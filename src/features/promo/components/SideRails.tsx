@@ -11,7 +11,8 @@ interface SideRailAdsProps {
 }
 
 const RAIL_HEIGHT = 600;
-const RAIL_TOP = 40;
+/** Clear space kept above and below a centred rail, so it never touches the edges. */
+const RAIL_MARGIN = 40;
 const GAP = 20;
 
 /**
@@ -33,7 +34,7 @@ const RAIL_UNITS = [
  * null with no data), two sets of rails end up drawn over each other. Below
  * this height the rails are not shown.
  */
-const MIN_SECTION_HEIGHT = RAIL_TOP + RAIL_HEIGHT;
+const MIN_SECTION_HEIGHT = RAIL_MARGIN + RAIL_HEIGHT;
 
 /** The widest rail that fits beside the content in the space actually available. */
 export const pickRail = (availableWidth: number, contentMaxWidth: number, gap: number = GAP) =>
@@ -42,15 +43,6 @@ export const pickRail = (availableWidth: number, contentMaxWidth: number, gap: n
 /** Shortest a section may be and still contain a rail. Exported for tests. */
 export const MIN_RAIL_SECTION_HEIGHT = MIN_SECTION_HEIGHT;
 
-/**
- * Wraps a section and floats a vertical ad in each side margin.
- *
- * Rails only appear when the section is wide enough to fit one beside the
- * centred content without overlapping, and tall enough to contain it —
- * otherwise they're hidden entirely. Left rail shows sidebar banner [0], right
- * rail shows [1], so each side is independently controllable from the admin
- * (by order within the placement).
- */
 /**
  * Width of the column the sections actually centre — 72rem, the max-width the
  * podium sections declare.
@@ -63,6 +55,15 @@ export const MIN_RAIL_SECTION_HEIGHT = MIN_SECTION_HEIGHT;
  */
 const DEFAULT_CONTENT_WIDTH = 1152;
 
+/**
+ * Wraps a section and floats a vertical ad in each side margin.
+ *
+ * Rails only appear when the section is wide enough to fit one beside the
+ * centred content without overlapping, and tall enough to contain it —
+ * otherwise they're hidden entirely. Left rail shows sidebar banner [0], right
+ * rail shows [1], so each side is independently controllable from the admin
+ * (by order within the placement).
+ */
 const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = DEFAULT_CONTENT_WIDTH, children }) => {
   const [rail, setRail] = useState<(typeof RAIL_UNITS)[number] | null>(null);
   const [isTallEnough, setIsTallEnough] = useState(false);
@@ -116,7 +117,11 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = DEFAU
             format={rail.format}
             style={{
               position: 'absolute',
-              top: RAIL_TOP,
+              // Centred against the section. Pinned near the top it sat level
+              // with the heading while the content below it did not, which
+              // read as a lopsided column rather than a matched pair.
+              top: '50%',
+              transform: 'translateY(-50%)',
               left: GAP,
               width: rail.width,
               zIndex: 1,
@@ -129,7 +134,8 @@ const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = DEFAU
             format={rail.format}
             style={{
               position: 'absolute',
-              top: RAIL_TOP,
+              top: '50%',
+              transform: 'translateY(-50%)',
               right: GAP,
               width: rail.width,
               zIndex: 1,
