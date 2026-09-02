@@ -51,7 +51,19 @@ export const MIN_RAIL_SECTION_HEIGHT = MIN_SECTION_HEIGHT;
  * rail shows [1], so each side is independently controllable from the admin
  * (by order within the placement).
  */
-const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = 1280, children }) => {
+/**
+ * Width of the column the sections actually centre — 72rem, the max-width the
+ * podium sections declare.
+ *
+ * This used to default to 1280, which is 128px wider than anything on the page.
+ * On a 1920px screen (≈1840px of content area once the icon rail is subtracted)
+ * that overstatement was the difference between a half-page fitting and not, so
+ * rails stepped down to a 160px skyscraper and, taking the creative's shape,
+ * came out half the height they should be. 1152 + 2 × (300 + 20) = 1792 fits.
+ */
+const DEFAULT_CONTENT_WIDTH = 1152;
+
+const SideRailAds: React.FC<SideRailAdsProps> = ({ page, contentMaxWidth = DEFAULT_CONTENT_WIDTH, children }) => {
   const [rail, setRail] = useState<(typeof RAIL_UNITS)[number] | null>(null);
   const [isTallEnough, setIsTallEnough] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);

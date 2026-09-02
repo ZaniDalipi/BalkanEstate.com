@@ -11,31 +11,39 @@
 import { describe, it, expect } from 'vitest';
 import { pickRail, MIN_RAIL_SECTION_HEIGHT } from '@/features/promo/components/SideRails';
 
-const CONTENT = 1280;
+/** What the podium sections actually centre: 72rem. */
+const CONTENT = 1152;
 
 describe('pickRail', () => {
   it('uses a half-page when there is room for one', () => {
-    // 1280 content + 2 × (300 + 20)
+    // 1152 content + 2 × (300 + 20) = 1792
     expect(pickRail(1920, CONTENT)).toEqual({ format: 'halfpage', width: 300 });
   });
 
-  it('steps down to a skyscraper on a Full-HD screen', () => {
-    // A 1920px monitor leaves ~1840px once the desktop icon rail is taken off:
-    // too narrow for a half-page, wide enough for a skyscraper. Stepping down
-    // is what keeps rails on Full-HD without them clipping the section.
-    const rail = pickRail(1840, CONTENT);
-    expect(rail).toEqual({ format: 'skyscraper', width: 160 });
+  it('still gives Full-HD a full-size half-page rail', () => {
+    // A 1920px monitor leaves ~1840px of content area once the icon rail is
+    // subtracted, and 1792 fits inside that. Measuring the column at 1280 —
+    // 128px wider than anything on the page — was what wrongly pushed this
+    // down to a 160px skyscraper, and a narrow rail then rendered a 1:2
+    // creative at half the height it should be.
+    expect(pickRail(1840, CONTENT)).toEqual({ format: 'halfpage', width: 300 });
+  });
+
+  it('steps down to a skyscraper when a half-page genuinely will not fit', () => {
+    // 1152 + 2 × 320 = 1792 needed for a half-page; 1700 has room only for
+    // 1152 + 2 × 180 = 1512.
+    expect(pickRail(1700, CONTENT)).toEqual({ format: 'skyscraper', width: 160 });
   });
 
   it('gives up rather than overlapping when even the narrowest will not fit', () => {
-    // 1280 + 2 × (160 + 20) = 1640 is the floor.
-    expect(pickRail(1639, CONTENT)).toBeNull();
+    // 1152 + 2 × (160 + 20) = 1512 is the floor.
+    expect(pickRail(1511, CONTENT)).toBeNull();
     expect(pickRail(1440, CONTENT)).toBeNull();
     expect(pickRail(1024, CONTENT)).toBeNull();
   });
 
   it('never picks a rail that would reach the content column', () => {
-    for (const width of [1200, 1440, 1640, 1700, 1840, 1920, 2560]) {
+    for (const width of [1200, 1440, 1512, 1700, 1840, 1920, 2560]) {
       const rail = pickRail(width, CONTENT);
       if (!rail) continue;
       const spaceUsed = CONTENT + 2 * (rail.width + 20);
@@ -45,7 +53,7 @@ describe('pickRail', () => {
 
   it('fits a rail into the tighter margin preview mode allows', () => {
     // Preview drops the gap so an admin can see the rails on a normal monitor.
-    expect(pickRail(1600, CONTENT, 0)).toEqual({ format: 'skyscraper', width: 160 });
+    expect(pickRail(1472, CONTENT, 0)).toEqual({ format: 'skyscraper', width: 160 });
   });
 });
 
