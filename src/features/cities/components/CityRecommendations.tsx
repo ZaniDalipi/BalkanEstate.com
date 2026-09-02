@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedCities, CityMarketData } from '@/services/apiService';
 import { mergeWithStaticFallback } from '../data/staticCities';
@@ -16,6 +16,7 @@ import { savedCityKey } from '../api/savedCitiesApi';
 import CityMarketCard from './CityMarketCard';
 import ExploreCitiesTabs, { type ExploreCitiesTab } from './ExploreCitiesTabs';
 import SavedCitiesPanel from './SavedCitiesPanel';
+import DataFreshness from './DataFreshness';
 
 const CityRecommendations: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
@@ -69,6 +70,13 @@ const CityRecommendations: React.FC = () => {
   const filteredCities = selectedCountry === 'all'
     ? cities
     : cities.filter(c => c.country === selectedCountry);
+
+  const lastFetchedAt = useMemo(() => {
+    const timestamps = cities
+      .map(c => new Date(c.lastUpdated).getTime())
+      .filter(Number.isFinite);
+    return timestamps.length > 0 ? new Date(Math.max(...timestamps)) : null;
+  }, [cities]);
 
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
@@ -265,15 +273,12 @@ const CityRecommendations: React.FC = () => {
                   <p className="text-sm text-slate-600 mb-2">
                     {t('aiInsights.description', { count: cities.length })}
                   </p>
-                  <p className="text-xs text-slate-500">
-                    {t('aiInsights.lastUpdated', {
-                      date: new Date(cities[0].lastUpdated).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
-                    })} • {t('aiInsights.dataSource')}
-                  </p>
+                  {/* Freshest row in the set: the age a reader should judge
+                      these figures by. Sourced from the data, not from "now". */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <DataFreshness fetchedAt={lastFetchedAt} />
+                    <span className="text-xs text-slate-500">{t('aiInsights.dataSource')}</span>
+                  </div>
                 </div>
               </div>
             </div>

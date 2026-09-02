@@ -594,9 +594,13 @@ const CinematicPropertyMap: React.FC<CinematicPropertyMapProps> = ({
       >
         <MapController lat={lat} lng={lng} onMapReady={handleMapReady} />
 
+        {/* Attribution comes from the resolved layer: without a provider key
+            these tiles are not CARTO's, and crediting the wrong source is
+            both wrong and a licence problem. */}
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          attribution={MAP_TILE_LAYERS.voyager.attribution}
           url={MAP_TILE_LAYERS.voyager.url}
+          maxNativeZoom={MAP_TILE_LAYERS.voyager.maxNativeZoom}
           maxZoom={21}
         />
 

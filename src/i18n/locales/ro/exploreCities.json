@@ -140,5 +140,16 @@
     "loadError": "Nu am putut încărca locurile salvate. Încercați din nou.",
     "marketDataPending": "Datele de piață pentru acest oraș nu sunt disponibile acum — îl urmăriți în continuare.",
     "unfollow": "Nu mai urmări"
+  },
+  "freshness": {
+    "justNow": "chiar acum",
+    "minutesAgo": "acum {{count}} min",
+    "hoursAgo": "acum {{count}} h",
+    "yesterday": "ieri",
+    "daysAgo": "acum {{count}} zile",
+    "monthAgo": "luna trecută",
+    "monthsAgo": "acum {{count}} luni",
+    "label": "Date preluate {{age}}",
+    "labelWithSource": "Date preluate {{age}} · {{source}}"
   }
 }

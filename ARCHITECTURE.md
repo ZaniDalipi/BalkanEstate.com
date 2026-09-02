@@ -272,6 +272,66 @@ admin `GET /api/cities/market-digest/preview` inspects the pending changes and
 
 ---
 
+## Neighbourhood Map — shapes, basemap, freshness
+
+The Explore-Neighborhoods map draws one partition of the city and says which
+kind it is drawing:
+
+```
+GET /api/cities/geodata/:city/:country
+  └── geoDataService.getCityGeoData()
+        ├── Nominatim  → city area id
+        ├── Overpass   → admin relations (level 7–10)
+        │                + place areas (neighbourhood/suburb/quarter/…),
+        │                  as relations AND closed ways
+        ├── selectBoundarySet()   ← ONE coherent set, never a mix
+        │     admin at 3–60 features  → source: 'admin'
+        │     else ≥3 place areas     → source: 'place'
+        └── cached 90 days with its fetch time
+
+CitySuburbMap
+  ├── real boundaries → GeoJSON from OSM            ("📍 OSM boundaries")
+  └── none available  → tessellateDistricts(centres) ("◇ Approx. districts")
+```
+
+Key decisions:
+- **Neighbourhoods are usually not administrative units.** Tirana's Blloku is
+  `place=neighbourhood` on a closed way, so a query restricted to
+  `boundary=administrative` relations returned nothing and every such city fell
+  back to drawn circles. The query now also asks for place areas, and ways as
+  well as relations, because that is how neighbourhoods are actually mapped.
+- **One partition, never two.** Administrative districts and place areas cover
+  the same ground; drawing both would overlay two different truths.
+  `selectBoundarySet` picks admin when it exists at a readable granularity
+  (coarser level first: level 9 districts beat level 10 blocks), else places.
+- **An unnamed area is dropped.** Every polygon carries a permanent name label,
+  so a shape with no `name` tag was previously labelled "Region 123456".
+- **Circles → a nearest-centre partition.** Where OSM has no polygon, the
+  fallback is a Voronoi tessellation of the neighbourhood centres
+  (`utils/districtTessellation.ts`): contiguous, non-overlapping districts that
+  read as a map, instead of overlapping bubbles that hid each other and their
+  labels. It is an approximation of *where a neighbourhood is nearest*, not a
+  claim about borders, and the badge says so. Pure and dependency-free
+  (half-plane clipping), with the invariants tested: every centre falls inside
+  its own district and inside no one else's.
+- **Basemap keys are resolved centrally.** CARTO and Stadia now watermark
+  keyless tiles with "API KEY REQUIRED" — which is what covered the map.
+  `config/mapStyles.ts` substitutes a keyless provider unless a key is set:
+  - `VITE_CARTO_API_KEY` / `VITE_STADIA_API_KEY` → use those providers, key appended
+  - no key → Esri light/dark grey canvas (`VITE_MAP_KEYLESS_PROVIDER=osm`
+    switches every map to OpenStreetMap instead)
+  Attribution travels with the resolved layer, so a substituted basemap is
+  never credited to CARTO. Every tile host must also be in the backend CSP
+  (`imgSrc` in `middleware/security.ts`) — a missing host fails as blank tiles.
+- **The reader is told when the data was fetched.** `DataFreshness` renders the
+  age ("Data fetched 3 days ago") with the exact timestamp in the tooltip and a
+  screen-reader `<time>`; it renders *nothing* without a usable timestamp rather
+  than implying freshness. Shown for the suburb figures and, separately, for the
+  OSM shapes on the city dashboard, and for the newest row in the set on
+  `/explore-cities`. A future timestamp (clock skew) reads as "just now".
+
+---
+
 ## Property Map — "Full Map" Destination
 
 The cinematic property map ends in a **Full Map** button. Which full map that

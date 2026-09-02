@@ -140,5 +140,16 @@
     "loadError": "Nuk mundëm t’i ngarkojmë vendet tuaja të ruajtura. Provoni sërish.",
     "marketDataPending": "Të dhënat e tregut për këtë qytet nuk janë të disponueshme tani — ju vazhdoni ta ndiqni.",
     "unfollow": "Ndalo ndjekjen"
+  },
+  "freshness": {
+    "justNow": "tani",
+    "minutesAgo": "{{count}} min më parë",
+    "hoursAgo": "{{count}} orë më parë",
+    "yesterday": "dje",
+    "daysAgo": "{{count}} ditë më parë",
+    "monthAgo": "mujin e kaluar",
+    "monthsAgo": "{{count}} muaj më parë",
+    "label": "Të dhënat e marra {{age}}",
+    "labelWithSource": "Të dhënat e marra {{age}} · {{source}}"
   }
 }

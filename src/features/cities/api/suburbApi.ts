@@ -56,13 +56,33 @@ export const getCityImages = async (
   return response;
 };
 
+/** Where the shapes came from: real admin districts, or mapped neighbourhood areas. */
+export type CityBoundarySource = 'admin' | 'place';
+
+export interface CityGeoDataResponse {
+  boundaries: GeoJSONFeatureCollection;
+  source: CityBoundarySource | null;
+  /** When the shapes were fetched from OpenStreetMap; null when unknown. */
+  fetchedAt: string | null;
+}
+
 export const getCityGeoData = async (
   city: string,
   country: string
-): Promise<GeoJSONFeatureCollection> => {
-  const response = await apiRequest<{ success: boolean; data: GeoJSONFeatureCollection }>(
+): Promise<CityGeoDataResponse> => {
+  const response = await apiRequest<{
+    success: boolean;
+    data: GeoJSONFeatureCollection;
+    source?: CityBoundarySource | null;
+    fetchedAt?: string | null;
+  }>(
     `/cities/geodata/${encodeURIComponent(city)}/${encodeURIComponent(country)}`,
     { requiresAuth: false }
   );
-  return response.data;
+
+  return {
+    boundaries: response.data ?? { type: 'FeatureCollection', features: [] },
+    source: response.source ?? null,
+    fetchedAt: response.fetchedAt ?? null,
+  };
 };

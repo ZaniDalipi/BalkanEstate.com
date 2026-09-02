@@ -140,5 +140,16 @@
     "loadError": "Nismo mogli da učitamo vaša sačuvana mesta. Pokušajte ponovo.",
     "marketDataPending": "Tržišni podaci za ovaj grad trenutno nisu dostupni — i dalje ga pratite.",
     "unfollow": "Prestani da pratiš"
+  },
+  "freshness": {
+    "justNow": "upravo sada",
+    "minutesAgo": "pre {{count}} min",
+    "hoursAgo": "pre {{count}} h",
+    "yesterday": "juče",
+    "daysAgo": "pre {{count}} dana",
+    "monthAgo": "prošlog meseca",
+    "monthsAgo": "pre {{count}} meseci",
+    "label": "Podaci preuzeti {{age}}",
+    "labelWithSource": "Podaci preuzeti {{age}} · {{source}}"
   }
 }

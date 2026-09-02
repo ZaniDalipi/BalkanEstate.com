@@ -293,7 +293,7 @@ export const getEconomicIndicatorsController = async (req: Request, res: Respons
 };
 
 /**
- * @desc    Get real GeoJSON municipality boundaries from OpenStreetMap
+ * @desc    Get real neighbourhood/municipality boundaries from OpenStreetMap
  * @route   GET /api/cities/geodata/:city/:country
  * @access  Public
  */
@@ -307,8 +307,17 @@ export const getCityGeoDataController = async (req: Request, res: Response): Pro
     }
     const forceRefresh = req.query.refresh === 'true';
     const geoData = await getCityGeoData(city, country, forceRefresh);
-    const result = geoData ?? { type: 'FeatureCollection' as const, features: [] };
-    res.json({ success: true, data: result, featureCount: result.features.length });
+    const boundaries = geoData?.boundaries ?? { type: 'FeatureCollection' as const, features: [] };
+
+    res.json({
+      success: true,
+      data: boundaries,
+      featureCount: boundaries.features.length,
+      // What the shapes are, and when they were pulled from OSM — the map
+      // labels both, so a reader can tell real boundaries from an estimate.
+      source: geoData?.source ?? null,
+      fetchedAt: geoData?.fetchedAt ?? null,
+    });
   } catch (error: unknown) {
     apiLogger.error('Error fetching city geo data:', error);
     res.status(500).json({ success: false, message: 'Error fetching boundary data' });
