@@ -485,7 +485,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -500,7 +503,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -721,7 +725,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -736,7 +743,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -836,7 +844,7 @@ class EmailService {
       <!-- CTA -->
       <div style="margin-top: 32px; text-align: center;">
         <a href="${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/dashboard"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;" class="ec-cta">
           View Full Analytics →
         </a>
       </div>
@@ -984,7 +992,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -999,7 +1010,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -1096,7 +1108,7 @@ class EmailService {
       <!-- CTA -->
       <div style="margin-top: 32px; text-align: center;">
         <a href="${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/agency/dashboard"
-           style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+           style="display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;" class="ec-cta">
           View Agency Dashboard →
         </a>
       </div>
@@ -1178,7 +1190,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1193,7 +1208,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -1241,7 +1257,7 @@ class EmailService {
 
       <!-- CTA -->
       <a href="${safeConversationUrl}"
-         style="display: block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
+         style="display: block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;" class="ec-cta">
         Reply to Message →
       </a>
     </div>
@@ -1522,7 +1538,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1537,7 +1556,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -1603,7 +1623,7 @@ class EmailService {
 
       <!-- CTA -->
       <a href="${frontendUrl}/property/${safePropertyId}"
-         style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+         style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);" class="ec-cta">
         View Property Details →
       </a>
 
@@ -1722,7 +1742,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1737,7 +1760,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -1767,7 +1791,7 @@ class EmailService {
 
       <!-- CTA -->
       <a href="${frontendUrl}/search"
-         style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
+         style="display: block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;" class="ec-cta">
         View All Properties →
       </a>
     </div>
@@ -1957,7 +1981,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -1972,7 +1999,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -2056,7 +2084,7 @@ class EmailService {
 
       <!-- CTA -->
       <a href="${frontendUrl}/property/${params.property.id}"
-         style="display: block; background: ${ctaGradient}; color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: ${ctaShadow};">
+         style="display: block; background: ${ctaGradient}; color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: ${ctaShadow};" class="ec-cta">
         ${ctaText}
       </a>
 
@@ -2274,7 +2302,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -2289,7 +2320,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -2381,7 +2413,7 @@ class EmailService {
 
       <!-- CTA -->
       <a href="${frontendUrl}/property/${safePropertyId}"
-         style="display: block; background: ${headerGradient}; color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: ${ctaShadow};">
+         style="display: block; background: ${headerGradient}; color: #ffffff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: 600; font-size: 16px; text-align: center; box-shadow: ${ctaShadow};" class="ec-cta">
         ${ctaText}
       </a>
 
@@ -2574,7 +2606,7 @@ class EmailService {
       <!-- CTA -->
       <div style="margin-top:28px;text-align:center;">
         <a href="${sanitizeUrlForHtml(exploreUrl)}"
-           style="display:inline-block;background:linear-gradient(135deg,#0252CD 0%,#0369a1 100%);color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:14px;">
+           style="display:inline-block;background:linear-gradient(135deg,#0252CD 0%,#0369a1 100%);color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:14px;" class="ec-cta">
           Explore all cities →
         </a>
       </div>
@@ -3012,7 +3044,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; }
       .ec-card { background-color: #1f2937 !important; }
@@ -3023,7 +3058,8 @@ class EmailService {
       .ec-text-muted { color: #d1d5db !important; }
       .ec-footer { background-color: #111827 !important; border-color: #374151 !important; }
       .ec-footer p, .ec-footer a, .ec-footer span { color: #ffffff !important; }
-      .ec-cta, .ec-cta a { color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     }
   </style>
 </head>
@@ -3348,7 +3384,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -3363,7 +3402,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -3421,7 +3461,7 @@ class EmailService {
 
       <!-- Reply CTA -->
       <a href="mailto:${safeBuyerEmail}?subject=Re: ${safePropertyTitle ? `Inquiry about ${safePropertyTitle}` : 'Your BalkanEstateᴬᴵ Inquiry'}"
-         style="display: block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;">
+         style="display: block; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-align: center;" class="ec-cta">
         Reply to ${safeBuyerName} →
       </a>
     </div>
@@ -3496,7 +3536,10 @@ class EmailService {
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -3511,7 +3554,8 @@ class EmailService {
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -3548,7 +3592,7 @@ class EmailService {
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
         <a href="${safeResetUrl}"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);" class="ec-cta">
           Reset My Password
         </a>
       </div>
@@ -3685,7 +3729,7 @@ class EmailService {
         <![endif]-->
         <!--[if !mso]><!-->
         <a href="${safeVerificationUrl}"
-           class="button"
+           class="button ec-cta"
            style="display: inline-block; background-color: #0252CD; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
           ✓ Verify My Email
         </a>
@@ -4026,7 +4070,7 @@ class EmailService {
       <!-- Primary CTA -->
       <div style="text-align: center; margin: 40px 0 32px 0;">
         <a href="${frontendUrl}/search"
-           class="button"
+           class="button ec-cta"
            style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 18px 56px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.4);">
           Start Exploring Properties →
         </a>
@@ -4218,7 +4262,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4233,7 +4280,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -4340,7 +4388,7 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Button -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/promotions"
-           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);">
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);" class="ec-cta">
           Use My Coupons →
         </a>
       </div>
@@ -4469,7 +4517,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4484,7 +4535,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -4685,7 +4737,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4700,7 +4755,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -4813,7 +4869,7 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Buttons -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/agency/dashboard"
-           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4); margin-bottom: 12px;">
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4); margin-bottom: 12px;" class="ec-cta">
           Go to Dashboard →
         </a>
       </div>
@@ -4914,7 +4970,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -4929,7 +4988,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -5018,7 +5078,7 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Button -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/agencies/${params.agencyId}"
-           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);" class="ec-cta">
           View Your Agency →
         </a>
       </div>
@@ -5121,7 +5181,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5136,7 +5199,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -5222,7 +5286,7 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Button -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/agencies/${params.agencyId}"
-           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);" class="ec-cta">
           View Agency Dashboard →
         </a>
       </div>
@@ -5316,7 +5380,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5331,7 +5398,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -5387,7 +5455,7 @@ Questions? Contact us at support@balkanestateai.com
       </div>
       <div style="text-align: center; margin: 24px 0;">
         <a href="${frontendUrl}/property/${params.propertyId}"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);" class="ec-cta">
           View Property
         </a>
       </div>
@@ -5497,7 +5565,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5512,7 +5583,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -5585,13 +5657,13 @@ Questions? Contact us at support@balkanestateai.com
       </div>
       <div style="text-align: center; margin: 24px 0;">
         <a href="${frontendUrl}/account/viewings"
-           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); margin-right: 8px;">
+           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); margin-right: 8px;" class="ec-cta">
           Manage Viewing Requests
         </a>
       </div>
       <div style="text-align: center; margin: 12px 0 0 0;">
         <a href="${frontendUrl}/property/${params.propertyId}"
-           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);" class="ec-cta">
           View Property Listing
         </a>
       </div>
@@ -5687,7 +5759,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5702,7 +5777,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -5758,7 +5834,7 @@ Questions? Contact us at support@balkanestateai.com
       </div>
       <div style="text-align: center; margin: 24px 0;">
         <a href="${frontendUrl}/property/${params.propertyId}"
-           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);" class="ec-cta">
           View Property Details
         </a>
       </div>
@@ -5854,7 +5930,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -5869,7 +5948,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -5926,7 +6006,7 @@ Questions? Contact us at support@balkanestateai.com
       </div>
       <div style="text-align: center; margin: 24px 0;">
         <a href="${frontendUrl}/property/${params.propertyId}"
-           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #0252CD 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(2, 82, 205, 0.3);" class="ec-cta">
           Try Another Time
         </a>
       </div>
@@ -6029,7 +6109,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -6044,7 +6127,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -6114,7 +6198,7 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Button -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/agency/dashboard"
-           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);" class="ec-cta">
           Go to Dashboard →
         </a>
       </div>
@@ -6222,7 +6306,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -6237,7 +6324,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -6356,7 +6444,7 @@ Questions? Contact us at support@balkanestateai.com
       <!-- CTA Button -->
       <div style="text-align: center; margin: 28px 0;">
         <a href="${frontendUrl}/sell"
-           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);">
+           style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);" class="ec-cta">
           Post Your First Listing →
         </a>
       </div>
@@ -6433,7 +6521,10 @@ Questions? Contact us at support@balkanestateai.com
     .ec-footer a, .ec-card a { color: #000000 !important; }
     /* Preserve white text on colored header and CTA button */
     .ec-header, .ec-header h1, .ec-header p, .ec-header span, .ec-header div { color: #ffffff !important; }
-    .ec-cta, .ec-cta a, .ec-cta center { color: #ffffff !important; }
+    /* CTA text must outrank the .ec-card a rule (0-1-1), so the button selectors
+       are qualified: .ec-cta alone (0-1-0) loses and a blue button renders black. */
+    .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+    .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
     /* Dark mode (device preference): white text */
     @media (prefers-color-scheme: dark) {
       .ec-body { background-color: #111827 !important; color: #ffffff !important; }
@@ -6448,7 +6539,8 @@ Questions? Contact us at support@balkanestateai.com
       .ec-footer p, .ec-footer a, .ec-footer span, .ec-footer div { color: #ffffff !important; }
       .ec-link { color: #60a5fa !important; }
       .ec-card a { color: #60a5fa !important; }
-      .ec-cta, .ec-cta center { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; }
+      .ec-cta, .ec-cta a, .ec-cta center, .ec-cta *,
+      .ec-card a.ec-cta, .ec-card .ec-cta a, .ec-card .ec-cta * { color: #ffffff !important; }
       .ec-border { border-color: #374151 !important; }
       .ec-stat-card { background-color: #374151 !important; }
       .ec-stat-card div, .ec-stat-card span { color: #ffffff !important; }
@@ -6490,7 +6582,7 @@ Questions? Contact us at support@balkanestateai.com
 
       <!-- CTA Button -->
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${sanitizeUrlForHtml(frontendUrl)}/profile" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, ${BRAND_COLORS.primaryDark} 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600;">
+        <a href="${sanitizeUrlForHtml(frontendUrl)}/profile" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, ${BRAND_COLORS.primaryDark} 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600;" class="ec-cta">
           Resubmit Your License
         </a>
       </div>
