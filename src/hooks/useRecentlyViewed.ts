@@ -36,7 +36,7 @@ interface StoredProperty {
   // search results did — a listing that changes state between rails reads as
   // two different products.
   constructionStatus?: Property['constructionStatus'];
-  expectedCompletionYear?: number;
+  expectedCompletionYear?: number | null;
   parking: number;
   viewedAt: number;
 }

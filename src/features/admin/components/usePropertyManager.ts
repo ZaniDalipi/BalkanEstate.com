@@ -30,7 +30,7 @@ export interface Property {
   livingRooms?: number;
   yearBuilt?: number;
   constructionStatus?: string;
-  expectedCompletionYear?: number;
+  expectedCompletionYear?: number | null;
   parking?: number;
   description?: string;
   isPromoted?: boolean;
