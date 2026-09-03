@@ -129,7 +129,14 @@ export interface CityMarketData {
   dataSource: 'gemini' | 'manual' | 'calculated';
   officialSourceName?: string;
   officialSourceUrl?: string;
+  /**
+   * Curated photo, resolved server-side across the three collections that can
+   * hold one for the same place (see `backend/src/services/cityPhotoService.ts`).
+   */
   imageUrl?: string;
+  /** Where `imageUrl` came from, for the admin screen and for debugging. */
+  imageSource?: 'manual' | 'city-gallery' | 'villa-destination' | 'auto';
+  imageCredit?: string;
   featured: boolean;
   displayOrder: number;
 }

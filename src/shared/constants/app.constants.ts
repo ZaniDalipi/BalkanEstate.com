@@ -171,6 +171,7 @@ export const ADMIN_SECTIONS = [
   'business-listings',
   'articles',
   'city-showcase',
+  'city-photos',
 ] as const;
 
 /**

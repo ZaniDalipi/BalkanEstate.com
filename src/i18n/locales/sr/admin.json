@@ -43,7 +43,8 @@
     "pricing": "Цене и Планови",
     "villaApprovals": "Odobrenja vila",
     "villaDestinations": "Destinacije vila",
-    "cityShowcase": "Галерија Градова"
+    "cityShowcase": "Галерија Градова",
+    "cityPhotos": "Фотографије градова"
   },
   "properties": {
     "title": "Управљање Некретнинама",
@@ -1074,7 +1075,43 @@
     "cityPlaceholder": "Izaberite jedan ili upišite novi grad",
     "imageCredit": "Zasluge za fotografiju (opciono)",
     "imageCreditPlaceholder": "Fotografija: Jane Doe na Unsplash-u",
-    "imageCreditHint": "Ako je fotografija sa Unsplash-a, Pexels-a ili odnekud drugde, nalepite ovde red sa zaslugama — većina sajtova ga prikazuje pored dugmeta za preuzimanje. Prikazuje se kao mali natpis na panelu.",
-    "cityTakenHint": "Već u galeriji, pa nisu na listi: {{cities}}"
+    "imageCreditHint": "Ako je fotografija sa Unsplash-a, Pexels-a ili odnekud drugde, nalepite ovde red sa zaslugama — većina sajtova ga prikazuje pored dugmeta za preuzimanje. Prikazuje se kao mali natpis na panelu."
+  },
+  "cityPhotos": {
+    "title": "Фотографије градова",
+    "subtitle": "Слика коју сваки град приказује у Истражи градове. Фотографије већ одабране у Галерији градова или као вила-дестинација могу се овде поново употребити једним притиском.",
+    "precedenceHint": "Град приказује прву фотографију коју има: вашу поставку, затим панел Галерије градова, затим вила-дестинацију за исто место, па онда аутоматски преузету. Постављање фотографије овде такође спречава да је аутоматско преузимање замени.",
+    "searchPlaceholder": "Претражите град или државу",
+    "onlyNeedsAttention": "Само непрегледани ({{count}})",
+    "empty": "Још нема забележених градова — Истражи градове нема за шта да прикаже фотографију.",
+    "noMatches": "Ниједан град не одговара том филтеру.",
+    "noPhoto": "Без фотографије",
+    "alsoAvailable": "Такође доступно:",
+    "adopt": "Користи {{source}}",
+    "adoptHint": "Користи ову фотографију за {{city}}",
+    "sourceCityGallery": "Галерија градова",
+    "sourceVillaDestination": "Вила-дестинација",
+    "sourceAuto": "Аутоматски (Википедија)",
+    "upload": "Отпреми",
+    "uploading": "Отпремање…",
+    "useUrl": "Користи URL",
+    "urlLabel": "URL слике (https)",
+    "creditLabel": "Заслуге (опционо)",
+    "saveUrl": "Сачувај фотографију",
+    "clear": "Уклони поставку",
+    "clearHint": "Врати овај град на фотографију Галерије / виле / аутоматску",
+    "saved": "Фотографија је ажурирана за {{city}}",
+    "cleared": "Поставка је уклоњена за {{city}}",
+    "saveError": "Чување фотографије града није успело",
+    "clearError": "Уклањање фотографије града није успело",
+    "loadError": "Учитавање фотографија градова није успело",
+    "uploadError": "Отпремање фотографије није успело",
+    "badge": {
+      "manual": "Поставили сте",
+      "city-gallery": "Галерија градова",
+      "villa-destination": "Вила-дестинација",
+      "auto": "Аутоматски"
+    },
+    "urlHint": "Могу се повезати само {{hosts}}. За фотографију са било ког другог места користите Отпреми — биће хостована за вас."
   }
 }

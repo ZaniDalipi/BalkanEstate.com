@@ -653,6 +653,86 @@ export const importCitiesIntoShowcase = async (): Promise<{
   missingPhoto: string[];
 }> => apiRequest('/admin/city-showcase/import-cities', { method: 'POST', requiresAuth: true });
 
+// --- City photos (one picture per city, across three collections) ---
+//
+// The same place is curated in `CityMarketData` (Explore Cities), the home
+// City Gallery and the villas corridor, and the backend resolves them in one
+// documented order (see `backend/src/services/cityPhotoService.ts`). This
+// screen shows what each of those holds for a city and lets an admin either
+// adopt one of them or override with an upload of their own.
+
+/** Where a resolved photo came from. Mirrors `CityPhotoSource` on the server. */
+export type CityPhotoSource = 'manual' | 'city-gallery' | 'villa-destination' | 'auto';
+
+export interface ResolvedCityPhoto {
+  imageUrl: string;
+  source: CityPhotoSource;
+  credit?: string;
+  creditUrl?: string;
+}
+
+export interface AdminCityPhoto {
+  city: string;
+  country: string;
+  countryCode?: string;
+  featured: boolean;
+  imageUpdatedAt: string | null;
+  /** What visitors see today — the winner of the precedence chain. */
+  active: ResolvedCityPhoto | null;
+  /** Every photo that exists for this place, so one can be adopted. */
+  candidates: {
+    manual: ResolvedCityPhoto | null;
+    cityGallery: ResolvedCityPhoto | null;
+    villaDestination: ResolvedCityPhoto | null;
+    auto: ResolvedCityPhoto | null;
+  };
+}
+
+export const getAdminCityPhotos = async (): Promise<{ cities: AdminCityPhoto[] }> =>
+  apiRequest('/admin/city-photos', { requiresAuth: true });
+
+/**
+ * Stores a photo and returns where it landed, without attaching it to
+ * anything. The caller commits it with `setCityPhoto`, which is what lets the
+ * form preview an upload before saving it.
+ */
+export const uploadCityPhoto = async (
+  file: File
+): Promise<{ url: string; publicId: string }> => {
+  const form = new FormData();
+  form.append('image', file);
+  return uploadRequest('/admin/city-photos/upload', form);
+};
+
+/**
+ * Overrides a city's photo. The result is marked `manual`, which wins over an
+ * inherited photo and stops the Wikipedia seeder from replacing it later.
+ */
+export const setCityPhoto = async (body: {
+  city: string;
+  country: string;
+  imageUrl: string;
+  imageCredit?: string;
+  imagePublicId?: string;
+}): Promise<{ city: CityDirectoryEntry; active: ResolvedCityPhoto }> =>
+  apiRequest('/admin/city-photos', { method: 'PUT', body, requiresAuth: true });
+
+/**
+ * Drops the override and hands the city back to the resolution chain. The
+ * response carries whatever now wins, so the row can be updated without
+ * refetching the whole list.
+ */
+export const clearCityPhoto = async (
+  city: string,
+  country: string
+): Promise<{ city: CityDirectoryEntry; active: ResolvedCityPhoto | null }> => {
+  const query = new URLSearchParams({ city, country });
+  return apiRequest(`/admin/city-photos?${query.toString()}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+};
+
 // --- City directory (names for the city/country pickers) ---
 //
 // Not market analytics and not a gallery panel — a lightweight list of

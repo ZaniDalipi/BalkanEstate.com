@@ -43,7 +43,8 @@
     "pricing": "Pricing & Plans",
     "villaApprovals": "Miratimi i Vilave",
     "villaDestinations": "Destinacionet e Vilave",
-    "cityShowcase": "Galeria e Qyteteve"
+    "cityShowcase": "Galeria e Qyteteve",
+    "cityPhotos": "Fotot e Qyteteve"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -1073,7 +1074,43 @@
     "cityPlaceholder": "Zgjidhni një ose shkruani një qytet të ri",
     "imageCredit": "Kredituar fotoja (opsionale)",
     "imageCreditPlaceholder": "Foto nga Jane Doe në Unsplash",
-    "imageCreditHint": "Nëse kjo foto vjen nga Unsplash, Pexels apo diku tjetër, ngjisni këtu rreshtin e kreditimit — shumica e faqeve tregojnë një pranë butonit të shkarkimit. Shfaqet si titull i vogël në panel.",
-    "cityTakenHint": "Tashmë në galeri, prandaj nuk shfaqen: {{cities}}"
+    "imageCreditHint": "Nëse kjo foto vjen nga Unsplash, Pexels apo diku tjetër, ngjisni këtu rreshtin e kreditimit — shumica e faqeve tregojnë një pranë butonit të shkarkimit. Shfaqet si titull i vogël në panel."
+  },
+  "cityPhotos": {
+    "title": "Fotot e Qyteteve",
+    "subtitle": "Fotografia që shfaq secili qytet në Eksploro Qytetet. Fotot e zgjedhura në Galerinë e Qyteteve ose si destinacion vilë mund të riperdoren këtu me një klikim.",
+    "precedenceHint": "Një qytet shfaq foton e parë që ka: zgjedhjen tuaj, pastaj panelin e Galerisë së Qyteteve, pastaj një destinacion vilë për të njëjtin vend, pastaj atë të marrë automatikisht. Vendosja e një fotoje këtu ndalon edhe marrjen automatike që të e zëvendësojë.",
+    "searchPlaceholder": "Kërko një qytet ose vend",
+    "onlyNeedsAttention": "Vetëm të pashqyrtuara ({{count}})",
+    "empty": "Asnjë qytet i regjistruar — Eksploro Qytetet nuk ka për çfarë të shfaqë foto.",
+    "noMatches": "Asnjë qytet nuk përputhet me këtë filtër.",
+    "noPhoto": "Pa foto",
+    "alsoAvailable": "Gjithashtu në dispozicion:",
+    "adopt": "Përdor {{source}}",
+    "adoptHint": "Përdor këtë foto për {{city}}",
+    "sourceCityGallery": "Galeria e Qyteteve",
+    "sourceVillaDestination": "Destinacion vilë",
+    "sourceAuto": "Automatike (Wikipedia)",
+    "upload": "Ngarko",
+    "uploading": "Duke ngarkuar…",
+    "useUrl": "Përdor një URL",
+    "urlLabel": "URL e imazhit (https)",
+    "creditLabel": "Kreditim (opsional)",
+    "saveUrl": "Ruaj foton",
+    "clear": "Hiq zgjedhjen",
+    "clearHint": "Kthe këtë qytet te fotoja e Galerisë / vilës / automatike",
+    "saved": "Fotoja u përditësua për {{city}}",
+    "cleared": "Zgjedhja u hoq për {{city}}",
+    "saveError": "Ruajtja e fotos së qytetit dështoi",
+    "clearError": "Heqja e fotos së qytetit dështoi",
+    "loadError": "Ngarkimi i fotove të qyteteve dështoi",
+    "uploadError": "Ngarkimi i fotos dështoi",
+    "badge": {
+      "manual": "Vendosur nga ju",
+      "city-gallery": "Galeria e Qyteteve",
+      "villa-destination": "Destinacion vilë",
+      "auto": "Automatike"
+    },
+    "urlHint": "Mund të lidhen vetëm {{hosts}}. Për një foto nga kudo tjetër, përdor Ngarko — do të strehohet për ty."
   }
 }

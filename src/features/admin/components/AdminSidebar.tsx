@@ -143,6 +143,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           icon: <BuildingOfficeIcon className="w-5 h-5" />,
         },
         {
+          id: 'cityPhotos',
+          label: t('admin:sidebar.cityPhotos', 'City Photos'),
+          icon: <PhotoIcon className="w-5 h-5" />,
+        },
+        {
           id: 'agencies',
           label: t('admin:sidebar.agencies'),
           icon: <BuildingOfficeIcon className="w-5 h-5" />,

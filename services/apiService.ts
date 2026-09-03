@@ -2393,6 +2393,16 @@ export interface CityMarketData {
   highlights: string[];
   lastUpdated: string;
   dataSource: 'gemini' | 'manual' | 'calculated';
+  /**
+   * Curated photo, resolved server-side across the three collections that can
+   * hold one for the same place (see `backend/src/services/cityPhotoService.ts`).
+   * Absent when no photo has been curated anywhere — the UI then falls back to
+   * the convention Cloudinary id. Read through `cityImageSources`.
+   */
+  imageUrl?: string;
+  /** Where `imageUrl` came from, for the admin screen and for debugging. */
+  imageSource?: 'manual' | 'city-gallery' | 'villa-destination' | 'auto';
+  imageCredit?: string;
   featured: boolean;
   displayOrder: number;
 }

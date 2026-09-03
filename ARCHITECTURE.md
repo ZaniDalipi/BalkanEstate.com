@@ -150,6 +150,85 @@ invented market statistics), so it becomes a selectable suggestion for every
 other city picker and a candidate for the "Import cities from database"
 action, without requiring a full market-data form.
 
+### One photo per city — resolution across three collections
+
+The same place can be curated three times over: as a city (`CityMarketData`,
+Explore Cities), as a gallery panel (`CityShowcase`, the home page) and as a
+villa destination (`VillaDestination`, the villas corridor). Each had its own
+upload, so the same photo of Tirana was being sourced and stored three times,
+and none of them was what Explore Cities actually drew.
+
+`backend/src/services/cityPhotoService.ts` resolves them in one documented
+order, keyed on a normalised (city, country) pair — `placeKey` is NFD,
+accent-stripped, lowercased and punctuation-collapsed, so "Prishtinë",
+"PRISHTINA " and "prishtina" are one place:
+
+```
+1. manual            — an admin set it on the city itself; always wins
+2. city-gallery      — the active CityShowcase panel for this city
+3. villa-destination — an active VillaDestination for the same place
+4. auto              — whatever cityImageService's Wikipedia seeder stored
+```
+
+- **Batched, not per-city.** The Explore Cities list asks for ~90 cities at
+  once, so resolution is exactly three queries (one per collection) regardless
+  of how many cities are being resolved — `loadCityPhotoCandidates(pairs)`.
+- **Each collection is independently fault-tolerant.** One lookup throwing is
+  logged and skipped rather than failing the resolution: a gallery outage must
+  degrade to the city's own photo, not blank every card on the page.
+- **Villa destinations match on either name.** A destination names its place in
+  `name`, and separately records which seeded city photo it borrowed
+  (`imageCity`/`imageCountry`) — either identifies the city.
+- **`https` only, everywhere.** A stored value that isn't an `http(s)` URL is
+  dropped on both sides (`usableUrl` in the service, `validateCityPhoto` and
+  `cityImageSources` on the client). These URLs land in an `<img src>` served
+  to every visitor.
+
+The resolved photo is attached by `withResolvedPhotos` in
+`cityMarketDataService` (`getFeaturedCities`, `getCitiesByCountry`,
+`getCityMarketData`), which returns `CityMarketDataResponse` — the wire type,
+distinct from the stored row because `imageSource` widens from the stored
+`'manual' | 'auto'` to the resolved four-value `CityPhotoSource`.
+
+**The client reads it through `cityImageSources`**
+(`src/features/cities/utils/cityImage.ts`), which returns an *ordered* list
+rather than one URL:
+
+```
+[ city.imageUrl (resized if Cloudinary) , convention id `city-{country}-{city}` ]
+   → then Wikipedia (card / hero only) → then a generated gradient
+```
+
+Both are returned because whether an image loads is only known in the browser:
+the convention id 404s for any city without that asset, and a curated URL can
+point at a photo since deleted. `CityMarketCard` walks the list by index in
+state; `CityDashboard`'s hero and its "other cities" thumbnails walk it via
+`dataset.sourceIndex` in `onError`. Before this the UI derived every city
+picture from the convention id alone, which is why the stored `imageUrl` was
+written by the backend and read by nobody — an admin edit changed a row and
+nothing else.
+
+**Admin:** `AdminSidebar → City Photos` (`/admin/city-photos`),
+`CityPhotosManager` + `CityPhotoRow` + `useCityPhotosManager`.
+
+- Shows what wins today with a badge naming its source, and offers the photos
+  curated elsewhere for the same place as one-press **adopt** buttons.
+- **Adopting copies the URL** and pins it as `manual` rather than pointing at
+  the other collection. Deliberate: whoever curates villas can deactivate or
+  replace a destination, and a city whose picture silently changed for that
+  reason would be impossible to explain.
+- Setting a photo marks it `imageSource: 'manual'`, which also makes
+  `cityImageService.refreshCityImage` and `seedMissingCityImages` leave that
+  city alone — an override the next automatic refresh would overwrite is not
+  an override.
+- **Clear override** unsets the fields and hands the city back to the chain;
+  the Cloudinary asset is left in place, since another city or gallery panel
+  may be using the same upload.
+- Mutations invalidate `cityPhotoKeys`, `cityShowcaseKeys` and `['cities']`,
+  and the routes call `invalidateCache('/api/cities')` — the photo is read by
+  three surfaces, so an edit that only refreshed this screen would leave the
+  public pages serving the previous picture until it went stale.
+
 ---
 
 ## Explore Cities — Market Update Digest

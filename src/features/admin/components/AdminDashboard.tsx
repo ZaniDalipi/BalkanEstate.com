@@ -25,6 +25,7 @@ import PendingLicenses from './PendingLicenses';
 import VillaApprovals from './VillaApprovals';
 import VillaDestinationsManager from './VillaDestinationsManager';
 import CityShowcaseManager from './CityShowcaseManager';
+import CityPhotosManager from './CityPhotosManager';
 import BusinessListingManager from './BusinessListingManager';
 import ArticleManager from './ArticleManager';
 import AdBannerManager from './AdBannerManager';
@@ -54,7 +55,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'villa-approvals': 'villaApprovals',
   'villa-destinations': 'villaDestinations',
   'city-showcase': 'cityShowcase',
-  'ad-banners': 'adBanners',
+  'city-photos': 'cityPhotos',
 };
 
 // Map AdminView to URL sections
@@ -80,7 +81,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'villaApprovals': 'villa-approvals',
   'villaDestinations': 'villa-destinations',
   'cityShowcase': 'city-showcase',
-  'adBanners': 'ad-banners',
+  'cityPhotos': 'city-photos',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -239,6 +240,8 @@ const AdminDashboard: React.FC = () => {
         return <VillaDestinationsManager />;
       case 'cityShowcase':
         return <CityShowcaseManager />;
+      case 'cityPhotos':
+        return <CityPhotosManager />;
       case 'properties':
         return <PropertyManager />;
       case 'agencies':

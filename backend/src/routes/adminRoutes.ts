@@ -128,6 +128,7 @@ import {
   resetSystemSettings,
 } from '../controllers/systemSettingsController';
 import multer from 'multer';
+import { isAllowedPhotoUrl, allowedPhotoHostsHint } from '../config/imageHosts';
 import Article from '../models/Article';
 
 const router = express.Router();
@@ -1276,6 +1277,196 @@ router.post(
     }
   }
 );
+
+// ============================================================================
+// City photos — the images Explore Cities shows
+//
+// One photo per city, but three collections can supply it (`CityMarketData`,
+// `CityShowcase`, `VillaDestination`). `cityPhotoService` resolves them in a
+// fixed order; these endpoints let an admin see what each city is currently
+// using, where it came from, and override it.
+// ============================================================================
+
+/**
+ * Every tracked city with its resolved photo and the alternatives available.
+ *
+ * The alternatives are what make "the same place is already curated over
+ * there" visible: an admin can adopt the City Gallery or Villa Destination
+ * photo in one click instead of re-uploading the same picture.
+ */
+router.get('/city-photos', logAdminAction('VIEW_CITY_PHOTOS'), async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const CityMarketData = (await import('../models/CityMarketData')).default;
+    const { loadCityPhotoCandidates, pickCityPhoto, placeKey } = await import('../services/cityPhotoService');
+
+    const cities = await CityMarketData
+      .find({}, 'city country countryCode featured imageUpdatedAt')
+      .sort({ country: 1, city: 1 })
+      .lean();
+
+    const candidates = await loadCityPhotoCandidates(
+      cities.map(c => ({ city: c.city, country: c.country })),
+    );
+
+    res.json({
+      cities: cities.map(c => {
+        const entry = candidates.get(placeKey(c.city, c.country));
+        const active = pickCityPhoto(entry);
+        return {
+          city: c.city,
+          country: c.country,
+          countryCode: c.countryCode,
+          featured: Boolean(c.featured),
+          imageUpdatedAt: c.imageUpdatedAt ?? null,
+          active: active ?? null,
+          candidates: {
+            manual: entry?.manual ?? null,
+            cityGallery: entry?.cityGallery ?? null,
+            villaDestination: entry?.villaDestination ?? null,
+            auto: entry?.auto ?? null,
+          },
+        };
+      }),
+    });
+  } catch (err) {
+    adminLogger.error('List city photos error:', err);
+    res.status(500).json({ message: 'Failed to load city photos' });
+  }
+});
+
+/**
+ * Upload a photo for a city. Returns the stored URL only — the caller attaches
+ * it with the PUT below, which is what lets the form preview an upload before
+ * committing it.
+ */
+router.post(
+  '/city-photos/upload',
+  logAdminAction('UPLOAD_CITY_PHOTO'),
+  cityShowcaseImageUpload.single('image'),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
+
+      const { uploadImage } = await import('../services/cloudinaryService');
+      // Landscape master: these appear as a wide hero (1200x500) and as card
+      // headers (800x400), always `object-cover`, so a portrait upload would
+      // lose its top and bottom.
+      const result = await uploadImage(req.file.buffer, {
+        userId: (req as any).user._id.toString(),
+        type: 'listing' as any,
+        maxWidth: 2000,
+        maxHeight: 1250, // 16:10, so a landscape upload is never squeezed
+        preserveQuality: true,
+      });
+
+      res.json({ url: result.url, publicId: result.publicId });
+    } catch (err) {
+      adminLogger.error('Upload city photo error:', err);
+      res.status(500).json({ message: 'Failed to upload image' });
+    }
+  }
+);
+
+/**
+ * Set a city's photo. Marks it `manual`, which both wins over an inherited
+ * photo and makes the Wikipedia auto-seeder leave it alone.
+ */
+router.put('/city-photos', logAdminAction('SET_CITY_PHOTO'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = String(req.body?.city ?? '').trim();
+    const country = String(req.body?.country ?? '').trim();
+    const imageUrl = String(req.body?.imageUrl ?? '').trim();
+    const imageCredit = String(req.body?.imageCredit ?? '').trim();
+    const imagePublicId = String(req.body?.imagePublicId ?? '').trim();
+
+    if (!city || !country) { res.status(400).json({ message: 'City and country are required' }); return; }
+    // Only https: a data: or javascript: URL would end up in an <img src>
+    // served to every visitor.
+    if (!/^https:\/\/[^\s]+$/i.test(imageUrl)) {
+      res.status(400).json({ message: 'Image URL must be an https:// address' });
+      return;
+    }
+    if (imageUrl.length > 2000) { res.status(400).json({ message: 'Image URL is too long' }); return; }
+    // Refused here rather than saved and then blocked by the CSP: an image
+    // from an unlisted host renders as a blank frame with nothing to explain
+    // it, so the curator has to hear about it now. Uploading through the app
+    // always satisfies this — those land on Cloudinary.
+    if (!isAllowedPhotoUrl(imageUrl)) {
+      res.status(400).json({
+        message: `Photos can only be linked from: ${allowedPhotoHostsHint()}. Upload the file instead and it will be hosted for you.`,
+      });
+      return;
+    }
+    if (imageCredit.length > 200) { res.status(400).json({ message: 'Credit must be 200 characters or fewer' }); return; }
+
+    const CityMarketData = (await import('../models/CityMarketData')).default;
+    const updated = await CityMarketData.findOneAndUpdate(
+      {
+        city: new RegExp(`^${escapeRegex(city)}$`, 'i'),
+        country: new RegExp(`^${escapeRegex(country)}$`, 'i'),
+      },
+      {
+        // Explicit operators rather than bare paths: this update both sets and
+        // clears fields, and mixing the two forms in one object leaves it to
+        // the driver to guess which is which.
+        $set: {
+          imageUrl,
+          imageSource: 'manual',
+          imageUpdatedAt: new Date(),
+          ...(imageCredit ? { imageCredit } : {}),
+          ...(imagePublicId ? { imagePublicId } : {}),
+        },
+        ...(imageCredit ? {} : { $unset: { imageCredit: 1 } }),
+      },
+      { new: true },
+    ).lean();
+
+    if (!updated) { res.status(404).json({ message: `We don't track ${city}, ${country}` }); return; }
+
+    void invalidateCache('/api/cities');
+    res.json({
+      city: { city: updated.city, country: updated.country },
+      active: { imageUrl, source: 'manual', ...(imageCredit ? { credit: imageCredit } : {}) },
+    });
+  } catch (err) {
+    adminLogger.error('Set city photo error:', err);
+    res.status(500).json({ message: 'Failed to save the city photo' });
+  }
+});
+
+/**
+ * Clear a city's override, handing it back to the resolution chain (City
+ * Gallery → Villa Destination → the Wikipedia seeder). The Cloudinary asset is
+ * left in place: another city or a gallery panel may be using the same upload.
+ */
+router.delete('/city-photos', logAdminAction('CLEAR_CITY_PHOTO'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = String(req.query?.city ?? '').trim();
+    const country = String(req.query?.country ?? '').trim();
+    if (!city || !country) { res.status(400).json({ message: 'City and country are required' }); return; }
+
+    const CityMarketData = (await import('../models/CityMarketData')).default;
+    const updated = await CityMarketData.findOneAndUpdate(
+      {
+        city: new RegExp(`^${escapeRegex(city)}$`, 'i'),
+        country: new RegExp(`^${escapeRegex(country)}$`, 'i'),
+      },
+      { $unset: { imageUrl: 1, imageCredit: 1, imagePublicId: 1 }, $set: { imageSource: 'auto' } },
+      { new: true },
+    ).lean();
+
+    if (!updated) { res.status(404).json({ message: `We don't track ${city}, ${country}` }); return; }
+
+    const { resolveCityPhoto } = await import('../services/cityPhotoService');
+    const active = await resolveCityPhoto(updated.city, updated.country);
+
+    void invalidateCache('/api/cities');
+    res.json({ city: { city: updated.city, country: updated.country }, active });
+  } catch (err) {
+    adminLogger.error('Clear city photo error:', err);
+    res.status(500).json({ message: 'Failed to clear the city photo' });
+  }
+});
 
 // ============================================================================
 // City directory — the (city, country) names the admin can pick from

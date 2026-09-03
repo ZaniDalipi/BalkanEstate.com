@@ -118,6 +118,13 @@ export async function refreshCityImage(cityId: string, force = false): Promise<s
   const city = await CityMarketData.findById(cityId);
   if (!city) return null;
 
+  // An admin's photo is not the seeder's to replace — not even on a forced
+  // refresh. Clearing the override in the admin screen is what hands the city
+  // back to this job.
+  if (city.imageSource === 'manual' && city.imageUrl) {
+    return city.imageUrl;
+  }
+
   // Skip if image is fresh enough
   if (!force && city.imageUrl && city.imageUpdatedAt) {
     const ageMs = Date.now() - city.imageUpdatedAt.getTime();
@@ -142,6 +149,7 @@ export async function refreshCityImage(cityId: string, force = false): Promise<s
   await CityMarketData.findByIdAndUpdate(cityId, {
     imageUrl: cloudinaryUrl,
     imageUpdatedAt: new Date(),
+    imageSource: 'auto',
   });
 
   apiLogger.info(`Updated city image for ${city.city}: ${cloudinaryUrl}`);
@@ -181,6 +189,7 @@ export async function refreshAllCityImages(force = false): Promise<number> {
 export async function seedMissingCityImages(): Promise<number> {
   const citiesWithoutImages = await CityMarketData.find({
     featured: true,
+    imageSource: { $ne: 'manual' },
     $or: [{ imageUrl: { $exists: false } }, { imageUrl: null }, { imageUrl: '' }],
   }).lean();
 
