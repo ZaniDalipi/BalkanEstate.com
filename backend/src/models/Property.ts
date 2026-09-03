@@ -79,7 +79,7 @@ export interface IProperty extends Document {
   /** On an under-construction listing this mirrors `expectedCompletionYear`. */
   yearBuilt: number;
   constructionStatus?: ConstructionStatus;
-  expectedCompletionYear?: number;
+  expectedCompletionYear?: number | null;
   parking: number;
   description: string;
   specialFeatures: string[];
@@ -667,15 +667,14 @@ const PropertySchema: Schema = new Schema(
   }
 );
 
-// Compound index for location-based queries
 /**
  * Keep the construction pair consistent on every write path — create, update,
  * import and admin edit alike — instead of at each call site.
  *
- * "Under construction" with no usable completion year is rejected (it would
- * store a badge promising a date the UI cannot render); everything else is
- * coerced: an unknown status becomes 'ready' and a stray completion year on a
- * ready listing is cleared.
+ * The completion year is optional, so the only rejection is a value that is
+ * not a year. Everything else is coerced: an unknown status becomes 'ready',
+ * a stray completion year on a ready listing is cleared, and an explicit
+ * `null` (how the client says "no handover date") is unset.
  */
 PropertySchema.pre('validate', function (next) {
   const doc = this as unknown as IProperty;
@@ -699,6 +698,7 @@ PropertySchema.pre('validate', function (next) {
   next();
 });
 
+// Compound index for location-based queries
 PropertySchema.index({ lat: 1, lng: 1 });
 // Index for price range queries
 PropertySchema.index({ price: 1, status: 1 });

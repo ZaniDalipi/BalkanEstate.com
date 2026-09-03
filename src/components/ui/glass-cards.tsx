@@ -33,7 +33,7 @@ interface PropertyCardData {
     livingRooms?: number;
     yearBuilt?: number;
     constructionStatus?: string;
-    expectedCompletionYear?: number;
+    expectedCompletionYear?: number | null;
     description?: string;
     listingType?: 'sale' | 'rent';
     isNegotiable?: boolean;
