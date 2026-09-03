@@ -10,7 +10,7 @@
  * Read side only — pure, dependency-free and safe to call on unvalidated
  * records straight off the API. The write side (form submit, API ingestion)
  * lives in `@/shared/utils/validation` and imports the rules from here, so the
- * ceiling is stated once.
+ * bounds are stated once.
  */
 
 /** Whether the building exists today, or is still going up. */
@@ -19,22 +19,23 @@ export type ConstructionStatus = 'ready' | 'under-construction';
 export const CONSTRUCTION_STATUSES = ['ready', 'under-construction'] as const;
 
 /**
- * How many years ahead a completion date may be promised.
+ * The window a completion year may fall in.
  *
- * Deliberately the same ceiling `validateYearBuilt` already applies to
- * `yearBuilt` (currentYear + 5): an under-construction listing mirrors its
- * expected year into `yearBuilt`, so two different ceilings would let a record
- * pass one guard and fail the other.
+ * Wide on purpose. A handover date is the seller's own estimate — some are
+ * years out, some slipped and are already behind — so these bounds only ask
+ * "is this a year at all", not "is this a good plan". Anything narrower
+ * silently overrules a seller who knows their project better than we do.
  */
-export const COMPLETION_YEAR_HORIZON = 5;
+export const MIN_COMPLETION_YEAR = 1900;
+export const COMPLETION_YEAR_HORIZON = 50;
 
 /**
  * What the UI may say about a record's construction state.
  *
- * `expectedYear` is `null` — never a guessed or partial value — when the year
- * is missing, unusable or already past. A listing whose promised year has come
- * and gone reads as "Under construction" with no date rather than advertising
- * a deadline it already missed.
+ * `expectedYear` is `null` — never a guessed or partial value — when no year
+ * was given or the stored value is not a usable year. The completion year is
+ * optional, so "under construction, date not announced" is an ordinary state,
+ * not an error.
  */
 export type ConstructionInfo =
   | { status: 'ready' }
@@ -51,13 +52,12 @@ export function normalizeConstructionStatus(value: unknown): ConstructionStatus 
   return value === 'under-construction' ? 'under-construction' : 'ready';
 }
 
-/** True when `year` is a plausible, still-future completion year. */
+/** True when `value` is a whole year inside the plausible window. */
 export function isUsableCompletionYear(value: unknown, now: Date = new Date()): boolean {
   const year = typeof value === 'string' ? Number(value.trim()) : value;
   if (typeof year !== 'number' || !Number.isInteger(year)) return false;
 
-  const currentYear = now.getFullYear();
-  return year >= currentYear && year <= currentYear + COMPLETION_YEAR_HORIZON;
+  return year >= MIN_COMPLETION_YEAR && year <= now.getFullYear() + COMPLETION_YEAR_HORIZON;
 }
 
 /**
@@ -89,12 +89,6 @@ export function isUnderConstruction(
   return !!input && normalizeConstructionStatus(input.constructionStatus) === 'under-construction';
 }
 
-/** The years a seller may pick from, oldest first. */
-export function completionYearOptions(now: Date = new Date()): number[] {
-  const currentYear = now.getFullYear();
-  return Array.from({ length: COMPLETION_YEAR_HORIZON + 1 }, (_, i) => currentYear + i);
-}
-
 /**
  * The year fields as they are persisted.
  *
@@ -102,15 +96,16 @@ export function completionYearOptions(now: Date = new Date()): number[] {
  * so a previewed listing and the saved one cannot disagree about what year the
  * listing carries.
  *
- * An under-construction listing mirrors its completion year into `yearBuilt`.
+ * An under-construction listing with a year mirrors it into `yearBuilt`.
  * `yearBuilt` is required by the schema and is what every existing sort and
  * year filter reads; leaving it at "this year" would file a 2029 handover
  * under 2026. The mirrored value is never *shown* as a year built — the UI
  * asks `resolveConstruction` first.
  *
- * An unusable year degrades to 'ready' rather than writing a promise with no
- * date on it. The form's boundary validator (`validateConstruction`) rejects
- * that combination before it gets here; this is the belt-and-braces path.
+ * Without a usable year the status still stands: the listing stays under
+ * construction and simply carries no date, and `yearBuilt` keeps whatever was
+ * entered. Dropping the status instead would silently republish an unfinished
+ * building as a finished one.
  */
 export function buildConstructionFields(
   input: {
@@ -123,8 +118,12 @@ export function buildConstructionFields(
   const enteredYearBuilt = Number(input.yearBuilt) || 0;
   const info = resolveConstruction(input, now);
 
-  if (info.status === 'ready' || info.expectedYear === null) {
+  if (info.status === 'ready') {
     return { yearBuilt: enteredYearBuilt, constructionStatus: 'ready' };
+  }
+
+  if (info.expectedYear === null) {
+    return { yearBuilt: enteredYearBuilt, constructionStatus: 'under-construction' };
   }
 
   return {

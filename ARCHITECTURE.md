@@ -557,32 +557,42 @@ Key decisions:
 - **Two fields, one meaning, checked together.** `constructionStatus` and
   `expectedCompletionYear` are each individually valid whatever the other says;
   only the *pair* can be wrong. `validateConstruction` is therefore the unit
-  both boundaries call — a per-field check would happily publish "under
-  construction" with no year, which is a badge promising a date it cannot show.
+  both boundaries call.
+- **The year is optional, and it is the seller's to choose.** "Under
+  construction, handover not announced" is an ordinary listing, and a date
+  that is years out — or one that has already slipped — is the seller's own
+  estimate to stand behind. So the guard asks only *is this a year at all*
+  (a whole number in `MIN_COMPLETION_YEAR` .. `currentYear +
+  COMPLETION_YEAR_HORIZON`, deliberately wide). Anything narrower overrules
+  someone who knows their project better than we do; the one thing rejected is
+  a value that would render as a badge with unreadable text on it.
 - **Unknown reads as ready.** Every listing written before this feature has
   neither field, and that is exactly what they are. `normalizeConstructionStatus`
   gives the same answer for a legacy row, a typo and a hostile payload, so no
   caller has to special-case the absent case.
-- **A year that has passed shows no year.** `resolveConstruction` returns
-  `expectedYear: null` — never a partial or guessed value — when the year is
-  missing, unparseable, out of range or already gone. The badge and the details
-  row then say "Under construction" without a date rather than advertising a
-  deadline the project already missed. Same rule as `DataFreshness`: render
-  nothing rather than imply something untrue.
+- **No year means no year shown.** `resolveConstruction` returns
+  `expectedYear: null` — never a partial or guessed value — when none was given
+  or the stored value is not a usable year. The badge and the details row then
+  say "Under construction" without a date, instead of printing whatever the
+  field happened to hold. Same rule as `DataFreshness`: render nothing rather
+  than imply something untrue.
 - **`yearBuilt` mirrors the completion year.** It is schema-required and it is
   what every year sort and year filter reads; left at "this year" a 2029
   handover would file under 2026. The mirrored value is never *displayed* as a
-  year built, because the UI asks `resolveConstruction` first.
-- **One ceiling, not two.** `COMPLETION_YEAR_HORIZON` is 5 — the same window
-  `validateYearBuilt` already allows above the current year. Two different
-  ceilings would let a record clear one guard and fail the other on the very
-  field they share.
+  year built, because the UI asks `resolveConstruction` first. With no year
+  given, `yearBuilt` keeps what the seller entered.
+- **A missing year never downgrades the status.** `buildConstructionFields`
+  and the server hook both keep `under-construction` when the date is absent
+  or unusable. Falling back to 'ready' there would quietly republish an
+  unfinished building as a finished one — the opposite of what the flag is
+  for.
 - **The server is the last word.** `backend/src/utils/constructionStatus.ts` is
   a deliberate mirror rather than a shared import (the backend compiles from
   its own `rootDir`, and the importer and other API clients never run the
   client's copy). `Property.pre('validate')` applies it on every write path —
   create, update, import, admin edit — so the rule cannot be skipped by
-  reaching a different controller.
+  reaching a different controller. It coerces what it safely can and rejects
+  only a completion year that is not a year.
 - **A rejected pair is a 400, not a 500.** `respondIfValidationError`
   (`middleware/propertyValidation.ts`) turns a Mongoose `ValidationError` into
   the same `{ field, message }[]` shape `handleValidationErrors` produces.

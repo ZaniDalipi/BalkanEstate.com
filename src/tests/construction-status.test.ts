@@ -10,8 +10,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   COMPLETION_YEAR_HORIZON,
+  MIN_COMPLETION_YEAR,
   buildConstructionFields,
-  completionYearOptions,
   isUnderConstruction,
   normalizeConstructionStatus,
   resolveConstruction,
@@ -54,8 +54,22 @@ describe('resolveConstruction', () => {
     ).toEqual({ status: 'under-construction', expectedYear: YEAR + 1 });
   });
 
-  it('drops a year that is missing, unusable or already past', () => {
-    const cases = [undefined, null, '', 'soon', NaN, YEAR - 1, YEAR + COMPLETION_YEAR_HORIZON + 1, 2026.5];
+  it('keeps a year the seller chose, however far out or already slipped', () => {
+    for (const year of [YEAR - 1, YEAR + 12, YEAR + COMPLETION_YEAR_HORIZON, MIN_COMPLETION_YEAR]) {
+      expect(resolveConstruction({ constructionStatus: 'under-construction', expectedCompletionYear: year }, NOW))
+        .toEqual({ status: 'under-construction', expectedYear: year });
+    }
+  });
+
+  it('stays under construction with no date when no year was given', () => {
+    for (const expectedCompletionYear of [undefined, null, '', 0]) {
+      expect(resolveConstruction({ constructionStatus: 'under-construction', expectedCompletionYear }, NOW))
+        .toEqual({ status: 'under-construction', expectedYear: null });
+    }
+  });
+
+  it('drops a value that is not a year', () => {
+    const cases = ['soon', NaN, 2026.5, MIN_COMPLETION_YEAR - 1, YEAR + COMPLETION_YEAR_HORIZON + 1];
     for (const expectedCompletionYear of cases) {
       expect(resolveConstruction({ constructionStatus: 'under-construction', expectedCompletionYear }, NOW))
         .toEqual({ status: 'under-construction', expectedYear: null });
@@ -80,38 +94,22 @@ describe('isUnderConstruction', () => {
   });
 });
 
-describe('completionYearOptions', () => {
-  it('offers this year through the horizon, oldest first', () => {
-    const options = completionYearOptions(NOW);
-    expect(options[0]).toBe(YEAR);
-    expect(options[options.length - 1]).toBe(YEAR + COMPLETION_YEAR_HORIZON);
-    expect(options).toHaveLength(COMPLETION_YEAR_HORIZON + 1);
-  });
-});
-
 describe('validateCompletionYear', () => {
-  it('accepts every year the picker offers', () => {
-    for (const year of completionYearOptions(NOW)) {
+  it('accepts whatever year the seller puts, near or far', () => {
+    for (const year of [YEAR, YEAR + 1, YEAR + 20, YEAR + COMPLETION_YEAR_HORIZON, MIN_COMPLETION_YEAR]) {
       expect(validateCompletionYear(year, { now: NOW })).toEqual({ isValid: true });
     }
   });
 
-  it('rejects a year that has already passed', () => {
-    expect(validateCompletionYear(YEAR - 1, { now: NOW })).toEqual({
-      isValid: false,
-      error: 'Completion year cannot be in the past',
-    });
+  it('accepts a date that has already slipped — that is the seller to explain, not us', () => {
+    expect(validateCompletionYear(YEAR - 3, { now: NOW })).toEqual({ isValid: true });
   });
 
-  it('rejects a year beyond the horizon', () => {
-    const result = validateCompletionYear(YEAR + COMPLETION_YEAR_HORIZON + 1, { now: NOW });
-    expect(result.isValid).toBe(false);
-    expect(result.error).toContain(String(COMPLETION_YEAR_HORIZON));
-  });
-
-  it('rejects values that are not whole years', () => {
+  it('rejects only what is not a year', () => {
     expect(validateCompletionYear('not a year', { now: NOW }).isValid).toBe(false);
     expect(validateCompletionYear(2027.4, { now: NOW }).isValid).toBe(false);
+    expect(validateCompletionYear(MIN_COMPLETION_YEAR - 1, { now: NOW }).isValid).toBe(false);
+    expect(validateCompletionYear(YEAR + COMPLETION_YEAR_HORIZON + 1, { now: NOW }).isValid).toBe(false);
   });
 });
 
@@ -122,19 +120,21 @@ describe('validateConstruction', () => {
       .toEqual({ isValid: true });
   });
 
-  it('requires a year once the listing says under construction', () => {
-    const result = validateConstruction({ constructionStatus: 'under-construction' }, { now: NOW });
-    expect(result).toEqual({ isValid: false, error: 'Please select the expected completion year' });
+  it('lets an under-construction listing go out with no year at all', () => {
+    for (const expectedCompletionYear of [undefined, null, '']) {
+      expect(validateConstruction({ constructionStatus: 'under-construction', expectedCompletionYear }, { now: NOW }))
+        .toEqual({ isValid: true });
+    }
   });
 
-  it('applies the year rules to the pair', () => {
-    expect(
-      validateConstruction({ constructionStatus: 'under-construction', expectedCompletionYear: YEAR - 5 }, { now: NOW })
-        .isValid
-    ).toBe(false);
+  it('applies the year rules only to a year that was actually given', () => {
     expect(
       validateConstruction({ constructionStatus: 'under-construction', expectedCompletionYear: YEAR + 1 }, { now: NOW })
     ).toEqual({ isValid: true });
+    expect(
+      validateConstruction({ constructionStatus: 'under-construction', expectedCompletionYear: 'whenever' }, { now: NOW })
+        .isValid
+    ).toBe(false);
   });
 });
 
@@ -159,10 +159,19 @@ describe('buildConstructionFields', () => {
     });
   });
 
-  it('never writes a promise with no date on it', () => {
+  it('keeps the status when no year was given, rather than republishing it as finished', () => {
     expect(
       buildConstructionFields({ constructionStatus: 'under-construction', yearBuilt: 2020 }, NOW)
-    ).toEqual({ yearBuilt: 2020, constructionStatus: 'ready' });
+    ).toEqual({ yearBuilt: 2020, constructionStatus: 'under-construction' });
+  });
+
+  it('drops a year that is not a year but keeps the status', () => {
+    expect(
+      buildConstructionFields(
+        { constructionStatus: 'under-construction', expectedCompletionYear: 'soon', yearBuilt: 2020 },
+        NOW
+      )
+    ).toEqual({ yearBuilt: 2020, constructionStatus: 'under-construction' });
   });
 
   it('clears a stale year when the listing goes back to ready', () => {
@@ -199,17 +208,32 @@ describe('validateListing — construction pair', () => {
     expect(validateListing(base, t)).toEqual({});
   });
 
-  it('blocks an under-construction listing with no year picked', () => {
+  it('publishes an under-construction listing with no year picked', () => {
     const errors = validateListing(
       { ...base, listingData: { ...base.listingData, constructionStatus: 'under-construction' } },
       t
     );
+    expect(errors).toEqual({});
+  });
+
+  it('flags a completion year that is not a year', () => {
+    const errors = validateListing(
+      {
+        ...base,
+        listingData: {
+          ...base.listingData,
+          constructionStatus: 'under-construction',
+          expected_completion_year: 12,
+        },
+      },
+      t
+    );
     expect(errors.expectedCompletionYear).toBe(
-      'Please select the year this property is expected to be finished.'
+      'Please enter a valid completion year, or leave it empty.'
     );
   });
 
-  it('publishes once the year is picked', () => {
+  it('publishes once a year is entered', () => {
     const errors = validateListing(
       {
         ...base,

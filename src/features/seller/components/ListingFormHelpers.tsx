@@ -268,16 +268,17 @@ export const validateListing = (
     }
 
     // Construction state — the pair is checked as a unit by the shared
-    // validator, so "under construction" can never be published without the
-    // completion year the badge promises to show.
+    // validator. The completion year is optional (a project without an
+    // announced handover date is a real listing), so this only fires when the
+    // seller typed something that is not a usable year.
     const construction = validateConstruction({
         constructionStatus: listingData.constructionStatus,
         expectedCompletionYear: listingData.expected_completion_year || undefined,
     });
     if (!construction.isValid) {
         errors.expectedCompletionYear = t(
-            'newListing:validation.completionYearRequired',
-            'Please select the year this property is expected to be finished.',
+            'newListing:validation.completionYearInvalid',
+            'Please enter a valid completion year, or leave it empty.',
         );
     }
 

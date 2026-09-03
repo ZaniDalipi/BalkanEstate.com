@@ -13,6 +13,7 @@ process.env.SKIP_TEST_DB = 'true';
 
 import {
   COMPLETION_YEAR_HORIZON,
+  MIN_COMPLETION_YEAR,
   isUsableCompletionYear,
   normalizeConstructionFields,
   normalizeConstructionStatus,
@@ -34,13 +35,15 @@ describe('normalizeConstructionStatus', () => {
 });
 
 describe('isUsableCompletionYear', () => {
-  it('accepts this year through the horizon', () => {
+  it('accepts any year in the window, including one already slipped', () => {
     expect(isUsableCompletionYear(YEAR, NOW)).toBe(true);
+    expect(isUsableCompletionYear(YEAR - 1, NOW)).toBe(true);
     expect(isUsableCompletionYear(YEAR + COMPLETION_YEAR_HORIZON, NOW)).toBe(true);
+    expect(isUsableCompletionYear(MIN_COMPLETION_YEAR, NOW)).toBe(true);
   });
 
-  it('rejects the past, the far future and non-years', () => {
-    expect(isUsableCompletionYear(YEAR - 1, NOW)).toBe(false);
+  it('rejects only what is not a year', () => {
+    expect(isUsableCompletionYear(MIN_COMPLETION_YEAR - 1, NOW)).toBe(false);
     expect(isUsableCompletionYear(YEAR + COMPLETION_YEAR_HORIZON + 1, NOW)).toBe(false);
     expect(isUsableCompletionYear('next spring', NOW)).toBe(false);
     expect(isUsableCompletionYear(2027.5, NOW)).toBe(false);
@@ -83,19 +86,29 @@ describe('normalizeConstructionFields', () => {
     });
   });
 
-  it('rejects "under construction" with no year — the one case it will not repair', () => {
+  it('stores "under construction" with no year — the date is optional', () => {
     const result = normalizeConstructionFields({ constructionStatus: 'under-construction', yearBuilt: 2004 }, NOW);
-    expect(result.ok).toBe(false);
-    expect(result.ok === false && result.error).toContain('expectedCompletionYear is required');
+    expect(result).toEqual({
+      ok: true,
+      fields: { constructionStatus: 'under-construction', expectedCompletionYear: undefined },
+    });
   });
 
-  it('rejects a year outside the window and says what the window is', () => {
+  it('keeps a handover date that has already slipped', () => {
     const result = normalizeConstructionFields(
       { constructionStatus: 'under-construction', expectedCompletionYear: YEAR - 2 },
       NOW
     );
+    expect(result.ok && result.fields.expectedCompletionYear).toBe(YEAR - 2);
+  });
+
+  it('rejects a value that is not a year and says what the window is', () => {
+    const result = normalizeConstructionFields(
+      { constructionStatus: 'under-construction', expectedCompletionYear: 'whenever' },
+      NOW
+    );
     expect(result.ok).toBe(false);
-    expect(result.ok === false && result.error).toContain(String(YEAR));
+    expect(result.ok === false && result.error).toContain(String(MIN_COMPLETION_YEAR));
     expect(result.ok === false && result.error).toContain(String(YEAR + COMPLETION_YEAR_HORIZON));
   });
 
@@ -160,8 +173,20 @@ describe("Property pre('validate')", () => {
     expect(doc.expectedCompletionYear).toBe(nextYear);
   });
 
-  it('refuses an under-construction listing with no completion year', async () => {
+  it('saves an under-construction listing with no completion year', async () => {
     const doc = new Property({ ...base(), constructionStatus: 'under-construction' });
+    await doc.validate();
+    expect(doc.constructionStatus).toBe('under-construction');
+    expect(doc.expectedCompletionYear).toBeUndefined();
+    expect(doc.yearBuilt).toBe(2010);
+  });
+
+  it('refuses a completion year that is not a year', async () => {
+    const doc = new Property({
+      ...base(),
+      constructionStatus: 'under-construction',
+      expectedCompletionYear: 12,
+    });
     await expect(doc.validate()).rejects.toMatchObject({
       name: 'ValidationError',
       errors: { expectedCompletionYear: expect.anything() },

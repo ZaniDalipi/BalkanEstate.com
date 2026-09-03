@@ -225,7 +225,7 @@
     "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj spratova (1 ili veći).",
     "apartmentElevator": "Za stanove, molimo navedite da li postoji lift (Da ili Ne).",
     "floorExceedsTotal": "Broj sprata ne može biti veći od ukupnog broja spratova.",
-    "completionYearRequired": "Molimo odaberite godinu kada se očekuje završetak ove nekretnine."
+    "completionYearInvalid": "Molimo unesite ispravnu godinu završetka ili ostavite prazno."
   },
   "success": {
     "title": "Oglas Objavljen!",

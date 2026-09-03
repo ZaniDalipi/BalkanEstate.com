@@ -4,6 +4,7 @@
 import { normalizePlaceName } from '@/shared/geo/normalize';
 import {
   COMPLETION_YEAR_HORIZON,
+  MIN_COMPLETION_YEAR,
   normalizeConstructionStatus,
 } from '@/shared/property/construction';
 
@@ -644,17 +645,17 @@ export function validateYearBuilt(year: number | string): ValidationResult {
 /**
  * Validate an expected completion year for an under-construction listing.
  *
- * A completion date is a promise about the future, so unlike `validateYearBuilt`
- * the *past* is what is rejected here. The upper bound is the same
- * `currentYear + 5` that guards `yearBuilt` (see `COMPLETION_YEAR_HORIZON`),
- * because an under-construction listing mirrors this year into `yearBuilt`.
+ * Deliberately permissive: a handover date is the seller's own estimate, and
+ * some of them are years out while others have already slipped. The check is
+ * "is this a year at all" (a whole number inside `MIN_COMPLETION_YEAR` ..
+ * `currentYear + COMPLETION_YEAR_HORIZON`), not a judgement about the plan.
  */
 export function validateCompletionYear(
   year: number | string,
   options: { now?: Date } = {}
 ): ValidationResult {
   const numYear = typeof year === 'string' ? parseInt(year.trim(), 10) : year;
-  const currentYear = (options.now ?? new Date()).getFullYear();
+  const maxYear = (options.now ?? new Date()).getFullYear() + COMPLETION_YEAR_HORIZON;
 
   if (typeof numYear !== 'number' || !Number.isFinite(numYear)) {
     return { isValid: false, error: 'Completion year must be a valid number' };
@@ -664,14 +665,10 @@ export function validateCompletionYear(
     return { isValid: false, error: 'Completion year must be a whole year' };
   }
 
-  if (numYear < currentYear) {
-    return { isValid: false, error: 'Completion year cannot be in the past' };
-  }
-
-  if (numYear > currentYear + COMPLETION_YEAR_HORIZON) {
+  if (numYear < MIN_COMPLETION_YEAR || numYear > maxYear) {
     return {
       isValid: false,
-      error: `Completion year cannot be more than ${COMPLETION_YEAR_HORIZON} years away`,
+      error: `Completion year must be between ${MIN_COMPLETION_YEAR} and ${maxYear}`,
     };
   }
 
@@ -681,14 +678,14 @@ export function validateCompletionYear(
 /**
  * Validate the construction pair as a unit.
  *
- * The two fields only mean something together: "under construction" with no
- * year is a badge that promises a date it cannot show, and a year on a
- * finished building is a contradiction. Checking them field-by-field in the
- * form would let either through, so both boundaries (form submit and API
- * ingestion) call this instead.
+ * The two fields only mean something together, so checking them field by field
+ * in the form would miss the combinations. The completion year is **optional**:
+ * "under construction, date not announced" is a listing a seller may publish.
+ * What is not allowed is a year that is not a year — that would store a badge
+ * with unreadable text on it.
  *
- * A year supplied alongside `ready` is *not* an error — the write path drops
- * it, the same way toggling the switch off in the form does.
+ * A year supplied alongside `ready` is not an error either — the write path
+ * drops it, the same way toggling the switch off in the form does.
  */
 export function validateConstruction(
   input: { constructionStatus?: unknown; expectedCompletionYear?: unknown },
@@ -700,7 +697,7 @@ export function validateConstruction(
 
   const year = input?.expectedCompletionYear;
   if (year === undefined || year === null || year === '') {
-    return { isValid: false, error: 'Please select the expected completion year' };
+    return { isValid: true };
   }
 
   return validateCompletionYear(year as number | string, options);

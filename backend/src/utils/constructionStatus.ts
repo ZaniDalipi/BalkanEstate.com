@@ -16,21 +16,26 @@ export type ConstructionStatus = 'ready' | 'under-construction';
 
 export const CONSTRUCTION_STATUSES: ConstructionStatus[] = ['ready', 'under-construction'];
 
-/** Matches the ceiling the frontend's `validateYearBuilt`/`validateCompletionYear` apply. */
-export const COMPLETION_YEAR_HORIZON = 5;
+/**
+ * The window a completion year may fall in — the same bounds the client's copy
+ * applies. Wide on purpose: a handover date is the seller's estimate, some of
+ * them years out and some already slipped, so this asks "is this a year at
+ * all", not whether the plan is a good one.
+ */
+export const MIN_COMPLETION_YEAR = 1900;
+export const COMPLETION_YEAR_HORIZON = 50;
 
 /** Anything unrecognised — including a missing field on a legacy record — is 'ready'. */
 export function normalizeConstructionStatus(value: unknown): ConstructionStatus {
   return value === 'under-construction' ? 'under-construction' : 'ready';
 }
 
-/** True when `value` is a whole year between this year and the horizon. */
+/** True when `value` is a whole year inside the plausible window. */
 export function isUsableCompletionYear(value: unknown, now: Date = new Date()): boolean {
   const year = typeof value === 'string' ? Number(value.trim()) : value;
   if (typeof year !== 'number' || !Number.isInteger(year)) return false;
 
-  const currentYear = now.getFullYear();
-  return year >= currentYear && year <= currentYear + COMPLETION_YEAR_HORIZON;
+  return year >= MIN_COMPLETION_YEAR && year <= now.getFullYear() + COMPLETION_YEAR_HORIZON;
 }
 
 export interface ConstructionFields {
@@ -52,11 +57,12 @@ export type ConstructionNormalization =
 /**
  * Normalize the construction pair for storage.
  *
- * Rejects rather than repairs the one case a client can get wrong in a way
- * that matters: "under construction" with no usable year, which would store a
- * badge promising a date the UI cannot show. Everything else is coerced —
- * an unknown status becomes 'ready', and a stray completion year on a ready
- * listing is dropped instead of failing the write.
+ * The completion year is optional — an under-construction listing with no
+ * announced handover date is an ordinary listing — so the only case rejected
+ * is a year that is not a year, which would store a badge with unreadable text
+ * on it. Everything else is coerced: an unknown status becomes 'ready', and a
+ * stray completion year on a ready listing is dropped instead of failing the
+ * write.
  */
 export function normalizeConstructionFields(
   input: { constructionStatus?: unknown; expectedCompletionYear?: unknown; yearBuilt?: unknown },
@@ -68,14 +74,14 @@ export function normalizeConstructionFields(
 
   const raw = input.expectedCompletionYear;
   if (raw === undefined || raw === null || raw === '') {
-    return { ok: false, error: 'expectedCompletionYear is required when constructionStatus is under-construction' };
+    // Under construction stands on its own; the listing simply carries no date.
+    return { ok: true, fields: { constructionStatus: 'under-construction', expectedCompletionYear: undefined } };
   }
 
   if (!isUsableCompletionYear(raw, now)) {
-    const currentYear = now.getFullYear();
     return {
       ok: false,
-      error: `expectedCompletionYear must be a whole year between ${currentYear} and ${currentYear + COMPLETION_YEAR_HORIZON}`,
+      error: `expectedCompletionYear must be a whole year between ${MIN_COMPLETION_YEAR} and ${now.getFullYear() + COMPLETION_YEAR_HORIZON}`,
     };
   }
 

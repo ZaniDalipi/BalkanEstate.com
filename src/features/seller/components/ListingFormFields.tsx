@@ -5,7 +5,6 @@ import { getCurrencySymbol } from '@/utils/currency';
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData, FieldErrors } from './ListingFormHelpers';
-import { completionYearOptions } from '@/shared/property/construction';
 import { floatingInputClasses, floatingSelectLabelClasses, inputBaseClasses, labelClasses, selectClasses, errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark } from './ListingFormHelpers';
 
 const chevronIcon = (
@@ -442,25 +441,24 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
 
                         {listingData.constructionStatus === 'under-construction' ? (
                             <>
+                                {/* Free entry, and optional: the handover year is the
+                                    seller's own estimate, so any year they choose to
+                                    give is accepted and leaving it blank publishes the
+                                    listing as "under construction" with no date. */}
                                 <label htmlFor="expectedCompletionYear" className={`${labelClasses} ${fieldErrors.expectedCompletionYear ? errorLabelClasses : ''}`}>
-                                    {t('seller:createListing.fields.expectedCompletion', 'Expected completion')}<RequiredMark />
+                                    {t('seller:createListing.fields.expectedCompletion', 'Expected completion')}
+                                    <span className="ml-1 font-normal text-gray-400">{t('seller:createListing.fields.optional', '(optional)')}</span>
                                 </label>
-                                <div className="relative">
-                                    <select
-                                        id="expectedCompletionYear"
-                                        value={listingData.expected_completion_year || ''}
-                                        onChange={(e) => setListingData(p => ({ ...p, expected_completion_year: Number(e.target.value) || 0 }))}
-                                        className={`${selectClasses} ${fieldErrors.expectedCompletionYear ? errorFieldClasses : ''}`}
-                                        aria-invalid={!!fieldErrors.expectedCompletionYear}
-                                        required
-                                    >
-                                        <option value="">{t('seller:createListing.fields.selectYear', 'Select year')}</option>
-                                        {completionYearOptions().map(year => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </select>
-                                    {chevronIcon}
-                                </div>
+                                <input
+                                    id="expectedCompletionYear"
+                                    type="number"
+                                    inputMode="numeric"
+                                    value={listingData.expected_completion_year || ''}
+                                    onChange={(e) => setListingData(p => ({ ...p, expected_completion_year: parseInt(e.target.value, 10) || 0 }))}
+                                    placeholder={t('seller:createListing.fields.completionYearPlaceholder', 'e.g. 2028')}
+                                    className={`${inputBaseClasses} ${fieldErrors.expectedCompletionYear ? errorFieldClasses : ''}`}
+                                    aria-invalid={!!fieldErrors.expectedCompletionYear}
+                                />
                                 <FieldError message={fieldErrors.expectedCompletionYear} />
                             </>
                         ) : (

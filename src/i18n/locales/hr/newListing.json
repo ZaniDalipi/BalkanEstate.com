@@ -312,7 +312,7 @@
     "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj katova (1 ili više).",
     "apartmentElevator": "Za stanove, molimo navedite ima li dizalo (Da ili Ne).",
     "floorExceedsTotal": "Broj kata ne može premašiti ukupan broj katova.",
-    "completionYearRequired": "Molimo odaberite godinu kada se očekuje završetak ove nekretnine.",
+    "completionYearInvalid": "Molimo unesite ispravnu godinu završetka ili ostavite prazno.",
     "required": "This field is required",
     "minImages": "Please upload at least {{count}} images",
     "selectCountry": "Please select a country",
