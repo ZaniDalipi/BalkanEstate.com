@@ -339,8 +339,8 @@ export interface Property {
     yearBuilt: number;
     /** Absent = 'ready'. Read through `resolveConstruction`. */
     constructionStatus?: ConstructionStatus;
-    /** Only meaningful when `constructionStatus` is 'under-construction'. */
-    expectedCompletionYear?: number;
+    /** Only meaningful when `constructionStatus` is 'under-construction'; `null` = no date. */
+    expectedCompletionYear?: number | null;
     parking: number;
     description: string;
     specialFeatures: string[];

@@ -137,8 +137,12 @@ export interface Property {
   /** Absent on every listing written before the feature — read it through
    *  `resolveConstruction`, which treats anything unrecognised as 'ready'. */
   constructionStatus?: ConstructionStatus;
-  /** Only meaningful when `constructionStatus` is 'under-construction'. */
-  expectedCompletionYear?: number;
+  /**
+   * Only meaningful when `constructionStatus` is 'under-construction'.
+   * `null` is an explicit "no handover date" — the write path sends it so a
+   * cleared year actually clears (an absent field means "unchanged").
+   */
+  expectedCompletionYear?: number | null;
   parking: number;
   description: string;
   specialFeatures: string[];

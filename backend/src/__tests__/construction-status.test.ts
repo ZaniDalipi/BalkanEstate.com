@@ -193,6 +193,23 @@ describe("Property pre('validate')", () => {
     });
   });
 
+  // The client sends null when the seller clears the field; an omitted key
+  // would read as "unchanged" and the old year would survive the edit.
+  it('unsets a completion year the seller cleared', async () => {
+    const doc = new Property({
+      ...base(),
+      constructionStatus: 'under-construction',
+      expectedCompletionYear: nextYear,
+    });
+    await doc.validate();
+    expect(doc.expectedCompletionYear).toBe(nextYear);
+
+    doc.expectedCompletionYear = null;
+    await doc.validate();
+    expect(doc.constructionStatus).toBe('under-construction');
+    expect(doc.expectedCompletionYear).toBeUndefined();
+  });
+
   it('clears a stray completion year rather than failing a ready listing', async () => {
     const doc = new Property({ ...base(), expectedCompletionYear: nextYear });
     await doc.validate();
