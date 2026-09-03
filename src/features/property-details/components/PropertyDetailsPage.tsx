@@ -39,6 +39,7 @@ import PromotionModal from '@/src/features/promotions/components/PromotionModal'
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
 import ExternalSourceBadge from '@/src/features/properties/components/ExternalSourceBadge';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import { getSellerDisplayName, getSellerRoleLabel } from '@/src/shared/utils/seller';
 import { buildMapFocusTarget, resolveMapDestination } from '@/shared/map/mapDestination';
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
@@ -89,11 +90,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     enabled: !!property.id,
   });
 
-  // Track recently viewed for homepage carousel
+  // Track recently viewed for homepage carousel.
+  // Re-runs once the fetched record arrives (`freshProperty`), because the first
+  // pass often sees only the cached card data — which, on a shared link or a
+  // refresh, carries no seller. Without this the carousel cached a seller-less
+  // snapshot and showed "Private Seller" with no name forever.
   const { trackView } = useRecentlyViewed();
   useEffect(() => {
     if (property?.id) trackView(property);
-  }, [property?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [property?.id, freshProperty]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Enable real-time updates - refresh when this property is updated
   useRealtimeProperties({
@@ -223,6 +228,22 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     if (property.sellerId && String(property.sellerId) === userId) return true;
     return false;
   }, [currentUser, property.sellerId]);
+
+  // Who is selling, resolved through the shared fallback chain (name → agency
+  // → role label) so the sidebar, the mobile sheet and the property cards all
+  // print the same thing for the same listing.
+  const sellerLabels = React.useMemo(
+    () => ({
+      agent: t('property:seller.agent', 'Agent'),
+      private: t('property:seller.private', 'Private Seller'),
+    }),
+    [t]
+  );
+  const sellerDisplay = React.useMemo(
+    () => getSellerDisplayName(property.seller, sellerLabels),
+    [property.seller, sellerLabels]
+  );
+  const sellerRoleLabel = getSellerRoleLabel(property.seller, sellerLabels);
 
   // Computed values
   const isFavorited = state.savedHomes.some((p) => p.id === property.id);
@@ -1146,16 +1167,16 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               {property.seller?.avatarUrl && !sellerAvatarError ? (
                 <img
                   src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 88, quality: 'auto', crop: 'fill' })}
-                  alt={property.seller.name || ''}
+                  alt={sellerDisplay.name}
                   className="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-md relative"
                   onError={() => setSellerAvatarError(true)}
                 />
               ) : (
                 <div className={`w-11 h-11 rounded-full flex items-center justify-center ring-2 ring-white shadow-md relative ${property.seller?.type === 'agent' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-green-500 to-emerald-600'}`}>
                   <span className="text-white font-bold text-base select-none">
-                    {property.seller?.name
-                      ? property.seller.name.trim().split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
-                      : '?'}
+                    {sellerDisplay.isFallback
+                      ? '?'
+                      : sellerDisplay.name.split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                   </span>
                 </div>
               )}
@@ -1164,8 +1185,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-sm text-neutral-900 truncate leading-tight">{property.seller?.name || t('property:seller.privateSeller', 'Private Seller')}</p>
-              <p className="text-xs text-neutral-500 leading-tight">{property.seller?.type === 'agent' ? t('property:seller.agent', 'Agent') : t('property:seller.privateSeller', 'Private Seller')}</p>
+              <p className="font-semibold text-sm text-neutral-900 truncate leading-tight">{sellerDisplay.name}</p>
+              <p className="text-xs text-neutral-500 leading-tight">{sellerRoleLabel}</p>
             </div>
           </button>
 
@@ -1218,18 +1239,20 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               {property.seller?.avatarUrl && !sellerAvatarError ? (
                 <img
                   src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 72, quality: 'auto', crop: 'fill' })}
-                  alt={property.seller.name || ''}
+                  alt={sellerDisplay.name}
                   className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0"
                 />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center ring-2 ring-white shadow-sm flex-shrink-0">
                   <span className="text-white font-bold text-xs select-none">
-                    {property.seller?.name?.trim().split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                    {sellerDisplay.isFallback
+                      ? '?'
+                      : sellerDisplay.name.split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                   </span>
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="font-bold text-sm text-neutral-900 truncate leading-tight">{property.seller?.name}</p>
+                <p className="font-bold text-sm text-neutral-900 truncate leading-tight">{sellerDisplay.name}</p>
                 <p className="text-xs text-neutral-500 leading-tight">{t('property:seller.moreFromAgent', 'More listings from this agent')} ✨</p>
               </div>
               <button

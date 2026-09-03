@@ -388,6 +388,71 @@ export function validateName(name: string, fieldName = 'Name'): ValidationResult
   return { isValid: true };
 }
 
+/** Values the API can hand us in a name field that must never be rendered as one. */
+const NAME_PLACEHOLDERS = new Set([
+  'undefined',
+  'null',
+  'nan',
+  'n/a',
+  'na',
+  '-',
+  'unknown',
+  'unnamed',
+  'no name',
+  'deleted user',
+]);
+
+/**
+ * Validate a seller / agency name for *display*.
+ *
+ * Deliberately more permissive than `validateName`: this guards a value we only
+ * ever render, and BalkanEstate spans Latin, Cyrillic and Greek scripts, while
+ * agency names legitimately carry digits and punctuation ("RE/MAX 21", "Dom 4U").
+ * What it does reject is the set of values that would otherwise leak onto a card:
+ * empty strings, stringified `undefined`/`null` placeholders, raw database ids,
+ * and anything long enough to be a description rather than a name.
+ */
+export function validateSellerDisplayName(name: unknown): ValidationResult {
+  if (typeof name !== 'string') {
+    return { isValid: false, error: 'Seller name is required' };
+  }
+
+  const trimmed = sanitizeText(name);
+
+  if (trimmed.length === 0) {
+    return { isValid: false, error: 'Seller name is required' };
+  }
+
+  if (trimmed.length > 100) {
+    return { isValid: false, error: 'Seller name is too long' };
+  }
+
+  if (NAME_PLACEHOLDERS.has(trimmed.toLowerCase())) {
+    return { isValid: false, error: 'Seller name is a placeholder value' };
+  }
+
+  // A populated seller was expected but an unpopulated id came through instead:
+  // a 24-char Mongo hex, or the 16-char base64url id the API returns in its
+  // place. The second shape is only rejected when it also carries an
+  // identifier's tell — a digit, an underscore/hyphen, or an interior capital —
+  // so a genuinely long single-word surname still renders.
+  const looksLikeObjectId = /^[a-f0-9]{24}$/i.test(trimmed);
+  const looksLikeEncodedId =
+    /^[A-Za-z0-9_-]{16}$/.test(trimmed) &&
+    (/[\d_-]/.test(trimmed) || /[A-Z]/.test(trimmed.slice(1)));
+  if (looksLikeObjectId || looksLikeEncodedId) {
+    return { isValid: false, error: 'Seller name looks like an identifier' };
+  }
+
+  // Must contain at least one letter in any script — digits and punctuation
+  // alone ("---", "0000") are never a name.
+  if (!/\p{L}/u.test(trimmed)) {
+    return { isValid: false, error: 'Seller name must contain letters' };
+  }
+
+  return { isValid: true };
+}
+
 /**
  * Sanitize text input (remove potential XSS)
  */

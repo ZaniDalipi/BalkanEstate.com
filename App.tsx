@@ -19,6 +19,8 @@ import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTran
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 import { useCookieConsent } from './src/shared/utils/cookieConsent';
+import { propertyLogger } from './src/shared/utils/logger';
+import { transformBackendProperty } from './src/features/properties/api/propertyApi';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -223,16 +225,27 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
           })
           .then(data => {
             setIsLoadingPropertyFromUrl(false);
-            if (data.property) {
-              // Transform backend property to frontend format
-              // Backend now returns obfuscated `id` (not raw `_id`)
-              const property = {
-                ...data.property,
-                id: data.property.id || data.property._id,
-                sellerId: data.property.sellerId?.id || data.property.sellerId?._id || data.property.sellerId,
-              };
-              dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-            } else {
+            if (!data?.property) {
+              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
+              return;
+            }
+            // Run the same transformer every other read path uses. Hand-rolling
+            // the shape here used to drop `seller` entirely, so a listing opened
+            // from a shared link or a page refresh showed no seller name — on the
+            // detail page, on its card, and in the recently-viewed carousel it
+            // was cached into. The raw payload is kept underneath so fields the
+            // transformer does not map yet (e.g. `isNegotiable`) still survive.
+            try {
+              dispatch({
+                type: 'SET_SELECTED_PROPERTY_OBJECT',
+                payload: {
+                  ...data.property,
+                  ...transformBackendProperty(data.property),
+                },
+              });
+            } catch (transformError) {
+              propertyLogger.error('Failed to transform property from URL', transformError);
+              dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
               dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
             }
           })

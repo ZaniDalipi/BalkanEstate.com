@@ -3,6 +3,7 @@
 
 export * from './sanitize';
 export * from './validation';
+export * from './seller';
 export * from './logger';
 export * from './subscriptionHelpers';
 export * from './featurePlaceholders';

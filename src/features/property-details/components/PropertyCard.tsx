@@ -12,6 +12,7 @@ import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 
 interface PropertyCardProps {
@@ -181,6 +182,19 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     sqft: property?.sqft ?? 0,
     seller: property?.seller || { type: 'private' as const, name: '', phone: '' },
   };
+
+  // Who is selling, resolved once: real name → agency name → role label.
+  // Listings that arrive without a populated seller (shared links, cached
+  // snapshots) fall back to the role label instead of rendering a blank line.
+  const sellerLabels = useMemo(
+    () => ({
+      agent: t('property:seller.agent', 'Agent'),
+      private: t('property:seller.private', 'Private Seller'),
+    }),
+    [t]
+  );
+  const sellerDisplay = getSellerDisplayName(safeProperty.seller, sellerLabels);
+  const sellerRoleLabel = getSellerRoleLabel(safeProperty.seller, sellerLabels);
 
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isPriceReduced = property?.originalPrice !== undefined && property?.originalPrice > property?.price;
@@ -687,7 +701,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             <div className="relative flex-shrink-0">
               <SellerAvatar
                 avatarUrl={safeProperty.seller.avatarUrl}
-                name={safeProperty.seller.name}
+                name={sellerDisplay.name}
                 type={safeProperty.seller.type}
                 size="sm"
               />
@@ -696,15 +710,20 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             {/* Seller Info */}
             <div className="min-w-0 flex-1">
-              {safeProperty.seller.name && (
-                <p className="text-xs font-semibold text-neutral-800 truncate">{safeProperty.seller.name}</p>
+              {/* Only print the name line when we actually have one — when the
+                  fallback *is* the role label the badge below already says it,
+                  and repeating it reads as a bug. */}
+              {!sellerDisplay.isFallback && (
+                <p className="text-xs font-semibold text-neutral-800 truncate" title={sellerDisplay.name}>
+                  {sellerDisplay.name}
+                </p>
               )}
               <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-[1px] rounded-full ${
                 safeProperty.seller.type === 'agent'
                   ? 'bg-blue-50 text-blue-600'
                   : 'bg-neutral-50 text-neutral-500'
               }`}>
-                {safeProperty.seller.type === 'agent' ? t('property:seller.agent') : t('property:seller.private')}
+                {sellerRoleLabel}
               </span>
             </div>
 

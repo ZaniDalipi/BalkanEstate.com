@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Property } from '@/types';
+import { hasSellerName } from '@/src/shared/utils/seller';
 
 const STORAGE_KEY = 'balkan_recently_viewed';
 const MAX_ITEMS = 10;
@@ -35,12 +36,30 @@ interface StoredProperty {
   viewedAt: number;
 }
 
+/**
+ * An entry is only usable if it has an id — everything else the card can fall
+ * back on, but an id-less entry renders the "invalid property" skeleton forever
+ * and can never be de-duplicated. Anything that is not a well-formed array of
+ * objects is treated as corrupt storage and dropped.
+ */
+function isUsableEntry(entry: unknown): entry is StoredProperty {
+  return (
+    !!entry &&
+    typeof entry === 'object' &&
+    typeof (entry as StoredProperty).id === 'string' &&
+    (entry as StoredProperty).id.length > 0
+  );
+}
+
 function readStorage(): StoredProperty[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as StoredProperty[];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isUsableEntry).slice(0, MAX_ITEMS);
   } catch {
+    // Corrupt or unreadable (private mode, quota, hand-edited JSON) — start clean.
     return [];
   }
 }
@@ -77,8 +96,11 @@ export function useRecentlyViewed() {
   }, []);
 
   const trackView = useCallback((property: Property) => {
+    if (!property?.id) return;
+
     setRecentlyViewed((prev) => {
-      // Remove duplicate if already viewed
+      // Remove duplicate if already viewed, but keep it around to merge from
+      const previousEntry = prev.find((p) => p.id === property.id);
       const filtered = prev.filter((p) => p.id !== property.id);
 
       const entry: StoredProperty = {
@@ -110,6 +132,15 @@ export function useRecentlyViewed() {
         parking: property.parking,
         viewedAt: Date.now(),
       };
+
+      // A detail page renders from cached data first and only then swaps in the
+      // fetched record, so `trackView` can legitimately fire twice for the same
+      // listing — once thin, once complete. Never let the thinner snapshot win:
+      // keep whichever seller actually carries a name, so the carousel doesn't
+      // regress to a bare "Private Seller" badge after a refresh.
+      if (previousEntry && hasSellerName(previousEntry.seller) && !hasSellerName(entry.seller)) {
+        entry.seller = previousEntry.seller;
+      }
 
       const next = [entry, ...filtered].slice(0, MAX_ITEMS);
       writeStorage(next);
