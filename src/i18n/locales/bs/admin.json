@@ -1138,6 +1138,15 @@
     "noCityPhoto": "Nijedna",
     "imageCredit": "Zasluge za fotografiju (opcionalno)",
     "imageCreditPlaceholder": "Fotografija: Jane Doe na Unsplash",
-    "imageCreditHint": "Ako je fotografija sa Unsplasha, Pexelsa ili odnekud drugdje, zalijepite njihovu liniju zasluga ovdje — većina stranica je prikazuje pored dugmeta za preuzimanje. Pojavljuje se kao mali natpis na kartici."
+    "imageCreditHint": "Ako je fotografija sa Unsplasha, Pexelsa ili odnekud drugdje, zalijepite njihovu liniju zasluga ovdje — većina stranica je prikazuje pored dugmeta za preuzimanje. Pojavljuje se kao mali natpis na kartici.",
+    "position": "Pozicija na karti",
+    "positionPinned": "Mjesto na koje karta vila odlazi kada posjetilac otvori ovu karticu.",
+    "positionMissing": "Još nema pozicije — potražite mjesto na karti ili dodirnite kartu da je postavite.",
+    "positionHint": "Popunjava karta. Ovdje upišite samo ako već imate tačne koordinate.",
+    "pickOnMap": "Postavi na karti",
+    "hideMap": "Sakrij kartu"
+  },
+  "cityShowcase": {
+    "cityTakenHint": "Već u galeriji, pa nisu na listi: {{cities}}"
   }
 }

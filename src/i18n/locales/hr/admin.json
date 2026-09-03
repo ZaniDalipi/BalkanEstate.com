@@ -1126,7 +1126,13 @@
     "importError": "Uvoz destinacija nije uspio",
     "photoSpec": "Fotografije kartica su portret, 18:25 — učitajte 2200 × 3056 ili najbliže što imate. Manje rade ali se rastežu na velikim karticama; veće se pohranjuju na širini 2200. Drugi oblici se režu, nikada ne izobličavaju.",
     "newAvailable": "{{count}} novih ugrađenih odredišta još nije u bazi podataka.",
-    "importNew": "Uvezi ih"
+    "importNew": "Uvezi ih",
+    "position": "Položaj na karti",
+    "positionPinned": "Mjesto na koje karta vila odlazi kada posjetitelj otvori ovu karticu.",
+    "positionMissing": "Još nema položaja — potražite mjesto na karti ili dodirnite kartu da ga postavite.",
+    "positionHint": "Popunjava karta. Ovdje upišite samo ako već imate točne koordinate.",
+    "pickOnMap": "Postavi na karti",
+    "hideMap": "Sakrij kartu"
   },
   "cityShowcase": {
     "title": "Galerija gradova",
@@ -1171,6 +1177,7 @@
     "cityPlaceholder": "Odaberite jedan ili upišite novi grad",
     "imageCredit": "Zasluge za fotografiju (neobavezno)",
     "imageCreditPlaceholder": "Fotografija: Jane Doe na Unsplashu",
-    "imageCreditHint": "Ako je fotografija s Unsplasha, Pexelsa ili odnekud drugdje, zalijepite ovdje redak sa zaslugama — većina stranica ga prikazuje pored gumba za preuzimanje. Prikazuje se kao mali natpis na panelu."
+    "imageCreditHint": "Ako je fotografija s Unsplasha, Pexelsa ili odnekud drugdje, zalijepite ovdje redak sa zaslugama — većina stranica ga prikazuje pored gumba za preuzimanje. Prikazuje se kao mali natpis na panelu.",
+    "cityTakenHint": "Već u galeriji, pa nisu na popisu: {{cities}}"
   }
 }

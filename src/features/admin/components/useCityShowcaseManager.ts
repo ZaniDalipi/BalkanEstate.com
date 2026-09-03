@@ -192,6 +192,11 @@ export function useCityShowcaseManager(onSaved: () => void): UseCityShowcaseMana
                 searchQuery: draft.searchQuery,
                 imageUrl: draft.imageUrl,
                 displayOrder: draft.displayOrder,
+                // The uniqueness rule is checked against the list this hook
+                // already holds, so a duplicate is refused here rather than
+                // becoming a second panel for a city that already has one.
+                existingPanels: rows,
+                panelId: draft._id,
             });
             if (!result.isValid) {
                 setError(result.error ?? null);
@@ -200,7 +205,7 @@ export function useCityShowcaseManager(onSaved: () => void): UseCityShowcaseMana
             saveMutation.mutate(draft);
             return true;
         },
-        [saveMutation],
+        [rows, saveMutation],
     );
 
     const remove = useCallback(

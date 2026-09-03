@@ -9,6 +9,11 @@ export {
   type LocalitySearchOptions,
 } from './localities';
 export {
+  getCountryCities,
+  getCountryCityNames,
+  findCountryCentre,
+} from './cityCatalog';
+export {
   DEFAULT_CITY_AREA_RADIUS_KM,
   MAX_CITY_AREA_RADIUS_KM,
   getCityAreaRadiusKm,

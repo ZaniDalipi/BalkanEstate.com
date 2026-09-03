@@ -1226,7 +1226,13 @@
     "importError": "Failed to import the built-in destinations",
     "photoSpec": "Card photos are portrait, 18:25 — upload 2200 × 3056 or as close as you have. Anything smaller still works but is stretched to fit large cards; anything larger is stored at 2200 wide. Other shapes are cropped, never squashed.",
     "newAvailable": "{{count}} new built-in destination(s) are not in the database yet.",
-    "importNew": "Import them"
+    "importNew": "Import them",
+    "position": "Map position",
+    "positionPinned": "Where the villas map flies when a visitor opens this card.",
+    "positionMissing": "No position yet — search for the place on the map, or tap it, to set one.",
+    "positionHint": "Filled in by the map. Type here only when you already have the exact pair.",
+    "pickOnMap": "Set on map",
+    "hideMap": "Hide map"
   },
   "cityShowcase": {
     "title": "City Gallery",
@@ -1271,6 +1277,7 @@
     "cityPlaceholder": "Pick one or type a new city",
     "imageCredit": "Photo credit (optional)",
     "imageCreditPlaceholder": "Photo by Jane Doe on Unsplash",
-    "imageCreditHint": "If this photo came from Unsplash, Pexels, or anywhere else, paste the credit line here — most sites show one next to the download button. It appears in a small caption on the panel."
+    "imageCreditHint": "If this photo came from Unsplash, Pexels, or anywhere else, paste the credit line here — most sites show one next to the download button. It appears in a small caption on the panel.",
+    "cityTakenHint": "Already in the gallery, so not listed: {{cities}}"
   }
 }

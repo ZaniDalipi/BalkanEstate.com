@@ -1022,7 +1022,13 @@
     "importError": "Importimi i destinacioneve dështoi",
     "photoSpec": "Fotot e kartës janë portret, 18:25 — ngarkoni 2200 × 3056 ose sa më afër. Më të vogla funksionojnë por zgjerohen në karta të mëdha; më të mëdha ruhen me gjerësi 2200. Format e tjera priten, kurrë nuk shtrembërohen.",
     "newAvailable": "{{count}} destinacion(e) të integruara të reja nuk janë ende në bazën e të dhënave.",
-    "importNew": "Importoji"
+    "importNew": "Importoji",
+    "position": "Pozicioni në hartë",
+    "positionPinned": "Aty ku shkon harta e vilave kur një vizitor hap këtë kartë.",
+    "positionMissing": "Ende pa pozicion — kërkoje vendin në hartë, ose prek hartën, për ta caktuar.",
+    "positionHint": "Plotësohet nga harta. Shkruaj këtu vetëm nëse i ke tashmë koordinatat e sakta.",
+    "pickOnMap": "Cakto në hartë",
+    "hideMap": "Fshih hartën"
   },
   "cityShowcase": {
     "title": "Galeria e Qyteteve",
@@ -1067,6 +1073,7 @@
     "cityPlaceholder": "Zgjidhni një ose shkruani një qytet të ri",
     "imageCredit": "Kredituar fotoja (opsionale)",
     "imageCreditPlaceholder": "Foto nga Jane Doe në Unsplash",
-    "imageCreditHint": "Nëse kjo foto vjen nga Unsplash, Pexels apo diku tjetër, ngjisni këtu rreshtin e kreditimit — shumica e faqeve tregojnë një pranë butonit të shkarkimit. Shfaqet si titull i vogël në panel."
+    "imageCreditHint": "Nëse kjo foto vjen nga Unsplash, Pexels apo diku tjetër, ngjisni këtu rreshtin e kreditimit — shumica e faqeve tregojnë një pranë butonit të shkarkimit. Shfaqet si titull i vogël në panel.",
+    "cityTakenHint": "Tashmë në galeri, prandaj nuk shfaqen: {{cities}}"
   }
 }
