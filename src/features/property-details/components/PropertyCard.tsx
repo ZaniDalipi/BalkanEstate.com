@@ -16,6 +16,7 @@ import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/Prop
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
+import { resolveConstruction } from '@/shared/property/construction';
 
 interface PropertyCardProps {
   property: Property;
@@ -222,6 +223,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const sellerDisplay = getSellerDisplayName(safeProperty.seller, sellerLabels);
   const sellerRoleLabel = getSellerRoleLabel(safeProperty.seller, sellerLabels);
 
+  const construction = resolveConstruction(property);
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isPriceReduced = property?.originalPrice !== undefined && property?.originalPrice > property?.price;
   const isSold = property?.status === 'sold';
@@ -497,6 +499,18 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
               <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full animate-pulse flex items-center gap-1">
                 <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
+              </div>
+            )}
+
+            {/* Under-construction badge. Reads the resolved state, so a listing
+                whose promised year is missing or already past still says what
+                it is — just without a date it can no longer stand behind. */}
+            {!isSold && !isRented && construction.status === 'under-construction' && (
+              <div className="bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
+                <span aria-hidden="true">🏗</span>
+                {construction.expectedYear
+                  ? t('property:status.completionYear', { year: construction.expectedYear, defaultValue: 'READY {{year}}' }).toUpperCase()
+                  : t('property:status.underConstruction', 'UNDER CONSTRUCTION').toUpperCase()}
               </div>
             )}
 

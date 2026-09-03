@@ -58,6 +58,9 @@
     "parking": "Паркинг",
     "parkingSpots": "Паркоместа",
     "yearBuilt": "Година на строеж",
+    "expectedCompletion": "Очаквано завършване",
+    "underConstruction": "В строеж",
+    "completionYearShort": "{{year}} (очаквано)",
     "furnished": "Обзаведено",
     "unfurnished": "Необзаведено",
     "partlyFurnished": "Частично обзаведено"
@@ -254,6 +257,8 @@
   "featuredAgencies": "Препоръчани агенции",
   "status": {
     "new": "Ново",
+    "underConstruction": "В строеж",
+    "completionYear": "Готово {{year}}",
     "reduced": "Намалена цена",
     "priceReduced": "Намалена цена",
     "urgent": "Спешно",
@@ -328,7 +333,9 @@
       "villa": "Вила",
       "land": "Земя",
       "other": "Друго",
-      "luxury-villa": "Луксозна вила"
+      "luxury-villa": "Луксозна вила",
+      "commercial": "Търговски",
+      "parking": "Паркомясто"
     },
     "promotedListings": "Промотирани обяви",
     "agentHint": "Кликнете за препоръки!",

@@ -95,7 +95,9 @@
       "villa": "Villa",
       "land": "Land",
       "commercial": "Commercial",
-      "other": "Other"
+      "other": "Other",
+      "luxury-villa": "Luxury Villa",
+      "parking": "Parking Space"
     },
     "mapLocation": "Map location",
     "mapLocationPinned": "This pin is what the listing page and search map show.",

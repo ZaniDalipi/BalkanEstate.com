@@ -2,11 +2,45 @@
 
 import { UserRole } from './user.types';
 
+// The construction state of a listing is a domain rule (with a write-side
+// validator and a read-side resolver), so it is defined once next to those and
+// re-exported here for the many `@/types` consumers.
+export type { ConstructionStatus } from '@/shared/property/construction';
+import type { ConstructionStatus } from '@/shared/property/construction';
+
 export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
 export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
-export type PropertyType = 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+/**
+ * Every property type a listing may be filed under, in the order pickers show
+ * them. Declared as a tuple so the union below can never drift from the list
+ * the UI, the filters and the backend enum are built from.
+ */
+export const PROPERTY_TYPES = [
+  'house',
+  'apartment',
+  'villa',
+  'luxury-villa',
+  'commercial',
+  'parking',
+  'land',
+  'other',
+] as const;
+
+export type PropertyType = (typeof PROPERTY_TYPES)[number];
+
+/** The same list plus the wildcard search filters use for "no preference". */
+export const PROPERTY_TYPE_FILTERS = ['any', ...PROPERTY_TYPES] as const;
+
+export type PropertyTypeFilter = (typeof PROPERTY_TYPE_FILTERS)[number];
+
+/** Narrowing guard for values arriving from the API, a URL or a form. */
+export const isPropertyType = (value: unknown): value is PropertyType =>
+  typeof value === 'string' && (PROPERTY_TYPES as readonly string[]).includes(value);
+
+export const isPropertyTypeFilter = (value: unknown): value is PropertyTypeFilter =>
+  typeof value === 'string' && (PROPERTY_TYPE_FILTERS as readonly string[]).includes(value);
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
@@ -93,7 +127,22 @@ export interface Property {
   baths: number;
   livingRooms: number;
   sqft: number;
+  /**
+   * The year the building was finished. On an under-construction listing this
+   * mirrors `expectedCompletionYear` (see `constructionStatus`) so year-based
+   * sorting and filtering keep working — it is never *displayed* as a year
+   * built, because the building does not exist yet.
+   */
   yearBuilt: number;
+  /** Absent on every listing written before the feature — read it through
+   *  `resolveConstruction`, which treats anything unrecognised as 'ready'. */
+  constructionStatus?: ConstructionStatus;
+  /**
+   * Only meaningful when `constructionStatus` is 'under-construction'.
+   * `null` is an explicit "no handover date" — the write path sends it so a
+   * cleared year actually clears (an absent field means "unchanged").
+   */
+  expectedCompletionYear?: number | null;
   parking: number;
   description: string;
   specialFeatures: string[];
@@ -211,7 +260,7 @@ export interface Filters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: SellerType;
-  propertyType: 'any' | PropertyType;
+  propertyType: PropertyTypeFilter;
   // Advanced filters
   minYearBuilt: number | null;
   maxYearBuilt: number | null;

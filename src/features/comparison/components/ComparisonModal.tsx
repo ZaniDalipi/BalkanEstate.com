@@ -5,6 +5,7 @@ import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon, XMarkIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { resolveConstruction } from '@/shared/property/construction';
 
 interface ComparisonModalProps {
     isOpen: boolean;
@@ -95,6 +96,15 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, prop
         ...(allLand ? [] : [
             { label: t('property:comparison.yearBuilt'), key: 'yearBuilt' as const, bestValue: bestYear, format: (p: Property) => p.yearBuilt },
         ]),
+        // The row compares one year per column, so an unfinished building shows
+        // its handover year labelled as such instead of a year it was "built".
+        { label: t('property:comparison.yearBuilt'), key: 'yearBuilt', bestValue: bestYear, format: (p) => {
+            const construction = resolveConstruction(p);
+            if (construction.status === 'ready') return p.yearBuilt;
+            return construction.expectedYear
+                ? t('property:features.completionYearShort', { year: construction.expectedYear, defaultValue: '{{year}} (expected)' })
+                : t('property:features.underConstruction', 'Under construction');
+        } },
         { label: t('property:comparison.parking'), key: 'parking', bestValue: bestParking, format: (p) => p.parking },
         { label: t('property:comparison.specialFeatures'), key: 'specialFeatures', format: (p) => p.specialFeatures },
         { label: t('property:comparison.materials'), key: 'materials', format: (p) => p.materials },

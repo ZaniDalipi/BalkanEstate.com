@@ -15,6 +15,8 @@ export const PROPERTY_TYPE_COLORS: Record<string, string> = {
   apartment: '#28a745',
   villa: '#6f42c1',
   'luxury-villa': '#E8B820', // Gold — luxury villas render a custom SVG marker; this is the cluster/legend swatch
+  commercial: '#E11D48', // Rose — business premises
+  parking: '#475569',    // Slate — reads like parking signage
   land: '#8B4513',
   other: '#0D9488', // Teal — friendlier than the old gray
 };

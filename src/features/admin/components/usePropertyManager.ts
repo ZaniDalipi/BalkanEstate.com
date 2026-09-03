@@ -29,6 +29,8 @@ export interface Property {
   area?: number;
   livingRooms?: number;
   yearBuilt?: number;
+  constructionStatus?: string;
+  expectedCompletionYear?: number | null;
   parking?: number;
   description?: string;
   isPromoted?: boolean;
