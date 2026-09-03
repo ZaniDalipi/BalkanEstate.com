@@ -76,6 +76,12 @@ describe('the place index', () => {
     expect(searchPlaces('Split', { near: nearBudva })[0].place.name).toBe('Split');
   });
 
+  it('holds coordinates for every city, so a map can open without a round trip', () => {
+    const budva = findPlace('Budva', 'Montenegro');
+    expect(budva?.lat).toBeCloseTo(42.29, 1);
+    expect(budva?.lng).toBeCloseTo(18.84, 1);
+  });
+
   it('carries a ready-made label and search value on every place', () => {
     const becici = findPlace('Bečići');
     expect(becici?.label.secondary).toBe('Budva, Montenegro');

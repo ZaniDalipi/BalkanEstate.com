@@ -7,6 +7,7 @@ import { generateSearchName, generateSearchNameFromCoords } from '@/services/gem
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
+import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
 import { generatePropertySlug } from '@/utils/slug';
@@ -475,6 +476,23 @@ export function useSearchPage() {
 
         // Then apply user's sorting preference (maintaining promotion priority)
         switch (activeFilters.sortBy) {
+            // How well each listing answers what was typed — the default any
+            // search engine sorts by, and meaningless without a query, so an
+            // empty box falls through to the newest-first ordering below.
+            case 'relevance': {
+                if (!activeFilters.query.trim()) break;
+                const relevance = new Map(
+                    rankProperties(promotionSorted, activeFilters.query).map(
+                        (result) => [result.doc.id, result.score]
+                    )
+                );
+                return promotionSorted.sort((a, b) => {
+                    const diff = score(b) - score(a);
+                    if (diff !== 0) return diff;
+                    const byRelevance = (relevance.get(b.id) ?? 0) - (relevance.get(a.id) ?? 0);
+                    return byRelevance !== 0 ? byRelevance : getPropertyTime(b) - getPropertyTime(a);
+                });
+            }
             case 'price_asc': return promotionSorted.sort((a, b) => {
                 const diff = score(b) - score(a);
                 return diff !== 0 ? diff : a.price - b.price;

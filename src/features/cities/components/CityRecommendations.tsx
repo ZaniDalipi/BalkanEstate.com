@@ -11,6 +11,7 @@ import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner
 import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import { navigateWithLanguage } from '@/src/utils/languageRouting';
 import { searchLocation } from '@/services/osmService';
+import { findPlace } from '@/src/features/search/universal/places';
 import { useSavedCities } from '../hooks/useSavedCities';
 import { savedCityKey } from '../api/savedCitiesApi';
 import CityMarketCard from './CityMarketCard';
@@ -88,10 +89,15 @@ const CityRecommendations: React.FC = () => {
   const handleViewListingsOnMap = async (e: React.MouseEvent, city: CityMarketData) => {
     e.stopPropagation();
     const searchQuery = `${city.city}, ${city.country}`;
-    const results = await searchLocation(searchQuery);
+
+    // The app already holds the coordinates of every city it lists, so the
+    // map opens on the tap rather than after a geocoder round trip. The
+    // geocoder is only for a city the catalogue somehow does not carry.
+    const known = findPlace(city.city, city.country);
+    const results = known?.lat === undefined ? await searchLocation(searchQuery) : [];
     const bestResult = results[0];
-    const lat = bestResult ? Number(bestResult.lat) : 0;
-    const lng = bestResult ? Number(bestResult.lon) : 0;
+    const lat = known?.lat ?? (bestResult ? Number(bestResult.lat) : 0);
+    const lng = known?.lng ?? (bestResult ? Number(bestResult.lon) : 0);
 
     let drawnBoundsJSON: string | null = null;
     if (bestResult?.boundingbox) {

@@ -941,6 +941,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     aria-label={t('search:filters.sortBy', 'Sort properties by')}
                                     className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                 >
+                                    {filters.query.trim() && (
+                                        <option value="relevance">{t('search:sort.relevance')}</option>
+                                    )}
                                     <option value="newest">{t('search:sort.newest')}</option>
                                     <option value="oldest">{t('search:sort.oldest')}</option>
                                     <option value="price_asc">{t('search:sort.priceAsc')}</option>
@@ -1078,6 +1081,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         onChange={(e) => onSortChange(e.target.value)}
                                         className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                     >
+                                        {filters.query.trim() && (
+                                            <option value="relevance">{t('search:sort.relevance')}</option>
+                                        )}
                                         <option value="newest">{t('search:sort.newest')}</option>
                                         <option value="oldest">{t('search:sort.oldest')}</option>
                                         <option value="price_asc">{t('search:sort.priceAsc')}</option>
