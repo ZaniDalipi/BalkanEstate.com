@@ -172,6 +172,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       onClick={handleSelectAgent}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      data-pressable
     >
       {/* Top badges row */}
       <div className="flex items-start justify-between mb-4">

@@ -802,6 +802,58 @@ html[data-zoom] {
 }
 
 /* ============================================================================
+   Press Feedback — global tap/click acknowledgement
+   See src/shared/interaction/pressFeedback.ts for what spawns these.
+   ============================================================================ */
+
+/* The layer itself is not interactive and not part of layout: every ripple
+   inside it is positioned in viewport coordinates (getBoundingClientRect),
+   so the layer just needs to sit above everything and never intercept a
+   pointer event meant for the real control underneath. */
+#press-ripple-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+}
+
+.press-ripple {
+  position: fixed;
+  overflow: hidden;
+  pointer-events: none;
+  /* Border radius and color are set inline per-control in pressFeedback.ts. */
+}
+
+.press-ripple__circle {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: scale(0);
+  animation: pressRipple 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes pressRipple {
+  0% {
+    opacity: 0.22;
+    transform: scale(0);
+  }
+  70% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press-ripple {
+    display: none;
+  }
+}
+
+/* ============================================================================
    Premium Gallery Image Slide Transitions
    Directional slide + scale + fade — iOS/macOS style photo navigation
    ============================================================================ */
