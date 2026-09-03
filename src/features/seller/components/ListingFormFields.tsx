@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
+import { PROPERTY_TYPE_OPTIONS, hasHabitableInterior } from '@/shared/constants/propertyTypes';
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData, FieldErrors } from './ListingFormHelpers';
@@ -207,12 +208,11 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                 <div>
                     <div className="relative">
                         <select name="propertyType" id="propertyType" value={listingData.propertyType} onChange={handleInputChange} className={`${floatingInputClasses} border-neutral-300`}>
-                            <option value="house">{t('seller:propertyTypes.house')}</option>
-                            <option value="apartment">{t('seller:propertyTypes.apartment')}</option>
-                            <option value="villa">{t('seller:propertyTypes.villa')}</option>
-                            <option value="luxury-villa">{t('seller:propertyTypes.luxuryVilla', 'Luxury Villa')}</option>
-                            <option value="land">{t('seller:propertyTypes.land')}</option>
-                            <option value="other">{t('seller:propertyTypes.other')}</option>
+                            {PROPERTY_TYPE_OPTIONS.map(option => (
+                                <option key={option.value} value={option.value}>
+                                    {t(`seller:${option.labelKey}`, option.fallback)}
+                                </option>
+                            ))}
                         </select>
                         <label htmlFor="propertyType" className={floatingSelectLabelClasses}>{t('seller:form.propertyType')}</label>
                     </div>
@@ -223,7 +223,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         </div>
                     )}
                 </div>
-                {listingData.propertyType === 'apartment' && (
+                {(listingData.propertyType === 'apartment' || listingData.propertyType === 'commercial') && (
                     <>
                         <NumberInputWithSteppers
                             label={t('seller:createListing.fields.totalFloors')}
@@ -386,7 +386,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
 
             {/* Property Details - hide some fields for land */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-w-0">
-                {listingData.propertyType !== 'land' && (
+                {hasHabitableInterior(listingData.propertyType) && (
                     <>
                         <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
                         <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />

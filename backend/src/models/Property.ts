@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { PROPERTY_TYPES, type PropertyType } from '../config/propertyTypes';
 import {
   CONSTRUCTION_STATUSES,
   ConstructionStatus,
@@ -99,7 +100,7 @@ export interface IProperty extends Document {
   images: IPropertyImage[];
   lat: number;
   lng: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+  propertyType: PropertyType;
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
@@ -436,7 +437,7 @@ const PropertySchema: Schema = new Schema(
     },
     propertyType: {
       type: String,
-      enum: ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'],
+      enum: [...PROPERTY_TYPES],
       required: true,
       index: true,
     },

@@ -360,7 +360,7 @@ export interface Property {
     lat: number;
     lng: number;
     seller: Seller;
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
@@ -500,7 +500,7 @@ export interface Filters {
     maxSqft: number | null;
     sortBy: string;
     sellerType: SellerType;
-    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
     // Advanced filters
     minYearBuilt: number | null;
     maxYearBuilt: number | null;
@@ -606,7 +606,7 @@ export interface AiSearchQuery {
     livingRooms?: number;
     minSqft?: number;
     maxSqft?: number;
-    propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'commercial';
+    propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land';
     sellerType?: 'agent' | 'private';
     features?: string[];
 }

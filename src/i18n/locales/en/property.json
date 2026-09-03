@@ -352,7 +352,9 @@
       "villa": "Villa",
       "land": "Land",
       "other": "Other",
-      "luxury-villa": "Luxury Villa"
+      "luxury-villa": "Luxury Villa",
+      "commercial": "Commercial",
+      "parking": "Parking Space"
     },
     "promotedListings": "Promoted Listings",
     "agentHint": "Click for recommendations!",

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '@/constants';
+import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import { type Property, type PropertyEditForm, getAllPropertyImages } from './usePropertyManager';
 import AdminPropertyLocationEditor from './AdminPropertyLocationEditor';
 import { resolveConstruction } from '@/shared/property/construction';
@@ -292,12 +293,11 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
                   onChange={(e) => setEditForm({ ...editForm, propertyType: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="house">{t('admin:properties.types.house')}</option>
-                  <option value="apartment">{t('admin:properties.types.apartment')}</option>
-                  <option value="villa">{t('admin:properties.types.villa')}</option>
-                  <option value="land">{t('admin:properties.types.land')}</option>
-                  <option value="commercial">{t('admin:properties.types.commercial')}</option>
-                  <option value="other">{t('admin:properties.types.other')}</option>
+                  {PROPERTY_TYPE_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {t(`admin:properties.types.${option.value}`, option.fallback)}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

@@ -163,7 +163,11 @@
       "hint": "Select \"Yes\" if available, \"No\" if not available, or leave as \"Any\" to skip",
       "no": "No",
       "any": "Any",
-      "yes": "Yes"
+      "yes": "Yes",
+      "parkingFeatures": "Parking Features",
+      "fencedSecured": "Fenced / Secured",
+      "hasVegetation": "Has Vegetation / Trees",
+      "hasWaterSource": "Has Water Source"
     },
     "advancedDetails": {
       "title": "Advanced Property Details",
@@ -617,11 +621,12 @@
     "house": "House",
     "villa": "Villa",
     "land": "Land",
-    "commercial": "Commercial",
+    "commercial": "Business / Commercial",
     "office": "Office",
     "garage": "Garage",
     "other": "Other",
-    "luxuryVilla": "Luxury Villa"
+    "luxuryVilla": "Luxury Villa",
+    "parking": "Parking Space"
   },
   "conditions": {
     "new": "New",

@@ -151,7 +151,11 @@
       "hint": "Odaberite \"Da\" ako je dostupno, \"Ne\" ako nije dostupno, ili ostavite kao \"Bilo Koje\" da preskočite",
       "no": "Ne",
       "any": "Bilo Koje",
-      "yes": "Da"
+      "yes": "Da",
+      "parkingFeatures": "Karakteristike parkinga",
+      "fencedSecured": "Ograđeno / osigurano",
+      "hasVegetation": "Ima vegetaciju / drveće",
+      "hasWaterSource": "Ima izvor vode"
     },
     "advancedDetails": {
       "title": "Napredni Detalji Nekretnine",
@@ -615,11 +619,12 @@
     "house": "House",
     "villa": "Villa",
     "land": "Land",
-    "commercial": "Commercial",
+    "commercial": "Poslovni prostor",
     "office": "Office",
     "garage": "Garage",
     "other": "Other",
-    "luxuryVilla": "Luxury Villa"
+    "luxuryVilla": "Luksuzna vila",
+    "parking": "Parking mjesto"
   },
   "conditions": {
     "new": "New",

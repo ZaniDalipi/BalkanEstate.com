@@ -75,7 +75,9 @@
       "villa": "Vilă",
       "land": "Teren",
       "commercial": "Comercial",
-      "other": "Altele"
+      "other": "Altele",
+      "luxury-villa": "Vilă de lux",
+      "parking": "Loc de parcare"
     },
     "bathrooms": "Băi",
     "bedrooms": "Dormitoare",
