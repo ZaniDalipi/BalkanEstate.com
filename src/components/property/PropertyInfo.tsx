@@ -93,6 +93,10 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   // generic primary blue.
   const isLuxuryVilla = property.propertyType === 'luxury-villa';
 
+  // Land has no rooms — bedrooms/bathrooms/living rooms are meaningless for a
+  // plot, so the stats row shows only area (and parking, if any) for it.
+  const isLand = property.propertyType === 'land';
+
   // Property-type name. `map.propertyTypes` is the app's one translated list of
   // type names — reused here so the card can never fall back to the raw
   // "Luxury-Villa" slug the way a card-only key set did.
@@ -454,39 +458,45 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-neutral-200 pt-5">
-            {/* Beds */}
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors cursor-default group">
-              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                <BedIcon className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-neutral-900 leading-none">{property.beds}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{t('features.bedrooms')}</p>
-              </div>
-            </div>
+          <div className={`mt-6 grid gap-3 border-t border-neutral-200 pt-5 ${
+            isLand ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'
+          }`}>
+            {!isLand && (
+              <>
+                {/* Beds */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors cursor-default group">
+                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <BedIcon className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-neutral-900 leading-none">{property.beds}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">{t('features.bedrooms')}</p>
+                  </div>
+                </div>
 
-            {/* Baths */}
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-cyan-50 hover:bg-cyan-100 transition-colors cursor-default group">
-              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                <BathIcon className="w-5 h-5 text-cyan-500" />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-neutral-900 leading-none">{property.baths}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{t('features.bathrooms')}</p>
-              </div>
-            </div>
+                {/* Baths */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-cyan-50 hover:bg-cyan-100 transition-colors cursor-default group">
+                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <BathIcon className="w-5 h-5 text-cyan-500" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-neutral-900 leading-none">{property.baths}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">{t('features.bathrooms')}</p>
+                  </div>
+                </div>
 
-            {/* Living rooms */}
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-violet-50 hover:bg-violet-100 transition-colors cursor-default group">
-              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                <LivingRoomIcon className="w-5 h-5 text-violet-500" />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-neutral-900 leading-none">{property.livingRooms}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}</p>
-              </div>
-            </div>
+                {/* Living rooms */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-violet-50 hover:bg-violet-100 transition-colors cursor-default group">
+                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <LivingRoomIcon className="w-5 h-5 text-violet-500" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-neutral-900 leading-none">{property.livingRooms}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">{property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}</p>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Area */}
             <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-default group">
@@ -498,6 +508,19 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 <p className="text-xs text-neutral-500 mt-0.5">m²</p>
               </div>
             </div>
+
+            {/* Parking (land only up here; otherwise it lives in the Property Details section below) */}
+            {isLand && property.parking > 0 && (
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50 hover:bg-amber-100 transition-colors cursor-default group">
+                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <ParkingIcon className="w-5 h-5 text-amber-500" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-neutral-900 leading-none">{property.parking}</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">{t('features.parking')}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -538,14 +561,18 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         </div>
 
         <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-          <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
-            {property.yearBuilt}
-          </DetailItem>
-          <DetailItem icon={<ParkingIcon />} label={t('features.parking')}>
-            {property.parking > 0
-              ? `${property.parking} ${property.parking === 1 ? t('details.spot') : t('details.spots')}`
-              : t('details.none')}
-          </DetailItem>
+          {!isLand && (
+            <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
+              {property.yearBuilt}
+            </DetailItem>
+          )}
+          {!isLand && (
+            <DetailItem icon={<ParkingIcon />} label={t('features.parking')}>
+              {property.parking > 0
+                ? `${property.parking} ${property.parking === 1 ? t('details.spot') : t('details.spots')}`
+                : t('details.none')}
+            </DetailItem>
+          )}
 
           {property.propertyType === 'apartment' && property.floorNumber && (
             <DetailItem icon={<BuildingOfficeIcon />} label={t('features.floor')}>
