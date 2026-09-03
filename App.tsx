@@ -16,6 +16,8 @@ import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
 import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
+import { takePendingScrollRestore, applyScrollSnapshot } from './src/app/navigation/navHistory';
+import { routeImporters, preloadRouteWhenIdle } from './src/app/navigation/routePreload';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 import { useCookieConsent } from './src/shared/utils/cookieConsent';
@@ -96,9 +98,11 @@ const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPa
 const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
 const AgentsPage = lazy(() => import('./src/features/agents/components/AgentsPage'));
 const AgenciesListPage = lazy(() => import('./components/AgenciesListPage'));
-const AgencyDetailPage = lazy(() => import('./components/AgencyDetailPage'));
+// The two detail routes import through routeImporters so a card can warm the
+// same chunk on hover/touch — see src/app/navigation/routePreload.ts.
+const AgencyDetailPage = lazyWithRetry(routeImporters.agencyDetail);
 const EnterpriseCreationForm = lazy(() => import('./src/features/seller/components/EnterpriseCreationForm'));
-const PropertyDetailsPage = lazy(() => import('./src/features/property-details/components/PropertyDetailsPage'));
+const PropertyDetailsPage = lazyWithRetry(routeImporters.propertyDetails);
 const PaymentSuccess = lazy(() => import('./src/features/payments/components/PaymentSuccess'));
 const PaymentCancel = lazy(() => import('./src/features/payments/components/PaymentCancel'));
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
@@ -144,6 +148,7 @@ const SplashScreen = lazy(() => import('./src/components/ui/SplashScreen'));
 // Global liquid glass SVG filter (needed for glass buttons & controls)
 import { LiquidGlassFilter } from './components/ui/liquid-glass-button';
 import { LogoLoader } from './src/shared/components/ui/LogoLoader';
+import { RouteLoader } from './src/shared/components/ui/RouteLoader';
 
 // PWA Install Prompt (lazy loaded)
 const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPrompt'));
@@ -151,12 +156,10 @@ const PWAInstallPrompt = lazy(() => import('./src/shared/components/PWAInstallPr
 // Microsoft Clarity - Heatmaps & Session Recordings (lazy loaded)
 const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));
 
-// Loading fallback component with animated logo
-const PageLoader: React.FC = () => (
-  <div className="flex flex-col items-center justify-center min-h-[50vh]">
-    <LogoLoader size="md" showText={false} />
-  </div>
-);
+// Route-level loading fallback. RouteLoader holds off for ~200ms so a cached
+// chunk never flashes a logo on its way in, and keeps one appearance across
+// every stage of a navigation.
+const PageLoader: React.FC = () => <RouteLoader />;
 
 const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
   const { state, dispatch } = useAppContext();
@@ -168,6 +171,14 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // In PWA standalone mode, intercept <a href> clicks to internal pages so the
   // OS never opens a second browser window — navigation stays within the app.
   usePWALinkInterceptor();
+
+  // Warm the listing detail chunk once the browser is idle. Almost every
+  // session opens at least one listing, and paying for that chunk during a
+  // quiet moment is the difference between a tap that renders immediately and
+  // one that waits on the network first.
+  useEffect(() => {
+    preloadRouteWhenIdle('propertyDetails');
+  }, []);
 
   // Listen for session expiration events from httpClient
   useEffect(() => {
@@ -588,7 +599,16 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     fetchAgency();
   }, [state.selectedAgencyId]);
 
-  // Scroll to top when active view changes
+  // A stable identity for "which page is on screen", used both to key the page
+  // transition and to decide when scroll position needs handling. Declared
+  // before the effects below so they can depend on it.
+  const viewKey = state.selectedProperty
+    ? `property-${state.selectedProperty.id || 'detail'}`
+    : state.selectedAgencyId
+      ? `agency-${state.selectedAgencyId}`
+      : state.activeView;
+
+  // Scroll handling on navigation.
   useEffect(() => {
     /*
      * The viewport meta is deliberately left alone here.
@@ -609,6 +629,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
      * against.
      */
 
+    // Coming back to an entry we have offsets for: put the user where they
+    // were. Opening a listing from halfway down the results and then going back
+    // used to land at the top of the list, which on a results page is the
+    // difference between resuming and starting over.
+    const restore = takePendingScrollRestore();
+    if (restore) {
+      return applyScrollSnapshot(restore);
+    }
+
     // Scroll window to top
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
 
@@ -622,20 +651,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     document.querySelectorAll('[data-scroll-container]').forEach(el => {
       el.scrollTop = 0;
     });
-  }, [state.activeView]);
-
-  // Also scroll to top when selected property, agency, or business listing changes
-  useEffect(() => {
-    if (state.selectedProperty || state.selectedAgencyId || state.selectedBusinessListingId) {
-      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-
-      // Also scroll main content container
-      const mainContent = document.getElementById('main-content');
-      if (mainContent) {
-        mainContent.scrollTop = 0;
-      }
-    }
-  }, [state.selectedProperty, state.selectedAgencyId, state.selectedBusinessListingId]);
+  }, [viewKey, state.selectedBusinessListingId]);
 
   // Payment callback routes (highest priority)
   const path = window.location.pathname;
@@ -654,48 +670,10 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     );
   }
 
-  // Show loader while fetching property from a direct URL (prevents home page flash)
-  if (isLoadingPropertyFromUrl) {
-    return <PageLoader />;
-  }
-
-  // Global handler for selected property view
-  if (state.selectedProperty) {
-    return (
-      <QueryErrorBoundary>
-        <Suspense fallback={<PageLoader />}>
-          <PropertyDetailsPage property={state.selectedProperty} />
-        </Suspense>
-      </QueryErrorBoundary>
-    );
-  }
-
-  // Global handler for selected agency view - show detail page if we have a selectedAgencyId
-  if (state.selectedAgencyId) {
-    if (isLoadingAgency || !selectedAgency) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <LogoLoader size="md" showText={true} />
-        </div>
-      );
-    }
-    return (
-      <QueryErrorBoundary>
-        <Suspense fallback={<PageLoader />}>
-          <AgencyDetailPage agency={selectedAgency} />
-        </Suspense>
-      </QueryErrorBoundary>
-    );
-  }
-
   // Show email verification required before any other view (highest priority)
   if (state.pendingEmailVerification) {
     return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <LogoLoader size="md" showText={false} />
-        </div>
-      }>
+      <Suspense fallback={<PageLoader />}>
         <EmailVerificationRequired email={state.pendingEmailVerification} />
       </Suspense>
     );
@@ -703,6 +681,37 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 
   // Wrap lazy loaded views in Suspense
   const renderView = () => {
+    // Detail routes are resolved before the view switch: they are driven by a
+    // selection rather than by `activeView`, but they still have to render from
+    // inside the shared ViewTransition + Suspense below. Returning them early
+    // from the component — which is what used to happen — meant the single most
+    // travelled navigation in the app, opening a listing, was the one with no
+    // transition at all.
+    if (isLoadingPropertyFromUrl) {
+      // Deep link straight to a listing: hold the frame while the property is
+      // fetched rather than flashing the home page behind it.
+      return <PageLoader />;
+    }
+
+    if (state.selectedProperty) {
+      return (
+        <QueryErrorBoundary>
+          <PropertyDetailsPage property={state.selectedProperty} />
+        </QueryErrorBoundary>
+      );
+    }
+
+    if (state.selectedAgencyId) {
+      if (isLoadingAgency || !selectedAgency) {
+        return <PageLoader />;
+      }
+      return (
+        <QueryErrorBoundary>
+          <AgencyDetailPage agency={selectedAgency} />
+        </QueryErrorBoundary>
+      );
+    }
+
     switch (state.activeView) {
       case 'home':
         return <QueryErrorBoundary><HomePage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
@@ -787,18 +796,15 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     }
   };
 
-  // Compute a stable key for the current view to trigger transitions
-  const viewKey = state.selectedProperty
-    ? `property-${state.selectedProperty.id || 'detail'}`
-    : state.selectedAgencyId
-      ? `agency-${state.selectedAgencyId}`
-      : state.activeView;
-
-  // All views now use Suspense since SearchPage is lazy loaded
-  // Direction-aware page transitions (slide, morph, blur dissolve)
+  // Every route — detail pages included — renders through this one
+  // ViewTransition, so the direction-aware entrance and the edge swipe-back it
+  // owns apply everywhere. The ErrorBoundary carries the view key so switching
+  // pages still gets a clean mount (and clears any error from the last one);
+  // the wrapper itself deliberately does not, since the swipe listeners need a
+  // node that outlives the view.
   return (
     <ViewTransition viewKey={viewKey}>
-      <ErrorBoundary level="route" key={state.activeView}>
+      <ErrorBoundary level="route" key={viewKey}>
         <Suspense fallback={<PageLoader />}>
           {renderView()}
         </Suspense>

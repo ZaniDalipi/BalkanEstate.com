@@ -673,66 +673,72 @@ html[data-zoom] {
    Page Transition Keyframes — Cool navigation animations
    ============================================================================ */
 
-/* Forward navigation: slide in from right with scale + blur */
+/* No `filter: blur()` in any of these.
+ *
+ * Blurring a viewport-sized element is the most expensive thing a phone can be
+ * asked to do every frame: the compositor has to rasterise the whole page into
+ * an offscreen surface and run a separable convolution over it, at the exact
+ * moment the incoming route is also parsing its chunk and laying itself out.
+ * That is where the dropped frames on entering a page came from. `transform`
+ * and `opacity` are the two properties a compositor animates without touching
+ * layout, paint, or the main thread at all, so the whole set is built from
+ * those alone — and the motion below is tuned to carry the transition on its
+ * own rather than lean on blur to hide the seam. */
+
+/* Forward navigation: push in from the right, iOS-style. */
 @keyframes pageEnter {
   0% {
     opacity: 0;
-    transform: translateX(60px) scale(0.97);
-    filter: blur(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-    filter: blur(0);
-  }
-}
-
-/* Back navigation: slide in from left with scale + blur */
-@keyframes pageEnterBack {
-  0% {
-    opacity: 0;
-    transform: translateX(-60px) scale(0.97);
-    filter: blur(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-    filter: blur(0);
-  }
-}
-
-/* Vertical enter: slide up with scale (for detail pages) */
-@keyframes pageEnterUp {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) scale(0.96);
-    filter: blur(6px);
-  }
-  50% {
-    filter: blur(1px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-}
-
-/* Morph transition: scale from center with blur dissolve */
-@keyframes pageMorph {
-  0% {
-    opacity: 0;
-    transform: scale(0.92);
-    filter: blur(8px);
+    transform: translate3d(28px, 0, 0);
   }
   60% {
     opacity: 1;
-    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Back navigation: the reverse — in from the left. */
+@keyframes pageEnterBack {
+  0% {
+    opacity: 0;
+    transform: translate3d(-28px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Vertical enter: sheet-style rise, for pages presented as a task. */
+@keyframes pageEnterUp {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Morph transition: settle in from slightly small, for a change of context. */
+@keyframes pageMorph {
+  0% {
+    opacity: 0;
+    transform: scale(0.975);
   }
   100% {
     opacity: 1;
     transform: scale(1);
-    filter: blur(0);
   }
 }
 
@@ -750,42 +756,48 @@ html[data-zoom] {
 
 /* Page transition utility classes
  *
- * `backwards`, not `both`. These keyframes end on `filter: blur(0)`, and
- * `forwards` (the other half of `both`) keeps that final frame applied for as
- * long as the page is mounted — so the wrapper is left with a permanent
- * `filter` and `transform` long after the 0.45s animation is over. A filter
+ * `backwards`, not `both`. `forwards` (the other half of `both`) keeps the
+ * final frame applied for as long as the page is mounted, leaving the wrapper
+ * with a permanent `transform` long after the animation is over. A transform
  * that is not `none` is not free: it makes the element a stacking context, a
- * containing block for fixed-position descendants, and its own compositing
- * layer. Every `backdrop-filter` under it (the hero's search bar, its
- * buttons, the stats card) then has to sample its backdrop through that
- * layer, which is what makes them shimmer on iOS.
+ * containing block for every `position: fixed` descendant — the sticky ad bar,
+ * the property page's contact bar, every modal — and its own compositing layer.
  *
  * `backwards` still applies the 0% frame before the animation starts, so the
  * entrance is unchanged; the element simply returns to its own styles at the
- * end, which are already opacity 1 / no transform / no filter. */
+ * end, which are already opacity 1 / no transform.
+ *
+ * ViewTransition also strips the class on `animationend`, so the containing
+ * block exists only while the animation is actually running — a `fixed` child
+ * mounted by the incoming page settles against the viewport, not against a
+ * wrapper that happens to still be carrying an identity transform.
+ *
+ * `will-change` is deliberately absent: the class is on the element for well
+ * under a second, and promoting a viewport-sized layer costs more memory than
+ * the hint saves — the browser promotes it for the duration anyway. */
 .animate-page-enter {
-  animation: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: pageEnter 0.34s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 .animate-page-enter-back {
-  animation: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: pageEnterBack 0.34s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 .animate-page-enter-up {
-  animation: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: pageEnterUp 0.38s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 .animate-page-morph {
-  animation: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: pageMorph 0.3s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
-/* Reduced motion: instant transition with no movement */
+/* Reduced motion: cross-fade only, no movement. */
 @media (prefers-reduced-motion: reduce) {
   .animate-page-enter,
   .animate-page-enter-back,
   .animate-page-enter-up,
   .animate-page-morph {
-    animation: fadeIn 0.15s ease-out both !important;
+    animation: fadeIn 0.15s ease-out backwards !important;
   }
 }
 

@@ -1,73 +1,74 @@
-import React, { memo, useRef, useState, createContext, useContext, useCallback, useMemo } from 'react';
+import React, { memo, useRef, useState, createContext, useContext, useCallback, useMemo, useEffect } from 'react';
+import {
+  installNavigationHistory,
+  setNavigationDirection,
+  consumeNavigationDirection,
+  type NavigationDirection,
+} from '@/app/navigation/navHistory';
+import { useSwipeBack } from '@/app/navigation/useSwipeBack';
+
+// Patch history and start tracking direction before React renders anything, so
+// our popstate listener is ahead of the app's own routing listener.
+installNavigationHistory();
 
 // ============================================================================
 // Navigation Direction Tracking
 // ============================================================================
 
-type NavigationDirection = 'forward' | 'back' | 'up' | 'morph';
-
 interface NavigationContextType {
-  direction: NavigationDirection;
   setDirection: (dir: NavigationDirection) => void;
 }
 
 const NavigationContext = createContext<NavigationContextType>({
-  direction: 'forward',
-  setDirection: () => {},
+  setDirection: setNavigationDirection,
 });
 
 export function useNavigationDirection() {
   return useContext(NavigationContext);
 }
 
-// Detail views that should animate from bottom (slide up)
-const DETAIL_VIEWS = new Set([
-  'property-detail',
-  'agent-detail',
-  'agency-detail',
+/**
+ * Form-like views presented as a sheet: they slide up from the bottom, the way
+ * a modal composer does, because they are a task you finish and dismiss rather
+ * than a place you navigated to.
+ */
+const SHEET_VIEWS = new Set([
+  'create-listing',
+  'create-rental',
   'edit-listing',
-  'city-dashboard',
 ]);
 
-// Views that should use morph (scale from center) animation
+/** Views that are a change of context rather than a step deeper — cross-fade. */
 const MORPH_VIEWS = new Set([
   'account',
   'admin',
   'agency-dashboard',
-  'create-listing',
-  'create-rental',
+  'city-dashboard',
   'inbox',
 ]);
 
 /**
- * Determine the best transition animation for a given navigation.
- * Priority: explicit direction > view-type auto-detection > default forward
+ * Pick the entrance animation for a navigation.
+ *
+ * Detail views (a listing, an agency, an agent) deliberately fall through to
+ * the default horizontal push: it is the platform convention for "a level
+ * deeper", it pairs with the edge swipe that takes you back out, and its
+ * reverse is unambiguous. They used to slide up, which read as a modal and left
+ * the back gesture with no matching motion.
  */
-function resolveTransitionClass(
-  direction: NavigationDirection,
-  viewKey: string,
-): string {
-  // Explicit back direction always wins (e.g., back button pressed)
+function resolveTransitionClass(direction: NavigationDirection, viewKey: string): string {
   if (direction === 'back') return 'animate-page-enter-back';
-
-  // Explicit direction from caller
   if (direction === 'up') return 'animate-page-enter-up';
   if (direction === 'morph') return 'animate-page-morph';
 
-  // Auto-detect based on view type when direction is 'forward' (default)
-  const isDetail = DETAIL_VIEWS.has(viewKey) ||
-    viewKey.startsWith('property-') ||
-    viewKey.startsWith('agency-') ||
-    viewKey.startsWith('agent-');
-
-  if (isDetail) return 'animate-page-enter-up';
+  if (SHEET_VIEWS.has(viewKey)) return 'animate-page-enter-up';
   if (MORPH_VIEWS.has(viewKey)) return 'animate-page-morph';
 
   return 'animate-page-enter';
 }
 
 // ============================================================================
-// NavigationProvider — Tracks navigation direction globally
+// NavigationProvider — exposes the direction setter
 // ============================================================================
 
 export const NavigationProvider = memo(function NavigationProvider({
@@ -75,73 +76,10 @@ export const NavigationProvider = memo(function NavigationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  // Use a ref so popstate reads the latest direction synchronously
-  const directionRef = useRef<NavigationDirection>('forward');
-  const [direction, setDirectionState] = useState<NavigationDirection>('forward');
-
-  const setDirection = useCallback((dir: NavigationDirection) => {
-    directionRef.current = dir;
-    setDirectionState(dir);
-  }, []);
-
-  // Track our own position in the history stack to detect back vs forward.
-  // We intercept pushState/replaceState to maintain a counter, and compare
-  // on popstate to reliably determine direction.
-  const historyIndexRef = useRef(0);
-
-  // One-time setup: monkey-patch pushState/replaceState and listen to popstate
-  const setupDone = useRef(false);
-  if (!setupDone.current) {
-    setupDone.current = true;
-
-    // Store our position index in history.state so popstate can read it
-    const currentState = window.history.state;
-    const initialIndex = (currentState && typeof currentState.__navIdx === 'number')
-      ? currentState.__navIdx
-      : 0;
-    historyIndexRef.current = initialIndex;
-
-    // If current state doesn't have our index, inject it
-    if (!currentState || typeof currentState.__navIdx !== 'number') {
-      window.history.replaceState({ ...currentState, __navIdx: initialIndex }, '');
-    }
-
-    // Intercept pushState to track forward navigation index
-    const origPush = window.history.pushState.bind(window.history);
-    window.history.pushState = function(state: any, title: string, url?: string | URL | null) {
-      historyIndexRef.current += 1;
-      const augmented = { ...state, __navIdx: historyIndexRef.current };
-      return origPush(augmented, title, url);
-    };
-
-    // Intercept replaceState to keep index in sync
-    const origReplace = window.history.replaceState.bind(window.history);
-    window.history.replaceState = function(state: any, title: string, url?: string | URL | null) {
-      const augmented = { ...state, __navIdx: historyIndexRef.current };
-      return origReplace(augmented, title, url);
-    };
-
-    // Listen for popstate (browser back/forward buttons)
-    window.addEventListener('popstate', (e) => {
-      const prevIdx = historyIndexRef.current;
-      const newIdx = (e.state && typeof e.state.__navIdx === 'number')
-        ? e.state.__navIdx
-        : prevIdx - 1; // Assume back if no index found
-
-      historyIndexRef.current = newIdx;
-
-      // Only auto-set direction if no explicit direction was set programmatically
-      // (i.e., this was triggered by browser back/forward button)
-      if (directionRef.current === 'forward') {
-        if (newIdx < prevIdx) {
-          setDirection('back');
-        }
-        // If newIdx > prevIdx, keep 'forward' (which is already default)
-      }
-    });
-  }
-
-  const contextValue = useMemo(() => ({ direction, setDirection }), [direction, setDirection]);
+  // Stable for the life of the app: setting a direction writes to module state
+  // (see navHistory) instead of React state, so telling the app which way to
+  // animate no longer costs a full re-render on top of the navigation itself.
+  const contextValue = useMemo(() => ({ setDirection: setNavigationDirection }), []);
 
   return (
     <NavigationContext.Provider value={contextValue}>
@@ -151,7 +89,7 @@ export const NavigationProvider = memo(function NavigationProvider({
 });
 
 // ============================================================================
-// ViewTransition — Animated wrapper for page-level transitions
+// ViewTransition — animated wrapper for page-level transitions
 // ============================================================================
 
 interface ViewTransitionProps {
@@ -160,32 +98,73 @@ interface ViewTransitionProps {
   className?: string;
 }
 
+/** Longest page keyframe, plus a margin. Backstop for a missed animationend. */
+const MAX_TRANSITION_MS = 600;
+
 export const ViewTransition = memo(function ViewTransition({
   children,
   viewKey,
   className = '',
 }: ViewTransitionProps) {
-  const { direction, setDirection } = useNavigationDirection();
-  const prevKeyRef = useRef(viewKey);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
-  // Resolve animation class synchronously during render (not in useEffect)
-  // so the first paint already has the correct animation applied.
-  let transitionClass: string;
-  if (prevKeyRef.current !== viewKey) {
-    transitionClass = resolveTransitionClass(direction, viewKey);
-    prevKeyRef.current = viewKey;
-    // Schedule direction reset after this render cycle completes
-    // so subsequent navigations default back to 'forward'
-    queueMicrotask(() => setDirection('forward'));
-  } else {
-    // Same view — use current direction (initial render or no navigation)
-    transitionClass = resolveTransitionClass(direction, viewKey);
+  // Derived-from-props state: resolve the animation in the same render that
+  // sees the new key, so the first paint already carries it. Anything later
+  // (an effect, a microtask) paints one frame of the new page at its resting
+  // position first, which is the flicker this is here to avoid.
+  const [transition, setTransition] = useState(() => ({
+    key: viewKey,
+    animation: '' as string,
+  }));
+
+  // Resolving consumes the pending direction, so it must happen exactly once
+  // per key even though React can call a render more than once for the same
+  // state — StrictMode does so on every render in development, and the second
+  // pass would otherwise find the direction already spent and fall back to
+  // 'forward'. The refs memoise the answer for the key currently being
+  // resolved, which is the standard shape for a render-phase computation with a
+  // one-shot input.
+  const resolvedKeyRef = useRef<string | null>(null);
+  const resolvedAnimationRef = useRef('');
+
+  if (transition.key !== viewKey) {
+    if (resolvedKeyRef.current !== viewKey) {
+      resolvedKeyRef.current = viewKey;
+      resolvedAnimationRef.current = resolveTransitionClass(consumeNavigationDirection(), viewKey);
+    }
+    setTransition({ key: viewKey, animation: resolvedAnimationRef.current });
   }
 
+  // Drop the class once the animation is over. While it is on, the wrapper
+  // carries a transform, which makes it a containing block for every
+  // `position: fixed` child — the property page's contact bar, the sticky ad,
+  // any modal — and its own compositing layer. Clearing it puts those back
+  // against the viewport the moment the motion is done.
+  const clearAnimation = useCallback(() => {
+    setTransition((current) => (current.animation ? { ...current, animation: '' } : current));
+  }, []);
+
+  useEffect(() => {
+    if (!transition.animation) return;
+    const timer = window.setTimeout(clearAnimation, MAX_TRANSITION_MS);
+    return () => window.clearTimeout(timer);
+  }, [transition.animation, transition.key, clearAnimation]);
+
+  const goBack = useCallback(() => {
+    window.history.back();
+  }, []);
+  useSwipeBack(nodeRef, goBack);
+
   return (
+    // No `key` here on purpose: the wrapper must outlive the view so the swipe
+    // listeners stay bound to a stable node. Remounting on view change is the
+    // job of the keyed ErrorBoundary inside it.
     <div
-      key={viewKey}
-      className={`h-full will-animate ${transitionClass} ${className}`}
+      ref={nodeRef}
+      className={`h-full ${transition.animation} ${className}`}
+      onAnimationEnd={(e) => {
+        if (e.target === e.currentTarget) clearAnimation();
+      }}
     >
       {children}
     </div>

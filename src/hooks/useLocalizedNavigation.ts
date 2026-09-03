@@ -41,8 +41,11 @@ export function useLocalizedNavigation() {
       window.history.pushState({}, '', localizedPath);
     }
 
-    // Dispatch popstate event to trigger route handling
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    // Dispatch popstate to trigger route handling. The current history state
+    // has to ride along: listeners that classify back vs forward read the
+    // navigation index off it, and a bare `new PopStateEvent('popstate')`
+    // carries `state: null`, which reads as a step backwards.
+    window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
   }, [i18n.language, setDirection]);
 
   /**

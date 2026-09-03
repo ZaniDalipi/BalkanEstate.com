@@ -76,7 +76,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
   return (
     <HighlightedPropertiesProvider properties={hook.validProperties}>
-      <div className="w-full h-full relative overflow-hidden">
+      {/* data-no-swipe-back: dragging the map pans it. */}
+      <div className="w-full h-full relative overflow-hidden" data-no-swipe-back>
         {/* Core Google Map */}
         <GoogleMap
           mapContainerStyle={mapContainerStyle}

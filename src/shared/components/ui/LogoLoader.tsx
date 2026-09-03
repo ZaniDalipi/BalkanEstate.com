@@ -5,6 +5,25 @@ interface LogoLoaderProps {
   showText?: boolean;
 }
 
+/** Length of every loop below, in seconds. */
+const CYCLE_S = 1.8;
+
+/**
+ * A negative `animation-delay` that starts the loop wherever a wall-clock
+ * animation would be right now.
+ *
+ * Navigating used to remount the loader — once for the route fetch, again for
+ * the lazy chunk — and each remount restarted the buildings from frame zero, so
+ * the logo visibly hitched mid-load. Seeding the phase off a shared clock makes
+ * a remount invisible: the new instance picks the animation up exactly where
+ * the old one left it.
+ */
+function phaseDelay(offsetS: number): string {
+  const now = typeof performance !== 'undefined' ? performance.now() / 1000 : 0;
+  const phase = (((now - offsetS) % CYCLE_S) + CYCLE_S) % CYCLE_S;
+  return `${-phase}s`;
+}
+
 export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = true }) => {
   const sizeMap = {
     sm: 80,
@@ -12,6 +31,11 @@ export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = 
     lg: 160,
   };
   const px = sizeMap[size];
+
+  // Computed once per mount — the loop runs on the compositor from there.
+  const glowDelay = phaseDelay(0);
+  const leftDelay = phaseDelay(0);
+  const rightDelay = phaseDelay(0.15);
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -52,7 +76,7 @@ export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = 
         }
       `}</style>
 
-      <div className="be-logo-wrap" style={{ width: px, height: px }}>
+      <div className="be-logo-wrap" style={{ width: px, height: px, animationDelay: glowDelay }}>
         <svg
           viewBox="0 0 200 200"
           width={px}
@@ -90,7 +114,7 @@ export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = 
           </defs>
 
           {/* Left building (shorter) */}
-          <g className="be-building-left">
+          <g className="be-building-left" style={{ animationDelay: leftDelay }}>
             {/* Front face */}
             <rect x="48" y="95" width="62" height="82" rx="8" fill="url(#be-grad-left-face)" />
             {/* Right side face (3D depth) */}
@@ -102,7 +126,7 @@ export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = 
           </g>
 
           {/* Right building (taller) */}
-          <g className="be-building-right">
+          <g className="be-building-right" style={{ animationDelay: rightDelay }}>
             {/* Front face */}
             <rect x="96" y="48" width="62" height="129" rx="8" fill="url(#be-grad-right-face)" />
             {/* Right side face (3D depth) */}
@@ -118,7 +142,7 @@ export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = 
       {showText && (
         <span
           className="be-text-anim font-bold tracking-widest text-blue-400"
-          style={{ fontSize: px * 0.12, letterSpacing: '0.15em' }}
+          style={{ fontSize: px * 0.12, letterSpacing: '0.15em', animationDelay: glowDelay }}
         >
           BALKANESTATE
         </span>

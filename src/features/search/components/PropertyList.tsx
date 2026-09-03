@@ -962,7 +962,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
                 {/* PROPERTY LIST SECTION */}
                 <div className="overflow-hidden relative z-0" style={{ flex: searchMode === 'ai' ? '1 1 50%' : '1 1 auto', minHeight: searchMode === 'ai' ? '40%' : 0 }}>
-                    <div className="h-full overflow-y-auto overflow-x-hidden">
+                    {/* data-scroll-container: results scroll in here rather than
+                        in the document, so this is the element navigation has to
+                        reset on a push and restore on a back. */}
+                    <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container>
                         <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                             <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
                             <div className="relative z-[101]">
@@ -1100,7 +1103,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     )}
 
                     {showList && (
-                        <div className="flex-grow min-h-0 overflow-y-auto relative z-0">
+                        <div className="flex-grow min-h-0 overflow-y-auto relative z-0" data-scroll-container>
                             <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                                 <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
                                 <div className="relative z-[101]">

@@ -449,7 +449,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [currentImageIndex, onImageIndexChange]);
 
   return (
-    <div className="overflow-hidden shadow-sm border-b border-neutral-200">
+    // data-no-swipe-back: a horizontal drag in here changes photo. It sits at
+    // the top of the detail page and runs edge to edge on a phone, so without
+    // this opt-out the first swipe on the first photo would navigate away.
+    <div className="overflow-hidden shadow-sm border-b border-neutral-200" data-no-swipe-back>
       {/* ── Gallery frame — fixed 16:9 aspect ratio (Zillow standard). Landscape photos
            fill edge-to-edge via object-cover; portrait photos are preserved with object-contain
            and a blurred LQIP backdrop on the side bars. ── */}
