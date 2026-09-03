@@ -565,20 +565,21 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           </div>
         </div>
 
-        <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
           {!isLand && (
-          {construction.status === 'under-construction' ? (
-            // The building does not exist yet, so "Year built" would be a claim
-            // about a year that has not happened. A promise whose year is
-            // missing or already past shows the state without a date rather
-            // than inventing one.
-            <DetailItem icon={<CalendarIcon />} label={t('features.expectedCompletion', 'Expected completion')}>
-              {construction.expectedYear ?? t('features.underConstruction', 'Under construction')}
-            </DetailItem>
-          ) : (
-            <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
-              {property.yearBuilt}
-            </DetailItem>
+            construction.status === 'under-construction' ? (
+              // The building does not exist yet, so "Year built" would be a claim
+              // about a year that has not happened. A promise whose year is
+              // missing or already past shows the state without a date rather
+              // than inventing one.
+              <DetailItem icon={<CalendarIcon />} label={t('features.expectedCompletion', 'Expected completion')}>
+                {construction.expectedYear ?? t('features.underConstruction', 'Under construction')}
+              </DetailItem>
+            ) : (
+              <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
+                {property.yearBuilt}
+              </DetailItem>
+            )
           )}
           {!isLand && (
             <DetailItem icon={<ParkingIcon />} label={t('features.parking')}>
@@ -587,12 +588,6 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 : t('details.none')}
             </DetailItem>
           )}
-          <DetailItem icon={<ParkingIcon />} label={t('features.parking')}>
-            {property.parking > 0
-              ? `${property.parking} ${property.parking === 1 ? t('details.spot') : t('details.spots')}`
-              : t('details.none')}
-          </DetailItem>
-
           {property.propertyType === 'apartment' && property.floorNumber && (
             <DetailItem icon={<BuildingOfficeIcon />} label={t('features.floor')}>
               {property.floorNumber}
