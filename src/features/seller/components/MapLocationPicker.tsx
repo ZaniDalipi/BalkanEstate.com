@@ -29,6 +29,15 @@ interface MapLocationPickerProps {
   cityLng?: number;
   onLocationChange: (lat: number, lng: number) => void;
   onAddressChange?: (address: string) => void;
+  /**
+   * Reports the map's zoom whenever the user settles on a new one. Set by
+   * callers that store a zoom level alongside the pin (the villa-destination
+   * admin), so "how close the map was" is captured from the map itself rather
+   * than typed in as a number.
+   */
+  onZoomChange?: (zoom: number) => void;
+  /** Overrides the heading for callers that are not pinning a property. */
+  title?: string;
   autoDetectLocation?: boolean;
   /**
    * Skip the "must be near the selected city" check. Set by admin tools, which
@@ -37,7 +46,7 @@ interface MapLocationPickerProps {
   allowOutsideCityArea?: boolean;
 }
 
-const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, autoDetectLocation, allowOutsideCityArea = false }) => {
+const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, onZoomChange, title, autoDetectLocation, allowOutsideCityArea = false }) => {
   const { t } = useTranslation(['search']);
   const { dispatch } = useAppContext();
   const mapRef = useRef<L.Map | null>(null);
@@ -115,6 +124,11 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   // reach the current check rather than the one from the first render.
   const acceptPinRef = useRef(acceptPin);
   useEffect(() => { acceptPinRef.current = acceptPin; }, [acceptPin]);
+
+  // Same reason: the zoom handler is bound with the map and would otherwise
+  // hold the callback identity from the first render forever.
+  const onZoomChangeRef = useRef(onZoomChange);
+  useEffect(() => { onZoomChangeRef.current = onZoomChange; }, [onZoomChange]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -215,6 +229,12 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     // Tap/click anywhere on the map to move the marker there, like pinning in Google Maps
     map.on('click', (e: L.LeafletMouseEvent) => {
       moveMarkerTo(e.latlng.lat, e.latlng.lng);
+    });
+
+    // `zoomend`, not `zoom`: the level is reported once the user has settled on
+    // it, not for every intermediate frame of a pinch or a wheel spin.
+    map.on('zoomend', () => {
+      onZoomChangeRef.current?.(map.getZoom());
     });
 
     mapRef.current = map;
@@ -488,7 +508,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-neutral-700">{t('search:map.propertyLocation')}</p>
+        <p className="text-sm font-medium text-neutral-700">{title ?? t('search:map.propertyLocation')}</p>
         <p className="text-xs text-neutral-500">{t('search:map.searchNavigatePin')}</p>
       </div>
 

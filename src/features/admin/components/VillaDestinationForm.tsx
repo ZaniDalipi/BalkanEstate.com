@@ -1,10 +1,40 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { uploadRequest } from '@/src/shared/api/httpClient';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { SEEDED_CITY_IMAGES, SEEDED_COUNTRIES } from '@/config/seededCityImages';
 import { validateVillaDestination } from '@/src/shared/utils/validation';
+import { findCityCentre, findCountryCentre } from '@/shared/geo';
+
+// Leaflet and its tile layers are a heavy import, and an admin who only
+// renames a destination or swaps its photo never needs them, so the picker is
+// fetched the first time the map is actually revealed.
+const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
+
+/** Where the map opens when neither the destination nor its country is known. */
+const FALLBACK_CENTRE = { lat: 42.0, lng: 21.0 } as const;
+
+/** The zoom a destination gets when it has none yet — a town, not a continent. */
+const DEFAULT_ZOOM = 12;
+
+/**
+ * A coordinate field's value as a number, or null when it is empty or not yet
+ * a number. Empty is not 0: 0/0 is a real point in the Gulf of Guinea, and
+ * treating a blank field as pinned there is how a destination ends up with a
+ * map that flies into the ocean.
+ */
+const parseCoordinate = (value: string): number | null => {
+    if (!value.trim()) return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+/** Leaflet only has tiles for 1–20; anything else opens the map at the default. */
+const parseZoom = (value: string): number => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 1 && parsed <= 20 ? parsed : DEFAULT_ZOOM;
+};
 
 /**
  * Numbers are held as strings while editing so a half-typed "-" or "42."
@@ -50,6 +80,13 @@ interface Props {
  * pressing Edit on anything below the fold scrolled the form out of sight and
  * the admin had to scroll back up to reach the fields. A dialog keeps the
  * editor with the row that opened it, whatever the list length.
+ *
+ * The position is set on a map, not typed. A destination's coordinates decide
+ * where the villas map flies when a visitor opens the card, and there is no
+ * way to tell a right latitude from a wrong one by reading it — so the map is
+ * the input: search for the place, or tap it, and the pin writes the
+ * coordinates and the zoom back into the draft. The number fields stay
+ * editable underneath for the case where an exact pair is already known.
  */
 const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCancel, onSave }) => {
     const { t } = useTranslation(['admin']);
@@ -57,6 +94,34 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
     const firstFieldRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
+
+    const pinnedLat = parseCoordinate(draft.lat);
+    const pinnedLng = parseCoordinate(draft.lng);
+    const isPinned = pinnedLat !== null && pinnedLng !== null;
+
+    /**
+     * Non-null exactly while the map is open, holding the zoom it opened at.
+     *
+     * One value rather than an `isMapOpen` flag beside a zoom, because the two
+     * are never independent — and the opening zoom is deliberately a snapshot:
+     * once the map is up it owns the zoom, so feeding the draft's value back in
+     * on every wheel notch would fight the user for control of their own map.
+     *
+     * It starts open for a destination that has no pin yet, which is every
+     * destination being created: that is the field the form exists to fill.
+     */
+    const [mapSession, setMapSession] = useState<{ zoom: number } | null>(() =>
+        isPinned ? null : { zoom: parseZoom(draft.zoom) },
+    );
+
+    const toggleMap = () =>
+        setMapSession(session => (session ? null : { zoom: parseZoom(draft.zoom) }));
+
+    // Where the map opens: the existing pin, else the place if it happens to be
+    // a city we hold coordinates for, else the middle of its country.
+    const mapCentre = isPinned
+        ? { lat: pinnedLat, lng: pinnedLng }
+        : findCityCentre(draft.country, draft.name) ?? findCountryCentre(draft.country) ?? FALLBACK_CENTRE;
 
     // The shared validator, not a private copy — the same rules the save path
     // and the server apply (Claude.md: validation lives in validation.ts).
@@ -203,23 +268,88 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                            <div>
-                                <label className={label} htmlFor="vd-lat">{t('admin:villaDestinations.lat', 'Latitude')}</label>
-                                <input id="vd-lat" className={field} value={draft.lat} onChange={e => set({ lat: e.target.value })} inputMode="decimal" />
+                        {/* ── Position ── */}
+                        <div className="rounded-xl border border-gray-200 p-4">
+                            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                        {t('admin:villaDestinations.position', 'Map position')}
+                                    </p>
+                                    <p className="mt-1 text-[11px] text-gray-400">
+                                        {isPinned
+                                            ? t('admin:villaDestinations.positionPinned', 'Where the villas map flies when a visitor opens this card.')
+                                            : t('admin:villaDestinations.positionMissing', 'No position yet — search for the place on the map, or tap it, to set one.')}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={toggleMap}
+                                    className="whitespace-nowrap rounded-lg bg-neutral-100 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-neutral-200"
+                                >
+                                    {mapSession
+                                        ? t('admin:villaDestinations.hideMap', 'Hide map')
+                                        : t('admin:villaDestinations.pickOnMap', 'Set on map')}
+                                </button>
                             </div>
-                            <div>
-                                <label className={label} htmlFor="vd-lng">{t('admin:villaDestinations.lng', 'Longitude')}</label>
-                                <input id="vd-lng" className={field} value={draft.lng} onChange={e => set({ lng: e.target.value })} inputMode="decimal" />
+
+                            {mapSession && (
+                                <Suspense
+                                    fallback={
+                                        <div className="flex h-96 items-center justify-center rounded-lg border-2 border-dashed border-gray-200">
+                                            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                        </div>
+                                    }
+                                >
+                                    {/*
+                                     * `allowOutsideCityArea` because a destination is
+                                     * not a listing: many of them are regions rather
+                                     * than cities, and the seller-side "must be near
+                                     * the chosen city" rule has no city to measure
+                                     * against here. The country still biases the
+                                     * search, so typing "Ksamil" finds the Albanian
+                                     * one first.
+                                     */}
+                                    <MapLocationPicker
+                                        lat={mapCentre.lat}
+                                        lng={mapCentre.lng}
+                                        zoom={mapSession.zoom}
+                                        address={[draft.name, draft.country].filter(Boolean).join(', ')}
+                                        country={draft.country}
+                                        allowOutsideCityArea
+                                        title={t('admin:villaDestinations.position', 'Map position')}
+                                        onLocationChange={(lat, lng) =>
+                                            // Six decimals is ~11cm — past the point
+                                            // where more digits mean anything for a
+                                            // card that frames a whole town.
+                                            set({ lat: lat.toFixed(6), lng: lng.toFixed(6) })
+                                        }
+                                        onZoomChange={zoom => set({ zoom: String(zoom) })}
+                                    />
+                                </Suspense>
+                            )}
+
+                            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                <div>
+                                    <label className={label} htmlFor="vd-lat">{t('admin:villaDestinations.lat', 'Latitude')}</label>
+                                    <input id="vd-lat" className={field} value={draft.lat} onChange={e => set({ lat: e.target.value })} inputMode="decimal" />
+                                </div>
+                                <div>
+                                    <label className={label} htmlFor="vd-lng">{t('admin:villaDestinations.lng', 'Longitude')}</label>
+                                    <input id="vd-lng" className={field} value={draft.lng} onChange={e => set({ lng: e.target.value })} inputMode="decimal" />
+                                </div>
+                                <div>
+                                    <label className={label} htmlFor="vd-zoom">{t('admin:villaDestinations.zoom', 'Zoom')}</label>
+                                    <input id="vd-zoom" className={field} value={draft.zoom} onChange={e => set({ zoom: e.target.value })} inputMode="numeric" />
+                                </div>
                             </div>
-                            <div>
-                                <label className={label} htmlFor="vd-zoom">{t('admin:villaDestinations.zoom', 'Zoom')}</label>
-                                <input id="vd-zoom" className={field} value={draft.zoom} onChange={e => set({ zoom: e.target.value })} inputMode="numeric" />
-                            </div>
-                            <div>
-                                <label className={label} htmlFor="vd-order">{t('admin:villaDestinations.order', 'Order')}</label>
-                                <input id="vd-order" className={field} value={draft.displayOrder} onChange={e => set({ displayOrder: e.target.value })} inputMode="numeric" />
-                            </div>
+                            <p className="mt-1 text-[11px] text-gray-400">
+                                {t('admin:villaDestinations.positionHint', 'Filled in by the map. Type here only when you already have the exact pair.')}
+                            </p>
+                        </div>
+
+                        <div className="sm:w-40">
+                            <label className={label} htmlFor="vd-order">{t('admin:villaDestinations.order', 'Order')}</label>
+                            <input id="vd-order" className={field} value={draft.displayOrder} onChange={e => set({ displayOrder: e.target.value })} inputMode="numeric" />
                         </div>
 
                         {/* ── Photo ── */}

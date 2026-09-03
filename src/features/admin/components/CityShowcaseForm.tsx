@@ -6,6 +6,7 @@ import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { validateCityShowcase } from '@/src/shared/utils/validation';
 import type { CityDirectoryEntry } from '../api/adminApi';
+import { buildCityPickerOptions } from './cityShowcaseOptions';
 
 /**
  * `displayOrder` is held as a string while editing so a half-typed "-" or "1."
@@ -44,8 +45,10 @@ interface Props {
     /** Stores the file and resolves with where it landed. */
     onUploadImage: (file: File) => Promise<{ url: string; publicId: string }>;
     /** Known (city, country) pairs — from the market-data directory and the
-     *  gallery's own rows — offered as suggestions for the city field. */
+     *  gallery's own rows — merged into the canonical list for the city field. */
     citySuggestions: CityDirectoryEntry[];
+    /** The panels that already exist, so this one cannot duplicate them. */
+    existingPanels: ReadonlyArray<{ _id: string; city: string; country: string }>;
 }
 
 /**
@@ -55,12 +58,18 @@ interface Props {
  * Balkan list as canonical everywhere else (search filters, the agents page),
  * so letting this one field free-type it was the one way to introduce a
  * country a typo-checked pair could never match. City stays free-text, wired
- * to a `<datalist>` of names already known for the chosen country: it can't
- * be a closed list the way country is, because the whole point of this
- * gallery is showing places nobody has entered yet, but the datalist means
- * typing "Podgorica" for a city already on record autocompletes instead of
- * risking "Podgorica " with a trailing space becoming a second, silently
- * duplicate entry.
+ * to a `<datalist>`: it can't be a closed list the way country is, because the
+ * whole point of this gallery is showing places nobody has entered yet, but
+ * the datalist means typing "Podgorica" for a city already on record
+ * autocompletes instead of risking "Podgorica " with a trailing space becoming
+ * a second, silently duplicate entry.
+ *
+ * What that datalist offers is the canonical country/city list — the same one
+ * the create-listing form gives a seller — merged with the names only the
+ * database knows, minus every city another panel already uses. A city already
+ * in the gallery is therefore not offered a second time, and picking one that
+ * is (by typing it) fails validation with the reason rather than creating a
+ * duplicate panel that competes with the first for the same slot.
  *
  * The photo is uploaded from inside the form rather than from the row list,
  * which is the one structural difference from the villa-destination form: a
@@ -80,39 +89,36 @@ interface Props {
  * the viewport regardless of scroll position or which page it was opened from.
  */
 const CityShowcaseForm: React.FC<Props> = ({
-    draft, saving, onChange, onCancel, onSave, onUploadImage, citySuggestions,
+    draft, saving, onChange, onCancel, onSave, onUploadImage, citySuggestions, existingPanels,
 }) => {
     const { t } = useTranslation(['admin']);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    // The same rule the server applies, so a problem reads as a sentence here
-    // instead of arriving as a 400 after a round trip.
+    // The same rules the save path and the server apply, so a problem — a
+    // missing photo or a city already on the home page — reads as a sentence
+    // here instead of arriving as a 400 after a round trip.
     const problem = validateCityShowcase({
         city: draft.city,
         country: draft.country,
         searchQuery: draft.searchQuery,
         imageUrl: draft.imageUrl,
         displayOrder: draft.displayOrder,
+        existingPanels,
+        panelId: draft._id,
     });
 
-    // Cities already on record for the chosen country. Case-insensitively
-    // deduped: the directory and the gallery's own rows can name the same
-    // city with different casing, and a datalist showing "Budva" twice reads
-    // as a bug even though neither entry is wrong.
-    const citySuggestionsForCountry = useMemo(() => {
-        if (!draft.country) return [];
-        const seen = new Set<string>();
-        const names: string[] = [];
-        for (const entry of citySuggestions) {
-            if (entry.country !== draft.country) continue;
-            const key = entry.city.toLowerCase();
-            if (seen.has(key)) continue;
-            seen.add(key);
-            names.push(entry.city);
-        }
-        return names.sort((a, b) => a.localeCompare(b));
-    }, [citySuggestions, draft.country]);
+    // What this country still has to offer: the canonical cities plus any name
+    // only the database knows, minus the ones other panels hold.
+    const { available: cityOptions, taken: takenCities } = useMemo(
+        () => buildCityPickerOptions({
+            country: draft.country,
+            known: citySuggestions,
+            used: existingPanels,
+            current: draft.city,
+        }),
+        [citySuggestions, existingPanels, draft.country, draft.city],
+    );
 
     const field = 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none';
     const label = 'block text-xs font-medium text-gray-600 mb-1';
@@ -186,13 +192,23 @@ const CityShowcaseForm: React.FC<Props> = ({
                                 placeholder={draft.country ? t('admin:cityShowcase.cityPlaceholder', 'Pick one or type a new city') : undefined}
                             />
                             <datalist id="cs-city-options">
-                                {citySuggestionsForCountry.map(name => (
+                                {cityOptions.map(name => (
                                     <option key={name} value={name} />
                                 ))}
                             </datalist>
                             <p className="mt-1 text-[11px] text-gray-400">
                                 {t('admin:cityShowcase.cityHint', 'The name shown on the panel. Not listed? Type it — it gets saved for next time too.')}
                             </p>
+                            {/* Named, not just missing: a curator who cannot
+                                find Tirana in the list needs to know it is
+                                already a panel, not that the list is broken. */}
+                            {takenCities.length > 0 && (
+                                <p className="mt-1 text-[11px] text-gray-400">
+                                    {t('admin:cityShowcase.cityTakenHint', 'Already in the gallery, so not listed: {{cities}}', {
+                                        cities: takenCities.join(' · '),
+                                    })}
+                                </p>
+                            )}
                         </div>
                     </div>
 

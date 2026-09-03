@@ -1,3 +1,8 @@
+// Imported from the leaf module rather than the geo barrel: this file is
+// pulled into nearly every form, and the barrel would drag the whole
+// country/city gazetteer along with it.
+import { normalizePlaceName } from '@/shared/geo/normalize';
+
 /**
  * Input Validation Utilities
  * Provides validation functions for user inputs before API calls
@@ -192,6 +197,15 @@ export function validateCoordinates(lat: number, lng: number): ValidationResult 
  * image library behind it — so a panel without a usable photo is not a panel
  * with a gap in it, it is a panel that cannot be drawn. Requiring an `https`
  * URL here also keeps anything but a real image URL out of an `img src`.
+ *
+ * Uniqueness is checked here too, when the caller can supply the panels that
+ * already exist. The gallery identifies a panel by its city and country, so a
+ * second panel for the same pair is not a second panel — it is a duplicate
+ * competing with the first for the same slot, with whichever photo the draw
+ * happens to pick. Matching is on the normalised name, so "Vlorë", "vlore" and
+ * " Vlore " all collide with an existing Vlore. It does not guess past that:
+ * "Vlora" and "Vlore" are two names this codebase keeps apart elsewhere, and
+ * folding them here would refuse a city the gallery does not actually hold.
  */
 export function validateCityShowcase(input: {
   city: string;
@@ -199,6 +213,10 @@ export function validateCityShowcase(input: {
   searchQuery: string;
   imageUrl: string;
   displayOrder: number | string;
+  /** Panels already in the gallery. Omit to skip the uniqueness check. */
+  existingPanels?: ReadonlyArray<{ _id?: string; city: string; country: string }>;
+  /** Id of the panel being edited, so it never collides with itself. */
+  panelId?: string;
 }): ValidationResult {
   const city = validateTextLength(String(input.city ?? '').trim(), {
     minLength: 2, maxLength: 80, fieldName: 'City',
@@ -226,7 +244,40 @@ export function validateCityShowcase(input: {
     return { isValid: false, error: 'Order must be a number' };
   }
 
+  const duplicate = findDuplicateCityPanel(input);
+  if (duplicate) {
+    return {
+      isValid: false,
+      error: `${duplicate.city} is already in the gallery — edit that panel instead of adding a second one`,
+    };
+  }
+
   return { isValid: true };
+}
+
+/** The existing panel a draft would duplicate, or null when it is unique. */
+function findDuplicateCityPanel(input: {
+  city: string;
+  country: string;
+  existingPanels?: ReadonlyArray<{ _id?: string; city: string; country: string }>;
+  panelId?: string;
+}): { city: string; country: string } | null {
+  if (!input.existingPanels?.length) return null;
+
+  const city = normalizePlaceName(String(input.city ?? ''));
+  const country = normalizePlaceName(String(input.country ?? ''));
+  if (!city || !country) return null;
+
+  return (
+    input.existingPanels.find(
+      (panel) =>
+        // A panel never duplicates itself. Panels without an id (a draft
+        // compared against unsaved rows) fall through to the name check.
+        (!input.panelId || panel._id !== input.panelId) &&
+        normalizePlaceName(panel.city) === city &&
+        normalizePlaceName(panel.country) === country
+    ) ?? null
+  );
 }
 
 /**

@@ -48,6 +48,14 @@ const CityShowcaseManager: React.FC = () => {
         [directoryEntries, rows],
     );
 
+    // Which cities are spoken for. The form drops these from its picker and
+    // refuses a draft that names one anyway, so the gallery cannot end up with
+    // two panels fighting over the same city.
+    const existingPanels = useMemo(
+        () => rows.map(r => ({ _id: r._id, city: r.city, country: r.country })),
+        [rows],
+    );
+
     const handleDelete = (row: AdminCityShowcase) => {
         if (!window.confirm(t('admin:cityShowcase.confirmDelete', 'Remove {{city}} from the home page?', { city: row.city }))) return;
         remove(row);
@@ -118,6 +126,7 @@ const CityShowcaseManager: React.FC = () => {
                     onSave={save}
                     onUploadImage={uploadCityShowcaseImage}
                     citySuggestions={citySuggestions}
+                    existingPanels={existingPanels}
                 />
             )}
 

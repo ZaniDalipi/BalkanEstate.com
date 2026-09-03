@@ -20,6 +20,7 @@ import {
   validateArea,
   validateYearBuilt,
   validateRoomCount,
+  validateCityShowcase,
 } from '../shared/utils/validation';
 
 describe('validateEmail', () => {
@@ -296,5 +297,87 @@ describe('validateRoomCount', () => {
 
   it('should reject very high counts', () => {
     expect(validateRoomCount(150)).toEqual({ isValid: false, error: 'Count value seems too high' });
+  });
+});
+
+describe('validateCityShowcase', () => {
+  const panel = {
+    city: 'Budva',
+    country: 'Montenegro',
+    searchQuery: 'Budva',
+    imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg',
+    displayOrder: 0,
+  };
+
+  it('accepts a complete panel', () => {
+    expect(validateCityShowcase(panel)).toEqual({ isValid: true });
+  });
+
+  it('requires a photo — the gallery has no stand-in image', () => {
+    expect(validateCityShowcase({ ...panel, imageUrl: '' })).toEqual({
+      isValid: false,
+      error: 'A photo is required',
+    });
+  });
+
+  it('rejects a city another panel already holds', () => {
+    const result = validateCityShowcase({
+      ...panel,
+      existingPanels: [{ _id: 'p1', city: 'Budva', country: 'Montenegro' }],
+    });
+
+    expect(result.isValid).toBe(false);
+    expect(result.error).toMatch(/already in the gallery/i);
+  });
+
+  it('matches a duplicate through casing, padding and diacritics', () => {
+    // "Vlorë" typed against a stored " vlore " is the same city, and a gallery
+    // holding both would draw two panels for one place.
+    expect(
+      validateCityShowcase({
+        ...panel,
+        city: 'Vlorë',
+        country: 'Albania',
+        searchQuery: 'Vlore',
+        existingPanels: [{ _id: 'p1', city: ' vlore ', country: 'ALBANIA' }],
+      }).isValid,
+    ).toBe(false);
+  });
+
+  it('does not fold two genuinely different names together', () => {
+    // "Vlora" and "Vlore" are spellings this codebase treats as distinct
+    // elsewhere; guessing they are the same would silently block a real city.
+    expect(
+      validateCityShowcase({
+        ...panel,
+        city: 'Vlora',
+        country: 'Albania',
+        searchQuery: 'Vlora',
+        existingPanels: [{ _id: 'p1', city: 'Vlore', country: 'Albania' }],
+      }),
+    ).toEqual({ isValid: true });
+  });
+
+  it('lets a panel keep its own city when it is edited', () => {
+    expect(
+      validateCityShowcase({
+        ...panel,
+        panelId: 'p1',
+        existingPanels: [{ _id: 'p1', city: 'Budva', country: 'Montenegro' }],
+      }),
+    ).toEqual({ isValid: true });
+  });
+
+  it('treats the same city in another country as a different place', () => {
+    expect(
+      validateCityShowcase({
+        ...panel,
+        existingPanels: [{ _id: 'p1', city: 'Budva', country: 'Croatia' }],
+      }),
+    ).toEqual({ isValid: true });
+  });
+
+  it('skips the uniqueness rule when the caller has no list to check against', () => {
+    expect(validateCityShowcase({ ...panel, existingPanels: [] })).toEqual({ isValid: true });
   });
 });
