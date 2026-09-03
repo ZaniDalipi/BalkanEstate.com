@@ -272,7 +272,8 @@
     "switchTo": "Comută la vizualizarea {{view}}",
     "drawAreaHint": "Desenează o zonă de căutare pe hartă",
     "locationLookupFailed": "Locul nu a putut fi găsit. Încercați alt rezultat sau plasați marcajul direct pe hartă.",
-    "noSearchResults": "Niciun loc găsit. Încercați un nume mai scurt sau plasați marcajul direct pe hartă."
+    "noSearchResults": "Niciun loc găsit. Încercați un nume mai scurt sau plasați marcajul direct pe hartă.",
+    "searchAreaHint": "Căutare în raza de {{radius}}km de {{city}} — satele și plajele din apropiere sunt incluse."
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",

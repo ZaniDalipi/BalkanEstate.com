@@ -21,7 +21,10 @@ vi.mock('@/services/osmService', () => ({
 const { useLocationSearch, getCountryCode } = await import('@/src/features/seller/hooks/useLocationSearch');
 
 const VLORE = { lat: 40.4686, lng: 19.4914 };
-const vloreOptions = { country: 'Albania', city: 'Vlore', cityCentre: VLORE };
+const HIMARE = { lat: 40.1017, lng: 19.7442 };
+// Vlorë is a county seat (70km area); Himarë a locality (15km).
+const vloreOptions = { country: 'Albania', city: 'Vlore', cityCentre: VLORE, radiusKm: 70 };
+const himareOptions = { country: 'Albania', city: 'Himare', cityCentre: HIMARE, radiusKm: 15 };
 
 const osmResult = (overrides: Record<string, unknown> = {}) => ({
   place_id: 1,
@@ -100,9 +103,7 @@ describe('useLocationSearch', () => {
     expect(result.current.suggestions.map((s) => s.source)).toEqual(['local', 'google']);
   });
 
-  it('keeps a Google prediction far from the selected city', async () => {
-    // Proximity to the chosen city is a ranking bias, never a filter: a seller
-    // may pick Vlorë from the list and pin an address hundreds of km away.
+  it('drops a Google prediction beyond the city area', async () => {
     isPlacesAvailable.mockReturnValue(true);
     fetchPlacePredictions.mockResolvedValue([
       { placeId: 'far', title: 'Palasovo', subtitle: 'Somewhere else', distanceKm: 400 },
@@ -111,7 +112,37 @@ describe('useLocationSearch', () => {
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
     await search(result, 'palase');
 
+    expect(result.current.suggestions.every((s) => s.source !== 'google')).toBe(true);
+  });
+
+  it('searches without a limit when no radius is given', async () => {
+    isPlacesAvailable.mockReturnValue(true);
+    fetchPlacePredictions.mockResolvedValue([
+      { placeId: 'far', title: 'Palasovo', subtitle: 'Somewhere else', distanceKm: 400 },
+    ]);
+
+    const { result } = renderHook(() =>
+      useLocationSearch({ country: 'Albania', city: 'Vlore', cityCentre: VLORE })
+    );
+    await search(result, 'palase');
+
     expect(result.current.suggestions.some((s) => s.source === 'google')).toBe(true);
+  });
+
+  it('narrows to the settlement itself when the city is a locality', async () => {
+    // Ksamil is ~40km down the coast from Himarë: inside Sarandë's area, well
+    // outside Himarë's own. Picking Himarë must not offer it.
+    const { result } = renderHook(() => useLocationSearch(himareOptions));
+    await search(result, 'ksamil');
+
+    expect(result.current.suggestions).toEqual([]);
+  });
+
+  it('still offers a locality\'s own neighbours', async () => {
+    const { result } = renderHook(() => useLocationSearch(himareOptions));
+    await search(result, 'qeparo');
+
+    expect(result.current.suggestions[0]).toMatchObject({ title: 'Qeparo', source: 'local' });
   });
 
   it('falls back to the geocoder when the other sources are thin', async () => {
@@ -120,7 +151,7 @@ describe('useLocationSearch', () => {
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
     await search(result, 'himare');
 
-    expect(searchLocation).toHaveBeenCalledWith('himare', 'AL', { near: VLORE, radiusKm: 100 });
+    expect(searchLocation).toHaveBeenCalledWith('himare', 'AL', { near: VLORE, radiusKm: 70 });
     // The curated Himarë entry wins; the same place from OSM is de-duplicated away.
     expect(result.current.suggestions.filter((s) => s.title === 'Himarë')).toHaveLength(1);
   });
@@ -134,7 +165,7 @@ describe('useLocationSearch', () => {
     ]);
 
     const { result } = renderHook(() =>
-      useLocationSearch({ country: 'Croatia', city: 'Dubrovnik', cityCentre: { lat: 42.6507, lng: 18.0944 } })
+      useLocationSearch({ country: 'Croatia', city: 'Dubrovnik', cityCentre: { lat: 42.6507, lng: 18.0944 }, radiusKm: 70 })
     );
     await search(result, 'zaton');
 
@@ -144,8 +175,8 @@ describe('useLocationSearch', () => {
     expect(zatons[0].source).toBe('local');
   });
 
-  it('keeps a geocoder result in another country entirely', async () => {
-    // Zagreb, while the form's city is Vlorë. The seller is free to pin it.
+  it('drops geocoder results outside the city area', async () => {
+    // Zagreb, far outside Vlorë's area.
     searchLocation.mockResolvedValue([
       osmResult({ place_id: 9, lat: '45.8150', lon: '15.9819', display_name: 'Zagreb, Croatia' }),
     ]);
@@ -153,7 +184,7 @@ describe('useLocationSearch', () => {
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
     await search(result, 'zagreb');
 
-    expect(result.current.suggestions.map((s) => s.title)).toContain('Zagreb');
+    expect(result.current.suggestions).toEqual([]);
   });
 
   it('resolves a local suggestion without a network call', async () => {

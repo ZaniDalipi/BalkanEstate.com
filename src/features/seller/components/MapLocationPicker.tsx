@@ -6,7 +6,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { reverseGeocode } from '@/services/osmService';
-import { findCityCentre, formatDistanceKm } from '@/shared/geo';
+import { findCityCentre, formatDistanceKm, getCityAreaRadiusKm } from '@/shared/geo';
 import { MIN_QUERY_LENGTH, useLocationSearch, type LocationSuggestion } from '../hooks/useLocationSearch';
 
 // Fix for default markers in Leaflet with Vite/webpack bundlers
@@ -64,6 +64,10 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     return known ? { lat: known.lat, lng: known.lng } : null;
   }, [cityLat, cityLng, country, city]);
 
+  // How far the address search reaches: a municipality around a county seat,
+  // just the settlement around a village or resort.
+  const cityRadiusKm = useMemo(() => getCityAreaRadiusKm(country, city), [country, city]);
+
   const {
     query: searchQuery,
     setQuery: setSearchQuery,
@@ -71,7 +75,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     isSearching,
     resolveSuggestion,
     reset: resetSearch,
-  } = useLocationSearch({ country, city, cityCentre });
+  } = useLocationSearch({ country, city, cityCentre, radiusKm: cityRadiusKm });
 
   // Same reason: the zoom handler is bound with the map and would otherwise
   // hold the callback identity from the first render forever.
@@ -445,6 +449,13 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         <p className="text-sm font-medium text-neutral-700">{title ?? t('search:map.propertyLocation')}</p>
         <p className="text-xs text-neutral-500">{t('search:map.searchNavigatePin')}</p>
       </div>
+
+      {/* Say what the search covers, so a missing result is never a mystery */}
+      {city && (
+        <p className="text-xs text-neutral-500">
+          {t('search:map.searchAreaHint', { radius: Math.round(cityRadiusKm), city })}
+        </p>
+      )}
 
       {/* Search box with geolocation button */}
       <div className="flex gap-2">

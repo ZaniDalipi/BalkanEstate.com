@@ -272,7 +272,8 @@
     "switchTo": "Prebaci na {{view}} prikaz",
     "drawAreaHint": "Nacrtaj područje pretrage na karti",
     "locationLookupFailed": "Nije moguće pronaći to mjesto. Pokušajte drugi rezultat ili postavite oznaku izravno na kartu.",
-    "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku izravno na kartu."
+    "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku izravno na kartu.",
+    "searchAreaHint": "Pretraživanje unutar {{radius}}km od {{city}} — obližnja sela i plaže su uključeni."
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",

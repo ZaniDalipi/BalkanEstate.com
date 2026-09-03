@@ -287,7 +287,8 @@
     "switchTo": "Switch to {{view}} view",
     "drawAreaHint": "Draw a search area on the map",
     "locationLookupFailed": "Could not look up that place. Please try another result or drop the pin on the map.",
-    "noSearchResults": "No places found. Try a shorter name, or drop the pin directly on the map."
+    "noSearchResults": "No places found. Try a shorter name, or drop the pin directly on the map.",
+    "searchAreaHint": "Searching within {{radius}}km of {{city}} — nearby villages and beaches are included."
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",

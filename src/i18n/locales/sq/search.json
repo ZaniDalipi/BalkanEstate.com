@@ -272,7 +272,8 @@
     "switchTo": "Kalo te pamja {{view}}",
     "drawAreaHint": "Vizato një zonë kërkimi në hartë",
     "locationLookupFailed": "Nuk u gjet ky vend. Provoni një rezultat tjetër ose vendosni shënuesin drejtpërdrejt në hartë.",
-    "noSearchResults": "Nuk u gjet asnjë vend. Provoni një emër më të shkurtër, ose vendosni shënuesin drejtpërdrejt në hartë."
+    "noSearchResults": "Nuk u gjet asnjë vend. Provoni një emër më të shkurtër, ose vendosni shënuesin drejtpërdrejt në hartë.",
+    "searchAreaHint": "Duke kërkuar brenda {{radius}}km nga {{city}} — fshatrat dhe plazhet përreth përfshihen."
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",

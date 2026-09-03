@@ -14,3 +14,8 @@ export {
   findCityCentre,
   findCountryCentre,
 } from './cityCatalog';
+export {
+  MUNICIPAL_AREA_RADIUS_KM,
+  LOCALITY_AREA_RADIUS_KM,
+  getCityAreaRadiusKm,
+} from './cityAreas';

@@ -2,7 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import {
   BALKAN_LOCALITIES,
+  LOCALITY_AREA_RADIUS_KM,
+  MUNICIPAL_AREA_RADIUS_KM,
   findCityCentre,
+  getCityAreaRadiusKm,
   getLocalitiesForCity,
   haversineDistanceKm,
   normalizePlaceName,
@@ -68,6 +71,48 @@ describe('gazetteer integrity', () => {
       expect(locality.lat, locality.name).toBeLessThan(49);
       expect(locality.lng, locality.name).toBeGreaterThan(12);
       expect(locality.lng, locality.name).toBeLessThan(30);
+    }
+  });
+});
+
+describe('getCityAreaRadiusKm', () => {
+  it('gives a county seat its whole municipality', () => {
+    expect(getCityAreaRadiusKm('Albania', 'Vlore')).toBe(MUNICIPAL_AREA_RADIUS_KM);
+    expect(getCityAreaRadiusKm('Albania', 'Sarande')).toBe(MUNICIPAL_AREA_RADIUS_KM);
+  });
+
+  it('narrows a village or resort to its own settlement', () => {
+    // The case this exists for: picking Himarë offers Himarë addresses, not
+    // everything down the riviera that Vlorë County covers.
+    expect(getCityAreaRadiusKm('Albania', 'Himare')).toBe(LOCALITY_AREA_RADIUS_KM);
+    expect(getCityAreaRadiusKm('Albania', 'Dhermi')).toBe(LOCALITY_AREA_RADIUS_KM);
+    expect(getCityAreaRadiusKm('Montenegro', 'Sveti Stefan')).toBe(LOCALITY_AREA_RADIUS_KM);
+  });
+
+  it('is spelling-insensitive', () => {
+    expect(getCityAreaRadiusKm('albania', 'himarë')).toBe(getCityAreaRadiusKm('Albania', 'Himare'));
+  });
+
+  it('narrows nothing for a city it does not know', () => {
+    expect(getCityAreaRadiusKm('Albania', 'Nowhere')).toBe(MUNICIPAL_AREA_RADIUS_KM);
+    expect(getCityAreaRadiusKm(null, null)).toBe(MUNICIPAL_AREA_RADIUS_KM);
+  });
+
+  it('reaches every locality the gazetteer files under a county seat', () => {
+    // A municipal centre must still offer the villages registered beneath it,
+    // or the gazetteer would list places its own city can never surface.
+    for (const locality of BALKAN_LOCALITIES) {
+      const centre = findCityCentre(locality.country, locality.city);
+      if (!centre || centre.tier === 'locality') continue;
+
+      const distance = haversineDistanceKm(
+        { lat: centre.lat, lng: centre.lng },
+        { lat: locality.lat, lng: locality.lng }
+      );
+      expect(
+        getCityAreaRadiusKm(locality.country, locality.city),
+        `${locality.name} must be reachable from ${locality.city}`
+      ).toBeGreaterThanOrEqual(distance);
     }
   });
 });
