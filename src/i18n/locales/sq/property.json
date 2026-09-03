@@ -328,7 +328,9 @@
       "villa": "Vilë",
       "land": "Tokë",
       "other": "Tjetër",
-      "luxury-villa": "Vilë Luksoze"
+      "luxury-villa": "Vilë luksoze",
+      "commercial": "Komerciale",
+      "parking": "Vend parkimi"
     },
     "promotedListings": "Listime të Promovuara",
     "agentHint": "Kliko për rekomandime!",

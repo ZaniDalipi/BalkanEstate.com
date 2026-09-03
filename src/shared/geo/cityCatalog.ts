@@ -34,6 +34,20 @@ export const getCountryCityNames = (country?: string | null): string[] =>
     .sort((a, b) => a.localeCompare(b));
 
 /**
+ * A city's centre coordinates, looked up by country and city name.
+ * Returns null rather than a guess when either name is unknown, so callers can
+ * fall back to a country centre or leave the map where it is.
+ */
+export const findCityCentre = (country?: string | null, city?: string | null): CityData | null => {
+  const normalizedCity = normalizePlaceName(city ?? '');
+  if (!normalizedCity) return null;
+
+  return (
+    getCountryCities(country).find((entry) => normalizePlaceName(entry.name) === normalizedCity) ?? null
+  );
+};
+
+/**
  * A starting point for a map of `country`: the mean of its listed city
  * coordinates.
  *

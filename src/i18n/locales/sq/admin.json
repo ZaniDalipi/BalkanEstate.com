@@ -75,7 +75,9 @@
       "villa": "Vilë",
       "land": "Tokë",
       "commercial": "Komerciale",
-      "other": "Tjetër"
+      "other": "Tjetër",
+      "luxury-villa": "Vilë luksoze",
+      "parking": "Vend parkimi"
     },
     "bathrooms": "Banja",
     "bedrooms": "Dhoma gjumi",

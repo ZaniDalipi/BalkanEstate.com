@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { type PropertyType } from '../config/propertyTypes';
 
 export interface IFilters {
   query: string;
@@ -13,7 +14,7 @@ export interface IFilters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: 'any' | 'agent' | 'private';
-  propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+  propertyType: 'any' | PropertyType;
   // Advanced filters
   minYearBuilt: number | null;
   maxYearBuilt: number | null;

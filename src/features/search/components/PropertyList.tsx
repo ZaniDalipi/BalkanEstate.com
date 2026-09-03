@@ -8,6 +8,7 @@ import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
 import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
+import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 
 interface PropertyListProps {
   properties: Property[];
@@ -362,7 +363,13 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.propertyType')}
-                                options={[ { value: 'any', label: t('search:propertyTypes.any') }, { value: 'house', label: t('search:propertyTypes.house') }, { value: 'apartment', label: t('search:propertyTypes.apartment') }, { value: 'villa', label: t('search:propertyTypes.villa') }, { value: 'land', label: t('search:propertyTypes.land') }, ]}
+                                options={[
+                                    { value: 'any', label: t('search:propertyTypes.any') },
+                                    ...PROPERTY_TYPE_OPTIONS.map(option => ({
+                                        value: option.value,
+                                        label: t(`search:${option.labelKey}`, option.fallback),
+                                    })),
+                                ]}
                                 selectedValue={filters.propertyType}
                                 onChange={(value) => onFilterChange('propertyType', (value as Filters['propertyType']) || 'any')}
                             />

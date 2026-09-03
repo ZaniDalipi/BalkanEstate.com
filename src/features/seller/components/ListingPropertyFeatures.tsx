@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses, FieldErrors, fieldAnchorId } from './ListingFormHelpers';
+import { hasHabitableInterior } from '@/shared/constants/propertyTypes';
 
 interface ListingPropertyFeaturesProps {
     listingData: ListingData;
@@ -39,6 +40,21 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
         { tag: 'home cinema',    labelKey: 'seller:createListing.quickAmenities.homeCinema',  fallback: 'Home Cinema',  emoji: '🎬' },
         { tag: 'beach access',   labelKey: 'seller:createListing.quickAmenities.beachAccess', fallback: 'Beach Access', emoji: '🏖️' },
     ];
+
+    // Which feature questions make sense for this listing.
+    //   · An interior means balconies, lifts, air conditioning, pets and the
+    //     furnishing/heating/condition block are all worth asking about.
+    //   · Land and parking spaces have none of that; land alone keeps the
+    //     outdoor questions (vegetation, water source) under its own labels.
+    const hasInterior = hasHabitableInterior(listingData.propertyType);
+    const isLand = listingData.propertyType === 'land';
+    const isParking = listingData.propertyType === 'parking';
+
+    const featuresTitle = isLand
+        ? t('seller:createListing.propertyFeatures.landFeatures', 'Land Features')
+        : isParking
+            ? t('seller:createListing.propertyFeatures.parkingFeatures', 'Parking Features')
+            : t('seller:createListing.propertyFeatures.title');
 
     const amenityActive = (tag: string): boolean =>
         (listingData.amenities || []).some(a => a.trim().toLowerCase() === tag);
@@ -92,25 +108,25 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                 </div>
             </fieldset>
 
-            {/* Mandatory Amenities Section - show different options for land */}
+            {/* Feature checklist — the questions asked depend on the property type */}
             <fieldset className="space-y-4 glass-fieldset">
-                <h3 className="text-base font-semibold text-gray-700 mb-3">
-                    {listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.landFeatures', 'Land Features') : t('seller:createListing.propertyFeatures.title')}
-                </h3>
+                <h3 className="text-base font-semibold text-gray-700 mb-3">{featuresTitle}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {listingData.propertyType !== 'land' && (
+                    {hasInterior && (
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.balconyTerrace')}
                             value={listingData.hasBalcony}
                             onChange={(val) => setListingData(p => ({ ...p, hasBalcony: val }))}
                         />
                     )}
-                    <TriStateCheckbox
-                        label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.hasVegetation', 'Has Vegetation/Trees') : t('seller:createListing.propertyFeatures.gardenYard')}
-                        value={listingData.hasGarden}
-                        onChange={(val) => setListingData(p => ({ ...p, hasGarden: val }))}
-                    />
-                    {listingData.propertyType !== 'land' && (
+                    {!isParking && (
+                        <TriStateCheckbox
+                            label={isLand ? t('seller:createListing.propertyFeatures.hasVegetation', 'Has Vegetation/Trees') : t('seller:createListing.propertyFeatures.gardenYard')}
+                            value={listingData.hasGarden}
+                            onChange={(val) => setListingData(p => ({ ...p, hasGarden: val }))}
+                        />
+                    )}
+                    {hasInterior && (
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.elevator')}
                             value={listingData.hasElevator}
@@ -120,23 +136,25 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                         />
                     )}
                     <TriStateCheckbox
-                        label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.fencedSecured', 'Fenced/Secured') : t('seller:createListing.propertyFeatures.securitySystem')}
+                        label={hasInterior ? t('seller:createListing.propertyFeatures.securitySystem') : t('seller:createListing.propertyFeatures.fencedSecured', 'Fenced/Secured')}
                         value={listingData.hasSecurity}
                         onChange={(val) => setListingData(p => ({ ...p, hasSecurity: val }))}
                     />
-                    {listingData.propertyType !== 'land' && (
+                    {hasInterior && (
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.airConditioning')}
                             value={listingData.hasAirConditioning}
                             onChange={(val) => setListingData(p => ({ ...p, hasAirConditioning: val }))}
                         />
                     )}
-                    <TriStateCheckbox
-                        label={listingData.propertyType === 'land' ? t('seller:createListing.propertyFeatures.hasWaterSource', 'Has Water Source') : t('seller:createListing.propertyFeatures.swimmingPool')}
-                        value={listingData.hasPool}
-                        onChange={(val) => setListingData(p => ({ ...p, hasPool: val }))}
-                    />
-                    {listingData.propertyType !== 'land' && (
+                    {!isParking && (
+                        <TriStateCheckbox
+                            label={isLand ? t('seller:createListing.propertyFeatures.hasWaterSource', 'Has Water Source') : t('seller:createListing.propertyFeatures.swimmingPool')}
+                            value={listingData.hasPool}
+                            onChange={(val) => setListingData(p => ({ ...p, hasPool: val }))}
+                        />
+                    )}
+                    {hasInterior && (
                         <TriStateCheckbox
                             label={t('seller:createListing.propertyFeatures.petsAllowed')}
                             value={listingData.petsAllowed}
@@ -147,8 +165,8 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                 <p className="text-xs text-gray-400 mt-2">{t('seller:createListing.propertyFeatures.hint')}</p>
             </fieldset>
 
-            {/* Advanced Property Details Section - hide for land */}
-            {listingData.propertyType !== 'land' ? (
+            {/* Furnishing, heating and condition — only meaningful with an interior */}
+            {hasInterior ? (
                 <fieldset className="space-y-4 glass-fieldset">
                     <h3 className="text-base font-semibold text-gray-700 mb-3">{t('seller:createListing.advancedDetails.title')}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

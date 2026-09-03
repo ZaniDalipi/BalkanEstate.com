@@ -300,22 +300,12 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
                                         </div>
                                     }
                                 >
-                                    {/*
-                                     * `allowOutsideCityArea` because a destination is
-                                     * not a listing: many of them are regions rather
-                                     * than cities, and the seller-side "must be near
-                                     * the chosen city" rule has no city to measure
-                                     * against here. The country still biases the
-                                     * search, so typing "Ksamil" finds the Albanian
-                                     * one first.
-                                     */}
                                     <MapLocationPicker
                                         lat={mapCentre.lat}
                                         lng={mapCentre.lng}
                                         zoom={mapSession.zoom}
                                         address={[draft.name, draft.country].filter(Boolean).join(', ')}
                                         country={draft.country}
-                                        allowOutsideCityArea
                                         title={t('admin:villaDestinations.position', 'Map position')}
                                         onLocationChange={(lat, lng) =>
                                             // Six decimals is ~11cm — past the point
