@@ -283,6 +283,11 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}
+      // Not `role="button"`: the card is announced as an article, and a tap
+      // on it navigates. `data-pressable` opts a non-button clickable region
+      // into the same global press feedback (ripple + scale) as a real
+      // button, without changing its accessibility role.
+      data-pressable
       aria-label={`${property.title || propertyTypeLabel}, ${property.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(property.price, property.country) + (isRental ? '/mo' : '')}, ${safeProperty.city}, ${safeProperty.country}`}
     >
       {/* Image Section */}

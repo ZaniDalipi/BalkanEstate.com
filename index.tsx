@@ -60,6 +60,13 @@ installAdsenseDebug();
 import { initPerfMode } from './src/utils/perfMode';
 initPerfMode();
 
+// Global tap/click acknowledgement (ripple + press scale) for every button,
+// link, and clickable row in the app. Installed once here — see
+// src/shared/interaction/pressFeedback.ts for why this has to be a single
+// delegated listener rather than a prop threaded onto every component.
+import { initPressFeedback } from './src/shared/interaction/pressFeedback';
+initPressFeedback();
+
 // Shared stale-deploy chunk recovery (unregister SW + clear caches + reload once)
 import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
 

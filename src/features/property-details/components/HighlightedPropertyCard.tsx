@@ -226,6 +226,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onCardClick}
+      data-pressable
     >
       {/* Image Section */}
       <div

@@ -229,6 +229,7 @@ const AgenciesListPage: React.FC = () => {
         <div
           onClick={() => handleViewAgency(agency)}
           className="relative bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-500 cursor-pointer overflow-hidden border border-gray-100/80 hover:border-primary/30"
+          data-pressable
         >
           {/* Shine sweep on hover */}
           <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-2xl sm:rounded-3xl">

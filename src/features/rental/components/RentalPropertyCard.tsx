@@ -50,6 +50,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
             onClick={handleClick}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
             tabIndex={0}
+            data-pressable
             onMouseEnter={() => onHover?.(property.id)}
             onMouseLeave={() => onHover?.(null)}
         >
