@@ -4,6 +4,7 @@ import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
+import { preloadRoute } from '@/app/navigation/routePreload';
 import { generatePropertySlug } from '@/utils/slug';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
@@ -259,6 +260,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       }`}
       onClick={onCardClick}
       onContextMenu={onContextMenu}
+      // Start fetching the detail chunk as soon as the card is under the
+      // cursor or the finger — by the time the tap resolves it is usually
+      // already in the module cache, so the page renders without a loader.
+      // preloadRoute is a no-op after the first call.
+      onPointerEnter={() => preloadRoute('propertyDetails')}
+      onPointerDown={() => preloadRoute('propertyDetails')}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}

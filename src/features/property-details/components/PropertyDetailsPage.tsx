@@ -587,7 +587,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const propertySlug = generatePropertySlug(property);
 
   return (
-    <div ref={scrollContainerRef} className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden animate-fade-in" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
+    // No `animate-fade-in` here: the page now arrives through the app's shared
+    // ViewTransition, and a second opacity animation nested inside the first
+    // just makes the entrance look like it stutters.
+    <div ref={scrollContainerRef} data-scroll-container className="bg-neutral-50 h-full overflow-y-auto overflow-x-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehaviorY: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* SEO Meta Tags + VideoObject for tours */}
       <SEO
         title={seoTitle}
