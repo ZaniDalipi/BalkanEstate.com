@@ -19,6 +19,7 @@ import {
   PlayCircleIcon,
   RocketLaunchIcon,
   BuildingStorefrontIcon,
+  PhotoIcon,
 } from '@/constants';
 import type { AdminView } from './AdminLayout';
 
@@ -140,6 +141,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           id: 'cityShowcase',
           label: t('admin:sidebar.cityShowcase', 'City Gallery'),
           icon: <BuildingOfficeIcon className="w-5 h-5" />,
+        },
+        {
+          id: 'cityPhotos',
+          label: t('admin:sidebar.cityPhotos', 'City Photos'),
+          icon: <PhotoIcon className="w-5 h-5" />,
         },
         {
           id: 'agencies',

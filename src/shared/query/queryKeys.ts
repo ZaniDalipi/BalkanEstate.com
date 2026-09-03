@@ -290,6 +290,15 @@ export const cityDirectoryKeys = {
 };
 
 /**
+ * Admin city photos — one resolved picture per city, drawn from the city
+ * itself, the home gallery and the villas corridor (see `cityPhotoService`).
+ */
+export const cityPhotoKeys = {
+  all: ['cityPhotos'] as const,
+  admin: () => [...cityPhotoKeys.all, 'admin'] as const,
+};
+
+/**
  * Get all discount-related keys that should be invalidated when discounts change
  */
 export function getDiscountInvalidationKeys() {

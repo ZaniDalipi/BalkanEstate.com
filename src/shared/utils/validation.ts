@@ -229,6 +229,75 @@ export function validateCityShowcase(input: {
   return { isValid: true };
 }
 
+/** Longest image URL we will store. Matches the admin route's own limit. */
+const MAX_IMAGE_URL_LENGTH = 2000;
+/** Longest photo credit we will store. Matches the admin route's own limit. */
+const MAX_IMAGE_CREDIT_LENGTH = 200;
+
+/**
+ * Hosts a curated photo URL may name. Mirrors `ALLOWED_PHOTO_HOSTS` in
+ * `backend/src/config/imageHosts.ts`, which is also what the production CSP's
+ * `imgSrc` is built from — a URL on any other host saves fine and then renders
+ * as a blank frame with nothing to explain it.
+ */
+export const ALLOWED_PHOTO_HOSTS = ['res.cloudinary.com', 'upload.wikimedia.org'] as const;
+
+/** Host-exact, never a suffix match — `res.cloudinary.com.evil.example` is not it. */
+function isAllowedPhotoHost(url: string): boolean {
+  try {
+    return (ALLOWED_PHOTO_HOSTS as readonly string[]).includes(new URL(url).hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate a city photo override as entered in the admin.
+ *
+ * The same rules the `PUT /admin/city-photos` route applies, stated here so a
+ * bad URL is refused inline instead of coming back as a 400. `https` only:
+ * this URL is written into an `img src` served to every visitor, and the
+ * lengths are the column limits — a URL the server would truncate is worse
+ * than one it rejects.
+ */
+export function validateCityPhoto(input: {
+  city: string;
+  country: string;
+  imageUrl: string;
+  imageCredit?: string;
+}): ValidationResult {
+  const city = validateTextLength(String(input.city ?? '').trim(), {
+    minLength: 2, maxLength: 80, fieldName: 'City',
+  });
+  if (!city.isValid) return city;
+
+  const country = validateTextLength(String(input.country ?? '').trim(), {
+    minLength: 2, maxLength: 60, fieldName: 'Country',
+  });
+  if (!country.isValid) return country;
+
+  const imageUrl = String(input.imageUrl ?? '').trim();
+  if (!imageUrl) return { isValid: false, error: 'A photo is required' };
+  if (imageUrl.length > MAX_IMAGE_URL_LENGTH) {
+    return { isValid: false, error: 'Image URL is too long' };
+  }
+  const url = validateUrl(imageUrl, ['https']);
+  if (!url.isValid) return url;
+  if (!isAllowedPhotoHost(imageUrl)) {
+    return {
+      isValid: false,
+      error: `Photos can only be linked from: ${ALLOWED_PHOTO_HOSTS.join(', ')}. Upload the file instead and it will be hosted for you.`,
+    };
+  }
+
+  const credit = String(input.imageCredit ?? '').trim();
+  if (credit.length > MAX_IMAGE_CREDIT_LENGTH) {
+    return { isValid: false, error: `Credit must be ${MAX_IMAGE_CREDIT_LENGTH} characters or fewer` };
+  }
+
+  return { isValid: true };
+}
+
 /**
  * Validate one villa destination as entered in the admin.
  *

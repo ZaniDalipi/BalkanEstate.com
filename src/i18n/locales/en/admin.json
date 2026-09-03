@@ -43,7 +43,8 @@
     "pricing": "Pricing & Plans",
     "villaApprovals": "Villa Approvals",
     "villaDestinations": "Villa Destinations",
-    "cityShowcase": "City Gallery"
+    "cityShowcase": "City Gallery",
+    "cityPhotos": "City Photos"
   },
   "properties": {
     "title": "Property Manager",
@@ -1271,5 +1272,42 @@
     "imageCredit": "Photo credit (optional)",
     "imageCreditPlaceholder": "Photo by Jane Doe on Unsplash",
     "imageCreditHint": "If this photo came from Unsplash, Pexels, or anywhere else, paste the credit line here — most sites show one next to the download button. It appears in a small caption on the panel."
+  },
+  "cityPhotos": {
+    "title": "City Photos",
+    "subtitle": "The picture each city shows in Explore Cities. Photos already curated in the City Gallery or as a villa destination can be reused here in one press.",
+    "precedenceHint": "A city shows the first photo it has: your override, then its City Gallery panel, then a villa destination for the same place, then the automatically fetched one. Setting a photo here also stops the automatic fetch from replacing it.",
+    "searchPlaceholder": "Search a city or country",
+    "onlyNeedsAttention": "Only unreviewed ({{count}})",
+    "empty": "No cities on record yet — Explore Cities has nothing to show a photo for.",
+    "noMatches": "No cities match that filter.",
+    "noPhoto": "No photo",
+    "alsoAvailable": "Also available:",
+    "adopt": "Use {{source}}",
+    "adoptHint": "Use this photo for {{city}}",
+    "sourceCityGallery": "City Gallery",
+    "sourceVillaDestination": "Villa destination",
+    "sourceAuto": "Auto (Wikipedia)",
+    "upload": "Upload",
+    "uploading": "Uploading…",
+    "useUrl": "Use a URL",
+    "urlLabel": "Image URL (https)",
+    "creditLabel": "Credit (optional)",
+    "saveUrl": "Save photo",
+    "clear": "Clear override",
+    "clearHint": "Hand this city back to the City Gallery / villa / auto photo",
+    "saved": "Photo updated for {{city}}",
+    "cleared": "Override removed for {{city}}",
+    "saveError": "Failed to save the city photo",
+    "clearError": "Failed to clear the city photo",
+    "loadError": "Failed to load city photos",
+    "uploadError": "Photo upload failed",
+    "badge": {
+      "manual": "Set by you",
+      "city-gallery": "City Gallery",
+      "villa-destination": "Villa destination",
+      "auto": "Automatic"
+    },
+    "urlHint": "Only {{hosts}} can be linked. For a photo anywhere else, use Upload — it will be hosted for you."
   }
 }

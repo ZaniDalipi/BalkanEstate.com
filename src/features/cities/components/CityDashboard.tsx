@@ -8,7 +8,8 @@ import PriceHistoryChart from './PriceHistoryChart';
 import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
 import { formatPrice } from '@/utils/currency';
 import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
-import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { cityImageSources } from '../utils/cityImage';
 import { useAppContext } from '@/context/AppContext';
 import { searchLocation } from '@/services/osmService';
 import Footer from '@/components/shared/Footer';
@@ -328,7 +329,12 @@ const CityDashboard: React.FC = () => {
   };
   const healthInfo = getHealthLabel(marketHealthScore);
 
-  const imageUrl = getCityImageUrl(city.city, { country: city.country, width: 1200, height: 500, quality: 'auto:good' });
+  // Curated photo first, then the convention Cloudinary id — see
+  // `cityImageSources`. Wikipedia is appended below, once its query has landed.
+  const heroSources = cityImageSources(
+    { city: city.city, country: city.country, imageUrl: city.imageUrl },
+    { width: 1200, height: 500 },
+  );
   const fallbackGradient = getCityFallbackGradient(city.city);
   const demandInfo = getDemandInfo(demandScore);
   const investmentInfo = getInvestmentInfo(investmentScore);
@@ -353,6 +359,17 @@ const CityDashboard: React.FC = () => {
   const heroWikiUrl = wikiImages[0]?.thumbUrl ?? cityImagesData?.fallbackUrl;
   const galleryImages = wikiImages.slice(0, 5);
 
+  /**
+   * Everything the hero can try, in order. Walked by index in `onError`
+   * rather than nested callbacks, so adding a source doesn't add a level of
+   * nesting — and so the curated photo missing doesn't skip the convention id
+   * that most cities are actually served from.
+   */
+  const heroFallbacks = [
+    ...heroSources,
+    galleryImages[0]?.thumbUrl ?? heroWikiUrl,
+  ].filter((url): url is string => typeof url === 'string' && url.length > 0);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
@@ -373,24 +390,25 @@ const CityDashboard: React.FC = () => {
           {/* Hero image — spans both rows on the left */}
           <div className="row-span-2 relative overflow-hidden bg-neutral-900">
             <img
-              src={imageUrl}
+              // Remounts when the leading source changes, which is what resets
+              // the walk below for a different city or a newly curated photo.
+              key={heroFallbacks[0]}
+              src={heroFallbacks[0]}
               alt={city.city}
               className="absolute inset-0 w-full h-full object-cover"
               loading="eager"
               decoding="async"
               onError={(e) => {
                 const el = e.target as HTMLImageElement;
-                const first = galleryImages[0]?.thumbUrl ?? heroWikiUrl ?? '';
-                if (first) {
-                  el.src = first;
-                  el.onerror = () => {
-                    el.style.display = 'none';
-                    (el.parentElement as HTMLElement).style.background = fallbackGradient;
-                  };
-                } else {
-                  el.style.display = 'none';
-                  (el.parentElement as HTMLElement).style.background = fallbackGradient;
+                const next = Number(el.dataset.sourceIndex ?? '0') + 1;
+                el.dataset.sourceIndex = String(next);
+                const candidate = heroFallbacks[next];
+                if (candidate) {
+                  el.src = candidate;
+                  return;
                 }
+                el.style.display = 'none';
+                (el.parentElement as HTMLElement).style.background = fallbackGradient;
               }}
             />
           </div>
@@ -1264,7 +1282,10 @@ const CityDashboard: React.FC = () => {
               {countryCities
                 .filter(c => c.city !== city.city)
                 .map((otherCity) => {
-                  const otherImageUrl = getCityImageUrl(otherCity.city, { country: otherCity.country, width: 400, height: 200, quality: 'auto:good' });
+                  const otherSources = cityImageSources(
+                    { city: otherCity.city, country: otherCity.country, imageUrl: otherCity.imageUrl },
+                    { width: 400, height: 200 },
+                  );
                   const otherFallback = getCityFallbackGradient(otherCity.city);
                   const handleNavigate = () => {
                     const path = `/explore-cities/${encodeURIComponent(otherCity.city)}/${encodeURIComponent(otherCity.country)}`;
@@ -1279,14 +1300,21 @@ const CityDashboard: React.FC = () => {
                     >
                       <div className="relative h-28 overflow-hidden">
                         <img
-                          src={otherImageUrl}
+                          src={otherSources[0]}
                           alt={otherCity.city}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                           decoding="async"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).parentElement!.style.background = otherFallback;
+                            const el = e.target as HTMLImageElement;
+                            const next = Number(el.dataset.sourceIndex ?? '0') + 1;
+                            el.dataset.sourceIndex = String(next);
+                            if (otherSources[next]) {
+                              el.src = otherSources[next];
+                              return;
+                            }
+                            el.style.display = 'none';
+                            el.parentElement!.style.background = otherFallback;
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />

@@ -5,9 +5,20 @@ import Property from '../models/Property';
 import { FlattenMaps } from 'mongoose';
 import { apiLogger } from '../utils/logger';
 import { fetchLiveCityPrice, getOfficialSourceInfo } from './officialPriceDataService';
+import { resolveCityPhotos, placeKey, ResolvedCityPhoto, CityPhotoSource } from './cityPhotoService';
 
 // Type for lean documents (plain objects without Mongoose methods)
 export type CityMarketDataLean = FlattenMaps<ICityMarketData> & { _id: string };
+
+/**
+ * A city as the API returns it: the stored row plus the *resolved* photo, whose
+ * source may be another collection entirely (`city-gallery`,
+ * `villa-destination`) and so cannot reuse the document's narrower field.
+ */
+export type CityMarketDataResponse = Omit<CityMarketDataLean, 'imageSource'> & {
+  imageSource?: CityPhotoSource;
+  imageCredit?: string;
+};
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY || '');
 
@@ -608,6 +619,38 @@ async function getLiveCityStats(city: string, country: string): Promise<{
   }
 }
 
+
+/**
+ * Attach each city's resolved photo (admin override → City Gallery → Villa
+ * Destination → auto-seeded) to rows on their way out of the API.
+ *
+ * Batched: one resolution pass for the whole list, not one per city.
+ */
+async function withResolvedPhotos(cities: CityMarketDataLean[]): Promise<CityMarketDataResponse[]> {
+  if (cities.length === 0) return cities;
+
+  let photos: Map<string, ResolvedCityPhoto>;
+  try {
+    photos = await resolveCityPhotos(cities.map(c => ({ city: c.city, country: c.country })));
+  } catch (error) {
+    // A photo is decoration; market data is the point. Serve the rows as-is
+    // and let the frontend fall back to its own image chain.
+    apiLogger.error('Failed to resolve city photos:', error);
+    return cities;
+  }
+
+  return cities.map(city => {
+    const photo = photos.get(placeKey(city.city, city.country));
+    if (!photo) return city;
+    return {
+      ...city,
+      imageUrl: photo.imageUrl,
+      imageSource: photo.source,
+      ...(photo.credit ? { imageCredit: photo.credit } : {}),
+    };
+  });
+}
+
 /**
  * Update market data for all featured cities
  * This should be called twice per month (biweekly)
@@ -743,7 +786,7 @@ export async function ensureAllFeaturedCitiesExist(): Promise<void> {
 /**
  * Get featured city recommendations with live listing counts
  */
-export async function getFeaturedCities(limit: number = 12): Promise<CityMarketDataLean[]> {
+export async function getFeaturedCities(limit: number = 12): Promise<CityMarketDataResponse[]> {
   try {
     const cities = await CityMarketData.find({ featured: true })
       .sort({ displayOrder: 1 })
@@ -779,7 +822,7 @@ export async function getFeaturedCities(limit: number = 12): Promise<CityMarketD
       })
     );
 
-    return enrichedCities;
+    return await withResolvedPhotos(enrichedCities);
   } catch (error) {
     apiLogger.error('Error fetching featured cities:', error);
     return [];
@@ -789,7 +832,7 @@ export async function getFeaturedCities(limit: number = 12): Promise<CityMarketD
 /**
  * Get city recommendations by country with live listing counts
  */
-export async function getCitiesByCountry(country: string): Promise<CityMarketDataLean[]> {
+export async function getCitiesByCountry(country: string): Promise<CityMarketDataResponse[]> {
   try {
     const cities = await CityMarketData.find({ country })
       .sort({ demandScore: -1, avgPricePerSqm: 1 })
@@ -816,7 +859,7 @@ export async function getCitiesByCountry(country: string): Promise<CityMarketDat
       })
     );
 
-    return enrichedCities;
+    return await withResolvedPhotos(enrichedCities);
   } catch (error) {
     apiLogger.error(`Error fetching cities for ${country}:`, error);
     return [];
@@ -826,7 +869,7 @@ export async function getCitiesByCountry(country: string): Promise<CityMarketDat
 /**
  * Get market data for a specific city with live listing counts
  */
-export async function getCityMarketData(city: string, country: string): Promise<CityMarketDataLean | null> {
+export async function getCityMarketData(city: string, country: string): Promise<CityMarketDataResponse | null> {
   try {
     const data = await CityMarketData.findOne({ city, country }).lean<CityMarketDataLean>();
 
@@ -839,7 +882,7 @@ export async function getCityMarketData(city: string, country: string): Promise<
       getLiveCityStats(city, country),
       getAuthoritativePrice(city, country),
     ]);
-    return {
+    const enriched = {
       ...data,
       avgPricePerSqm: priceData.avgPricePerSqm,
       officialSourceName: priceData.officialSourceName,
@@ -850,6 +893,9 @@ export async function getCityMarketData(city: string, country: string): Promise<
         ? { listingAvgPricePerSqm: liveStats.listingAvgPricePerSqm }
         : {}),
     };
+
+    const [withPhoto] = await withResolvedPhotos([enriched]);
+    return withPhoto;
   } catch (error) {
     apiLogger.error(`Error fetching market data for ${city}:`, error);
     return null;

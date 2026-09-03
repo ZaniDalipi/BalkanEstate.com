@@ -12,6 +12,7 @@ import cors from 'cors';
 import crypto from 'crypto';
 import { apiLogger } from '../utils/logger';
 import { buildSafeHttpsRedirect } from '../utils/redirectValidation';
+import { ALLOWED_PHOTO_HOSTS } from '../config/imageHosts';
 
 // Environment detection
 const isProduction = process.env.NODE_ENV === 'production';
@@ -159,7 +160,9 @@ export const helmetConfig = helmet({
         "'self'",
         'data:',
         'blob:',
-        'https://res.cloudinary.com',
+        // Photo hosts, shared with the admin routes that accept a photo URL so
+        // a saved URL can never be one this policy then blocks.
+        ...ALLOWED_PHOTO_HOSTS.map(host => `https://${host}`),
         // Map tiles. Keep in step with config/mapStyles.ts — a host missing
         // here fails silently as blank tiles.
         'https://*.tile.openstreetmap.org',

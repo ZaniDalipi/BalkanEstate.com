@@ -38,6 +38,16 @@ export interface ICityMarketData extends Document {
   // City image (stored in Cloudinary, fetched from Wikipedia once)
   imageUrl?: string; // Cloudinary URL for city thumbnail
   imageUpdatedAt?: Date; // When the image was last fetched/updated
+  /**
+   * Who chose this photo. `manual` means an admin set it, which makes it
+   * untouchable by the Wikipedia auto-seeder and higher priority than a photo
+   * inherited from the City Gallery or a Villa Destination.
+   */
+  imageSource?: 'manual' | 'auto';
+  /** Cloudinary public id, kept so a replaced upload can be cleaned up. */
+  imagePublicId?: string;
+  /** Attribution line, e.g. "Photo by Jane Doe on Unsplash". */
+  imageCredit?: string;
 
   // Display priority
   featured: boolean; // Whether to feature this city prominently
@@ -134,6 +144,21 @@ const CityMarketDataSchema = new Schema<ICityMarketData>({
   },
   imageUpdatedAt: {
     type: Date,
+  },
+  imageSource: {
+    type: String,
+    enum: ['manual', 'auto'],
+    default: 'auto',
+  },
+  imagePublicId: {
+    type: String,
+  },
+  imageCredit: {
+    type: String,
+    trim: true,
+    // Same cap as CityShowcase.imageCredit and the admin route's own check —
+    // a credit line, not a description.
+    maxlength: 200,
   },
   featured: {
     type: Boolean,

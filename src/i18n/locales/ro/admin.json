@@ -43,7 +43,8 @@
     "pricing": "Pricing & Plans",
     "villaApprovals": "Aprobări vile",
     "villaDestinations": "Destinații vile",
-    "cityShowcase": "Galerie de orașe"
+    "cityShowcase": "Galerie de orașe",
+    "cityPhotos": "Fotografii orașe"
   },
   "properties": {
     "title": "Property Manager",
@@ -1171,5 +1172,42 @@
     "imageCredit": "Credit foto (opțional)",
     "imageCreditPlaceholder": "Fotografie de Jane Doe pe Unsplash",
     "imageCreditHint": "Dacă această fotografie provine de pe Unsplash, Pexels sau de altundeva, lipiți aici linia de credit — majoritatea site-urilor afișează una lângă butonul de descărcare. Apare ca o mică legendă pe panou."
+  },
+  "cityPhotos": {
+    "title": "Fotografii orașe",
+    "subtitle": "Imaginea pe care fiecare oraș o afișează în Explorează orașele. Fotografiile deja alese în Galeria de orașe sau ca destinație de vilă pot fi refolosite aici cu o singură apăsare.",
+    "precedenceHint": "Un oraș afișează prima fotografie pe care o are: setarea ta, apoi panoul din Galeria de orașe, apoi o destinație de vilă pentru același loc, apoi cea preluată automat. Setarea unei fotografii aici împiedică și preluarea automată să o înlocuiască.",
+    "searchPlaceholder": "Caută un oraș sau o țară",
+    "onlyNeedsAttention": "Doar neverificate ({{count}})",
+    "empty": "Încă nu există orașe înregistrate — Explorează orașele nu are pentru ce să afișeze o fotografie.",
+    "noMatches": "Niciun oraș nu corespunde acelui filtru.",
+    "noPhoto": "Fără fotografie",
+    "alsoAvailable": "Disponibil și:",
+    "adopt": "Folosește {{source}}",
+    "adoptHint": "Folosește această fotografie pentru {{city}}",
+    "sourceCityGallery": "Galerie de orașe",
+    "sourceVillaDestination": "Destinație de vilă",
+    "sourceAuto": "Automat (Wikipedia)",
+    "upload": "Încarcă",
+    "uploading": "Se încarcă…",
+    "useUrl": "Folosește un URL",
+    "urlLabel": "URL imagine (https)",
+    "creditLabel": "Credit (opțional)",
+    "saveUrl": "Salvează fotografia",
+    "clear": "Elimină setarea",
+    "clearHint": "Redă acest oraș fotografiei din Galerie / vilă / automată",
+    "saved": "Fotografia a fost actualizată pentru {{city}}",
+    "cleared": "Setarea a fost eliminată pentru {{city}}",
+    "saveError": "Salvarea fotografiei orașului a eșuat",
+    "clearError": "Eliminarea fotografiei orașului a eșuat",
+    "loadError": "Încărcarea fotografiilor de orașe a eșuat",
+    "uploadError": "Încărcarea fotografiei a eșuat",
+    "badge": {
+      "manual": "Setat de tine",
+      "city-gallery": "Galerie de orașe",
+      "villa-destination": "Destinație de vilă",
+      "auto": "Automat"
+    },
+    "urlHint": "Se pot lega doar {{hosts}}. Pentru o fotografie din altă parte, folosește Încarcă — va fi găzduită pentru tine."
   }
 }

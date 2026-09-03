@@ -43,7 +43,8 @@
     "pricing": "Cijene i Planovi",
     "villaApprovals": "Odobrenja vila",
     "villaDestinations": "Destinacije vila",
-    "cityShowcase": "Galerija gradova"
+    "cityShowcase": "Galerija gradova",
+    "cityPhotos": "Fotografije gradova"
   },
   "properties": {
     "title": "Upravljanje Nekretninama",
@@ -1271,5 +1272,42 @@
     "imageCredit": "Zasluge za fotografiju (opciono)",
     "imageCreditPlaceholder": "Fotografija: Jane Doe na Unsplash-u",
     "imageCreditHint": "Ako je fotografija sa Unsplash-a, Pexels-a ili odnekle drugo, nalijepite ovdje red sa zaslugama — većina stranica ga prikazuje pored dugmeta za preuzimanje. Prikazuje se kao mali natpis na panelu."
+  },
+  "cityPhotos": {
+    "title": "Fotografije gradova",
+    "subtitle": "Slika koju svaki grad prikazuje u Istraži gradove. Fotografije već odabrane u Galeriji gradova ili kao vila-destinacija mogu se ovdje ponovo upotrijebiti jednim pritiskom.",
+    "precedenceHint": "Grad prikazuje prvu fotografiju koju ima: vašu postavku, zatim panel Galerije gradova, zatim vila-destinaciju za isto mjesto, pa onda automatski preuzetu. Postavljanje fotografije ovdje takođe sprječava da je automatsko preuzimanje zamijeni.",
+    "searchPlaceholder": "Pretražite grad ili državu",
+    "onlyNeedsAttention": "Samo nepregledani ({{count}})",
+    "empty": "Još nema zabilježenih gradova — Istraži gradove nema za što prikazati fotografiju.",
+    "noMatches": "Nijedan grad ne odgovara tom filteru.",
+    "noPhoto": "Bez fotografije",
+    "alsoAvailable": "Takođe dostupno:",
+    "adopt": "Koristi {{source}}",
+    "adoptHint": "Koristi ovu fotografiju za {{city}}",
+    "sourceCityGallery": "Galerija gradova",
+    "sourceVillaDestination": "Vila-destinacija",
+    "sourceAuto": "Automatski (Wikipedija)",
+    "upload": "Otpremi",
+    "uploading": "Otpremanje…",
+    "useUrl": "Koristi URL",
+    "urlLabel": "URL slike (https)",
+    "creditLabel": "Zasluge (neobavezno)",
+    "saveUrl": "Sačuvaj fotografiju",
+    "clear": "Ukloni postavku",
+    "clearHint": "Vrati ovaj grad na fotografiju Galerije / vile / automatsku",
+    "saved": "Fotografija je ažurirana za {{city}}",
+    "cleared": "Postavka je uklonjena za {{city}}",
+    "saveError": "Čuvanje fotografije grada nije uspjelo",
+    "clearError": "Uklanjanje fotografije grada nije uspjelo",
+    "loadError": "Učitavanje fotografija gradova nije uspjelo",
+    "uploadError": "Otpremanje fotografije nije uspjelo",
+    "badge": {
+      "manual": "Postavili ste",
+      "city-gallery": "Galerija gradova",
+      "villa-destination": "Vila-destinacija",
+      "auto": "Automatski"
+    },
+    "urlHint": "Mogu se povezati samo {{hosts}}. Za fotografiju s bilo kojeg drugog mjesta koristite Otpremi — biće hostovana za vas."
   }
 }

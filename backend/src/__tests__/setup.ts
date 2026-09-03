@@ -8,10 +8,25 @@ import mongoose from 'mongoose';
 import request from 'supertest';
 import express from 'express';
 
-let mongoServer: MongoMemoryServer;
+let mongoServer: MongoMemoryServer | undefined;
+
+/**
+ * A suite that touches no collection can opt out of the in-memory database by
+ * setting `process.env.SKIP_TEST_DB = 'true'` at the top of its file — module
+ * bodies run after this file registers its hooks but before they execute, so
+ * the flag is read in time.
+ *
+ * Worth having for suites that mock their models: `MongoMemoryServer.create()`
+ * downloads a mongod binary on first use, which costs every one of those
+ * suites tens of seconds for a database they never query, and fails outright
+ * where that download is unreachable.
+ */
+const usesDatabase = () => process.env.SKIP_TEST_DB !== 'true';
 
 // Setup before all tests
 beforeAll(async () => {
+  if (!usesDatabase()) return;
+
   // Create an in-memory MongoDB instance
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
@@ -22,6 +37,8 @@ beforeAll(async () => {
 
 // Cleanup after each test
 afterEach(async () => {
+  if (!usesDatabase()) return;
+
   // Clear all collections after each test
   const collections = mongoose.connection.collections;
   for (const key in collections) {
@@ -31,9 +48,10 @@ afterEach(async () => {
 
 // Cleanup after all tests
 afterAll(async () => {
-  // Disconnect and stop the in-memory database
+  // Guarded rather than assumed: when startup itself failed, an unguarded
+  // `mongoServer.stop()` throws in teardown and buries the real error.
   await mongoose.disconnect();
-  await mongoServer.stop();
+  await mongoServer?.stop();
 });
 
 // Set environment variables for testing

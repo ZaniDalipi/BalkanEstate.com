@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CityMarketData } from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
@@ -6,7 +6,8 @@ import {
   MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon,
   CalendarIcon, HomeIcon, FireIcon, StarIcon, BuildingOfficeIcon,
 } from '@/constants';
-import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { cityImageSources } from '../utils/cityImage';
 import SaveCityButton from './SaveCityButton';
 
 export interface CityMarketCardProps {
@@ -26,25 +27,55 @@ type WikiImageState = 'idle' | 'loading' | 'missing';
  * One city's market card.
  *
  * Owns only its own ephemeral display state — which price series is shown and
- * how far the image fallback chain (Cloudinary → Wikipedia → gradient) has got.
- * Both belong to the card, not to the page, so two tabs can render the same
- * city without sharing a keyed map of per-card flags.
+ * how far the image fallback chain (curated photo → convention Cloudinary id →
+ * Wikipedia → gradient) has got. Both belong to the card, not to the page, so
+ * two tabs can render the same city without sharing a keyed map of per-card
+ * flags.
  */
 const CityMarketCard: React.FC<CityMarketCardProps> = ({
   city, isSaved, canSave, isSavePending, onToggleSave, onOpen, onViewListings,
 }) => {
   const { t } = useTranslation(['exploreCities']);
   const [showListingPrice, setShowListingPrice] = useState(false);
-  const [cloudinaryFailed, setCloudinaryFailed] = useState(false);
+  /** How far down `imageSources` we have got. Past the end means all failed. */
+  const [sourceIndex, setSourceIndex] = useState(0);
   const [wikiImage, setWikiImage] = useState<string | null>(null);
   const wikiState = useRef<WikiImageState>('idle');
   const mounted = useRef(true);
 
   useEffect(() => () => { mounted.current = false; }, []);
 
-  /** Cloudinary missed — try Wikipedia once, then fall through to a gradient. */
+  // Keyed on the three fields the photo depends on, not on `city`: the market
+  // data refetches on a schedule, and a new object identity carrying the same
+  // photo would restart the fallback chain and flash the image.
+  const imageSources = useMemo(
+    () => cityImageSources(
+      { city: city.city, country: city.country, imageUrl: city.imageUrl },
+      { width: 800, height: 400 },
+    ),
+    [city.city, city.country, city.imageUrl],
+  );
+
+  // A different city in the same card slot (filtering, paging) starts its own
+  // fallback chain — otherwise it would inherit the previous city's failures
+  // and skip straight to a gradient.
+  useEffect(() => {
+    setSourceIndex(0);
+    setWikiImage(null);
+    wikiState.current = 'idle';
+  }, [imageSources]);
+
+  const cloudinaryFailed = sourceIndex >= imageSources.length;
+
+  /**
+   * This source missed — try the next one, and once they are exhausted try
+   * Wikipedia once before falling through to a gradient.
+   */
   const handleImageError = useCallback(async () => {
-    setCloudinaryFailed(true);
+    const next = sourceIndex + 1;
+    setSourceIndex(next);
+    if (next < imageSources.length) return;
+
     if (wikiState.current !== 'idle') return;
     wikiState.current = 'loading';
 
@@ -69,7 +100,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
       }
     }
     wikiState.current = 'missing';
-  }, [city.city, city.country]);
+  }, [city.city, city.country, sourceIndex, imageSources.length]);
 
   const trend = city.marketTrend;
   const trendIcon = trend === 'rising'
@@ -115,7 +146,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
       <div className="relative h-36 overflow-hidden">
         {!cloudinaryFailed && (
           <img
-            src={getCityImageUrl(city.city, { country: city.country, width: 800, height: 400, quality: 'auto:good' })}
+            src={imageSources[sourceIndex]}
             alt={city.city}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             onError={handleImageError}
