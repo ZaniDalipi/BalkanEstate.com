@@ -12,7 +12,14 @@ export interface GeoJSONFeatureCollection {
       osm_id?: number;
       name: string;
       name_en?: string | null;
-      admin_level?: number;
+      admin_level?: number | null;
+      /**
+       * Which of the map's two nested layers this shape belongs to:
+       * `district` shapes tile the city, `neighbourhood` shapes sit inside
+       * them. Absent on rows cached before the split, which held one
+       * partition and are read as districts. See `boundaryLayers.ts`.
+       */
+      layer?: 'district' | 'neighbourhood';
       [key: string]: unknown;
     };
     geometry: {
@@ -56,8 +63,12 @@ export const getCityImages = async (
   return response;
 };
 
-/** Where the shapes came from: real admin districts, or mapped neighbourhood areas. */
-export type CityBoundarySource = 'admin' | 'place';
+/**
+ * Where the shapes came from: administrative districts, mapped neighbourhood
+ * areas, or — the usual case for a real city — both, districts with the
+ * neighbourhoods nested inside them.
+ */
+export type CityBoundarySource = 'admin' | 'place' | 'mixed';
 
 export interface CityGeoDataResponse {
   boundaries: GeoJSONFeatureCollection;

@@ -4,13 +4,19 @@
  * Interactive neighbourhood map.
  * • Default view: each district gets a distinct palette color
  * • Official toggle: switches to choropleth (low→high price heat scale)
- * • Permanent name + price labels on every polygon (no hover required)
+ * • Name + price labels on every polygon big enough to hold one
  *
- * Shapes come from OpenStreetMap where the neighbourhood is actually mapped as
- * an area. Many are only a `place` node, so the fallback is a nearest-centre
- * partition of the city (`districtTessellation`) rather than a circle per
- * neighbourhood: contiguous districts read as a map, overlapping bubbles hide
- * each other and their labels. The badge says which of the two is on screen.
+ * Shapes come from OpenStreetMap, in two nested layers (see `selectBoundarySet`
+ * in `backend/src/services/geoDataService.ts`): a base partition of the city —
+ * its administrative districts — with the named neighbourhoods that sit inside
+ * them drawn on top. Both are shown at once, because they are a hierarchy
+ * rather than two rival partitions of the same ground; showing only one is what
+ * used to leave most of a city's neighbourhoods off the map.
+ *
+ * Where a city has no mapped areas at all, the fallback is a nearest-centre
+ * partition (`districtTessellation`) rather than a circle per neighbourhood:
+ * contiguous districts read as a map, overlapping bubbles hide each other and
+ * their labels. The badge says which of the two is on screen.
  */
 
 import React, { useMemo, useCallback, useRef, useState } from 'react';
@@ -29,6 +35,8 @@ import type {
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import { getTileLayer } from '@/config/mapStyles';
 import { tessellateDistricts } from '../utils/districtTessellation';
+import { splitBoundaryLayers, type BoundaryLayer } from '../utils/boundaryLayers';
+import MapLabelDensity, { HIDDEN_LABEL_CLASS } from './MapLabelDensity';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,6 +56,7 @@ interface FeatureProps {
   osmNameEn: string | null;
   pricePerSqm: number | null;
   featureIndex: number;
+  layer: BoundaryLayer;
 }
 
 interface SuburbFeatureProps {
@@ -66,6 +75,17 @@ const PALETTE = [
 
 // Choropleth scale for official price mode (mirrors kvadrat.house)
 const CHORO = { low: '#fde8d8', mid: '#f0842c', high: '#c0392b', noData: '#d9d9d9' };
+
+/**
+ * The nested layer is drawn on top of the districts, so it is deliberately
+ * quieter: a light wash and a dark outline read as "an area inside this
+ * district" rather than as a competing block of colour.
+ */
+const NEIGHBOURHOOD_STYLE = {
+  fill: '#ffffff',
+  fillOpacity: 0.22,
+  outline: '#37415199',
+} as const;
 
 function lerpHex(a: string, b: string, t: number): string {
   const p = (h: string) => [
@@ -97,7 +117,7 @@ function normalizeForMatch(s: string): string {
   return s
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9 ]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -220,7 +240,9 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
   officialAvgPrice,
   officialSource = 'BIS',
 }) => {
-  const layerRef = useRef<GeoJSONLayer | null>(null);
+  const districtLayerRef = useRef<GeoJSONLayer | null>(null);
+  const neighbourhoodLayerRef = useRef<GeoJSONLayer | null>(null);
+  const fallbackLayerRef = useRef<GeoJSONLayer | null>(null);
   const [priceMode, setPriceMode] = useState<'ai' | 'official'>('ai');
 
   // Label-free light base: the polygons carry the labels here. Resolved through
@@ -254,13 +276,11 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
   );
   const center = useMemo(() => computeCenter(suburbs), [suburbs]);
 
-  // ── GeoJSON (real boundaries) ─────────────────────────────────────────────
+  // ── GeoJSON (real boundaries, two nested layers) ──────────────────────────
 
-  const enrichedGeoJSON = useMemo<FeatureCollection<Geometry, FeatureProps> | null>(() => {
-    if (!geoData?.features.length) return null;
-    return {
-      type: 'FeatureCollection',
-      features: geoData.features.map((f, idx) => {
+  const layers = useMemo(
+    () =>
+      splitBoundaryLayers<FeatureProps>(geoData, (f, layer, indexInLayer) => {
         const osmName = (f.properties.name as string) ?? '';
         const osmNameEn = (f.properties.name_en as string | null) ?? null;
         // Try name matching first; fall back to geographic containment test
@@ -268,62 +288,83 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
           matchSuburb([osmNameEn, osmName], effectiveSuburbs) ??
           matchSuburbByGeography(f.geometry as unknown as Geometry, effectiveSuburbs);
         return {
-          type: 'Feature' as const,
-          id: f.id,
-          geometry: f.geometry as unknown as Geometry,
-          properties: {
-            suburbName: matched?.name ?? null,
-            osmName,
-            osmNameEn,
-            pricePerSqm: matched?.stats.avgPricePerSqm ?? null,
-            featureIndex: idx,
-          } satisfies FeatureProps,
+          suburbName: matched?.name ?? null,
+          osmName,
+          osmNameEn,
+          pricePerSqm: matched?.stats.avgPricePerSqm ?? null,
+          featureIndex: indexInLayer,
+          layer,
         };
       }),
-    };
-  }, [geoData, effectiveSuburbs]);
+    [geoData, effectiveSuburbs]
+  );
 
   const fillForGeo = useCallback(
-    (featureIndex: number, pricePerSqm: number | null): string => {
+    (featureIndex: number, pricePerSqm: number | null, layer: BoundaryLayer): string => {
+      // A nested area is a wash over its district's colour, not a colour of its
+      // own — except in price mode, where its own price is the whole point.
       if (priceMode === 'official' && hasOfficialData) {
         return pricePerSqm != null
           ? priceToColor(pricePerSqm, minPrice, maxPrice)
-          : CHORO.noData;
+          : layer === 'neighbourhood' ? NEIGHBOURHOOD_STYLE.fill : CHORO.noData;
       }
-      return PALETTE[featureIndex % PALETTE.length];
+      return layer === 'neighbourhood'
+        ? NEIGHBOURHOOD_STYLE.fill
+        : PALETTE[featureIndex % PALETTE.length];
     },
     [priceMode, hasOfficialData, minPrice, maxPrice]
   );
 
-  const styleGeoFeature = useCallback(
-    (feature?: Feature<Geometry, FeatureProps>): PathOptions => {
-      if (!feature) return {};
-      const { pricePerSqm, suburbName, featureIndex } = feature.properties;
-      const isSelected = selectedSuburb?.name === suburbName;
+  const restingStyle = useCallback(
+    (props: FeatureProps): PathOptions => {
+      const { pricePerSqm, suburbName, featureIndex, layer } = props;
+      const isSelected = suburbName != null && selectedSuburb?.name === suburbName;
+      const nested = layer === 'neighbourhood';
+      const hasOwnPrice = priceMode === 'official' && hasOfficialData && pricePerSqm != null;
+
       return {
-        fillColor: fillForGeo(featureIndex, pricePerSqm),
-        fillOpacity: isSelected ? 0.92 : 0.7,
-        color: isSelected ? '#1a1a1a' : 'rgba(255,255,255,0.85)',
-        weight: isSelected ? 3 : 1.5,
+        fillColor: fillForGeo(featureIndex, pricePerSqm, layer),
+        fillOpacity: isSelected
+          ? 0.92
+          : nested && !hasOwnPrice
+            ? NEIGHBOURHOOD_STYLE.fillOpacity
+            : 0.7,
+        color: isSelected
+          ? '#1a1a1a'
+          : nested
+            ? NEIGHBOURHOOD_STYLE.outline
+            : 'rgba(255,255,255,0.85)',
+        weight: isSelected ? 3 : nested ? 1 : 1.5,
+        // Dashed nested outlines: a solid one at this weight reads as another
+        // district boundary, which is the one thing it must not look like.
+        ...(nested && !isSelected ? { dashArray: '3 3' } : {}),
         opacity: 1,
       };
     },
-    [selectedSuburb, fillForGeo]
+    [selectedSuburb, fillForGeo, priceMode, hasOfficialData]
+  );
+
+  const styleGeoFeature = useCallback(
+    (feature?: Feature<Geometry, FeatureProps>): PathOptions =>
+      feature ? restingStyle(feature.properties) : {},
+    [restingStyle]
   );
 
   const onEachGeoFeature = useCallback(
     (feature: Feature<Geometry, FeatureProps>, layer: Layer) => {
-      const { osmName, osmNameEn, pricePerSqm, suburbName, featureIndex } = feature.properties;
+      const props = feature.properties;
+      const { osmName, osmNameEn, pricePerSqm, suburbName } = props;
 
       // Show suburb name (e.g. "Blloku") when matched; fall back to OSM name
       const displayName = suburbName ?? osmName;
       const displaySubtitle = suburbName ? null : osmNameEn;
 
-      // Single permanent label — name + price always visible
+      // Permanent label — hidden by MapLabelDensity while this shape is too
+      // small on screen to hold it, shown again as the reader zooms in.
       layer.bindTooltip(labelHtml(displayName, displaySubtitle, pricePerSqm), {
         permanent: true,
         direction: 'center',
-        className: 'municipality-label',
+        className: `municipality-label${props.layer === 'neighbourhood' ? ' municipality-label--nested' : ''}`,
       });
 
       layer.on('click', () => {
@@ -336,19 +377,15 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
           fillOpacity: 0.95,
           weight: 3,
           color: '#1a1a1a',
+          dashArray: '',
         });
       });
 
       layer.on('mouseout', (e: LeafletMouseEvent) => {
-        (e.target as GeoJSONLayer).setStyle({
-          fillColor: fillForGeo(featureIndex, pricePerSqm),
-          fillOpacity: selectedSuburb?.name === suburbName ? 0.92 : 0.7,
-          color: selectedSuburb?.name === suburbName ? '#1a1a1a' : 'rgba(255,255,255,0.85)',
-          weight: selectedSuburb?.name === suburbName ? 3 : 1.5,
-        });
+        (e.target as GeoJSONLayer).setStyle({ dashArray: '', ...restingStyle(props) });
       });
     },
-    [onSuburbSelect, suburbs, fillForGeo, selectedSuburb]
+    [onSuburbSelect, suburbs, restingStyle]
   );
 
   // ── Approximate districts (no OSM area for these neighbourhoods) ─────────
@@ -417,17 +454,21 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
 
   if (!suburbs.length) {
     return (
-      <div className="h-64 sm:h-80 lg:h-[500px] flex items-center justify-center bg-neutral-100 rounded-xl">
+      <div className="h-[420px] sm:h-[520px] md:h-[620px] lg:h-[760px] flex items-center justify-center bg-neutral-100 rounded-xl">
         <p className="text-neutral-400 text-sm">No suburb data available</p>
       </div>
     );
   }
 
-  const usingRealBoundaries = enrichedGeoJSON != null && enrichedGeoJSON.features.length > 0;
+  const usingRealBoundaries = layers.total > 0;
+  const hasNested = layers.neighbourhoods.features.length > 0;
+  // A rebuild of either layer needs a fresh label pass, and both are keyed on
+  // the same inputs, so one revision string covers them.
+  const layerRevision = `${layers.total}-${priceMode}-${selectedSuburb?.name ?? 'none'}`;
 
   return (
     <div
-      className="relative rounded-xl overflow-hidden shadow-md border border-neutral-100 h-64 sm:h-80 md:h-[420px] lg:h-[520px]"
+      className="relative rounded-xl overflow-hidden shadow-md border border-neutral-100 h-[420px] sm:h-[520px] md:h-[620px] lg:h-[760px]"
     >
       {/* Price-mode toggle */}
       {hasOfficialData && (
@@ -455,8 +496,8 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
         </div>
       )}
 
-      {/* Boundary source badge */}
-      <div className="absolute top-3 right-3 z-[1000]">
+      {/* Boundary source badge — what is on screen, and how much of it */}
+      <div className="absolute top-3 right-3 z-[1000] flex flex-col items-end gap-1">
         <span
           className={`text-[9px] font-bold px-2 py-1 rounded-full ${
             usingRealBoundaries
@@ -464,8 +505,16 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
               : 'bg-violet-100 text-violet-700'
           }`}
         >
-          {usingRealBoundaries ? '📍 OSM boundaries' : '◇ Approx. districts'}
+          {usingRealBoundaries
+            ? `📍 OSM boundaries · ${layers.total}`
+            : '◇ Approx. districts'}
         </span>
+        {hasNested && (
+          <span className="text-[9px] font-semibold px-2 py-1 rounded-full bg-white/90 text-neutral-600 border border-neutral-200">
+            {layers.districts.features.length} districts ·{' '}
+            {layers.neighbourhoods.features.length} neighbourhoods
+          </span>
+        )}
       </div>
 
       <MapContainer
@@ -485,25 +534,46 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
         />
 
         {usingRealBoundaries ? (
-          <GeoJSON
-            ref={layerRef}
-            key={`geo-${selectedSuburb?.name ?? 'none'}-${priceMode}`}
-            data={enrichedGeoJSON as unknown as FeatureCollection}
-            style={
-              styleGeoFeature as unknown as (
-                f?: Feature<Geometry, Record<string, unknown>>
-              ) => PathOptions
-            }
-            onEachFeature={
-              onEachGeoFeature as unknown as (
-                f: Feature<Geometry, Record<string, unknown>>,
-                l: Layer
-              ) => void
-            }
-          />
+          <>
+            {/* Base partition first, so the nested areas draw over it. */}
+            <GeoJSON
+              ref={districtLayerRef}
+              key={`districts-${layerRevision}`}
+              data={layers.districts as unknown as FeatureCollection}
+              style={
+                styleGeoFeature as unknown as (
+                  f?: Feature<Geometry, Record<string, unknown>>
+                ) => PathOptions
+              }
+              onEachFeature={
+                onEachGeoFeature as unknown as (
+                  f: Feature<Geometry, Record<string, unknown>>,
+                  l: Layer
+                ) => void
+              }
+            />
+            {hasNested && (
+              <GeoJSON
+                ref={neighbourhoodLayerRef}
+                key={`neighbourhoods-${layerRevision}`}
+                data={layers.neighbourhoods as unknown as FeatureCollection}
+                style={
+                  styleGeoFeature as unknown as (
+                    f?: Feature<Geometry, Record<string, unknown>>
+                  ) => PathOptions
+                }
+                onEachFeature={
+                  onEachGeoFeature as unknown as (
+                    f: Feature<Geometry, Record<string, unknown>>,
+                    l: Layer
+                  ) => void
+                }
+              />
+            )}
+          </>
         ) : (
           <GeoJSON
-            ref={layerRef}
+            ref={fallbackLayerRef}
             key={`district-${selectedSuburb?.name ?? 'none'}-${priceMode}`}
             data={districtGeoJSON as unknown as FeatureCollection}
             style={
@@ -520,7 +590,12 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
           />
         )}
 
-        <FitBounds geoData={usingRealBoundaries ? geoData : districtGeoJSON} />
+        <MapLabelDensity
+          layers={[districtLayerRef, neighbourhoodLayerRef, fallbackLayerRef]}
+          revision={layerRevision}
+        />
+
+        <FitBounds geoData={usingRealBoundaries ? layers.districts : districtGeoJSON} />
       </MapContainer>
 
       {/* Legend */}
@@ -555,6 +630,15 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
                 <div key={i} className="w-3.5 h-3.5 rounded-sm" style={{ background: c }} />
               ))}
             </div>
+            {hasNested && (
+              <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-neutral-200">
+                <div
+                  className="w-4 h-3 rounded-sm border border-dashed"
+                  style={{ borderColor: '#374151', background: 'rgba(255,255,255,0.5)' }}
+                />
+                <span className="text-[9px] text-neutral-500">Neighbourhood</span>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -582,6 +666,23 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
           backdrop-filter: blur(2px);
         }
         .municipality-label::before { display: none !important; }
+
+        /* A nested area's label sits lighter than its district's, so the two
+           read as a hierarchy where they end up side by side. */
+        .municipality-label--nested {
+          background: rgba(255, 255, 255, 0.78) !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+          padding: 2px 5px !important;
+        }
+        .municipality-label--nested .mlabel-name {
+          font-size: 9.5px !important;
+          font-weight: 600 !important;
+          color: #333 !important;
+        }
+
+        /* Set by MapLabelDensity on shapes too small at this zoom to hold a
+           label. The shape itself stays drawn and clickable. */
+        .${HIDDEN_LABEL_CLASS} { display: none !important; }
 
         .mlabel-name {
           font-size: 10.5px !important;

@@ -353,23 +353,25 @@ admin `GET /api/cities/market-digest/preview` inspects the pending changes and
 
 ## Neighbourhood Map — shapes, basemap, freshness
 
-The Explore-Neighborhoods map draws one partition of the city and says which
-kind it is drawing:
+The Explore-Neighborhoods map draws a city in **two nested layers** and says
+what it is drawing and how much of it:
 
 ```
 GET /api/cities/geodata/:city/:country
   └── geoDataService.getCityGeoData()
         ├── Nominatim  → city area id
-        ├── Overpass   → admin relations (level 7–10)
-        │                + place areas (neighbourhood/suburb/quarter/…),
-        │                  as relations AND closed ways
-        ├── selectBoundarySet()   ← ONE coherent set, never a mix
-        │     admin at 3–60 features  → source: 'admin'
-        │     else ≥3 place areas     → source: 'place'
-        └── cached 90 days with its fetch time
+        ├── Overpass   → admin boundaries (level 7–11), relations AND ways
+        │                + place areas (neighbourhood/suburb/quarter/…
+        │                  and town/village/hamlet), relations AND ways
+        ├── selectBoundarySet()   ← BOTH layers, tagged per feature
+        │     districts      = one admin level, 3–60 features (base partition)
+        │     neighbourhoods = every place area + every FINER admin level
+        │     source: 'mixed' | 'admin' | 'place'
+        └── cached 90 days, stamped with BOUNDARY_PIPELINE_VERSION
 
 CitySuburbMap
-  ├── real boundaries → GeoJSON from OSM            ("📍 OSM boundaries")
+  ├── real boundaries → two GeoJSON layers      ("📍 OSM boundaries · 84")
+  │                     + MapLabelDensity        (labels by on-screen size)
   └── none available  → tessellateDistricts(centres) ("◇ Approx. districts")
 ```
 
@@ -377,12 +379,49 @@ Key decisions:
 - **Neighbourhoods are usually not administrative units.** Tirana's Blloku is
   `place=neighbourhood` on a closed way, so a query restricted to
   `boundary=administrative` relations returned nothing and every such city fell
-  back to drawn circles. The query now also asks for place areas, and ways as
-  well as relations, because that is how neighbourhoods are actually mapped.
-- **One partition, never two.** Administrative districts and place areas cover
-  the same ground; drawing both would overlay two different truths.
-  `selectBoundarySet` picks admin when it exists at a readable granularity
-  (coarser level first: level 9 districts beat level 10 blocks), else places.
+  back to drawn circles. The query also asks for place areas, and ways as well
+  as relations, because that is how neighbourhoods are actually mapped — and
+  for the same reason it asks for *boundary* ways too: an administrative
+  boundary drawn as one closed way was never requested at all.
+- **A relation's member ways usually carry no role.** `relationToFeature`
+  accepted only `role=outer`, but `outer` is only needed to disambiguate a
+  multipolygon with holes — a great many simple boundaries leave the role
+  empty. Those relations parsed to zero rings and were dropped silently, which
+  was the single largest reason a city drew a handful of districts instead of
+  all of them. An empty role now means outer; `subarea`, `label` and
+  `admin_centre` are still skipped, since they are not part of the outline.
+- **Two nested layers, not one partition.** Two *rival* partitions of the same
+  ground cannot be overlaid — but a city's named neighbourhoods sit *inside*
+  its administrative districts, and so does any finer admin level. That is a
+  hierarchy, so both are drawn: the districts fill the ground, the
+  neighbourhoods sit on top with a dashed outline and a lighter wash.
+  `selectBoundarySet` picks one admin level as the base (coarser first: level 9
+  districts beat level 10 blocks) and nests *everything finer* rather than
+  discarding it. Levels coarser than the base are dropped — the city outlined
+  against itself tells a reader nothing. A single admin shape is not a
+  partition either: where that is all there is, the places become the base.
+- **Naming the same ground twice is one area.** An area mapped as both an admin
+  unit and a place is deduplicated on an accent- and punctuation-insensitive
+  name, and the district wins so the base partition stays intact.
+- **Caps are generous and never silent.** 60 for the base partition (a real
+  city's subdivision does not exceed that, and a bigger number is finer grain
+  that belongs in the nested layer), 400 for the nested layer, because "all the
+  neighbourhoods" of a large city legitimately runs to hundreds. Anything the
+  caps drop is counted and logged.
+- **A cached city gets the fix.** The cache holds 90 days, so improving what we
+  ask OSM for — or which of its answers we keep — would otherwise be invisible
+  on every city already cached until next quarter. Rows carry
+  `pipelineVersion`; a row below `BOUNDARY_PIPELINE_VERSION` is stale and
+  refetched on the next request. Bump it whenever the query or the selection
+  changes what a city ends up with.
+- **A label is drawn only where it fits.** Drawing every neighbourhood means
+  drawing every name, and at city zoom a small polygon's label is wider than
+  the polygon — 84 of them overlap into an unreadable pile.
+  `MapLabelDensity` projects each shape at the current zoom and hides the label
+  of anything under `MIN_LABEL_AREA_PX` (5000 px²), restoring it as the reader
+  zooms in. The shape stays drawn, coloured and clickable throughout; only its
+  name waits. Implemented by toggling a class on the tooltip element rather
+  than rebinding tooltips, which would churn DOM on every zoom frame.
 - **An unnamed area is dropped.** Every polygon carries a permanent name label,
   so a shape with no `name` tag was previously labelled "Region 123456".
 - **Circles → a nearest-centre partition.** Where OSM has no polygon, the

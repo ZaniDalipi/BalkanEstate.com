@@ -24,6 +24,18 @@ import CityGeoData, { CityBoundarySource } from '../models/CityGeoData';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const GEO_CACHE_DAYS = 90;
+
+/**
+ * Bump this whenever the Overpass query or `selectBoundarySet` changes what a
+ * city ends up with. Cached rows stamped with anything lower are refetched on
+ * the next request, so a fix reaches cities already in the cache instead of
+ * waiting out their 90 days.
+ *
+ * 1 — districts + nested neighbourhoods in one response; boundary ways and
+ *     settlement places requested; relations with unroled member ways no
+ *     longer dropped.
+ */
+const BOUNDARY_PIPELINE_VERSION = 1;
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org';
 
@@ -164,10 +176,18 @@ function relationToFeature(rel: OverpassRelation): GeoJSONFeature | null {
   for (const m of rel.members) {
     if (m.type !== 'way' || !m.geometry || m.geometry.length < 2) continue;
     const coords = m.geometry.map(toCoord);
-    if (m.role === 'outer') {
-      outerBuckets.set(wayIndex++, coords);
-    } else if (m.role === 'inner') {
+
+    // An EMPTY role is the common case for a boundary relation's outer ways:
+    // `outer` is only required to disambiguate a multipolygon that has holes,
+    // so a great many simple boundaries tag their ways with no role at all.
+    // Accepting only `outer` therefore dropped those relations whole — the
+    // single largest reason a city drew a handful of districts instead of all
+    // of them. Any other named role (`subarea`, `label`, `admin_centre`) is
+    // not part of the ring and is still skipped.
+    if (m.role === 'inner') {
       innerWays.push(coords);
+    } else if (!m.role || m.role === 'outer') {
+      outerBuckets.set(wayIndex++, coords);
     }
   }
 
@@ -281,7 +301,8 @@ function wayToFeature(way: OverpassWay): GeoJSONFeature | null {
   };
 }
 
-function overpassToGeoJSON(elements: OverpassElement[]): GeoJSONFeatureCollection {
+/** Exported for tests: what OSM sent in, and which shapes survive parsing. */
+export function overpassToGeoJSON(elements: OverpassElement[]): GeoJSONFeatureCollection {
   const features: GeoJSONFeature[] = [];
   for (const el of elements) {
     const f = el.type === 'relation'
@@ -295,32 +316,121 @@ function overpassToGeoJSON(elements: OverpassElement[]): GeoJSONFeatureCollectio
 }
 
 const MIN_DISTRICTS = 3;
+/**
+ * Cap on the *base partition* — the one set of shapes that tiles the city.
+ * A real city's administrative subdivision does not exceed this, so a level
+ * with more than 60 members is a finer grain than a city view wants; it is
+ * not discarded, it becomes part of the nested layer below.
+ */
 const MAX_DISTRICTS = 60;
+/**
+ * Cap on the nested layer. Generous on purpose: this is the answer to "show
+ * all the neighbourhoods", and a large city legitimately has hundreds of named
+ * ones. Bounded only so a pathological Overpass response cannot ship megabytes
+ * of geometry to a phone.
+ */
+const MAX_NEIGHBOURHOODS = 400;
+
+/**
+ * Which of the two layers a shape belongs to.
+ *
+ * `district` shapes tile the city — one coherent partition, drawn filled.
+ * `neighbourhood` shapes sit *inside* those districts, drawn on top. The
+ * distinction is what lets both be shown at once: they are a hierarchy, not
+ * two rival partitions of the same ground.
+ */
+export type BoundaryLayer = 'district' | 'neighbourhood';
 
 export interface BoundarySelection {
+  /** Both layers in one collection; every feature carries `properties.layer`. */
   geojson: GeoJSONFeatureCollection;
   source: CityBoundarySource;
   adminLevel: number;
+  districtCount: number;
+  neighbourhoodCount: number;
+  /** Shapes the caps discarded, so a truncation is never silent. */
+  droppedCount: number;
 }
 
 const isPlaceFeature = (f: GeoJSONFeature): boolean =>
   typeof f.properties.place === 'string' && (f.properties.place as string).length > 0;
 
+const featureLevel = (f: GeoJSONFeature): number =>
+  typeof f.properties.admin_level === 'number' ? f.properties.admin_level : 8;
+
+/** Tolerant identity for "the same area named twice". */
+function normalizeName(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  return value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+const tagLayer = (f: GeoJSONFeature, layer: BoundaryLayer): GeoJSONFeature => ({
+  ...f,
+  properties: { ...f.properties, layer },
+});
+
 /**
- * Choose one coherent set of shapes to draw.
+ * Choose the base partition: the administrative level that tiles the city at a
+ * granularity a reader can take in. Coarser levels first — level 9 districts
+ * read better than level 10 blocks for a whole-city view, and whatever is
+ * finer than the chosen level is not lost, it moves to the nested layer.
+ */
+function chooseDistrictLevel(
+  byLevel: Map<number, GeoJSONFeature[]>,
+  placeCount: number,
+): number | null {
+  const levels = [...byLevel.keys()].sort((a, b) => a - b);
+
+  for (const lvl of levels) {
+    const count = byLevel.get(lvl)!.length;
+    if (count >= MIN_DISTRICTS && count <= MAX_DISTRICTS) return lvl;
+  }
+
+  // Nothing in the readable range. The most populated level is still a real
+  // partition, and drawing it beats drawing nothing.
+  let best: number | null = null;
+  for (const [lvl, features] of byLevel) {
+    if (best === null || features.length > byLevel.get(best)!.length) best = lvl;
+  }
+  if (best === null) return null;
+
+  // …but one or two shapes are not a partition of anything. That case is
+  // usually the city's own boundary and nothing below it, and drawing the city
+  // outlined against itself while its named neighbourhoods sit unused is the
+  // worst of both: the places become the base instead.
+  if (byLevel.get(best)!.length < MIN_DISTRICTS && placeCount >= MIN_DISTRICTS) return null;
+
+  return best;
+}
+
+/**
+ * Split every shape OSM returned into the two layers the map draws.
  *
- * Only one set can be drawn: mixing administrative districts with mapped
- * neighbourhood areas would overlay two different partitions of the same
- * ground. Administrative subdivisions win when they exist at a useful
- * granularity; otherwise the `place` areas are used, which is what makes
- * neighbourhoods appear in cities where they are not administrative units
- * (Tirana's Blloku, for instance, is a place, not an admin boundary).
+ * The previous version of this picked exactly one set and threw the other
+ * away, on the reasoning that two partitions of the same ground cannot be
+ * overlaid. That is true of two *rival* partitions — but a city's named
+ * neighbourhoods sit inside its administrative districts, and so do any finer
+ * admin levels. So they are drawn as a nested second layer instead of being
+ * discarded, which is what makes a city show all of its neighbourhoods rather
+ * than only whichever set happened to win.
+ *
+ * Concretely, for Tirana: the 24 `Njësia Bashkiake` become the districts, and
+ * Blloku, Kombinat, Fresku and the rest become the layer on top. Before, one
+ * of those two groups was invisible.
  */
 export function selectBoundarySet(raw: GeoJSONFeatureCollection): BoundarySelection {
   const empty: BoundarySelection = {
     geojson: { type: 'FeatureCollection', features: [] },
     source: 'admin',
     adminLevel: 8,
+    districtCount: 0,
+    neighbourhoodCount: 0,
+    droppedCount: 0,
   };
   if (raw.features.length === 0) return empty;
 
@@ -329,55 +439,74 @@ export function selectBoundarySet(raw: GeoJSONFeatureCollection): BoundarySelect
 
   const byLevel = new Map<number, GeoJSONFeature[]>();
   for (const f of adminFeatures) {
-    const lvl = typeof f.properties.admin_level === 'number' ? f.properties.admin_level : 8;
+    const lvl = featureLevel(f);
     if (!byLevel.has(lvl)) byLevel.set(lvl, []);
     byLevel.get(lvl)!.push(f);
   }
 
-  // Coarse levels first: level 9 districts beat level 10 blocks for a city view.
-  const levels = [...byLevel.keys()].sort((a, b) => a - b);
-  for (const lvl of levels) {
-    const features = byLevel.get(lvl)!;
-    if (features.length >= MIN_DISTRICTS && features.length <= MAX_DISTRICTS) {
-      return { geojson: { type: 'FeatureCollection', features }, source: 'admin', adminLevel: lvl };
-    }
-  }
+  const districtLevel = chooseDistrictLevel(byLevel, placeFeatures.length);
 
-  // No usable admin granularity — fall back to mapped neighbourhood areas.
-  if (placeFeatures.length >= MIN_DISTRICTS) {
-    return {
-      geojson: {
-        type: 'FeatureCollection',
-        features: placeFeatures.slice(0, MAX_DISTRICTS),
-      },
-      source: 'place',
-      adminLevel: 0,
-    };
-  }
+  let districts: GeoJSONFeature[] = [];
+  let nested: GeoJSONFeature[] = [];
+  let adminLevel = 0;
+  let source: CityBoundarySource;
 
-  // Last resort: the most populated admin level, even if it is coarse.
-  if (levels.length > 0) {
-    let best = levels[0];
+  if (districtLevel !== null) {
+    districts = byLevel.get(districtLevel)!;
+    adminLevel = districtLevel;
+    // Everything finer than the base partition is nested inside it. Coarser
+    // levels — the city's own outline, its county — are dropped: an outline
+    // drawn over itself tells a reader nothing.
     for (const [lvl, features] of byLevel) {
-      if (features.length > (byLevel.get(best)?.length ?? 0)) best = lvl;
+      if (lvl > districtLevel) nested.push(...features);
     }
-    return {
-      geojson: { type: 'FeatureCollection', features: byLevel.get(best) ?? [] },
-      source: 'admin',
-      adminLevel: best,
-    };
+    nested.push(...placeFeatures);
+    source = nested.length > 0 ? 'mixed' : 'admin';
+  } else {
+    // No administrative subdivision at all. The `place` areas are then the
+    // only partition there is, which is the case in cities where
+    // neighbourhoods were never mapped as admin units.
+    districts = placeFeatures;
+    source = 'place';
   }
 
-  // Only a handful of place areas: still better than nothing to draw.
-  if (placeFeatures.length > 0) {
-    return {
-      geojson: { type: 'FeatureCollection', features: placeFeatures },
-      source: 'place',
-      adminLevel: 0,
-    };
+  // An area named once as an admin unit and again as a place is one area. The
+  // district wins, so the base partition stays intact.
+  const districtNames = new Set(districts.map(f => normalizeName(f.properties.name)));
+  const seenNested = new Set<string>();
+  nested = nested.filter(f => {
+    const key = normalizeName(f.properties.name);
+    if (!key || districtNames.has(key) || seenNested.has(key)) return false;
+    seenNested.add(key);
+    return true;
+  });
+
+  const keptDistricts = districts.slice(0, MAX_DISTRICTS);
+  const keptNested = nested.slice(0, MAX_NEIGHBOURHOODS);
+  const droppedCount =
+    districts.length - keptDistricts.length + (nested.length - keptNested.length);
+
+  if (droppedCount > 0) {
+    apiLogger.warn(
+      `Boundary selection dropped ${droppedCount} shape(s) over the display caps ` +
+      `(${MAX_DISTRICTS} districts, ${MAX_NEIGHBOURHOODS} neighbourhoods)`,
+    );
   }
 
-  return empty;
+  return {
+    geojson: {
+      type: 'FeatureCollection',
+      features: [
+        ...keptDistricts.map(f => tagLayer(f, 'district')),
+        ...keptNested.map(f => tagLayer(f, 'neighbourhood')),
+      ],
+    },
+    source,
+    adminLevel,
+    districtCount: keptDistricts.length,
+    neighbourhoodCount: keptNested.length,
+    droppedCount,
+  };
 }
 
 // ── Nominatim + Overpass fetch ────────────────────────────────────────────────
@@ -402,14 +531,28 @@ async function getCityAreaId(city: string, country: string): Promise<number | nu
   }
 }
 
-/** Neighbourhood-scale `place` values worth drawing as districts. */
-const PLACE_KINDS = 'neighbourhood|suburb|quarter|borough|city_district|city_block';
+/**
+ * `place` values worth drawing.
+ *
+ * Includes `town|village|hamlet` because a Balkan municipality routinely
+ * absorbs surrounding settlements — Tirana's boundary contains villages that
+ * are every bit as much "a neighbourhood" to a reader as Blloku is, and
+ * leaving them out left visible holes in the map.
+ */
+const PLACE_KINDS =
+  'neighbourhood|suburb|quarter|borough|city_district|city_block|town|village|hamlet';
+
+/** Administrative levels that subdivide a city rather than contain it. */
+const ADMIN_LEVELS = '^(7|8|9|10|11)$';
 
 async function fetchOverpassBoundaries(areaId: number): Promise<GeoJSONFeatureCollection> {
-  // Three sets in one request: administrative subdivisions, plus neighbourhood
-  // areas mapped either as relations or (much more commonly) as closed ways.
-  const query = `[out:json][timeout:40];area(${areaId})->.city;(`
-    + `relation(area.city)["boundary"="administrative"]["admin_level"~"^(7|8|9|10)$"];`
+  // Four sets in one request. Both administrative boundaries and neighbourhood
+  // areas turn up as relations *and* as single closed ways in OSM, and asking
+  // only for relations is why whole districts went missing: a boundary drawn
+  // as one closed way was never requested at all.
+  const query = `[out:json][timeout:60];area(${areaId})->.city;(`
+    + `relation(area.city)["boundary"="administrative"]["admin_level"~"${ADMIN_LEVELS}"];`
+    + `way(area.city)["boundary"="administrative"]["admin_level"~"${ADMIN_LEVELS}"];`
     + `relation(area.city)["place"~"^(${PLACE_KINDS})$"];`
     + `way(area.city)["place"~"^(${PLACE_KINDS})$"];`
     + `);out body geom;`;
@@ -418,7 +561,9 @@ async function fetchOverpassBoundaries(areaId: number): Promise<GeoJSONFeatureCo
     OVERPASS_URL,
     `data=${encodeURIComponent(query)}`,
     {
-      timeout: 45000,
+      // Comfortably past the 60s Overpass is allowed to spend, so a query that
+      // runs long comes back with data rather than being cut off locally.
+      timeout: 70000,
       headers: { ...HTTP_HEADERS, 'Content-Type': 'application/x-www-form-urlencoded' },
     }
   );
@@ -446,7 +591,14 @@ export async function getCityGeoData(
       const cached = await CityGeoData.findOne({ city, country }).lean();
       if (cached) {
         const ageMs = Date.now() - cached.lastUpdated.getTime();
-        if (ageMs < GEO_CACHE_DAYS * 24 * 60 * 60 * 1000) {
+        const currentPipeline = (cached.pipelineVersion ?? 0) >= BOUNDARY_PIPELINE_VERSION;
+        if (!currentPipeline) {
+          apiLogger.info(
+            `Refetching boundaries for ${city}, ${country}: cached by pipeline ` +
+            `v${cached.pipelineVersion ?? 0}, now v${BOUNDARY_PIPELINE_VERSION}`,
+          );
+        }
+        if (currentPipeline && ageMs < GEO_CACHE_DAYS * 24 * 60 * 60 * 1000) {
           return {
             boundaries: cached.boundaries as unknown as GeoJSONFeatureCollection,
             source: cached.boundarySource ?? 'admin',
@@ -486,13 +638,18 @@ export async function getCityGeoData(
         adminLevel: selection.adminLevel,
         boundarySource: selection.source,
         featureCount: selection.geojson.features.length,
+        districtCount: selection.districtCount,
+        neighbourhoodCount: selection.neighbourhoodCount,
+        pipelineVersion: BOUNDARY_PIPELINE_VERSION,
         lastUpdated: fetchedAt,
       },
       { upsert: true, new: true }
     );
 
     apiLogger.info(
-      `Cached ${selection.geojson.features.length} ${selection.source} boundaries for ${city}, ${country}`,
+      `Cached boundaries for ${city}, ${country}: ${selection.districtCount} district(s) ` +
+      `at admin level ${selection.adminLevel} + ${selection.neighbourhoodCount} neighbourhood(s) ` +
+      `[${selection.source}]`,
     );
     return { boundaries: selection.geojson, source: selection.source, fetchedAt };
   } catch (err) {

@@ -1038,7 +1038,7 @@ const CityDashboard: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <Suspense
                       fallback={
-                        <div className="h-64 sm:h-80 md:h-[420px] lg:h-[520px] bg-neutral-100 rounded-xl animate-pulse" />
+                        <div className="h-[420px] sm:h-[520px] md:h-[620px] lg:h-[760px] bg-neutral-100 rounded-xl animate-pulse" />
                       }
                     >
                       <CitySuburbMap
