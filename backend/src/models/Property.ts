@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { PROPERTY_TYPES, type PropertyType } from '../config/propertyTypes';
 import {
   CONSTRUCTION_STATUSES,
   ConstructionStatus,
