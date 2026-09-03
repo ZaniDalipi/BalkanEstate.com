@@ -255,6 +255,24 @@ export function validateCityShowcase(input: {
   return { isValid: true };
 }
 
+/** Return a matching existing panel, excluding the panel currently being edited. */
+function findDuplicateCityPanel(input: {
+  city: string;
+  country: string;
+  existingPanels?: ReadonlyArray<{ _id?: string; city: string; country: string }>;
+  panelId?: string;
+}): { city: string } | undefined {
+  if (!input.existingPanels) return undefined;
+
+  const city = normalizePlaceName(input.city);
+  const country = normalizePlaceName(input.country);
+
+  return input.existingPanels.find((panel) => {
+    if (input.panelId && panel._id === input.panelId) return false;
+    return normalizePlaceName(panel.city) === city && normalizePlaceName(panel.country) === country;
+  });
+}
+
 /** Longest image URL we will store. Matches the admin route's own limit. */
 const MAX_IMAGE_URL_LENGTH = 2000;
 /** Longest photo credit we will store. Matches the admin route's own limit. */

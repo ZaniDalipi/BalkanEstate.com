@@ -12,6 +12,7 @@ export const PAGE_ROUTE: Record<AdPage, { path: string; label: string }> = {
   home: { path: '/', label: 'Home' },
   search: { path: '/search', label: 'Search Results' },
   rentals: { path: '/rent', label: 'Rentals' },
+  villas: { path: '/villas', label: 'Villas' },
   'property-details': { path: '/property/…', label: 'Property Details' },
   agents: { path: '/agents', label: 'Agents' },
   agencies: { path: '/agencies', label: 'Agencies' },

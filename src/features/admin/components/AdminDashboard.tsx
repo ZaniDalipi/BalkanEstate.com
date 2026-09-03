@@ -61,6 +61,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
 // Map AdminView to URL sections
 const adminViewToUrl: Record<AdminView, string> = {
   'dashboard': 'dashboard',
+  'adBanners': 'ad-banners',
   'heatmap': 'heatmap',
   'users': 'users',
   'inquiries': 'inquiries',

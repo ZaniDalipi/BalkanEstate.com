@@ -42,7 +42,7 @@ export type AdminView =
   | 'villaApprovals'
   | 'villaDestinations'
   | 'cityShowcase'
-  | 'adBanners';
+  | 'adBanners'
   | 'cityPhotos';
 
 interface AdminLayoutProps {
