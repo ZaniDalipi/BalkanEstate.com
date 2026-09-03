@@ -21,6 +21,7 @@ import {
   boundsOfPositions,
   cameraForBounds,
   createFlightPath,
+  pixelSpanOfBounds,
   projectToWorld,
   unprojectFromWorld,
   spiderLayout,
@@ -36,6 +37,13 @@ const BLOOM_DURATION_MS = 620;
 
 /** Clusters stop existing above the algorithm's maxZoom, so this is the ceiling. */
 export const CLUSTER_FIT_PADDING = 72;
+
+/**
+ * A cluster whose listings land within this many pixels of each other, at the
+ * zoom the camera settles on, is one no visitor could ever tell apart. That —
+ * and only that — is what the spider legs are for.
+ */
+const COINCIDENT_SPAN_PX = 48;
 
 /** The clusterer supports both marker generations; so does everything here. */
 type AnyMarker = google.maps.Marker | google.maps.marker.AdvancedMarkerElement;
@@ -476,10 +484,17 @@ function spiderfy({ map, anchor, markers, bubble, onCollapsed }: SpiderfyOptions
         el.style.removeProperty('--be-spider-delay');
       }
       if (position) setMarkerPosition(marker, position);
-      // Hand the pin back to the clusterer, which owns its visibility again.
-      setMarkerMap(marker, null);
     });
 
+    // The pins stay *on* the map on the way out. `MarkerClusterer.render()`
+    // short-circuits whenever its algorithm's (markers, zoom) key is unchanged,
+    // and a spider only ever opens above the clustering zoom — so the re-render
+    // below is usually a no-op, and a pin detached here would stay invisible
+    // until something unrelated forced a redraw. That is how two co-located
+    // listings vanished for good on a zoom-out. Leaving them attached is also
+    // the correct end state: above the clustering zoom every pin is its own
+    // cluster, and when the render *does* recompute (the zoom fell back into
+    // the clustering band) it hides the members it folds into a bubble itself.
     onCollapsed();
   };
 
@@ -608,15 +623,22 @@ export function createClusterActivation({
       maxZoom,
     });
 
-    // Zooming can't split pins this close together, however far we go.
-    const needsSpiderfy = fit.requiredZoom > maxZoom;
+    // Where the camera comes to rest. A cluster already filling the viewport
+    // fits at barely more than the current zoom; nudge past it so the tap
+    // always breaks the cluster up instead of looking like nothing happened.
+    const settleZoom = Math.min(maxZoom, Math.max(fit.zoom, currentZoom + 1));
+
+    // Spiderfy only for pins that are *still* stacked once we get there.
+    // Asking `fit.requiredZoom > maxZoom` instead measures whether the cluster
+    // fills the viewport, which is a different question: on any roomy screen it
+    // calls a perfectly separable pair unseparable and fans two listings onto
+    // legs that the zoom alone had already pulled hundreds of pixels apart.
+    const span = pixelSpanOfBounds(bounds, settleZoom);
+    const needsSpiderfy = Math.max(span.width, span.height) < COINCIDENT_SPAN_PX;
 
     const targetZoom = needsSpiderfy
       ? Math.min(maxZoom, Math.max(currentZoom + 2, spiderfyZoom))
-      // A cluster already filling the viewport fits at barely more than the
-      // current zoom; nudge past it so the tap always breaks the cluster up
-      // instead of looking like nothing happened.
-      : Math.min(maxZoom, Math.max(fit.zoom, currentZoom + 1));
+      : settleZoom;
 
     cancelFlight = flyCamera(
       map,

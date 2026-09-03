@@ -137,6 +137,29 @@ export function cameraForBounds({
   };
 }
 
+/**
+ * How much screen `bounds` covers at `zoom`, in CSS pixels.
+ *
+ * This answers the question a fit zoom cannot: "once the camera is there, are
+ * these pins still stacked on top of each other?" It depends only on how far
+ * apart the listings are, never on how wide the viewport happens to be — so a
+ * tight cluster isn't declared unseparable just because a desktop window has
+ * room to spare around it.
+ */
+export function pixelSpanOfBounds(
+  bounds: BoundsLiteral,
+  zoom: number,
+): { width: number; height: number } {
+  const northEast = projectToWorld({ lat: bounds.north, lng: bounds.east });
+  const southWest = projectToWorld({ lat: bounds.south, lng: bounds.west });
+  const scale = Math.pow(2, zoom);
+
+  return {
+    width: Math.abs(northEast.x - southWest.x) * scale,
+    height: Math.abs(southWest.y - northEast.y) * scale,
+  };
+}
+
 export interface FlightPathOptions {
   from: CameraTarget;
   to: CameraTarget;
