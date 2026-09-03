@@ -443,10 +443,14 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                             <p className="text-xs text-gray-500 truncate mb-1">{property.city}, {property.country}</p>
                                                             <p className="font-bold text-blue-600 text-sm mb-1.5">{formatPrice(property.price, property.country)}</p>
                                                             <div className="flex gap-1.5 text-[11px] text-gray-600 mb-2 flex-wrap">
-                                                                <span>{property.beds} {t('profilePage.propertiesMap.beds')}</span>
-                                                                <span>•</span>
-                                                                <span>{property.baths} {t('profilePage.propertiesMap.baths')}</span>
-                                                                <span>•</span>
+                                                                {property.propertyType !== 'land' && (
+                                                                    <>
+                                                                        <span>{property.beds} {t('profilePage.propertiesMap.beds')}</span>
+                                                                        <span>•</span>
+                                                                        <span>{property.baths} {t('profilePage.propertiesMap.baths')}</span>
+                                                                        <span>•</span>
+                                                                    </>
+                                                                )}
                                                                 <span>{property.sqft} m²</span>
                                                             </div>
                                                             <button

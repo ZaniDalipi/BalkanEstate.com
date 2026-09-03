@@ -529,15 +529,16 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/property/${propertySlug}`;
     try {
-      const bedroomText = property.beds === 1 ? '1 bedroom' : `${property.beds} bedrooms`;
-      const bathroomText = property.baths === 1 ? '1 bathroom' : `${property.baths} bathrooms`;
-      const livingRoomText = property.livingRooms
+      const isLand = property.propertyType === 'land';
+      const bedroomText = isLand ? '' : `${property.beds === 1 ? '1 bedroom' : `${property.beds} bedrooms`}, `;
+      const bathroomText = isLand ? '' : `${property.baths === 1 ? '1 bathroom' : `${property.baths} bathrooms`}, `;
+      const livingRoomText = !isLand && property.livingRooms
         ? property.livingRooms === 1
-          ? ', 1 living room'
-          : `, ${property.livingRooms} living rooms`
+          ? '1 living room, '
+          : `${property.livingRooms} living rooms, `
         : '';
       const mapText = ` Check out the 3D map: ${shareUrl}`;
-      const shareText = `Check out this property: ${bedroomText}, ${bathroomText}${livingRoomText}, ${property.sqft}m².${mapText}`;
+      const shareText = `Check out this property: ${bedroomText}${bathroomText}${livingRoomText}${property.sqft}m².${mapText}`;
       if (navigator.share) {
         await navigator.share({
           title: `${property.address}, ${property.city}`,

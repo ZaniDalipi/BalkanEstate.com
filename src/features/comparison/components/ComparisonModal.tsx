@@ -79,13 +79,22 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, prop
     const bestYear = findBestValue('yearBuilt', 'max');
     const bestParking = findBestValue('parking', 'max');
 
+    // Rooms and year-built are meaningless for a plot of land — skip those
+    // rows only when every compared property is land, so a mixed comparison
+    // (e.g. land vs. house) still shows the rows that apply to the house.
+    const allLand = properties.every(p => p.propertyType === 'land');
+
     const rows: RowDef[] = [
         { label: t('property:comparison.price'), key: 'price', bestValue: bestPrice, format: (p) => p.isNegotiable ? t('property:byNegotiation', 'By Negotiation') : formatPrice(p.price, p.country) },
-        { label: t('property:comparison.beds'), key: 'beds', bestValue: bestBeds, format: (p) => p.beds },
-        { label: t('property:comparison.baths'), key: 'baths', bestValue: bestBaths, format: (p) => p.baths },
-        { label: t('property:comparison.livingRooms'), key: 'livingRooms', bestValue: bestLivingRooms, format: (p) => p.livingRooms },
+        ...(allLand ? [] : [
+            { label: t('property:comparison.beds'), key: 'beds' as const, bestValue: bestBeds, format: (p: Property) => p.beds },
+            { label: t('property:comparison.baths'), key: 'baths' as const, bestValue: bestBaths, format: (p: Property) => p.baths },
+            { label: t('property:comparison.livingRooms'), key: 'livingRooms' as const, bestValue: bestLivingRooms, format: (p: Property) => p.livingRooms },
+        ]),
         { label: t('property:comparison.area'), key: 'sqft', bestValue: bestSqft, format: (p) => p.sqft },
-        { label: t('property:comparison.yearBuilt'), key: 'yearBuilt', bestValue: bestYear, format: (p) => p.yearBuilt },
+        ...(allLand ? [] : [
+            { label: t('property:comparison.yearBuilt'), key: 'yearBuilt' as const, bestValue: bestYear, format: (p: Property) => p.yearBuilt },
+        ]),
         { label: t('property:comparison.parking'), key: 'parking', bestValue: bestParking, format: (p) => p.parking },
         { label: t('property:comparison.specialFeatures'), key: 'specialFeatures', format: (p) => p.specialFeatures },
         { label: t('property:comparison.materials'), key: 'materials', format: (p) => p.materials },

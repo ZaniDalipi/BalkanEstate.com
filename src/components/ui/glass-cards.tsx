@@ -31,6 +31,7 @@ interface PropertyCardData {
     sqft: number;
     livingRooms?: number;
     yearBuilt?: number;
+    propertyType?: string;
     description?: string;
     listingType?: 'sale' | 'rent';
     isNegotiable?: boolean;
@@ -414,8 +415,10 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                             flexWrap: 'wrap'
                         }}>
                             {[
-                                { value: property.beds, label: t('featured.bedsLabel'), icon: '🛏' },
-                                { value: property.baths, label: t('featured.bathsLabel'), icon: '🚿' },
+                                ...(property.propertyType === 'land' ? [] : [
+                                    { value: property.beds, label: t('featured.bedsLabel'), icon: '🛏' },
+                                    { value: property.baths, label: t('featured.bathsLabel'), icon: '🚿' },
+                                ]),
                                 { value: property.sqft, label: 'm²', icon: '📐' },
                                 ...(property.yearBuilt ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: '🏗' }] : []),
                             ].map((stat) => (
@@ -576,8 +579,10 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                 </p>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {[
-                        { v: property.beds, l: t('featured.bedsLabel') },
-                        { v: property.baths, l: t('featured.bathsLabel') },
+                        ...(property.propertyType === 'land' ? [] : [
+                            { v: property.beds, l: t('featured.bedsLabel') },
+                            { v: property.baths, l: t('featured.bathsLabel') },
+                        ]),
                         { v: property.sqft, l: 'm²' },
                     ].map(s => (
                         <span key={s.l} style={{
