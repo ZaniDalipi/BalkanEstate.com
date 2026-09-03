@@ -74,8 +74,10 @@
       "apartment": "Stan",
       "villa": "Vila",
       "land": "Zemljište",
-      "commercial": "Poslovni prostor",
-      "other": "Ostalo"
+      "commercial": "Komercijalno",
+      "other": "Ostalo",
+      "luxury-villa": "Luksuzna vila",
+      "parking": "Parkirno mjesto"
     },
     "bathrooms": "Kupaonice",
     "bedrooms": "Spavaće sobe",

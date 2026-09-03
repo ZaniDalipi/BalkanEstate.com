@@ -122,6 +122,12 @@
       "livingRooms": "Living Rooms",
       "area": "Area (m²)",
       "yearBuilt": "Year Built",
+      "buildStatus": "Status gradnje",
+      "statusReady": "Useljivo",
+      "statusUnderConstruction": "U izgradnji",
+      "expectedCompletion": "Očekivani završetak",
+      "optional": "(neobavezno)",
+      "completionYearPlaceholder": "npr. 2028",
       "parkingSpots": "Parking Spots",
       "floorNumber": "Floor Number",
       "totalFloors": "Total Floors",
@@ -145,7 +151,11 @@
       "hint": "Select \"Yes\" if available, \"No\" if not available, or leave as \"Any\" to skip",
       "no": "No",
       "any": "Any",
-      "yes": "Yes"
+      "yes": "Yes",
+      "parkingFeatures": "Značajke parkirnog mjesta",
+      "fencedSecured": "Ograđeno / osigurano",
+      "hasVegetation": "Ima vegetaciju / drveće",
+      "hasWaterSource": "Ima izvor vode"
     },
     "advancedDetails": {
       "title": "Advanced Property Details",
@@ -599,11 +609,12 @@
     "house": "House",
     "villa": "Villa",
     "land": "Land",
-    "commercial": "Commercial",
+    "commercial": "Poslovni prostor",
     "office": "Office",
     "garage": "Garage",
     "other": "Other",
-    "luxuryVilla": "Luxury Villa"
+    "luxuryVilla": "Luksuzna vila",
+    "parking": "Parkirno mjesto"
   },
   "conditions": {
     "new": "New",

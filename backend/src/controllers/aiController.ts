@@ -9,6 +9,7 @@ import {
   ENTERPRISE_TIER_LIMITS,
   PRO_BUYER_LIMITS,
 } from '../config/subscriptionConstants';
+import { isPropertyType, PROPERTY_TYPES_LABEL } from '../config/propertyTypes';
 import { getRoomStyle } from '../data/roomStyles';
 import { getRoomStyleUsageStats } from '../utils/roomStyleLimits';
 
@@ -99,9 +100,8 @@ export const generateDescription = async (req: Request, res: Response): Promise<
       return;
     }
 
-    const validPropertyTypes = ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'];
-    if (!validPropertyTypes.includes(propertyType)) {
-      res.status(400).json({ message: `propertyType must be one of: ${validPropertyTypes.join(', ')}` });
+    if (!isPropertyType(propertyType)) {
+      res.status(400).json({ message: `propertyType must be one of: ${PROPERTY_TYPES_LABEL}` });
       return;
     }
 

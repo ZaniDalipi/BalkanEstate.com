@@ -17,6 +17,15 @@ function pointerMove(target: Element, x: number, y: number) {
   target.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, cancelable: true, clientX: x, clientY: y }));
 }
 
+/** Let the ripple's anchor-tracking loop run for a few frames. */
+function nextFrames(count = 1): Promise<void> {
+  return new Promise((resolve) => {
+    let left = count;
+    const tick = () => (left-- > 0 ? requestAnimationFrame(tick) : resolve());
+    requestAnimationFrame(tick);
+  });
+}
+
 /**
  * jsdom lays out nothing, so every element's `getBoundingClientRect()` is
  * zeros by default — which the module treats as "not really on screen" and
@@ -250,6 +259,103 @@ describe('pressFeedback', () => {
       pointerDown(btn);
       expect(btn.style.transform).toBe('');
       expect(document.querySelector('.press-ripple')).toBeNull();
+    });
+
+    /**
+     * The ripple is `position: fixed` at the control's rect as it was on
+     * pointerdown. If the control then moves and the ripple does not, what is
+     * left on screen is a control-sized, control-coloured slab stranded at the
+     * old position — the large grey rectangle that showed up over the Recently
+     * Viewed rail when a press turned into a scroll.
+     */
+    describe('does not strand a ripple when the control moves', () => {
+      it('drops the ripple when the press turns into a scroll', () => {
+        initPressFeedback();
+        document.body.innerHTML = '<button id="b">Go</button>';
+        const btn = document.getElementById('b')!;
+        stubRect(btn, {});
+
+        pointerDown(btn);
+        expect(document.querySelector('.press-ripple')).not.toBeNull();
+
+        // `scroll` does not bubble, so the listener is a capturing one on
+        // window — dispatching on document reaches it the same way a nested
+        // card rail's scroll does.
+        document.dispatchEvent(new Event('scroll'));
+        expect(document.querySelector('.press-ripple')).toBeNull();
+      });
+
+      it('drops the ripple when the press turns into a drag', () => {
+        initPressFeedback();
+        document.body.innerHTML = '<button id="b">Go</button>';
+        const btn = document.getElementById('b')!;
+        stubRect(btn, {});
+
+        pointerDown(btn, 10, 10);
+        expect(document.querySelector('.press-ripple')).not.toBeNull();
+
+        pointerMove(btn, 40, 10); // past DRAG_CANCEL_PX
+        expect(document.querySelector('.press-ripple')).toBeNull();
+      });
+
+      it('drops the ripple when the pointer is cancelled', () => {
+        initPressFeedback();
+        document.body.innerHTML = '<button id="b">Go</button>';
+        const btn = document.getElementById('b')!;
+        stubRect(btn, {});
+
+        pointerDown(btn);
+        window.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true }));
+        expect(document.querySelector('.press-ripple')).toBeNull();
+      });
+
+      it('keeps the ripple for a real tap, so the feedback still plays out', () => {
+        initPressFeedback();
+        document.body.innerHTML = '<button id="b">Go</button>';
+        const btn = document.getElementById('b')!;
+        stubRect(btn, {});
+
+        pointerDown(btn);
+        pointerUp();
+        // A pointerup is the tap the user meant; only an abandoned press
+        // retracts the ripple.
+        expect(document.querySelector('.press-ripple')).not.toBeNull();
+      });
+
+      it('re-anchors the ripple to the control when the control moves', async () => {
+        initPressFeedback();
+        document.body.innerHTML = '<button id="b">Go</button>';
+        const btn = document.getElementById('b')!;
+        stubRect(btn, { left: 5, top: 400, right: 105, bottom: 440, width: 100, height: 40 });
+
+        pointerDown(btn);
+        pointerUp(); // a real tap — the ripple lives on for its animation
+        const ripple = document.querySelector('.press-ripple') as HTMLElement;
+        expect(ripple.style.top).toBe('400px');
+
+        // The page scrolls underneath during the ripple's tail.
+        stubRect(btn, { left: 5, top: 240, right: 105, bottom: 280, width: 100, height: 40 });
+        await nextFrames(2);
+
+        expect(ripple.style.top).toBe('240px');
+        expect(ripple.style.left).toBe('5px');
+      });
+
+      it('removes the ripple when its control leaves the DOM', async () => {
+        initPressFeedback();
+        document.body.innerHTML = '<button id="b">Go</button>';
+        const btn = document.getElementById('b')!;
+        stubRect(btn, {});
+
+        pointerDown(btn);
+        pointerUp();
+        expect(document.querySelector('.press-ripple')).not.toBeNull();
+
+        btn.remove(); // e.g. the tap navigated and the list unmounted
+        await nextFrames(2);
+
+        expect(document.querySelector('.press-ripple')).toBeNull();
+      });
     });
 
     it('releases via the safety timeout if pointerup never arrives', () => {

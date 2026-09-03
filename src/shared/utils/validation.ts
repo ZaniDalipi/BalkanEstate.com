@@ -2,6 +2,11 @@
 // pulled into nearly every form, and the barrel would drag the whole
 // country/city gazetteer along with it.
 import { normalizePlaceName } from '@/shared/geo/normalize';
+import {
+  COMPLETION_YEAR_HORIZON,
+  MIN_COMPLETION_YEAR,
+  normalizeConstructionStatus,
+} from '@/shared/property/construction';
 
 /**
  * Input Validation Utilities
@@ -638,6 +643,67 @@ export function validateYearBuilt(year: number | string): ValidationResult {
 }
 
 /**
+ * Validate an expected completion year for an under-construction listing.
+ *
+ * Deliberately permissive: a handover date is the seller's own estimate, and
+ * some of them are years out while others have already slipped. The check is
+ * "is this a year at all" (a whole number inside `MIN_COMPLETION_YEAR` ..
+ * `currentYear + COMPLETION_YEAR_HORIZON`), not a judgement about the plan.
+ */
+export function validateCompletionYear(
+  year: number | string,
+  options: { now?: Date } = {}
+): ValidationResult {
+  const numYear = typeof year === 'string' ? parseInt(year.trim(), 10) : year;
+  const maxYear = (options.now ?? new Date()).getFullYear() + COMPLETION_YEAR_HORIZON;
+
+  if (typeof numYear !== 'number' || !Number.isFinite(numYear)) {
+    return { isValid: false, error: 'Completion year must be a valid number' };
+  }
+
+  if (!Number.isInteger(numYear)) {
+    return { isValid: false, error: 'Completion year must be a whole year' };
+  }
+
+  if (numYear < MIN_COMPLETION_YEAR || numYear > maxYear) {
+    return {
+      isValid: false,
+      error: `Completion year must be between ${MIN_COMPLETION_YEAR} and ${maxYear}`,
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Validate the construction pair as a unit.
+ *
+ * The two fields only mean something together, so checking them field by field
+ * in the form would miss the combinations. The completion year is **optional**:
+ * "under construction, date not announced" is a listing a seller may publish.
+ * What is not allowed is a year that is not a year — that would store a badge
+ * with unreadable text on it.
+ *
+ * A year supplied alongside `ready` is not an error either — the write path
+ * drops it, the same way toggling the switch off in the form does.
+ */
+export function validateConstruction(
+  input: { constructionStatus?: unknown; expectedCompletionYear?: unknown },
+  options: { now?: Date } = {}
+): ValidationResult {
+  if (normalizeConstructionStatus(input?.constructionStatus) === 'ready') {
+    return { isValid: true };
+  }
+
+  const year = input?.expectedCompletionYear;
+  if (year === undefined || year === null || year === '') {
+    return { isValid: true };
+  }
+
+  return validateCompletionYear(year as number | string, options);
+}
+
+/**
  * Validate number of rooms/bedrooms/bathrooms
  */
 export function validateRoomCount(count: number | string, fieldName = 'Count'): ValidationResult {
@@ -673,5 +739,7 @@ export default {
   validateSearchQuery,
   validateArea,
   validateYearBuilt,
+  validateCompletionYear,
+  validateConstruction,
   validateRoomCount,
 };

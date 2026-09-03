@@ -13,6 +13,10 @@
  * - App types: @/src/shared/types/app.types
  */
 
+// The construction state of a listing lives with its validator and resolver.
+import type { ConstructionStatus } from '@/shared/property/construction';
+export type { ConstructionStatus } from '@/shared/property/construction';
+
 // --- Enums and Simple Types ---
 export enum UserRole {
     BUYER = 'buyer',
@@ -331,7 +335,12 @@ export interface Property {
     storageRooms?: number;
     offices?: number;
     sqft: number;
+    /** On an under-construction listing this mirrors `expectedCompletionYear`. */
     yearBuilt: number;
+    /** Absent = 'ready'. Read through `resolveConstruction`. */
+    constructionStatus?: ConstructionStatus;
+    /** Only meaningful when `constructionStatus` is 'under-construction'; `null` = no date. */
+    expectedCompletionYear?: number | null;
     parking: number;
     description: string;
     specialFeatures: string[];
@@ -351,7 +360,7 @@ export interface Property {
     lat: number;
     lng: number;
     seller: Seller;
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
@@ -491,7 +500,7 @@ export interface Filters {
     maxSqft: number | null;
     sortBy: string;
     sellerType: SellerType;
-    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
     // Advanced filters
     minYearBuilt: number | null;
     maxYearBuilt: number | null;
@@ -597,7 +606,7 @@ export interface AiSearchQuery {
     livingRooms?: number;
     minSqft?: number;
     maxSqft?: number;
-    propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'commercial';
+    propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land';
     sellerType?: 'agent' | 'private';
     features?: string[];
 }

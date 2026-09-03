@@ -25,6 +25,30 @@ export function handleValidationErrors(req: Request, res: Response, next: NextFu
   next();
 }
 
+/**
+ * Turn a Mongoose ValidationError into the same 400 shape
+ * `handleValidationErrors` produces, and report whether it did.
+ *
+ * Without this a schema-level rejection (a listing marked under construction
+ * with no usable completion year, say) reaches the controller's catch-all and
+ * is reported as a 500 "Error creating property" — an input mistake dressed up
+ * as a server fault, with nothing telling the seller which field to fix.
+ */
+export function respondIfValidationError(res: Response, error: unknown): boolean {
+  const err = error as { name?: string; errors?: Record<string, { message?: string }> };
+  if (!err || err.name !== 'ValidationError' || !err.errors) return false;
+
+  res.status(400).json({
+    success: false,
+    message: 'Validation failed',
+    errors: Object.entries(err.errors).map(([field, detail]) => ({
+      field,
+      message: detail?.message ?? 'Invalid value',
+    })),
+  });
+  return true;
+}
+
 /** Validates that :id is a well-formed MongoDB ObjectId. */
 export const validatePropertyId = [
   param('id')

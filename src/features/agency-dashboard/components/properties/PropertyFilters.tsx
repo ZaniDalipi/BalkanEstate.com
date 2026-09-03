@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyFilters as PropertyFiltersType } from '../../types';
+import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 
 interface PropertyFiltersProps {
   filters: PropertyFiltersType;
@@ -17,14 +18,19 @@ const STATUS_OPTIONS = [
   { value: 'draft', labelKey: 'properties.statusDraft', fallback: 'Draft' },
 ] as const;
 
+/**
+ * The wildcard plus the app's canonical property types. Type labels are read
+ * from the seller namespace — the one place they are translated — so this
+ * filter names a type exactly as the seller who filed it saw it.
+ */
 const TYPE_OPTIONS = [
-  { value: '', labelKey: 'properties.typeAll', fallback: 'All Types' },
-  { value: 'apartment', labelKey: 'properties.typeApartment', fallback: 'Apartment' },
-  { value: 'house', labelKey: 'properties.typeHouse', fallback: 'House' },
-  { value: 'land', labelKey: 'properties.typeLand', fallback: 'Land' },
-  { value: 'villa', labelKey: 'properties.typeVilla', fallback: 'Villa' },
-  { value: 'other', labelKey: 'properties.typeOther', fallback: 'Other' },
-] as const;
+  { value: '', labelKey: 'agencyDashboard:properties.typeAll', fallback: 'All Types' },
+  ...PROPERTY_TYPE_OPTIONS.map((option) => ({
+    value: option.value,
+    labelKey: `seller:${option.labelKey}`,
+    fallback: option.fallback,
+  })),
+];
 
 const DATE_OPTIONS = [
   { value: '', labelKey: 'properties.dateAll', fallback: 'All Time' },
@@ -44,7 +50,7 @@ const selectClasses =
   'px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-w-[140px]';
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ filters, onFiltersChange, agents }) => {
-  const { t } = useTranslation(['agencyDashboard']);
+  const { t } = useTranslation(['agencyDashboard', 'seller']);
 
   const handleChange = (key: string, value: string) => {
     if (key === 'dateRange') {
@@ -68,7 +74,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ filters, onFiltersCha
       >
         {STATUS_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
-            {t(`agencyDashboard:${opt.labelKey}`, opt.fallback)}
+            {t(opt.labelKey, opt.fallback)}
           </option>
         ))}
       </select>

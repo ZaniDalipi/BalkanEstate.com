@@ -594,7 +594,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         src={currentSources.placeholder || optimizeCloudinaryUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-40 pointer-events-none select-none"
+                        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-60 pointer-events-none select-none"
                     />
                 )}
 
