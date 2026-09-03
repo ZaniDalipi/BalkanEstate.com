@@ -48,6 +48,85 @@ const queryNominatim = async (params: URLSearchParams): Promise<NominatimResult[
   return Array.isArray(data) ? (data as NominatimResult[]) : [];
 };
 
+/**
+ * Fold a name to a matching key: lowercase, no diacritics, no punctuation.
+ *
+ * Mirrors the client's `foldText` (`src/shared/search/text.ts`) closely
+ * enough for ranking. The client does the authoritative folding for display
+ * and matching; this exists so the proxy can order and de-duplicate what it
+ * hands back rather than passing Nominatim's global-importance order
+ * straight through.
+ */
+const foldName = (value: string): string =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đð]/g, 'd')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+/** Place types worth showing above a road or a shop with the same name. */
+const SETTLEMENT_TYPES = new Set([
+  'country', 'state', 'region', 'county', 'city', 'town', 'village', 'hamlet',
+  'suburb', 'neighbourhood', 'municipality', 'island', 'locality',
+]);
+
+/**
+ * How well a result answers the query.
+ *
+ * Nominatim ranks by global importance, which is why a query for a Balkan
+ * village loses to a same-named street in a bigger country. Ranking by name
+ * match first — exact, then prefix, then anything else — puts the place the
+ * user typed at the top, and settlements ahead of streets when the names
+ * tie.
+ */
+const scoreResult = (result: NominatimResult, foldedQuery: string): number => {
+  const name = foldName(String(result.display_name).split(',')[0] ?? '');
+
+  let score = 0;
+  if (name === foldedQuery) score += 1000;
+  else if (name.startsWith(foldedQuery)) score += 700;
+  else if (name.includes(foldedQuery)) score += 400;
+
+  if (SETTLEMENT_TYPES.has(String(result.type))) score += 120;
+  if (result.class === 'place') score += 60;
+
+  // Importance still breaks ties between two equally good name matches.
+  const importance = typeof result.importance === 'number' ? result.importance : 0;
+  return score + importance * 50;
+};
+
+/**
+ * Collapse rows that are the same place seen twice.
+ *
+ * Nominatim regularly returns a settlement as both a node and an
+ * administrative boundary; they carry the same name and sit within a few
+ * hundred metres of each other, and one of them is noise in a suggestion
+ * list.
+ */
+const dedupeResults = (results: NominatimResult[]): NominatimResult[] => {
+  const kept: NominatimResult[] = [];
+
+  for (const result of results) {
+    const name = foldName(String(result.display_name).split(',')[0] ?? '');
+    const lat = Number(result.lat);
+    const lon = Number(result.lon);
+
+    const isDuplicate = kept.some((other) => {
+      if (foldName(String(other.display_name).split(',')[0] ?? '') !== name) return false;
+      const dLat = Math.abs(Number(other.lat) - lat);
+      const dLon = Math.abs(Number(other.lon) - lon);
+      // ~2km at Balkan latitudes: the same settlement, not two of them.
+      return dLat < 0.02 && dLon < 0.02;
+    });
+
+    if (!isDuplicate) kept.push(result);
+  }
+
+  return kept;
+};
+
 // @desc    Search locations using Nominatim (proxy to avoid CORS)
 // @route   GET /api/geocoding/search
 // @access  Public
@@ -105,7 +184,14 @@ export const searchLocation = async (req: Request, res: Response): Promise<void>
       }
     }
 
-    res.json(results.slice(0, RESULT_LIMIT));
+    // Ordered by how well each row answers the query, not by how important
+    // the place is in the world, and with each place named only once.
+    const foldedQuery = foldName(query);
+    const ranked = dedupeResults(results).sort(
+      (a, b) => scoreResult(b, foldedQuery) - scoreResult(a, foldedQuery)
+    );
+
+    res.json(ranked.slice(0, RESULT_LIMIT));
   } catch (error: any) {
     geocodingLogger.error('Geocoding search error:', error);
     res.status(500).json({ message: 'Error searching location' });

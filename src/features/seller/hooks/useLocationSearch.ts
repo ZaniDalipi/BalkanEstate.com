@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { searchLocation } from '@/services/osmService';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import {
+  canonicalPlaceName,
+  formatGeocodedPlace,
+  formatPlace,
   haversineDistanceKm,
   normalizePlaceName,
   searchLocalities,
@@ -125,12 +128,6 @@ const dedupe = (suggestions: LocationSuggestion[]): LocationSuggestion[] => {
   return result;
 };
 
-/** Split a Nominatim `display_name` into a name line and a context line. */
-const splitDisplayName = (displayName: string): { title: string; subtitle: string } => {
-  const [first, ...rest] = displayName.split(',').map((part) => part.trim());
-  return { title: first ?? displayName, subtitle: rest.join(', ') };
-};
-
 export const useLocationSearch = ({
   country,
   city,
@@ -174,8 +171,8 @@ export const useLocationSearch = ({
 
       const results: LocationSuggestion[] = localMatches.map((match) => ({
         id: `local:${match.country}:${match.city}:${match.name}`,
-        title: match.name,
-        subtitle: [match.city, match.country].filter(Boolean).join(', '),
+        title: canonicalPlaceName(match.name),
+        subtitle: formatPlace(match).secondary,
         source: 'local',
         lat: match.lat,
         lng: match.lng,
@@ -220,11 +217,13 @@ export const useLocationSearch = ({
           const distanceKm = centre ? haversineDistanceKm(centre, { lat, lng }) : undefined;
           if (limitKm !== undefined && distanceKm !== undefined && distanceKm > limitKm) continue;
 
-          const { title, subtitle } = splitDisplayName(result.display_name);
+          // Named the same way as every other place in the app: local
+          // spelling, no postcode, no repeated municipality.
+          const label = formatGeocodedPlace(result);
           results.push({
             id: `osm:${result.place_id}`,
-            title,
-            subtitle,
+            title: label.primary,
+            subtitle: label.secondary,
             source: 'osm',
             lat,
             lng,
