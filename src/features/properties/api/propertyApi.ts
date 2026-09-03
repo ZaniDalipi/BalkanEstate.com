@@ -3,6 +3,7 @@
 
 import { apiRequest, uploadRequest } from '@/src/shared/api';
 import type { Property, Filters, UserRole } from '@/src/shared/types';
+import { buildConstructionFields } from '@/shared/property/construction';
 
 // --- Transformers ---
 
@@ -24,7 +25,14 @@ export function transformBackendProperty(backendProp: any): Property {
     baths: backendProp.baths,
     livingRooms: backendProp.livingRooms,
     sqft: backendProp.sqft,
-    yearBuilt: backendProp.yearBuilt,
+    // Ingestion boundary: a status the client does not know becomes 'ready',
+    // and an unusable completion year is dropped rather than carried into the
+    // UI as a promise nobody can render.
+    ...buildConstructionFields({
+      constructionStatus: backendProp.constructionStatus,
+      expectedCompletionYear: backendProp.expectedCompletionYear,
+      yearBuilt: backendProp.yearBuilt,
+    }),
     parking: backendProp.parking,
     description: backendProp.description,
     specialFeatures: backendProp.specialFeatures || [],
@@ -129,7 +137,11 @@ export function transformToBackendProperty(frontendProp: Property): any {
     baths: frontendProp.baths,
     livingRooms: frontendProp.livingRooms,
     sqft: frontendProp.sqft,
-    yearBuilt: frontendProp.yearBuilt,
+    ...buildConstructionFields({
+      constructionStatus: frontendProp.constructionStatus,
+      expectedCompletionYear: frontendProp.expectedCompletionYear,
+      yearBuilt: frontendProp.yearBuilt,
+    }),
     parking: frontendProp.parking,
     description: frontendProp.description,
     specialFeatures: frontendProp.specialFeatures,

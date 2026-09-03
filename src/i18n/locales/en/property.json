@@ -65,6 +65,9 @@
     "parking": "Parking",
     "parkingSpots": "Parking Spots",
     "yearBuilt": "Year Built",
+    "expectedCompletion": "Expected completion",
+    "underConstruction": "Under construction",
+    "completionYearShort": "{{year}} (expected)",
     "furnished": "Furnished",
     "unfurnished": "Unfurnished",
     "partlyFurnished": "Partly Furnished"
@@ -273,6 +276,8 @@
   "featuredAgencies": "Featured Agencies",
   "status": {
     "new": "New",
+    "underConstruction": "Under construction",
+    "completionYear": "Ready {{year}}",
     "reduced": "Price Reduced",
     "priceReduced": "Price Reduced",
     "urgent": "Urgent",

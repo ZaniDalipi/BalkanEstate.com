@@ -13,6 +13,10 @@
  * - App types: @/src/shared/types/app.types
  */
 
+// The construction state of a listing lives with its validator and resolver.
+import type { ConstructionStatus } from '@/shared/property/construction';
+export type { ConstructionStatus } from '@/shared/property/construction';
+
 // --- Enums and Simple Types ---
 export enum UserRole {
     BUYER = 'buyer',
@@ -331,7 +335,12 @@ export interface Property {
     storageRooms?: number;
     offices?: number;
     sqft: number;
+    /** On an under-construction listing this mirrors `expectedCompletionYear`. */
     yearBuilt: number;
+    /** Absent = 'ready'. Read through `resolveConstruction`. */
+    constructionStatus?: ConstructionStatus;
+    /** Only meaningful when `constructionStatus` is 'under-construction'. */
+    expectedCompletionYear?: number;
     parking: number;
     description: string;
     specialFeatures: string[];

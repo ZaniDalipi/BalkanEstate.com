@@ -399,8 +399,72 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                     </>
                 )}
                 <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
-                {hasHabitableInterior(listingData.propertyType) && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.yearBuilt')} value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} />
+                {listingData.propertyType !== 'land' && (
+                    <div id={fieldAnchorId('expectedCompletionYear')} className="min-w-0">
+                        {/* Build status decides which year the seller is asked for:
+                            a finished building has a year built, one still going
+                            up has a completion year. Asking for both would invite
+                            a listing that claims to be built in a year it is also
+                            expected to be finished. */}
+                        <span className={`${labelClasses} ${fieldErrors.expectedCompletionYear ? errorLabelClasses : ''}`}>
+                            {t('seller:createListing.fields.buildStatus', 'Build status')}
+                        </span>
+                        <div className="flex gap-2 mb-3" role="group" aria-label={t('seller:createListing.fields.buildStatus', 'Build status')}>
+                            {([
+                                { value: 'ready' as const, label: t('seller:createListing.fields.statusReady', 'Ready') },
+                                { value: 'under-construction' as const, label: t('seller:createListing.fields.statusUnderConstruction', 'Under construction') },
+                            ]).map(({ value, label }) => {
+                                const active = listingData.constructionStatus === value;
+                                return (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        aria-pressed={active}
+                                        onClick={() => setListingData(p => ({
+                                            ...p,
+                                            constructionStatus: value,
+                                            // Leaving a stale completion year behind would
+                                            // resurface if the seller toggled back and forth.
+                                            expected_completion_year: value === 'under-construction' ? p.expected_completion_year : 0,
+                                        }))}
+                                        className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium border transition-all ${
+                                            active
+                                                ? 'bg-[#FFA500]/15 text-[#0252CD] border-[#FFA500]'
+                                                : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]'
+                                        }`}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {listingData.constructionStatus === 'under-construction' ? (
+                            <>
+                                {/* Free entry, and optional: the handover year is the
+                                    seller's own estimate, so any year they choose to
+                                    give is accepted and leaving it blank publishes the
+                                    listing as "under construction" with no date. */}
+                                <label htmlFor="expectedCompletionYear" className={`${labelClasses} ${fieldErrors.expectedCompletionYear ? errorLabelClasses : ''}`}>
+                                    {t('seller:createListing.fields.expectedCompletion', 'Expected completion')}
+                                    <span className="ml-1 font-normal text-gray-400">{t('seller:createListing.fields.optional', '(optional)')}</span>
+                                </label>
+                                <input
+                                    id="expectedCompletionYear"
+                                    type="number"
+                                    inputMode="numeric"
+                                    value={listingData.expected_completion_year || ''}
+                                    onChange={(e) => setListingData(p => ({ ...p, expected_completion_year: parseInt(e.target.value, 10) || 0 }))}
+                                    placeholder={t('seller:createListing.fields.completionYearPlaceholder', 'e.g. 2028')}
+                                    className={`${inputBaseClasses} ${fieldErrors.expectedCompletionYear ? errorFieldClasses : ''}`}
+                                    aria-invalid={!!fieldErrors.expectedCompletionYear}
+                                />
+                                <FieldError message={fieldErrors.expectedCompletionYear} />
+                            </>
+                        ) : (
+                            <NumberInputWithSteppers label={t('seller:createListing.fields.yearBuilt')} value={listingData.year_built} max={new Date().getFullYear()} onChange={(val) => setListingData(p => ({ ...p, year_built: val }))} />
+                        )}
+                    </div>
                 )}
                 <NumberInputWithSteppers label={t('seller:createListing.fields.parkingSpots')} value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} />
             </fieldset>
@@ -432,6 +496,8 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
         d0.offices === d1.offices &&
         d0.sq_meters === d1.sq_meters &&
         d0.year_built === d1.year_built &&
+        d0.constructionStatus === d1.constructionStatus &&
+        d0.expected_completion_year === d1.expected_completion_year &&
         d0.parking_spots === d1.parking_spots &&
         d0.checkInTime === d1.checkInTime &&
         d0.checkOutTime === d1.checkOutTime &&
@@ -440,6 +506,10 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
         d0.breakfastIncluded === d1.breakfastIncluded &&
         d0.towelsIncluded === d1.towelsIncluded &&
         d0.parkingIncluded === d1.parkingIncluded &&
+        // Without this the inline messages this component renders never appear:
+        // a failed submit changes only `fieldErrors`, and the comparator would
+        // report the props equal and skip the re-render.
+        prev.fieldErrors === next.fieldErrors &&
         prev.selectedCountry === next.selectedCountry &&
         prev.selectedCity === next.selectedCity &&
         prev.availableCities === next.availableCities &&

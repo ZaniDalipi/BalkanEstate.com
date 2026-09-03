@@ -2,6 +2,12 @@
 
 import { UserRole } from './user.types';
 
+// The construction state of a listing is a domain rule (with a write-side
+// validator and a read-side resolver), so it is defined once next to those and
+// re-exported here for the many `@/types` consumers.
+export type { ConstructionStatus } from '@/shared/property/construction';
+import type { ConstructionStatus } from '@/shared/property/construction';
+
 export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
 export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
@@ -121,7 +127,18 @@ export interface Property {
   baths: number;
   livingRooms: number;
   sqft: number;
+  /**
+   * The year the building was finished. On an under-construction listing this
+   * mirrors `expectedCompletionYear` (see `constructionStatus`) so year-based
+   * sorting and filtering keep working — it is never *displayed* as a year
+   * built, because the building does not exist yet.
+   */
   yearBuilt: number;
+  /** Absent on every listing written before the feature — read it through
+   *  `resolveConstruction`, which treats anything unrecognised as 'ready'. */
+  constructionStatus?: ConstructionStatus;
+  /** Only meaningful when `constructionStatus` is 'under-construction'. */
+  expectedCompletionYear?: number;
   parking: number;
   description: string;
   specialFeatures: string[];

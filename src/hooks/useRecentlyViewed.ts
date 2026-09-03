@@ -32,6 +32,11 @@ interface StoredProperty {
   lng: number;
   description: string;
   yearBuilt: number;
+  // Kept so the carousel's card shows the same under-construction badge the
+  // search results did — a listing that changes state between rails reads as
+  // two different products.
+  constructionStatus?: Property['constructionStatus'];
+  expectedCompletionYear?: number;
   parking: number;
   viewedAt: number;
 }
@@ -129,6 +134,8 @@ export function useRecentlyViewed() {
         lng: property.lng,
         description: property.description,
         yearBuilt: property.yearBuilt,
+        constructionStatus: property.constructionStatus,
+        expectedCompletionYear: property.expectedCompletionYear,
         parking: property.parking,
         viewedAt: Date.now(),
       };
