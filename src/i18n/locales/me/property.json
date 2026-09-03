@@ -328,7 +328,9 @@
       "villa": "Vila",
       "land": "Zemljište",
       "other": "Ostalo",
-      "luxury-villa": "Luksuzna vila"
+      "luxury-villa": "Luksuzna vila",
+      "commercial": "Komercijalno",
+      "parking": "Parking mjesto"
     },
     "promotedListings": "Promovisani oglasi",
     "agentHint": "Kliknite za preporuke!",

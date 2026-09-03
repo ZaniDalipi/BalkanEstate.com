@@ -6,7 +6,35 @@ export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
 export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
-export type PropertyType = 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+/**
+ * Every property type a listing may be filed under, in the order pickers show
+ * them. Declared as a tuple so the union below can never drift from the list
+ * the UI, the filters and the backend enum are built from.
+ */
+export const PROPERTY_TYPES = [
+  'house',
+  'apartment',
+  'villa',
+  'luxury-villa',
+  'commercial',
+  'parking',
+  'land',
+  'other',
+] as const;
+
+export type PropertyType = (typeof PROPERTY_TYPES)[number];
+
+/** The same list plus the wildcard search filters use for "no preference". */
+export const PROPERTY_TYPE_FILTERS = ['any', ...PROPERTY_TYPES] as const;
+
+export type PropertyTypeFilter = (typeof PROPERTY_TYPE_FILTERS)[number];
+
+/** Narrowing guard for values arriving from the API, a URL or a form. */
+export const isPropertyType = (value: unknown): value is PropertyType =>
+  typeof value === 'string' && (PROPERTY_TYPES as readonly string[]).includes(value);
+
+export const isPropertyTypeFilter = (value: unknown): value is PropertyTypeFilter =>
+  typeof value === 'string' && (PROPERTY_TYPE_FILTERS as readonly string[]).includes(value);
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
 export type HeatingType = 'any' | 'central' | 'electric' | 'gas' | 'oil' | 'heat-pump' | 'solar' | 'wood' | 'none';
 export type PropertyCondition = 'any' | 'new' | 'excellent' | 'good' | 'fair' | 'needs-renovation';
@@ -211,7 +239,7 @@ export interface Filters {
   maxSqft: number | null;
   sortBy: string;
   sellerType: SellerType;
-  propertyType: 'any' | PropertyType;
+  propertyType: PropertyTypeFilter;
   // Advanced filters
   minYearBuilt: number | null;
   maxYearBuilt: number | null;

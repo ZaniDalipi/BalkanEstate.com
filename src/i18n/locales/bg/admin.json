@@ -75,7 +75,9 @@
       "villa": "Вила",
       "land": "Земя",
       "commercial": "Търговски",
-      "other": "Друго"
+      "other": "Друго",
+      "luxury-villa": "Луксозна вила",
+      "parking": "Паркомясто"
     },
     "bathrooms": "Бани",
     "bedrooms": "Спални",

@@ -30,7 +30,7 @@ interface ValuationInput {
   country: string;
   lat?: number;
   lng?: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
   sqft: number;
   beds: number;
   baths: number;

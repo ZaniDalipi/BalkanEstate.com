@@ -328,7 +328,9 @@
       "villa": "Vilă",
       "land": "Teren",
       "other": "Altele",
-      "luxury-villa": "Vilă de Lux"
+      "luxury-villa": "Vilă de lux",
+      "commercial": "Comercial",
+      "parking": "Loc de parcare"
     },
     "promotedListings": "Anunțuri Promovate",
     "agentHint": "Click pentru recomandări!",

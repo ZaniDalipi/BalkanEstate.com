@@ -145,7 +145,11 @@
       "hint": "Изберете \"Да\" ако е налично, \"Не\" ако не е налично, или оставете като \"Всяко\" за пропускане",
       "no": "Не",
       "any": "Всяко",
-      "yes": "Да"
+      "yes": "Да",
+      "parkingFeatures": "Характеристики на паркомястото",
+      "fencedSecured": "Оградено / охранявано",
+      "hasVegetation": "С растителност / дървета",
+      "hasWaterSource": "С водоизточник"
     },
     "advancedDetails": {
       "title": "Разширени детайли на имота",
@@ -603,11 +607,12 @@
     "house": "House",
     "villa": "Villa",
     "land": "Land",
-    "commercial": "Commercial",
+    "commercial": "Бизнес имот",
     "office": "Office",
     "garage": "Garage",
     "other": "Other",
-    "luxuryVilla": "Luxury Villa"
+    "luxuryVilla": "Луксозна вила",
+    "parking": "Паркомясто"
   },
   "conditions": {
     "new": "New",

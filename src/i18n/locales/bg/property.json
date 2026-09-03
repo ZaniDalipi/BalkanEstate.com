@@ -328,7 +328,9 @@
       "villa": "Вила",
       "land": "Земя",
       "other": "Друго",
-      "luxury-villa": "Луксозна вила"
+      "luxury-villa": "Луксозна вила",
+      "commercial": "Търговски",
+      "parking": "Паркомясто"
     },
     "promotedListings": "Промотирани обяви",
     "agentHint": "Кликнете за препоръки!",

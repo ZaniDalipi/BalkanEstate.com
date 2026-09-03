@@ -328,7 +328,9 @@
       "villa": "Вила",
       "land": "Земјиште",
       "other": "Друго",
-      "luxury-villa": "Луксузна вила"
+      "luxury-villa": "Луксузна вила",
+      "commercial": "Комерцијален",
+      "parking": "Паркинг место"
     },
     "promotedListings": "Промовирани огласи",
     "agentHint": "Кликнете за препораки!",
