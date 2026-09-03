@@ -11,6 +11,7 @@ import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { getGallerySources, warmImage, warmGallery } from '@/config/galleryImages';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
@@ -172,6 +173,30 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     });
   }, [currentImageIndex, allImages, IMAGE_WIDTHS]);
 
+  /**
+   * Warm the *detail page's* gallery from the card, so a listing the user has
+   * never opened still paints a real photo immediately rather than a blur.
+   *
+   * The card renders its photos at ~640px; the detail gallery renders them far
+   * larger, so these are genuinely different bytes and nothing here is already
+   * cached. Split by how much intent the gesture shows: hovering a grid warms
+   * one hero per card, while an actual press — which precedes navigation —
+   * warms the whole set. Warming every photo of every hovered card would mean
+   * hundreds of full-size downloads just to scan a results page.
+   */
+  const detailImageUrls = useMemo(
+    () => [property.imageUrl, ...(property.images || []).map((img) => img.url)].filter(Boolean),
+    [property.imageUrl, property.images]
+  );
+
+  const warmDetailHero = useCallback(() => {
+    warmImage(getGallerySources(detailImageUrls[0]), 'low');
+  }, [detailImageUrls]);
+
+  const warmDetailGallery = useCallback(() => {
+    warmGallery(detailImageUrls, { activeIndex: 0 });
+  }, [detailImageUrls]);
+
   // Safe access with fallbacks
   const safeProperty = {
     ...property,
@@ -278,8 +303,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       // cursor or the finger — by the time the tap resolves it is usually
       // already in the module cache, so the page renders without a loader.
       // preloadRoute is a no-op after the first call.
-      onPointerEnter={() => preloadRoute('propertyDetails')}
-      onPointerDown={() => preloadRoute('propertyDetails')}
+      onPointerEnter={() => { preloadRoute('propertyDetails'); warmDetailHero(); }}
+      onPointerDown={() => { preloadRoute('propertyDetails'); warmDetailGallery(); }}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(e as any); } }}
       role="article"
       tabIndex={0}

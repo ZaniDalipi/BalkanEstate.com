@@ -843,6 +843,43 @@ html[data-zoom] {
   }
 }
 
+/* Loading sweep for a gallery photo still in flight. Sits over the blurred
+   LQIP, so unlike the light `.animate-shimmer` skeleton it has to be a
+   translucent highlight rather than an opaque grey gradient. */
+@keyframes gallerySheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.gallery-shimmer {
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.18);
+}
+
+.gallery-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 80%
+  );
+  animation: gallerySheen 1.25s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-shimmer::after {
+    animation: none;
+  }
+}
+
 /* ============================================================================
    Micro-interaction Animations — Subtle polish for interactive elements
    ============================================================================ */
