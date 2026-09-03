@@ -106,6 +106,11 @@ export function isUnderConstruction(
  * construction and simply carries no date, and `yearBuilt` keeps whatever was
  * entered. Dropping the status instead would silently republish an unfinished
  * building as a finished one.
+ *
+ * "No year" is written as an explicit `null`, never by leaving the key out.
+ * The update endpoint reads an absent field as "unchanged", so an omitted key
+ * would make a cleared handover date impossible to save — the old year would
+ * come straight back on the next load.
  */
 export function buildConstructionFields(
   input: {
@@ -114,16 +119,16 @@ export function buildConstructionFields(
     yearBuilt: number | string;
   },
   now: Date = new Date(),
-): { yearBuilt: number; constructionStatus: ConstructionStatus; expectedCompletionYear?: number } {
+): { yearBuilt: number; constructionStatus: ConstructionStatus; expectedCompletionYear: number | null } {
   const enteredYearBuilt = Number(input.yearBuilt) || 0;
   const info = resolveConstruction(input, now);
 
   if (info.status === 'ready') {
-    return { yearBuilt: enteredYearBuilt, constructionStatus: 'ready' };
+    return { yearBuilt: enteredYearBuilt, constructionStatus: 'ready', expectedCompletionYear: null };
   }
 
   if (info.expectedYear === null) {
-    return { yearBuilt: enteredYearBuilt, constructionStatus: 'under-construction' };
+    return { yearBuilt: enteredYearBuilt, constructionStatus: 'under-construction', expectedCompletionYear: null };
   }
 
   return {

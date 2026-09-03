@@ -143,7 +143,22 @@ describe('buildConstructionFields', () => {
     expect(buildConstructionFields({ constructionStatus: 'ready', yearBuilt: 2011 }, NOW)).toEqual({
       yearBuilt: 2011,
       constructionStatus: 'ready',
+      expectedCompletionYear: null,
     });
+  });
+
+  // The update endpoint reads an absent field as "unchanged", so omitting the
+  // key would make a cleared handover date impossible to save.
+  it('writes "no year" as an explicit null, never as a missing key', () => {
+    for (const input of [
+      { constructionStatus: 'under-construction', yearBuilt: 2020 },
+      { constructionStatus: 'under-construction', expectedCompletionYear: '', yearBuilt: 2020 },
+      { constructionStatus: 'ready', expectedCompletionYear: YEAR + 1, yearBuilt: 2015 },
+    ]) {
+      const fields = buildConstructionFields(input, NOW);
+      expect('expectedCompletionYear' in fields).toBe(true);
+      expect(fields.expectedCompletionYear).toBeNull();
+    }
   });
 
   it('mirrors the completion year into yearBuilt so year sorts stay right', () => {
@@ -162,7 +177,7 @@ describe('buildConstructionFields', () => {
   it('keeps the status when no year was given, rather than republishing it as finished', () => {
     expect(
       buildConstructionFields({ constructionStatus: 'under-construction', yearBuilt: 2020 }, NOW)
-    ).toEqual({ yearBuilt: 2020, constructionStatus: 'under-construction' });
+    ).toEqual({ yearBuilt: 2020, constructionStatus: 'under-construction', expectedCompletionYear: null });
   });
 
   it('drops a year that is not a year but keeps the status', () => {
@@ -171,7 +186,7 @@ describe('buildConstructionFields', () => {
         { constructionStatus: 'under-construction', expectedCompletionYear: 'soon', yearBuilt: 2020 },
         NOW
       )
-    ).toEqual({ yearBuilt: 2020, constructionStatus: 'under-construction' });
+    ).toEqual({ yearBuilt: 2020, constructionStatus: 'under-construction', expectedCompletionYear: null });
   });
 
   it('clears a stale year when the listing goes back to ready', () => {
@@ -179,7 +194,7 @@ describe('buildConstructionFields', () => {
       { constructionStatus: 'ready', expectedCompletionYear: YEAR + 2, yearBuilt: 2015 },
       NOW
     );
-    expect(fields.expectedCompletionYear).toBeUndefined();
+    expect(fields.expectedCompletionYear).toBeNull();
   });
 });
 
