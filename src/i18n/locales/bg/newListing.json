@@ -312,6 +312,7 @@
     "houseTotalFloors": "За къщи и вили, моля въведете общия брой етажи (1 или повече).",
     "apartmentElevator": "За апартаменти, моля посочете дали има асансьор (Да или Не).",
     "floorExceedsTotal": "Номерът на етажа не може да надвишава общия брой етажи.",
+    "completionYearRequired": "Моля, изберете годината, в която се очаква да бъде завършен този имот.",
     "required": "This field is required",
     "minImages": "Please upload at least {{count}} images",
     "selectCountry": "Please select a country",

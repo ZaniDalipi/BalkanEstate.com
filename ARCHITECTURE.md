@@ -531,6 +531,66 @@ Key decisions:
 
 ---
 
+## Under Construction — a promise, not a fact
+
+A listing that is still going up carries a *promise* ("finished in 2028") where
+a finished one carries a *fact* ("built in 2019"). Rendering the first in the
+"Year Built" cell states a completion nobody can stand behind, so the two are
+kept apart end to end.
+
+```
+src/shared/property/construction.ts          ← read side (pure, no imports)
+  ├── normalizeConstructionStatus(value)     unknown → 'ready'
+  ├── resolveConstruction(record)            → { status: 'ready' }
+  │                                          | { status: 'under-construction',
+  │                                              expectedYear: number | null }
+  └── buildConstructionFields(input)         → the persisted trio
+        │
+        ├── validation.ts   validateCompletionYear · validateConstruction  (write side)
+        ├── ListingFormHelpers.validateListing   ← form-submit boundary
+        ├── apiService / propertyApi transformers ← API ingestion boundary
+        ├── PropertyCard badge · PropertyInfo details row
+        └── backend/src/utils/constructionStatus.ts (mirror) → Property pre('validate')
+```
+
+Key decisions:
+- **Two fields, one meaning, checked together.** `constructionStatus` and
+  `expectedCompletionYear` are each individually valid whatever the other says;
+  only the *pair* can be wrong. `validateConstruction` is therefore the unit
+  both boundaries call — a per-field check would happily publish "under
+  construction" with no year, which is a badge promising a date it cannot show.
+- **Unknown reads as ready.** Every listing written before this feature has
+  neither field, and that is exactly what they are. `normalizeConstructionStatus`
+  gives the same answer for a legacy row, a typo and a hostile payload, so no
+  caller has to special-case the absent case.
+- **A year that has passed shows no year.** `resolveConstruction` returns
+  `expectedYear: null` — never a partial or guessed value — when the year is
+  missing, unparseable, out of range or already gone. The badge and the details
+  row then say "Under construction" without a date rather than advertising a
+  deadline the project already missed. Same rule as `DataFreshness`: render
+  nothing rather than imply something untrue.
+- **`yearBuilt` mirrors the completion year.** It is schema-required and it is
+  what every year sort and year filter reads; left at "this year" a 2029
+  handover would file under 2026. The mirrored value is never *displayed* as a
+  year built, because the UI asks `resolveConstruction` first.
+- **One ceiling, not two.** `COMPLETION_YEAR_HORIZON` is 5 — the same window
+  `validateYearBuilt` already allows above the current year. Two different
+  ceilings would let a record clear one guard and fail the other on the very
+  field they share.
+- **The server is the last word.** `backend/src/utils/constructionStatus.ts` is
+  a deliberate mirror rather than a shared import (the backend compiles from
+  its own `rootDir`, and the importer and other API clients never run the
+  client's copy). `Property.pre('validate')` applies it on every write path —
+  create, update, import, admin edit — so the rule cannot be skipped by
+  reaching a different controller.
+- **A rejected pair is a 400, not a 500.** `respondIfValidationError`
+  (`middleware/propertyValidation.ts`) turns a Mongoose `ValidationError` into
+  the same `{ field, message }[]` shape `handleValidationErrors` produces.
+  Before it, a schema rejection fell through the controller's catch-all and
+  came back as "Error updating property" with nothing naming the bad field.
+
+---
+
 ## Sticky Bottom Action Bar
 
 Mobile-only companion to the desktop `PropertyContact` sidebar.

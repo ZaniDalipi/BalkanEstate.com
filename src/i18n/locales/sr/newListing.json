@@ -219,6 +219,7 @@
     "houseTotalFloors": "За куће и виле, молимо унесите укупан број спратова (1 или више).",
     "apartmentElevator": "За станове, молимо наведите да ли постоји лифт (Да или Не).",
     "floorExceedsTotal": "Број спрата не може бити већи од укупног броја спратова.",
+    "completionYearRequired": "Молимо изаберите годину када се очекује завршетак ове некретнине.",
     "required": "This field is required",
     "minImages": "Please upload at least {{count}} images",
     "selectCountry": "Please select a country",

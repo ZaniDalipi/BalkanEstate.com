@@ -58,6 +58,9 @@
     "parking": "Parcare",
     "parkingSpots": "Locuri de Parcare",
     "yearBuilt": "Anul Construcției",
+    "expectedCompletion": "Finalizare estimată",
+    "underConstruction": "În construcție",
+    "completionYearShort": "{{year}} (estimat)",
     "furnished": "Mobilat",
     "unfurnished": "Nemobilat",
     "partlyFurnished": "Parțial Mobilat"
@@ -254,6 +257,8 @@
   "featuredAgencies": "Agenții Recomandate",
   "status": {
     "new": "Nou",
+    "underConstruction": "În construcție",
+    "completionYear": "Gata {{year}}",
     "reduced": "Preț Redus",
     "priceReduced": "Preț Redus",
     "urgent": "Urgent",

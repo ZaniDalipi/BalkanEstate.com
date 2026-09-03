@@ -224,7 +224,8 @@
     "apartmentFloorNumber": "Për apartamente, ju lutem vendosni një numër kati të vlefshëm (1 ose më shumë).",
     "houseTotalFloors": "Për shtëpi dhe vila, ju lutem vendosni numrin total të kateve (1 ose më shumë).",
     "apartmentElevator": "Për apartamente, ju lutem specifikoni nëse ka ashensor (Po ose Jo).",
-    "floorExceedsTotal": "Numri i katit nuk mund të tejkalojë numrin total të kateve."
+    "floorExceedsTotal": "Numri i katit nuk mund të tejkalojë numrin total të kateve.",
+    "completionYearRequired": "Ju lutemi zgjidhni vitin kur pritet të përfundojë kjo pronë."
   },
   "success": {
     "title": "Listimi u Publikua!",

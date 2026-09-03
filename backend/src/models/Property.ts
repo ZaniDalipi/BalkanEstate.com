@@ -1,4 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import {
+  CONSTRUCTION_STATUSES,
+  ConstructionStatus,
+  normalizeConstructionFields,
+} from '../utils/constructionStatus';
 
 export interface IPropertyImage {
   url: string;
@@ -71,7 +76,10 @@ export interface IProperty extends Document {
   storageRooms?: number;
   offices?: number;
   sqft: number;
+  /** On an under-construction listing this mirrors `expectedCompletionYear`. */
   yearBuilt: number;
+  constructionStatus?: ConstructionStatus;
+  expectedCompletionYear?: number;
   parking: number;
   description: string;
   specialFeatures: string[];
@@ -333,6 +341,20 @@ const PropertySchema: Schema = new Schema(
     yearBuilt: {
       type: Number,
       required: true,
+    },
+    // Construction state. Legacy documents have neither field; they read as
+    // 'ready', which is what they are. The pair is kept consistent by the
+    // pre-validate hook below rather than by two independent field validators,
+    // because either field alone is always valid — it is the combination that
+    // can be wrong.
+    constructionStatus: {
+      type: String,
+      enum: CONSTRUCTION_STATUSES,
+      default: 'ready',
+      index: true,
+    },
+    expectedCompletionYear: {
+      type: Number,
     },
     parking: {
       type: Number,
@@ -646,6 +668,37 @@ const PropertySchema: Schema = new Schema(
 );
 
 // Compound index for location-based queries
+/**
+ * Keep the construction pair consistent on every write path — create, update,
+ * import and admin edit alike — instead of at each call site.
+ *
+ * "Under construction" with no usable completion year is rejected (it would
+ * store a badge promising a date the UI cannot render); everything else is
+ * coerced: an unknown status becomes 'ready' and a stray completion year on a
+ * ready listing is cleared.
+ */
+PropertySchema.pre('validate', function (next) {
+  const doc = this as unknown as IProperty;
+
+  const result = normalizeConstructionFields({
+    constructionStatus: doc.constructionStatus,
+    expectedCompletionYear: doc.expectedCompletionYear,
+    yearBuilt: doc.yearBuilt,
+  });
+
+  if (!result.ok) {
+    this.invalidate('expectedCompletionYear', result.error);
+    return next();
+  }
+
+  doc.constructionStatus = result.fields.constructionStatus;
+  doc.expectedCompletionYear = result.fields.expectedCompletionYear;
+  if (result.fields.yearBuilt !== undefined) {
+    doc.yearBuilt = result.fields.yearBuilt;
+  }
+  next();
+});
+
 PropertySchema.index({ lat: 1, lng: 1 });
 // Index for price range queries
 PropertySchema.index({ price: 1, status: 1 });

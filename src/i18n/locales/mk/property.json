@@ -58,6 +58,9 @@
     "parking": "Паркинг",
     "parkingSpots": "Паркинг места",
     "yearBuilt": "Година на градба",
+    "expectedCompletion": "Очекувано завршување",
+    "underConstruction": "Во изградба",
+    "completionYearShort": "{{year}} (очекувано)",
     "furnished": "Наместено",
     "unfurnished": "Ненаместено",
     "partlyFurnished": "Делумно наместено"
@@ -254,6 +257,8 @@
   "featuredAgencies": "Истакнати агенции",
   "status": {
     "new": "Ново",
+    "underConstruction": "Во изградба",
+    "completionYear": "Готово {{year}}",
     "reduced": "Намалена цена",
     "priceReduced": "Намалена цена",
     "urgent": "Итно",

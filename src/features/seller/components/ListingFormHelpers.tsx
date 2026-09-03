@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import type { ConstructionStatus } from '@/shared/property/construction';
+import { validateConstruction } from '@/shared/utils/validation';
 import { Button } from '@/components/ui/liquid-glass-button';
 
 // --- Types ---
@@ -25,6 +27,10 @@ export interface ListingData {
     offices: number;
     sq_meters: number;
     year_built: number;
+    /** 'under-construction' swaps the year-built field for a completion year. */
+    constructionStatus: ConstructionStatus;
+    /** 0 = not chosen yet; only read when under construction. */
+    expected_completion_year: number;
     parking_spots: number;
     specialFeatures: string[];
     materials: string[];
@@ -97,6 +103,8 @@ export const initialListingData: ListingData = {
     offices: 0,
     sq_meters: 0,
     year_built: new Date().getFullYear(),
+    constructionStatus: 'ready',
+    expected_completion_year: 0,
     parking_spots: 0,
     specialFeatures: [],
     materials: [],
@@ -186,6 +194,7 @@ export type FieldErrors = Record<string, string>;
 export const FIELD_ERROR_ORDER = [
     'country', 'city', 'title', 'price',
     'totalFloors', 'floorNumber', 'hasElevator',
+    'expectedCompletionYear',
     'description', 'images',
 ] as const;
 
@@ -256,6 +265,20 @@ export const validateListing = (
             && (!listingData.totalFloors || listingData.totalFloors < 1)) {
             errors.totalFloors = t('newListing:validation.houseTotalFloors', 'For houses and villas, please enter the total number of floors (1 or greater).');
         }
+    }
+
+    // Construction state — the pair is checked as a unit by the shared
+    // validator, so "under construction" can never be published without the
+    // completion year the badge promises to show.
+    const construction = validateConstruction({
+        constructionStatus: listingData.constructionStatus,
+        expectedCompletionYear: listingData.expected_completion_year || undefined,
+    });
+    if (!construction.isValid) {
+        errors.expectedCompletionYear = t(
+            'newListing:validation.completionYearRequired',
+            'Please select the year this property is expected to be finished.',
+        );
     }
 
     return errors;

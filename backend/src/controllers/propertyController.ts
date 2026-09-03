@@ -29,6 +29,7 @@ import {
 import { propertyLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
+import { respondIfValidationError } from '../middleware/propertyValidation';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -46,7 +47,7 @@ export const ALLOWED_PROPERTY_FIELDS = [
   'propertyId', 'listingType', 'title', 'status', 'price', 'isNegotiable', 'originalPrice', 'priceIntervals',
   'address', 'city', 'country',
   'beds', 'baths', 'livingRooms', 'kitchens', 'diningRooms', 'toilets', 'storageRooms', 'offices',
-  'sqft', 'yearBuilt', 'parking',
+  'sqft', 'yearBuilt', 'constructionStatus', 'expectedCompletionYear', 'parking',
   'description', 'specialFeatures', 'materials',
   'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
   'imageUrl', 'imagePublicId', 'images',
@@ -1079,6 +1080,8 @@ export const createProperty = async (
       },
     });
   } catch (error: any) {
+    // A rejected field is the client's mistake, not a server fault.
+    if (respondIfValidationError(res, error)) return;
     propertyLogger.error('Create property error:', error);
     res.status(500).json({ message: 'Error creating property' });
   }
@@ -1224,6 +1227,7 @@ export const updateProperty = async (
 
     res.json({ property });
   } catch (error: any) {
+    if (respondIfValidationError(res, error)) return;
     propertyLogger.error('Update property error:', error);
     res.status(500).json({ message: 'Error updating property' });
   }

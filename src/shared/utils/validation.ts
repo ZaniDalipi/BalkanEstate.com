@@ -2,6 +2,10 @@
 // pulled into nearly every form, and the barrel would drag the whole
 // country/city gazetteer along with it.
 import { normalizePlaceName } from '@/shared/geo/normalize';
+import {
+  COMPLETION_YEAR_HORIZON,
+  normalizeConstructionStatus,
+} from '@/shared/property/construction';
 
 /**
  * Input Validation Utilities
@@ -638,6 +642,71 @@ export function validateYearBuilt(year: number | string): ValidationResult {
 }
 
 /**
+ * Validate an expected completion year for an under-construction listing.
+ *
+ * A completion date is a promise about the future, so unlike `validateYearBuilt`
+ * the *past* is what is rejected here. The upper bound is the same
+ * `currentYear + 5` that guards `yearBuilt` (see `COMPLETION_YEAR_HORIZON`),
+ * because an under-construction listing mirrors this year into `yearBuilt`.
+ */
+export function validateCompletionYear(
+  year: number | string,
+  options: { now?: Date } = {}
+): ValidationResult {
+  const numYear = typeof year === 'string' ? parseInt(year.trim(), 10) : year;
+  const currentYear = (options.now ?? new Date()).getFullYear();
+
+  if (typeof numYear !== 'number' || !Number.isFinite(numYear)) {
+    return { isValid: false, error: 'Completion year must be a valid number' };
+  }
+
+  if (!Number.isInteger(numYear)) {
+    return { isValid: false, error: 'Completion year must be a whole year' };
+  }
+
+  if (numYear < currentYear) {
+    return { isValid: false, error: 'Completion year cannot be in the past' };
+  }
+
+  if (numYear > currentYear + COMPLETION_YEAR_HORIZON) {
+    return {
+      isValid: false,
+      error: `Completion year cannot be more than ${COMPLETION_YEAR_HORIZON} years away`,
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Validate the construction pair as a unit.
+ *
+ * The two fields only mean something together: "under construction" with no
+ * year is a badge that promises a date it cannot show, and a year on a
+ * finished building is a contradiction. Checking them field-by-field in the
+ * form would let either through, so both boundaries (form submit and API
+ * ingestion) call this instead.
+ *
+ * A year supplied alongside `ready` is *not* an error — the write path drops
+ * it, the same way toggling the switch off in the form does.
+ */
+export function validateConstruction(
+  input: { constructionStatus?: unknown; expectedCompletionYear?: unknown },
+  options: { now?: Date } = {}
+): ValidationResult {
+  if (normalizeConstructionStatus(input?.constructionStatus) === 'ready') {
+    return { isValid: true };
+  }
+
+  const year = input?.expectedCompletionYear;
+  if (year === undefined || year === null || year === '') {
+    return { isValid: false, error: 'Please select the expected completion year' };
+  }
+
+  return validateCompletionYear(year as number | string, options);
+}
+
+/**
  * Validate number of rooms/bedrooms/bathrooms
  */
 export function validateRoomCount(count: number | string, fieldName = 'Count'): ValidationResult {
@@ -673,5 +742,7 @@ export default {
   validateSearchQuery,
   validateArea,
   validateYearBuilt,
+  validateCompletionYear,
+  validateConstruction,
   validateRoomCount,
 };

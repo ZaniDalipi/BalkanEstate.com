@@ -5,6 +5,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { validateCoordinates } from '../../shared/utils/validation';
+import { resolveConstruction } from '../../shared/property/construction';
 import { openExternalUrl } from '../../shared/utils/pwa';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
@@ -92,6 +93,11 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   // the type card carries the villa mark and the gold accent rather than the
   // generic primary blue.
   const isLuxuryVilla = property.propertyType === 'luxury-villa';
+
+  // Whether this listing is finished or still going up decides which year the
+  // details grid may state. Resolved once, from the record, so the badge and
+  // the details row cannot disagree.
+  const construction = useMemo(() => resolveConstruction(property), [property]);
 
   // Property-type name. `map.propertyTypes` is the app's one translated list of
   // type names — reused here so the card can never fall back to the raw
@@ -538,9 +544,19 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         </div>
 
         <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-          <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
-            {property.yearBuilt}
-          </DetailItem>
+          {construction.status === 'under-construction' ? (
+            // The building does not exist yet, so "Year built" would be a claim
+            // about a year that has not happened. A promise whose year is
+            // missing or already past shows the state without a date rather
+            // than inventing one.
+            <DetailItem icon={<CalendarIcon />} label={t('features.expectedCompletion', 'Expected completion')}>
+              {construction.expectedYear ?? t('features.underConstruction', 'Under construction')}
+            </DetailItem>
+          ) : (
+            <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
+              {property.yearBuilt}
+            </DetailItem>
+          )}
           <DetailItem icon={<ParkingIcon />} label={t('features.parking')}>
             {property.parking > 0
               ? `${property.parking} ${property.parking === 1 ? t('details.spot') : t('details.spots')}`

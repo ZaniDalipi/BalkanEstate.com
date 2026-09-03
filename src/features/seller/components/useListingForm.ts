@@ -12,6 +12,7 @@ import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, FIELD_ERROR_ORDER, fieldAnchorId, validateListing } from './ListingFormHelpers';
+import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
@@ -53,7 +54,11 @@ export function buildPreviewProperty(
         storageRooms: Number(listingData.storageRooms),
         offices: Number(listingData.offices),
         sqft: Number(listingData.sq_meters),
-        yearBuilt: Number(listingData.year_built),
+        ...buildConstructionFields({
+            constructionStatus: listingData.constructionStatus,
+            expectedCompletionYear: listingData.expected_completion_year,
+            yearBuilt: listingData.year_built,
+        }),
         parking: Number(listingData.parking_spots),
         description: listingData.description,
         specialFeatures: listingData.specialFeatures,
@@ -221,6 +226,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 offices: propertyToEdit.offices || 0,
                 sq_meters: propertyToEdit.sqft,
                 year_built: propertyToEdit.yearBuilt,
+                constructionStatus: normalizeConstructionStatus(propertyToEdit.constructionStatus),
+                expected_completion_year: propertyToEdit.expectedCompletionYear || 0,
                 parking_spots: propertyToEdit.parking,
                 specialFeatures: propertyToEdit.specialFeatures,
                 materials: propertyToEdit.materials,
@@ -1054,7 +1061,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 storageRooms: Number(listingData.storageRooms),
                 offices: Number(listingData.offices),
                 sqft: Number(listingData.sq_meters),
-                yearBuilt: Number(listingData.year_built),
+                ...buildConstructionFields({
+                    constructionStatus: listingData.constructionStatus,
+                    expectedCompletionYear: listingData.expected_completion_year,
+                    yearBuilt: listingData.year_built,
+                }),
                 parking: Number(listingData.parking_spots),
                 description: listingData.description,
                 specialFeatures: listingData.specialFeatures,

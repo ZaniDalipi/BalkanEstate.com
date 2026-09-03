@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '@/constants';
 import { type Property, type PropertyEditForm, getAllPropertyImages } from './usePropertyManager';
 import AdminPropertyLocationEditor from './AdminPropertyLocationEditor';
+import { resolveConstruction } from '@/shared/property/construction';
 
 interface PropertyViewModalProps {
   property: Property;
@@ -21,7 +22,8 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
   getStatusBadgeColor,
   getPropertyTypeLabel,
 }) => {
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'property']);
+  const construction = resolveConstruction(property);
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
@@ -100,8 +102,18 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
               )}
               {property.yearBuilt && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="text-gray-500 text-xs">{t('admin:properties.yearBuilt')}</div>
-                  <div className="font-medium text-gray-900">{property.yearBuilt}</div>
+                  {/* Same rule as the public detail page: an unfinished building
+                      has a handover year, not a year built. */}
+                  <div className="text-gray-500 text-xs">
+                    {construction.status === 'under-construction'
+                      ? t('property:features.expectedCompletion', 'Expected completion')
+                      : t('admin:properties.yearBuilt')}
+                  </div>
+                  <div className="font-medium text-gray-900">
+                    {construction.status === 'under-construction'
+                      ? (construction.expectedYear ?? t('property:features.underConstruction', 'Under construction'))
+                      : property.yearBuilt}
+                  </div>
                 </div>
               )}
               {property.parking !== undefined && (
