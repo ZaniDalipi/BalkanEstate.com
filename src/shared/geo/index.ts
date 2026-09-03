@@ -21,3 +21,14 @@ export {
   findCityCentre,
   type CityAreaCheck,
 } from './cityAreas';
+export {
+  canonicalPlaceName,
+  formatCityPlace,
+  formatGeocodedPlace,
+  formatPlace,
+  formatPlaceLabel,
+  formatPropertyPlace,
+  isSamePlace,
+  placeSearchValue,
+  type PlaceLabel,
+} from './placeNames';

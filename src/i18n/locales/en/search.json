@@ -484,5 +484,11 @@
     "applyingFilters": "Applying filters..."
   },
   "saving": "Saving...",
-  "saveSearch": "Save search"
+  "saveSearch": "Save search",
+  "suggestions": {
+    "recent": "Recent searches",
+    "places": "Places",
+    "listings": "Listings",
+    "remove": "Remove"
+  }
 }

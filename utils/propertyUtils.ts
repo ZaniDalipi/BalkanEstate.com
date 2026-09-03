@@ -1,12 +1,12 @@
 import { Property, Filters } from '../types';
 import { BALKAN_COUNTRIES } from '../constants/countries';
+import { createPropertyMatcher } from '../src/shared/search';
 
 export const filterProperties = (properties: Property[], filters: Filters): Property[] => {
-    const query = filters.query?.toLowerCase().trim();
-
-    // Extract individual search terms from query (split by comma, space)
-    // This handles cases like "Grad Zagreb, Hrvatska" matching properties in "Zagreb"
-    const queryTerms = query ? query.split(/[,\s]+/).filter(term => term.length > 1) : [];
+    // Text matching runs through the search engine: the query is parsed once,
+    // its words are all required (typing more narrows), spellings are folded
+    // so "Becici" and "Bečići" are one word, and a typo is forgiven.
+    const queryMatcher = createPropertyMatcher(filters.query ?? '');
 
     return properties.filter(p => {
         // Ensure property has valid coordinates
@@ -14,21 +14,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             return false;
         }
 
-        // Text search - match if ANY query term matches city or address
-        let queryMatch = true;
-        if (query && queryTerms.length > 0) {
-            const addressLower = (p.address || '').toLowerCase();
-            const cityLower = (p.city || '').toLowerCase();
-
-            // Check if any term from the query matches the property's city or address
-            // Also check if the city/address contains any of the query terms
-            queryMatch = queryTerms.some(term =>
-                addressLower.includes(term) ||
-                cityLower.includes(term) ||
-                term.includes(cityLower) ||
-                term.includes(addressLower)
-            );
-        }
+        const queryMatch = queryMatcher.matches(p);
 
         // Country filter — handles both key ("kosovo") and name ("Kosovo") formats
         let countryMatch = true;

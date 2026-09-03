@@ -484,5 +484,11 @@
     "in": "u"
   },
   "saving": "Spremanje...",
-  "saveSearch": "Spremi pretragu"
+  "saveSearch": "Spremi pretragu",
+  "suggestions": {
+    "recent": "Nedavne pretrage",
+    "places": "Mjesta",
+    "listings": "Oglasi",
+    "remove": "Ukloni"
+  }
 }

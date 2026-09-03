@@ -484,5 +484,11 @@
     "in": "în"
   },
   "saving": "Se salvează...",
-  "saveSearch": "Salvează căutarea"
+  "saveSearch": "Salvează căutarea",
+  "suggestions": {
+    "recent": "Căutări recente",
+    "places": "Locuri",
+    "listings": "Anunțuri",
+    "remove": "Elimină"
+  }
 }

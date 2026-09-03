@@ -484,5 +484,11 @@
     "in": "në"
   },
   "saving": "Duke ruajtur...",
-  "saveSearch": "Ruaj kërkimin"
+  "saveSearch": "Ruaj kërkimin",
+  "suggestions": {
+    "recent": "Kërkimet e fundit",
+    "places": "Vendet",
+    "listings": "Listimet",
+    "remove": "Hiq"
+  }
 }

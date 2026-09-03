@@ -9,6 +9,11 @@ import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
+import { generatePropertySlug } from '@/utils/slug';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { applyQueryToFilters } from '../universal/queryToFilters';
+import { searchPlaces } from '../universal/places';
+import type { Suggestion } from '../universal/types';
 
 // Helper to serialize Leaflet bounds to a consistent JSON format
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -203,6 +208,19 @@ export function useSearchPage() {
             return null;
         }
     }, [mapBoundsJSON]);
+
+    /**
+     * Where the map is looking, as a plain point.
+     *
+     * The omnibox uses it to break ties between same-named places: someone
+     * looking at the Montenegrin coast who types "Bar" means the town they
+     * can see, not a village four countries away.
+     */
+    const mapCentre = useMemo(() => {
+        if (!mapBounds) return null;
+        const centre = mapBounds.getCenter();
+        return { lat: centre.lat, lng: centre.lng };
+    }, [mapBounds]);
 
     const drawnBounds = useMemo(() => {
         if (!drawnBoundsJSON) return null;
@@ -657,26 +675,114 @@ export function useSearchPage() {
         updateSearchPageState({ filters: newFilters, activeFilters: newFilters });
     }, [filters, updateSearchPageState]);
 
+    /**
+     * Run whatever is in the box.
+     *
+     * The sentence is read first, so "3 bed villa in Budva under 300k" moves
+     * the bedroom, type and price filters and leaves "Budva" as the place to
+     * find. Then the app's own gazetteer is asked — it answers from memory,
+     * so a known city or village flies the map with no network round trip —
+     * and only a place it has never heard of goes to the geocoder.
+     *
+     * A place that cannot be resolved is not an error: the filters have
+     * already been applied, so the text search runs and the user sees
+     * listings rather than an empty screen with a toast.
+     */
     const handleSearch = useCallback(async (searchQuery?: string) => {
         setSuggestions([]);
         const query = (searchQuery || filters.query).trim();
 
         if (!query) {
-            updateSearchPageState({ activeFilters: filters, drawnBoundsJSON: null });
+            const cleared = { ...filters, query: '' };
+            updateSearchPageState({ filters: cleared, activeFilters: cleared, drawnBoundsJSON: null });
+            return;
+        }
+
+        const { filters: nextFilters, parsed } = applyQueryToFilters(filters, query);
+        updateSearchPageState({
+            filters: nextFilters,
+            activeFilters: nextFilters,
+            drawnBoundsJSON: null,
+        });
+
+        const placeQuery = parsed.text.trim();
+        // A sentence that was entirely filters ("under 300k with a pool") has
+        // no place in it, and the map should stay where it is.
+        if (!placeQuery) return;
+
+        const [local] = searchPlaces(placeQuery, {
+            limit: 1,
+            country: nextFilters.country !== 'any' ? nextFilters.country : undefined,
+        });
+
+        if (local && Number.isFinite(local.place.lat) && Number.isFinite(local.place.lng)) {
+            setShowAllOnMobile(false);
+            setFlyToTarget({
+                center: [local.place.lat as number, local.place.lng as number],
+                zoom: local.place.zoom,
+            });
             return;
         }
 
         setIsSearchingLocation(true);
-        const results = await searchLocation(query);
+        const results = await searchLocation(placeQuery);
         setIsSearchingLocation(false);
 
         if (results.length > 0) {
-            handleSuggestionClick(results[0]);
-        } else {
-            showToast("Location not found. Showing text-based results.", 'error');
-            updateSearchPageState({ activeFilters: filters, drawnBoundsJSON: null });
+            const [best] = results;
+            setShowAllOnMobile(false);
+            setFlyToTarget({
+                center: [Number(best.lat), Number(best.lon)],
+                zoom: getZoomFromBoundingBox(best.boundingbox),
+            });
         }
-    }, [filters, updateSearchPageState, showToast, handleSuggestionClick]);
+    }, [filters, updateSearchPageState]);
+
+    /**
+     * A row picked in the omnibox.
+     *
+     * Three kinds of row, three things to do, and the box itself decides
+     * none of them: a place flies the map, a listing opens it, and a query —
+     * the row that says what Enter will do — is run as a search with whatever
+     * filters the sentence carried ("under 300k", "3 bed") already applied.
+     */
+    const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
+        setIsQueryInputFocused(false);
+
+        if (suggestion.type === 'property') {
+            // Same route a listing card opens, so a listing found through the
+            // search box lands exactly where one found by scrolling does.
+            const property = suggestion.property;
+            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+            window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+            return;
+        }
+
+        if (suggestion.type === 'place') {
+            const { filters: nextFilters } = applyQueryToFilters(filters, suggestion.searchValue);
+
+            updateSearchPageState({
+                filters: nextFilters,
+                activeFilters: nextFilters,
+                drawnBoundsJSON: null, // A picked place replaces any drawn area.
+            });
+
+            // The list follows the map from here, so only what is on screen shows.
+            setShowAllOnMobile(false);
+
+            if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
+                setFlyToTarget({
+                    center: [suggestion.lat as number, suggestion.lng as number],
+                    zoom: suggestion.zoom ?? 12,
+                });
+            }
+            return;
+        }
+
+        // 'query' and 'recent' are both "search for this text".
+        void handleSearch(suggestion.type === 'query' ? suggestion.text : suggestion.title);
+    }, [filters, updateSearchPageState, dispatch, handleSearch]);
+
 
     const handleLocalFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
         setLocalFilters(prev => ({ ...prev, [name]: value }));
@@ -1040,6 +1146,7 @@ export function useSearchPage() {
         fallbackLocation,
         // Computed
         mapBounds,
+        mapCentre,
         drawnBounds,
         baseFilteredProperties,
         listProperties,
@@ -1047,6 +1154,7 @@ export function useSearchPage() {
         seoDescription,
         // Handlers
         handleSuggestionClick,
+        handleSelectSuggestion,
         toggleDrawing,
         handleClearDrawnArea,
         handleDrawComplete,

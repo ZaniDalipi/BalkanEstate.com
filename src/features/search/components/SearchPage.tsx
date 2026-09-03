@@ -81,6 +81,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         fallbackLocation,
         // Computed
         mapBounds,
+        mapCentre,
         drawnBounds,
         baseFilteredProperties,
         listProperties,
@@ -88,6 +89,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         seoDescription,
         // Handlers
         handleSuggestionClick,
+        handleSelectSuggestion,
         toggleDrawing,
         handleDrawComplete,
         handleFilterChange,
@@ -162,10 +164,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         isDrawing: isDrawing,
         isSearchingLocation: isSearchingLocation,
         onPropertyHover: setHoveredPropertyId,
-        suggestions: suggestions,
-        onSuggestionClick: handleSuggestionClick,
-        isQueryInputFocused: isQueryInputFocused,
-        onQueryInputFocusChange: setIsQueryInputFocused,
+        onSelectSuggestion: handleSelectSuggestion,
         fallbackLocation: fallbackLocation,
         // Passed directly to avoid PropertyList subscribing to AppContext
         isLoadingProperties: isLoadingProperties,
@@ -277,14 +276,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         <SearchHeader
                             t={t as any}
                             filters={filters}
-                            suggestions={suggestions}
-                            isQueryInputFocused={isQueryInputFocused}
-                            isSearchingLocation={isSearchingLocation}
-                            searchWrapperRef={searchWrapperRef}
+                            properties={properties}
+                            near={mapCentre}
                             onFilterChange={handleFilterChange}
-                            onSearch={() => handleSearch()}
-                            onQueryInputFocusChange={setIsQueryInputFocused}
-                            onSuggestionClick={handleSuggestionClick}
+                            onSearch={handleSearch}
+                            onSelectSuggestion={handleSelectSuggestion}
                         />
                     )}
                     <PropertyList {...propertyListProps} />
@@ -355,14 +351,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         </button>
                                         <SearchLocationBar
                                             filters={filters}
-                                            suggestions={suggestions}
-                                            isQueryInputFocused={isQueryInputFocused}
-                                            isSearchingLocation={isSearchingLocation}
-                                            searchWrapperRef={searchWrapperRef}
+                                            properties={properties}
+                                            near={mapCentre}
                                             onFilterChange={handleFilterChange}
-                                            onSearch={() => handleSearch()}
-                                            onQueryInputFocusChange={setIsQueryInputFocused}
-                                            onSuggestionClick={handleSuggestionClick}
+                                            onSearch={handleSearch}
+                                            onSelectSuggestion={handleSelectSuggestion}
                                             variant="mobile"
                                         />
                                         <button

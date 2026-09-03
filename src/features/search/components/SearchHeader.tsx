@@ -1,33 +1,28 @@
 import React from 'react';
-import { Filters, NominatimResult } from '@/types';
-// Icons are used by the SearchLocationBar child component
+import { Filters, Property } from '@/types';
+import type { Coordinates } from '@/shared/geo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import SearchLocationBar from './SearchLocationBar';
+import type { Suggestion } from '../universal/types';
 
 interface SearchHeaderProps {
     t: (key: string, defaultValue?: string) => string;
     filters: Filters;
-    suggestions: NominatimResult[];
-    isQueryInputFocused: boolean;
-    isSearchingLocation: boolean;
-    searchWrapperRef: React.RefObject<HTMLDivElement>;
+    properties?: readonly Property[];
+    near?: Coordinates | null;
     onFilterChange: <K extends keyof Filters>(name: K, value: Filters[K]) => void;
-    onSearch: () => void;
-    onQueryInputFocusChange: (focused: boolean) => void;
-    onSuggestionClick: (suggestion: NominatimResult) => void;
+    onSearch: (query?: string) => void;
+    onSelectSuggestion: (suggestion: Suggestion) => void;
 }
 
 const SearchHeader: React.FC<SearchHeaderProps> = ({
     t,
     filters,
-    suggestions,
-    isQueryInputFocused,
-    isSearchingLocation,
-    searchWrapperRef,
+    properties,
+    near,
     onFilterChange,
     onSearch,
-    onQueryInputFocusChange,
-    onSuggestionClick,
+    onSelectSuggestion,
 }) => {
     return (
         <div
@@ -40,14 +35,11 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
             {/* Desktop Search Bar */}
             <SearchLocationBar
                 filters={filters}
-                suggestions={suggestions}
-                isQueryInputFocused={isQueryInputFocused}
-                isSearchingLocation={isSearchingLocation}
-                searchWrapperRef={searchWrapperRef}
+                properties={properties}
+                near={near}
                 onFilterChange={onFilterChange}
                 onSearch={onSearch}
-                onQueryInputFocusChange={onQueryInputFocusChange}
-                onSuggestionClick={onSuggestionClick}
+                onSelectSuggestion={onSelectSuggestion}
                 variant="desktop"
             />
             <select

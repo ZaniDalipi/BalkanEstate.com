@@ -484,5 +484,11 @@
     "in": "u"
   },
   "saving": "Čuvanje...",
-  "saveSearch": "Sačuvaj pretragu"
+  "saveSearch": "Sačuvaj pretragu",
+  "suggestions": {
+    "recent": "Недавне претраге",
+    "places": "Места",
+    "listings": "Огласи",
+    "remove": "Уклони"
+  }
 }
