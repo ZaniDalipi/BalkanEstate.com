@@ -57,6 +57,13 @@ describe('the place index', () => {
     expect(searchPlaces('Montenegro')[0].place.kind).toBe('country');
   });
 
+  it('writes every place as <place>, <city>, <country>', () => {
+    expect(findPlace('Krani')?.searchValue).toBe('Krani, Resen, North Macedonia');
+    expect(findPlace('Himare')?.searchValue).toBe('Himarë, Vlorë, Albania');
+    expect(findPlace('Budva')?.searchValue).toBe('Budva, Montenegro');
+    expect(findPlace('Montenegro')?.searchValue).toBe('Montenegro');
+  });
+
   it('finds a village typed without its diacritics, or misspelled', () => {
     expect(searchPlaces('palase')[0].place.name).toBe('Palasë');
     expect(searchPlaces('dhermi')[0].place.name).toBe('Dhërmi');
@@ -85,7 +92,9 @@ describe('the place index', () => {
   it('carries a ready-made label and search value on every place', () => {
     const becici = findPlace('Bečići');
     expect(becici?.label.secondary).toBe('Budva, Montenegro');
-    expect(becici?.searchValue).toBe('Bečići, Budva');
+    // The full label, because the label is the address: one shape in the
+    // search box, in the address field and on the listing.
+    expect(becici?.searchValue).toBe('Bečići, Budva, Montenegro');
   });
 });
 

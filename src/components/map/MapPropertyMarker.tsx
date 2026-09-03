@@ -11,6 +11,7 @@ import { BuildingOfficeIcon } from '@/constants';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
 import { getVillaMarkerPalette, buildLuxuryVillaMarkerHTML } from '@/shared/map/villaMarker';
+import { formatCityPlace } from '@/shared/geo';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -825,7 +826,7 @@ const PropertyPopup: React.FC<{
 
           {/* Location */}
           <p className="text-[10px] text-neutral-500 mb-1.5 line-clamp-1">
-            {property.city}, {property.country}
+            {formatCityPlace(property.city, property.country).full}
           </p>
 
           {/* Property stats - compact */}
@@ -906,7 +907,7 @@ const PropertyPopup: React.FC<{
 
         {/* Location */}
         <p className="text-[10px] text-neutral-500 mb-1.5 line-clamp-1">
-          {property.city}, {property.country}
+          {formatCityPlace(property.city, property.country).full}
         </p>
 
         {/* Specs row with icons - compact */}

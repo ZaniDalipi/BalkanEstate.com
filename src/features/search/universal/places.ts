@@ -87,7 +87,7 @@ const buildPlaces = (): IndexedPlace[] => {
     });
 
     for (const city of country.cities) {
-      const label = formatPlaceLabel([city.name, country.name]);
+      const label = formatPlaceLabel({ city: city.name, country: country.name });
       places.push({
         id: `city:${country.code}:${city.name}`,
         kind: 'city',

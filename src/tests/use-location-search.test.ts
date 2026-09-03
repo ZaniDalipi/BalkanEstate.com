@@ -178,7 +178,7 @@ describe('useLocationSearch', () => {
     expect(resolvePlaceDetails).not.toHaveBeenCalled();
   });
 
-  it('resolves a Google suggestion through the details lookup', async () => {
+  it('resolves a Google suggestion through the details lookup, keeping the app\'s address shape', async () => {
     isPlacesAvailable.mockReturnValue(true);
     fetchPlacePredictions.mockResolvedValue([
       { placeId: 'p1', title: 'Dhërmi Beach Road', subtitle: 'Albania', distanceKm: 38 },
@@ -195,7 +195,14 @@ describe('useLocationSearch', () => {
     const googleSuggestion = result.current.suggestions.find((s) => s.source === 'google')!;
     const resolved = await result.current.resolveSuggestion(googleSuggestion);
 
-    expect(resolved).toEqual({ lat: 40.15, lng: 19.6417, address: 'Dhërmi, Albania' });
+    // The coordinates come from Google; the address does not. Google's
+    // formatted address is in Google's shape, and the app files every listing
+    // under one shape: <place>, <the city being listed in>, <country>.
+    expect(resolved).toEqual({
+      lat: 40.15,
+      lng: 19.6417,
+      address: 'Dhërmi Beach Road, Vlorë, Albania',
+    });
   });
 
   it('returns null when a Google suggestion cannot be resolved', async () => {

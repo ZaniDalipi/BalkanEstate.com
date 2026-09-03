@@ -1,25 +1,33 @@
 /**
  * How a place is written on screen.
  *
- * Two rules, both borrowed from Google Maps, and they are the whole module:
+ * One shape, everywhere in the app, and it is the one Google Maps uses:
  *
- *   1. **A place is written the way it is written locally.** Budva's beach
- *      suburb is "Bečići", not "Becici"; Albania's second port is "Durrës",
- *      not "Durres". The app *stores* ASCII (that is what a seller's listing
- *      and every URL carry) and searching folds both spellings to the same
- *      key, so the diacritics are free — they cost nothing but a lookup and
- *      they are what makes the list look like it was written by someone who
- *      lives there.
+ *     <place>, <city>, <country>
  *
- *   2. **A label is one specific name plus just enough context to tell it
- *      apart.** Google shows "Bečići" over "Budva, Montenegro", never
- *      "Bečići, Opština Budva, 85315, Montenegro". So the primary line is
- *      the most specific name, the secondary line is at most two ancestors
- *      and the country, and administrative filler and postcodes are dropped
- *      on the way.
+ *     Himarë, Vlorë, Albania
+ *     Krani, Resen, North Macedonia
+ *     Bečići, Budva, Montenegro
  *
- * Everything the user reads goes through here, so a place cannot be spelled
- * one way in the search box and another way on the listing.
+ * Three parts at most, never four. The levels a geocoder is fond of — county,
+ * district, region, state, postcode — are dropped outright: "Himarë, Vlorë
+ * County, 9425, Albania" is the same place written the way a database writes
+ * it, not the way a person does.
+ *
+ * Two rules make it work:
+ *
+ *   1. **The city is the city the user chose**, not the administrative parent
+ *      the geocoder reports. Someone listing in Vlorë who drops a pin on
+ *      Himarë — 45km down the coast, but inside Vlorë's area — gets
+ *      "Himarë, Vlorë, Albania", because that listing's city *is* Vlorë and
+ *      the address has to agree with it. Callers pass what they know as
+ *      `context`; it wins.
+ *
+ *   2. **A place is written the way it is written locally.** The app stores
+ *      ASCII ("Vlore", "Becici") because that is what listings and URLs
+ *      carry, and search folds both spellings to one key, so the diacritics
+ *      cost nothing and are what makes the list look like it was written by
+ *      someone who lives there.
  */
 
 import { normalizePlaceName } from './normalize';
@@ -147,6 +155,40 @@ for (const locality of BALKAN_LOCALITIES) {
 }
 
 /**
+ * Administrative dressing that wraps a name without adding to it: Nominatim
+ * returns Himarë's municipality as "Bashkia Himarë" and Budva's as "Opština
+ * Budva". Stripped from both the label and the key, so the wrapper never
+ * reaches the screen and never hides the fact that it is a repeat.
+ */
+const ADMIN_PREFIXES =
+  /^(?:bashkia|komuna|opstina|opština|општина|община|obshtina|obshtina|grad|gradska\s+opcina|gradska\s+općina|municipality\s+of|municipiul|orașul|orasul|comuna|city\s+of|dimos|δήμος)\s+/i;
+
+const ADMIN_SUFFIXES =
+  /\s+(?:municipality|opstina|opština|општина|komuna|bashkia|city|town|village)$/i;
+
+/**
+ * Levels between a city and its country — county, district, region and their
+ * local names. A structured address lets these be skipped by key; a bare
+ * `display_name` only offers the words, so they are recognised and dropped
+ * here.
+ */
+const ADMIN_LEVELS =
+  /\b(?:county|district|region|prefecture|province|state|okrug|oblast|qark(?:u)?|rreth(?:i)?|jude[țt](?:ul)?|voivodeship|regional\s+unit|administrative)\b/i;
+
+/** One address component, cleaned down to the bare place name. */
+const cleanComponent = (part?: string | null): string => {
+  const trimmed = part?.trim();
+  if (!trimmed) return '';
+
+  // Postcodes, plus codes and bare numbers are never a place name.
+  if (/^[\d\s-]+$/.test(trimmed)) return '';
+  if (/^[A-Z0-9]{4}\+[A-Z0-9]{2,}$/i.test(trimmed)) return '';
+
+  const stripped = trimmed.replace(ADMIN_PREFIXES, '').replace(ADMIN_SUFFIXES, '').trim();
+  return canonicalPlaceName(stripped || trimmed);
+};
+
+/**
  * The local spelling of `name`, or `name` itself when the app holds no
  * spelling for it.
  *
@@ -169,168 +211,173 @@ export const isSamePlace = (a?: string | null, b?: string | null): boolean => {
 export interface PlaceLabel {
   /** The specific name — the bold first line of a suggestion. */
   primary: string;
-  /** Context: ancestors, ending with the country. May be empty. */
+  /** `city, country`; either half may be absent. */
   secondary: string;
-  /** `primary`, then `secondary` — one line, what goes in the search box. */
+  /** `<place>, <city>, <country>` — the address, and what a search box holds. */
   full: string;
 }
 
-/**
- * Administrative wrappers that repeat the name they contain. Nominatim
- * returns "Bashkia Himarë" as the municipality of "Himarë" and "Opština
- * Budva" as the municipality of "Budva"; both are noise in a label.
- */
-const ADMIN_PREFIXES =
-  /^(?:bashkia|komuna|opstina|opština|община|obshtina|grad|gradska\s+opcina|gradska\s+općina|municipality\s+of|municipiul|orașul|orasul|comuna|județul|judetul|okrug|kanton|canton|district\s+of|regional\s+unit\s+of|municipal\s+unit\s+of|dimos|δήμος|periferiaki|нас\.?\s*място)\s+/i;
-
-const ADMIN_SUFFIXES =
-  /\s+(?:county|district|region|municipality|prefecture|regional\s+unit|okrug|oblast|obshtina|општина|opstina|qarku|rrethi|kanton|canton|province|voivodeship)$/i;
-
-/**
- * Clean one address component into what it should read as, and the key it
- * should be de-duplicated by.
- *
- * The two differ on purpose. A prefix like "Bashkia" or "Opština" is pure
- * administrative dressing and never belongs on screen, so it is dropped from
- * both. A suffix like "County" is real context worth reading — Google shows
- * "Vlorë County, Albania" — but it must not stop the component from being
- * recognised as a repeat of the "Vlorë" already on the line, so it survives
- * in the display and is dropped from the key.
- */
-const cleanComponent = (part: string): { display: string; key: string } => {
-  const withoutPrefix = part.replace(ADMIN_PREFIXES, '').trim();
-  const core = withoutPrefix.replace(ADMIN_SUFFIXES, '').trim();
-  const suffix = withoutPrefix.slice(core.length);
-  const canonicalCore = canonicalPlaceName(core);
-
-  return {
-    display: canonicalCore ? `${canonicalCore}${suffix}` : withoutPrefix,
-    key: normalizePlaceName(canonicalCore || withoutPrefix),
-  };
-};
-
-/** True for a component that is a postcode, a plus code, or a bare number. */
-const isCodeLike = (part: string): boolean =>
-  /^[\d\s-]+$/.test(part) || /^[A-Z0-9]{4}\+[A-Z0-9]{2,}$/i.test(part);
-
-/**
- * Turn raw address components into a Google-shaped label.
- *
- * `parts` runs most-specific first — the way both Nominatim's `display_name`
- * and the app's own `{ name, city, country }` triples are ordered.
- */
-export const formatPlaceLabel = (
-  parts: (string | null | undefined)[],
-  { maxContext = 2 }: { maxContext?: number } = {}
-): PlaceLabel => {
-  const cleaned: string[] = [];
-  const seen = new Set<string>();
-
-  for (const raw of parts) {
-    const trimmed = raw?.trim();
-    if (!trimmed || isCodeLike(trimmed)) continue;
-
-    // Drop a component that repeats one already kept, whatever its spelling
-    // or administrative dressing: "Himarë, Bashkia Himarë, Vlorë County"
-    // is one place named three times, and reads as "Himarë, Vlorë County".
-    const { display, key } = cleanComponent(trimmed);
-    if (!display || !key || seen.has(key)) continue;
-
-    seen.add(key);
-    cleaned.push(display);
-  }
-
-  if (cleaned.length === 0) return { primary: '', secondary: '', full: '' };
-
-  const [primary, ...rest] = cleaned;
-  // The country is the last component and always earns its place; the levels
-  // between it and the name are trimmed to the two most specific.
-  const country = rest.length > 1 ? rest[rest.length - 1] : undefined;
-  const middle = country ? rest.slice(0, -1) : rest;
-  const context = [...middle.slice(0, maxContext), ...(country ? [country] : [])];
-
-  const secondary = context.join(', ');
-  return { primary, secondary, full: [primary, secondary].filter(Boolean).join(', ') };
-};
-
-/** Label for a place the app holds structurally: a locality, city, country. */
-export const formatPlace = (place: {
+/** The three levels a place is written with. */
+export interface PlaceParts {
+  /** The specific place: a village, suburb, street, or the city itself. */
   name?: string | null;
   city?: string | null;
   country?: string | null;
-}): PlaceLabel => formatPlaceLabel([place.name, place.city, place.country]);
+}
 
-/** Label for a listing: its address, then the city and country it sits in. */
+/**
+ * The city and country the caller already knows the place belongs to —
+ * typically the ones chosen on the form the user is filling in.
+ *
+ * These win over anything a geocoder reports, so a listing's address always
+ * agrees with the city the listing is filed under.
+ */
+export interface PlaceContext {
+  city?: string | null;
+  country?: string | null;
+}
+
+export interface PlaceLabelOptions {
+  context?: PlaceContext;
+}
+
+const EMPTY_LABEL: PlaceLabel = { primary: '', secondary: '', full: '' };
+
+/**
+ * Write a place as `<place>, <city>, <country>`.
+ *
+ * A level that repeats the one before it is dropped rather than said twice,
+ * so a city writes itself as "Budva, Montenegro" and a country as
+ * "Montenegro".
+ */
+export const formatPlaceLabel = (
+  parts: PlaceParts,
+  { context }: PlaceLabelOptions = {}
+): PlaceLabel => {
+  const name = cleanComponent(parts.name);
+  const city = cleanComponent(context?.city ?? parts.city);
+  const country = cleanComponent(context?.country ?? parts.country);
+
+  const primary = name || city || country;
+  if (!primary) return EMPTY_LABEL;
+
+  const rest = [city, country].filter(
+    (part, index, all) =>
+      part &&
+      !isSamePlace(part, primary) &&
+      all.findIndex((other) => isSamePlace(other, part)) === index
+  );
+
+  const secondary = rest.join(', ');
+  return { primary, secondary, full: [primary, secondary].filter(Boolean).join(', ') };
+};
+
+/** Label for a place the app holds structurally: a locality, city or country. */
+export const formatPlace = (place: PlaceParts, options?: PlaceLabelOptions): PlaceLabel =>
+  formatPlaceLabel(place, options);
+
+/** A city, written for display: `"Budva, Montenegro"`. */
+export const formatCityPlace = (city?: string | null, country?: string | null): PlaceLabel =>
+  formatPlaceLabel({ city, country });
+
+/** Label for a listing: its address, then the city and country it is filed under. */
 export const formatPropertyPlace = (property: {
   address?: string | null;
   city?: string | null;
   country?: string | null;
-}): PlaceLabel => formatPlaceLabel([property.address, property.city, property.country]);
-
-/** A city, written for display: `"Bečići, Montenegro"`. */
-export const formatCityPlace = (city?: string | null, country?: string | null): PlaceLabel =>
-  formatPlaceLabel([city, country]);
+}): PlaceLabel =>
+  formatPlaceLabel({ name: property.address, city: property.city, country: property.country });
 
 /**
- * Label for a geocoder result.
- *
- * The structured `address` object is preferred when the geocoder returns one,
- * because it names each level and the noisy ones can be left out by name
- * rather than guessed at by position. Without it, `display_name` is split on
- * commas and cleaned the same way.
+ * Address components a geocoder returns, in the shape Nominatim uses.
+ * Everything above the city — county, state, region — is deliberately absent:
+ * this format has no room for it.
  */
-export const formatGeocodedPlace = (result: {
+export interface GeocodedAddress {
+  road?: string;
+  street?: string;
+  suburb?: string;
+  neighbourhood?: string;
+  hamlet?: string;
+  village?: string;
+  town?: string;
+  city?: string;
+  municipality?: string;
+  county?: string;
+  state?: string;
+  country?: string;
+  postcode?: string;
+}
+
+export interface GeocodedPlace {
   display_name?: string;
   name?: string;
-  address?: {
-    road?: string;
-    street?: string;
-    suburb?: string;
-    neighbourhood?: string;
-    city?: string;
-    town?: string;
-    village?: string;
-    municipality?: string;
-    county?: string;
-    state?: string;
-    country?: string;
-    postcode?: string;
-  } | null;
-}): PlaceLabel => {
+  address?: GeocodedAddress | null;
+}
+
+/**
+ * Most specific first. The first of these that the geocoder filled in is the
+ * place; the first *settlement* below it that is a different place is the
+ * city.
+ */
+const NAME_LADDER: (keyof GeocodedAddress)[] = [
+  'road', 'street', 'neighbourhood', 'suburb', 'hamlet', 'village', 'town', 'city',
+];
+
+const CITY_LADDER: (keyof GeocodedAddress)[] = ['city', 'town', 'municipality', 'village'];
+
+/**
+ * Write a geocoder result as `<place>, <city>, <country>`.
+ *
+ * The structured address is used when there is one, because each level is
+ * named and the ones this format has no room for can be left out by name
+ * rather than guessed at by counting commas. Without it, `display_name` is
+ * read as "most specific, …, country" and the middle is discarded.
+ *
+ * Krani, a village in Resen municipality, comes back from Nominatim as
+ * `village: "Krani", municipality: "Resen", county: "Resen Municipality",
+ * country: "North Macedonia"` and is written "Krani, Resen, North Macedonia".
+ */
+export const formatGeocodedPlace = (
+  result: GeocodedPlace,
+  { context }: PlaceLabelOptions = {}
+): PlaceLabel => {
   const address = result.address;
 
   if (address) {
-    const settlement = address.city || address.town || address.village || address.municipality;
-    const specific =
-      result.name ||
-      address.road ||
-      address.street ||
-      address.neighbourhood ||
-      address.suburb ||
-      settlement;
+    const name = result.name?.trim() || NAME_LADDER.map((key) => address[key]).find(Boolean) || '';
 
-    return formatPlaceLabel([
-      specific,
-      address.suburb,
-      settlement,
-      address.county || address.state,
-      address.country,
-    ]);
+    const city = CITY_LADDER.map((key) => address[key]).find(
+      (value) => value && !isSamePlace(cleanComponent(value), cleanComponent(name))
+    );
+
+    return formatPlaceLabel({ name, city, country: address.country }, { context });
   }
 
-  const components = (result.display_name ?? result.name ?? '').split(',');
-  return formatPlaceLabel(components);
+  // No structured address. `display_name` runs most-specific to country, so
+  // the first component is the place and the last is the country; between
+  // them sit the levels this format has no room for, which are dropped by
+  // name before the nearest surviving one is taken as the city.
+  const components = (result.display_name ?? result.name ?? '')
+    .split(',')
+    .map((part) => part.trim())
+    .filter((part) => part && !ADMIN_LEVELS.test(part) && cleanComponent(part));
+
+  if (components.length === 0) return EMPTY_LABEL;
+
+  const [name, ...rest] = components;
+  const country = rest.length > 0 ? rest[rest.length - 1] : undefined;
+  // The component directly above the place is its nearest parent, which is
+  // the city; a repeat of the place's own name is dropped by the formatter.
+  const city = rest.length > 1 ? rest[0] : undefined;
+
+  return formatPlaceLabel({ name, city, country }, { context });
 };
 
 /**
- * The string to put in the search box when a suggestion is picked.
- *
- * Deliberately short — the name and one level of context. A search box
- * holding "Bečići, Budva" reads as a place; one holding "Bečići, Budva,
- * Coastal Montenegro, 85315, Montenegro" reads as a bug, and the extra
- * levels only make the text match noisier.
+ * What goes into a search box, an address field, or a listing's address when
+ * a suggestion is picked: the whole label, because the whole label *is* the
+ * address. One format everywhere means the text a user is left looking at is
+ * the text the app searched and the text it will store.
  */
-export const placeSearchValue = (label: PlaceLabel): string => {
-  const firstContext = label.secondary.split(',')[0]?.trim();
-  return [label.primary, firstContext].filter(Boolean).join(', ');
-};
+export const placeSearchValue = (label: PlaceLabel): string => label.full;

@@ -7,10 +7,10 @@ import {
   formatPlaceLabel,
   formatPropertyPlace,
   isSamePlace,
+  normalizePlaceName,
   placeSearchValue,
 } from '@/shared/geo';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
-import { normalizePlaceName } from '@/shared/geo';
 
 describe('canonicalPlaceName', () => {
   it('restores the local spelling of a city the app stores in ASCII', () => {
@@ -46,47 +46,106 @@ describe('canonicalPlaceName', () => {
   });
 });
 
-describe('formatPlaceLabel', () => {
-  it('splits a place into a name and just enough context', () => {
-    const label = formatPlace({ name: 'Becici', city: 'Budva', country: 'Montenegro' });
-    expect(label.primary).toBe('Bečići');
-    expect(label.secondary).toBe('Budva, Montenegro');
-    expect(label.full).toBe('Bečići, Budva, Montenegro');
+describe('the label is <place>, <city>, <country> and nothing else', () => {
+  it('writes a village inside a city', () => {
+    expect(formatPlace({ name: 'Becici', city: 'Budva', country: 'Montenegro' }).full)
+      .toBe('Bečići, Budva, Montenegro');
   });
 
-  it('never says the same place twice', () => {
+  it('writes a city as city and country', () => {
     expect(formatPlace({ name: 'Budva', city: 'Budva', country: 'Montenegro' }).full)
       .toBe('Budva, Montenegro');
+    expect(formatCityPlace('Vlore', 'Albania').full).toBe('Vlorë, Albania');
   });
 
-  it('drops the administrative wrapper around a name it already showed', () => {
-    // "Himarë, Bashkia Himarë, Vlorë County, 9425, Albania" is one place
-    // named three times with a postcode in the middle.
-    const label = formatPlaceLabel(['Himarë', 'Bashkia Himarë', 'Vlorë County', '9425', 'Albania']);
-    expect(label.primary).toBe('Himarë');
-    expect(label.secondary).toBe('Vlorë County, Albania');
+  it('writes a country as itself', () => {
+    expect(formatCityPlace(null, 'Montenegro').full).toBe('Montenegro');
   });
 
-  it('keeps context that is real, even when it wears an administrative word', () => {
-    const label = formatPlaceLabel(['Bečići', 'Opština Budva', 'Montenegro']);
-    expect(label.full).toBe('Bečići, Budva, Montenegro');
+  it('splits the label into a bold name and a grey context line', () => {
+    const label = formatPlace({ name: 'Krani', city: 'Resen', country: 'North Macedonia' });
+    expect(label.primary).toBe('Krani');
+    expect(label.secondary).toBe('Resen, North Macedonia');
   });
 
-  it('trims a deep hierarchy to two levels plus the country', () => {
-    const label = formatPlaceLabel([
-      'Stari Grad', 'Budva', 'Coastal Region', 'Southern Montenegro', 'Montenegro',
-    ]);
-    expect(label.primary).toBe('Stari Grad');
-    expect(label.secondary).toBe('Budva, Coastal Region, Montenegro');
+  it('never keeps a county, district, region or postcode', () => {
+    // Whatever a geocoder calls the levels between a place and its country,
+    // this format has no room for them.
+    const label = formatGeocodedPlace({
+      address: {
+        village: 'Krani',
+        municipality: 'Resen',
+        county: 'Resen Municipality',
+        state: 'Southwestern Region',
+        postcode: '7310',
+        country: 'North Macedonia',
+      },
+    });
+
+    expect(label.full).toBe('Krani, Resen, North Macedonia');
+  });
+
+  it('strips the administrative wrapper off a municipality', () => {
+    expect(formatPlace({ name: 'Bečići', city: 'Opština Budva', country: 'Montenegro' }).full)
+      .toBe('Bečići, Budva, Montenegro');
   });
 
   it('has nothing to say about nothing', () => {
-    expect(formatPlaceLabel([null, undefined, '  '])).toEqual({ primary: '', secondary: '', full: '' });
+    expect(formatPlaceLabel({ name: null, city: undefined, country: '  ' }))
+      .toEqual({ primary: '', secondary: '', full: '' });
+  });
+});
+
+describe('the city the user chose anchors the label', () => {
+  it('writes a far-away place under the city being listed in', () => {
+    // Himarë is 45km down the coast from Vlorë but inside its listing area.
+    // Filed under Vlorë, so it is written under Vlorë — not under whichever
+    // county the geocoder files it in.
+    const label = formatGeocodedPlace(
+      {
+        address: {
+          town: 'Himarë',
+          municipality: 'Bashkia Himarë',
+          county: 'Vlorë County',
+          country: 'Albania',
+        },
+      },
+      { context: { city: 'Vlore', country: 'Albania' } }
+    );
+
+    expect(label.full).toBe('Himarë, Vlorë, Albania');
+  });
+
+  it('writes a suburb under the city being listed in', () => {
+    const label = formatGeocodedPlace(
+      { address: { village: 'Krani', county: 'Resen Municipality', country: 'North Macedonia' } },
+      { context: { city: 'Resen', country: 'North Macedonia' } }
+    );
+
+    expect(label.full).toBe('Krani, Resen, North Macedonia');
+  });
+
+  it('still says the city only once when the place is the city', () => {
+    const label = formatGeocodedPlace(
+      { address: { city: 'Vlorë', county: 'Vlorë County', country: 'Albania' } },
+      { context: { city: 'Vlore', country: 'Albania' } }
+    );
+
+    expect(label.full).toBe('Vlorë, Albania');
+  });
+
+  it('overrides the parent the gazetteer holds, because the listing decides', () => {
+    const label = formatPlace(
+      { name: 'Trpejca', city: 'Ohrid', country: 'North Macedonia' },
+      { context: { city: 'Resen', country: 'North Macedonia' } }
+    );
+
+    expect(label.full).toBe('Trpejca, Resen, North Macedonia');
   });
 });
 
 describe('formatGeocodedPlace', () => {
-  it('reads the structured address a geocoder returns, ignoring the postcode', () => {
+  it('reads a street from the structured address', () => {
     const label = formatGeocodedPlace({
       display_name: 'ignored',
       address: {
@@ -98,39 +157,36 @@ describe('formatGeocodedPlace', () => {
       },
     });
 
-    expect(label.primary).toBe('Rruga Ismail Qemali');
-    expect(label.secondary).toBe('Vlorë, Albania');
+    expect(label.full).toBe('Rruga Ismail Qemali, Vlorë, Albania');
   });
 
-  it('falls back to the display name when there is no structured address', () => {
+  it('falls back to the display name, keeping only the place and the country', () => {
     const label = formatGeocodedPlace({
       display_name: 'Sveti Stefan, Opština Budva, 85315, Montenegro',
     });
 
-    expect(label.primary).toBe('Sveti Stefan');
-    expect(label.secondary).toBe('Budva, Montenegro');
+    expect(label.full).toBe('Sveti Stefan, Budva, Montenegro');
+  });
+
+  it('reads a bare two-part display name', () => {
+    expect(formatGeocodedPlace({ display_name: 'Ksamil, Albania' }).full).toBe('Ksamil, Albania');
   });
 });
 
 describe('placeSearchValue', () => {
-  it('puts a short, canonical label in the search box', () => {
+  it('is the whole label, because the label is the address', () => {
     const label = formatPlace({ name: 'Palasa', city: 'Vlore', country: 'Albania' });
-    expect(placeSearchValue(label)).toBe('Palasë, Vlorë');
-  });
-
-  it('leaves a place with no context as just its name', () => {
-    expect(placeSearchValue(formatCityPlace('Montenegro'))).toBe('Montenegro');
+    expect(placeSearchValue(label)).toBe('Palasë, Vlorë, Albania');
   });
 });
 
 describe('formatPropertyPlace', () => {
-  it('labels a listing by its address, then where it is', () => {
-    const label = formatPropertyPlace({
+  it('labels a listing by its address, then where it is filed', () => {
+    expect(formatPropertyPlace({
       address: 'Jadranski Put 12',
       city: 'Budva',
       country: 'Montenegro',
-    });
-    expect(label.full).toBe('Jadranski Put 12, Budva, Montenegro');
+    }).full).toBe('Jadranski Put 12, Budva, Montenegro');
   });
 });
 

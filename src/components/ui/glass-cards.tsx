@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { formatCityPlace } from '@/shared/geo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -386,7 +387,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                 <circle cx="12" cy="10" r="3" />
                             </svg>
                             <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                                {property.city}, {property.country}
+                                {formatCityPlace(property.city, property.country).full}
                             </span>
                         </div>
 
@@ -572,7 +573,7 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                     {property.title || property.address}
                 </h3>
                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                    {property.city}, {property.country}
+                    {formatCityPlace(property.city, property.country).full}
                 </p>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {[
