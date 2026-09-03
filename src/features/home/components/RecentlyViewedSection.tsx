@@ -91,13 +91,12 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
           </div>
         </div>
 
-        {/* Horizontal carousel */}
+        {/* Horizontal carousel.
+            No edge fade overlays: a white gradient sitting on top of the first
+            and last card washed them out — the card looked faded rather than
+            the rail looking scrollable. The arrows already signal that there is
+            more to scroll to. */}
         <div className="relative">
-          {/* Left fade */}
-          {canScrollLeft && (
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
-          )}
-
           {/* `overflow-x-auto` also clips vertically, so the rail has to pay for
               what the cards do on hover: 6px of lift plus the ~26px the raised
               shadow reaches below them. Without this padding the top of a
@@ -122,11 +121,6 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
               </div>
             ))}
           </div>
-
-          {/* Right fade */}
-          {canScrollRight && (
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-          )}
         </div>
       </div>
     </section>
