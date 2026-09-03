@@ -47,8 +47,9 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
   return (
     <section className="py-10 sm:py-14 bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Header — the rail below carries its own top padding for the hover
+            lift, so the header sits closer than the usual mb-6. */}
+        <div className="flex items-center justify-between mb-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
@@ -90,33 +91,36 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
           </div>
         </div>
 
-        {/* Horizontal carousel */}
+        {/* Horizontal carousel.
+            No edge fade overlays: a white gradient sitting on top of the first
+            and last card washed them out — the card looked faded rather than
+            the rail looking scrollable. The arrows already signal that there is
+            more to scroll to. */}
         <div className="relative">
-          {/* Left fade */}
-          {canScrollLeft && (
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
-          )}
-
+          {/* `overflow-x-auto` also clips vertically, so the rail has to pay for
+              what the cards do on hover: 6px of lift plus the ~26px the raised
+              shadow reaches below them. Without this padding the top of a
+              hovered card was sliced off and its drop shadow ended in a hard
+              horizontal band. The negative margins keep the first card flush
+              with the section's own gutter. */}
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2 -mx-1 px-1 no-backdrop-blur"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pt-5 pb-9 -mx-4 px-4 no-backdrop-blur"
             style={{ scrollSnapType: 'x mandatory' }}
           >
             {recentlyViewed.map((property) => (
+              /* No background or radius here: the card paints its own, and a
+                 second rounded white box behind it stayed put during the hover
+                 lift, showing as a grey seam under the card. */
               <div
                 key={property.id}
-                className="rv-card flex-shrink-0 w-[280px] sm:w-[310px] bg-white rounded-2xl"
+                className="rv-card flex-shrink-0 w-[280px] sm:w-[310px]"
                 style={{ scrollSnapAlign: 'start', willChange: 'transform', backfaceVisibility: 'hidden' }}
               >
                 <PropertyCard property={property} />
               </div>
             ))}
           </div>
-
-          {/* Right fade */}
-          {canScrollRight && (
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-          )}
         </div>
       </div>
     </section>
