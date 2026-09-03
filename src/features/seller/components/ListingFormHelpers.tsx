@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability, PropertyType } from '@/types';
 import type { ConstructionStatus } from '@/shared/property/construction';
 import { validateConstruction } from '@/shared/utils/validation';
 import { Button } from '@/components/ui/liquid-glass-button';
@@ -40,7 +40,7 @@ export interface ListingData {
     image_tags: { index: number; tag: string; }[];
     tourUrl: string; // URL for video (YouTube, TikTok, Instagram, Vimeo, Facebook)
     virtualTour360Url: string; // URL for 360 virtual tour (Matterport, Kuula, etc.)
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
+    propertyType: PropertyType;
     floorNumber: number;
     totalFloors: number;
     lat: number;

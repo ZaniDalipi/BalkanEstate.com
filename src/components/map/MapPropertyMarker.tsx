@@ -276,7 +276,11 @@ const PROPERTY_TYPE_COLORS: Record<
   villa: '#6f42c1',
   'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
   commercial: '#E11D48', // Rose — business premises
+  office: '#BE123C',     // Rose, darker — a commercial subtype, same family
+  warehouse: '#9F1239',  // Rose, darkest — industrial end of the same family
+  hotel: '#DB2777',      // Pink — hospitality, adjacent to but distinct from commercial
   parking: '#475569',    // Slate — reads like parking signage
+  garage: '#334155',     // Slate, darker — parking's built sibling
   land: '#8B4513',    // Brown for land
   other: '#0D9488',   // Teal — friendlier than the old gray, distinct from the other types
 };

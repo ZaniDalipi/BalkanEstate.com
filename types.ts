@@ -17,6 +17,12 @@
 import type { ConstructionStatus } from '@/shared/property/construction';
 export type { ConstructionStatus } from '@/shared/property/construction';
 
+// The property-type list is one contract with the backend, so it is read from
+// the shared module rather than re-spelled here. Four hand-copied versions of
+// it already drifted apart once and broke the build.
+import type { PropertyType, PropertyTypeFilter } from '@/shared/types/property.types';
+export type { PropertyType, PropertyTypeFilter } from '@/shared/types/property.types';
+
 // --- Enums and Simple Types ---
 export enum UserRole {
     BUYER = 'buyer',
@@ -360,7 +366,7 @@ export interface Property {
     lat: number;
     lng: number;
     seller: Seller;
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
+    propertyType: PropertyType;
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
@@ -500,7 +506,7 @@ export interface Filters {
     maxSqft: number | null;
     sortBy: string;
     sellerType: SellerType;
-    propertyType: 'any' | 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
+    propertyType: PropertyTypeFilter;
     // Advanced filters
     minYearBuilt: number | null;
     maxYearBuilt: number | null;

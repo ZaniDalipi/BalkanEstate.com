@@ -6,21 +6,6 @@ import {
   normalizeConstructionFields,
 } from '../utils/constructionStatus';
 
-export const PROPERTY_TYPES = [
-  'apartment',
-  'house',
-  'villa',
-  'luxury-villa',
-  'land',
-  'commercial',
-  'office',
-  'warehouse',
-  'hotel',
-  'garage',
-] as const;
-
-export type PropertyType = (typeof PROPERTY_TYPES)[number];
-
 export interface IPropertyImage {
   url: string;
   publicId?: string; // Cloudinary public_id for image management and deletion (optional for backwards compatibility)

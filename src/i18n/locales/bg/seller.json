@@ -618,7 +618,9 @@
     "garage": "Garage",
     "other": "Other",
     "luxuryVilla": "Луксозна вила",
-    "parking": "Паркомясто"
+    "parking": "Паркомясто",
+    "warehouse": "Склад",
+    "hotel": "Хотел"
   },
   "conditions": {
     "new": "New",

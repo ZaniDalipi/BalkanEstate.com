@@ -335,7 +335,11 @@
       "other": "Ostalo",
       "luxury-villa": "Luksuzna vila",
       "commercial": "Komercijalno",
-      "parking": "Parking mjesto"
+      "parking": "Parking mjesto",
+      "office": "Kancelarija",
+      "warehouse": "Skladište",
+      "hotel": "Hotel",
+      "garage": "Garaža"
     },
     "promotedListings": "Promovisani oglasi",
     "agentHint": "Kliknite za preporuke!",

@@ -614,7 +614,9 @@
     "garage": "Γκαράζ",
     "other": "Άλλο",
     "luxuryVilla": "Πολυτελής Βίλα",
-    "parking": "Θέση Στάθμευσης"
+    "parking": "Θέση Στάθμευσης",
+    "warehouse": "Αποθήκη",
+    "hotel": "Ξενοδοχείο"
   },
   "conditions": {
     "new": "Νέο",

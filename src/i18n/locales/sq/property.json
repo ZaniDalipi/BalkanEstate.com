@@ -335,7 +335,11 @@
       "other": "Tjetër",
       "luxury-villa": "Vilë luksoze",
       "commercial": "Komerciale",
-      "parking": "Vend parkimi"
+      "parking": "Vend parkimi",
+      "office": "Zyrë",
+      "warehouse": "Depo",
+      "hotel": "Hotel",
+      "garage": "Garazh"
     },
     "promotedListings": "Listime të Promovuara",
     "agentHint": "Kliko për rekomandime!",

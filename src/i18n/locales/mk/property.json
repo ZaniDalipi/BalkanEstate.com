@@ -335,7 +335,11 @@
       "other": "Друго",
       "luxury-villa": "Луксузна вила",
       "commercial": "Комерцијален",
-      "parking": "Паркинг место"
+      "parking": "Паркинг место",
+      "office": "Канцеларија",
+      "warehouse": "Магацин",
+      "hotel": "Хотел",
+      "garage": "Гаража"
     },
     "promotedListings": "Промовирани огласи",
     "agentHint": "Кликнете за препораки!",

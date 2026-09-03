@@ -354,7 +354,9 @@
     "garage": "Garazh",
     "other": "Tjetër",
     "luxuryVilla": "Vilë luksoze",
-    "parking": "Vend parkimi"
+    "parking": "Vend parkimi",
+    "warehouse": "Depo",
+    "hotel": "Hotel"
   },
   "conditions": {
     "new": "E Re",

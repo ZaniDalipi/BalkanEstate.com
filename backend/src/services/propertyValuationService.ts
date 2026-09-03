@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { escapeRegex } from '../utils/escapeRegex';
 import { propertyLogger } from '../utils/logger';
+import type { PropertyType } from '../config/propertyTypes';
 import PropertyValuation, {
   IPropertyValuation,
   IComparableProperty,
@@ -30,7 +31,7 @@ interface ValuationInput {
   country: string;
   lat?: number;
   lng?: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
+  propertyType: PropertyType;
   sqft: number;
   beds: number;
   baths: number;

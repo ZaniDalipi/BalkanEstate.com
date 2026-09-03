@@ -335,7 +335,11 @@
       "other": "Altele",
       "luxury-villa": "Vilă de lux",
       "commercial": "Comercial",
-      "parking": "Loc de parcare"
+      "parking": "Loc de parcare",
+      "office": "Birou",
+      "warehouse": "Depozit",
+      "hotel": "Hotel",
+      "garage": "Garaj"
     },
     "promotedListings": "Anunțuri Promovate",
     "agentHint": "Click pentru recomandări!",

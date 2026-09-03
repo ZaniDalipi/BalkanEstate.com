@@ -13,7 +13,11 @@ export const PROPERTY_TYPES = [
   'villa',
   'luxury-villa',
   'commercial',
+  'office',
+  'warehouse',
+  'hotel',
   'parking',
+  'garage',
   'land',
   'other',
 ] as const;

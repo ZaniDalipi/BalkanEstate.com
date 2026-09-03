@@ -24,7 +24,11 @@ const OPTION_BY_TYPE: Record<PropertyType, Omit<PropertyTypeOption, 'value'>> = 
   villa: { labelKey: 'propertyTypes.villa', fallback: 'Villa' },
   'luxury-villa': { labelKey: 'propertyTypes.luxuryVilla', fallback: 'Luxury Villa' },
   commercial: { labelKey: 'propertyTypes.commercial', fallback: 'Business / Commercial' },
+  office: { labelKey: 'propertyTypes.office', fallback: 'Office' },
+  warehouse: { labelKey: 'propertyTypes.warehouse', fallback: 'Warehouse' },
+  hotel: { labelKey: 'propertyTypes.hotel', fallback: 'Hotel' },
   parking: { labelKey: 'propertyTypes.parking', fallback: 'Parking Space' },
+  garage: { labelKey: 'propertyTypes.garage', fallback: 'Garage' },
   land: { labelKey: 'propertyTypes.land', fallback: 'Land' },
   other: { labelKey: 'propertyTypes.other', fallback: 'Other' },
 };
@@ -50,10 +54,10 @@ const RESIDENTIAL_TYPES: ReadonlySet<PropertyType> = new Set<PropertyType>([
 export const isResidentialPropertyType = (type: PropertyType): boolean => RESIDENTIAL_TYPES.has(type);
 
 /**
- * Types with no interior to describe room by room. A parking space and a plot
- * of land both fall here: the form hides room counts, floor plans and interior
- * features for them.
+ * Types with no interior to describe room by room. A plot of land, a parking
+ * bay and a lock-up garage all fall here: the form hides room counts, floor
+ * plans and interior features for them.
  */
-const UNBUILT_TYPES: ReadonlySet<PropertyType> = new Set<PropertyType>(['land', 'parking']);
+const UNBUILT_TYPES: ReadonlySet<PropertyType> = new Set<PropertyType>(['land', 'parking', 'garage']);
 
 export const hasHabitableInterior = (type: PropertyType): boolean => !UNBUILT_TYPES.has(type);

@@ -614,7 +614,9 @@
     "garage": "Garaj",
     "other": "Altele",
     "luxuryVilla": "Vilă de lux",
-    "parking": "Loc de parcare"
+    "parking": "Loc de parcare",
+    "warehouse": "Depozit",
+    "hotel": "Hotel"
   },
   "conditions": {
     "new": "Nou",

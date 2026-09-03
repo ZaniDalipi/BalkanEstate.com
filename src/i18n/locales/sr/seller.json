@@ -614,7 +614,9 @@
     "garage": "Гаража",
     "other": "Остало",
     "luxuryVilla": "Луксузна вила",
-    "parking": "Паркинг место"
+    "parking": "Паркинг место",
+    "warehouse": "Складиште",
+    "hotel": "Хотел"
   },
   "conditions": {
     "new": "Ново",

@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import { apiLogger } from '../utils/logger';
+import type { PropertyType } from '../config/propertyTypes';
 
 // Target long-edge (px) for the high-quality downloadable restyle image.
 const HQ_LONG_EDGE = 2048;
@@ -190,7 +191,7 @@ export const generateDescriptionFromImages = async (
   images: Buffer[],
   mimeTypes: string[],
   language: string,
-  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other',
+  propertyType: PropertyType,
   location?: LocationContext
 ): Promise<PropertyAnalysisResult> => {
   // Convert buffers to base64 inline data parts for Gemini API

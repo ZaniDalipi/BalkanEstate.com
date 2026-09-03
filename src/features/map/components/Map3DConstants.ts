@@ -3,6 +3,7 @@
 
 import type { TimePeriod } from '../hooks/useShadowTimelapse';
 import type { MapDestination } from '@/shared/map/mapDestination';
+import type { PropertyType } from '@/shared/types/property.types';
 
 /**
  * Props for Map3DBuildings component
@@ -30,7 +31,7 @@ export interface Map3DBuildingsProps {
   // Floor highlighting for apartments
   floorNumber?: number;
   totalFloors?: number;
-  propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
+  propertyType?: PropertyType;
   // 360 Virtual Tour
   virtualTour360Url?: string;
   // Building facing direction (user-defined)

@@ -354,7 +354,11 @@
       "other": "Other",
       "luxury-villa": "Luxury Villa",
       "commercial": "Commercial",
-      "parking": "Parking Space"
+      "parking": "Parking Space",
+      "office": "Office",
+      "warehouse": "Warehouse",
+      "hotel": "Hotel",
+      "garage": "Garage"
     },
     "promotedListings": "Promoted Listings",
     "agentHint": "Click for recommendations!",

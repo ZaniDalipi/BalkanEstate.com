@@ -626,7 +626,9 @@
     "garage": "Garage",
     "other": "Other",
     "luxuryVilla": "Luxury Villa",
-    "parking": "Parking Space"
+    "parking": "Parking Space",
+    "warehouse": "Warehouse",
+    "hotel": "Hotel"
   },
   "conditions": {
     "new": "New",

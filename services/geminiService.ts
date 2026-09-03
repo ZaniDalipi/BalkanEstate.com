@@ -2,6 +2,7 @@
 // This ensures API keys are never exposed in the browser bundle
 
 import { Property, PropertyImageTag, ChatMessage, AiSearchQuery, Filters } from '../types';
+import type { PropertyType } from '@/shared/types/property.types';
 import { apiRequest, uploadRequest } from '@/src/shared/api';
 import type { LatLngBounds } from 'leaflet';
 
@@ -49,7 +50,7 @@ export interface AiChatResponse {
 export const generateDescriptionFromImages = async (
     images: File[],
     language: string,
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other',
+    propertyType: PropertyType,
     location?: LocationContext
 ): Promise<PropertyAnalysisResult> => {
     const formData = new FormData();
