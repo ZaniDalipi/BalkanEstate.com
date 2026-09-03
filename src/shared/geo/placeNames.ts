@@ -33,101 +33,24 @@
 import { normalizePlaceName } from './normalize';
 import { BALKAN_LOCALITIES } from './localities';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
+import CITY_SPELLING_DATA from './placeSpellings.json';
 
 /**
- * Local spellings of the cities the app stores in ASCII.
+ * Local spellings of the cities the app stores in ASCII, in
+ * `placeSpellings.json`.
+ *
+ * Data rather than code because it is not only this app that needs it: the
+ * address migration (`backend/src/scripts/migratePropertyAddresses.ts`) reads
+ * the same file, and a table that lived in two places would eventually spell
+ * one city two ways.
  *
  * Only diacritics are restored — never a different name. "Belgrade" stays
  * "Belgrade" and "Tirana" stays "Tirana", because swapping in "Beograd" or
  * "Tiranë" would be translating rather than spelling, and the app's own i18n
- * layer is what decides which language a user reads.
+ * layer is what decides which language a user reads. A test holds the file to
+ * that rule.
  */
-const CITY_SPELLINGS: Record<string, string> = {
-  // Kosovo
-  Decan: 'Deçan',
-  // Albania
-  Durres: 'Durrës',
-  Vlore: 'Vlorë',
-  Shkoder: 'Shkodër',
-  Korce: 'Korçë',
-  Kavaje: 'Kavajë',
-  Gjirokaster: 'Gjirokastër',
-  Sarande: 'Sarandë',
-  Kukes: 'Kukës',
-  Lezhe: 'Lezhë',
-  Lushnje: 'Lushnjë',
-  Permet: 'Përmet',
-  Kruje: 'Krujë',
-  Corovode: 'Çorovodë',
-  Erseke: 'Ersekë',
-  Kelcyre: 'Këlcyrë',
-  // North Macedonia
-  Stip: 'Štip',
-  Kicevo: 'Kičevo',
-  Kocani: 'Kočani',
-  Radovis: 'Radoviš',
-  Delcevo: 'Delčevo',
-  // Serbia
-  Nis: 'Niš',
-  Pancevo: 'Pančevo',
-  Cacak: 'Čačak',
-  Uzice: 'Užice',
-  Sabac: 'Šabac',
-  Pozarevac: 'Požarevac',
-  Zajecar: 'Zaječar',
-  Vrsac: 'Vršac',
-  Krusevac: 'Kruševac',
-  Arandelovac: 'Aranđelovac',
-  // Bosnia and Herzegovina
-  Brcko: 'Brčko',
-  'Velika Kladusa': 'Velika Kladuša',
-  Gorazde: 'Goražde',
-  Zavidovici: 'Zavidovići',
-  Foca: 'Foča',
-  Gradacac: 'Gradačac',
-  'Siroki Brijeg': 'Široki Brijeg',
-  // Croatia
-  Varazdin: 'Varaždin',
-  Sibenik: 'Šibenik',
-  Pozega: 'Požega',
-  Gospic: 'Gospić',
-  Cakovec: 'Čakovec',
-  Omis: 'Omiš',
-  Korcula: 'Korčula',
-  Losinj: 'Lošinj',
-  Pasman: 'Pašman',
-  Solta: 'Šolta',
-  Ciovo: 'Čiovo',
-  Fazana: 'Fažana',
-  Porec: 'Poreč',
-  Primosten: 'Primošten',
-  Brac: 'Brač',
-  // Montenegro
-  Niksic: 'Nikšić',
-  Zabljak: 'Žabljak',
-  Kolasin: 'Kolašin',
-  Pluzine: 'Plužine',
-  Rozaje: 'Rožaje',
-  // Romania
-  Timisoara: 'Timișoara',
-  Iasi: 'Iași',
-  Constanta: 'Constanța',
-  Brasov: 'Brașov',
-  Galati: 'Galați',
-  Ploiesti: 'Ploiești',
-  Braila: 'Brăila',
-  Pitesti: 'Pitești',
-  Bacau: 'Bacău',
-  'Targu Mures': 'Târgu Mureș',
-  Buzau: 'Buzău',
-  Botosani: 'Botoșani',
-  'Piatra Neamt': 'Piatra Neamț',
-  'Ramnicu Valcea': 'Râmnicu Vâlcea',
-  Focsani: 'Focșani',
-  'Targu Jiu': 'Târgu Jiu',
-  Resita: 'Reșița',
-  Targoviste: 'Târgoviște',
-};
+const CITY_SPELLINGS: Record<string, string> = CITY_SPELLING_DATA;
 
 /**
  * Every name the app knows how to spell, keyed by its folded form: the city
