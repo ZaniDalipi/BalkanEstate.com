@@ -337,7 +337,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               <div style={{
                 position: 'absolute', top: '100%', left: 0, right: 0,
                 marginTop: '6px', borderRadius: '16px', overflow: 'hidden',
-                background: 'rgba(255,255,255,0.92)',
+                // Near-opaque, not merely frosted: the hero's action buttons
+                // sit directly under this panel, and at any real transparency
+                // they ghost through the suggestions and make them hard to read.
+                background: 'rgba(255,255,255,0.985)',
                 backdropFilter: 'blur(24px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(24px) saturate(180%)',
                 border: '1px solid rgba(226,232,240,0.7)',

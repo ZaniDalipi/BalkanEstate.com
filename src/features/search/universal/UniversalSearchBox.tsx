@@ -284,7 +284,9 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
           id={listboxId}
           role="listbox"
           aria-label={t('search:searchLocation')}
-          className="absolute z-30 w-full mt-1 bg-white/95 backdrop-blur-xl border border-neutral-200/80 rounded-2xl shadow-2xl shadow-black/10 max-h-[26rem] overflow-y-auto py-1"
+          // Near-opaque: this list sits over a map and over page content,
+          // and anything that shows through it makes the rows hard to read.
+          className="absolute z-30 w-full mt-1 bg-white/[0.98] backdrop-blur-xl border border-neutral-200/80 rounded-2xl shadow-2xl shadow-black/10 max-h-[26rem] overflow-y-auto py-1"
         >
           {groups.map((group) => (
             <React.Fragment key={group.labelKey || 'primary'}>
