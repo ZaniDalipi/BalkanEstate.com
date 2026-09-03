@@ -129,7 +129,67 @@ function hasOwnTransform(el: HTMLElement): boolean {
   return !IDENTITY_TRANSFORMS.has(getComputedStyle(el).transform);
 }
 
-function spawnRipple(el: HTMLElement, rect: DOMRect, x: number, y: number): void {
+/** A live ripple, for as long as the press it belongs to is undecided. */
+interface RippleHandle {
+  cancel: () => void;
+}
+
+/**
+ * How the ripple is anchored, and why it needs watching.
+ *
+ * `.press-ripple` is `position: fixed`, placed at the control's viewport rect
+ * as it was at `pointerdown`. That is correct for exactly as long as the
+ * control does not move — and on a touchscreen it moves constantly: the press
+ * that starts a scroll, momentum still running from the previous flick, a
+ * horizontal rail snapping to the next card, the page reflowing as an image
+ * finally decodes.
+ *
+ * When it moved, the ripple stayed where it was: a fixed, control-sized,
+ * control-coloured slab left behind at the old position while the control
+ * scrolled away from underneath it. On a big surface — a property card is
+ * ~280x530 — that reads as a large grey rectangle floating over the page with
+ * a curved bite out of it (the expanding circle's edge, frozen mid-animation),
+ * nothing like a press. It is the "weird shadow" this watcher exists to stop.
+ *
+ * So for the ripple's short life the anchor is re-read each frame and the box
+ * follows it, and a ripple whose anchor has left the DOM or collapsed is
+ * dropped rather than orphaned. ~31 frames of one `getBoundingClientRect` is
+ * far cheaper than the alternative of an artifact that outlives the gesture.
+ */
+function trackAnchor(ripple: HTMLElement, el: HTMLElement, rect: DOMRect): () => void {
+  if (typeof requestAnimationFrame !== 'function') return () => {};
+
+  let frame = 0;
+  let { left, top, width, height } = rect;
+
+  const step = () => {
+    if (!ripple.isConnected) return;
+    // The control is gone (navigated away, list re-rendered) or has collapsed:
+    // there is nothing left for the ripple to belong to.
+    if (!el.isConnected) {
+      ripple.remove();
+      return;
+    }
+    const next = el.getBoundingClientRect();
+    if (next.width <= 0 || next.height <= 0) {
+      ripple.remove();
+      return;
+    }
+    if (next.left !== left || next.top !== top || next.width !== width || next.height !== height) {
+      ({ left, top, width, height } = next);
+      ripple.style.left = `${left}px`;
+      ripple.style.top = `${top}px`;
+      ripple.style.width = `${width}px`;
+      ripple.style.height = `${height}px`;
+    }
+    frame = requestAnimationFrame(step);
+  };
+
+  frame = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(frame);
+}
+
+function spawnRipple(el: HTMLElement, rect: DOMRect, x: number, y: number): RippleHandle {
   const style = getComputedStyle(el);
   const ripple = document.createElement('span');
   ripple.className = 'press-ripple';
@@ -161,7 +221,29 @@ function spawnRipple(el: HTMLElement, rect: DOMRect, x: number, y: number): void
 
   ripple.appendChild(circle);
   ensureLayer().appendChild(ripple);
-  window.setTimeout(() => ripple.remove(), RIPPLE_MS);
+
+  const untrack = trackAnchor(ripple, el, rect);
+
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    untrack();
+    window.clearTimeout(timeout);
+    ripple.remove();
+  };
+
+  const timeout = window.setTimeout(finish, RIPPLE_MS);
+
+  return {
+    /**
+     * The press turned out to be a scroll or a drag. Take the ripple away at
+     * once rather than letting it play out: the finger is already moving the
+     * page, so a ripple that keeps expanding is confirming a tap that is not
+     * going to happen.
+     */
+    cancel: finish,
+  };
 }
 
 /**
@@ -184,7 +266,7 @@ export function initPressFeedback(): void {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
 
-      spawnRipple(el, rect, event.clientX, event.clientY);
+      const ripple = spawnRipple(el, rect, event.clientX, event.clientY);
 
       // Only take over the transform when the element has none of its own.
       // Components with their own `active:scale-*` keep their behaviour, and a
@@ -195,26 +277,40 @@ export function initPressFeedback(): void {
         !isTooLargeToScale(rect);
 
       let released = false;
-      const release = () => {
+      /**
+       * `abandoned` separates the two ways a press ends. A `pointerup` is the
+       * tap the user meant, and its ripple should play out. A scroll, a drag,
+       * or a `pointercancel` means the gesture became something else — there
+       * the ripple has to go immediately, because the thing it is drawn on is
+       * about to move out from under it.
+       */
+      const release = (abandoned: boolean) => {
         if (released) return;
         released = true;
+        if (abandoned) ripple.cancel();
         if (scalable) {
           el.style.transform = '';
           el.style.transition = '';
         }
         window.clearTimeout(safety);
-        window.removeEventListener('pointerup', release, true);
-        window.removeEventListener('pointercancel', release, true);
+        window.removeEventListener('pointerup', onUp, true);
+        window.removeEventListener('pointercancel', onAbandon, true);
         window.removeEventListener('pointermove', onMove, true);
-        window.removeEventListener('scroll', release, true);
+        window.removeEventListener('scroll', onAbandon, true);
       };
+
+      // Wrappers, not `release` itself: an event listener is called with the
+      // event, and a truthy event would silently make every release an
+      // abandonment — including the plain taps whose ripple should finish.
+      const onUp = () => release(false);
+      const onAbandon = () => release(true);
 
       const onMove = (moveEvent: PointerEvent) => {
         if (
           Math.abs(moveEvent.clientX - event.clientX) > DRAG_CANCEL_PX ||
           Math.abs(moveEvent.clientY - event.clientY) > DRAG_CANCEL_PX
         ) {
-          release();
+          release(true);
         }
       };
 
@@ -227,13 +323,16 @@ export function initPressFeedback(): void {
 
       // A pointerup swallowed by a component that removes the element, or a
       // gesture the browser never resolves, must not leave a control shrunk.
-      const safety = window.setTimeout(release, PRESS_SAFETY_MS);
+      const safety = window.setTimeout(onAbandon, PRESS_SAFETY_MS);
 
       // Capture phase: a handler calling stopPropagation must not strand us.
-      window.addEventListener('pointerup', release, true);
-      window.addEventListener('pointercancel', release, true);
+      // `scroll` also has to be captured — it does not bubble, so a nested
+      // scroller (the horizontal card rails) would otherwise never reach us,
+      // and those rails are exactly where a press turns into a scroll.
+      window.addEventListener('pointerup', onUp, true);
+      window.addEventListener('pointercancel', onAbandon, true);
       window.addEventListener('pointermove', onMove, true);
-      window.addEventListener('scroll', release, true);
+      window.addEventListener('scroll', onAbandon, true);
     },
     true, // capture — see above
   );
