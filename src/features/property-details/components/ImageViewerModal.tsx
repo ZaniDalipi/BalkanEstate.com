@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { getGallerySources, warmGallery, VIEWER_SIZES } from '@/config/galleryImages';
 import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
 
@@ -65,7 +66,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const [drawWidth, setDrawWidth] = useState(WIDTHS[1]);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawingRef = useRef(false);
-    const imageElRef = useRef<HTMLImageElement>(null);
+    const imageElRef = useRef<HTMLImageElement | null>(null);
     const imageAreaRef = useRef<HTMLDivElement>(null);
 
     // Touch tracking (never causes re-renders)
@@ -347,13 +348,18 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
         resetZoom(); setStrokes([]); setAnnotateMode(false);
     }, [currentIndex, images, resetZoom]);
 
+    // Warm neighbours with the exact request the <img> below will make — same
+    // srcSet/sizes/crossOrigin. Preloading a single hard-coded width (or without
+    // crossOrigin) lands in a different cache entry and is silently re-fetched.
     useEffect(() => {
         if (images.length <= 1) return;
-        [((currentIndex - 1 + images.length) % images.length), ((currentIndex + 1) % images.length)].forEach(idx => {
-            const url = images[idx]?.url;
-            if (url) { const img = new Image(); img.src = optimizeCloudinaryUrl(url, { width: 1920, quality: 'auto' }); }
-        });
+        warmGallery(images.map(img => img.url), { activeIndex: currentIndex, sizes: VIEWER_SIZES, fallbackWidth: 1920 });
     }, [currentIndex, images]);
+
+    const currentSources = useMemo(
+        () => getGallerySources(images[currentIndex]?.url, { sizes: VIEWER_SIZES, fallbackWidth: 1920 }),
+        [images, currentIndex]
+    );
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -583,7 +589,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                 {/* Blurred LQIP backdrop */}
                 {!imageError && (
                     <img
-                        src={optimizeCloudinaryUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
+                        // Same placeholder URL the inline gallery uses, so opening
+                        // fullscreen paints the blur from cache instead of fetching.
+                        src={currentSources.placeholder || optimizeCloudinaryUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-40 pointer-events-none select-none"
@@ -609,20 +617,35 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         </div>
                     ) : (
                         <img
-                            ref={imageElRef}
+                            ref={(el) => {
+                                imageElRef.current = el;
+                                // A warmed photo can already be complete before
+                                // onLoad is wired up; without this it would sit
+                                // invisible behind the blur until the next paint.
+                                if (el?.complete && el.naturalWidth > 0) setImageLoaded(true);
+                            }}
                             key={images[currentIndex].url}
-                            src={optimizeCloudinaryUrl(images[currentIndex].url, { width: 1920, quality: 'auto' })}
-                            srcSet={cloudinarySrcSet(images[currentIndex].url, [640, 1024, 1440, 1920])}
-                            sizes="100vw"
+                            src={currentSources.src}
+                            srcSet={currentSources.srcSet || undefined}
+                            sizes={currentSources.srcSet ? currentSources.sizes : undefined}
+                            crossOrigin={currentSources.crossOrigin}
                             alt={t('property:imageViewer.imageAlt', 'Property image {{current}} of {{total}}', { current: currentIndex + 1, total: images.length })}
                             width={1920}
                             height={1280}
                             loading="eager"
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                            fetchpriority="high"
                             decoding="async"
                             draggable={false}
-                            crossOrigin="anonymous"
-                            className={`max-w-full max-h-full object-contain select-none transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            style={{ userSelect: 'none', pointerEvents: 'none' }}
+                            className="max-w-full max-h-full object-contain select-none"
+                            style={{
+                                userSelect: 'none',
+                                pointerEvents: 'none',
+                                opacity: imageLoaded ? 1 : 0,
+                                transform: imageLoaded ? 'scale(1)' : 'scale(1.02)',
+                                transition: 'opacity 320ms ease-out, transform 320ms ease-out',
+                            }}
                             onLoad={() => setImageLoaded(true)}
                             onError={() => setImageError(true)}
                         />

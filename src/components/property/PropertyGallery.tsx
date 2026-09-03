@@ -2,7 +2,7 @@
 // Image gallery with carousel, street view, video player, and interactive controls
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '../../../types';
 import {
@@ -10,24 +10,9 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { getGallerySources, warmGallery } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
-
-const isCloudinaryUrl = (url: string): boolean =>
-  typeof url === 'string' && url.includes('res.cloudinary.com');
-
-/** Returns an optimized src — Cloudinary transform for uploads, backend proxy for external URLs. */
-const getImageSrc = (url: string, width: number): string => {
-  if (!url) return '';
-  if (isCloudinaryUrl(url)) return optimizeCloudinaryUrl(url, { width, quality: 'auto' });
-  return `/api/image-proxy?url=${encodeURIComponent(url)}`;
-};
-
-/** srcSet is only meaningful for Cloudinary images; proxied external images don't support it. */
-const getImageSrcSet = (url: string, widths: number[]): string => {
-  if (!url || !isCloudinaryUrl(url)) return '';
-  return cloudinarySrcSet(url, widths);
-};
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
 interface PropertyGalleryProps {
@@ -66,14 +51,33 @@ interface PropertyGalleryProps {
  * />
  * ```
  */
-const imageSlideVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%' }),
-  center: { x: '0%' },
-  exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%' }),
-};
-
 const KEN_BURNS_DURATION = 6;
 const CONTAINER_ASPECT = 16 / 9;
+
+/**
+ * How many slides either side of the visible one stay mounted.
+ *
+ * Mounted slides keep their decoded bitmap, so stepping to a neighbour is a
+ * pure transform — no network, no decode, no blur-up. Two each way covers a
+ * swipe, an arrow tap and the 5 s auto-rotate without holding the whole gallery
+ * in memory.
+ */
+const SLIDE_WINDOW = 2;
+
+const SLIDE_TRANSITION = { duration: 0.42, ease: [0.22, 0.61, 0.36, 1] as const };
+
+/**
+ * Signed distance from `current` to `index` around a ring of `length`, taking
+ * the short way round so wrapping from the last photo to the first still slides
+ * forwards rather than rewinding through the whole strip.
+ */
+const cyclicOffset = (index: number, current: number, length: number): number => {
+  if (length <= 1) return 0;
+  let delta = index - current;
+  if (delta > length / 2) delta -= length;
+  if (delta < -length / 2) delta += length;
+  return delta;
+};
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
@@ -121,15 +125,35 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [onImageIndexChange, controlledIndex, internalIndex]);
 
-  const [mainImageError, setMainImageError] = useState(false);
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
-  const [imageAspect, setImageAspect] = useState<number>(CONTAINER_ASPECT);
-  const handleMainImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
+
+  // Slides persist, so load state, aspect ratio and failures are tracked per
+  // photo rather than as one flag for "the current image".
+  const [loadedUrls, setLoadedUrls] = useState<Record<string, true>>({});
+  const [failedUrls, setFailedUrls] = useState<Record<string, true>>({});
+  const [aspects, setAspects] = useState<Record<string, number>>({});
+
+  const markLoaded = useCallback((url: string, img: HTMLImageElement) => {
     if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-      setImageAspect(img.naturalWidth / img.naturalHeight);
+      const ratio = img.naturalWidth / img.naturalHeight;
+      setAspects((prev) => (prev[url] === ratio ? prev : { ...prev, [url]: ratio }));
     }
+    setLoadedUrls((prev) => (prev[url] ? prev : { ...prev, [url]: true }));
   }, []);
+
+  /**
+   * A warmed photo can already be complete before React attaches `onLoad`,
+   * which would leave it stuck behind the blur-up overlay. Checking on mount
+   * reveals it in the same frame instead.
+   *
+   * The URL rides on a data attribute rather than a closure so this callback
+   * keeps a stable identity — otherwise React would detach and reattach every
+   * slide's ref on every render.
+   */
+  const registerSlideImage = useCallback((img: HTMLImageElement | null) => {
+    const url = img?.dataset.galleryUrl;
+    if (url && img.complete && img.naturalWidth > 0) markLoaded(url, img);
+  }, [markLoaded]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -349,34 +373,24 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
+  /**
+   * Warm the whole listing the moment it opens, not just the active category.
+   *
+   * `warmGallery` issues the exact request each `<img>` will make — same
+   * srcSet/sizes/crossOrigin — so a warmed photo is a cache hit when shown.
+   * Preloading with any other combination silently downloads everything twice.
+   *
+   * Every photo is covered (categories only filter the same set, so switching
+   * pill is instant too), ordered outwards from whatever is on screen and
+   * capped to a few parallel requests so background warms never slow the photo
+   * the user is actually looking at.
+   */
   useEffect(() => {
-    setMainImageError(false);
-  }, [currentImageUrl]);
-
-  // Preload all gallery images at display size when the category changes.
-  // This runs in the background — lower priority so it doesn't block the current image.
-  useEffect(() => {
-    imagesForCurrentCategory.forEach((item) => {
-      const el = new Image();
-      el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
+    const activeIndex = allImages.findIndex((img) => img.url === currentImageUrl);
+    warmGallery(allImages.map((img) => img.url), {
+      activeIndex: activeIndex >= 0 ? activeIndex : 0,
     });
-  }, [imagesForCurrentCategory]);
-
-  // High-priority preload of adjacent images whenever the slide index changes.
-  // This ensures the next/prev images are always in the browser cache before the user swipes.
-  useEffect(() => {
-    const len = imagesForCurrentCategory.length;
-    if (len <= 1) return;
-    [-1, 1, 2].forEach((offset) => {
-      const idx = ((currentImageIndex + offset) % len + len) % len;
-      const item = imagesForCurrentCategory[idx];
-      if (item?.url) {
-        const el = new Image();
-        el.fetchPriority = 'high';
-        el.src = optimizeCloudinaryUrl(item.url, { width: 1200, quality: 'auto' });
-      }
-    });
-  }, [currentImageIndex, imagesForCurrentCategory]);
+  }, [allImages, currentImageUrl]);
 
   const handleCategorySelect = useCallback((tag: PropertyImageTag | 'all') => {
     setActiveCategory(tag);
@@ -387,16 +401,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [setActiveCategory, onImageIndexChange]);
 
-  // 1 = forward/next, -1 = backward/prev
-  const [slideDirection, setSlideDirection] = useState(1);
-
   // In-gallery ad: appears once the visitor starts browsing photos; dismissible.
   const [galleryAdDismissed, setGalleryAdDismissed] = useState(false);
   const showGalleryAd =
     viewMode === 'photos' && !galleryAdDismissed && currentImageIndex >= 1;
 
   const handleNextImage = useCallback(() => {
-    setSlideDirection(1);
     const newIndex = (currentImageIndex + 1) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -430,7 +440,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [viewMode, imagesForCurrentCategory.length, handleNextImage]);
 
   const handlePrevImage = useCallback(() => {
-    setSlideDirection(-1);
     const newIndex = (currentImageIndex - 1 + imagesForCurrentCategory.length) % imagesForCurrentCategory.length;
     if (onImageIndexChange) {
       onImageIndexChange(newIndex);
@@ -439,14 +448,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
   }, [currentImageIndex, imagesForCurrentCategory.length, onImageIndexChange]);
 
-  const handleDotNav = useCallback((index: number) => {
-    setSlideDirection(index > currentImageIndex ? 1 : -1);
-    if (onImageIndexChange) {
-      onImageIndexChange(index);
-    } else {
-      setInternalIndex(index);
-    }
-  }, [currentImageIndex, onImageIndexChange]);
+  /**
+   * The slides that stay mounted: the visible photo plus `SLIDE_WINDOW` either
+   * side, each carrying its signed offset so the whole strip animates as one
+   * track. Because these elements are never unmounted, moving between them
+   * costs a transform and nothing else.
+   */
+  const visibleSlides = useMemo(() => {
+    const len = imagesForCurrentCategory.length;
+    return imagesForCurrentCategory
+      .map((item, index) => ({ item, index, offset: cyclicOffset(index, currentImageIndex, len) }))
+      .filter(({ item, offset }) => !!item.url && Math.abs(offset) <= SLIDE_WINDOW);
+  }, [imagesForCurrentCategory, currentImageIndex]);
 
   return (
     // data-no-swipe-back: a horizontal drag in here changes photo. It sits at
@@ -481,83 +494,98 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             style={{ touchAction: 'pan-y' }}
             aria-label={t('property:gallery.viewImages', 'View property images')}
           >
-            {mainImageError ? (
+            {failedUrls[currentImageUrl] || visibleSlides.length === 0 ? (
               <div className="w-full h-full bg-gradient-to-br from-neutral-700 to-neutral-800 flex items-center justify-center">
                 <BuildingOfficeIcon className="w-20 h-20 text-neutral-500" />
               </div>
             ) : (
-              <>
-                {/* LQIP blurred background — fills letterbox bars on desktop object-contain */}
-                <img
-                  src={getPropertyImagePlaceholder(currentImageUrl) || getImageSrc(currentImageUrl, 40)}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
-                />
+              /* Persistent slide track. Every windowed photo stays mounted and is
+                 positioned by its offset, so changing photo is a GPU transform
+                 rather than a mount + fetch + decode. */
+              visibleSlides.map(({ item, index, offset }) => {
+                const isActive = offset === 0;
+                const sources = getGallerySources(item.url);
+                const isLoaded = !!loadedUrls[item.url];
 
-                {/* AnimatePresence at the outer level so exit animations complete before unmount */}
-                <AnimatePresence initial={false} custom={slideDirection}>
+                // Animate only photos that fill the frame. Narrow ones sit
+                // inside letterbox bars and must stay perfectly still.
+                const isWide = (aspects[item.url] ?? CONTAINER_ASPECT) >= CONTAINER_ASPECT;
+
+                // Camera pan L↔R. Scale 1.14 overflows 7% each side, exactly
+                // matching the 7% travel, so an edge never shows. The direction
+                // alternates per photo so consecutive slides don't pan alike.
+                const sign = index % 2 === 0 ? 1 : -1;
+                const kbFrom = isWide ? { scale: 1.14, x: `${7 * sign}%` } : { scale: 1, x: '0%' };
+                const kbTo = isWide ? { scale: 1.14, x: `${-7 * sign}%` } : { scale: 1, x: '0%' };
+
+                return (
                   <motion.div
-                    key={currentImageUrl}
-                    className="absolute inset-0"
-                    custom={slideDirection}
-                    variants={imageSlideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] },
-                    }}
+                    key={item.url}
+                    className="absolute inset-0 overflow-hidden"
+                    initial={false}
+                    animate={{ x: `${offset * 100}%` }}
+                    transition={SLIDE_TRANSITION}
+                    style={{ zIndex: isActive ? 2 : 1, willChange: 'transform' }}
+                    aria-hidden={!isActive}
                   >
-                    {(() => {
-                      // Animate only images that fill the container (wide / landscape).
-                      // Narrow images with side bars stay completely still.
-                      const isWide = imageAspect >= CONTAINER_ASPECT;
+                    {/* Blurred LQIP — the instant first paint, and the filler
+                        behind the letterbox bars of a portrait photo. */}
+                    {sources.placeholder && (
+                      <img
+                        src={sources.placeholder}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
+                      />
+                    )}
 
-                      let kbInitial, kbAnimate;
-                      if (isWide) {
-                        // Camera pan L↔R. Scale 1.08 gives 4% overflow each side,
-                        // exactly matching the 4% travel so edges never show.
-                        const sign = currentImageIndex % 2 === 0 ? 1 : -1;
-                        kbInitial = { scale: 1.14, x: `${7 * sign}%`,  y: '0%' };
-                        kbAnimate = { scale: 1.14, x: `${-7 * sign}%`, y: '0%' };
-                      } else {
-                        kbInitial = { scale: 1, x: '0%', y: '0%' };
-                        kbAnimate = { scale: 1, x: '0%', y: '0%' };
-                      }
+                    {/* Shimmer sweep — only while this photo is genuinely still
+                        in flight, so a cached photo never flashes a skeleton. */}
+                    {!isLoaded && (
+                      <div className="gallery-shimmer absolute inset-0 pointer-events-none" aria-hidden="true" />
+                    )}
 
-                      return (
-                        <motion.div
-                          className="absolute inset-0 flex items-center justify-center"
-                          initial={kbInitial}
-                          animate={kbAnimate}
-                          transition={{ duration: KEN_BURNS_DURATION, ease: 'linear' }}
-                          style={{ willChange: 'transform' }}
-                        >
-                          <img
-                            src={getImageSrc(currentImageUrl, 1200)}
-                            srcSet={getImageSrcSet(currentImageUrl, [640, 960, 1200, 1920])}
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px"
-                            alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
-                            width={1200}
-                            height={800}
-                            {...(isCloudinaryUrl(currentImageUrl) ? { crossOrigin: 'anonymous' as const } : {})}
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
-                            fetchpriority={currentImageIndex === 0 ? 'high' : 'auto'}
-                            decoding={currentImageIndex === 0 ? 'sync' : 'async'}
-                            loading={currentImageIndex === 0 ? 'eager' : 'lazy'}
-                            className={`pointer-events-none select-none w-full h-full ${isWide ? 'object-cover' : 'object-contain'}`}
-                            draggable={false}
-                            onLoad={handleMainImageLoad}
-                            onError={() => setMainImageError(true)}
-                          />
-                        </motion.div>
-                      );
-                    })()}
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center"
+                      initial={kbFrom}
+                      animate={isActive ? kbTo : kbFrom}
+                      transition={isActive ? { duration: KEN_BURNS_DURATION, ease: 'linear' } : { duration: 0 }}
+                      style={{ willChange: 'transform' }}
+                    >
+                      <img
+                        ref={registerSlideImage}
+                        data-gallery-url={item.url}
+                        src={sources.src}
+                        srcSet={sources.srcSet || undefined}
+                        sizes={sources.srcSet ? sources.sizes : undefined}
+                        alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                        width={1200}
+                        height={800}
+                        crossOrigin={sources.crossOrigin}
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore fetchpriority is a valid HTML perf hint not yet in all TS lib defs
+                        fetchpriority={isActive ? 'high' : 'low'}
+                        decoding="async"
+                        // Never lazy: every mounted slide is one swipe away, and
+                        // lazy would defer exactly the fetch we are racing.
+                        loading="eager"
+                        className={`pointer-events-none select-none w-full h-full ${isWide ? 'object-cover' : 'object-contain'}`}
+                        // Reveal: the photo settles out of the blur rather than
+                        // snapping in. Written inline because the transition has
+                        // to name the exact properties being animated.
+                        style={{
+                          opacity: isLoaded ? 1 : 0,
+                          transform: isLoaded ? 'scale(1)' : 'scale(1.02)',
+                          transition: 'opacity 320ms ease-out, transform 320ms ease-out',
+                        }}
+                        draggable={false}
+                        onLoad={(e) => markLoaded(item.url, e.currentTarget)}
+                        onError={() => setFailedUrls((prev) => ({ ...prev, [item.url]: true }))}
+                      />
+                    </motion.div>
                   </motion.div>
-                </AnimatePresence>
-              </>
+                );
+              })
             )}
           </motion.button>
         )}
@@ -1104,7 +1132,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               <button
                 key={img.url}
                 onClick={() => {
-                  setSlideDirection(index > currentImageIndex ? 1 : -1);
                   if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
                 }}
                 className={`flex-shrink-0 w-[155px] h-[110px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden transition-all border-2 ${
@@ -1119,7 +1146,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   sizes="(max-width: 640px) 155px, 195px"
                   alt=""
                   className="w-full h-full object-cover"
-                  loading="lazy"
+                  // The strip scrolls horizontally, so lazy thumbnails past the
+                  // fold pop in as the user drags. The first screenful is cheap
+                  // enough to fetch up front; the tail stays lazy.
+                  loading={index < 6 ? 'eager' : 'lazy'}
                   decoding="async"
                 />
               </button>
