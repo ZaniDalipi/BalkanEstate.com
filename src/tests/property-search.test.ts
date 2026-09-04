@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { Property, Filters } from '@/types';
 import { initialFilters } from '@/types';
 import { createPropertyMatcher, rankProperties, sortByRelevance } from '@/shared/search';
-import { filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
 import { applyQueryToFilters } from '@/src/features/search/universal/queryToFilters';
 
 const property = (overrides: Partial<Property>): Property => ({
@@ -194,5 +194,46 @@ describe('applyQueryToFilters', () => {
     const { filters } = applyQueryToFilters(initialFilters, 'furnished sea view apartment in Bar');
     expect(filters.viewType).toBe('sea');
     expect(filters.furnishing).toBe('furnished');
+  });
+});
+
+describe('filterAndSortProperties', () => {
+  /**
+   * Every branch of the sort must hand back a list. The relevance branch once
+   * did not: with an empty query it `break`ed out of the switch instead of
+   * falling through, so the memo returned undefined and the page crashed on
+   * the next `.length`. A `switch` this size needs the guarantee stated, not
+   * assumed.
+   */
+  it('returns a list for every sort order, with and without a query', () => {
+    const orders = [
+      'relevance', 'newest', 'oldest', 'price_asc', 'price_desc', 'beds_desc',
+      'baths_desc', 'sqft_desc', 'sqft_asc', 'area_asc', 'area_desc',
+      'year_built_desc', 'featured', 'price_reduced', 'price_per_sqm',
+      'something_unknown',
+    ];
+
+    for (const sortBy of orders) {
+      for (const query of ['', 'Budva']) {
+        const result = filterAndSortProperties(all, withQuery(query, { sortBy }));
+        expect(Array.isArray(result), `${sortBy} with query "${query}"`).toBe(true);
+      }
+    }
+  });
+
+  it('orders by relevance when there is a query to be relevant to', () => {
+    const [first] = filterAndSortProperties(all, withQuery('Bečići', { sortBy: 'relevance' }));
+    expect(first.id).toBe('becici-villa');
+  });
+
+  it('falls back to newest when relevance is asked for with an empty box', () => {
+    const byRelevance = filterAndSortProperties(all, withQuery('', { sortBy: 'relevance' }));
+    const byNewest = filterAndSortProperties(all, withQuery('', { sortBy: 'newest' }));
+    expect(byRelevance.map((entry) => entry.id)).toEqual(byNewest.map((entry) => entry.id));
+  });
+
+  it('still applies the filters, not just the order', () => {
+    const filtered = filterAndSortProperties(all, withQuery('Budva', { maxPrice: 300_000 }));
+    expect(filtered.map((entry) => entry.id)).toEqual(['budva-apt']);
   });
 });

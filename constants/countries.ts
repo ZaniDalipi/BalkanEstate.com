@@ -3,7 +3,16 @@ import L from 'leaflet';
 export interface CountryData {
     name: string;
     code: string;
-    bounds: L.LatLngBoundsExpression;
+    /**
+     * South-west and north-east corners.
+     *
+     * Spelled out as a corner pair rather than Leaflet's
+     * `LatLngBoundsExpression`, which is a union wide enough to include a
+     * `LatLngBounds` object and so cannot be indexed. Every entry below is
+     * this shape, callers read `bounds[0]` / `bounds[1]`, and a tuple is
+     * still assignable to anything Leaflet asks for.
+     */
+    bounds: [[number, number], [number, number]];
     center: [number, number];
     zoom: number;
 }

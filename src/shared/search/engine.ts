@@ -25,8 +25,13 @@ import { matchTermAcrossFields, type FieldMatch } from './match';
 export interface SearchField<T> {
   /** Field name, echoed back in `matchedFields` so callers can highlight it. */
   key: string;
-  /** Pull the searchable text out of a document. Multiple values are allowed. */
-  value: (doc: T) => string | string[] | null | undefined;
+  /**
+   * Pull the searchable text out of a document. Multiple values are allowed,
+   * and an absent one is fine — a listing without a reference number simply
+   * contributes nothing to that field rather than needing a guard at the
+   * call site.
+   */
+  value: (doc: T) => string | (string | null | undefined)[] | null | undefined;
   /**
    * Multiplier on this field's match score. A title is worth several times a
    * description; the numbers only ever matter relative to each other.
@@ -79,7 +84,7 @@ export interface SearchIndex<T> {
   top: (limit?: number) => T[];
 }
 
-const foldFieldValue = (value: string | string[] | null | undefined): string => {
+const foldFieldValue = (value: string | (string | null | undefined)[] | null | undefined): string => {
   if (!value) return '';
   return foldText(Array.isArray(value) ? value.filter(Boolean).join(' ') : value);
 };
