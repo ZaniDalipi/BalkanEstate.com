@@ -50,6 +50,7 @@
     "bedsLabel": "Beds",
     "bathsLabel": "Baths",
     "builtLabel": "Built",
+    "completionLabel": "Expected",
     "viewProperty": "View Property",
     "forRent": "For Rent",
     "forSale": "For Sale",

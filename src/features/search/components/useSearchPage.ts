@@ -15,6 +15,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { applyQueryToFilters } from '../universal/queryToFilters';
 import { searchPlaces } from '../universal/places';
 import type { Suggestion } from '../universal/types';
+import { isPropertyTypeFilter } from '@/shared/types/property.types';
 
 // Helper to serialize Leaflet bounds to a consistent JSON format
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -277,12 +278,10 @@ export function useSearchPage() {
             if (countryParam) {
                 newFilters.country = countryParam;
             }
-            if (propertyTypeParam) {
-                // Validate that propertyType is a valid option
-                const validPropertyTypes = ['any', 'house', 'apartment', 'villa', 'land', 'other'] as const;
-                if (validPropertyTypes.includes(propertyTypeParam as typeof validPropertyTypes[number])) {
-                    newFilters.propertyType = propertyTypeParam as typeof validPropertyTypes[number];
-                }
+            // A propertyType arriving in the URL is untrusted input: keep it only
+            // when it names a type the app actually knows about.
+            if (isPropertyTypeFilter(propertyTypeParam)) {
+                newFilters.propertyType = propertyTypeParam;
             }
 
             // Apply filters from URL

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -6,8 +6,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { reverseGeocode } from '@/services/osmService';
-import { useAppContext } from '@/context/AppContext';
-import { checkCityArea, findCityCentre, formatDistanceKm, getCityAreaRadiusKm } from '@/shared/geo';
+import { findCityCentre, formatDistanceKm } from '@/shared/geo';
 import { MIN_QUERY_LENGTH, useLocationSearch, type LocationSuggestion } from '../hooks/useLocationSearch';
 
 // Fix for default markers in Leaflet with Vite/webpack bundlers
@@ -39,16 +38,10 @@ interface MapLocationPickerProps {
   /** Overrides the heading for callers that are not pinning a property. */
   title?: string;
   autoDetectLocation?: boolean;
-  /**
-   * Skip the "must be near the selected city" check. Set by admin tools, which
-   * correct listings whose city and pin legitimately disagree.
-   */
-  allowOutsideCityArea?: boolean;
 }
 
-const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, onZoomChange, title, autoDetectLocation, allowOutsideCityArea = false }) => {
+const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address, zoom = 15, country, city, cityLat, cityLng, onLocationChange, onAddressChange, onZoomChange, title, autoDetectLocation }) => {
   const { t } = useTranslation(['search']);
-  const { dispatch } = useAppContext();
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -71,8 +64,6 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     return known ? { lat: known.lat, lng: known.lng } : null;
   }, [cityLat, cityLng, country, city]);
 
-  const cityRadiusKm = useMemo(() => getCityAreaRadiusKm(country, city), [country, city]);
-
   const {
     query: searchQuery,
     setQuery: setSearchQuery,
@@ -80,50 +71,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     isSearching,
     resolveSuggestion,
     reset: resetSearch,
-  } = useLocationSearch({ country, city, cityCentre, radiusKm: cityRadiusKm, allowOutsideCityArea });
-
-  // Use refs to hold current prop values so event handlers always access latest values
-  const latRef = useRef(lat);
-  const lngRef = useRef(lng);
-  const addressRef = useRef(address);
-
-  useEffect(() => { latRef.current = lat; }, [lat]);
-  useEffect(() => { lngRef.current = lng; }, [lng]);
-  useEffect(() => { addressRef.current = address; }, [address]);
-
-  /**
-   * Reject pins that fall outside the selected city's area, showing the seller
-   * how far off they are. Returns true when the pin is acceptable.
-   */
-  const acceptPin = useCallback((newLat: number, newLng: number): boolean => {
-    if (allowOutsideCityArea || !city) return true;
-
-    const { isWithinArea, distanceKm } = checkCityArea(
-      { lat: newLat, lng: newLng },
-      cityCentre,
-      { country, city }
-    );
-    if (isWithinArea) return true;
-
-    dispatch({
-      type: 'SHOW_ALERT',
-      payload: {
-        type: 'warning',
-        title: t('search:map.locationTooFarTitle', 'Location Too Far'),
-        message: t('search:map.locationTooFar', {
-          distance: formatDistanceKm(distanceKm),
-          city,
-          radius: Math.round(cityRadiusKm),
-        }),
-      },
-    });
-    return false;
-  }, [allowOutsideCityArea, city, country, cityCentre, cityRadiusKm, dispatch, t]);
-
-  // Leaflet handlers are bound once on mount, so they call through this ref to
-  // reach the current check rather than the one from the first render.
-  const acceptPinRef = useRef(acceptPin);
-  useEffect(() => { acceptPinRef.current = acceptPin; }, [acceptPin]);
+  } = useLocationSearch({ country, city, cityCentre });
 
   // Same reason: the zoom handler is bound with the map and would otherwise
   // hold the callback identity from the first render forever.
@@ -182,14 +130,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     // Shared logic for moving the marker to a new position, used by both
     // marker drag-end and map click (tap-to-pin, like Google Maps).
     const moveMarkerTo = async (newLat: number, newLng: number) => {
-      if (!acceptPinRef.current(newLat, newLng)) {
-        // Snap the marker back to the last accepted position.
-        marker.setLatLng([latRef.current, lngRef.current]);
-        marker.setPopupContent(`<b>${t('search:map.locationTooFarTitle', 'Location Too Far')}</b>`);
-        marker.openPopup();
-        return;
-      }
-
+      // Any pin is accepted: the address the seller means is the one they drop
+      // the marker on, whatever city they picked from the list.
       marker.setLatLng([newLat, newLng]);
       onLocationChange(newLat, newLng);
       marker.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${newLat.toFixed(6)}, Lng: ${newLng.toFixed(6)}`);
@@ -378,9 +320,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
   /**
    * Move the pin to a chosen suggestion.
    *
-   * Google predictions carry no coordinates, so they are resolved first; the
-   * city-area check then runs against the real position rather than the
-   * prediction's reported distance.
+   * Google predictions carry no coordinates, so they are resolved to a real
+   * position before the marker and the map are moved.
    */
   const handleResultSelect = async (suggestion: LocationSuggestion) => {
     const resolved = await resolveSuggestion(suggestion);
@@ -390,8 +331,6 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     }
 
     const { lat: newLat, lng: newLng, address: locationName } = resolved;
-    if (!acceptPin(newLat, newLng)) return;
-
     setLocationError(null);
 
     // Move marker and map directly rather than waiting on the prop round trip.
@@ -448,11 +387,6 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-
-        if (!acceptPin(latitude, longitude)) {
-          setIsGettingLocation(false);
-          return;
-        }
 
         // Update location
         onLocationChange(latitude, longitude);
@@ -511,13 +445,6 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
         <p className="text-sm font-medium text-neutral-700">{title ?? t('search:map.propertyLocation')}</p>
         <p className="text-xs text-neutral-500">{t('search:map.searchNavigatePin')}</p>
       </div>
-
-      {/* Make the allowed area explicit, so a rejected pin is never a surprise */}
-      {city && !allowOutsideCityArea && (
-        <p className="text-xs text-neutral-500">
-          {t('search:map.searchAreaHint', { radius: Math.round(cityRadiusKm), city })}
-        </p>
-      )}
 
       {/* Search box with geolocation button */}
       <div className="flex gap-2">

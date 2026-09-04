@@ -30,10 +30,9 @@ const coordinateInputClasses =
 /**
  * Map-based location editor for the admin property form.
  *
- * Admins are correcting listings, not creating them, so this deliberately runs
- * the picker with `allowOutsideCityArea`: a listing whose pin and city disagree
- * is exactly the case an admin is here to fix, and the seller-side radius check
- * would block the correction.
+ * Admins are correcting listings, not creating them: a listing whose pin and
+ * city disagree is exactly the case they are here to fix, so the picker accepts
+ * whatever position they drop the marker on.
  */
 const AdminPropertyLocationEditor: React.FC<AdminPropertyLocationEditorProps> = ({
   country,
@@ -141,7 +140,6 @@ const AdminPropertyLocationEditor: React.FC<AdminPropertyLocationEditorProps> = 
             address={location.address || `${city}, ${country}`}
             country={country}
             city={city}
-            allowOutsideCityArea
             onLocationChange={(lat, lng) => onChange({ lat, lng })}
             onAddressChange={(address) => onChange({ address })}
           />

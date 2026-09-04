@@ -64,8 +64,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const [isEnteringBuilding, setIsEnteringBuilding] = useState(false);
 
   // Calculate floor visualization data
-  // Show floor levels for any property with more than 3 floors (not just apartments)
-  const hasFloorInfo = floorNumber != null && totalFloors != null && totalFloors > 0;
+  // Show floor levels for any property with more than 3 floors (not just apartments).
+  // Land has no floors — a plot with default/leftover floorNumber+totalFloors
+  // values would otherwise still show a "Floor 1/1" indicator.
+  const hasFloorInfo = propertyType !== 'land' && floorNumber != null && totalFloors != null && totalFloors > 0;
   const has360Tour = !!virtualTour360Url;
   const floorHeightMeters = 3; // Average floor height
   const buildingHeightMeters = hasFloorInfo ? totalFloors * floorHeightMeters : 0;
@@ -1268,7 +1270,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
       // Add 360 tour door marker for properties without floor visualization
       // (properties with floor data get the door marker via addCustomBuilding3D instead)
-      const willHaveFloorViz = floorNumber != null && totalFloors != null && totalFloors > 0;
+      const willHaveFloorViz = propertyType !== 'land' && floorNumber != null && totalFloors != null && totalFloors > 0;
       if (!willHaveFloorViz && virtualTour360Url) {
         const doorEl = document.createElement('div');
         doorEl.className = 'apartment-door-marker';
@@ -1320,9 +1322,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapLogger.warn('[FLOORVIZ] trigger check', {
         floorNumber, floorNumberType: typeof floorNumber,
         totalFloors, totalFloorsType: typeof totalFloors,
-        willRender: floorNumber != null && totalFloors != null && totalFloors > 0,
+        willRender: willHaveFloorViz,
       });
-      if (floorNumber != null && totalFloors != null && totalFloors > 0) {
+      if (willHaveFloorViz) {
         // Retry mechanism to ensure building tiles are loaded
         let retryCount = 0;
         const maxRetries = 8;

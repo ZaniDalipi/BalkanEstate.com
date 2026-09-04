@@ -48,7 +48,7 @@ export interface PropertyAnalysisResult {
   materials: string[];
   description: string;
   image_tags: ImageTag[];
-  property_type: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'other';
+  property_type: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'other';
   floor_number?: number;
   total_floors?: number;
 }
@@ -190,7 +190,7 @@ export const generateDescriptionFromImages = async (
   images: Buffer[],
   mimeTypes: string[],
   language: string,
-  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other',
+  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other',
   location?: LocationContext
 ): Promise<PropertyAnalysisResult> => {
   // Convert buffers to base64 inline data parts for Gemini API
@@ -779,7 +779,7 @@ export const getAiChatResponse = async (
           propertyType: {
             type: Type.STRING,
             nullable: true,
-            enum: ['house', 'apartment', 'villa', 'land', 'commercial'],
+            enum: ['house', 'apartment', 'villa', 'luxury-villa', 'commercial', 'parking', 'land'],
             description: 'ONLY set if user explicitly mentions property type (house, apartment, etc). Must be null if not mentioned.'
           },
           sellerType: {

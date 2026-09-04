@@ -10,8 +10,8 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
-import { getGallerySources, warmGallery } from '../../../config/galleryImages';
+import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { getGallerySources, warmGallery, shouldCoverFrame } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 
@@ -77,6 +77,67 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
   if (delta > length / 2) delta -= length;
   if (delta < -length / 2) delta += length;
   return delta;
+};
+
+/**
+ * Shape of one card in the thumbnail strip: 155x110 on a phone, 195x140 above
+ * it. Both land within a hair of 1.4, so one number describes the frame.
+ */
+const THUMB_ASPECT = 155 / 110;
+
+/**
+ * One card in the thumbnail strip.
+ *
+ * A thumbnail is the only place a listing shows every photo at once, so a photo
+ * that does not match the card's shape has to stay recognisable rather than be
+ * cropped down to whichever band sat in the middle — for a phone-shot portrait
+ * that band is sky, which is how a strip of three photos ends up looking like
+ * three identical blue rectangles.
+ *
+ * So an off-shape photo is shown whole over a blurred copy of itself, which
+ * fills the side bars with that photo's own colours instead of a black slab.
+ * Ordinary landscape photos are unaffected: they still fill the card edge to
+ * edge, because cropping a 4:3 into a 1.4 card loses almost nothing.
+ */
+const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eager }) => {
+  // Undefined until the photo reports its natural size. `shouldCoverFrame`
+  // reads that as "cover", the answer for the common case, so the card never
+  // flips layout after the fact for an ordinary photo.
+  const [aspect, setAspect] = useState<number | undefined>(undefined);
+
+  const cover = shouldCoverFrame(aspect, THUMB_ASPECT);
+  const placeholder = getPropertyImagePlaceholder(url);
+
+  return (
+    <>
+      {/* Blurred fill behind the bars. Only mounted once we know the photo
+          needs it, so a full-bleed thumbnail costs no extra request. */}
+      {!cover && placeholder && (
+        <img
+          src={placeholder}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
+          decoding="async"
+        />
+      )}
+      <img
+        // `limit` never crops and never upscales, so the card decides the
+        // framing rather than the CDN guessing at it.
+        src={optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })}
+        srcSet={`${optimizeCloudinaryUrl(url, { width: 195, quality: 'auto', crop: 'limit' })} 195w, ${optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })} 390w`}
+        sizes="(max-width: 640px) 155px, 195px"
+        alt=""
+        className={`relative w-full h-full ${cover ? 'object-cover' : 'object-contain'}`}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        onLoad={(e) => {
+          const { naturalWidth, naturalHeight } = e.currentTarget;
+          if (naturalWidth > 0 && naturalHeight > 0) setAspect(naturalWidth / naturalHeight);
+        }}
+      />
+    </>
+  );
 };
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
@@ -507,9 +568,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 const sources = getGallerySources(item.url);
                 const isLoaded = !!loadedUrls[item.url];
 
-                // Animate only photos that fill the frame. Narrow ones sit
-                // inside letterbox bars and must stay perfectly still.
-                const isWide = (aspects[item.url] ?? CONTAINER_ASPECT) >= CONTAINER_ASPECT;
+                // Photos that fill the frame get the Ken Burns pan; ones sitting
+                // inside letterbox bars must stay perfectly still. Filling is
+                // judged by how much of the photo the crop keeps, not by whether
+                // it is wider than 16:9 — that test letterboxed a plain 4:3
+                // photo, the commonest shape a listing has.
+                const isWide = shouldCoverFrame(aspects[item.url], CONTAINER_ASPECT);
 
                 // Camera pan L↔R. Scale 1.14 overflows 7% each side, exactly
                 // matching the 7% travel, so an edge never shows. The direction
@@ -535,7 +599,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         src={sources.placeholder}
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 pointer-events-none select-none"
+                        // scale-150, not 110: a CSS blur samples past the element as
+                        // transparent, so a 64px blur over a 5% overflow fades the
+                        // frame edges back to the black container — the very bars
+                        // this backdrop exists to hide.
+                        className="absolute inset-0 w-full h-full object-cover blur-3xl scale-150 pointer-events-none select-none"
                       />
                     )}
 
@@ -1134,23 +1202,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 onClick={() => {
                   if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
                 }}
-                className={`flex-shrink-0 w-[155px] h-[110px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden transition-all border-2 ${
+                className={`relative flex-shrink-0 w-[155px] h-[110px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden bg-neutral-900 transition-all border-2 ${
                   index === currentImageIndex
                     ? 'border-primary shadow-lg'
                     : 'border-transparent hover:border-neutral-300'
                 }`}
               >
-                <img
-                  src={optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })}
-                  srcSet={`${optimizeCloudinaryUrl(img.url, { width: 195, quality: 'auto', crop: 'fill' })} 195w, ${optimizeCloudinaryUrl(img.url, { width: 390, quality: 'auto', crop: 'fill' })} 390w`}
-                  sizes="(max-width: 640px) 155px, 195px"
-                  alt=""
-                  className="w-full h-full object-cover"
+                <GalleryThumbnail
+                  url={img.url}
                   // The strip scrolls horizontally, so lazy thumbnails past the
                   // fold pop in as the user drags. The first screenful is cheap
                   // enough to fetch up front; the tail stays lazy.
-                  loading={index < 6 ? 'eager' : 'lazy'}
-                  decoding="async"
+                  eager={index < 6}
                 />
               </button>
             ))}

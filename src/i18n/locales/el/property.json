@@ -58,6 +58,9 @@
     "parking": "Πάρκινγκ",
     "parkingSpots": "Θέσεις Στάθμευσης",
     "yearBuilt": "Έτος Κατασκευής",
+    "expectedCompletion": "Αναμενόμενη ολοκλήρωση",
+    "underConstruction": "Υπό κατασκευή",
+    "completionYearShort": "{{year}} (αναμενόμενο)",
     "furnished": "Επιπλωμένο",
     "unfurnished": "Χωρίς Έπιπλα",
     "partlyFurnished": "Μερικώς Επιπλωμένο"
@@ -254,6 +257,8 @@
   "featuredAgencies": "Προτεινόμενα Μεσιτικά Γραφεία",
   "status": {
     "new": "Νέο",
+    "underConstruction": "Υπό κατασκευή",
+    "completionYear": "Έτοιμο {{year}}",
     "reduced": "Μειωμένη Τιμή",
     "priceReduced": "Μειωμένη Τιμή",
     "urgent": "Επείγον",
@@ -328,7 +333,9 @@
       "villa": "Βίλα",
       "land": "Οικόπεδο",
       "other": "Άλλο",
-      "luxury-villa": "Πολυτελής Βίλα"
+      "luxury-villa": "Πολυτελής Βίλα",
+      "commercial": "Επαγγελματικό",
+      "parking": "Θέση Στάθμευσης"
     },
     "promotedListings": "Προωθημένες Αγγελίες",
     "agentHint": "Κλικ για προτάσεις!",

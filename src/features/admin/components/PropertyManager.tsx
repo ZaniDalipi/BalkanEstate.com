@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import {
   MagnifyingGlassIcon,
   PencilIcon,
@@ -168,12 +169,9 @@ const PropertyManager: React.FC = () => {
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Types</option>
-            <option value="house">House</option>
-            <option value="apartment">Apartment</option>
-            <option value="villa">Villa</option>
-            <option value="land">Land</option>
-            <option value="commercial">Commercial</option>
-            <option value="other">Other</option>
+            {PROPERTY_TYPE_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>{option.fallback}</option>
+            ))}
           </select>
           <select
             value={filterPromoted}

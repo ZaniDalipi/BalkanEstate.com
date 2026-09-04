@@ -59,10 +59,6 @@ export interface UseLocationSearchOptions {
   city?: string;
   /** Centre the search is biased towards, and measured from. */
   cityCentre?: Coordinates | null;
-  /** Allowed distance from `cityCentre`; results beyond it are dropped. */
-  radiusKm?: number;
-  /** Admin mode — keep results regardless of how far from the city they are. */
-  allowOutsideCityArea?: boolean;
 }
 
 export const MIN_QUERY_LENGTH = 2;
@@ -72,6 +68,15 @@ const DEBOUNCE_MS = 250;
 const MAX_SUGGESTIONS = 8;
 /** Below this many hits, bring in the slower fallback source. */
 const THIN_RESULTS_THRESHOLD = 4;
+
+/**
+ * How far around the selected city the geocoders are told to look first.
+ *
+ * A bias, never a limit: results outside it still come back and are still
+ * selectable. It exists only so that typing "Riviera" while listing in Vlorë
+ * surfaces the Albanian coast before a same-named street elsewhere.
+ */
+const SEARCH_BIAS_RADIUS_KM = 100;
 
 const countryCodeByName = new Map(
   BALKAN_LOCATIONS.map((country) => [normalizePlaceName(country.name), country.code])
@@ -133,8 +138,6 @@ export const useLocationSearch = ({
   country,
   city,
   cityCentre,
-  radiusKm,
-  allowOutsideCityArea = false,
 }: UseLocationSearchOptions) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
@@ -157,16 +160,12 @@ export const useLocationSearch = ({
     [centreLat, centreLng]
   );
 
-  /** Distance limit actually applied to results, or `undefined` for none. */
-  const limitKm = !allowOutsideCityArea && centre && radiusKm ? radiusKm : undefined;
-
   const gather = useCallback(
     async (trimmedQuery: string): Promise<LocationSuggestion[]> => {
       const localMatches = searchLocalities(trimmedQuery, {
         country,
         city,
         near: centre,
-        maxDistanceKm: limitKm,
         maxResults: 5,
       });
 
@@ -191,7 +190,7 @@ export const useLocationSearch = ({
         const predictions = await fetchPlacePredictions(trimmedQuery, {
           countryCode,
           origin: centre,
-          biasRadiusKm: radiusKm,
+          biasRadiusKm: SEARCH_BIAS_RADIUS_KM,
           sessionToken: sessionTokenRef.current,
         });
 
@@ -214,7 +213,10 @@ export const useLocationSearch = ({
       }
 
       if (results.length < THIN_RESULTS_THRESHOLD && trimmedQuery.length >= MIN_OSM_QUERY_LENGTH) {
-        const osmResults = await searchLocation(trimmedQuery, countryCode, { near: centre, radiusKm });
+        const osmResults = await searchLocation(trimmedQuery, countryCode, {
+          near: centre,
+          radiusKm: SEARCH_BIAS_RADIUS_KM,
+        });
 
         for (const result of osmResults) {
           const lat = parseFloat(result.lat);
@@ -227,6 +229,7 @@ export const useLocationSearch = ({
           // Named the same way as every other place in the app: local
           // spelling, no postcode, no repeated municipality.
           const label = formatGeocodedPlace(result, { context });
+          const { title, subtitle } = splitDisplayName(result.display_name);
           results.push({
             id: `osm:${result.place_id}`,
             title: label.primary,
@@ -241,7 +244,7 @@ export const useLocationSearch = ({
 
       return dedupe(results).slice(0, MAX_SUGGESTIONS);
     },
-    [country, city, centre, countryCode, radiusKm, limitKm]
+    [country, city, centre, countryCode]
   );
 
   useEffect(() => {

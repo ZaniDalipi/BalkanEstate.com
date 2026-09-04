@@ -58,6 +58,9 @@
     "parking": "Parking",
     "parkingSpots": "Vende Parkimi",
     "yearBuilt": "Viti i Ndërtimit",
+    "expectedCompletion": "Përfundimi i pritur",
+    "underConstruction": "Në ndërtim",
+    "completionYearShort": "{{year}} (pritet)",
     "furnished": "E Mobiluar",
     "unfurnished": "E Pamobiluar",
     "partlyFurnished": "Pjesërisht e Mobiluar"
@@ -254,6 +257,8 @@
   "featuredAgencies": "Agjenci të Zgjedhura",
   "status": {
     "new": "E re",
+    "underConstruction": "Në ndërtim",
+    "completionYear": "Gati {{year}}",
     "reduced": "Çmim i Ulur",
     "priceReduced": "Çmim i Ulur",
     "urgent": "Urgjent",
@@ -328,7 +333,9 @@
       "villa": "Vilë",
       "land": "Tokë",
       "other": "Tjetër",
-      "luxury-villa": "Vilë Luksoze"
+      "luxury-villa": "Vilë luksoze",
+      "commercial": "Komerciale",
+      "parking": "Vend parkimi"
     },
     "promotedListings": "Listime të Promovuara",
     "agentHint": "Kliko për rekomandime!",

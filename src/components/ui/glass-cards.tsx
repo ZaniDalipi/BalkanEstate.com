@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
 import { formatCityPlace } from '@/shared/geo';
+import { resolveConstruction } from '@/shared/property/construction';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -32,6 +33,9 @@ interface PropertyCardData {
     sqft: number;
     livingRooms?: number;
     yearBuilt?: number;
+    propertyType?: string;
+    constructionStatus?: string;
+    expectedCompletionYear?: number | null;
     description?: string;
     listingType?: 'sale' | 'rent';
     isNegotiable?: boolean;
@@ -62,6 +66,7 @@ const CARD_COLORS = [
 
 const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: boolean }> = ({ property, index, totalCards, color, onClick, isMobile = false }) => {
     const { t } = useTranslation(['home']);
+    const construction = resolveConstruction(property);
     const cardRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -415,10 +420,22 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                             flexWrap: 'wrap'
                         }}>
                             {[
-                                { value: property.beds, label: t('featured.bedsLabel'), icon: '🛏' },
-                                { value: property.baths, label: t('featured.bathsLabel'), icon: '🚿' },
+                                ...(property.propertyType === 'land' ? [] : [
+                                    { value: property.beds, label: t('featured.bedsLabel'), icon: '🛏' },
+                                    { value: property.baths, label: t('featured.bathsLabel'), icon: '🚿' },
+                                ]),
                                 { value: property.sqft, label: 'm²', icon: '📐' },
-                                ...(property.yearBuilt ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: '🏗' }] : []),
+                                // "Built 2028" on a building that does not exist yet is a
+                                // claim about a year that has not happened. The same pill
+                                // reads as a handover date instead, and shows no date at
+                                // all when the promised year is missing or already past.
+                                ...(construction.status === 'under-construction'
+                                    ? (construction.expectedYear
+                                        ? [{ value: construction.expectedYear, label: t('featured.completionLabel', 'Expected'), icon: '🏗' }]
+                                        : [])
+                                    : property.yearBuilt
+                                        ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: '🏗' }]
+                                        : []),
                             ].map((stat) => (
                                 <div
                                     key={stat.label}
@@ -577,8 +594,10 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                 </p>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {[
-                        { v: property.beds, l: t('featured.bedsLabel') },
-                        { v: property.baths, l: t('featured.bathsLabel') },
+                        ...(property.propertyType === 'land' ? [] : [
+                            { v: property.beds, l: t('featured.bedsLabel') },
+                            { v: property.baths, l: t('featured.bathsLabel') },
+                        ]),
                         { v: property.sqft, l: 'm²' },
                     ].map(s => (
                         <span key={s.l} style={{
