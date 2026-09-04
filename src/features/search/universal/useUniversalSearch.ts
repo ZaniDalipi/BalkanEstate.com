@@ -18,10 +18,20 @@ import type { Property } from '@/types';
 import { getZoomFromBoundingBox, searchLocation } from '@/services/osmService';
 import {
   formatGeocodedPlace,
+  formatPlaceLabel,
   formatPropertyPlace,
   placeSearchValue,
   type Coordinates,
 } from '@/shared/geo';
+import {
+  createSessionToken,
+  fetchPlacePredictions,
+  isPlacesAvailable,
+  resolvePlaceDetails,
+} from '@/shared/places';
+import { useGoogleMapLoader } from '@/src/features/map/hooks/useGoogleMapLoader';
+import { getCountryCode } from '@/src/features/seller/hooks/useLocationSearch';
+import { validateSearchQuery } from '@/shared/utils/validation';
 import { createSearchIndex, parseSearchQuery, type ParsedQuery } from '@/shared/search';
 import { searchPlaces, type IndexedPlace } from './places';
 import { getRecentSearches, type RecentSearch } from './recentSearches';
@@ -33,11 +43,11 @@ import type {
   SuggestionGroup,
 } from './types';
 
-/** Local sources answer from memory; only the geocoder needs a debounce. */
-const GEOCODER_DEBOUNCE_MS = 220;
-/** Nominatim rejects anything shorter. */
-const MIN_GEOCODER_QUERY_LENGTH = 3;
-/** Below this many local places, ask the geocoder as well. */
+/** Local sources answer from memory; only the remote ones need a debounce. */
+const REMOTE_DEBOUNCE_MS = 220;
+/** Both Places and Nominatim reject anything shorter. */
+const MIN_REMOTE_QUERY_LENGTH = 3;
+/** Below this many local places, ask the remote sources as well. */
 const THIN_PLACE_RESULTS = 3;
 
 const MAX_PLACES = 5;
@@ -55,11 +65,24 @@ export interface UseUniversalSearchOptions {
   near?: Coordinates | null;
   /** False while the box is closed, so nothing is computed or fetched. */
   enabled?: boolean;
-  /** Ask the geocoder for places the app does not hold itself. */
-  useGeocoder?: boolean;
+  /**
+   * Ask Google Places, then the geocoder, for what the app's own gazetteer
+   * does not hold — businesses, residences, buildings, streets.
+   */
+  useRemoteSources?: boolean;
 }
 
 export interface UniversalSearchState {
+  /**
+   * Turn a picked suggestion into coordinates.
+   *
+   * Google Places rows carry no geometry — fetching it is a second billed
+   * call — so it is resolved here, when a row is actually chosen. Every other
+   * kind of suggestion already has its coordinates and resolves without a
+   * round trip. Resolves to `null` when the lookup fails, which the caller
+   * reports rather than silently ignoring.
+   */
+  resolvePlace: (suggestion: PlaceSuggestion) => Promise<Coordinates | null>;
   /** Ranked, grouped, ready to render. */
   groups: SuggestionGroup[];
   /** The same suggestions, flat and in display order, for keyboard nav. */
@@ -152,13 +175,22 @@ export const useUniversalSearch = ({
   country,
   near,
   enabled = true,
-  useGeocoder = true,
+  useRemoteSources = true,
 }: UseUniversalSearchOptions): UniversalSearchState => {
-  const [geocoded, setGeocoded] = useState<PlaceSuggestion[]>([]);
+  const [remote, setRemote] = useState<PlaceSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [recents, setRecents] = useState<RecentSearch[]>([]);
   // Guards against a slow earlier request overwriting a newer one's results.
   const requestIdRef = useRef(0);
+  // A Places session token groups a run of keystrokes with the detail lookup
+  // that follows into one billed session. It is spent on select.
+  const sessionTokenRef = useRef<unknown>(undefined);
+
+  // The Places library rides on the Maps script the app already loads for its
+  // maps. Asking for it here too means the box works on pages that have no
+  // map — the home hero, the filter panel — and the loader is shared, so this
+  // never loads the script twice.
+  useGoogleMapLoader();
 
   const refreshRecents = useCallback(() => setRecents(getRecentSearches()), []);
 
@@ -166,7 +198,10 @@ export const useUniversalSearch = ({
     if (enabled) refreshRecents();
   }, [enabled, refreshRecents]);
 
-  const trimmed = query.trim();
+  // The search box is a system boundary: what arrives here is raw user input
+  // that goes on to a third-party API and into a saved search. It is
+  // sanitised and length-capped once, here, rather than at each source.
+  const trimmed = useMemo(() => validateSearchQuery(query).sanitized.trim(), [query]);
   const parsed = useMemo(() => parseSearchQuery(trimmed), [trimmed]);
 
   // The place-name part of the query — "villa in Budva under 300k" searches
@@ -187,66 +222,140 @@ export const useUniversalSearch = ({
     return propertyIndex.search(trimmed, { limit: MAX_PROPERTIES, requireAllTerms: false, minScore: 80 });
   }, [enabled, trimmed, propertyIndex]);
 
-  // ── Geocoder fill-in ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (!enabled || !useGeocoder || placeQuery.length < MIN_GEOCODER_QUERY_LENGTH) {
-      requestIdRef.current += 1;
-      setGeocoded([]);
-      setIsSearching(false);
-      return;
-    }
+  /**
+   * Ask the remote sources, best first, and stop as soon as one answers.
+   *
+   * Every provider here resolves to `[]` rather than throwing — a quota
+   * error, a missing key or a dead network is a thinner suggestion list, not
+   * a broken search box — so there is no try/catch at the call site and the
+   * user always gets whatever did come back.
+   */
+  const gatherRemote = useCallback(
+    async (query: string, requestId: number): Promise<PlaceSuggestion[]> => {
+      const taken = new Set(localPlaces.map((result) => result.place.searchValue.toLowerCase()));
 
+      const collect = (candidates: PlaceSuggestion[]): PlaceSuggestion[] => {
+        const kept: PlaceSuggestion[] = [];
+        for (const candidate of candidates) {
+          const key = candidate.searchValue.toLowerCase();
+          if (!candidate.title || taken.has(key)) continue;
+          taken.add(key);
+          kept.push(candidate);
+        }
+        return kept.slice(0, MAX_PLACES);
+      };
+
+      if (isPlacesAvailable()) {
+        // One token groups this run of keystrokes with the detail lookup that
+        // follows into a single billed session.
+        if (!sessionTokenRef.current) sessionTokenRef.current = createSessionToken();
+
+        const predictions = await fetchPlacePredictions(query, {
+          countryCode: getCountryCode(country),
+          origin: near,
+          biasRadiusKm: 50,
+          sessionToken: sessionTokenRef.current,
+        });
+        if (requestId !== requestIdRef.current) return [];
+
+        const fromPlaces = collect(
+          predictions.map((prediction) => {
+            // Google's secondary line is already "<city>, <country>" for a
+            // Balkan result, but it can run longer; the formatter trims it to
+            // the app's shape rather than trusting it.
+            const [city, ...rest] = prediction.subtitle.split(',').map((part) => part.trim());
+            const label = formatPlaceLabel({
+              name: prediction.title,
+              city,
+              country: rest.length > 0 ? rest[rest.length - 1] : undefined,
+            });
+
+            return {
+              id: `places:${prediction.placeId}`,
+              type: 'place' as const,
+              title: label.primary,
+              subtitle: label.secondary,
+              searchValue: label.full,
+              placeId: prediction.placeId,
+              // Coordinates cost a second billed call, so they are resolved
+              // when the row is picked, not when it is shown.
+              source: 'places' as const,
+              distanceKm: prediction.distanceKm,
+            };
+          })
+        );
+
+        if (fromPlaces.length > 0) return fromPlaces;
+      }
+
+      const results = await searchLocation(query, undefined, { near, radiusKm: 100 });
+      if (requestId !== requestIdRef.current) return [];
+
+      return collect(
+        results.flatMap((result) => {
+          const label = formatGeocodedPlace(result);
+          const lat = Number.parseFloat(result.lat);
+          const lng = Number.parseFloat(result.lon);
+          if (!label.primary || !Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+
+          return [{
+            id: `geocoder:${result.place_id}`,
+            type: 'place' as const,
+            title: label.primary,
+            subtitle: label.secondary,
+            searchValue: placeSearchValue(label),
+            lat,
+            lng,
+            zoom: result.boundingbox ? getZoomFromBoundingBox(result.boundingbox) : undefined,
+            boundingbox: result.boundingbox,
+            source: 'geocoder' as const,
+          }];
+        })
+      );
+    },
+    [localPlaces, country, near]
+  );
+
+  // ── Remote fill-in: Google Places, then the geocoder ──────────────────
+  /**
+   * What the app's own gazetteer cannot know.
+   *
+   * The gazetteer holds countries, cities and villages; it does not hold
+   * businesses, residences or buildings, and those are exactly what people
+   * type — "MOA Residence", "Rolling Hills", a hotel name. Google Places
+   * indexes them, and is the same source Google Maps' own search box uses,
+   * so it runs first. The Nominatim proxy stays as the fallback for
+   * installations with no Maps key.
+   *
+   * Both are asked only when the local sources came back thin, which keeps a
+   * search for a city that the app already knows off the network — and, for
+   * Places, off the bill.
+   */
+  useEffect(() => {
+    const cancel = () => {
+      requestIdRef.current += 1;
+      setRemote([]);
+      setIsSearching(false);
+    };
+
+    if (!enabled || !useRemoteSources || placeQuery.length < MIN_REMOTE_QUERY_LENGTH) return cancel();
     // The app's own gazetteer already answered well; a round trip would only
     // add rows nobody is going to read.
-    if (localPlaces.length >= THIN_PLACE_RESULTS) {
-      requestIdRef.current += 1;
-      setGeocoded([]);
-      setIsSearching(false);
-      return;
-    }
+    if (localPlaces.length >= THIN_PLACE_RESULTS) return cancel();
 
     const requestId = ++requestIdRef.current;
     setIsSearching(true);
 
     const timer = setTimeout(async () => {
-      const results = await searchLocation(placeQuery, undefined, { near, radiusKm: 100 });
+      const suggestions = await gatherRemote(placeQuery, requestId);
       if (requestId !== requestIdRef.current) return; // Superseded.
 
-      const known = new Set(localPlaces.map((result) => result.place.searchValue.toLowerCase()));
-      const suggestions: PlaceSuggestion[] = [];
-
-      for (const result of results) {
-        const label = formatGeocodedPlace(result);
-        if (!label.primary) continue;
-
-        const value = placeSearchValue(label);
-        if (known.has(value.toLowerCase())) continue;
-        known.add(value.toLowerCase());
-
-        const lat = Number.parseFloat(result.lat);
-        const lng = Number.parseFloat(result.lon);
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
-
-        suggestions.push({
-          id: `geocoder:${result.place_id}`,
-          type: 'place',
-          title: label.primary,
-          subtitle: label.secondary,
-          searchValue: value,
-          lat,
-          lng,
-          zoom: result.boundingbox ? getZoomFromBoundingBox(result.boundingbox) : undefined,
-          boundingbox: result.boundingbox,
-          source: 'geocoder',
-        });
-      }
-
-      setGeocoded(suggestions.slice(0, MAX_PLACES));
+      setRemote(suggestions);
       setIsSearching(false);
-    }, GEOCODER_DEBOUNCE_MS);
+    }, REMOTE_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [enabled, useGeocoder, placeQuery, localPlaces, near]);
+  }, [enabled, useRemoteSources, placeQuery, localPlaces, gatherRemote]);
 
   // ── Assembly ──────────────────────────────────────────────────────────
   const groups = useMemo<SuggestionGroup[]>(() => {
@@ -287,7 +396,7 @@ export const useUniversalSearch = ({
 
     const places: Suggestion[] = [
       ...localPlaces.map((result) => placeToSuggestion(result.place, result.distanceKm)),
-      ...geocoded,
+      ...remote,
     ].slice(0, MAX_PLACES);
 
     if (places.length > 0) {
@@ -302,12 +411,29 @@ export const useUniversalSearch = ({
     }
 
     return assembled;
-  }, [enabled, trimmed, parsed, recents, localPlaces, geocoded, propertyMatches]);
+  }, [enabled, trimmed, parsed, recents, localPlaces, remote, propertyMatches]);
+
+  const resolvePlace = useCallback(
+    async (suggestion: PlaceSuggestion): Promise<Coordinates | null> => {
+      if (suggestion.placeId) {
+        const place = await resolvePlaceDetails(suggestion.placeId, sessionTokenRef.current);
+        // The token is spent once a detail lookup uses it; the next keystroke
+        // starts a new session.
+        sessionTokenRef.current = undefined;
+        if (place) return { lat: place.lat, lng: place.lng };
+        // The lookup failed — fall through to any geometry the row carries.
+      }
+
+      if (!Number.isFinite(suggestion.lat) || !Number.isFinite(suggestion.lng)) return null;
+      return { lat: suggestion.lat as number, lng: suggestion.lng as number };
+    },
+    []
+  );
 
   const suggestions = useMemo(
     () => groups.flatMap((group) => group.suggestions),
     [groups]
   );
 
-  return { groups, suggestions, parsed, isSearching, recents, refreshRecents };
+  return { groups, suggestions, parsed, isSearching, recents, refreshRecents, resolvePlace };
 };

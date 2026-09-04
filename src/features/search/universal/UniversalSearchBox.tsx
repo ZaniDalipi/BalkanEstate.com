@@ -47,8 +47,8 @@ interface UniversalSearchBoxProps {
   autoFocus?: boolean;
   className?: string;
   inputClassName?: string;
-  /** Ask the geocoder for places beyond the app's own gazetteer. */
-  useGeocoder?: boolean;
+  /** Ask Google Places, then the geocoder, for what the gazetteer lacks. */
+  useRemoteSources?: boolean;
   'aria-label'?: string;
 }
 
@@ -106,29 +106,33 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
   autoFocus = false,
   className = '',
   inputClassName = '',
-  useGeocoder = true,
+  useRemoteSources = true,
   'aria-label': ariaLabel,
 }) => {
   const { t } = useTranslation(['search']);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  /** Set when a picked row could not be turned into a position. */
+  const [selectError, setSelectError] = useState<string | null>(null);
+  const [isResolving, setIsResolving] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
 
-  const { groups, suggestions, isSearching, refreshRecents } = useUniversalSearch({
+  const { groups, suggestions, isSearching, refreshRecents, resolvePlace } = useUniversalSearch({
     query: value,
     properties,
     country,
     near,
     enabled: isOpen,
-    useGeocoder,
+    useRemoteSources,
   });
 
   // A changed result set invalidates the highlight: keeping index 2 while the
   // list under it changes is how a user ends up opening the wrong listing.
   useEffect(() => {
     setActiveIndex(-1);
+    setSelectError(null);
   }, [value]);
 
   useEffect(() => {
@@ -157,7 +161,7 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
   }, []);
 
   const choose = useCallback(
-    (suggestion: Suggestion) => {
+    async (suggestion: Suggestion) => {
       // What goes in the box is the canonical spelling of what was picked, so
       // the text the user is left looking at is the text the app searched.
       const nextValue =
@@ -176,9 +180,31 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
       }
 
       close();
+      setSelectError(null);
+
+      // A Google Places row carries no coordinates — geometry is a second
+      // billed call, made only now that a row has actually been chosen. Every
+      // consumer is handed a suggestion that already has its position, so none
+      // of them has to know which source answered.
+      if (suggestion.type === 'place' && suggestion.placeId && suggestion.lat === undefined) {
+        setIsResolving(true);
+        const resolved = await resolvePlace(suggestion);
+        setIsResolving(false);
+
+        if (!resolved) {
+          // The pick failed, so the box says so instead of doing nothing and
+          // leaving the user to wonder whether they missed the row.
+          setSelectError(t('search:suggestions.lookupFailed'));
+          return;
+        }
+
+        onSelect({ ...suggestion, lat: resolved.lat, lng: resolved.lng });
+        return;
+      }
+
       onSelect(suggestion);
     },
-    [value, onValueChange, onSelect, close, refreshRecents]
+    [value, onValueChange, onSelect, close, refreshRecents, resolvePlace, t]
   );
 
   const submit = useCallback(() => {
@@ -212,7 +238,7 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
     if (event.key === 'Enter') {
       event.preventDefault();
       const active = activeIndex >= 0 ? suggestions[activeIndex] : undefined;
-      if (active) choose(active);
+      if (active) void choose(active);
       else submit();
       return;
     }
@@ -265,7 +291,7 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
       />
 
       <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-        {isSearching ? (
+        {isSearching || isResolving ? (
           <SpinnerIcon className={`${iconSize} text-primary`} />
         ) : value ? (
           <button
@@ -278,6 +304,12 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
           </button>
         ) : null}
       </div>
+
+      {selectError && (
+        <p role="alert" className="mt-1 text-xs text-red-600">
+          {selectError}
+        </p>
+      )}
 
       {dropdownVisible && (
         <ul
@@ -315,7 +347,7 @@ const UniversalSearchBox: React.FC<UniversalSearchBoxProps> = ({
                     // otherwise close the list before the click landed.
                     onMouseDown={(event) => {
                       event.preventDefault();
-                      choose(suggestion);
+                      void choose(suggestion);
                     }}
                     onMouseEnter={() => setActiveIndex(index)}
                     className={`group flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${

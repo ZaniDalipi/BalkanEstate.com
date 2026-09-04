@@ -489,6 +489,7 @@
     "recent": "Kërkimet e fundit",
     "places": "Vendet",
     "listings": "Listimet",
-    "remove": "Hiq"
+    "remove": "Hiq",
+    "lookupFailed": "Nuk u gjet dot ai vend. Ju lutemi provoni një rezultat tjetër."
   }
 }

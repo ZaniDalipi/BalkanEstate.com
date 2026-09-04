@@ -489,6 +489,7 @@
     "recent": "Nedavne pretrage",
     "places": "Mjesta",
     "listings": "Oglasi",
-    "remove": "Ukloni"
+    "remove": "Ukloni",
+    "lookupFailed": "Nije moguće pronaći to mjesto. Pokušajte s drugim rezultatom."
   }
 }

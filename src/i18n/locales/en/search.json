@@ -489,6 +489,7 @@
     "recent": "Recent searches",
     "places": "Places",
     "listings": "Listings",
-    "remove": "Remove"
+    "remove": "Remove",
+    "lookupFailed": "Could not look up that place. Please try another result."
   }
 }

@@ -16,7 +16,7 @@ import {
   fetchPlacePredictions,
   isPlacesAvailable,
   resolvePlaceDetails,
-} from '../api/placesAutocomplete';
+} from '@/shared/places';
 
 /**
  * Location search for the listing map picker.

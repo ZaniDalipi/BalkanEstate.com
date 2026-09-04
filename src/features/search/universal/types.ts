@@ -33,7 +33,7 @@ export interface QuerySuggestion extends SuggestionBase {
 
 export interface PlaceSuggestion extends SuggestionBase {
   type: 'place';
-  /** Present for a place the app holds itself; absent for a geocoder hit. */
+  /** Present for a place the app holds itself; absent for a remote hit. */
   place?: IndexedPlace;
   searchValue: string;
   lat?: number;
@@ -41,7 +41,16 @@ export interface PlaceSuggestion extends SuggestionBase {
   zoom?: number;
   /** Bounding box from the geocoder, when it gave one. */
   boundingbox?: [string, string, string, string];
-  source: 'local' | 'geocoder';
+  /**
+   * Google Places id. Present instead of coordinates: geometry costs a second
+   * billed call, so it is fetched when the row is picked (`resolvePlace`).
+   */
+  placeId?: string;
+  /**
+   * Which source answered. 'places' is Google — the only one that knows
+   * businesses, residences and buildings by name.
+   */
+  source: 'local' | 'places' | 'geocoder';
   distanceKm?: number;
 }
 

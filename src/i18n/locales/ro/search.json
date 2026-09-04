@@ -489,6 +489,7 @@
     "recent": "Căutări recente",
     "places": "Locuri",
     "listings": "Anunțuri",
-    "remove": "Elimină"
+    "remove": "Elimină",
+    "lookupFailed": "Locul nu a putut fi găsit. Încercați alt rezultat."
   }
 }

@@ -6,7 +6,7 @@ const resolvePlaceDetails = vi.fn();
 const isPlacesAvailable = vi.fn();
 const searchLocation = vi.fn();
 
-vi.mock('@/src/features/seller/api/placesAutocomplete', () => ({
+vi.mock('@/shared/places', () => ({
   fetchPlacePredictions: (...args: unknown[]) => fetchPlacePredictions(...args),
   resolvePlaceDetails: (...args: unknown[]) => resolvePlaceDetails(...args),
   isPlacesAvailable: () => isPlacesAvailable(),
