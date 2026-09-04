@@ -140,19 +140,19 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
           {/* Tab controls - Glass morphism */}
           <div className="max-w-xl mx-auto">
             <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 border border-white/20 shadow-2xl">
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2">
                 <button
                   onClick={() => onTabChange('properties')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold transition-all duration-300 ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-base font-bold transition-all duration-300 ${
                     activeTab === 'properties'
                       ? 'bg-white text-slate-900 shadow-lg'
                       : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
                   }`}
                 >
-                  <HomeIcon className="w-5 h-5" />
-                  <span>{t('saved:favorites.tabs.properties')}</span>
+                  <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span className="truncate">{t('saved:favorites.tabs.properties')}</span>
                   {savedPropertiesCount > 0 && (
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                    <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs shrink-0 ${
                       activeTab === 'properties' ? 'bg-rose-100 text-rose-600' : 'bg-white/20'
                     }`}>
                       {savedPropertiesCount}
@@ -162,16 +162,16 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
 
                 <button
                   onClick={() => onTabChange('agents')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold transition-all duration-300 ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-base font-bold transition-all duration-300 ${
                     activeTab === 'agents'
                       ? 'bg-white text-slate-900 shadow-lg'
                       : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
                   }`}
                 >
-                  <UsersIcon className="w-5 h-5" />
-                  <span>{t('saved:favorites.tabs.agents')}</span>
+                  <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span className="truncate">{t('saved:favorites.tabs.agents')}</span>
                   {savedAgentsCount > 0 && (
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                    <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs shrink-0 ${
                       activeTab === 'agents' ? 'bg-pink-100 text-pink-600' : 'bg-white/20'
                     }`}>
                       {savedAgentsCount}
@@ -181,16 +181,16 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
 
                 <button
                   onClick={() => onTabChange('agencies')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold transition-all duration-300 ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-xs sm:text-base font-bold transition-all duration-300 ${
                     activeTab === 'agencies'
                       ? 'bg-white text-slate-900 shadow-lg'
                       : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
                   }`}
                 >
-                  <BuildingOfficeIcon className="w-5 h-5" />
-                  <span>{t('saved:favorites.tabs.agencies', 'Agencies')}</span>
+                  <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span className="truncate">{t('saved:favorites.tabs.agencies', 'Agencies')}</span>
                   {savedAgenciesCount > 0 && (
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                    <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs shrink-0 ${
                       activeTab === 'agencies' ? 'bg-fuchsia-100 text-fuchsia-600' : 'bg-white/20'
                     }`}>
                       {savedAgenciesCount}
