@@ -74,8 +74,10 @@
       "apartment": "Стан",
       "villa": "Вила",
       "land": "Земјиште",
-      "commercial": "Деловен простор",
-      "other": "Друго"
+      "commercial": "Комерцијален",
+      "other": "Друго",
+      "luxury-villa": "Луксузна вила",
+      "parking": "Паркинг место"
     },
     "bathrooms": "Бањи",
     "bedrooms": "Спални",

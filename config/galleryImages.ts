@@ -185,3 +185,50 @@ export const warmGallery = (
     warmImage(getGallerySources(url, sourceOptions), distance <= 2 ? 'high' : 'low');
   });
 };
+
+// ── Frame fitting ──────────────────────────────────────────────────────────
+
+/**
+ * Fraction of a photo that survives an `object-cover` crop into a frame.
+ *
+ * `object-cover` scales the photo until it covers the frame and throws away the
+ * overflow, so the survivor is whichever ratio is smaller:
+ *
+ *   4:3 photo (1.33) in a 16:9 frame (1.78) → 0.75 — a quarter is trimmed off
+ *   the top and bottom, which nobody notices.
+ *
+ *   9:16 photo (0.56) in the same frame → 0.32 — two thirds of the listing is
+ *   gone and what is left is whatever happened to sit in the middle band,
+ *   usually sky. That is the "black bar + blue gradient" thumbnail.
+ */
+export const coveredFraction = (photoAspect: number, frameAspect: number): number => {
+  if (!(photoAspect > 0) || !(frameAspect > 0)) return 1;
+  return Math.min(photoAspect, frameAspect) / Math.max(photoAspect, frameAspect);
+};
+
+/**
+ * How much of a photo has to survive the crop before we fill the frame with it:
+ * cover while at least half the photo is still on screen, otherwise show it
+ * whole against a blurred fill.
+ *
+ * Half is where the crop stops being a trim and starts being a choice of
+ * subject. Every shape a camera or a phone shoots landscape — 4:3, 3:2, square,
+ * a 3:1 panorama — stays above it and fills the frame. The shapes that fall
+ * below it are the ones held the other way up, where the frame and the photo
+ * disagree about orientation and the middle band the crop keeps is whatever the
+ * photographer was pointing past.
+ */
+export const MIN_VISIBLE_ON_COVER = 0.5;
+
+/**
+ * Whether a photo should fill its frame (`object-cover`) or be shown whole
+ * (`object-contain`) against a blurred backdrop.
+ *
+ * An unmeasured photo covers: that is what the common case resolves to, so the
+ * first paint is already right and no layout flips once `naturalWidth` lands.
+ */
+export const shouldCoverFrame = (
+  photoAspect: number | undefined,
+  frameAspect: number
+): boolean =>
+  photoAspect === undefined || coveredFraction(photoAspect, frameAspect) >= MIN_VISIBLE_ON_COVER;

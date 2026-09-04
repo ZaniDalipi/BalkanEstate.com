@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { resolveConstruction } from '@/shared/property/construction';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -32,6 +33,8 @@ interface PropertyCardData {
     livingRooms?: number;
     yearBuilt?: number;
     propertyType?: string;
+    constructionStatus?: string;
+    expectedCompletionYear?: number | null;
     description?: string;
     listingType?: 'sale' | 'rent';
     isNegotiable?: boolean;
@@ -62,6 +65,7 @@ const CARD_COLORS = [
 
 const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: boolean }> = ({ property, index, totalCards, color, onClick, isMobile = false }) => {
     const { t } = useTranslation(['home']);
+    const construction = resolveConstruction(property);
     const cardRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -420,7 +424,17 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                     { value: property.baths, label: t('featured.bathsLabel'), icon: '🚿' },
                                 ]),
                                 { value: property.sqft, label: 'm²', icon: '📐' },
-                                ...(property.yearBuilt ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: '🏗' }] : []),
+                                // "Built 2028" on a building that does not exist yet is a
+                                // claim about a year that has not happened. The same pill
+                                // reads as a handover date instead, and shows no date at
+                                // all when the promised year is missing or already past.
+                                ...(construction.status === 'under-construction'
+                                    ? (construction.expectedYear
+                                        ? [{ value: construction.expectedYear, label: t('featured.completionLabel', 'Expected'), icon: '🏗' }]
+                                        : [])
+                                    : property.yearBuilt
+                                        ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: '🏗' }]
+                                        : []),
                             ].map((stat) => (
                                 <div
                                     key={stat.label}

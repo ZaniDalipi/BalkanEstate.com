@@ -312,6 +312,7 @@
     "houseTotalFloors": "Pentru case și vile, vă rugăm introduceți numărul total de etaje (1 sau mai mare).",
     "apartmentElevator": "Pentru apartamente, vă rugăm specificați dacă există lift (Da sau Nu).",
     "floorExceedsTotal": "Numărul etajului nu poate depăși numărul total de etaje.",
+    "completionYearInvalid": "Introduceți un an de finalizare valid sau lăsați câmpul gol.",
     "required": "This field is required",
     "minImages": "Please upload at least {{count}} images",
     "selectCountry": "Please select a country",

@@ -78,7 +78,9 @@
     "villa": "Vila",
     "land": "Zemljište",
     "commercial": "Komercijalno",
-    "other": "Ostalo"
+    "other": "Ostalo",
+    "luxuryVilla": "Luksuzna vila",
+    "parking": "Parking mjesto"
   },
   "listingTypes": {
     "any": "Bilo Koji",
@@ -206,7 +208,6 @@
     "dragToAdjust": "Povuci me za prilagođavanje lokacije",
     "locationSet": "Lokacija Postavljena",
     "dragging": "Povlačenje...",
-    "locationTooFar": "Ova lokacija je {{distance}}km udaljena od {{city}} — oglasi za {{city}} moraju biti unutar {{radius}}km. Molimo izaberite bliže mjesto ili promijenite grad.",
     "tips": "💡 Savjeti: Koristite polje za pretragu da pronađete Vaše selo/grad, zumirajte sa +/- dugmićima ili točkićem miša, pomičite mapu povlačenjem, i povucite crveni marker na tačnu lokaciju Vaše nekretnine.",
     "latitude": "Geografska Širina:",
     "longitude": "Geografska Dužina:",
@@ -270,9 +271,7 @@
     "mapView": "Mapa",
     "switchTo": "Prebaci na {{view}} prikaz",
     "drawAreaHint": "Nacrtaj područje pretrage na mapi",
-    "locationTooFarTitle": "Lokacija je predaleko",
     "locationLookupFailed": "Nije moguće pronaći to mjesto. Pokušajte drugi rezultat ili postavite oznaku direktno na mapu.",
-    "searchAreaHint": "Pretraga unutar {{radius}}km od {{city}} — obližnja sela i plaže su uključeni.",
     "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku direktno na mapu."
   },
   "newsletter": {

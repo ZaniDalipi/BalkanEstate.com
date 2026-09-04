@@ -1,4 +1,10 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { PROPERTY_TYPES, type PropertyType } from '../config/propertyTypes';
+import {
+  CONSTRUCTION_STATUSES,
+  ConstructionStatus,
+  normalizeConstructionFields,
+} from '../utils/constructionStatus';
 
 export interface IPropertyImage {
   url: string;
@@ -71,7 +77,10 @@ export interface IProperty extends Document {
   storageRooms?: number;
   offices?: number;
   sqft: number;
+  /** On an under-construction listing this mirrors `expectedCompletionYear`. */
   yearBuilt: number;
+  constructionStatus?: ConstructionStatus;
+  expectedCompletionYear?: number | null;
   parking: number;
   description: string;
   specialFeatures: string[];
@@ -91,7 +100,7 @@ export interface IProperty extends Document {
   images: IPropertyImage[];
   lat: number;
   lng: number;
-  propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+  propertyType: PropertyType;
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
@@ -334,6 +343,20 @@ const PropertySchema: Schema = new Schema(
       type: Number,
       required: true,
     },
+    // Construction state. Legacy documents have neither field; they read as
+    // 'ready', which is what they are. The pair is kept consistent by the
+    // pre-validate hook below rather than by two independent field validators,
+    // because either field alone is always valid — it is the combination that
+    // can be wrong.
+    constructionStatus: {
+      type: String,
+      enum: CONSTRUCTION_STATUSES,
+      default: 'ready',
+      index: true,
+    },
+    expectedCompletionYear: {
+      type: Number,
+    },
     parking: {
       type: Number,
       default: 0,
@@ -414,7 +437,7 @@ const PropertySchema: Schema = new Schema(
     },
     propertyType: {
       type: String,
-      enum: ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'],
+      enum: [...PROPERTY_TYPES],
       required: true,
       index: true,
     },
@@ -644,6 +667,37 @@ const PropertySchema: Schema = new Schema(
     timestamps: true,
   }
 );
+
+/**
+ * Keep the construction pair consistent on every write path — create, update,
+ * import and admin edit alike — instead of at each call site.
+ *
+ * The completion year is optional, so the only rejection is a value that is
+ * not a year. Everything else is coerced: an unknown status becomes 'ready',
+ * a stray completion year on a ready listing is cleared, and an explicit
+ * `null` (how the client says "no handover date") is unset.
+ */
+PropertySchema.pre('validate', function (next) {
+  const doc = this as unknown as IProperty;
+
+  const result = normalizeConstructionFields({
+    constructionStatus: doc.constructionStatus,
+    expectedCompletionYear: doc.expectedCompletionYear,
+    yearBuilt: doc.yearBuilt,
+  });
+
+  if (!result.ok) {
+    this.invalidate('expectedCompletionYear', result.error);
+    return next();
+  }
+
+  doc.constructionStatus = result.fields.constructionStatus;
+  doc.expectedCompletionYear = result.fields.expectedCompletionYear;
+  if (result.fields.yearBuilt !== undefined) {
+    doc.yearBuilt = result.fields.yearBuilt;
+  }
+  next();
+});
 
 // Compound index for location-based queries
 PropertySchema.index({ lat: 1, lng: 1 });

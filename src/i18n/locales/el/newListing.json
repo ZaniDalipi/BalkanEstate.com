@@ -312,6 +312,7 @@
     "houseTotalFloors": "Για σπίτια και βίλες, παρακαλώ εισάγετε τον συνολικό αριθμό ορόφων (1 ή περισσότερο).",
     "apartmentElevator": "Για διαμερίσματα, παρακαλώ προσδιορίστε αν υπάρχει ανελκυστήρας (Ναι ή Όχι).",
     "floorExceedsTotal": "Ο αριθμός ορόφου δεν μπορεί να υπερβαίνει τον συνολικό αριθμό ορόφων.",
+    "completionYearInvalid": "Εισαγάγετε έγκυρο έτος ολοκλήρωσης ή αφήστε το κενό.",
     "required": "This field is required",
     "minImages": "Please upload at least {{count}} images",
     "selectCountry": "Please select a country",

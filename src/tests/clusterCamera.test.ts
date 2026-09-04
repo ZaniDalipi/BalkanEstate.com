@@ -13,6 +13,7 @@ import {
   boundsOfPositions,
   cameraForBounds,
   createFlightPath,
+  pixelSpanOfBounds,
   projectToWorld,
   unprojectFromWorld,
   spiderLayout,
@@ -123,6 +124,47 @@ describe('cameraForBounds', () => {
       padding: 72,
     });
     expect(Number.isFinite(camera.zoom)).toBe(true);
+  });
+});
+
+describe('pixelSpanOfBounds', () => {
+  it('collapses to nothing for pins on the same coordinate', () => {
+    const point = { north: 42.6, south: 42.6, east: 21.1, west: 21.1 };
+    expect(pixelSpanOfBounds(point, 21)).toEqual({ width: 0, height: 0 });
+  });
+
+  it('doubles the span for every zoom level', () => {
+    const bounds = { north: 42.61, south: 42.6, east: 21.11, west: 21.1 };
+    const near = pixelSpanOfBounds(bounds, 15);
+    const far = pixelSpanOfBounds(bounds, 16);
+
+    expect(far.width).toBeCloseTo(near.width * 2, 6);
+    expect(far.height).toBeCloseTo(near.height * 2, 6);
+  });
+
+  it('measures the gap itself, not how much viewport is left around it', () => {
+    // Two listings sharing an address, pulled apart by the map's co-located fan
+    // (0.00015 deg of latitude either side of the anchor) on a phone. Their
+    // bounds cannot fill the tall viewport at zoom 21, so `cameraForBounds`
+    // reports them unreachable and the old spiderfy test fanned them onto legs
+    // — even though on screen they already stand ~590px apart.
+    const phone = { width: 390, height: 844 };
+    const fanned = { north: 42.60015, south: 42.59985, east: 21.1, west: 21.1 };
+
+    expect(
+      cameraForBounds({ bounds: fanned, viewport: phone, padding: 72, maxZoom: 21 }).requiredZoom,
+    ).toBeGreaterThan(21);
+
+    const span = pixelSpanOfBounds(fanned, 21);
+    expect(Math.max(span.width, span.height)).toBeGreaterThan(48);
+  });
+
+  it('leaves genuinely coincident pins under the spiderfy threshold', () => {
+    // A metre apart: no zoom the map offers puts daylight between these.
+    const touching = { north: 42.600009, south: 42.6, east: 21.1, west: 21.1 };
+    const span = pixelSpanOfBounds(touching, 21);
+
+    expect(Math.max(span.width, span.height)).toBeLessThan(48);
   });
 });
 

@@ -122,6 +122,12 @@
       "livingRooms": "Дневне Собе",
       "area": "Површина (m²)",
       "yearBuilt": "Година Изградње",
+      "buildStatus": "Статус изградње",
+      "statusReady": "Усељиво",
+      "statusUnderConstruction": "У изградњи",
+      "expectedCompletion": "Очекивани завршетак",
+      "optional": "(опционо)",
+      "completionYearPlaceholder": "нпр. 2028",
       "parkingSpots": "Паркинг Места",
       "floorNumber": "Број Спрата",
       "totalFloors": "Укупно Спратова",
@@ -145,7 +151,11 @@
       "hint": "Изаберите \"Да\" ако је доступно, \"Не\" ако није доступно, или оставите као \"Било које\" да прескочите",
       "no": "Не",
       "any": "Било које",
-      "yes": "Да"
+      "yes": "Да",
+      "parkingFeatures": "Карактеристике паркинга",
+      "fencedSecured": "Ограђено / обезбеђено",
+      "hasVegetation": "Има вегетацију / дрвеће",
+      "hasWaterSource": "Има извор воде"
     },
     "advancedDetails": {
       "title": "Напредни Детаљи Некретнине",
@@ -599,11 +609,12 @@
     "house": "Кућа",
     "villa": "Вила",
     "land": "Земљиште",
-    "commercial": "Комерцијално",
+    "commercial": "Пословни простор",
     "office": "Канцеларија",
     "garage": "Гаража",
     "other": "Остало",
-    "luxuryVilla": "Luxury Villa"
+    "luxuryVilla": "Луксузна вила",
+    "parking": "Паркинг место"
   },
   "conditions": {
     "new": "Ново",

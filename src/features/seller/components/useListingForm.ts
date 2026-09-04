@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyImage, PropertyImageTag, UserRole } from '@/types';
+import type { PropertyType } from '@/shared/types/property.types';
 import { generateDescriptionFromImages, calculatePropertyDistances, LocationContext } from '@/services/geminiService';
 import { useAppContext } from '@/context/AppContext';
 import { useAlert } from '@/context/AlertContext';
@@ -12,6 +13,7 @@ import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, FIELD_ERROR_ORDER, fieldAnchorId, validateListing } from './ListingFormHelpers';
+import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
@@ -53,7 +55,11 @@ export function buildPreviewProperty(
         storageRooms: Number(listingData.storageRooms),
         offices: Number(listingData.offices),
         sqft: Number(listingData.sq_meters),
-        yearBuilt: Number(listingData.year_built),
+        ...buildConstructionFields({
+            constructionStatus: listingData.constructionStatus,
+            expectedCompletionYear: listingData.expected_completion_year,
+            yearBuilt: listingData.year_built,
+        }),
         parking: Number(listingData.parking_spots),
         description: listingData.description,
         specialFeatures: listingData.specialFeatures,
@@ -141,7 +147,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         listingType: propertyToEdit?.listingType || initialType as any,
     });
     const [language, setLanguage] = useState('English');
-    const [aiPropertyType, setAiPropertyType] = useState<'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other'>('house');
+    const [aiPropertyType, setAiPropertyType] = useState<PropertyType>('house');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [wantToPromote, setWantToPromote] = useState(false);
     const [pendingPropertyData, setPendingPropertyData] = useState<Property | null>(null);
@@ -221,6 +227,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 offices: propertyToEdit.offices || 0,
                 sq_meters: propertyToEdit.sqft,
                 year_built: propertyToEdit.yearBuilt,
+                constructionStatus: normalizeConstructionStatus(propertyToEdit.constructionStatus),
+                expected_completion_year: propertyToEdit.expectedCompletionYear || 0,
                 parking_spots: propertyToEdit.parking,
                 specialFeatures: propertyToEdit.specialFeatures,
                 materials: propertyToEdit.materials,
@@ -846,37 +854,6 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             return;
         }
 
-        // Floor validation - skip for land
-        if (listingData.propertyType !== 'land') {
-            if (listingData.propertyType === 'apartment') {
-                if (!listingData.floorNumber || listingData.floorNumber < 0) {
-                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.apartmentFloorNumber'));
-                    setIsSubmitting(false);
-                    return;
-                }
-                if (!listingData.totalFloors || listingData.totalFloors < 1) {
-                    showError(t('validation:invalidFloorCount'), t('newListing:validation.apartmentTotalFloors'));
-                    setIsSubmitting(false);
-                    return;
-                }
-                if (listingData.floorNumber > listingData.totalFloors) {
-                    showError(t('validation:invalidFloorNumber'), t('newListing:validation.floorExceedsTotal'));
-                    setIsSubmitting(false);
-                    return;
-                }
-                if (listingData.hasElevator === undefined) {
-                    showError(t('validation:elevatorRequired'), t('newListing:validation.apartmentElevator'));
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
-            if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa' || listingData.propertyType === 'luxury-villa') && (!listingData.totalFloors || listingData.totalFloors < 1)) {
-                showError(t('validation:invalidFloorCount'), t('newListing:validation.houseTotalFloors'));
-                setIsSubmitting(false);
-                return;
-            }
-        }
-
         try {
             // Step 1: Upload images to Cloudinary before creating the property
             let imageUrls: PropertyImage[] = [];
@@ -1054,7 +1031,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 storageRooms: Number(listingData.storageRooms),
                 offices: Number(listingData.offices),
                 sqft: Number(listingData.sq_meters),
-                yearBuilt: Number(listingData.year_built),
+                ...buildConstructionFields({
+                    constructionStatus: listingData.constructionStatus,
+                    expectedCompletionYear: listingData.expected_completion_year,
+                    yearBuilt: listingData.year_built,
+                }),
                 parking: Number(listingData.parking_spots),
                 description: listingData.description,
                 specialFeatures: listingData.specialFeatures,
