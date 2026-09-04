@@ -18,6 +18,7 @@
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import {
   BALKAN_LOCALITIES,
+  normalizePlaceName,
   canonicalPlaceName,
   formatPlace,
   formatPlaceLabel,
@@ -124,7 +125,43 @@ const buildPlaces = (): IndexedPlace[] => {
     });
   }
 
-  return places;
+  // A place can now appear twice: `BALKAN_LOCATIONS` has grown to hold
+  // settlements the gazetteer already described (Bečići, Himarë), so the same
+  // village arrives as both a city and a locality. The city entry is the one
+  // to keep — it is what a listing's `city` field is filed under — but the
+  // locality's parent city is context worth carrying over, so a village that
+  // is also a city still reads "Bečići, Budva, Montenegro".
+  const byIdentity = new Map<string, IndexedPlace>();
+
+  for (const place of places) {
+    const identity = `${normalizePlaceName(place.country)}|${normalizePlaceName(place.name)}`;
+    const existing = byIdentity.get(identity);
+    if (!existing) {
+      byIdentity.set(identity, place);
+      continue;
+    }
+
+    const city = existing.kind === 'city' ? existing : place;
+    const locality = existing.kind === 'city' ? place : existing;
+    if (city.kind !== 'city' || locality.kind === 'city') continue; // Two of a kind: keep the first.
+
+    const label = formatPlace({
+      name: city.name,
+      city: locality.city,
+      country: city.country,
+    });
+
+    byIdentity.set(identity, {
+      ...city,
+      label,
+      searchValue: placeSearchValue(label),
+      city: locality.city,
+      // Both spellings still have to find it.
+      aliases: [...new Set([...city.aliases, ...locality.aliases])],
+    });
+  }
+
+  return [...byIdentity.values()];
 };
 
 export const ALL_PLACES: IndexedPlace[] = buildPlaces();

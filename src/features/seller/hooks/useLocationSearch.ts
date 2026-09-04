@@ -195,11 +195,6 @@ export const useLocationSearch = ({
         });
 
         for (const prediction of predictions) {
-          // Google reports the distance from `origin`; when it is missing we
-          // keep the prediction and re-check once its coordinates resolve.
-          if (limitKm !== undefined && prediction.distanceKm !== undefined && prediction.distanceKm > limitKm) {
-            continue;
-          }
           const label = formatPlaceLabel({ name: prediction.title }, { context });
           results.push({
             id: `google:${prediction.placeId}`,
@@ -224,12 +219,10 @@ export const useLocationSearch = ({
           if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
 
           const distanceKm = centre ? haversineDistanceKm(centre, { lat, lng }) : undefined;
-          if (limitKm !== undefined && distanceKm !== undefined && distanceKm > limitKm) continue;
 
           // Named the same way as every other place in the app: local
           // spelling, no postcode, no repeated municipality.
           const label = formatGeocodedPlace(result, { context });
-          const { title, subtitle } = splitDisplayName(result.display_name);
           results.push({
             id: `osm:${result.place_id}`,
             title: label.primary,

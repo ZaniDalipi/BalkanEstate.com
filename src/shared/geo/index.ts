@@ -15,14 +15,6 @@ export {
   findCountryCentre,
 } from './cityCatalog';
 export {
-  DEFAULT_CITY_AREA_RADIUS_KM,
-  MAX_CITY_AREA_RADIUS_KM,
-  getCityAreaRadiusKm,
-  checkCityArea,
-  findCityCentre,
-  type CityAreaCheck,
-} from './cityAreas';
-export {
   canonicalPlaceName,
   formatCityPlace,
   formatGeocodedPlace,

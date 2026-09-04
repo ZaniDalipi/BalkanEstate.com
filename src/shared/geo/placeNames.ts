@@ -59,21 +59,61 @@ const CITY_SPELLINGS: Record<string, string> = CITY_SPELLING_DATA;
  */
 const SPELLING_BY_KEY = new Map<string, string>();
 
+/**
+ * The keys that are also city names in `BALKAN_LOCATIONS`.
+ *
+ * A city name is a storage key: it is what a listing's `city` field holds,
+ * what a URL carries and what the seller's form filed. So it may be
+ * *re-spelled* — "Becici" shown as "Bečići", "Himare" as "Himarë" — but never
+ * renamed. The gazetteer is allowed to supply that spelling only when its
+ * name folds to the same key, which is exactly the test for "same name, with
+ * its marks".
+ *
+ * That distinction matters because the two lists disagree about more than
+ * marks. The gazetteer calls Kosovo's Gračanica by its Albanian name,
+ * "Graçanicë", which folds to `gracanice` — a different key, so a different
+ * name, so not a spelling. Letting it through would quietly rename a city
+ * that listings are filed under.
+ */
+const CITY_KEYS = new Set<string>();
 for (const country of BALKAN_LOCATIONS) {
-  SPELLING_BY_KEY.set(normalizePlaceName(country.name), country.name);
-  for (const city of country.cities) {
-    SPELLING_BY_KEY.set(normalizePlaceName(city.name), CITY_SPELLINGS[city.name] ?? city.name);
+  for (const city of country.cities) CITY_KEYS.add(normalizePlaceName(city.name));
+}
+
+/** True when `name` may stand in as the spelling of `key`. */
+const isSpellingOf = (name: string, key: string): boolean =>
+  !CITY_KEYS.has(key) || normalizePlaceName(name) === key;
+
+/**
+ * The gazetteer goes in first, because it is the better-spelled source: it
+ * writes places locally ("Himarë", "Bečići") while `BALKAN_LOCATIONS` carries
+ * the ASCII a listing is stored under ("Himare", "Becici"). The two lists
+ * overlap — a village big enough to list in eventually earns a city entry too
+ * — and where they do, the accented spelling is the one to show.
+ */
+for (const locality of BALKAN_LOCALITIES) {
+  const key = normalizePlaceName(locality.name);
+  if (isSpellingOf(locality.name, key)) SPELLING_BY_KEY.set(key, locality.name);
+
+  for (const alias of locality.aliases ?? []) {
+    const aliasKey = normalizePlaceName(alias);
+    if (SPELLING_BY_KEY.has(aliasKey)) continue;
+    if (!isSpellingOf(locality.name, aliasKey)) continue;
+    SPELLING_BY_KEY.set(aliasKey, locality.name);
   }
 }
 
-for (const locality of BALKAN_LOCALITIES) {
-  const key = normalizePlaceName(locality.name);
-  // A gazetteer name never overwrites a city's — "Bar" the Montenegrin city
-  // outranks any village of the same name.
-  if (!SPELLING_BY_KEY.has(key)) SPELLING_BY_KEY.set(key, locality.name);
-  for (const alias of locality.aliases ?? []) {
-    const aliasKey = normalizePlaceName(alias);
-    if (!SPELLING_BY_KEY.has(aliasKey)) SPELLING_BY_KEY.set(aliasKey, locality.name);
+for (const country of BALKAN_LOCATIONS) {
+  SPELLING_BY_KEY.set(normalizePlaceName(country.name), country.name);
+
+  for (const city of country.cities) {
+    const key = normalizePlaceName(city.name);
+    const override = CITY_SPELLINGS[city.name];
+
+    // An explicit entry in the spelling table is the author's decision and
+    // always wins; otherwise a city only fills a gap the gazetteer left.
+    if (override) SPELLING_BY_KEY.set(key, override);
+    else if (!SPELLING_BY_KEY.has(key)) SPELLING_BY_KEY.set(key, city.name);
   }
 }
 
