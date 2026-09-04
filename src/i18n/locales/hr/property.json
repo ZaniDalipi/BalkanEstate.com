@@ -58,6 +58,9 @@
     "parking": "Parking",
     "parkingSpots": "Parkirna Mjesta",
     "yearBuilt": "Godina Gradnje",
+    "expectedCompletion": "Očekivani završetak",
+    "underConstruction": "U izgradnji",
+    "completionYearShort": "{{year}} (očekivano)",
     "furnished": "Namješteno",
     "unfurnished": "Nenamješteno",
     "partlyFurnished": "Djelomično Namješteno"
@@ -254,6 +257,8 @@
   "featuredAgencies": "Istaknute Agencije",
   "status": {
     "new": "Novo",
+    "underConstruction": "U izgradnji",
+    "completionYear": "Gotovo {{year}}",
     "reduced": "Snižena Cijena",
     "priceReduced": "Snižena Cijena",
     "urgent": "Hitno",
@@ -328,7 +333,9 @@
       "villa": "Vila",
       "land": "Zemljište",
       "other": "Ostalo",
-      "luxury-villa": "Luksuzna vila"
+      "luxury-villa": "Luksuzna vila",
+      "commercial": "Komercijalno",
+      "parking": "Parkirno mjesto"
     },
     "promotedListings": "Promovirani Oglasi",
     "agentHint": "Kliknite za preporuke!",

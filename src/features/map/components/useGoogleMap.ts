@@ -901,20 +901,62 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     setMeasurementPoints([]);
   }, [measurementPoints, measurementMode]);
 
-  // Compute offsets for properties sharing the same coordinates
+  // Fan out listings that sit on (or within a few metres of) the same spot, so
+  // each one keeps a pin of its own at every zoom level.
+  //
+  // Matching on exact rounded coordinates used to miss neighbours a couple of
+  // metres apart: their pins stacked into a single unreadable blob that only a
+  // spiderfy could pull apart, and spider legs are temporary — they fold away
+  // again the moment the visitor zooms. Grouping by proximity gives those
+  // listings a permanent place to stand instead.
   const colocatedOffsets = useMemo(() => {
     const offsets = new Map<string, { lat: number; lng: number }>();
-    const PRECISION = 5;
+
+    // ~5 m of latitude: closer than this and two pins overlap even at the map's
+    // maximum zoom, so the fan is the only way to keep both reachable.
+    const COLOCATION_EPSILON = 0.00005;
     const OFFSET_RADIUS = 0.00015;
-    const groups = new Map<string, Property[]>();
+
+    // A plain rounded key would split a pair that happens to straddle a cell
+    // boundary, so each listing also looks into the eight neighbouring cells.
+    const groups: Property[][] = [];
+    const cells = new Map<string, number[]>();
+    const cellKey = (latCell: number, lngCell: number) => `${latCell},${lngCell}`;
+
     for (const prop of validProperties) {
       if (prop.lat == null || prop.lng == null) continue;
-      const key = `${prop.lat.toFixed(PRECISION)},${prop.lng.toFixed(PRECISION)}`;
-      const group = groups.get(key);
-      if (group) group.push(prop);
-      else groups.set(key, [prop]);
+      const latCell = Math.floor(prop.lat / COLOCATION_EPSILON);
+      const lngCell = Math.floor(prop.lng / COLOCATION_EPSILON);
+
+      let groupIndex = -1;
+      for (let dLat = -1; dLat <= 1 && groupIndex < 0; dLat++) {
+        for (let dLng = -1; dLng <= 1 && groupIndex < 0; dLng++) {
+          for (const candidate of cells.get(cellKey(latCell + dLat, lngCell + dLng)) ?? []) {
+            const anchor = groups[candidate][0];
+            if (
+              Math.abs(anchor.lat - prop.lat) <= COLOCATION_EPSILON &&
+              Math.abs(anchor.lng - prop.lng) <= COLOCATION_EPSILON
+            ) {
+              groupIndex = candidate;
+              break;
+            }
+          }
+        }
+      }
+
+      if (groupIndex < 0) {
+        groupIndex = groups.length;
+        groups.push([]);
+      }
+      groups[groupIndex].push(prop);
+
+      const key = cellKey(latCell, lngCell);
+      const bucket = cells.get(key);
+      if (!bucket) cells.set(key, [groupIndex]);
+      else if (!bucket.includes(groupIndex)) bucket.push(groupIndex);
     }
-    for (const group of groups.values()) {
+
+    for (const group of groups) {
       if (group.length <= 1) continue;
       const step = (2 * Math.PI) / group.length;
       for (let i = 0; i < group.length; i++) {

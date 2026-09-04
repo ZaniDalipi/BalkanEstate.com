@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import type { ConstructionStatus } from '@/shared/property/construction';
+import { validateConstruction } from '@/shared/utils/validation';
 import { Button } from '@/components/ui/liquid-glass-button';
+import { hasHabitableInterior } from '@/shared/constants/propertyTypes';
 
 // --- Types ---
 
@@ -25,6 +28,10 @@ export interface ListingData {
     offices: number;
     sq_meters: number;
     year_built: number;
+    /** 'under-construction' swaps the year-built field for a completion year. */
+    constructionStatus: ConstructionStatus;
+    /** 0 = not chosen yet; only read when under construction. */
+    expected_completion_year: number;
     parking_spots: number;
     specialFeatures: string[];
     materials: string[];
@@ -33,7 +40,7 @@ export interface ListingData {
     image_tags: { index: number; tag: string; }[];
     tourUrl: string; // URL for video (YouTube, TikTok, Instagram, Vimeo, Facebook)
     virtualTour360Url: string; // URL for 360 virtual tour (Matterport, Kuula, etc.)
-    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'land' | 'other';
+    propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
     floorNumber: number;
     totalFloors: number;
     lat: number;
@@ -97,6 +104,8 @@ export const initialListingData: ListingData = {
     offices: 0,
     sq_meters: 0,
     year_built: new Date().getFullYear(),
+    constructionStatus: 'ready',
+    expected_completion_year: 0,
     parking_spots: 0,
     specialFeatures: [],
     materials: [],
@@ -186,6 +195,7 @@ export type FieldErrors = Record<string, string>;
 export const FIELD_ERROR_ORDER = [
     'country', 'city', 'title', 'price',
     'totalFloors', 'floorNumber', 'hasElevator',
+    'expectedCompletionYear',
     'description', 'images',
 ] as const;
 
@@ -194,6 +204,12 @@ export const fieldAnchorId = (field: string) => `field-${field}`;
 
 /** Minimal translate signature: `(key, fallback) => string`. */
 type Translate = (key: string, fallback?: string) => string;
+
+/** Types that occupy one floor of a larger building — the form asks which floor. */
+const STACKED_TYPES: ReadonlySet<ListingData['propertyType']> = new Set(['apartment', 'commercial']);
+
+/** Types that are a building in their own right — the form asks how many storeys. */
+const STANDALONE_TYPES: ReadonlySet<ListingData['propertyType']> = new Set(['house', 'villa', 'luxury-villa']);
 
 /**
  * Checks every mandatory field of a listing and returns a message per invalid
@@ -237,9 +253,11 @@ export const validateListing = (
         errors.images = t('newListing:validation.imagesRequired', 'Please upload at least one image.');
     }
 
-    // Floor details - not applicable to land
-    if (listingData.propertyType !== 'land') {
-        if (listingData.propertyType === 'apartment') {
+    // Floor details. Land and parking spaces have no storeys to describe, so the
+    // whole block is skipped for them.
+    if (hasHabitableInterior(listingData.propertyType)) {
+        if (STACKED_TYPES.has(listingData.propertyType)) {
+            // A unit inside a larger building: which floor it is on, and how many the building has.
             if (!listingData.floorNumber || listingData.floorNumber < 0) {
                 errors.floorNumber = t('newListing:validation.apartmentFloorNumber', 'For apartments, please enter a valid floor number (1 or greater).');
             } else if (listingData.totalFloors && listingData.floorNumber > listingData.totalFloors) {
@@ -248,14 +266,31 @@ export const validateListing = (
             if (!listingData.totalFloors || listingData.totalFloors < 1) {
                 errors.totalFloors = t('newListing:validation.apartmentTotalFloors', 'For apartments, please enter the total number of floors (1 or greater).');
             }
-            if (listingData.hasElevator === undefined) {
-                errors.hasElevator = t('newListing:validation.apartmentElevator', 'For apartments, please specify whether there is a lift/elevator (Yes or No).');
-            }
         }
-        if ((listingData.propertyType === 'house' || listingData.propertyType === 'villa')
+        if (listingData.propertyType === 'apartment' && listingData.hasElevator === undefined) {
+            // Asked of apartments only: a commercial unit is as often a street-level
+            // shopfront as a floor in an office block, so "lift or not" has no answer to force.
+            errors.hasElevator = t('newListing:validation.apartmentElevator', 'For apartments, please specify whether there is a lift/elevator (Yes or No).');
+        }
+        if (STANDALONE_TYPES.has(listingData.propertyType)
             && (!listingData.totalFloors || listingData.totalFloors < 1)) {
             errors.totalFloors = t('newListing:validation.houseTotalFloors', 'For houses and villas, please enter the total number of floors (1 or greater).');
         }
+    }
+
+    // Construction state — the pair is checked as a unit by the shared
+    // validator. The completion year is optional (a project without an
+    // announced handover date is a real listing), so this only fires when the
+    // seller typed something that is not a usable year.
+    const construction = validateConstruction({
+        constructionStatus: listingData.constructionStatus,
+        expectedCompletionYear: listingData.expected_completion_year || undefined,
+    });
+    if (!construction.isValid) {
+        errors.expectedCompletionYear = t(
+            'newListing:validation.completionYearInvalid',
+            'Please enter a valid completion year, or leave it empty.',
+        );
     }
 
     return errors;

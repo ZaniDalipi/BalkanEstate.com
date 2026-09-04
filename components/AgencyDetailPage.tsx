@@ -3157,10 +3157,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <p className="text-xs text-slate-500 mb-2">{property.city}, {property.country}</p>
                         <p className="font-bold text-emerald-600 mb-2">{formatPrice(property.price, property.country)}</p>
                         <div className="flex gap-2 text-xs text-slate-600 mb-3">
-                          <span>{property.beds} {t('agencyDetails:properties.beds', 'beds')}</span>
-                          <span>•</span>
-                          <span>{property.baths} {t('agencyDetails:properties.baths', 'baths')}</span>
-                          <span>•</span>
+                          {property.propertyType !== 'land' && (
+                            <>
+                              <span>{property.beds} {t('agencyDetails:properties.beds', 'beds')}</span>
+                              <span>•</span>
+                              <span>{property.baths} {t('agencyDetails:properties.baths', 'baths')}</span>
+                              <span>•</span>
+                            </>
+                          )}
                           <span>{property.sqft} m²</span>
                         </div>
                         <button

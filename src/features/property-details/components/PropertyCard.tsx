@@ -17,6 +17,7 @@ import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 import { canonicalPlaceName } from '@/shared/geo';
+import { resolveConstruction } from '@/shared/property/construction';
 
 interface PropertyCardProps {
   property: Property;
@@ -223,6 +224,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const sellerDisplay = getSellerDisplayName(safeProperty.seller, sellerLabels);
   const sellerRoleLabel = getSellerRoleLabel(safeProperty.seller, sellerLabels);
 
+  const construction = resolveConstruction(property);
   const isNew = property?.createdAt && (Date.now() - property.createdAt < 3 * 24 * 60 * 60 * 1000);
   const isPriceReduced = property?.originalPrice !== undefined && property?.originalPrice > property?.price;
   const isSold = property?.status === 'sold';
@@ -266,6 +268,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   };
 
   const isLuxuryVilla = property.propertyType === 'luxury-villa';
+  const isLand = property.propertyType === 'land';
 
   // Build luxury amenity chips to show on the card
   const luxuryAmenityChips: { emoji: string; label: string }[] = isLuxuryVilla ? (() => {
@@ -500,6 +503,18 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             )}
 
+            {/* Under-construction badge. Reads the resolved state, so a listing
+                whose promised year is missing or already past still says what
+                it is — just without a date it can no longer stand behind. */}
+            {!isSold && !isRented && construction.status === 'under-construction' && (
+              <div className="bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
+                <span aria-hidden="true">🏗</span>
+                {construction.expectedYear
+                  ? t('property:status.completionYear', { year: construction.expectedYear, defaultValue: 'READY {{year}}' }).toUpperCase()
+                  : t('property:status.underConstruction', 'UNDER CONSTRUCTION').toUpperCase()}
+              </div>
+            )}
+
             {/* iOS-style 360° Tour Badge */}
             {property.virtualTour360Url && (
               <div className="bg-purple-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
@@ -630,45 +645,49 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         </div>
 
         {/* Property Stats - Liquid Glass Design */}
-        <div className="property-card__stats grid grid-cols-4 gap-1.5 mb-2.5">
-          {/* Beds */}
-          <div
-            className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-[box-shadow,border-color] duration-200"
-            aria-label={`${safeProperty.beds} ${safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}`}
-          >
-            <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-            <svg className="w-4 h-4 text-blue-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2 17V8a2 2 0 012-2h16a2 2 0 012 2v9M2 17v2a1 1 0 001 1h1m16-3v2a1 1 0 01-1 1h-1M2 17h20M6 12h12a2 2 0 012 2v1H4v-1a2 2 0 012-2z" />
-            </svg>
-            <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.beds}</span>
-            <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}</span>
-          </div>
+        <div className={`property-card__stats grid gap-1.5 mb-2.5 ${isLand ? 'grid-cols-1' : 'grid-cols-4'}`}>
+          {!isLand && (
+            <>
+              {/* Beds */}
+              <div
+                className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-[box-shadow,border-color] duration-200"
+                aria-label={`${safeProperty.beds} ${safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}`}
+              >
+                <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
+                <svg className="w-4 h-4 text-blue-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2 17V8a2 2 0 012-2h16a2 2 0 012 2v9M2 17v2a1 1 0 001 1h1m16-3v2a1 1 0 01-1 1h-1M2 17h20M6 12h12a2 2 0 012 2v1H4v-1a2 2 0 012-2z" />
+                </svg>
+                <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.beds}</span>
+                <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.beds === 1 ? t('property:features.bedroom') : t('property:features.bedrooms')}</span>
+              </div>
 
-          {/* Baths */}
-          <div
-            className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-[box-shadow,border-color] duration-200"
-            aria-label={`${safeProperty.baths} ${safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}`}
-          >
-            <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-            <svg className="w-4 h-4 text-emerald-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6M4 12V7a3 3 0 013-3h1M8 4v4M12 4v2m-1 2a1 1 0 102 0 1 1 0 00-2 0z" />
-            </svg>
-            <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.baths}</span>
-            <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}</span>
-          </div>
+              {/* Baths */}
+              <div
+                className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-[box-shadow,border-color] duration-200"
+                aria-label={`${safeProperty.baths} ${safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}`}
+              >
+                <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
+                <svg className="w-4 h-4 text-emerald-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16M4 12v6a2 2 0 002 2h12a2 2 0 002-2v-6M4 12V7a3 3 0 013-3h1M8 4v4M12 4v2m-1 2a1 1 0 102 0 1 1 0 00-2 0z" />
+                </svg>
+                <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.baths}</span>
+                <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.baths === 1 ? t('property:features.bathroom') : t('property:features.bathrooms')}</span>
+              </div>
 
-          {/* Living Rooms */}
-          <div
-            className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-[box-shadow,border-color] duration-200"
-            aria-label={`${safeProperty.livingRooms} ${safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}`}
-          >
-            <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-            <svg className="w-4 h-4 text-purple-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 12v6a1 1 0 001 1h2v-4h12v4h2a1 1 0 001-1v-6M3 12V9a3 3 0 013-3h12a3 3 0 013 3v3M7 19v-4m10 4v-4" />
-            </svg>
-            <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.livingRooms}</span>
-            <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}</span>
-          </div>
+              {/* Living Rooms */}
+              <div
+                className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-purple-100 transition-[box-shadow,border-color] duration-200"
+                aria-label={`${safeProperty.livingRooms} ${safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}`}
+              >
+                <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
+                <svg className="w-4 h-4 text-purple-500 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 12v6a1 1 0 001 1h2v-4h12v4h2a1 1 0 001-1v-6M3 12V9a3 3 0 013-3h12a3 3 0 013 3v3M7 19v-4m10 4v-4" />
+                </svg>
+                <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{safeProperty.livingRooms}</span>
+                <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{safeProperty.livingRooms === 1 ? t('property:features.livingRoom') : t('property:features.livingRooms')}</span>
+              </div>
+            </>
+          )}
 
           {/* Sqft - Highlighted */}
           <div

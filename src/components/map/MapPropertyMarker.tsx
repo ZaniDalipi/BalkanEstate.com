@@ -276,6 +276,8 @@ const PROPERTY_TYPE_COLORS: Record<
   apartment: '#28a745',
   villa: '#6f42c1',
   'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
+  commercial: '#E11D48', // Rose — business premises
+  parking: '#475569',    // Slate — reads like parking signage
   land: '#8B4513',    // Brown for land
   other: '#0D9488',   // Teal — friendlier than the old gray, distinct from the other types
 };

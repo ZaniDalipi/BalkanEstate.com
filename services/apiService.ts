@@ -27,6 +27,7 @@ import {
   type ResponseKeyInfo,
 } from '@/src/shared/api/payloadEncryption';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { buildConstructionFields } from '@/shared/property/construction';
 
 // Get API URL from environment variables
 // Production detection: if running on balkanestateai.com, use production API
@@ -1201,7 +1202,13 @@ function transformBackendProperty(backendProp: any): Property {
     storageRooms: backendProp.storageRooms,
     offices: backendProp.offices,
     sqft: backendProp.sqft,
-    yearBuilt: backendProp.yearBuilt,
+    // Ingestion boundary: an unknown status reads as 'ready' and an unusable
+    // completion year is dropped, so the UI never renders a half-set promise.
+    ...buildConstructionFields({
+      constructionStatus: backendProp.constructionStatus,
+      expectedCompletionYear: backendProp.expectedCompletionYear,
+      yearBuilt: backendProp.yearBuilt,
+    }),
     parking: backendProp.parking,
     description: backendProp.description,
     specialFeatures: backendProp.specialFeatures || [],
@@ -1305,7 +1312,11 @@ function transformToBackendProperty(frontendProp: Property): any {
     storageRooms: frontendProp.storageRooms,
     offices: frontendProp.offices,
     sqft: frontendProp.sqft,
-    yearBuilt: frontendProp.yearBuilt,
+    ...buildConstructionFields({
+      constructionStatus: frontendProp.constructionStatus,
+      expectedCompletionYear: frontendProp.expectedCompletionYear,
+      yearBuilt: frontendProp.yearBuilt,
+    }),
     parking: frontendProp.parking,
     description: frontendProp.description,
     specialFeatures: frontendProp.specialFeatures,

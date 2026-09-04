@@ -5,6 +5,7 @@ import {
   getValuationById,
   getCityValuationStats,
 } from '../services/propertyValuationService';
+import { isPropertyType, PROPERTY_TYPES_LABEL } from '../config/propertyTypes';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
 
@@ -50,11 +51,10 @@ export const createValuationController = async (req: Request, res: Response): Pr
     }
 
     // Validate property type
-    const validPropertyTypes = ['house', 'apartment', 'villa', 'luxury-villa', 'land', 'other'];
-    if (!validPropertyTypes.includes(propertyType)) {
+    if (!isPropertyType(propertyType)) {
       res.status(400).json({
         success: false,
-        message: `Invalid property type. Must be one of: ${validPropertyTypes.join(', ')}`,
+        message: `Invalid property type. Must be one of: ${PROPERTY_TYPES_LABEL}`,
       });
       return;
     }

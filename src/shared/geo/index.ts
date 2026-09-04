@@ -11,6 +11,7 @@ export {
 export {
   getCountryCities,
   getCountryCityNames,
+  findCityCentre,
   findCountryCentre,
 } from './cityCatalog';
 export {

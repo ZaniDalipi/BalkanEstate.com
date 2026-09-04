@@ -379,18 +379,22 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
         {/* Property Stats */}
         <div className="flex items-center gap-4 mb-2.5 text-neutral-600">
-          <div className="flex items-center gap-1">
-            <BedIcon className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold">{property.beds}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <BathIcon className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold">{property.baths}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <LivingRoomIcon className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold">{property.livingRooms}</span>
-          </div>
+          {property.propertyType !== 'land' && (
+            <>
+              <div className="flex items-center gap-1">
+                <BedIcon className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold">{property.beds}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <BathIcon className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold">{property.baths}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <LivingRoomIcon className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold">{property.livingRooms}</span>
+              </div>
+            </>
+          )}
           <div className="flex items-center gap-1">
             <SqftIcon className="w-4 h-4 text-primary" />
             <span className="text-sm font-bold text-primary">{property.sqft} {t('common:sqm')}</span>

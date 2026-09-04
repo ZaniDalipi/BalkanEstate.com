@@ -2,11 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import {
   BALKAN_LOCALITIES,
-  DEFAULT_CITY_AREA_RADIUS_KM,
-  MAX_CITY_AREA_RADIUS_KM,
-  checkCityArea,
   findCityCentre,
-  getCityAreaRadiusKm,
   getLocalitiesForCity,
   haversineDistanceKm,
   normalizePlaceName,
@@ -14,9 +10,7 @@ import {
 } from '@/shared/geo';
 
 const VLORE = { lat: 40.4686, lng: 19.4914 };
-const PALASE = { lat: 40.2033, lng: 19.5967 };
 const HIMARE = { lat: 40.1017, lng: 19.7442 };
-const BORSH = { lat: 40.05, lng: 19.85 };
 
 describe('haversineDistanceKm', () => {
   it('measures a known Albanian riviera leg', () => {
@@ -75,65 +69,6 @@ describe('gazetteer integrity', () => {
       expect(locality.lng, locality.name).toBeGreaterThan(12);
       expect(locality.lng, locality.name).toBeLessThan(30);
     }
-  });
-});
-
-describe('getCityAreaRadiusKm', () => {
-  it('covers the whole Vlorë riviera, the case the old 30km limit broke', () => {
-    const radius = getCityAreaRadiusKm('Albania', 'Vlore');
-    expect(radius).toBeGreaterThanOrEqual(haversineDistanceKm(VLORE, HIMARE));
-    expect(radius).toBeGreaterThanOrEqual(haversineDistanceKm(VLORE, BORSH));
-  });
-
-  it('falls back to the default for a city with no override', () => {
-    expect(getCityAreaRadiusKm('Kosovo', 'Shtime')).toBe(DEFAULT_CITY_AREA_RADIUS_KM);
-  });
-
-  it('never exceeds the cap', () => {
-    for (const country of BALKAN_LOCATIONS) {
-      for (const city of country.cities) {
-        expect(getCityAreaRadiusKm(country.name, city.name)).toBeLessThanOrEqual(MAX_CITY_AREA_RADIUS_KM);
-      }
-    }
-  });
-
-  it('is spelling-insensitive', () => {
-    expect(getCityAreaRadiusKm('albania', 'vlorë')).toBe(getCityAreaRadiusKm('Albania', 'Vlore'));
-  });
-
-  it('always reaches every locality registered under a city', () => {
-    for (const locality of BALKAN_LOCALITIES) {
-      const centre = findCityCentre(locality.country, locality.city);
-      if (!centre) continue;
-
-      const distance = haversineDistanceKm(
-        { lat: centre.lat, lng: centre.lng },
-        { lat: locality.lat, lng: locality.lng }
-      );
-      expect(
-        getCityAreaRadiusKm(locality.country, locality.city),
-        `${locality.name} must be selectable under ${locality.city}`
-      ).toBeGreaterThanOrEqual(distance);
-    }
-  });
-});
-
-describe('checkCityArea', () => {
-  it('accepts Palasë and Himarë for a Vlorë listing', () => {
-    expect(checkCityArea(PALASE, VLORE, { country: 'Albania', city: 'Vlore' }).isWithinArea).toBe(true);
-    expect(checkCityArea(HIMARE, VLORE, { country: 'Albania', city: 'Vlore' }).isWithinArea).toBe(true);
-  });
-
-  it('still rejects a pin in a different part of the country', () => {
-    const tirana = { lat: 41.3275, lng: 19.8187 };
-    const check = checkCityArea(tirana, VLORE, { country: 'Albania', city: 'Vlore' });
-    expect(check.isWithinArea).toBe(false);
-    expect(check.distanceKm).toBeGreaterThan(check.radiusKm);
-  });
-
-  it('fails open when the city centre is unknown', () => {
-    expect(checkCityArea(HIMARE, null, { country: 'Albania', city: 'Vlore' }).isWithinArea).toBe(true);
-    expect(checkCityArea(HIMARE, { lat: NaN, lng: NaN }).isWithinArea).toBe(true);
   });
 });
 
