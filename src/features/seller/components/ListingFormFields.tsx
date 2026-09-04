@@ -6,6 +6,11 @@ import { PROPERTY_TYPE_OPTIONS, hasHabitableInterior } from '@/shared/constants/
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData, FieldErrors } from './ListingFormHelpers';
+import {
+    COMPLETION_YEAR_HORIZON,
+    MIN_COMPLETION_YEAR,
+    readCompletionYearInput,
+} from '@/shared/property/construction';
 import { floatingInputClasses, floatingSelectLabelClasses, inputBaseClasses, labelClasses, selectClasses, errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark } from './ListingFormHelpers';
 
 const chevronIcon = (
@@ -453,8 +458,18 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                                     id="expectedCompletionYear"
                                     type="number"
                                     inputMode="numeric"
+                                    // A year, not a number: four digits at most, so a
+                                    // slipped keypress or a pasted "20353333" cannot
+                                    // become a value the form would only reject on
+                                    // submit. min/max state the same bounds for the
+                                    // browser's own stepper and validity UI.
+                                    min={MIN_COMPLETION_YEAR}
+                                    max={new Date().getFullYear() + COMPLETION_YEAR_HORIZON}
                                     value={listingData.expected_completion_year || ''}
-                                    onChange={(e) => setListingData(p => ({ ...p, expected_completion_year: parseInt(e.target.value, 10) || 0 }))}
+                                    onChange={(e) => setListingData(p => ({
+                                        ...p,
+                                        expected_completion_year: readCompletionYearInput(e.target.value),
+                                    }))}
                                     placeholder={t('seller:createListing.fields.completionYearPlaceholder', 'e.g. 2028')}
                                     className={`${inputBaseClasses} ${fieldErrors.expectedCompletionYear ? errorFieldClasses : ''}`}
                                     aria-invalid={!!fieldErrors.expectedCompletionYear}

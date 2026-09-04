@@ -60,6 +60,31 @@ export function isUsableCompletionYear(value: unknown, now: Date = new Date()): 
   return year >= MIN_COMPLETION_YEAR && year <= now.getFullYear() + COMPLETION_YEAR_HORIZON;
 }
 
+/** How many digits a year has. Nothing here is a year beyond four. */
+const YEAR_DIGITS = 4;
+
+/**
+ * Read what the seller typed into the completion-year box.
+ *
+ * A year is four digits, so this keeps four and drops the rest: pasting
+ * "20353333" leaves "2035" rather than a number the form would only reject on
+ * submit, and typing a fifth digit simply does not take. Non-digits go too, so
+ * a stray minus or decimal point cannot turn the year into something else.
+ *
+ * Deliberately *not* clamped to the valid range. Clamping on every keystroke
+ * would fight the seller — the "2" of "2035" would become 1900 before they
+ * reached the next key. Whether the finished number is a plausible handover
+ * year is `validateCompletionYear`'s question, asked when the form is
+ * submitted.
+ *
+ * Returns 0 for an empty box, which is how the form spells "no date given" —
+ * a legitimate state for a project with no announced handover.
+ */
+export function readCompletionYearInput(raw: string): number {
+  const digits = (raw ?? '').replace(/[^0-9]/g, '').slice(0, YEAR_DIGITS);
+  return digits ? Number(digits) : 0;
+}
+
 /**
  * Read a property's construction state.
  *

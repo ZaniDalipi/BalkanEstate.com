@@ -17,6 +17,7 @@ import {
   resolveConstruction,
 } from '../shared/property/construction';
 import { validateCompletionYear, validateConstruction } from '../shared/utils/validation';
+import { readCompletionYearInput } from '../shared/property/construction';
 import { validateListing, initialListingData } from '../features/seller/components/ListingFormHelpers';
 
 const NOW = new Date('2026-06-15T00:00:00Z');
@@ -261,5 +262,39 @@ describe('validateListing — construction pair', () => {
       t
     );
     expect(errors).toEqual({});
+  });
+});
+
+describe('readCompletionYearInput — the box only accepts a year', () => {
+  it('keeps a four-digit year', () => {
+    expect(readCompletionYearInput('2035')).toBe(2035);
+  });
+
+  it('stops at four digits, so a slipped keypress cannot become 20353333', () => {
+    expect(readCompletionYearInput('20353333')).toBe(2035);
+    expect(readCompletionYearInput('2020230131')).toBe(2020);
+  });
+
+  it('drops anything that is not a digit', () => {
+    expect(readCompletionYearInput('2035abc')).toBe(2035);
+    expect(readCompletionYearInput('-2035')).toBe(2035);
+    expect(readCompletionYearInput('20.35')).toBe(2035);
+    expect(readCompletionYearInput('e')).toBe(0);
+  });
+
+  it('reads an empty box as no date given, which is a legitimate listing', () => {
+    expect(readCompletionYearInput('')).toBe(0);
+    expect(readCompletionYearInput('   ')).toBe(0);
+  });
+
+  it('lets a year be typed one digit at a time without fighting back', () => {
+    // Clamping to the valid range on each keystroke would turn the "2" of
+    // "2035" into 1900 before the seller reached the next key.
+    expect(['2', '20', '203', '2035'].map(readCompletionYearInput)).toEqual([2, 20, 203, 2035]);
+  });
+
+  it('hands the finished number to the validator, which owns the range', () => {
+    expect(validateCompletionYear(readCompletionYearInput('20353333'), { now: NOW }).isValid).toBe(true);
+    expect(validateCompletionYear(readCompletionYearInput('0203'), { now: NOW }).isValid).toBe(false);
   });
 });
