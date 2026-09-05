@@ -87,7 +87,12 @@ const CityDashboard: React.FC = () => {
   // Re-parse URL when navigating between cities (popstate or pushState)
   useEffect(() => {
     const handleUrlChange = () => {
-      setParams(parseCityFromUrl());
+      const next = parseCityFromUrl();
+      // Navigating away from the dashboard is App's routing to handle: this
+      // view is about to be replaced, and blanking it out first only costs the
+      // page transition the snapshot it animates out.
+      if (!next) return;
+      setParams(next);
     };
     window.addEventListener('popstate', handleUrlChange);
     return () => window.removeEventListener('popstate', handleUrlChange);

@@ -802,6 +802,207 @@ html[data-zoom] {
 }
 
 /* ============================================================================
+   Paired page transitions — back and forward
+   See src/app/navigation/pageTransition.ts for what turns these on.
+
+   The classes above animate the page that arrives; they cannot animate the one
+   that leaves, because React swaps the subtree in a single commit and the old
+   DOM is gone before anything could move it. Stepping through history is the
+   navigation where that shows most: back should look like the page you were on
+   sliding away to reveal the one underneath, not like it blinking out.
+
+   The View Transitions API supplies exactly the missing half. The browser holds
+   an image of the outgoing page and one of the incoming page and animates both
+   on the compositor, so the two move together without a second React tree ever
+   existing. `pageTransition` writes `data-nav-transition` on <html> with the
+   direction, which both names the region being transitioned and selects the
+   motion below; it removes it again when the animation is done.
+
+   Only #main-content is named, so the chrome around the page — sidebar,
+   header, bottom nav, sticky ad bar — is not part of the sliding snapshot and
+   stays where it is. What is left of the document still cross-fades under the
+   `root` name, which is what carries small chrome differences between pages
+   (the mobile top bar's title, a header that only some views show).
+   ============================================================================ */
+
+html[data-nav-transition] #main-content {
+  view-transition-name: page;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-nav-transition]::view-transition-group(page) {
+    animation-duration: 340ms;
+    /* Keep the slide inside the page region: neither snapshot should ride out
+       over the header or the bottom nav on its way past. */
+    overflow: clip;
+  }
+
+  /* The pair blends its two children by default, which turns the overlap of two
+     opaque pages into a grey wash halfway through the move. */
+  html[data-nav-transition]::view-transition-image-pair(page) {
+    isolation: auto;
+  }
+
+  html[data-nav-transition]::view-transition-old(page),
+  html[data-nav-transition]::view-transition-new(page) {
+    /* Replaces the default cross-fade; the directional pairs are below. */
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /* Chrome differences dissolve rather than switch, on the page's own clock. */
+  html[data-nav-transition]::view-transition-group(root) {
+    animation-duration: 260ms;
+  }
+
+  /* Forward: the page you were on moves aside to the left as the new one
+     arrives from the right — the same direction as `pageEnter`, now with the
+     departure it was always missing. */
+  html[data-nav-transition='forward']::view-transition-old(page) {
+    animation: pageSlideOutLeft 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  html[data-nav-transition='forward']::view-transition-new(page) {
+    animation: pageSlideInRight 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* Back: the exact mirror, so the motion reads as undoing the step forward. */
+  html[data-nav-transition='back']::view-transition-old(page) {
+    animation: pageSlideOutRight 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  html[data-nav-transition='back']::view-transition-new(page) {
+    animation: pageSlideInLeft 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* A page presented as a task rises over the one that opened it, the way a
+     composer does — the paired form of `pageEnterUp`. */
+  html[data-nav-transition='up']::view-transition-old(page) {
+    animation: pageSettleBack 380ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  html[data-nav-transition='up']::view-transition-new(page) {
+    animation: pageRiseIn 380ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* A change of context rather than a step: neither page travels, they trade
+     places — the paired form of `pageMorph`. */
+  html[data-nav-transition='morph']::view-transition-old(page) {
+    animation: pageMorphOut 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  html[data-nav-transition='morph']::view-transition-new(page) {
+    animation: pageMorphIn 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  html[data-nav-transition='morph']::view-transition-group(page) {
+    animation-duration: 300ms;
+  }
+  html[data-nav-transition='up']::view-transition-group(page) {
+    animation-duration: 380ms;
+  }
+}
+
+/* The outgoing page: a short move, and a fade that finishes before the travel
+   does so the two pages are never both solid on top of each other. */
+@keyframes pageSlideOutLeft {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-16%, 0, 0);
+  }
+}
+
+@keyframes pageSlideOutRight {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(16%, 0, 0);
+  }
+}
+
+/* The incoming page travels further than the one it replaces — the arrival is
+   the movement the eye should follow. */
+@keyframes pageSlideInRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(22%, 0, 0);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes pageSlideInLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(-22%, 0, 0);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* The page a sheet opens over: it stays where it is and recedes, so the sheet
+   reads as arriving on top of it rather than replacing it. */
+@keyframes pageSettleBack {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+@keyframes pageRiseIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18%, 0);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes pageMorphOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.008);
+  }
+}
+
+@keyframes pageMorphIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.975);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================================================
    Press Feedback — global tap/click acknowledgement
    See src/shared/interaction/pressFeedback.ts for what spawns these.
    ============================================================================ */

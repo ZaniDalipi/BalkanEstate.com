@@ -16,7 +16,14 @@ import { ErrorBoundary } from './src/app/components/ErrorBoundary';
 import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
 import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
-import { takePendingScrollRestore, applyScrollSnapshot } from './src/app/navigation/navHistory';
+import {
+  takePendingScrollRestore,
+  applyScrollSnapshot,
+  consumePageChange,
+  canNavigateBack,
+  setNavigationDirection,
+} from './src/app/navigation/navHistory';
+import { runPageTransition } from './src/app/navigation/pageTransition';
 import { routeImporters, preloadRouteWhenIdle } from './src/app/navigation/routePreload';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
@@ -553,9 +560,23 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     // - Browser forward button
     // - Mobile swipe back gesture
     // - History API navigation
-    window.addEventListener('popstate', checkUrlForRouting);
+    //
+    // Anything that lands on a different path — history steps and the app's own
+    // navigations alike — runs inside a paired page transition: the page being
+    // left moves away under the one arriving, instead of being replaced by it
+    // in a single frame. `runPageTransition` falls back to calling the routing
+    // straight through wherever it cannot animate.
+    const handlePopState = () => {
+      const pageChange = consumePageChange();
+      if (!pageChange) {
+        checkUrlForRouting();
+        return;
+      }
+      runPageTransition(pageChange, checkUrlForRouting);
+    };
+    window.addEventListener('popstate', handlePopState);
 
-    return () => window.removeEventListener('popstate', checkUrlForRouting);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, [dispatch]);
 
   // Fetch selected agency when selectedAgencyId changes
@@ -947,7 +968,24 @@ const MainLayout: React.FC = () => {
   }, [state.activeView, state.selectedAgencyId, state.selectedAgentId, t]);
 
   const handlePWABack = useCallback(() => {
-    // Clear any detail selections
+    // Step back through history whenever there is an in-app entry to step back
+    // to. This is what makes the bar's back button behave like the platform's:
+    // it returns to wherever the user actually came from, it animates as a
+    // step back, and it unwinds the stack instead of growing it.
+    //
+    // Detail views used to push their parent list instead — a *forward*
+    // navigation dressed up as back, which animated the wrong way, buried the
+    // page the user came from one entry deeper, and left the real back button
+    // walking through pages they had already dismissed.
+    if (canNavigateBack()) {
+      window.history.back();
+      return;
+    }
+
+    // Opened straight onto a detail page (a shared link, a fresh install):
+    // there is nothing behind it, so fall back to its parent list and animate
+    // as if we had stepped back to it.
+    setNavigationDirection('back');
     if (state.selectedAgencyId) {
       dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
@@ -963,21 +1001,11 @@ const MainLayout: React.FC = () => {
     if (state.selectedBusinessListingId) {
       dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
       dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
-      }
+      window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
       return;
     }
-    // Use browser history for proper back navigation
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      // Fallback: go to search (home)
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.pushState({}, '', buildLocalizedPath('/search'));
-    }
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    window.history.pushState({}, '', buildLocalizedPath('/search'));
   }, [state.selectedAgencyId, state.selectedAgentId, state.selectedBusinessListingId, dispatch]);
 
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;

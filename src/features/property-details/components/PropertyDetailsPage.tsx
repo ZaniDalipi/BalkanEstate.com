@@ -560,15 +560,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, [property.id]);
 
-  // Handle browser back button
-  useEffect(() => {
-    const handlePopState = () => {
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [dispatch]);
+  // Deliberately no popstate listener here.
+  //
+  // Clearing the selection on every popstate duplicated what App's routing
+  // already does for each route it resolves, and it did it eagerly: the
+  // listener ran before routing, so the listing vanished the instant history
+  // changed — including on the synthetic popstate the app fires after its own
+  // pushState, which is why moving from one listing to another flashed the
+  // loader in between. It also emptied the page before the back transition
+  // could capture it, leaving the animation with nothing to slide away.
 
   const propertyTypeLabel = property.propertyType
     ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)

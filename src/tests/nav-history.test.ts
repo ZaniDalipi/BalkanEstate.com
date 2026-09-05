@@ -161,6 +161,109 @@ describe('navHistory', () => {
     }
   });
 
+  it('reports a real back navigation as a page change', async () => {
+    const nav = await loadNavHistory();
+
+    window.history.pushState({}, '', '/property/abc');
+    simulateBackTo(0, '/');
+    expect(nav.consumePageChange()).toBe('back');
+    // One-shot: only the routing listener acts on it.
+    expect(nav.consumePageChange()).toBeNull();
+  });
+
+  it('reports stepping forward again as a forward page change', async () => {
+    const nav = await loadNavHistory();
+
+    window.history.pushState({}, '', '/property/abc');
+    simulateBackTo(0, '/');
+    nav.consumePageChange();
+
+    simulateBackTo(1, '/property/abc');
+    expect(nav.consumePageChange()).toBe('forward');
+    expect(nav.consumeNavigationDirection()).toBe('forward');
+  });
+
+  it('reports the app pushing its own entry as a page change', async () => {
+    const nav = await loadNavHistory();
+
+    // How every in-app navigation reaches routing: push the entry, then fire a
+    // synthetic popstate. It moves to another page, so it animates like one.
+    window.history.pushState({}, '', '/agents');
+    firePopstate();
+
+    expect(nav.consumePageChange()).toBe('forward');
+  });
+
+  it('carries an explicit back direction through an in-app navigation', async () => {
+    const nav = await loadNavHistory();
+
+    // The fallback a detail page uses when it was opened from a shared link and
+    // has no history behind it: pushing its parent list, but as a step back.
+    nav.setNavigationDirection('back');
+    window.history.pushState({}, '', '/search');
+    firePopstate();
+
+    expect(nav.consumePageChange()).toBe('back');
+  });
+
+  it('does not treat a query-only step as a page change', async () => {
+    const nav = await loadNavHistory();
+
+    // Filters written into the query string are the same page: pairing them
+    // with a page transition would stall the update behind an animation of one
+    // view sliding into an identical copy of itself.
+    window.history.pushState({}, '', '/search');
+    firePopstate();
+    nav.consumePageChange();
+
+    window.history.pushState({}, '', '/search?beds=2');
+    firePopstate();
+    expect(nav.consumePageChange()).toBeNull();
+
+    simulateBackTo(1, '/search');
+    expect(nav.consumePageChange()).toBeNull();
+    expect(nav.consumeNavigationDirection()).toBe('back');
+  });
+
+  it('drops a direction that no view change ever claimed', async () => {
+    const nav = await loadNavHistory();
+
+    // A navigation that lands on the same view — two tabs of the account page,
+    // say — leaves its direction unconsumed. Applying it to the navigation
+    // after it is what made tapping into a listing right after a back press
+    // slide in from the wrong side.
+    nav.setNavigationDirection('morph');
+    window.history.pushState({}, '', '/account/saved');
+    firePopstate();
+
+    window.history.pushState({}, '', '/property/abc');
+    firePopstate();
+    expect(nav.consumeNavigationDirection()).toBe('forward');
+  });
+
+  it('holds a direction across the navigation it was set for', async () => {
+    const nav = await loadNavHistory();
+
+    // Routing is deferred, so the view change that claims a direction lands
+    // well after the navigation that set it. It has to survive that wait.
+    nav.setNavigationDirection('morph');
+    window.history.pushState({}, '', '/account');
+    firePopstate();
+
+    expect(nav.consumeNavigationDirection()).toBe('morph');
+  });
+
+  it('keeps an inferred back direction until the view change claims it', async () => {
+    const nav = await loadNavHistory();
+
+    window.history.pushState({}, '', '/property/abc');
+    simulateBackTo(0, '/');
+
+    // The browser's own back button: nothing set a direction, and the one
+    // inferred from the index has to outlive the popstate that inferred it.
+    expect(nav.consumeNavigationDirection()).toBe('back');
+  });
+
   it('reports whether there is an in-app entry to go back to', async () => {
     const nav = await loadNavHistory();
 

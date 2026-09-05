@@ -107,6 +107,27 @@ describe('ViewTransition', () => {
     }
   });
 
+  it('stands aside while a paired transition drives the change', async () => {
+    // Back and forward run through the browser's View Transitions API, which
+    // animates a snapshot of the outgoing page against one of the incoming
+    // page. The wrapper underneath has to sit still: its own entrance would
+    // animate the same arrival a second time, half a frame out of step.
+    const pageTransition = await import('@/app/navigation/pageTransition');
+    const running = vi.spyOn(pageTransition, 'isPageTransitionRunning').mockReturnValue(true);
+    try {
+      const { container, rerender } = renderView('search');
+      setNavigationDirection('back');
+      rerender(
+        <ViewTransition viewKey="agents">
+          <div data-testid="page">agents</div>
+        </ViewTransition>,
+      );
+      expect(wrapperOf(container).className).not.toMatch(/animate-page/);
+    } finally {
+      running.mockRestore();
+    }
+  });
+
   it('keeps the wrapper node identity across a view change', () => {
     // The swipe-back listeners bind to this node on mount; remounting it on
     // every navigation would silently unbind the gesture.

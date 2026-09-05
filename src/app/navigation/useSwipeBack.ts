@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { canNavigateBack, setNavigationDirection } from './navHistory';
+import { skipNextPageTransition } from './pageTransition';
 
 /**
  * Edge swipe-to-go-back for the installed app.
@@ -144,6 +145,11 @@ export function useSwipeBack(
           node.style.pointerEvents = '';
           reset();
           setNavigationDirection('back');
+          // The page has just been dragged off screen under the user's finger.
+          // A paired transition would snapshot it and slide it away a second
+          // time, so the gesture owns the exit and the arrival keeps the plain
+          // entrance animation.
+          skipNextPageTransition();
           onBack();
         }, EXIT_MS);
         return;

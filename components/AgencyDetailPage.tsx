@@ -39,6 +39,7 @@ import { searchLocation } from '../services/osmService';
 import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
 import { SocialShare } from '../src/components/marketing/SocialShare';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { canNavigateBack, setNavigationDirection } from '@/app/navigation/navHistory';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
 // Map icon SVG for section headers
@@ -154,7 +155,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation(['agencyDetails', 'nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
-  const { getLocalizedPath } = useLocalizedNavigation();
+  const { getLocalizedPath, navigate } = useLocalizedNavigation();
   const { confirm } = useConfirmation();
   const { success, error, warning, info } = useNotification();
 
@@ -646,14 +647,27 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { salesLast12Months, totalSales, minPrice, maxPrice, averagePrice } = salesStats;
 
   const handleBack = () => {
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    // Go back to the previous view (could be agencies or agents)
-    // Check if we have a selected agent, if so go back to agents view
-    if (state.selectedAgentId) {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-    } else {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+    // Step back through history when there is an entry to step back to, so this
+    // returns the user to wherever they opened the agency from and animates as
+    // a step back. It used to swap the view without touching history at all:
+    // the URL stayed on the agency, the browser's own back button then landed
+    // on the page that was already showing, and the change animated forwards.
+    if (canNavigateBack()) {
+      window.history.back();
+      return;
     }
+
+    // Opened straight onto the agency (a shared link): nothing to go back to,
+    // so fall back to the view it belongs to, still moving like a step back.
+    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+    if (state.selectedAgentId) {
+      // Came in from an agent's profile — keep them on it rather than dropping
+      // to the list. Routing the URL here would clear the selection.
+      setNavigationDirection('back');
+      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
+      return;
+    }
+    navigate('/agencies', { direction: 'back' });
   };
 
   const handleAgentClick = (agentDatabaseId: string) => {
