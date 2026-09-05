@@ -39,7 +39,7 @@ docs/
 - [Backend Quick Start](./setup/backend/QUICK_START.md)
 - [Database Setup](./setup/backend/DATABASE_SETUP.md)
 - [OAuth Setup](./setup/backend/OAUTH_SETUP.md)
-- [Cloudinary Setup](./setup/backend/CLOUDINARY_SETUP.md)
+- [Bunny.net Image Hosting Setup](./setup/backend/BUNNY_SETUP.md)
 - [Payment Integration](./setup/backend/PAYMENT_SETUP.md)
 - [Subscription Setup](./setup/backend/SUBSCRIPTION_SETUP.md)
 

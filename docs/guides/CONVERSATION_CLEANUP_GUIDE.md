@@ -2,7 +2,7 @@
 
 ## Overview
 
-This system automatically tracks and deletes old conversations after 30 days from the last message. It also properly manages Cloudinary images associated with messages, ensuring no orphaned files remain in cloud storage.
+This system automatically tracks and deletes old conversations after 30 days from the last message. It also properly manages the stored images associated with messages, ensuring no orphaned files remain in cloud storage.
 
 ## Features
 
@@ -19,7 +19,7 @@ This system automatically tracks and deletes old conversations after 30 days fro
 ### 3. **Complete Cleanup**
 - Deletes expired conversations
 - Deletes all associated messages
-- Deletes Cloudinary images
+- Deletes stored images
 - Prevents orphaned data
 
 ### 4. **Manual and Automated Execution**
@@ -57,7 +57,7 @@ interface IConversation {
 ```typescript
 interface IMessage {
   // ... existing fields
-  imagePublicId?: string; // NEW: Cloudinary public_id for cleanup
+  imagePublicId?: string; // NEW: storage path, for cleanup
 }
 ```
 
@@ -115,7 +115,7 @@ npm run cleanup:conversations
 🧹 Starting cleanup...
 
 🗑️  Processing conversation 507f1f77bcf86cd799439011 (expired: 2024-10-18T14:30:00.000Z)
-  📸 Deleting 5 images from Cloudinary...
+  📸 Deleting 5 images from storage...
     ✅ Deleted: balkan-estate/messages/user-abc123-user-def456/conv-507f.../img1
     ✅ Deleted: balkan-estate/messages/user-abc123-user-def456/conv-507f.../img2
     ...
@@ -184,14 +184,14 @@ console.log(stats);
 **Before:**
 ```json
 {
-  "imageUrl": "https://res.cloudinary.com/..."
+  "imageUrl": "https://your-zone.b-cdn.net/balkan-estate/..."
 }
 ```
 
 **After:**
 ```json
 {
-  "imageUrl": "https://res.cloudinary.com/...",
+  "imageUrl": "https://your-zone.b-cdn.net/balkan-estate/...",
   "publicId": "balkan-estate/messages/user-abc-user-def/conv-xyz/img123"
 }
 ```
@@ -217,7 +217,7 @@ await sendMessage(conversationId, {
 
 **Behavior:**
 - Finds all messages with images
-- Deletes images from Cloudinary
+- Deletes images from storage
 - Deletes all messages
 - Deletes conversation
 - Returns summary
@@ -297,7 +297,7 @@ Old messages without `imagePublicId` will still work, but images won't be delete
 4. **Verify:**
    - Conversation deleted
    - Messages deleted
-   - Cloudinary images deleted
+   - Stored images deleted
 
 ### Test Image Upload
 
@@ -308,7 +308,7 @@ Old messages without `imagePublicId` will still work, but images won't be delete
      -F "image=@annotated-screenshot.png"
    ```
 
-2. **Verify folder structure in Cloudinary:**
+2. **Verify folder structure in the Bunny storage browser:**
    - Should be in: `balkan-estate/messages/user-{id1}-user-{id2}/conv-{id}/`
    - Should have context metadata
 
@@ -337,15 +337,15 @@ Old messages without `imagePublicId` will still work, but images won't be delete
 ### Issue: Cleanup script fails to delete images
 
 **Possible causes:**
-1. Cloudinary credentials not set
+1. Bunny.net credentials not set
 2. Invalid public_id format
 3. Image already deleted
 
 **Solution:**
 ```bash
-# Check Cloudinary config
-echo $CLOUDINARY_CLOUD_NAME
-echo $CLOUDINARY_API_KEY
+# Check Bunny config
+echo $BUNNY_STORAGE_ZONE
+echo $BUNNY_PULL_ZONE_HOST
 # (Don't echo API_SECRET in production)
 
 # Check logs for specific errors
@@ -402,7 +402,7 @@ cd /path/to/backend && npm run cleanup:conversations
 ### Optimization Tips
 
 1. **Run during off-peak hours** (2-4 AM)
-2. **Monitor Cloudinary rate limits**
+2. **Monitor storage API rate limits**
 3. **Consider batching for very large cleanups**
 4. **Add retry logic for failed deletes**
 
@@ -429,7 +429,7 @@ cd /path/to/backend && npm run cleanup:conversations
 - No orphaned images in cloud storage
 - Complies with "right to be forgotten"
 
-### Cloudinary Context
+### Storage Context
 
 Images include metadata:
 ```json
@@ -540,7 +540,7 @@ The conversation cleanup system provides:
 ✅ **Easy execution** - npm script + cron scheduling
 ✅ **Detailed logging** - Full visibility into cleanup process
 ✅ **Privacy compliant** - Automatic data deletion
-✅ **Cloud optimized** - Prevents orphaned Cloudinary files
+✅ **Cloud optimized** - Prevents orphaned files in the storage zone
 
 For questions or issues, check the troubleshooting section or review the cleanup service code at:
 - `/backend/src/services/conversationCleanupService.ts`

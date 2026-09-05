@@ -18,14 +18,14 @@ Backend API server for the Balkan Estate real estate application built with Node
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (jsonwebtoken) + bcrypt
-- **File Storage**: Cloudinary
+- **File Storage**: Bunny.net Edge Storage + CDN
 - **Security**: Helmet, CORS
 
 ## Prerequisites
 
 - Node.js (v18 or higher)
 - MongoDB (v6 or higher)
-- Cloudinary account (for image uploads)
+- Bunny.net account (for image uploads and delivery)
 
 ## Installation
 
@@ -56,10 +56,10 @@ Backend API server for the Balkan Estate real estate application built with Node
    JWT_SECRET=your-super-secret-jwt-key-change-in-production
    JWT_EXPIRES_IN=7d
 
-   # Cloudinary (for image uploads)
-   CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key
-   CLOUDINARY_API_SECRET=your-api-secret
+   # Bunny.net (for image uploads and delivery)
+   BUNNY_STORAGE_ZONE=your-storage-zone
+   BUNNY_STORAGE_PASSWORD=your-storage-password
+   BUNNY_PULL_ZONE_HOST=your-zone.b-cdn.net
 
    # Frontend URL (for CORS)
    FRONTEND_URL=http://localhost:5173
@@ -98,15 +98,18 @@ Backend API server for the Balkan Estate real estate application built with Node
    MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/balkan-estate?retryWrites=true&w=majority
    ```
 
-## Cloudinary Setup
+## Bunny.net Setup
 
-1. Create free account at [cloudinary.com](https://cloudinary.com)
+See `docs/setup/backend/BUNNY_SETUP.md` for the full walkthrough, including
+the dashboard settings that determine the bill.
+
+1. Create an account at [bunny.net](https://bunny.net)
 2. Get credentials from Dashboard
 3. Update `.env` with your credentials:
    ```env
-   CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key
-   CLOUDINARY_API_SECRET=your-api-secret
+   BUNNY_STORAGE_ZONE=your-storage-zone
+   BUNNY_STORAGE_PASSWORD=your-storage-password
+   BUNNY_PULL_ZONE_HOST=your-zone.b-cdn.net
    ```
 
 ## Running the Server
@@ -267,7 +270,7 @@ backend/
 ├── src/
 │   ├── config/
 │   │   ├── database.ts      # MongoDB connection
-│   │   └── cloudinary.ts    # Cloudinary config
+│   │   └── bunny.ts         # Bunny.net storage & CDN config
 │   ├── controllers/
 │   │   ├── authController.ts
 │   │   ├── propertyController.ts
@@ -314,7 +317,7 @@ backend/
    ```bash
    heroku config:set MONGODB_URI="your-mongodb-uri"
    heroku config:set JWT_SECRET="your-secret"
-   heroku config:set CLOUDINARY_CLOUD_NAME="your-cloud-name"
+   heroku config:set BUNNY_STORAGE_ZONE="your-storage-zone"
    # ... add all env vars
    ```
 
@@ -353,9 +356,12 @@ backend/
 | `MONGODB_URI` | MongoDB connection string | Yes | - |
 | `JWT_SECRET` | JWT signing secret | Yes | - |
 | `JWT_EXPIRES_IN` | Token expiration | No | 7d |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | Yes | - |
-| `CLOUDINARY_API_KEY` | Cloudinary API key | Yes | - |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret | Yes | - |
+| `BUNNY_STORAGE_ZONE` | Bunny Edge Storage zone name | Yes | - |
+| `BUNNY_STORAGE_PASSWORD` | Storage zone FTP & API password | Yes | - |
+| `BUNNY_PULL_ZONE_HOST` | Public CDN hostname, no scheme | Yes | - |
+| `BUNNY_STORAGE_REGION` | Storage region prefix | No | `''` (Falkenstein) |
+| `BUNNY_PRIVATE_PULL_ZONE_HOST` | Token-authenticated zone for documents | No | - |
+| `BUNNY_TOKEN_AUTH_KEY` | Private pull zone token key | No | - |
 | `FRONTEND_URL` | Frontend URL for CORS | No | http://localhost:5173 |
 
 ### Paysera Payment Configuration

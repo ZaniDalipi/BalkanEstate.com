@@ -93,7 +93,7 @@ router.post('/signed-urls', generalRateLimiter, getBatchSignedUrls);
  *         required: true
  *         schema:
  *           type: string
- *         description: Cloudinary public ID (URL-encoded)
+ *         description: Storage path (URL-encoded)
  *       - in: query
  *         name: resourceType
  *         schema:
@@ -124,7 +124,7 @@ router.get('/signed-url/{*publicId}', generalRateLimiter, getSignedUrl);
  *         required: true
  *         schema:
  *           type: string
- *         description: Cloudinary public ID (URL-encoded)
+ *         description: Storage path (URL-encoded)
  *     responses:
  *       200:
  *         description: File deleted

@@ -34,7 +34,7 @@ export interface ImportResult {
   missingPhoto: string[];
 }
 
-/** Matches `seedCityImages.ts`, which named the Cloudinary assets this way. */
+/** Matches `seedCityImages.ts`, which names the stored assets this way. */
 function normalizeName(value: string): string {
   return value.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
@@ -89,7 +89,7 @@ export function isUsablePhotoUrl(url: unknown): url is string {
 /**
  * Finds a photo for one city, or `null` if there is none.
  *
- * The seeded Cloudinary city library (`city-{country}-{city}`) is checked
+ * The seeded city photo library (`city-{country}-{city}`) is checked
  * first, ahead of `row.imageUrl`, even though the library needs a network
  * round trip and the row field doesn't. That library is built by
  * `seedCityImages.ts`, which is deliberately picky — it prefers Commons

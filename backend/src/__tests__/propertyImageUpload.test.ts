@@ -82,7 +82,7 @@ describe('Property Image Upload', () => {
   });
 
   describe('POST /api/properties/upload-images', () => {
-    it('should upload images to Cloudinary successfully', async () => {
+    it('should upload images to storage successfully', async () => {
       const response = await request(app)
         .post('/api/properties/upload-images')
         .set('Authorization', `Bearer ${authToken}`)
@@ -320,7 +320,7 @@ describe('Property Image Upload', () => {
       expect(createResponse.status).toBe(201);
       expect(createResponse.body.property.images.length).toBe(2);
 
-      // Verify all images have Cloudinary URLs and public IDs
+      // Verify all images have CDN URLs and storage paths
       createResponse.body.property.images.forEach((img: any) => {
         expect(img.url).toContain('test-zone.b-cdn.net');
         expect(img.publicId).toContain('balkan-estate/users/');

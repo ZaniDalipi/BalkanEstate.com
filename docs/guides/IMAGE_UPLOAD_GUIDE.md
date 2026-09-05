@@ -2,11 +2,11 @@
 
 ## Overview
 
-This application uses Cloudinary for efficient, cost-optimized image storage. All property images are automatically compressed, optimized, and organized in a structured folder hierarchy.
+This application uses Bunny.net Edge Storage for efficient, cost-optimized image storage, with Bunny Optimizer resizing at the edge. All property images are compressed to a single WebP master on upload and organized in a structured folder hierarchy; every displayed size is rendered from that master on request rather than pre-generated.
 
 ## Folder Structure
 
-Images are organized in Cloudinary with the following structure:
+Images are organized in the storage zone with the following structure:
 
 ```
 balkan-estate/
@@ -38,13 +38,13 @@ balkan-estate/
 ## Cost Optimization Features
 
 ### 1. **Pre-Upload Compression**
-Images are compressed using Sharp before uploading to Cloudinary:
+Images are compressed using Sharp before upload:
 - Resized to max 1920x1080 (maintaining aspect ratio)
 - Converted to JPEG with 85% quality
 - Progressive JPEG for better web loading
 - Metadata removed
 
-### 2. **Cloudinary Transformations**
+### 2. **Edge Transformations**
 - `quality: auto:good` - Automatic quality adjustment
 - `fetch_format: auto` - Serves WebP to supported browsers (50-80% smaller than JPEG)
 
@@ -82,7 +82,7 @@ formData.append('images', file2);
 {
   "images": [
     {
-      "url": "https://res.cloudinary.com/.../image.jpg",
+      "url": "https://your-zone.b-cdn.net/balkan-estate/.../image.webp",
       "publicId": "balkan-estate/properties/user-123/listing-456/abc123",
       "tag": "other"
     }
@@ -216,7 +216,7 @@ const ImageUploader: React.FC<{ propertyId?: string }> = ({ propertyId }) => {
 ```typescript
 interface IPropertyImage {
   url: string;
-  publicId?: string; // Cloudinary public_id
+  publicId?: string; // Storage path within the zone
   tag: 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 }
 
@@ -254,7 +254,7 @@ property.images = uploadedImages.map(img => ({
 const imageUrls = property.images.map(img => img.url);
 
 // Or generate optimized URLs on-demand
-import { getOptimizedUrl } from '../services/cloudinaryService';
+import { getOptimizedUrl } from '../services/imageStorageService';
 
 const thumbnailUrl = getOptimizedUrl(img.publicId, {
   width: 400,
@@ -267,20 +267,20 @@ const thumbnailUrl = getOptimizedUrl(img.publicId, {
 
 ### Automatic Deletion
 
-When a property is deleted, all associated images are automatically removed from Cloudinary:
+When a property is deleted, all associated images are automatically removed from storage:
 
 ```typescript
 // Backend automatically handles this
 await deleteProperty(propertyId);
 // ✓ Property deleted from database
-// ✓ All images deleted from Cloudinary
+// ✓ All images deleted from storage
 // ✓ Entire folder removed
 ```
 
 ### Manual Deletion
 
 ```typescript
-import { deleteImages, deleteFolder } from '../services/cloudinaryService';
+import { deleteImages, deleteFolder } from '../services/imageStorageService';
 
 // Delete specific images
 await deleteImages([publicId1, publicId2]);
@@ -360,7 +360,7 @@ const newPublicIds = await moveImagesToProperty(
 
 ## Cost Monitoring
 
-### Cloudinary Free Tier Limits
+### Cost Notes
 - **Storage**: 25 GB
 - **Bandwidth**: 25 GB/month
 - **Transformations**: 25,000/month
@@ -375,7 +375,7 @@ With our optimizations, you can store approximately:
 2. ✓ Use the property ID in uploads for proper organization
 3. ✓ Limit images to 10-15 per property
 4. ✓ Compress large images before upload (we do this automatically)
-5. ✓ Use Cloudinary's auto format (WebP when supported)
+5. ✓ Let Bunny Optimizer negotiate the format (WebP/AVIF when supported)
 
 ## Troubleshooting
 
@@ -398,7 +398,7 @@ if (oversized.length > 0) {
 ### Images Not Deleting
 - Check that `publicId` is stored in database
 - Verify folder path matches the pattern
-- Check Cloudinary dashboard for orphaned files
+- Check the Bunny storage browser for orphaned files
 
 ### Slow Uploads
 - Upload images in batches (5-10 at a time)
@@ -408,6 +408,6 @@ if (oversized.length > 0) {
 ## Support
 
 For issues or questions:
-1. Check Cloudinary dashboard: [cloudinary.com/console](https://cloudinary.com/console)
+1. Check the Bunny dashboard: [dash.bunny.net](https://dash.bunny.net)
 2. Review server logs for upload errors
-3. Verify folder structure in Cloudinary media library
+3. Verify folder structure in the Bunny storage browser

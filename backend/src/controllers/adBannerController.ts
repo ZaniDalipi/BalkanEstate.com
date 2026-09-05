@@ -209,7 +209,7 @@ export const deleteAdBanner = async (req: Request, res: Response): Promise<void>
 };
 
 /**
- * @desc    Admin: upload a banner image to Cloudinary
+ * @desc    Admin: upload a banner image to storage
  * @route   POST /api/admin/ad-banners/upload-image
  * @access  Admin
  */

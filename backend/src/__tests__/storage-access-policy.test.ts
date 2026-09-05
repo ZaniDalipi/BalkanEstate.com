@@ -573,7 +573,7 @@ describe('Storage Access Policy', () => {
       expect(res.status).toBe(400);
     });
 
-    it('should accept valid Cloudinary publicId with slashes/hyphens/underscores', async () => {
+    it('should accept a valid storage path with slashes/hyphens/underscores', async () => {
       await registerFileUpload({
         publicId: 'balkan-estate/users/abc_123/avatar/my-image.jpg',
         url: 'https://example.com/img',

@@ -252,7 +252,7 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    // Delete document from Cloudinary if exists
+    // Delete document from storage if exists
     if (agent.credentials[credentialIndex].documentPublicId) {
       await deleteImages([agent.credentials[credentialIndex].documentPublicId!]);
     }

@@ -10,6 +10,7 @@ import {
 } from '../services/videoGenerationService';
 import { videoLogger } from '../utils/logger';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
+import { storagePathFromUrl } from '../utils/bunnyUrl';
 
 /**
  * @desc    Generate video for a property (synchronous - for smaller videos)
@@ -299,17 +300,17 @@ export const deleteVideo = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // If property has a generated video with public ID, delete from Cloudinary
+    // If property has a generated video with a storage path, delete the object
     if (property.generatedVideoPublicId) {
       await deleteGeneratedVideo(property.generatedVideoPublicId);
-    } else if (property.videoUrl && property.videoUrl.includes('cloudinary')) {
-      // Fallback: Extract public_id from Cloudinary URL
-      const urlParts = property.videoUrl.split('/');
-      const versionIndex = urlParts.findIndex(part => part.startsWith('v') && !isNaN(parseInt(part.substring(1))));
-      if (versionIndex !== -1) {
-        const publicIdWithExtension = urlParts.slice(versionIndex + 1).join('/');
-        const publicId = publicIdWithExtension.replace(/\.[^/.]+$/, ''); // Remove extension
-        await deleteGeneratedVideo(publicId);
+    } else {
+      // Fallback for a row that kept only the URL: the storage path is simply
+      // the URL's pathname, so it needs no parsing of version or transform
+      // segments the way the Cloudinary form did. Returns '' — and so deletes
+      // nothing — for a URL that is not ours.
+      const storagePath = storagePathFromUrl(property.videoUrl || '');
+      if (storagePath) {
+        await deleteGeneratedVideo(storagePath);
       }
     }
 

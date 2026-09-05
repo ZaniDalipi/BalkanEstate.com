@@ -29,9 +29,8 @@ Create `.env` file:
 # API
 VITE_API_URL=http://localhost:5000/api
 
-# Cloudinary (for images)
-VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
-VITE_CLOUDINARY_UPLOAD_PRESET=your_preset
+# Image CDN — must match the backend's BUNNY_PULL_ZONE_HOST
+VITE_CDN_HOST=your-zone.b-cdn.net
 
 # OAuth (optional)
 VITE_GOOGLE_CLIENT_ID=your_google_client_id

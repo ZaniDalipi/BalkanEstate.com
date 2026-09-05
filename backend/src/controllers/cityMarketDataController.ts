@@ -198,7 +198,7 @@ export const runCityMarketDigestController = async (req: Request, res: Response)
 };
 
 /**
- * @desc    Refresh city images from Wikipedia → Cloudinary (admin only)
+ * @desc    Refresh city images from Wikipedia → storage (admin only)
  * @route   POST /api/cities/refresh-images
  * @access  Private/Admin
  */
@@ -325,7 +325,7 @@ export const getCityGeoDataController = async (req: Request, res: Response): Pro
 };
 
 /**
- * @desc    Seed missing city images to Cloudinary (admin only)
+ * @desc    Seed missing city images to storage (admin only)
  * @route   POST /api/cities/seed-images
  * @access  Private/Admin
  */

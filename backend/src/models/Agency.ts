@@ -30,7 +30,7 @@ export interface IAgency extends Document {
   invitationCode: string; // Unique code for agents to join: format "AGY-{agencyId}-{randomString}"
   description?: string;
   logo?: string;
-  logoPublicId?: string; // Cloudinary ID for cleanup
+  logoPublicId?: string; // Storage path, for cleanup
   logoPosition?: { x: number; y: number }; // object-position percentages (0-100)
   coverImage?: string;
   coverImagePublicId?: string;
@@ -65,8 +65,8 @@ export interface IAgency extends Document {
     dateReceived: Date;
     expiryDate?: Date;          // For certifications that expire
     issuingOrganization: string;
-    documentUrl?: string;       // Proof document (S3/Cloudinary URL)
-    documentPublicId?: string;  // Cloudinary public ID for cleanup
+    documentUrl?: string;       // Proof document (storage URL)
+    documentPublicId?: string;  // Storage path, for cleanup
     isVerified: boolean;
     verifiedAt?: Date;
     verifiedBy?: mongoose.Types.ObjectId; // Admin who verified

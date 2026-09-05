@@ -1,3 +1,12 @@
+// Every model this touches is mocked below, so no collection is read — see
+// `usesDatabase` in setup.ts. Without this the suite spins up an in-memory
+// MongoDB it never queries.
+process.env.SKIP_TEST_DB = 'true';
+
+// The restyle SSRF allowlist is built from the configured pull zone when the
+// controller is first imported, so this must be set before that happens.
+process.env.BUNNY_PULL_ZONE_HOST = 'test-zone.b-cdn.net';
+
 import type { Request, Response } from 'express';
 
 // Mock the Gemini service so no real API call is made.
@@ -21,7 +30,7 @@ import User from '../models/User';
 import Product from '../models/Product';
 import { restyleRoom, getRoomStyleUsage } from '../controllers/aiController';
 
-const CLOUDINARY_URL = 'https://res.cloudinary.com/demo/image/upload/v1/room.jpg';
+const HOSTED_URL = 'https://test-zone.b-cdn.net/balkan-estate/users/1/listings/a/photos/room.webp';
 const FUTURE = new Date(Date.now() + 86_400_000);
 
 const makeRes = () => {
@@ -54,7 +63,7 @@ describe('restyleRoom controller', () => {
     mockFindByIdAndUpdate.mockResolvedValue({});
   });
 
-  it('returns 400 when imageUrl is not a Cloudinary URL', async () => {
+  it('returns 400 when imageUrl is not on our own image CDN', async () => {
     const res = makeRes();
     await restyleRoom(makeReq({ imageUrl: 'https://evil.example.com/x.jpg', style: 'scandinavian' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
@@ -63,7 +72,7 @@ describe('restyleRoom controller', () => {
 
   it('returns 400 for an unknown style', async () => {
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'not-a-real-style' }), res);
+    await restyleRoom(makeReq({ imageUrl: HOSTED_URL, style: 'not-a-real-style' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(mockGenerate).not.toHaveBeenCalled();
   });
@@ -78,7 +87,7 @@ describe('restyleRoom controller', () => {
       save: jest.fn(),
     });
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }, { _id: 'u1' }), res);
+    await restyleRoom(makeReq({ imageUrl: HOSTED_URL, style: 'scandinavian' }, { _id: 'u1' }), res);
     expect(res.status).toHaveBeenCalledWith(429);
     expect(mockGenerate).not.toHaveBeenCalled();
   });
@@ -95,7 +104,7 @@ describe('restyleRoom controller', () => {
       save: jest.fn(),
     });
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }, { _id: 'u2' }), res);
+    await restyleRoom(makeReq({ imageUrl: HOSTED_URL, style: 'scandinavian' }, { _id: 'u2' }), res);
 
     expect(res.status).not.toHaveBeenCalledWith(429);
     expect(mockGenerate).toHaveBeenCalledTimes(1);
@@ -113,7 +122,7 @@ describe('restyleRoom controller', () => {
       save: jest.fn(),
     });
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'ext-modern' }, { _id: 'u6' }), res);
+    await restyleRoom(makeReq({ imageUrl: HOSTED_URL, style: 'ext-modern' }, { _id: 'u6' }), res);
 
     expect(mockGenerate).toHaveBeenCalledTimes(1);
     // Service is called with category 'exterior' for ext- styles.
@@ -134,7 +143,7 @@ describe('restyleRoom controller', () => {
     });
 
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }, { _id: 'u3' }), res);
+    await restyleRoom(makeReq({ imageUrl: HOSTED_URL, style: 'scandinavian' }, { _id: 'u3' }), res);
 
     expect(mockGenerate).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith(

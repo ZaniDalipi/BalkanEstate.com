@@ -1390,7 +1390,7 @@ router.put('/city-photos', logAdminAction('SET_CITY_PHOTO'), async (req: Request
     // Refused here rather than saved and then blocked by the CSP: an image
     // from an unlisted host renders as a blank frame with nothing to explain
     // it, so the curator has to hear about it now. Uploading through the app
-    // always satisfies this — those land on Cloudinary.
+    // always satisfies this — those land on our own pull zone.
     if (!isAllowedPhotoUrl(imageUrl)) {
       res.status(400).json({
         message: `Photos can only be linked from: ${allowedPhotoHostsHint()}. Upload the file instead and it will be hosted for you.`,
@@ -1436,7 +1436,7 @@ router.put('/city-photos', logAdminAction('SET_CITY_PHOTO'), async (req: Request
 
 /**
  * Clear a city's override, handing it back to the resolution chain (City
- * Gallery → Villa Destination → the Wikipedia seeder). The Cloudinary asset is
+ * Gallery → Villa Destination → the Wikipedia seeder). The stored asset is
  * left in place: another city or a gallery panel may be using the same upload.
  */
 router.delete('/city-photos', logAdminAction('CLEAR_CITY_PHOTO'), async (req: Request, res: Response): Promise<void> => {

@@ -12,7 +12,7 @@ Browser
               └── HTTP / WebSocket
                     └── Express API (Node.js)
                           └── MongoDB (Mongoose)
-                                └── Cloudinary (image CDN)
+                                └── Bunny.net (Edge Storage + image CDN)
 ```
 
 ---
@@ -111,7 +111,7 @@ Key decisions:
   under the pointer.
 - **Image quality.** Both automatic city-photo pipelines
   (`cityImageService.ts`'s Wikipedia fetch, `seedCityImages.ts`'s Commons
-  fetch) and the gallery's own Cloudinary delivery request (`crop: 'limit'`)
+  fetch) and the gallery's own CDN delivery request (`crop: 'limit'`)
   are written to never upscale a source smaller than the frame — upscaling,
   not the source photo, was what actually produced blurry panels.
 - **Photo credit.** `imageCredit` (optional, e.g. "Photo by Jane Doe on
@@ -195,7 +195,7 @@ distinct from the stored row because `imageSource` widens from the stored
 rather than one URL:
 
 ```
-[ city.imageUrl (resized if Cloudinary) , convention id `city-{country}-{city}` ]
+[ city.imageUrl (resized if on our CDN) , convention path `city-{country}-{city}` ]
    → then Wikipedia (card / hero only) → then a generated gradient
 ```
 
@@ -222,7 +222,7 @@ nothing else.
   city alone — an override the next automatic refresh would overwrite is not
   an override.
 - **Clear override** unsets the fields and hands the city back to the chain;
-  the Cloudinary asset is left in place, since another city or gallery panel
+  the stored asset is left in place, since another city or gallery panel
   may be using the same upload.
 - Mutations invalidate `cityPhotoKeys`, `cityShowcaseKeys` and `['cities']`,
   and the routes call `invalidateCache('/api/cities')` — the photo is read by
@@ -691,17 +691,29 @@ Availability source priority:
 
 ---
 
-## Cloudinary Image Pipeline
+## Image Pipeline (Bunny.net)
 
 ```
-Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
-                                                          → cloudinarySrcSet([480,768,1200,1920])
+Upload → sharp (rotate, resize to cap, WebP q84, EXIF stripped) → Edge Storage
+Stored URL → optimizeImageUrl(url, { width, quality }) → <img src>
+                                                       → imageSrcSet([480,768,1200,1920])
 ```
 
-- LQIP (Low-Quality Image Placeholder): `width: 40, quality: 'auto:eco'` loaded immediately
+One WebP master is stored per image; every displayed size is rendered from it
+by Bunny Optimizer at the edge, from query parameters. Nothing is
+pre-generated — a size is rendered on first request and cached thereafter.
+
+- LQIP (Low-Quality Image Placeholder): `width: 20, quality: 10, blur: 80`, loaded immediately
 - Full image: `width: 1200, quality: 'auto'` with srcSet for responsive delivery
 - Avatar thumbnails: `width: 80-96, quality: 'auto', crop: 'fill'`
-- Never use raw Cloudinary URLs — always go through the helper.
+- Never use raw CDN URLs — always go through the helper, which replaces any
+  transforms already on the URL instead of stacking on them.
+- Private documents (agent licenses, credentials) are served only from a
+  second, token-authenticated pull zone. Bunny applies token auth per pull
+  zone, so it cannot be enabled on the hostname serving public listing photos.
+
+See `docs/setup/backend/BUNNY_SETUP.md` for the dashboard settings that
+determine the bill.
 
 ---
 
@@ -709,4 +721,4 @@ Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
 - All API mutations use CSRF cookie (`credentials: 'include'`)
 - JWT stored in httpOnly cookies (not localStorage)
 - Input sanitisation on the Express layer
-- Image uploads validated by Cloudinary (type + size limits on the backend)
+- Image uploads validated and re-encoded by sharp on the backend (type + size limits), which also strips EXIF — including the GPS tag phone photos carry

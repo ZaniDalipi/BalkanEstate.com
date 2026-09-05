@@ -2,7 +2,7 @@
  * seedDestinationImages.ts
  *
  * Fills in a photo for every villa destination that does not have one yet,
- * sourced from Unsplash and stored in Cloudinary.
+ * sourced from Unsplash and stored on our own CDN.
  *
  * The important behaviour is what it refuses to do: a destination whose
  * `imageUrl` is already set was curated by hand in the admin, and this script
@@ -13,7 +13,7 @@
  * Requires, in backend/.env:
  *   UNSPLASH_ACCESS_KEY   an Unsplash API access key
  *   MONGODB_URI           the database to update
- *   CLOUDINARY_*          the usual upload credentials
+ *   BUNNY_*               the usual storage credentials
  *
  * Usage:
  *   npx ts-node backend/src/scripts/seedDestinationImages.ts --dry-run

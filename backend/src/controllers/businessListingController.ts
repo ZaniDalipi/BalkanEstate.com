@@ -330,7 +330,7 @@ export const deleteBusinessListing = async (
       return;
     }
 
-    // Clean up images from Cloudinary
+    // Clean up images from storage
     if (listing.logoPublicId) {
       await deleteImage(listing.logoPublicId).catch(() => {});
     }
@@ -562,7 +562,7 @@ export const adminDeleteBusinessListing = async (
       return;
     }
 
-    // Clean up images from Cloudinary
+    // Clean up images from storage
     if (listing.logoPublicId) {
       await deleteImage(listing.logoPublicId).catch(() => {});
     }

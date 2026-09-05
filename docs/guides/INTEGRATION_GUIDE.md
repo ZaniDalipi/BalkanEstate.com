@@ -22,7 +22,7 @@ Backend (Node.js + Express + TypeScript)
     ↓ Mongoose ODM
 Database (MongoDB)
 
-File Storage: Cloudinary
+File Storage: Bunny.net Edge Storage + CDN
 ```
 
 ## Quick Start
@@ -94,10 +94,10 @@ MONGODB_URI=mongodb://localhost:27017/balkan-estate
 JWT_SECRET=your-super-secret-key-change-this
 JWT_EXPIRES_IN=7d
 
-# Cloudinary - Get from cloudinary.com (free account)
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
+# Bunny.net - see docs/setup/backend/BUNNY_SETUP.md
+BUNNY_STORAGE_ZONE=your-storage-zone
+BUNNY_STORAGE_PASSWORD=your-storage-password
+BUNNY_PULL_ZONE_HOST=your-zone.b-cdn.net
 
 # Frontend URL
 FRONTEND_URL=http://localhost:5173
@@ -116,9 +116,9 @@ VITE_API_URL=http://localhost:5001/api
 VITE_GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
-### 5. Set Up Cloudinary (Image Uploads)
+### 5. Set Up Bunny.net (Image Uploads)
 
-1. Create free account at [cloudinary.com](https://cloudinary.com)
+1. Create an account at [bunny.net](https://bunny.net)
 2. Go to Dashboard
 3. Copy: Cloud name, API Key, API Secret
 4. Add to `backend/.env`
@@ -169,7 +169,7 @@ Visit: [http://localhost:5173](http://localhost:5173)
 
 1. Click "Create Listing"
 2. Fill in property details or use AI generation
-3. Upload images (stored in Cloudinary)
+3. Upload images (stored on Bunny Edge Storage)
 4. Submit → Property saved to database
 
 ### 3. Test Ownership Validation
@@ -244,11 +244,11 @@ FRONTEND_URL=http://localhost:5173
 
 **Error**: `Failed to upload images`
 
-**Solution**: Verify Cloudinary credentials in `backend/.env`:
+**Solution**: Verify Bunny.net credentials in `backend/.env`:
 ```env
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
+BUNNY_STORAGE_ZONE=your-storage-zone
+BUNNY_STORAGE_PASSWORD=your-storage-password
+BUNNY_PULL_ZONE_HOST=your-zone.b-cdn.net
 ```
 
 ### JWT Token Invalid
@@ -318,7 +318,7 @@ BalkanEstateWebVersion/
 │   │   ├── models/           # Database models
 │   │   ├── routes/           # API routes
 │   │   ├── middleware/       # Auth, validation
-│   │   ├── config/           # DB, Cloudinary config
+│   │   ├── config/           # DB, Bunny.net config
 │   │   ├── utils/            # Helper functions
 │   │   └── server.ts         # Express server
 │   ├── .env                  # Backend config
@@ -376,7 +376,7 @@ BalkanEstateWebVersion/
 - Database indexes on frequently queried fields
 - Pagination for property listings
 - Compression middleware
-- Image optimization via Cloudinary
+- Image optimization via Bunny Optimizer
 
 ## Next Steps / TODOs
 

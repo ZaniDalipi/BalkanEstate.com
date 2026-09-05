@@ -6,7 +6,7 @@
  * `src/features/home/data/villaDestinations.ts` on the frontend, which is the
  * fallback the corridor uses until these exist in the database.
  *
- * `imageCity`/`imageCountry` point at a seeded Cloudinary city photo
+ * `imageCity`/`imageCountry` point at a seeded city photo
  * (`city-{country}-{city}`). Several entries are regions rather than seeded
  * cities, so they borrow the nearest city that has a photo — a Ferizaj picture
  * standing in for Jezerc is approximate on purpose, and is exactly what an

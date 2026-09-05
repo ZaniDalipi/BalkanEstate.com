@@ -1735,7 +1735,7 @@ export const uploadAvatar = async (
     }
 
 
-    // Delete old avatar from Cloudinary if exists
+    // Delete old avatar from storage if exists
     if (user.avatarPublicId) {
       try {
         await deleteImage(user.avatarPublicId);
@@ -1744,7 +1744,7 @@ export const uploadAvatar = async (
       }
     }
 
-    // Upload avatar using centralized cloudinaryService
+    // Upload avatar using centralized imageStorageService
     // Path: balkan-estate/users/{userId}/avatar/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId,
@@ -1833,7 +1833,7 @@ export const saveAvatarOptions = async (req: Request, res: Response): Promise<vo
         const { deleteImage } = require('../services/imageStorageService');
         await deleteImage(user.avatarPublicId);
       } catch {
-        // Non-blocking: continue even if cloudinary deletion fails
+        // Non-blocking: continue even if storage deletion fails
       }
       user.avatarPublicId = undefined;
     }

@@ -93,7 +93,7 @@ const makeTranslucent = async (logoBuffer: Buffer, opacity: number): Promise<Buf
 };
 
 export interface WatermarkOptions {
-  agencyLogoUrl?: string; // URL of the agency logo (from Cloudinary)
+  agencyLogoUrl?: string; // URL of the agency logo (from our CDN)
 }
 
 /**

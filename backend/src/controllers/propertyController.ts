@@ -984,7 +984,7 @@ export const createProperty = async (
     // The frontend uploads images to a temp folder before the property exists,
     // so relocate them now into the listing's own folder
     // (balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos) so
-    // Cloudinary stays organized by user + listing. Best-effort: a failure here
+    // Storage stays organized by user + listing. Best-effort: a failure here
     // must not fail listing creation.
     try {
       if (Array.isArray(property.images) && property.images.length > 0) {
@@ -1459,7 +1459,7 @@ export const deleteProperty = async (
       return;
     }
 
-    // Delete images from Cloudinary before deleting property
+    // Delete images from storage before deleting property
     try {
       const userId = currentUser._id.toString();
       const propertyId = String(property._id);
@@ -1493,9 +1493,9 @@ export const deleteProperty = async (
       }
 
       propertyLogger.info(`✅ Cleaned up all images for property ${propertyId}`);
-    } catch (cloudinaryError: any) {
-      propertyLogger.error('⚠️  Error deleting images from Cloudinary:', cloudinaryError);
-      // Continue with property deletion even if Cloudinary cleanup fails
+    } catch (storageError: any) {
+      propertyLogger.error('⚠️  Error deleting images from storage:', storageError);
+      // Continue with property deletion even if storage cleanup fails
     }
 
     // Decrement listing count if property is active or pending

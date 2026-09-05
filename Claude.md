@@ -110,5 +110,13 @@ Every new translation key must be added to all 10 locale files simultaneously.
 
 ## Images
 
-Always use `optimizeCloudinaryUrl(url, { width, quality })` and `cloudinarySrcSet()` — never raw Cloudinary URLs.
-LQIP uses `width: 40, quality: 'auto:eco'`.
+Images are stored on Bunny Edge Storage and served through a pull zone with Bunny Optimizer.
+
+Always use `optimizeImageUrl(url, { width, quality })` and `imageSrcSet()` from `config/imageConfig.ts` — never a raw CDN URL. Transforms are query parameters (`?width=800&quality=75`), and the helper replaces any already on the URL rather than merging, so an earlier crop cannot survive into a later one.
+LQIP uses `width: 20, quality: 10, blur: 80` via `getPropertyImagePlaceholder`.
+
+Two things the helper vocabulary no longer means what it did:
+- `crop: 'fill'` becomes `aspect_ratio` + `width`; Bunny letterboxes when handed both dimensions.
+- `gravity` is accepted and ignored — Bunny has no subject-aware crop, so cropping is always centred.
+
+Quality presets must stay at or below the stored master's own quality (`MASTER_QUALITY` in `backend/src/utils/bunnyUrl.ts`). Asking the edge for more than the master holds cannot recover detail — it only ships more bytes, on every request. `bunny-url.test.ts` pins this.

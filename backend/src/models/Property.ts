@@ -8,7 +8,7 @@ import {
 
 export interface IPropertyImage {
   url: string;
-  publicId?: string; // Cloudinary public_id for image management and deletion (optional for backwards compatibility)
+  publicId?: string; // Storage path, for image management and deletion (optional for backwards compatibility)
   tag: 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
 }
 
@@ -91,12 +91,12 @@ export interface IProperty extends Document {
   videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, etc.)
   // Generated video fields (auto-generated property showcase video)
   generatedVideoUrl?: string; // URL for the auto-generated property video
-  generatedVideoPublicId?: string; // Cloudinary public_id for the generated video
+  generatedVideoPublicId?: string; // Storage path of the generated video
   generatedVideoFormat?: 'vertical' | 'horizontal' | 'square'; // Video format
   generatedVideoDuration?: number; // Duration in seconds
   hasGeneratedVideo: boolean; // Flag indicating if generated video is available
   imageUrl: string;
-  imagePublicId?: string; // Cloudinary public_id for main image
+  imagePublicId?: string; // Storage path of the main image
   images: IPropertyImage[];
   lat: number;
   lng: number;
@@ -104,7 +104,7 @@ export interface IProperty extends Document {
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
-  floorplanPublicId?: string; // Cloudinary public_id for floorplan
+  floorplanPublicId?: string; // Storage path of the floorplan
   lastRenewed: Date;
   views: number;
   saves: number;

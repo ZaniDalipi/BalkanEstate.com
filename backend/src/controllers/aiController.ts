@@ -12,6 +12,7 @@ import {
 import { isPropertyType, PROPERTY_TYPES_LABEL } from '../config/propertyTypes';
 import { getRoomStyle } from '../data/roomStyles';
 import { getRoomStyleUsageStats } from '../utils/roomStyleLimits';
+import { BUNNY_PULL_ZONE_HOST } from '../config/bunny';
 
 function getNextMonthStart(): Date {
   const d = new Date();
@@ -275,10 +276,19 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
  * POST /api/ai/restyle-room
  * Restyle a listing's room photo into a chosen interior design style.
  * Expects JSON body { imageUrl, style }. The image is fetched server-side
- * (restricted to Cloudinary) and sent to Gemini's image model.
+ * (restricted to our own image CDN) and sent to Gemini's image model.
  */
 const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
-const ALLOWED_IMAGE_HOSTS = new Set(['res.cloudinary.com']);
+
+/**
+ * Hosts this endpoint will fetch from.
+ *
+ * An SSRF guard, so it is deliberately just the pull zone that serves our own
+ * listing photos — the only images the feature is for. Read from configuration
+ * rather than hardcoded, because a stale literal here does not fail loudly: it
+ * rejects every legitimate photo and the feature simply stops working.
+ */
+const ALLOWED_IMAGE_HOSTS = new Set([BUNNY_PULL_ZONE_HOST].filter(Boolean));
 
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -304,7 +314,7 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // SSRF guard: only allow https Cloudinary image URLs (listing photos).
+    // SSRF guard: only allow https URLs on our own image CDN (listing photos).
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(imageUrl);
@@ -313,7 +323,7 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
     if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMAGE_HOSTS.has(parsedUrl.hostname)) {
-      res.status(400).json({ message: 'imageUrl must be a Cloudinary https URL.' });
+      res.status(400).json({ message: 'imageUrl must be an https URL on the site image CDN.' });
       return;
     }
 

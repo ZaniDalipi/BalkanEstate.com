@@ -13,7 +13,7 @@ export interface IMessage extends Document {
   iv?: string; // Base64 encoded IV for AES-GCM
 
   imageUrl?: string;
-  imagePublicId?: string; // Cloudinary public ID for image cleanup
+  imagePublicId?: string; // Storage path, for image cleanup
   isRead: boolean;
   hadSensitiveInfo?: boolean;
   securityWarnings?: string[];
@@ -57,7 +57,7 @@ const MessageSchema: Schema = new Schema(
     },
     imagePublicId: {
       type: String,
-      // Cloudinary public_id for image deletion during cleanup
+      // Storage path, for image deletion during cleanup
     },
     isRead: {
       type: Boolean,

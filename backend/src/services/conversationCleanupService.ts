@@ -50,9 +50,9 @@ export const cleanupExpiredConversations = async (): Promise<{
         imagePublicId: { $exists: true, $ne: null },
       }).select('imagePublicId');
 
-      // Delete images from Cloudinary
+      // Delete images from storage
       if (messagesWithImages.length > 0) {
-        apiLogger.info(`  📸 Deleting ${messagesWithImages.length} images from Cloudinary...`);
+        apiLogger.info(`  📸 Deleting ${messagesWithImages.length} images from storage...`);
 
         const imageDeletePromises = messagesWithImages.map(async (message) => {
           try {
@@ -85,8 +85,7 @@ export const cleanupExpiredConversations = async (): Promise<{
       apiLogger.info(`  ✅ Deleted conversation ${conversationId}`);
     }
 
-    // Try to delete empty folders from Cloudinary (optional, may not always work)
-    // Cloudinary doesn't have a direct API to delete empty folders, but we can try
+    // Try to delete the now-empty folders (optional, may not always work)
     apiLogger.info('🧹 Cleanup complete!');
     apiLogger.info(`  📊 Summary:`);
     apiLogger.info(`    - Conversations deleted: ${expiredConversations.length}`);

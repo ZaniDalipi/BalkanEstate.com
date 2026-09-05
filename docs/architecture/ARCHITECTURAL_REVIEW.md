@@ -1,4 +1,8 @@
 # Balkan Estate - Comprehensive Architectural Review & Refactoring Plan
+
+> **Historical.** This describes the Cloudinary-era pipeline. Image hosting has
+> since moved to Bunny.net — see `docs/setup/backend/BUNNY_SETUP.md`. The
+> `CLOUDINARY_*` variables and module paths below no longer exist.
 ## Senior Frontend Architect Analysis
 
 ---

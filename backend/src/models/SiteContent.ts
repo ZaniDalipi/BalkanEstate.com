@@ -22,7 +22,7 @@ export interface ISiteContent extends Document {
   type: 'video' | 'image';
   contentType: 'video' | 'guide' | 'faq' | 'feature'; // Type of content
   url: string;
-  publicId?: string; // Cloudinary public ID
+  publicId?: string; // Storage path
   title: string;
   description?: string;
   section: string; // e.g., 'how-it-works', 'homepage'

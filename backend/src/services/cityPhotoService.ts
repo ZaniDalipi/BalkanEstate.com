@@ -209,7 +209,7 @@ export function pickCityPhoto(candidates: CityPhotoCandidates | undefined): Reso
 /**
  * Resolved photo per city, keyed by `placeKey`. Cities with no photo anywhere
  * are absent from the map — the frontend then falls back to its own chain
- * (convention Cloudinary id → Wikipedia → gradient).
+ * (convention CDN path → Wikipedia → gradient).
  */
 export async function resolveCityPhotos(
   pairs: readonly CityPair[],

@@ -71,7 +71,7 @@
 | Vercel | Frontend Hosting |
 | Railway | Backend Hosting |
 | MongoDB Atlas | Database Hosting |
-| Cloudinary | Image CDN (optional) |
+| Bunny.net | Image storage + CDN |
 
 ---
 
@@ -638,7 +638,7 @@ router.get('/profile', authMiddleware, getProfile);
 ```env
 VITE_API_URL=https://api.balkanestateai.com
 VITE_GOOGLE_MAPS_KEY=your-google-maps-key
-VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+VITE_CDN_HOST=your-zone.b-cdn.net
 ```
 
 ### Backend (.env)
@@ -661,9 +661,10 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 
 # File Storage (optional)
-CLOUDINARY_CLOUD_NAME=your-cloud
-CLOUDINARY_API_KEY=your-key
-CLOUDINARY_API_SECRET=your-secret
+BUNNY_STORAGE_ZONE=your-storage-zone
+BUNNY_STORAGE_PASSWORD=your-storage-password
+BUNNY_PULL_ZONE_HOST=your-zone.b-cdn.net
+BUNNY_TOKEN_AUTH_KEY=your-token-key   # only for private documents
 ```
 
 ---
@@ -844,7 +845,7 @@ npm run db:clear
 - Optimized bundle with Vite
 
 ### Recommended
-- Use Cloudinary for image optimization
+- Use Bunny Optimizer for image optimization
 - Implement Redis caching for API
 - Add CDN (Cloudflare) for static assets
 - Enable Brotli compression on server

@@ -1,5 +1,9 @@
 # Listing Image Upload Fix Documentation
 
+> **Historical.** This describes the Cloudinary-era pipeline. Image hosting has
+> since moved to Bunny.net — see `docs/setup/backend/BUNNY_SETUP.md`. The
+> `CLOUDINARY_*` variables and module paths below no longer exist.
+
 ## Problems Fixed
 
 ### 1. Images Not Saved to Cloudinary

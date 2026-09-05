@@ -28,7 +28,7 @@ npm run dev
 - **[Backend Setup](./docs/setup/backend/QUICK_START.md)** - Server configuration
 - **[Database Setup](./docs/setup/backend/DATABASE_SETUP.md)** - MongoDB
 - **[OAuth Setup](./docs/setup/backend/OAUTH_SETUP.md)** - Social login
-- **[Cloudinary Setup](./docs/setup/backend/CLOUDINARY_SETUP.md)** - Image hosting
+- **[Bunny.net Setup](./docs/setup/backend/BUNNY_SETUP.md)** - Image hosting
 
 ### Architecture
 - **[Frontend Architecture](./docs/architecture/FRONTEND_ARCHITECTURE.md)** - React + TanStack Query
@@ -56,7 +56,7 @@ npm run dev
 - **MongoDB** + **Mongoose**
 - **JWT** - Authentication
 - **Socket.io** - Real-time messaging
-- **Cloudinary** - Image CDN
+- **Bunny.net** - Image storage + CDN
 
 ## ✨ Features
 
@@ -194,13 +194,14 @@ cd backend && npm run dev
 ```bash
 # Frontend .env
 VITE_API_URL=http://localhost:5000/api
-VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CDN_HOST=your-zone.b-cdn.net
 
 # Backend .env
 MONGODB_URI=mongodb://localhost:27017/balkan-estate
 JWT_SECRET=your_super_secret_key
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
+BUNNY_STORAGE_ZONE=your-storage-zone
+BUNNY_STORAGE_PASSWORD=your-storage-password
+BUNNY_PULL_ZONE_HOST=your-zone.b-cdn.net
 ```
 
 See complete setup guides:

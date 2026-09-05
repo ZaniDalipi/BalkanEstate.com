@@ -63,10 +63,10 @@ FRONTEND_URL=http://localhost:5173
 MAX_FILE_SIZE=10485760  # 10MB in bytes
 UPLOAD_DIR=./uploads
 
-# Cloudinary (for image hosting)
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+# Bunny.net (for image hosting)
+BUNNY_STORAGE_ZONE=your-storage-zone
+BUNNY_STORAGE_PASSWORD=your-storage-password
+BUNNY_PULL_ZONE_HOST=your-zone.b-cdn.net
 
 # Email (optional - for notifications)
 SMTP_HOST=smtp.gmail.com
@@ -293,7 +293,7 @@ Check `FRONTEND_URL` in `.env` matches your frontend URL.
 
 ### Optional
 - `PORT` - Server port (default: 5000)
-- `CLOUDINARY_*` - Image hosting
+- `BUNNY_*` - Image storage and CDN delivery
 - `STRIPE_*` - Payments
 - `SMTP_*` - Email notifications
 - `GOOGLE_*`, `FACEBOOK_*` - OAuth
@@ -336,7 +336,7 @@ const properties = await Property.find().select('title price');
 
 - [Database Setup](./DATABASE_SETUP.md) - Detailed DB configuration
 - [OAuth Setup](./OAUTH_SETUP.md) - Social login
-- [Cloudinary Setup](./CLOUDINARY_SETUP.md) - Image hosting
+- [Bunny.net Setup](./BUNNY_SETUP.md) - Image hosting
 - [API Reference](../../api/API_REFERENCE.md) - Complete API docs
 - [Backend Architecture](../../architecture/BACKEND_ARCHITECTURE.md) - How it works
 

@@ -1379,7 +1379,7 @@ export const uploadAgencyLogo = async (
       }
     }
 
-    // Upload logo using centralized cloudinaryService
+    // Upload logo using centralized imageStorageService
     // Path: balkan-estate/agencies/{agencyId}/logo/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId,
@@ -1460,7 +1460,7 @@ export const uploadAgencyCover = async (
       }
     }
 
-    // Upload cover using centralized cloudinaryService
+    // Upload cover using centralized imageStorageService
     // Path: balkan-estate/agencies/{agencyId}/cover/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId,

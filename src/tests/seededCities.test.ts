@@ -10,7 +10,7 @@ import { SEEDED_CITY_IMAGES } from '@/config/seededCityImages';
  * seeder itself and fails the moment the two disagree.
  *
  * A drift here is not loud. A destination pointed at a city that is no longer
- * seeded resolves to a Cloudinary 404, and the corridor quietly keeps showing
+ * seeded resolves to a CDN 404, and the corridor quietly keeps showing
  * that card's gradient placeholder instead of a photo.
  */
 describe('seeded city images', () => {

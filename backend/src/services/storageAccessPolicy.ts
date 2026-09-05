@@ -16,7 +16,7 @@ import { mediaLogger } from '../utils/logger';
  * 5. The client uses the signed URL (valid for a limited time) to access the file
  *
  * Security notes:
- * - Cloudinary signed URLs with type: 'authenticated' prevent access without a valid
+ * - Token-authenticated CDN URLs prevent access without a valid
  *   HMAC signature, but the signature itself does not expire. Actual time-based
  *   expiration requires Cloudinary's Token-based Authentication (paid feature).
  * - The _exp query param is for client-side cache invalidation only.
@@ -34,7 +34,7 @@ const safeLog = (s: string): string =>
 
 /**
  * Register a file upload in the access policy system.
- * Must be called after every successful Cloudinary upload.
+ * Must be called after every successful upload.
  */
 export const registerFileUpload = async (params: {
   publicId: string;
@@ -185,7 +185,7 @@ export const getUserFiles = async (
 };
 
 /**
- * Remove a file record (called when a file is deleted from Cloudinary).
+ * Remove a file record (called when a file is deleted from storage).
  */
 export const removeFileRecord = async (publicId: string): Promise<void> => {
   await FileRecord.deleteOne({ publicId });
@@ -231,8 +231,19 @@ export const batchGetSignedUrls = async (
     const isOwner = record.userId.toString() === userId;
     const isAdmin = userRole === 'admin';
 
-    if (isOwner || isAdmin) {
+    if (!isOwner && !isAdmin) continue;
+
+    try {
       signedUrls[record.publicId] = generateSignedUrl(record.publicId, 'image', record.fileType);
+    } catch (error: any) {
+      // Signing throws when the private pull zone has no token key. In a batch
+      // that must not be fatal: one unsignable document would otherwise take
+      // down the URLs for every other file the caller asked about. Omitting the
+      // entry is what the caller already handles — it means "no URL for this
+      // one" — while the log names the misconfiguration for an operator.
+      mediaLogger.error(
+        `Could not sign URL for ${safeLog(record.publicId)} (${record.fileType}): ${error.message}`
+      );
     }
   }
 

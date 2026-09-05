@@ -28,7 +28,7 @@ Three-tier optimization strategy:
 - Detects pre-compressed images
 - Skips heavy processing for optimized images
 - Only resizes if absolutely necessary
-- Faster Cloudinary upload
+- Faster upload to storage
 
 ## Performance Improvements
 
@@ -120,7 +120,7 @@ if (width > maxWidth * 1.5 || height > maxHeight * 1.5) {
 
 2. **During Upload** (Network)
    ```
-   📤 Uploading 5 compressed images to Cloudinary...
+   📤 Uploading 5 compressed images to storage...
    📊 Total upload size: 4.2MB
    [Progress Bar: 45%]
    Uploading to cloud...
@@ -129,7 +129,7 @@ if (width > maxWidth * 1.5 || height > maxHeight * 1.5) {
 3. **During Processing** (Server)
    ```
    Creating listing...
-   ✅ Successfully uploaded 5 images to Cloudinary
+   ✅ Successfully uploaded 5 images to storage
    ```
 
 ## Compression Statistics
@@ -163,7 +163,7 @@ if (width > maxWidth * 1.5 || height > maxHeight * 1.5) {
   - Added `browser-image-compression` dependency
 
 ### Backend
-- `backend/src/services/cloudinaryService.ts`
+- `backend/src/services/imageStorageService.ts`
   - Optimized `uploadImage` function
   - Added smart detection for pre-compressed images
   - Reduced unnecessary Sharp processing
@@ -214,10 +214,10 @@ if (width > maxWidth * 1.5 || height > maxHeight * 1.5) {
 - ✅ File size reduction: > 80%
 - ✅ Visual quality: No visible degradation
 
-## Cloudinary Integration
+## Storage Integration
 
 ### Folder Structure
-Images still organized in Cloudinary:
+Images still organized in the storage zone:
 ```
 balkan-estate/
   └── properties/
@@ -228,8 +228,8 @@ balkan-estate/
               └── ...
 ```
 
-### Cloudinary Transformations
-Cloudinary still applies:
+### Edge Transformations
+Bunny Optimizer applies, per request:
 - Auto format (WebP for supported browsers)
 - Auto quality optimization
 - Eager transformations (thumbnails, medium sizes)
@@ -260,7 +260,7 @@ If compression fails:
 
 ### For Backend
 1. **Reduced load**: Less CPU processing
-2. **Faster response**: Quicker Cloudinary uploads
+2. **Faster response**: Quicker uploads to storage
 3. **Lower costs**: Reduced bandwidth usage
 4. **Better scalability**: Can handle more concurrent uploads
 
@@ -295,7 +295,7 @@ const compressionOptions = {
 **Possible causes**:
 1. Network connection (not optimization issue)
 2. Backend server location (latency)
-3. Cloudinary region (check Cloudinary settings)
+3. Storage region (check the zone's main region)
 
 **Debug**:
 ```typescript
@@ -320,7 +320,7 @@ console.log(`Total upload size: ${totalSize}MB`);
 - Both types work together seamlessly
 
 ### Backward Compatibility
-- ✅ Works with existing Cloudinary images
+- ✅ Works with existing hosted images
 - ✅ Works with existing Property model
 - ✅ Works in edit mode (mixing old/new images)
 

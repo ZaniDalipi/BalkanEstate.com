@@ -5,7 +5,7 @@ import mongoose, { Document, Schema } from 'mongoose';
  *
  * Unlike `VillaDestination`, this collection is the **only** source of truth
  * for what the gallery shows: there is no built-in list to fall back on and no
- * seeded Cloudinary city library behind it. A panel exists because an admin
+ * seeded city photo library behind it. A panel exists because an admin
  * created it, and it carries a photo because an admin uploaded one — which is
  * why `imageUrl` is required rather than optional. A row that cannot be
  * rendered has no reason to exist, so the invariant is enforced here instead
@@ -20,7 +20,7 @@ export interface ICityShowcase extends Document {
   country: string;
   searchQuery: string;
   imageUrl: string;
-  /** Cloudinary public id, kept so a replaced image can be cleaned up. */
+  /** Storage path, kept so a replaced image can be cleaned up. */
   imagePublicId?: string;
   /**
    * Attribution line for the photo, e.g. "Photo by Jane Doe on Unsplash".

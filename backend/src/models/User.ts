@@ -208,8 +208,8 @@ export interface IUser extends Document {
     number: string;
     country: string;
     expiryDate?: Date;
-    documentUrl?: string; // S3/Cloudinary URL to uploaded license
-    documentPublicId?: string; // Cloudinary public ID for cleanup
+    documentUrl?: string; // Storage URL of the uploaded license
+    documentPublicId?: string; // Storage path, for cleanup
     isVerified: boolean;
     verifiedAt?: Date;
     verifiedBy?: mongoose.Types.ObjectId; // Admin who verified
@@ -319,8 +319,8 @@ export interface IUser extends Document {
     dateReceived: Date;
     expiryDate?: Date;          // For certifications that expire
     issuingOrganization: string;
-    documentUrl?: string;       // Proof document (S3/Cloudinary URL)
-    documentPublicId?: string;  // Cloudinary public ID for cleanup
+    documentUrl?: string;       // Proof document (storage URL)
+    documentPublicId?: string;  // Storage path, for cleanup
     isVerified: boolean;
     verifiedAt?: Date;
     verifiedBy?: mongoose.Types.ObjectId; // Admin who verified

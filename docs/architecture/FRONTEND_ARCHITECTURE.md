@@ -378,7 +378,7 @@ npm run preview       # Preview production build
 ### Environment Variables
 ```env
 VITE_API_URL=http://localhost:5000/api
-VITE_CLOUDINARY_CLOUD_NAME=...
+VITE_CDN_HOST=...
 ```
 
 ## DevTools

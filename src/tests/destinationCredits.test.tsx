@@ -79,7 +79,7 @@ describe('useDestinationImages — when a credit is attached', () => {
 
     it('credits the photographer of a stock photo', async () => {
         const { result } = run(dest({
-            imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg',
+            imageUrl: 'https://test-zone.b-cdn.net/balkan-estate/villa-destinations/a.webp',
             imageCredit: 'Photo by Ada L on Unsplash',
         }));
         // Verbatim — reformatting someone's attribution is not ours to do.
@@ -92,8 +92,8 @@ describe('useDestinationImages — when a credit is attached', () => {
     });
 
     it('credits nobody for a photo an admin uploaded themselves', async () => {
-        const { result } = run(dest({ imageUrl: 'https://res.cloudinary.com/x/image/upload/own.jpg' }));
-        await waitFor(() => expect(result.current[0].src).toContain('cloudinary'));
+        const { result } = run(dest({ imageUrl: 'https://test-zone.b-cdn.net/balkan-estate/villa-destinations/own.webp' }));
+        await waitFor(() => expect(result.current[0].src).toContain('b-cdn.net'));
         expect(result.current[0].credit).toBeUndefined();
     });
 

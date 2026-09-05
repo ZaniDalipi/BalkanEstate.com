@@ -7,6 +7,7 @@ import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
 import { uploadImage } from '../services/imageStorageService';
+import { isAllowedPhotoUrl } from '../config/imageHosts';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
 const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership', 'advertising'];
@@ -403,7 +404,7 @@ export const sendContactInquiry = async (
     const cleanAdPage = isAdvertising && AD_PAGES.includes(adPage) ? adPage : undefined;
     const cleanAdPlacement = isAdvertising && AD_PLACEMENTS.includes(adPlacement) ? adPlacement : undefined;
     const cleanAttachment =
-      isAdvertising && typeof attachmentUrl === 'string' && /^https:\/\/res\.cloudinary\.com\//.test(attachmentUrl)
+      isAdvertising && typeof attachmentUrl === 'string' && isAllowedPhotoUrl(attachmentUrl)
         ? attachmentUrl
         : undefined;
 
