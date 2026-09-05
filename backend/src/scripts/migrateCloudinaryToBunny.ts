@@ -23,7 +23,9 @@
  * run reports zero remaining.
  */
 
-import 'dotenv/config';
+// Loads .env.development / .env.staging / .env.production plus .env, the same
+// way the server does — `dotenv/config` alone would only find plain `.env`.
+import '../config/loadEnv';
 import mongoose from 'mongoose';
 import { v2 as cloudinary } from 'cloudinary';
 import { putObject } from '../services/bunnyStorageService';

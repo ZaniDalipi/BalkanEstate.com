@@ -12,7 +12,7 @@ import {
 import { isPropertyType, PROPERTY_TYPES_LABEL } from '../config/propertyTypes';
 import { getRoomStyle } from '../data/roomStyles';
 import { getRoomStyleUsageStats } from '../utils/roomStyleLimits';
-import { BUNNY_PULL_ZONE_HOST } from '../config/bunny';
+import { pullZoneHost } from '../config/bunny';
 
 function getNextMonthStart(): Date {
   const d = new Date();
@@ -284,11 +284,11 @@ const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
  * Hosts this endpoint will fetch from.
  *
  * An SSRF guard, so it is deliberately just the pull zone that serves our own
- * listing photos — the only images the feature is for. Read from configuration
- * rather than hardcoded, because a stale literal here does not fail loudly: it
- * rejects every legitimate photo and the feature simply stops working.
+ * listing photos — the only images the feature is for. Built per request rather
+ * than at module load: a set captured before `.env` was read is empty, and an
+ * empty allowlist rejects every legitimate photo without saying why.
  */
-const ALLOWED_IMAGE_HOSTS = new Set([BUNNY_PULL_ZONE_HOST].filter(Boolean));
+const allowedImageHosts = (): Set<string> => new Set([pullZoneHost()].filter(Boolean));
 
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -322,7 +322,7 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       res.status(400).json({ message: 'Invalid imageUrl.' });
       return;
     }
-    if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMAGE_HOSTS.has(parsedUrl.hostname)) {
+    if (parsedUrl.protocol !== 'https:' || !allowedImageHosts().has(parsedUrl.hostname)) {
       res.status(400).json({ message: 'imageUrl must be an https URL on the site image CDN.' });
       return;
     }

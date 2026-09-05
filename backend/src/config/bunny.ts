@@ -18,25 +18,39 @@
  * The pull zone's *token authentication key* is a third credential, used only
  * to sign URLs for the documents that must not be publicly readable (agent
  * licenses and credentials). See `signBunnyUrl`.
+ *
+ * ## Why these are functions
+ *
+ * Every value is read from `process.env` when it is asked for, not captured
+ * when this module is first imported. Module-level capture is an invisible
+ * ordering dependency: `dotenv` has to have run before the first import that
+ * reaches this file, and when it has not, the variables come back empty. For
+ * an upload that throws, which is findable. For the allowlists built on top of
+ * these — the CSP's `imgSrc`, the Room Styler's SSRF check — an empty value
+ * silently rejects everything instead, which is not.
+ *
+ * `config/loadEnv.ts` fixes the ordering; reading lazily means the ordering
+ * cannot break it again.
  */
 
-/** Storage region prefix. Empty string = Falkenstein (DE), Bunny's default. */
-const REGION_PREFIX = (process.env.BUNNY_STORAGE_REGION || '').trim().toLowerCase();
+/** Read a variable, trimmed. Never cached — see the note above. */
+const env = (name: string): string => (process.env[name] || '').trim();
+
+/** Strip scheme and trailing slashes so a hostname is always a bare host. */
+const asHostname = (value: string): string =>
+  value.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
 
 /** Storage zone name — the first path segment of every storage API call. */
-export const BUNNY_STORAGE_ZONE = (process.env.BUNNY_STORAGE_ZONE || '').trim();
+export const storageZone = (): string => env('BUNNY_STORAGE_ZONE');
 
 /** Storage zone password. Full read/write/delete on the zone — backend only. */
-export const BUNNY_STORAGE_PASSWORD = (process.env.BUNNY_STORAGE_PASSWORD || '').trim();
+export const storagePassword = (): string => env('BUNNY_STORAGE_PASSWORD');
 
 /**
- * CDN hostname images are served from, without scheme or trailing slash.
+ * CDN hostname images are served from, without scheme.
  * e.g. `balkanestate.b-cdn.net`, or a custom domain pointed at the pull zone.
  */
-export const BUNNY_PULL_ZONE_HOST = (process.env.BUNNY_PULL_ZONE_HOST || '')
-  .trim()
-  .replace(/^https?:\/\//i, '')
-  .replace(/\/+$/, '');
+export const pullZoneHost = (): string => asHostname(env('BUNNY_PULL_ZONE_HOST'));
 
 /**
  * CDN hostname for private documents (agent licenses and credentials).
@@ -45,32 +59,34 @@ export const BUNNY_PULL_ZONE_HOST = (process.env.BUNNY_PULL_ZONE_HOST || '')
  * switched on. Bunny applies token auth to a whole pull zone, so it cannot be
  * enabled on the hostname that serves listing photos to logged-out visitors —
  * doing that would make every image on the site require a signature.
- *
- * Falls back to the public host, which is correct only if that zone has token
- * auth enabled. `signBunnyUrl` will not sign without a key either way.
  */
-export const BUNNY_PRIVATE_PULL_ZONE_HOST = (process.env.BUNNY_PRIVATE_PULL_ZONE_HOST || '')
-  .trim()
-  .replace(/^https?:\/\//i, '')
-  .replace(/\/+$/, '');
+export const privatePullZoneHost = (): string =>
+  asHostname(env('BUNNY_PRIVATE_PULL_ZONE_HOST'));
 
 /**
  * Token authentication key of the private pull zone. Only needed if sensitive
  * documents are uploaded; without it `signBunnyUrl` refuses rather than handing
- * out a URL that would be readable by anyone who guessed the path.
+ * out a publicly readable one.
  */
-export const BUNNY_TOKEN_AUTH_KEY = (process.env.BUNNY_TOKEN_AUTH_KEY || '').trim();
+export const tokenAuthKey = (): string => env('BUNNY_TOKEN_AUTH_KEY');
 
 /** Base URL for the storage API, e.g. `https://storage.bunnycdn.com/my-zone`. */
-export const BUNNY_STORAGE_BASE_URL =
-  `https://${REGION_PREFIX ? `${REGION_PREFIX}.` : ''}storage.bunnycdn.com/${BUNNY_STORAGE_ZONE}`;
+export const storageBaseUrl = (): string => {
+  const region = env('BUNNY_STORAGE_REGION').toLowerCase();
+  return `https://${region ? `${region}.` : ''}storage.bunnycdn.com/${storageZone()}`;
+};
 
 /** Public base URL for delivery, e.g. `https://balkanestate.b-cdn.net`. */
-export const BUNNY_CDN_BASE_URL = `https://${BUNNY_PULL_ZONE_HOST}`;
+export const cdnBaseUrl = (): string => `https://${pullZoneHost()}`;
 
-/** Base URL signed document URLs are issued against. */
-export const BUNNY_PRIVATE_CDN_BASE_URL =
-  `https://${BUNNY_PRIVATE_PULL_ZONE_HOST || BUNNY_PULL_ZONE_HOST}`;
+/**
+ * Base URL signed document URLs are issued against.
+ *
+ * Falls back to the public host, which is correct only if that zone has token
+ * auth enabled. `signBunnyUrl` will not sign without a key either way.
+ */
+export const privateCdnBaseUrl = (): string =>
+  `https://${privatePullZoneHost() || pullZoneHost()}`;
 
 /**
  * True when uploads can actually happen.
@@ -80,17 +96,20 @@ export const BUNNY_PRIVATE_CDN_BASE_URL =
  * source URLs instead of failing.
  */
 export const isBunnyConfigured = (): boolean =>
-  Boolean(BUNNY_STORAGE_ZONE && BUNNY_STORAGE_PASSWORD && BUNNY_PULL_ZONE_HOST);
+  Boolean(storageZone() && storagePassword() && pullZoneHost());
 
 /** Throw with the missing names, so a misconfigured deploy says which. */
 export const assertBunnyConfigured = (): void => {
   const missing = [
-    !BUNNY_STORAGE_ZONE && 'BUNNY_STORAGE_ZONE',
-    !BUNNY_STORAGE_PASSWORD && 'BUNNY_STORAGE_PASSWORD',
-    !BUNNY_PULL_ZONE_HOST && 'BUNNY_PULL_ZONE_HOST',
+    !storageZone() && 'BUNNY_STORAGE_ZONE',
+    !storagePassword() && 'BUNNY_STORAGE_PASSWORD',
+    !pullZoneHost() && 'BUNNY_PULL_ZONE_HOST',
   ].filter(Boolean);
 
   if (missing.length > 0) {
-    throw new Error(`Bunny.net storage is not configured: missing ${missing.join(', ')}`);
+    throw new Error(
+      `Bunny.net storage is not configured: missing ${missing.join(', ')}. ` +
+      'Set them in backend/.env (see backend/.env.example) and restart the server.',
+    );
   }
 };

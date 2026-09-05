@@ -11,15 +11,15 @@
 // No collection is touched here — see `usesDatabase` in setup.ts.
 process.env.SKIP_TEST_DB = 'true';
 
-// The allowlist is built from the configured pull zone at import time, so the
-// host has to be set before `imageHosts` (and the `bunny` config it reads) is
-// first evaluated.
+// The allowlist reads the configured pull zone each time it is called, so this
+// need not precede the import — but a realistic value keeps the cases below
+// readable.
 process.env.BUNNY_PULL_ZONE_HOST = 'test-zone.b-cdn.net';
 process.env.BUNNY_PRIVATE_PULL_ZONE_HOST = '';
 
 import {
-  ALLOWED_PHOTO_HOSTS,
-  CDN_IMAGE_HOST,
+  allowedPhotoHosts,
+  cdnImageHost,
   isAllowedPhotoUrl,
   allowedPhotoHostsHint,
 } from '../config/imageHosts';
@@ -66,23 +66,23 @@ describe('isAllowedPhotoUrl', () => {
 
 describe('the allowlist itself', () => {
   it('names our own CDN, so an upload through the app always passes', () => {
-    expect(ALLOWED_PHOTO_HOSTS).toContain(CDN_IMAGE_HOST);
+    expect(allowedPhotoHosts()).toContain(cdnImageHost());
   });
 
   it('drops an unconfigured private zone rather than allowing every host', () => {
     // An empty hostname would render as `https://` in the CSP, which is the
     // whole web. `.filter(Boolean)` is what keeps that out of the policy.
-    expect(ALLOWED_PHOTO_HOSTS).not.toContain('');
+    expect(allowedPhotoHosts()).not.toContain('');
   });
 
   it('lists bare hostnames — the CSP prefixes the scheme itself', () => {
-    for (const host of ALLOWED_PHOTO_HOSTS) {
+    for (const host of allowedPhotoHosts()) {
       expect(host).not.toMatch(/:\/\//);
       expect(host).toBe(host.toLowerCase());
     }
   });
 
   it('renders a hint an admin can act on', () => {
-    expect(allowedPhotoHostsHint()).toContain(CDN_IMAGE_HOST);
+    expect(allowedPhotoHostsHint()).toContain(cdnImageHost());
   });
 });

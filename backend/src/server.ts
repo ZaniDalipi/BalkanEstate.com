@@ -1,7 +1,10 @@
+// MUST be first: ES imports are evaluated before this module's body, so any
+// module below that reads process.env at load time needs the .env files
+// already applied. See config/loadEnv.ts.
+import { ENV_FILE } from './config/loadEnv';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import dotenv from 'dotenv';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
@@ -45,20 +48,8 @@ import { apiCache } from './middleware/cache';
 // Import Swagger configuration
 import { setupSwagger } from './config/swagger';
 
-// Load environment variables based on NODE_ENV
-const envFile = process.env.NODE_ENV === 'production'
-  ? '.env.production'
-  : process.env.NODE_ENV === 'staging'
-    ? '.env.staging'
-    : '.env.development';
-
-dotenv.config({ path: envFile });
-
-// Fallback to .env if environment-specific file doesn't exist
-dotenv.config();
-
 serverLogger.info(`🚀 Server starting in ${process.env.NODE_ENV || 'development'} mode`);
-serverLogger.info(`📁 Loading environment from: ${envFile}`);
+serverLogger.info(`📁 Loading environment from: ${ENV_FILE}`);
 
 // Initialize Sentry first (before anything else)
 initSentry();

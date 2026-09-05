@@ -1,8 +1,4 @@
-import {
-  BUNNY_STORAGE_BASE_URL,
-  BUNNY_STORAGE_PASSWORD,
-  assertBunnyConfigured,
-} from '../config/bunny';
+import { storageBaseUrl, storagePassword, assertBunnyConfigured } from '../config/bunny';
 import { mediaLogger } from '../utils/logger';
 
 /**
@@ -21,7 +17,7 @@ import { mediaLogger } from '../utils/logger';
 const REQUEST_TIMEOUT_MS = 60_000;
 
 const storageUrl = (path: string): string =>
-  `${BUNNY_STORAGE_BASE_URL}/${encodeStoragePath(path)}`;
+  `${storageBaseUrl()}/${encodeStoragePath(path)}`;
 
 /**
  * Percent-encode each path segment, leaving the separators alone.
@@ -51,7 +47,7 @@ const request = async (
     return await fetch(storageUrl(path), {
       method,
       headers: {
-        AccessKey: BUNNY_STORAGE_PASSWORD,
+        AccessKey: storagePassword(),
         accept: 'application/json',
         ...extraHeaders,
       },

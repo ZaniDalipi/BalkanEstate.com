@@ -19,15 +19,17 @@
  * object under `balkan-estate/_setup-check/`; touches nothing else.
  */
 
-import 'dotenv/config';
+// Loads .env.development / .env.staging / .env.production plus .env, the same
+// way the server does — `dotenv/config` alone would only find plain `.env`.
+import '../config/loadEnv';
 import crypto from 'crypto';
 import sharp from 'sharp';
 import {
-  BUNNY_STORAGE_ZONE,
-  BUNNY_PULL_ZONE_HOST,
-  BUNNY_PRIVATE_PULL_ZONE_HOST,
-  BUNNY_TOKEN_AUTH_KEY,
-  BUNNY_STORAGE_BASE_URL,
+  storageZone,
+  pullZoneHost,
+  privatePullZoneHost,
+  tokenAuthKey,
+  storageBaseUrl,
   isBunnyConfigured,
 } from '../config/bunny';
 import { putObject, getObject, deleteObject } from '../services/bunnyStorageService';
@@ -81,10 +83,10 @@ const main = async (): Promise<void> => {
     process.exit(1);
   }
   pass('required variables are set');
-  console.log(`      storage : ${BUNNY_STORAGE_BASE_URL}`);
-  console.log(`      cdn     : https://${BUNNY_PULL_ZONE_HOST}`);
+  console.log(`      storage : ${storageBaseUrl()}`);
+  console.log(`      cdn     : https://${pullZoneHost()}`);
   console.log(
-    `      private : ${BUNNY_PRIVATE_PULL_ZONE_HOST || '(not configured — document uploads will be refused)'}`,
+    `      private : ${privatePullZoneHost() || '(not configured — document uploads will be refused)'}`,
   );
 
   const probePath = `balkan-estate/_setup-check/${crypto.randomBytes(8).toString('hex')}.jpg`;
@@ -110,7 +112,7 @@ const main = async (): Promise<void> => {
     try {
       await putObject(probePath, probe, 'image/jpeg');
       uploaded = true;
-      pass('upload', `${Math.round(probe.length / 1024)}KB to ${BUNNY_STORAGE_ZONE}`);
+      pass('upload', `${Math.round(probe.length / 1024)}KB to ${storageZone()}`);
     } catch (error: any) {
       fail(
         'upload',
@@ -171,7 +173,7 @@ const main = async (): Promise<void> => {
 
     // ── Private zone ─────────────────────────────────────────────────────────
     console.log('\nPrivate pull zone (agent licenses and credentials)');
-    if (!BUNNY_PRIVATE_PULL_ZONE_HOST || !BUNNY_TOKEN_AUTH_KEY) {
+    if (!privatePullZoneHost() || !tokenAuthKey()) {
       console.log(
         '  – skipped: not configured. Public images work fine without it, but uploading\n' +
         '      a license or credential document will be refused rather than stored\n' +
@@ -192,7 +194,7 @@ const main = async (): Promise<void> => {
 
       // The security-critical half: the same path without a token must be refused.
       const unsignedResponse = await fetchWithRetry(
-        `https://${BUNNY_PRIVATE_PULL_ZONE_HOST}/${probePath}`,
+        `https://${privatePullZoneHost()}/${probePath}`,
         2,
       );
 

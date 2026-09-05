@@ -10,7 +10,7 @@
  */
 
 import { OG_BASE_URL } from '../config/ogConstants';
-import { BUNNY_PULL_ZONE_HOST } from '../config/bunny';
+import { pullZoneHost } from '../config/bunny';
 
 export const DEFAULT_OG_IMAGE = `${OG_BASE_URL}/og-image.jpg`;
 
@@ -78,10 +78,11 @@ function normalizeOgImage(raw?: string): OgImage | null {
   if (/[\u0000-\u001f\u007f]/.test(url)) return null;
 
   // Images on our own CDN can be rendered to the exact card frame.
-  if (BUNNY_PULL_ZONE_HOST) {
+  const cdnHost = pullZoneHost();
+  if (cdnHost) {
     try {
       const parsed = new URL(url);
-      if (parsed.hostname.toLowerCase() === BUNNY_PULL_ZONE_HOST.toLowerCase()) {
+      if (parsed.hostname.toLowerCase() === cdnHost.toLowerCase()) {
         return { url: toOgCardUrl(parsed), sized: true };
       }
     } catch {

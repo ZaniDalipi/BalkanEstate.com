@@ -1,10 +1,5 @@
 import crypto from 'crypto';
-import {
-  BUNNY_CDN_BASE_URL,
-  BUNNY_PRIVATE_CDN_BASE_URL,
-  BUNNY_PULL_ZONE_HOST,
-  BUNNY_TOKEN_AUTH_KEY,
-} from '../config/bunny';
+import { cdnBaseUrl, privateCdnBaseUrl, pullZoneHost, tokenAuthKey } from '../config/bunny';
 
 /**
  * Building and signing Bunny CDN delivery URLs.
@@ -158,7 +153,7 @@ export const buildBunnyUrl = (
 ): string => {
   const query = buildTransformQuery(options);
   const qs = query.toString();
-  return `${BUNNY_CDN_BASE_URL}${toCdnPath(storagePath)}${qs ? `?${qs}` : ''}`;
+  return `${cdnBaseUrl()}${toCdnPath(storagePath)}${qs ? `?${qs}` : ''}`;
 };
 
 /**
@@ -179,7 +174,8 @@ export const signBunnyUrl = (
   expiresInSeconds: number,
   options: BunnyTransformOptions = {}
 ): string => {
-  if (!BUNNY_TOKEN_AUTH_KEY) {
+  const key = tokenAuthKey();
+  if (!key) {
     throw new Error(
       'BUNNY_TOKEN_AUTH_KEY is not set — cannot sign a URL for a sensitive document. ' +
       'Enable Token Authentication on the pull zone and set the key.'
@@ -191,7 +187,7 @@ export const signBunnyUrl = (
   const query = buildTransformQuery(options);
   const queryString = query.toString();
 
-  const hashable = `${BUNNY_TOKEN_AUTH_KEY}${path}${expires}${queryString}`;
+  const hashable = `${key}${path}${expires}${queryString}`;
   const token = crypto
     .createHash('sha256')
     .update(hashable)
@@ -206,7 +202,7 @@ export const signBunnyUrl = (
 
   // Issued against the private pull zone: the public one does not check tokens,
   // so a signature there would be decoration on a publicly readable URL.
-  return `${BUNNY_PRIVATE_CDN_BASE_URL}${path}?${finalQuery.toString()}`;
+  return `${privateCdnBaseUrl()}${path}?${finalQuery.toString()}`;
 };
 
 /** Folder holding the curated one-per-city photo library. */
@@ -229,9 +225,10 @@ export const cityImageStoragePath = (city: string, country = 'unknown'): string 
 
 /** True when `url` is served by our pull zone (host-exact, never a suffix match). */
 export const isBunnyUrl = (url: string): boolean => {
-  if (!BUNNY_PULL_ZONE_HOST) return false;
+  const host = pullZoneHost();
+  if (!host) return false;
   try {
-    return new URL(url).hostname.toLowerCase() === BUNNY_PULL_ZONE_HOST.toLowerCase();
+    return new URL(url).hostname.toLowerCase() === host.toLowerCase();
   } catch {
     return false;
   }

@@ -16,7 +16,7 @@
  * it. Uploading through the app is the route that needs no entry at all: those
  * land on our own pull zone, which is already listed.
  */
-import { BUNNY_PULL_ZONE_HOST, BUNNY_PRIVATE_PULL_ZONE_HOST } from './bunny';
+import { pullZoneHost, privatePullZoneHost } from './bunny';
 
 /**
  * Where our own uploads and transformations live: the Bunny pull zone.
@@ -25,7 +25,7 @@ import { BUNNY_PULL_ZONE_HOST, BUNNY_PRIVATE_PULL_ZONE_HOST } from './bunny';
  * deployment — and because a stale literal here would block every image on the
  * site in exactly the silent way this module exists to prevent.
  */
-export const CDN_IMAGE_HOST = BUNNY_PULL_ZONE_HOST;
+export const cdnImageHost = (): string => pullZoneHost();
 
 /**
  * Hosts that may appear in a photo URL an admin sets by hand.
@@ -35,11 +35,11 @@ export const CDN_IMAGE_HOST = BUNNY_PULL_ZONE_HOST;
  * `CityDashboard`), so those URLs reach an `<img src>` whether or not anyone
  * pastes one.
  */
-export const ALLOWED_PHOTO_HOSTS: readonly string[] = [
-  CDN_IMAGE_HOST,
+export const allowedPhotoHosts = (): readonly string[] => [
+  cdnImageHost(),
   // Signed document URLs live on a second pull zone; listed only when one is
   // configured, so an empty variable cannot widen the policy to every host.
-  BUNNY_PRIVATE_PULL_ZONE_HOST,
+  privatePullZoneHost(),
   'upload.wikimedia.org',
 ].filter(Boolean);
 
@@ -57,8 +57,8 @@ export function isAllowedPhotoUrl(url: string): boolean {
     return false;
   }
   if (parsed.protocol !== 'https:') return false;
-  return ALLOWED_PHOTO_HOSTS.includes(parsed.hostname.toLowerCase());
+  return allowedPhotoHosts().includes(parsed.hostname.toLowerCase());
 }
 
 /** The allowlist as a sentence, for an error an admin has to act on. */
-export const allowedPhotoHostsHint = (): string => ALLOWED_PHOTO_HOSTS.join(', ');
+export const allowedPhotoHostsHint = (): string => allowedPhotoHosts().join(', ');
