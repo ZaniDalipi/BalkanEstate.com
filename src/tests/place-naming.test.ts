@@ -144,6 +144,32 @@ describe('the city the user chose anchors the label', () => {
   });
 });
 
+describe('country names outside the Latin alphabet', () => {
+  it('keeps a Cyrillic or Greek country in the label', () => {
+    // These used to vanish: the place normaliser only knew Latin, so any name
+    // in another script folded to the empty string and was dropped as a
+    // duplicate of nothing.
+    expect(formatPlaceLabel({ name: 'Moa Center', city: 'Ohrid', country: 'Северна Македонија' }).full)
+      .toBe('Moa Center, Ohrid, Северна Македонија');
+    expect(formatPlaceLabel({ name: 'Kafe', city: 'Athens', country: 'Ελλάδα' }).full)
+      .toBe('Kafe, Athens, Ελλάδα');
+  });
+
+  it('resolves a known place written in Cyrillic to the app\'s own spelling', () => {
+    // A useful consequence of the normaliser knowing more than Latin: the
+    // spelling table is reachable from any script, so a place arriving as
+    // "Скопје" is shown under the one name the app uses everywhere — and
+    // recognised as the same place as the city beside it, not repeated.
+    expect(formatPlaceLabel({ name: 'Скопје', city: 'Skopje', country: 'North Macedonia' }).full)
+      .toBe('Skopje, North Macedonia');
+    expect(canonicalPlaceName('Скопје')).toBe('Skopje');
+    // And the rule that only marks are restored still holds across scripts:
+    // "Београд" folds to `beograd`, which is a different name from
+    // "Belgrade", not a different spelling of it, so it is left alone.
+    expect(canonicalPlaceName('Београд')).toBe('Београд');
+  });
+});
+
 describe('formatGeocodedPlace', () => {
   it('reads a street from the structured address', () => {
     const label = formatGeocodedPlace({

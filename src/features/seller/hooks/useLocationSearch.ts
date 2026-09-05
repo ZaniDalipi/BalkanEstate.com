@@ -7,6 +7,7 @@ import {
   formatPlace,
   formatPlaceLabel,
   haversineDistanceKm,
+  isPlaceInCoverage,
   normalizePlaceName,
   searchLocalities,
   type Coordinates,
@@ -195,6 +196,11 @@ export const useLocationSearch = ({
         });
 
         for (const prediction of predictions) {
+          // A seller cannot file a listing outside the countries the app
+          // covers, so a pin outside them is a dead end.
+          const predictionCountry = prediction.subtitle.split(',').pop()?.trim();
+          if (!isPlaceInCoverage(predictionCountry)) continue;
+
           const label = formatPlaceLabel({ name: prediction.title }, { context });
           results.push({
             id: `google:${prediction.placeId}`,
@@ -223,6 +229,8 @@ export const useLocationSearch = ({
           // Named the same way as every other place in the app: local
           // spelling, no postcode, no repeated municipality.
           const label = formatGeocodedPlace(result, { context });
+          if (!isPlaceInCoverage(result.address?.country)) continue;
+
           results.push({
             id: `osm:${result.place_id}`,
             title: label.primary,

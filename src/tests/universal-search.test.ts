@@ -386,3 +386,69 @@ describe('Google Places — the businesses and residences a gazetteer cannot hol
     vi.useRealTimers();
   });
 });
+
+describe('only places inside the countries the app covers', () => {
+  beforeEach(() => {
+    isPlacesAvailable.mockReturnValue(true);
+  });
+
+  it('drops the results Google offers from outside them', async () => {
+    vi.useFakeTimers();
+    // The mix Google actually returned for "Moa resi": one Albanian result
+    // and three from countries this app has nothing in.
+    fetchPlacePredictions.mockResolvedValue([
+      { placeId: '1', title: 'MOA RESIDENCE', subtitle: 'Kashar, Albania' },
+      { placeId: '2', title: 'Mia RESİDENCE', subtitle: 'Bayraklıdede, Kuşadası/Aydın, Türkiye' },
+      { placeId: '3', title: "MO'Ã Residência", subtitle: 'Rua das Flores, Portugal' },
+      { placeId: '4', title: 'MOA Residence', subtitle: 'Bacolod, Philippines' },
+    ]);
+
+    const { result } = renderHook(() => useUniversalSearch({ query: 'Moa resi', properties: [] }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(400);
+    });
+
+    const titles = result.current.suggestions.map((entry) => entry.title);
+    expect(titles).toContain('MOA RESIDENCE');
+    expect(titles).not.toContain('Mia RESİDENCE');
+    expect(titles).not.toContain("MO'Ã Residência");
+    expect(titles).not.toContain('MOA Residence');
+    vi.useRealTimers();
+  });
+
+  it('keeps a result whose country is named in Cyrillic', async () => {
+    vi.useFakeTimers();
+    fetchPlacePredictions.mockResolvedValue([
+      { placeId: 'mk', title: 'Moa Center', subtitle: 'Ohrid, Северна Македонија' },
+    ]);
+
+    const { result } = renderHook(() => useUniversalSearch({ query: 'moa center', properties: [] }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(400);
+    });
+
+    const suggestion = result.current.suggestions.find((entry) => entry.title === 'Moa Center');
+    expect(suggestion).toBeDefined();
+    // And the country survives into the label rather than being folded away.
+    expect(suggestion?.subtitle).toContain('Македонија');
+    vi.useRealTimers();
+  });
+
+  it('drops a geocoder row from outside them as a backstop', async () => {
+    vi.useFakeTimers();
+    isPlacesAvailable.mockReturnValue(false);
+    searchLocation.mockResolvedValue([
+      { place_id: 8, lat: '38.3', lon: '26.3', display_name: 'Çeşme, İzmir, Türkiye', boundingbox: ['0','0','0','0'] },
+    ]);
+
+    const { result } = renderHook(() => useUniversalSearch({ query: 'cesme izmir', properties: [] }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(400);
+    });
+
+    expect(
+      result.current.suggestions.filter((entry) => entry.type === 'place' && entry.source === 'geocoder'),
+    ).toEqual([]);
+    vi.useRealTimers();
+  });
+});

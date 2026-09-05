@@ -13,7 +13,7 @@
  *   - `AutocompleteService` / `PlacesService` (legacy)
  * When neither is present the caller falls back to the gazetteer + Nominatim.
  */
-import type { Coordinates } from '@/shared/geo';
+import { SUPPORTED_COUNTRY_CODES, type Coordinates } from '@/shared/geo';
 
 export interface PlacePrediction {
   placeId: string;
@@ -32,7 +32,11 @@ export interface ResolvedPlace {
 }
 
 export interface PlacePredictionOptions {
-  /** ISO 3166-1 alpha-2, restricts results to one country. */
+  /**
+   * ISO 3166-1 alpha-2, restricts results to one country. Without it the
+   * request is still fenced to the countries the app covers — never the whole
+   * world, which is where Türkiye and the Philippines came from.
+   */
   countryCode?: string;
   /** Biases results towards this point and yields `distanceKm`. */
   origin?: Coordinates | null;
@@ -84,7 +88,11 @@ const fetchWithNewApi = async (
   const places = getMaps()!.places as any;
 
   const request: Record<string, unknown> = { input: query, sessionToken };
-  if (countryCode) request.includedRegionCodes = [countryCode.toLowerCase()];
+  // The new API takes up to fifteen regions, so the whole coverage area fits
+  // and the restriction is enforced by Google rather than by us afterwards.
+  request.includedRegionCodes = countryCode
+    ? [countryCode.toLowerCase()]
+    : [...SUPPORTED_COUNTRY_CODES];
   if (origin) {
     request.origin = { lat: origin.lat, lng: origin.lng };
     request.locationBias = {
@@ -116,6 +124,9 @@ const fetchWithLegacyApi = (
   const service = new places.AutocompleteService();
 
   const request: Record<string, unknown> = { input: query, sessionToken };
+  // The legacy API caps `country` at five, which the coverage area exceeds,
+  // so it can only be narrowed when the user picked one. Everything from this
+  // path is checked against the coverage list by the caller.
   if (countryCode) request.componentRestrictions = { country: countryCode.toLowerCase() };
   if (origin) {
     const center = new maps.LatLng(origin.lat, origin.lng);

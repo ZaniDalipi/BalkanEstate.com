@@ -105,7 +105,9 @@ describe('useLocationSearch', () => {
     // may pick Vlorë from the list and pin an address hundreds of km away.
     isPlacesAvailable.mockReturnValue(true);
     fetchPlacePredictions.mockResolvedValue([
-      { placeId: 'far', title: 'Palasovo', subtitle: 'Somewhere else', distanceKm: 400 },
+      // Far from Vlorë, but still inside the countries the app covers — the
+      // point of this test is distance, not coverage.
+      { placeId: 'far', title: 'Palasovo', subtitle: 'Kukës, Albania', distanceKm: 400 },
     ]);
 
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
@@ -233,5 +235,36 @@ describe('useLocationSearch', () => {
     });
 
     expect(result.current.suggestions).toEqual([]);
+  });
+});
+
+describe('places outside the countries the app covers', () => {
+  it('drops a Google prediction from outside them', async () => {
+    // A seller cannot file a listing in Türkiye, so offering a Turkish pin
+    // leads only to a form that will not submit.
+    isPlacesAvailable.mockReturnValue(true);
+    fetchPlacePredictions.mockResolvedValue([
+      { placeId: 'in', title: 'Palasë Beach', subtitle: 'Vlorë, Albania' },
+      { placeId: 'out', title: 'Mia Residence', subtitle: 'Kuşadası, Türkiye' },
+    ]);
+
+    const { result } = renderHook(() => useLocationSearch(vloreOptions));
+    await search(result, 'palase');
+
+    const titles = result.current.suggestions.map((suggestion) => suggestion.title);
+    expect(titles).toContain('Palasë Beach');
+    expect(titles).not.toContain('Mia Residence');
+  });
+
+  it('drops a geocoder row from outside them', async () => {
+    isPlacesAvailable.mockReturnValue(false);
+    searchLocation.mockResolvedValue([
+      osmResult({ place_id: 9, display_name: 'Çeşme, İzmir, Türkiye', address: { country: 'Türkiye' } }),
+    ]);
+
+    const { result } = renderHook(() => useLocationSearch(vloreOptions));
+    await search(result, 'cesme');
+
+    expect(result.current.suggestions.filter((s) => s.source === 'osm')).toEqual([]);
   });
 });

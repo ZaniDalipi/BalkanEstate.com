@@ -1,0 +1,107 @@
+{
+  "albania": [
+    "Albania",
+    "Albanija",
+    "Shqiperia",
+    "Shqipëri",
+    "Shqipëria",
+    "Αλβανία",
+    "Албания",
+    "Албанија"
+  ],
+  "bosnia-herzegovina": [
+    "BiH",
+    "Bosna",
+    "Bosna i Hercegovina",
+    "Bosnia",
+    "Bosnia & Herzegovina",
+    "Bosnia and Herzegovina",
+    "Bosnia și Herțegovina",
+    "Bosnjë dhe Hercegovinë",
+    "Βοσνία και Ερζεγοβίνη",
+    "Босна и Херцеговина"
+  ],
+  "bulgaria": [
+    "Balgariya",
+    "Bugarska",
+    "Bulgaria",
+    "Bulgariya",
+    "Bullgari",
+    "Βουλγαρία",
+    "Бугарија",
+    "Бугарска",
+    "България"
+  ],
+  "croatia": [
+    "Croatia",
+    "Croația",
+    "Hrvatska",
+    "Kroaci",
+    "Κροατία",
+    "Хрватска",
+    "Хърватска"
+  ],
+  "greece": [
+    "Ellada",
+    "Elláda",
+    "Grecia",
+    "Greece",
+    "Greqi",
+    "Grčka",
+    "Hellas",
+    "Ελλάδα",
+    "Ελλάς",
+    "Грција",
+    "Грчка",
+    "Гърция"
+  ],
+  "kosovo": [
+    "Kosova",
+    "Kosovo",
+    "Kosovë",
+    "Republika e Kosovës",
+    "Κόσοβο",
+    "Косово"
+  ],
+  "montenegro": [
+    "Crna Gora",
+    "Mal i Zi",
+    "Montenegro",
+    "Muntenegru",
+    "Μαυροβούνιο",
+    "Црна Гора",
+    "Черна гора"
+  ],
+  "north-macedonia": [
+    "Macedonia",
+    "Macedonia de Nord",
+    "Makedonija",
+    "Maqedoni e Veriut",
+    "Maqedonia",
+    "North Macedonia",
+    "Sjeverna Makedonija",
+    "Βόρεια Μακεδονία",
+    "Македонија",
+    "Северна Македония",
+    "Северна Македонија"
+  ],
+  "romania": [
+    "Romania",
+    "România",
+    "Rumani",
+    "Rumunija",
+    "Rumunjska",
+    "Ρουμανία",
+    "Романија",
+    "Румунија",
+    "Румъния"
+  ],
+  "serbia": [
+    "Serbi",
+    "Serbia",
+    "Srbija",
+    "Σερβία",
+    "Србија",
+    "Сърбия"
+  ]
+}
