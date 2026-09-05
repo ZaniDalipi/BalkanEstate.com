@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Property, Agency } from '../../../types';
 import { PhoneIcon, ShareIcon, MapPinIcon, UsersIcon, HomeIcon, BuildingOfficeIcon, ChevronRightIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { optimizeImageUrl } from '../../../config/imageConfig';
 import * as api from '../../../services/apiService';
 import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
 import RentVsBuyCalculator from '@/src/features/calculators/components/RentVsBuyCalculator';
@@ -268,7 +268,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           >
             {property.seller?.avatarUrl ? (
               <img
-                src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 96, quality: 'auto', crop: 'fill' })}
+                src={optimizeImageUrl(property.seller.avatarUrl, { width: 96, quality: 'auto', crop: 'fill' })}
                 alt={property.seller.name}
                 loading="lazy"
                 decoding="async"
@@ -299,7 +299,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           <div className="flex items-center gap-4 mb-4">
             {property.seller?.avatarUrl ? (
               <img
-                src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 96, quality: 'auto', crop: 'fill' })}
+                src={optimizeImageUrl(property.seller.avatarUrl, { width: 96, quality: 'auto', crop: 'fill' })}
                 alt={property.seller.name}
                 loading="lazy"
                 decoding="async"

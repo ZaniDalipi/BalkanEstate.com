@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import SiteContent from '../models/SiteContent';
-import cloudinary from '../config/cloudinary';
+import { randomBytes } from 'crypto';
+import { putObject, deleteObject } from '../services/bunnyStorageService';
+import { buildBunnyUrl } from '../utils/bunnyUrl';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 
 // Get all content for a section (public)
@@ -126,14 +128,12 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Delete from Cloudinary if publicId exists
+    // Delete from storage if a path exists
     if (content.publicId) {
       try {
-        await cloudinary.uploader.destroy(content.publicId, {
-          resource_type: content.type === 'video' ? 'video' : 'image'
-        });
-      } catch (_cloudErr) {
-        // Cloudinary deletion failed silently - content will still be removed from database
+        await deleteObject(content.publicId);
+      } catch (_storageErr) {
+        // Storage deletion failed silently - content will still be removed from database
       }
     }
 
@@ -144,7 +144,21 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-// Admin: Upload video to Cloudinary
+/** Container formats a browser will play directly from the CDN. */
+const PLAYABLE_VIDEO_TYPES: Record<string, string> = {
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'video/quicktime': 'mp4', // .mov is H.264 in practice; served as mp4 it plays
+};
+
+/**
+ * Admin: upload a site-content video.
+ *
+ * Bunny Edge Storage stores and serves the file as-is — unlike Cloudinary it
+ * does not transcode, so a format browsers cannot play is rejected here rather
+ * than silently stored and discovered broken on the page. (Bunny Stream is the
+ * product that transcodes, if arbitrary uploads ever become a requirement.)
+ */
 export const uploadVideo = async (req: Request, res: Response): Promise<void> => {
   try {
     const file = req.file;
@@ -153,29 +167,23 @@ export const uploadVideo = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Upload to Cloudinary as video
-    const result = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'balkan-estate/site-content/how-it-works',
-          resource_type: 'video',
-          eager: [
-            { format: 'mp4', video_codec: 'h264' }
-          ],
-          eager_async: true,
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
+    const extension = PLAYABLE_VIDEO_TYPES[file.mimetype];
+    if (!extension) {
+      res.status(400).json({
+        message: `Unsupported video format ${file.mimetype}. Upload an MP4 (H.264) or WebM file.`,
+      });
+      return;
+    }
 
-      uploadStream.end(file.buffer);
-    });
+    const storagePath =
+      `balkan-estate/site-content/how-it-works/` +
+      `${Date.now().toString(36)}-${randomBytes(8).toString('hex')}.${extension}`;
+
+    await putObject(storagePath, file.buffer, extension === 'webm' ? 'video/webm' : 'video/mp4');
 
     res.json({
-      url: result.secure_url,
-      publicId: result.public_id,
+      url: buildBunnyUrl(storagePath),
+      publicId: storagePath,
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Internal server error' });

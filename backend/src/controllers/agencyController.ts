@@ -8,7 +8,8 @@ import Property from '../models/Property';
 import Subscription from '../models/Subscription';
 import Product from '../models/Product';
 import { geocodeAgency } from '../services/geocodingService';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/imageStorageService';
+import { isBunnyConfigured } from '../config/bunny';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 
@@ -1339,9 +1340,9 @@ export const uploadAgencyLogo = async (
       return;
     }
 
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      agencyLogger.error('Cloudinary not configured');
+    // Check if image storage is configured
+    if (!isBunnyConfigured()) {
+      agencyLogger.error('Bunny storage not configured');
       res.status(500).json({ message: 'Image upload service not configured' });
       return;
     }
@@ -1420,9 +1421,9 @@ export const uploadAgencyCover = async (
       return;
     }
 
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      agencyLogger.error('Cloudinary not configured');
+    // Check if image storage is configured
+    if (!isBunnyConfigured()) {
+      agencyLogger.error('Bunny storage not configured');
       res.status(500).json({ message: 'Image upload service not configured' });
       return;
     }

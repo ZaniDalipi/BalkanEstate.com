@@ -103,7 +103,7 @@ export interface WatermarkOptions {
  * - Agency logo in bottom-left (if provided)
  * - Both at ~50% opacity
  *
- * Returns the watermarked image buffer (JPEG).
+ * Returns the watermarked image buffer (PNG — an intermediate, re-encoded on upload).
  */
 export const applyWatermark = async (
   imageBuffer: Buffer,
@@ -167,10 +167,15 @@ export const applyWatermark = async (
       return imageBuffer;
     }
 
-    // Apply all watermarks in a single composite call
+    // Apply all watermarks in a single composite call.
+    //
+    // PNG, not JPEG: this buffer is an intermediate that `uploadImage` re-encodes
+    // straight away, so a lossy step here would only add artifacts the final
+    // encode then has to preserve. Low compression effort keeps it cheap — the
+    // buffer never leaves memory.
     const watermarked = await sharp(imageBuffer)
       .composite(compositeInputs)
-      .jpeg({ quality: 92, progressive: true })
+      .png({ compressionLevel: 3 })
       .toBuffer();
 
     mediaLogger.info(`🔖 Applied ${compositeInputs.length} watermark(s) to property photo`);

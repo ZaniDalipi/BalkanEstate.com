@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { useAppContext } from '@/context/AppContext';
 import { UsageMeter } from '@/src/shared/components/ui';
 import { roomStylerKeys } from '@/src/shared/query/queryKeys';
@@ -47,7 +47,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
     }, [mode]);
 
     // Send a high-res version to the AI for a better result (still a Cloudinary URL).
-    const sourceUrl = optimizeCloudinaryUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
+    const sourceUrl = optimizeImageUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
 
     const isUnlimited = usage?.limit === -1;
     const isExhausted = !!usage && usage.limit !== -1 && usage.remaining <= 0;

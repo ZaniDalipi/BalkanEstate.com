@@ -6,7 +6,7 @@
  * twins) to generate rich link previews for social media crawlers.
  */
 
-import { optimizeCloudinaryUrl } from '../config/cloudinaryConfig';
+import { optimizeImageUrl, isCdnUrl } from '../config/imageConfig';
 
 export const CRAWLER_USER_AGENTS = [
   'facebookexternalhit',
@@ -144,13 +144,14 @@ export interface OgImage {
 export const OG_CARD_OPTIONS = {
   width: 1200,
   height: 630,
-  crop: 'pad',
-  background: 'white',
+  // `fill` crops to exactly 1200x630. The old `pad` scaled the picture into
+  // the frame and filled the remainder with white, which Bunny Optimizer has
+  // no equivalent for — and a card that comes back smaller than the
+  // dimensions we advertise is what makes Facebook and LinkedIn mislay it.
+  crop: 'fill',
   format: 'jpg',
   quality: 'auto',
 } as const;
-
-const CLOUDINARY_UPLOAD_RE = /^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/i;
 
 /** Normalize one image candidate, or null if it can't be used as og:image. */
 function normalizeOgImage(raw?: string): OgImage | null {
@@ -159,17 +160,17 @@ function normalizeOgImage(raw?: string): OgImage | null {
 
   // Site-relative path → absolute; crawlers reject relative og:image values.
   // (Inline DiceBear data: URIs, which crawlers cannot fetch, are rejected by
-  // optimizeCloudinaryUrl's http(s)-only check below.)
+  // optimizeImageUrl's http(s)-only check below.)
   if (url.startsWith('/')) return { url: `${SITE_URL}${url}`, sized: false };
 
   // Shared helper: rejects non-http(s) and control-character URLs, strips any
-  // transformation already baked into the URL so an existing crop can't shrink
+  // transformation already on the URL so an existing crop can't shrink
   // the card, and sizes Google OAuth avatars via their own =s{n} parameter.
-  const delivered = optimizeCloudinaryUrl(url, OG_CARD_OPTIONS);
+  const delivered = optimizeImageUrl(url, OG_CARD_OPTIONS);
   if (!delivered) return null;
 
-  // Only a Cloudinary-delivered image is guaranteed to come back at 1200×630.
-  return { url: delivered, sized: CLOUDINARY_UPLOAD_RE.test(url) };
+  // Only an image delivered by our own CDN is guaranteed to come back at 1200×630.
+  return { url: delivered, sized: isCdnUrl(url) };
 }
 
 /**

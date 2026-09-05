@@ -34,20 +34,21 @@ import {
   batchGetSignedUrls,
 } from '../services/storageAccessPolicy';
 
-// Mock Cloudinary to avoid real API calls
-jest.mock('../config/cloudinary', () => ({
+// Signed and plain delivery URLs are built from the configured zones at
+// import time, so these must be set before the service is first evaluated.
+process.env.BUNNY_PULL_ZONE_HOST = 'test-zone.b-cdn.net';
+process.env.BUNNY_PRIVATE_PULL_ZONE_HOST = 'test-private.b-cdn.net';
+process.env.BUNNY_TOKEN_AUTH_KEY = 'test-token-key';
+
+// Mock the storage client so no request reaches Bunny.
+jest.mock('../services/bunnyStorageService', () => ({
   __esModule: true,
-  default: {
-    url: jest.fn(
-      (publicId: string, options: any) => {
-        const deliveryType = options?.type === 'authenticated' ? 'authenticated' : 'upload';
-        return `https://res.cloudinary.com/test/${options?.resource_type || 'image'}/${deliveryType}/s--fakesig--/${publicId}`;
-      }
-    ),
-    uploader: {
-      destroy: jest.fn().mockResolvedValue({ result: 'ok' }),
-    },
-  },
+  putObject: jest.fn().mockResolvedValue(undefined),
+  deleteObject: jest.fn().mockResolvedValue(true),
+  objectExists: jest.fn().mockResolvedValue(true),
+  listObjects: jest.fn().mockResolvedValue([]),
+  deleteFolderRecursive: jest.fn().mockResolvedValue([]),
+  moveObject: jest.fn().mockResolvedValue(true),
 }));
 
 describe('Storage Access Policy', () => {
@@ -97,7 +98,7 @@ describe('Storage Access Policy', () => {
     it('should create a FileRecord with correct ownership', async () => {
       const record = await registerFileUpload({
         publicId: 'balkan-estate/users/123/avatar/img1',
-        url: 'https://res.cloudinary.com/test/image/upload/img1',
+        url: 'https://test-zone.b-cdn.net/balkan-estate/img1.webp',
         userId: String(userA._id),
         fileType: 'avatar',
       });

@@ -6,7 +6,7 @@ import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { validateName, validateEmail, validatePhone, sanitizeText } from '@/shared/utils/validation';
 
 interface VillaBookingModalProps {
@@ -275,7 +275,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                 <div className="flex gap-3.5 mb-5 items-center">
                   {property.imageUrl && (
                     <img
-                      src={optimizeCloudinaryUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
+                      src={optimizeImageUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
                       alt={property.title}
                       loading="lazy"
                       decoding="async"

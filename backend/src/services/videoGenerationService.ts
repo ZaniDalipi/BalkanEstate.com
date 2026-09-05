@@ -5,7 +5,9 @@ import fs from 'fs';
 import os from 'os';
 import https from 'https';
 import http from 'http';
-import cloudinary from '../config/cloudinary';
+import { randomBytes } from 'crypto';
+import { putObject, deleteObject } from './bunnyStorageService';
+import { buildBunnyUrl } from '../utils/bunnyUrl';
 import { videoLogger } from '../utils/logger';
 
 // Set FFmpeg path from installer
@@ -303,19 +305,19 @@ export const generatePropertyVideo = async (
 
     videoLogger.info('✅ Video created successfully');
 
-    // Step 4: Upload to Cloudinary
-    videoLogger.info('☁️  Uploading to Cloudinary...');
-    const cloudinaryResult = await uploadVideoToCloudinary(outputPath, userId, propertyId);
+    // Step 4: Upload to storage
+    videoLogger.info('☁️  Uploading to storage...');
+    const uploadResult = await uploadGeneratedVideo(outputPath, userId, propertyId);
 
     // Step 5: Cleanup
     videoLogger.info('🧹 Cleaning up...');
     fs.rmSync(tempDir, { recursive: true, force: true });
 
-    videoLogger.info(`🎉 Video complete: ${cloudinaryResult.url}`);
+    videoLogger.info(`🎉 Video complete: ${uploadResult.url}`);
 
     return {
-      url: cloudinaryResult.url,
-      publicId: cloudinaryResult.publicId,
+      url: uploadResult.url,
+      publicId: uploadResult.publicId,
       duration: totalDuration,
       format,
       width,
@@ -821,40 +823,35 @@ const escapeText = (text: string): string => {
 };
 
 /**
- * Upload video to Cloudinary
+ * Upload a generated video to storage.
+ *
+ * No transcode on the way in: ffmpeg has already produced the H.264 MP4 at the
+ * target dimensions just above, so the eager `{ width: 720, height: 1280 }`
+ * derivative the old host built was re-encoding a file that was already
+ * exactly that.
  */
-const uploadVideoToCloudinary = async (
+const uploadGeneratedVideo = async (
   videoPath: string,
   userId: string,
   propertyId: string
 ): Promise<{ url: string; publicId: string }> => {
-  return new Promise((resolve, reject) => {
-    const folder = `balkan-estate/users/${userId}/listings/${propertyId}/videos`;
+  const storagePath =
+    `balkan-estate/users/${userId}/listings/${propertyId}/videos/` +
+    `${Date.now().toString(36)}-${randomBytes(8).toString('hex')}.mp4`;
 
-    cloudinary.uploader.upload(videoPath, {
-      resource_type: 'video',
-      folder,
-      eager: [{ width: 720, height: 1280, crop: 'limit', format: 'mp4' }],
-      eager_async: true,
-    }, (error, result) => {
-      if (error) {
-        videoLogger.error('Cloudinary error:', error);
-        reject(error);
-      } else if (result) {
-        resolve({ url: result.secure_url, publicId: result.public_id });
-      } else {
-        reject(new Error('No result from Cloudinary'));
-      }
-    });
-  });
+  const body = await fs.promises.readFile(videoPath);
+  await putObject(storagePath, body, 'video/mp4');
+
+  videoLogger.info(`🎬 Uploaded generated video: ${storagePath} (${Math.round(body.length / 1024)}KB)`);
+  return { url: buildBunnyUrl(storagePath), publicId: storagePath };
 };
 
 /**
- * Delete generated video from Cloudinary
+ * Delete a generated video from storage
  */
 export const deleteGeneratedVideo = async (publicId: string): Promise<void> => {
   try {
-    await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+    await deleteObject(publicId);
     videoLogger.info(`🗑️ Deleted video: ${publicId}`);
   } catch (error: any) {
     videoLogger.error(`❌ Failed to delete video ${publicId}:`, error.message);

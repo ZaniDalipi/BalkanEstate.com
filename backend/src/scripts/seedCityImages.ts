@@ -2,9 +2,10 @@
  * seedCityImages.ts
  *
  * Fetches a representative image for each of the 89 featured cities from
- * Wikipedia / Wikimedia Commons and uploads to Cloudinary.
+ * Wikipedia / Wikimedia Commons and uploads to Bunny storage.
  *
- * Public ID format: city-{country}-{city}  (matches getCityImageUrl in cloudinaryConfig.ts)
+ * Storage path: balkan-estate/cities/city-{country}-{city}.webp
+ * (matches getCityImageUrl in config/imageConfig.ts)
  *
  * Usage:
  *   npx ts-node backend/src/scripts/seedCityImages.ts            # skip existing
@@ -17,7 +18,9 @@ import path from 'path';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-import cloudinary from '../config/cloudinary';
+import sharp from 'sharp';
+import { putObject, objectExists } from '../services/bunnyStorageService';
+import { cityImageStoragePath } from '../utils/bunnyUrl';
 import axios from 'axios';
 
 const BATCH_SIZE = 3;
@@ -25,12 +28,12 @@ const BATCH_DELAY_MS = 2500;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function normalizeName(s: string): string {
-  return s.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-}
-
+/**
+ * Storage path of a city's photo, from the one shared definition — the
+ * frontend builds the same path from the same names to display it.
+ */
 function publicId(city: string, country: string): string {
-  return `city-${normalizeName(country)}-${normalizeName(city)}`;
+  return cityImageStoragePath(city, country);
 }
 
 const HTTP = axios.create({
@@ -190,36 +193,35 @@ async function fetchCommonsImageUrl(city: string, country: string): Promise<stri
   return null;
 }
 
-// ── Cloudinary operations ─────────────────────────────────────────────────────
+// ── Storage operations ────────────────────────────────────────────────────────
 
-async function imageExists(pid: string): Promise<boolean> {
+async function imageExists(path: string): Promise<boolean> {
   try {
-    await cloudinary.api.resource(pid);
-    return true;
+    return await objectExists(path);
   } catch {
     return false;
   }
 }
 
-async function uploadFromUrl(imageUrl: string, pid: string): Promise<boolean> {
+async function uploadFromUrl(imageUrl: string, storagePath: string): Promise<boolean> {
   try {
-    await cloudinary.uploader.upload(imageUrl, {
-      public_id: pid,
-      overwrite: true,
-      resource_type: 'image',
-      transformation: [
-        // `lfill` ("limit fill"): crops to the 1200x800 frame like `fill`,
-        // but never enlarges past the source's own size. Most Commons
-        // originals are well above this, so it rarely engages — it exists for
-        // the smaller-town photos where a plain `fill` would upscale and blur.
-        { width: 1200, height: 800, crop: 'lfill', gravity: 'auto' },
-        { quality: 'auto:good', fetch_format: 'auto' },
-      ],
-    });
+    const response = await HTTP.get<ArrayBuffer>(imageUrl, { responseType: 'arraybuffer' });
+
+    // The resize the old host did on ingest happens here instead.
+    // `fit: 'inside'` is the old `lfill`'s intent: fit the 1200x800 frame and
+    // never enlarge past the source, since the smaller-town photos on Commons
+    // would otherwise be upscaled and blurred.
+    const master = await sharp(Buffer.from(response.data))
+      .rotate()
+      .resize(1200, 800, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 78, effort: 5 })
+      .toBuffer();
+
+    await putObject(storagePath, master, 'image/webp');
     return true;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(`  ✗ Cloudinary upload failed: ${msg}`);
+    console.error(`  ✗ Upload failed: ${msg}`);
     return false;
   }
 }

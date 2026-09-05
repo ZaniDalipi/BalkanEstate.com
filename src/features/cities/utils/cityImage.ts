@@ -18,7 +18,7 @@
  * since deleted from Cloudinary.
  */
 
-import { getCityImageUrl, optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { getCityImageUrl, optimizeImageUrl } from '@/config/imageConfig';
 
 /** Just enough of a city to find its photo. */
 export interface CityPhotoSubject {
@@ -65,7 +65,7 @@ export function cityImageSources(
     // Cloudinary URLs get resized to the box they fill; anything else (a
     // Wikipedia or Unsplash original) comes back unchanged, since we cannot
     // transform a host we don't control.
-    sources.push(optimizeCloudinaryUrl(stored, {
+    sources.push(optimizeImageUrl(stored, {
       width, height, quality, crop: 'fill', gravity: 'auto',
     }) || stored);
   }

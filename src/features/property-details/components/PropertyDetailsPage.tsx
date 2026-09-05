@@ -44,7 +44,7 @@ import { buildMapFocusTarget, resolveMapDestination } from '@/shared/map/mapDest
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { AdSlot } from '@/src/features/promo';
 
 /**
@@ -1170,7 +1170,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               <span className="absolute inset-0 rounded-full avatar-ring-pulse" />
               {property.seller?.avatarUrl && !sellerAvatarError ? (
                 <img
-                  src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 88, quality: 'auto', crop: 'fill' })}
+                  src={optimizeImageUrl(property.seller.avatarUrl, { width: 88, quality: 'auto', crop: 'fill' })}
                   alt={sellerDisplay.name}
                   className="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-md relative"
                   onError={() => setSellerAvatarError(true)}
@@ -1242,7 +1242,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             <div className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-neutral-100">
               {property.seller?.avatarUrl && !sellerAvatarError ? (
                 <img
-                  src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 72, quality: 'auto', crop: 'fill' })}
+                  src={optimizeImageUrl(property.seller.avatarUrl, { width: 72, quality: 'auto', crop: 'fill' })}
                   alt={sellerDisplay.name}
                   className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0"
                 />
@@ -1284,7 +1284,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                     <div className="w-32 h-20 bg-neutral-100 flex items-center justify-center overflow-hidden">
                       {p.images?.[0]?.url ? (
                         <img
-                          src={optimizeCloudinaryUrl(p.images[0].url, { width: 160, quality: 'auto', crop: 'fill' })}
+                          src={optimizeImageUrl(p.images[0].url, { width: 160, quality: 'auto', crop: 'fill' })}
                           alt={p.title}
                           loading="lazy"
                           className="w-full h-full object-cover"

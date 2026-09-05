@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { getTopAgents } from '@/src/features/agents/api/agentApi';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
@@ -201,7 +201,7 @@ const AgentPodiumCard: React.FC<{
         }}>
           {agent.avatarUrl ? (
             <img
-              src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 160, quality: 'auto', crop: 'fill' })}
+              src={optimizeImageUrl(agent.avatarUrl, { width: 160, quality: 'auto', crop: 'fill' })}
               alt={agentName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               loading="eager"

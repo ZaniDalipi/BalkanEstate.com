@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import {
@@ -56,7 +56,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 animate-pulse" />
       )}
       <img
-        src={optimizeCloudinaryUrl(avatarUrl, { width: 192, quality: 'auto', crop: 'fill' })}
+        src={optimizeImageUrl(avatarUrl, { width: 192, quality: 'auto', crop: 'fill' })}
         alt={`${agent.name} - Real Estate Agent${agent.city ? ` in ${agent.city}` : ''}${agent.country ? `, ${agent.country}` : ''}`}
         className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
@@ -349,7 +349,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
               {agent.agencyLogo ? (
                 <div className="w-4 h-4 rounded overflow-hidden flex-shrink-0">
                   <img
-                    src={optimizeCloudinaryUrl(agent.agencyLogo, { width: 40, quality: 'auto', crop: 'fill' })}
+                    src={optimizeImageUrl(agent.agencyLogo, { width: 40, quality: 'auto', crop: 'fill' })}
                     alt={`${agent.agencyName} logo`}
                     loading="lazy"
                     decoding="async"

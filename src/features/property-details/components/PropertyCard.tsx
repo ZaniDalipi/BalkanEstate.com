@@ -10,7 +10,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { getGallerySources, warmImage, warmGallery } from '@/config/galleryImages';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
@@ -72,7 +72,7 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string; s
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
       )}
       <img
-        src={optimizeCloudinaryUrl(avatarUrl, { width: 64, quality: 'auto', crop: 'fill' })}
+        src={optimizeImageUrl(avatarUrl, { width: 64, quality: 'auto', crop: 'fill' })}
         alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
         loading="lazy"
         decoding="async"
@@ -788,7 +788,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <div className="flex items-center gap-1.5 flex-shrink-0 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
                 {safeProperty.seller.agencyLogo ? (
                   <img
-                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
+                    src={optimizeImageUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
                     alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                     loading="lazy"
                     decoding="async"

@@ -1,22 +1,40 @@
-import { Readable } from 'stream';
+import crypto from 'crypto';
 import sharp from 'sharp';
-import cloudinary from '../config/cloudinary';
+import { isBunnyConfigured } from '../config/bunny';
+import {
+  putObject,
+  deleteObject,
+  deleteFolderRecursive,
+  moveObject,
+} from './bunnyStorageService';
+import {
+  buildBunnyUrl,
+  signBunnyUrl,
+  BunnyTransformOptions,
+} from '../utils/bunnyUrl';
 import { mediaLogger } from '../utils/logger';
 import { registerFileUpload, removeFileRecord, removeAllUserFileRecords } from './storageAccessPolicy';
 import { applyWatermark, WatermarkOptions } from './watermarkService';
 
 /**
- * Cloudinary Service - Efficient image upload and management
+ * Image storage — uploads, deletes, and the folder layout, on Bunny.net.
  *
  * Cost optimization strategies:
- * 1. Pre-compress images before upload using sharp (reduces storage and bandwidth)
- * 2. Use auto quality and auto format transformations (serves WebP when supported)
- * 3. Resize large images to reasonable dimensions
- * 4. Store only public_id in database (not full URLs)
+ * 1. Pre-compress with sharp before upload (smaller stored objects)
+ * 2. Resize oversized images to sensible dimensions
+ * 3. Let Bunny Optimizer resize and re-encode per request at the edge, so one
+ *    stored master serves every size the site asks for
+ * 4. Store the storage path in the database, and rebuild URLs from it
  * 5. Organized folder structure for easy cleanup
+ *
+ * On identifiers: an object's `publicId` is its **path within the storage
+ * zone**, extension included — `balkan-estate/users/{id}/avatar/{uuid}.jpg`.
+ * Unlike Cloudinary's opaque public IDs this is directly addressable, so a URL
+ * can always be rebuilt from a database row without calling Bunny, and the
+ * prefix-matching that drives folder deletes works on the string itself.
  */
 
-export interface CloudinaryUploadResult {
+export interface ImageUploadResult {
   url: string;
   publicId: string;
   width: number;
@@ -26,7 +44,7 @@ export interface CloudinaryUploadResult {
 }
 
 /**
- * Upload types for organized Cloudinary storage
+ * Upload types for organized storage
  *
  * Folder structure:
  * balkan-estate/
@@ -81,17 +99,14 @@ interface UploadOptions {
   /**
    * Store the master as close to what was uploaded as possible.
    *
-   * By default the upload call passes a `transformation`, which Cloudinary
-   * applies as an *incoming* transformation — it re-encodes the asset being
-   * stored, not just the copy being delivered. Combined with the JPEG
-   * re-encode below, the master is already twice-compressed before any
-   * delivery transformation touches it, and delivery then compresses a third
-   * time. That is invisible on a thumbnail and very visible on something
-   * displayed nearly full-bleed.
+   * Bunny stores exactly the bytes we send and transforms only on delivery, so
+   * the master is compressed once — by sharp, below — rather than re-encoded on
+   * the way in. This flag now controls just that one encode: raise the JPEG
+   * quality and keep full chroma resolution for images shown nearly full-bleed,
+   * where 4:2:0's halved colour resolution shows as fringing on hard edges.
    *
-   * Set this for images shown large, where the extra stored bytes buy real
-   * detail. Delivery still optimises per request, so nothing is served
-   * unoptimised — only what sits in the bucket changes.
+   * Delivery still optimises per request, so nothing is served unoptimised —
+   * only what sits in the bucket changes.
    */
   preserveQuality?: boolean;
   /** Skip the ownership FileRecord (for public uploads with no real user). */
@@ -124,7 +139,7 @@ const idSlugSegment = (id: string, slug: string): string =>
   slug ? `${id}-${slug}` : id;
 
 /**
- * Sanitize email for use as a Cloudinary folder name.
+ * Sanitize email for use as a folder name.
  * Replaces @ and dots with underscores, strips unsafe chars.
  * e.g. "john.doe@gmail.com" → "john_doe_at_gmail_com"
  */
@@ -134,6 +149,17 @@ const sanitizeEmailForFolder = (email: string): string => {
     .replace('@', '_at_')
     .replace(/[^a-z0-9_-]/g, '_');
 };
+
+/**
+ * A unique object name.
+ *
+ * Cloudinary minted these for us; Bunny overwrites whatever path it is handed,
+ * so a colliding name would silently replace someone else's photo. Random,
+ * not derived from the file: two users uploading the same stock photo into the
+ * same folder must not land on the same object.
+ */
+const generateObjectName = (extension = 'jpg'): string =>
+  `${Date.now().toString(36)}-${crypto.randomBytes(8).toString('hex')}.${extension}`;
 
 /**
  * Build organized folder path based on upload type
@@ -151,66 +177,54 @@ const buildFolderPath = (options: UploadOptions): string => {
 
   switch (type) {
     case 'property':
-      // balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos or /temp
       if (propertyId) {
         return `${ROOT}/users/${userId}/listings/${listingSegment}/photos`;
       }
       return `${ROOT}/users/${userId}/listings/temp`;
 
     case 'floorplan':
-      // balkan-estate/users/{userId}/listings/{propertyId}-{slug}/floorplans
       if (propertyId) {
         return `${ROOT}/users/${userId}/listings/${listingSegment}/floorplans`;
       }
       return `${ROOT}/users/${userId}/listings/temp/floorplans`;
 
     case 'avatar':
-      // balkan-estate/users/{userId}/avatar
       return `${ROOT}/users/${userId}/avatar`;
 
     case 'license':
-      // balkan-estate/users/{userId}/documents/license
       return `${ROOT}/users/${userId}/documents/license`;
 
     case 'credential':
-      // balkan-estate/users/{userId}/documents/credentials/{credentialId}
       if (credentialId) {
         return `${ROOT}/users/${userId}/documents/credentials/${credentialId}`;
       }
       return `${ROOT}/users/${userId}/documents/credentials`;
 
     case 'agency-logo':
-      // balkan-estate/agencies/{agencyId}/logo
       return `${ROOT}/agencies/${agencyId || userId}/logo`;
 
     case 'agency-cover':
-      // balkan-estate/agencies/{agencyId}/cover
       return `${ROOT}/agencies/${agencyId || userId}/cover`;
 
     case 'business-logo': {
-      // balkan-estate/businesses/{userEmail}/{businessListingId}/logo
       const emailFolder = userEmail ? sanitizeEmailForFolder(userEmail) : userId;
       const listingId = businessListingId || userId;
       return `${ROOT}/businesses/${emailFolder}/${listingId}/logo`;
     }
 
     case 'business-banner': {
-      // balkan-estate/businesses/{userEmail}/{businessListingId}/banner
       const emailFolder = userEmail ? sanitizeEmailForFolder(userEmail) : userId;
       const listingId = businessListingId || userId;
       return `${ROOT}/businesses/${emailFolder}/${listingId}/banner`;
     }
 
     case 'site-logo':
-      // balkan-estate/site/logo
       return `${ROOT}/site/logo`;
 
     case 'site-email-logo':
-      // balkan-estate/site/email-logo
       return `${ROOT}/site/email-logo`;
 
     case 'ad-banner':
-      // balkan-estate/site/ad-banners
       return `${ROOT}/site/ad-banners`;
 
     default:
@@ -219,22 +233,75 @@ const buildFolderPath = (options: UploadOptions): string => {
 };
 
 /**
- * Sensitive file types that require authenticated (signed URL) delivery.
- * These are private documents that should NOT be publicly accessible.
- * All other types (property, avatar, agency-logo, etc.) stay public
- * because they're rendered in <img> tags by unauthenticated visitors.
+ * Encode the master we actually store.
+ *
+ * Everything the site displays is rendered from this one object by Bunny
+ * Optimizer, so its job is to be the smallest file that still holds every
+ * detail a delivery-time resize might need — not to be a pristine archive.
+ * Three things do most of the work:
+ *
+ *  - **WebP, not JPEG.** At matched visual quality WebP lands roughly 25-30%
+ *    smaller. Bunny transcodes from it happily, and it re-encodes to whatever
+ *    a given browser advertises, so the stored format is not what visitors
+ *    receive.
+ *  - **Always resize.** The old threshold only shrank images more than 1.5x
+ *    over the cap, so a 2800x1800 photo was stored whole — twice the pixels of
+ *    the 1920-wide master anything actually renders from.
+ *  - **Drop metadata.** sharp strips EXIF unless asked not to, which trims a
+ *    little weight and, for property photos taken on a phone, removes the GPS
+ *    tag that would otherwise publish the seller's address.
+ *
+ * `.rotate()` runs first and must: it bakes in the EXIF orientation flag
+ * before that flag is stripped, and without it phone photos are stored sideways.
+ */
+export const encodeMaster = async (
+  fileBuffer: Buffer,
+  options: { maxWidth: number; maxHeight: number; preserveQuality: boolean }
+): Promise<{ buffer: Buffer; width: number; height: number }> => {
+  const { data, info } = await sharp(fileBuffer)
+    .rotate()
+    .resize(options.maxWidth, options.maxHeight, {
+      fit: 'inside',
+      withoutEnlargement: true,
+    })
+    .webp({
+      // 76 is visually clean on photographs; 86 is for images shown nearly
+      // full-bleed, where compression artifacts on flat walls and sky become
+      // visible. Neither is the delivery quality — that is set per request.
+      quality: options.preserveQuality ? 86 : 76,
+      // Costs CPU at upload once, saves bytes on every request forever.
+      effort: 5,
+      // WebP's default chroma subsampling halves colour resolution and shows
+      // as fringing along hard edges; this keeps it for the large images.
+      smartSubsample: options.preserveQuality,
+    })
+    .toBuffer({ resolveWithObject: true });
+
+  return { buffer: data, width: info.width, height: info.height };
+};
+
+/**
+ * Sensitive file types that must never be served from the public pull zone.
+ *
+ * These are private documents. They live in the same storage zone as
+ * everything else, but their URLs are only ever handed out signed, against the
+ * token-authenticated private pull zone — see `storageAccessPolicy`.
  */
 const SENSITIVE_TYPES: ReadonlySet<UploadType> = new Set(['license', 'credential']);
 
+/** True when this type's URLs require a signature. Exported for the access policy. */
+export const isSensitiveType = (type: string): boolean =>
+  SENSITIVE_TYPES.has(type as UploadType);
+
 /**
- * Upload image to Cloudinary with optimization
+ * Upload image to Bunny storage with optimization
  *
  * Organized folder structure - see buildFolderPath() for details
  */
 export const uploadImage = async (
   fileBuffer: Buffer,
   options: UploadOptions
-): Promise<CloudinaryUploadResult> => {
+): Promise<ImageUploadResult> => {
   const {
     userId,
     propertyId,
@@ -246,129 +313,62 @@ export const uploadImage = async (
   } = options;
 
   try {
-    // Step 1: Light processing using sharp (frontend already compresses)
-    // Just ensure correct format and basic optimization
-    // Images are already compressed on frontend, so minimal processing needed
-    const imageMetadata = await sharp(fileBuffer).metadata();
+    // Step 1: Re-encode to the stored master. See `encodeMaster` — this is the
+    // only compression that touches the bytes we keep; delivery sizes are
+    // rendered from it on demand.
+    const { buffer: masterBuffer, width, height } = await encodeMaster(fileBuffer, {
+      maxWidth,
+      maxHeight,
+      preserveQuality,
+    });
 
-    let processedBuffer: Buffer;
-
-    // Only resize if image is significantly larger than max dimensions
-    // This reduces processing time since frontend already compresses
-    if (imageMetadata.width && imageMetadata.height &&
-        (imageMetadata.width > maxWidth * 1.5 || imageMetadata.height > maxHeight * 1.5)) {
-      mediaLogger.info(`⚡ Image needs resizing: ${imageMetadata.width}x${imageMetadata.height} -> max ${maxWidth}x${maxHeight}`);
-      processedBuffer = await sharp(fileBuffer)
-        .resize(maxWidth, maxHeight, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .jpeg({
-          // 4:4:4 keeps full colour resolution for images shown large —
-          // JPEG's default 4:2:0 halves the chroma and shows up as coloured
-          // fringing along hard edges once the picture fills the screen.
-          quality: preserveQuality ? 95 : 90,
-          ...(preserveQuality ? { chromaSubsampling: '4:4:4' } : {}),
-          progressive: true,
-        })
-        .toBuffer();
-    } else {
-      // Image is already good size, just ensure JPEG format
-      mediaLogger.info(`✨ Image already optimized: ${imageMetadata.width}x${imageMetadata.height}, skipping resize`);
-      processedBuffer = await sharp(fileBuffer)
-        .jpeg({
-          quality: preserveQuality ? 98 : 95, // Minimal quality loss
-          ...(preserveQuality ? { chromaSubsampling: '4:4:4' } : {}),
-          progressive: true,
-        })
-        .toBuffer();
-    }
-
-    const compressedBuffer = processedBuffer;
+    mediaLogger.info(
+      `🗜️  Encoded master: ${width}x${height}, ${Math.round(masterBuffer.length / 1024)}KB ` +
+      `(from ${Math.round(fileBuffer.length / 1024)}KB)`
+    );
 
     // Step 2: Build organized folder path using centralized function
     const folder = buildFolderPath(options);
+    const storagePath = `${folder}/${generateObjectName('webp')}`;
 
-    // Step 3: Upload to Cloudinary with optimizations
-    // Sensitive documents (license, credential) use authenticated delivery (requires signed URL).
-    // Public assets (property photos, avatars, logos) use standard upload so they render
-    // in <img> tags without authentication — buyers browse listings without logging in.
-    const deliveryType = SENSITIVE_TYPES.has(type) ? 'authenticated' : 'upload';
-    const result = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder,
-          resource_type: 'image',
-          type: deliveryType,
-          // Cloudinary transformations for automatic optimization.
-          //
-          // This is an *incoming* transformation: it rewrites the asset being
-          // stored, so the master itself is compressed, not just the copies
-          // served from it. That is the right trade for most uploads, and the
-          // wrong one for an image displayed nearly full-bleed, which is then
-          // compressed again on delivery. `preserveQuality` keeps the master
-          // as uploaded; delivery still applies `q_auto`/`f_auto` per request
-          // via `optimizeCloudinaryUrl`, so nothing is served unoptimised.
-          ...(preserveQuality
-            ? {}
-            : {
-              transformation: [
-                { quality: 'auto:good' }, // Auto quality adjustment
-                { fetch_format: 'auto' }, // Serve WebP to supported browsers
-              ],
-            }),
-          // Add metadata for better organization
-          context: {
-            type,
-            user_id: userId,
-            ...(propertyId && { property_id: propertyId }),
-          },
-          // Enable eager transformations for commonly used sizes
-          // This pre-generates optimized versions
-          eager: type === 'property' ? [
-            { width: 800, height: 600, crop: 'fill', quality: 'auto:good' }, // Thumbnail
-            { width: 1200, height: 800, crop: 'fill', quality: 'auto:good' }, // Medium
-          ] : undefined,
-          eager_async: true, // Generate eagerly in background
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
+    // Step 3: Upload to Bunny storage.
+    //
+    // No eager/derived versions are generated here. Bunny Optimizer renders a
+    // size on first request and caches it at the edge, so pre-generating
+    // thumbnails would pay for renders nobody asked for.
+    await putObject(storagePath, masterBuffer, 'image/webp');
 
-      const readableStream = new Readable();
-      readableStream.push(compressedBuffer);
-      readableStream.push(null);
-      readableStream.pipe(uploadStream);
-    });
+    const isSensitive = SENSITIVE_TYPES.has(type);
+    // Sensitive documents get no stored public URL — the only URL that works
+    // for them is a short-lived signed one, minted per authorized request.
+    const url = isSensitive ? '' : buildBunnyUrl(storagePath);
 
-    mediaLogger.info(`✅ Uploaded image to Cloudinary: ${result.public_id} (${Math.round(result.bytes / 1024)}KB)`);
+    mediaLogger.info(`✅ Uploaded image to Bunny: ${storagePath}`);
 
     // Step 4: Register file in storage access policy (ownership tracking).
     // Skipped for public uploads (e.g. advertising creatives) that have no user.
     if (!options.skipRegistration) {
       await registerFileUpload({
-        publicId: result.public_id,
-        url: result.secure_url,
+        publicId: storagePath,
+        url,
         userId,
         fileType: type,
         resourceId: propertyId,
-        mimeType: `image/${result.format}`,
-        bytes: result.bytes,
+        mimeType: 'image/webp',
+        bytes: masterBuffer.length,
       });
     }
 
     return {
-      url: result.secure_url,
-      publicId: result.public_id,
-      width: result.width,
-      height: result.height,
-      format: result.format,
-      bytes: result.bytes,
+      url,
+      publicId: storagePath,
+      width,
+      height,
+      format: 'webp',
+      bytes: masterBuffer.length,
     };
   } catch (error: any) {
-    mediaLogger.error('❌ Cloudinary upload error:', error);
+    mediaLogger.error('❌ Bunny upload error:', error);
     throw new Error(`Failed to upload image: ${error.message}`);
   }
 };
@@ -448,137 +448,125 @@ const buildExternalFolder = (ctx: ExternalImageContext): string => {
   return `${ROOT}/external-listings`;
 };
 
+/** Cap on a re-hosted source image, so one huge remote file cannot exhaust memory. */
+const MAX_REMOTE_IMAGE_BYTES = 25 * 1024 * 1024;
+
 /**
  * Upload an image directly from a remote URL.
  * Used by the universal-listings ingest pipeline to re-host external images
- * onto Cloudinary so frontend image optimization (srcset / WebP) keeps working
+ * onto our own CDN so frontend image optimization (srcset / WebP) keeps working
  * and source sites can't break our listings by deleting images later.
  *
- * Cloudinary's `uploader.upload(remoteUrl)` accepts http(s) URLs natively.
+ * Cloudinary fetched the remote URL itself. Bunny's storage API only accepts
+ * bytes, so the download happens here — which also means a source that returns
+ * an error page instead of an image fails now, at ingest, rather than becoming
+ * a broken listing photo.
  */
 export const uploadFromUrl = async (
   remoteUrl: string,
   context: ExternalImageContext = {}
-): Promise<CloudinaryUploadResult> => {
-  // In local/development we NEVER upload external images to Cloudinary — that
-  // would consume storage/quota for throwaway dev data. Always reference the
-  // source URL directly instead of re-hosting it.
-  if (process.env.NODE_ENV !== 'production') {
-    mediaLogger.info(`⏭️  [dev] Skipping Cloudinary re-host, referencing source: ${remoteUrl}`);
-    return {
-      url: remoteUrl,
-      publicId: '',
-      width: 0,
-      height: 0,
-      format: '',
-      bytes: 0,
-    };
+): Promise<ImageUploadResult> => {
+  // In local/development we NEVER re-host external images — that would consume
+  // storage/bandwidth for throwaway dev data. Always reference the source URL
+  // directly instead. Same when Bunny isn't configured at all.
+  if (process.env.NODE_ENV !== 'production' || !isBunnyConfigured()) {
+    mediaLogger.info(`⏭️  [dev] Skipping re-host, referencing source: ${remoteUrl}`);
+    return { url: remoteUrl, publicId: '', width: 0, height: 0, format: '', bytes: 0 };
   }
 
-  const result = await cloudinary.uploader.upload(remoteUrl, {
-    folder: buildExternalFolder(context),
-    resource_type: 'image',
-    transformation: [
-      { quality: 'auto:good' },
-      { fetch_format: 'auto' },
-    ],
+  const response = await fetch(remoteUrl, {
+    redirect: 'follow',
+    signal: AbortSignal.timeout(30_000),
   });
-  mediaLogger.info(`✅ Re-hosted external image to Cloudinary: ${result.public_id}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch source image ${remoteUrl}: ${response.status}`);
+  }
+
+  const declaredLength = Number(response.headers.get('content-length') || 0);
+  if (declaredLength > MAX_REMOTE_IMAGE_BYTES) {
+    throw new Error(`Source image ${remoteUrl} is too large (${declaredLength} bytes)`);
+  }
+
+  const sourceBuffer = Buffer.from(await response.arrayBuffer());
+  if (sourceBuffer.length > MAX_REMOTE_IMAGE_BYTES) {
+    throw new Error(`Source image ${remoteUrl} is too large (${sourceBuffer.length} bytes)`);
+  }
+
+  // Same encoder as a user upload — it normalises the format and, more
+  // importantly, rejects a response that is not actually an image.
+  const { buffer, width, height } = await encodeMaster(sourceBuffer, {
+    maxWidth: 1920,
+    maxHeight: 1080,
+    preserveQuality: false,
+  });
+
+  const storagePath = `${buildExternalFolder(context)}/${generateObjectName('webp')}`;
+
+  await putObject(storagePath, buffer, 'image/webp');
+  mediaLogger.info(`✅ Re-hosted external image to Bunny: ${storagePath} (${Math.round(buffer.length / 1024)}KB)`);
+
   return {
-    url: result.secure_url,
-    publicId: result.public_id,
-    width: result.width,
-    height: result.height,
-    format: result.format,
-    bytes: result.bytes,
+    url: buildBunnyUrl(storagePath),
+    publicId: storagePath,
+    width,
+    height,
+    format: 'webp',
+    bytes: buffer.length,
   };
 };
 
 /**
- * Delete image from Cloudinary and remove its file record.
- * Tries authenticated first, then falls back to upload type,
- * since the file may be either delivery type.
+ * Delete an image and remove its file record.
  */
 export const deleteImage = async (publicId: string): Promise<void> => {
   try {
-    // Try the standard upload type first (most files are public)
-    const result = await cloudinary.uploader.destroy(publicId);
-    if (result.result === 'not found') {
-      // May be an authenticated resource (license/credential)
-      await cloudinary.uploader.destroy(publicId, { type: 'authenticated' });
-    }
+    await deleteObject(publicId);
     await removeFileRecord(publicId);
-    mediaLogger.info(`🗑️  Deleted image from Cloudinary: ${publicId}`);
+    mediaLogger.info(`🗑️  Deleted image from Bunny: ${publicId}`);
   } catch (error: any) {
     mediaLogger.error(`❌ Failed to delete image ${publicId}:`, error.message);
     // Don't throw - we don't want to fail the whole operation if cleanup fails
   }
 };
 
+/** How many deletes to have in flight at once. Bunny is per-object, so batch by hand. */
+const DELETE_CONCURRENCY = 10;
+
 /**
- * Delete multiple images from Cloudinary and remove their file records
+ * Delete multiple images and remove their file records.
+ *
+ * Bunny has no batch delete endpoint, so this is one request per object, run in
+ * bounded parallel rather than all at once — a listing can carry dozens of
+ * photos and firing them off simultaneously invites rate limiting.
  */
 export const deleteImages = async (publicIds: string[]): Promise<void> => {
   if (!publicIds || publicIds.length === 0) {
     return;
   }
 
-  mediaLogger.info(`🗑️  Deleting ${publicIds.length} images from Cloudinary...`);
+  mediaLogger.info(`🗑️  Deleting ${publicIds.length} images from Bunny...`);
 
-  try {
-    // Cloudinary allows batch deletion — try both delivery types
-    const uploadResult = await cloudinary.api.delete_resources(publicIds);
-    const notDeleted = Object.entries(uploadResult.deleted)
-      .filter(([, status]) => status === 'not_found')
-      .map(([id]) => id);
-    if (notDeleted.length > 0) {
-      await cloudinary.api.delete_resources(notDeleted, { type: 'authenticated' });
-    }
-    // Clean up file records for all deleted resources
-    await Promise.all(publicIds.map(id => removeFileRecord(id)));
-    mediaLogger.info(`✅ Deleted ${publicIds.length} images from Cloudinary`);
-  } catch (error: any) {
-    mediaLogger.error(`❌ Batch delete error:`, error.message);
-    // Fallback to individual deletion
-    await Promise.all(publicIds.map(id => deleteImage(id)));
+  for (let i = 0; i < publicIds.length; i += DELETE_CONCURRENCY) {
+    const chunk = publicIds.slice(i, i + DELETE_CONCURRENCY);
+    await Promise.all(chunk.map(id => deleteImage(id)));
   }
+
+  mediaLogger.info(`✅ Deleted ${publicIds.length} images from Bunny`);
 };
 
 /**
- * Delete all images in a folder (e.g., when deleting a property)
- * Checks both authenticated and public upload types for backwards compatibility.
+ * Delete all images in a folder (e.g., when deleting a property),
+ * along with the ownership record of everything removed.
  */
 export const deleteFolder = async (folderPath: string): Promise<void> => {
   try {
     mediaLogger.info(`🗑️  Deleting folder: ${folderPath}`);
 
-    // Check authenticated resources first (new policy)
-    const authResult = await cloudinary.api.resources({
-      type: 'authenticated',
-      prefix: folderPath,
-      max_results: 500,
-    }).catch(() => ({ resources: [] }));
+    const deleted = await deleteFolderRecursive(folderPath);
+    await Promise.all(deleted.map(path => removeFileRecord(path)));
 
-    // Also check legacy public uploads for backwards compatibility
-    const uploadResult = await cloudinary.api.resources({
-      type: 'upload',
-      prefix: folderPath,
-      max_results: 500,
-    }).catch(() => ({ resources: [] }));
-
-    const allPublicIds = [
-      ...authResult.resources.map((r: any) => r.public_id),
-      ...uploadResult.resources.map((r: any) => r.public_id),
-    ];
-
-    // Deduplicate
-    const uniqueIds = [...new Set(allPublicIds)];
-
-    if (uniqueIds.length > 0) {
-      await deleteImages(uniqueIds);
-    }
-
-    mediaLogger.info(`✅ Deleted folder: ${folderPath}`);
+    mediaLogger.info(`✅ Deleted folder: ${folderPath} (${deleted.length} objects)`);
   } catch (error: any) {
     mediaLogger.error(`❌ Failed to delete folder ${folderPath}:`, error.message);
   }
@@ -602,30 +590,30 @@ export const moveImagesToProperty = async (
 
   for (const publicId of publicIds) {
     try {
-      // Extract filename from old public_id
+      // Extract filename from old path
       const filename = publicId.split('/').pop();
 
       // New path with property ID using the new folder structure
       const newPublicId = `balkan-estate/users/${userId}/listings/${propertyId}/${subfolder}/${filename}`;
 
-      // Rename/move the resource (property images are public type)
-      const result = await cloudinary.uploader.rename(publicId, newPublicId, {
-        overwrite: false,
-        invalidate: true,
-      });
+      const moved = await moveObject(publicId, newPublicId);
+      if (!moved) {
+        newPublicIds.push(publicId);
+        continue;
+      }
 
       // Update the file record with new publicId
       await removeFileRecord(publicId);
       await registerFileUpload({
-        publicId: result.public_id,
-        url: result.secure_url,
+        publicId: newPublicId,
+        url: buildBunnyUrl(newPublicId),
         userId,
         fileType: isFloorplan ? 'floorplan' : 'property',
         resourceId: propertyId,
       });
 
-      newPublicIds.push(result.public_id);
-      mediaLogger.info(`📁 Moved image: ${publicId} → ${result.public_id}`);
+      newPublicIds.push(newPublicId);
+      mediaLogger.info(`📁 Moved image: ${publicId} → ${newPublicId}`);
     } catch (error: any) {
       mediaLogger.error(`⚠️  Failed to move image ${publicId}:`, error.message);
       // Keep old public_id if move fails
@@ -645,14 +633,14 @@ export interface ListingImageRef {
 
 /**
  * Relocate a listing's freshly-uploaded temp images into the listing's own
- * folder, so Cloudinary is organized as:
+ * folder, so storage is organized as:
  *   balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos|floorplans
  *
  * The frontend uploads images before the property exists (to a temp folder),
  * so this runs right after the property is created and has an id + title.
- * Only Cloudinary-hosted temp images are moved; external URLs (no publicId, or
- * not under .../listings/temp) are left untouched. Each rename is best-effort —
- * on failure the original ref is kept so a listing never loses its image.
+ * Only our own temp images are moved; external URLs (no publicId, or not under
+ * .../listings/temp) are left untouched. Each move is best-effort — on failure
+ * the original ref is kept so a listing never loses its image.
  */
 export const organizeListingMedia = async (
   images: ListingImageRef[],
@@ -661,7 +649,7 @@ export const organizeListingMedia = async (
   propertyTitle?: string
 ): Promise<ListingImageRef[]> => {
   const segment = idSlugSegment(propertyId, slugify(propertyTitle));
-  // Dedupe renames — the main image often shares a publicId with images[0].
+  // Dedupe moves — the main image often shares a publicId with images[0].
   const movedByPublicId = new Map<string, { url: string; publicId: string }>();
 
   const out: ListingImageRef[] = [];
@@ -684,21 +672,24 @@ export const organizeListingMedia = async (
     const newPublicId = `balkan-estate/users/${userId}/listings/${segment}/${subfolder}/${filename}`;
 
     try {
-      const result = await cloudinary.uploader.rename(publicId, newPublicId, {
-        overwrite: false,
-        invalidate: true,
-      });
+      const moved = await moveObject(publicId, newPublicId);
+      if (!moved) {
+        out.push(img);
+        continue;
+      }
+
+      const newUrl = buildBunnyUrl(newPublicId);
       await removeFileRecord(publicId);
       await registerFileUpload({
-        publicId: result.public_id,
-        url: result.secure_url,
+        publicId: newPublicId,
+        url: newUrl,
         userId,
         fileType: isFloorplan ? 'floorplan' : 'property',
         resourceId: propertyId,
       });
-      movedByPublicId.set(publicId, { url: result.secure_url, publicId: result.public_id });
-      out.push({ ...img, url: result.secure_url, publicId: result.public_id });
-      mediaLogger.info(`📁 Organized listing image: ${publicId} → ${result.public_id}`);
+      movedByPublicId.set(publicId, { url: newUrl, publicId: newPublicId });
+      out.push({ ...img, url: newUrl, publicId: newPublicId });
+      mediaLogger.info(`📁 Organized listing image: ${publicId} → ${newPublicId}`);
     } catch (error: any) {
       mediaLogger.error(`⚠️  Failed to organize image ${publicId}:`, error.message);
       out.push(img); // keep original on failure
@@ -708,10 +699,14 @@ export const organizeListingMedia = async (
   return out;
 };
 
+/** How long a signed document URL stays valid. */
+export const SIGNED_URL_TTL_SECONDS = 60 * 10;
+
 /**
- * Get optimized image URL with transformations.
- * Uses signed URL for sensitive file types, standard URL for public assets.
- * This doesn't require a new request to Cloudinary - just builds the URL.
+ * Get an optimized image URL with transformations.
+ * Signed against the private pull zone for sensitive file types, plain CDN URL
+ * for public assets. Either way this is pure string building — no request to
+ * Bunny is made.
  */
 export const getOptimizedUrl = (
   publicId: string,
@@ -725,15 +720,16 @@ export const getOptimizedUrl = (
 ): string => {
   const { width, height, crop = 'fill', quality = 'auto:good', sensitive = false } = options;
 
-  return cloudinary.url(publicId, {
-    ...(sensitive ? { type: 'authenticated', sign_url: true } : {}),
-    transformation: [
-      ...(width && height ? [{ width, height, crop }] : []),
-      { quality },
-      { fetch_format: 'auto' },
-    ],
-    secure: true,
-  });
+  const transform: BunnyTransformOptions = {
+    ...(width ? { width } : {}),
+    ...(height ? { height } : {}),
+    crop: crop as BunnyTransformOptions['crop'],
+    quality: quality as BunnyTransformOptions['quality'],
+  };
+
+  return sensitive
+    ? signBunnyUrl(publicId, SIGNED_URL_TTL_SECONDS, transform)
+    : buildBunnyUrl(publicId, transform);
 };
 
 /**

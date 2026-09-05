@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircleIcon, XCircleIcon, ClockIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import {
   getVillaApprovals,
   approveVilla,
@@ -126,7 +126,7 @@ const VillaApprovals: React.FC = () => {
               <div className="w-20 h-20 rounded-lg bg-neutral-100 flex-shrink-0 overflow-hidden">
                 {v.imageUrl && (
                   <img
-                    src={optimizeCloudinaryUrl(v.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
+                    src={optimizeImageUrl(v.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
                     alt={v.title || 'Villa'} loading="lazy" className="w-full h-full object-cover"
                   />
                 )}

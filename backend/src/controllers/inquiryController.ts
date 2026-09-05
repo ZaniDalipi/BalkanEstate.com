@@ -6,7 +6,7 @@ import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
-import { uploadImage } from '../services/cloudinaryService';
+import { uploadImage } from '../services/imageStorageService';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
 const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership', 'advertising'];

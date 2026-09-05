@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import AdBanner, { AD_PLACEMENTS, AD_PAGES, AdPage, AdPlacement } from '../models/AdBanner';
 import { IUser } from '../models/User';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/imageStorageService';
 import { getObjectIdParam } from '../utils/validateParams';
 import { encodeId } from '../utils/idObfuscation';
 

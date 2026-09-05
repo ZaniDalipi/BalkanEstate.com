@@ -5,7 +5,7 @@ import {
     type ElasticGalleryAction,
     type ElasticGalleryItem,
 } from '@/src/components/ui/elastic-gallery';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet } from '@/config/imageConfig';
 import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
 import { useShowcaseCities } from '../hooks/useShowcaseCities';
 import { pickShowcaseCities } from '../utils/pickShowcaseCities';
@@ -83,10 +83,10 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 // 960px, a smaller one is delivered at its own size — sharper
                 // either way — and the `object-cover` on the panel still
                 // fills the frame regardless of which it gets.
-                imageUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 960, quality: 'auto', crop: 'limit' }) || city.imageUrl,
-                imageSrcSet: cloudinarySrcSet(city.imageUrl, PANEL_WIDTHS, { quality: 'auto', crop: 'limit' }) || undefined,
+                imageUrl: optimizeImageUrl(city.imageUrl, { width: 960, quality: 'auto', crop: 'limit' }) || city.imageUrl,
+                imageSrcSet: imageSrcSet(city.imageUrl, PANEL_WIDTHS, { quality: 'auto', crop: 'limit' }) || undefined,
                 imageSizes: PANEL_SIZES,
-                placeholderUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 40, quality: 'auto:eco' }) || undefined,
+                placeholderUrl: optimizeImageUrl(city.imageUrl, { width: 40, quality: 'auto:eco' }) || undefined,
                 alt: t('home:cityGallery.imageAlt', 'Property in {{city}}, {{country}}', {
                     city: city.city,
                     country: city.country,

@@ -4,7 +4,7 @@ import Modal from '@/components/shared/Modal';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { BuildingOfficeIcon, XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { resolveConstruction } from '@/shared/property/construction';
 
 interface ComparisonModalProps {
@@ -43,7 +43,7 @@ const CompareModalImage: React.FC<{ property: Property }> = ({ property }) => {
                 </div>
             ) : (
                 <img
-                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })}
+                    src={optimizeImageUrl(property.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })}
                     alt={property.title || property.address}
                     loading="lazy"
                     decoding="async"

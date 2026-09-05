@@ -12,7 +12,8 @@ import {
   OptionalEmailPreferenceKey,
 } from '../models/User';
 import crypto from 'crypto';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/imageStorageService';
+import { isBunnyConfigured } from '../config/bunny';
 import { validatePassword, passwordContainsUserInfo } from '../utils/passwordValidator';
 import { sendVerificationEmail } from '../services/emailVerificationService';
 import { generateTokenPair } from '../services/refreshTokenService';
@@ -1717,12 +1718,8 @@ export const uploadAvatar = async (
       return;
     }
 
-    // Check if Cloudinary is configured
-    const cloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME &&
-                                   process.env.CLOUDINARY_API_KEY &&
-                                   process.env.CLOUDINARY_API_SECRET;
-
-    if (!cloudinaryConfigured) {
+    // Check if image storage is configured
+    if (!isBunnyConfigured()) {
       res.status(500).json({
         message: 'Image upload service is currently unavailable.',
       });
@@ -1833,7 +1830,7 @@ export const saveAvatarOptions = async (req: Request, res: Response): Promise<vo
     user.avatarUrl = undefined;
     if (user.avatarPublicId) {
       try {
-        const { deleteImage } = require('../services/cloudinaryService');
+        const { deleteImage } = require('../services/imageStorageService');
         await deleteImage(user.avatarPublicId);
       } catch {
         // Non-blocking: continue even if cloudinary deletion fails

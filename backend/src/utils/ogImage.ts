@@ -1,8 +1,8 @@
 /**
  * Share-card image resolution for the OG middleware.
  *
- * This mirrors the frontend's `optimizeCloudinaryUrl` (config/cloudinaryConfig.ts):
- * same security checks, same "strip transforms already baked into the URL"
+ * This mirrors the frontend's `optimizeImageUrl` (config/imageConfig.ts):
+ * same security checks, same "replace the transforms already on the URL"
  * behaviour, so a picture already cropped square doesn't get cropped a second
  * time on its way into a share card. It is a separate copy only because the
  * backend is its own package — `tsconfig.rootDir` is `backend/src`, so it
@@ -10,6 +10,7 @@
  */
 
 import { OG_BASE_URL } from '../config/ogConstants';
+import { BUNNY_PULL_ZONE_HOST } from '../config/bunny';
 
 export const DEFAULT_OG_IMAGE = `${OG_BASE_URL}/og-image.jpg`;
 
@@ -25,34 +26,39 @@ export interface OgImage {
 }
 
 /**
- * Cloudinary delivery options for a share card: any picture — including a
- * square or portrait profile photo — is scaled to fit 1200×630 and padded onto
- * white, so the subject is never cropped out.
+ * Delivery options for a share card: any picture is rendered to exactly
+ * 1200×630 so `sized` can be honestly true.
  *
- * `f_jpg` rather than the usual `f_auto`: crawlers send no useful Accept
- * header, and a WebP some of them can't render means no preview at all. Every
- * parameter is core Cloudinary — no add-on or paid-plan feature.
+ * `format=jpeg` rather than letting the CDN negotiate: crawlers send no useful
+ * Accept header, and a WebP some of them can't render means no preview at all.
+ *
+ * One deliberate behaviour change from the Cloudinary version, which used
+ * `c_pad,b_white` to scale a picture *into* the frame and fill the rest with
+ * white. Bunny Optimizer has no pad-with-background mode — `width` + `height`
+ * together fit within the box and return something smaller than 1200×630,
+ * which is exactly the mismatch that makes Facebook and LinkedIn lay the card
+ * out wrong. `aspect_ratio` crops to the frame instead, which guarantees the
+ * dimensions. The cost is that a portrait photo loses its top and bottom
+ * rather than being letterboxed; property photos, which are almost always
+ * landscape, are unaffected.
  */
-const OG_CARD_TRANSFORM = 'f_jpg,q_auto,w_1200,h_630,c_pad,b_white';
-
-const CLOUDINARY_UPLOAD_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/i;
+const OG_CARD_PARAMS: Readonly<Record<string, string>> = {
+  aspect_ratio: '1200:630',
+  format: 'jpeg',
+  quality: '82',
+  width: '1200',
+};
 
 /**
- * Strip the transformation segments a Cloudinary URL already carries, leaving
- * the versioned public id. Transform tokens always look like `key_value` with a
- * 1–3 character key (`c_fill`, `w_1200`, `ar_16:9`); folders and filenames
- * don't.
+ * Rebuild a CDN URL with only the share-card transforms.
+ *
+ * Replacing the whole query string rather than merging is what stops a picture
+ * already cropped square from being cropped a second time on its way into a
+ * card.
  */
-function stripCloudinaryTransforms(rest: string): string {
-  const parts = rest.split('/');
-
-  const versionIdx = parts.findIndex(part => /^v\d+$/.test(part));
-  if (versionIdx !== -1) return parts.slice(versionIdx).join('/');
-
-  const firstNonTransform = parts.findIndex(
-    part => !part.split(',').every(token => /^[a-z]{1,3}_/.test(token)),
-  );
-  return firstNonTransform !== -1 ? parts.slice(firstNonTransform).join('/') : rest;
+function toOgCardUrl(url: URL): string {
+  const params = new URLSearchParams(OG_CARD_PARAMS);
+  return `${url.origin}${url.pathname}?${params.toString()}`;
 }
 
 /** Normalize one image candidate, or null if it can't be used as og:image. */
@@ -71,10 +77,16 @@ function normalizeOgImage(raw?: string): OgImage | null {
   // meta tag.
   if (/[\u0000-\u001f\u007f]/.test(url)) return null;
 
-  const match = url.match(CLOUDINARY_UPLOAD_RE);
-  if (match) {
-    const [, base, rest] = match;
-    return { url: `${base}${OG_CARD_TRANSFORM}/${stripCloudinaryTransforms(rest)}`, sized: true };
+  // Images on our own CDN can be rendered to the exact card frame.
+  if (BUNNY_PULL_ZONE_HOST) {
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname.toLowerCase() === BUNNY_PULL_ZONE_HOST.toLowerCase()) {
+        return { url: toOgCardUrl(parsed), sized: true };
+      }
+    } catch {
+      // Not parseable as a URL — fall through to the untouched-URL case.
+    }
   }
 
   // Google OAuth avatars carry their own size parameter.

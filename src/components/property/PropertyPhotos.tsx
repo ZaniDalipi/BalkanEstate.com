@@ -4,7 +4,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Property, PropertyImageTag } from '../../../types';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { optimizeImageUrl } from '../../../config/imageConfig';
 
 // Category emoji map
 const categoryEmojis: Record<string, string> = {
@@ -161,7 +161,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
               }`}
             >
               <img
-                src={optimizeCloudinaryUrl(img.url, { width: 200, quality: 'auto', crop: 'fill' })}
+                src={optimizeImageUrl(img.url, { width: 200, quality: 'auto', crop: 'fill' })}
                 alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} ${img.tag || 'photo'} - ${property.city}, ${property.country}`}
                 loading={index < 9 ? 'eager' : 'lazy'}
                 decoding="async"

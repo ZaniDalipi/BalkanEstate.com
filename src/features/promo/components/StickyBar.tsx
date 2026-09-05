@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { useAdBanners, selectByPlacement } from '../hooks/useBanners';
 import { useAdPreview } from '../hooks/usePreview';
 import { trackClick, trackImpression } from '../api/bannerApi';
@@ -115,7 +115,7 @@ const StickyAdBanner: React.FC<StickyAdBannerProps> = ({ page, placement = 'stic
     }
   };
 
-  const imageSrc = banner ? optimizeCloudinaryUrl(banner.imageUrl, { width: 1000, quality: 'auto' }) : '';
+  const imageSrc = banner ? optimizeImageUrl(banner.imageUrl, { width: 1000, quality: 'auto' }) : '';
 
   // Card height — fixed so any image (square logo or wide banner) fits neatly.
   const cardHeight = isDesktop ? 96 : 68;

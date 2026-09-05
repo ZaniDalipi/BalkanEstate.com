@@ -48,7 +48,7 @@ vi.mock('../features/cities/data/staticCities', () => ({
   mergeWithStaticFallback: (cities: unknown[]) => cities,
 }));
 
-vi.mock('@/config/cloudinaryConfig', () => ({
+vi.mock('@/config/imageConfig', () => ({
   getCityImageUrl: () => 'https://img.test/city.jpg',
   getCityFallbackGradient: () => 'linear-gradient(#fff,#000)',
 }));

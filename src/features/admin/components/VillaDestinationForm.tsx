@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { uploadRequest } from '@/src/shared/api/httpClient';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { SEEDED_CITY_IMAGES, SEEDED_COUNTRIES } from '@/config/seededCityImages';
 import { validateVillaDestination } from '@/src/shared/utils/validation';
 import { findCityCentre, findCountryCentre } from '@/shared/geo';
@@ -190,7 +190,7 @@ const VillaDestinationForm: React.FC<Props> = ({ draft, saving, onChange, onCanc
     const otherCountries = SEEDED_COUNTRIES.filter(c => c !== draft.country);
 
     const preview = draft.imageUrl
-        ? optimizeCloudinaryUrl(draft.imageUrl, { width: 216, height: 300, crop: 'fill', gravity: 'auto' }) || draft.imageUrl
+        ? optimizeImageUrl(draft.imageUrl, { width: 216, height: 300, crop: 'fill', gravity: 'auto' }) || draft.imageUrl
         : null;
 
     return createPortal(

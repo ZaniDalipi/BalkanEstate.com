@@ -1,4 +1,5 @@
-import cloudinary from '../config/cloudinary';
+import { objectExists } from './bunnyStorageService';
+import { buildBunnyUrl, cityImageStoragePath } from '../utils/bunnyUrl';
 import CityMarketData from '../models/CityMarketData';
 import CityShowcase from '../models/CityShowcase';
 import { apiLogger } from '../utils/logger';
@@ -100,15 +101,17 @@ export function isUsablePhotoUrl(url: unknown): url is string {
  * gallery photos. Checking the library first means a city the good pipeline
  * has already covered is never displaced by the automatic one.
  *
- * The Cloudinary lookup can 404 — the id is derived from the name, so most
+ * The library lookup can 404 — the path is derived from the name, so most
  * databases will have cities the seed script never ran for — and that is not
  * an error, just a reason to fall back to the row's own field.
  */
 export async function resolveCityPhoto(row: ImportableCity): Promise<string | null> {
-  const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
+  const storagePath = cityImageStoragePath(row.city, row.country);
   try {
-    const resource = await cloudinary.api.resource(publicId);
-    if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;
+    if (await objectExists(storagePath)) {
+      const url = buildBunnyUrl(storagePath);
+      if (isUsablePhotoUrl(url)) return url;
+    }
   } catch {
     // Not in the library — fall through to the row's own field.
   }
@@ -116,7 +119,7 @@ export async function resolveCityPhoto(row: ImportableCity): Promise<string | nu
   return isUsablePhotoUrl(row.imageUrl) ? row.imageUrl.trim() : null;
 }
 
-/** Resolves photos a few at a time so an import cannot hammer Cloudinary. */
+/** Resolves photos a few at a time so an import cannot hammer the storage API. */
 const PHOTO_LOOKUP_CONCURRENCY = 5;
 
 /** Ceiling on one import run, so a runaway collection cannot stall a request. */

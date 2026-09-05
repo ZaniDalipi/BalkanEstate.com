@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { BuildingOfficeIcon, XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 
 const MAX_COMPARE = 5;
 
@@ -26,7 +26,7 @@ const CompareImage: React.FC<{ prop: Property; onRemove: (id: string) => void }>
                     </div>
                 ) : (
                     <img
-                        src={optimizeCloudinaryUrl(prop.imageUrl, { width: 80, quality: 'auto', crop: 'thumb' })}
+                        src={optimizeImageUrl(prop.imageUrl, { width: 80, quality: 'auto', crop: 'thumb' })}
                         alt={prop.address}
                         loading="lazy"
                         decoding="async"

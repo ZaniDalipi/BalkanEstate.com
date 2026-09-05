@@ -13,7 +13,7 @@ import {
   ShieldCheckIcon,
   ChevronRightIcon,
 } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 
 interface AgencyPropertyCardProps {
   agencyId: string;
@@ -75,7 +75,7 @@ const AgencyPropertyCard: React.FC<AgencyPropertyCardProps> = ({
           {/* Logo */}
           {agencyLogo ? (
             <img
-              src={optimizeCloudinaryUrl(agencyLogo, { width: 56, quality: 'auto', crop: 'fill' })}
+              src={optimizeImageUrl(agencyLogo, { width: 56, quality: 'auto', crop: 'fill' })}
               alt={agencyName}
               className="w-14 h-14 rounded-xl object-cover border border-gray-100 shadow-sm flex-shrink-0"
               loading="lazy"

@@ -14,7 +14,7 @@ import {
   deleteImages,
   deleteFolder,
   organizeListingMedia,
-} from '../services/cloudinaryService';
+} from '../services/imageStorageService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';

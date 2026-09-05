@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
-import { uploadImage, deleteImages } from '../services/cloudinaryService';
+import { uploadImage, deleteImages } from '../services/imageStorageService';
 import { apiLogger } from '../utils/logger';
 import { validateLicenseNumber, getLicenseFormatHint, SUPPORTED_LICENSE_COUNTRIES } from '../utils/licenseValidation';
 

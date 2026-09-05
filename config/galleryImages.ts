@@ -23,10 +23,11 @@
  * `crossOrigin`). A warmed photo is then a guaranteed cache hit on display.
  */
 
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from './cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet, getPropertyImagePlaceholder, isCdnUrl } from './imageConfig';
 
-export const isCloudinaryUrl = (url: string | undefined): url is string =>
-  typeof url === 'string' && url.includes('res.cloudinary.com');
+/** True for a photo on our own CDN, which is the only kind we can resize. */
+export const isOwnCdnUrl = (url: string | undefined): url is string =>
+  typeof url === 'string' && isCdnUrl(url);
 
 /**
  * Candidate widths shared by the inline gallery and the fullscreen viewer.
@@ -45,12 +46,12 @@ export const VIEWER_SIZES = '100vw';
 
 export interface ImageSources {
   src: string;
-  /** Empty for non-Cloudinary URLs, which are served through the backend proxy. */
+  /** Empty for URLs not on our CDN, which are served through the backend proxy. */
   srcSet: string;
   sizes: string;
   /** Tiny blurred stand-in, or '' when the URL cannot produce one. */
   placeholder: string;
-  /** `'anonymous'` for Cloudinary, otherwise undefined — must match on both paths. */
+  /** `'anonymous'` for our CDN, otherwise undefined — must match on both paths. */
   crossOrigin?: 'anonymous';
 }
 
@@ -58,7 +59,7 @@ export interface ImageSources {
  * Describes one photo once, for both rendering and warming.
  *
  * `fallbackWidth` is the width baked into `src`; it is only used by browsers
- * that ignore `srcSet` and by non-Cloudinary URLs.
+ * that ignore `srcSet` and by URLs not on our CDN.
  */
 export const getGallerySources = (
   url: string | undefined,
@@ -68,14 +69,14 @@ export const getGallerySources = (
 
   if (!url) return { src: '', srcSet: '', sizes, placeholder: '' };
 
-  if (!isCloudinaryUrl(url)) {
+  if (!isOwnCdnUrl(url)) {
     // External URLs go through the backend proxy, which serves a single size.
     return { src: `/api/image-proxy?url=${encodeURIComponent(url)}`, srcSet: '', sizes, placeholder: '' };
   }
 
   return {
-    src: optimizeCloudinaryUrl(url, { width: fallbackWidth, quality: 'auto' }),
-    srcSet: cloudinarySrcSet(url, widths),
+    src: optimizeImageUrl(url, { width: fallbackWidth, quality: 'auto' }),
+    srcSet: imageSrcSet(url, widths),
     sizes,
     placeholder: getPropertyImagePlaceholder(url),
     crossOrigin: 'anonymous',

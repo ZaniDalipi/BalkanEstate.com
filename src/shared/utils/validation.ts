@@ -3,6 +3,7 @@
 // country/city gazetteer along with it.
 import { normalizePlaceName } from '@/shared/geo/normalize';
 import {
+import { CDN_HOST } from '@/config/imageConfig';
   COMPLETION_YEAR_HORIZON,
   MIN_COMPLETION_YEAR,
   normalizeConstructionStatus,
@@ -289,12 +290,12 @@ const MAX_IMAGE_CREDIT_LENGTH = 200;
  * `imgSrc` is built from — a URL on any other host saves fine and then renders
  * as a blank frame with nothing to explain it.
  */
-export const ALLOWED_PHOTO_HOSTS = ['res.cloudinary.com', 'upload.wikimedia.org'] as const;
+export const ALLOWED_PHOTO_HOSTS: readonly string[] = [CDN_HOST, 'upload.wikimedia.org'].filter(Boolean);
 
-/** Host-exact, never a suffix match — `res.cloudinary.com.evil.example` is not it. */
+/** Host-exact, never a suffix match — `our-zone.b-cdn.net.evil.example` is not it. */
 function isAllowedPhotoHost(url: string): boolean {
   try {
-    return (ALLOWED_PHOTO_HOSTS as readonly string[]).includes(new URL(url).hostname.toLowerCase());
+    return ALLOWED_PHOTO_HOSTS.includes(new URL(url).hostname.toLowerCase());
   } catch {
     return false;
   }

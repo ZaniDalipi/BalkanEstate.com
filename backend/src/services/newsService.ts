@@ -1,5 +1,7 @@
 import axios from 'axios';
-import cloudinary from '../config/cloudinary';
+import sharp from 'sharp';
+import { putObject, deleteObject } from './bunnyStorageService';
+import { buildBunnyUrl } from '../utils/bunnyUrl';
 import News from '../models/News';
 import { cronLogger } from '../utils/logger';
 
@@ -107,23 +109,32 @@ async function extractOgImage(url: string): Promise<string | null> {
 }
 
 /**
- * Upload an image URL to Cloudinary for news covers
+ * Re-host a remote cover image for a news article.
+ *
+ * The 16:9 crop that used to be baked in on upload now happens at delivery, so
+ * the stored master keeps its full frame and the cover can be re-cropped later
+ * without re-fetching a source article that may well be gone.
  */
-async function uploadCoverToCloudinary(imageUrl: string, newsId: string): Promise<{ url: string; publicId: string } | null> {
+async function uploadNewsCover(imageUrl: string, newsId: string): Promise<{ url: string; publicId: string } | null> {
   try {
-    const result = await cloudinary.uploader.upload(imageUrl, {
-      folder: 'balkan-estate/news/covers',
-      public_id: `news-${newsId}`,
-      overwrite: true,
-      resource_type: 'image',
-      transformation: [
-        { width: 800, height: 450, crop: 'fill', gravity: 'auto' },
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
-    });
-    return { url: result.secure_url, publicId: result.public_id };
+    const response = await fetch(imageUrl, { redirect: 'follow', signal: AbortSignal.timeout(20_000) });
+    if (!response.ok) throw new Error(`source responded ${response.status}`);
+
+    const source = Buffer.from(await response.arrayBuffer());
+    const master = await sharp(source)
+      .rotate()
+      .resize(1600, 900, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 76, effort: 5 })
+      .toBuffer();
+
+    // Deterministic path: re-running the fetch for an article replaces its
+    // cover rather than accumulating one object per attempt.
+    const storagePath = `balkan-estate/news/covers/news-${newsId}.webp`;
+    await putObject(storagePath, master, 'image/webp');
+
+    return { url: buildBunnyUrl(storagePath), publicId: storagePath };
   } catch (err) {
-    logger.error(`Failed to upload news cover to Cloudinary: ${err}`);
+    logger.error(`Failed to upload news cover: ${err}`);
     return null;
   }
 }
@@ -291,7 +302,7 @@ async function saveArticle(article: {
   // Try to get cover image from the original article
   const ogImage = await extractOgImage(article.link);
   if (ogImage) {
-    const cloudResult = await uploadCoverToCloudinary(ogImage, newsDoc._id.toString());
+    const cloudResult = await uploadNewsCover(ogImage, newsDoc._id.toString());
     if (cloudResult) {
       newsDoc.coverImageUrl = cloudResult.url;
       newsDoc.coverImagePublicId = cloudResult.publicId;
@@ -357,7 +368,7 @@ export async function fetchAndStoreNews(): Promise<number> {
 
 /**
  * Delete news articles older than the specified number of months.
- * Also cleans up their Cloudinary covers.
+ * Also cleans up their stored cover images.
  */
 export async function cleanupOldNews(monthsOld = 3): Promise<number> {
   const cutoffDate = new Date();
@@ -369,16 +380,16 @@ export async function cleanupOldNews(monthsOld = 3): Promise<number> {
 
   if (oldArticles.length === 0) return 0;
 
-  // Delete Cloudinary images
+  // Delete the stored cover images
   const publicIds = oldArticles
     .map(a => a.coverImagePublicId)
     .filter(Boolean) as string[];
 
-  if (publicIds.length > 0) {
+  for (const publicId of publicIds) {
     try {
-      await cloudinary.api.delete_resources(publicIds);
+      await deleteObject(publicId);
     } catch (err) {
-      logger.error(`Failed to delete old news covers from Cloudinary: ${err}`);
+      logger.error(`Failed to delete old news cover ${publicId}: ${err}`);
     }
   }
 

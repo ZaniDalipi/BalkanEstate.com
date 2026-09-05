@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { ALLOWED_PHOTO_HOSTS } from '@/src/shared/utils/validation';
 import {
     uploadCityPhoto,
@@ -39,7 +39,7 @@ const SOURCE_LABELS: Record<CityPhotoSource, string> = {
 };
 
 const thumb = (url: string, w: number, h: number) =>
-    optimizeCloudinaryUrl(url, { width: w, height: h, crop: 'fill', gravity: 'auto' }) || url;
+    optimizeImageUrl(url, { width: w, height: h, crop: 'fill', gravity: 'auto' }) || url;
 
 /**
  * One city's photo: what visitors see today, where it came from, and the other

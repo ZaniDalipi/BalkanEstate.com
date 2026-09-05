@@ -4,7 +4,7 @@ import type { IListingSource } from '../models/ListingSource';
 import type { IProperty, IPropertyImage } from '../models/Property';
 import type { RawListing } from './listingAdapters';
 import { geocodeAddress } from './geocodingService';
-import { uploadFromUrl } from './cloudinaryService';
+import { uploadFromUrl } from './imageStorageService';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
 import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 import User from '../models/User';

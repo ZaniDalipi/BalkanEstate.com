@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import SiteSettings from '../models/SiteSettings';
 import { apiLogger } from '../utils/logger';
 import { clearSiteSettingsCache } from '../utils/emailTemplateRenderer';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/imageStorageService';
 
 // Get site settings (singleton)
 export const getSiteSettings = async (_req: Request, res: Response): Promise<void> => {

@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { LogoIcon, SearchIcon, HomeIcon } from '@/constants';
-import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
+import { ONBOARDING_IMAGES } from '@/config/imageConfig';
 import { getAgencies } from '@/services/apiService';
 
 /* ---------------- CONSTANTS ---------------- */

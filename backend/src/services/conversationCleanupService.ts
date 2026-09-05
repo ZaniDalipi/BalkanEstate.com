@@ -1,11 +1,11 @@
+import { deleteObject } from './bunnyStorageService';
 import Conversation from '../models/Conversation';
 import Message from '../models/Message';
-import cloudinary from '../config/cloudinary';
 import { apiLogger } from '../utils/logger';
 
 /**
  * Delete expired conversations (older than 30 days from last message)
- * Also deletes all associated messages and Cloudinary images
+ * Also deletes all associated messages and their stored images
  */
 export const cleanupExpiredConversations = async (): Promise<{
   deletedConversations: number;
@@ -56,7 +56,7 @@ export const cleanupExpiredConversations = async (): Promise<{
 
         const imageDeletePromises = messagesWithImages.map(async (message) => {
           try {
-            await cloudinary.uploader.destroy(message.imagePublicId!);
+            await deleteObject(message.imagePublicId!);
             apiLogger.info(`    ✅ Deleted: ${message.imagePublicId}`);
             return true;
           } catch (error) {

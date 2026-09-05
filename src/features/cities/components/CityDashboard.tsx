@@ -8,7 +8,7 @@ import PriceHistoryChart from './PriceHistoryChart';
 import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
 import { formatPrice } from '@/utils/currency';
 import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
-import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { getCityFallbackGradient } from '@/config/imageConfig';
 import { cityImageSources } from '../utils/cityImage';
 import { useAppContext } from '@/context/AppContext';
 import { searchLocation } from '@/services/osmService';

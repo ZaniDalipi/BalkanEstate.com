@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { ClockIcon, BuildingOfficeIcon, MapPinIcon, ChartBarIcon, StarIconSolid, FireIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 
 // Tier configuration
 export const TIER_CONFIG: Record<string, { color: string; bg: string; label: string; icon: string }> = {
@@ -208,7 +208,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="flex gap-4">
           <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-neutral-100">
             {property.imageUrl ? (
-              <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" decoding="async" width={96} height={96} />
+              <img src={optimizeImageUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" decoding="async" width={96} height={96} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <BuildingOfficeIcon className="w-10 h-10 text-neutral-300" />

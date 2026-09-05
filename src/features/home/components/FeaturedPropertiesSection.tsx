@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet, getPropertyImagePlaceholder } from '@/config/imageConfig';
 
 interface FeaturedPropertiesSectionProps {
   properties: Property[];
@@ -82,7 +82,7 @@ const PropertyCard: React.FC<{
         <>
           {/* LQIP blur-up placeholder */}
           <img
-            src={getPropertyImagePlaceholder(property.imageUrl) || optimizeCloudinaryUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
+            src={getPropertyImagePlaceholder(property.imageUrl) || optimizeImageUrl(property.imageUrl, { width: 40, quality: 'auto:eco', crop: 'fill' })}
             alt=""
             aria-hidden="true"
             loading="lazy"
@@ -97,8 +97,8 @@ const PropertyCard: React.FC<{
             className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
             <img
-              src={optimizeCloudinaryUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
-              srcSet={cloudinarySrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              src={optimizeImageUrl(currentImageUrl, { width: 400, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              srcSet={imageSrcSet(currentImageUrl, [300, 400, 600], { quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
               sizes="(max-width: 640px) calc(50vw - 20px), (max-width: 1024px) calc(50vw - 32px), 33vw"
               alt={property.title || property.address || 'Property image'}
               width={400}

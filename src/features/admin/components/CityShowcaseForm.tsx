@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon } from '@/constants';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { validateCityShowcase } from '@/src/shared/utils/validation';
 import type { CityDirectoryEntry } from '../api/adminApi';
 import { buildCityPickerOptions } from './cityShowcaseOptions';
@@ -224,7 +224,7 @@ const CityShowcaseForm: React.FC<Props> = ({
                         <div className="h-28 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-100">
                             {draft.imageUrl && (
                                 <img
-                                    src={optimizeCloudinaryUrl(draft.imageUrl, { width: 192, height: 224, crop: 'fill', gravity: 'auto' }) || draft.imageUrl}
+                                    src={optimizeImageUrl(draft.imageUrl, { width: 192, height: 224, crop: 'fill', gravity: 'auto' }) || draft.imageUrl}
                                     alt=""
                                     className="h-full w-full object-cover"
                                 />

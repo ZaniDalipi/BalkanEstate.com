@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { getCityImageUrl, getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { getCityImageUrl, getCityFallbackGradient } from '@/config/imageConfig';
 import { decorativeMotionEnabled } from '../../src/utils/perfMode';
 
 // Types for random bubble positioning

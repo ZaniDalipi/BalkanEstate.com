@@ -6,7 +6,7 @@ import { getCurrencySymbol } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { generatePropertySlug } from '@/utils/slug';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 
@@ -192,7 +192,7 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {/* Seller Info */}
                 <div className="flex items-center gap-2 mt-3 pt-2 border-t border-gray-200">
                     {property.seller?.avatarUrl ? (
-                        <img src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" width={24} height={24} className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-200" />
+                        <img src={optimizeImageUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" width={24} height={24} className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-200" />
                     ) : (
                         <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
                             {property.seller?.name?.charAt(0) || '?'}

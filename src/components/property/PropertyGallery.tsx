@@ -10,7 +10,7 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { optimizeImageUrl, getPropertyImagePlaceholder } from '../../../config/imageConfig';
 import { getGallerySources, warmGallery, shouldCoverFrame } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
@@ -124,8 +124,8 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
       <img
         // `limit` never crops and never upscales, so the card decides the
         // framing rather than the CDN guessing at it.
-        src={optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })}
-        srcSet={`${optimizeCloudinaryUrl(url, { width: 195, quality: 'auto', crop: 'limit' })} 195w, ${optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })} 390w`}
+        src={optimizeImageUrl(url, { width: 390, quality: 'auto', crop: 'limit' })}
+        srcSet={`${optimizeImageUrl(url, { width: 195, quality: 'auto', crop: 'limit' })} 195w, ${optimizeImageUrl(url, { width: 390, quality: 'auto', crop: 'limit' })} 390w`}
         sizes="(max-width: 640px) 155px, 195px"
         alt=""
         className={`relative w-full h-full ${cover ? 'object-cover' : 'object-contain'}`}

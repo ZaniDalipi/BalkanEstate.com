@@ -1,6 +1,6 @@
 import React from 'react';
 import { User } from 'lucide-react';
-import { optimizeCloudinaryUrl } from '../../../../config/cloudinaryConfig';
+import { optimizeImageUrl } from '../../../../config/imageConfig';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -56,7 +56,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   if (src && !imageError) {
     // Request 2x the display size for retina screens
-    const optimizedSrc = optimizeCloudinaryUrl(src, { width: pixelWidths[size] * 2, quality: 'auto', crop: 'fill' });
+    const optimizedSrc = optimizeImageUrl(src, { width: pixelWidths[size] * 2, quality: 'auto', crop: 'fill' });
     const displaySize = pixelWidths[size];
     return (
       <img

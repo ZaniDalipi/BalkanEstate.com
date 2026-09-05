@@ -10,37 +10,39 @@ import { protect } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
 import { createMockUser } from './setup';
 
-// Mock Cloudinary to avoid actual uploads during tests
-jest.mock('../config/cloudinary', () => ({
+// The delivery URL is built from the configured pull zone at import time.
+process.env.BUNNY_PULL_ZONE_HOST = 'test-zone.b-cdn.net';
+process.env.BUNNY_STORAGE_ZONE = 'test-zone';
+process.env.BUNNY_STORAGE_PASSWORD = 'test-password';
+
+// Mock the storage client so no bytes leave the test run.
+jest.mock('../services/bunnyStorageService', () => ({
   __esModule: true,
-  default: {
-    uploader: {
-      upload_stream: jest.fn((options, callback) => {
-        // Simulate successful upload
-        const mockResult = {
-          secure_url: 'https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg',
-          public_id: 'balkan-estate/properties/user-test123/listing-test456/img1',
-          width: 1920,
-          height: 1080,
-          format: 'jpg',
-          bytes: 245678,
-        };
-        callback(null, mockResult);
-        return {
-          on: jest.fn(),
-        };
-      }),
-    },
-  },
+  putObject: jest.fn().mockResolvedValue(undefined),
+  getObject: jest.fn().mockResolvedValue(Buffer.from('mock-image-data')),
+  deleteObject: jest.fn().mockResolvedValue(true),
+  objectExists: jest.fn().mockResolvedValue(true),
+  listObjects: jest.fn().mockResolvedValue([]),
+  deleteFolderRecursive: jest.fn().mockResolvedValue([]),
+  moveObject: jest.fn().mockResolvedValue(true),
 }));
 
-// Mock Sharp for image processing
+// Mock Sharp for image processing. `toBuffer` resolves with an object because
+// the upload path asks for `{ resolveWithObject: true }` — it needs the encoded
+// dimensions back, which a bare Buffer cannot carry.
 jest.mock('sharp', () => {
   return jest.fn(() => ({
     metadata: jest.fn().mockResolvedValue({ width: 1920, height: 1080, format: 'jpeg' }),
+    rotate: jest.fn().mockReturnThis(),
     resize: jest.fn().mockReturnThis(),
     jpeg: jest.fn().mockReturnThis(),
-    toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-image-data')),
+    webp: jest.fn().mockReturnThis(),
+    png: jest.fn().mockReturnThis(),
+    composite: jest.fn().mockReturnThis(),
+    toBuffer: jest.fn().mockResolvedValue({
+      data: Buffer.from('mock-image-data'),
+      info: { width: 1920, height: 1080, size: 15 },
+    }),
   }));
 });
 
@@ -97,8 +99,8 @@ describe('Property Image Upload', () => {
         expect(img).toHaveProperty('url');
         expect(img).toHaveProperty('publicId');
         expect(img).toHaveProperty('tag');
-        expect(img.url).toContain('cloudinary.com');
-        expect(img.publicId).toContain('balkan-estate/properties');
+        expect(img.url).toContain('test-zone.b-cdn.net');
+        expect(img.publicId).toContain('balkan-estate/users/');
       });
     });
 
@@ -170,10 +172,10 @@ describe('Property Image Upload', () => {
         yearBuilt: 2021,
         parking: 2,
         description: 'Beautiful property with great views',
-        imageUrl: 'https://res.cloudinary.com/test/image/test.jpg',
+        imageUrl: 'https://test-zone.b-cdn.net/balkan-estate/test.webp',
         images: [
           {
-            url: 'https://res.cloudinary.com/test/image/test1.jpg',
+            url: 'https://test-zone.b-cdn.net/balkan-estate/test1.webp',
             publicId: 'balkan-estate/properties/user-123/listing-456/img1',
             tag: 'exterior',
           },
@@ -204,7 +206,7 @@ describe('Property Image Upload', () => {
       expect(savedProperty!.createdByName).toBe(testUser.name);
       expect(savedProperty!.createdByEmail).toBe(testUser.email);
       expect(savedProperty!.images.length).toBe(1);
-      expect(savedProperty!.images[0].url).toContain('cloudinary.com');
+      expect(savedProperty!.images[0].url).toContain('test-zone.b-cdn.net');
       expect(savedProperty!.images[0].publicId).toBeTruthy();
     });
 
@@ -320,8 +322,8 @@ describe('Property Image Upload', () => {
 
       // Verify all images have Cloudinary URLs and public IDs
       createResponse.body.property.images.forEach((img: any) => {
-        expect(img.url).toContain('cloudinary.com');
-        expect(img.publicId).toContain('balkan-estate/properties');
+        expect(img.url).toContain('test-zone.b-cdn.net');
+        expect(img.publicId).toContain('balkan-estate/users/');
       });
 
       // Verify user identification

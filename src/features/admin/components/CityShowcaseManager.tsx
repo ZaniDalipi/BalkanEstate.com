@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
 import { uploadCityShowcaseImage, type AdminCityShowcase, type CityDirectoryEntry } from '../api/adminApi';
 import CityShowcaseForm, { emptyCityDraft, type CityShowcaseDraft } from './CityShowcaseForm';
@@ -150,7 +150,7 @@ const CityShowcaseManager: React.FC = () => {
                                     is 48×64 and the list can run long, so
                                     serving masters here would pull megabytes. */}
                                 <img
-                                    src={optimizeCloudinaryUrl(row.imageUrl, { width: 96, height: 128, crop: 'fill', gravity: 'auto' }) || row.imageUrl}
+                                    src={optimizeImageUrl(row.imageUrl, { width: 96, height: 128, crop: 'fill', gravity: 'auto' }) || row.imageUrl}
                                     alt=""
                                     loading="lazy"
                                     className="h-full w-full object-cover"

@@ -6,7 +6,7 @@ import {
   batchGetSignedUrls,
   isFileOwner,
 } from '../services/storageAccessPolicy';
-import { deleteImage } from '../services/cloudinaryService';
+import { deleteImage } from '../services/imageStorageService';
 import { mediaLogger } from '../utils/logger';
 
 // Matches valid Cloudinary public IDs: alphanumeric, hyphens, underscores, slashes, dots

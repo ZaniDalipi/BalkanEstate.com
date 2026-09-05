@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { getTopAgencies } from '@/src/features/agencies/api/agencyApi';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import { useAppContext } from '@/context/AppContext';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import type { Agency } from '@/src/shared/types';
@@ -108,7 +108,7 @@ const AgencyPodiumCard: React.FC<{
           style={{
             height: isChamp ? '80px' : '64px',
             background: agency.coverImage
-              ? `url(${optimizeCloudinaryUrl(agency.coverImage, { width: 560, quality: 'auto', crop: 'fill' })}) center/cover`
+              ? `url(${optimizeImageUrl(agency.coverImage, { width: 560, quality: 'auto', crop: 'fill' })}) center/cover`
               : 'linear-gradient(135deg, #0f172a, #1e293b)',
             position: 'relative',
           }}
@@ -164,7 +164,7 @@ const AgencyPodiumCard: React.FC<{
         >
           {agency.logo ? (
             <img
-              src={optimizeCloudinaryUrl(agency.logo, { width: 128, quality: 'auto', crop: 'fill' })}
+              src={optimizeImageUrl(agency.logo, { width: 128, quality: 'auto', crop: 'fill' })}
               alt={agencyName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               loading="eager"

@@ -14,11 +14,18 @@
  *
  * Adding a host means allowing every visitor's browser to fetch images from
  * it. Uploading through the app is the route that needs no entry at all: those
- * land on Cloudinary, which is already listed.
+ * land on our own pull zone, which is already listed.
  */
+import { BUNNY_PULL_ZONE_HOST, BUNNY_PRIVATE_PULL_ZONE_HOST } from './bunny';
 
-/** Where our own uploads and transformations live. */
-export const CLOUDINARY_IMAGE_HOST = 'res.cloudinary.com';
+/**
+ * Where our own uploads and transformations live: the Bunny pull zone.
+ *
+ * Read from the environment rather than hardcoded, because it differs per
+ * deployment — and because a stale literal here would block every image on the
+ * site in exactly the silent way this module exists to prevent.
+ */
+export const CDN_IMAGE_HOST = BUNNY_PULL_ZONE_HOST;
 
 /**
  * Hosts that may appear in a photo URL an admin sets by hand.
@@ -29,14 +36,17 @@ export const CLOUDINARY_IMAGE_HOST = 'res.cloudinary.com';
  * pastes one.
  */
 export const ALLOWED_PHOTO_HOSTS: readonly string[] = [
-  CLOUDINARY_IMAGE_HOST,
+  CDN_IMAGE_HOST,
+  // Signed document URLs live on a second pull zone; listed only when one is
+  // configured, so an empty variable cannot widen the policy to every host.
+  BUNNY_PRIVATE_PULL_ZONE_HOST,
   'upload.wikimedia.org',
-];
+].filter(Boolean);
 
 /**
  * True when `url` is an `https` URL on an allowed host.
  *
- * Host-exact, never a suffix match: `res.cloudinary.com.attacker.example`
+ * Host-exact, never a suffix match: `our-zone.b-cdn.net.attacker.example`
  * ends with an allowed host but is not one.
  */
 export function isAllowedPhotoUrl(url: string): boolean {

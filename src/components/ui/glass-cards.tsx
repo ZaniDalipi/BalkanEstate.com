@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet } from '@/config/imageConfig';
 import { resolveConstruction } from '@/shared/property/construction';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -225,8 +225,8 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                         borderRadius: isMobile ? '20px 20px 0 0' : '28px 0 0 28px'
                     }}>
                         <img
-                            src={optimizeCloudinaryUrl(property.imageUrl, { width: 800, quality: 'auto', format: 'auto' })}
-                            srcSet={cloudinarySrcSet(property.imageUrl, [480, 800, 1200])}
+                            src={optimizeImageUrl(property.imageUrl, { width: 800, quality: 'auto', format: 'auto' })}
+                            srcSet={imageSrcSet(property.imageUrl, [480, 800, 1200])}
                             sizes="(max-width: 768px) 100vw, 45vw"
                             alt={property.title || property.address}
                             style={{
@@ -545,8 +545,8 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
             {/* Image */}
             <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
                 <img
-                    src={optimizeCloudinaryUrl(property.imageUrl, { width: 480, quality: 'auto', format: 'auto' })}
-                    srcSet={cloudinarySrcSet(property.imageUrl, [320, 480, 640])}
+                    src={optimizeImageUrl(property.imageUrl, { width: 480, quality: 'auto', format: 'auto' })}
+                    srcSet={imageSrcSet(property.imageUrl, [320, 480, 640])}
                     sizes="(max-width: 480px) 100vw, 50vw"
                     alt={property.title || property.address}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}

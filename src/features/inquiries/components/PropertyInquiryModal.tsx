@@ -5,7 +5,7 @@ import { sendPropertyInquiry } from '@/services/apiService';
 import { Property } from '@/types';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 
 interface PropertyInquiryModalProps {
   property: Property;
@@ -176,7 +176,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
               <div className="flex gap-3 mb-6 p-3 bg-neutral-50 rounded-lg">
                 {property.imageUrl ? (
                 <img
-                  src={optimizeCloudinaryUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
+                  src={optimizeImageUrl(property.imageUrl, { width: 160, quality: 'auto', crop: 'fill' })}
                   alt={property.title}
                   loading="lazy"
                   decoding="async"

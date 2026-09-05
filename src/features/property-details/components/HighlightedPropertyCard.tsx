@@ -5,7 +5,7 @@ import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon
 import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
@@ -60,7 +60,7 @@ const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string }>
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
       )}
       <img
-        src={optimizeCloudinaryUrl(avatarUrl, { width: 56, quality: 'auto', crop: 'fill' })}
+        src={optimizeImageUrl(avatarUrl, { width: 56, quality: 'auto', crop: 'fill' })}
         alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
         loading="lazy"
         decoding="async"

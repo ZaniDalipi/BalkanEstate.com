@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getCityImageUrl, optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { getCityImageUrl, optimizeImageUrl } from '@/config/imageConfig';
 import type { VillaDestination } from '../data/villaDestinations';
 
 /**
@@ -125,11 +125,11 @@ export function useDestinationImages(
                 // pick the crop around the subject instead of blindly taking
                 // the middle, and asking for the card's exact size stops a
                 // large original being downloaded in full and squeezed by the
-                // browser. `optimizeCloudinaryUrl` strips any transform
+                // browser. `optimizeImageUrl` strips any transform
                 // already baked into the stored URL first, and returns
                 // non-Cloudinary URLs untouched.
                 url: dest.imageUrl
-                    ? optimizeCloudinaryUrl(dest.imageUrl, {
+                    ? optimizeImageUrl(dest.imageUrl, {
                         width: imageWidth,
                         height: imageHeight,
                         crop: 'fill',

@@ -1,4 +1,4 @@
-import cloudinary from '../config/cloudinary';
+import { buildBunnyUrl, signBunnyUrl } from '../utils/bunnyUrl';
 import FileRecord, { IFileRecord } from '../models/FileRecord';
 import { mediaLogger } from '../utils/logger';
 
@@ -9,7 +9,7 @@ import { mediaLogger } from '../utils/logger';
  * Users can only access files they uploaded. Admins can access any file.
  *
  * Flow:
- * 1. File is uploaded via cloudinaryService with type: 'authenticated'
+ * 1. File is uploaded via imageStorageService with a sensitive type
  * 2. A FileRecord is created linking publicId -> userId (owner)
  * 3. When a client needs to display/download a file, it calls GET /api/files/signed-url
  * 4. This service checks ownership, then generates a short-lived signed URL
@@ -110,40 +110,32 @@ export const checkFileAccess = async (
 };
 
 /**
- * Sensitive file types that use Cloudinary authenticated delivery.
- * Must be kept in sync with SENSITIVE_TYPES in cloudinaryService.ts.
+ * Sensitive file types that are served only from the token-authenticated
+ * private pull zone.
+ * Must be kept in sync with SENSITIVE_TYPES in imageStorageService.ts.
  */
 const SENSITIVE_FILE_TYPES = new Set(['license', 'credential']);
 
 /**
- * Generate a URL for a Cloudinary resource.
+ * Generate a delivery URL for a stored object.
  *
- * For sensitive files (license, credential): generates a signed authenticated URL.
- * For public files (property, avatar, etc.): generates a standard optimized URL.
+ * For sensitive files (license, credential): a URL signed with the private pull
+ * zone's token key, which the CDN itself rejects once `expires` passes.
+ * For public files (property, avatar, etc.): a standard optimized CDN URL.
+ *
+ * The expiry is enforced by Bunny rather than advertised to the client, so
+ * unlike the Cloudinary version this needs no companion `_exp` parameter.
  */
 export const generateSignedUrl = (
   publicId: string,
-  resourceType: 'image' | 'video' | 'raw' = 'image',
+  _resourceType: 'image' | 'video' | 'raw' = 'image',
   fileType?: string
 ): string => {
   const isSensitive = fileType ? SENSITIVE_FILE_TYPES.has(fileType) : false;
 
-  const url = cloudinary.url(publicId, {
-    ...(isSensitive ? { type: 'authenticated', sign_url: true } : {}),
-    secure: true,
-    resource_type: resourceType,
-    transformation: [
-      { quality: 'auto:good' },
-      { fetch_format: 'auto' },
-    ],
-  });
-
-  if (isSensitive) {
-    const expiresAt = Math.floor(Date.now() / 1000) + SIGNED_URL_EXPIRY_SECONDS;
-    return `${url}${url.includes('?') ? '&' : '?'}_exp=${expiresAt}`;
-  }
-
-  return url;
+  return isSensitive
+    ? signBunnyUrl(publicId, SIGNED_URL_EXPIRY_SECONDS, { quality: 'auto:good' })
+    : buildBunnyUrl(publicId, { quality: 'auto:good' });
 };
 
 /**

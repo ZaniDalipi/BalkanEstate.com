@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { escapeRegex } from '../utils/escapeRegex';
 import BusinessListing, { BUSINESS_CATEGORIES, LISTING_TYPES } from '../models/BusinessListing';
 import { IUser } from '../models/User';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/imageStorageService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 import { encodeId, resolveId } from '../utils/idObfuscation';
 

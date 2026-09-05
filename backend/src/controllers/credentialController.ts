@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Agent, { ICredential } from '../models/Agent';
 import { IUser } from '../models/User';
-import { uploadImage, deleteImages } from '../services/cloudinaryService';
+import { uploadImage, deleteImages } from '../services/imageStorageService';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
 

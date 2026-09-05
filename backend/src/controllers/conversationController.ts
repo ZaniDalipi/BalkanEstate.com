@@ -6,7 +6,10 @@ import Property from '../models/Property';
 import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import { SECURITY_WARNING } from '../utils/messageFilter';
-import cloudinary from '../config/cloudinary';
+import sharp from 'sharp';
+import { randomBytes } from 'crypto';
+import { putObject, deleteObject } from '../services/bunnyStorageService';
+import { buildBunnyUrl } from '../utils/bunnyUrl';
 import { sendNewMessageNotification } from '../services/emailService';
 import { createNotificationWithPush } from '../services/engagementService';
 import { getSocketInstance } from '../utils/socketInstance';
@@ -333,7 +336,7 @@ export const sendMessage = async (
       conversationId: conversation._id,
       senderId: String((req.user as IUser)._id),
       imageUrl,
-      imagePublicId, // Store Cloudinary public ID for cleanup
+      imagePublicId, // Store storage path for cleanup
     };
 
     // E2E encrypted message
@@ -396,7 +399,7 @@ export const sendMessage = async (
     if (io) {
       const rawConversationId = String((conversation as any)._id);
 
-      // SECURITY: Only send safe message fields — exclude imagePublicId (internal Cloudinary ID) and __v
+      // SECURITY: Only send safe message fields — exclude imagePublicId (internal storage path) and __v
       const safeMessage = {
         _id: message._id,
         conversationId: message.conversationId,
@@ -490,12 +493,7 @@ export const uploadMessageImage = async (
       return;
     }
 
-    // Upload to Cloudinary with organized folder structure
-    // Store images by both user IDs for tracking who is in the conversation
-    const b64 = Buffer.from(req.file.buffer).toString('base64');
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-
-    // Create folder path that includes both users
+    // Store images by both user IDs for tracking who is in the conversation.
     // Format: balkan-estate/messages/user-{userId1}-user-{userId2}/conv-{conversationId}
     const buyerId = String(conversation.buyerId);
     const sellerId = String(conversation.sellerId);
@@ -505,23 +503,22 @@ export const uploadMessageImage = async (
     const [user1, user2] = [buyerId, sellerId].sort();
     const folderPath = `balkan-estate/messages/user-${user1}-user-${user2}/conv-${conversationId}`;
 
-    const result = await cloudinary.uploader.upload(dataURI, {
-      folder: folderPath,
-      resource_type: 'image',
-      // Add context for tracking
-      context: {
-        conversation_id: conversationId,
-        buyer_id: buyerId,
-        seller_id: sellerId,
-        uploaded_by: String((req.user as IUser)._id),
-      },
-    });
+    // Same compression as every other upload — a chat attachment is a photo of
+    // a property as often as not, and is served through the same CDN.
+    const master = await sharp(req.file.buffer)
+      .rotate()
+      .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 76, effort: 5 })
+      .toBuffer();
 
-    apiLogger.info(`📸 Message image uploaded: ${result.public_id}`);
+    const storagePath = `${folderPath}/${Date.now().toString(36)}-${randomBytes(8).toString('hex')}.webp`;
+    await putObject(storagePath, master, 'image/webp');
+
+    apiLogger.info(`📸 Message image uploaded: ${storagePath}`);
 
     res.json({
-      imageUrl: result.secure_url,
-      publicId: result.public_id, // Return public ID for message storage
+      imageUrl: buildBunnyUrl(storagePath),
+      publicId: storagePath, // Return storage path for message storage
     });
   } catch (error: any) {
     apiLogger.error('Upload message image error:', error);
@@ -678,20 +675,20 @@ export const deleteConversation = async (
       return;
     }
 
-    // Get all messages with images to delete from Cloudinary
+    // Get all messages with images to delete from storage
     const messagesWithImages = await Message.find({
       conversationId: conversation._id,
       imagePublicId: { $exists: true, $ne: null },
     }).select('imagePublicId');
 
-    // Delete images from Cloudinary
+    // Delete images from storage
     if (messagesWithImages.length > 0) {
-      apiLogger.info(`🗑️  Deleting ${messagesWithImages.length} images from Cloudinary...`);
+      apiLogger.info(`🗑️  Deleting ${messagesWithImages.length} images from storage...`);
 
       const deletePromises = messagesWithImages.map(async (message) => {
         try {
-          await cloudinary.uploader.destroy(message.imagePublicId!);
-          // Deleted image from Cloudinary
+          await deleteObject(message.imagePublicId!);
+          // Deleted image from storage
         } catch (error) {
           apiLogger.error(`❌ Failed to delete image ${message.imagePublicId}:`, error);
           // Continue even if some images fail to delete

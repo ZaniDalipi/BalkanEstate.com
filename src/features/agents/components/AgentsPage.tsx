@@ -16,7 +16,7 @@ import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
-import { HERO_IMAGES } from '@/config/cloudinaryConfig';
+import { HERO_IMAGES } from '@/config/imageConfig';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 

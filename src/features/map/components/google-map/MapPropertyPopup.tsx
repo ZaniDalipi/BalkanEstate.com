@@ -7,7 +7,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/imageConfig';
 
 // Promotion tier colors
 const PROMOTION_TIER_COLORS: Record<string, string> = {
@@ -116,8 +116,8 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
             className={`absolute inset-0 ${slideDirection === 'right' ? 'animate-gallery-right' : 'animate-gallery-left'}`}
           >
             <img
-              src={optimizeCloudinaryUrl(imageUrl, { width: 200, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
-              srcSet={`${optimizeCloudinaryUrl(imageUrl, { width: 160, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 160w, ${optimizeCloudinaryUrl(imageUrl, { width: 200, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 200w, ${optimizeCloudinaryUrl(imageUrl, { width: 280, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 280w`}
+              src={optimizeImageUrl(imageUrl, { width: 200, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
+              srcSet={`${optimizeImageUrl(imageUrl, { width: 160, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 160w, ${optimizeImageUrl(imageUrl, { width: 200, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 200w, ${optimizeImageUrl(imageUrl, { width: 280, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 280w`}
               sizes="(max-width: 640px) calc(70vw - 20px), 200px"
               alt={property.title || property.address || 'Property image'}
               loading="lazy"

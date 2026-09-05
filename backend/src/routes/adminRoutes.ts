@@ -611,11 +611,11 @@ router.delete('/news/:id', logAdminAction('DELETE_NEWS'), async (req: Request, r
       res.status(404).json({ message: 'News article not found' });
       return;
     }
-    // Cleanup Cloudinary cover
+    // Cleanup the stored cover image
     if (article.coverImagePublicId) {
       try {
-        const cloudinary = (await import('../config/cloudinary')).default;
-        await cloudinary.uploader.destroy(article.coverImagePublicId);
+        const { deleteObject } = await import('../services/bunnyStorageService');
+        await deleteObject(article.coverImagePublicId);
       } catch { /* ignore cleanup errors */ }
     }
     await article.deleteOne();
@@ -787,11 +787,11 @@ router.delete('/articles/:id', logAdminAction('DELETE_ARTICLE'), async (req: Req
       return;
     }
 
-    // Cleanup Cloudinary cover image if it exists
+    // Cleanup the stored cover image if it exists
     if (article.coverImagePublicId) {
       try {
-        const cloudinary = (await import('../config/cloudinary')).default;
-        await cloudinary.uploader.destroy(article.coverImagePublicId);
+        const { deleteObject } = await import('../services/bunnyStorageService');
+        await deleteObject(article.coverImagePublicId);
       } catch { /* ignore cleanup errors */ }
     }
 
@@ -839,7 +839,7 @@ router.post('/articles/upload-image', logAdminAction('UPLOAD_ARTICLE_IMAGE'), ar
       return;
     }
 
-    const { uploadImage } = await import('../services/cloudinaryService');
+    const { uploadImage } = await import('../services/imageStorageService');
     const result = await uploadImage(req.file.buffer, {
       userId: (req as any).user._id.toString(),
       type: 'listing' as any,
@@ -1048,7 +1048,7 @@ router.post(
     try {
       if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
 
-      const { uploadImage } = await import('../services/cloudinaryService');
+      const { uploadImage } = await import('../services/imageStorageService');
       // Portrait: the corridor card is 18:25 and a card fills a large part of
       // the frame as it exits, so a small upload would visibly soften there.
       //
@@ -1255,7 +1255,7 @@ router.post(
     try {
       if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
 
-      const { uploadImage } = await import('../services/cloudinaryService');
+      const { uploadImage } = await import('../services/imageStorageService');
       // Portrait master: the gallery panel is a tall column — roughly 4:5 when
       // expanded on a desktop and far narrower when collapsed — and it is
       // always `object-cover`, so a landscape master would lose its sides. The
@@ -1347,7 +1347,7 @@ router.post(
     try {
       if (!req.file) { res.status(400).json({ message: 'No image file provided' }); return; }
 
-      const { uploadImage } = await import('../services/cloudinaryService');
+      const { uploadImage } = await import('../services/imageStorageService');
       // Landscape master: these appear as a wide hero (1200x500) and as card
       // headers (800x400), always `object-cover`, so a portrait upload would
       // lose its top and bottom.

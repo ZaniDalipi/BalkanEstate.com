@@ -6,7 +6,7 @@ import {
   MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon,
   CalendarIcon, HomeIcon, FireIcon, StarIcon, BuildingOfficeIcon,
 } from '@/constants';
-import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { getCityFallbackGradient } from '@/config/imageConfig';
 import { cityImageSources } from '../utils/cityImage';
 import SaveCityButton from './SaveCityButton';
 

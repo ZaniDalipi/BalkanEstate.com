@@ -34,7 +34,9 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 import mongoose from 'mongoose';
 import axios from 'axios';
-import cloudinary from '../config/cloudinary';
+import sharp from 'sharp';
+import { putObject } from '../services/bunnyStorageService';
+import { buildBunnyUrl } from '../utils/bunnyUrl';
 import VillaDestination from '../models/VillaDestination';
 
 /** Unsplash's demo tier allows 50 requests an hour; be a good citizen. */
@@ -121,19 +123,25 @@ async function registerDownload(photo: UnsplashPhoto): Promise<void> {
   }
 }
 
-async function uploadToCloudinary(photo: UnsplashPhoto, slug: string) {
-  // `raw` is the untouched original; Cloudinary does the resize once, rather
-  // than us fetching an already-compressed size and compressing it again.
+async function uploadDestinationImage(photo: UnsplashPhoto, slug: string) {
+  // `raw` is the untouched original; we ask Unsplash for it at the width we
+  // intend to store, rather than fetching an already-compressed size and
+  // compressing it again.
   const source = `${photo.urls.raw}&w=${STORE_WIDTH}&fm=jpg&q=90`;
-  const result = await cloudinary.uploader.upload(source, {
-    public_id: `villa-destination-${slug}`,
-    overwrite: true,
-    resource_type: 'image',
-    transformation: [
-      { width: STORE_WIDTH, height: STORE_HEIGHT, crop: 'fill', gravity: 'auto' },
-    ],
-  });
-  return { url: result.secure_url as string, publicId: result.public_id as string };
+  const response = await HTTP.get<ArrayBuffer>(source, { responseType: 'arraybuffer' });
+
+  // `cover` is the old `crop: 'fill'`: fill the card's frame exactly, cropping
+  // the overflow rather than letterboxing it.
+  const master = await sharp(Buffer.from(response.data))
+    .rotate()
+    .resize(STORE_WIDTH, STORE_HEIGHT, { fit: 'cover', position: 'attention' })
+    .webp({ quality: 80, effort: 5 })
+    .toBuffer();
+
+  const storagePath = `balkan-estate/villa-destinations/villa-destination-${slug}.webp`;
+  await putObject(storagePath, master, 'image/webp');
+
+  return { url: buildBunnyUrl(storagePath), publicId: storagePath };
 }
 
 function slugify(s: string): string {
@@ -181,7 +189,7 @@ export async function seedDestinationImages(opts: {
       }
 
       await registerDownload(photo);
-      const { url, publicId } = await uploadToCloudinary(photo, slugify(`${dest.country}-${dest.name}`));
+      const { url, publicId } = await uploadDestinationImage(photo, slugify(`${dest.country}-${dest.name}`));
 
       dest.imageUrl = url;
       dest.imagePublicId = publicId;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, getPropertyImagePlaceholder } from '@/config/imageConfig';
 import { BuildingOfficeIcon } from '@/constants';
 
 interface PropertyImageProps {
@@ -36,9 +36,9 @@ export const getPropertyImageSources = (
 
   const placeholder =
     getPropertyImagePlaceholder(src) ||
-    optimizeCloudinaryUrl(src, { width: 40, quality: 'auto:eco', crop });
+    optimizeImageUrl(src, { width: 40, quality: 'auto:eco', crop });
 
-  const mainSrc = optimizeCloudinaryUrl(src, {
+  const mainSrc = optimizeImageUrl(src, {
     width: displayWidth,
     height: displayHeight,
     quality: 'auto',
@@ -48,7 +48,7 @@ export const getPropertyImageSources = (
 
   const srcSet = widths
     .map((w) => {
-      const url = optimizeCloudinaryUrl(src, {
+      const url = optimizeImageUrl(src, {
         width: w,
         height: Math.round(w * 0.75),
         quality: 'auto',

@@ -14,6 +14,15 @@ export default defineConfig(({ mode }) => {
     const wsTarget = env.VITE_WS_URL || 'ws://localhost:5001';
     const isProduction = mode === 'production';
 
+    // Runtime-cache pattern for our own image CDN (Bunny pull zone). Escaped so
+    // a host with dots cannot match more than the host it names. Falls back to
+    // a pattern that matches nothing when VITE_CDN_HOST is unset, rather than
+    // one that would match every host.
+    const cdnHost = (env.VITE_CDN_HOST || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+    const cdnImagePattern = cdnHost
+      ? new RegExp(`^https://${cdnHost.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*`, 'i')
+      : /^$/;
+
     // Only log in development
     if (mode === 'development') {
       console.log(`🚀 Starting Vite in ${mode} mode`);
@@ -225,10 +234,13 @@ export default defineConfig(({ mode }) => {
                 }
               },
               {
-                urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+                // Our own image CDN. Built from the configured host rather than
+                // a literal, so a deployment pointed at a different pull zone
+                // does not quietly lose its runtime image cache.
+                urlPattern: cdnImagePattern,
                 handler: 'StaleWhileRevalidate',
                 options: {
-                  cacheName: 'cloudinary-images-cache',
+                  cacheName: 'cdn-images-cache',
                   expiration: {
                     maxEntries: 100,
                     maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
