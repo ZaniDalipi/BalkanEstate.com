@@ -27,7 +27,7 @@ type WikiImageState = 'idle' | 'loading' | 'missing';
  * One city's market card.
  *
  * Owns only its own ephemeral display state — which price series is shown and
- * how far the image fallback chain (curated photo → convention Cloudinary id →
+ * how far the image fallback chain (curated photo → convention CDN path →
  * Wikipedia → gradient) has got. Both belong to the card, not to the page, so
  * two tabs can render the same city without sharing a keyed map of per-card
  * flags.
@@ -65,7 +65,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
     wikiState.current = 'idle';
   }, [imageSources]);
 
-  const cloudinaryFailed = sourceIndex >= imageSources.length;
+  const hostedFailed = sourceIndex >= imageSources.length;
 
   /**
    * This source missed — try the next one, and once they are exhausted try
@@ -131,8 +131,8 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
       ? { label: t('cityCard.investmentGood', 'Good'), color: 'text-blue-600', barColor: 'from-blue-400 to-blue-500' }
       : { label: t('cityCard.investmentFair', 'Fair'), color: 'text-neutral-500', barColor: 'from-neutral-400 to-neutral-500' };
 
-  const showWiki = cloudinaryFailed && typeof wikiImage === 'string';
-  const showGradient = cloudinaryFailed && !showWiki;
+  const showWiki = hostedFailed && typeof wikiImage === 'string';
+  const showGradient = hostedFailed && !showWiki;
   const displayPricePerSqm = showListingPrice && city.listingAvgPricePerSqm
     ? city.listingAvgPricePerSqm
     : city.avgPricePerSqm;
@@ -144,7 +144,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
     >
       {/* City Image Header */}
       <div className="relative h-36 overflow-hidden">
-        {!cloudinaryFailed && (
+        {!hostedFailed && (
           <img
             src={imageSources[sourceIndex]}
             alt={city.city}

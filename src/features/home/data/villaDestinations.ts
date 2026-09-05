@@ -2,7 +2,7 @@
  * Balkan villa destinations showcased on the home page.
  *
  * `imageCity`/`imageCountry` name the city whose photo represents the
- * destination. Those photos already live in Cloudinary under the
+ * destination. Those photos already live in the photo library under the
  * `city-{country}-{city}` public id, seeded by
  * `backend/src/scripts/seedCityImages.ts` — so nothing here needs uploading.
  *
@@ -24,9 +24,9 @@ export interface VillaDestination {
     query: string;
     /** Country label shown under the name. */
     country: string;
-    /** Seeded city supplying the Cloudinary photo. */
+    /** Seeded city supplying the hosted photo. */
     imageCity: string;
-    /** Country of `imageCity` — part of the Cloudinary public id. */
+    /** Country of `imageCity` — part of the storage path. */
     imageCountry: string;
     /**
      * Admin-uploaded photo. When set it wins over the seeded city image —

@@ -46,13 +46,21 @@ export const normalizeName = (name: string): string => {
 // Alias for backward compatibility
 export const normalizeCityName = normalizeName;
 
-/** Quality presets. Must match QUALITY_PRESETS in backend/src/utils/bunnyUrl.ts. */
+/**
+ * Quality presets. Must match QUALITY_PRESETS in backend/src/utils/bunnyUrl.ts.
+ *
+ * Every rung sits at or below the stored master's own quality, because the
+ * master is already a lossy WebP: asking the edge for more than it holds
+ * cannot recover detail, it only ships bytes reproducing the first encode's
+ * artifacts. Since the CDN bills per GB delivered, these numbers are the
+ * largest single lever on the hosting bill.
+ */
 const QUALITY_PRESETS: Record<string, number> = {
-  auto: 82,
-  'auto:low': 55,
-  'auto:eco': 65,
-  'auto:good': 78,
-  'auto:best': 92,
+  auto: 75,
+  'auto:low': 45,
+  'auto:eco': 58,
+  'auto:good': 70,
+  'auto:best': 82,
 };
 
 export type ImageQuality = 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best';
@@ -88,9 +96,15 @@ const TRANSFORM_PARAMS = [
   'background',
 ] as const;
 
+/**
+ * Clamp to a sane range. A value below the minimum is dropped rather than
+ * raised to it — `width: 0` means "no width", and clamping it up to 1 would
+ * render a one-pixel image. Mirrors `clamp` in backend/src/utils/bunnyUrl.ts.
+ */
 const clamp = (value: number | undefined, min: number, max: number): number | undefined => {
   if (value === undefined || !Number.isFinite(value)) return undefined;
-  return Math.max(min, Math.min(Math.round(value), max));
+  if (value < min) return undefined;
+  return Math.min(Math.round(value), max);
 };
 
 const resolveQuality = (quality: ImageQuality | number | undefined): number | undefined => {
@@ -105,7 +119,8 @@ const resolveQuality = (quality: ImageQuality | number | undefined): number | un
  * Shared by every builder below so a URL that has been through this once — as
  * stored URLs have — comes back out with exactly the transforms just asked for,
  * rather than the union of both. That is the query-string equivalent of the old
- * `stripCloudinaryTransforms`, and it exists for the same reason: an
+ * transform-stripping the Cloudinary version had to do, and it exists for
+ * the same reason: an
  * already-cropped URL being cropped again silently produced the wrong picture.
  */
 const applyTransforms = (params: URLSearchParams, options: ImageTransformOptions): void => {

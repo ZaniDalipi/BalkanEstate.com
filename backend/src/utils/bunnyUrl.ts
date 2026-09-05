@@ -22,14 +22,39 @@ import {
  * builds in the browser.
  */
 
-/** Quality presets, mapping Cloudinary's `q_auto:*` ladder onto real numbers. */
-const QUALITY_PRESETS: Record<string, number> = {
-  auto: 82,
-  'auto:low': 55,
-  'auto:eco': 65,
-  'auto:good': 78,
-  'auto:best': 92,
+/**
+ * Quality presets, mapping Cloudinary's `q_auto:*` ladder onto real numbers.
+ *
+ * Every rung sits at or below the stored master's own quality (84, see
+ * `encodeMaster`). That ceiling is the point: the master is already a lossy
+ * WebP, so asking the edge for a *higher* quality than it holds cannot recover
+ * detail — it only spends bytes faithfully reproducing the first encode's
+ * artifacts, on every request, forever.
+ *
+ * Egress is the dominant cost on a per-GB CDN, so these numbers are the single
+ * biggest lever on the bill. They are chosen low enough to matter and high
+ * enough that photographs stay clean; `auto:best` exists for the few places
+ * that genuinely need the top of the range.
+ */
+export const QUALITY_PRESETS: Record<string, number> = {
+  auto: 75,
+  'auto:low': 45,
+  'auto:eco': 58,
+  'auto:good': 70,
+  'auto:best': 82,
 };
+
+/**
+ * Quality of the WebP master we store, for an ordinary image and for one shown
+ * nearly full-bleed.
+ *
+ * Lives here, next to the delivery ladder, because the two are one decision:
+ * the master must stay at or above every rung above, or the edge spends bytes
+ * re-encoding upward from a lossy source. `bunny-url.test.ts` pins that
+ * relationship so it cannot drift apart.
+ */
+export const MASTER_QUALITY = 84;
+export const MASTER_QUALITY_LARGE = 90;
 
 export type BunnyQuality = keyof typeof QUALITY_PRESETS | number;
 
@@ -47,10 +72,17 @@ export interface BunnyTransformOptions {
   background?: string;
 }
 
-/** Clamp to a sane range so a bad caller cannot ask the edge for a 40000px render. */
+/**
+ * Clamp to a sane range so a bad caller cannot ask the edge for a 40000px render.
+ *
+ * A value below the minimum is dropped rather than raised to it: a caller that
+ * passes `width: 0` means "no width", and clamping that up to 1 would render a
+ * one-pixel image — a broken picture that still looks like a deliberate size.
+ */
 const clamp = (value: number | undefined, min: number, max: number): number | undefined => {
   if (value === undefined || !Number.isFinite(value)) return undefined;
-  return Math.max(min, Math.min(Math.round(value), max));
+  if (value < min) return undefined;
+  return Math.min(Math.round(value), max);
 };
 
 const resolveQuality = (quality: BunnyQuality | undefined): number | undefined => {

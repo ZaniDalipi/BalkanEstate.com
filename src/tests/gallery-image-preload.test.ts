@@ -20,7 +20,9 @@ import {
   VIEWER_SIZES,
 } from '@/config/galleryImages';
 
-const CLOUDINARY = 'https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/photo.jpg';
+// Must match VITE_CDN_HOST in vitest.config.ts: only photos on our own pull
+// zone get a srcSet, a placeholder, or CORS — everything else is proxied.
+const HOSTED = 'https://test-zone.b-cdn.net/balkan-estate/listing/photo.webp';
 
 /** Captures what each `new Image()` preloader was actually asked to fetch. */
 interface Requested {
@@ -103,17 +105,17 @@ const drain = async () => {
 let uid = 0;
 const uniqueUrls = (count: number): string[] => {
   uid += 1;
-  return Array.from({ length: count }, (_, i) => CLOUDINARY.replace('photo', `t${uid}-${i}`));
+  return Array.from({ length: count }, (_, i) => HOSTED.replace('photo', `t${uid}-${i}`));
 };
 
 describe('getGallerySources', () => {
   it('offers every candidate width so the browser can match the device DPR', () => {
-    const { srcSet } = getGallerySources(CLOUDINARY);
-    GALLERY_WIDTHS.forEach((w) => expect(srcSet).toContain(`w_${w}`));
+    const { srcSet } = getGallerySources(HOSTED);
+    GALLERY_WIDTHS.forEach((w) => expect(srcSet).toContain(`width=${w}`));
   });
 
-  it('requests CORS for Cloudinary, matching the rendered <img>', () => {
-    expect(getGallerySources(CLOUDINARY).crossOrigin).toBe('anonymous');
+  it('requests CORS for our own CDN, matching the rendered <img>', () => {
+    expect(getGallerySources(HOSTED).crossOrigin).toBe('anonymous');
   });
 
   it('routes external URLs through the proxy with no srcSet', () => {
@@ -124,7 +126,7 @@ describe('getGallerySources', () => {
   });
 
   it('produces a blurred placeholder for the first paint', () => {
-    expect(getGallerySources(CLOUDINARY).placeholder).toContain('e_blur');
+    expect(getGallerySources(HOSTED).placeholder).toContain('blur=');
   });
 
   it('tolerates a missing URL', () => {

@@ -70,8 +70,8 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 id: city.id,
                 title: city.city,
                 subtitle: city.country,
-                // Through the Cloudinary helpers, never the raw stored URL
-                // (Claude.md). A non-Cloudinary URL falls through them
+                // Through the image helpers, never the raw stored URL
+                // (Claude.md). A URL not on our CDN falls through them
                 // unchanged, so a manually entered photo still renders.
                 //
                 // `crop: 'limit'` rather than the helper's own `fill` default:

@@ -29,7 +29,7 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/src/features/promo/components/Slot', () => ({ default: () => null }));
 
-const photo = (n: number) => `https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/p${n}.jpg`;
+const photo = (n: number) => `https://test-zone.b-cdn.net/balkan-estate/listing/p${n}.webp`;
 
 const property = {
   id: 'p1',
@@ -103,7 +103,7 @@ describe('PropertyGallery slide track', () => {
   it('offers the full candidate set and CORS mode the warm-up replays', () => {
     renderGallery(0);
     const active = slideImages().find((img) => img.dataset.galleryUrl === photo(0))!;
-    GALLERY_WIDTHS.forEach((w) => expect(active.getAttribute('srcset')).toContain(`w_${w}`));
+    GALLERY_WIDTHS.forEach((w) => expect(active.getAttribute('srcset')).toContain(`width=${w}`));
     // Must match the preloader, or the warmed bytes cannot satisfy this request.
     expect(active.getAttribute('crossorigin')).toBe('anonymous');
   });
@@ -125,7 +125,7 @@ describe('PropertyGallery slide track', () => {
   it('fetches the first screenful of thumbnails up front rather than on scroll', () => {
     renderGallery(0);
     const thumbs = Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-      img.getAttribute('src')?.includes('w_390')
+      img.getAttribute('src')?.includes('width=390')
     );
     expect(thumbs).toHaveLength(11);
     // The strip scrolls horizontally, so a fully lazy strip pops in under the

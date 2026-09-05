@@ -855,7 +855,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }
 
         try {
-            // Step 1: Upload images to Cloudinary before creating the property
+            // Step 1: Upload images to storage before creating the property
             let imageUrls: PropertyImage[] = [];
 
             // Get all image files that need to be uploaded (new images with file objects)
@@ -879,14 +879,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     const totalSize = imageFiles.reduce((sum, file) => sum + file.size, 0);
                     // Log removed
 
-                    // Upload to Cloudinary (without propertyId first, we'll get temp URLs)
+                    // Upload to storage (without propertyId first, we'll get temp URLs)
                     const uploadedImages = await api.uploadPropertyImages(imageFiles);
 
                     setUploadProgress(100);
                     setIsUploading(false);
                     // Log removed
 
-                    // Map the uploaded Cloudinary URLs back to our image array with proper tags
+                    // Map the uploaded CDN URLs back to our image array with proper tags
                     let uploadIndex = 0;
                     imageUrls = images.map((img, index) => {
                         const tagInfo = listingData.image_tags.find(t => t.index === index);
@@ -894,10 +894,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
                         if (img.file !== null) {
                             // This is a new image that was just uploaded
-                            const cloudinaryData = uploadedImages[uploadIndex++];
+                            const uploaded = uploadedImages[uploadIndex++];
                             return {
-                                url: cloudinaryData.url,
-                                publicId: cloudinaryData.publicId,
+                                url: uploaded.url,
+                                publicId: uploaded.publicId,
                                 tag,
                             };
                         } else {
@@ -929,7 +929,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 // Warning removed
             }
 
-            // Step 2: Upload floorplan to Cloudinary if a new file was selected
+            // Step 2: Upload floorplan to storage if a new file was selected
             let floorplanUrl: string | undefined = undefined;
             if (floorplanImage.file) {
                 try {
@@ -947,7 +947,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     return;
                 }
             } else if (floorplanImage.previewUrl && !floorplanImage.previewUrl.startsWith('blob:')) {
-                // Existing Cloudinary URL from editing
+                // Existing CDN URL from editing
                 floorplanUrl = floorplanImage.previewUrl;
             }
 

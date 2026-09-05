@@ -1173,7 +1173,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      // Apply server URL (Cloudinary optimized) to replace the local preview
+      // Apply server URL (CDN optimized) to replace the local preview
       setAgencyData(prev => ({
         ...prev,
         logo: data.logo || data.agency?.logo || prev.logo,
@@ -1244,7 +1244,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      // Apply server URL (Cloudinary optimized) to replace the local preview
+      // Apply server URL (CDN optimized) to replace the local preview
       setAgencyData(prev => ({
         ...prev,
         coverImage: data.coverImage || data.agency?.coverImage || prev.coverImage,

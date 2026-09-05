@@ -11,6 +11,8 @@ import {
   buildBunnyUrl,
   signBunnyUrl,
   BunnyTransformOptions,
+  MASTER_QUALITY,
+  MASTER_QUALITY_LARGE,
 } from '../utils/bunnyUrl';
 import { mediaLogger } from '../utils/logger';
 import { registerFileUpload, removeFileRecord, removeAllUserFileRecords } from './storageAccessPolicy';
@@ -265,10 +267,19 @@ export const encodeMaster = async (
       withoutEnlargement: true,
     })
     .webp({
-      // 76 is visually clean on photographs; 86 is for images shown nearly
-      // full-bleed, where compression artifacts on flat walls and sky become
-      // visible. Neither is the delivery quality — that is set per request.
-      quality: options.preserveQuality ? 86 : 76,
+      // Deliberately a little above the delivery ladder's top rung
+      // (`auto:best`, 82 — see QUALITY_PRESETS in utils/bunnyUrl.ts). Bunny
+      // re-encodes this master for every size it serves, and asking for a
+      // higher quality than the source has cannot recover detail: it just
+      // spends bytes preserving the artifacts of the first encode. Keeping the
+      // master at or above every delivery rung means each derivative is a
+      // clean step down rather than an expensive step sideways.
+      //
+      // Storage is the cheap half of the bill (~$0.01/GB/month against
+      // per-GB egress on every view), so the extra stored bytes here buy
+      // smaller delivered ones — the right trade for a photo served many
+      // times and stored once.
+      quality: options.preserveQuality ? MASTER_QUALITY_LARGE : MASTER_QUALITY,
       // Costs CPU at upload once, saves bytes on every request forever.
       effort: 5,
       // WebP's default chroma subsampling halves colour resolution and shows

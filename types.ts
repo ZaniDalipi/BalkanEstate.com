@@ -351,7 +351,7 @@ export interface Property {
     hasVirtualTour360?: boolean; // Flag indicating if 360 virtual tour is available
     videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, or generated)
     generatedVideoUrl?: string; // URL for auto-generated property video
-    generatedVideoPublicId?: string; // Cloudinary public_id for generated video
+    generatedVideoPublicId?: string; // Storage path of the generated video
     generatedVideoFormat?: 'vertical' | 'horizontal' | 'square';
     generatedVideoDuration?: number; // Duration in seconds
     hasGeneratedVideo?: boolean;

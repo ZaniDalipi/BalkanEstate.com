@@ -2,10 +2,10 @@
  * City photos — resolution chain and the admin screen that edits it.
  *
  * The point of both is that an admin's edit is visible. Before this, the UI
- * derived every city picture from a Cloudinary id built out of the city's
+ * derived every city picture from a storage path built out of the city's
  * name, so the stored `imageUrl` was written by the backend and read by
  * nobody: editing a photo changed a database row and nothing else. These
- * pin the two halves — the stored URL is preferred, and the convention id is
+ * pin the two halves — the stored URL is preferred, and the convention path is
  * still there behind it for the cities nobody has curated.
  */
 
@@ -52,6 +52,9 @@ vi.mock('react-i18next', () => {
 import CityPhotosManager from '../features/admin/components/CityPhotosManager';
 import type { AdminCityPhoto } from '../features/admin/api/adminApi';
 
+// Must match VITE_CDN_HOST in vitest.config.ts.
+const CDN = 'https://test-zone.b-cdn.net';
+
 // ---------------------------------------------------------------------------
 // Resolution
 // ---------------------------------------------------------------------------
@@ -76,18 +79,22 @@ describe('cityImageSources', () => {
     expect(sources[0]).toContain('city-montenegro-budva');
   });
 
-  it('resizes a curated Cloudinary photo to the box it fills', () => {
+  it('resizes a curated photo to the box it fills', () => {
     const [first] = cityImageSources(
       {
         city: 'Split',
         country: 'Croatia',
-        imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/city-split.jpg',
+        imageUrl: `${CDN}/balkan-estate/cities/city-split.webp`,
       },
       { width: 800, height: 400 },
     );
 
-    expect(first).toContain('w_800');
-    expect(first).toContain('h_400');
+    // `crop: 'fill'` becomes an aspect ratio plus a width — see
+    // config/imageConfig.ts, where the box is expressed that way because Bunny
+    // letterboxes rather than crops when handed both dimensions.
+    const params = new URL(first).searchParams;
+    expect(params.get('width')).toBe('800');
+    expect(params.get('aspect_ratio')).toBe('800:400');
   });
 
   it('passes a photo on a host we cannot transform through untouched', () => {
@@ -102,23 +109,23 @@ describe('cityImageSources', () => {
   it('refuses a stored value that has no business in an img src', () => {
     for (const bad of ['javascript:alert(1)', 'data:image/png;base64,AAA', '   ', 'https://a.example/x\njavascript:1']) {
       const sources = cityImageSources({ city: 'Skopje', country: 'North Macedonia', imageUrl: bad }, { width: 10, height: 10 });
-      expect(sources.every(url => url.startsWith('https://res.cloudinary.com'))).toBe(true);
+      expect(sources.every(url => url.startsWith(CDN))).toBe(true);
     }
   });
 });
 
 describe('validateCityPhoto', () => {
-  const CLOUDINARY = 'https://res.cloudinary.com/demo/image/upload/v1/x.jpg';
+  const CURATED = `${CDN}/balkan-estate/cities/x.webp`;
 
   it('accepts a plausible override', () => {
     expect(validateCityPhoto({
-      city: 'Tirana', country: 'Albania', imageUrl: CLOUDINARY, imageCredit: 'Jane Doe',
+      city: 'Tirana', country: 'Albania', imageUrl: CURATED, imageCredit: 'Jane Doe',
     })).toEqual({ isValid: true });
   });
 
   it('requires https, not just a URL', () => {
     expect(validateCityPhoto({
-      city: 'Tirana', country: 'Albania', imageUrl: CLOUDINARY.replace('https', 'http'),
+      city: 'Tirana', country: 'Albania', imageUrl: CURATED.replace('https', 'http'),
     }).isValid).toBe(false);
   });
 
@@ -127,12 +134,12 @@ describe('validateCityPhoto', () => {
     // why the check is here and not only in the browser's console.
     const result = validateCityPhoto({ city: 'Tirana', country: 'Albania', imageUrl: 'https://images.example/x.jpg' });
     expect(result.isValid).toBe(false);
-    expect(result.error).toMatch(/res\.cloudinary\.com/);
+    expect(result.error).toMatch(/b-cdn\.net/);
   });
 
   it('matches the host exactly, not as a suffix', () => {
     expect(validateCityPhoto({
-      city: 'Tirana', country: 'Albania', imageUrl: 'https://res.cloudinary.com.evil.example/x.jpg',
+      city: 'Tirana', country: 'Albania', imageUrl: 'https://test-zone.b-cdn.net.evil.example/x.jpg',
     }).isValid).toBe(false);
   });
 
@@ -145,11 +152,11 @@ describe('validateCityPhoto', () => {
   it('rejects an over-long URL or credit rather than letting the server truncate it', () => {
     expect(validateCityPhoto({
       city: 'Tirana', country: 'Albania',
-      imageUrl: `https://res.cloudinary.com/demo/image/upload/${'a'.repeat(2100)}`,
+      imageUrl: `${CDN}/balkan-estate/${'a'.repeat(2100)}`,
     }).isValid).toBe(false);
 
     expect(validateCityPhoto({
-      city: 'Tirana', country: 'Albania', imageUrl: CLOUDINARY, imageCredit: 'c'.repeat(201),
+      city: 'Tirana', country: 'Albania', imageUrl: CURATED, imageCredit: 'c'.repeat(201),
     }).isValid).toBe(false);
   });
 
@@ -168,12 +175,12 @@ const photoRow = (overrides: Partial<AdminCityPhoto> = {}): AdminCityPhoto => ({
     countryCode: 'AL',
     featured: true,
     imageUpdatedAt: null,
-    active: { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/auto.jpg', source: 'auto' },
+    active: { imageUrl: `${CDN}/balkan-estate/cities/auto.webp`, source: 'auto' },
     candidates: {
         manual: null,
-        cityGallery: { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/gallery.jpg', source: 'city-gallery' },
+        cityGallery: { imageUrl: `${CDN}/balkan-estate/cities/gallery.webp`, source: 'city-gallery' },
         villaDestination: null,
-        auto: { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/auto.jpg', source: 'auto' },
+        auto: { imageUrl: `${CDN}/balkan-estate/cities/auto.webp`, source: 'auto' },
     },
     ...overrides,
 });
@@ -214,7 +221,7 @@ describe('CityPhotosManager', () => {
                 body: expect.objectContaining({
                     city: 'Tirana',
                     country: 'Albania',
-                    imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/gallery.jpg',
+                    imageUrl: `${CDN}/balkan-estate/cities/gallery.webp`,
                 }),
             }));
         });
@@ -241,7 +248,7 @@ describe('CityPhotosManager', () => {
         expect(screen.queryByRole('button', { name: /Clear override/i })).not.toBeInTheDocument();
         unmount();
 
-        const manual = { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/manual.jpg', source: 'manual' as const };
+        const manual = { imageUrl: `${CDN}/balkan-estate/cities/manual.webp`, source: 'manual' as const };
         apiRequest.mockResolvedValue({
             cities: [photoRow({ active: manual, candidates: { ...photoRow().candidates, manual } })],
         });
@@ -251,7 +258,7 @@ describe('CityPhotosManager', () => {
     });
 
     it('filters to the cities nobody has reviewed', async () => {
-        const manual = { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/manual.jpg', source: 'manual' as const };
+        const manual = { imageUrl: `${CDN}/balkan-estate/cities/manual.webp`, source: 'manual' as const };
         apiRequest.mockResolvedValue({
             cities: [
                 photoRow(),

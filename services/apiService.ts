@@ -858,7 +858,7 @@ export const getMyListings = async (role?: 'agent' | 'private_seller'): Promise<
 };
 
 /**
- * Upload property images to Cloudinary
+ * Upload property images to storage
  * @param images - Array of image files to upload
  * @param propertyId - Optional property ID for organized folder structure
  * @returns Array of uploaded images with URLs and public IDs
@@ -2408,7 +2408,7 @@ export interface CityMarketData {
    * Curated photo, resolved server-side across the three collections that can
    * hold one for the same place (see `backend/src/services/cityPhotoService.ts`).
    * Absent when no photo has been curated anywhere — the UI then falls back to
-   * the convention Cloudinary id. Read through `cityImageSources`.
+   * the convention CDN path. Read through `cityImageSources`.
    */
   imageUrl?: string;
   /** Where `imageUrl` came from, for the admin screen and for debugging. */

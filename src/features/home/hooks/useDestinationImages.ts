@@ -5,7 +5,7 @@ import type { VillaDestination } from '../data/villaDestinations';
 /**
  * The corridor card is 18 wide by 25 tall in the geometry's own units, so
  * every request keeps exactly that ratio. Asking for any other shape would
- * make Cloudinary's `c_fill` throw away more of the photo than the card
+ * make the crop throw away more of the photo than the card
  * actually hides, and asking for one that disagrees with the card would leave
  * `object-cover` to crop the difference a second time. Deriving the height
  * from the width is what stops the two drifting apart.
@@ -14,7 +14,7 @@ const CARD_ASPECT = 18 / 25;
 
 /**
  * Widest image worth fetching. The master stored on upload is 2200px, so
- * anything beyond this is Cloudinary upscaling — more bytes, no more detail.
+ * anything beyond this is the CDN upscaling — more bytes, no more detail.
  */
 const MAX_IMAGE_WIDTH = 2200;
 
@@ -80,12 +80,12 @@ export interface ResolvedDestinationImage {
 }
 
 /**
- * Resolves each destination to a Cloudinary city photo, falling back to a
+ * Resolves each destination to a hosted city photo, falling back to a
  * gradient.
  *
  * The corridor renders gradients on the first frame and swaps in each photo
  * only once it has actually decoded. Preloading out here — rather than reacting
- * to an `onError` inside the corridor — means a missing Cloudinary asset simply
+ * to an `onError` inside the corridor — means a missing asset simply
  * never swaps in: no broken-image icon, no gap, and the vendored component
  * stays untouched.
  *
@@ -121,13 +121,20 @@ export function useDestinationImages(
                 // The curated one goes through the same crop as the seeded
                 // ones rather than being used as uploaded. The card is a
                 // fixed 18:25 portrait, so an upload of any other shape has
-                // to lose something — `c_fill` with `g_auto` makes Cloudinary
-                // pick the crop around the subject instead of blindly taking
-                // the middle, and asking for the card's exact size stops a
-                // large original being downloaded in full and squeezed by the
-                // browser. `optimizeImageUrl` strips any transform
-                // already baked into the stored URL first, and returns
-                // non-Cloudinary URLs untouched.
+                // to lose something — `crop: 'fill'` takes the card's ratio
+                // out of the middle, and asking for the card's exact size
+                // stops a large original being downloaded in full and squeezed
+                // by the browser. `optimizeImageUrl` replaces any transform
+                // already on the stored URL first, and returns URLs that are
+                // not ours untouched.
+                //
+                // `gravity` is passed but no longer does anything: Bunny
+                // Optimizer has no equivalent of Cloudinary's subject-aware
+                // `g_auto`, so the crop is always centred. The villa
+                // destination seeder compensates by storing these already
+                // cropped to 18:25 (see `seedDestinationImages.ts`), which
+                // means the centre crop here is a no-op on a seeded photo and
+                // only bites on an admin upload of some other shape.
                 url: dest.imageUrl
                     ? optimizeImageUrl(dest.imageUrl, {
                         width: imageWidth,
@@ -135,8 +142,9 @@ export function useDestinationImages(
                         crop: 'fill',
                         gravity: 'auto',
                         // These are the hero of the section and are shown very
-                        // large; `auto:best` spends the extra bytes rather
-                        // than letting Cloudinary trade detail for size.
+                        // large; `auto:best` is the top of the delivery ladder
+                        // and spends the extra bytes rather than trading
+                        // detail for size.
                         quality: 'auto:best',
                     }) || dest.imageUrl
                     : getCityImageUrl(dest.imageCity, {

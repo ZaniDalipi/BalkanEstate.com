@@ -329,7 +329,7 @@ const CityDashboard: React.FC = () => {
   };
   const healthInfo = getHealthLabel(marketHealthScore);
 
-  // Curated photo first, then the convention Cloudinary id — see
+  // Curated photo first, then the convention CDN path — see
   // `cityImageSources`. Wikipedia is appended below, once its query has landed.
   const heroSources = cityImageSources(
     { city: city.city, country: city.country, imageUrl: city.imageUrl },

@@ -3,11 +3,11 @@
 // country/city gazetteer along with it.
 import { normalizePlaceName } from '@/shared/geo/normalize';
 import {
-import { CDN_HOST } from '@/config/imageConfig';
   COMPLETION_YEAR_HORIZON,
   MIN_COMPLETION_YEAR,
   normalizeConstructionStatus,
 } from '@/shared/property/construction';
+import { CDN_HOST } from '@/config/imageConfig';
 
 /**
  * Input Validation Utilities

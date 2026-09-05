@@ -98,7 +98,7 @@ describe('shouldCoverFrame', () => {
   });
 });
 
-const photo = (n: number) => `https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/p${n}.jpg`;
+const photo = (n: number) => `https://test-zone.b-cdn.net/balkan-estate/listing/p${n}.webp`;
 
 const property = {
   id: 'p1',
@@ -113,10 +113,10 @@ const property = {
   lng: 19.8,
 } as unknown as Property;
 
-/** The thumbnail strip renders at w_390; the carousel does not. */
+/** The thumbnail strip renders at width=390; the carousel does not. */
 const thumbnails = (): HTMLImageElement[] =>
   Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-    img.getAttribute('src')?.includes('w_390')
+    img.getAttribute('src')?.includes('width=390')
   );
 
 /** Fakes a decode so the component learns the photo's real shape. */
@@ -146,9 +146,14 @@ describe('thumbnail strip', () => {
 
   it('asks the CDN not to crop, so the card decides the framing', () => {
     renderStrip();
-    // c_fill at a bare width silently upscales small photos; c_limit does not,
-    // and neither crops — the decision belongs to the component below.
-    thumbnails().forEach((img) => expect(img.getAttribute('src')).toContain('c_limit'));
+    // A width with no `aspect_ratio` is a plain scale: the CDN resizes and the
+    // component below decides the framing. An `aspect_ratio` here would crop
+    // first and take that decision away.
+    thumbnails().forEach((img) => {
+      const src = new URL(img.getAttribute('src')!);
+      expect(src.searchParams.get('width')).toBe('390');
+      expect(src.searchParams.get('aspect_ratio')).toBeNull();
+    });
   });
 
   it('fills the card with a landscape photo and adds no backdrop', () => {
@@ -160,7 +165,7 @@ describe('thumbnail strip', () => {
     expect(thumb.className).not.toContain('object-contain');
     // A full-bleed card has nothing to fill, so it pays for no extra request.
     // Scoped to the card: the carousel above keeps its own blurred backdrop.
-    expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(0);
+    expect(thumb.closest('button')!.querySelectorAll('img[src*="blur="]')).toHaveLength(0);
   });
 
   it('shows a portrait photo whole over a blurred copy of itself', () => {
@@ -170,7 +175,7 @@ describe('thumbnail strip', () => {
 
     expect(thumb.className).toContain('object-contain');
 
-    const backdrop = thumb.closest('button')!.querySelector<HTMLImageElement>('img[src*="e_blur"]');
+    const backdrop = thumb.closest('button')!.querySelector<HTMLImageElement>('img[src*="blur="]');
     expect(backdrop).not.toBeNull();
     // Filling the bars is the whole point: it must cover, and it must be the
     // same photo rather than a generic placeholder.

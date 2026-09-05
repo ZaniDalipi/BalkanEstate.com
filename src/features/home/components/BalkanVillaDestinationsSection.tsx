@@ -28,7 +28,7 @@ interface BalkanVillaDestinationsSectionProps {
  * corridor. Both the moving cards and the chips below are real buttons —
  * either one opens that destination's luxury villas.
  *
- * Photos come from the Cloudinary city library already seeded by
+ * Photos come from the city photo library already seeded by
  * `backend/src/scripts/seedCityImages.ts`; see `../data/villaDestinations.ts`
  * for how a region maps to the city that represents it.
  */

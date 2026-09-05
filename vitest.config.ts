@@ -10,6 +10,14 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/tests/setup.ts'],
+    // Image URLs are built against the configured CDN host, which is read from
+    // import.meta.env when config/imageConfig.ts is first loaded. Without a
+    // value here every URL looks external, so srcSet comes back empty and the
+    // responsive-image tests assert against a code path production never
+    // takes. Must match the host the tests use in their fixtures.
+    env: {
+      VITE_CDN_HOST: 'test-zone.b-cdn.net',
+    },
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist'],
     coverage: {

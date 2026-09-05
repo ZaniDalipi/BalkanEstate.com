@@ -1,10 +1,10 @@
 /**
- * The cities whose photographs are seeded into Cloudinary.
+ * The cities whose photographs are seeded into the image CDN.
  *
  * Mirrors the `CITIES` table in `backend/src/scripts/seedCityImages.ts`, which
  * is what actually uploads them. A destination that has no photo of its own
  * borrows one of these, so the admin needs the list to offer a choice — and a
- * name that is not in this table resolves to a Cloudinary 404 and leaves the
+ * name that is not in this table resolves to a CDN 404 and leaves the
  * card on its gradient placeholder.
  *
  * `src/tests/seededCities.test.ts` parses the backend table and fails if the

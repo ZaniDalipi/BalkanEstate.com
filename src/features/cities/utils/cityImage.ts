@@ -7,7 +7,7 @@
  *     that curate the same place (an admin override, the City Gallery panel,
  *     a villa destination, or the auto-seeded one). See
  *     `backend/src/services/cityPhotoService.ts`.
- *   - a Cloudinary asset named by convention, `city-{country}-{city}`, which
+ *   - a stored asset named by convention, `city-{country}-{city}`, which
  *     predates the field and is still how most cities have a picture at all.
  *
  * The stored URL is tried first — that is what makes an admin's edit visible —
@@ -15,7 +15,7 @@
  * photo they already had. Both are returned rather than one chosen, because
  * whether an image loads is only known in the browser: the convention URL is a
  * 404 for any city without that asset, and the stored URL can point at a photo
- * since deleted from Cloudinary.
+ * since deleted from storage.
  */
 
 import { getCityImageUrl, optimizeImageUrl } from '@/config/imageConfig';
@@ -62,7 +62,7 @@ export function cityImageSources(
 
   const stored = usableUrl(subject.imageUrl);
   if (stored) {
-    // Cloudinary URLs get resized to the box they fill; anything else (a
+    // Our own CDN URLs get resized to the box they fill; anything else (a
     // Wikipedia or Unsplash original) comes back unchanged, since we cannot
     // transform a host we don't control.
     sources.push(optimizeImageUrl(stored, {

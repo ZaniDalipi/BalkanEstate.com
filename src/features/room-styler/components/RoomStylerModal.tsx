@@ -12,7 +12,7 @@ import { useRoomStylerUsage } from '../hooks/useRoomStylerUsage';
 import BeforeAfterSlider from './BeforeAfterSlider';
 
 interface RoomStylerModalProps {
-    /** Full Cloudinary URL of the room photo to restyle */
+    /** Full CDN URL of the room photo to restyle */
     imageUrl: string;
     onClose: () => void;
 }
@@ -46,7 +46,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
         setErrorMsg(null);
     }, [mode]);
 
-    // Send a high-res version to the AI for a better result (still a Cloudinary URL).
+    // Send a high-res version to the AI for a better result (still a CDN URL).
     const sourceUrl = optimizeImageUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
 
     const isUnlimited = usage?.limit === -1;

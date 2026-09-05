@@ -17,7 +17,10 @@ import {
   type AgencyData,
 } from '@/functions/_og-utils';
 
-const CLOUDINARY = 'https://res.cloudinary.com/balkanestate/image/upload';
+// Must match VITE_CDN_HOST in vitest.config.ts — the OG helper only claims
+// card dimensions for images it can actually render to 1200x630, which means
+// images on our own pull zone.
+const CDN = 'https://test-zone.b-cdn.net';
 
 const agent = (overrides: Partial<AgentData> = {}): AgentData => ({
   agentId: 'ERIKSON-REAL-ESTATE',
@@ -28,7 +31,7 @@ const agent = (overrides: Partial<AgentData> = {}): AgentData => ({
   totalReviews: 23,
   userId: {
     name: 'Erik Sonn',
-    avatarUrl: `${CLOUDINARY}/v1699999999/avatars/erik.jpg`,
+    avatarUrl: `${CDN}/avatars/erik.jpg`,
     city: 'Tirana',
     country: 'Albania',
   },
@@ -42,7 +45,7 @@ const agency = (overrides: Partial<AgencyData> = {}): AgencyData => ({
   country: 'Albania',
   totalAgents: 7,
   totalProperties: 41,
-  logo: `${CLOUDINARY}/v1699999999/logos/erikson.png`,
+  logo: `${CDN}/logos/erikson.png`,
   ...overrides,
 });
 
@@ -53,10 +56,22 @@ const meta = (html: string, key: string): string | null => {
   const match = html.match(
     new RegExp(`<meta ${attr}="${key}" content="([^"]*)"`),
   );
-  return match ? match[1] : null;
+  if (!match) return null;
+
+  // Meta content is HTML-escaped, and every CDN URL now carries a query string,
+  // so `&` really does arrive as `&amp;`. Decode to compare logical values —
+  // asserting on the escaped form would be testing the escaper, not the URL.
+  return match[1].replace(/&amp;/g, '&');
 };
 
-const OG_CARD = 'f_jpg,q_auto,w_1200,h_630,c_pad,b_white';
+/**
+ * The share-card query string, in the order `optimizeImageUrl` writes it.
+ *
+ * `aspect_ratio` rather than a pad: Bunny Optimizer has no pad-with-background
+ * mode, and a card that comes back smaller than the dimensions we advertise is
+ * what makes Facebook and LinkedIn mislay it.
+ */
+const OG_CARD = 'aspect_ratio=1200%3A630&width=1200&quality=75&format=jpeg';
 
 describe('isUsableSlug', () => {
   it('accepts real agent ids and two-segment agency slugs', () => {
@@ -77,7 +92,7 @@ describe('isUsableSlug', () => {
 
 describe('resolveOgImage', () => {
   it('skips DiceBear data URIs, which crawlers cannot fetch', () => {
-    const image = resolveOgImage('data:image/svg+xml;base64,abc', `${CLOUDINARY}/v1/logo.png`);
+    const image = resolveOgImage('data:image/svg+xml;base64,abc', `${CDN}/logo.png`);
     expect(image.url).toContain('logo.png');
   });
 
@@ -97,7 +112,7 @@ describe('buildAgentOgHtml', () => {
     const html = buildAgentOgHtml(agent(), 'ERIKSON-REAL-ESTATE');
 
     expect(meta(html, 'og:image')).toBe(
-      `${CLOUDINARY}/${OG_CARD}/v1699999999/avatars/erik.jpg`,
+      `${CDN}/avatars/erik.jpg?${OG_CARD}`,
     );
     expect(meta(html, 'og:image:width')).toBe('1200');
     expect(meta(html, 'og:image:height')).toBe('630');
@@ -108,7 +123,7 @@ describe('buildAgentOgHtml', () => {
     const html = buildAgentOgHtml(
       agent({
         userId: { name: 'Erik Sonn' },
-        agencyId: { name: 'Erikson', logo: `${CLOUDINARY}/v1/logos/erikson.png` },
+        agencyId: { name: 'Erikson', logo: `${CDN}/logos/erikson.png` },
       }),
       'ERIKSON-REAL-ESTATE',
     );
@@ -129,19 +144,19 @@ describe('buildAgentOgHtml', () => {
     expect(meta(html, 'twitter:card')).toBe('summary');
   });
 
-  it('strips a crop already baked into the avatar URL instead of stacking on it', () => {
+  it('replaces a crop already on the avatar URL instead of stacking on it', () => {
     const html = buildAgentOgHtml(
       agent({
         userId: {
           name: 'Erik Sonn',
-          avatarUrl: `${CLOUDINARY}/c_fill,ar_1:1,w_96/v123/avatars/erik.jpg`,
+          avatarUrl: `${CDN}/avatars/erik.jpg?aspect_ratio=1%3A1&width=96`,
         },
       }),
       'ERIKSON-REAL-ESTATE',
     );
 
     // The 96px square crop must not survive into the 1200x630 card.
-    expect(meta(html, 'og:image')).toBe(`${CLOUDINARY}/${OG_CARD}/v123/avatars/erik.jpg`);
+    expect(meta(html, 'og:image')).toBe(`${CDN}/avatars/erik.jpg?${OG_CARD}`);
   });
 
   it('builds a profile card with name, location and facts', () => {
@@ -176,7 +191,7 @@ describe('buildAgentOgHtml', () => {
 describe('buildAgencyOgHtml', () => {
   it('prefers the logo over the cover photo — it is the agency\'s profile picture', () => {
     const html = buildAgencyOgHtml(
-      agency({ coverImage: `${CLOUDINARY}/v1/covers/tirana.jpg` }),
+      agency({ coverImage: `${CDN}/covers/tirana.jpg` }),
       'albania/erikson-real-estate',
     );
 
@@ -185,7 +200,7 @@ describe('buildAgencyOgHtml', () => {
 
   it('uses the cover photo when there is no logo', () => {
     const html = buildAgencyOgHtml(
-      agency({ logo: undefined, coverImage: `${CLOUDINARY}/v1/covers/tirana.jpg` }),
+      agency({ logo: undefined, coverImage: `${CDN}/covers/tirana.jpg` }),
       'albania/erikson-real-estate',
     );
 

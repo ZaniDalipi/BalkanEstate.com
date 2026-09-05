@@ -88,7 +88,7 @@ export const getRoomStyleUsage = async (): Promise<RoomStyleUsage> => {
 };
 
 /**
- * Restyle a room photo (by its Cloudinary URL) into a chosen interior design style.
+ * Restyle a room photo (by its CDN URL) into a chosen interior design style.
  * Returns a base64 data URL of the AI-generated image.
  */
 export const restyleRoom = async (

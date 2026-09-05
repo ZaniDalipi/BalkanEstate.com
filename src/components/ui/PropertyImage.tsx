@@ -66,7 +66,7 @@ export const getPropertyImageSources = (
  * Renders a property image with:
  *  - An immediately-loaded (eager) blurred LQIP backdrop
  *  - A main image that fades in once loaded
- *  - Responsive srcSet from Cloudinary
+ *  - Responsive srcSet from the image CDN
  *  - Priority mode for above-the-fold / LCP images
  *  - Error fallback (gradient + building icon)
  *

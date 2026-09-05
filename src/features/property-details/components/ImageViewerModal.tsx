@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
-import { optimizeImageUrl } from '@/config/imageConfig';
+import { optimizeImageUrl, isCdnUrl } from '@/config/imageConfig';
 import { getGallerySources, warmGallery, VIEWER_SIZES } from '@/config/galleryImages';
 import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
-import { isCdnUrl } from '@/config/imageConfig';
 
 const RoomStylerModal = lazy(() => import('../../room-styler/components/RoomStylerModal'));
 
