@@ -137,7 +137,11 @@
       "amenitiesHint": "Add hashtag-style amenities that buyers can search for",
       "amenitiesPlaceholder": "e.g., #gym, #pool, #parking, #wifi",
       "description": "Description",
-      "addTags": "Dodaj oznake..."
+      "addTags": "Dodaj oznake...",
+      "openPlanArea": "Otvoreni prostor (m²)",
+      "parkingType": "Vrsta parkinga",
+      "parkingSpaces": "Mjesta",
+      "officeRooms": "Uredi"
     },
     "propertyFeatures": {
       "title": "Property Features",
@@ -760,5 +764,11 @@
     "extendNow": "Produži Sada",
     "autoExtendReady": "Automatsko produženje spremno! Dovršite plaćanje za produženje.",
     "completePayment": "Dovrši Plaćanje"
+  },
+  "parkingTypes": {
+    "garage": "Garaža",
+    "underground": "Podzemna",
+    "covered": "Natkrivena",
+    "outdoor": "Otvorena"
   }
 }

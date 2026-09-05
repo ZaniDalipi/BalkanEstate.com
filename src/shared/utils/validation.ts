@@ -7,6 +7,11 @@ import {
   MIN_COMPLETION_YEAR,
   normalizeConstructionStatus,
 } from '@/shared/property/construction';
+import {
+  PARKING_TYPES,
+  attributesForType,
+  isParkingType,
+} from '@/shared/property/typeAttributes';
 
 /**
  * Input Validation Utilities
@@ -643,6 +648,56 @@ export function validateYearBuilt(year: number | string): ValidationResult {
 }
 
 /**
+ * Validate the attributes a listing carries against the type it is filed
+ * under.
+ *
+ * Two different failures, kept apart on purpose:
+ *
+ *   - An attribute the type does not have (bedrooms on a garage) is *not* an
+ *     error. `stripAttributesForType` drops it on the way to storage, because
+ *     a client sending a field the type ignores is sloppy rather than
+ *     hostile, and failing a whole listing over it helps nobody.
+ *   - An attribute the type *does* have, carrying a value that is not a
+ *     count — negative, fractional, absurd — is an error, because storing it
+ *     would put "-3 offices" on a page.
+ *
+ * The counts share one bound: nothing here is a number of rooms, spaces or
+ * WCs beyond `MAX_ATTRIBUTE_COUNT`, and anything larger is a typo rather than
+ * a very large building.
+ */
+export const MAX_ATTRIBUTE_COUNT = 999;
+
+export function validateTypeAttributes(
+  propertyType: unknown,
+  input: Record<string, unknown>,
+): ValidationResult {
+  for (const attribute of attributesForType(propertyType)) {
+    const value = input[attribute];
+    if (value === undefined || value === null || value === '') continue;
+
+    if (attribute === 'parkingType') {
+      if (!isParkingType(value)) {
+        return { isValid: false, error: `Parking type must be one of: ${PARKING_TYPES.join(', ')}` };
+      }
+      continue;
+    }
+
+    const count = typeof value === 'string' ? Number(value.trim()) : value;
+    if (typeof count !== 'number' || !Number.isFinite(count) || !Number.isInteger(count)) {
+      return { isValid: false, error: `${attribute} must be a whole number` };
+    }
+    if (count < 0) {
+      return { isValid: false, error: `${attribute} cannot be negative` };
+    }
+    if (count > MAX_ATTRIBUTE_COUNT) {
+      return { isValid: false, error: `${attribute} cannot be more than ${MAX_ATTRIBUTE_COUNT}` };
+    }
+  }
+
+  return { isValid: true };
+}
+
+/**
  * Validate an expected completion year for an under-construction listing.
  *
  * Deliberately permissive: a handover date is the seller's own estimate, and
@@ -741,5 +796,6 @@ export default {
   validateYearBuilt,
   validateCompletionYear,
   validateConstruction,
+  validateTypeAttributes,
   validateRoomCount,
 };

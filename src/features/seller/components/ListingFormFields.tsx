@@ -2,7 +2,21 @@ import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
-import { PROPERTY_TYPE_OPTIONS, hasHabitableInterior } from '@/shared/constants/propertyTypes';
+import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
+import {
+    PARKING_TYPES,
+    typeHasAttribute,
+    type ParkingType,
+    type TypeAttribute,
+} from '@/shared/property/typeAttributes';
+
+/** English shown while a locale still lacks the parking-type keys. */
+const PARKING_TYPE_FALLBACKS: Record<ParkingType, string> = {
+    garage: 'Garage',
+    underground: 'Underground',
+    covered: 'Covered',
+    outdoor: 'Outdoor',
+};
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData, FieldErrors } from './ListingFormHelpers';
@@ -55,6 +69,11 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
     fieldErrors,
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
+
+    /** Does the chosen type carry this attribute? */
+
+    const has = (attribute: TypeAttribute) => typeHasAttribute(listingData.propertyType, attribute);
+
 
     return (
         <>
@@ -391,17 +410,65 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
 
             {/* Property Details - hide some fields for land */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-w-0">
-                {hasHabitableInterior(listingData.propertyType) && (
-                    <>
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.kitchens', 'Kitchens')} value={listingData.kitchens} onChange={(val) => setListingData(p => ({ ...p, kitchens: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.diningRooms', 'Dining rooms')} value={listingData.diningRooms} onChange={(val) => setListingData(p => ({ ...p, diningRooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.toilets', 'Toilets (WC)')} value={listingData.toilets} onChange={(val) => setListingData(p => ({ ...p, toilets: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.storageRooms', 'Storage rooms')} value={listingData.storageRooms} onChange={(val) => setListingData(p => ({ ...p, storageRooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.offices', 'Office / study')} value={listingData.offices} onChange={(val) => setListingData(p => ({ ...p, offices: val }))} />
-                    </>
+                {/* One question per attribute the chosen type actually has —
+                    a garage is never asked how many living rooms it holds, and
+                    a shop is asked about offices and open-plan area instead of
+                    bedrooms. The list comes from the same table the write path
+                    filters by, so the form cannot offer a field the database
+                    would then throw away. */}
+                {has('beds') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
+                )}
+                {has('baths') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
+                )}
+                {has('livingRooms') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
+                )}
+                {has('kitchens') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.kitchens', 'Kitchens')} value={listingData.kitchens} onChange={(val) => setListingData(p => ({ ...p, kitchens: val }))} />
+                )}
+                {has('diningRooms') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.diningRooms', 'Dining rooms')} value={listingData.diningRooms} onChange={(val) => setListingData(p => ({ ...p, diningRooms: val }))} />
+                )}
+                {has('toilets') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.toilets', 'Toilets (WC)')} value={listingData.toilets} onChange={(val) => setListingData(p => ({ ...p, toilets: val }))} />
+                )}
+                {has('storageRooms') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.storageRooms', 'Storage rooms')} value={listingData.storageRooms} onChange={(val) => setListingData(p => ({ ...p, storageRooms: val }))} />
+                )}
+                {has('offices') && (
+                    <NumberInputWithSteppers
+                        // In a home this is the study; in business premises it is
+                        // the count that describes the place.
+                        label={listingData.propertyType === 'commercial'
+                            ? t('seller:createListing.fields.officeRooms', 'Offices')
+                            : t('seller:createListing.fields.offices', 'Office / study')}
+                        value={listingData.offices}
+                        onChange={(val) => setListingData(p => ({ ...p, offices: val }))}
+                    />
+                )}
+                {has('openPlanArea') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.openPlanArea', 'Open-plan area (m²)')} value={listingData.openPlanArea} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, openPlanArea: val }))} />
+                )}
+                {has('parkingType') && (
+                    <div className="min-w-0">
+                        <label htmlFor="parkingType" className={labelClasses}>
+                            {t('seller:createListing.fields.parkingType', 'Parking type')}
+                        </label>
+                        <select
+                            id="parkingType"
+                            value={listingData.parkingType}
+                            onChange={(e) => setListingData(p => ({ ...p, parkingType: e.target.value as ParkingType }))}
+                            className={inputBaseClasses}
+                        >
+                            {PARKING_TYPES.map((value) => (
+                                <option key={value} value={value}>
+                                    {t(`seller:parkingTypes.${value}`, PARKING_TYPE_FALLBACKS[value])}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 )}
                 <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
                 {listingData.propertyType !== 'land' && (
@@ -481,7 +548,17 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         )}
                     </div>
                 )}
-                <NumberInputWithSteppers label={t('seller:createListing.fields.parkingSpots')} value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} />
+                {has('parking') && (
+                    <NumberInputWithSteppers
+                        // On a parking listing this is the thing being sold, so it
+                        // is named for that rather than for a dwelling's included spots.
+                        label={listingData.propertyType === 'parking'
+                            ? t('seller:createListing.fields.parkingSpaces', 'Spaces')
+                            : t('seller:createListing.fields.parkingSpots')}
+                        value={listingData.parking_spots}
+                        onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))}
+                    />
+                )}
             </fieldset>
         </>
     );

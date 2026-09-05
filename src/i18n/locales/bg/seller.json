@@ -137,7 +137,11 @@
       "amenitiesHint": "Добавете удобства като хаштагове, за да могат купувачите да ги търсят",
       "amenitiesPlaceholder": "напр. #фитнес, #басейн, #паркинг, #wifi",
       "description": "Описание",
-      "addTags": "Add tags..."
+      "addTags": "Add tags...",
+      "openPlanArea": "Открита площ (m²)",
+      "parkingType": "Тип паркинг",
+      "parkingSpaces": "Места",
+      "officeRooms": "Офиси"
     },
     "propertyFeatures": {
       "title": "Характеристики на имота",
@@ -760,5 +764,11 @@
     "extendNow": "Удължи Сега",
     "autoExtendReady": "Автоматичното удължаване е готово! Завършете плащането за удължаване.",
     "completePayment": "Завърши Плащането"
+  },
+  "parkingTypes": {
+    "garage": "Гараж",
+    "underground": "Подземен",
+    "covered": "Покрит",
+    "outdoor": "Открит"
   }
 }

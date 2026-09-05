@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
 import type { ConstructionStatus } from '@/shared/property/construction';
-import { validateConstruction } from '@/shared/utils/validation';
+import { validateConstruction, validateTypeAttributes } from '@/shared/utils/validation';
+import type { ParkingType } from '@/shared/property/typeAttributes';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { hasHabitableInterior } from '@/shared/constants/propertyTypes';
 
@@ -26,6 +27,10 @@ export interface ListingData {
     toilets: number;
     storageRooms: number;
     offices: number;
+    /** Commercial: how much of the area is open plan rather than cellular. */
+    openPlanArea: number;
+    /** Parking: how the space is arranged. */
+    parkingType: ParkingType;
     sq_meters: number;
     year_built: number;
     /** 'under-construction' swaps the year-built field for a completion year. */
@@ -102,6 +107,8 @@ export const initialListingData: ListingData = {
     toilets: 0,
     storageRooms: 0,
     offices: 0,
+    openPlanArea: 0,
+    parkingType: 'garage',
     sq_meters: 0,
     year_built: new Date().getFullYear(),
     constructionStatus: 'ready',
@@ -290,6 +297,31 @@ export const validateListing = (
         errors.expectedCompletionYear = t(
             'newListing:validation.completionYearInvalid',
             'Please enter a valid completion year, or leave it empty.',
+        );
+    }
+
+    // Attributes are checked against the type they are filed under. A field
+    // the type does not have is not an error — the payload filter drops it —
+    // so this only fires on a value that is not a count.
+    const attributes = validateTypeAttributes(listingData.propertyType, {
+        beds: listingData.bedrooms,
+        baths: listingData.bathrooms,
+        livingRooms: listingData.livingRooms,
+        kitchens: listingData.kitchens,
+        diningRooms: listingData.diningRooms,
+        toilets: listingData.toilets,
+        storageRooms: listingData.storageRooms,
+        offices: listingData.offices,
+        openPlanArea: listingData.openPlanArea,
+        parking: listingData.parking_spots,
+        parkingType: listingData.parkingType,
+        floorNumber: listingData.floorNumber,
+        totalFloors: listingData.totalFloors,
+    });
+    if (!attributes.isValid) {
+        errors.propertyType = attributes.error ?? t(
+            'newListing:validation.attributesInvalid',
+            'Please check the details for this property type.',
         );
     }
 

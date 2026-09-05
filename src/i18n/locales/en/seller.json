@@ -149,7 +149,11 @@
       "amenitiesHint": "Add hashtag-style amenities that buyers can search for",
       "amenitiesPlaceholder": "e.g., #gym, #pool, #parking, #wifi",
       "description": "Description",
-      "addTags": "Add tags..."
+      "addTags": "Add tags...",
+      "openPlanArea": "Open-plan area (m²)",
+      "parkingType": "Parking type",
+      "parkingSpaces": "Spaces",
+      "officeRooms": "Offices"
     },
     "propertyFeatures": {
       "title": "Property Features",
@@ -768,5 +772,11 @@
     "extendNow": "Extend Now",
     "autoExtendReady": "Auto-extend ready! Complete payment to extend.",
     "completePayment": "Complete Payment"
+  },
+  "parkingTypes": {
+    "garage": "Garage",
+    "underground": "Underground",
+    "covered": "Covered",
+    "outdoor": "Outdoor"
   }
 }

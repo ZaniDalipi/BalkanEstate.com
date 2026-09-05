@@ -708,5 +708,10 @@
     "disclaimer": "Amenajare generată de AI doar în scop demonstrativ. Aceste imagini nu sunt fotografii reale ale proprietății și pot include obiecte care nu fac parte din anunț.",
     "interior": "Interior",
     "exterior": "Exterior"
+  },
+  "featured": {
+    "spacesLabel": "Locuri",
+    "officesLabel": "Birouri",
+    "openPlanLabel": "Spațiu deschis m²"
   }
 }

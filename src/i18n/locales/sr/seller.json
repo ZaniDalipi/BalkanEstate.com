@@ -137,7 +137,11 @@
       "amenitiesHint": "Додајте погодности у стилу хештега које купци могу претраживати",
       "amenitiesPlaceholder": "нпр., #теретана, #базен, #паркинг, #wifi",
       "description": "Опис",
-      "addTags": "Додај ознаке..."
+      "addTags": "Додај ознаке...",
+      "openPlanArea": "Отворени простор (m²)",
+      "parkingType": "Тип паркинга",
+      "parkingSpaces": "Места",
+      "officeRooms": "Канцеларије"
     },
     "propertyFeatures": {
       "title": "Карактеристике Некретнине",
@@ -760,5 +764,11 @@
     "extendNow": "Продужи Сада",
     "autoExtendReady": "Аутоматско продужење спремно! Довршите плаћање да продужите.",
     "completePayment": "Доврши Плаћање"
+  },
+  "parkingTypes": {
+    "garage": "Гаража",
+    "underground": "Подземна",
+    "covered": "Наткривена",
+    "outdoor": "Отворена"
   }
 }
