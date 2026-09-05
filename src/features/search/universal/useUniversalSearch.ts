@@ -17,7 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Property } from '@/types';
 import { getZoomFromBoundingBox, searchLocation } from '@/services/osmService';
 import {
-  isPlaceInCoverage,
+  isSupportedCountryCode,
   formatGeocodedPlace,
   formatPlaceLabel,
   formatPropertyPlace,
@@ -43,10 +43,6 @@ import type {
   Suggestion,
   SuggestionGroup,
 } from './types';
-
-/** A provider's context line ends with the country: "Kashar, Albania". */
-const countryOf = (subtitle: string): string =>
-  subtitle.split(',').pop()?.trim() ?? '';
 
 /** Local sources answer from memory; only the remote ones need a debounce. */
 const REMOTE_DEBOUNCE_MS = 220;
@@ -263,13 +259,10 @@ export const useUniversalSearch = ({
         });
         if (requestId !== requestIdRef.current) return [];
 
+        // No filtering here: the request itself was restricted to the covered
+        // countries by ISO code, so Google has already done it.
         const fromPlaces = collect(
-          predictions
-            // The legacy Places API cannot be narrowed to ten countries at the
-            // request, so anything from outside the app's coverage is dropped
-            // here. Picking one could only ever lead to an empty result page.
-            .filter((prediction) => isPlaceInCoverage(countryOf(prediction.subtitle)))
-            .map((prediction) => {
+          predictions.map((prediction) => {
             // Google's secondary line is already "<city>, <country>" for a
             // Balkan result, but it can run longer; the formatter trims it to
             // the app's shape rather than trusting it.
@@ -303,10 +296,12 @@ export const useUniversalSearch = ({
 
       return collect(
         results.flatMap((result) => {
-          const label = formatGeocodedPlace(result);
           // The proxy restricts by country code already; this is the backstop
-          // for a result that somehow arrives from outside it.
-          if (!isPlaceInCoverage(label.secondary.split(',').pop()?.trim())) return [];
+          // for a row that somehow arrives from outside, read from the code
+          // the geocoder returns rather than from the country's name.
+          if (!isSupportedCountryCode(result.address?.country_code)) return [];
+
+          const label = formatGeocodedPlace(result);
           const lat = Number.parseFloat(result.lat);
           const lng = Number.parseFloat(result.lon);
           if (!label.primary || !Number.isFinite(lat) || !Number.isFinite(lng)) return [];

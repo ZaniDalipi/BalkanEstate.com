@@ -225,6 +225,7 @@ describe('useUniversalSearch', () => {
         lon: '19.81',
         display_name: 'Rruga e Durrësit, Tirana, Albania',
         boundingbox: ['0', '0', '0', '0'],
+        address: { road: 'Rruga e Durrësit', city: 'Tirana', country: 'Albania', country_code: 'al' },
       },
     ]);
 
@@ -304,7 +305,7 @@ describe('Google Places — the businesses and residences a gazetteer cannot hol
     vi.useFakeTimers();
     isPlacesAvailable.mockReturnValue(false);
     searchLocation.mockResolvedValue([
-      { place_id: 3, lat: '41.3', lon: '19.7', display_name: 'Rruga e Durrësit, Tirana, Albania', boundingbox: ['0','0','0','0'] },
+      { place_id: 3, lat: '41.3', lon: '19.7', display_name: 'Rruga e Durrësit, Tirana, Albania', boundingbox: ['0','0','0','0'], address: { road: 'Rruga e Durrësit', city: 'Tirana', country: 'Albania', country_code: 'al' } },
     ]);
 
     const { result } = renderHook(() => useUniversalSearch({ query: 'rruga e durresit', properties: [] }));
@@ -388,57 +389,50 @@ describe('Google Places — the businesses and residences a gazetteer cannot hol
 });
 
 describe('only places inside the countries the app covers', () => {
-  beforeEach(() => {
+  it('asks Google only about the covered countries, by ISO code', async () => {
+    vi.useFakeTimers();
     isPlacesAvailable.mockReturnValue(true);
-  });
+    fetchPlacePredictions.mockResolvedValue([]);
 
-  it('drops the results Google offers from outside them', async () => {
-    vi.useFakeTimers();
-    // The mix Google actually returned for "Moa resi": one Albanian result
-    // and three from countries this app has nothing in.
-    fetchPlacePredictions.mockResolvedValue([
-      { placeId: '1', title: 'MOA RESIDENCE', subtitle: 'Kashar, Albania' },
-      { placeId: '2', title: 'Mia RESİDENCE', subtitle: 'Bayraklıdede, Kuşadası/Aydın, Türkiye' },
-      { placeId: '3', title: "MO'Ã Residência", subtitle: 'Rua das Flores, Portugal' },
-      { placeId: '4', title: 'MOA Residence', subtitle: 'Bacolod, Philippines' },
-    ]);
-
-    const { result } = renderHook(() => useUniversalSearch({ query: 'Moa resi', properties: [] }));
+    renderHook(() => useUniversalSearch({ query: 'Moa resi', properties: [] }));
     await act(async () => {
       await vi.advanceTimersByTimeAsync(400);
     });
 
-    const titles = result.current.suggestions.map((entry) => entry.title);
-    expect(titles).toContain('MOA RESIDENCE');
-    expect(titles).not.toContain('Mia RESİDENCE');
-    expect(titles).not.toContain("MO'Ã Residência");
-    expect(titles).not.toContain('MOA Residence');
+    // The restriction is the request, not a filter afterwards: nothing from
+    // outside the ten countries is ever returned to be filtered.
+    expect(fetchPlacePredictions).toHaveBeenCalledWith('Moa resi', expect.objectContaining({
+      countryCode: undefined,
+    }));
     vi.useRealTimers();
   });
 
-  it('keeps a result whose country is named in Cyrillic', async () => {
+  it('narrows to one country when the user picked one', async () => {
     vi.useFakeTimers();
-    fetchPlacePredictions.mockResolvedValue([
-      { placeId: 'mk', title: 'Moa Center', subtitle: 'Ohrid, Северна Македонија' },
-    ]);
+    isPlacesAvailable.mockReturnValue(true);
+    fetchPlacePredictions.mockResolvedValue([]);
 
-    const { result } = renderHook(() => useUniversalSearch({ query: 'moa center', properties: [] }));
+    renderHook(() => useUniversalSearch({ query: 'Moa resi', properties: [], country: 'Albania' }));
     await act(async () => {
       await vi.advanceTimersByTimeAsync(400);
     });
 
-    const suggestion = result.current.suggestions.find((entry) => entry.title === 'Moa Center');
-    expect(suggestion).toBeDefined();
-    // And the country survives into the label rather than being folded away.
-    expect(suggestion?.subtitle).toContain('Македонија');
+    expect(fetchPlacePredictions).toHaveBeenCalledWith('Moa resi', expect.objectContaining({
+      countryCode: 'AL',
+    }));
     vi.useRealTimers();
   });
 
-  it('drops a geocoder row from outside them as a backstop', async () => {
+  it('drops a geocoder row from outside them, read from its country code', async () => {
     vi.useFakeTimers();
     isPlacesAvailable.mockReturnValue(false);
     searchLocation.mockResolvedValue([
-      { place_id: 8, lat: '38.3', lon: '26.3', display_name: 'Çeşme, İzmir, Türkiye', boundingbox: ['0','0','0','0'] },
+      {
+        place_id: 8, lat: '38.3', lon: '26.3',
+        display_name: 'Çeşme, İzmir, Türkiye',
+        boundingbox: ['0', '0', '0', '0'],
+        address: { town: 'Çeşme', city: 'İzmir', country: 'Türkiye', country_code: 'tr' },
+      },
     ]);
 
     const { result } = renderHook(() => useUniversalSearch({ query: 'cesme izmir', properties: [] }));
@@ -449,6 +443,29 @@ describe('only places inside the countries the app covers', () => {
     expect(
       result.current.suggestions.filter((entry) => entry.type === 'place' && entry.source === 'geocoder'),
     ).toEqual([]);
+    vi.useRealTimers();
+  });
+
+  it('keeps a geocoder row from inside them', async () => {
+    vi.useFakeTimers();
+    isPlacesAvailable.mockReturnValue(false);
+    searchLocation.mockResolvedValue([
+      {
+        place_id: 9, lat: '41.3', lon: '19.8',
+        display_name: 'Rruga e Durrësit, Tirana, Albania',
+        boundingbox: ['0', '0', '0', '0'],
+        address: { road: 'Rruga e Durrësit', city: 'Tirana', country: 'Albania', country_code: 'al' },
+      },
+    ]);
+
+    const { result } = renderHook(() => useUniversalSearch({ query: 'rruga e durresit', properties: [] }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(400);
+    });
+
+    expect(
+      result.current.suggestions.some((entry) => entry.type === 'place' && entry.source === 'geocoder'),
+    ).toBe(true);
     vi.useRealTimers();
   });
 });

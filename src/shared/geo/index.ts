@@ -25,9 +25,4 @@ export {
   placeSearchValue,
   type PlaceLabel,
 } from './placeNames';
-export {
-  SUPPORTED_COUNTRY_CODES,
-  isPlaceInCoverage,
-  isSupportedCountry,
-  isSupportedCountryCode,
-} from './coverage';
+export { SUPPORTED_COUNTRY_CODES, isSupportedCountryCode } from './coverage';

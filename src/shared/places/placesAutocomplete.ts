@@ -115,19 +115,20 @@ const fetchWithNewApi = async (
     .filter((prediction: PlacePrediction) => prediction.placeId && prediction.title);
 };
 
-const fetchWithLegacyApi = (
+/** The legacy API accepts at most five countries per request. */
+const LEGACY_COUNTRY_LIMIT = 5;
+
+const legacyBatch = (
   query: string,
-  { countryCode, origin, biasRadiusKm, sessionToken }: PlacePredictionOptions
+  countries: string[],
+  { origin, biasRadiusKm, sessionToken }: PlacePredictionOptions
 ): Promise<PlacePrediction[]> => {
   const maps = getMaps()!;
   const places = maps.places as any;
   const service = new places.AutocompleteService();
 
   const request: Record<string, unknown> = { input: query, sessionToken };
-  // The legacy API caps `country` at five, which the coverage area exceeds,
-  // so it can only be narrowed when the user picked one. Everything from this
-  // path is checked against the coverage list by the caller.
-  if (countryCode) request.componentRestrictions = { country: countryCode.toLowerCase() };
+  if (countries.length > 0) request.componentRestrictions = { country: countries };
   if (origin) {
     const center = new maps.LatLng(origin.lat, origin.lng);
     request.origin = center;
@@ -150,6 +151,41 @@ const fetchWithLegacyApi = (
         }))
       );
     });
+  });
+};
+
+/**
+ * The legacy path, restricted the same way as the new one.
+ *
+ * `componentRestrictions.country` takes at most five countries, and the app
+ * covers ten, so the codes are sent in two requests and the answers merged.
+ * Two calls rather than one is the price of having Google apply the
+ * restriction: the alternative is asking the whole world and then guessing
+ * from the country *name* on each row, which cannot be done reliably when the
+ * provider writes that name in the viewer's language.
+ */
+const fetchWithLegacyApi = async (
+  query: string,
+  options: PlacePredictionOptions
+): Promise<PlacePrediction[]> => {
+  const { countryCode } = options;
+  const countries = countryCode
+    ? [countryCode.toLowerCase()]
+    : [...SUPPORTED_COUNTRY_CODES];
+
+  const batches: string[][] = [];
+  for (let i = 0; i < countries.length; i += LEGACY_COUNTRY_LIMIT) {
+    batches.push(countries.slice(i, i + LEGACY_COUNTRY_LIMIT));
+  }
+
+  const results = await Promise.all(batches.map((batch) => legacyBatch(query, batch, options)));
+
+  // Google ranks within a request, so merging two of them can repeat a place.
+  const seen = new Set<string>();
+  return results.flat().filter((prediction) => {
+    if (seen.has(prediction.placeId)) return false;
+    seen.add(prediction.placeId);
+    return true;
   });
 };
 

@@ -156,8 +156,22 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
     searchQueryRef.current = value;
   }, []);
 
-  const handleSearch = useCallback(() => {
-    const query = searchQueryRef.current.trim();
+  /**
+   * Open the search page for what was typed or picked.
+   *
+   * `focus` is the position of a place the user chose from the suggestions.
+   * It is passed through rather than dropped because the search page cannot
+   * always find the place again from its name alone — a business or a
+   * building is known to Google and to nothing else, so re-looking it up
+   * there finds nothing and the map never moves. With a position it goes
+   * straight there, and the same `focusMapOnProperty` channel the
+   * explore-cities screens use does the flying.
+   */
+  const handleSearch = useCallback((
+    searchText?: string,
+    focus?: { lat: number; lng: number; zoom?: number } | null,
+  ) => {
+    const query = (searchText ?? searchQueryRef.current).trim();
     const updatedFilters = {
       ...state.searchPageState.filters,
       query,
@@ -168,6 +182,11 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
         filters: updatedFilters,
         activeFilters: updatedFilters,
         mobileView: 'map',
+        // Cleared when there is no picked place, so a plain text search does
+        // not fly to wherever the last pick was.
+        focusMapOnProperty: focus
+          ? { lat: focus.lat, lng: focus.lng, zoom: focus.zoom, address: query }
+          : null,
       },
     });
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });

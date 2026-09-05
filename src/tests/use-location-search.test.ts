@@ -35,6 +35,9 @@ const osmResult = (overrides: Record<string, unknown> = {}) => ({
   class: 'place',
   type: 'town',
   importance: 0.3,
+  // The proxy asks for `addressdetails`, so a real row carries the components
+  // the label is built from and the country code the coverage check reads.
+  address: { town: 'Himarë', county: 'Vlorë County', country: 'Albania', country_code: 'al' },
   ...overrides,
 });
 
@@ -131,8 +134,8 @@ describe('useLocationSearch', () => {
     // Zaton is a curated locality near Dubrovnik; a second, unrelated Zaton
     // 40km up the coast must not be collapsed into it.
     searchLocation.mockResolvedValue([
-      osmResult({ place_id: 21, lat: '42.6900', lon: '18.0400', display_name: 'Zaton, Dubrovnik, Croatia' }),
-      osmResult({ place_id: 22, lat: '42.9500', lon: '17.7500', display_name: 'Zaton, Croatia' }),
+      osmResult({ place_id: 21, lat: '42.6900', lon: '18.0400', display_name: 'Zaton, Dubrovnik, Croatia', address: { village: 'Zaton', city: 'Dubrovnik', country: 'Croatia', country_code: 'hr' } }),
+      osmResult({ place_id: 22, lat: '42.9500', lon: '17.7500', display_name: 'Zaton, Croatia', address: { village: 'Zaton', country: 'Croatia', country_code: 'hr' } }),
     ]);
 
     const { result } = renderHook(() =>
@@ -149,7 +152,7 @@ describe('useLocationSearch', () => {
   it('keeps a geocoder result in another country entirely', async () => {
     // Zagreb, while the form's city is Vlorë. The seller is free to pin it.
     searchLocation.mockResolvedValue([
-      osmResult({ place_id: 9, lat: '45.8150', lon: '15.9819', display_name: 'Zagreb, Croatia' }),
+      osmResult({ place_id: 9, lat: '45.8150', lon: '15.9819', display_name: 'Zagreb, Croatia', address: { city: 'Zagreb', country: 'Croatia', country_code: 'hr' } }),
     ]);
 
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
@@ -239,32 +242,38 @@ describe('useLocationSearch', () => {
 });
 
 describe('places outside the countries the app covers', () => {
-  it('drops a Google prediction from outside them', async () => {
+  it('drops a geocoder row from outside them, read from its country code', async () => {
     // A seller cannot file a listing in Türkiye, so offering a Turkish pin
     // leads only to a form that will not submit.
-    isPlacesAvailable.mockReturnValue(true);
-    fetchPlacePredictions.mockResolvedValue([
-      { placeId: 'in', title: 'Palasë Beach', subtitle: 'Vlorë, Albania' },
-      { placeId: 'out', title: 'Mia Residence', subtitle: 'Kuşadası, Türkiye' },
-    ]);
-
-    const { result } = renderHook(() => useLocationSearch(vloreOptions));
-    await search(result, 'palase');
-
-    const titles = result.current.suggestions.map((suggestion) => suggestion.title);
-    expect(titles).toContain('Palasë Beach');
-    expect(titles).not.toContain('Mia Residence');
-  });
-
-  it('drops a geocoder row from outside them', async () => {
     isPlacesAvailable.mockReturnValue(false);
     searchLocation.mockResolvedValue([
-      osmResult({ place_id: 9, display_name: 'Çeşme, İzmir, Türkiye', address: { country: 'Türkiye' } }),
+      osmResult({
+        place_id: 9,
+        display_name: 'Çeşme, İzmir, Türkiye',
+        address: { town: 'Çeşme', city: 'İzmir', country: 'Türkiye', country_code: 'tr' },
+      }),
     ]);
 
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
     await search(result, 'cesme');
 
     expect(result.current.suggestions.filter((s) => s.source === 'osm')).toEqual([]);
+  });
+
+  it('keeps a geocoder row from inside them', async () => {
+    isPlacesAvailable.mockReturnValue(false);
+    // A street, so the curated gazetteer has nothing to de-duplicate it against.
+    searchLocation.mockResolvedValue([
+      osmResult({
+        place_id: 31,
+        display_name: 'Rruga Ismail Qemali, Vlorë, Albania',
+        address: { road: 'Rruga Ismail Qemali', city: 'Vlorë', country: 'Albania', country_code: 'al' },
+      }),
+    ]);
+
+    const { result } = renderHook(() => useLocationSearch(vloreOptions));
+    await search(result, 'rruga ismail qemali');
+
+    expect(result.current.suggestions.some((s) => s.source === 'osm')).toBe(true);
   });
 });

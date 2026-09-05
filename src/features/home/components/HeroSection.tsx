@@ -11,7 +11,11 @@ import type { Suggestion } from '@/src/features/search/universal/types';
 interface HeroSectionProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  onSearch: () => void;
+  /**
+   * Run the search. `focus` is where the map should open when the user picked
+   * a specific place rather than typing free text.
+   */
+  onSearch: (query?: string, focus?: { lat: number; lng: number; zoom?: number } | null) => void;
   onNavigate: (view: string, path: string) => void;
   /**
    * Rendered directly under the Buy / Rent / List buttons, inside the hero's
@@ -66,6 +70,14 @@ const AnimatedNumber: React.FC<{ value: string; delay?: number }> = ({ value, de
   return <span ref={ref}>{display}{suffix}</span>;
 };
 
+/**
+ * How close the map sits on a place picked from the hero.
+ *
+ * A business or a building, which is what most picks from here are; a city or
+ * a country carries its own wider zoom and uses that instead.
+ */
+const PICKED_PLACE_ZOOM = 16;
+
 const HeroSection: React.FC<HeroSectionProps> = ({
   searchQuery,
   onSearchChange,
@@ -83,7 +95,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
    * clothes: local places answer instantly, listings are offered alongside
    * them, and the geocoder only fills in what the app does not already know.
    */
-  const { groups, suggestions, isSearching } = useUniversalSearch({
+  const { groups, suggestions, isSearching, resolvePlace } = useUniversalSearch({
     query: searchQuery,
     enabled: isFocused && !isDismissed,
   });
@@ -129,7 +141,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
    * the text the row stands for. A place row carries its canonical spelling
    * ("Bečići, Budva"), so the search that runs is the one the label promised.
    */
-  const handleSuggestionClick = useCallback((suggestion: Suggestion) => {
+  const handleSuggestionClick = useCallback(async (suggestion: Suggestion) => {
     const value =
       suggestion.type === 'place'
         ? suggestion.searchValue
@@ -140,8 +152,30 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     onSearchChange(value);
     rememberSearch(value);
     setIsDismissed(true);
-    setTimeout(() => onSearch(), 0);
-  }, [onSearchChange, onSearch]);
+
+    /**
+     * Carry the picked place's position to the search page.
+     *
+     * Handing over only the text meant the search page had to find the place
+     * again from its name, and the places people pick here are often ones
+     * only Google knows — "Green Coast", "Sun Palasë Residence". Neither the
+     * gazetteer nor the geocoder has them, so the second lookup found
+     * nothing and the map stayed where it was while the box showed a place
+     * it had not gone to.
+     *
+     * The coordinates were already in hand at the moment of the pick; this
+     * simply stops throwing them away. A Places row costs one detail lookup
+     * to resolve, which is the call that would have happened on selection
+     * anyway.
+     */
+    if (suggestion.type !== 'place') {
+      onSearch(value, null);
+      return;
+    }
+
+    const target = await resolvePlace(suggestion);
+    onSearch(value, target ? { ...target, zoom: suggestion.zoom ?? PICKED_PLACE_ZOOM } : null);
+  }, [onSearchChange, onSearch, resolvePlace]);
 
   const formatStat = (value: number): string => {
     if (value >= 10000) return `${Math.floor(value / 1000)},${String(value % 1000).padStart(3, '0')}+`;

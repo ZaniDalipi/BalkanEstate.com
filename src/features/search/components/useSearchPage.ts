@@ -42,6 +42,14 @@ export function useSearchPage() {
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const shownErrorToast = useRef(false);
     const skipGeolocationRef = useRef(false); // Skip geolocation when navigating from explore cities
+    /**
+     * Set when the caller handed over an exact position — a place picked from
+     * a suggestion list, which already knows where it is. The URL-parameter
+     * lookups below resolve asynchronously and would otherwise land after it
+     * and fly somewhere less precise, or nowhere at all when the place is a
+     * business the geocoder has never heard of.
+     */
+    const hasExplicitFocusRef = useRef(false);
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number], zoom: number } | null>(null);
     const [localFilters, setLocalFilters] = useState<Filters>(filters);
@@ -161,6 +169,7 @@ export function useSearchPage() {
         if (focusMapOnProperty) {
             // Prevent geolocation from overriding this position (e.g., when coming from explore cities)
             skipGeolocationRef.current = true;
+            hasExplicitFocusRef.current = true;
 
             // Set the map to fly to the location - use provided zoom or default to 18 for properties
             setFlyToTarget({
@@ -295,7 +304,7 @@ export function useSearchPage() {
                 // Use searchLocation to get coordinates for the city
                 const countryData = BALKAN_COUNTRIES[countryParam];
                 searchLocation(`${cityParam}, ${countryData?.name || countryParam}`).then(results => {
-                    if (results.length > 0) {
+                    if (results.length > 0 && !hasExplicitFocusRef.current) {
                         setFlyToTarget({
                             center: [Number(results[0].lat), Number(results[0].lon)],
                             zoom: 12
@@ -305,7 +314,7 @@ export function useSearchPage() {
             } else if (cityParam && !countryParam) {
                 // City only (e.g., from hero search) — geocode and fly to it
                 searchLocation(cityParam).then(results => {
-                    if (results.length > 0) {
+                    if (results.length > 0 && !hasExplicitFocusRef.current) {
                         setFlyToTarget({
                             center: [Number(results[0].lat), Number(results[0].lon)],
                             zoom: 13
