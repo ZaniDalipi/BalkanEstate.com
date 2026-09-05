@@ -12,7 +12,7 @@ import { incrementViewCount, updateSoldStats, incrementActiveListings } from '..
 import {
   uploadPropertyImages,
   deleteImages,
-  deleteFolder,
+  deleteListingImages,
   organizeListingMedia,
 } from '../services/imageStorageService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
@@ -1464,9 +1464,14 @@ export const deleteProperty = async (
       const userId = currentUser._id.toString();
       const propertyId = String(property._id);
 
-      // Option 1: Delete entire property folder (most efficient)
-      // This deletes all images in balkan-estate/properties/user-{userId}/listing-{propertyId}/
-      await deleteFolder(`balkan-estate/properties/user-${userId}/listing-${propertyId}`);
+      // Option 1: Delete the listing's whole folder (most efficient).
+      // Goes through the service rather than naming a path here: the folder
+      // carries a slug after the id, so it has to be matched rather than
+      // addressed. The literal path this used to build
+      // (`balkan-estate/properties/user-…`) never existed — uploads have always
+      // gone to `balkan-estate/users/{userId}/listings/…` — so it deleted
+      // nothing and left every image the fallback below missed in the zone.
+      await deleteListingImages(userId, propertyId);
 
       // Option 2 (fallback): Delete individual images if they exist
       const publicIdsToDelete: string[] = [];
@@ -1750,7 +1755,10 @@ export const uploadImages = async (
     }
 
     // Upload images using the centralized service (with watermarking)
-    // Images will be organized in: balkan-estate/properties/user-{userId}/listing-{propertyId}/
+    // Images land in balkan-estate/users/{userId}/listings/temp/ when no
+    // propertyId is known yet; `organizeListingMedia` moves them into
+    // balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos/ once
+    // the listing is created.
     const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions, propertyTitle);
 
     res.json({

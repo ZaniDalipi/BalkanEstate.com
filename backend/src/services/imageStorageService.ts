@@ -5,6 +5,7 @@ import {
   putObject,
   deleteObject,
   deleteFolderRecursive,
+  deleteFoldersMatching,
   moveObject,
 } from './bunnyStorageService';
 import {
@@ -173,8 +174,9 @@ const generateObjectName = (extension = 'jpg'): string =>
 const buildFolderPath = (options: UploadOptions): string => {
   const { userId, userEmail, propertyId, propertyTitle, agencyId, businessListingId, credentialId, type } = options;
   const ROOT = 'balkan-estate';
-  // ID first, readable slug appended — keeps prefix-based deletes
-  // (e.g. .../listings/{propertyId}) matching the slugged folder.
+  // ID first, readable slug appended. Deleting a listing therefore cannot
+  // address the folder by id alone — see `deleteListingImages`, which matches
+  // `{propertyId}` and `{propertyId}-*` among the parent's subdirectories.
   const listingSegment = propertyId ? idSlugSegment(propertyId, slugify(propertyTitle)) : '';
 
   switch (type) {
@@ -751,8 +753,13 @@ export const deleteListingImages = async (
   userId: string,
   propertyId: string
 ): Promise<void> => {
-  const folderPath = `balkan-estate/users/${userId}/listings/${propertyId}`;
-  await deleteFolder(folderPath);
+  // Matched by prefix, not addressed directly: the folder carries a readable
+  // slug after the id (`{propertyId}-cozy-2br`), and the id alone names a
+  // directory that does not exist. See `deleteFoldersMatching`.
+  const parent = `balkan-estate/users/${userId}/listings`;
+  const deleted = await deleteFoldersMatching(parent, propertyId);
+  await Promise.all(deleted.map(path => removeFileRecord(path)));
+  mediaLogger.info(`🗑️  Deleted ${deleted.length} object(s) for listing ${propertyId}`);
 };
 
 /**

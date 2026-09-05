@@ -210,6 +210,43 @@ export const deleteFolderRecursive = async (folder: string): Promise<string[]> =
 };
 
 /**
+ * Delete every folder directly under `parent` whose name is `id` or begins
+ * `id-`, and everything beneath them. Returns the object paths removed.
+ *
+ * This exists because listing folders carry a readable slug after the id
+ * (`{propertyId}-cozy-2br-in-tetovo`), and Bunny's list endpoint returns the
+ * contents of one exact directory — it is not a prefix search. Cloudinary's
+ * `api.resources({ prefix })` was, which is why addressing a listing folder by
+ * its id alone used to work and silently stopped: the request 404s, the folder
+ * is reported empty, and the images stay in the zone being paid for.
+ *
+ * Matching is anchored on the separator so `{id}-slug` matches while a
+ * different listing whose id merely starts with the same characters does not.
+ */
+export const deleteFoldersMatching = async (parent: string, id: string): Promise<string[]> => {
+  const base = parent.replace(/^\/+|\/+$/g, '');
+
+  let entries: BunnyListEntry[];
+  try {
+    entries = await listDirectory(base);
+  } catch (error: any) {
+    mediaLogger.warn(`⚠️  Could not list ${base}: ${error.message}`);
+    return [];
+  }
+
+  const matches = entries.filter(
+    entry => entry.IsDirectory && (entry.ObjectName === id || entry.ObjectName.startsWith(`${id}-`)),
+  );
+
+  const deleted: string[] = [];
+  for (const match of matches) {
+    deleted.push(...(await deleteFolderRecursive(`${base}/${match.ObjectName}`)));
+  }
+
+  return deleted;
+};
+
+/**
  * Move an object.
  *
  * Edge Storage has no server-side rename, so this is a read, a write, and a
