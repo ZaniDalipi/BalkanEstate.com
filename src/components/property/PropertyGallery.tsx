@@ -14,6 +14,7 @@ import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '../../../con
 import { getGallerySources, warmGallery, shouldCoverFrame } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
+import { useMediaQuery } from '@/src/hooks/useMediaQuery';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -52,7 +53,25 @@ interface PropertyGalleryProps {
  * ```
  */
 const KEN_BURNS_DURATION = 6;
-const CONTAINER_ASPECT = 16 / 9;
+
+/**
+ * Shape of the hero frame.
+ *
+ * A phone gets the taller 4:3 window: 16:9 across a 390px screen is barely
+ * 220px of photo, less height than the controls stacked over and under it, so
+ * the listing's own images were the smallest thing on the page. From `sm` up
+ * there is width to spare and the frame keeps the 16:9 Zillow standard.
+ *
+ * These are the JS half of a rule the markup states as
+ * `aspect-[4/3] sm:aspect-[16/9]`; the two must move together, because the
+ * carousel picks cover vs. contain from the frame it is actually drawn in — a
+ * photo judged against the wrong frame gets bars it does not need.
+ */
+const CONTAINER_ASPECT_MOBILE = 4 / 3;
+const CONTAINER_ASPECT_DESKTOP = 16 / 9;
+
+/** Tailwind's `sm`, as a query `useMediaQuery` can subscribe to. */
+const WIDE_VIEWPORT_QUERY = '(min-width: 640px)';
 
 /**
  * How many slides either side of the visible one stay mounted.
@@ -80,10 +99,10 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
 };
 
 /**
- * Shape of one card in the thumbnail strip: 155x110 on a phone, 195x140 above
+ * Shape of one card in the thumbnail strip: 180x128 on a phone, 195x140 above
  * it. Both land within a hair of 1.4, so one number describes the frame.
  */
-const THUMB_ASPECT = 155 / 110;
+const THUMB_ASPECT = 180 / 128;
 
 /**
  * One card in the thumbnail strip.
@@ -126,7 +145,7 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
         // framing rather than the CDN guessing at it.
         src={optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })}
         srcSet={`${optimizeCloudinaryUrl(url, { width: 195, quality: 'auto', crop: 'limit' })} 195w, ${optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })} 390w`}
-        sizes="(max-width: 640px) 155px, 195px"
+        sizes="(max-width: 640px) 180px, 195px"
         alt=""
         className={`relative w-full h-full ${cover ? 'object-cover' : 'object-contain'}`}
         loading={eager ? 'eager' : 'lazy'}
@@ -235,6 +254,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   // Use tourUrl first, fall back to videoUrl for external video detection
   const externalVideoUrl = property.tourUrl || property.videoUrl || '';
   const videoPlatform = useMemo(() => getVideoPlatform(externalVideoUrl), [externalVideoUrl, getVideoPlatform]);
+
+  // The frame's real shape, mirrored from CSS so the cover/contain decision
+  // below is made against the box the photo is actually drawn in. Where
+  // `matchMedia` is unavailable this reads false, which is the mobile-first
+  // default the stylesheet applies for the same reason.
+  const isWideViewport = useMediaQuery(WIDE_VIEWPORT_QUERY);
+  const containerAspect = isWideViewport ? CONTAINER_ASPECT_DESKTOP : CONTAINER_ASPECT_MOBILE;
 
   // YouTube, Vimeo, Facebook, TikTok, and Instagram can be embedded via iframe
   // TikTok uses their official player embed: tiktok.com/player/v1/{videoId}
@@ -522,20 +548,25 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       .filter(({ item, offset }) => !!item.url && Math.abs(offset) <= SLIDE_WINDOW);
   }, [imagesForCurrentCategory, currentImageIndex]);
 
+  const frameAspectClass =
+    viewMode === 'video'
+      ? videoPlatform === 'tiktok'
+        ? 'aspect-[9/16] sm:aspect-[16/9]'
+        : 'aspect-[16/9]'
+      : 'aspect-[4/3] sm:aspect-[16/9]';
+
   return (
     // data-no-swipe-back: a horizontal drag in here changes photo. It sits at
     // the top of the detail page and runs edge to edge on a phone, so without
     // this opt-out the first swipe on the first photo would navigate away.
     <div className="overflow-hidden shadow-sm border-b border-neutral-200" data-no-swipe-back>
-      {/* ── Gallery frame — fixed 16:9 aspect ratio (Zillow standard). Landscape photos
-           fill edge-to-edge via object-cover; portrait photos are preserved with object-contain
-           and a blurred LQIP backdrop on the side bars. ── */}
+      {/* ── Gallery frame — 4:3 on a phone, 16:9 from `sm` up (Zillow standard).
+           Landscape photos fill edge-to-edge via object-cover; portrait photos are
+           preserved with object-contain and a blurred LQIP backdrop on the side bars.
+           Video keeps its authored shape at every width: the embeds are 16:9 (9:16 for
+           TikTok), so a taller box round one would add letterboxing, not picture. ── */}
       <div
-        className={`relative w-full bg-neutral-900 overflow-hidden ${
-          viewMode === 'video' && videoPlatform === 'tiktok'
-            ? 'aspect-[9/16] sm:aspect-[16/9]'
-            : 'aspect-[16/9]'
-        }`}
+        className={`relative w-full bg-neutral-900 overflow-hidden ${frameAspectClass}`}
         style={{ maxHeight: '90vh' }}
       >
 
@@ -573,7 +604,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 // judged by how much of the photo the crop keeps, not by whether
                 // it is wider than 16:9 — that test letterboxed a plain 4:3
                 // photo, the commonest shape a listing has.
-                const isWide = shouldCoverFrame(aspects[item.url], CONTAINER_ASPECT);
+                const isWide = shouldCoverFrame(aspects[item.url], containerAspect);
 
                 // Camera pan L↔R. Scale 1.14 overflows 7% each side, exactly
                 // matching the 7% travel, so an edge never shows. The direction
@@ -1202,7 +1233,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 onClick={() => {
                   if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
                 }}
-                className={`relative flex-shrink-0 w-[155px] h-[110px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden bg-neutral-900 transition-all border-2 ${
+                className={`relative flex-shrink-0 w-[180px] h-[128px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden bg-neutral-900 transition-all border-2 ${
                   index === currentImageIndex
                     ? 'border-primary shadow-lg'
                     : 'border-transparent hover:border-neutral-300'
@@ -1220,7 +1251,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             {imagesForCurrentCategory.length > 5 && (
               <button
                 onClick={handleNextImage}
-                className="flex-shrink-0 w-10 h-[110px] sm:h-[140px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
+                className="flex-shrink-0 w-10 h-[128px] sm:h-[140px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
               >
                 <ChevronRightIcon className="w-5 h-5 text-neutral-600" />
               </button>
