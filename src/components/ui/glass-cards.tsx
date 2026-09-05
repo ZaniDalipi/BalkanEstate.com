@@ -110,7 +110,10 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
         <div
             ref={containerRef}
             style={{
-                height: isMobile ? '70vh' : '100vh',
+                // minHeight, not height: on mobile the card is auto-height, so a
+                // long title or an extra spec row would otherwise grow past the
+                // slot and get sliced off at the section edge.
+                minHeight: isMobile ? '70vh' : '100vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -704,8 +707,17 @@ export const StackedCards: React.FC<StackedCardsProps> = ({
                 </div>
             </div>
 
-            {/* Stacked scroll cards — same animation for both mobile and desktop */}
-            <div style={{ width: '100%' }}>
+            {/* Stacked scroll cards — same animation for both mobile and desktop.
+                Each card is nudged down by `index * 25px` inside its sticky slot,
+                so the deepest one hangs that far past the last slot. The padding
+                below gives it somewhere to land instead of running into the next
+                section. */}
+            <div
+                style={{
+                    width: '100%',
+                    paddingBottom: `${Math.max(0, Math.min(properties.length, 6) - 1) * 25 + 48}px`,
+                }}
+            >
                 {properties.slice(0, 6).map((property, index) => (
                     <StackedPropertyCard
                         key={property.id}

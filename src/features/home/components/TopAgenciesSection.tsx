@@ -34,6 +34,9 @@ const AgencyPodiumCard: React.FC<{
   const isChamp = rank === 0;
   const gap = rank > 0 ? topScore - score : 0;
   const badge = getAgencyAchievementBadge(agency);
+  // podiumHeight 0 = stacked layout (mobile), where there is no pillar to sit on
+  // and the card must not pull itself down over the section edge.
+  const showPillar = podiumHeight > 0;
 
   useEffect(() => {
     const card = cardRef.current;
@@ -95,7 +98,7 @@ const AgencyPodiumCard: React.FC<{
           overflow: 'hidden',
           position: 'relative',
           boxShadow: '0 20px 40px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.8)',
-          marginBottom: '-30px',
+          marginBottom: showPillar ? '-30px' : '0',
           zIndex: 10,
           cursor: 'pointer',
           opacity: isVisible ? 1 : 0,
@@ -278,46 +281,48 @@ const AgencyPodiumCard: React.FC<{
       </div>
 
       {/* Podium pillar */}
-      <div
-        style={{
-          width: '100%',
-          maxWidth: rank === 0 ? '280px' : '230px',
-          height: `${podiumHeight}px`,
-          background: `linear-gradient(180deg, ${medal.bg}18 0%, ${medal.bg}06 100%)`,
-          borderRadius: '16px 16px 0 0',
-          border: `1px solid ${medal.bg}28`,
-          borderBottom: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          paddingTop: '2.5rem',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <span
-          style={{
-            fontSize: rank === 0 ? '3.5rem' : '2.5rem',
-            fontWeight: 900,
-            color: `${medal.bg}25`,
-            lineHeight: 1,
-          }}
-        >
-          #{rank + 1}
-        </span>
-
+      {showPillar && (
         <div
           style={{
-            position: 'absolute',
-            top: 0,
-            left: '10%',
-            right: '10%',
-            height: '2px',
-            background: `linear-gradient(90deg, transparent, ${medal.bg}55, transparent)`,
+            width: '100%',
+            maxWidth: rank === 0 ? '280px' : '230px',
+            height: `${podiumHeight}px`,
+            background: `linear-gradient(180deg, ${medal.bg}18 0%, ${medal.bg}06 100%)`,
+            borderRadius: '16px 16px 0 0',
+            border: `1px solid ${medal.bg}28`,
+            borderBottom: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            paddingTop: '2.5rem',
+            position: 'relative',
+            overflow: 'hidden',
           }}
-        />
-      </div>
+        >
+          <span
+            style={{
+              fontSize: rank === 0 ? '3.5rem' : '2.5rem',
+              fontWeight: 900,
+              color: `${medal.bg}25`,
+              lineHeight: 1,
+            }}
+          >
+            #{rank + 1}
+          </span>
+
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: '10%',
+              right: '10%',
+              height: '2px',
+              background: `linear-gradient(90deg, transparent, ${medal.bg}55, transparent)`,
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -456,14 +461,17 @@ const TopAgenciesSection: React.FC = () => {
             ))}
           </div>
 
-          {/* Mobile: vertical stack */}
-          <div className="sm:hidden flex flex-col items-center gap-5 px-4 pb-6">
+          {/* Mobile: vertical stack. No podium pillars here — stacked cards have
+              nothing to stand on, and the 50px stub they used to render was
+              buried by the card's negative margin, leaving a sliver that read as
+              a cut-off card. */}
+          <div className="sm:hidden flex flex-col items-center gap-6 px-4 pt-4 pb-10">
             {[0, 1, 2].map((dataIndex) => (
               <AgencyPodiumCard
                 key={podiumAgencies[dataIndex]._id}
                 agency={podiumAgencies[dataIndex]}
                 rank={dataIndex}
-                podiumHeight={50}
+                podiumHeight={0}
                 score={calcAgencyScore(podiumAgencies[dataIndex])}
                 topScore={topScore}
                 onAgencyClick={handleAgencyClick}

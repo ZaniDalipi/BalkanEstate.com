@@ -502,10 +502,18 @@
         50% { transform: translateY(-3px); }
       }
 
-      /* Optimize rendering for below-fold sections */
+      /* Below-fold sections.
+
+         `content-visibility: auto` used to live here. It also applies paint
+         containment, which clips every descendant to the wrapper's padding
+         box — so sections whose content sits outside their own box (the
+         sticky stacked property cards, the podium crowns, card shadows) were
+         sliced off at the wrapper border, and a stale `contain-intrinsic-size`
+         cut them mid-card while scrolling. These sections are already
+         code-split behind React.lazy + Suspense, so the wrapper now only
+         hints at off-screen work without clipping anything. */
       .content-below-fold {
-        content-visibility: auto;
-        contain-intrinsic-size: auto 500px;
+        content-visibility: visible;
       }
 
       /* Hero section CSS animations (replaces framer-motion for FCP) */
