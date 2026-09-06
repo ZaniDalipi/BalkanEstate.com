@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { validateCoordinates } from '../../shared/utils/validation';
 import { resolveConstruction } from '../../shared/property/construction';
-import { attributeEntries, statsForType } from '../../shared/property/typeAttributes';
+import { attributeEntries, statsForType, type TypeAttribute } from '../../shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '../../shared/property/attributeDisplay';
 import { openExternalUrl } from '../../shared/utils/pwa';
 import { formatPrice } from '../../../utils/currency';
@@ -133,12 +133,18 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
    * everything else the type carries and the seller filled in.
    */
   const headlineStats = useMemo(
-    () => statsForType(property.propertyType).filter((stat) => stat !== 'sqft'),
-    [property.propertyType],
+    () => attributeEntries(
+      property as unknown as Record<string, unknown>,
+      statsForType(property.propertyType).filter((stat) => stat !== 'sqft') as readonly TypeAttribute[],
+    ),
+    [property],
   );
   const detailAttributes = useMemo(
-    () => attributeEntries(property as unknown as Record<string, unknown>)
-      .filter(({ attribute }) => !(headlineStats as readonly string[]).includes(attribute)),
+    () => {
+      const shownAbove = new Set(headlineStats.map(({ attribute }) => attribute));
+      return attributeEntries(property as unknown as Record<string, unknown>)
+        .filter(({ attribute }) => !shownAbove.has(attribute));
+    },
     [property, headlineStats],
   );
 
@@ -522,19 +528,16 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               Read from the type's profile so none of them is a zero standing
               in for a field this type was never asked about. */}
           <div className="mt-6 grid gap-3 border-t border-neutral-200 pt-5 grid-cols-2 sm:grid-cols-4">
-            {headlineStats.map((stat) => {
-              const value = (property as unknown as Record<string, unknown>)[stat];
-              if (typeof value !== 'number' && typeof value !== 'string') return null;
-              const display = ATTRIBUTE_DISPLAY[stat as keyof typeof ATTRIBUTE_DISPLAY];
-              if (!display) return null;
+            {headlineStats.map(({ attribute, value }) => {
+              const display = ATTRIBUTE_DISPLAY[attribute];
 
               return (
-                <div key={stat} className={`flex items-center gap-3 p-3 rounded-2xl transition-colors cursor-default group ${HEADLINE_STAT_TONES[stat] ?? 'bg-slate-50 hover:bg-slate-100'}`}>
+                <div key={attribute} className={`flex items-center gap-3 p-3 rounded-2xl transition-colors cursor-default group ${HEADLINE_STAT_TONES[attribute] ?? 'bg-slate-50 hover:bg-slate-100'}`}>
                   <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform text-lg">
-                    {HEADLINE_STAT_ICONS[stat] ?? <span>{display.icon}</span>}
+                    {HEADLINE_STAT_ICONS[attribute] ?? <span>{display.icon}</span>}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xl font-bold text-neutral-900 leading-none truncate">{formatAttributeValue(stat, value)}</p>
+                    <p className="text-xl font-bold text-neutral-900 leading-none truncate">{formatAttributeValue(attribute, value)}</p>
                     <p className="text-xs text-neutral-500 mt-0.5 truncate">{t(display.key, display.fallback)}</p>
                   </div>
                 </div>

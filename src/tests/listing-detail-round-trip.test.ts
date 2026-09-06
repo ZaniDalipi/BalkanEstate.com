@@ -110,3 +110,57 @@ describe('what the form sends is what the page can show', () => {
         expect(stripAttributesForType('parking', filledIn).parkingType).toBe('underground');
     });
 });
+
+/**
+ * The card obeys the same rule as the detail page: a stat the seller never
+ * filled in is left out rather than printed as a zero, which is what put
+ * "Parking type 0" and "Open-plan area 0" on cards.
+ */
+describe('a card shows only the stats a listing has values for', () => {
+    it('leaves out a parking arrangement that was never recorded', () => {
+        const shown = attributeEntries(
+            { propertyType: 'parking', parking: 150 },
+            statsForType('parking').filter((s) => s !== 'sqft') as never,
+        ).map((e) => e.attribute);
+
+        expect(shown).toEqual(['parking']);
+    });
+
+    it('shows the arrangement once it is recorded', () => {
+        const shown = attributeEntries(
+            { propertyType: 'parking', parking: 2, parkingType: 'underground' },
+            statsForType('parking').filter((s) => s !== 'sqft') as never,
+        );
+
+        expect(shown).toEqual([
+            { attribute: 'parking', value: 2 },
+            { attribute: 'parkingType', value: 'underground' },
+        ]);
+    });
+
+    it('leaves out an open-plan area nobody entered', () => {
+        const shown = attributeEntries(
+            { propertyType: 'commercial', offices: 3, openPlanArea: 0 },
+            statsForType('commercial').filter((s) => s !== 'sqft') as never,
+        ).map((e) => e.attribute);
+
+        expect(shown).toEqual(['offices']);
+    });
+});
+
+/**
+ * Every type a listing may be filed under needs a name to show on a card.
+ * `types.*` had never gained 'parking', so a garage was labelled the generic
+ * "Property" while `map.propertyTypes.*` had the right word all along.
+ */
+describe('every property type has a name to show', () => {
+    it.each(ALL_PROPERTY_TYPES)('names %s in both lists', (propertyType) => {
+        const bundle = en as unknown as {
+            types: Record<string, string>;
+            map: { propertyTypes: Record<string, string> };
+        };
+
+        expect(typeof bundle.types[propertyType]).toBe('string');
+        expect(typeof bundle.map.propertyTypes[propertyType]).toBe('string');
+    });
+});

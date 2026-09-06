@@ -223,11 +223,12 @@ export interface AttributeEntry {
  */
 export const attributeEntries = (
   property: Record<string, unknown> | null | undefined,
+  attributes: readonly TypeAttribute[] = attributesForType(property?.propertyType),
 ): AttributeEntry[] => {
   if (!property) return [];
 
   const entries: AttributeEntry[] = [];
-  for (const attribute of attributesForType(property.propertyType)) {
+  for (const attribute of attributes) {
     const value = property[attribute];
     if (value === undefined || value === null || value === '') continue;
     if (value === 0 && !MEANINGFUL_ZEROES.has(attribute)) continue;

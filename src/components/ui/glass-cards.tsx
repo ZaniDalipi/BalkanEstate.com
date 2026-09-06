@@ -85,6 +85,18 @@ type StatSource = {
     openPlanArea?: number;
 };
 
+/**
+ * Whether a listing has anything to say about a stat.
+ *
+ * A blank the seller never filled in is not "0" — printing it as one puts a
+ * number on the card that nobody entered. Area is exempt: every listing has
+ * one, and a zero there is a data problem worth seeing.
+ */
+const hasStatValue = (property: StatSource, key: StatKey): boolean => {
+    const value = (property as unknown as Record<string, unknown>)[key];
+    return value !== undefined && value !== null && value !== '' && value !== 0;
+};
+
 const STAT_CHIPS: Record<StatKey, (property: StatSource, t: TFunction) => StatChip> = {
     beds: (property, t) => ({ value: property.beds ?? 0, label: t('featured.bedsLabel'), icon: '🛏' }),
     baths: (property, t) => ({ value: property.baths ?? 0, label: t('featured.bathsLabel'), icon: '🚿' }),
@@ -493,7 +505,13 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                 // its type, not a run of exceptions: a garage shows
                                 // its spaces, a shop its offices and open-plan area,
                                 // and neither is described as "0 Beds · 0 Baths".
-                                ...statsForType(property.propertyType).map((key) => STAT_CHIPS[key](property, t)),
+                                // Only the stats this listing has a value for. Mapping
+                                // the type's whole list printed a zero for every field
+                                // the seller left blank — "Open plan 0" on a shop that
+                                // simply has none recorded.
+                                ...statsForType(property.propertyType)
+                                    .filter((key) => key === 'sqft' || hasStatValue(property, key))
+                                    .map((key) => STAT_CHIPS[key](property, t)),
                                 // "Built 2028" on a building that does not exist yet is a
                                 // claim about a year that has not happened. The same pill
                                 // reads as a handover date instead, and shows no date at

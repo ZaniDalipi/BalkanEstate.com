@@ -18,7 +18,7 @@ import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller'
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
-import { statsForType } from '@/shared/property/typeAttributes';
+import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '@/shared/property/attributeDisplay';
 
 /**
@@ -218,8 +218,17 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
    * so it is dropped from the list here.
    */
   const cardStats = useMemo(
-    () => statsForType(property?.propertyType).filter((stat) => stat !== 'sqft'),
-    [property?.propertyType],
+    () => {
+      // Only the stats this listing actually has a value for. Rendering the
+      // type's whole list meant a garage with no recorded arrangement showed
+      // "Parking type: 0" — a zero invented for a missing word.
+      const wanted = statsForType(property?.propertyType).filter((stat) => stat !== 'sqft');
+      return attributeEntries(
+        property as unknown as Record<string, unknown>,
+        wanted as readonly TypeAttribute[],
+      );
+    },
+    [property],
   );
 
   // Safe access with fallbacks
@@ -271,7 +280,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const promotionTier = isActivelyPromoted ? property?.promotionTier : null;
 
   // Property type labels
-  const propertyTypeLabel = t(`property:types.${property.propertyType}`, { defaultValue: t('property:property') });
+  // `map.propertyTypes` is the app's complete list of type names — `types.*`
+  // had never gained 'parking', so a garage was labelled the generic
+  // "Property". Fall back through it before giving up on a name.
+  const propertyTypeLabel = t(`property:types.${property.propertyType}`, {
+    defaultValue: t(`property:map.propertyTypes.${property.propertyType}`, { defaultValue: t('property:property') }),
+  });
 
   // Determine card styles based on promotion tier. Elevation comes from the
   // shadow-card / shadow-card-raised pair (see @theme in src/index.css) so
@@ -673,10 +687,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             premises, spaces on a garage. Hard-coding the residential three
             printed "0 Bedrooms" on every shop and lock-up. */}
         <div className={`property-card__stats grid gap-1.5 mb-2.5 ${STAT_GRID_COLUMNS[cardStats.length + 1] ?? 'grid-cols-4'}`}>
-          {cardStats.map((stat) => {
-            const display = ATTRIBUTE_DISPLAY[stat as keyof typeof ATTRIBUTE_DISPLAY];
-            const raw = (safeProperty as unknown as Record<string, unknown>)[stat];
-            const value = typeof raw === 'number' || typeof raw === 'string' ? raw : 0;
+          {cardStats.map(({ attribute, value }) => {
+            const display = ATTRIBUTE_DISPLAY[attribute];
             const label = t(display.key, display.fallback);
             const shown = isParkingTypeValue(value)
               ? t(`property:details.parkingTypes.${value}`, PARKING_TYPE_FALLBACKS[value])
@@ -684,7 +696,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
             return (
               <div
-                key={stat}
+                key={attribute}
                 className="group relative flex flex-col items-center justify-center text-center py-2 px-0.5 rounded-xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-[box-shadow,border-color] duration-200"
                 aria-label={`${shown} ${label}`}
               >

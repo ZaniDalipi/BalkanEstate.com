@@ -45,7 +45,8 @@
     "office": "Office",
     "garage": "Garage",
     "other": "Other",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Luxury Villa",
+    "parking": "Parking Space"
   },
   "features": {
     "bedrooms": "Bedrooms",
