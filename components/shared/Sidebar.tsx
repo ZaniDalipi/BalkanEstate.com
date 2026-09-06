@@ -312,6 +312,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return (
         <>
             {/* Overlay for mobile.
+                The scrim and the drawer sit above the app chrome (`z-[1290]`
+                and `z-[1300]`), not below it. The page's own floating controls
+                are not modest about their stacking — the map's search pill and
+                its List/Map switch are `z-[100]`, the header is `z-[1000]` —
+                so at the drawer's old `z-50` they all punched straight through
+                an open menu: the search bar sat over the top of it and the
+                List/Map pill floated across the middle of the links. Anything
+                the drawer covers now goes behind it, dimmed, which is the whole
+                point of a scrim. Modals stay above at `z-[5000]`, and the
+                desktop rail keeps `md:z-50` — it is permanent chrome that a
+                full-screen editor is entitled to cover.
                 `invisible` when closed, not just `opacity-0`: this is a
                 full-viewport `backdrop-blur`, and an element at zero opacity
                 is still painted, so the blur was being resampled over the
@@ -322,7 +333,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 starts. */}
             <div
                 data-app-scrim={isOpen ? 'open' : 'closed'}
-                className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden transition-[opacity,visibility] duration-200 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
+                className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-[1290] md:hidden transition-[opacity,visibility] duration-200 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
                 onClick={onClose}
                 aria-hidden="true"
             ></div>
@@ -338,13 +349,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 untouched. */}
             <aside
                 data-app-drawer={isOpen ? 'open' : 'closed'}
-                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 z-50 flex flex-col transition-transform duration-[260ms] ease-[cubic-bezier(0.32,0.72,0,1)] group overflow-hidden ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 invisible md:visible'} md:w-20 md:translate-x-0 hover:md:w-64`}
+                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 md:z-50 flex flex-col transition-transform duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] group overflow-hidden ${isOpen ? 'z-[1300] translate-x-0 w-64' : 'z-50 -translate-x-full w-64 invisible md:visible'} md:w-20 md:translate-x-0 hover:md:w-64`}
                 aria-label={t('nav:mainNavigation', 'Main navigation')}
                 style={{
                   paddingTop: 'env(safe-area-inset-top, 0px)',
                   paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                   paddingLeft: 'env(safe-area-inset-left, 0px)',
                   WebkitBackfaceVisibility: 'hidden',
+                  // Promoted only while it is the thing moving. Left on
+                  // permanently it would keep a full-height layer alive behind
+                  // the desktop rail for the whole session, which is what
+                  // `will-change` is explicitly not for.
+                  willChange: isOpen ? 'transform' : undefined,
                 }}
             >
                 <div className="flex items-center justify-between p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">

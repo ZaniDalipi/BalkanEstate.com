@@ -23,7 +23,9 @@ const Toast: React.FC<ToastProps> = ({ show, message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ease-in-out ${
+      // Above the mobile drawer (z-[1300]): a toast is the app answering
+      // something you just did, and it is worth nothing behind a scrim.
+      className={`fixed top-24 left-1/2 -translate-x-1/2 z-[1400] transition-all duration-300 ease-in-out ${
         show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'
       }`}
     >

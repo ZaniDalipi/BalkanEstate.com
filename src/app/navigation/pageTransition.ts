@@ -42,8 +42,14 @@ type StartViewTransition = (callback: () => void | Promise<void>) => ViewTransit
  * later; capturing before it would animate the outgoing page against itself.
  * The cap matters more than the wait — a route that takes longer than this to
  * commit (a fetch on the way in) should not freeze the page any further.
+ *
+ * The browser has the document's rendering suspended for the whole of this
+ * wait, so every millisecond of it is a tap that has visibly done nothing yet:
+ * it is dead time in front of the animation, not part of it. A commit that has
+ * not landed within ~6 frames is not about to, and waiting longer only makes
+ * the navigation feel heavier than it is.
  */
-const COMMIT_TIMEOUT_MS = 160;
+const COMMIT_TIMEOUT_MS = 100;
 
 /**
  * How long to let layout settle after the view commits, before the new state is
@@ -56,8 +62,12 @@ const COMMIT_TIMEOUT_MS = 160;
  * not run while it is. Waiting on one here hung the transition until the
  * browser gave up on us — the page frozen the whole time, which is the exact
  * opposite of what any of this is for.
+ *
+ * One frame, not two: scroll restoration writes its offset synchronously in the
+ * same commit, so the extra frame bought nothing but a longer pause between the
+ * tap and the movement.
  */
-const SETTLE_MS = 32;
+const SETTLE_MS = 16;
 
 let running = false;
 let currentRun = 0;
