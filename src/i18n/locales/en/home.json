@@ -58,7 +58,11 @@
     "promoted": "Promoted",
     "new": "New",
     "priceReduced": "Price Reduced",
-    "byNegotiation": "By Negotiation"
+    "byNegotiation": "By Negotiation",
+    "livingRoomsLabel": "Living rooms",
+    "spacesLabel": "Spaces",
+    "officesLabel": "Offices",
+    "openPlanLabel": "Open plan m²"
   },
   "categories": {
     "title": "Browse by Category",

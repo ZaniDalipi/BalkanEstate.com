@@ -9,6 +9,7 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import { typeHasAttribute } from '@/shared/property/typeAttributes';
 
 // Chevron Icons
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -377,23 +378,27 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           <span className="text-xs truncate">{property.address}</span>
         </div>
 
-        {/* Property Stats */}
+        {/* Property Stats. A garage has no bedrooms and a shop no living
+            rooms, so each stat is shown only where the type carries it —
+            "not land" let both through as blanks. */}
         <div className="flex items-center gap-4 mb-2.5 text-neutral-600">
-          {property.propertyType !== 'land' && (
-            <>
-              <div className="flex items-center gap-1">
-                <BedIcon className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold">{property.beds}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <BathIcon className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold">{property.baths}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <LivingRoomIcon className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold">{property.livingRooms}</span>
-              </div>
-            </>
+          {typeHasAttribute(property.propertyType, 'beds') && (
+            <div className="flex items-center gap-1">
+              <BedIcon className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold">{property.beds ?? 0}</span>
+            </div>
+          )}
+          {typeHasAttribute(property.propertyType, 'baths') && (
+            <div className="flex items-center gap-1">
+              <BathIcon className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold">{property.baths ?? 0}</span>
+            </div>
+          )}
+          {typeHasAttribute(property.propertyType, 'livingRooms') && (
+            <div className="flex items-center gap-1">
+              <LivingRoomIcon className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold">{property.livingRooms ?? 0}</span>
+            </div>
           )}
           <div className="flex items-center gap-1">
             <SqftIcon className="w-4 h-4 text-primary" />

@@ -69,7 +69,7 @@ describe('what each type is described by', () => {
 
 describe('what the search shows', () => {
   it('leads a parking space with its spaces, never with 0 Beds · 0 Baths', () => {
-    expect(statsForType('parking')).toEqual(['sqft', 'parking']);
+    expect(statsForType('parking')).toEqual(['sqft', 'parking', 'parkingType']);
     expect(statsForType('parking')).not.toContain('beds');
   });
 

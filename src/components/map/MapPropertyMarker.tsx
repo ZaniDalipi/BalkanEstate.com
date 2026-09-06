@@ -14,6 +14,7 @@ import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
 import { getVillaMarkerPalette, buildLuxuryVillaMarkerHTML } from '@/shared/map/villaMarker';
 import { formatCityPlace } from '@/shared/geo';
+import { typeHasAttribute } from '@/shared/property/typeAttributes';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -832,8 +833,12 @@ const PropertyPopup: React.FC<{
             </div>
           ) : (
             <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
-              <span><b>{property.beds}</b> {t('map.popup.bed')}</span>
-              <span><b>{property.baths}</b> {t('map.popup.bath')}</span>
+              {typeHasAttribute(property.propertyType, 'beds') && (
+                <span><b>{property.beds ?? 0}</b> {t('map.popup.bed')}</span>
+              )}
+              {typeHasAttribute(property.propertyType, 'baths') && (
+                <span><b>{property.baths ?? 0}</b> {t('map.popup.bath')}</span>
+              )}
               <span><b>{property.sqft}</b> m²</span>
             </div>
           )}
@@ -917,18 +922,22 @@ const PropertyPopup: React.FC<{
           </div>
         ) : (
           <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-2">
-            <div className="flex items-center gap-0.5">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span className="font-semibold">{property.beds}</span>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-              </svg>
-              <span className="font-semibold">{property.baths}</span>
-            </div>
+            {typeHasAttribute(property.propertyType, 'beds') && (
+              <div className="flex items-center gap-0.5">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span className="font-semibold">{property.beds ?? 0}</span>
+              </div>
+            )}
+            {typeHasAttribute(property.propertyType, 'baths') && (
+              <div className="flex items-center gap-0.5">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                </svg>
+                <span className="font-semibold">{property.baths ?? 0}</span>
+              </div>
+            )}
             <div className="flex items-center gap-0.5">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />

@@ -58,7 +58,7 @@ export const isParkingType = (value: unknown): value is ParkingType =>
   typeof value === 'string' && (PARKING_TYPES as readonly string[]).includes(value);
 
 /** A stat chip on a search card, in the order it is shown. */
-export type StatKey = 'beds' | 'baths' | 'sqft' | 'parking' | 'offices' | 'openPlanArea';
+export type StatKey = 'beds' | 'baths' | 'livingRooms' | 'sqft' | 'parking' | 'parkingType' | 'offices' | 'openPlanArea';
 
 interface TypeProfile {
   /** Attributes this type may carry. Everything else is dropped on write. */
@@ -80,7 +80,7 @@ const RESIDENTIAL_ATTRIBUTES = [
   'toilets', 'storageRooms', 'offices', 'totalFloors',
 ] as const satisfies readonly TypeAttribute[];
 
-const RESIDENTIAL_STATS = ['beds', 'baths', 'sqft'] as const satisfies readonly StatKey[];
+const RESIDENTIAL_STATS = ['beds', 'baths', 'livingRooms', 'sqft'] as const satisfies readonly StatKey[];
 
 const PROFILES: Record<PropertyType, TypeProfile> = {
   house: { attributes: RESIDENTIAL_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#0252CD' },
@@ -107,7 +107,9 @@ const PROFILES: Record<PropertyType, TypeProfile> = {
   // Its condition comes from the same enum every other type uses.
   parking: {
     attributes: ['parking', 'parkingType', 'floorNumber'],
-    stats: ['sqft', 'parking'],
+    // How the space is arranged is the thing that tells two garages apart, so
+    // it earns a place on the card rather than only on the detail page.
+    stats: ['sqft', 'parking', 'parkingType'],
     color: '#475569', // Slate — reads like parking signage
   },
   land: { attributes: [], stats: ['sqft'], color: '#8B4513' },
@@ -190,6 +192,51 @@ export const copyTypeAttributes = (source: Record<string, unknown> | null | unde
   }
 
   return copied;
+};
+
+/**
+ * A zero that means something.
+ *
+ * "0 dining rooms" is the absence of a field worth printing, so a zero count
+ * is skipped. A ground floor is genuinely floor 0, though, and hiding it would
+ * lose the one thing the seller said about where the flat is.
+ */
+const MEANINGFUL_ZEROES = new Set<TypeAttribute>(['floorNumber']);
+
+export interface AttributeEntry {
+  attribute: TypeAttribute;
+  value: number | string;
+}
+
+/**
+ * What to show about a listing, in table order.
+ *
+ * The read side's half of the same contract the write path enforces: a type
+ * carries the attributes its profile names and no others, so a garage is never
+ * described as having zero bedrooms and a shop is never asked to explain its
+ * living rooms. Pages that hard-coded "beds, baths, living rooms unless it is
+ * land" printed exactly those zeroes; reading the table instead means a page
+ * shows what the seller was actually asked for.
+ *
+ * Attributes with nothing to say are left out — an absent value, and a zero
+ * count, which is the absence of a room rather than a fact about one.
+ */
+export const attributeEntries = (
+  property: Record<string, unknown> | null | undefined,
+): AttributeEntry[] => {
+  if (!property) return [];
+
+  const entries: AttributeEntry[] = [];
+  for (const attribute of attributesForType(property.propertyType)) {
+    const value = property[attribute];
+    if (value === undefined || value === null || value === '') continue;
+    if (value === 0 && !MEANINGFUL_ZEROES.has(attribute)) continue;
+    if (typeof value !== 'number' && typeof value !== 'string') continue;
+
+    entries.push({ attribute, value });
+  }
+
+  return entries;
 };
 
 /** Type-checked list of every type, for exhaustive tests and pickers. */

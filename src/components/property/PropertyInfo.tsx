@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { validateCoordinates } from '../../shared/utils/validation';
 import { resolveConstruction } from '../../shared/property/construction';
+import { attributeEntries, statsForType } from '../../shared/property/typeAttributes';
+import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '../../shared/property/attributeDisplay';
 import { openExternalUrl } from '../../shared/utils/pwa';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
@@ -17,7 +19,6 @@ import {
   ParkingIcon,
   StarIcon,
   CubeIcon,
-  BuildingOfficeIcon,
   CubeTransparentIcon,
   LivingRoomIcon,
   CheckCircleIcon,
@@ -56,11 +57,35 @@ const humanisePropertyType = (value: unknown): string =>
   typeof value === 'string' ? value.replace(/[-_]+/g, ' ').trim() : '';
 
 /**
+ * The look of each headline stat.
+ *
+ * Which stats appear is the type table's decision; only their colour and icon
+ * live here. A stat with no entry falls back to a neutral tone and the emoji
+ * from `ATTRIBUTE_DISPLAY`, so adding a stat to a type never leaves a blank
+ * tile — it just looks plainer until someone gives it a colour.
+ */
+const HEADLINE_STAT_TONES: Record<string, string> = {
+  beds: 'bg-blue-50 hover:bg-blue-100',
+  baths: 'bg-cyan-50 hover:bg-cyan-100',
+  livingRooms: 'bg-violet-50 hover:bg-violet-100',
+  parking: 'bg-amber-50 hover:bg-amber-100',
+  offices: 'bg-rose-50 hover:bg-rose-100',
+  openPlanArea: 'bg-sky-50 hover:bg-sky-100',
+};
+
+const HEADLINE_STAT_ICONS: Record<string, React.ReactNode> = {
+  beds: <BedIcon className="w-5 h-5 text-blue-500" />,
+  baths: <BathIcon className="w-5 h-5 text-cyan-500" />,
+  livingRooms: <LivingRoomIcon className="w-5 h-5 text-violet-500" />,
+  parking: <ParkingIcon className="w-5 h-5 text-amber-500" />,
+};
+
+/**
  * PropertyInfo Component
  *
  * Comprehensive property information display including:
  * - Price and address
- * - Key stats (beds, baths, sqft)
+ * - Key stats, chosen by the listing's type (see `statsForType`)
  * - Description
  * - Detailed property information
  * - Amenities and features
@@ -94,9 +119,37 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   // generic primary blue.
   const isLuxuryVilla = property.propertyType === 'luxury-villa';
 
-  // Land has no rooms — bedrooms/bathrooms/living rooms are meaningless for a
-  // plot, so the stats row shows only area (and parking, if any) for it.
+  // A plot has no building, so it has no year built either.
   const isLand = property.propertyType === 'land';
+
+  /**
+   * What this listing is described by, from the one table that decides it.
+   *
+   * The stats row and the details grid used to hard-code "bedrooms, bathrooms
+   * and living rooms unless it is land", which described a garage as having
+   * none of the three and never mentioned a shop's open-plan area at all. Both
+   * now read the type's own profile: `headlineStats` is the short row at the
+   * top (the same stats the search card leads with), and `detailAttributes` is
+   * everything else the type carries and the seller filled in.
+   */
+  const headlineStats = useMemo(
+    () => statsForType(property.propertyType).filter((stat) => stat !== 'sqft'),
+    [property.propertyType],
+  );
+  const detailAttributes = useMemo(
+    () => attributeEntries(property as unknown as Record<string, unknown>)
+      .filter(({ attribute }) => !(headlineStats as readonly string[]).includes(attribute)),
+    [property, headlineStats],
+  );
+
+  /** Print an attribute's value: a translated term, a measurement, or a count. */
+  const formatAttributeValue = useCallback((attribute: string, value: number | string) => {
+    const display = ATTRIBUTE_DISPLAY[attribute as keyof typeof ATTRIBUTE_DISPLAY];
+    if (display?.valueKey && isParkingTypeValue(value)) {
+      return t(`${display.valueKey}.${value}`, PARKING_TYPE_FALLBACKS[value]);
+    }
+    return display?.unit ? `${value} ${display.unit}` : String(value);
+  }, [t]);
   // Whether this listing is finished or still going up decides which year the
   // details grid may state. Resolved once, from the record, so the badge and
   // the details row cannot disagree.
@@ -463,47 +516,32 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </div>
           )}
 
-          <div className={`mt-6 grid gap-3 border-t border-neutral-200 pt-5 ${
-            isLand ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'
-          }`}>
-            {!isLand && (
-              <>
-                {/* Beds */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors cursor-default group">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                    <BedIcon className="w-5 h-5 text-blue-500" />
+          {/* The stats a listing of this type leads with — bedrooms and
+              bathrooms on a home, offices and open-plan area on business
+              premises, spaces on a garage — plus the area every listing has.
+              Read from the type's profile so none of them is a zero standing
+              in for a field this type was never asked about. */}
+          <div className="mt-6 grid gap-3 border-t border-neutral-200 pt-5 grid-cols-2 sm:grid-cols-4">
+            {headlineStats.map((stat) => {
+              const value = (property as unknown as Record<string, unknown>)[stat];
+              if (typeof value !== 'number' && typeof value !== 'string') return null;
+              const display = ATTRIBUTE_DISPLAY[stat as keyof typeof ATTRIBUTE_DISPLAY];
+              if (!display) return null;
+
+              return (
+                <div key={stat} className={`flex items-center gap-3 p-3 rounded-2xl transition-colors cursor-default group ${HEADLINE_STAT_TONES[stat] ?? 'bg-slate-50 hover:bg-slate-100'}`}>
+                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform text-lg">
+                    {HEADLINE_STAT_ICONS[stat] ?? <span>{display.icon}</span>}
                   </div>
-                  <div>
-                    <p className="text-xl font-bold text-neutral-900 leading-none">{property.beds}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{t('features.bedrooms')}</p>
+                  <div className="min-w-0">
+                    <p className="text-xl font-bold text-neutral-900 leading-none truncate">{formatAttributeValue(stat, value)}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5 truncate">{t(display.key, display.fallback)}</p>
                   </div>
                 </div>
+              );
+            })}
 
-                {/* Baths */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-cyan-50 hover:bg-cyan-100 transition-colors cursor-default group">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                    <BathIcon className="w-5 h-5 text-cyan-500" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold text-neutral-900 leading-none">{property.baths}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{t('features.bathrooms')}</p>
-                  </div>
-                </div>
-
-                {/* Living rooms */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-violet-50 hover:bg-violet-100 transition-colors cursor-default group">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                    <LivingRoomIcon className="w-5 h-5 text-violet-500" />
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold text-neutral-900 leading-none">{property.livingRooms}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{property.livingRooms === 1 ? t('details.livingRoom') : t('details.livingRoomPlural')}</p>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Area */}
+            {/* Area — the one measure every listing has, whatever its type. */}
             <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-default group">
               <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
                 <SqftIcon className="w-5 h-5 text-emerald-500" />
@@ -513,19 +551,6 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 <p className="text-xs text-neutral-500 mt-0.5">m²</p>
               </div>
             </div>
-
-            {/* Parking (land only up here; otherwise it lives in the Property Details section below) */}
-            {isLand && property.parking > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50 hover:bg-amber-100 transition-colors cursor-default group">
-                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                  <ParkingIcon className="w-5 h-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-neutral-900 leading-none">{property.parking}</p>
-                  <p className="text-xs text-neutral-500 mt-0.5">{t('features.parking')}</p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -581,54 +606,22 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               </DetailItem>
             )
           )}
-          {!isLand && (
-            <DetailItem icon={<ParkingIcon />} label={t('features.parking')}>
-              {property.parking > 0
-                ? `${property.parking} ${property.parking === 1 ? t('details.spot') : t('details.spots')}`
-                : t('details.none')}
-            </DetailItem>
-          )}
-          {property.propertyType === 'apartment' && property.floorNumber && (
-            <DetailItem icon={<BuildingOfficeIcon />} label={t('features.floor')}>
-              {property.floorNumber}
-            </DetailItem>
-          )}
-          {(property.propertyType === 'house' || property.propertyType === 'villa') &&
-            property.totalFloors && (
-              <DetailItem icon={<BuildingOfficeIcon />} label={t('features.floors')}>
-                {property.totalFloors}
+          {/* Everything else this type carries and the seller filled in —
+              kitchens and WCs on a home, open-plan area on a shop, how a
+              garage is arranged. One row per attribute the type actually has,
+              so nothing appears as a zero for a question never asked. */}
+          {detailAttributes.map(({ attribute, value }) => {
+            const display = ATTRIBUTE_DISPLAY[attribute];
+            return (
+              <DetailItem
+                key={attribute}
+                icon={<span className="text-2xl">{display.icon}</span>}
+                label={t(display.key, display.fallback)}
+              >
+                {formatAttributeValue(attribute, value)}
               </DetailItem>
-            )}
-
-          {!!property.kitchens && property.kitchens > 0 && (
-            <DetailItem icon={<span className="text-2xl">🍳</span>} label={t('details.kitchens', 'Kitchens')}>
-              {property.kitchens}
-            </DetailItem>
-          )}
-
-          {!!property.diningRooms && property.diningRooms > 0 && (
-            <DetailItem icon={<span className="text-2xl">🍽️</span>} label={t('details.diningRooms', 'Dining rooms')}>
-              {property.diningRooms}
-            </DetailItem>
-          )}
-
-          {!!property.toilets && property.toilets > 0 && (
-            <DetailItem icon={<span className="text-2xl">🚻</span>} label={t('details.toilets', 'Toilets (WC)')}>
-              {property.toilets}
-            </DetailItem>
-          )}
-
-          {!!property.storageRooms && property.storageRooms > 0 && (
-            <DetailItem icon={<span className="text-2xl">📦</span>} label={t('details.storageRooms', 'Storage rooms')}>
-              {property.storageRooms}
-            </DetailItem>
-          )}
-
-          {!!property.offices && property.offices > 0 && (
-            <DetailItem icon={<span className="text-2xl">💼</span>} label={t('details.offices', 'Office / study')}>
-              {property.offices}
-            </DetailItem>
-          )}
+            );
+          })}
 
           {property.furnishing && property.furnishing !== 'any' && (
             <DetailItem icon={<span className="text-2xl">🛋️</span>} label={t('details.furnishing')}>

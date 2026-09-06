@@ -39,6 +39,7 @@ interface PropertyCardData {
     parking?: number;
     offices?: number;
     openPlanArea?: number;
+    parkingType?: string;
     yearBuilt?: number;
     propertyType?: string;
     constructionStatus?: string;
@@ -76,6 +77,8 @@ type StatChip = { value: React.ReactNode; label: string; icon: string };
 type StatSource = {
     beds?: number;
     baths?: number;
+    livingRooms?: number;
+    parkingType?: string;
     sqft?: number;
     parking?: number;
     offices?: number;
@@ -85,11 +88,25 @@ type StatSource = {
 const STAT_CHIPS: Record<StatKey, (property: StatSource, t: TFunction) => StatChip> = {
     beds: (property, t) => ({ value: property.beds ?? 0, label: t('featured.bedsLabel'), icon: '🛏' }),
     baths: (property, t) => ({ value: property.baths ?? 0, label: t('featured.bathsLabel'), icon: '🚿' }),
+    livingRooms: (property, t) => ({
+        value: property.livingRooms ?? 0,
+        label: t('featured.livingRoomsLabel', 'Living rooms'),
+        icon: '🛋️',
+    }),
     sqft: (property) => ({ value: property.sqft ?? 0, label: 'm²', icon: '📐' }),
     parking: (property, t) => ({
         value: property.parking ?? 0,
         label: t('featured.spacesLabel', 'Spaces'),
         icon: '🅿️',
+    }),
+    parkingType: (property, t) => ({
+        // A word, not a count: the arrangement is translated, and a listing
+        // without one simply shows a dash rather than a stray zero.
+        value: property.parkingType
+            ? t(`property:details.parkingTypes.${property.parkingType}`, property.parkingType)
+            : '—',
+        label: t('property:details.parkingType', 'Parking type'),
+        icon: '🚗',
     }),
     offices: (property, t) => ({
         value: property.offices ?? 0,
