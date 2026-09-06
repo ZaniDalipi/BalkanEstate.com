@@ -3,8 +3,10 @@ import { PROPERTY_TYPES, type PropertyType } from '../config/propertyTypes';
 import {
   PARKING_TYPES,
   TYPE_ATTRIBUTES,
+  attributesForType,
   normalizeTypeAttributes,
   type ParkingType,
+  type TypeAttribute,
 } from '../config/typeAttributes';
 import {
   CONSTRUCTION_STATUSES,
@@ -74,9 +76,11 @@ export interface IProperty extends Document {
   address: string;
   city: string;
   country: string;
-  beds: number;
-  baths: number;
-  livingRooms: number;
+  // Present only on the types described by them — a plot of land carries no
+  // bedroom count at all, not a zero. See `describedByType` below.
+  beds?: number;
+  baths?: number;
+  livingRooms?: number;
   kitchens?: number;
   diningRooms?: number;
   toilets?: number;
@@ -179,6 +183,32 @@ export interface IProperty extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * Require a room count only on the types that are described by one.
+ *
+ * `beds`, `baths` and `livingRooms` are type attributes: the table in
+ * `config/typeAttributes` says which types carry them, and the pre-validate
+ * hook below *removes* the ones a type does not carry. An unconditional
+ * `required: true` turned that removal into a rejection — every land, parking
+ * and commercial listing came back 400 "Validation failed", naming three
+ * fields the form had correctly declined to send. Asking the same table that
+ * strips the field whether it should have been there keeps the two from
+ * disagreeing.
+ *
+ * Under an update validator (`context: 'query'`) `this` is the query, whose
+ * `get` reads the update rather than the stored document. An update that does
+ * not set the type cannot say what the listing is, so nothing is required
+ * there and the document-level hook remains the one that decides.
+ */
+const describedByType = (attribute: TypeAttribute) =>
+  function (this: unknown): boolean {
+    const holder = this as { get?: (path: string) => unknown } | null;
+    const propertyType = typeof holder?.get === 'function' ? holder.get('propertyType') : undefined;
+    if (propertyType === undefined || propertyType === null) return false;
+
+    return attributesForType(propertyType).includes(attribute);
+  };
 
 const PropertySchema: Schema = new Schema(
   {
@@ -303,17 +333,17 @@ const PropertySchema: Schema = new Schema(
     },
     beds: {
       type: Number,
-      required: true,
+      required: describedByType('beds'),
       min: 0,
     },
     baths: {
       type: Number,
-      required: true,
+      required: describedByType('baths'),
       min: 0,
     },
     livingRooms: {
       type: Number,
-      required: true,
+      required: describedByType('livingRooms'),
       min: 0,
     },
     kitchens: {

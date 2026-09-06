@@ -143,8 +143,10 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
             {title}
           </h3>
 
-          {/* Message */}
-          <p className="text-neutral-700 text-center mb-6 leading-relaxed">
+          {/* Message. `whitespace-pre-line` so a message that lists several
+              problems — one rejected field per line — reads as a list rather
+              than one collapsed run-on sentence. */}
+          <p className="text-neutral-700 text-center mb-6 leading-relaxed whitespace-pre-line">
             {message}
           </p>
 

@@ -1,6 +1,19 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export type SubscriptionStore = 'google' | 'apple' | 'web' | 'stripe' | 'paddle' | 'agency_coupon' | 'agency_creation';
+/**
+ * Where a subscription came from.
+ *
+ * The schema's enum reads from this list rather than repeating it: the two had
+ * drifted, and a subscription the agency system creates ('agency_creation')
+ * was accepted by the compiler and then rejected on save — every /auth/me
+ * auto-sync logged "`agency_creation` is not a valid enum value" and left the
+ * agency owner's subscription unsaved.
+ */
+export const SUBSCRIPTION_STORES = [
+  'google', 'apple', 'web', 'stripe', 'paddle', 'agency_coupon', 'agency_creation',
+] as const;
+
+export type SubscriptionStore = (typeof SUBSCRIPTION_STORES)[number];
 export type SubscriptionStatus =
   | 'active'
   | 'expired'
@@ -89,7 +102,7 @@ const SubscriptionSchema: Schema = new Schema(
     },
     store: {
       type: String,
-      enum: ['google', 'apple', 'web', 'stripe', 'paddle', 'agency_coupon'],
+      enum: SUBSCRIPTION_STORES,
       required: true,
       index: true,
     },

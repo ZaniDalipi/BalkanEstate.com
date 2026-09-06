@@ -1205,7 +1205,17 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             }
         } catch (err: any) {
             const errorCode = err.code;
-            const errorMessage = err.message || "Failed to submit listing.";
+            // A rejected field comes back as `errors: [{ field, message }]` next to
+            // a flat "Validation failed". Showing only the latter told the seller
+            // nothing about which field to fix, so spell the fields out.
+            const fieldFailures: { field?: string; message?: string }[] =
+                Array.isArray(err.details?.errors) ? err.details.errors : [];
+            const errorMessage = fieldFailures.length > 0
+                ? fieldFailures
+                    .map(({ field, message }) => (field ? `${field}: ${message}` : message))
+                    .filter(Boolean)
+                    .join('\n')
+                : err.message || "Failed to submit listing.";
 
             // Handle specific backend error codes with professional dialogs
             const propertyToSave = {

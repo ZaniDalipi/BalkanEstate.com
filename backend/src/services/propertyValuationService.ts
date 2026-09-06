@@ -122,8 +122,8 @@ async function getComparableProperties(
     price: prop.price,
     sqft: prop.sqft,
     pricePerSqm: Math.round(prop.price / prop.sqft),
-    beds: prop.beds,
-    baths: prop.baths,
+    beds: prop.beds ?? 0,
+    baths: prop.baths ?? 0,
     propertyType: prop.propertyType,
     soldDate: prop.soldAt,
   }));

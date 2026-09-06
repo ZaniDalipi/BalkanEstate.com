@@ -80,10 +80,12 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   if (filters.minPrice && property.price < filters.minPrice) return false;
   if (filters.maxPrice && property.price > filters.maxPrice) return false;
 
-  // Beds, baths, living rooms
-  if (filters.beds && property.beds < filters.beds) return false;
-  if (filters.baths && property.baths < filters.baths) return false;
-  if (filters.livingRooms && property.livingRooms < filters.livingRooms) return false;
+  // Beds, baths, living rooms. A type that carries no room counts at all — land,
+  // parking — reads as zero here, so a search asking for two bedrooms skips it
+  // rather than matching on a missing field.
+  if (filters.beds && (property.beds ?? 0) < filters.beds) return false;
+  if (filters.baths && (property.baths ?? 0) < filters.baths) return false;
+  if (filters.livingRooms && (property.livingRooms ?? 0) < filters.livingRooms) return false;
 
   // Square footage
   if (filters.minSqft && property.sqft < filters.minSqft) return false;
@@ -322,8 +324,8 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
                 address: property.address,
                 city: property.city,
                 price: property.price,
-                beds: property.beds,
-                baths: property.baths,
+                beds: property.beds ?? 0,
+                baths: property.baths ?? 0,
                 sqft: property.sqft,
                 imageUrl: property.imageUrl,
               },
@@ -357,8 +359,8 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
               address: p.address,
               city: p.city,
               price: p.price,
-              beds: p.beds,
-              baths: p.baths,
+              beds: p.beds ?? 0,
+              baths: p.baths ?? 0,
               sqft: p.sqft,
               imageUrl: p.imageUrl,
             })),
@@ -477,8 +479,8 @@ export async function processPriceDropAlerts(): Promise<void> {
             previousPrice: savedPrice,
             newPrice: currentPrice,
             percentageDrop,
-            beds: property.beds,
-            baths: property.baths,
+            beds: property.beds ?? 0,
+            baths: property.baths ?? 0,
             sqft: property.sqft,
             imageUrl: property.imageUrl,
           },
@@ -635,8 +637,8 @@ async function processSavedSearchPriceDropAlerts(): Promise<void> {
               newPrice,
               percentageDrop: percentageChange,
               isPriceIncrease: !isPriceDrop,
-              beds: property.beds,
-              baths: property.baths,
+              beds: property.beds ?? 0,
+              baths: property.baths ?? 0,
               sqft: property.sqft,
               imageUrl: property.imageUrl,
             },
@@ -929,8 +931,8 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
             address: property.address,
             city: property.city,
             price: property.price,
-            beds: property.beds,
-            baths: property.baths,
+            beds: property.beds ?? 0,
+            baths: property.baths ?? 0,
             sqft: property.sqft,
             imageUrl: property.imageUrl,
           },
@@ -1043,8 +1045,8 @@ export async function processInstantPriceDropForProperty(
             newPrice,
             percentageDrop: percentageChange,
             isPriceIncrease: !isPriceDrop,
-            beds: property.beds,
-            baths: property.baths,
+            beds: property.beds ?? 0,
+            baths: property.baths ?? 0,
             sqft: property.sqft,
             imageUrl: property.imageUrl,
           },
@@ -1111,8 +1113,8 @@ export async function processInstantPriceDropForProperty(
             newPrice,
             percentageDrop: percentageChange,
             isPriceIncrease: !isPriceDrop,
-            beds: property.beds,
-            baths: property.baths,
+            beds: property.beds ?? 0,
+            baths: property.baths ?? 0,
             sqft: property.sqft,
             imageUrl: property.imageUrl,
           },

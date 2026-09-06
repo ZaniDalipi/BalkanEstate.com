@@ -92,7 +92,10 @@ function buildOgTitle(property: PropertyOgProjection): string {
     return `${property.title} – ${property.city}, ${property.country} | BalkanEstateAI`;
   }
 
-  const bedsPrefix = property.beds > 0 ? `${property.beds}-Bed ` : '';
+  // A land or parking listing carries no bedroom count at all, so read it as
+  // zero rather than printing "undefined-Bed" into a share card.
+  const beds = property.beds ?? 0;
+  const bedsPrefix = beds > 0 ? `${beds}-Bed ` : '';
   const typeLabel =
     property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1);
   const action = property.listingType === 'rent' ? 'for Rent' : 'for Sale';
@@ -102,9 +105,11 @@ function buildOgTitle(property: PropertyOgProjection): string {
 
 function buildOgDescription(property: PropertyOgProjection): string {
   const price = formatPrice(property.price, property.isNegotiable);
+  const beds = property.beds ?? 0;
+  const baths = property.baths ?? 0;
   const details = [
-    property.beds > 0 ? `${property.beds} bed` : '',
-    property.baths > 0 ? `${property.baths} bath` : '',
+    beds > 0 ? `${beds} bed` : '',
+    baths > 0 ? `${baths} bath` : '',
     property.sqft > 0 ? `${property.sqft} m²` : '',
   ]
     .filter(Boolean)
