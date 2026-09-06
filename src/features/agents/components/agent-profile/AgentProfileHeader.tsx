@@ -73,7 +73,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
               {agent.licenseVerified && (
                 <span className="inline-flex items-center gap-1 bg-white/20 text-white px-2 py-1 rounded-full text-xs font-medium">
                   <CheckBadgeIcon className="w-4 h-4" />
-                  {t('agents:profilePage.verified')}
+                  {t('agents:profilePage.header.verified')}
                 </span>
               )}
             </div>
@@ -101,7 +101,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
             <div className="flex items-center gap-2 mb-4">
               <StarRating rating={agent.rating || 0} className="h-5 w-5" />
               <span className="text-white/80">
-                ({agent.totalReviews || 0} {t('agents:profilePage.reviews')})
+                ({agent.totalReviews || 0} {t('agents:profilePage.stats.reviews')})
               </span>
             </div>
 
@@ -135,14 +135,14 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
               className={`p-3 rounded-full ${
                 isSaved ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
               } transition-colors`}
-              aria-label={isSaved ? t('agents:profilePage.unsave') : t('agents:profilePage.save')}
+              aria-label={isSaved ? t('agents:profilePage.header.unsave') : t('agents:profilePage.header.save')}
             >
               <HeartIcon className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={onShare}
               className="p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-              aria-label={t('agents:profilePage.share')}
+              aria-label={t('agents:profilePage.header.share')}
             >
               <ShareIcon className="w-5 h-5" />
             </button>
@@ -150,7 +150,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
               onClick={onContact}
               className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
             >
-              {t('agents:profilePage.contact')}
+              {t('agents:profilePage.header.contact')}
             </button>
           </div>
         </div>

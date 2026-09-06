@@ -152,9 +152,9 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 <div className="flex items-center gap-3 mt-2 text-sm text-gray-400">
                     {property.propertyType !== 'land' && (
                         <>
-                            <span>{property.beds} {t('common:beds')}</span>
+                            <span>{property.beds} {t('property:features.beds')}</span>
                             <span className="text-gray-300">|</span>
-                            <span>{property.baths} {t('common:baths')}</span>
+                            <span>{property.baths} {t('property:features.baths')}</span>
                             <span className="text-gray-300">|</span>
                         </>
                     )}

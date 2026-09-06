@@ -42,7 +42,7 @@ const AgentMarketInsights: React.FC<AgentMarketInsightsProps> = ({ insights, age
   const insightItems = [
     {
       icon: ClockIcon,
-      title: t('agents:profilePage.marketInsights.avgDaysTitle'),
+      title: t('agents:profilePage.marketInsights.avgDaysOnMarket'),
       value: `${insights.avgDaysOnMarket} ${t('agents:profilePage.marketInsights.days')}`,
       description: t(insights.daysDescription),
       color: 'text-blue-600',
@@ -50,7 +50,7 @@ const AgentMarketInsights: React.FC<AgentMarketInsightsProps> = ({ insights, age
     },
     {
       icon: ArrowTrendingUpIcon,
-      title: t('agents:profilePage.marketInsights.priceGrowthTitle'),
+      title: t('agents:profilePage.marketInsights.priceGrowthYoY'),
       value: `${insights.priceGrowth > 0 ? '+' : ''}${insights.priceGrowth}%`,
       description: t(insights.growthDescription),
       color: insights.priceGrowth > 0 ? 'text-green-600' : 'text-red-600',
@@ -58,7 +58,7 @@ const AgentMarketInsights: React.FC<AgentMarketInsightsProps> = ({ insights, age
     },
     {
       icon: FireIcon,
-      title: t('agents:profilePage.marketInsights.activityTitle'),
+      title: t('agents:profilePage.marketInsights.marketActivity'),
       value: insights.activityLevel,
       description: t(insights.activityDescription),
       color: getActivityColor(insights.activityLevel).split(' ')[0],

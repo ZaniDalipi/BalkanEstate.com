@@ -245,7 +245,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             </button>
                             <button onClick={handleLogout} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg font-semibold transition-colors w-full text-left text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start">
                                 <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" />
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:logout')}</span>
+                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:buttons.logout')}</span>
                             </button>
                         </div>
                     ) : (

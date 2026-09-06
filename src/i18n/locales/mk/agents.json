@@ -526,13 +526,17 @@
       "saved": "Зачувано",
       "share": "Сподели",
       "independentAgent": "Независен агент",
-      "editProfile": "Уреди профил"
+      "editProfile": "Уреди профил",
+      "verified": "Верификуван",
+      "unsave": "Отстрани од зачуваните",
+      "contact": "Контакт"
     },
     "stats": {
       "propertiesSold": "Продадени имоти",
       "yearsExperience": "Години искуство",
       "activeListings": "Активни огласи",
-      "reviews": "рецензии"
+      "reviews": "рецензии",
+      "avgPrice": "Просечна цена"
     },
     "badges": {
       "topAgent": "Врвен агент"
@@ -695,7 +699,8 @@
       "forSale": "За продажба",
       "forRent": "За изнајмување",
       "noListings": "Нема достапни огласи",
-      "allTypes": "Сите типови"
+      "allTypes": "Сите типови",
+      "noSearchResults": "Ниту еден имот не одговара на пребарувањето"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани рецензии",

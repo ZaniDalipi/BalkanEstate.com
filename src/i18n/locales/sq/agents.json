@@ -458,13 +458,17 @@
       "saved": "Ruajtur",
       "share": "Shpërndaj",
       "independentAgent": "Agjent i Pavarur",
-      "editProfile": "Modifiko Profilin"
+      "editProfile": "Modifiko Profilin",
+      "verified": "I verifikuar",
+      "unsave": "Hiq nga të ruajturat",
+      "contact": "Kontakt"
     },
     "stats": {
       "propertiesSold": "Prona të Shitura",
       "yearsExperience": "Vite Përvojë",
       "activeListings": "Listime Aktive",
-      "reviews": "vlerësime"
+      "reviews": "vlerësime",
+      "avgPrice": "Çmimi mesatar"
     },
     "badges": {
       "topAgent": "Agjent Kryesor"
@@ -558,7 +562,8 @@
       "forSale": "Për Shitje",
       "forRent": "Për Qira",
       "noListings": "Nuk ka listime të disponueshme",
-      "allTypes": "Të gjitha llojet"
+      "allTypes": "Të gjitha llojet",
+      "noSearchResults": "Asnjë pronë nuk përputhet me kërkimin tuaj"
     },
     "marketInsights": {
       "title": "Local Market Insights",

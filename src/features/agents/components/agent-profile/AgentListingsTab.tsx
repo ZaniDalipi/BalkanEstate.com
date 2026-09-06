@@ -119,7 +119,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {t('agents:profilePage.listings.all')} ({activeListings.length + soldProperties.length})
+            {t('agents:profilePage.listingsTab.all')} ({activeListings.length + soldProperties.length})
           </button>
           <button
             onClick={() => setListingsFilter('active')}
@@ -129,7 +129,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {t('agents:profilePage.listings.active')} ({activeListings.length})
+            {t('agents:profilePage.listingsTab.activeListings')} ({activeListings.length})
           </button>
           <button
             onClick={() => setListingsFilter('sold')}
@@ -139,7 +139,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {t('agents:profilePage.listings.sold')} ({soldProperties.length})
+            {t('agents:profilePage.listingsTab.soldProperties')} ({soldProperties.length})
           </button>
         </div>
 
@@ -148,7 +148,7 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder={t('agents:profilePage.listings.search')}
+            placeholder={t('agents:profilePage.listingsTab.searchAllProperties')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-9 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -170,8 +170,8 @@ const AgentListingsTab: React.FC<AgentListingsTabProps> = ({
         <div className="text-center py-12">
           <p className="text-gray-500">
             {searchTerm
-              ? t('agents:profilePage.listings.noSearchResults')
-              : t('agents:profilePage.listings.noListings')}
+              ? t('agents:profilePage.listingsTab.noSearchResults')
+              : t('agents:profilePage.listingsTab.noListings')}
           </p>
         </div>
       ) : (
