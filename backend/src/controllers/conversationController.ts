@@ -36,8 +36,8 @@ export const getConversations = async (
       $or: [{ buyerId: String((req.user as IUser)._id) }, { sellerId: String((req.user as IUser)._id) }],
     })
       .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
-      .populate('buyerId', 'name email phone avatarUrl')
-      .populate('sellerId', 'name email phone avatarUrl role agencyName')
+      .populate('buyerId', 'name email phone avatarUrl avatarOptions gender')
+      .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName')
       .sort({ lastMessageAt: -1 });
 
     // Get last message for ALL conversations in a single aggregation query
@@ -82,8 +82,8 @@ export const getConversation = async (
 
     const conversation = await Conversation.findById(id)
       .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
-      .populate('buyerId', 'name email phone avatarUrl')
-      .populate('sellerId', 'name email phone avatarUrl role agencyName');
+      .populate('buyerId', 'name email phone avatarUrl avatarOptions gender')
+      .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
 
     if (!conversation) {
       res.status(404).json({ message: 'Conversation not found' });
@@ -107,7 +107,7 @@ export const getConversation = async (
 
     // Get messages (E2E encrypted, server cannot decrypt)
     const messages = await Message.find({ conversationId: conversation._id })
-      .populate('senderId', 'name avatarUrl')
+      .populate('senderId', 'name avatarUrl avatarOptions gender')
       .sort({ createdAt: 1 });
 
     // Messages remain encrypted, client will decrypt them
@@ -179,8 +179,8 @@ export const createConversation = async (
         sellerId: property.sellerId,
       })
         .populate('propertyId', 'title imageUrl images price city country address propertyType sellerId')
-        .populate('buyerId', 'name email phone avatarUrl')
-        .populate('sellerId', 'name email phone avatarUrl role agencyName');
+        .populate('buyerId', 'name email phone avatarUrl avatarOptions gender')
+        .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
 
       if (!conversation) {
         conversation = await Conversation.create({
@@ -194,8 +194,8 @@ export const createConversation = async (
         await incrementInquiryCount(String(property.sellerId));
 
         await conversation.populate('propertyId', 'title images price city country address propertyType sellerId');
-        await conversation.populate('buyerId', 'name email phone avatarUrl');
-        await conversation.populate('sellerId', 'name email phone avatarUrl role agencyName');
+        await conversation.populate('buyerId', 'name email phone avatarUrl avatarOptions gender');
+        await conversation.populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
       }
 
       res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
@@ -245,8 +245,8 @@ export const createConversation = async (
         buyerId,
         sellerId,
       })
-        .populate('buyerId', 'name email phone avatarUrl')
-        .populate('sellerId', 'name email phone avatarUrl role agencyName');
+        .populate('buyerId', 'name email phone avatarUrl avatarOptions gender')
+        .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
 
       if (!conversation) {
         // Also check without the $exists constraint (propertyId may be null/undefined)
@@ -255,8 +255,8 @@ export const createConversation = async (
           buyerId,
           sellerId,
         })
-          .populate('buyerId', 'name email phone avatarUrl')
-          .populate('sellerId', 'name email phone avatarUrl role agencyName');
+          .populate('buyerId', 'name email phone avatarUrl avatarOptions gender')
+          .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
       }
 
       if (!conversation) {
@@ -268,8 +268,8 @@ export const createConversation = async (
 
         await incrementInquiryCount(sellerId);
 
-        await conversation.populate('buyerId', 'name email phone avatarUrl');
-        await conversation.populate('sellerId', 'name email phone avatarUrl role agencyName');
+        await conversation.populate('buyerId', 'name email phone avatarUrl avatarOptions gender');
+        await conversation.populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
       }
 
       res.status(201).json({ conversation: sanitizeConversation(conversation.toObject()) });
@@ -355,7 +355,7 @@ export const sendMessage = async (
       $inc: { [unreadField]: 1 },
     });
 
-    await message.populate('senderId', 'name avatarUrl');
+    await message.populate('senderId', 'name avatarUrl avatarOptions gender');
 
     // Send email notification to recipient
     try {

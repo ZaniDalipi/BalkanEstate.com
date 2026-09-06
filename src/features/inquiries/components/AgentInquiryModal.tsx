@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sendAgentInquiry } from '@/services/apiService';
-import { XMarkIcon, UserCircleIcon } from '@/constants';
+import { XMarkIcon } from '@/constants';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface Agent {
   id: string;
@@ -10,6 +11,9 @@ interface Agent {
   agentId?: string;
   name: string;
   avatarUrl?: string;
+  /** Their generated character, for when there is no uploaded photo. */
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
   agencyName?: string;
   city?: string;
   country?: string;
@@ -196,17 +200,17 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
         {/* ── Header ── */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-5 py-3.5 flex items-center justify-between flex-shrink-0 sm:rounded-t-2xl">
           <div className="flex items-center gap-3 min-w-0">
-            {agent.avatarUrl ? (
-              <img
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-white/20 ring-2 ring-white/30 flex-shrink-0">
+              <UserAvatar
                 src={agent.avatarUrl}
                 alt={agent.name}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-white/30 flex-shrink-0"
+                gender={agent.gender}
+                seed={agent.agentId || agent.id || agent.name}
+                avatarOptions={agent.avatarOptions}
+                width={80}
+                className="w-full h-full object-cover"
               />
-            ) : (
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                <UserCircleIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white/80" />
-              </div>
-            )}
+            </div>
             <div className="min-w-0">
               <h2 className="text-sm sm:text-base font-bold text-white leading-tight truncate">
                 {t('agents:inquiry.title', 'Contact Agent')}

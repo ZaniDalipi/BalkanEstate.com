@@ -5,6 +5,7 @@ import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import { type Property, type PropertyEditForm, getAllPropertyImages } from './usePropertyManager';
 import AdminPropertyLocationEditor from './AdminPropertyLocationEditor';
 import { resolveConstruction } from '@/shared/property/construction';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface PropertyViewModalProps {
   property: Property;
@@ -151,10 +152,16 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
             <h5 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">{t('admin:properties.owner')}</h5>
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold">
-                    {property.sellerId?.name?.charAt(0) || '?'}
-                  </span>
+                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-blue-50">
+                  <UserAvatar
+                    src={property.sellerId?.avatarUrl}
+                    alt={property.sellerId?.name || ''}
+                    gender={property.sellerId?.gender}
+                    seed={property.sellerId?._id || property.sellerId?.name}
+                    avatarOptions={property.sellerId?.avatarOptions}
+                    width={96}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{property.sellerId?.name || t('admin:properties.unknown')}</div>

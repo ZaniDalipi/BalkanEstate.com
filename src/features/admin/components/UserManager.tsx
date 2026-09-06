@@ -14,6 +14,7 @@ import {
 } from '@/constants';
 import { useUserManager } from './useUserManager';
 import UserManagerDetail from './UserManagerDetail';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 const UserManager: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -168,13 +169,17 @@ const UserManager: React.FC = () => {
               <tr key={user._id} className={`hover:bg-gray-50 ${!user.isEmailVerified ? 'bg-yellow-50' : ''}`}>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.name} loading="lazy" decoding="async" className="w-10 h-10 rounded-full mr-3" referrerPolicy="no-referrer" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center mr-3 font-semibold">
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0 bg-blue-50">
+                      <UserAvatar
+                        src={user.avatarUrl}
+                        alt={user.name}
+                        gender={user.gender}
+                        seed={user._id || user.name}
+                        avatarOptions={user.avatarOptions}
+                        width={80}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <div>
                       <div className="font-medium text-gray-900">{user.name}</div>
                       {user.agencyName && (

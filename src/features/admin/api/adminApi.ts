@@ -487,6 +487,9 @@ export interface PendingLicenseAgent {
     email: string;
     phone?: string;
     avatarUrl?: string;
+    /** Their generated character, shown when there is no uploaded photo. */
+    avatarOptions?: string;
+    gender?: 'male' | 'female' | 'other';
     country?: string;
     city?: string;
   };

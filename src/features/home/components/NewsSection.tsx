@@ -6,6 +6,7 @@ import { useArticles } from '../../blog/hooks/useArticles';
 import { ArticleListItem } from '../../blog/types/article.types';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'All': '🌍',
@@ -184,8 +185,16 @@ const ArticleMiniCard: React.FC<{ article: ArticleListItem; index: number; onNav
 
         <div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-neutral-50">
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-slate-600 to-slate-900 flex items-center justify-center text-white text-[9px] font-bold">
-              {article.author?.name?.charAt(0)?.toUpperCase() || 'B'}
+            <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-slate-100 to-slate-200">
+              <UserAvatar
+                src={article.author?.avatarUrl}
+                alt={article.author?.name || 'BalkanEstate'}
+                gender={article.author?.gender}
+                seed={article.author?._id || article.author?.name}
+                avatarOptions={article.author?.avatarOptions}
+                width={40}
+                className="w-full h-full object-cover"
+              />
             </div>
             <span className="text-[9px] sm:text-[10px] text-slate-400 truncate max-w-[80px]">{article.author?.name || 'BalkanEstate'}</span>
           </div>

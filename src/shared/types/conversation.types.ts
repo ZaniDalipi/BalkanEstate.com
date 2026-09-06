@@ -19,6 +19,9 @@ export interface ConversationParticipant {
   id: string;
   name: string;
   avatarUrl?: string;
+  /** DiceBear customisation JSON, so a participant with no photo still has a face. */
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
   role?: string;
   agencyName?: string;
 }

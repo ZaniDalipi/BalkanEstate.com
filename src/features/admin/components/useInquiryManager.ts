@@ -15,6 +15,9 @@ export interface Inquiry {
     email: string;
     role: string;
     avatarUrl?: string;
+    /** Their generated character, shown when there is no uploaded photo. */
+    avatarOptions?: string;
+    gender?: 'male' | 'female' | 'other';
   };
   recipientName: string;
   recipientEmail: string;

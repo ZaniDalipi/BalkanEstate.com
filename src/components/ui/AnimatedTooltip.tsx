@@ -6,6 +6,7 @@ import {
   useMotionValue,
   useSpring,
 } from 'framer-motion';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 export interface AnimatedTooltipItem {
   id: number;
@@ -90,20 +91,13 @@ const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({ items, onItemClick, o
               onMouseMove={handleMouseMove}
               className="relative rounded-full h-14 w-14 border-2 border-white group-hover:scale-105 group-hover:z-30 transition duration-500 overflow-hidden cursor-pointer"
             >
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="object-cover w-full h-full rounded-full"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">
-                    {item.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              <UserAvatar
+                src={item.image || undefined}
+                alt={item.name}
+                seed={item.listingId || item.name}
+                width={112}
+                className="object-cover w-full h-full rounded-full"
+              />
 
               {/* Online pulse indicator */}
               <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white">

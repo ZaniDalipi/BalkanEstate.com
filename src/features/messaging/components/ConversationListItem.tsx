@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Conversation } from '@/types';
 import { useAppContext } from '@/context/AppContext';
-import { BuildingOfficeIcon, UserCircleIcon } from '@/constants';
+import { BuildingOfficeIcon } from '@/constants';
 import { markConversationAsRead } from '@/services/apiService';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface ConversationListItemProps {
     conversation: Conversation;
@@ -80,6 +81,9 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
     const timestamp = conversation.lastMessageAt || lastMessage?.timestamp || conversation.createdAt;
     const timeLabel = formatRelativeTime(timestamp);
 
+    // The person on the other end of this thread — named, and given a face
+    // below when the row has no property thumbnail to show instead.
+    const otherPerson = isBuyer ? conversation.seller : conversation.buyer;
     const otherPersonName = isBuyer
         ? (conversation.seller?.name || property?.seller?.name || t('messages:inbox.seller', 'Seller'))
         : (conversation.buyer?.name || t('messages:inbox.buyer', 'Buyer'));
@@ -117,8 +121,16 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
             {/* Avatar / thumbnail */}
             <div className="relative flex-shrink-0">
                 {!property ? (
-                    <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center rounded-full">
-                        <UserCircleIcon className="w-7 h-7 text-primary/60" />
+                    <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-primary/10 to-primary/20">
+                        <UserAvatar
+                            src={otherPerson?.avatarUrl}
+                            alt={otherPersonName}
+                            gender={otherPerson?.gender}
+                            seed={otherPerson?.id || otherPersonName}
+                            avatarOptions={otherPerson?.avatarOptions}
+                            width={112}
+                            className="w-full h-full object-cover"
+                        />
                     </div>
                 ) : imageError ? (
                     <div className="w-14 h-14 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-xl">

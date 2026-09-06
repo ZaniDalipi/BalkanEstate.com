@@ -8,6 +8,7 @@ import {
 } from '@/constants';
 import { useInquiryManager } from './useInquiryManager';
 import InquiryManagerDetail from './InquiryManagerDetail';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 const InquiryManager: React.FC = () => {
   const {
@@ -231,13 +232,17 @@ const InquiryManager: React.FC = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center">
-                      {inquiry.recipientId?.avatarUrl ? (
-                        <img src={inquiry.recipientId.avatarUrl} alt="" loading="lazy" decoding="async" className="w-8 h-8 rounded-full mr-2" referrerPolicy="no-referrer" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center mr-2 text-sm">
-                          {(inquiry.recipientName || '?').charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <div className="w-8 h-8 rounded-full overflow-hidden mr-2 flex-shrink-0 bg-blue-50">
+                        <UserAvatar
+                          src={inquiry.recipientId?.avatarUrl}
+                          alt={inquiry.recipientName || ''}
+                          gender={inquiry.recipientId?.gender}
+                          seed={inquiry.recipientId?._id || inquiry.recipientName}
+                          avatarOptions={inquiry.recipientId?.avatarOptions}
+                          width={64}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <div>
                         <div className="font-medium text-gray-900 text-sm">{inquiry.recipientName || '-'}</div>
                         <div className="text-xs text-gray-500">{inquiry.recipientEmail || '-'}</div>

@@ -45,7 +45,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 
     const [articles, total] = await Promise.all([
       Article.find(filter)
-        .populate('author', 'name')
+        .populate('author', 'name avatarUrl avatarOptions gender')
         .sort({ isFeatured: -1, publishedAt: -1 })
         .skip(skip)
         .limit(limitNum)
@@ -125,7 +125,7 @@ router.get('/:slug', async (req: Request, res: Response): Promise<void> => {
     }
 
     const article = await Article.findOne({ slug, status: 'published' })
-      .populate('author', 'name')
+      .populate('author', 'name avatarUrl avatarOptions gender')
       .lean();
 
     if (!article) {

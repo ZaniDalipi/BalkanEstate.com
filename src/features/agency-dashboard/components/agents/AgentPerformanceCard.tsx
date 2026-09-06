@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ClockIcon, HomeIcon, EnvelopeIcon } from '@/constants';
 import type { DashboardAgent } from '../../types';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface AgentPerformanceCardProps {
   agent: DashboardAgent;
@@ -35,15 +36,17 @@ const AgentPerformanceCard: React.FC<AgentPerformanceCardProps> = ({ agent }) =>
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
       <div className="flex items-center gap-3 mb-5">
-        {agent.avatar ? (
-          <img src={agent.avatar} alt={agent.name} className="w-11 h-11 rounded-full object-cover" />
-        ) : (
-          <div className="w-11 h-11 bg-indigo-100 rounded-full flex items-center justify-center">
-            <span className="text-indigo-700 font-bold text-base">
-              {agent.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        )}
+        <div className="w-11 h-11 rounded-full overflow-hidden bg-indigo-50 flex-shrink-0">
+          <UserAvatar
+            src={agent.avatar || undefined}
+            alt={agent.name}
+            gender={agent.gender}
+            seed={agent.userId || agent.name}
+            avatarOptions={agent.avatarOptions}
+            width={88}
+            className="w-full h-full object-cover"
+          />
+        </div>
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-gray-900 truncate">{agent.name}</h4>
           <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${

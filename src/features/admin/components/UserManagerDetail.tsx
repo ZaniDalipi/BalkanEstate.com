@@ -11,6 +11,7 @@ import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { approveLicense, rejectLicense } from '../api/adminApi';
 import { useUpdateUserListingCounter, useUpdateUserListingLimit } from '../hooks/useAdminData';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface UserManagerDetailProps {
   // Detail modal
@@ -66,13 +67,17 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
               {/* User Header */}
               <div className="flex items-center gap-4">
-                {viewingUser.avatarUrl ? (
-                  <img src={viewingUser.avatarUrl} alt={viewingUser.name} loading="lazy" decoding="async" className="w-20 h-20 rounded-full" referrerPolicy="no-referrer" />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold">
-                    {viewingUser.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 bg-blue-50">
+                  <UserAvatar
+                    src={viewingUser.avatarUrl}
+                    alt={viewingUser.name}
+                    gender={viewingUser.gender}
+                    seed={viewingUser._id || viewingUser.name}
+                    avatarOptions={viewingUser.avatarOptions}
+                    width={160}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div>
                   <h4 className="text-xl font-bold text-gray-900">{viewingUser.name}</h4>
                   <p className="text-gray-600">{viewingUser.email}</p>

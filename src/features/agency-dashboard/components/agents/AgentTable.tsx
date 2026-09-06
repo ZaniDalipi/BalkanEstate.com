@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { UsersIcon, TicketIcon } from '@/constants';
 import type { DashboardAgent } from '../../types';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface AgentTableProps {
   agents: DashboardAgent[];
@@ -99,13 +100,17 @@ const AgentTable: React.FC<AgentTableProps> = ({
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {agent.avatar ? (
-                        <img src={agent.avatar} alt={agent.name} className="w-9 h-9 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center">
-                          <span className="text-indigo-700 font-semibold text-sm">{agent.name.charAt(0).toUpperCase()}</span>
-                        </div>
-                      )}
+                      <div className="w-9 h-9 rounded-full overflow-hidden bg-indigo-50 flex-shrink-0">
+                        <UserAvatar
+                          src={agent.avatar || undefined}
+                          alt={agent.name}
+                          gender={agent.gender}
+                          seed={agent.userId || agent.name}
+                          avatarOptions={agent.avatarOptions}
+                          width={72}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <span className="font-medium text-gray-900 truncate max-w-[160px]">{agent.name}</span>
                     </div>
                   </td>

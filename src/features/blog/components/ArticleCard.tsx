@@ -3,6 +3,7 @@ import { ArticleListItem } from '../types/article.types';
 import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { cn } from '@/lib/utils';
+import UserAvatar from '@/components/shared/UserAvatar';
 const COUNTRY_FLAGS: Record<string, string> = {
   Albania: '🇦🇱', Serbia: '🇷🇸', Croatia: '🇭🇷', Greece: '🇬🇷',
   Montenegro: '🇲🇪', 'North Macedonia': '🇲🇰', Bulgaria: '🇧🇬',
@@ -227,10 +228,18 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className={cn(
-              'w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0',
-              'shadow-[2px_2px_6px_rgba(0,0,0,0.12)] bg-gradient-to-br from-slate-600 to-slate-900',
+              'w-7 h-7 rounded-full overflow-hidden flex-shrink-0',
+              'shadow-[2px_2px_6px_rgba(0,0,0,0.12)] bg-gradient-to-br from-slate-100 to-slate-200',
             )}>
-              {article.author?.name?.charAt(0)?.toUpperCase() || '?'}
+              <UserAvatar
+                src={article.author?.avatarUrl}
+                alt={article.author?.name || ''}
+                gender={article.author?.gender}
+                seed={article.author?._id || article.author?.name}
+                avatarOptions={article.author?.avatarOptions}
+                width={56}
+                className="w-full h-full object-cover"
+              />
             </div>
             <span className="text-[11px] text-slate-500 truncate max-w-[90px] font-medium">
               {article.author?.name}

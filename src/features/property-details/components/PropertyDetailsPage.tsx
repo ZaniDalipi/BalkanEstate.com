@@ -46,6 +46,7 @@ import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { AdSlot } from '@/src/features/promo';
+import SellerAvatar from '@/shared/components/property/SellerAvatar';
 
 /**
  * PropertyDetailsPage Component
@@ -134,18 +135,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // State for sticky bottom bar schedule modal
   const [showStickyScheduleModal, setShowStickyScheduleModal] = useState(false);
-  const [sellerAvatarError, setSellerAvatarError] = useState(false);
 
   // State for sticky bar agent long-press preview ("more from this agent")
   const [showAgentPreview, setShowAgentPreview] = useState(false);
   const agentLongPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const agentLongPressFiredRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Reset avatar error if the seller's photo changes (e.g. live property refresh)
-  useEffect(() => {
-    setSellerAvatarError(false);
-  }, [property.seller?.avatarUrl]);
 
   // State for promotion modal
   const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
@@ -1176,22 +1171,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* Avatar with ripple-ring animation */}
             <div className="relative flex-shrink-0">
               <span className="absolute inset-0 rounded-full avatar-ring-pulse" />
-              {property.seller?.avatarUrl && !sellerAvatarError ? (
-                <img
-                  src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 88, quality: 'auto', crop: 'fill' })}
-                  alt={sellerDisplay.name}
-                  className="w-11 h-11 rounded-full object-cover ring-2 ring-white shadow-md relative"
-                  onError={() => setSellerAvatarError(true)}
-                />
-              ) : (
-                <div className={`w-11 h-11 rounded-full flex items-center justify-center ring-2 ring-white shadow-md relative ${property.seller?.type === 'agent' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-green-500 to-emerald-600'}`}>
-                  <span className="text-white font-bold text-base select-none">
-                    {sellerDisplay.isFallback
-                      ? '?'
-                      : sellerDisplay.name.split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              <SellerAvatar
+                seller={property.seller}
+                seed={property.sellerId}
+                size={44}
+                className="ring-2 ring-white shadow-md"
+              />
               {/* Online indicator */}
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm" />
             </div>
@@ -1248,21 +1233,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             style={{ bottom: 'calc(4.75rem + env(safe-area-inset-bottom, 0px))' }}
           >
             <div className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-neutral-100">
-              {property.seller?.avatarUrl && !sellerAvatarError ? (
-                <img
-                  src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 72, quality: 'auto', crop: 'fill' })}
-                  alt={sellerDisplay.name}
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0"
-                />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center ring-2 ring-white shadow-sm flex-shrink-0">
-                  <span className="text-white font-bold text-xs select-none">
-                    {sellerDisplay.isFallback
-                      ? '?'
-                      : sellerDisplay.name.split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              <SellerAvatar
+                seller={property.seller}
+                seed={property.sellerId}
+                size={36}
+                className="ring-2 ring-white shadow-sm flex-shrink-0"
+              />
               <div className="min-w-0 flex-1">
                 <p className="font-bold text-sm text-neutral-900 truncate leading-tight">{sellerDisplay.name}</p>
                 <p className="text-xs text-neutral-500 leading-tight">{t('property:seller.moreFromAgent', 'More listings from this agent')} ✨</p>

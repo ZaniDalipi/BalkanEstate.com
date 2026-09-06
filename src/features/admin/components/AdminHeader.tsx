@@ -13,6 +13,8 @@ import {
   BuildingOfficeIcon,
 } from '@/constants';
 import { tokenService } from '@/src/shared/api/tokenService';
+import UserAvatar from '@/components/shared/UserAvatar';
+import { useAppContext } from '@/context/AppContext';
 
 interface AdminHeaderProps {
   stats?: {
@@ -38,6 +40,9 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   userRole
 }) => {
   const { t } = useTranslation(['admin']);
+  // The signed-in admin, for the avatar on the user menu.
+  const { state } = useAppContext();
+  const currentUser = state.currentUser;
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -197,7 +202,17 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <UserCircleIcon className="w-8 h-8 text-gray-400" />
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-100">
+                  <UserAvatar
+                    src={currentUser?.avatarUrl}
+                    alt={userName}
+                    gender={currentUser?.gender}
+                    seed={currentUser?.id || userName}
+                    avatarOptions={currentUser?.avatarOptions}
+                    width={64}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div className="hidden sm:block text-left">
                   <div className="text-sm font-medium text-gray-900">{userName}</div>
                   <div className="text-xs text-gray-500 capitalize">{userRole.replace('_', ' ')}</div>
