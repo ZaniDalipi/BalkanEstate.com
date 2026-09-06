@@ -187,7 +187,7 @@ export const PropertyViewModal: React.FC<PropertyViewModalProps> = ({
 interface PropertyEditModalProps {
   property: Property;
   editForm: PropertyEditForm;
-  setEditForm: (form: PropertyEditForm) => void;
+  setEditForm: React.Dispatch<React.SetStateAction<PropertyEditForm>>;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
 }
@@ -306,7 +306,10 @@ export const PropertyEditModal: React.FC<PropertyEditModalProps> = ({
               country={editForm.country}
               city={editForm.city}
               location={{ lat: editForm.lat, lng: editForm.lng, address: editForm.address }}
-              onChange={(patch) => setEditForm({ ...editForm, ...patch })}
+              // Functional update: the map's pin handlers can fire long after
+              // the render they were bound in, and spreading a captured
+              // editForm there would put the coordinates back where they were.
+              onChange={(patch) => setEditForm((prev) => ({ ...prev, ...patch }))}
             />
 
             <div className="grid grid-cols-4 gap-4">
