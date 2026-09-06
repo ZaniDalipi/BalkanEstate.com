@@ -211,6 +211,28 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     // highlighted in red in the form until the user fixes them.
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
+    // The success screen redirects to the dashboard on a timer. Keeping the id
+    // lets us cancel it if the seller navigates away first — otherwise the
+    // pending dispatch yanks them back to the dashboard from wherever they went.
+    const redirectTimerRef = useRef<number | null>(null);
+
+    const scheduleDashboardRedirect = useCallback(() => {
+        if (redirectTimerRef.current !== null) {
+            window.clearTimeout(redirectTimerRef.current);
+        }
+        redirectTimerRef.current = window.setTimeout(() => {
+            redirectTimerRef.current = null;
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+        }, SUCCESS_REDIRECT_MS);
+    }, [dispatch]);
+
+    useEffect(() => () => {
+        if (redirectTimerRef.current !== null) {
+            window.clearTimeout(redirectTimerRef.current);
+            redirectTimerRef.current = null;
+        }
+    }, []);
+
     // Jump back to the top whenever the flow lands on a terminal/interstitial
     // step. Without this the page keeps the scroll position from the long form,
     // which left the success message off-screen with only the footer visible.
@@ -1214,9 +1236,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 await updateListing(newProperty);
                 // For edits, go directly to success
                 setStep('success');
-                setTimeout(() => {
-                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                }, SUCCESS_REDIRECT_MS);
+                scheduleDashboardRedirect();
             } else {
                 // For new properties, check if user wants to promote
                 if (wantToPromote) {
@@ -1230,9 +1250,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                         await updateUser({ role: UserRole.PRIVATE_SELLER });
                     }
                     setStep('success');
-                    setTimeout(() => {
-                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                    }, SUCCESS_REDIRECT_MS);
+                    scheduleDashboardRedirect();
                 }
             }
         } catch (err: any) {
@@ -1452,9 +1470,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
             setPendingPropertyData(null);
             setStep('success');
-            setTimeout(() => {
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-            }, SUCCESS_REDIRECT_MS);
+            scheduleDashboardRedirect();
         } catch (err) {
             // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
@@ -1478,9 +1494,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
             setPendingPropertyData(null);
             setStep('success');
-            setTimeout(() => {
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-            }, SUCCESS_REDIRECT_MS);
+            scheduleDashboardRedirect();
         } catch (err) {
             // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));

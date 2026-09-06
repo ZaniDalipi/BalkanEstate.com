@@ -2250,59 +2250,60 @@ html.reduce-motion .property-card--interactive:hover .property-card__photo {
 
 /* ============================================================================
    Listing published celebration — the reward screen a seller sees the moment
-   their property goes live. Decorative only; every loop is dropped under
-   reduced motion (see the block at the end of this section).
+   their property goes live. Restrained on purpose: one accent colour, hairline
+   rings, spring easing borrowed from the page transitions. Every loop is
+   dropped under reduced motion (see the block at the end of this section).
    ============================================================================ */
 
-/* Confetti pieces rain down the panel, drifting sideways as they spin. */
+/* Confetti pieces drift down the panel, spinning slowly. */
 @keyframes celebrationConfetti {
   0% {
     transform: translate3d(0, -20%, 0) rotate(0deg);
     opacity: 0;
   }
-  8% {
+  10% {
     opacity: 1;
   }
-  85% {
+  80% {
     opacity: 1;
   }
   100% {
-    transform: translate3d(var(--confetti-drift, 0px), 440px, 0) rotate(var(--confetti-spin, 540deg));
+    transform: translate3d(var(--confetti-drift, 0px), 440px, 0) rotate(var(--confetti-spin, 360deg));
     opacity: 0;
   }
 }
 
 .celebration-confetti {
-  animation: celebrationConfetti var(--confetti-duration, 2.8s) cubic-bezier(0.3, 0.5, 0.6, 1) var(--confetti-delay, 0s) infinite;
+  animation: celebrationConfetti var(--confetti-duration, 3s) cubic-bezier(0.3, 0.5, 0.6, 1) var(--confetti-delay, 0s) infinite;
 }
 
-/* Halo rings pulsing out from the success badge. */
+/* A hairline ring breathing outwards from the success badge. */
 @keyframes celebrationRing {
   0% {
-    transform: scale(0.65);
-    opacity: 0.5;
+    transform: scale(0.7);
+    opacity: 0.9;
   }
   70% {
     opacity: 0;
   }
   100% {
-    transform: scale(2.2);
+    transform: scale(1.9);
     opacity: 0;
   }
 }
 
 .celebration-ring {
-  animation: celebrationRing 2.6s cubic-bezier(0.22, 1, 0.36, 1) var(--ring-delay, 0s) infinite;
+  animation: celebrationRing 2.6s cubic-bezier(0.32, 0.72, 0, 1) var(--ring-delay, 0s) infinite;
 }
 
-/* The badge itself pops in with a slight overshoot. */
+/* The badge itself springs in with a slight overshoot. */
 @keyframes celebrationPop {
   0% {
-    transform: scale(0.4);
+    transform: scale(0.5);
     opacity: 0;
   }
   60% {
-    transform: scale(1.08);
+    transform: scale(1.06);
     opacity: 1;
   }
   100% {
@@ -2312,7 +2313,7 @@ html.reduce-motion .property-card--interactive:hover .property-card__photo {
 }
 
 .celebration-pop {
-  animation: celebrationPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: celebrationPop 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
 /* The checkmark draws itself once the badge has landed. */
@@ -2323,14 +2324,14 @@ html.reduce-motion .property-card--interactive:hover .property-card__photo {
 
 .celebration-check {
   stroke-dasharray: 48;
-  animation: celebrationCheckDraw 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.35s both;
+  animation: celebrationCheckDraw 0.45s cubic-bezier(0.65, 0, 0.35, 1) 0.32s both;
 }
 
 /* Copy and chips rise into place under the badge. */
 @keyframes celebrationRise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -2339,15 +2340,15 @@ html.reduce-motion .property-card--interactive:hover .property-card__photo {
 }
 
 .celebration-rise {
-  animation: celebrationRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--rise-delay, 0s) both;
+  animation: celebrationRise 0.5s cubic-bezier(0.32, 0.72, 0, 1) var(--rise-delay, 0s) both;
 }
 
 /* Each rotating encouragement fades in as it replaces the previous one. */
 .celebration-message {
-  animation: celebrationRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: celebrationRise 0.4s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-/* Countdown bar that empties as the redirect approaches. */
+/* Countdown bar that fills as the redirect approaches. */
 @keyframes celebrationBar {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }

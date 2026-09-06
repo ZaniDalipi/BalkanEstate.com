@@ -237,9 +237,9 @@
     "message": "Your property listing has been successfully published.",
     "viewListing": "View Listing",
     "createAnother": "Create Another Listing",
-    "publishedTitle": "You're live! 🎉",
+    "publishedTitle": "Your listing is live",
     "publishedSubtitle": "Your property is now on BalkanEstate.",
-    "updatedTitle": "Listing updated!",
+    "updatedTitle": "Listing updated",
     "updatedSubtitle": "Your property page has been refreshed.",
     "redirecting": "Taking you to your dashboard...",
     "chips": {
@@ -253,7 +253,7 @@
       "notify": "We'll notify you the moment someone saves or messages your listing.",
       "proud": "Nice work — that's one big step closer to closing the deal.",
       "updatedLive": "Your changes are already visible to buyers.",
-      "updatedFresh": "Freshly updated listings get pushed back up the search results.",
+      "updatedFresh": "Freshly updated listings move back up the search results.",
       "updatedNotify": "We'll let you know as soon as someone reaches out."
     }
   },
