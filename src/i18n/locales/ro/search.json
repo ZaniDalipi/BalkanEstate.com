@@ -272,7 +272,12 @@
     "switchTo": "Comută la vizualizarea {{view}}",
     "drawAreaHint": "Desenează o zonă de căutare pe hartă",
     "locationLookupFailed": "Locul nu a putut fi găsit. Încercați alt rezultat sau plasați marcajul direct pe hartă.",
-    "noSearchResults": "Niciun loc găsit. Încercați un nume mai scurt sau plasați marcajul direct pe hartă."
+    "noSearchResults": "Niciun loc găsit. Încercați un nume mai scurt sau plasați marcajul direct pe hartă.",
+    "drawHint": {
+      "title": "Desenați-vă propria zonă",
+      "subtitle": "Desenați o formă pe hartă pentru a căuta doar în interiorul ei",
+      "dismiss": "Închide sugestia"
+    }
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",

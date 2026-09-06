@@ -272,7 +272,12 @@
     "switchTo": "Prebaci na {{view}} prikaz",
     "drawAreaHint": "Nacrtaj područje pretrage na karti",
     "locationLookupFailed": "Nije moguće pronaći to mjesto. Pokušajte drugi rezultat ili postavite oznaku izravno na kartu.",
-    "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku izravno na kartu."
+    "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku izravno na kartu.",
+    "drawHint": {
+      "title": "Nacrtajte svoje područje",
+      "subtitle": "Nacrtajte oblik na karti za pretragu samo unutar njega",
+      "dismiss": "Zatvori savjet"
+    }
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",

@@ -307,13 +307,20 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     <PencilIcon className="w-5 h-5 text-white" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold">{t('search:map.drawHint.title')}</p>
-                                    <p className="text-xs text-white/80">{t('search:map.drawHint.subtitle')}</p>
+                                    {/* Second argument is the English fallback: without it a
+                                        key missing from every locale renders as its own path,
+                                        which is what this hint was showing on the map. */}
+                                    <p className="text-sm font-semibold">
+                                        {t('search:map.drawHint.title', 'Draw your own area')}
+                                    </p>
+                                    <p className="text-xs text-white/80">
+                                        {t('search:map.drawHint.subtitle', 'Trace a shape on the map to search only inside it')}
+                                    </p>
                                 </div>
                                 <button
                                     onClick={() => setShowDrawHint(false)}
                                     className="flex-shrink-0 p-1.5 hover:bg-white/20 rounded-full transition-colors"
-                                    aria-label="Dismiss hint"
+                                    aria-label={t('search:map.drawHint.dismiss', 'Dismiss hint')}
                                 >
                                     <XMarkIcon className="w-5 h-5 text-white" />
                                 </button>
