@@ -348,6 +348,73 @@ export const generateDescriptionFromImages = async (
   }
 };
 
+/**
+ * Aspect ratios the Gemini image model is able to output, as width / height.
+ * The model re-frames the scene to fill whatever ratio it picks, so an
+ * unconstrained request comes back cropped and zoomed in compared with the
+ * source photo. We always ask for the ratio closest to the original instead.
+ */
+const IMAGE_ASPECT_RATIOS: ReadonlyArray<{ label: string; ratio: number }> = [
+  { label: '21:9', ratio: 21 / 9 },
+  { label: '16:9', ratio: 16 / 9 },
+  { label: '3:2', ratio: 3 / 2 },
+  { label: '4:3', ratio: 4 / 3 },
+  { label: '1:1', ratio: 1 },
+  { label: '3:4', ratio: 3 / 4 },
+  { label: '2:3', ratio: 2 / 3 },
+  { label: '9:16', ratio: 9 / 16 },
+];
+
+/**
+ * Picks the supported aspect ratio closest to the given image dimensions.
+ * Compared on a log scale so "one third wider" counts the same whether the
+ * photo is portrait or landscape. Falls back to 4:3 for unusable dimensions.
+ */
+export const nearestSupportedAspectRatio = (width?: number, height?: number): string => {
+  if (!width || !height || width <= 0 || height <= 0) return '4:3';
+  const ratio = width / height;
+  return IMAGE_ASPECT_RATIOS.reduce((best, candidate) =>
+    Math.abs(Math.log(ratio / candidate.ratio)) < Math.abs(Math.log(ratio / best.ratio)) ? candidate : best
+  ).label;
+};
+
+/**
+ * How far the generated image's proportions may drift from the source before we
+ * stop nudging them back. Within this margin the correction is an imperceptible
+ * stretch that keeps the before/after slider perfectly aligned; beyond it we
+ * leave the model's framing alone rather than visibly distorting the photo.
+ */
+const ASPECT_MATCH_TOLERANCE = 0.08; // ~8%
+
+/**
+ * Output size for a generated restyle: upscaled to the high-quality long edge,
+ * and squared up to the source photo's proportions when the model's output only
+ * drifted slightly from them. `sourceRatio` of 0 means the source could not be
+ * measured, in which case the model's own proportions are kept.
+ */
+export const restyleOutputSize = (
+  width: number,
+  height: number,
+  sourceRatio = 0
+): { width: number; height: number } => {
+  if (!width || !height || width <= 0 || height <= 0) return { width, height };
+
+  const outRatio = width / height;
+  // Only correct a small drift — a bigger mismatch would need a visible
+  // stretch, so the model's own framing is kept instead.
+  const targetRatio =
+    sourceRatio > 0 && Math.abs(Math.log(outRatio / sourceRatio)) <= ASPECT_MATCH_TOLERANCE
+      ? sourceRatio
+      : outRatio;
+
+  const longEdge = Math.max(width, height);
+  const targetLongEdge = longEdge < HQ_LONG_EDGE ? HQ_LONG_EDGE : longEdge;
+
+  return targetRatio >= 1
+    ? { width: targetLongEdge, height: Math.round(targetLongEdge / targetRatio) }
+    : { width: Math.round(targetLongEdge * targetRatio), height: targetLongEdge };
+};
+
 const DISCLAIMER_TEXT = 'VIRTUALLY STAGED · AI-GENERATED · FOR DEMONSTRATION ONLY — NOT AN ACTUAL PHOTO OF THE PROPERTY';
 
 /**
@@ -460,6 +527,12 @@ export const restyleRoomImage = async (
 - Preserve any real view visible through the windows and the real surroundings.
 - Do NOT add people, pets, on-image text, logos, watermarks, or captions.`;
 
+  const framing = `FRAMING — KEEP IT IDENTICAL (critical):
+- Return the SAME view at the SAME zoom level. Do NOT zoom in or out, do not crop, pan, tilt, or move the camera closer to or further from the subject.
+- Every object visible in the input photo must still be visible in the output, at the same size and in the same place, right up to the edges of the frame.
+- Keep the input's aspect ratio and edges: nothing may be cut off at the top, bottom, left or right, and no new area may be invented beyond the original edges.
+- Treat this as editing the pixels of the given photograph in place, not as re-shooting the scene.`;
+
   let task: string;
   if (isEmptyRoom) {
     task = `TASK — EMPTY THE ROOM:
@@ -490,6 +563,8 @@ STYLE BRIEF — ${styleLabel}: ${stylePrompt}
 
 ${subjectPreservation}
 
+${framing}
+
 ${task}
 
 PHOTOREALISM (this is critical — the result must look like a REAL photo, not AI):
@@ -502,6 +577,23 @@ PHOTOREALISM (this is critical — the result must look like a REAL photo, not A
 
 Output only the edited photograph.`;
 
+  // Measure the source photo so we can ask for the same proportions back. Left
+  // unconstrained, the model reframes the scene into a ratio of its own choosing,
+  // which comes back looking zoomed in on the original.
+  let sourceRatio = 0;
+  let aspectRatio: string | undefined;
+  try {
+    const sourceMeta = await sharp(Buffer.from(imageBase64, 'base64')).metadata();
+    if (sourceMeta.width && sourceMeta.height) {
+      sourceRatio = sourceMeta.width / sourceMeta.height;
+      aspectRatio = nearestSupportedAspectRatio(sourceMeta.width, sourceMeta.height);
+    }
+  } catch (e) {
+    // Unreadable source: let the model choose rather than forcing a ratio that
+    // could itself reframe the photo.
+    apiLogger.warn(`Could not read source image dimensions, letting the model pick the aspect ratio: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
   const result = await retryWithBackoff(() =>
     getAI().models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -511,6 +603,7 @@ Output only the edited photograph.`;
           { inlineData: { data: imageBase64, mimeType: mimeType || 'image/jpeg' } },
         ],
       },
+      ...(aspectRatio ? { config: { imageConfig: { aspectRatio } } } : {}),
     })
   );
 
@@ -528,24 +621,34 @@ Output only the edited photograph.`;
 
   // Upscale to a high-quality version for download. The generative model outputs
   // ~1024px on the long edge; enlarge with a high-quality kernel + gentle sharpen
-  // so the saved file is crisp for viewing/printing. Falls back to the raw image
-  // if sharp fails for any reason. A disclaimer caption is baked on either way.
+  // so the saved file is crisp for viewing/printing. The same resize also snaps
+  // the proportions back to the source photo's when the model came back a hair
+  // off the requested ratio, so the before/after slider lines up exactly and the
+  // restyled room reads as the same shot rather than a cropped-in one. Falls back
+  // to the raw image if sharp fails for any reason. A disclaimer caption is baked
+  // on either way.
   let finalBuffer: Buffer = rawBuffer;
   try {
     const meta = await sharp(rawBuffer).metadata();
-    const longEdge = Math.max(meta.width || 0, meta.height || 0);
+    const width = meta.width || 0;
+    const height = meta.height || 0;
     let pipeline = sharp(rawBuffer);
-    if (longEdge > 0 && longEdge < HQ_LONG_EDGE) {
-      const scale = HQ_LONG_EDGE / longEdge;
-      pipeline = pipeline
-        .resize({
-          width: Math.round((meta.width || longEdge) * scale),
-          height: Math.round((meta.height || longEdge) * scale),
+
+    if (width > 0 && height > 0) {
+      const target = restyleOutputSize(width, height, sourceRatio);
+      if (target.width !== width || target.height !== height) {
+        pipeline = pipeline.resize({
+          width: target.width,
+          height: target.height,
           kernel: 'lanczos3',
           fit: 'fill',
-        })
-        .sharpen();
+        });
+        if (Math.max(target.width, target.height) > Math.max(width, height)) {
+          pipeline = pipeline.sharpen();
+        }
+      }
     }
+
     finalBuffer = await pipeline.png({ quality: 100, compressionLevel: 6 }).toBuffer();
   } catch (e) {
     apiLogger.warn(`HQ upscale failed, using raw model image: ${e instanceof Error ? e.message : String(e)}`);
