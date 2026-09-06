@@ -1,5 +1,6 @@
 import multer from 'multer';
 import path from 'path';
+import { MAX_PROPERTY_IMAGE_SIZE_BYTES } from '../config/uploadLimits';
 
 // Allowed image extensions (whitelist)
 // SVG removed: SVGs can contain embedded JavaScript causing stored XSS
@@ -42,6 +43,6 @@ export const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB max file size
+    fileSize: MAX_PROPERTY_IMAGE_SIZE_BYTES,
   },
 });

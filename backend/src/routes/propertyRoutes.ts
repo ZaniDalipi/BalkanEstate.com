@@ -20,6 +20,8 @@ import { protect } from '../middleware/auth';
 import { upload } from '../utils/upload';
 import { mutationRateLimiter } from '../middleware/security';
 import { validatePropertyId } from '../middleware/propertyValidation';
+import { withUploadErrors } from '../middleware/uploadErrors';
+import { MAX_PROPERTY_IMAGES, MAX_PROPERTY_IMAGE_SIZE_BYTES } from '../config/uploadLimits';
 
 const router = express.Router();
 
@@ -190,8 +192,13 @@ router.put('/:id', protect, mutationRateLimiter, updateProperty);
 router.delete('/:id', protect, mutationRateLimiter, deleteProperty);
 router.get('/my/listings', protect, getMyListings);
 // Upload images - can be used with or without propertyId
-router.post('/upload-images', protect, mutationRateLimiter, upload.array('images', 30), uploadImages);
-router.post('/:propertyId/upload-images', protect, mutationRateLimiter, upload.array('images', 30), uploadImages);
+const propertyImagesUpload = withUploadErrors(upload.array('images', MAX_PROPERTY_IMAGES), {
+  field: 'images',
+  maxFiles: MAX_PROPERTY_IMAGES,
+  maxFileSizeBytes: MAX_PROPERTY_IMAGE_SIZE_BYTES,
+});
+router.post('/upload-images', protect, mutationRateLimiter, propertyImagesUpload, uploadImages);
+router.post('/:propertyId/upload-images', protect, mutationRateLimiter, propertyImagesUpload, uploadImages);
 router.patch('/:id/mark-sold', protect, mutationRateLimiter, markAsSold);
 router.patch('/:id/mark-rented', protect, mutationRateLimiter, markAsRented);
 router.patch('/:id/mark-available', protect, mutationRateLimiter, markAsAvailable);

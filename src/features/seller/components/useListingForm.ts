@@ -15,6 +15,14 @@ import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
+import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
+
+/**
+ * Maximum images a listing can carry. The backend applies the same cap to both
+ * /api/properties/upload-images and /api/ai/generate-description; exceeding it
+ * makes multer abort the multipart request with "Unexpected field".
+ */
+const MAX_IMAGES = FILE_LIMITS.MAX_IMAGES_PER_PROPERTY;
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
@@ -393,14 +401,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         const totalCount = currentImageCount + files.length;
         let filesToProcess = files;
 
-        if (totalCount > 30) {
-            const availableSlots = 30 - currentImageCount;
+        if (totalCount > MAX_IMAGES) {
+            const availableSlots = MAX_IMAGES - currentImageCount;
             if (availableSlots <= 0) {
-                showWarning(t('newListing:imageUpload.maxImages', { count: 30 }), t('newListing:errors.removeImagesFirst'));
+                showWarning(t('newListing:imageUpload.maxImages', { count: MAX_IMAGES }), t('newListing:errors.removeImagesFirst'));
                 e.target.value = '';
                 return;
             }
-            showWarning(t('newListing:imageUpload.maxImages', { count: 30 }), t('newListing:errors.onlyMoreImages', { count: availableSlots }));
+            showWarning(t('newListing:imageUpload.maxImages', { count: MAX_IMAGES }), t('newListing:errors.onlyMoreImages', { count: availableSlots }));
             filesToProcess = files.slice(0, availableSlots);
         }
 
@@ -647,7 +655,10 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setIsGenerating(true);
         try {
-            const imageFiles = images.map(img => img.file).filter((f): f is File => f !== null);
+            const allImageFiles = images.map(img => img.file).filter((f): f is File => f !== null);
+            // Defensive cap: the backend rejects the whole multipart request if
+            // it receives more files than it accepts.
+            const imageFiles = allImageFiles.slice(0, MAX_IMAGES);
             if (imageFiles.length === 0) {
                 if (images.some(img => img.previewUrl)) {
                     setIsGenerating(false);

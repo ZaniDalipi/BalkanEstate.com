@@ -89,8 +89,8 @@ export const PAGINATION = {
 export const FILE_LIMITS = {
   /** Maximum image size in bytes (5MB) */
   MAX_IMAGE_SIZE: 5 * 1024 * 1024,
-  /** Maximum number of images per property */
-  MAX_IMAGES_PER_PROPERTY: 20,
+  /** Maximum number of images per property (must match the backend multer caps) */
+  MAX_IMAGES_PER_PROPERTY: 30,
   /** Allowed image types */
   ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
 } as const;

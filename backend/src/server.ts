@@ -22,6 +22,7 @@ import { serverLogger } from './utils/logger';
 
 // Import and initialize Sentry for error monitoring (must be early)
 import { initSentry, setupSentry, attachSentryErrorHandler } from './lib/sentry';
+import { uploadErrorHandler } from './middleware/uploadErrors';
 
 // Import security middleware
 import {
@@ -469,6 +470,10 @@ if (frontendDistExists) {
 
 // Sentry error handler (must be before other error handlers)
 attachSentryErrorHandler(app);
+
+// Upload errors (multer) -> 4xx with an actionable message, so they never fall
+// through to the generic 500 handler below.
+app.use(uploadErrorHandler);
 
 // Error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

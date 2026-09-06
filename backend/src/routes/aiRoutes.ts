@@ -2,6 +2,8 @@ import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth';
 import { roomStyleCooldownLimiter } from '../middleware/security';
+import { withUploadErrors } from '../middleware/uploadErrors';
+import { MAX_AI_ANALYSIS_IMAGES, MAX_AI_IMAGE_SIZE_BYTES } from '../config/uploadLimits';
 import {
   generateDescription,
   calculateDistances,
@@ -14,14 +16,24 @@ import {
 const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per file
+  limits: { fileSize: MAX_AI_IMAGE_SIZE_BYTES },
 });
 
 // All AI routes require authentication
 router.use(protect);
 
 // POST /api/ai/generate-description - Generate property description from images
-router.post('/generate-description', upload.array('images', 20), generateDescription);
+// The file cap must match what the listing form allows to upload; a lower cap
+// here makes multer reject the extra files with "Unexpected field".
+router.post(
+  '/generate-description',
+  withUploadErrors(upload.array('images', MAX_AI_ANALYSIS_IMAGES), {
+    field: 'images',
+    maxFiles: MAX_AI_ANALYSIS_IMAGES,
+    maxFileSizeBytes: MAX_AI_IMAGE_SIZE_BYTES,
+  }),
+  generateDescription
+);
 
 // POST /api/ai/calculate-distances - Calculate distances to key amenities
 router.post('/calculate-distances', calculateDistances);
