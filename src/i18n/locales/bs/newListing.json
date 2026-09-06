@@ -231,7 +231,26 @@
     "title": "Oglas Objavljen!",
     "message": "Vaš oglas za nekretninu je uspješno objavljen.",
     "viewListing": "Pogledajte Oglas",
-    "createAnother": "Kreirajte Drugi Oglas"
+    "createAnother": "Kreirajte Drugi Oglas",
+    "publishedTitle": "Uživo ste! 🎉",
+    "publishedSubtitle": "Vaša nekretnina je sada na BalkanEstate.",
+    "updatedTitle": "Oglas je ažuriran!",
+    "updatedSubtitle": "Stranica vaše nekretnine je osvježena.",
+    "redirecting": "Vodimo vas na vašu kontrolnu ploču...",
+    "chips": {
+      "visible": "Vidljivo u pretrazi",
+      "alerts": "Obavještenja poslana",
+      "messages": "Spremno za poruke"
+    },
+    "encouragement": {
+      "live": "Kupci u 10 balkanskih zemalja mogu odmah pronaći vašu nekretninu.",
+      "photos": "Oglasi sa dobrim fotografijama dobijaju do 3× više pregleda — vaše su objavljene.",
+      "notify": "Javit ćemo vam čim neko sačuva oglas ili vam pošalje poruku.",
+      "proud": "Bravo — to je veliki korak bliže dogovoru.",
+      "updatedLive": "Vaše izmjene su već vidljive kupcima.",
+      "updatedFresh": "Ažurirani oglasi se vraćaju više u rezultatima pretrage.",
+      "updatedNotify": "Javit ćemo vam čim vas neko kontaktira."
+    }
   },
   "errors": {
     "aiGenerationFailed": "AI Generisanje Nije Uspjelo",

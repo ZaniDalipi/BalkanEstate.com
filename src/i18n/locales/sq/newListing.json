@@ -231,7 +231,26 @@
     "title": "Listimi u Publikua!",
     "message": "Listimi juaj i pronës u publikua me sukses.",
     "viewListing": "Shiko Listimin",
-    "createAnother": "Krijo Listim Tjetër"
+    "createAnother": "Krijo Listim Tjetër",
+    "publishedTitle": "Je online! 🎉",
+    "publishedSubtitle": "Prona jote tashmë është në BalkanEstate.",
+    "updatedTitle": "Listimi u përditësua!",
+    "updatedSubtitle": "Faqja e pronës tënde u rifreskua.",
+    "redirecting": "Po të çojmë te paneli yt...",
+    "chips": {
+      "visible": "E dukshme në kërkim",
+      "alerts": "Njoftimet u dërguan",
+      "messages": "Gati për mesazhe"
+    },
+    "encouragement": {
+      "live": "Blerësit në 10 shtete të Ballkanit mund ta gjejnë pronën tënde që tani.",
+      "photos": "Listimet me foto të mira marrin deri në 3× më shumë shikime — të tuat janë online.",
+      "notify": "Të njoftojmë sapo dikush ta ruajë ose të të shkruajë për listimin.",
+      "proud": "Punë e mirë — një hap i madh më afër marrëveshjes.",
+      "updatedLive": "Ndryshimet e tua janë tashmë të dukshme për blerësit.",
+      "updatedFresh": "Listimet e përditësuara ngjiten sërish në rezultatet e kërkimit.",
+      "updatedNotify": "Të njoftojmë sapo dikush të kontaktojë."
+    }
   },
   "errors": {
     "aiGenerationFailed": "Gjenerimi i AI Dështoi",

@@ -17,12 +17,13 @@ import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
 import ListingSubmitOverlay from './ListingSubmitOverlay';
 import ListingPreview from './ListingPreview';
+import ListingSuccessCelebration from './ListingSuccessCelebration';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
-    LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
+    LANGUAGES, UploadIcon, TagListInput,
     inputBaseClasses, labelClasses, selectClasses,
     errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark, FIELD_ERROR_ORDER,
 } from './ListingFormHelpers';
@@ -87,15 +88,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     // Payment step is now rendered as a modal overlay (see bottom of component)
 
     if (step === 'success') {
-        return (
-            <div className="text-center py-12 flex flex-col items-center justify-center min-h-[60vh]" aria-live="polite">
-                <div className="p-4 rounded-full bg-emerald-50 border border-emerald-200 mb-4">
-                    <CheckCircleIcon className="w-16 h-16 text-emerald-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">Listing {propertyToEdit ? 'Updated' : 'Published'} Successfully!</h3>
-                <p className="text-gray-400 mt-2">Redirecting you to your dashboard...</p>
-            </div>
-        );
+        return <ListingSuccessCelebration isEdit={!!propertyToEdit} />;
     }
 
     if (step === 'loading') {

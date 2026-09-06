@@ -2247,3 +2247,143 @@ html.reduce-motion .property-card--interactive:hover .property-card__photo {
   transform: none;
 }
 
+
+/* ============================================================================
+   Listing published celebration — the reward screen a seller sees the moment
+   their property goes live. Decorative only; every loop is dropped under
+   reduced motion (see the block at the end of this section).
+   ============================================================================ */
+
+/* Confetti pieces rain down the panel, drifting sideways as they spin. */
+@keyframes celebrationConfetti {
+  0% {
+    transform: translate3d(0, -20%, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--confetti-drift, 0px), 440px, 0) rotate(var(--confetti-spin, 540deg));
+    opacity: 0;
+  }
+}
+
+.celebration-confetti {
+  animation: celebrationConfetti var(--confetti-duration, 2.8s) cubic-bezier(0.3, 0.5, 0.6, 1) var(--confetti-delay, 0s) infinite;
+}
+
+/* Halo rings pulsing out from the success badge. */
+@keyframes celebrationRing {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.celebration-ring {
+  animation: celebrationRing 2.6s cubic-bezier(0.22, 1, 0.36, 1) var(--ring-delay, 0s) infinite;
+}
+
+/* The badge itself pops in with a slight overshoot. */
+@keyframes celebrationPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.celebration-pop {
+  animation: celebrationPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* The checkmark draws itself once the badge has landed. */
+@keyframes celebrationCheckDraw {
+  from { stroke-dashoffset: 48; }
+  to { stroke-dashoffset: 0; }
+}
+
+.celebration-check {
+  stroke-dasharray: 48;
+  animation: celebrationCheckDraw 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.35s both;
+}
+
+/* Copy and chips rise into place under the badge. */
+@keyframes celebrationRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.celebration-rise {
+  animation: celebrationRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--rise-delay, 0s) both;
+}
+
+/* Each rotating encouragement fades in as it replaces the previous one. */
+.celebration-message {
+  animation: celebrationRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Countdown bar that empties as the redirect approaches. */
+@keyframes celebrationBar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.celebration-bar {
+  transform-origin: left center;
+  animation: celebrationBar var(--celebration-duration, 4.5s) linear both;
+}
+
+/* Reduced motion: keep the screen, drop the movement. The confetti layer is
+   not rendered at all in that mode, so only the static styles matter here. */
+@media (prefers-reduced-motion: reduce) {
+  .celebration-confetti,
+  .celebration-ring,
+  .celebration-pop,
+  .celebration-check,
+  .celebration-rise,
+  .celebration-message,
+  .celebration-bar {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+html.reduce-motion .celebration-confetti,
+html.reduce-motion .celebration-ring,
+html.reduce-motion .celebration-pop,
+html.reduce-motion .celebration-check,
+html.reduce-motion .celebration-rise,
+html.reduce-motion .celebration-message,
+html.reduce-motion .celebration-bar {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  stroke-dashoffset: 0 !important;
+}

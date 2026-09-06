@@ -324,7 +324,26 @@
     "title": "Anunț Publicat!",
     "message": "Proprietatea dumneavoastră este acum activă",
     "viewListing": "Vezi Anunțul",
-    "createAnother": "Creează Altul"
+    "createAnother": "Creează Altul",
+    "publishedTitle": "Ești live! 🎉",
+    "publishedSubtitle": "Proprietatea ta este acum pe BalkanEstate.",
+    "updatedTitle": "Anunț actualizat!",
+    "updatedSubtitle": "Pagina proprietății tale a fost împrospătată.",
+    "redirecting": "Te ducem către panoul tău...",
+    "chips": {
+      "visible": "Vizibil în căutare",
+      "alerts": "Alerte trimise",
+      "messages": "Pregătit pentru mesaje"
+    },
+    "encouragement": {
+      "live": "Cumpărătorii din 10 țări balcanice îți pot găsi proprietatea chiar acum.",
+      "photos": "Anunțurile cu fotografii bune primesc până la 3× mai multe vizualizări — ale tale sunt publicate.",
+      "notify": "Te anunțăm imediat ce cineva salvează anunțul sau îți scrie.",
+      "proud": "Bravo — este un pas mare mai aproape de tranzacție.",
+      "updatedLive": "Modificările tale sunt deja vizibile pentru cumpărători.",
+      "updatedFresh": "Anunțurile actualizate urcă din nou în rezultatele căutării.",
+      "updatedNotify": "Te anunțăm imediat ce cineva te contactează."
+    }
   },
   "errors": {
     "saveFailed": "Salvare eșuată. Vă rugăm încercați din nou.",

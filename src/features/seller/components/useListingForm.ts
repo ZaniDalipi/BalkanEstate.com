@@ -12,7 +12,7 @@ import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
-import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing } from './ListingFormHelpers';
+import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
 
@@ -1216,7 +1216,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 setStep('success');
                 setTimeout(() => {
                     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                }, 3000);
+                }, SUCCESS_REDIRECT_MS);
             } else {
                 // For new properties, check if user wants to promote
                 if (wantToPromote) {
@@ -1232,7 +1232,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     setStep('success');
                     setTimeout(() => {
                         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                    }, 3000);
+                    }, SUCCESS_REDIRECT_MS);
                 }
             }
         } catch (err: any) {
@@ -1454,7 +1454,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             setStep('success');
             setTimeout(() => {
                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-            }, 3000);
+            }, SUCCESS_REDIRECT_MS);
         } catch (err) {
             // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
@@ -1480,7 +1480,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             setStep('success');
             setTimeout(() => {
                 dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-            }, 3000);
+            }, SUCCESS_REDIRECT_MS);
         } catch (err) {
             // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
