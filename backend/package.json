@@ -7,7 +7,7 @@
     "dev": "NODE_ENV=development nodemon --exec ts-node src/server.ts",
     "dev:staging": "NODE_ENV=staging nodemon --exec ts-node src/server.ts",
     "dev:prod": "NODE_ENV=production nodemon --exec ts-node src/server.ts",
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/assets && cp -R assets/. dist/assets/",
     "start": "NODE_ENV=production node dist/server.js",
     "start:dev": "NODE_ENV=development node dist/server.js",
     "start:staging": "NODE_ENV=staging node dist/server.js",

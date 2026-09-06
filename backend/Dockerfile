@@ -28,6 +28,10 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
+# Fonts for sharp's text renderer (disclaimer captions). The app ships its own
+# font file, but fontconfig needs a config to resolve any family at all.
+RUN apk add --no-cache fontconfig ttf-dejavu
+
 # Copy package files
 COPY package*.json ./
 
@@ -36,6 +40,11 @@ RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
+
+# Copy runtime assets that live outside dist (the font used to draw the
+# AI-staging disclaimer onto generated images — without it the caption
+# renders as empty boxes). Resolved as ../../assets from dist/services.
+COPY --from=builder /app/assets ./assets
 
 # Set ownership
 RUN chown -R nodejs:nodejs /app

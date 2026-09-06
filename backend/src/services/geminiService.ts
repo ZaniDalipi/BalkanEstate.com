@@ -418,21 +418,32 @@ export const restyleOutputSize = (
 const DISCLAIMER_TEXT = 'VIRTUALLY STAGED · AI-GENERATED · FOR DEMONSTRATION ONLY — NOT AN ACTUAL PHOTO OF THE PROPERTY';
 
 /**
- * A font bundled with the app so the caption always has glyphs to draw. Rendering
- * the text via an SVG `<text>` element relies on a system font being installed,
- * which minimal deploy containers don't have — the text then rasterises as empty
- * "tofu" boxes. We resolve a real font file and hand it to sharp's text renderer
- * instead. `__dirname` is `.../src/services` under ts-node and `.../dist/services`
- * once compiled; both sit two levels below `backend/`, so `../../assets/fonts`
- * points at the bundled font in dev and production alike.
+ * A font bundled with the app so the caption always has glyphs to draw. The text
+ * renderer otherwise falls back to whatever fonts the host has installed, which
+ * on a minimal deploy container is none — the caption then rasterises as a row
+ * of empty "tofu" boxes. We resolve a real font file and hand it to sharp.
+ *
+ * `__dirname` is `.../src/services` under ts-node and `.../dist/services` once
+ * compiled, so `../../assets/fonts` finds the font in the repo layout and
+ * `../assets/fonts` finds the copy that `npm run build` places inside `dist`.
+ * Between them a deploy works whether it ships the backend folder or `dist`
+ * alone; disclaimerCaption.test.ts guards both routes plus the Dockerfiles.
  */
-const DISCLAIMER_FONT_PATH = [
+const DISCLAIMER_FONT_CANDIDATES = [
   path.resolve(__dirname, '../../assets/fonts/DejaVuSans-Bold.ttf'),
   path.resolve(__dirname, '../assets/fonts/DejaVuSans-Bold.ttf'),
+  // System copies, if the host happens to have DejaVu installed. Alpine (our
+  // production base) puts it under ttf-dejavu; Debian/Ubuntu under truetype.
+  '/usr/share/fonts/ttf-dejavu/DejaVuSans-Bold.ttf',
   '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-].find((p) => {
-  try { return fs.existsSync(p); } catch { return false; }
-});
+];
+
+export const resolveDisclaimerFontPath = (): string | undefined =>
+  DISCLAIMER_FONT_CANDIDATES.find((candidate) => {
+    try { return fs.existsSync(candidate); } catch { return false; }
+  });
+
+const DISCLAIMER_FONT_PATH = resolveDisclaimerFontPath();
 
 const escapePangoMarkup = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -442,12 +453,23 @@ const escapePangoMarkup = (s: string): string =>
  * AI staging can never be mistaken for a real listing photo, even once downloaded.
  * Non-fatal: returns the original buffer if compositing fails.
  */
-const addDisclaimerCaption = async (buffer: Buffer): Promise<Buffer> => {
+export const addDisclaimerCaption = async (buffer: Buffer): Promise<Buffer> => {
   try {
     const meta = await sharp(buffer).metadata();
     const width = meta.width || 0;
     const height = meta.height || 0;
     if (!width || !height) return buffer;
+
+    if (!DISCLAIMER_FONT_PATH) {
+      // Without a real font file the text renderer draws empty "tofu" boxes.
+      // Skip the caption rather than baking gibberish into the image — the UI
+      // still shows the disclaimer next to the picture.
+      apiLogger.error(
+        `No caption font found. Looked in: ${DISCLAIMER_FONT_CANDIDATES.join(', ')}. ` +
+        'Ship backend/assets/fonts with the build so the disclaimer can be drawn.'
+      );
+      return buffer;
+    }
 
     const fontSize = Math.max(12, Math.round(height * 0.02));
 
@@ -456,7 +478,7 @@ const addDisclaimerCaption = async (buffer: Buffer): Promise<Buffer> => {
     let textPng = await sharp({
       text: {
         text: `<span foreground="white">${escapePangoMarkup(DISCLAIMER_TEXT)}</span>`,
-        ...(DISCLAIMER_FONT_PATH ? { fontfile: DISCLAIMER_FONT_PATH } : {}),
+        fontfile: DISCLAIMER_FONT_PATH,
         font: `DejaVu Sans Bold ${fontSize}`,
         rgba: true,
         align: 'center',
