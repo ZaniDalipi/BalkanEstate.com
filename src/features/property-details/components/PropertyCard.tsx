@@ -760,30 +760,34 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 {sellerRoleLabel}
               </span>
             </div>
-
-            {/* Agency Logo (if agent with agency) */}
-            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
-              <div className="flex items-center gap-1.5 flex-shrink-0 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
-                {safeProperty.seller.agencyLogo ? (
-                  <img
-                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
-                    alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
-                    loading="lazy"
-                    decoding="async"
-                    width={24}
-                    height={24}
-                    className="w-6 h-6 rounded object-contain bg-white"
-                  />
-                ) : (
-                  <BuildingOfficeIcon className="w-5 h-5 text-primary" />
-                )}
-                <div>
-                  <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
-                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[80px]">{safeProperty.seller.agencyName}</p>
-                </div>
-              </div>
-            )}
           </div>
+
+          {/* Agency (if agent with agency). On its own row: sharing one line
+              with the name squeezed both to a single letter in any narrow grid
+              — three columns on an agent profile, for instance. */}
+          {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
+            <div className="mt-2 flex items-center gap-1.5 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
+              {safeProperty.seller.agencyLogo ? (
+                <img
+                  src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
+                  alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
+                  loading="lazy"
+                  decoding="async"
+                  width={24}
+                  height={24}
+                  className="w-6 h-6 rounded object-contain bg-white flex-shrink-0"
+                />
+              ) : (
+                <BuildingOfficeIcon className="w-5 h-5 text-primary flex-shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
+                <p className="text-[10px] font-medium text-neutral-700 truncate" title={safeProperty.seller.agencyName}>
+                  {safeProperty.seller.agencyName}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* iOS-style Compare Button */}
           {showCompareButton && (
