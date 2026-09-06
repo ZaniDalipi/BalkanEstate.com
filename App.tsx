@@ -1010,9 +1010,25 @@ const MainLayout: React.FC = () => {
 
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
 
+  /*
+   * Two different things used to be one flag.
+   *
+   * A modal needs the page behind it pushed back, and `blur-sm` on this
+   * container is how that is done. The mobile drawer does not: it already has a
+   * full-viewport scrim with `backdrop-blur-sm` over exactly this content, so
+   * blurring the content as well rendered the same pixels through two blur
+   * passes — one of them animated, since this container transitions — on every
+   * open and every close. On a phone that is the most expensive thing happening
+   * during a navigation, and it happens while the arriving page is mounting.
+   *
+   * The scrim is left to do the blurring for the drawer. It looks the same; it
+   * costs half as much, and the half that is gone is the half on the layer the
+   * new page renders into.
+   */
+  const isBlurredBehindModal = state.isAuthModalOpen || anyNonAuthModalOpen;
+
   const isOverlayVisible =
-    state.isAuthModalOpen ||
-    anyNonAuthModalOpen ||
+    isBlurredBehindModal ||
     (isMobile && isSidebarOpen);
 
 
@@ -1074,7 +1090,7 @@ const MainLayout: React.FC = () => {
           </button>
         )}
 
-        <div className={`relative transition-all duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isOverlayVisible ? 'blur-sm pointer-events-none' : ''}`}>
+        <div className={`relative transition-[filter] duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isBlurredBehindModal ? 'blur-sm' : ''} ${isOverlayVisible ? 'pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>
