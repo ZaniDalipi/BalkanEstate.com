@@ -43,6 +43,16 @@ export const isParkingType = (value: unknown): value is ParkingType =>
 /** Nothing here is a count of rooms or spaces beyond this. */
 export const MAX_ATTRIBUTE_COUNT = 999;
 
+/**
+ * Attributes that measure an area rather than count things.
+ *
+ * A count has to be whole — there is no half an office — but an area does
+ * not: an open-plan floor really can be 102.5 m². Holding both to the same
+ * "whole number" rule rejected an honest measurement, and mirrors the
+ * client's `MEASURED_ATTRIBUTES`.
+ */
+const MEASURED_ATTRIBUTES = new Set<string>(['openPlanArea']);
+
 const RESIDENTIAL_ATTRIBUTES: readonly TypeAttribute[] = [
   'beds', 'baths', 'livingRooms', 'kitchens', 'diningRooms',
   'toilets', 'storageRooms', 'offices', 'totalFloors',
@@ -113,16 +123,25 @@ export function normalizeTypeAttributes(
       continue;
     }
 
-    const count = typeof value === 'string' ? Number(value.trim()) : value;
-    if (typeof count !== 'number' || !Number.isInteger(count) || count < 0 || count > MAX_ATTRIBUTE_COUNT) {
+    const measured = typeof value === 'string' ? Number(value.trim()) : value;
+    const mustBeWhole = !MEASURED_ATTRIBUTES.has(key);
+    if (
+      typeof measured !== 'number'
+      || !Number.isFinite(measured)
+      || (mustBeWhole && !Number.isInteger(measured))
+      || measured < 0
+      || measured > MAX_ATTRIBUTE_COUNT
+    ) {
       return {
         ok: false,
         fields: {},
         dropped,
-        error: `${key} must be a whole number between 0 and ${MAX_ATTRIBUTE_COUNT}`,
+        error: mustBeWhole
+          ? `${key} must be a whole number between 0 and ${MAX_ATTRIBUTE_COUNT}`
+          : `${key} must be a number between 0 and ${MAX_ATTRIBUTE_COUNT}`,
       };
     }
-    fields[key] = count;
+    fields[key] = measured;
   }
 
   return { ok: true, fields, dropped };

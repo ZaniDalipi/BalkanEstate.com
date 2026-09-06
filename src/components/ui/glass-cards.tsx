@@ -30,8 +30,10 @@ interface PropertyCardData {
     country: string;
     price: number;
     currency?: string;
-    beds: number;
-    baths: number;
+    // Optional for the same reason the chips read them with `?? 0`: a garage or
+    // a plot carries no bedroom count at all.
+    beds?: number;
+    baths?: number;
     sqft: number;
     livingRooms?: number;
     parking?: number;

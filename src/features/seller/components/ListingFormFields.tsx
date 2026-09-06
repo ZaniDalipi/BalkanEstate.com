@@ -461,25 +461,25 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                     filters by, so the form cannot offer a field the database
                     would then throw away. */}
                 {has('beds') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} error={fieldErrors.bedrooms} anchorId={fieldAnchorId('bedrooms')} />
                 )}
                 {has('baths') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} error={fieldErrors.bathrooms} anchorId={fieldAnchorId('bathrooms')} />
                 )}
                 {has('livingRooms') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} error={fieldErrors.livingRooms} anchorId={fieldAnchorId('livingRooms')} />
                 )}
                 {has('kitchens') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.kitchens', 'Kitchens')} value={listingData.kitchens} onChange={(val) => setListingData(p => ({ ...p, kitchens: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.kitchens', 'Kitchens')} value={listingData.kitchens} onChange={(val) => setListingData(p => ({ ...p, kitchens: val }))} error={fieldErrors.kitchens} anchorId={fieldAnchorId('kitchens')} />
                 )}
                 {has('diningRooms') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.diningRooms', 'Dining rooms')} value={listingData.diningRooms} onChange={(val) => setListingData(p => ({ ...p, diningRooms: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.diningRooms', 'Dining rooms')} value={listingData.diningRooms} onChange={(val) => setListingData(p => ({ ...p, diningRooms: val }))} error={fieldErrors.diningRooms} anchorId={fieldAnchorId('diningRooms')} />
                 )}
                 {has('toilets') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.toilets', 'Toilets (WC)')} value={listingData.toilets} onChange={(val) => setListingData(p => ({ ...p, toilets: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.toilets', 'Toilets (WC)')} value={listingData.toilets} onChange={(val) => setListingData(p => ({ ...p, toilets: val }))} error={fieldErrors.toilets} anchorId={fieldAnchorId('toilets')} />
                 )}
                 {has('storageRooms') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.storageRooms', 'Storage rooms')} value={listingData.storageRooms} onChange={(val) => setListingData(p => ({ ...p, storageRooms: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.storageRooms', 'Storage rooms')} value={listingData.storageRooms} onChange={(val) => setListingData(p => ({ ...p, storageRooms: val }))} error={fieldErrors.storageRooms} anchorId={fieldAnchorId('storageRooms')} />
                 )}
                 {has('offices') && (
                     <NumberInputWithSteppers
@@ -490,21 +490,23 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                             : t('seller:createListing.fields.offices', 'Office / study')}
                         value={listingData.offices}
                         onChange={(val) => setListingData(p => ({ ...p, offices: val }))}
+                        error={fieldErrors.offices}
+                        anchorId={fieldAnchorId('offices')}
                     />
                 )}
                 {has('openPlanArea') && (
-                    <NumberInputWithSteppers label={t('seller:createListing.fields.openPlanArea', 'Open-plan area (m²)')} value={listingData.openPlanArea} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, openPlanArea: val }))} />
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.openPlanArea', 'Open-plan area (m²)')} value={listingData.openPlanArea} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, openPlanArea: val }))} error={fieldErrors.openPlanArea} anchorId={fieldAnchorId('openPlanArea')} />
                 )}
                 {has('parkingType') && (
-                    <div className="min-w-0">
-                        <label htmlFor="parkingType" className={labelClasses}>
+                    <div id={fieldAnchorId('parkingType')} className="min-w-0">
+                        <label htmlFor="parkingType" className={`${labelClasses} ${fieldErrors.parkingType ? errorLabelClasses : ''}`}>
                             {t('seller:createListing.fields.parkingType', 'Parking type')}
                         </label>
                         <select
                             id="parkingType"
                             value={listingData.parkingType}
                             onChange={(e) => setListingData(p => ({ ...p, parkingType: e.target.value as ParkingType }))}
-                            className={inputBaseClasses}
+                            className={`${inputBaseClasses} ${fieldErrors.parkingType ? errorFieldClasses : ''}`}
                         >
                             {PARKING_TYPES.map((value) => (
                                 <option key={value} value={value}>
@@ -512,6 +514,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                                 </option>
                             ))}
                         </select>
+                        <FieldError message={fieldErrors.parkingType} />
                     </div>
                 )}
                 <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
@@ -601,6 +604,8 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                             : t('seller:createListing.fields.parkingSpots')}
                         value={listingData.parking_spots}
                         onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))}
+                        error={fieldErrors.parking_spots}
+                        anchorId={fieldAnchorId('parking_spots')}
                     />
                 )}
             </fieldset>

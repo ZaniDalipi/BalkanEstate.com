@@ -166,5 +166,31 @@ export const stripAttributesForType = <T extends Record<string, unknown>>(
   return result;
 };
 
+/**
+ * Carry the type-dependent attributes across a transform boundary.
+ *
+ * The API and the database use the same names as `Property`, so a transform
+ * has nothing to translate here — it only has to not forget anything. Naming
+ * each attribute by hand is what went wrong before: `openPlanArea` and
+ * `parkingType` were added to the type table and to the form, and then
+ * silently dropped by every transform and by the server's write allow-list,
+ * so a shop's office count and open-plan area were collected from the seller
+ * and thrown away on the way to the database. Reading the table itself means
+ * the next attribute cannot go missing the same way.
+ *
+ * Absent keys stay absent — a type that does not carry an attribute must not
+ * gain an explicit `undefined`, which would read as "clear this field".
+ */
+export const copyTypeAttributes = (source: Record<string, unknown> | null | undefined) => {
+  const copied: Record<string, unknown> = {};
+  if (!source) return copied;
+
+  for (const attribute of TYPE_ATTRIBUTES) {
+    if (source[attribute] !== undefined) copied[attribute] = source[attribute];
+  }
+
+  return copied;
+};
+
 /** Type-checked list of every type, for exhaustive tests and pickers. */
 export const ALL_PROPERTY_TYPES: readonly PropertyType[] = PROPERTY_TYPES;

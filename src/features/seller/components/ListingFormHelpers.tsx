@@ -201,10 +201,54 @@ export type FieldErrors = Record<string, string>;
  */
 export const FIELD_ERROR_ORDER = [
     'country', 'city', 'title', 'price',
+    'propertyType',
+    'bedrooms', 'bathrooms', 'livingRooms', 'kitchens', 'diningRooms',
+    'toilets', 'storageRooms', 'offices', 'openPlanArea',
+    'parkingType', 'parking_spots',
     'totalFloors', 'floorNumber', 'hasElevator',
     'expectedCompletionYear',
     'description', 'images',
 ] as const;
+
+/**
+ * The form input each type attribute is entered in.
+ *
+ * The two sets of names differ — the API calls it `beds`, the form input is
+ * `bedrooms` — so a rejected attribute has to be translated back before the
+ * form can highlight it.
+ */
+export const ATTRIBUTE_FIELDS: Record<string, string> = {
+    beds: 'bedrooms',
+    baths: 'bathrooms',
+    livingRooms: 'livingRooms',
+    kitchens: 'kitchens',
+    diningRooms: 'diningRooms',
+    toilets: 'toilets',
+    storageRooms: 'storageRooms',
+    offices: 'offices',
+    openPlanArea: 'openPlanArea',
+    parking: 'parking_spots',
+    parkingType: 'parkingType',
+    floorNumber: 'floorNumber',
+    totalFloors: 'totalFloors',
+};
+
+/**
+ * Every field in error, `FIELD_ERROR_ORDER` first and anything it does not
+ * name after it.
+ *
+ * The order list used to be the whole story, which meant an error on a field
+ * missing from it was dropped from the summary and skipped by the scroll —
+ * the seller got "Please fix the errors before submitting" over an empty
+ * dialog, with nothing on the form marked. Ordering is a presentation
+ * preference; it must not decide whether a problem is mentioned at all.
+ */
+export const orderedErrorFields = (errors: FieldErrors): string[] => {
+    const ordered = FIELD_ERROR_ORDER.filter(field => errors[field]) as string[];
+    const rest = Object.keys(errors).filter(field => errors[field] && !ordered.includes(field));
+
+    return [...ordered, ...rest];
+};
 
 /** Anchor id used to scroll a field into view when validation fails. */
 export const fieldAnchorId = (field: string) => `field-${field}`;
@@ -319,10 +363,15 @@ export const validateListing = (
         totalFloors: listingData.totalFloors,
     });
     if (!attributes.isValid) {
-        errors.propertyType = attributes.error ?? t(
+        const message = attributes.error ?? t(
             'newListing:validation.attributesInvalid',
             'Please check the details for this property type.',
         );
+        // Report it against the input the seller can actually fix. Keying this
+        // on `propertyType` meant the offending field was never painted red and
+        // — since `propertyType` is not in `FIELD_ERROR_ORDER` — the summary
+        // dialog came up naming nothing at all.
+        errors[ATTRIBUTE_FIELDS[attributes.attribute ?? ''] ?? 'propertyType'] = message;
     }
 
     return errors;

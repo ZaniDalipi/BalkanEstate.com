@@ -667,30 +667,48 @@ export function validateYearBuilt(year: number | string): ValidationResult {
  */
 export const MAX_ATTRIBUTE_COUNT = 999;
 
+/** Attributes that measure an area rather than count things, so may be fractional. */
+const MEASURED_ATTRIBUTES = new Set<string>(['openPlanArea']);
+
+/**
+ * Which attribute was rejected, so the form can paint that field red instead
+ * of reporting the failure against the property type — an error keyed on a
+ * field the form does not render is one the seller never sees.
+ */
+export interface TypeAttributeValidation extends ValidationResult {
+  attribute?: string;
+}
+
 export function validateTypeAttributes(
   propertyType: unknown,
   input: Record<string, unknown>,
-): ValidationResult {
+): TypeAttributeValidation {
   for (const attribute of attributesForType(propertyType)) {
     const value = input[attribute];
     if (value === undefined || value === null || value === '') continue;
 
     if (attribute === 'parkingType') {
       if (!isParkingType(value)) {
-        return { isValid: false, error: `Parking type must be one of: ${PARKING_TYPES.join(', ')}` };
+        return { isValid: false, attribute, error: `Parking type must be one of: ${PARKING_TYPES.join(', ')}` };
       }
       continue;
     }
 
-    const count = typeof value === 'string' ? Number(value.trim()) : value;
-    if (typeof count !== 'number' || !Number.isFinite(count) || !Number.isInteger(count)) {
-      return { isValid: false, error: `${attribute} must be a whole number` };
+    const measured = typeof value === 'string' ? Number(value.trim()) : value;
+    if (typeof measured !== 'number' || !Number.isFinite(measured)) {
+      return { isValid: false, attribute, error: `${attribute} must be a number` };
     }
-    if (count < 0) {
-      return { isValid: false, error: `${attribute} cannot be negative` };
+    // Areas are measured, counts are counted. Only the counts have to be whole:
+    // an open-plan floor really can be 102.5 m², and rejecting that told the
+    // seller "please fix the errors" while naming nothing they could fix.
+    if (!MEASURED_ATTRIBUTES.has(attribute) && !Number.isInteger(measured)) {
+      return { isValid: false, attribute, error: `${attribute} must be a whole number` };
     }
-    if (count > MAX_ATTRIBUTE_COUNT) {
-      return { isValid: false, error: `${attribute} cannot be more than ${MAX_ATTRIBUTE_COUNT}` };
+    if (measured < 0) {
+      return { isValid: false, attribute, error: `${attribute} cannot be negative` };
+    }
+    if (measured > MAX_ATTRIBUTE_COUNT) {
+      return { isValid: false, attribute, error: `${attribute} cannot be more than ${MAX_ATTRIBUTE_COUNT}` };
     }
   }
 

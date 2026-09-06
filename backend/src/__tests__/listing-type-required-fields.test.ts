@@ -3,7 +3,8 @@ process.env.SKIP_TEST_DB = 'true';
 import Property from '../models/Property';
 import { SUBSCRIPTION_STORES } from '../models/Subscription';
 import Subscription from '../models/Subscription';
-import { attributesForType } from '../config/typeAttributes';
+import { TYPE_ATTRIBUTES, attributesForType, normalizeTypeAttributes } from '../config/typeAttributes';
+import { ALLOWED_PROPERTY_FIELDS, ALLOWED_UPDATE_FIELDS } from '../controllers/propertyController';
 
 /**
  * A listing carries only the attributes its type has — the client strips the
@@ -104,5 +105,56 @@ describe('every subscription store the type allows can be saved', () => {
     });
     const error = doc.validateSync();
     expect(error?.errors?.store).toBeUndefined();
+  });
+});
+
+/**
+ * The write allow-list drops anything it does not name. It named the room
+ * counts by hand and had never gained 'openPlanArea' or 'parkingType', so a
+ * shop's open-plan area and a garage's arrangement were collected from the
+ * seller, sent, and thrown away before the save — the listing then showed
+ * zeroes it had never been given.
+ */
+describe('the write allow-list carries every type attribute', () => {
+  it.each(TYPE_ATTRIBUTES)('accepts %s', (attribute) => {
+    expect(ALLOWED_PROPERTY_FIELDS as readonly string[]).toContain(attribute);
+  });
+
+  it('lets each one be changed on an existing listing too', () => {
+    for (const attribute of TYPE_ATTRIBUTES) {
+      expect(ALLOWED_UPDATE_FIELDS).toContain(attribute);
+    }
+  });
+});
+
+/** An area is measured, not counted — an open-plan floor can be 102.5 m². */
+describe('areas may be fractional, counts may not', () => {
+  it('stores a fractional open-plan area', () => {
+    const result = normalizeTypeAttributes('commercial', { openPlanArea: 102.5 });
+    expect(result.ok).toBe(true);
+    expect(result.fields.openPlanArea).toBe(102.5);
+  });
+
+  it('still refuses half an office', () => {
+    expect(normalizeTypeAttributes('commercial', { offices: 1.5 }).ok).toBe(false);
+  });
+
+  it('refuses a negative or absurd area', () => {
+    expect(normalizeTypeAttributes('commercial', { openPlanArea: -1 }).ok).toBe(false);
+    expect(normalizeTypeAttributes('commercial', { openPlanArea: 100000 }).ok).toBe(false);
+  });
+
+  it('saves a shop with its offices and open-plan area intact', async () => {
+    const doc = listing({ propertyType: 'commercial', offices: 4, openPlanArea: 102.5, toilets: 2 });
+    expect(await failedPaths(doc)).toEqual([]);
+    expect(doc.get('offices')).toBe(4);
+    expect(doc.get('openPlanArea')).toBe(102.5);
+  });
+
+  it('saves a garage with its spaces and arrangement intact', async () => {
+    const doc = listing({ propertyType: 'parking', parking: 2, parkingType: 'underground' });
+    expect(await failedPaths(doc)).toEqual([]);
+    expect(doc.get('parking')).toBe(2);
+    expect(doc.get('parkingType')).toBe('underground');
   });
 });
