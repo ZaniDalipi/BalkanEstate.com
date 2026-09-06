@@ -710,7 +710,7 @@ export const getAgency = async (
         status: { $in: ['active', 'sold'] }, // Include both active and sold properties
         createdAsRole: 'agent', // Only show listings posted as agent on the agency page
       })
-        .populate('sellerId', 'name email phone avatarUrl role agencyName')
+        .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName')
         .sort({ createdAt: -1 })
         .lean();
 

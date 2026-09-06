@@ -47,6 +47,10 @@ export interface Seller {
     type: 'agent' | 'private';
     name: string;
     avatarUrl?: string;
+    /** DiceBear customisation JSON (the avatar the seller built in their profile). */
+    avatarOptions?: string;
+    /** Steers the generated fallback avatar when the seller never customised one. */
+    gender?: 'male' | 'female' | 'other';
     phone: string;
     agencyName?: string;
     agencyLogo?: string;

@@ -104,6 +104,8 @@ function promotionToProperty(promo: any): Property {
       name: seller.name || '',
       phone: seller.phone || '',
       avatarUrl: seller.avatarUrl,
+      avatarOptions: seller.avatarOptions,
+      gender: seller.gender,
       agencyName: seller.agencyName,
     },
     createdAt: prop.createdAt ? new Date(prop.createdAt).getTime() : Date.now(),

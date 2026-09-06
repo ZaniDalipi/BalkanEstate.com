@@ -35,6 +35,9 @@ interface StoredProperty extends Partial<Property> {
   originalPrice?: number;
   images?: Property['images'];
   seller: Property['seller'];
+  /** Kept so the card can seed the seller's generated avatar with the same id
+      every other surface uses — a name-seeded face would be a different person. */
+  sellerId?: string;
   status: Property['status'];
   lat: number;
   lng: number;
@@ -136,6 +139,9 @@ export function useRecentlyViewed() {
         originalPrice: property.originalPrice,
         images: property.images,
         seller: property.seller,
+        // Fall back to the previous snapshot's id: a thin re-track must not
+        // drop it, or the generated avatar changes face after a refresh.
+        sellerId: property.sellerId || previousEntry?.sellerId,
         status: property.status,
         lat: property.lat,
         lng: property.lng,

@@ -574,7 +574,7 @@ export const getFeaturedProperties = async (
           : { status: 'active' },
         populate: {
           path: 'sellerId',
-          select: 'name email phone avatarUrl role agencyName',
+          select: 'name email phone avatarUrl avatarOptions gender role agencyName',
         },
       })
       .limit(Number(limit))

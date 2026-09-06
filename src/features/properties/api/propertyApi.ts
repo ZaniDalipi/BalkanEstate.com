@@ -51,6 +51,8 @@ export function transformBackendProperty(backendProp: any): Property {
       name: typeof seller === 'object' ? seller.name : '',
       phone: typeof seller === 'object' ? seller.phone : '',
       avatarUrl: typeof seller === 'object' ? seller.avatarUrl : undefined,
+      avatarOptions: typeof seller === 'object' ? seller.avatarOptions : undefined,
+      gender: typeof seller === 'object' ? seller.gender : undefined,
       agencyName: typeof seller === 'object' ? seller.agencyName : undefined,
       agencyLogo: typeof seller === 'object' ? seller.agencyLogo : undefined,
       agencyId: typeof seller === 'object' ? seller.agencyId : undefined,

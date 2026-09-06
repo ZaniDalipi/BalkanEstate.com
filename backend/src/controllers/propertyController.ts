@@ -383,7 +383,7 @@ export const getProperties = async (
     const [rawProperties, total] = await Promise.all([
       Property.find(filter)
         .select(LIST_PROJECTION)
-        .populate('sellerId', 'name email phone avatarUrl role agencyName agencyId agentId')
+        .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName agencyId agentId')
         .collation({ locale: 'en', strength: 2 }) // Case-insensitive matching for city/country
         .sort(sort)
         .skip(skip)
@@ -535,7 +535,7 @@ export const getProperty = async (
       // Reload the now-active property
       const refreshed = await Property.findById(id).populate(
         'sellerId',
-        'name email phone avatarUrl role agencyName agencyId licenseNumber'
+        'name email phone avatarUrl avatarOptions gender role agencyName agencyId licenseNumber'
       );
       if (!refreshed) {
         res.status(404).json({ message: 'Property not found' });
@@ -1057,7 +1057,7 @@ export const createProperty = async (
     }
 
     // Populate seller info
-    await property.populate('sellerId', 'name email phone avatarUrl role agencyName');
+    await property.populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
 
     // Record initial price in history (skip negotiable listings where price is 0)
     if (property.price > 0) {
@@ -1223,7 +1223,7 @@ export const updateProperty = async (
     }
 
     // Populate seller info
-    await property.populate('sellerId', 'name email phone avatarUrl role agencyName');
+    await property.populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName');
 
     // Emit real-time event for instant updates across all connected clients
     emitPropertyUpdated(String(property._id), property.toObject());
@@ -1420,7 +1420,7 @@ export const reassignPropertyRole = async (
     );
 
     // Populate seller info for the response, then broadcast + invalidate caches
-    await property.populate('sellerId', 'name email phone avatarUrl role agencyName agencyId licenseNumber');
+    await property.populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName agencyId licenseNumber');
 
     emitPropertyUpdated(String(property._id), property.toObject());
     invalidateCache('/api/properties');
@@ -1679,7 +1679,7 @@ export const getMyListings = async (
     }
 
     const properties = await Property.find(query)
-      .populate('sellerId', 'name email phone avatarUrl role agencyName')
+      .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName')
       .sort({ lastRenewed: -1, createdAt: -1 }); // Renewed listings appear first
 
     propertyLogger.info(`✅ Found ${properties.length} listings`);

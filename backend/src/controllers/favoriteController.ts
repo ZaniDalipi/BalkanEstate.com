@@ -27,7 +27,7 @@ export const getFavorites = async (
         path: 'propertyId',
         populate: {
           path: 'sellerId',
-          select: 'name email phone avatarUrl role agencyName',
+          select: 'name email phone avatarUrl avatarOptions gender role agencyName',
         },
       })
       .sort({ createdAt: -1 });
