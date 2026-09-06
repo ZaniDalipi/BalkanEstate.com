@@ -66,15 +66,28 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   // Fetch admin stats for header - only if user is admin
   useEffect(() => {
     // Only fetch if user is authenticated and is admin
-    const token = tokenService.getAccessToken();
-    const isAdmin = state.user?.role === 'admin';
+    const isAdmin = state.currentUser?.role === 'admin';
 
-    if (!token || !isAdmin) {
-      setIsLoadingStats(false);
+    if (!isAdmin) {
+      // Keep the loading placeholder while the session is still being restored,
+      // so the header doesn't flash zeros before currentUser is known.
+      if (!state.isAuthenticating) {
+        setStats(null);
+        setIsLoadingStats(false);
+      }
       return;
     }
 
+    let isActive = true;
+
     const fetchStats = async () => {
+      const token = tokenService.getAccessToken();
+
+      if (!token) {
+        if (isActive) setIsLoadingStats(false);
+        return;
+      }
+
       try {
         const response = await fetch(`${API_URL}/admin/stats`, {
           headers: {
@@ -84,17 +97,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
         if (response.ok) {
           const data = await response.json();
-          setStats(data);
+          if (isActive) setStats(data);
         }
       } catch (err) {
         // Error removed
       } finally {
-        setIsLoadingStats(false);
+        if (isActive) setIsLoadingStats(false);
       }
     };
 
     fetchStats();
-  }, [state.user?.role]);
+
+    // Keep the header counters in sync with the dashboard (same 30s cadence)
+    const interval = setInterval(fetchStats, 30000);
+
+    return () => {
+      isActive = false;
+      clearInterval(interval);
+    };
+  }, [state.currentUser?.role, state.isAuthenticating]);
 
   const handleBackToSite = () => {
     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
