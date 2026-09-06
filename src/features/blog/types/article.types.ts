@@ -5,6 +5,10 @@ export interface ArticleAuthor {
   _id: string;
   name: string;
   email?: string;
+  avatarUrl?: string;
+  /** Their generated character, shown when there is no uploaded photo. */
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
 }
 
 export interface ArticleListItem {

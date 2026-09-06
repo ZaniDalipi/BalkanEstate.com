@@ -1,15 +1,15 @@
 import React, { useState, useCallback, memo, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, UserCircleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
+import { MapPinIcon, BedIcon, BathIcon, SqftIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { typeHasAttribute } from '@/shared/property/typeAttributes';
+import SellerAvatar from '@/shared/components/property/SellerAvatar';
 
 // Chevron Icons
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -37,43 +37,6 @@ interface HighlightedCardInnerProps {
   onCardClick: (e?: React.MouseEvent) => void;
   onFavoriteClick: (e: React.MouseEvent) => void;
 }
-
-// Seller Avatar component with error handling
-const SellerAvatar: React.FC<{ avatarUrl?: string; name: string; type: string }> = ({
-  avatarUrl,
-  name,
-  type
-}) => {
-  const [error, setError] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-
-  if (!avatarUrl || error) {
-    return (
-      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow-sm border-2 border-white">
-        <UserCircleIcon className="w-4 h-4 text-primary" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-primary/20 to-primary/40">
-      {!loaded && (
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
-      )}
-      <img
-        src={optimizeCloudinaryUrl(avatarUrl, { width: 56, quality: 'auto', crop: 'fill' })}
-        alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
-        loading="lazy"
-        decoding="async"
-        width={28}
-        height={28}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        onError={() => setError(true)}
-        onLoad={() => setLoaded(true)}
-      />
-    </div>
-  );
-};
 
 /**
  * Pure inner component - handles ALL rendering, NO context subscription.
@@ -417,9 +380,10 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         <div className="pt-2.5 border-t border-neutral-100 flex items-center justify-between mt-auto">
           <div className="flex items-center gap-2 min-w-0">
             <SellerAvatar
-              avatarUrl={property.seller.avatarUrl}
-              name={property.seller.name}
-              type={property.seller.type}
+              seller={property.seller}
+              seed={property.sellerId}
+              size={28}
+              className="border-2 border-white shadow-sm"
             />
             <div className="min-w-0">
               <p className="text-xs font-semibold text-neutral-800 truncate">{property.seller.name}</p>

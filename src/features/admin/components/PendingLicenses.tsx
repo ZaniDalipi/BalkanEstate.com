@@ -12,6 +12,7 @@ import {
   rejectLicense,
   PendingLicenseAgent,
 } from '../api/adminApi';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 const PendingLicenses: React.FC = () => {
   const { t } = useTranslation(['admin']);
@@ -119,13 +120,17 @@ const PendingLicenses: React.FC = () => {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    {user?.avatarUrl ? (
-                      <img src={user.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
-                        {user?.name?.charAt(0)?.toUpperCase() || '?'}
-                      </div>
-                    )}
+                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-blue-50">
+                      <UserAvatar
+                        src={user?.avatarUrl}
+                        alt={user?.name || ''}
+                        gender={user?.gender}
+                        seed={userId || user?.name}
+                        avatarOptions={user?.avatarOptions}
+                        width={80}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-900 truncate">{user?.name || 'Unknown'}</p>
                       <p className="text-xs text-gray-500 truncate">{user?.email || ''}</p>

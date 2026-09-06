@@ -373,7 +373,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         onError={() => setImgError(true)}
                                     />
                                 ) : (
-                                    <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+                                    <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                 )}
                             </div>
                             {/* Verified Badge */}

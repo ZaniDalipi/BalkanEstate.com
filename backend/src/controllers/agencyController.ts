@@ -502,9 +502,9 @@ export const getAgencies = async (
 
     // Get agencies sorted by rotation order for featured ones
     const agencies = await Agency.find(filter)
-      .populate('ownerId', 'name email phone avatarUrl')
+      .populate('ownerId', 'name email phone avatarUrl avatarOptions gender')
       .populate('agents', 'name email phone avatarUrl avatarOptions gender role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
-      .populate('admins', 'name email phone avatarUrl')
+      .populate('admins', 'name email phone avatarUrl avatarOptions gender')
       .sort({ score: -1, isFeatured: -1 })
       .skip(skip)
       .limit(limitNum)
@@ -594,9 +594,9 @@ export const getAgency = async (
       lookupMethod = 'ID';
       agencyLogger.info(`🔑 Attempting lookup by ObjectId: ${identifier}`);
       agency = await Agency.findById(identifier)
-        .populate('ownerId', 'name email phone avatarUrl')
+        .populate('ownerId', 'name email phone avatarUrl avatarOptions gender')
         .populate('agents', 'name email phone avatarUrl avatarOptions gender role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
-        .populate('admins', 'name email phone avatarUrl');
+        .populate('admins', 'name email phone avatarUrl avatarOptions gender');
     }
 
     if (!agency) {
@@ -604,9 +604,9 @@ export const getAgency = async (
       const slugLower = identifier.toLowerCase();
       agencyLogger.info(`🏷️  Attempting lookup by slug: ${slugLower}`);
       agency = await Agency.findOne({ slug: slugLower })
-        .populate('ownerId', 'name email phone avatarUrl')
+        .populate('ownerId', 'name email phone avatarUrl avatarOptions gender')
         .populate('agents', 'name email phone avatarUrl avatarOptions gender role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
-        .populate('admins', 'name email phone avatarUrl');
+        .populate('admins', 'name email phone avatarUrl avatarOptions gender');
     }
 
     // If not found and slug contains forward slash, try converting to comma format for backward compatibility
@@ -615,9 +615,9 @@ export const getAgency = async (
       const legacySlug = identifier.toLowerCase().replace('/', ',');
       agencyLogger.info(`🏷️  Attempting lookup by legacy slug format: ${legacySlug}`);
       agency = await Agency.findOne({ slug: legacySlug })
-        .populate('ownerId', 'name email phone avatarUrl')
+        .populate('ownerId', 'name email phone avatarUrl avatarOptions gender')
         .populate('agents', 'name email phone avatarUrl avatarOptions gender role agencyName licenseNumber agentId city country stats.activeListings stats.totalSalesValue stats.propertiesSold stats.rating')
-        .populate('admins', 'name email phone avatarUrl');
+        .populate('admins', 'name email phone avatarUrl avatarOptions gender');
     }
 
     if (!agency) {
@@ -987,8 +987,8 @@ export const updateAgency = async (
 
     await agency.save();
 
-    await agency.populate('ownerId', 'name email phone avatarUrl');
-    await agency.populate('agents', 'name email phone avatarUrl role agencyName');
+    await agency.populate('ownerId', 'name email phone avatarUrl avatarOptions gender');
+    await agency.populate('agents', 'name email phone avatarUrl avatarOptions gender role agencyName');
 
     res.json({ agency });
   } catch (error: any) {
@@ -1067,7 +1067,7 @@ export const addAgentToAgency = async (
     // Sync agent's attributes (languages, service areas, specializations, certifications) to agency
     await syncAgentAttributesToAgency(agency, agentUserId);
 
-    await agency.populate('agents', 'name email phone avatarUrl role agencyName');
+    await agency.populate('agents', 'name email phone avatarUrl avatarOptions gender role agencyName');
 
     res.json({ agency });
   } catch (error: any) {
@@ -1276,7 +1276,7 @@ export const getFeaturedAgencies = async (
 
     // Get all featured agencies with agents populated
     const agencies = await Agency.find({ isFeatured: true })
-      .populate('ownerId', 'name email phone avatarUrl')
+      .populate('ownerId', 'name email phone avatarUrl avatarOptions gender')
       .populate('agents', '_id')
       .sort({ adRotationOrder: 1, createdAt: -1 })
       .lean();
@@ -3279,7 +3279,7 @@ export const getAgencyAgents = async (
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
 
-    const agency = await Agency.findById(id).populate('agents', 'name email phone avatarUrl subscription agency agentLicense');
+    const agency = await Agency.findById(id).populate('agents', 'name email phone avatarUrl avatarOptions gender subscription agency agentLicense');
     if (!agency) {
       res.status(404).json({ message: 'Agency not found' });
       return;
@@ -3542,7 +3542,7 @@ export const getTopAgencies = async (req: Request, res: Response): Promise<void>
     const limitNum = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
     const agencies = await Agency.find({})
       .populate('ownerId', 'name email')
-      .populate('agents', 'name email avatarUrl')
+      .populate('agents', 'name email avatarUrl avatarOptions gender')
       .sort({ score: -1, isFeatured: -1 })
       .limit(limitNum)
       .lean();

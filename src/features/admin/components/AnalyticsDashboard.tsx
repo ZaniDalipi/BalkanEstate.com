@@ -17,6 +17,7 @@ import {
 } from '@/constants';
 import { API_URL } from '@/src/shared/api/config';
 import { tokenService } from '@/src/shared/api/tokenService';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface AdminStats {
   overview: {
@@ -47,6 +48,10 @@ interface PendingLicenseAgent {
   _id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
+  /** Their generated character, shown when there is no uploaded photo. */
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
   createdAt: string;
 }
 
@@ -424,8 +429,16 @@ const AnalyticsDashboard: React.FC = () => {
                 className="flex items-center justify-between p-3 bg-purple-50 rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-200 text-purple-700 rounded-full flex items-center justify-center text-sm font-semibold">
-                    {(agent.name || agent.email)?.[0]?.toUpperCase() || '?'}
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-purple-100">
+                    <UserAvatar
+                      src={agent.avatarUrl}
+                      alt={agent.name || agent.email}
+                      gender={agent.gender}
+                      seed={agent._id || agent.email}
+                      avatarOptions={agent.avatarOptions}
+                      width={64}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">{agent.name || agent.email}</p>

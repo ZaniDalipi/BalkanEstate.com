@@ -10,6 +10,7 @@ import { useAppContext } from '@/context/AppContext';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import { cn } from '@/lib/utils';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface ArticlePageProps {
   slug: string;
@@ -440,8 +441,16 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
           {/* Author + date + read time */}
           <div className="flex flex-wrap items-center justify-between gap-4 py-5 border-t border-b border-neutral-100">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-md">
-                {article.author?.name?.charAt(0)?.toUpperCase() || '?'}
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 shadow-md bg-gradient-to-br from-slate-100 to-slate-200">
+                <UserAvatar
+                  src={article.author?.avatarUrl}
+                  alt={article.author?.name || ''}
+                  gender={article.author?.gender}
+                  seed={article.author?._id || article.author?.name}
+                  avatarOptions={article.author?.avatarOptions}
+                  width={80}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <p className="font-semibold text-slate-900 text-sm">{article.author?.name || 'BalkanEstate'}</p>

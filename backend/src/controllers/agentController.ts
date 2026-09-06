@@ -53,7 +53,7 @@ export const getAgents = async (req: Request, res: Response): Promise<void> => {
     let agents = await Agent.find(filter)
       .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
       .populate('agencyId', 'name logo coverGradient coverImage slug type')
-      .populate('testimonials.userId', 'name avatarUrl')
+      .populate('testimonials.userId', 'name avatarUrl avatarOptions gender')
       .sort({ score: -1, rating: -1 })
       .skip(skip)
       .limit(limitNum);
@@ -123,7 +123,7 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
       agent = await Agent.findById(id)
         .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
         .populate('agencyId', 'name logo coverGradient coverImage slug type')
-        .populate('testimonials.userId', 'name avatarUrl');
+        .populate('testimonials.userId', 'name avatarUrl avatarOptions gender');
     }
 
     // Fallback: search by custom agentId field
@@ -131,7 +131,7 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
       agent = await Agent.findOne({ agentId: id })
         .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
         .populate('agencyId', 'name logo coverGradient coverImage slug type')
-        .populate('testimonials.userId', 'name avatarUrl');
+        .populate('testimonials.userId', 'name avatarUrl avatarOptions gender');
     }
 
     // Fallback: search by userId (for agency agent listings that use User ObjectId)
@@ -139,7 +139,7 @@ export const getAgent = async (req: Request, res: Response): Promise<void> => {
       agent = await Agent.findOne({ userId: id })
         .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
         .populate('agencyId', 'name logo coverGradient coverImage slug type')
-        .populate('testimonials.userId', 'name avatarUrl');
+        .populate('testimonials.userId', 'name avatarUrl avatarOptions gender');
     }
 
     if (!agent) {
@@ -165,7 +165,7 @@ export const getAgentByUserId = async (req: Request, res: Response): Promise<voi
     const agent = await Agent.findOne({ userId })
       .populate('userId', 'name email phone avatarUrl avatarOptions gender city country address')
       .populate('agencyId', 'name logo coverGradient coverImage slug type')
-      .populate('testimonials.userId', 'name avatarUrl');
+      .populate('testimonials.userId', 'name avatarUrl avatarOptions gender');
 
     if (!agent) {
       res.status(404).json({ message: 'Agent not found' });
@@ -392,7 +392,7 @@ export const addReview = async (req: Request, res: Response): Promise<void> => {
     await agent.save();
 
     // Populate testimonials with user data before sending response
-    await agent.populate('testimonials.userId', 'name avatarUrl');
+    await agent.populate('testimonials.userId', 'name avatarUrl avatarOptions gender');
 
     res.json({
       message: 'Review added successfully',

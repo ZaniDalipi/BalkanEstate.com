@@ -215,7 +215,7 @@ export const getAgents = async (
     const populatedAgency = await Agency.findById(agency._id)
       .populate(
         'agents',
-        'name email phone avatarUrl role stats listingsCount agentId licenseNumber'
+        'name email phone avatarUrl avatarOptions gender role stats listingsCount agentId licenseNumber'
       )
       .lean();
 
@@ -317,7 +317,7 @@ export const getAgentPerformance = async (
 
     // Fetch agent user details
     const agent = await User.findById(agentId)
-      .select('name email avatarUrl stats listingsCount')
+      .select('name email avatarUrl avatarOptions gender stats listingsCount')
       .lean();
 
     if (!agent) {
@@ -1299,7 +1299,7 @@ export const getTeamNotes = async (
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('userId', 'name email avatarUrl')
+        .populate('userId', 'name email avatarUrl avatarOptions gender')
         .lean(),
       Notification.countDocuments(filter),
     ]);

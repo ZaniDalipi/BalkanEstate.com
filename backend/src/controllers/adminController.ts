@@ -160,7 +160,7 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
       'role', 'activeRole', 'primaryRole',
       'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
       'licenseNumber', 'bio', 'languages', 'specializations',
-      'serviceAreas', 'avatarUrl', 'avatarOptions',
+      'serviceAreas', 'avatarUrl avatarOptions gender', 'avatarOptions',
       'agencyName',
     ];
 
@@ -323,8 +323,8 @@ export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise
     if (!id) return;
 
     const agency = await Agency.findById(id)
-      .populate('ownerId', 'name email phone subscription avatarUrl')
-      .populate('agents', 'name email phone role subscription agencyName avatarUrl createdAt')
+      .populate('ownerId', 'name email phone subscription avatarUrl avatarOptions gender')
+      .populate('agents', 'name email phone role subscription agencyName avatarUrl avatarOptions gender createdAt')
       .lean();
 
     if (!agency) {
@@ -516,7 +516,7 @@ export const getAllPropertiesAdmin = async (req: Request, res: Response): Promis
     const skip = (Number(page) - 1) * Number(limit);
 
     const properties = await Property.find(query)
-      .populate('sellerId', 'name email role')
+      .populate('sellerId', 'name email role avatarUrl avatarOptions gender')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
@@ -578,7 +578,7 @@ export const updateProperty = async (req: Request, res: Response): Promise<void>
       runValidators: true,
       context: 'query'
     })
-      .populate('sellerId', 'name email role');
+      .populate('sellerId', 'name email role avatarUrl avatarOptions gender');
 
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
@@ -857,7 +857,7 @@ export const getAllInquiries = async (req: Request, res: Response): Promise<void
     // High-priority inquiries (advertising requests) always sort to the top.
     // 'high' < 'normal' alphabetically, so ascending puts high-priority first.
     const inquiries = await Inquiry.find(query)
-      .populate('recipientId', 'name email role avatarUrl')
+      .populate('recipientId', 'name email role avatarUrl avatarOptions gender')
       .populate('propertyId', 'title images price city country')
       .sort({ priority: 1, [String(sortBy)]: sortOrder })
       .skip(skip)
@@ -909,9 +909,9 @@ export const getInquiryById = async (req: Request, res: Response): Promise<void>
     if (!id) return;
 
     const inquiry = await Inquiry.findById(id)
-      .populate('recipientId', 'name email role avatarUrl phone')
+      .populate('recipientId', 'name email role avatarUrl avatarOptions gender phone')
       .populate('propertyId', 'title images price city country address')
-      .populate('buyerId', 'name email avatarUrl');
+      .populate('buyerId', 'name email avatarUrl avatarOptions gender');
 
     if (!inquiry) {
       res.status(404).json({ message: 'Inquiry not found' });
@@ -952,7 +952,7 @@ export const updateInquiry = async (req: Request, res: Response): Promise<void> 
       new: true,
       runValidators: true,
     })
-      .populate('recipientId', 'name email role avatarUrl')
+      .populate('recipientId', 'name email role avatarUrl avatarOptions gender')
       .populate('propertyId', 'title images price city country');
 
     if (!inquiry) {
@@ -1141,7 +1141,7 @@ export const syncPropertySchema = async (req: Request, res: Response): Promise<v
 export const getPendingLicenses = async (req: Request, res: Response): Promise<void> => {
   try {
     const pendingAgents = await Agent.find({ licenseStatus: 'pending' })
-      .populate('userId', 'name email phone avatarUrl country city')
+      .populate('userId', 'name email phone avatarUrl avatarOptions gender country city')
       .sort({ updatedAt: -1 });
 
     res.json({

@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { Property, Agency } from '../../../types';
 import { PhoneIcon, ShareIcon, MapPinIcon, UsersIcon, HomeIcon, BuildingOfficeIcon, ChevronRightIcon } from '../../../constants';
 import { useAppContext } from '../../../context/AppContext';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
 import * as api from '../../../services/apiService';
 import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
 import RentVsBuyCalculator from '@/src/features/calculators/components/RentVsBuyCalculator';
@@ -15,6 +14,7 @@ import RentAffordabilityCalculator from '@/src/features/rental/components/RentAf
 import MoveInCostBreakdown from '@/src/features/rental/components/MoveInCostBreakdown';
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
 import { formatCityPlace } from '@/shared/geo';
+import SellerAvatar from '@/shared/components/property/SellerAvatar';
 
 interface PropertyContactProps {
   property: Property;
@@ -267,23 +267,12 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             }}
             className="flex items-center gap-4 mb-4 w-full p-2 -m-2 rounded-xl hover:bg-blue-50 transition-colors group cursor-pointer text-left"
           >
-            {property.seller?.avatarUrl ? (
-              <img
-                src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 96, quality: 'auto', crop: 'fill' })}
-                alt={property.seller.name}
-                loading="lazy"
-                decoding="async"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all shadow-md">
-                <span className="text-white font-bold text-lg">
-                  {property.seller?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '👤'}
-                </span>
-              </div>
-            )}
+            <SellerAvatar
+              seller={property.seller}
+              seed={property.sellerId}
+              size={48}
+              className="ring-2 ring-neutral-100 group-hover:ring-blue-200 transition-all flex-shrink-0"
+            />
             <div className="flex-1">
               <p className="font-bold text-base text-neutral-900 group-hover:text-blue-600 transition-colors">{property.seller?.name}</p>
               <div className="flex items-center gap-2">
@@ -298,23 +287,12 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           </button>
         ) : (
           <div className="flex items-center gap-4 mb-4">
-            {property.seller?.avatarUrl ? (
-              <img
-                src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 96, quality: 'auto', crop: 'fill' })}
-                alt={property.seller.name}
-                loading="lazy"
-                decoding="async"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-neutral-100"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center ring-2 ring-neutral-100 shadow-md">
-                <span className="text-white font-bold text-lg">
-                  {property.seller?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '👤'}
-                </span>
-              </div>
-            )}
+            <SellerAvatar
+              seller={property.seller}
+              seed={property.sellerId}
+              size={48}
+              className="ring-2 ring-neutral-100 flex-shrink-0"
+            />
             <div className="flex-1">
               <p className="font-bold text-base text-neutral-900">{property.seller?.name}</p>
               <div className="flex items-center gap-2">

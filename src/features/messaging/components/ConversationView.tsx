@@ -4,7 +4,7 @@ import { Conversation, Message } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import MessageInput from './MessageInput';
 import { formatPrice } from '@/utils/currency';
-import { CalendarIcon, UserCircleIcon, ChevronLeftIcon, BuildingOfficeIcon, ShieldExclamationIcon, TrashIcon } from '@/constants';
+import { CalendarIcon, ChevronLeftIcon, BuildingOfficeIcon, ShieldExclamationIcon, TrashIcon } from '@/constants';
 import { getConversation, sendMessage as sendMessageAPI, uploadMessageImage, getSecurityWarning } from '@/services/apiService';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { generatePropertySlug } from '@/utils/slug';
@@ -13,6 +13,7 @@ import { notificationService } from '@/services/notificationService';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface ConversationViewProps {
     conversation: Conversation;
@@ -244,17 +245,15 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 )}
                 {isDirectConversation ? (
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center rounded-lg flex-shrink-0">
-                        {otherParticipant?.avatarUrl ? (
-                            <img
-                                src={otherParticipant.avatarUrl}
-                                alt={otherParticipant.name}
-                                loading="lazy"
-                                decoding="async"
-                                className="w-full h-full object-cover rounded-lg"
-                            />
-                        ) : (
-                            <UserCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary/60" />
-                        )}
+                        <UserAvatar
+                            src={otherParticipant?.avatarUrl}
+                            alt={otherParticipant?.name || ''}
+                            gender={otherParticipant?.gender}
+                            seed={otherParticipant?.id || otherParticipant?.name}
+                            avatarOptions={otherParticipant?.avatarOptions}
+                            width={96}
+                            className="w-full h-full object-cover rounded-lg"
+                        />
                     </div>
                 ) : imageError ? (
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-lg flex-shrink-0">
@@ -366,11 +365,26 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
 
                             // Get the other person in the conversation based on current user's role
                             const isCurrentUserBuyer = String(conversation.buyer?.id || conversation.buyerId) === String(currentUserId);
+                            // Normalised into one shape: the seller can arrive either
+                            // from the conversation or off the property, and those two
+                            // carry the person's id in different places.
                             const otherPerson = isCurrentUserMessage
                                 ? null // Don't need avatar for own messages
                                 : (isCurrentUserBuyer
-                                    ? (conversation.seller || property?.seller)
-                                    : (conversation.buyer || { name: 'Buyer', avatarUrl: null }));
+                                    ? {
+                                        id: conversation.seller?.id || conversation.sellerId || property?.sellerId,
+                                        name: conversation.seller?.name || property?.seller?.name || 'Seller',
+                                        avatarUrl: conversation.seller?.avatarUrl || property?.seller?.avatarUrl,
+                                        avatarOptions: conversation.seller?.avatarOptions || property?.seller?.avatarOptions,
+                                        gender: conversation.seller?.gender || property?.seller?.gender,
+                                    }
+                                    : {
+                                        id: conversation.buyer?.id || conversation.buyerId,
+                                        name: conversation.buyer?.name || 'Buyer',
+                                        avatarUrl: conversation.buyer?.avatarUrl,
+                                        avatarOptions: conversation.buyer?.avatarOptions,
+                                        gender: conversation.buyer?.gender,
+                                    });
 
                             return (
                                 <div
@@ -379,11 +393,15 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                 >
                                     {!isCurrentUserMessage && otherPerson && (
                                         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100 ring-2 ring-white/60 shadow-sm">
-                                            {otherPerson.avatarUrl ? (
-                                                <img src={otherPerson.avatarUrl} alt={otherPerson.name} loading="lazy" decoding="async" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                                            ) : (
-                                                <UserCircleIcon className="w-full h-full text-neutral-400" />
-                                            )}
+                                            <UserAvatar
+                                                src={otherPerson.avatarUrl}
+                                                alt={otherPerson.name}
+                                                gender={otherPerson.gender}
+                                                seed={otherPerson.id || otherPerson.name}
+                                                avatarOptions={otherPerson.avatarOptions}
+                                                width={64}
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
                                     )}
                                     <div className={`max-w-[75%] sm:max-w-md p-2.5 sm:p-3 rounded-2xl shadow-sm ${isCurrentUserMessage
@@ -405,17 +423,15 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                         {isTyping && (
                             <div className="flex items-end gap-1.5 sm:gap-2 justify-start animate-pulse">
                                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100 ring-2 ring-primary ring-opacity-50">
-                                    {(conversation.seller?.avatarUrl || property?.seller?.avatarUrl) ? (
-                                        <img
-                                            src={conversation.seller?.avatarUrl || property?.seller?.avatarUrl}
-                                            alt="Seller"
-                                            loading="lazy"
-                                            decoding="async"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <UserCircleIcon className="w-full h-full text-neutral-400" />
-                                    )}
+                                    <UserAvatar
+                                        src={conversation.seller?.avatarUrl || property?.seller?.avatarUrl}
+                                        alt={conversation.seller?.name || property?.seller?.name || 'Seller'}
+                                        gender={conversation.seller?.gender || property?.seller?.gender}
+                                        seed={conversation.seller?.id || conversation.sellerId || property?.sellerId}
+                                        avatarOptions={conversation.seller?.avatarOptions || property?.seller?.avatarOptions}
+                                        width={64}
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
                                 <div className="bg-neutral-100 p-2.5 sm:p-3 rounded-2xl rounded-bl-lg shadow-sm">
                                     <div className="flex gap-1">

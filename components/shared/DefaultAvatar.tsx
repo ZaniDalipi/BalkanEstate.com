@@ -36,7 +36,15 @@ function deterministicPick<T>(arr: T[], seed: number, offset: number): T {
   return arr[(seed + offset * 7919) % arr.length]; // use a prime for better distribution
 }
 
-function generateFromSeed(seed: string, gender?: 'male' | 'female' | 'other'): AvatarOptions {
+/**
+ * The face a person gets before they ever open the customiser.
+ *
+ * Exported because the backend mirrors it (backend/src/utils/defaultAvatar.ts)
+ * to persist these options on the user, so every surface reads one saved
+ * character instead of each re-deriving one from whichever id its payload
+ * happened to carry. `src/tests/avatar-parity.test.ts` holds the two in sync.
+ */
+export function generateAvatarOptionsFromSeed(seed: string, gender?: 'male' | 'female' | 'other'): AvatarOptions {
   const h = hashSeed(seed);
   const isFemale = gender === 'female';
   const facialHair = isFemale ? '' : deterministicPick(FACIAL_HAIR_OPTS, h, 7);
@@ -73,7 +81,7 @@ const DefaultAvatar: React.FC<DefaultAvatarProps> = ({
   // Determine which options to use
   const parsed = parseAvatarOptions(avatarOptions);
   const options: AvatarOptions = parsed
-    || (seed !== 'default' ? generateFromSeed(seed, gender) : getDefaultAvatarOptions(gender));
+    || (seed !== 'default' ? generateAvatarOptionsFromSeed(seed, gender) : getDefaultAvatarOptions(gender));
 
   const url = buildAvatarUrl(options);
 

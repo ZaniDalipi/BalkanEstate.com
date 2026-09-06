@@ -9,6 +9,8 @@ import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
 } from '@/constants';
+import { useAppContext } from '@/context/AppContext';
+import UserAvatar from '@/components/shared/UserAvatar';
 import type { OverviewData } from '../types';
 
 interface AgencyDashboardHeaderProps {
@@ -31,6 +33,9 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
   userName,
 }) => {
   const { t } = useTranslation(['agencyDashboard']);
+  // The signed-in owner, for the avatar beside their name in the corner.
+  const { state } = useAppContext();
+  const currentUser = state.currentUser;
 
   const quickStats = [
     {
@@ -125,10 +130,16 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
             </button>
 
             <div className="hidden sm:flex items-center gap-2 px-3 py-2">
-              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                <span className="text-indigo-700 font-semibold text-sm">
-                  {userName.charAt(0).toUpperCase()}
-                </span>
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-50 flex-shrink-0">
+                <UserAvatar
+                  src={currentUser?.avatarUrl}
+                  alt={userName}
+                  gender={currentUser?.gender}
+                  seed={currentUser?.id || userName}
+                  avatarOptions={currentUser?.avatarOptions}
+                  width={64}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="text-sm font-medium text-gray-700">{userName}</span>
             </div>

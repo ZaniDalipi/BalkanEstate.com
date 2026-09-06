@@ -61,6 +61,8 @@ export const getDashboardAgents = async (agencyId: string): Promise<DashboardAge
     userId: String(a.id ?? a._id ?? a.userId ?? ''),
     name: (a.name as string) ?? '',
     avatar: (a.avatarUrl as string) ?? (a.avatar as string) ?? null,
+    avatarOptions: (a.avatarOptions as string) ?? undefined,
+    gender: (a.gender as DashboardAgent['gender']) ?? undefined,
     activeListings: (a.listingsCount as number) ?? (a.activeListings as number) ?? 0,
     inquiriesHandled: ((a.stats as Record<string, unknown>)?.inquiriesHandled as number) ?? (a.inquiriesHandled as number) ?? 0,
     avgResponseTime: (a.avgResponseTime as string) ?? '-',

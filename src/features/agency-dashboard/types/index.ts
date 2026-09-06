@@ -34,6 +34,9 @@ export interface DashboardAgent {
   userId: string;
   name: string;
   avatar: string | null;
+  /** Their generated character, shown when there is no uploaded photo. */
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
   activeListings: number;
   inquiriesHandled: number;
   avgResponseTime: string;

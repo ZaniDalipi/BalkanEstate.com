@@ -42,6 +42,10 @@ export interface Property {
     name: string;
     email: string;
     role: string;
+    avatarUrl?: string;
+    /** Their generated character, shown when there is no uploaded photo. */
+    avatarOptions?: string;
+    gender?: 'male' | 'female' | 'other';
   };
   createdAt: string;
   updatedAt: string;

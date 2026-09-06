@@ -45,7 +45,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
   if (!agent.avatarUrl || error) {
     return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+        <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
       </div>
     );
   }

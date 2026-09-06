@@ -15,7 +15,7 @@ import { getGallerySources, warmImage, warmGallery } from '@/config/galleryImage
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
-import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
 import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
@@ -57,76 +57,6 @@ interface PropertyCardInnerProps {
   onLocationClick: (e: React.MouseEvent, type: 'city' | 'country') => void;
   onContextMenu: (e: React.MouseEvent) => void;
 }
-
-/**
- * Seller avatar for a card.
- *
- * With no photo (or one that fails to load) the card used to fall back to a
- * flat user glyph, which made every seller look like the same anonymous
- * account. Instead we render the same DiceBear character the seller sees on
- * their own profile: their saved `avatarOptions` when they customised one,
- * otherwise the deterministic default generated from their id — so the face is
- * theirs, stable across every card, and recognisable next to the listing.
- */
-const SellerAvatar: React.FC<{
-  avatarUrl?: string;
-  name: string;
-  type: string;
-  avatarOptions?: string;
-  gender?: 'male' | 'female' | 'other';
-  /** Stable id so the generated face never changes between renders or pages. */
-  seed?: string;
-  size?: 'sm' | 'md';
-}> = ({
-  avatarUrl,
-  name,
-  type,
-  avatarOptions,
-  gender,
-  seed,
-  size = 'sm'
-}) => {
-  const [error, setError] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-
-  const sizeClasses = size === 'sm'
-    ? 'w-8 h-8'
-    : 'w-10 h-10';
-
-  if (!avatarUrl || error) {
-    return (
-      <div className={`relative ${sizeClasses} rounded-full overflow-hidden border-2 border-white shadow-md bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100`}>
-        <DefaultAvatar
-          gender={gender}
-          seed={seed || name}
-          avatarOptions={avatarOptions}
-          className="w-full h-full"
-        />
-        {/* Glossy highlight: the depth cue that makes the flat SVG read as 3D */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/35 via-transparent to-transparent pointer-events-none" />
-      </div>
-    );
-  }
-
-  return (
-    <div className={`${sizeClasses} rounded-full overflow-hidden border-2 border-white shadow bg-gradient-to-br from-primary/20 to-primary/40`}>
-      {!loaded && (
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/20 animate-pulse" />
-      )}
-      <img
-        src={optimizeCloudinaryUrl(avatarUrl, { width: 64, quality: 'auto', crop: 'fill' })}
-        alt={`${name} - Real Estate ${type === 'agent' ? 'Agent' : 'Seller'}`}
-        loading="lazy"
-        decoding="async"
-        width={64}
-        height={64}
-        className={`w-full h-full object-cover object-center transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        onError={() => setError(true)}
-        onLoad={() => setLoaded(true)}
-      />
-    </div>
-  );
-};
 
 /**
  * Pure inner component - handles ALL rendering, NO context subscription.
@@ -804,13 +734,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* Seller Avatar */}
             <div className="relative flex-shrink-0">
               <SellerAvatar
-                avatarUrl={safeProperty.seller.avatarUrl}
-                name={sellerDisplay.name}
-                type={safeProperty.seller.type}
-                avatarOptions={safeProperty.seller.avatarOptions}
-                gender={safeProperty.seller.gender}
-                seed={safeProperty.sellerId || safeProperty.seller.agentId || sellerDisplay.name}
-                size="sm"
+                seller={safeProperty.seller}
+                seed={safeProperty.sellerId}
+                size={32}
+                className="border-2 border-white shadow-md"
               />
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
             </div>

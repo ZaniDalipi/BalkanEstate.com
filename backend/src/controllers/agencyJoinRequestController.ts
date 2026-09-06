@@ -171,7 +171,7 @@ export const getAgencyJoinRequests = async (req: Request, res: Response): Promis
 
     // Get all join requests for this agency
     const joinRequests = await AgencyJoinRequest.find({ agencyId })
-      .populate('agentId', 'name email phone avatarUrl licenseNumber totalSalesValue propertiesSold')
+      .populate('agentId', 'name email phone avatarUrl avatarOptions gender licenseNumber totalSalesValue propertiesSold')
       .sort({ requestedAt: -1 });
 
     res.json({ joinRequests });

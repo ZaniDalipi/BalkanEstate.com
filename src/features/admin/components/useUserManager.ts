@@ -10,6 +10,9 @@ export interface User {
   phone?: string;
   role: string;
   avatarUrl?: string;
+  /** Their generated character, shown when there is no uploaded photo. */
+  avatarOptions?: string;
+  gender?: 'male' | 'female' | 'other';
   city?: string;
   country?: string;
   isSubscribed: boolean;

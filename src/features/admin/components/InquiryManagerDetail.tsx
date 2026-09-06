@@ -11,6 +11,7 @@ import {
   TrashIcon,
 } from '@/constants';
 import type { Inquiry } from './useInquiryManager';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface InquiryDetailProps {
   inquiry: Inquiry;
@@ -95,13 +96,17 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
           <div className="bg-blue-50 rounded-lg p-4">
             <h4 className="font-semibold text-gray-700 mb-3">{t('admin:inquiries.recipientAgentSeller')}</h4>
             <div className="flex items-center gap-3">
-              {inquiry.recipientId?.avatarUrl ? (
-                <img src={inquiry.recipientId.avatarUrl} alt="" loading="lazy" decoding="async" className="w-12 h-12 rounded-full" referrerPolicy="no-referrer" />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg font-bold">
-                  {inquiry.recipientName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-blue-50">
+                <UserAvatar
+                  src={inquiry.recipientId?.avatarUrl}
+                  alt={inquiry.recipientName}
+                  gender={inquiry.recipientId?.gender}
+                  seed={inquiry.recipientId?._id || inquiry.recipientName}
+                  avatarOptions={inquiry.recipientId?.avatarOptions}
+                  width={96}
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <p className="font-medium">{inquiry.recipientName}</p>
                 <p className="text-sm text-gray-600">{inquiry.recipientEmail}</p>

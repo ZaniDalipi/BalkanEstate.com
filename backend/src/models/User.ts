@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { encryptionPlugin } from '../utils/fieldEncryption';
+import { defaultAvatarOptionsForUser } from '../utils/defaultAvatar';
 
 /**
  * Per-category email opt-ins.
@@ -1052,6 +1053,25 @@ UserSchema.pre('save', async function (next) {
   } catch (error: any) {
     next(error);
   }
+});
+
+/**
+ * Give every new account a face.
+ *
+ * Without stored options each surface derived one from whatever id its payload
+ * carried — obfuscated on a listing, raw for the signed-in user — so the same
+ * person looked like two people. Storing the character at creation makes it a
+ * single fact everyone reads. Seeded with the id, so it is still a different
+ * face per person, and it stays exactly what the customiser would have shown.
+ */
+UserSchema.pre('save', function (next) {
+  if (this.isNew && !this.get('avatarOptions') && !this.get('avatarUrl')) {
+    this.set(
+      'avatarOptions',
+      defaultAvatarOptionsForUser(String(this._id), this.get('gender') as IUser['gender'])
+    );
+  }
+  next();
 });
 
 // Initialize role fields for new users

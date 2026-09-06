@@ -69,7 +69,7 @@ export const getBusinessListings = async (
         .sort({ isVerified: -1, views: -1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('owner', 'name avatarUrl')
+        .populate('owner', 'name avatarUrl avatarOptions gender')
         .lean(),
       BusinessListing.countDocuments(filter),
     ]);
@@ -105,14 +105,14 @@ export const getBusinessListing = async (
     const resolvedId = resolveId(idOrSlug);
     if (resolvedId) {
       listing = await BusinessListing.findById(resolvedId)
-        .populate('owner', 'name avatarUrl email')
+        .populate('owner', 'name avatarUrl avatarOptions gender email')
         .lean();
     }
 
     // 2. Fallback: try finding by slug field directly
     if (!listing) {
       listing = await BusinessListing.findOne({ slug: idOrSlug.toLowerCase() })
-        .populate('owner', 'name avatarUrl email')
+        .populate('owner', 'name avatarUrl avatarOptions gender email')
         .lean();
     }
 
@@ -526,7 +526,7 @@ export const getAllBusinessListingsAdmin = async (
 
     const [listings, total] = await Promise.all([
       BusinessListing.find(filter)
-        .populate('owner', 'name email avatarUrl')
+        .populate('owner', 'name email avatarUrl avatarOptions gender')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)

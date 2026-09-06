@@ -11,6 +11,7 @@ import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { formatPropertyPlace } from '@/shared/geo';
 import { typeHasAttribute } from '@/shared/property/typeAttributes';
+import SellerAvatar from '@/shared/components/property/SellerAvatar';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -199,13 +200,12 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
 
                 {/* Seller Info */}
                 <div className="flex items-center gap-2 mt-3 pt-2 border-t border-gray-200">
-                    {property.seller?.avatarUrl ? (
-                        <img src={optimizeCloudinaryUrl(property.seller.avatarUrl, { width: 48, quality: 'auto', crop: 'fill' })} alt="" loading="lazy" decoding="async" width={24} height={24} className="w-6 h-6 rounded-full object-cover ring-1 ring-gray-200" />
-                    ) : (
-                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
-                            {property.seller?.name?.charAt(0) || '?'}
-                        </div>
-                    )}
+                    <SellerAvatar
+                        seller={property.seller}
+                        seed={property.sellerId}
+                        size={24}
+                        className="ring-1 ring-gray-200 flex-shrink-0"
+                    />
                     <span className="text-xs text-gray-400 truncate">
                         {property.seller?.name}
                         {property.seller?.agencyName && ` - ${property.seller.agencyName}`}

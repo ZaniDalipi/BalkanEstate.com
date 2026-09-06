@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XMarkIcon, UserCircleIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../constants';
+import { XMarkIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../constants';
 import { getAgencyJoinRequests, approveJoinRequest, rejectJoinRequest } from '../src/features/agencies/api';
 import { formatPrice } from '../utils/currency';
 import { useNotification } from '../src/shared/hooks/useNotification';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface JoinRequest {
   id: string;
   agentId: {
     id: string;
+    _id?: string;
     name: string;
     email: string;
     phone: string;
     avatarUrl?: string;
+    /** Their generated character, for when there is no uploaded photo. */
+    avatarOptions?: string;
+    gender?: 'male' | 'female' | 'other';
     licenseNumber?: string;
     totalSalesValue?: number;
     propertiesSold?: number;
@@ -173,19 +178,20 @@ const AgencyJoinRequestsModal: React.FC<AgencyJoinRequestsModalProps> = ({
                 >
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
-                    {request.agentId.avatarUrl ? (
-                      <img
+                    <div
+                      className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-white/60 shadow-md flex-shrink-0 bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100"
+                      style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 1px 1px 1px 0 rgba(255,255,255,0.4)' }}
+                    >
+                      <UserAvatar
                         src={request.agentId.avatarUrl}
                         alt={request.agentId.name}
-                        className="w-16 h-16 rounded-full object-cover ring-2 ring-white/60 shadow-md"
-                        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1), inset 1px 1px 1px 0 rgba(255,255,255,0.4)' }}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        gender={request.agentId.gender}
+                        seed={request.agentId._id || request.agentId.id || request.agentId.name}
+                        avatarOptions={request.agentId.avatarOptions}
+                        width={128}
+                        className="w-full h-full object-cover"
                       />
-                    ) : (
-                      <UserCircleIcon className="w-16 h-16 text-gray-300" />
-                    )}
+                    </div>
 
                     {/* Info */}
                     <div className="flex-1">

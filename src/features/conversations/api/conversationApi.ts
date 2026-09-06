@@ -39,6 +39,8 @@ function transformBackendConversation(backendConv: any): Conversation {
           id: buyer.id || buyer._id,
           name: buyer.name,
           avatarUrl: buyer.avatarUrl,
+          avatarOptions: buyer.avatarOptions,
+          gender: buyer.gender,
         }
       : undefined,
     seller: seller && (seller.id || seller._id)
@@ -46,6 +48,8 @@ function transformBackendConversation(backendConv: any): Conversation {
           id: seller.id || seller._id,
           name: seller.name,
           avatarUrl: seller.avatarUrl,
+          avatarOptions: seller.avatarOptions,
+          gender: seller.gender,
           role: seller.role,
           agencyName: seller.agencyName,
         }

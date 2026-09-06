@@ -25,6 +25,7 @@ import {
   PencilIcon,
 } from '@/constants';
 import Footer from '@/components/shared/Footer';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface BusinessDetailPageProps {
   listingId: string;
@@ -1190,14 +1191,14 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     <h2 className="text-lg font-bold text-neutral-900">{t('detail.owner')}</h2>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-neutral-100 shadow-md bg-gradient-to-br from-violet-400 to-purple-500">
-                      {listing.owner.avatarUrl ? (
-                        <img src={listing.owner.avatarUrl} alt={listing.owner.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-xl font-bold text-white">{listing.owner.name.charAt(0).toUpperCase()}</span>
-                        </div>
-                      )}
+                    <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-neutral-100 shadow-md bg-gradient-to-br from-violet-100 to-purple-100">
+                      <UserAvatar
+                        src={listing.owner.avatarUrl}
+                        alt={listing.owner.name}
+                        seed={listing.owner.id || listing.owner.name}
+                        width={112}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold text-neutral-900">{listing.owner.name}</h3>
