@@ -16,6 +16,22 @@ import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS,
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
 
+/**
+ * Scrolls the listing flow back to the top of the page. The app scrolls inside
+ * `main#main-content` (see App.tsx) rather than the window, so resetting the
+ * window alone leaves the new step rendered wherever the previous, much taller
+ * step had been scrolled to.
+ */
+function scrollPageToTop() {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    document.querySelectorAll<HTMLElement>('[data-scroll-container]').forEach(el => {
+        el.scrollTop = 0;
+    });
+}
+
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
     listingData: ListingData,
@@ -200,9 +216,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     // which left the success message off-screen with only the footer visible.
     useEffect(() => {
         if (step !== 'success' && step !== 'loading' && step !== 'payment') return;
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
+        scrollPageToTop();
+        // Run again after the shorter step has painted: the container shrinks as
+        // the form unmounts, and some browsers restore the old offset on reflow.
+        const raf = requestAnimationFrame(scrollPageToTop);
+        return () => cancelAnimationFrame(raf);
     }, [step]);
 
     // Track modal state to react to it closing
@@ -654,7 +672,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             return;
         }
         // Scroll to top and show generating modal
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollPageToTop();
         setIsGenerating(true);
         try {
             const imageFiles = images.map(img => img.file).filter((f): f is File => f !== null);
@@ -707,7 +725,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             setIsGenerating(false);
             setStep('form');
             // Scroll to top after generation completes
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollPageToTop();
         } catch (e) {
             setIsGenerating(false);
             if (e instanceof Error) {
@@ -842,12 +860,12 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         );
         setPreviewProperty(preview);
         setStep('preview');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollPageToTop();
     }, [runValidation, listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
 
     const handleBackToForm = useCallback(() => {
         setStep('form');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollPageToTop();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
