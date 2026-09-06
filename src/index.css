@@ -77,10 +77,10 @@
 
   /* Page Transition Animations. `backwards` rather than `both` — see the
      note on `.animate-page-enter` for why the final frame must not be kept. */
-  --animate-page-enter: pageEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-  --animate-page-enter-back: pageEnterBack 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-  --animate-page-enter-up: pageEnterUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-  --animate-page-morph: pageMorph 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-page-enter: pageEnter 0.26s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+  --animate-page-enter-back: pageEnterBack 0.26s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+  --animate-page-enter-up: pageEnterUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+  --animate-page-morph: pageMorph 0.22s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 /* Aurora background color variables */
@@ -776,19 +776,19 @@ html[data-zoom] {
  * under a second, and promoting a viewport-sized layer costs more memory than
  * the hint saves — the browser promotes it for the duration anyway. */
 .animate-page-enter {
-  animation: pageEnter 0.34s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+  animation: pageEnter 0.26s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 .animate-page-enter-back {
-  animation: pageEnterBack 0.34s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+  animation: pageEnterBack 0.26s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 .animate-page-enter-up {
-  animation: pageEnterUp 0.38s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+  animation: pageEnterUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 .animate-page-morph {
-  animation: pageMorph 0.3s cubic-bezier(0.32, 0.72, 0, 1) backwards;
+  animation: pageMorph 0.22s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 }
 
 /* Reduced motion: cross-fade only, no movement. */
@@ -830,8 +830,15 @@ html[data-nav-transition] #main-content {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* 260ms, not 340. A page transition is not something anyone watches — it
+     tells you which way you moved and then needs to be out of the way. Past
+     roughly a quarter of a second the ease-out tail is still crawling towards
+     its resting position long after the eye has read the movement, and a
+     navigation you are waiting on at the end of reads as a slow app rather
+     than a smooth one. Every duration below is set against this one, so the
+     drawer, the scrim and the chrome all land in the same window. */
   html[data-nav-transition]::view-transition-group(page) {
-    animation-duration: 340ms;
+    animation-duration: 260ms;
     /* Keep the slide inside the page region: neither snapshot should ride out
        over the header or the bottom nav on its way past. */
     overflow: clip;
@@ -852,50 +859,50 @@ html[data-nav-transition] #main-content {
 
   /* Chrome differences dissolve rather than switch, on the page's own clock. */
   html[data-nav-transition]::view-transition-group(root) {
-    animation-duration: 260ms;
+    animation-duration: 220ms;
   }
 
   /* Forward: the page you were on moves aside to the left as the new one
      arrives from the right — the same direction as `pageEnter`, now with the
      departure it was always missing. */
   html[data-nav-transition='forward']::view-transition-old(page) {
-    animation: pageSlideOutLeft 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageSlideOutLeft 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
   html[data-nav-transition='forward']::view-transition-new(page) {
-    animation: pageSlideInRight 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageSlideInRight 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 
   /* Back: the exact mirror, so the motion reads as undoing the step forward. */
   html[data-nav-transition='back']::view-transition-old(page) {
-    animation: pageSlideOutRight 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageSlideOutRight 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
   html[data-nav-transition='back']::view-transition-new(page) {
-    animation: pageSlideInLeft 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageSlideInLeft 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 
   /* A page presented as a task rises over the one that opened it, the way a
      composer does — the paired form of `pageEnterUp`. */
   html[data-nav-transition='up']::view-transition-old(page) {
-    animation: pageSettleBack 380ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageSettleBack 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
   html[data-nav-transition='up']::view-transition-new(page) {
-    animation: pageRiseIn 380ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageRiseIn 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 
   /* A change of context rather than a step: neither page travels, they trade
      places — the paired form of `pageMorph`. */
   html[data-nav-transition='morph']::view-transition-old(page) {
-    animation: pageMorphOut 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageMorphOut 220ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
   html[data-nav-transition='morph']::view-transition-new(page) {
-    animation: pageMorphIn 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: pageMorphIn 220ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 
   html[data-nav-transition='morph']::view-transition-group(page) {
-    animation-duration: 300ms;
+    animation-duration: 220ms;
   }
   html[data-nav-transition='up']::view-transition-group(page) {
-    animation-duration: 380ms;
+    animation-duration: 300ms;
   }
 
   /* ------------------------------------------------------------------------
@@ -929,20 +936,20 @@ html[data-nav-transition] #main-content {
   }
   html[data-nav-transition]::view-transition-group(app-drawer) {
     z-index: 3;
-    animation-duration: 260ms;
+    animation-duration: 220ms;
   }
 
   /* Off to the left, the way it came in. A touch faster than the page it
      leaves with, so the drawer is gone before the new page has finished
      arriving rather than the two landing together. */
   html[data-nav-transition]::view-transition-old(app-drawer) {
-    animation: drawerSlideOut 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: drawerSlideOut 220ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 
   /* The dim + blur behind it: a plain fade, and a shorter one. A blurred layer
      travelling anywhere is the one thing here that would cost real GPU time. */
   html[data-nav-transition]::view-transition-old(app-scrim) {
-    animation: scrimFadeOut 200ms linear both;
+    animation: scrimFadeOut 160ms linear both;
   }
 }
 
