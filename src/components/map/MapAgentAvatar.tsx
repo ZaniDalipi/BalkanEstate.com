@@ -15,6 +15,7 @@ import { useMap } from 'react-leaflet';
 import { useHighlightedProperties, PROMOTION_TIER_COLORS } from '../../context/HighlightedPropertiesContext';
 import { formatPrice } from '../../../utils/currency';
 import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { formatCityPlace } from '@/shared/geo';
 
 interface MapAgentAvatarProps {
   onPropertySelect: (propertyId: string) => void;
@@ -207,7 +208,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                 <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
-                <span className="truncate">{currentMapFeatured.city}, {currentMapFeatured.country}</span>
+                <span className="truncate">{formatCityPlace(currentMapFeatured.city, currentMapFeatured.country).full}</span>
               </p>
             </div>
 

@@ -1,3 +1,4 @@
+import type { ParkingType } from '@/shared/property/typeAttributes';
 // Property domain types
 
 import { UserRole } from './user.types';
@@ -164,6 +165,10 @@ export interface Property {
   lng: number;
   seller: Seller;
   propertyType: PropertyType;
+  /** Commercial: how much of the floor area is open plan. */
+  openPlanArea?: number;
+  /** Parking: how the space is arranged. Absent on every other type. */
+  parkingType?: ParkingType;
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;

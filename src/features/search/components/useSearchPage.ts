@@ -6,9 +6,15 @@ import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, Searc
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties } from '@/utils/propertyUtils';
+import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
+import { generatePropertySlug } from '@/utils/slug';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { applyQueryToFilters } from '../universal/queryToFilters';
+import { searchPlaces } from '../universal/places';
+import type { Suggestion } from '../universal/types';
 import { isPropertyTypeFilter } from '@/shared/types/property.types';
 
 // Helper to serialize Leaflet bounds to a consistent JSON format
@@ -36,6 +42,14 @@ export function useSearchPage() {
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const shownErrorToast = useRef(false);
     const skipGeolocationRef = useRef(false); // Skip geolocation when navigating from explore cities
+    /**
+     * Set when the caller handed over an exact position — a place picked from
+     * a suggestion list, which already knows where it is. The URL-parameter
+     * lookups below resolve asynchronously and would otherwise land after it
+     * and fly somewhere less precise, or nowhere at all when the place is a
+     * business the geocoder has never heard of.
+     */
+    const hasExplicitFocusRef = useRef(false);
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number], zoom: number } | null>(null);
     const [localFilters, setLocalFilters] = useState<Filters>(filters);
@@ -155,6 +169,7 @@ export function useSearchPage() {
         if (focusMapOnProperty) {
             // Prevent geolocation from overriding this position (e.g., when coming from explore cities)
             skipGeolocationRef.current = true;
+            hasExplicitFocusRef.current = true;
 
             // Set the map to fly to the location - use provided zoom or default to 18 for properties
             setFlyToTarget({
@@ -204,6 +219,19 @@ export function useSearchPage() {
             return null;
         }
     }, [mapBoundsJSON]);
+
+    /**
+     * Where the map is looking, as a plain point.
+     *
+     * The omnibox uses it to break ties between same-named places: someone
+     * looking at the Montenegrin coast who types "Bar" means the town they
+     * can see, not a village four countries away.
+     */
+    const mapCentre = useMemo(() => {
+        if (!mapBounds) return null;
+        const centre = mapBounds.getCenter();
+        return { lat: centre.lat, lng: centre.lng };
+    }, [mapBounds]);
 
     const drawnBounds = useMemo(() => {
         if (!drawnBoundsJSON) return null;
@@ -276,7 +304,7 @@ export function useSearchPage() {
                 // Use searchLocation to get coordinates for the city
                 const countryData = BALKAN_COUNTRIES[countryParam];
                 searchLocation(`${cityParam}, ${countryData?.name || countryParam}`).then(results => {
-                    if (results.length > 0) {
+                    if (results.length > 0 && !hasExplicitFocusRef.current) {
                         setFlyToTarget({
                             center: [Number(results[0].lat), Number(results[0].lon)],
                             zoom: 12
@@ -286,7 +314,7 @@ export function useSearchPage() {
             } else if (cityParam && !countryParam) {
                 // City only (e.g., from hero search) — geocode and fly to it
                 searchLocation(cityParam).then(results => {
-                    if (results.length > 0) {
+                    if (results.length > 0 && !hasExplicitFocusRef.current) {
                         setFlyToTarget({
                             center: [Number(results[0].lat), Number(results[0].lon)],
                             zoom: 13
@@ -347,8 +375,6 @@ export function useSearchPage() {
     }, [filters.country, filters.query]);
 
     useEffect(() => {
-        let timeoutId: number;
-
         const handleGeoError = (error: GeolocationPositionError) => {
             if (error.code === error.POSITION_UNAVAILABLE) {
                 // Warning removed
@@ -407,116 +433,18 @@ export function useSearchPage() {
         };
 
         getLocation();
-        return () => clearTimeout(timeoutId);
+        // `getCurrentPosition` carries its own `timeout`, so there is no timer
+        // of ours to clear here.
     }, []);
 
     const showToast = useCallback((message: string, type: 'success' | 'error') => {
         setToast({ show: true, message, type });
     }, []);
 
-    const baseFilteredProperties = useMemo(() => {
-        const filtered = filterProperties(properties, activeFilters);
-        const now = Date.now();
-
-        // Pre-compute promotion scores once (O(N)) — avoids O(N log N) calls inside comparators
-        const scoreCache = new Map<string, number>();
-        const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
-        for (const p of filtered) {
-            const isActivelyPromoted = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
-            if (!isActivelyPromoted) {
-                scoreCache.set(p.id, 0);
-            } else {
-                const tierScore = tierScores[p.promotionTier || 'standard'] || 0;
-                scoreCache.set(p.id, tierScore + (p.hasUrgentBadge ? 5 : 0));
-            }
-        }
-        const score = (p: Property) => scoreCache.get(p.id) ?? 0;
-
-        // First sort by promotion score, then apply user's selected sort
-        const promotionSorted = [...filtered].sort((a, b) => {
-            const diff = score(b) - score(a);
-            return diff !== 0 ? diff : 0;
-        });
-
-        // Helper to convert date/string/number to timestamp
-        const toTimestamp = (value: number | string | Date | undefined | null): number => {
-            if (!value) return 0;
-            if (typeof value === 'number') return value;
-            if (typeof value === 'string') return new Date(value).getTime();
-            if (value instanceof Date) return value.getTime();
-            return 0;
-        };
-
-        // Helper to get property timestamp (prioritize lastRenewed over createdAt)
-        const getPropertyTime = (p: Property) => {
-            const renewed = toTimestamp(p.lastRenewed);
-            const created = toTimestamp(p.createdAt);
-            return Math.max(renewed, created);
-        };
-
-        // Then apply user's sorting preference (maintaining promotion priority)
-        switch (activeFilters.sortBy) {
-            case 'price_asc': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : a.price - b.price;
-            });
-            case 'price_desc': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : b.price - a.price;
-            });
-            case 'area_asc':
-            case 'sqft_asc': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : a.sqft - b.sqft;
-            });
-            case 'area_desc':
-            case 'sqft_desc': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : b.sqft - a.sqft;
-            });
-            case 'beds_desc': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : b.beds - a.beds;
-            });
-            case 'baths_desc': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : b.baths - a.baths;
-            });
-            case 'oldest': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : (a.createdAt || 0) - (b.createdAt || 0);
-            });
-            case 'featured': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : getPropertyTime(b) - getPropertyTime(a);
-            });
-            case 'price_per_sqm': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                if (diff !== 0) return diff;
-                const pricePerSqmA = a.sqft > 0 ? a.price / a.sqft : Infinity;
-                const pricePerSqmB = b.sqft > 0 ? b.price / b.sqft : Infinity;
-                return pricePerSqmA - pricePerSqmB;
-            });
-            case 'year_built_desc': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                return diff !== 0 ? diff : (b.yearBuilt || 0) - (a.yearBuilt || 0);
-            });
-            case 'price_reduced': return promotionSorted.sort((a, b) => {
-                const diff = score(b) - score(a);
-                if (diff !== 0) return diff;
-                const hasDiscountA = a.hasDiscount ? 1 : 0;
-                const hasDiscountB = b.hasDiscount ? 1 : 0;
-                if (hasDiscountA !== hasDiscountB) return hasDiscountB - hasDiscountA;
-                return getPropertyTime(b) - getPropertyTime(a);
-            });
-            case 'newest':
-            default:
-                return promotionSorted.sort((a, b) => {
-                    const diff = score(b) - score(a);
-                    return diff !== 0 ? diff : getPropertyTime(b) - getPropertyTime(a);
-                });
-        }
-    }, [properties, activeFilters]);
+    const baseFilteredProperties = useMemo(
+        () => filterAndSortProperties(properties, activeFilters),
+        [properties, activeFilters]
+    );
 
     const { listProperties, fallbackLocationValue } = useMemo(() => {
         // Helper to calculate distance between two points
@@ -656,26 +584,114 @@ export function useSearchPage() {
         updateSearchPageState({ filters: newFilters, activeFilters: newFilters });
     }, [filters, updateSearchPageState]);
 
+    /**
+     * Run whatever is in the box.
+     *
+     * The sentence is read first, so "3 bed villa in Budva under 300k" moves
+     * the bedroom, type and price filters and leaves "Budva" as the place to
+     * find. Then the app's own gazetteer is asked — it answers from memory,
+     * so a known city or village flies the map with no network round trip —
+     * and only a place it has never heard of goes to the geocoder.
+     *
+     * A place that cannot be resolved is not an error: the filters have
+     * already been applied, so the text search runs and the user sees
+     * listings rather than an empty screen with a toast.
+     */
     const handleSearch = useCallback(async (searchQuery?: string) => {
         setSuggestions([]);
         const query = (searchQuery || filters.query).trim();
 
         if (!query) {
-            updateSearchPageState({ activeFilters: filters, drawnBoundsJSON: null });
+            const cleared = { ...filters, query: '' };
+            updateSearchPageState({ filters: cleared, activeFilters: cleared, drawnBoundsJSON: null });
+            return;
+        }
+
+        const { filters: nextFilters, parsed } = applyQueryToFilters(filters, query);
+        updateSearchPageState({
+            filters: nextFilters,
+            activeFilters: nextFilters,
+            drawnBoundsJSON: null,
+        });
+
+        const placeQuery = parsed.text.trim();
+        // A sentence that was entirely filters ("under 300k with a pool") has
+        // no place in it, and the map should stay where it is.
+        if (!placeQuery) return;
+
+        const [local] = searchPlaces(placeQuery, {
+            limit: 1,
+            country: nextFilters.country !== 'any' ? nextFilters.country : undefined,
+        });
+
+        if (local && Number.isFinite(local.place.lat) && Number.isFinite(local.place.lng)) {
+            setShowAllOnMobile(false);
+            setFlyToTarget({
+                center: [local.place.lat as number, local.place.lng as number],
+                zoom: local.place.zoom,
+            });
             return;
         }
 
         setIsSearchingLocation(true);
-        const results = await searchLocation(query);
+        const results = await searchLocation(placeQuery);
         setIsSearchingLocation(false);
 
         if (results.length > 0) {
-            handleSuggestionClick(results[0]);
-        } else {
-            showToast("Location not found. Showing text-based results.", 'error');
-            updateSearchPageState({ activeFilters: filters, drawnBoundsJSON: null });
+            const [best] = results;
+            setShowAllOnMobile(false);
+            setFlyToTarget({
+                center: [Number(best.lat), Number(best.lon)],
+                zoom: getZoomFromBoundingBox(best.boundingbox),
+            });
         }
-    }, [filters, updateSearchPageState, showToast, handleSuggestionClick]);
+    }, [filters, updateSearchPageState]);
+
+    /**
+     * A row picked in the omnibox.
+     *
+     * Three kinds of row, three things to do, and the box itself decides
+     * none of them: a place flies the map, a listing opens it, and a query —
+     * the row that says what Enter will do — is run as a search with whatever
+     * filters the sentence carried ("under 300k", "3 bed") already applied.
+     */
+    const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
+        setIsQueryInputFocused(false);
+
+        if (suggestion.type === 'property') {
+            // Same route a listing card opens, so a listing found through the
+            // search box lands exactly where one found by scrolling does.
+            const property = suggestion.property;
+            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+            window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+            return;
+        }
+
+        if (suggestion.type === 'place') {
+            const { filters: nextFilters } = applyQueryToFilters(filters, suggestion.searchValue);
+
+            updateSearchPageState({
+                filters: nextFilters,
+                activeFilters: nextFilters,
+                drawnBoundsJSON: null, // A picked place replaces any drawn area.
+            });
+
+            // The list follows the map from here, so only what is on screen shows.
+            setShowAllOnMobile(false);
+
+            if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
+                setFlyToTarget({
+                    center: [suggestion.lat as number, suggestion.lng as number],
+                    zoom: suggestion.zoom ?? 12,
+                });
+            }
+            return;
+        }
+
+        // 'query' and 'recent' are both "search for this text".
+        void handleSearch(suggestion.type === 'query' ? suggestion.text : suggestion.title);
+    }, [filters, updateSearchPageState, dispatch, handleSearch]);
+
 
     const handleLocalFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
         setLocalFilters(prev => ({ ...prev, [name]: value }));
@@ -1039,6 +1055,7 @@ export function useSearchPage() {
         fallbackLocation,
         // Computed
         mapBounds,
+        mapCentre,
         drawnBounds,
         baseFilteredProperties,
         listProperties,
@@ -1046,6 +1063,7 @@ export function useSearchPage() {
         seoDescription,
         // Handlers
         handleSuggestionClick,
+        handleSelectSuggestion,
         toggleDrawing,
         handleClearDrawnArea,
         handleDrawComplete,

@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { searchLocation } from '@/services/osmService';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import {
+  canonicalPlaceName,
+  formatGeocodedPlace,
+  formatPlace,
+  formatPlaceLabel,
   haversineDistanceKm,
+  isSupportedCountryCode,
   normalizePlaceName,
   searchLocalities,
   type Coordinates,
@@ -12,7 +17,7 @@ import {
   fetchPlacePredictions,
   isPlacesAvailable,
   resolvePlaceDetails,
-} from '../api/placesAutocomplete';
+} from '@/shared/places';
 
 /**
  * Location search for the listing map picker.
@@ -130,12 +135,6 @@ const dedupe = (suggestions: LocationSuggestion[]): LocationSuggestion[] => {
   return result;
 };
 
-/** Split a Nominatim `display_name` into a name line and a context line. */
-const splitDisplayName = (displayName: string): { title: string; subtitle: string } => {
-  const [first, ...rest] = displayName.split(',').map((part) => part.trim());
-  return { title: first ?? displayName, subtitle: rest.join(', ') };
-};
-
 export const useLocationSearch = ({
   country,
   city,
@@ -171,10 +170,15 @@ export const useLocationSearch = ({
         maxResults: 5,
       });
 
+      // Every suggestion is written against the city the seller picked, so a
+      // village 45km down the coast still reads "Himarë, Vlorë, Albania" —
+      // the address agrees with the city the listing is filed under.
+      const context = { city, country };
+
       const results: LocationSuggestion[] = localMatches.map((match) => ({
         id: `local:${match.country}:${match.city}:${match.name}`,
-        title: match.name,
-        subtitle: [match.city, match.country].filter(Boolean).join(', '),
+        title: canonicalPlaceName(match.name),
+        subtitle: formatPlace(match, { context }).secondary,
         source: 'local',
         lat: match.lat,
         lng: match.lng,
@@ -192,10 +196,12 @@ export const useLocationSearch = ({
         });
 
         for (const prediction of predictions) {
+          // Restricted at the request by ISO code, so nothing to re-check.
+          const label = formatPlaceLabel({ name: prediction.title }, { context });
           results.push({
             id: `google:${prediction.placeId}`,
-            title: prediction.title,
-            subtitle: prediction.subtitle,
+            title: label.primary,
+            subtitle: label.secondary,
             source: 'google',
             placeId: prediction.placeId,
             distanceKm: prediction.distanceKm,
@@ -215,11 +221,19 @@ export const useLocationSearch = ({
           if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
 
           const distanceKm = centre ? haversineDistanceKm(centre, { lat, lng }) : undefined;
-          const { title, subtitle } = splitDisplayName(result.display_name);
+
+          // Named the same way as every other place in the app: local
+          // spelling, no postcode, no repeated municipality.
+          // A seller cannot file a listing outside the covered countries, so
+          // a pin outside them is a dead end. Read from the geocoder's own
+          // country code, not from the name it prints.
+          if (!isSupportedCountryCode(result.address?.country_code)) continue;
+
+          const label = formatGeocodedPlace(result, { context });
           results.push({
             id: `osm:${result.place_id}`,
-            title,
-            subtitle,
+            title: label.primary,
+            subtitle: label.secondary,
             source: 'osm',
             lat,
             lng,
@@ -257,13 +271,20 @@ export const useLocationSearch = ({
   }, [query, gather]);
 
   /**
-   * Turn a suggestion into concrete coordinates.
+   * Turn a suggestion into concrete coordinates and the address to store.
+   *
+   * The address is the suggestion's own label — "Himarë, Vlorë, Albania" —
+   * and not the provider's formatted address, which arrives in whatever shape
+   * that provider prefers (Google's own, with a postcode and a county). One
+   * shape everywhere is the point: what the seller read in the list is what
+   * the listing is filed under.
+   *
    * Google predictions carry no geometry, so they are resolved here; local and
    * OSM suggestions already have theirs and resolve without a round trip.
    */
   const resolveSuggestion = useCallback(
     async (suggestion: LocationSuggestion): Promise<ResolvedLocation | null> => {
-      const label = [suggestion.title, suggestion.subtitle].filter(Boolean).join(', ');
+      const address = [suggestion.title, suggestion.subtitle].filter(Boolean).join(', ');
 
       if (suggestion.placeId) {
         const place = await resolvePlaceDetails(suggestion.placeId, sessionTokenRef.current);
@@ -271,14 +292,12 @@ export const useLocationSearch = ({
         // starts a new session.
         sessionTokenRef.current = undefined;
 
-        if (place) {
-          return { lat: place.lat, lng: place.lng, address: place.formattedAddress || label };
-        }
+        if (place) return { lat: place.lat, lng: place.lng, address };
         // Detail lookup failed — fall through to any stored geometry below.
       }
 
       if (!Number.isFinite(suggestion.lat) || !Number.isFinite(suggestion.lng)) return null;
-      return { lat: suggestion.lat as number, lng: suggestion.lng as number, address: label };
+      return { lat: suggestion.lat as number, lng: suggestion.lng as number, address };
     },
     []
   );

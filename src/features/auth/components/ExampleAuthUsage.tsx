@@ -22,7 +22,7 @@ import { useAuthModal } from '@/app/store/uiStore';
  * - UI store for modal management
  */
 export function SimpleLoginExample() {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useLogin();
@@ -43,7 +43,7 @@ export function SimpleLoginExample() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="email">{t('common:auth.email')}</label>
+        <label htmlFor="email">{t('auth:labels.email')}</label>
         <input
           id="email"
           type="email"
@@ -54,7 +54,7 @@ export function SimpleLoginExample() {
       </div>
 
       <div>
-        <label htmlFor="password">{t('common:auth.password')}</label>
+        <label htmlFor="password">{t('auth:labels.password')}</label>
         <input
           id="password"
           type="password"
@@ -66,12 +66,12 @@ export function SimpleLoginExample() {
 
       {error && (
         <div className="text-red-600">
-          {error instanceof Error ? error.message : t('common:auth.loginFailed')}
+          {error instanceof Error ? error.message : t('auth:errors.loginFailed')}
         </div>
       )}
 
       <button type="submit" disabled={isLoading}>
-        {isLoading ? t('common:auth.loggingIn') : t('common:auth.login')}
+        {isLoading ? t('auth:status.loggingIn') : t('auth:buttons.login')}
       </button>
     </form>
   );
@@ -86,25 +86,25 @@ export function SimpleLoginExample() {
  * - Authentication check
  */
 export function UserProfileExample() {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['auth', 'common']);
   const { user, isLoading, isAuthenticated } = useCurrentUser();
   const { logout, isLoading: isLoggingOut } = useLogout();
 
   if (isLoading) {
-    return <div>{t('common:auth.loadingUser')}</div>;
+    return <div>{t('auth:status.loadingUser')}</div>;
   }
 
   if (!isAuthenticated || !user) {
-    return <div>{t('common:auth.pleaseLogIn')}</div>;
+    return <div>{t('auth:messages.pleaseLogin')}</div>;
   }
 
   return (
     <div>
-      <h2>{t('common:auth.welcome', { name: user.name })}</h2>
-      <p>{t('common:auth.email')}: {user.email}</p>
-      <p>{t('common:auth.role')}: {user.role}</p>
+      <h2>{t('auth:messages.welcomeUser', { name: user.name })}</h2>
+      <p>{t('auth:labels.email')}: {user.email}</p>
+      <p>{t('auth:labels.role')}: {user.role}</p>
       <button onClick={() => logout()} disabled={isLoggingOut}>
-        {isLoggingOut ? t('common:auth.loggingOut') : t('common:auth.logout')}
+        {isLoggingOut ? t('auth:status.loggingOut') : t('auth:buttons.logout')}
       </button>
     </div>
   );
@@ -119,7 +119,7 @@ export function UserProfileExample() {
  * - Success handling
  */
 export function SignupExample() {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -141,28 +141,28 @@ export function SignupExample() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <input
         type="text"
-        placeholder={t('common:auth.name')}
+        placeholder={t('auth:labels.fullName')}
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
       <input
         type="email"
-        placeholder={t('common:auth.email')}
+        placeholder={t('auth:labels.email')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
       <input
         type="password"
-        placeholder={t('common:auth.password')}
+        placeholder={t('auth:labels.password')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
 
       {error && <div className="text-red-600">{error.message}</div>}
-      {isSuccess && <div className="text-green-600">{t('common:auth.accountCreated')}</div>}
+      {isSuccess && <div className="text-green-600">{t('auth:messages.accountCreated')}</div>}
 
       <button type="submit" disabled={isLoading}>
-        {isLoading ? t('common:auth.creatingAccount') : t('common:auth.signUp')}
+        {isLoading ? t('auth:status.creatingAccount') : t('auth:buttons.signup')}
       </button>
     </form>
   );
@@ -176,7 +176,7 @@ export function SignupExample() {
  * - Multi-step flow
  */
 export function PasswordResetExample() {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['auth', 'common']);
   const [email, setEmail] = useState('');
   const { requestReset, isRequestingReset, requestError } = usePasswordReset();
   const [sent, setSent] = useState(false);
@@ -193,14 +193,14 @@ export function PasswordResetExample() {
   };
 
   if (sent) {
-    return <div>{t('common:auth.passwordResetSent')}</div>;
+    return <div>{t('auth:messages.resetLinkSent')}</div>;
   }
 
   return (
     <form onSubmit={handleSubmit}>
       <input
         type="email"
-        placeholder={t('common:auth.enterYourEmail')}
+        placeholder={t('auth:placeholders.email')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -208,7 +208,7 @@ export function PasswordResetExample() {
       {requestError && <div className="text-red-600">{requestError.message}</div>}
 
       <button type="submit" disabled={isRequestingReset}>
-        {isRequestingReset ? t('common:auth.sending') : t('common:auth.resetPassword')}
+        {isRequestingReset ? t('auth:status.sending') : t('auth:buttons.resetPassword')}
       </button>
     </form>
   );
@@ -222,7 +222,7 @@ export function PasswordResetExample() {
  * - Managing multi-step state
  */
 export function PhoneAuthExample() {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['auth', 'common']);
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'phone' | 'code'>('phone');
@@ -260,7 +260,7 @@ export function PhoneAuthExample() {
           onChange={(e) => setPhone(e.target.value)}
         />
         <button type="submit" disabled={isSendingCode}>
-          {isSendingCode ? t('common:auth.sending') : t('common:auth.sendCode')}
+          {isSendingCode ? t('auth:status.sending') : t('auth:phoneSignup.sendCode')}
         </button>
       </form>
     );
@@ -268,7 +268,7 @@ export function PhoneAuthExample() {
 
   return (
     <form onSubmit={handleVerifyCode}>
-      <p>{t('common:auth.enterCodeSentTo', { phone })}</p>
+      <p>{t('auth:phoneCode.sentTo', { phone })}</p>
       <input
         type="text"
         placeholder="123456"
@@ -276,7 +276,7 @@ export function PhoneAuthExample() {
         onChange={(e) => setCode(e.target.value)}
       />
       <button type="submit" disabled={isVerifying}>
-        {isVerifying ? t('common:auth.verifying') : t('common:auth.verify')}
+        {isVerifying ? t('auth:status.verifying') : t('auth:buttons.verify')}
       </button>
     </form>
   );
@@ -290,19 +290,19 @@ export function PhoneAuthExample() {
  * - Showing login prompt
  */
 export function ProtectedComponentExample({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['auth', 'common']);
   const { isAuthenticated, isLoading } = useCurrentUser();
   const { open } = useAuthModal();
 
   if (isLoading) {
-    return <div>{t('common:auth.loading')}</div>;
+    return <div>{t('common:loading')}</div>;
   }
 
   if (!isAuthenticated) {
     return (
       <div>
-        <p>{t('common:auth.pleaseLogInToContinue')}</p>
-        <button onClick={() => open('login')}>{t('common:auth.login')}</button>
+        <p>{t('auth:messages.pleaseLogin')}</p>
+        <button onClick={() => open('login')}>{t('auth:buttons.login')}</button>
       </div>
     );
   }

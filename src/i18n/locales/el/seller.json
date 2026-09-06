@@ -137,7 +137,11 @@
       "amenitiesHint": "Προσθέστε παροχές με hashtag που οι αγοραστές μπορούν να αναζητήσουν",
       "amenitiesPlaceholder": "π.χ., #γυμναστήριο, #πισίνα, #στάθμευση, #wifi",
       "description": "Περιγραφή",
-      "addTags": "Προσθήκη ετικετών..."
+      "addTags": "Προσθήκη ετικετών...",
+      "openPlanArea": "Ενιαίος χώρος (m²)",
+      "parkingType": "Τύπος στάθμευσης",
+      "parkingSpaces": "Θέσεις",
+      "officeRooms": "Γραφεία"
     },
     "propertyFeatures": {
       "title": "Χαρακτηριστικά Ακινήτου",
@@ -760,5 +764,11 @@
     "extendNow": "Επέκταση Τώρα",
     "autoExtendReady": "Η αυτόματη επέκταση είναι έτοιμη! Ολοκληρώστε την πληρωμή για επέκταση.",
     "completePayment": "Ολοκλήρωση Πληρωμής"
+  },
+  "parkingTypes": {
+    "garage": "Γκαράζ",
+    "underground": "Υπόγειο",
+    "covered": "Στεγασμένο",
+    "outdoor": "Υπαίθριο"
   }
 }

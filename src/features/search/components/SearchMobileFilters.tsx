@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filters, Property, AiSearchQuery, ChatMessage, NominatimResult } from '@/types';
+import { Filters, Property, AiSearchQuery, ChatMessage } from '@/types';
 import { XMarkIcon } from '@/constants';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import PropertyList from './PropertyList';
@@ -27,10 +27,6 @@ export interface PropertyListPropsForMobile {
     isDrawing: boolean;
     isSearchingLocation: boolean;
     onPropertyHover?: (propertyId: string | null) => void;
-    suggestions?: NominatimResult[];
-    onSuggestionClick?: (suggestion: NominatimResult) => void;
-    isQueryInputFocused?: boolean;
-    onQueryInputFocusChange?: (focused: boolean) => void;
     fallbackLocation?: string | null;
 }
 

@@ -9,6 +9,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import { formatPropertyPlace } from '@/shared/geo';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -145,15 +146,15 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 {property.title && (
                     <h3 className="text-sm font-semibold text-gray-700 truncate mb-0.5">{property.title}</h3>
                 )}
-                <p className="text-sm text-gray-400 truncate">{property.address}, {property.city}</p>
+                <p className="text-sm text-gray-400 truncate">{formatPropertyPlace(property).full}</p>
 
                 {/* Key Details */}
                 <div className="flex items-center gap-3 mt-2 text-sm text-gray-400">
                     {property.propertyType !== 'land' && (
                         <>
-                            <span>{property.beds} {t('common:beds')}</span>
+                            <span>{property.beds} {t('property:features.beds')}</span>
                             <span className="text-gray-300">|</span>
-                            <span>{property.baths} {t('common:baths')}</span>
+                            <span>{property.baths} {t('property:features.baths')}</span>
                             <span className="text-gray-300">|</span>
                         </>
                     )}

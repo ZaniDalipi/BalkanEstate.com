@@ -3,6 +3,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { typeLabel, type TranslateFn } from '@/shared/constants/propertyTypes';
+import { ALL_PROPERTY_TYPES, colorForType } from '@/shared/property/typeAttributes';
 import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '@/types';
@@ -11,6 +13,7 @@ import { BuildingOfficeIcon } from '@/constants';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { validateCoordinates } from '@/shared/utils/validation';
 import { getVillaMarkerPalette, buildLuxuryVillaMarkerHTML } from '@/shared/map/villaMarker';
+import { formatCityPlace } from '@/shared/geo';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -267,19 +270,11 @@ const getMarkerScaleForZoom = (zoom: number): number => {
   return 0.8;                      // 80% at zoom 7 and below
 };
 
-const PROPERTY_TYPE_COLORS: Record<
-  NonNullable<Property['propertyType']> | 'other',
-  string
-> = {
-  house: '#0252CD',
-  apartment: '#28a745',
-  villa: '#6f42c1',
-  'luxury-villa': '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
-  commercial: '#E11D48', // Rose — business premises
-  parking: '#475569',    // Slate — reads like parking signage
-  land: '#8B4513',    // Brown for land
-  other: '#0D9488',   // Teal — friendlier than the old gray, distinct from the other types
-};
+// Colours come from the type table, so a pin, a card and a badge cannot show
+// one listing in three different colours.
+const PROPERTY_TYPE_COLORS = Object.fromEntries(
+  ALL_PROPERTY_TYPES.map((type) => [type, colorForType(type)]),
+) as Record<NonNullable<Property['propertyType']> | 'other', string>;
 
 // Luxury villa marker builder is shared with the Google marker
 // (src/features/map/components/useGoogleMap.ts) via @/shared/map/villaMarker.
@@ -813,8 +808,8 @@ const PropertyPopup: React.FC<{
               {formatPrice(priceInfo.currentPrice, property.country)}
               {isRental && <span className="text-[9px] font-normal opacity-80">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? t('common:day', 'day') : t('common:mo', 'mo')}</span>}
             </span>
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 capitalize">
-              {property.propertyType}
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600">
+              {typeLabel(property.propertyType, t as TranslateFn)}
             </span>
           </div>
 
@@ -827,7 +822,7 @@ const PropertyPopup: React.FC<{
 
           {/* Location */}
           <p className="text-[10px] text-neutral-500 mb-1.5 line-clamp-1">
-            {property.city}, {property.country}
+            {formatCityPlace(property.city, property.country).full}
           </p>
 
           {/* Property stats - compact */}
@@ -886,8 +881,8 @@ const PropertyPopup: React.FC<{
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
 
         {/* Property type badge - smaller on mobile */}
-        <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-white/95 text-neutral-700 capitalize shadow-sm z-10">
-          {property.propertyType}
+        <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-white/95 text-neutral-700 shadow-sm z-10">
+          {typeLabel(property.propertyType, t as TranslateFn)}
         </span>
 
         {/* Price on image */}
@@ -908,7 +903,7 @@ const PropertyPopup: React.FC<{
 
         {/* Location */}
         <p className="text-[10px] text-neutral-500 mb-1.5 line-clamp-1">
-          {property.city}, {property.country}
+          {formatCityPlace(property.city, property.country).full}
         </p>
 
         {/* Specs row with icons - compact */}

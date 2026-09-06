@@ -137,7 +137,11 @@
       "amenitiesHint": "Shtoni komoditete në stilin e hashtageve që blerësit mund t'i kërkojnë",
       "amenitiesPlaceholder": "p.sh., #palestër, #pishinë, #parkim, #wifi",
       "description": "Përshkrimi",
-      "addTags": "Shto etiketa..."
+      "addTags": "Shto etiketa...",
+      "openPlanArea": "Hapësirë e hapur (m²)",
+      "parkingType": "Lloji i parkimit",
+      "parkingSpaces": "Vende",
+      "officeRooms": "Zyra"
     },
     "propertyFeatures": {
       "title": "Veçoritë e Pronës",
@@ -760,5 +764,11 @@
     "extendNow": "Zgjat Tani",
     "autoExtendReady": "Zgjatja automatike gati! Kryejeni pagesën për të zgjatur.",
     "completePayment": "Kryej Pagesën"
+  },
+  "parkingTypes": {
+    "garage": "Garazh",
+    "underground": "Nëntokësor",
+    "covered": "I mbuluar",
+    "outdoor": "I hapur"
   }
 }

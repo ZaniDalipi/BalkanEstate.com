@@ -8,6 +8,8 @@ import AiSearch from './AiSearch';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
 import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
+import UniversalSearchBox from '../universal/UniversalSearchBox';
+import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 
 interface PropertyListProps {
@@ -32,10 +34,8 @@ interface PropertyListProps {
   isDrawing: boolean;
   isSearchingLocation: boolean;
   onPropertyHover?: (propertyId: string | null) => void;
-  suggestions?: { place_id: number; display_name: string }[];
-  onSuggestionClick?: (suggestion: { place_id: number; display_name: string; lat: string; lon: string; boundingbox: string[] }) => void;
-  isQueryInputFocused?: boolean;
-  onQueryInputFocusChange?: (focused: boolean) => void;
+  /** A row picked in the search box — a place, a listing, or the query itself. */
+  onSelectSuggestion?: (suggestion: Suggestion) => void;
   // Passed from parent to avoid subscribing to full AppContext
   // (prevents re-render cascade when savedHomes changes)
   isLoadingProperties?: boolean;
@@ -125,7 +125,7 @@ const ToggleSwitch: React.FC<{
 );
 
 const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList' | 'aiChatHistory' | 'onAiChatHistoryChange'>> = ({
-    filters, onFilterChange, onSearchClick, onResetFilters, onSaveSearch, isSaving, isMobile, isAreaDrawn, onDrawStart, isDrawing, isSearchingLocation, suggestions = [], onSuggestionClick, isQueryInputFocused, onQueryInputFocusChange
+    filters, onFilterChange, onSearchClick, onResetFilters, onSaveSearch, isSaving, isMobile, isAreaDrawn, onDrawStart, isDrawing, onSelectSuggestion
 }) => {
     const { t } = useTranslation(['search', 'common']);
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -143,51 +143,15 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
             {/* Search by Address */}
             <div className="relative">
                 <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:searchLocation')}</label>
-                <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <MapPinIcon className="h-4 w-4 text-neutral-400" />
-                    </div>
-                    <input
-                        type="text"
-                        placeholder={t('search:searchPlaceholder')}
-                        value={filters.query}
-                        onChange={(e) => onFilterChange('query', e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && onSearchClick()}
-                        onFocus={() => onQueryInputFocusChange?.(true)}
-                        className={`${inputBaseClasses} pl-9`}
-                        aria-label={t('search:searchLocation')}
-                        aria-autocomplete="list"
-                        aria-expanded={suggestions.length > 0 && isQueryInputFocused}
-                    />
-                    {filters.query && !isSearchingLocation && (
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-                            <button onClick={() => onFilterChange('query', '')} className="text-neutral-400 hover:text-neutral-800 transition-colors">
-                                <XMarkIcon className="h-4 w-4" />
-                            </button>
-                        </div>
-                    )}
-                    {isSearchingLocation && (
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-                            <SpinnerIcon className="h-4 w-4 text-primary" />
-                        </div>
-                    )}
-                </div>
-                {suggestions.length > 0 && isQueryInputFocused && (
-                    <ul className="absolute z-30 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto" role="listbox" aria-label="Search suggestions">
-                        {suggestions.map((suggestion) => (
-                            <li
-                                key={suggestion.place_id}
-                                onMouseDown={() => onSuggestionClick?.(suggestion as any)}
-                                className="px-3 py-2 text-xs text-neutral-700 hover:bg-primary/5 cursor-pointer flex items-center gap-2 transition-colors"
-                                role="option"
-                                aria-selected={false}
-                            >
-                                <MapPinIcon className="w-4 h-4 text-primary flex-shrink-0" />
-                                <span className="truncate">{suggestion.display_name}</span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                <UniversalSearchBox
+                    value={filters.query}
+                    onValueChange={(value) => onFilterChange('query', value)}
+                    onSelect={onSelectSuggestion ?? (() => {})}
+                    onSubmit={() => onSearchClick()}
+                    country={filters.country !== 'any' ? filters.country : undefined}
+                    inputClassName="text-xs"
+                    aria-label={t('search:searchLocation')}
+                />
             </div>
 
             <div>
@@ -984,6 +948,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     aria-label={t('search:filters.sortBy', 'Sort properties by')}
                                     className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                 >
+                                    {filters.query.trim() && (
+                                        <option value="relevance">{t('search:sort.relevance')}</option>
+                                    )}
                                     <option value="newest">{t('search:sort.newest')}</option>
                                     <option value="oldest">{t('search:sort.oldest')}</option>
                                     <option value="price_asc">{t('search:sort.priceAsc')}</option>
@@ -1121,6 +1088,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         onChange={(e) => onSortChange(e.target.value)}
                                         className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
                                     >
+                                        {filters.query.trim() && (
+                                            <option value="relevance">{t('search:sort.relevance')}</option>
+                                        )}
                                         <option value="newest">{t('search:sort.newest')}</option>
                                         <option value="oldest">{t('search:sort.oldest')}</option>
                                         <option value="price_asc">{t('search:sort.priceAsc')}</option>

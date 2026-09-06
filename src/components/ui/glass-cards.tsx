@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { formatCityPlace } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
+import { statsForType, type StatKey } from '@/shared/property/typeAttributes';
+import type { TFunction } from 'i18next';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,6 +34,9 @@ interface PropertyCardData {
     baths: number;
     sqft: number;
     livingRooms?: number;
+    parking?: number;
+    offices?: number;
+    openPlanArea?: number;
     yearBuilt?: number;
     propertyType?: string;
     constructionStatus?: string;
@@ -53,6 +59,48 @@ interface StackedPropertyCardProps {
     color: string;
     onClick: () => void;
 }
+
+
+/**
+ * How each stat is drawn on a card.
+ *
+ * The type table says *which* stats a listing shows; this says what each one
+ * looks like. Split that way so adding a stat to a type is a one-word change
+ * there rather than an edit to every card.
+ */
+type StatChip = { value: React.ReactNode; label: string; icon: string };
+
+/** Only the fields a chip reads, so a card need not carry a whole Property. */
+type StatSource = {
+    beds?: number;
+    baths?: number;
+    sqft?: number;
+    parking?: number;
+    offices?: number;
+    openPlanArea?: number;
+};
+
+const STAT_CHIPS: Record<StatKey, (property: StatSource, t: TFunction) => StatChip> = {
+    beds: (property, t) => ({ value: property.beds ?? 0, label: t('featured.bedsLabel'), icon: '🛏' }),
+    baths: (property, t) => ({ value: property.baths ?? 0, label: t('featured.bathsLabel'), icon: '🚿' }),
+    sqft: (property) => ({ value: property.sqft ?? 0, label: 'm²', icon: '📐' }),
+    parking: (property, t) => ({
+        value: property.parking ?? 0,
+        label: t('featured.spacesLabel', 'Spaces'),
+        icon: '🅿️',
+    }),
+    offices: (property, t) => ({
+        value: property.offices ?? 0,
+        label: t('featured.officesLabel', 'Offices'),
+        icon: '🏢',
+    }),
+    openPlanArea: (property, t) => ({
+        value: property.openPlanArea ?? 0,
+        label: t('featured.openPlanLabel', 'Open plan m²'),
+        icon: '🪟',
+    }),
+};
+
 
 const CARD_COLORS = [
     'rgba(2, 82, 205, 0.7)',
@@ -394,7 +442,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                 <circle cx="12" cy="10" r="3" />
                             </svg>
                             <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                                {property.city}, {property.country}
+                                {formatCityPlace(property.city, property.country).full}
                             </span>
                         </div>
 
@@ -422,11 +470,11 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                             flexWrap: 'wrap'
                         }}>
                             {[
-                                ...(property.propertyType === 'land' ? [] : [
-                                    { value: property.beds, label: t('featured.bedsLabel'), icon: '🛏' },
-                                    { value: property.baths, label: t('featured.bathsLabel'), icon: '🚿' },
-                                ]),
-                                { value: property.sqft, label: 'm²', icon: '📐' },
+                                // Which stats a listing leads with is a property of
+                                // its type, not a run of exceptions: a garage shows
+                                // its spaces, a shop its offices and open-plan area,
+                                // and neither is described as "0 Beds · 0 Baths".
+                                ...statsForType(property.propertyType).map((key) => STAT_CHIPS[key](property, t)),
                                 // "Built 2028" on a building that does not exist yet is a
                                 // claim about a year that has not happened. The same pill
                                 // reads as a handover date instead, and shows no date at
@@ -592,16 +640,13 @@ const MobilePropertyCard: React.FC<{ property: PropertyCardData; color: string; 
                     {property.title || property.address}
                 </h3>
                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                    {property.city}, {property.country}
+                    {formatCityPlace(property.city, property.country).full}
                 </p>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {[
-                        ...(property.propertyType === 'land' ? [] : [
-                            { v: property.beds, l: t('featured.bedsLabel') },
-                            { v: property.baths, l: t('featured.bathsLabel') },
-                        ]),
-                        { v: property.sqft, l: 'm²' },
-                    ].map(s => (
+                    {statsForType(property.propertyType)
+                        .map((key) => STAT_CHIPS[key](property, t))
+                        .map(chip => ({ v: chip.value, l: chip.label }))
+                        .map(s => (
                         <span key={s.l} style={{
                             padding: '2px 8px', borderRadius: '8px', fontSize: '0.7rem',
                             background: '#f8fafc', border: '1px solid #e2e8f0', color: '#334155', fontWeight: 600,

@@ -57,3 +57,23 @@ export const isResidentialPropertyType = (type: PropertyType): boolean => RESIDE
 const UNBUILT_TYPES: ReadonlySet<PropertyType> = new Set<PropertyType>(['land', 'parking']);
 
 export const hasHabitableInterior = (type: PropertyType): boolean => !UNBUILT_TYPES.has(type);
+
+/**
+ * The name a type is shown under, translated.
+ *
+ * Every surface that names a type goes through this, so a map pin, a search
+ * card and the create-listing picker cannot call the same thing three
+ * different things — which is what happened while the markers rendered the
+ * raw slug and showed "Luxury-villa" and "Parking" next to a picker offering
+ * "Luxury Villa" and "Parking Space".
+ *
+ * Unknown values are returned as-is rather than dropped: a listing filed
+ * under a type this build does not know still has to be labelled something.
+ */
+export type TranslateFn = (key: string, fallback?: string) => string;
+
+export const typeLabel = (type: unknown, translate: TranslateFn): string => {
+  const option = PROPERTY_TYPE_OPTIONS.find((entry) => entry.value === type);
+  if (!option) return typeof type === 'string' ? type : '';
+  return translate(`seller:${option.labelKey}`, option.fallback);
+};

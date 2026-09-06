@@ -1,3 +1,4 @@
+import type { ParkingType } from './src/shared/property/typeAttributes';
 /**
  * @deprecated Import from '@/src/shared/types' instead for better code organization.
  * This file re-exports all types for backward compatibility.
@@ -361,6 +362,10 @@ export interface Property {
     lng: number;
     seller: Seller;
     propertyType: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land' | 'other';
+    /** Commercial: how much of the floor area is open plan. */
+    openPlanArea?: number;
+    /** Parking: how the space is arranged. Absent on every other type. */
+    parkingType?: ParkingType;
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;

@@ -12,6 +12,7 @@ import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { cityImageSources } from '../utils/cityImage';
 import { useAppContext } from '@/context/AppContext';
 import { searchLocation } from '@/services/osmService';
+import { findPlace } from '@/src/features/search/universal/places';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import SuburbDetailPanel from './SuburbDetailPanel';
@@ -119,10 +120,15 @@ const CityDashboard: React.FC = () => {
   const handleViewListings = async () => {
     if (!city) return;
     const searchQuery = `${city.city}, ${city.country}`;
-    const results = await searchLocation(searchQuery);
+
+    // The app already holds the coordinates of every city it lists, so the
+    // map opens on the tap rather than after a geocoder round trip. The
+    // geocoder is only for a city the catalogue somehow does not carry.
+    const known = findPlace(city.city, city.country);
+    const results = known?.lat === undefined ? await searchLocation(searchQuery) : [];
     const bestResult = results[0];
-    const lat = bestResult ? Number(bestResult.lat) : 0;
-    const lng = bestResult ? Number(bestResult.lon) : 0;
+    const lat = known?.lat ?? (bestResult ? Number(bestResult.lat) : 0);
+    const lng = known?.lng ?? (bestResult ? Number(bestResult.lon) : 0);
 
     let drawnBoundsJSON: string | null = null;
     if (bestResult?.boundingbox) {

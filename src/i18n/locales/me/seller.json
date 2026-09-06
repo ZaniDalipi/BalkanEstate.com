@@ -140,7 +140,11 @@
       "amenitiesHint": "Dodajte sadržaje u hashtag stilu koje kupci mogu pretražiti",
       "amenitiesPlaceholder": "npr., #teretana, #bazen, #parking, #wifi",
       "description": "Opis",
-      "addTags": "Dodajte oznake..."
+      "addTags": "Dodajte oznake...",
+      "openPlanArea": "Otvoreni prostor (m²)",
+      "parkingType": "Vrsta parkinga",
+      "parkingSpaces": "Mjesta",
+      "officeRooms": "Kancelarije"
     },
     "propertyFeatures": {
       "title": "Karakteristike Nekretnine",
@@ -763,5 +767,11 @@
     "extendNow": "Produži Sada",
     "autoExtendReady": "Automatsko produženje spremno! Završite plaćanje za produženje.",
     "completePayment": "Završi Plaćanje"
+  },
+  "parkingTypes": {
+    "garage": "Garaža",
+    "underground": "Podzemna",
+    "covered": "Natkrivena",
+    "outdoor": "Otvorena"
   }
 }

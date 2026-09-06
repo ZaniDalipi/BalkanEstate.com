@@ -272,7 +272,12 @@
     "switchTo": "Prebaci na {{view}} prikaz",
     "drawAreaHint": "Nacrtaj područje pretrage na mapi",
     "locationLookupFailed": "Nije moguće pronaći to mjesto. Pokušajte drugi rezultat ili postavite oznaku direktno na mapu.",
-    "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku direktno na mapu."
+    "noSearchResults": "Nema pronađenih mjesta. Pokušajte kraći naziv ili postavite oznaku direktno na mapu.",
+    "drawHint": {
+      "title": "Nacrtajte svoje područje",
+      "subtitle": "Nacrtajte oblik na karti da pretražite samo unutar njega",
+      "dismiss": "Zatvori savjet"
+    }
   },
   "newsletter": {
     "title": "Budite Ažurirani sa Novim Nekretninama",
@@ -483,5 +488,12 @@
     "tagline": "Pretraga nekretnina pokretana vještačkom inteligencijom na BalkanEstateAI — 11 zemalja, 10 jezika."
   },
   "saving": "Čuvanje...",
-  "saveSearch": "Sačuvaj pretragu"
+  "saveSearch": "Sačuvaj pretragu",
+  "suggestions": {
+    "recent": "Nedavne pretrage",
+    "places": "Mjesta",
+    "listings": "Oglasi",
+    "remove": "Ukloni",
+    "lookupFailed": "Nije moguće pronaći to mjesto. Pokušajte s drugim rezultatom."
+  }
 }

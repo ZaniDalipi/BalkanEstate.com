@@ -13,7 +13,7 @@
  *   - `AutocompleteService` / `PlacesService` (legacy)
  * When neither is present the caller falls back to the gazetteer + Nominatim.
  */
-import type { Coordinates } from '@/shared/geo';
+import { SUPPORTED_COUNTRY_CODES, type Coordinates } from '@/shared/geo';
 
 export interface PlacePrediction {
   placeId: string;
@@ -32,7 +32,11 @@ export interface ResolvedPlace {
 }
 
 export interface PlacePredictionOptions {
-  /** ISO 3166-1 alpha-2, restricts results to one country. */
+  /**
+   * ISO 3166-1 alpha-2, restricts results to one country. Without it the
+   * request is still fenced to the countries the app covers — never the whole
+   * world, which is where Türkiye and the Philippines came from.
+   */
   countryCode?: string;
   /** Biases results towards this point and yields `distanceKm`. */
   origin?: Coordinates | null;
@@ -84,7 +88,11 @@ const fetchWithNewApi = async (
   const places = getMaps()!.places as any;
 
   const request: Record<string, unknown> = { input: query, sessionToken };
-  if (countryCode) request.includedRegionCodes = [countryCode.toLowerCase()];
+  // The new API takes up to fifteen regions, so the whole coverage area fits
+  // and the restriction is enforced by Google rather than by us afterwards.
+  request.includedRegionCodes = countryCode
+    ? [countryCode.toLowerCase()]
+    : [...SUPPORTED_COUNTRY_CODES];
   if (origin) {
     request.origin = { lat: origin.lat, lng: origin.lng };
     request.locationBias = {
@@ -107,16 +115,20 @@ const fetchWithNewApi = async (
     .filter((prediction: PlacePrediction) => prediction.placeId && prediction.title);
 };
 
-const fetchWithLegacyApi = (
+/** The legacy API accepts at most five countries per request. */
+const LEGACY_COUNTRY_LIMIT = 5;
+
+const legacyBatch = (
   query: string,
-  { countryCode, origin, biasRadiusKm, sessionToken }: PlacePredictionOptions
+  countries: string[],
+  { origin, biasRadiusKm, sessionToken }: PlacePredictionOptions
 ): Promise<PlacePrediction[]> => {
   const maps = getMaps()!;
   const places = maps.places as any;
   const service = new places.AutocompleteService();
 
   const request: Record<string, unknown> = { input: query, sessionToken };
-  if (countryCode) request.componentRestrictions = { country: countryCode.toLowerCase() };
+  if (countries.length > 0) request.componentRestrictions = { country: countries };
   if (origin) {
     const center = new maps.LatLng(origin.lat, origin.lng);
     request.origin = center;
@@ -139,6 +151,41 @@ const fetchWithLegacyApi = (
         }))
       );
     });
+  });
+};
+
+/**
+ * The legacy path, restricted the same way as the new one.
+ *
+ * `componentRestrictions.country` takes at most five countries, and the app
+ * covers ten, so the codes are sent in two requests and the answers merged.
+ * Two calls rather than one is the price of having Google apply the
+ * restriction: the alternative is asking the whole world and then guessing
+ * from the country *name* on each row, which cannot be done reliably when the
+ * provider writes that name in the viewer's language.
+ */
+const fetchWithLegacyApi = async (
+  query: string,
+  options: PlacePredictionOptions
+): Promise<PlacePrediction[]> => {
+  const { countryCode } = options;
+  const countries = countryCode
+    ? [countryCode.toLowerCase()]
+    : [...SUPPORTED_COUNTRY_CODES];
+
+  const batches: string[][] = [];
+  for (let i = 0; i < countries.length; i += LEGACY_COUNTRY_LIMIT) {
+    batches.push(countries.slice(i, i + LEGACY_COUNTRY_LIMIT));
+  }
+
+  const results = await Promise.all(batches.map((batch) => legacyBatch(query, batch, options)));
+
+  // Google ranks within a request, so merging two of them can repeat a place.
+  const seen = new Set<string>();
+  return results.flat().filter((prediction) => {
+    if (seen.has(prediction.placeId)) return false;
+    seen.add(prediction.placeId);
+    return true;
   });
 };
 

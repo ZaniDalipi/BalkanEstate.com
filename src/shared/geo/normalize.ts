@@ -1,3 +1,5 @@
+import { foldText } from '@/shared/search/text';
+
 /**
  * Place-name normalisation.
  *
@@ -8,36 +10,19 @@
  * the same key.
  */
 
-/**
- * Latin transliterations that Unicode decomposition alone does not produce.
- * `ë → e` falls out of NFD, but `đ`, `ł` and `ß` carry no combining mark.
- */
-const TRANSLITERATIONS: Record<string, string> = {
-  đ: 'd',
-  ð: 'd',
-  ł: 'l',
-  ø: 'o',
-  æ: 'ae',
-  œ: 'oe',
-  ß: 'ss',
-  ъ: 'a',
-};
 
 /**
  * Lowercase, strip diacritics, collapse punctuation and whitespace.
  * `"  Dhërmi/Drimades "` → `"dhermi drimades"`.
+ *
+ * Delegates to the search layer's `foldText`, which does the same to Latin
+ * and also transliterates Cyrillic and Greek. Doing only Latin here — as this
+ * did — meant "Ελλάδα" and "Црна Гора" folded to the empty string, so every
+ * name in those scripts compared equal to nothing and unequal to itself: a
+ * Greek or Macedonian country name was silently dropped from the label it
+ * belonged to.
  */
-export const normalizePlaceName = (value: string): string => {
-  if (!value) return '';
-
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[đðłøæœßъ]/g, (char) => TRANSLITERATIONS[char] ?? char)
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-};
+export const normalizePlaceName = (value: string): string => foldText(value);
 
 /** True when `haystack` contains `needle` as a whole word or word prefix. */
 export const matchesPlaceToken = (haystack: string, needle: string): boolean => {

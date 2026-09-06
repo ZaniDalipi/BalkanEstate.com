@@ -1,12 +1,12 @@
 import { Property, Filters } from '../types';
 import { BALKAN_COUNTRIES } from '../constants/countries';
+import { createPropertyMatcher, rankProperties } from '../src/shared/search';
 
 export const filterProperties = (properties: Property[], filters: Filters): Property[] => {
-    const query = filters.query?.toLowerCase().trim();
-
-    // Extract individual search terms from query (split by comma, space)
-    // This handles cases like "Grad Zagreb, Hrvatska" matching properties in "Zagreb"
-    const queryTerms = query ? query.split(/[,\s]+/).filter(term => term.length > 1) : [];
+    // Text matching runs through the search engine: the query is parsed once,
+    // its words are all required (typing more narrows), spellings are folded
+    // so "Becici" and "Bečići" are one word, and a typo is forgiven.
+    const queryMatcher = createPropertyMatcher(filters.query ?? '');
 
     return properties.filter(p => {
         // Ensure property has valid coordinates
@@ -14,21 +14,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             return false;
         }
 
-        // Text search - match if ANY query term matches city or address
-        let queryMatch = true;
-        if (query && queryTerms.length > 0) {
-            const addressLower = (p.address || '').toLowerCase();
-            const cityLower = (p.city || '').toLowerCase();
-
-            // Check if any term from the query matches the property's city or address
-            // Also check if the city/address contains any of the query terms
-            queryMatch = queryTerms.some(term =>
-                addressLower.includes(term) ||
-                cityLower.includes(term) ||
-                term.includes(cityLower) ||
-                term.includes(addressLower)
-            );
-        }
+        const queryMatch = queryMatcher.matches(p);
 
         // Country filter — handles both key ("kosovo") and name ("Kosovo") formats
         let countryMatch = true;
@@ -178,4 +164,137 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                maxPricePerSqmMatch &&
                maxDaysListedMatch;
     });
+};
+
+/**
+ * The listings a search page shows, in the order it shows them.
+ *
+ * Filtering and ordering in one place because the order depends on the
+ * filters: "most relevant" means nothing without a query, and promoted
+ * listings hold the top of every ordering. Kept out of the page hook so the
+ * orderings can be tested directly — a `switch` this size is exactly where a
+ * branch quietly stops returning anything.
+ */
+export const filterAndSortProperties = (properties: Property[], activeFilters: Filters): Property[] => {
+    const filtered = filterProperties(properties, activeFilters);
+    const now = Date.now();
+
+    // Pre-compute promotion scores once (O(N)) — avoids O(N log N) calls inside comparators
+    const scoreCache = new Map<string, number>();
+    const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
+    for (const p of filtered) {
+        const isActivelyPromoted = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
+        if (!isActivelyPromoted) {
+            scoreCache.set(p.id, 0);
+        } else {
+            const tierScore = tierScores[p.promotionTier || 'standard'] || 0;
+            scoreCache.set(p.id, tierScore + (p.hasUrgentBadge ? 5 : 0));
+        }
+    }
+    const score = (p: Property) => scoreCache.get(p.id) ?? 0;
+
+    // First sort by promotion score, then apply user's selected sort
+    const promotionSorted = [...filtered].sort((a, b) => {
+        const diff = score(b) - score(a);
+        return diff !== 0 ? diff : 0;
+    });
+
+    // Helper to convert date/string/number to timestamp
+    const toTimestamp = (value: number | string | Date | undefined | null): number => {
+        if (!value) return 0;
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') return new Date(value).getTime();
+        if (value instanceof Date) return value.getTime();
+        return 0;
+    };
+
+    // Helper to get property timestamp (prioritize lastRenewed over createdAt)
+    const getPropertyTime = (p: Property) => {
+        const renewed = toTimestamp(p.lastRenewed);
+        const created = toTimestamp(p.createdAt);
+        return Math.max(renewed, created);
+    };
+
+    /** Newest first — the ordering every other sort falls back to. */
+    const byNewest = () => promotionSorted.sort((a, b) => {
+        const diff = score(b) - score(a);
+        return diff !== 0 ? diff : getPropertyTime(b) - getPropertyTime(a);
+    });
+
+    // Then apply user's sorting preference (maintaining promotion priority)
+    switch (activeFilters.sortBy) {
+        // How well each listing answers what was typed — the ordering any
+        // search engine defaults to, and meaningless without a query, so
+        // an empty box gets the newest-first ordering instead.
+        case 'relevance': {
+            if (!activeFilters.query.trim()) return byNewest();
+            const relevance = new Map(
+                rankProperties(promotionSorted, activeFilters.query).map(
+                    (result) => [result.doc.id, result.score]
+                )
+            );
+            return promotionSorted.sort((a, b) => {
+                const diff = score(b) - score(a);
+                if (diff !== 0) return diff;
+                const byRelevance = (relevance.get(b.id) ?? 0) - (relevance.get(a.id) ?? 0);
+                return byRelevance !== 0 ? byRelevance : getPropertyTime(b) - getPropertyTime(a);
+            });
+        }
+        case 'price_asc': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : a.price - b.price;
+        });
+        case 'price_desc': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : b.price - a.price;
+        });
+        case 'area_asc':
+        case 'sqft_asc': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : a.sqft - b.sqft;
+        });
+        case 'area_desc':
+        case 'sqft_desc': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : b.sqft - a.sqft;
+        });
+        case 'beds_desc': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : b.beds - a.beds;
+        });
+        case 'baths_desc': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : b.baths - a.baths;
+        });
+        case 'oldest': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : (a.createdAt || 0) - (b.createdAt || 0);
+        });
+        case 'featured': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : getPropertyTime(b) - getPropertyTime(a);
+        });
+        case 'price_per_sqm': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            if (diff !== 0) return diff;
+            const pricePerSqmA = a.sqft > 0 ? a.price / a.sqft : Infinity;
+            const pricePerSqmB = b.sqft > 0 ? b.price / b.sqft : Infinity;
+            return pricePerSqmA - pricePerSqmB;
+        });
+        case 'year_built_desc': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            return diff !== 0 ? diff : (b.yearBuilt || 0) - (a.yearBuilt || 0);
+        });
+        case 'price_reduced': return promotionSorted.sort((a, b) => {
+            const diff = score(b) - score(a);
+            if (diff !== 0) return diff;
+            const hasDiscountA = a.hasDiscount ? 1 : 0;
+            const hasDiscountB = b.hasDiscount ? 1 : 0;
+            if (hasDiscountA !== hasDiscountB) return hasDiscountB - hasDiscountA;
+            return getPropertyTime(b) - getPropertyTime(a);
+        });
+        case 'newest':
+        default:
+            return byNewest();
+    }
 };

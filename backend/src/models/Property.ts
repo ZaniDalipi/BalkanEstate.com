@@ -1,6 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { PROPERTY_TYPES, type PropertyType } from '../config/propertyTypes';
 import {
+  PARKING_TYPES,
+  TYPE_ATTRIBUTES,
+  normalizeTypeAttributes,
+  type ParkingType,
+} from '../config/typeAttributes';
+import {
   CONSTRUCTION_STATUSES,
   ConstructionStatus,
   normalizeConstructionFields,
@@ -76,6 +82,8 @@ export interface IProperty extends Document {
   toilets?: number;
   storageRooms?: number;
   offices?: number;
+  openPlanArea?: number;
+  parkingType?: ParkingType;
   sqft: number;
   /** On an under-construction listing this mirrors `expectedCompletionYear`. */
   yearBuilt: number;
@@ -332,6 +340,16 @@ const PropertySchema: Schema = new Schema(
       type: Number,
       min: 0,
       default: 0,
+    },
+    /** Commercial: how much of the floor area is open plan rather than cellular. */
+    openPlanArea: {
+      type: Number,
+      min: 0,
+    },
+    /** Parking: how the space is arranged. Absent on every other type. */
+    parkingType: {
+      type: String,
+      enum: PARKING_TYPES,
     },
     sqft: {
       type: Number,
@@ -677,6 +695,41 @@ const PropertySchema: Schema = new Schema(
  * a stray completion year on a ready listing is cleared, and an explicit
  * `null` (how the client says "no handover date") is unset.
  */
+/**
+ * Keep a listing's attributes to the ones its type actually has.
+ *
+ * The last word on it, so the API, the importer and the admin screens cannot
+ * each decide differently. A parking space filed with a bedroom count does
+ * not store a zero — it stores no bedroom field at all, which is what makes
+ * the type table the single source of truth rather than a display rule the
+ * read side has to remember to apply.
+ *
+ * Changing a listing's type is the case that matters: the attributes of the
+ * old type are cleared rather than left behind, so an apartment converted to
+ * a garage stops advertising its bathrooms.
+ */
+PropertySchema.pre('validate', function (next) {
+  // Read and written through the document API rather than by index, so
+  // Mongoose tracks the change and an unset attribute is actually removed.
+  const doc = this as unknown as IProperty;
+  const document = this as unknown as mongoose.Document;
+
+  const supplied: Record<string, unknown> = {};
+  for (const attribute of TYPE_ATTRIBUTES) supplied[attribute] = document.get(attribute);
+
+  const result = normalizeTypeAttributes(doc.propertyType, supplied);
+  if (!result.ok) {
+    this.invalidate('propertyType', result.error as string);
+    return next();
+  }
+
+  for (const attribute of TYPE_ATTRIBUTES) {
+    document.set(attribute, attribute in result.fields ? result.fields[attribute] : undefined);
+  }
+
+  next();
+});
+
 PropertySchema.pre('validate', function (next) {
   const doc = this as unknown as IProperty;
 

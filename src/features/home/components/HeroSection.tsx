@@ -3,13 +3,19 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Typewriter } from '@/src/components/ui/typewriter';
 import { apiRequest } from '@/src/shared/api';
-import { searchLocation } from '@/services/osmService';
-import type { NominatimResult } from '@/types';
+import { splitHighlights } from '@/shared/search';
+import { useUniversalSearch } from '@/src/features/search/universal/useUniversalSearch';
+import { rememberSearch } from '@/src/features/search/universal/recentSearches';
+import type { Suggestion } from '@/src/features/search/universal/types';
 
 interface HeroSectionProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  onSearch: () => void;
+  /**
+   * Run the search. `focus` is where the map should open when the user picked
+   * a specific place rather than typing free text.
+   */
+  onSearch: (query?: string, focus?: { lat: number; lng: number; zoom?: number } | null) => void;
   onNavigate: (view: string, path: string) => void;
   /**
    * Rendered directly under the Buy / Rent / List buttons, inside the hero's
@@ -64,6 +70,14 @@ const AnimatedNumber: React.FC<{ value: string; delay?: number }> = ({ value, de
   return <span ref={ref}>{display}{suffix}</span>;
 };
 
+/**
+ * How close the map sits on a place picked from the hero.
+ *
+ * A business or a building, which is what most picks from here are; a city or
+ * a country carries its own wider zoom and uses that instead.
+ */
+const PICKED_PLACE_ZOOM = 16;
+
 const HeroSection: React.FC<HeroSectionProps> = ({
   searchQuery,
   onSearchChange,
@@ -71,12 +85,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   onNavigate,
   belowActions,
 }) => {
-  const { t } = useTranslation(['home']);
+  const { t } = useTranslation(['home', 'search']);
   const [isFocused, setIsFocused] = useState(false);
-  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const debounceRef = useRef<number>();
+  const [isDismissed, setIsDismissed] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * The hero box is the same engine as the search page's, wearing the hero's
+   * clothes: local places answer instantly, listings are offered alongside
+   * them, and the geocoder only fills in what the app does not already know.
+   */
+  const { groups, suggestions, isSearching, resolvePlace } = useUniversalSearch({
+    query: searchQuery,
+    enabled: isFocused && !isDismissed,
+  });
 
   // Fetch real stats from backend
   const { data: stats } = useQuery<PlatformStats>({
@@ -98,42 +120,62 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     retry: 1,
   });
 
-  // Autocomplete: debounced location search
+  // A fresh keystroke re-opens a list the user dismissed with Escape.
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (isFocused && searchQuery.trim().length > 2) {
-      setIsSearching(true);
-      debounceRef.current = window.setTimeout(async () => {
-        const results = await searchLocation(searchQuery);
-        setSuggestions(results);
-        setIsSearching(false);
-      }, 500);
-    } else {
-      setSuggestions([]);
-      setIsSearching(false);
-    }
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [searchQuery, isFocused]);
+    setIsDismissed(false);
+  }, [searchQuery]);
 
   // Close suggestions on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setSuggestions([]);
+        setIsDismissed(true);
       }
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const handleSuggestionClick = useCallback((suggestion: NominatimResult) => {
-    // Extract a short display name (city, country)
-    const parts = suggestion.display_name.split(',');
-    const shortName = parts.slice(0, 2).map(s => s.trim()).join(', ');
-    onSearchChange(shortName);
-    setSuggestions([]);
-    setTimeout(() => onSearch(), 0);
-  }, [onSearchChange, onSearch]);
+  /**
+   * Every row leads to the same place from the hero: the search page, for
+   * the text the row stands for. A place row carries its canonical spelling
+   * ("Bečići, Budva"), so the search that runs is the one the label promised.
+   */
+  const handleSuggestionClick = useCallback(async (suggestion: Suggestion) => {
+    const value =
+      suggestion.type === 'place'
+        ? suggestion.searchValue
+        : suggestion.type === 'property'
+          ? [suggestion.property.city, suggestion.property.country].filter(Boolean).join(', ')
+          : suggestion.title;
+
+    onSearchChange(value);
+    rememberSearch(value);
+    setIsDismissed(true);
+
+    /**
+     * Carry the picked place's position to the search page.
+     *
+     * Handing over only the text meant the search page had to find the place
+     * again from its name, and the places people pick here are often ones
+     * only Google knows — "Green Coast", "Sun Palasë Residence". Neither the
+     * gazetteer nor the geocoder has them, so the second lookup found
+     * nothing and the map stayed where it was while the box showed a place
+     * it had not gone to.
+     *
+     * The coordinates were already in hand at the moment of the pick; this
+     * simply stops throwing them away. A Places row costs one detail lookup
+     * to resolve, which is the call that would have happened on selection
+     * anyway.
+     */
+    if (suggestion.type !== 'place') {
+      onSearch(value, null);
+      return;
+    }
+
+    const target = await resolvePlace(suggestion);
+    onSearch(value, target ? { ...target, zoom: suggestion.zoom ?? PICKED_PLACE_ZOOM } : null);
+  }, [onSearchChange, onSearch, resolvePlace]);
 
   const formatStat = (value: number): string => {
     if (value >= 10000) return `${Math.floor(value / 1000)},${String(value % 1000).padStart(3, '0')}+`;
@@ -163,11 +205,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        setSuggestions([]);
+        setIsDismissed(true);
+        if (searchQuery.trim()) rememberSearch(searchQuery.trim());
         onSearch();
       }
+      if (e.key === 'Escape') setIsDismissed(true);
     },
-    [onSearch]
+    [onSearch, searchQuery]
   );
 
   return (
@@ -288,7 +332,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
               {searchQuery && (
                 <button
-                  onClick={() => { onSearchChange(''); setSuggestions([]); }}
+                  onClick={() => { onSearchChange(''); setIsDismissed(false); }}
                   className="mr-1 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors"
                   aria-label="Clear"
                 >
@@ -299,7 +343,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               )}
 
               <button
-                onClick={() => { setSuggestions([]); onSearch(); }}
+                onClick={() => { setIsDismissed(true); if (searchQuery.trim()) rememberSearch(searchQuery.trim()); onSearch(); }}
                 style={{
                   margin: '6px 8px',
                   padding: '8px 20px',
@@ -323,39 +367,80 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             {/* Autocomplete suggestions dropdown — liquid glass */}
-            {suggestions.length > 0 && isFocused && (
+            {suggestions.length > 0 && isFocused && !isDismissed && (
               <div style={{
                 position: 'absolute', top: '100%', left: 0, right: 0,
                 marginTop: '6px', borderRadius: '16px', overflow: 'hidden',
-                background: 'rgba(255,255,255,0.92)',
+                // Near-opaque, not merely frosted: the hero's action buttons
+                // sit directly under this panel, and at any real transparency
+                // they ghost through the suggestions and make them hard to read.
+                background: 'rgba(255,255,255,0.985)',
                 backdropFilter: 'blur(24px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(24px) saturate(180%)',
                 border: '1px solid rgba(226,232,240,0.7)',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9)',
-                zIndex: 50, maxHeight: '280px', overflowY: 'auto',
+                zIndex: 50, maxHeight: '320px', overflowY: 'auto',
               }}>
-                {suggestions.map((s) => (
-                  <button
-                    key={s.place_id}
-                    onMouseDown={() => handleSuggestionClick(s)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      width: '100%', padding: '10px 16px',
-                      background: 'transparent', border: 'none', cursor: 'pointer',
-                      textAlign: 'left', fontSize: '13px', color: '#334155',
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(248,250,252,0.8)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                    </svg>
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {s.display_name}
-                    </span>
-                  </button>
+                {groups.map((group) => (
+                  <React.Fragment key={group.labelKey || 'primary'}>
+                    {group.labelKey && (
+                      <div style={{
+                        padding: '8px 16px 4px', fontSize: '11px', fontWeight: 600,
+                        letterSpacing: '0.04em', textTransform: 'uppercase', color: '#94a3b8',
+                      }}>
+                        {t(group.labelKey)}
+                      </div>
+                    )}
+                    {group.suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion.id}
+                        onMouseDown={() => handleSuggestionClick(suggestion)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '10px',
+                          width: '100%', padding: '10px 16px',
+                          background: 'transparent', border: 'none', cursor: 'pointer',
+                          textAlign: 'left', fontSize: '13px', color: '#334155',
+                          transition: 'background 0.15s',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(248,250,252,0.8)'}
+                        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          {suggestion.type === 'property' ? (
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.5a1.125 1.125 0 001.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21.375h4.125A1.125 1.125 0 0019.5 20.25V9.75" />
+                          ) : suggestion.type === 'recent' ? (
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          ) : suggestion.type === 'query' ? (
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                          ) : (
+                            <>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                            </>
+                          )}
+                        </svg>
+                        <span style={{ minWidth: 0, flex: 1 }}>
+                          <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {suggestion.type === 'query'
+                              ? suggestion.title
+                              : splitHighlights(suggestion.title, searchQuery).map((part, index) => (
+                                  <React.Fragment key={index}>
+                                    {part.match ? <strong style={{ fontWeight: 600, color: '#0f172a' }}>{part.text}</strong> : part.text}
+                                  </React.Fragment>
+                                ))}
+                          </span>
+                          {suggestion.subtitle && (
+                            <span style={{
+                              display: 'block', fontSize: '11px', color: '#94a3b8',
+                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            }}>
+                              {suggestion.subtitle}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    ))}
+                  </React.Fragment>
                 ))}
               </div>
             )}

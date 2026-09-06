@@ -13,10 +13,10 @@ const LegalFooter: React.FC<LegalFooterProps> = ({ onNavigate }) => {
   const { t } = useTranslation(['footer']);
 
   const legalLinks = [
-    { label: t('footer:legal.privacy'), path: 'privacy-policy' },
-    { label: t('footer:legal.terms'), path: 'terms-of-service' },
-    { label: t('footer:legal.cookies'), path: 'cookie-policy' },
-    { label: t('footer:legal.refund'), path: 'refund-policy' },
+    { label: t('footer:legal.privacyPolicy'), path: 'privacy-policy' },
+    { label: t('footer:legal.termsOfService'), path: 'terms-of-service' },
+    { label: t('footer:legal.cookiePolicy'), path: 'cookie-policy' },
+    { label: t('footer:legal.refundPolicy'), path: 'refund-policy' },
   ];
 
   return (
@@ -60,7 +60,7 @@ const LegalFooter: React.FC<LegalFooterProps> = ({ onNavigate }) => {
 
         {/* Copyright */}
         <div className="mt-6 pt-4 border-t border-gray-800 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} {CONTACT_CONFIG.company.name}. {t('footer:copyright.allRights')}
+          © {new Date().getFullYear()} {CONTACT_CONFIG.company.name}. {t('footer:legal.allRightsReserved')}
         </div>
       </div>
     </footer>

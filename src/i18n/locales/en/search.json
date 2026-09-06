@@ -287,7 +287,12 @@
     "switchTo": "Switch to {{view}} view",
     "drawAreaHint": "Draw a search area on the map",
     "locationLookupFailed": "Could not look up that place. Please try another result or drop the pin on the map.",
-    "noSearchResults": "No places found. Try a shorter name, or drop the pin directly on the map."
+    "noSearchResults": "No places found. Try a shorter name, or drop the pin directly on the map.",
+    "drawHint": {
+      "title": "Draw your own area",
+      "subtitle": "Trace a shape on the map to search only inside it",
+      "dismiss": "Dismiss hint"
+    }
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",
@@ -483,5 +488,12 @@
     "applyingFilters": "Applying filters..."
   },
   "saving": "Saving...",
-  "saveSearch": "Save search"
+  "saveSearch": "Save search",
+  "suggestions": {
+    "recent": "Recent searches",
+    "places": "Places",
+    "listings": "Listings",
+    "remove": "Remove",
+    "lookupFailed": "Could not look up that place. Please try another result."
+  }
 }

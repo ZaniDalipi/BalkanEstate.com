@@ -137,7 +137,11 @@
       "amenitiesHint": "Adaugă facilități stil hashtag pe care cumpărătorii le pot căuta",
       "amenitiesPlaceholder": "ex., #sală, #piscină, #parcare, #wifi",
       "description": "Descriere",
-      "addTags": "Adaugă etichete..."
+      "addTags": "Adaugă etichete...",
+      "openPlanArea": "Spațiu deschis (m²)",
+      "parkingType": "Tip parcare",
+      "parkingSpaces": "Locuri",
+      "officeRooms": "Birouri"
     },
     "propertyFeatures": {
       "title": "Caracteristici Proprietate",
@@ -760,5 +764,11 @@
     "extendNow": "Extinde Acum",
     "autoExtendReady": "Extinderea automată este pregătită! Finalizați plata pentru extindere.",
     "completePayment": "Finalizează Plata"
+  },
+  "parkingTypes": {
+    "garage": "Garaj",
+    "underground": "Subteran",
+    "covered": "Acoperit",
+    "outdoor": "Descoperit"
   }
 }

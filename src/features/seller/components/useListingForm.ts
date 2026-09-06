@@ -14,6 +14,7 @@ import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, FIELD_ERROR_ORDER, fieldAnchorId, validateListing } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
+import { stripAttributesForType } from '@/shared/property/typeAttributes';
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
@@ -54,6 +55,8 @@ export function buildPreviewProperty(
         toilets: Number(listingData.toilets),
         storageRooms: Number(listingData.storageRooms),
         offices: Number(listingData.offices),
+        openPlanArea: Number(listingData.openPlanArea),
+        parkingType: listingData.parkingType,
         sqft: Number(listingData.sq_meters),
         ...buildConstructionFields({
             constructionStatus: listingData.constructionStatus,
@@ -225,6 +228,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 toilets: propertyToEdit.toilets || 0,
                 storageRooms: propertyToEdit.storageRooms || 0,
                 offices: propertyToEdit.offices || 0,
+                openPlanArea: propertyToEdit.openPlanArea || 0,
+                parkingType: propertyToEdit.parkingType || 'garage',
                 sq_meters: propertyToEdit.sqft,
                 year_built: propertyToEdit.yearBuilt,
                 constructionStatus: normalizeConstructionStatus(propertyToEdit.constructionStatus),
@@ -1010,108 +1015,117 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
             // Log removed
 
-            const newProperty: Property = {
-                id: propertyToEdit ? propertyToEdit.id : `prop-${Date.now()}`,
-                propertyId: listingData.propertyId.trim() || undefined,
-                sellerId: currentUser.id,
-                listingType: listingData.listingType || 'sale',
-                status: propertyToEdit ? propertyToEdit.status : 'active',
-                title: listingData.title.trim() || undefined,
-                price: Number(listingData.price),
-                isNegotiable: listingData.isNegotiable || undefined,
-                address: finalAddress,
-                city: selectedCity,
-                country: selectedCountry,
-                beds: Number(listingData.bedrooms),
-                baths: Number(listingData.bathrooms),
-                livingRooms: Number(listingData.livingRooms),
-                kitchens: Number(listingData.kitchens),
-                diningRooms: Number(listingData.diningRooms),
-                toilets: Number(listingData.toilets),
-                storageRooms: Number(listingData.storageRooms),
-                offices: Number(listingData.offices),
-                sqft: Number(listingData.sq_meters),
-                ...buildConstructionFields({
-                    constructionStatus: listingData.constructionStatus,
-                    expectedCompletionYear: listingData.expected_completion_year,
-                    yearBuilt: listingData.year_built,
-                }),
-                parking: Number(listingData.parking_spots),
-                description: listingData.description,
-                specialFeatures: listingData.specialFeatures,
-                materials: listingData.materials,
-                amenities: listingData.amenities,
-                tourUrl: listingData.tourUrl,
-                virtualTour360Url: listingData.virtualTour360Url || undefined,
-                hasVirtualTour360: !!listingData.virtualTour360Url,
-                imageUrl: imageUrls.length > 0 ? imageUrls[0].url : '',
-                images: imageUrls,
-                lat: lat,
-                lng: lng,
-                seller: {
-                    type: selectedRole === UserRole.AGENT ? 'agent' : 'private',
-                    name: currentUser.name,
-                    phone: currentUser.phone,
-                    avatarUrl: currentUser.avatarUrl,
+            // The seller's answers to the previous type's questions do not
+            // travel with a listing that has since been re-typed: the payload
+            // is filtered by the same table the server filters by, so the two
+            // sides cannot disagree about what a parking space carries.
+            const newProperty = stripAttributesForType(
+                listingData.propertyType,
+    {
+                    id: propertyToEdit ? propertyToEdit.id : `prop-${Date.now()}`,
+                    propertyId: listingData.propertyId.trim() || undefined,
+                    sellerId: currentUser.id,
+                    listingType: listingData.listingType || 'sale',
+                    status: propertyToEdit ? propertyToEdit.status : 'active',
+                    title: listingData.title.trim() || undefined,
+                    price: Number(listingData.price),
+                    isNegotiable: listingData.isNegotiable || undefined,
+                    address: finalAddress,
+                    city: selectedCity,
+                    country: selectedCountry,
+                    beds: Number(listingData.bedrooms),
+                    baths: Number(listingData.bathrooms),
+                    livingRooms: Number(listingData.livingRooms),
+                    kitchens: Number(listingData.kitchens),
+                    diningRooms: Number(listingData.diningRooms),
+                    toilets: Number(listingData.toilets),
+                    storageRooms: Number(listingData.storageRooms),
+                    offices: Number(listingData.offices),
+                    openPlanArea: Number(listingData.openPlanArea),
+                    parkingType: listingData.parkingType,
+                    sqft: Number(listingData.sq_meters),
+                    ...buildConstructionFields({
+                        constructionStatus: listingData.constructionStatus,
+                        expectedCompletionYear: listingData.expected_completion_year,
+                        yearBuilt: listingData.year_built,
+                    }),
+                    parking: Number(listingData.parking_spots),
+                    description: listingData.description,
+                    specialFeatures: listingData.specialFeatures,
+                    materials: listingData.materials,
+                    amenities: listingData.amenities,
+                    tourUrl: listingData.tourUrl,
+                    virtualTour360Url: listingData.virtualTour360Url || undefined,
+                    hasVirtualTour360: !!listingData.virtualTour360Url,
+                    imageUrl: imageUrls.length > 0 ? imageUrls[0].url : '',
+                    images: imageUrls,
+                    lat: lat,
+                    lng: lng,
+                    seller: {
+                        type: selectedRole === UserRole.AGENT ? 'agent' : 'private',
+                        name: currentUser.name,
+                        phone: currentUser.phone,
+                        avatarUrl: currentUser.avatarUrl,
+                    },
+                    propertyType: listingData.propertyType,
+                    floorNumber: Number(listingData.floorNumber) || undefined,
+                    totalFloors: Number(listingData.totalFloors) || undefined,
+                    floorplanUrl,
+                    createdAt: propertyToEdit ? propertyToEdit.createdAt : Date.now(),
+                    lastRenewed: Date.now(),
+                    views: propertyToEdit?.views || 0,
+                    saves: propertyToEdit?.saves || 0,
+                    inquiries: propertyToEdit?.inquiries || 0,
+                    // Dual-role system: Pass the selected role to backend
+                    createdAsRole: selectedRole,
+                    // Amenities - always send values (default to false if not set)
+                    hasBalcony: listingData.hasBalcony ?? false,
+                    hasGarden: listingData.hasGarden ?? false,
+                    hasElevator: listingData.hasElevator ?? false,
+                    hasSecurity: listingData.hasSecurity ?? false,
+                    hasAirConditioning: listingData.hasAirConditioning ?? false,
+                    hasPool: listingData.hasPool ?? false,
+                    petsAllowed: listingData.petsAllowed ?? false,
+                    // Advanced property features
+                    furnishing: listingData.furnishing !== 'any' ? listingData.furnishing : undefined,
+                    heatingType: listingData.heatingType !== 'any' ? listingData.heatingType : undefined,
+                    condition: listingData.condition !== 'any' ? listingData.condition : undefined,
+                    viewType: listingData.viewType !== 'any' ? listingData.viewType : undefined,
+                    energyRating: listingData.energyRating !== 'any' ? listingData.energyRating : undefined,
+                    orientation: listingData.orientation !== 'any' ? listingData.orientation : undefined,
+                    // Calculated distances
+                    distanceToCenter: distances.distanceToCenter,
+                    distanceToSea: distances.distanceToSea,
+                    distanceToSchool: distances.distanceToSchool,
+                    distanceToHospital: distances.distanceToHospital,
+                    // Rental-specific fields (always included when listingType is 'rent')
+                    ...(listingData.listingType === 'rent' ? {
+                        rentPeriod: listingData.rentPeriod || 'monthly',
+                        securityDeposit: Number(listingData.securityDeposit) || 0,
+                        minimumLeaseDuration: Number(listingData.minimumLeaseDuration) || 1,
+                        maximumLeaseDuration: Number(listingData.maximumLeaseDuration) || 12,
+                        availableFrom: listingData.availableFrom ? new Date(listingData.availableFrom).getTime() : undefined,
+                        utilitiesIncluded: listingData.utilitiesIncluded ?? false,
+                        internetIncluded: listingData.internetIncluded ?? false,
+                        tenantRequirements: listingData.tenantRequirements || [],
+                        maxOccupants: Number(listingData.maxOccupants) || 1,
+                    } : {}),
+                    // Daily rental / luxury villa fields
+                    ...(listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' ? {
+                        checkInTime: listingData.checkInTime || '14:00',
+                        checkOutTime: listingData.checkOutTime || '11:00',
+                        cleaningFee: Number(listingData.cleaningFee) || 0,
+                        cancellationPolicy: listingData.cancellationPolicy || undefined,
+                        breakfastIncluded: listingData.breakfastIncluded ?? false,
+                        towelsIncluded: listingData.towelsIncluded ?? false,
+                        parkingIncluded: listingData.parkingIncluded ?? false,
+                    } : {}),
+                    // Visit availability (for all listing types)
+                    ...(listingData.visitAvailability.enabled ? {
+                        visitAvailability: listingData.visitAvailability,
+                    } : {}),
                 },
-                propertyType: listingData.propertyType,
-                floorNumber: Number(listingData.floorNumber) || undefined,
-                totalFloors: Number(listingData.totalFloors) || undefined,
-                floorplanUrl,
-                createdAt: propertyToEdit ? propertyToEdit.createdAt : Date.now(),
-                lastRenewed: Date.now(),
-                views: propertyToEdit?.views || 0,
-                saves: propertyToEdit?.saves || 0,
-                inquiries: propertyToEdit?.inquiries || 0,
-                // Dual-role system: Pass the selected role to backend
-                createdAsRole: selectedRole,
-                // Amenities - always send values (default to false if not set)
-                hasBalcony: listingData.hasBalcony ?? false,
-                hasGarden: listingData.hasGarden ?? false,
-                hasElevator: listingData.hasElevator ?? false,
-                hasSecurity: listingData.hasSecurity ?? false,
-                hasAirConditioning: listingData.hasAirConditioning ?? false,
-                hasPool: listingData.hasPool ?? false,
-                petsAllowed: listingData.petsAllowed ?? false,
-                // Advanced property features
-                furnishing: listingData.furnishing !== 'any' ? listingData.furnishing : undefined,
-                heatingType: listingData.heatingType !== 'any' ? listingData.heatingType : undefined,
-                condition: listingData.condition !== 'any' ? listingData.condition : undefined,
-                viewType: listingData.viewType !== 'any' ? listingData.viewType : undefined,
-                energyRating: listingData.energyRating !== 'any' ? listingData.energyRating : undefined,
-                orientation: listingData.orientation !== 'any' ? listingData.orientation : undefined,
-                // Calculated distances
-                distanceToCenter: distances.distanceToCenter,
-                distanceToSea: distances.distanceToSea,
-                distanceToSchool: distances.distanceToSchool,
-                distanceToHospital: distances.distanceToHospital,
-                // Rental-specific fields (always included when listingType is 'rent')
-                ...(listingData.listingType === 'rent' ? {
-                    rentPeriod: listingData.rentPeriod || 'monthly',
-                    securityDeposit: Number(listingData.securityDeposit) || 0,
-                    minimumLeaseDuration: Number(listingData.minimumLeaseDuration) || 1,
-                    maximumLeaseDuration: Number(listingData.maximumLeaseDuration) || 12,
-                    availableFrom: listingData.availableFrom ? new Date(listingData.availableFrom).getTime() : undefined,
-                    utilitiesIncluded: listingData.utilitiesIncluded ?? false,
-                    internetIncluded: listingData.internetIncluded ?? false,
-                    tenantRequirements: listingData.tenantRequirements || [],
-                    maxOccupants: Number(listingData.maxOccupants) || 1,
-                } : {}),
-                // Daily rental / luxury villa fields
-                ...(listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' ? {
-                    checkInTime: listingData.checkInTime || '14:00',
-                    checkOutTime: listingData.checkOutTime || '11:00',
-                    cleaningFee: Number(listingData.cleaningFee) || 0,
-                    cancellationPolicy: listingData.cancellationPolicy || undefined,
-                    breakfastIncluded: listingData.breakfastIncluded ?? false,
-                    towelsIncluded: listingData.towelsIncluded ?? false,
-                    parkingIncluded: listingData.parkingIncluded ?? false,
-                } : {}),
-                // Visit availability (for all listing types)
-                ...(listingData.visitAvailability.enabled ? {
-                    visitAvailability: listingData.visitAvailability,
-                } : {}),
-            };
+            ) as Property;
 
             // Phone number is required to create or edit a listing
             if (!currentUser.phone || currentUser.phone.trim() === '') {

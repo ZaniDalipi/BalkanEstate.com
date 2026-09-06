@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatPrice } from '@/utils/currency';
 import type { PropertyValuation } from '../types';
 import { valuationKey } from '../data/valuationHistoryStore';
+import { formatCityPlace } from '@/shared/geo';
 
 interface ValuationHistoryProps {
   items: PropertyValuation[];
@@ -78,7 +79,7 @@ const ValuationHistory: React.FC<ValuationHistoryProps> = ({ items, onOpen, onRe
                     className="flex-1 min-w-0 text-left"
                   >
                     <p className="text-sm font-semibold text-neutral-800 truncate">
-                      {v.address || `${v.city}, ${v.country}`}
+                      {v.address || formatCityPlace(v.city, v.country).full}
                     </p>
                     <p className="text-[11px] text-neutral-500 truncate">
                       {[v.city, v.propertyType, v.sqft ? `${v.sqft} m²` : null]

@@ -16,7 +16,7 @@ import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
-import { NominatimResult, Property } from '@/types';
+import { Property } from '@/types';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -303,14 +303,19 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 {/* Location Suggestions Dropdown */}
                                 {isQueryInputFocused && suggestions.length > 0 && (
                                     <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar">
-                                        {suggestions.map((suggestion: NominatimResult, index: number) => (
+                                        {suggestions.map((suggestion) => (
                                             <button
-                                                key={index}
+                                                key={suggestion.id}
                                                 onClick={() => handleSuggestionClick(suggestion)}
                                                 className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
                                             >
                                                 <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                                <span className="truncate text-gray-600">{suggestion.display_name}</span>
+                                                <span className="truncate text-gray-600">
+                                                    {suggestion.title}
+                                                    {suggestion.subtitle && (
+                                                        <span className="text-gray-400"> · {suggestion.subtitle}</span>
+                                                    )}
+                                                </span>
                                             </button>
                                         ))}
                                     </div>
@@ -575,14 +580,19 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                             {/* Location Suggestions Dropdown */}
                                             {isQueryInputFocused && suggestions.length > 0 && (
                                                 <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar rounded-xl">
-                                                    {suggestions.map((suggestion: NominatimResult, index: number) => (
+                                                    {suggestions.map((suggestion) => (
                                                         <button
-                                                            key={index}
+                                                            key={suggestion.id}
                                                             onClick={() => handleSuggestionClick(suggestion)}
                                                             className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
                                                         >
                                                             <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                                            <span className="truncate text-gray-600">{suggestion.display_name}</span>
+                                                            <span className="truncate text-gray-600">
+                                                                {suggestion.title}
+                                                                {suggestion.subtitle && (
+                                                                    <span className="text-gray-400"> · {suggestion.subtitle}</span>
+                                                                )}
+                                                            </span>
                                                         </button>
                                                     ))}
                                                 </div>

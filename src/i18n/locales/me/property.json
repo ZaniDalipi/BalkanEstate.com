@@ -713,5 +713,10 @@
     "disclaimer": "AI-generisano uređenje samo u svrhu demonstracije. Ove slike nisu stvarne fotografije nekretnine i mogu sadržati predmete koji nisu dio oglasa.",
     "interior": "Enterijer",
     "exterior": "Eksterijer"
+  },
+  "featured": {
+    "spacesLabel": "Mjesta",
+    "officesLabel": "Kancelarije",
+    "openPlanLabel": "Otvoreni prostor m²"
   }
 }

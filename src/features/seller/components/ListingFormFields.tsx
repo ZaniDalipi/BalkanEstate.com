@@ -2,10 +2,29 @@ import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
-import { PROPERTY_TYPE_OPTIONS, hasHabitableInterior } from '@/shared/constants/propertyTypes';
+import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
+import {
+    PARKING_TYPES,
+    typeHasAttribute,
+    type ParkingType,
+    type TypeAttribute,
+} from '@/shared/property/typeAttributes';
+
+/** English shown while a locale still lacks the parking-type keys. */
+const PARKING_TYPE_FALLBACKS: Record<ParkingType, string> = {
+    garage: 'Garage',
+    underground: 'Underground',
+    covered: 'Covered',
+    outdoor: 'Outdoor',
+};
 import MapLocationPicker from './MapLocationPicker';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData, FieldErrors } from './ListingFormHelpers';
+import {
+    COMPLETION_YEAR_HORIZON,
+    MIN_COMPLETION_YEAR,
+    readCompletionYearInput,
+} from '@/shared/property/construction';
 import { floatingInputClasses, floatingSelectLabelClasses, inputBaseClasses, labelClasses, selectClasses, errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark } from './ListingFormHelpers';
 
 const chevronIcon = (
@@ -33,6 +52,50 @@ interface ListingFormFieldsProps {
     fieldErrors: FieldErrors;
 }
 
+
+/**
+ * Fields this component never renders, so a change to one of them cannot
+ * change anything on screen here.
+ *
+ * They are skipped for the reason the memo exists at all: they are the large,
+ * frequently-rewritten ones — a description being typed, an image list being
+ * reordered — and re-rendering the map picker on every keystroke of the
+ * description is what this comparator was written to avoid.
+ */
+export const UNRENDERED_LISTING_FIELDS: ReadonlySet<string> = new Set([
+    'description',
+    'image_tags',
+    'amenities',
+    'specialFeatures',
+    'materials',
+    'tenantRequirements',
+    'visitAvailability',
+]);
+
+/**
+ * Compare the listing data this component actually shows.
+ *
+ * Deliberately a deny-list. It used to be an allow-list of every field to
+ * compare, which meant adding a field to the form and forgetting to add it
+ * here produced an input that silently would not change: React saw equal
+ * props and skipped the render, so the number on screen stayed put while the
+ * state behind it moved. Three fields had drifted that way.
+ *
+ * Inverted, the failure mode inverts with it. Forget to list a new field and
+ * the worst that happens is one extra re-render; the field still works. A
+ * test holds the exclusions to fields this component does not read.
+ */
+export const listingDataEqual = (a: ListingData, b: ListingData): boolean => {
+    if (a === b) return true;
+
+    for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
+        if (UNRENDERED_LISTING_FIELDS.has(key)) continue;
+        if (a[key as keyof ListingData] !== b[key as keyof ListingData]) return false;
+    }
+
+    return true;
+};
+
 const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
     listingData,
     setListingData,
@@ -50,6 +113,11 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
     fieldErrors,
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
+
+    /** Does the chosen type carry this attribute? */
+
+    const has = (attribute: TypeAttribute) => typeHasAttribute(listingData.propertyType, attribute);
+
 
     return (
         <>
@@ -386,17 +454,65 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
 
             {/* Property Details - hide some fields for land */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 min-w-0">
-                {hasHabitableInterior(listingData.propertyType) && (
-                    <>
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.kitchens', 'Kitchens')} value={listingData.kitchens} onChange={(val) => setListingData(p => ({ ...p, kitchens: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.diningRooms', 'Dining rooms')} value={listingData.diningRooms} onChange={(val) => setListingData(p => ({ ...p, diningRooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.toilets', 'Toilets (WC)')} value={listingData.toilets} onChange={(val) => setListingData(p => ({ ...p, toilets: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.storageRooms', 'Storage rooms')} value={listingData.storageRooms} onChange={(val) => setListingData(p => ({ ...p, storageRooms: val }))} />
-                        <NumberInputWithSteppers label={t('seller:createListing.fields.offices', 'Office / study')} value={listingData.offices} onChange={(val) => setListingData(p => ({ ...p, offices: val }))} />
-                    </>
+                {/* One question per attribute the chosen type actually has —
+                    a garage is never asked how many living rooms it holds, and
+                    a shop is asked about offices and open-plan area instead of
+                    bedrooms. The list comes from the same table the write path
+                    filters by, so the form cannot offer a field the database
+                    would then throw away. */}
+                {has('beds') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} />
+                )}
+                {has('baths') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.bathrooms')} value={listingData.bathrooms} onChange={(val) => setListingData(p => ({ ...p, bathrooms: val }))} />
+                )}
+                {has('livingRooms') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.livingRooms')} value={listingData.livingRooms} onChange={(val) => setListingData(p => ({ ...p, livingRooms: val }))} />
+                )}
+                {has('kitchens') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.kitchens', 'Kitchens')} value={listingData.kitchens} onChange={(val) => setListingData(p => ({ ...p, kitchens: val }))} />
+                )}
+                {has('diningRooms') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.diningRooms', 'Dining rooms')} value={listingData.diningRooms} onChange={(val) => setListingData(p => ({ ...p, diningRooms: val }))} />
+                )}
+                {has('toilets') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.toilets', 'Toilets (WC)')} value={listingData.toilets} onChange={(val) => setListingData(p => ({ ...p, toilets: val }))} />
+                )}
+                {has('storageRooms') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.storageRooms', 'Storage rooms')} value={listingData.storageRooms} onChange={(val) => setListingData(p => ({ ...p, storageRooms: val }))} />
+                )}
+                {has('offices') && (
+                    <NumberInputWithSteppers
+                        // In a home this is the study; in business premises it is
+                        // the count that describes the place.
+                        label={listingData.propertyType === 'commercial'
+                            ? t('seller:createListing.fields.officeRooms', 'Offices')
+                            : t('seller:createListing.fields.offices', 'Office / study')}
+                        value={listingData.offices}
+                        onChange={(val) => setListingData(p => ({ ...p, offices: val }))}
+                    />
+                )}
+                {has('openPlanArea') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.openPlanArea', 'Open-plan area (m²)')} value={listingData.openPlanArea} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, openPlanArea: val }))} />
+                )}
+                {has('parkingType') && (
+                    <div className="min-w-0">
+                        <label htmlFor="parkingType" className={labelClasses}>
+                            {t('seller:createListing.fields.parkingType', 'Parking type')}
+                        </label>
+                        <select
+                            id="parkingType"
+                            value={listingData.parkingType}
+                            onChange={(e) => setListingData(p => ({ ...p, parkingType: e.target.value as ParkingType }))}
+                            className={inputBaseClasses}
+                        >
+                            {PARKING_TYPES.map((value) => (
+                                <option key={value} value={value}>
+                                    {t(`seller:parkingTypes.${value}`, PARKING_TYPE_FALLBACKS[value])}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 )}
                 <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
                 {listingData.propertyType !== 'land' && (
@@ -453,8 +569,18 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                                     id="expectedCompletionYear"
                                     type="number"
                                     inputMode="numeric"
+                                    // A year, not a number: four digits at most, so a
+                                    // slipped keypress or a pasted "20353333" cannot
+                                    // become a value the form would only reject on
+                                    // submit. min/max state the same bounds for the
+                                    // browser's own stepper and validity UI.
+                                    min={MIN_COMPLETION_YEAR}
+                                    max={new Date().getFullYear() + COMPLETION_YEAR_HORIZON}
                                     value={listingData.expected_completion_year || ''}
-                                    onChange={(e) => setListingData(p => ({ ...p, expected_completion_year: parseInt(e.target.value, 10) || 0 }))}
+                                    onChange={(e) => setListingData(p => ({
+                                        ...p,
+                                        expected_completion_year: readCompletionYearInput(e.target.value),
+                                    }))}
                                     placeholder={t('seller:createListing.fields.completionYearPlaceholder', 'e.g. 2028')}
                                     className={`${inputBaseClasses} ${fieldErrors.expectedCompletionYear ? errorFieldClasses : ''}`}
                                     aria-invalid={!!fieldErrors.expectedCompletionYear}
@@ -466,63 +592,38 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         )}
                     </div>
                 )}
-                <NumberInputWithSteppers label={t('seller:createListing.fields.parkingSpots')} value={listingData.parking_spots} onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))} />
+                {has('parking') && (
+                    <NumberInputWithSteppers
+                        // On a parking listing this is the thing being sold, so it
+                        // is named for that rather than for a dwelling's included spots.
+                        label={listingData.propertyType === 'parking'
+                            ? t('seller:createListing.fields.parkingSpaces', 'Spaces')
+                            : t('seller:createListing.fields.parkingSpots')}
+                        value={listingData.parking_spots}
+                        onChange={(val) => setListingData(p => ({ ...p, parking_spots: val }))}
+                    />
+                )}
             </fieldset>
         </>
     );
-}, (prev, next) => {
-    // Only the fields ListingFormFields actually renders; ignore description, image_tags, amenities, etc.
-    const d0 = prev.listingData;
-    const d1 = next.listingData;
-    return (
-        d0.lat === d1.lat &&
-        d0.lng === d1.lng &&
-        d0.streetAddress === d1.streetAddress &&
-        d0.title === d1.title &&
-        d0.propertyId === d1.propertyId &&
-        d0.price === d1.price &&
-        d0.isNegotiable === d1.isNegotiable &&
-        d0.propertyType === d1.propertyType &&
-        d0.totalFloors === d1.totalFloors &&
-        d0.floorNumber === d1.floorNumber &&
-        d0.orientation === d1.orientation &&
-        d0.bedrooms === d1.bedrooms &&
-        d0.bathrooms === d1.bathrooms &&
-        d0.livingRooms === d1.livingRooms &&
-        d0.kitchens === d1.kitchens &&
-        d0.diningRooms === d1.diningRooms &&
-        d0.toilets === d1.toilets &&
-        d0.storageRooms === d1.storageRooms &&
-        d0.offices === d1.offices &&
-        d0.sq_meters === d1.sq_meters &&
-        d0.year_built === d1.year_built &&
-        d0.constructionStatus === d1.constructionStatus &&
-        d0.expected_completion_year === d1.expected_completion_year &&
-        d0.parking_spots === d1.parking_spots &&
-        d0.checkInTime === d1.checkInTime &&
-        d0.checkOutTime === d1.checkOutTime &&
-        d0.cleaningFee === d1.cleaningFee &&
-        d0.cancellationPolicy === d1.cancellationPolicy &&
-        d0.breakfastIncluded === d1.breakfastIncluded &&
-        d0.towelsIncluded === d1.towelsIncluded &&
-        d0.parkingIncluded === d1.parkingIncluded &&
-        // Without this the inline messages this component renders never appear:
-        // a failed submit changes only `fieldErrors`, and the comparator would
-        // report the props equal and skip the re-render.
-        prev.fieldErrors === next.fieldErrors &&
-        prev.selectedCountry === next.selectedCountry &&
-        prev.selectedCity === next.selectedCity &&
-        prev.availableCities === next.availableCities &&
-        prev.getZoomLevel === next.getZoomLevel &&
-        prev.cityData === next.cityData &&
-        prev.handleCountryChange === next.handleCountryChange &&
-        prev.handleCityChange === next.handleCityChange &&
-        prev.handleInputChange === next.handleInputChange &&
-        prev.handlePriceChange === next.handlePriceChange &&
-        prev.handleMapLocationChange === next.handleMapLocationChange &&
-        prev.handleMapAddressChange === next.handleMapAddressChange &&
-        prev.setListingData === next.setListingData
-    );
-});
+}, (prev, next) => (
+    listingDataEqual(prev.listingData, next.listingData) &&
+    // Without this the inline messages this component renders never appear:
+    // a failed submit changes only `fieldErrors`, and the comparator would
+    // report the props equal and skip the re-render.
+    prev.fieldErrors === next.fieldErrors &&
+    prev.selectedCountry === next.selectedCountry &&
+    prev.selectedCity === next.selectedCity &&
+    prev.availableCities === next.availableCities &&
+    prev.getZoomLevel === next.getZoomLevel &&
+    prev.cityData === next.cityData &&
+    prev.handleCountryChange === next.handleCountryChange &&
+    prev.handleCityChange === next.handleCityChange &&
+    prev.handleInputChange === next.handleInputChange &&
+    prev.handlePriceChange === next.handlePriceChange &&
+    prev.handleMapLocationChange === next.handleMapLocationChange &&
+    prev.handleMapAddressChange === next.handleMapAddressChange &&
+    prev.setListingData === next.setListingData
+));
 
 export default ListingFormFields;

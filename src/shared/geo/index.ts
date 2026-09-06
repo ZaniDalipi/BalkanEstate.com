@@ -14,3 +14,15 @@ export {
   findCityCentre,
   findCountryCentre,
 } from './cityCatalog';
+export {
+  canonicalPlaceName,
+  formatCityPlace,
+  formatGeocodedPlace,
+  formatPlace,
+  formatPlaceLabel,
+  formatPropertyPlace,
+  isSamePlace,
+  placeSearchValue,
+  type PlaceLabel,
+} from './placeNames';
+export { SUPPORTED_COUNTRY_CODES, isSupportedCountryCode } from './coverage';

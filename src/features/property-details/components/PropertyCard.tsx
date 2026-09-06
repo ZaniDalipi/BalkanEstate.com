@@ -16,6 +16,7 @@ import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/Prop
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { getSellerDisplayName, getSellerRoleLabel } from '@/shared/utils/seller';
 import ExternalSourceBadge from '@/features/properties/components/ExternalSourceBadge';
+import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 
 interface PropertyCardProps {
@@ -630,7 +631,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
               aria-label={`View all properties in ${safeProperty.city}`}
             >
-              {safeProperty.city}
+              {canonicalPlaceName(safeProperty.city)}
             </button>
             <span>,</span>
             <button
@@ -638,7 +639,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               className="hover:text-primary hover:underline transition-colors cursor-pointer"
               aria-label={`View all properties in ${safeProperty.country}`}
             >
-              {safeProperty.country}
+              {canonicalPlaceName(safeProperty.country)}
             </button>
           </div>
         </div>

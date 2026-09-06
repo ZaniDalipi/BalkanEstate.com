@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatPrice } from '@/utils/currency';
 import { NominatimResult } from '@/types';
+import { formatGeocodedPlace } from '@/shared/geo';
 import { searchLocation } from '@/services/osmService';
 import { MapPinIcon, SpinnerIcon } from '@/constants';
 import { Button } from '@/components/ui/liquid-glass-button';
@@ -55,7 +56,9 @@ const PropertyCalculator: React.FC = () => {
   
   const handleSuggestionClick = (suggestion: NominatimResult) => {
     setSelectedLocation(suggestion);
-    setLocationSearch(suggestion.display_name);
+    // The clean label, not the raw geocoder string with its postcode and
+    // repeated municipality — this is what the user is left reading.
+    setLocationSearch(formatGeocodedPlace(suggestion).full);
     setSuggestions([]);
   };
 
@@ -175,7 +178,10 @@ const PropertyCalculator: React.FC = () => {
                         {suggestions.map((suggestion) => (
                             <li key={suggestion.place_id} onMouseDown={() => handleSuggestionClick(suggestion)} className="px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center gap-2 transition-colors">
                                 <MapPinIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                <span>{suggestion.display_name}</span>
+                                <span className="min-w-0">
+                                    <span className="block truncate">{formatGeocodedPlace(suggestion).primary}</span>
+                                    <span className="block truncate text-xs text-gray-400">{formatGeocodedPlace(suggestion).secondary}</span>
+                                </span>
                             </li>
                         ))}
                     </ul>

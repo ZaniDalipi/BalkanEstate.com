@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { Property, Filters, initialFilters, NominatimResult, SavedSearch } from '@/types';
-import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
+import { Property, Filters, initialFilters, SavedSearch } from '@/types';
+import { useUniversalSearch } from '@/src/features/search/universal/useUniversalSearch';
+import type { Suggestion } from '@/src/features/search/universal/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
 import { filterProperties } from '@/utils/propertyUtils';
@@ -97,16 +98,13 @@ export function useVillaSearch() {
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(deepLink.focus);
-    const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
     const searchWrapperRef = useRef<HTMLDivElement>(null);
-    const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [mapBoundsJSON, setMapBoundsJSON] = useState<string | null>(null);
     const [drawnBoundsJSON, setDrawnBoundsJSON] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const debounceTimer = useRef<number | null>(null);
 
     const abortRef = useRef<AbortController | null>(null);
 
@@ -440,38 +438,42 @@ export function useVillaSearch() {
 
     const handleSaveSearchArea = useCallback(() => handleSaveSearch(true), [handleSaveSearch]);
 
-    const handleSuggestionClick = useCallback((suggestion: NominatimResult) => {
-        const lat = parseFloat(suggestion.lat);
-        const lng = parseFloat(suggestion.lon);
-        if (isNaN(lat) || isNaN(lng)) return;
-        const displayName = suggestion.display_name.split(',').slice(0, 2).join(',').trim();
-        setFilters(prev => ({ ...prev, query: displayName }));
-        setSuggestions([]);
-        setDrawnBoundsJSON(null);
-        const zoom = getZoomFromBoundingBox(suggestion.boundingbox);
-        setFlyToTarget({ center: [lat, lng], zoom });
+    /**
+     * A row picked in the search box.
+     *
+     * Places fly the map; a listing row is handled by the caller; the query
+     * row is the text as typed. The canonical spelling of whatever was picked
+     * goes back into the box, so what the user reads is what was searched.
+     */
+    const handleSuggestionClick = useCallback((suggestion: Suggestion) => {
         setIsQueryInputFocused(false);
-    }, []);
 
-    useEffect(() => {
-        if (!filters.query || filters.query.length < 2 || !isQueryInputFocused) {
-            setSuggestions([]);
+        if (suggestion.type === 'property') {
+            setFilters(prev => ({ ...prev, query: suggestion.property.city }));
             return;
         }
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        debounceTimer.current = window.setTimeout(async () => {
-            setIsSearchingLocation(true);
-            try {
-                const results = await searchLocation(filters.query);
-                setSuggestions(results.slice(0, 5));
-            } catch {
-                setSuggestions([]);
-            } finally {
-                setIsSearchingLocation(false);
-            }
-        }, 500);
-        return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
-    }, [filters.query, isQueryInputFocused]);
+
+        const value = suggestion.type === 'place' ? suggestion.searchValue : suggestion.title;
+        setFilters(prev => ({ ...prev, query: value }));
+        setDrawnBoundsJSON(null);
+
+        if (suggestion.type === 'place' && Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
+            setFlyToTarget({
+                center: [suggestion.lat as number, suggestion.lng as number],
+                zoom: suggestion.zoom ?? 12,
+            });
+        }
+    }, []);
+
+    /**
+     * Suggestions come from the app-wide engine, so this page offers the same
+     * places, under the same names, as every other search box in the app.
+     */
+    const { suggestions, isSearching: isSearchingLocation } = useUniversalSearch({
+        query: filters.query,
+        properties: villaProperties,
+        enabled: isQueryInputFocused,
+    });
 
     return {
         t,

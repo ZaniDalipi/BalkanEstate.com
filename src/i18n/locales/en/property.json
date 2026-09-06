@@ -708,5 +708,10 @@
     "priceHistory": "Price History",
     "similar": "Similar Homes",
     "onThisPage": "On this page"
+  },
+  "featured": {
+    "spacesLabel": "Spaces",
+    "officesLabel": "Offices",
+    "openPlanLabel": "Open plan m²"
   }
 }

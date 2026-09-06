@@ -357,7 +357,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('auth:logoutAccount', 'Log out of your account')}
                             >
                                 <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:logout')}</span>
+                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:buttons.logout')}</span>
                             </button>
                         </div>
                     ) : (

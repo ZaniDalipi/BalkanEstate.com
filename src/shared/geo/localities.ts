@@ -329,6 +329,20 @@ export const BALKAN_LOCALITIES: Locality[] = [
   { name: 'Mavrovo', city: 'Gostivar', country: 'North Macedonia', lat: 41.6300, lng: 20.7700, kind: 'resort' },
   { name: 'Krushevo', aliases: ['Krusevo'], city: 'Prilep', country: 'North Macedonia', lat: 41.3700, lng: 21.2500, kind: 'town' },
   { name: 'Dojran', aliases: ['Star Dojran'], city: 'Gevgelija', country: 'North Macedonia', lat: 41.1900, lng: 22.7200, kind: 'town' },
+
+  // Resen — the villages ringing Lake Prespa, which is where property in this
+  // municipality actually is; Resen town itself is inland from the shore.
+  { name: 'Krani', city: 'Resen', country: 'North Macedonia', lat: 40.9394, lng: 20.9906, kind: 'village' },
+  { name: 'Nakolec', city: 'Resen', country: 'North Macedonia', lat: 40.9050, lng: 21.0000, kind: 'village' },
+  { name: 'Dolno Dupeni', city: 'Resen', country: 'North Macedonia', lat: 40.8700, lng: 21.0200, kind: 'village' },
+  { name: 'Ljubojno', aliases: ['Ljubojno Prespa'], city: 'Resen', country: 'North Macedonia', lat: 40.8800, lng: 21.0500, kind: 'village' },
+  { name: 'Brajčino', aliases: ['Brajcino'], city: 'Resen', country: 'North Macedonia', lat: 40.8900, lng: 21.0800, kind: 'village' },
+  { name: 'Stenje', city: 'Resen', country: 'North Macedonia', lat: 40.9200, lng: 20.9200, kind: 'village' },
+  { name: 'Oteševo', aliases: ['Otesevo'], city: 'Resen', country: 'North Macedonia', lat: 40.9700, lng: 20.9100, kind: 'resort' },
+  { name: 'Pretor', city: 'Resen', country: 'North Macedonia', lat: 41.0000, lng: 21.0200, kind: 'resort' },
+  { name: 'Asamati', city: 'Resen', country: 'North Macedonia', lat: 41.0100, lng: 21.0100, kind: 'village' },
+  { name: 'Carev Dvor', city: 'Resen', country: 'North Macedonia', lat: 41.0800, lng: 21.0000, kind: 'village' },
+  { name: 'Jankovec', city: 'Resen', country: 'North Macedonia', lat: 41.1000, lng: 21.0100, kind: 'village' },
 ];
 
 export interface LocalityMatch extends Locality {

@@ -6,7 +6,7 @@ const resolvePlaceDetails = vi.fn();
 const isPlacesAvailable = vi.fn();
 const searchLocation = vi.fn();
 
-vi.mock('@/src/features/seller/api/placesAutocomplete', () => ({
+vi.mock('@/shared/places', () => ({
   fetchPlacePredictions: (...args: unknown[]) => fetchPlacePredictions(...args),
   resolvePlaceDetails: (...args: unknown[]) => resolvePlaceDetails(...args),
   isPlacesAvailable: () => isPlacesAvailable(),
@@ -35,6 +35,9 @@ const osmResult = (overrides: Record<string, unknown> = {}) => ({
   class: 'place',
   type: 'town',
   importance: 0.3,
+  // The proxy asks for `addressdetails`, so a real row carries the components
+  // the label is built from and the country code the coverage check reads.
+  address: { town: 'Himarë', county: 'Vlorë County', country: 'Albania', country_code: 'al' },
   ...overrides,
 });
 
@@ -105,7 +108,9 @@ describe('useLocationSearch', () => {
     // may pick Vlorë from the list and pin an address hundreds of km away.
     isPlacesAvailable.mockReturnValue(true);
     fetchPlacePredictions.mockResolvedValue([
-      { placeId: 'far', title: 'Palasovo', subtitle: 'Somewhere else', distanceKm: 400 },
+      // Far from Vlorë, but still inside the countries the app covers — the
+      // point of this test is distance, not coverage.
+      { placeId: 'far', title: 'Palasovo', subtitle: 'Kukës, Albania', distanceKm: 400 },
     ]);
 
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
@@ -129,8 +134,8 @@ describe('useLocationSearch', () => {
     // Zaton is a curated locality near Dubrovnik; a second, unrelated Zaton
     // 40km up the coast must not be collapsed into it.
     searchLocation.mockResolvedValue([
-      osmResult({ place_id: 21, lat: '42.6900', lon: '18.0400', display_name: 'Zaton, Dubrovnik, Croatia' }),
-      osmResult({ place_id: 22, lat: '42.9500', lon: '17.7500', display_name: 'Zaton, Croatia' }),
+      osmResult({ place_id: 21, lat: '42.6900', lon: '18.0400', display_name: 'Zaton, Dubrovnik, Croatia', address: { village: 'Zaton', city: 'Dubrovnik', country: 'Croatia', country_code: 'hr' } }),
+      osmResult({ place_id: 22, lat: '42.9500', lon: '17.7500', display_name: 'Zaton, Croatia', address: { village: 'Zaton', country: 'Croatia', country_code: 'hr' } }),
     ]);
 
     const { result } = renderHook(() =>
@@ -147,7 +152,7 @@ describe('useLocationSearch', () => {
   it('keeps a geocoder result in another country entirely', async () => {
     // Zagreb, while the form's city is Vlorë. The seller is free to pin it.
     searchLocation.mockResolvedValue([
-      osmResult({ place_id: 9, lat: '45.8150', lon: '15.9819', display_name: 'Zagreb, Croatia' }),
+      osmResult({ place_id: 9, lat: '45.8150', lon: '15.9819', display_name: 'Zagreb, Croatia', address: { city: 'Zagreb', country: 'Croatia', country_code: 'hr' } }),
     ]);
 
     const { result } = renderHook(() => useLocationSearch(vloreOptions));
@@ -166,7 +171,7 @@ describe('useLocationSearch', () => {
     expect(resolvePlaceDetails).not.toHaveBeenCalled();
   });
 
-  it('resolves a Google suggestion through the details lookup', async () => {
+  it('resolves a Google suggestion through the details lookup, keeping the app\'s address shape', async () => {
     isPlacesAvailable.mockReturnValue(true);
     fetchPlacePredictions.mockResolvedValue([
       { placeId: 'p1', title: 'Dhërmi Beach Road', subtitle: 'Albania', distanceKm: 38 },
@@ -183,7 +188,14 @@ describe('useLocationSearch', () => {
     const googleSuggestion = result.current.suggestions.find((s) => s.source === 'google')!;
     const resolved = await result.current.resolveSuggestion(googleSuggestion);
 
-    expect(resolved).toEqual({ lat: 40.15, lng: 19.6417, address: 'Dhërmi, Albania' });
+    // The coordinates come from Google; the address does not. Google's
+    // formatted address is in Google's shape, and the app files every listing
+    // under one shape: <place>, <the city being listed in>, <country>.
+    expect(resolved).toEqual({
+      lat: 40.15,
+      lng: 19.6417,
+      address: 'Dhërmi Beach Road, Vlorë, Albania',
+    });
   });
 
   it('returns null when a Google suggestion cannot be resolved', async () => {
@@ -226,5 +238,42 @@ describe('useLocationSearch', () => {
     });
 
     expect(result.current.suggestions).toEqual([]);
+  });
+});
+
+describe('places outside the countries the app covers', () => {
+  it('drops a geocoder row from outside them, read from its country code', async () => {
+    // A seller cannot file a listing in Türkiye, so offering a Turkish pin
+    // leads only to a form that will not submit.
+    isPlacesAvailable.mockReturnValue(false);
+    searchLocation.mockResolvedValue([
+      osmResult({
+        place_id: 9,
+        display_name: 'Çeşme, İzmir, Türkiye',
+        address: { town: 'Çeşme', city: 'İzmir', country: 'Türkiye', country_code: 'tr' },
+      }),
+    ]);
+
+    const { result } = renderHook(() => useLocationSearch(vloreOptions));
+    await search(result, 'cesme');
+
+    expect(result.current.suggestions.filter((s) => s.source === 'osm')).toEqual([]);
+  });
+
+  it('keeps a geocoder row from inside them', async () => {
+    isPlacesAvailable.mockReturnValue(false);
+    // A street, so the curated gazetteer has nothing to de-duplicate it against.
+    searchLocation.mockResolvedValue([
+      osmResult({
+        place_id: 31,
+        display_name: 'Rruga Ismail Qemali, Vlorë, Albania',
+        address: { road: 'Rruga Ismail Qemali', city: 'Vlorë', country: 'Albania', country_code: 'al' },
+      }),
+    ]);
+
+    const { result } = renderHook(() => useLocationSearch(vloreOptions));
+    await search(result, 'rruga ismail qemali');
+
+    expect(result.current.suggestions.some((s) => s.source === 'osm')).toBe(true);
   });
 });

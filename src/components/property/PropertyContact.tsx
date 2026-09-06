@@ -14,6 +14,7 @@ import PropertyInquiryModal from '@/src/features/inquiries/components/PropertyIn
 import RentAffordabilityCalculator from '@/src/features/rental/components/RentAffordabilityCalculator';
 import MoveInCostBreakdown from '@/src/features/rental/components/MoveInCostBreakdown';
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
+import { formatCityPlace } from '@/shared/geo';
 
 interface PropertyContactProps {
   property: Property;
@@ -504,7 +505,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             {agencyData.city && (
               <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-gray-600 bg-white rounded-lg p-2 sm:p-3 border border-gray-200">
                 <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-500" />
-                <span className="text-xs sm:text-sm truncate">{agencyData.city}, {agencyData.country}</span>
+                <span className="text-xs sm:text-sm truncate">{formatCityPlace(agencyData.city, agencyData.country).full}</span>
               </div>
             )}
 

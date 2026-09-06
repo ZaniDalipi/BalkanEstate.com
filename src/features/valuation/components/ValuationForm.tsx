@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { searchLocation } from '@/services/osmService';
 import { NominatimResult } from '@/types';
+import { canonicalPlaceName, formatCityPlace, formatGeocodedPlace } from '@/shared/geo';
 import type { ValuationInput, PropertyType, PropertyCondition, ViewType, Furnishing } from '../types';
 
 interface ValuationFormProps {
@@ -190,35 +191,36 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
     }, 400);
   };
 
-  // Handle result selection
+  /**
+   * Handle result selection.
+   *
+   * The city and country come from the geocoder's structured address where
+   * it gave one, rather than being guessed at by counting commas backwards
+   * through a display name — that guess put postcodes and "Region" strings
+   * into the city field. What the user is left looking at is the clean label
+   * ("Rruga Ismail Qemali, Vlorë, Albania"), not the raw geocoder string.
+   */
   const handleResultSelect = (result: NominatimResult) => {
     const newLat = parseFloat(result.lat);
     const newLng = parseFloat(result.lon);
 
     setLat(newLat);
     setLng(newLng);
-    setSearchQuery(result.display_name);
     setShowResults(false);
     setSearchResults([]);
 
-    const parts = result.display_name.split(', ');
-    if (parts.length >= 1) {
-      setAddress(parts.slice(0, Math.min(3, parts.length)).join(', '));
-    }
+    const label = formatGeocodedPlace(result);
+    setSearchQuery(label.full);
+    setAddress(label.full);
 
-    if (parts.length >= 2) {
-      setCountry(parts[parts.length - 1]);
-    }
-    if (parts.length >= 3) {
-      const potentialCity = parts.slice(-4, -1).find(p =>
-        !p.match(/^\d/) && p.length > 2 && !p.includes('Region') && !p.includes('District')
-      );
-      if (potentialCity) {
-        setCity(potentialCity);
-      } else {
-        setCity(parts[parts.length - 3] || parts[parts.length - 2]);
-      }
-    }
+    const details = result.address;
+    const settlement = details?.city || details?.town || details?.village || details?.municipality;
+
+    // Without structured details, fall back to the cleaned label: its last
+    // component is the country and the one before it the nearest settlement.
+    const labelParts = label.full.split(',').map((part) => part.trim()).filter(Boolean);
+    setCity(canonicalPlaceName(settlement || labelParts[labelParts.length - 2] || ''));
+    setCountry(canonicalPlaceName(details?.country || labelParts[labelParts.length - 1] || ''));
   };
 
   // Handle form submit
@@ -382,8 +384,8 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-neutral-900 line-clamp-2">{result.display_name}</p>
-                        <p className="text-xs text-neutral-500 mt-0.5 capitalize">{result.type?.replace('_', ' ')}</p>
+                        <p className="text-sm font-medium text-neutral-900 line-clamp-2">{formatGeocodedPlace(result).primary}</p>
+                        <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{formatGeocodedPlace(result).secondary || result.type?.replace('_', ' ')}</p>
                       </div>
                     </div>
                   </button>
@@ -397,7 +399,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span className="font-medium">{city}, {country}</span>
+            <span className="font-medium">{formatCityPlace(city, country).full}</span>
           </div>
         )}
       </div>
