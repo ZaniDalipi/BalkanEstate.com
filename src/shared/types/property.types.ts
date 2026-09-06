@@ -124,9 +124,11 @@ export interface Property {
   address: string;
   city: string;
   country: string;
-  beds: number;
-  baths: number;
-  livingRooms: number;
+  // Present only on the types described by them — a plot of land carries no
+  // bedroom count at all, and a garage no living rooms. See `typeAttributes`.
+  beds?: number;
+  baths?: number;
+  livingRooms?: number;
   sqft: number;
   /**
    * The year the building was finished. On an under-construction listing this
@@ -144,7 +146,7 @@ export interface Property {
    * cleared year actually clears (an absent field means "unchanged").
    */
   expectedCompletionYear?: number | null;
-  parking: number;
+  parking?: number;
   description: string;
   specialFeatures: string[];
   materials: string[];

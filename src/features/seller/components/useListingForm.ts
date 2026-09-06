@@ -12,7 +12,7 @@ import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
-import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, FIELD_ERROR_ORDER, fieldAnchorId, validateListing } from './ListingFormHelpers';
+import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
 
@@ -780,7 +780,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
     /** Scrolls the first field in error into view and focuses it. */
     const focusFirstError = useCallback((errors: FieldErrors) => {
-        const firstField = FIELD_ERROR_ORDER.find(field => errors[field]);
+        const [firstField] = orderedErrorFields(errors);
         if (!firstField) return;
         // Wait for the fields to re-render in their error state before scrolling.
         window.requestAnimationFrame(() => {
@@ -804,7 +804,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         setFieldErrors(errors);
         if (Object.keys(errors).length === 0) return true;
 
-        const messages = FIELD_ERROR_ORDER.filter(field => errors[field]).map(field => errors[field]);
+        const messages = orderedErrorFields(errors).map(field => errors[field]);
         showError(
             t('validation:form.hasErrors', 'Please fix the errors before submitting'),
             messages.join(' • '),

@@ -28,6 +28,7 @@ import {
 } from '@/src/shared/api/payloadEncryption';
 import { tokenService } from '@/src/shared/api/tokenService';
 import { buildConstructionFields } from '@/shared/property/construction';
+import { copyTypeAttributes } from '@/shared/property/typeAttributes';
 
 // Get API URL from environment variables
 // Production detection: if running on balkanestateai.com, use production API
@@ -1193,14 +1194,9 @@ function transformBackendProperty(backendProp: any): Property {
     address: backendProp.address,
     city: backendProp.city,
     country: backendProp.country,
-    beds: backendProp.beds,
-    baths: backendProp.baths,
-    livingRooms: backendProp.livingRooms,
-    kitchens: backendProp.kitchens,
-    diningRooms: backendProp.diningRooms,
-    toilets: backendProp.toilets,
-    storageRooms: backendProp.storageRooms,
-    offices: backendProp.offices,
+    // Room counts, open-plan area, parking and floors, read from the type
+    // table so a newly added attribute cannot be dropped here.
+    ...copyTypeAttributes(backendProp),
     sqft: backendProp.sqft,
     // Ingestion boundary: an unknown status reads as 'ready' and an unusable
     // completion year is dropped, so the UI never renders a half-set promise.
@@ -1209,7 +1205,6 @@ function transformBackendProperty(backendProp: any): Property {
       expectedCompletionYear: backendProp.expectedCompletionYear,
       yearBuilt: backendProp.yearBuilt,
     }),
-    parking: backendProp.parking,
     description: backendProp.description,
     specialFeatures: backendProp.specialFeatures || [],
     materials: backendProp.materials || [],
@@ -1235,8 +1230,6 @@ function transformBackendProperty(backendProp: any): Property {
     },
     propertyId: backendProp.propertyId,
     propertyType: backendProp.propertyType,
-    floorNumber: backendProp.floorNumber,
-    totalFloors: backendProp.totalFloors,
     floorplanUrl: backendProp.floorplanUrl,
     createdAt: new Date(backendProp.createdAt).getTime(),
     lastRenewed: new Date(backendProp.lastRenewed).getTime(),
@@ -1303,21 +1296,13 @@ function transformToBackendProperty(frontendProp: Property): any {
     address: frontendProp.address,
     city: frontendProp.city,
     country: frontendProp.country,
-    beds: frontendProp.beds,
-    baths: frontendProp.baths,
-    livingRooms: frontendProp.livingRooms,
-    kitchens: frontendProp.kitchens,
-    diningRooms: frontendProp.diningRooms,
-    toilets: frontendProp.toilets,
-    storageRooms: frontendProp.storageRooms,
-    offices: frontendProp.offices,
+    ...copyTypeAttributes(frontendProp as unknown as Record<string, unknown>),
     sqft: frontendProp.sqft,
     ...buildConstructionFields({
       constructionStatus: frontendProp.constructionStatus,
       expectedCompletionYear: frontendProp.expectedCompletionYear,
       yearBuilt: frontendProp.yearBuilt,
     }),
-    parking: frontendProp.parking,
     description: frontendProp.description,
     specialFeatures: frontendProp.specialFeatures,
     materials: frontendProp.materials,
@@ -1351,13 +1336,8 @@ function transformToBackendProperty(frontendProp: Property): any {
   if (frontendProp.videoUrl) result.videoUrl = frontendProp.videoUrl;
   if (frontendProp.floorplanUrl) result.floorplanUrl = frontendProp.floorplanUrl;
 
-  // Floor info
-  if (frontendProp.floorNumber !== undefined && frontendProp.floorNumber > 0) {
-    result.floorNumber = frontendProp.floorNumber;
-  }
-  if (frontendProp.totalFloors !== undefined && frontendProp.totalFloors > 0) {
-    result.totalFloors = frontendProp.totalFloors;
-  }
+  // Floor info is carried by `copyTypeAttributes` above, which keeps a ground
+  // floor's honest 0 rather than dropping it as this block used to.
 
   // Advanced property features - always include if set to a real value (not 'any')
   if (frontendProp.furnishing && frontendProp.furnishing !== 'any') {

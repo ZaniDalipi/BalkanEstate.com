@@ -10,6 +10,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Property } from '@/types';
+import { copyTypeAttributes } from '@/shared/property/typeAttributes';
 import {
   getMyPromotions,
   addUrgentBadge,
@@ -94,8 +95,9 @@ function promotionToProperty(promo: any): Property {
     images: prop.images || [],
     lat: prop.lat || 0,
     lng: prop.lng || 0,
-    beds: prop.beds,
-    baths: prop.baths,
+    // Whatever this listing's type carries, from the one table that decides
+    // it — naming beds and baths by hand left a shop's offices behind.
+    ...copyTypeAttributes(prop as unknown as Record<string, unknown>),
     sqft: prop.sqft,
     seller: {
       type: seller.role === 'agent' ? 'agent' : 'private',

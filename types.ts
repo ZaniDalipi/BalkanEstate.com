@@ -327,9 +327,11 @@ export interface Property {
     address: string;
     city: string;
     country: string;
-    beds: number;
-    baths: number;
-    livingRooms: number;
+    // Present only on the types described by them — a plot of land carries no
+    // bedroom count at all, and a garage no living rooms. See `typeAttributes`.
+    beds?: number;
+    baths?: number;
+    livingRooms?: number;
     kitchens?: number;
     diningRooms?: number;
     toilets?: number;
@@ -342,7 +344,7 @@ export interface Property {
     constructionStatus?: ConstructionStatus;
     /** Only meaningful when `constructionStatus` is 'under-construction'; `null` = no date. */
     expectedCompletionYear?: number | null;
-    parking: number;
+    parking?: number;
     description: string;
     specialFeatures: string[];
     materials: string[];

@@ -45,7 +45,8 @@
     "office": "Office",
     "garage": "Garage",
     "other": "Other",
-    "luxury-villa": "Luxury Villa"
+    "luxury-villa": "Luxury Villa",
+    "parking": "Parking Space"
   },
   "features": {
     "bedrooms": "Bedrooms",
@@ -163,7 +164,16 @@
       },
       "slotDuration": "{{minutes}} min slots"
     },
-    "propertyType": "Property Type"
+    "propertyType": "Property Type",
+    "openPlanArea": "Open-plan area",
+    "parkingType": "Parking type",
+    "parkingTypes": {
+      "garage": "Garage",
+      "underground": "Underground",
+      "covered": "Covered",
+      "outdoor": "Outdoor"
+    },
+    "spaces": "Spaces"
   },
   "distances": {
     "title": "Distances",

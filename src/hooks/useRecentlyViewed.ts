@@ -1,22 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Property } from '@/types';
 import { hasSellerName } from '@/src/shared/utils/seller';
+import { copyTypeAttributes } from '@/shared/property/typeAttributes';
 
 const STORAGE_KEY = 'balkan_recently_viewed';
 const MAX_ITEMS = 10;
 
-/** Minimal shape stored in localStorage to keep size small */
-interface StoredProperty {
+/**
+ * Minimal shape stored in localStorage to keep size small.
+ *
+ * The type-dependent attributes are carried wholesale rather than named one
+ * by one: listing them by hand meant this snapshot knew about bedrooms and
+ * living rooms but had never heard of offices, open-plan area or how a garage
+ * is arranged. The carousel then showed a shop it had the numbers for as
+ * "0 Office / study · 0 Open-plan area", because those numbers were never
+ * written down. `Partial<Property>` covers them; `copyTypeAttributes` fills
+ * them in from the same table everything else reads.
+ */
+interface StoredProperty extends Partial<Property> {
   id: string;
   title?: string;
   price: number;
   imageUrl: string;
   city: string;
   country: string;
-  beds: number;
-  baths: number;
   sqft: number;
-  livingRooms: number;
   address: string;
   propertyType: Property['propertyType'];
   listingType: Property['listingType'];
@@ -37,7 +45,6 @@ interface StoredProperty {
   // two different products.
   constructionStatus?: Property['constructionStatus'];
   expectedCompletionYear?: number | null;
-  parking: number;
   viewedAt: number;
 }
 
@@ -115,10 +122,10 @@ export function useRecentlyViewed() {
         imageUrl: property.imageUrl,
         city: property.city,
         country: property.country,
-        beds: property.beds,
-        baths: property.baths,
+        // Room counts, open-plan area, parking and floors — whatever this
+        // listing's type carries, without this snapshot having to know.
+        ...copyTypeAttributes(property as unknown as Record<string, unknown>),
         sqft: property.sqft,
-        livingRooms: property.livingRooms,
         address: property.address,
         propertyType: property.propertyType,
         listingType: property.listingType,
@@ -136,7 +143,6 @@ export function useRecentlyViewed() {
         yearBuilt: property.yearBuilt,
         constructionStatus: property.constructionStatus,
         expectedCompletionYear: property.expectedCompletionYear,
-        parking: property.parking,
         viewedAt: Date.now(),
       };
 

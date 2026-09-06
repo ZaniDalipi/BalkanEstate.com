@@ -10,6 +10,7 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { formatPropertyPlace } from '@/shared/geo';
+import { typeHasAttribute } from '@/shared/property/typeAttributes';
 
 interface RentalPropertyCardProps {
     property: Property;
@@ -149,12 +150,18 @@ const RentalPropertyCard: React.FC<RentalPropertyCardProps> = ({ property, onHov
                 <p className="text-sm text-gray-400 truncate">{formatPropertyPlace(property).full}</p>
 
                 {/* Key Details */}
+                {/* Bedrooms and bathrooms belong to a home, not to a garage or
+                    a shop — shown only where the type carries them. */}
                 <div className="flex items-center gap-3 mt-2 text-sm text-gray-400">
-                    {property.propertyType !== 'land' && (
+                    {typeHasAttribute(property.propertyType, 'beds') && (
                         <>
-                            <span>{property.beds} {t('property:features.beds')}</span>
+                            <span>{property.beds ?? 0} {t('property:features.beds')}</span>
                             <span className="text-gray-300">|</span>
-                            <span>{property.baths} {t('property:features.baths')}</span>
+                        </>
+                    )}
+                    {typeHasAttribute(property.propertyType, 'baths') && (
+                        <>
+                            <span>{property.baths ?? 0} {t('property:features.baths')}</span>
                             <span className="text-gray-300">|</span>
                         </>
                     )}

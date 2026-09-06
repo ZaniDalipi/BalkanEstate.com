@@ -576,11 +576,19 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const isRentalProperty = property.listingType === 'rent';
   const listingAction = isRentalProperty ? t('property:seo.forRent', 'Rent') : t('property:seo.forSale', 'Sale');
   const priceStr = `€${property.price?.toLocaleString()}${isRentalProperty ? t('property:seo.perMonth', '/mo') : ''}`;
-  const bedsPrefix = property.beds > 0 ? `${property.beds}-Bed ` : '';
+  // A shop or a garage carries no bedroom count at all, so the meta
+  // description leads with what the listing has rather than printing
+  // "undefined bedroom, undefined bathroom" into a search result.
+  const seoBeds = property.beds ?? 0;
+  const seoBaths = property.baths ?? 0;
+  const bedsPrefix = seoBeds > 0 ? `${seoBeds}-Bed ` : '';
+  const roomsSentence = seoBeds > 0 || seoBaths > 0
+    ? `${seoBeds} bedroom, ${seoBaths} bathroom `
+    : '';
   const seoTitle = property.title
     ? `${property.title} – ${property.city}, ${property.country}`
     : t('property:seo.title', {
-        beds: property.beds,
+        beds: seoBeds,
         type: propertyTypeLabel,
         listingAction,
         city: property.city,
@@ -591,15 +599,15 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   // Generate SEO description
   const seoDescription = t('property:seo.description', {
-    beds: property.beds,
-    baths: property.baths,
+    beds: seoBeds,
+    baths: seoBaths,
     type: property.propertyType || 'property',
     listingAction,
     city: property.city,
     country: property.country,
     sqft: property.sqft,
     price: property.price?.toLocaleString(),
-    defaultValue: `${property.beds} bedroom, ${property.baths} bathroom ${property.propertyType || 'property'} for ${listingAction} in ${property.city}, ${property.country}. ${property.sqft}m² for ${priceStr}.`,
+    defaultValue: `${roomsSentence}${property.propertyType || 'property'} for ${listingAction} in ${property.city}, ${property.country}. ${property.sqft}m² for ${priceStr}.`,
   }) + (property.description ? ` ${property.description.slice(0, 120)}` : '');
 
   // Get all images for SEO

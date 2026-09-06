@@ -30,6 +30,7 @@ import { propertyLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
 import { respondIfValidationError } from '../middleware/propertyValidation';
+import { TYPE_ATTRIBUTES } from '../config/typeAttributes';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -44,15 +45,20 @@ import { respondIfValidationError } from '../middleware/propertyValidation';
  * keeps villaApprovalStatus server-controlled (no self-approval).
  */
 export const ALLOWED_PROPERTY_FIELDS = [
+  // Everything a type is described by — room counts, open-plan area, parking,
+  // floors — read from the table rather than restated. Restating it is how
+  // 'openPlanArea' and 'parkingType' came to be missing here: the form asked a
+  // shop for its offices and open-plan area, and this list threw both away
+  // before the write, so the listing showed zeroes it had never been given.
+  ...TYPE_ATTRIBUTES,
   'propertyId', 'listingType', 'title', 'status', 'price', 'isNegotiable', 'originalPrice', 'priceIntervals',
   'address', 'city', 'country',
-  'beds', 'baths', 'livingRooms', 'kitchens', 'diningRooms', 'toilets', 'storageRooms', 'offices',
-  'sqft', 'yearBuilt', 'constructionStatus', 'expectedCompletionYear', 'parking',
+  'sqft', 'yearBuilt', 'constructionStatus', 'expectedCompletionYear',
   'description', 'specialFeatures', 'materials',
   'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
   'imageUrl', 'imagePublicId', 'images',
   'lat', 'lng',
-  'propertyType', 'floorNumber', 'totalFloors', 'floorplanUrl', 'floorplanPublicId',
+  'propertyType', 'floorplanUrl', 'floorplanPublicId',
   'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
   'hasAirConditioning', 'hasPool', 'petsAllowed',
   'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
