@@ -73,6 +73,17 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     reset: resetSearch,
   } = useLocationSearch({ country, city, cityCentre });
 
+  // The map is built once and its click/drag handlers are bound with it, so a
+  // callback captured there would stay the one from the first render forever —
+  // a pin moved later would write into a stale copy of the form and the
+  // latitude/longitude fields would never catch up. Refs keep every handler
+  // calling the callbacks this render was given.
+  const onLocationChangeRef = useRef(onLocationChange);
+  useEffect(() => { onLocationChangeRef.current = onLocationChange; }, [onLocationChange]);
+
+  const onAddressChangeRef = useRef(onAddressChange);
+  useEffect(() => { onAddressChangeRef.current = onAddressChange; }, [onAddressChange]);
+
   // Same reason: the zoom handler is bound with the map and would otherwise
   // hold the callback identity from the first render forever.
   const onZoomChangeRef = useRef(onZoomChange);
@@ -127,29 +138,55 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
 
     marker.bindPopup(`<b>${t('search:map.dragToAdjust')}</b><br>${address.length > 60 ? address.slice(0, 60) + '…' : address}`, { maxWidth: 220 }).openPopup();
 
+    // Counts pin moves so a reverse geocode that resolves late can tell whether
+    // it is still describing where the pin is.
+    let latestMove = 0;
+
     // Shared logic for moving the marker to a new position, used by both
     // marker drag-end and map click (tap-to-pin, like Google Maps).
     const moveMarkerTo = async (newLat: number, newLng: number) => {
       // Any pin is accepted: the address the seller means is the one they drop
       // the marker on, whatever city they picked from the list.
       marker.setLatLng([newLat, newLng]);
-      onLocationChange(newLat, newLng);
+      // Coordinates go out first and synchronously, so the caller's latitude
+      // and longitude fields are already showing the new pin before the
+      // address lookup below has even started.
+      onLocationChangeRef.current(newLat, newLng);
       marker.setPopupContent(`<b>${t('search:map.locationSet')}</b><br>Lat: ${newLat.toFixed(6)}, Lng: ${newLng.toFixed(6)}`);
       marker.openPopup();
 
       // Reverse geocode to get address for the new pin location
-      if (onAddressChange) {
+      const move = ++latestMove;
+      if (onAddressChangeRef.current) {
         try {
           const result = await reverseGeocode(newLat, newLng);
-          if (result) {
+          // A lookup that comes back after the pin has moved on describes the
+          // wrong place, so drop it rather than overwrite the current address.
+          if (result && move === latestMove) {
             // Use the full display_name to preserve complete location information
             const locationName = result.display_name;
-            onAddressChange(locationName);
+            onAddressChangeRef.current?.(locationName);
           }
         } catch (error) {
           // Error removed
         }
       }
+    };
+
+    let dragFrame: number | null = null;
+    let pendingDrag: L.LatLng | null = null;
+    const flushDrag = () => {
+      dragFrame = null;
+      if (!pendingDrag) return;
+      onLocationChangeRef.current(pendingDrag.lat, pendingDrag.lng);
+      pendingDrag = null;
+    };
+    const cancelPendingDrag = () => {
+      if (dragFrame !== null) {
+        cancelAnimationFrame(dragFrame);
+        dragFrame = null;
+      }
+      pendingDrag = null;
     };
 
     // Handle marker drag
@@ -159,6 +196,9 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
 
     marker.on('dragend', (e) => {
       const position = e.target.getLatLng();
+      // The drop is authoritative: drop any frame still queued from the drag so
+      // it cannot land after this position.
+      cancelPendingDrag();
       setIsDragging(false);
       moveMarkerTo(position.lat, position.lng);
     });
@@ -166,6 +206,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
     marker.on('drag', (e) => {
       const position = e.target.getLatLng();
       marker.setPopupContent(`<b>${t('search:map.dragging')}</b><br>Lat: ${position.lat.toFixed(6)}, Lng: ${position.lng.toFixed(6)}`);
+      // Report the position while the pin is still moving, so the caller's
+      // coordinate fields follow the marker instead of waiting for the drop.
+      // Dragging fires per mouse move, which is more often than a form needs
+      // to re-render, so the write-through is coalesced to one per frame.
+      pendingDrag = position;
+      if (dragFrame === null) {
+        dragFrame = requestAnimationFrame(flushDrag);
+      }
     });
 
     // Tap/click anywhere on the map to move the marker there, like pinning in Google Maps
@@ -211,6 +259,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
 
     // Cleanup
     return () => {
+      cancelPendingDrag();
       if (initialResizeTimer) {
         clearTimeout(initialResizeTimer);
       }
@@ -239,7 +288,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          onLocationChange(latitude, longitude);
+          onLocationChangeRef.current(latitude, longitude);
 
           if (mapRef.current) {
             mapRef.current.flyTo([latitude, longitude], 16, {
@@ -248,11 +297,11 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
             });
           }
 
-          if (onAddressChange) {
+          if (onAddressChangeRef.current) {
             try {
               const result = await reverseGeocode(latitude, longitude);
               if (result) {
-                onAddressChange(result.display_name);
+                onAddressChangeRef.current?.(result.display_name);
                 setSearchQuery(result.display_name);
               }
             } catch {

@@ -51,24 +51,42 @@ const AdminPropertyLocationEditor: React.FC<AdminPropertyLocationEditorProps> = 
 
   // Coordinates are edited as text so a half-typed or cleared field stays
   // visible instead of being committed as 0 — which is a real point in the
-  // Gulf of Guinea, and would silently move the listing there.
-  const [draft, setDraft] = useState<{ lat?: string; lng?: string }>({});
+  // Gulf of Guinea, and would silently move the listing there. `committed` is
+  // the coordinate this text last wrote to the form: while the form still
+  // holds it, the text is the admin's and is shown as typed.
+  type CoordinateDraft = { text: string; committed: number };
+  const [draft, setDraft] = useState<{ lat?: CoordinateDraft; lng?: CoordinateDraft }>({});
   const limits = { lat: 90, lng: 180 } as const;
 
   const handleCoordinateChange = (field: 'lat' | 'lng') => (event: React.ChangeEvent<HTMLInputElement>) => {
     const raw = event.target.value;
-    setDraft((current) => ({ ...current, [field]: raw }));
-
     const parsed = Number(raw);
-    if (raw.trim() && Number.isFinite(parsed) && Math.abs(parsed) <= limits[field]) {
+    const isCommittable = Boolean(raw.trim()) && Number.isFinite(parsed) && Math.abs(parsed) <= limits[field];
+
+    setDraft((current) => ({
+      ...current,
+      // A value too partial to commit (empty, "-", "4.") keeps the coordinate
+      // the field last committed, so the text survives until the map or
+      // another edit replaces it.
+      [field]: { text: raw, committed: isCommittable ? parsed : current[field]?.committed ?? location[field] },
+    }));
+
+    if (isCommittable) {
       onChange({ [field]: parsed } as Partial<AdminPropertyLocation>);
     }
   };
 
-  // The map writes straight to the form, so drop the draft once it diverges.
+  // Six decimals is ~11cm — past the point where more digits mean anything for
+  // a property pin, and it keeps a dragged coordinate readable in the field.
+  const formatCoordinate = (value: number): string =>
+    Number.isFinite(value) ? String(Number(value.toFixed(6))) : '';
+
+  // The map writes straight to the form, so as soon as the pin moves the form
+  // no longer holds what this field committed and the typed text is dropped
+  // for the pin's coordinate.
   const displayValue = (field: 'lat' | 'lng'): string => {
     const drafted = draft[field];
-    return drafted !== undefined && Number(drafted) === location[field] ? drafted : String(location[field]);
+    return drafted && drafted.committed === location[field] ? drafted.text : formatCoordinate(location[field]);
   };
 
   return (

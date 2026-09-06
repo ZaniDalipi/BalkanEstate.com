@@ -25,7 +25,7 @@ interface AgencyManagerDetailProps {
   setIsEditModalOpen: (open: boolean) => void;
   editingAgency: Agency | null;
   editForm: AgencyEditForm;
-  setEditForm: (form: AgencyEditForm) => void;
+  setEditForm: React.Dispatch<React.SetStateAction<AgencyEditForm>>;
   handleUpdateAgency: (e: React.FormEvent) => void;
   // Subscription actions
   handleActivateSubscription: (agencyId: string, agencyName: string) => void;
@@ -446,8 +446,8 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     zoom={editForm.lat ? 15 : 8}
                     country={editForm.country}
                     city={editForm.city}
-                    onLocationChange={(lat: number, lng: number) => setEditForm({ ...editForm, lat, lng })}
-                    onAddressChange={(address: string) => setEditForm({ ...editForm, address })}
+                    onLocationChange={(lat: number, lng: number) => setEditForm((prev) => ({ ...prev, lat, lng }))}
+                    onAddressChange={(address: string) => setEditForm((prev) => ({ ...prev, address }))}
                   />
                 </Suspense>
               </div>
