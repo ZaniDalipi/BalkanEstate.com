@@ -8,6 +8,7 @@ import { UsageMeter } from '@/src/shared/components/ui';
 import { roomStylerKeys } from '@/src/shared/query/queryKeys';
 import { restyleRoom } from '../../../../services/geminiService';
 import { ROOM_STYLE_OPTIONS, EXTERIOR_STYLE_OPTIONS } from '../data/styles';
+import { useImageAspect } from '../hooks/useImageAspect';
 import { useRoomStylerUsage } from '../hooks/useRoomStylerUsage';
 import BeforeAfterSlider from './BeforeAfterSlider';
 
@@ -48,6 +49,14 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
 
     // Send a high-res version to the AI for a better result (still a Cloudinary URL).
     const sourceUrl = optimizeCloudinaryUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
+
+    // A thumbnail of the same photo, blurred up behind it to fill whatever the
+    // picture does not cover — nicer than black bars, and it lets us show the
+    // whole photo instead of cropping it to fit the frame.
+    const backdropUrl = optimizeCloudinaryUrl(imageUrl, { width: 48, quality: 'auto:eco' }) || sourceUrl;
+
+    // The photo's own proportions, so the stage can take its shape.
+    const aspect = useImageAspect(sourceUrl);
 
     const isUnlimited = usage?.limit === -1;
     const isExhausted = !!usage && usage.limit !== -1 && usage.remaining <= 0;
@@ -127,33 +136,48 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                         />
                     )}
 
-                    {/* Preview / result */}
-                    <div className="relative mb-3 flex h-[42vh] items-center justify-center overflow-hidden rounded-xl bg-neutral-900 sm:h-[54vh] lg:h-[62vh]">
-                        {status === 'done' && resultUrl ? (
-                            <BeforeAfterSlider
-                                beforeSrc={sourceUrl}
-                                afterSrc={resultUrl}
-                                beforeLabel={t('property:roomStyler.before', 'Original')}
-                                afterLabel={selectedLabel}
-                                className="h-full w-full"
-                            />
-                        ) : (
-                            <>
+                    {/* Preview / result — the whole photo is always visible. The stage
+                        inside the frame takes the picture's own proportions, so a portrait
+                        photo gets a portrait stage rather than being cropped or pillarboxed
+                        into a landscape box, and a blurred copy of the photo fills whatever
+                        room is left over. */}
+                    <div className="relative mb-3 flex h-[46vh] items-center justify-center overflow-hidden rounded-xl bg-neutral-900 sm:h-[58vh] lg:h-[68vh]">
+                        <img
+                            src={backdropUrl}
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 h-full w-full scale-110 select-none object-cover opacity-60 blur-2xl"
+                        />
+
+                        <div
+                            className="relative h-full max-w-full"
+                            style={{ aspectRatio: aspect ?? 4 / 3 }}
+                        >
+                            {status === 'done' && resultUrl ? (
+                                <BeforeAfterSlider
+                                    beforeSrc={sourceUrl}
+                                    afterSrc={resultUrl}
+                                    beforeLabel={t('property:roomStyler.before', 'Original')}
+                                    afterLabel={selectedLabel}
+                                    className="h-full w-full"
+                                />
+                            ) : (
                                 <img
                                     src={sourceUrl}
                                     alt={t('property:roomStyler.roomPhoto', 'Room photo')}
                                     className="h-full w-full object-contain"
                                     crossOrigin="anonymous"
                                 />
-                                {status === 'loading' && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 px-4 text-center backdrop-blur-sm">
-                                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/30 border-t-white" />
-                                        <p className="text-sm font-medium text-white">
-                                            {t('property:roomStyler.generating', 'Restyling in {{style}}…', { style: selectedLabel })}
-                                        </p>
-                                    </div>
-                                )}
-                            </>
+                            )}
+                        </div>
+
+                        {status === 'loading' && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 px-4 text-center backdrop-blur-sm">
+                                <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+                                <p className="text-sm font-medium text-white">
+                                    {t('property:roomStyler.generating', 'Restyling in {{style}}…', { style: selectedLabel })}
+                                </p>
+                            </div>
                         )}
                     </div>
 

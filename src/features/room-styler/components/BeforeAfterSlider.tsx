@@ -60,14 +60,15 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
     return (
         <div
             ref={containerRef}
-            className={`relative block h-full w-full select-none overflow-hidden rounded-xl touch-none bg-neutral-900 ${className}`}
+            className={`relative block h-full w-full select-none overflow-hidden rounded-xl touch-none ${className}`}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerLeave={onPointerUp}
         >
-            {/* After (base layer) — fills the fixed-size parent frame; object-contain shows
-                the whole image letterboxed inside, so portrait/landscape photos always show
-                in full (no crop) and the frame stays the same size for every image. */}
+            {/* After (base layer) — fills the parent stage, which is sized to the photo's
+                own proportions by the modal. object-contain guarantees the whole image is
+                shown whatever its shape: it can never be cropped, and any room left over
+                falls through to the blurred backdrop behind the slider. */}
             <img
                 src={afterSrc}
                 alt={afterLabel}
