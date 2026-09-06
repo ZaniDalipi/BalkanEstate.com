@@ -203,6 +203,16 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     // highlighted in red in the form until the user fixes them.
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
+    // Jump back to the top whenever the flow lands on a terminal/interstitial
+    // step. Without this the page keeps the scroll position from the long form,
+    // which left the success message off-screen with only the footer visible.
+    useEffect(() => {
+        if (step !== 'success' && step !== 'loading' && step !== 'payment') return;
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    }, [step]);
+
     // Track modal state to react to it closing
     const wasModalOpen = useRef(isPricingModalOpen);
     useEffect(() => {

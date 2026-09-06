@@ -88,7 +88,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
 
     if (step === 'success') {
         return (
-            <div className="text-center py-12 flex flex-col items-center" aria-live="polite">
+            <div className="text-center py-12 flex flex-col items-center justify-center min-h-[60vh]" aria-live="polite">
                 <div className="p-4 rounded-full bg-emerald-50 border border-emerald-200 mb-4">
                     <CheckCircleIcon className="w-16 h-16 text-emerald-600" />
                 </div>
