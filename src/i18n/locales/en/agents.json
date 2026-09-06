@@ -536,17 +536,13 @@
       "saved": "Saved",
       "share": "Share",
       "independentAgent": "Independent Agent",
-      "editProfile": "Edit Profile",
-      "verified": "Verified",
-      "unsave": "Remove from saved",
-      "contact": "Contact"
+      "editProfile": "Edit Profile"
     },
     "stats": {
       "propertiesSold": "Properties Sold",
       "yearsExperience": "Years Experience",
       "activeListings": "Active Listings",
-      "reviews": "reviews",
-      "avgPrice": "Avg. Price"
+      "reviews": "reviews"
     },
     "badges": {
       "topAgent": "Top Agent"
@@ -728,8 +724,7 @@
       "forSale": "For Sale",
       "forRent": "For Rent",
       "noListings": "No listings available",
-      "allTypes": "All Types",
-      "noSearchResults": "No properties match your search"
+      "allTypes": "All Types"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

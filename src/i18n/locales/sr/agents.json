@@ -526,17 +526,13 @@
       "saved": "Сачувано",
       "share": "Подели",
       "independentAgent": "Независан Агент",
-      "editProfile": "Измени Профил",
-      "verified": "Верификован",
-      "unsave": "Уклони из сачуваних",
-      "contact": "Контакт"
+      "editProfile": "Измени Профил"
     },
     "stats": {
       "propertiesSold": "Продатих Некретнина",
       "yearsExperience": "Година Искуства",
       "activeListings": "Активних Огласа",
-      "reviews": "рецензије",
-      "avgPrice": "Просечна цена"
+      "reviews": "рецензије"
     },
     "badges": {
       "topAgent": "Врхунски Агент"
@@ -699,8 +695,7 @@
       "forSale": "На продају",
       "forRent": "За изнајмљивање",
       "noListings": "Нема доступних огласа",
-      "allTypes": "Sви типови",
-      "noSearchResults": "Ниједна некретнина не одговара претрази"
+      "allTypes": "Sви типови"
     },
     "reviewsTab": {
       "verifiedReviews": "верификоване рецензије",

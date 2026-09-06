@@ -526,17 +526,13 @@
       "saved": "Saved",
       "share": "Share",
       "independentAgent": "Independent Agent",
-      "editProfile": "Επεξεργασία Προφίλ",
-      "verified": "Επαληθευμένος",
-      "unsave": "Αφαίρεση από τα αποθηκευμένα",
-      "contact": "Επικοινωνία"
+      "editProfile": "Επεξεργασία Προφίλ"
     },
     "stats": {
       "propertiesSold": "Properties Sold",
       "yearsExperience": "Years Experience",
       "activeListings": "Active Listings",
-      "reviews": "reviews",
-      "avgPrice": "Μέση Τιμή"
+      "reviews": "reviews"
     },
     "badges": {
       "topAgent": "Top Agent"
@@ -699,8 +695,7 @@
       "forSale": "Προς Πώληση",
       "forRent": "Προς Ενοικίαση",
       "noListings": "Δεν βρέθηκαν καταχωρήσεις",
-      "allTypes": "Όλοι οι τύποι",
-      "noSearchResults": "Κανένα ακίνητο δεν ταιριάζει με την αναζήτησή σας"
+      "allTypes": "Όλοι οι τύποι"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

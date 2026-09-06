@@ -526,17 +526,13 @@
       "saved": "Spremljeno",
       "share": "Podijeli",
       "independentAgent": "Nezavisni agent",
-      "editProfile": "Uredi profil",
-      "verified": "Provjeren",
-      "unsave": "Ukloni iz spremljenih",
-      "contact": "Kontakt"
+      "editProfile": "Uredi profil"
     },
     "stats": {
       "propertiesSold": "Prodane nekretnine",
       "yearsExperience": "Godine iskustva",
       "activeListings": "Aktivni oglasi",
-      "reviews": "recenzije",
-      "avgPrice": "Prosječna cijena"
+      "reviews": "recenzije"
     },
     "badges": {
       "topAgent": "Vrhunski agent"
@@ -699,8 +695,7 @@
       "forSale": "Na prodaju",
       "forRent": "Za najam",
       "noListings": "Nema dostupnih oglasa",
-      "allTypes": "Svi tipovi",
-      "noSearchResults": "Nijedna nekretnina ne odgovara vašoj pretrazi"
+      "allTypes": "Svi tipovi"
     },
     "reviewsTab": {
       "verifiedReviews": "verificiranih recenzija",

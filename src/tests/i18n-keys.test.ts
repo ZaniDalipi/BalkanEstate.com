@@ -138,6 +138,9 @@ describe('no screen can show a raw translation key', () => {
 /**
  * The keys added when the app's 121 raw-key leaks were cleared. Held here so
  * a locale cannot quietly lose one of them again.
+ *
+ * The five `agents` keys that were here went out with the dead
+ * agent-profile/ components they were added for.
  */
 const ADDED_KEYS: Record<string, string[]> = {
   common: ['note'],
@@ -154,13 +157,6 @@ const ADDED_KEYS: Record<string, string[]> = {
     'labels.role',
     'buttons.resetPassword',
     'phoneCode.sentTo',
-  ],
-  agents: [
-    'profilePage.header.verified',
-    'profilePage.header.unsave',
-    'profilePage.header.contact',
-    'profilePage.listingsTab.noSearchResults',
-    'profilePage.stats.avgPrice',
   ],
   admin: [
     'loading.loadingHeatmap',

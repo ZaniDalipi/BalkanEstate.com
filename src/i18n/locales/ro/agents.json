@@ -526,17 +526,13 @@
       "saved": "Saved",
       "share": "Share",
       "independentAgent": "Independent Agent",
-      "editProfile": "Editează Profil",
-      "verified": "Verificat",
-      "unsave": "Elimină din salvate",
-      "contact": "Contact"
+      "editProfile": "Editează Profil"
     },
     "stats": {
       "propertiesSold": "Properties Sold",
       "yearsExperience": "Years Experience",
       "activeListings": "Active Listings",
-      "reviews": "reviews",
-      "avgPrice": "Preț mediu"
+      "reviews": "reviews"
     },
     "badges": {
       "topAgent": "Top Agent"
@@ -699,8 +695,7 @@
       "forSale": "De vânzare",
       "forRent": "De închiriat",
       "noListings": "Nu sunt anunțuri disponibile",
-      "allTypes": "Toate tipurile",
-      "noSearchResults": "Nicio proprietate nu corespunde căutării"
+      "allTypes": "Toate tipurile"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",
