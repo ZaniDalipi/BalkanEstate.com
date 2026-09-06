@@ -316,6 +316,10 @@ export default defineConfig(({ mode }) => {
             chunkFileNames: `assets/[name].[hash].js`,
             assetFileNames: `assets/[name].[hash].[ext]`,
             manualChunks(id) {
+              // Absolute, so a `constants/` folder inside a feature is not
+              // mistaken for the shared one at the repository root.
+              const sharedConstantsDir = path.resolve(__dirname, 'constants') + path.sep;
+
               // ============================================================
               // ADVERTISING — must ship under a name no ad blocker matches
               // ============================================================
@@ -405,10 +409,39 @@ export default defineConfig(({ mode }) => {
               // Let Rollup handle features with cross-dependencies
               // ============================================================
 
-              // Auth features (standalone, no deps on other features)
-              if (id.includes('/features/auth/')) {
-                return 'auth';
+              // Shared leaf modules that belong to no feature: the icon set and
+              // the country tables, imported by nearly every screen in the app.
+              //
+              // Left unassigned, Rollup folds them into whichever feature chunk
+              // happens to reach them, and that chunk is then imported by every
+              // other one. Any import back the other way closes a cycle between
+              // two chunks — which an ES module graph reports not as a build
+              // warning but as `Cannot access 'X' before initialization` in the
+              // browser, on a page that renders nothing. That is exactly what
+              // happened when the icons were swallowed into `promo-slots` and
+              // `auth` pulled them back out. Their own chunk is a leaf, so it
+              // cannot take part in a cycle at all.
+              if (id.startsWith(sharedConstantsDir)) {
+                return 'app-constants';
               }
+
+              // Auth is deliberately NOT a manual chunk any more.
+              //
+              // It was assigned one on the premise that it is "standalone, no
+              // deps on other features", and that stopped being true: auth and
+              // the promo chunk both reach the same shared modules (the API
+              // layer, the global context, shared UI), which Rollup then splits
+              // between the two — leaving each importing the other. Rollup says
+              // so on every build ("Circular chunk: auth -> promo-slots ->
+              // auth"), and whether that cycle is merely ugly or fatal comes
+              // down to which module happens to be evaluated first: a small
+              // change anywhere in the graph turns it into `Cannot access 'X'
+              // before initialization` and a blank page.
+              //
+              // Rollup's own chunking has the whole graph in view and does not
+              // produce that. The auth screens are lazy imports, so they still
+              // arrive as chunks of their own — just ones it is allowed to
+              // arrange safely.
               // Legal pages - each page separate for better code splitting
               if (id.includes('/features/legal/components/PrivacyPolicyPage')) {
                 return 'legal-privacy';
