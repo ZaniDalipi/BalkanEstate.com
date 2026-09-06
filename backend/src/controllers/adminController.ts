@@ -160,7 +160,7 @@ export const updateUserAdmin = async (req: Request, res: Response): Promise<void
       'role', 'activeRole', 'primaryRole',
       'availableRoles', 'status', 'isEmailVerified', 'licenseVerified',
       'licenseNumber', 'bio', 'languages', 'specializations',
-      'serviceAreas', 'avatarUrl', 'avatarOptions',
+      'serviceAreas', 'avatarUrl avatarOptions gender', 'avatarOptions',
       'agencyName',
     ];
 
@@ -323,8 +323,8 @@ export const getAgencyDetailAdmin = async (req: Request, res: Response): Promise
     if (!id) return;
 
     const agency = await Agency.findById(id)
-      .populate('ownerId', 'name email phone subscription avatarUrl')
-      .populate('agents', 'name email phone role subscription agencyName avatarUrl createdAt')
+      .populate('ownerId', 'name email phone subscription avatarUrl avatarOptions gender')
+      .populate('agents', 'name email phone role subscription agencyName avatarUrl avatarOptions gender createdAt')
       .lean();
 
     if (!agency) {
@@ -911,7 +911,7 @@ export const getInquiryById = async (req: Request, res: Response): Promise<void>
     const inquiry = await Inquiry.findById(id)
       .populate('recipientId', 'name email role avatarUrl avatarOptions gender phone')
       .populate('propertyId', 'title images price city country address')
-      .populate('buyerId', 'name email avatarUrl');
+      .populate('buyerId', 'name email avatarUrl avatarOptions gender');
 
     if (!inquiry) {
       res.status(404).json({ message: 'Inquiry not found' });

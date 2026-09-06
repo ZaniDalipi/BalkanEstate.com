@@ -25,7 +25,7 @@ export const getSavedAgents = async (
         path: 'agentId',
         populate: {
           path: 'userId',
-          select: 'name email phone avatarUrl',
+          select: 'name email phone avatarUrl avatarOptions gender',
         },
       })
       .sort({ createdAt: -1 });

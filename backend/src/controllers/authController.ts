@@ -24,6 +24,7 @@ import { setRefreshTokenCookie, clearRefreshTokenCookie, getRefreshTokenFromRequ
 import { FREE_TIER_LIMITS, PRO_TIER_LIMITS, ENTERPRISE_TIER_LIMITS } from '../config/subscriptionConstants';
 import { buildFrontendRedirectUrl } from '../utils/redirectValidation';
 import { validateLicenseNumber } from '../utils/licenseValidation';
+import { defaultAvatarOptionsForUser } from '../utils/defaultAvatar';
 
 /**
  * Build a sanitized user response object for public-facing auth endpoints (login/signup).
@@ -978,6 +979,15 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         }
       }
 
+    }
+
+    // Accounts created before avatars were stored have no character of their
+    // own, so every surface invented one from whichever id it held and the same
+    // person came out looking like two. Fill it in on the way past, seeded with
+    // the id their own profile has always generated from — the face they know
+    // does not change, it just becomes the one everyone else sees too.
+    if (!user.avatarOptions && !user.avatarUrl) {
+      user.avatarOptions = defaultAvatarOptionsForUser(String(user._id), user.gender);
     }
 
     await user.save();

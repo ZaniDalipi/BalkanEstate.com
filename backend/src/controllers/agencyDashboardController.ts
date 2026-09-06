@@ -1299,7 +1299,7 @@ export const getTeamNotes = async (
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('userId', 'name email avatarUrl')
+        .populate('userId', 'name email avatarUrl avatarOptions gender')
         .lean(),
       Notification.countDocuments(filter),
     ]);

@@ -489,7 +489,7 @@ export const getProperty = async (
 
     const property = await Property.findById(id).populate(
       'sellerId',
-      'name email phone avatarUrl role agencyName agencyId agentId licenseNumber'
+      'name email phone avatarUrl avatarOptions gender role agencyName agencyId agentId licenseNumber'
     );
 
     if (!property) {

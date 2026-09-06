@@ -491,7 +491,7 @@ export const agentPageOgMiddleware = async (
 
     const agent = await Agent.findOne(query)
       .select('agentId bio specializations yearsOfExperience rating totalReviews activeListings agencyName userId agencyId')
-      .populate('userId', 'name avatarUrl city country')
+      .populate('userId', 'name avatarUrl avatarOptions gender city country')
       .populate('agencyId', 'name logo coverImage')
       .lean<AgentOgProjection>();
 

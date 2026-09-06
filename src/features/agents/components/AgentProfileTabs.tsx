@@ -541,7 +541,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                         {agent.avatarUrl ? (
                                                             <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                         ) : (
-                                                            <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+                                                            <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                                         )}
                                                     </div>
                                                     <p className="font-bold text-base mb-1">{agent.name}</p>
@@ -576,7 +576,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 {agent.avatarUrl ? (
                                                     <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                 ) : (
-                                                    <DefaultAvatar gender={agent.gender} seed={agent.agentId || agent.id || agent.name} avatarOptions={agent.avatarOptions} show3d />
+                                                    <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                                 )}
                                             </div>
                                             <p className="font-bold text-lg">{agent.name}</p>
