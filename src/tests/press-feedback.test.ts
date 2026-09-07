@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { initPressFeedback, __testing } from '@/shared/interaction/pressFeedback';
 
-const { pressScale, findPressable, hasOwnTransform } = __testing;
+const { pressScale, findPressable, hasOwnTransform, isOverMedia, MAX_RIPPLE_PX } = __testing;
 
 function pointerDown(target: Element, x = 10, y = 10) {
   target.dispatchEvent(
@@ -119,6 +119,23 @@ describe('pressFeedback', () => {
     });
   });
 
+  describe('isOverMedia', () => {
+    it('recognises a press that landed on a photo', () => {
+      document.body.innerHTML = '<div data-pressable><img id="p" alt="" /></div>';
+      expect(isOverMedia(document.getElementById('p'))).toBe(true);
+    });
+
+    it('does not treat a text node inside a card as media', () => {
+      document.body.innerHTML = '<div data-pressable><img alt="" /><p id="t">Street</p></div>';
+      expect(isOverMedia(document.getElementById('t'))).toBe(false);
+    });
+
+    it('honours an explicit data-press-no-ripple opt-out', () => {
+      document.body.innerHTML = '<button><span id="s" data-press-no-ripple>x</span></button>';
+      expect(isOverMedia(document.getElementById('s'))).toBe(true);
+    });
+  });
+
   describe('hasOwnTransform', () => {
     it('treats `none` as no transform', () => {
       const el = document.createElement('div');
@@ -209,6 +226,78 @@ describe('pressFeedback', () => {
 
       pointerDown(btn);
       expect(document.querySelector('.press-ripple')).not.toBeNull();
+      pointerUp();
+    });
+
+    it('does not wash a photo over: a press on an image scales but does not ripple', () => {
+      // The complaint this covers: a tap anywhere on a listing card's photo
+      // painted a large translucent slab of the card's text colour across the
+      // picture, which reads as a black thing appearing on the photo.
+      initPressFeedback();
+      document.body.innerHTML = '<div id="card" data-pressable><img id="photo" alt="" /><p id="addr">Street</p></div>';
+      const card = document.getElementById('card')!;
+      const photo = document.getElementById('photo')!;
+      stubRect(card, { left: 0, top: 0, right: 280, bottom: 530, width: 280, height: 530 });
+
+      pointerDown(photo, 100, 100);
+
+      expect(document.querySelector('.press-ripple')).toBeNull();
+      // The press is still acknowledged — the whole card moves under the finger.
+      expect(card.style.transform).toMatch(/scale\(/);
+
+      pointerUp();
+      expect(card.style.transform).toBe('');
+    });
+
+    it('still ripples the non-photo part of the same card', () => {
+      initPressFeedback();
+      document.body.innerHTML = '<div id="card" data-pressable><img id="photo" alt="" /><p id="addr">Street</p></div>';
+      const card = document.getElementById('card')!;
+      const addr = document.getElementById('addr')!;
+      stubRect(card, { left: 0, top: 0, right: 280, bottom: 530, width: 280, height: 530 });
+
+      pointerDown(addr, 100, 400);
+      expect(document.querySelector('.press-ripple')).not.toBeNull();
+      pointerUp();
+    });
+
+    it('keeps rippling a press on an icon inside a button', () => {
+      // An svg is the button's label, not a picture — it must not be treated
+      // as media, or most icon buttons would lose their feedback.
+      initPressFeedback();
+      document.body.innerHTML = '<button id="b"><svg id="i"></svg></button>';
+      const btn = document.getElementById('b')!;
+      stubRect(btn, {});
+
+      pointerDown(document.getElementById('i')!);
+      expect(document.querySelector('.press-ripple')).not.toBeNull();
+      pointerUp();
+    });
+
+    it('caps the ripple on a large surface instead of covering it', () => {
+      initPressFeedback();
+      document.body.innerHTML = '<div id="card" data-pressable><p id="addr">Street</p></div>';
+      const card = document.getElementById('card')!;
+      stubRect(card, { left: 0, top: 0, right: 280, bottom: 530, width: 280, height: 530 });
+
+      pointerDown(document.getElementById('addr')!, 100, 400);
+
+      const circle = document.querySelector('.press-ripple__circle') as HTMLElement;
+      expect(parseFloat(circle.style.width)).toBe(MAX_RIPPLE_PX);
+      pointerUp();
+    });
+
+    it('still covers a small control completely', () => {
+      initPressFeedback();
+      document.body.innerHTML = '<button id="b">Go</button>';
+      const btn = document.getElementById('b')!;
+      stubRect(btn, { left: 0, top: 0, right: 100, bottom: 40, width: 100, height: 40 });
+
+      pointerDown(btn, 50, 20);
+
+      const circle = document.querySelector('.press-ripple__circle') as HTMLElement;
+      // Diagonal of the half-box, doubled — well under the cap.
+      expect(parseFloat(circle.style.width)).toBeCloseTo(2 * Math.hypot(50, 20), 5);
       pointerUp();
     });
 

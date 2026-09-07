@@ -34,6 +34,7 @@ import {
 import SimilarProperties from '@/src/components/property/SimilarProperties';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { canNavigateBack } from '@/src/app/navigation/navHistory';
+import { useFastTap } from '@/src/shared/interaction/useFastTap';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
@@ -327,6 +328,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     const isRental = property.listingType === 'rent';
     navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
   }, [dispatch, navigate, property.listingType]);
+
+  // Back resolves on the finger lifting rather than on the browser's click.
+  // This button sits in the same left-edge strip the swipe-back gesture
+  // watches, where a `touchmove` the gesture cancels also cancels the click —
+  // which is what made it feel like the button needed a second, harder press.
+  const backTapProps = useFastTap(handleBack);
 
   const handleFavoriteClick = async () => {
     if (!state.isAuthenticated && !state.user) {
@@ -835,8 +842,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         <div className="px-2 xs:px-3 sm:px-4 py-2 sm:py-3 md:py-5 md:mt-2 flex items-center justify-between gap-1 xs:gap-2">
           {/* Back button - larger tap target for PWA */}
           <button
-            onClick={handleBack}
-            className="flex items-center gap-1.5 sm:gap-2 text-primary font-semibold hover:underline active:opacity-60 touch-manipulation text-sm sm:text-base min-h-[44px] min-w-[44px] -ml-1 pl-1"
+            {...backTapProps}
+            type="button"
+            // `before:` is hit slop: a transparent box reaching past the
+            // button's visual bounds, so a thumb landing just above or beside
+            // the arrow still hits it. Events on a pseudo-element are the
+            // button's, so this widens the target without moving the layout.
+            className="relative flex items-center justify-start gap-1.5 sm:gap-2 text-primary font-semibold rounded-full text-sm sm:text-base min-h-[48px] min-w-[48px] px-2 -ml-2 touch-manipulation select-none transition-[transform,background-color] duration-150 active:scale-[0.96] active:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 before:content-[''] before:absolute before:-inset-x-2 before:-inset-y-1.5"
             aria-label={t('property:navigation.goBackToSearch')}
           >
             <ArrowLeftIcon className="w-5 h-5" />

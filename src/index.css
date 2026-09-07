@@ -699,11 +699,11 @@ html[data-zoom] {
 
 @keyframes pressRipple {
   0% {
-    opacity: 0.22;
+    opacity: 0.18;
     transform: scale(0);
   }
   70% {
-    opacity: 0.1;
+    opacity: 0.08;
   }
   100% {
     opacity: 0;

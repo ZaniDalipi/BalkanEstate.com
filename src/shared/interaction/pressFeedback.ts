@@ -50,6 +50,31 @@ const DRAG_CANCEL_PX = 10;
 /** Ripple lifetime; must match the CSS animation duration. */
 const RIPPLE_MS = 520;
 
+/**
+ * Widest a ripple may grow, in px.
+ *
+ * The circle used to be sized to cover the control completely — correct for a
+ * 44px icon button, wrong for anything big. A property card is ~280x530, so
+ * "cover it from the far corner" meant a ~1200px circle: what the user sees is
+ * not a ripple travelling out from the finger but the entire card washing over
+ * dark in one frame, a grey slab with a curved edge sitting on top of the
+ * photo. Capping the diameter keeps the gesture reading as *a touch at a
+ * point*, which is the whole information the ripple carries; on small controls
+ * the cap is never reached, so they are unchanged.
+ */
+const MAX_RIPPLE_PX = 320;
+
+/**
+ * Elements a ripple must never be drawn over.
+ *
+ * A translucent wash of the control's text colour is legible on a white row
+ * and on a solid button; over a photograph it is just a dark stain across the
+ * image, with no edge to explain it. Every complaint about "a black thing on
+ * the photos" is this. Media presses still get the press scale, which reads
+ * correctly on an image because the whole picture moves.
+ */
+const MEDIA_SELECTOR = 'img,picture,video,canvas,[data-press-no-ripple]';
+
 /** Longest a press may stay applied without a release event. */
 const PRESS_SAFETY_MS = 2000;
 
@@ -91,6 +116,16 @@ function findPressable(target: EventTarget | null): HTMLElement | null {
   if (isDisabled(el)) return null;
   if (el.closest('[data-no-press],[data-no-swipe-back]')) return null;
   return el;
+}
+
+/**
+ * Whether the point the finger landed on is a picture rather than a surface.
+ * The press target is used rather than the pressable ancestor: a card is half
+ * photo and half text, and a tap on its address line should still ripple.
+ */
+function isOverMedia(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  return target.closest(MEDIA_SELECTOR) !== null;
 }
 
 /**
@@ -206,11 +241,11 @@ function spawnRipple(el: HTMLElement, rect: DOMRect, x: number, y: number): Ripp
   // lookup and nothing to keep in sync with the theme.
   ripple.style.color = style.color;
 
-  // Cover the whole control from wherever the finger landed: the radius has to
-  // reach the furthest corner.
+  // Reach the furthest corner from wherever the finger landed, up to the cap:
+  // small controls fill completely, large ones ripple locally.
   const dx = Math.max(x - rect.left, rect.right - x);
   const dy = Math.max(y - rect.top, rect.bottom - y);
-  const diameter = 2 * Math.hypot(dx, dy);
+  const diameter = Math.min(MAX_RIPPLE_PX, 2 * Math.hypot(dx, dy));
 
   const circle = document.createElement('span');
   circle.className = 'press-ripple__circle';
@@ -266,7 +301,11 @@ export function initPressFeedback(): void {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
 
-      const ripple = spawnRipple(el, rect, event.clientX, event.clientY);
+      // A press that landed on a photo gets the scale but no wash over the
+      // image itself.
+      const ripple = isOverMedia(event.target)
+        ? null
+        : spawnRipple(el, rect, event.clientX, event.clientY);
 
       // Only take over the transform when the element has none of its own.
       // Components with their own `active:scale-*` keep their behaviour, and a
@@ -287,7 +326,7 @@ export function initPressFeedback(): void {
       const release = (abandoned: boolean) => {
         if (released) return;
         released = true;
-        if (abandoned) ripple.cancel();
+        if (abandoned) ripple?.cancel();
         if (scalable) {
           el.style.transform = '';
           el.style.transition = '';
@@ -339,4 +378,4 @@ export function initPressFeedback(): void {
 }
 
 /** Exposed for tests; not part of the runtime surface. */
-export const __testing = { PRESSABLE, pressScale, findPressable, hasOwnTransform };
+export const __testing = { PRESSABLE, pressScale, findPressable, hasOwnTransform, isOverMedia, MAX_RIPPLE_PX };
