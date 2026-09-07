@@ -695,7 +695,13 @@
       "forSale": "Προς Πώληση",
       "forRent": "Προς Ενοικίαση",
       "noListings": "Δεν βρέθηκαν καταχωρήσεις",
-      "allTypes": "Όλοι οι τύποι"
+      "allTypes": "Όλοι οι τύποι",
+      "searchPlaceholder": "Αναζήτηση με τίτλο, πόλη, διεύθυνση ή ID",
+      "searchLabel": "Αναζήτηση στα ακίνητα αυτού του συμβούλου",
+      "clearSearch": "Καθαρισμός αναζήτησης",
+      "searchResults": "Εμφάνιση {{matches}} από {{total}} ακίνητα",
+      "noMatches": "Κανένα ακίνητο δεν ταιριάζει με την αναζήτηση",
+      "noMatchesHint": "Δοκιμάστε μια πόλη, έναν τύπο ακινήτου ή μέρος του τίτλου."
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

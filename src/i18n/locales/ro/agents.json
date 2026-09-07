@@ -695,7 +695,13 @@
       "forSale": "De vânzare",
       "forRent": "De închiriat",
       "noListings": "Nu sunt anunțuri disponibile",
-      "allTypes": "Toate tipurile"
+      "allTypes": "Toate tipurile",
+      "searchPlaceholder": "Caută după titlu, oraș, adresă sau ID",
+      "searchLabel": "Caută în proprietățile acestui agent",
+      "clearSearch": "Șterge căutarea",
+      "searchResults": "Se afișează {{matches}} din {{total}} proprietăți",
+      "noMatches": "Nicio proprietate nu corespunde căutării",
+      "noMatchesHint": "Încearcă un oraș, un tip de proprietate sau o parte din titlu."
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

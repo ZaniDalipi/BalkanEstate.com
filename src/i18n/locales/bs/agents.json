@@ -695,7 +695,13 @@
       "forSale": "Na prodaju",
       "forRent": "Za najam",
       "noListings": "Nema dostupnih oglasa",
-      "allTypes": "Svi tipovi"
+      "allTypes": "Svi tipovi",
+      "searchPlaceholder": "Pretražite po naslovu, gradu, adresi ili ID-u",
+      "searchLabel": "Pretražite nekretnine ovog agenta",
+      "clearSearch": "Očisti pretragu",
+      "searchResults": "Prikazano {{matches}} od {{total}} nekretnina",
+      "noMatches": "Nijedna nekretnina ne odgovara pretrazi",
+      "noMatchesHint": "Pokušajte sa gradom, vrstom nekretnine ili dijelom naslova."
     },
     "reviewsTab": {
       "verifiedReviews": "verificiranih recenzija",
