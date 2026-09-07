@@ -553,6 +553,10 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     // On screen, it mounts immediately as before.
     const isMapOnScreen = !showViewToggle || mobileView === 'map';
     const mountMap = useDeferredMount(!isMapOnScreen);
+    // And the same the other way round: with the map showing, the cards behind
+    // it are a screenful of DOM nobody is looking at, built in that same commit.
+    const isListOnScreen = !showViewToggle || mobileView === 'list';
+    const mountList = useDeferredMount(!isListOnScreen);
 
     const mapProps = {
         properties: baseFilteredProperties,
@@ -826,7 +830,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                         {/* Card grid / loading / empty states */}
                         <div className="p-3 pt-0 bg-gray-50">
-                            {(isLoading || isSearchFiltering) ? (
+                            {!mountList ? null : (isLoading || isSearchFiltering) ? (
                                 /* Cinematic loading state */
                                 <>
                                     <div className="relative -mx-3 -mt-2 mb-4 border-b border-black/[0.06]"

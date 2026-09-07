@@ -195,6 +195,10 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     // `useDeferredMount`. On screen, it mounts immediately as before.
     const isMapOnScreen = showSplitView || mobileView === 'map';
     const mountMap = useDeferredMount(!isMapOnScreen);
+    // And the same the other way round: with the map showing, the cards behind
+    // it are a screenful of DOM nobody is looking at, built in that same commit.
+    const isListOnScreen = showSplitView || mobileView === 'list';
+    const mountList = useDeferredMount(!isListOnScreen);
 
     const mapProps = {
         properties: baseFilteredProperties,
@@ -463,7 +467,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             </div>
                         </div>
                         <div className="p-3">
-                        {(isLoading || isSearchFiltering) ? (
+                        {!mountList ? null : (isLoading || isSearchFiltering) ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {[...Array(6)].map((_, i) => (
                                     <PropertyCardSkeleton key={i} index={i} />

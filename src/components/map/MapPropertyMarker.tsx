@@ -15,6 +15,7 @@ import { validateCoordinates } from '@/shared/utils/validation';
 import { getVillaMarkerPalette, buildLuxuryVillaMarkerHTML } from '@/shared/map/villaMarker';
 import { formatCityPlace } from '@/shared/geo';
 import { typeHasAttribute } from '@/shared/property/typeAttributes';
+import { useProgressiveList } from '@/src/shared/hooks/useProgressiveList';
 
 /**
  * A property is mappable only when it carries coordinates that are real
@@ -619,6 +620,73 @@ const createCustomMarkerIcon = (property: Property, zoom: number, isHovered: boo
 };
 
 /**
+ * Everything a marker's appearance is derived from.
+ *
+ * Two properties with the same signature produce byte-identical markup, so they
+ * can share one icon; the same property with an unchanged signature can keep the
+ * icon it already has. Anything the builders above read has to appear here, or a
+ * change to it would not reach the map.
+ */
+const iconSignature = (
+  property: Property,
+  zoom: number,
+  isHovered: boolean,
+  isNightMode: boolean,
+): string =>
+  [
+    property.id,
+    zoom,
+    isHovered ? 'h' : '',
+    isNightMode ? 'n' : '',
+    property.price,
+    property.propertyType,
+    property.listingType,
+    property.isPromoted ? 'p' : '',
+    property.promotionTier ?? '',
+    property.promotionEndDate ?? '',
+    property.hasUrgentBadge ? 'u' : '',
+  ].join('|');
+
+/**
+ * Icons, keyed by what they look like.
+ *
+ * Building one is a template string plus an `L.divIcon`, which is cheap on its
+ * own and ruinous in bulk: the markers are rebuilt on every render of the layer
+ * — a poll returning the same listings, a hover, a pan — and a *new* icon object
+ * makes react-leaflet call `setIcon`, which throws away the marker's DOM and
+ * parses fresh HTML for it. On a map showing a few hundred listings that was
+ * seconds of main thread per render, for markers that had not changed at all.
+ *
+ * Handing back the same object for the same appearance makes those renders free:
+ * react-leaflet compares the icon by identity, sees no change, and leaves the
+ * DOM alone.
+ *
+ * Sharing one `L.DivIcon` between markers is safe — Leaflet builds a fresh
+ * element from it per marker (`createIcon`), the icon itself is only options.
+ */
+const iconCache = new Map<string, L.DivIcon>();
+/** Roughly a full map's worth of markers across a few zoom levels. */
+const ICON_CACHE_LIMIT = 3000;
+
+export const getMarkerIcon = (
+  property: Property,
+  zoom: number,
+  isHovered: boolean,
+  isNightMode: boolean,
+): L.DivIcon => {
+  const key = iconSignature(property, zoom, isHovered, isNightMode);
+  const cached = iconCache.get(key);
+  if (cached) return cached;
+
+  const icon = createCustomMarkerIcon(property, zoom, isHovered, isNightMode);
+  // Zooming across a wide range on a big result set is the only way to reach
+  // this; dropping the lot is fine, the next render rebuilds what it needs.
+  if (iconCache.size >= ICON_CACHE_LIMIT) iconCache.clear();
+  iconCache.set(key, icon);
+  return icon;
+};
+
+/**
  * Wrap a Leaflet divIcon with an entrance fly-in animation wrapper.
  * Each marker flies in from a unique direction using golden-angle distribution
  * for a visually appealing starburst scatter-gather effect.
@@ -1013,28 +1081,39 @@ const computeColocatedOffsets = (properties: Property[]): Map<string, [number, n
   return offsets;
 };
 
+/**
+ * How many markers go up with the page, and how many follow per idle callback.
+ * Sized so the first batch covers a phone screen at a normal zoom: what the
+ * visitor can actually see is there in the first frame, the rest of the country
+ * fills in behind it.
+ */
+const MARKERS_IN_FIRST_PAINT = 24;
+const MARKERS_PER_CHUNK = 40;
+
 const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, hoveredPropertyId, isNightMode = false }) => {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
-  const markerRefsMap = React.useRef<Map<string, L.Marker>>(new Map());
-  const prevHoveredIdRef = React.useRef<string | null | undefined>(null);
-  const prevZoomRef = React.useRef<number>(zoom);
-  const prevNightModeRef = React.useRef<boolean>(isNightMode);
 
   // Entrance animation: check if splash screen just completed
   const [animateEntrance, setAnimateEntrance] = useState(() => {
     const splashDone = (window as any).__balkanestateSplashDone;
     return !!(splashDone && Date.now() - splashDone < 5000);
   });
-  const entranceAnimatingRef = React.useRef(animateEntrance);
+
+  // The fly-in wrapper is per marker (each flies in from its own direction), so
+  // it cannot come from the shared icon cache. Holding the wrapped icons here
+  // keeps their identity stable for as long as the animation runs, which is
+  // what stops an unrelated render — a hover, a poll — from handing every
+  // marker a new icon and restarting the cascade halfway through.
+  const entranceIconsRef = React.useRef<Map<string, L.DivIcon>>(new Map());
 
   // Clear entrance animation flag after all fly-in animations complete
   useEffect(() => {
     if (!animateEntrance) return;
-    entranceAnimatingRef.current = true;
     const timer = setTimeout(() => {
       setAnimateEntrance(false);
-      entranceAnimatingRef.current = false;
+      // Wrapped icons are only good for the cascade they were built for.
+      entranceIconsRef.current.clear();
       delete (window as any).__balkanestateSplashDone;
     }, 3500);
     return () => clearTimeout(timer);
@@ -1046,73 +1125,42 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
     },
   });
 
-  // Update marker icon only when hover state, zoom, or night mode actually changes
-  React.useEffect(() => {
-    const hoverChanged = prevHoveredIdRef.current !== hoveredPropertyId;
-    const zoomChanged = prevZoomRef.current !== zoom;
-    const nightModeChanged = prevNightModeRef.current !== isNightMode;
-
-    if (!hoverChanged && !zoomChanged && !nightModeChanged) return;
-
-    // Skip hover-only icon updates during entrance animation to avoid interrupting fly-in
-    if (entranceAnimatingRef.current && hoverChanged && !zoomChanged && !nightModeChanged) {
-      prevHoveredIdRef.current = hoveredPropertyId;
-      return;
-    }
-
-    // Only update affected markers for hover changes (performance optimization)
-    if (hoverChanged && !zoomChanged && !nightModeChanged) {
-      // Update previously hovered marker
-      if (prevHoveredIdRef.current) {
-        const prevMarker = markerRefsMap.current.get(prevHoveredIdRef.current);
-        const prevProp = properties.find(p => p.id === prevHoveredIdRef.current);
-        if (prevMarker && prevProp) {
-          prevMarker.setIcon(createCustomMarkerIcon(prevProp, zoom, false, isNightMode));
-        }
-      }
-      // Update newly hovered marker
-      if (hoveredPropertyId) {
-        const newMarker = markerRefsMap.current.get(hoveredPropertyId);
-        const newProp = properties.find(p => p.id === hoveredPropertyId);
-        if (newMarker && newProp) {
-          newMarker.setIcon(createCustomMarkerIcon(newProp, zoom, true, isNightMode));
-        }
-      }
-    } else {
-      // Full update for zoom or night mode changes
-      markerRefsMap.current.forEach((marker, id) => {
-        const prop = properties.find(p => p.id === id);
-        if (prop) {
-          const isHovered = id === hoveredPropertyId;
-          marker.setIcon(createCustomMarkerIcon(prop, zoom, isHovered, isNightMode));
-        }
-      });
-    }
-
-    prevHoveredIdRef.current = hoveredPropertyId;
-    prevZoomRef.current = zoom;
-    prevNightModeRef.current = isNightMode;
-  }, [hoveredPropertyId, zoom, isNightMode, properties]);
-
   // Helper to check if property is actively promoted
   const isPropertyPromoted = (prop: Property) =>
     prop.isPromoted && prop.promotionEndDate && prop.promotionEndDate > Date.now();
 
-  // Compute offsets for co-located properties
+  // Compute offsets for co-located properties. Over the whole result set, not
+  // just the markers on screen yet: a listing's offset must not shift when the
+  // one it shares a doorstep with arrives in a later chunk.
   const colocatedOffsets = useMemo(() => computeColocatedOffsets(properties), [properties]);
+
+  // Mounting a few hundred markers is a commit whose cost the visitor pays as a
+  // frozen screen — and on the search page that commit is the one a back press
+  // lands in. The first batch goes up with the page; the rest arrive at idle.
+  const visibleProperties = useProgressiveList(properties, {
+    initial: MARKERS_IN_FIRST_PAINT,
+    chunk: MARKERS_PER_CHUNK,
+  });
 
   return (
     <>
-      {properties.map((prop, idx) => {
+      {visibleProperties.map((prop, idx) => {
         // Skip properties without valid, in-range coordinates
         if (!hasValidCoordinates(prop)) {
           return null;
         }
         const isPromoted = isPropertyPromoted(prop);
-        const baseIcon = createCustomMarkerIcon(prop, zoom, prop.id === hoveredPropertyId, isNightMode);
-        const icon = animateEntrance
-          ? wrapIconWithEntrance(baseIcon, idx, properties.length)
-          : baseIcon;
+        // Shared per appearance: a render that changes nothing about this marker
+        // hands back the very same object, and react-leaflet leaves its DOM
+        // alone instead of rebuilding it.
+        const baseIcon = getMarkerIcon(prop, zoom, prop.id === hoveredPropertyId, isNightMode);
+        let icon = baseIcon;
+        if (animateEntrance) {
+          const wrapped = entranceIconsRef.current.get(prop.id)
+            ?? wrapIconWithEntrance(baseIcon, idx, properties.length);
+          entranceIconsRef.current.set(prop.id, wrapped);
+          icon = wrapped;
+        }
         const offset = colocatedOffsets.get(prop.id);
         const markerLat = offset ? prop.lat + offset[0] : prop.lat;
         const markerLng = offset ? prop.lng + offset[1] : prop.lng;
@@ -1121,11 +1169,6 @@ const MarkersComponent: React.FC<MarkersProps> = ({ properties, onPopupClick, ho
             key={prop.id}
             position={[markerLat, markerLng]}
             icon={icon}
-            ref={(marker) => {
-              if (marker) {
-                markerRefsMap.current.set(prop.id, marker);
-              }
-            }}
             zIndexOffset={isPromoted ? 1000 : 0} // Promoted markers appear on top
           >
             <Popup

@@ -122,14 +122,16 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
 
-    // The map is the most expensive thing this page mounts, and on mobile the
-    // list panel is sitting on top of it — so building it inside the commit that
-    // brings the page back is work nobody can see, paid for at the exact moment
-    // the back animation needs the main thread. Off-screen, it waits for idle;
-    // the moment it is actually on screen (split view, or the user switching to
-    // the map tab) it mounts straight away.
+    // The two panels are the expensive halves of this page, and on a phone only
+    // one of them is ever on screen: the list slides over the map, so whichever
+    // is behind is being built for nobody — in the very commit a navigation
+    // lands in. Each waits for idle while it is off screen, and mounts straight
+    // away the moment it is on it (split view, or the visitor switching tabs).
+    // Once mounted they stay mounted, so switching between them is instant.
     const isMapOnScreen = showSplitView || mobileView === 'map';
     const mountMap = useDeferredMount(!isMapOnScreen);
+    const isListOnScreen = showSplitView || mobileView === 'list';
+    const mountList = useDeferredMount(!isListOnScreen);
 
     const mapProps = {
         properties: baseFilteredProperties,
@@ -282,7 +284,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
                  <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-neutral-200 ${ showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : '' } lg:translate-x-0 transition-transform duration-300`}>
-                    {searchMode !== 'ai' && (
+                    {mountList && searchMode !== 'ai' && (
                         <SearchHeader
                             t={t as any}
                             filters={filters}
@@ -293,7 +295,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             onSelectSuggestion={handleSelectSuggestion}
                         />
                     )}
-                    <PropertyList {...propertyListProps} />
+                    {mountList && <PropertyList {...propertyListProps} />}
                 </div>
 
 
