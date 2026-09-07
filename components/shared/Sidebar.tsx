@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { runPageTransition } from '@/app/navigation/pageTransition';
 import { setNavigationDirection, type NavigationDirection } from '@/app/navigation/navHistory';
 import { preloadView } from '@/app/navigation/routePreload';
 import {
@@ -148,22 +147,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     /**
      * Navigate to a sidebar destination.
      *
-     * Everything a tap has to do happens in one place and in one order, which
-     * is the whole point: the drawer used to dispatch, push a URL and close
-     * itself as three independent things, so the new page committed on the
-     * same frame that the drawer started sliding shut and the content behind
-     * it started un-blurring. Three animations and a route change competing
-     * for one frame is what "laggy" was.
-     *
-     * Now the view change and the drawer closing are handed to
-     * `runPageTransition` together. The browser captures the screen as it is —
-     * drawer open, old page behind it — runs the update, captures the result,
-     * and animates between the two on the compositor: the page swishes across
-     * while the drawer slides off it, both off the main thread, while React
-     * commits underneath. Where the View Transitions API is missing, or the
-     * user asked for reduced motion, `runPageTransition` simply calls the
-     * update and the drawer closes with its own CSS transition exactly as
-     * before.
+     * Everything a tap has to do happens in one place, in one commit, with no
+     * animation in front of it: the view changes, the URL is pushed and the
+     * drawer closes together, so the destination is on screen in the frame
+     * after the tap rather than at the end of a transition.
      */
     const navigateTo = useCallback((
         view: AppView,
@@ -207,39 +194,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         const direction = options?.direction ?? directionFor(activeView, view);
         const localizedPath = getLocalizedPath(route.path);
 
-        // Tell `ViewTransition` which way this arrival should move before the
-        // navigation fires; it refines the choice once it knows which view
-        // actually landed (a composer rises, a change of context dissolves).
+        // Still recorded, because `navHistory` classifies the history entry off
+        // it — it no longer selects any motion, since a navigation plays none.
         setNavigationDirection(direction);
 
-        runPageTransition(direction, () => {
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
+        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
 
-            // On mobile/tablet, always open the property search on the map
-            // first so users land on the map when navigating in from the
-            // sidebar. The rentals view manages its own mobileView (defaults
-            // to map).
-            if (view === 'search') {
-                dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { mobileView: 'map' } });
-            }
+        // On mobile/tablet, always open the property search on the map
+        // first so users land on the map when navigating in from the
+        // sidebar. The rentals view manages its own mobileView (defaults
+        // to map).
+        if (view === 'search') {
+            dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { mobileView: 'map' } });
+        }
 
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
+        dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
 
-            try {
-                window.history.pushState({}, '', localizedPath);
-            } catch (error) {
-                // pushState throws in a handful of real situations (a sandboxed
-                // frame, a rate-limited burst). The view has already changed, so
-                // losing the URL is a worse-but-working navigation, not a
-                // failed one — never let it take the page down with it.
-                navLogger.warn('Could not update the URL for a sidebar navigation', { path: localizedPath, error });
-            }
+        try {
+            window.history.pushState({}, '', localizedPath);
+        } catch (error) {
+            // pushState throws in a handful of real situations (a sandboxed
+            // frame, a rate-limited burst). The view has already changed, so
+            // losing the URL is a worse-but-working navigation, not a
+            // failed one — never let it take the page down with it.
+            navLogger.warn('Could not update the URL for a sidebar navigation', { path: localizedPath, error });
+        }
 
-            // Closed inside the update, not before it: the drawer has to still
-            // be open when the browser captures the outgoing frame, or it
-            // vanishes instead of sliding away.
-            onClose();
-        });
+        onClose();
     }, [
         activeView,
         dispatch,
@@ -332,23 +313,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 the transition finishes, and back to visible as soon as it
                 starts. */}
             <div
-                data-app-scrim={isOpen ? 'open' : 'closed'}
                 className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-[1290] md:hidden transition-[opacity,visibility] duration-200 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
                 onClick={onClose}
                 aria-hidden="true"
             ></div>
 
             {/* Sidebar */}
-            {/* `data-app-drawer="open"` is what gives the drawer a view transition
-                name of its own while it is on screen (see index.css). Without it
-                the drawer rides along in the `root` snapshot and cross-fades with
-                the rest of the chrome; with it, it slides off to the left on the
-                compositor as the page swishes across underneath — the two halves
-                of one gesture rather than two unrelated fades. Closed, it is
-                unnamed, so the desktop rail (always on screen, never moving) is
-                untouched. */}
             <aside
-                data-app-drawer={isOpen ? 'open' : 'closed'}
                 className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 md:z-50 flex flex-col transition-transform duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] group overflow-hidden ${isOpen ? 'z-[1300] translate-x-0 w-64' : 'z-50 -translate-x-full w-64 invisible md:visible'} md:w-20 md:translate-x-0 hover:md:w-64`}
                 aria-label={t('nav:mainNavigation', 'Main navigation')}
                 style={{

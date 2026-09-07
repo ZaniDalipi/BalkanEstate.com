@@ -9,19 +9,19 @@
  *     can be classified as back or forward by comparing indices;
  *   - it remembers the scroll offsets of the entry being left, so going back
  *     returns the user to where they were instead of the top of the list;
- *   - it holds the *pending transition direction* that a caller set just before
- *     navigating (`setNavigationDirection`), which `ViewTransition` consumes on
- *     the next view change;
+ *   - it holds the *pending direction* that a caller set just before navigating
+ *     (`setNavigationDirection`), which records which way the app is moving;
  *   - it says whether a popstate actually moved the app to another page
- *     (`consumePageChange`), which is what decides whether the view change is
- *     run as a paired transition — the outgoing page animating away as the
- *     incoming one arrives — rather than as an entrance alone.
+ *     (`consumePageChange`), which is what tells routing that the view is
+ *     swapping rather than that the same page got a new query string.
+ *
+ * Navigations themselves are not animated — the view swaps in the commit the
+ * navigation triggers — so direction is bookkeeping about the history stack,
+ * not a choice of motion.
  *
  * Everything here is module state on purpose. Direction used to live in React
  * state, which meant every navigation triggered a second full-tree render on
- * top of the one the navigation itself caused — an extra commit landing right
- * as the entrance animation started, which is exactly when a phone can least
- * afford it.
+ * top of the one the navigation itself caused.
  *
  * `install()` is called at import time from ViewTransition, before React
  * renders, so our popstate listener is registered ahead of the app's own
@@ -56,10 +56,11 @@ let pendingScrollRestore: ScrollSnapshot | null = null;
  * Set when the last popstate moved the app to a different path — the browser or
  * a gesture stepping through history, or the app pushing an entry of its own and
  * firing the synthetic popstate that kicks routing. Read once, by the routing
- * listener, to decide whether the view change gets a paired old/new page
- * transition. Null for a popstate that leaves the path where it was: two entries
- * of the same page (a filter in the query string) are not a page change, and
- * animating one only stalls the update behind motion nobody can see.
+ * listener, to decide whether the view swap runs at default priority — the user
+ * is looking at a page that is on its way out — or as an interruptible
+ * transition. Null for a popstate that leaves the path where it was: two
+ * entries of the same page (a filter in the query string) are not a page
+ * change, and must not block whatever the user is still doing on it.
  */
 let pendingPageChange: NavigationDirection | null = null;
 /** Whether the last pushState/replaceState actually moved to a different path. */
@@ -173,10 +174,8 @@ export function installNavigationHistory(): void {
       // us the direction (or wants the default). Leave the index alone.
       //
       // It is still a page change if the pushState it follows moved to another
-      // path — that is how every in-app navigation reaches routing — so it gets
-      // the same paired transition the browser's own buttons do. The direction
-      // here is only a starting point: `ViewTransition` settles what the motion
-      // should be once it knows which view arrived.
+      // path — that is how every in-app navigation reaches routing — so it is
+      // routed exactly as the browser's own buttons are.
       pendingPageChange = pushChangedPath ? (pendingDirection === 'back' ? 'back' : 'forward') : null;
       pushChangedPath = false;
       return;
@@ -186,12 +185,10 @@ export function installNavigationHistory(): void {
     historyIndex = nextIndex;
     pendingScrollRestore = scrollMemory.get(nextIndex) ?? null;
 
-    // A direction set explicitly by a caller wins; otherwise the index decides,
-    // so the browser's own back and forward buttons each animate their own way.
-    // Inference is re-run rather than only upgraded to 'back': an inferred
-    // direction that no view change claimed used to survive into the next
-    // traversal, which is what made pressing forward straight after a back
-    // slide in from the wrong side.
+    // A direction set explicitly by a caller wins; otherwise the index decides.
+    // Inference is re-run rather than only upgraded to 'back', so an inferred
+    // direction that no view change claimed cannot survive into the next
+    // traversal and misreport which way the app moved.
     if (!directionIsExplicit) {
       pendingDirection = nextIndex < previousIndex ? 'back' : 'forward';
     }
@@ -199,7 +196,7 @@ export function installNavigationHistory(): void {
     // The browser stepping through history — the back/forward buttons, Android's
     // system back, an edge swipe, or `history.back()` from one of our own back
     // buttons. The index says which way, and that is not up for interpretation
-    // here: whichever button the user pressed is the motion they expect.
+    // here.
     const nextPath = window.location.pathname;
     pendingPageChange = nextPath === lastPath ? null : (nextIndex < previousIndex ? 'back' : 'forward');
     lastPath = nextPath;
@@ -210,17 +207,15 @@ export function installNavigationHistory(): void {
 /**
  * Drop a direction that no view change ever claimed.
  *
- * `consumeNavigationDirection` only runs when the view key changes, so a
- * navigation that lands on the same view — back and forth between two account
- * tabs, or between two sets of search filters — leaves its direction armed. The
- * next navigation would then animate with it: tapping into a listing after a
- * back press slid in from the wrong side.
+ * A navigation that lands on the same view — back and forth between two account
+ * tabs, or between two sets of search filters — leaves its direction armed, and
+ * the next navigation would then be classified with it.
  *
  * A caller sets a direction immediately before navigating, so anything still
  * pending when the *following* navigation starts was set for a view change that
- * never happened. That is the test — not a timer. Routing is deferred (it runs
- * inside `startTransition`, and a paired transition holds it a little longer
- * still), so no fixed delay can tell a slow commit from an abandoned one.
+ * never happened. That is the test — not a timer. Routing on the same page is
+ * deferred (it runs inside `startTransition`), so no fixed delay can tell a slow
+ * commit from an abandoned one.
  */
 function dropUnclaimedDirection(): void {
   if (directionSetSinceNavigation) return;
@@ -228,7 +223,7 @@ function dropUnclaimedDirection(): void {
   directionIsExplicit = false;
 }
 
-/** Set the direction the next view change should animate in. */
+/** Record which way the next view change is moving through history. */
 export function setNavigationDirection(direction: NavigationDirection): void {
   pendingDirection = direction;
   directionIsExplicit = true;
@@ -247,8 +242,7 @@ export function consumeNavigationDirection(): NavigationDirection {
 /**
  * Take the direction of the page change the last popstate represents, if it was
  * one. Returns null when the path did not move — the routing listener reads
- * this to decide whether the navigation runs inside a paired page transition,
- * and nothing else should see it.
+ * this to decide at what priority to route, and nothing else should see it.
  */
 export function consumePageChange(): NavigationDirection | null {
   const direction = pendingPageChange;

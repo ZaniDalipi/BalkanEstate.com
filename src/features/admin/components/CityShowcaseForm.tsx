@@ -77,11 +77,9 @@ interface Props {
  * one before it exists as a row. The upload therefore writes into the draft,
  * and the draft is what gets saved.
  *
- * Rendered through a portal into `document.body`, not in place. The admin
- * view's page-transition wrapper (`animate-page-morph` in index.css) holds a
- * `transform: scale(1)` after its animation ends — an identity transform, but
- * any transform value other than `none` makes that element a CSS containing
- * block for `position: fixed` descendants. Left in place, this modal's
+ * Rendered through a portal into `document.body`, not in place. Any ancestor
+ * carrying a transform — even an identity one — is a CSS containing block for
+ * its `position: fixed` descendants. Left in place, this modal's
  * "centered" position would be centered inside that (tall, scrollable) page
  * wrapper instead of the actual viewport, so scrolling down a long city list
  * before opening it could put the modal partly or fully off-screen.

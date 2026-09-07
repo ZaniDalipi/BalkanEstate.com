@@ -23,7 +23,6 @@ import {
   canNavigateBack,
   setNavigationDirection,
 } from './src/app/navigation/navHistory';
-import { runPageTransition } from './src/app/navigation/pageTransition';
 import { routeImporters, preloadRouteWhenIdle } from './src/app/navigation/routePreload';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
@@ -561,11 +560,9 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     // - Mobile swipe back gesture
     // - History API navigation
     //
-    // Anything that lands on a different path — history steps and the app's own
-    // navigations alike — runs inside a paired page transition: the page being
-    // left moves away under the one arriving, instead of being replaced by it
-    // in a single frame. `runPageTransition` falls back to calling the routing
-    // straight through wherever it cannot animate.
+    // A page change swaps the view on the spot: no animation is played and
+    // nothing is held back waiting for one, so the new page is on screen in the
+    // frame after the tap.
     const handlePopState = () => {
       const pageChange = consumePageChange();
       if (!pageChange) {
@@ -579,12 +576,8 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       // A transition is deliberately interruptible and yields between slices,
       // and React holds the *old* screen while one is in flight — which on a
       // back press is precisely the wrong trade: the user has already left, and
-      // every slice React defers is another frame of a page they dismissed. It
-      // also has to land before the paired transition gives up waiting for it
-      // (`COMMIT_TIMEOUT_MS`), or the browser animates the outgoing page against
-      // a snapshot of itself and the real one appears afterwards with no motion
-      // at all.
-      runPageTransition(pageChange, checkUrlForRoutingInner);
+      // every slice React defers is another frame of a page they dismissed.
+      checkUrlForRoutingInner();
     };
     window.addEventListener('popstate', handlePopState);
 
@@ -855,7 +848,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // the wrapper itself deliberately does not, since the swipe listeners need a
   // node that outlives the view.
   return (
-    <ViewTransition viewKey={viewKey}>
+    <ViewTransition>
       <ErrorBoundary level="route" key={viewKey}>
         <Suspense fallback={<PageLoader />}>
           {renderView()}

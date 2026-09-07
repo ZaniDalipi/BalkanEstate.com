@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { canNavigateBack, setNavigationDirection } from './navHistory';
-import { skipNextPageTransition } from './pageTransition';
 
 /**
  * Edge swipe-to-go-back for the installed app.
@@ -27,7 +26,7 @@ const COMMIT_RATIO = 0.28;
 /** px/ms — a quick flick commits even if it didn't travel far. */
 const COMMIT_VELOCITY = 0.45;
 
-const EXIT_MS = 190;
+/** How long an abandoned drag takes to settle back into place. */
 const CANCEL_MS = 220;
 
 function isStandalone(): boolean {
@@ -135,23 +134,15 @@ export function useSwipeBack(
       captured = false;
 
       if (commit) {
-        // Finish the exit first, then navigate. The wrapper swaps its children
-        // the moment history changes, so navigating mid-slide would animate the
-        // *incoming* page off screen.
-        node.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.32, 0.72, 0, 1)`;
-        node.style.transform = 'translate3d(100%, 0, 0)';
-        node.style.pointerEvents = 'none';
-        window.setTimeout(() => {
-          node.style.pointerEvents = '';
-          reset();
-          setNavigationDirection('back');
-          // The page has just been dragged off screen under the user's finger.
-          // A paired transition would snapshot it and slide it away a second
-          // time, so the gesture owns the exit and the arrival keeps the plain
-          // entrance animation.
-          skipNextPageTransition();
-          onBack();
-        }, EXIT_MS);
+        // Go back on the frame the finger lifts. The drag itself is the only
+        // motion here: nothing is played out afterwards, so the previous page
+        // is on screen immediately rather than after an exit animation the user
+        // has already told us the outcome of. Clearing the styles first puts
+        // the wrapper back at rest before its children are swapped, so the
+        // arriving page is never sitting under a leftover transform.
+        reset();
+        setNavigationDirection('back');
+        onBack();
         return;
       }
 

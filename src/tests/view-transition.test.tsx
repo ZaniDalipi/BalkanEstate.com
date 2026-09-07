@@ -1,131 +1,78 @@
 import React from 'react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, act } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render } from '@testing-library/react';
 import { ViewTransition } from '@/src/components/ui/ViewTransition';
 import { setNavigationDirection } from '@/app/navigation/navHistory';
 
-function renderView(viewKey: string) {
+function renderView(view: string) {
   return render(
-    <ViewTransition viewKey={viewKey}>
-      <div data-testid="page">{viewKey}</div>
+    <ViewTransition>
+      <div data-testid="page">{view}</div>
     </ViewTransition>,
   );
 }
 
-/** The animated wrapper is the element the page content sits directly inside. */
+function rerenderView(rerender: (ui: React.ReactElement) => void, view: string) {
+  rerender(
+    <ViewTransition>
+      <div data-testid="page">{view}</div>
+    </ViewTransition>,
+  );
+}
+
+/** The wrapper is the element the page content sits directly inside. */
 function wrapperOf(container: HTMLElement): HTMLElement {
   return container.firstElementChild as HTMLElement;
 }
 
+/**
+ * Navigation is instant by design: no entrance animation on the page that
+ * arrives, and no paired view transition sliding the one it replaces away.
+ * Both put motion in front of every tap — and the paired transition also held
+ * the document's rendering suspended while it waited for the new view to commit
+ * — which is the delay these tests exist to keep out.
+ */
 describe('ViewTransition', () => {
   beforeEach(() => {
     // Leave no direction behind for the next case to pick up.
     setNavigationDirection('forward');
   });
 
-  it('does not animate the first view it renders', () => {
+  it('renders the first view with no animation on it', () => {
     const { container } = renderView('search');
-    expect(wrapperOf(container).className).not.toMatch(/animate-page/);
+    expect(wrapperOf(container).className).not.toMatch(/animate/);
   });
 
-  it('pushes a new view in from the right by default', () => {
+  it('swaps a new view in without animating it', () => {
     const { container, rerender } = renderView('search');
-    rerender(
-      <ViewTransition viewKey="property-1">
-        <div data-testid="page">property-1</div>
-      </ViewTransition>,
-    );
-    expect(wrapperOf(container).className).toContain('animate-page-enter');
-    expect(wrapperOf(container).className).not.toContain('animate-page-enter-back');
+    rerenderView(rerender, 'property-1');
+    expect(wrapperOf(container).className).not.toMatch(/animate/);
+    expect(wrapperOf(container).textContent).toBe('property-1');
   });
 
-  it('animates a detail page, which used to bypass transitions entirely', () => {
-    const { container, rerender } = renderView('search');
-    rerender(
-      <ViewTransition viewKey="agency-42">
-        <div data-testid="page">agency-42</div>
-      </ViewTransition>,
-    );
-    expect(wrapperOf(container).className).toMatch(/animate-page-/);
-  });
-
-  it('reverses the motion when the direction is back', () => {
+  it('does not animate a back navigation either', () => {
     const { container, rerender } = renderView('property-1');
     setNavigationDirection('back');
-    rerender(
-      <ViewTransition viewKey="search">
-        <div data-testid="page">search</div>
-      </ViewTransition>,
-    );
-    expect(wrapperOf(container).className).toContain('animate-page-enter-back');
+    rerenderView(rerender, 'search');
+    expect(wrapperOf(container).className).not.toMatch(/animate/);
   });
 
-  it('presents form pages as a sheet', () => {
+  it('does not animate views that used to be presented as a sheet', () => {
     const { container, rerender } = renderView('search');
-    rerender(
-      <ViewTransition viewKey="create-listing">
-        <div data-testid="page">create-listing</div>
-      </ViewTransition>,
-    );
-    expect(wrapperOf(container).className).toContain('animate-page-enter-up');
+    rerenderView(rerender, 'create-listing');
+    expect(wrapperOf(container).className).not.toMatch(/animate/);
   });
 
-  it('cross-fades a change of context', () => {
+  it('leaves no transform on the wrapper', () => {
+    // A wrapper carrying a transform is a containing block for every
+    // `position: fixed` child inside the page — the detail page's contact bar,
+    // the sticky ad, any modal — and its own compositing layer. With nothing
+    // animating, there is never one to clear.
     const { container, rerender } = renderView('search');
-    rerender(
-      <ViewTransition viewKey="account">
-        <div data-testid="page">account</div>
-      </ViewTransition>,
-    );
-    expect(wrapperOf(container).className).toContain('animate-page-morph');
-  });
-
-  it('does not leave the animation class on the wrapper', () => {
-    // While the class is on, the wrapper carries a transform and is therefore
-    // the containing block for every `position: fixed` child inside the page —
-    // the detail page's contact bar, the sticky ad, any modal. It has to come
-    // off again. In the browser `animationend` does that; here we exercise the
-    // timeout backstop that covers an animationend which never arrives, since
-    // jsdom does not dispatch animation events to React at all.
-    vi.useFakeTimers();
-    try {
-      const { container, rerender } = renderView('search');
-      rerender(
-        <ViewTransition viewKey="agents">
-          <div data-testid="page">agents</div>
-        </ViewTransition>,
-      );
-      const wrapper = wrapperOf(container);
-      expect(wrapper.className).toMatch(/animate-page-/);
-
-      act(() => {
-        vi.advanceTimersByTime(1000);
-      });
-      expect(wrapper.className).not.toMatch(/animate-page-/);
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it('stands aside while a paired transition drives the change', async () => {
-    // Back and forward run through the browser's View Transitions API, which
-    // animates a snapshot of the outgoing page against one of the incoming
-    // page. The wrapper underneath has to sit still: its own entrance would
-    // animate the same arrival a second time, half a frame out of step.
-    const pageTransition = await import('@/app/navigation/pageTransition');
-    const running = vi.spyOn(pageTransition, 'isPageTransitionRunning').mockReturnValue(true);
-    try {
-      const { container, rerender } = renderView('search');
-      setNavigationDirection('back');
-      rerender(
-        <ViewTransition viewKey="agents">
-          <div data-testid="page">agents</div>
-        </ViewTransition>,
-      );
-      expect(wrapperOf(container).className).not.toMatch(/animate-page/);
-    } finally {
-      running.mockRestore();
-    }
+    rerenderView(rerender, 'agents');
+    const wrapper = wrapperOf(container);
+    expect(wrapper.className.trim()).toBe('h-full');
+    expect(wrapper.style.transform).toBe('');
   });
 
   it('keeps the wrapper node identity across a view change', () => {
@@ -133,11 +80,7 @@ describe('ViewTransition', () => {
     // every navigation would silently unbind the gesture.
     const { container, rerender } = renderView('search');
     const before = wrapperOf(container);
-    rerender(
-      <ViewTransition viewKey="agents">
-        <div data-testid="page">agents</div>
-      </ViewTransition>,
-    );
+    rerenderView(rerender, 'agents');
     expect(wrapperOf(container)).toBe(before);
   });
 });
