@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
+import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
@@ -188,6 +189,12 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
+
+    // Off-screen behind the list panel, the map waits for idle rather than
+    // being built inside the commit a navigation lands in — see
+    // `useDeferredMount`. On screen, it mounts immediately as before.
+    const isMapOnScreen = showSplitView || mobileView === 'map';
+    const mountMap = useDeferredMount(!isMapOnScreen);
 
     const mapProps = {
         properties: baseFilteredProperties,
@@ -523,7 +530,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 {/* Right Panel: Map */}
                 <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
                     <div className="absolute inset-0 overflow-hidden">
-                        <MapComponent {...mapProps} />
+                        {mountMap && <MapComponent {...mapProps} />}
                     </div>
                 </div>
 

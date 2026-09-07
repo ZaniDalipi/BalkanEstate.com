@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
+import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { interleaveInFeedAds } from '@/features/promo';
@@ -547,6 +548,12 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
     const showViewToggle = isMobile || isTablet;
 
+    // Off-screen behind the list panel, the map waits for idle rather than being
+    // built inside the commit a navigation lands in — see `useDeferredMount`.
+    // On screen, it mounts immediately as before.
+    const isMapOnScreen = !showViewToggle || mobileView === 'map';
+    const mountMap = useDeferredMount(!isMapOnScreen);
+
     const mapProps = {
         properties: baseFilteredProperties,
         onMapMove: handleMapMove,
@@ -933,7 +940,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                 {/* Right Panel: Map */}
                 <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
                     <div className="absolute inset-0 overflow-hidden">
-                        <MapComponent {...mapProps} />
+                        {mountMap && <MapComponent {...mapProps} />}
                     </div>
                     {/* Pin colour key — gold = for rent, emerald = for sale */}
                     {listProperties.length > 0 && (

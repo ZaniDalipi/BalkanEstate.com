@@ -16,6 +16,7 @@ import { generatePropertySlug } from '@/utils/slug';
 import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
 import SearchMobileFilters from './SearchMobileFilters';
+import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -120,6 +121,15 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     // Zillow-style layout: split view only at lg+ (1024px), full-width with toggle on md tablets
     const showSplitView = !isMobile && !isTablet;
     const showViewToggle = isMobile || isTablet;
+
+    // The map is the most expensive thing this page mounts, and on mobile the
+    // list panel is sitting on top of it — so building it inside the commit that
+    // brings the page back is work nobody can see, paid for at the exact moment
+    // the back animation needs the main thread. Off-screen, it waits for idle;
+    // the moment it is actually on screen (split view, or the user switching to
+    // the map tab) it mounts straight away.
+    const isMapOnScreen = showSplitView || mobileView === 'map';
+    const mountMap = useDeferredMount(!isMapOnScreen);
 
     const mapProps = {
         properties: baseFilteredProperties,
@@ -291,7 +301,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* On mobile/tablet: full-width behind list panel. On lg: 50% map, on xl+: 40% map */}
                 <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
                     <div className="absolute inset-0 overflow-hidden">
-                        <MapComponent {...mapProps} />
+                        {mountMap && <MapComponent {...mapProps} />}
                     </div>
 
                     {/* Draw hint banner - shown when navigating from explore cities */}

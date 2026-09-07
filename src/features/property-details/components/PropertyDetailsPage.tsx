@@ -33,6 +33,7 @@ import {
 } from '@/src/components/property';
 import SimilarProperties from '@/src/components/property/SimilarProperties';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { canNavigateBack } from '@/src/app/navigation/navHistory';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PromotionModal from '@/src/features/promotions/components/PromotionModal';
@@ -303,19 +304,29 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
   // Handlers
-  const handleBack = () => {
-    // Use browser history for proper PWA back navigation
-    // This preserves the user's navigation context (e.g., coming from saved properties, agents, etc.)
-    if (window.history.length > 1) {
-      // popstate handler in NavigationProvider will auto-detect back direction
+  const handleBack = useCallback(() => {
+    // Step back through history whenever the app has an entry of its own to
+    // step back to, so the button returns the visitor wherever they actually
+    // came from — the results, saved homes, an agent's page — and unwinds the
+    // stack instead of growing it.
+    //
+    // `canNavigateBack` asks the app's own history index, not
+    // `window.history.length`. The two disagree exactly where it matters: an
+    // installed PWA opened straight onto a shared listing already reports a
+    // length above 1, so that test sent `history.back()` to an entry belonging
+    // to whatever the app was launched from — which either did nothing visible
+    // or dropped the visitor out of the app entirely.
+    if (canNavigateBack()) {
       window.history.back();
-    } else {
-      // Fallback for direct navigation (e.g., shared link with no history)
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      const isRental = property.listingType === 'rent';
-      navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
+      return;
     }
-  };
+
+    // Nothing behind this page (a shared link, a fresh install): fall back to
+    // its parent list, animated as though we had stepped back to it.
+    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
+    const isRental = property.listingType === 'rent';
+    navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
+  }, [dispatch, navigate, property.listingType]);
 
   const handleFavoriteClick = async () => {
     if (!state.isAuthenticated && !state.user) {
@@ -825,7 +836,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           {/* Back button - larger tap target for PWA */}
           <button
             onClick={handleBack}
-            className="flex items-center gap-1.5 sm:gap-2 text-primary font-semibold hover:underline text-sm sm:text-base min-h-[44px] min-w-[44px] -ml-1 pl-1"
+            className="flex items-center gap-1.5 sm:gap-2 text-primary font-semibold hover:underline active:opacity-60 touch-manipulation text-sm sm:text-base min-h-[44px] min-w-[44px] -ml-1 pl-1"
             aria-label={t('property:navigation.goBackToSearch')}
           >
             <ArrowLeftIcon className="w-5 h-5" />

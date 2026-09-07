@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition, useReducer } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition, useReducer } from 'react';
 import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
@@ -569,10 +569,22 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     const handlePopState = () => {
       const pageChange = consumePageChange();
       if (!pageChange) {
+        // Same page, different entry — a filter in the query string. Nothing
+        // swaps, so this stays a transition: it must not block whatever the
+        // user is still doing on the page.
         checkUrlForRouting();
         return;
       }
-      runPageTransition(pageChange, checkUrlForRouting);
+      // A page change routes at default priority, not inside `startTransition`.
+      // A transition is deliberately interruptible and yields between slices,
+      // and React holds the *old* screen while one is in flight — which on a
+      // back press is precisely the wrong trade: the user has already left, and
+      // every slice React defers is another frame of a page they dismissed. It
+      // also has to land before the paired transition gives up waiting for it
+      // (`COMMIT_TIMEOUT_MS`), or the browser animates the outgoing page against
+      // a snapshot of itself and the real one appears afterwards with no motion
+      // at all.
+      runPageTransition(pageChange, checkUrlForRoutingInner);
     };
     window.addEventListener('popstate', handlePopState);
 
@@ -643,7 +655,13 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       : state.activeView;
 
   // Scroll handling on navigation.
-  useEffect(() => {
+  //
+  // Layout effect, not passive: this runs in the commit that swapped the page,
+  // before the browser paints it. A passive effect paints one frame at the
+  // wrong offset first — the top of a list the reader was halfway down — and a
+  // paired transition can capture that frame as the arriving page, which is
+  // what made going back jump after it had already animated.
+  useLayoutEffect(() => {
     /*
      * The viewport meta is deliberately left alone here.
      *

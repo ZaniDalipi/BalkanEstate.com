@@ -1,15 +1,47 @@
 // PropertyMapLink Component
 // 3D map experience with extruded buildings and shadow timelapse
 
-import React, { Suspense, lazy, useMemo } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { resolveMapDestination } from '@/shared/map/mapDestination';
 
 // Lazy load the 3D map component for better initial page load
-const Map3DBuildings = lazy(
-  () => import('@/features/map/components/Map3DBuildings')
-);
+const loadMap3D = () => import('@/features/map/components/Map3DBuildings');
+const Map3DBuildings = lazy(loadMap3D);
+
+/**
+ * Fetch the map's chunk once the browser is idle.
+ *
+ * Mounting the map and fetching the code for it are two different costs, and
+ * only the first one belongs near the viewport: the module is a plain network
+ * fetch that can happen while the reader is still looking at the photos, so
+ * that scrolling down to the section — or tapping "3D Location Map", which
+ * scrolls straight to it — finds the code already there and only has to build
+ * the map itself.
+ */
+function warmMap3DChunk(): () => void {
+  if (typeof window === 'undefined') return () => {};
+
+  let cancelled = false;
+  const fetchChunk = () => {
+    if (!cancelled) void loadMap3D().catch(() => {});
+  };
+
+  const idle = (window as Window & {
+    requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+  }).requestIdleCallback;
+  const handle = idle ? idle(fetchChunk, { timeout: 4000 }) : window.setTimeout(fetchChunk, 2000);
+
+  return () => {
+    cancelled = true;
+    if (idle) {
+      (window as Window & { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback?.(handle);
+    } else {
+      window.clearTimeout(handle);
+    }
+  };
+}
 
 interface PropertyMapLinkProps {
   property: Property;
@@ -19,22 +51,83 @@ interface PropertyMapLinkProps {
 }
 
 /**
- * Map loading fallback component
+ * Placeholder for the map: the same box it will occupy, so nothing shifts when
+ * it arrives.
+ *
+ * `heightClassName` is the map's own, not a second copy of it — the reservation
+ * has to be exactly the size of the thing being reserved, or the page reflows
+ * under the reader (and under a restored scroll offset) the moment it mounts.
+ *
+ * `busy` separates the two states this stands in for. Once the map is actually
+ * loading, the spinner says so. Before that it is a section the reader has not
+ * reached yet, and an animation running off-screen is only work.
  */
-const MapLoadingFallback: React.FC = () => (
-  <div className="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-xl animate-pulse flex items-center justify-center h-[420px] sm:h-[520px] lg:h-[650px]">
-    <div className="text-center">
-      <div className="relative w-12 h-12 mx-auto mb-3">
-        <div className="absolute inset-0 border-4 border-neutral-300 rounded-full" />
-        <div
-          className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"
-          style={{ animationDuration: '1s' }}
-        />
+const MapPlaceholder: React.FC<{ heightClassName: string; busy?: boolean }> = ({
+  heightClassName,
+  busy = false,
+}) => (
+  <div
+    className={`bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center ${heightClassName} ${busy ? 'animate-pulse' : ''}`}
+  >
+    {busy && (
+      <div className="text-center">
+        <div className="relative w-12 h-12 mx-auto mb-3">
+          <div className="absolute inset-0 border-4 border-neutral-300 rounded-full" />
+          <div
+            className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"
+            style={{ animationDuration: '1s' }}
+          />
+        </div>
+        <p className="text-neutral-500 text-sm font-medium">Loading map...</p>
       </div>
-      <p className="text-neutral-500 text-sm font-medium">Loading map...</p>
-    </div>
+    )}
   </div>
 );
+
+/**
+ * Mount the 3D map only once it is close to the viewport.
+ *
+ * The map is a live WebGL surface with its own tiles, its own animation loop
+ * and a teardown to match — and it sits well below the fold, under the gallery
+ * and the description. Mounting it with the page meant every listing opened
+ * paid for a map the visitor may never scroll to, and every back press out of
+ * the listing had to tear that map down inside the same commit that renders the
+ * page being returned to. Both of those land on the frames where the navigation
+ * is animating.
+ *
+ * `rootMargin` starts the work well before the section is reached, so scrolling
+ * down to it still finds the map already there.
+ */
+function useNearViewport<T extends HTMLElement>(ref: React.RefObject<T | null>): boolean {
+  const [near, setNear] = useState(false);
+
+  useEffect(() => {
+    if (near) return;
+    const node = ref.current;
+    if (!node) return;
+
+    // No IntersectionObserver (or a test environment without one): behave
+    // exactly as the page did before and mount straight away.
+    if (typeof IntersectionObserver === 'undefined') {
+      setNear(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '600px 0px' },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ref, near]);
+
+  return near;
+}
 
 /**
  * PropertyMapLink Component
@@ -85,8 +178,14 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
     ? 'h-[460px] sm:h-[600px] lg:h-[78vh]'
     : 'h-[420px] sm:h-[520px] lg:h-[650px]';
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isNearViewport = useNearViewport(containerRef);
+
+  useEffect(() => warmMap3DChunk(), []);
+
   return (
     <div
+      ref={containerRef}
       className={
         fullBleed
           ? 'bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden'
@@ -129,8 +228,10 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
       </div>
 
       {/* 3D Map with Buildings */}
-      {hasValidCoordinates ? (
-        <Suspense fallback={<MapLoadingFallback />}>
+      {!hasValidCoordinates ? null : !isNearViewport ? (
+        <MapPlaceholder heightClassName={heightClassName} />
+      ) : (
+        <Suspense fallback={<MapPlaceholder heightClassName={heightClassName} busy />}>
           <Map3DBuildings
             lat={property.lat}
             lng={property.lng}
@@ -150,7 +251,8 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             orientation={property.orientation}
           />
         </Suspense>
-      ) : (
+      )}
+      {!hasValidCoordinates && (
         <div className={`${heightClassName} bg-neutral-100 flex items-center justify-center`}>
           <div className="text-center text-neutral-500">
             <svg
