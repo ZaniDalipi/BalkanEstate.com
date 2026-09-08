@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { Property, Filters, initialFilters, SavedSearch } from '@/types';
-import { useUniversalSearch } from '@/src/features/search/universal/useUniversalSearch';
 import type { Suggestion } from '@/src/features/search/universal/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
@@ -98,9 +97,7 @@ export function useVillaSearch() {
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(deepLink.focus);
-    const searchWrapperRef = useRef<HTMLDivElement>(null);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
-    const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [mapBoundsJSON, setMapBoundsJSON] = useState<string | null>(null);
     const [drawnBoundsJSON, setDrawnBoundsJSON] = useState<string | null>(null);
@@ -219,16 +216,6 @@ export function useVillaSearch() {
                 { enableHighAccuracy: false, timeout: 5000, maximumAge: 600000 }
             );
         }
-    }, []);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target as Node)) {
-                setIsQueryInputFocused(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const focusMapOnProperty = state.searchPageState.focusMapOnProperty;
@@ -444,10 +431,12 @@ export function useVillaSearch() {
      * Places fly the map; a listing row is handled by the caller; the query
      * row is the text as typed. The canonical spelling of whatever was picked
      * goes back into the box, so what the user reads is what was searched.
+     *
+     * A Google Places row reaches this already carrying its coordinates: the
+     * box makes the second lookup before handing the pick over, so nothing
+     * here has to know which source answered.
      */
     const handleSuggestionClick = useCallback((suggestion: Suggestion) => {
-        setIsQueryInputFocused(false);
-
         if (suggestion.type === 'property') {
             setFilters(prev => ({ ...prev, query: suggestion.property.city }));
             return;
@@ -464,16 +453,6 @@ export function useVillaSearch() {
             });
         }
     }, []);
-
-    /**
-     * Suggestions come from the app-wide engine, so this page offers the same
-     * places, under the same names, as every other search box in the app.
-     */
-    const { suggestions, isSearching: isSearchingLocation } = useUniversalSearch({
-        query: filters.query,
-        properties: villaProperties,
-        enabled: isQueryInputFocused,
-    });
 
     return {
         t,
@@ -492,15 +471,10 @@ export function useVillaSearch() {
         setMobileView,
         isMobile,
         isTablet,
-        isQueryInputFocused,
-        setIsQueryInputFocused,
         toast,
         setToast,
         isDrawing,
         flyToTarget,
-        suggestions,
-        searchWrapperRef,
-        isSearchingLocation,
         hoveredPropertyId,
         setHoveredPropertyId,
         userLocation,
