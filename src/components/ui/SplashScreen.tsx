@@ -60,6 +60,25 @@ interface HelloGreetingProps {
 
 const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) => {
   const [showName, setShowName] = useState(false);
+  const [fontReady, setFontReady] = useState(false);
+
+  /* The name is written in Pacifico to match the handwritten "hello". Giving
+     the face a chance to arrive first avoids revealing the name in a fallback
+     and then snapping to the script mid-animation. Best effort only: the wait
+     is capped, and every path resolves, so a slow or blocked font request
+     delays the name briefly rather than stalling the splash. */
+  useEffect(() => {
+    if (!userName) return;
+    let cancelled = false;
+    const ready = () => { if (!cancelled) setFontReady(true); };
+    const timer = setTimeout(ready, 1200);
+    if (document.fonts?.load) {
+      document.fonts.load('400 48px Pacifico', userName).then(ready, ready);
+    } else {
+      ready();
+    }
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [userName]);
 
   const handleHelloAnimComplete = useCallback(() => {
     if (userName) {
@@ -77,13 +96,19 @@ const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) =
         onAnimationComplete={handleHelloAnimComplete}
       />
       <AnimatePresence>
-        {showName && userName && (
+        {showName && fontReady && userName && (
           <motion.p
-            initial={{ opacity: 0, y: 12, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-2 text-3xl sm:text-4xl md:text-5xl font-light text-neutral-500 tracking-wide"
-            style={{ fontFamily: "'SF Pro Display', system-ui, -apple-system, sans-serif" }}
+            /* Written on left-to-right like the "hello" stroke, rather than
+               faded in: same easing, and no `tracking-*`, which would pull the
+               joined script letters apart. */
+            initial={{ clipPath: 'inset(0 100% -20% 0)', opacity: 0 }}
+            animate={{ clipPath: 'inset(0 0% -20% 0)', opacity: 1 }}
+            transition={{
+              clipPath: { duration: 0.9, ease: 'easeInOut' },
+              opacity: { duration: 0.25 },
+            }}
+            className="mt-1 px-2 text-4xl sm:text-5xl md:text-6xl text-neutral-500"
+            style={{ fontFamily: "'Pacifico', 'Snell Roundhand', 'Brush Script MT', cursive" }}
             onAnimationComplete={() => {
               setTimeout(() => onComplete?.(), 150);
             }}
