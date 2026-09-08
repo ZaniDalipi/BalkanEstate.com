@@ -10,8 +10,8 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
-import { getGallerySources, warmGallery, shouldCoverFrame } from '../../../config/galleryImages';
+import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
@@ -105,6 +105,14 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
 const THUMB_ASPECT = 180 / 128;
 
 /**
+ * Candidate widths for a thumbnail card: 1x, 2x and 3x its 195px frame.
+ *
+ * The strip used to stop at 390 (2x), so every phone with a 3x screen — most of
+ * them — stretched a 2x file across a 3x card. 585 is that missing candidate.
+ */
+const THUMB_WIDTHS = [195, 390, 585];
+
+/**
  * One card in the thumbnail strip.
  *
  * A thumbnail is the only place a listing shows every photo at once, so a photo
@@ -143,8 +151,8 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
       <img
         // `limit` never crops and never upscales, so the card decides the
         // framing rather than the CDN guessing at it.
-        src={optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })}
-        srcSet={`${optimizeCloudinaryUrl(url, { width: 195, quality: 'auto', crop: 'limit' })} 195w, ${optimizeCloudinaryUrl(url, { width: 390, quality: 'auto', crop: 'limit' })} 390w`}
+        src={optimizeCloudinaryUrl(url, { width: 390, quality: GALLERY_QUALITY, crop: 'limit' })}
+        srcSet={cloudinarySrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
         sizes="(max-width: 640px) 180px, 195px"
         alt=""
         className={`relative w-full h-full ${cover ? 'object-cover' : 'object-contain'}`}
