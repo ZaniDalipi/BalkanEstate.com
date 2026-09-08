@@ -701,7 +701,12 @@
       "clearSearch": "Șterge căutarea",
       "searchResults": "Se afișează {{matches}} din {{total}} proprietăți",
       "noMatches": "Nicio proprietate nu corespunde căutării",
-      "noMatchesHint": "Încearcă un oraș, un tip de proprietate sau o parte din titlu."
+      "noMatchesHint": "Încearcă un oraș, un tip de proprietate sau o parte din titlu.",
+      "showingRange": "Se afișează {{from}}–{{to}} din {{total}}",
+      "pagination": "Pagini de anunțuri",
+      "previousPage": "Anterioara",
+      "nextPage": "Următoarea",
+      "goToPage": "Pagina {{page}}"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

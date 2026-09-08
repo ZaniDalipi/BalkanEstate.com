@@ -564,7 +564,12 @@
       "clearSearch": "Pastro kërkimin",
       "searchResults": "Duke shfaqur {{matches}} nga {{total}} prona",
       "noMatches": "Asnjë pronë nuk përputhet me kërkimin tuaj",
-      "noMatchesHint": "Provo një qytet, një lloj prone ose një pjesë të titullit."
+      "noMatchesHint": "Provo një qytet, një lloj prone ose një pjesë të titullit.",
+      "showingRange": "Duke treguar {{from}}–{{to}} nga {{total}}",
+      "pagination": "Faqet e listimeve",
+      "previousPage": "E mëparshme",
+      "nextPage": "Tjetra",
+      "goToPage": "Faqja {{page}}"
     },
     "marketInsights": {
       "title": "Local Market Insights",

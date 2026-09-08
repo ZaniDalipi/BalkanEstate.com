@@ -701,7 +701,12 @@
       "clearSearch": "Обриши претрагу",
       "searchResults": "Приказано {{matches}} од {{total}} некретнина",
       "noMatches": "Ниједна некретнина не одговара претрази",
-      "noMatchesHint": "Пробајте град, тип некретнине или део наслова."
+      "noMatchesHint": "Пробајте град, тип некретнине или део наслова.",
+      "showingRange": "Приказано {{from}}–{{to}} од {{total}}",
+      "pagination": "Странице огласа",
+      "previousPage": "Претходна",
+      "nextPage": "Следећа",
+      "goToPage": "Страница {{page}}"
     },
     "reviewsTab": {
       "verifiedReviews": "верификоване рецензије",

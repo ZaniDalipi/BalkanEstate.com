@@ -701,7 +701,12 @@
       "clearSearch": "Изчисти търсенето",
       "searchResults": "Показани {{matches}} от {{total}} имота",
       "noMatches": "Няма имоти, които да отговарят на търсенето",
-      "noMatchesHint": "Опитайте с град, тип имот или част от заглавието."
+      "noMatchesHint": "Опитайте с град, тип имот или част от заглавието.",
+      "showingRange": "Показани {{from}}–{{to}} от {{total}}",
+      "pagination": "Страници с обяви",
+      "previousPage": "Предишна",
+      "nextPage": "Следваща",
+      "goToPage": "Страница {{page}}"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани отзиви",
