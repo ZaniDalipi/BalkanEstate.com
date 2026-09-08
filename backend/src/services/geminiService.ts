@@ -540,6 +540,8 @@ export const restyleRoomImage = async (
   const isEmptyRoom = styleId === 'no-furniture';
   const isExterior = category === 'exterior';
   const isExtRefresh = styleId === 'ext-refresh';
+  // Emptying a room keeps its existing finishes, and an exterior has no ceiling to finish.
+  const finishSurfaces = !isEmptyRoom && !isExterior;
 
   const structure = `LOCKED ELEMENTS — COPY THESE THROUGH UNCHANGED (highest priority, overrides the style):
 Treat the following as a locked mask over the input photograph. Reproduce these pixels as they are. You may only clean dirt, dust, rubble and construction debris off them — nothing else about them may change.
@@ -560,13 +562,22 @@ Treat the following as a locked mask over the input photograph. Reproduce these 
 
 3. THE REST OF THE SHELL — same position, same size, same shape.
 - Doors, doorways, archways, pass-throughs and closet openings.
-- Walls, partitions, corners, wall angles and room proportions; ceiling height and ceiling shape including slopes, exposed beams, coffers and bulkheads; columns, pillars, posts, niches, alcoves, chimney breasts and fireplaces.
+- Walls, partitions, corners, wall angles and room proportions; columns, pillars, posts, niches, alcoves, chimney breasts and fireplaces.
+- Ceiling HEIGHT and ceiling GEOMETRY: the slope or pitch, and the position, direction and depth of every beam, coffer and bulkhead. Do not lower, raise or flatten the ceiling and do not move or delete a beam.${finishSurfaces ? ' The ceiling SURFACE is not locked — see WHAT MUST CHANGE below.' : ''}
 - Fixed services: radiators, air-conditioning units, vents, sockets, switches, thermostats and light points stay in place; their cover or finish may be updated, their position may not.
 - Do NOT open up walls, merge rooms, extend the space, "square off" an irregular room or otherwise improve the layout.
 - If a feature looks awkward, dated, unfinished or oddly placed, KEEP IT ANYWAY. This is a real photo of a real property for sale and must stay an honest picture of that same space.`;
 
+  const surfaces = !finishSurfaces ? '' : `WHAT MUST CHANGE — SURFACES AND CONTENTS:
+The locked list above is about POSITION and SHAPE, not about finish. The point of this edit is to furnish the space and finish its surfaces, and that includes the CEILING.
+- CEILING: finish it properly. Plaster and paint it smooth in a colour suited to the style, and cover any raw concrete slab, hollow-block or brick infill, patchwork, stains, exposed cabling and unfinished edges. Exposed beams stay where they are but get the style's finish (painted, plastered, clad or left as feature timber/concrete as the style calls for). Add ceiling light fittings that suit the style. Never change the ceiling's height or geometry while doing this, and never let a ceiling finish spill down over a window head or an opening.
+- WALLS: plaster and paint or clad bare block, brick and unfinished walls, and fit skirting and trim to suit the style.
+- FLOOR: lay a proper finished floor over raw screed or concrete.
+- CONTENTS: furniture, textiles, lighting, art, plants and decor, per the task below.
+A room that arrives as an unfinished shell should come back looking like a completed, habitable room in the chosen style — with the exact same windows, stairs and openings it started with.`;
+
   const subjectPreservation = `SUBJECT PRESERVATION (critical):
-- Change as LITTLE as possible beyond adding furnishings and updating surface finishes. When in doubt about an element, leave it exactly as it is.
+- Beyond finishing surfaces and adding furnishings, change as LITTLE as possible. When in doubt about an element, leave it exactly as it is.
 - Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door openings, staircases, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions, external steps and number of floors. The structural shell must be unchanged.
 - Built-in fixtures (bathtub, shower, sink, toilet, tiles, kitchen cabinets/counters, etc.) are NOT part of the structure: keep them in their existing POSITIONS with realistic plumbing, but their style, material and finish SHOULD change to match the chosen style.
 - Keep the SAME camera angle, perspective and framing as the original photo.
@@ -601,7 +612,7 @@ STYLE BRIEF — ${styleLabel}: ${stylePrompt}
 STYLE BRIEF — ${styleLabel}: ${stylePrompt}
 - Work ADDITIVELY. Your main job is to ADD what the style needs into the space that is already there: furniture, seating, tables, storage, rugs, cushions and textiles, lighting and lamps, artwork, mirrors, plants and decor — all clearly belonging to the "${styleLabel}" style and arranged the way the room would really be used.
 - Place the new furnishings in the OPEN FLOOR AREA only. Keep every window, staircase, stairwell opening, landing, doorway and walkway completely clear and fully visible, and do not stand furniture in front of radiators, fireplaces or doors. Add no window coverings of any kind.
-- You may also update SURFACE FINISHES to suit the style — wall paint/treatment, flooring finish, ceiling finish and the overall color palette. A finish is a thin skin over what is already there: it may never move, resize, cover or delete anything. Repainting a wall keeps every window in that wall at its exact size and shape; laying a new floor keeps the stairs and leaves the stairwell opening open; window frames, door frames, skirting, mouldings, beams and railings are refinished in place, never removed or reshaped.
+- Also update SURFACE FINISHES to suit the style — wall paint/treatment, flooring, ceiling finish and lighting, and the overall color palette. Do not leave a raw or unfinished ceiling, wall or floor behind; a finished room is part of the result. A finish is a thin skin over what is already there: it may never move, resize, cover or delete anything. Repainting a wall keeps every window in that wall at its exact size and shape; laying a new floor keeps the stairs and leaves the stairwell opening open; window frames, door frames, skirting, mouldings, beams and railings are refinished in place, never removed or reshaped.
 - Also restyle the built-in fixtures and fittings that are present in the room:
   · Bathroom: the bathtub, shower, vanity, sink/basin, faucets and taps, toilet, wall & floor tiles, mirror, towel rails, radiators and all hardware.
   · Kitchen: the cabinetry, countertops, backsplash, sink, faucet and visible appliances.
@@ -612,7 +623,9 @@ STYLE BRIEF — ${styleLabel}: ${stylePrompt}
   const prompt = `You are an expert interior designer and architectural photographer. Edit the provided real-estate photograph exactly as instructed. You are DRESSING an existing real room, not designing a new one: the architecture stays, the contents and finishes change.
 
 ${structure}
-
+${surfaces ? `
+${surfaces}
+` : ''}
 ${subjectPreservation}
 
 ${framing}
@@ -630,7 +643,7 @@ PHOTOREALISM (this is critical — the result must look like a REAL photo, not A
 FINAL CHECK before you output — put your result side by side with the input photograph and verify, one by one:
 - WINDOWS: same number, same positions, same width and height, same sill and head height, same shape and frame divisions? None enlarged, extended to the floor, turned into a door, walled over, invented, curtained or blocked by furniture?
 - STAIRS: every staircase, step and railing still present, in the same place and still clearly visible? Any stairwell opening still open, not floored over and not covered by furniture? No staircase invented?
-- SHELL: same doors and openings, walls, corners, ceiling shape, beams, columns, fireplaces and radiators, in the same positions?
+- SHELL: same doors and openings, walls, corners, columns, fireplaces and radiators in the same positions? Same ceiling height, and beams still on the same lines (their finish may differ)?${finishSurfaces ? '\n- FINISH: are the ceiling, walls and floor actually finished in the chosen style rather than left raw?' : ''}
 - FRAMING: same camera angle, same zoom, nothing cropped or added beyond the original edges?
 If any of these differs from the input, correct it and restore the original element before answering. Preserving the real room matters more than achieving the style.
 
