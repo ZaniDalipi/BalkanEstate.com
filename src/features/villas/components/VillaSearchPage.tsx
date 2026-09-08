@@ -8,9 +8,9 @@ import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
+import VillaLocationBar from './VillaLocationBar';
 import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
-import UniversalSearchBox from '@/src/features/search/universal/UniversalSearchBox';
 import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, Bars3Icon, Squares2x2Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
@@ -60,6 +60,57 @@ const VillaAnimationStyles = () => (
         0 0 0 1.5px rgba(232,184,32,0.95),
         0 0 44px rgba(232,184,32,0.42),
         0 0 80px rgba(232,184,32,0.22);
+    }
+
+    /* ── Media clip ──
+       The card is a 3D-transformed element (.villa-tilt-card), and WebKit does
+       not clip transformed descendants to a transformed ancestor's rounded
+       overflow box. That let the parallax layer — and PropertyImage's blurred
+       scale(1.5) backdrop — paint outside the card on iOS. clip-path is
+       honoured in that situation, so the media gets its own clip that matches
+       the card's 1rem radius. */
+    .villa-img-clip {
+      clip-path: inset(0 round 1rem);
+      -webkit-clip-path: inset(0 round 1rem);
+    }
+
+    /* ── Image cross-fade layers ── */
+    .villa-img-layer {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* ── Opting the card's small controls out of the global touch-target rule ──
+       index.html sets button { min-height: 44px } under (pointer: coarse).
+       That rule is unlayered, so it beats every Tailwind utility — those live
+       in @layer utilities, and layered styles always lose to unlayered ones no
+       matter how specific they are. min-h-0 in the markup therefore does
+       nothing, and on phones the indicators stretched into tall white bars and
+       the heart into an oval. These selectors are unlayered too, and a class
+       out-specifies a bare element, so they win. Only the floor is lifted here
+       — the elements' own sizes stay in the markup. */
+    .villa-dots button,
+    .villa-nav-arrow,
+    .villa-fav-btn {
+      min-height: 0;
+    }
+
+    /* Arrows reveal on hover, which touch devices never fire. Rather than
+       leaving them invisible-but-tappable there, they are shown permanently and
+       sized up to a proper thumb target: on a phone the dots and a swipe were
+       otherwise the only way through the gallery. Unlayered, so these win over
+       the opacity/size utilities in the markup without !important. */
+    @media (hover: none), (pointer: coarse) {
+      .villa-nav-arrow {
+        opacity: 1;
+        width: 36px;
+        height: 36px;
+        background: rgba(0,0,0,0.45);
+      }
+      .villa-nav-arrow svg { width: 16px; height: 16px; }
+      /* Clear of the 24px dot row above and the CTA in the middle. */
+      .villa-nav-arrow-prev { left: 8px; }
+      .villa-nav-arrow-next { right: 8px; }
     }
 
     /* ── Parallax image layer ── */
@@ -157,9 +208,11 @@ const VillaAnimationStyles = () => (
       .villa-tilt-card,
       .villa-border-trace,
       .villa-img-wrap,
+      .villa-img-layer,
       .villa-cta-btn,
       .luxury-chip {
         animation: none !important;
+        /* !important also overrides the per-layer inline fade timing */
         transition: none !important;
       }
       .villa-card-fly { opacity: 1; }
@@ -418,6 +471,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         baseFilteredProperties,
         listProperties,
         activeFilters,
+        fallbackLocation,
+        isTextRelaxed,
+        isSearchingLocation,
         listingMode,
         handleListingModeChange,
         toggleDrawing,
@@ -430,18 +486,12 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         handleRecenterOnUser,
         handleResetView,
         onFlyComplete,
-        // Location search
-        mapCentre,
-        isSearchingLocation,
-        fallbackLocation,
-        isTextRelaxed,
-        handleSelectSuggestion,
+        handleSuggestionClick,
         handleDestinationSelect,
         isSaving,
         handleSaveSearchArea,
         toast,
         setToast,
-        fetchVillas,
     } = useVillaSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
@@ -619,8 +669,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         <div className="flex-shrink-0" style={{ height: headerHeight }} aria-hidden />
                     )}
 
-                    {/* Desktop header — sticky, new 3-tier design */}
-                    <div className="hidden lg:block sticky top-0 z-20">
+                    {/* Desktop header — sticky, new 3-tier design.
+                        Above the results bar's z-[100], not because the two
+                        ever overlap — the bar sticks to the top of the scroll
+                        container below this — but because the search box's
+                        suggestion list hangs out of this header and down over
+                        it. `sticky` + a z-index makes this header a stacking
+                        context, so the dropdown's own z-index is confined to
+                        it: at z-20 the whole subtree painted under the bar, and
+                        the bar cut a white stripe through the suggestions. */}
+                    <div className="hidden lg:block sticky top-0 z-[110]">
 
                         {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div
@@ -666,21 +724,13 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             className="flex items-center px-4"
                             style={{ height: '44px', background: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
                         >
-                            {/* The app's one search box, so a town, a resort, a
-                                street address or a villa itself all answer
-                                here exactly as they do on the buy page. */}
-                            <UniversalSearchBox
-                                value={filters.query}
-                                onValueChange={(value) => handleFilterChange('query', value)}
-                                onSelect={handleSelectSuggestion}
-                                onSubmit={handleSearch}
+                            <VillaLocationBar
+                                query={filters.query}
                                 properties={villaProperties}
-                                country={filters.country !== 'any' ? filters.country : undefined}
-                                near={mapCentre}
-                                variant="bare"
-                                className="w-full"
-                                placeholder={t('villas:filters.searchCity', 'Search by location...')}
-                                aria-label={t('villas:filters.searchCity', 'Search by location...')}
+                                onQueryChange={(value) => handleFilterChange('query', value)}
+                                onSelectSuggestion={handleSuggestionClick}
+                                onSearch={handleSearch}
+                                variant="desktop"
                             />
                         </div>
 
@@ -846,7 +896,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             ) : error ? (
                                 <div className="text-center py-12">
                                     <p className="text-sm text-red-400 mb-2">{error}</p>
-                                    <button onClick={() => fetchVillas()} className="text-sm text-[var(--color-primary)] hover:underline">
+                                    <button onClick={handleSearch} className="text-sm text-[var(--color-primary)] hover:underline">
                                         {t('common:tryAgain')}
                                     </button>
                                 </div>
@@ -994,19 +1044,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800" />
                                         </button>
-                                        <UniversalSearchBox
-                                            value={filters.query}
-                                            onValueChange={(value) => handleFilterChange('query', value)}
-                                            onSelect={handleSelectSuggestion}
-                                            onSubmit={handleSearch}
-                                            properties={villaProperties}
-                                            country={filters.country !== 'any' ? filters.country : undefined}
-                                            near={mapCentre}
-                                            variant="bare"
-                                            className="flex-1 min-w-0"
-                                            placeholder={t('villas:filters.searchCity', 'Search by location...')}
-                                            aria-label={t('villas:filters.searchCity', 'Search by location...')}
-                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <VillaLocationBar
+                                                query={filters.query}
+                                                properties={villaProperties}
+                                                onQueryChange={(value) => handleFilterChange('query', value)}
+                                                onSelectSuggestion={handleSuggestionClick}
+                                                onSearch={handleSearch}
+                                                variant="mobile"
+                                            />
+                                        </div>
                                         {/* Filter button with active count badge */}
                                         <div className="relative">
                                             <button

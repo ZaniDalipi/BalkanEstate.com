@@ -2,14 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 /**
- * Searching the luxury villas page.
+ * Searching the luxury villas page, through the hook.
  *
- * Same complaint the rent page had: typing a place did nothing to the map,
- * because `handleSearch` only refetched the collection. It now runs the buy
- * page's search — parse the sentence, ask the gazetteer, then the geocoder —
- * with the villa page's own two rules: the collection stays luxury villas,
- * and "for sale" in the sentence moves the market tabs rather than being
- * ignored.
+ * Where the map goes for a given string is `resolveVillaSearchTarget`'s
+ * decision and is covered directly in `villa-search-map.test.ts`; these cover
+ * what the hook does around it — reading the sentence, holding the page to
+ * luxury villas while letting the market move, and answering with something
+ * rather than an empty page when the text matches no villa.
  */
 
 const searchLocation = vi.fn();
@@ -109,20 +108,6 @@ describe('useVillaSearch — searching', () => {
     expect(searchLocation).not.toHaveBeenCalled();
   });
 
-  it('geocodes an address the gazetteer has never heard of, and flies there', async () => {
-    searchLocation.mockResolvedValue([
-      { lat: '42.2800', lon: '18.8300', boundingbox: ['0', '0', '0', '0'], display_name: 'Jadranski put 4' },
-    ]);
-    const { result } = await mountHook();
-
-    await act(async () => {
-      await result.current.handleSearch('Obala Iva Novakovica 3');
-    });
-
-    expect(searchLocation).toHaveBeenCalledWith('Obala Iva Novakovica 3');
-    expect(result.current.flyToTarget).toEqual({ center: [42.28, 18.83], zoom: 13 });
-  });
-
   it('stays on luxury villas but lets the sentence move the market', async () => {
     const { result } = await mountHook();
 
@@ -134,6 +119,9 @@ describe('useVillaSearch — searching', () => {
     expect(result.current.filters.propertyType).toBe('luxury-villa');
     expect(result.current.activeFilters.propertyType).toBe('luxury-villa');
     expect(result.current.listingMode).toBe('sale');
+    // The place inside the sentence is what the map is asked about, not the
+    // whole sentence — "4 bedroom villa in ... for sale" locates nothing.
+    expect(result.current.flyToTarget?.center[0]).toBeCloseTo(42.29, 1);
   });
 
   it('does not empty the list while a place name is still being typed', async () => {

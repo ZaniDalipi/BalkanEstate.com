@@ -8,6 +8,7 @@ import {
   normalizeConstructionStatus,
 } from '@/shared/property/construction';
 import {
+  MEASURED_ATTRIBUTES,
   PARKING_TYPES,
   attributesForType,
   isParkingType,
@@ -663,12 +664,19 @@ export function validateYearBuilt(year: number | string): ValidationResult {
  *
  * The counts share one bound: nothing here is a number of rooms, spaces or
  * WCs beyond `MAX_ATTRIBUTE_COUNT`, and anything larger is a typo rather than
- * a very large building.
+ * a very large building. Areas are bounded separately — see
+ * `MAX_ATTRIBUTE_AREA`.
  */
 export const MAX_ATTRIBUTE_COUNT = 999;
 
-/** Attributes that measure an area rather than count things, so may be fractional. */
-const MEASURED_ATTRIBUTES = new Set<string>(['openPlanArea']);
+/**
+ * The largest area a listing may claim, in m² — 100 hectares.
+ *
+ * A villa's land runs to thousands of square metres, so the count bound would
+ * reject an honest plot; still bounded, because a plot the size of a city is a
+ * mistyped digit. Mirrors the backend's `MAX_ATTRIBUTE_AREA`.
+ */
+export const MAX_ATTRIBUTE_AREA = 1_000_000;
 
 /**
  * Which attribute was rejected, so the form can paint that field red instead
@@ -707,8 +715,9 @@ export function validateTypeAttributes(
     if (measured < 0) {
       return { isValid: false, attribute, error: `${attribute} cannot be negative` };
     }
-    if (measured > MAX_ATTRIBUTE_COUNT) {
-      return { isValid: false, attribute, error: `${attribute} cannot be more than ${MAX_ATTRIBUTE_COUNT}` };
+    const max = MEASURED_ATTRIBUTES.has(attribute) ? MAX_ATTRIBUTE_AREA : MAX_ATTRIBUTE_COUNT;
+    if (measured > max) {
+      return { isValid: false, attribute, error: `${attribute} cannot be more than ${max}` };
     }
   }
 

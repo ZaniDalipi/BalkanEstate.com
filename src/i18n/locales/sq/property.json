@@ -156,7 +156,11 @@
     "toilets": "Tualete (WC)",
     "storageRooms": "Dhoma depozitimi",
     "offices": "Zyrë / studio",
-    "propertyType": "Lloji i Pronës"
+    "propertyType": "Lloji i Pronës",
+    "landArea": "Sipërfaqja e truallit",
+    "buildingArea": "Sipërfaqja e ndërtimit",
+    "grossArea": "Sipërfaqja bruto",
+    "netArea": "Sipërfaqja neto"
   },
   "distances": {
     "title": "Distancat",

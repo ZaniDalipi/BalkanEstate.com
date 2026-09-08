@@ -139,6 +139,10 @@
       "description": "Описание",
       "addTags": "Add tags...",
       "openPlanArea": "Открита площ (m²)",
+      "landArea": "Площ на парцела (m²)",
+      "buildingArea": "Застроена площ (m²)",
+      "grossArea": "Бруто площ (m²)",
+      "netArea": "Нето площ (m²)",
       "parkingType": "Тип паркинг",
       "parkingSpaces": "Места",
       "officeRooms": "Офиси"

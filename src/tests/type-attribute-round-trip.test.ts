@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TYPE_ATTRIBUTES, attributesForType, copyTypeAttributes } from '@/shared/property/typeAttributes';
-import { validateTypeAttributes } from '@/shared/utils/validation';
+import { validateTypeAttributes, MAX_ATTRIBUTE_AREA } from '@/shared/utils/validation';
 import {
     ATTRIBUTE_FIELDS,
     FIELD_ERROR_ORDER,
@@ -100,7 +100,15 @@ describe('areas may be fractional, counts may not', () => {
 
     it('refuses a negative or absurd area', () => {
         expect(validateTypeAttributes('commercial', { openPlanArea: -1 }).isValid).toBe(false);
-        expect(validateTypeAttributes('commercial', { openPlanArea: 100000 }).isValid).toBe(false);
+        expect(validateTypeAttributes('commercial', { openPlanArea: MAX_ATTRIBUTE_AREA + 1 }).isValid).toBe(false);
+    });
+
+    it('bounds an area by the area limit, not by the room-count limit', () => {
+        // Areas are bounded separately from counts: 999 is a sane ceiling for
+        // bedrooms and far too low for a floor plate or a plot, so a warehouse
+        // of 5,000 m² is a listing rather than a typo.
+        expect(validateTypeAttributes('commercial', { openPlanArea: 5000 }).isValid).toBe(true);
+        expect(validateTypeAttributes('commercial', { offices: 5000 }).isValid).toBe(false);
     });
 
     it('checks only the attributes the type is described by', () => {

@@ -139,6 +139,10 @@
       "description": "Опис",
       "addTags": "Додадете ознаки...",
       "openPlanArea": "Отворен простор (m²)",
+      "landArea": "Површина на земјиште (m²)",
+      "buildingArea": "Површина на објект (m²)",
+      "grossArea": "Бруто површина (m²)",
+      "netArea": "Нето површина (m²)",
       "parkingType": "Тип на паркинг",
       "parkingSpaces": "Места",
       "officeRooms": "Канцеларии"
