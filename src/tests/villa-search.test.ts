@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 /**
- * Searching the rent page.
+ * Searching the luxury villas page.
  *
- * The complaint these cover: typing a place into the rent page's search box
- * did nothing — the map stayed where it was, because the page's `handleSearch`
- * was a no-op. It now runs the buy page's search (parse the sentence, ask the
- * gazetteer, then the geocoder) with the rent tab's own constraint: whatever
- * the sentence says, the listings stay rentals.
+ * Same complaint the rent page had: typing a place did nothing to the map,
+ * because `handleSearch` only refetched the collection. It now runs the buy
+ * page's search — parse the sentence, ask the gazetteer, then the geocoder —
+ * with the villa page's own two rules: the collection stays luxury villas,
+ * and "for sale" in the sentence moves the market tabs rather than being
+ * ignored.
  */
 
 const searchLocation = vi.fn();
@@ -52,21 +53,21 @@ vi.mock('@/context/AppContext', () => ({
   }),
 }));
 
-const { useRentalSearch } = await import('@/src/features/rental/hooks/useRentalSearch');
+const { useVillaSearch } = await import('@/src/features/villas/hooks/useVillaSearch');
 
-const rental = (overrides: Record<string, unknown> = {}) => ({
-  id: 'r1',
-  title: 'Apartment in Tirana',
-  address: 'Rruga e Kavajes 12',
-  city: 'Tirana',
-  country: 'Albania',
-  lat: 41.3275,
-  lng: 19.8187,
-  price: 500,
-  beds: 2,
-  baths: 1,
-  sqft: 70,
-  propertyType: 'apartment',
+const villa = (overrides: Record<string, unknown> = {}) => ({
+  id: 'v1',
+  title: 'Villa in Budva',
+  address: 'Jadranski put 4',
+  city: 'Budva',
+  country: 'Montenegro',
+  lat: 42.2911,
+  lng: 18.8401,
+  price: 2000,
+  beds: 4,
+  baths: 3,
+  sqft: 300,
+  propertyType: 'luxury-villa',
   listingType: 'rent',
   status: 'available',
   seller: { type: 'private', name: '', phone: '' },
@@ -79,7 +80,7 @@ beforeEach(() => {
   dispatch.mockReset();
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
     ok: true,
-    json: async () => ({ properties: [rental()] }),
+    json: async () => ({ properties: [villa()], pagination: { total: 1 } }),
   }));
 });
 
@@ -88,50 +89,51 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** Mount the hook and let the initial rentals fetch settle. */
+/** Mount the hook and let the initial villa fetch settle. */
 const mountHook = async () => {
-  const view = renderHook(() => useRentalSearch());
+  const view = renderHook(() => useVillaSearch());
   await waitFor(() => expect(view.result.current.isLoading).toBe(false));
   return view;
 };
 
-describe('useRentalSearch — searching', () => {
+describe('useVillaSearch — searching', () => {
   it('flies the map to a place the app already knows, without asking the geocoder', async () => {
     const { result } = await mountHook();
 
     await act(async () => {
-      await result.current.handleSearch('Tirana');
+      await result.current.handleSearch('Budva');
     });
 
-    expect(result.current.flyToTarget?.center[0]).toBeCloseTo(41.3275, 2);
-    expect(result.current.flyToTarget?.center[1]).toBeCloseTo(19.8187, 2);
+    expect(result.current.flyToTarget?.center[0]).toBeCloseTo(42.29, 1);
+    expect(result.current.flyToTarget?.center[1]).toBeCloseTo(18.84, 1);
     expect(searchLocation).not.toHaveBeenCalled();
   });
 
   it('geocodes an address the gazetteer has never heard of, and flies there', async () => {
     searchLocation.mockResolvedValue([
-      { lat: '41.3200', lon: '19.8100', boundingbox: ['0', '0', '0', '0'], display_name: 'Rruga e Kavajes 12' },
+      { lat: '42.2800', lon: '18.8300', boundingbox: ['0', '0', '0', '0'], display_name: 'Jadranski put 4' },
     ]);
     const { result } = await mountHook();
 
     await act(async () => {
-      await result.current.handleSearch('Rruga e Kavajes 12');
+      await result.current.handleSearch('Obala Iva Novakovica 3');
     });
 
-    expect(searchLocation).toHaveBeenCalledWith('Rruga e Kavajes 12');
-    expect(result.current.flyToTarget).toEqual({ center: [41.32, 19.81], zoom: 13 });
+    expect(searchLocation).toHaveBeenCalledWith('Obala Iva Novakovica 3');
+    expect(result.current.flyToTarget).toEqual({ center: [42.28, 18.83], zoom: 13 });
   });
 
-  it('reads filters out of the sentence but never leaves the rent listings', async () => {
+  it('stays on luxury villas but lets the sentence move the market', async () => {
     const { result } = await mountHook();
 
     await act(async () => {
-      await result.current.handleSearch('2 bedroom apartment in Tirana for sale');
+      await result.current.handleSearch('4 bedroom villa in Budva for sale');
     });
 
-    expect(result.current.filters.beds).toBe(2);
-    expect(result.current.filters.listingType).toBe('rent');
-    expect(result.current.activeFilters.listingType).toBe('rent');
+    expect(result.current.filters.beds).toBe(4);
+    expect(result.current.filters.propertyType).toBe('luxury-villa');
+    expect(result.current.activeFilters.propertyType).toBe('luxury-villa');
+    expect(result.current.listingMode).toBe('sale');
   });
 
   it('does not empty the list while a place name is still being typed', async () => {
@@ -140,30 +142,45 @@ describe('useRentalSearch — searching', () => {
     vi.useFakeTimers();
 
     act(() => {
-      result.current.handleFilterChange('query', 'Tir');
+      result.current.handleFilterChange('query', 'Bud');
     });
 
-    // The box shows the keystroke; the applied filters have not moved yet.
-    expect(result.current.filters.query).toBe('Tir');
+    expect(result.current.filters.query).toBe('Bud');
     expect(result.current.activeFilters.query).toBe('');
 
     act(() => {
       vi.advanceTimersByTime(400);
     });
-    expect(result.current.activeFilters.query).toBe('Tir');
+    expect(result.current.activeFilters.query).toBe('Bud');
   });
 
-  it('falls back to what is in the area when the typed text matches no rental', async () => {
+  it('falls back to what is in the area when the typed text matches no villa', async () => {
     const { result } = await mountHook();
 
     // An address none of the listings carry in its own text.
     await act(async () => {
-      await result.current.handleSearch('Bulevardi Zogu i Pare 88');
+      await result.current.handleSearch('Obala Iva Novakovica 3');
     });
 
-    // Nothing text-matches the address, so the map view answers instead of an
-    // empty page — and the page is told the answer is a looser one.
     expect(result.current.listProperties).toHaveLength(1);
     expect(result.current.isTextRelaxed).toBe(true);
+  });
+
+  it('searches a destination chip without a lookup, and toggles it off', async () => {
+    const { result } = await mountHook();
+    const destination = { query: 'Budva', center: [42.2911, 18.8401] as [number, number], zoom: 12 };
+
+    act(() => {
+      result.current.handleDestinationSelect(destination);
+    });
+    expect(result.current.activeFilters.query).toBe('Budva');
+    expect(result.current.flyToTarget).toEqual({ center: destination.center, zoom: 12 });
+    expect(searchLocation).not.toHaveBeenCalled();
+
+    // Clicking the active chip again clears it and leaves the map alone.
+    act(() => {
+      result.current.handleDestinationSelect(destination);
+    });
+    expect(result.current.activeFilters.query).toBe('');
   });
 });

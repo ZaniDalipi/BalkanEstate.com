@@ -445,7 +445,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
             <div className="flex flex-col gap-2.5 pt-1">
                 <Button
                     variant="cool"
-                    onClick={onSearch}
+                    onClick={() => onSearch()}
                     className="w-full text-sm font-semibold rounded-xl py-3"
                 >
                     {t('villas:filters.search', 'Search Villas')}

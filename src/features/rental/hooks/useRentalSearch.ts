@@ -8,7 +8,8 @@ import { searchPlaces } from '@/src/features/search/universal/places';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties } from '@/utils/propertyUtils';
+import { narrowToMapView } from '@/src/features/search/mapList';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { getCountryData } from '@/constants/countries';
@@ -21,59 +22,6 @@ export const serializeBounds = (bounds: L.LatLngBounds): string => {
     return JSON.stringify({
         _southWest: { lat: sw.lat, lng: sw.lng },
         _northEast: { lat: ne.lat, lng: ne.lng }
-    });
-};
-
-/**
- * Promoted rentals first, then whatever ordering the user picked — the buy
- * page's ordering, kept in one place so the strict and relaxed result sets
- * cannot drift apart.
- */
-const sortRentals = (properties: Property[], sortBy?: string): Property[] => {
-    const now = Date.now();
-
-    const getPromotionScore = (p: Property) => {
-        const isActive = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
-        if (!isActive) return 0;
-        const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
-        return (tierScores[p.promotionTier || 'standard'] || 0) + (p.hasUrgentBadge ? 5 : 0);
-    };
-
-    const toTimestamp = (v: number | string | Date | undefined | null): number => {
-        if (!v) return 0;
-        if (typeof v === 'number') return v;
-        if (typeof v === 'string') return new Date(v).getTime();
-        if (v instanceof Date) return v.getTime();
-        return 0;
-    };
-
-    const getPropertyTime = (p: Property) => Math.max(toTimestamp(p.lastRenewed), toTimestamp(p.createdAt));
-
-    return [...properties].sort((a, b) => {
-        const sA = getPromotionScore(a);
-        const sB = getPromotionScore(b);
-        if (sA !== sB) return sB - sA;
-
-        switch (sortBy) {
-            case 'price_asc': return a.price - b.price;
-            case 'price_desc': return b.price - a.price;
-            case 'sqft_asc': return a.sqft - b.sqft;
-            case 'sqft_desc': return b.sqft - a.sqft;
-            case 'beds_desc': return b.beds - a.beds;
-            case 'baths_desc': return b.baths - a.baths;
-            case 'oldest': return (a.createdAt || 0) - (b.createdAt || 0);
-            case 'year_built_desc': return (b.yearBuilt || 0) - (a.yearBuilt || 0);
-            case 'price_reduced': {
-                const dA = a.hasDiscount ? 1 : 0;
-                const dB = b.hasDiscount ? 1 : 0;
-                if (dA !== dB) return dB - dA;
-                return getPropertyTime(b) - getPropertyTime(a);
-            }
-            case 'featured':
-            case 'newest':
-            default:
-                return getPropertyTime(b) - getPropertyTime(a);
-        }
     });
 };
 
@@ -292,7 +240,7 @@ export function useRentalSearch() {
     // Bounds are deliberately NOT applied here: the map draws every rental that
     // matches the filters, and only the list follows the viewport (below).
     const baseFilteredProperties = useMemo(
-        () => sortRentals(filterProperties(rentalProperties, activeFilters), activeFilters.sortBy),
+        () => filterAndSortProperties(rentalProperties, activeFilters),
         [rentalProperties, activeFilters]
     );
 
@@ -309,8 +257,8 @@ export function useRentalSearch() {
     const needsRelaxedText = baseFilteredProperties.length === 0 && activeFilters.query.trim() !== '';
     const relaxedProperties = useMemo(() => {
         if (!needsRelaxedText) return null;
-        const relaxed = filterProperties(rentalProperties, { ...activeFilters, query: '' });
-        return relaxed.length > 0 ? sortRentals(relaxed, activeFilters.sortBy) : null;
+        const relaxed = filterAndSortProperties(rentalProperties, { ...activeFilters, query: '' });
+        return relaxed.length > 0 ? relaxed : null;
     }, [needsRelaxedText, rentalProperties, activeFilters]);
 
     /**
@@ -322,57 +270,17 @@ export function useRentalSearch() {
      * are shown instead of an empty screen, with `fallbackLocation` naming
      * where they actually are.
      */
-    const { listProperties, fallbackLocation } = useMemo(() => {
-        // The strict search, or — when it found nothing for the typed text —
-        // everything the other filters allow, located by the map instead.
-        const source = relaxedProperties ?? baseFilteredProperties;
-
-        const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) =>
-            Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
-
-        const getSmartFallback = (centerLat: number, centerLng: number): { properties: Property[]; location: string | null } => {
-            if (source.length === 0) return { properties: [], location: null };
-
-            const byDistance = [...source].sort((a, b) =>
-                getDistance(centerLat, centerLng, a.lat, a.lng) - getDistance(centerLat, centerLng, b.lat, b.lng)
-            );
-            const closest = byDistance[0];
-
-            // Priority 1: the same city as the nearest rental.
-            const sameCity = byDistance.filter(p => p.city?.toLowerCase() === closest.city?.toLowerCase());
-            if (sameCity.length > 0) return { properties: sameCity, location: closest.city || null };
-
-            // Priority 2: the same country, nearest first.
-            const sameCountry = byDistance.filter(p => p.country?.toLowerCase() === closest.country?.toLowerCase());
-            if (sameCountry.length > 0) {
-                return { properties: sameCountry, location: sameCountry[0]?.city || closest.country || null };
-            }
-
-            // Priority 3: everything, nearest first.
-            return { properties: byDistance, location: closest.city || closest.country || null };
-        };
-
-        if (drawnBounds) {
-            const withinDrawn = source.filter(p => drawnBounds.contains(L.latLng(p.lat, p.lng)));
-            // An area with nothing in it falls through to the viewport rules
-            // rather than showing an empty list.
-            if (withinDrawn.length > 0) return { listProperties: withinDrawn, fallbackLocation: null };
-        }
-
-        if (mapBounds && !isLoading && source.length > 0) {
-            const withinView = source.filter(p => mapBounds.contains(L.latLng(p.lat, p.lng)));
-            if (withinView.length > 0) return { listProperties: withinView, fallbackLocation: null };
-
-            const centre = mapBounds.getCenter();
-            const fallback = getSmartFallback(centre.lat, centre.lng);
-            if (fallback.properties.length === 0) {
-                return { listProperties: source, fallbackLocation: null };
-            }
-            return { listProperties: fallback.properties, fallbackLocation: fallback.location };
-        }
-
-        return { listProperties: source, fallbackLocation: null };
-    }, [baseFilteredProperties, relaxedProperties, drawnBounds, mapBounds, isLoading]);
+    const { listProperties, fallbackLocation } = useMemo(
+        () => narrowToMapView({
+            // The strict search, or — when it found nothing for the typed
+            // text — everything the other filters allow, located by the map.
+            properties: relaxedProperties ?? baseFilteredProperties,
+            drawnBounds,
+            mapBounds,
+            ready: !isLoading,
+        }),
+        [baseFilteredProperties, relaxedProperties, drawnBounds, mapBounds, isLoading]
+    );
 
     /**
      * True when the list is answering a looser question than the one typed —
