@@ -541,22 +541,36 @@ export const restyleRoomImage = async (
   const isExterior = category === 'exterior';
   const isExtRefresh = styleId === 'ext-refresh';
 
-  const structure = `EXISTING STRUCTURE — NEVER REMOVE, NEVER MOVE (highest priority):
-- The shell of this space is FIXED. You may NOT add, delete, move, resize, reshape, hide or "tidy away" any architectural element. Everything structural in the input photo must still be there, in the same place, in the output.
-- Staircases: keep every staircase, step, tread, riser, landing, mezzanine and change of floor level, plus its railing, banister, balustrade, newel posts and spindles. A staircase may be refinished, but it may NEVER be removed, relocated, shortened, walled over or replaced by furniture.
-- Windows: keep the SAME number of windows, in the same positions, at the same size and shape, with the same frame divisions/mullions, sills, reveals and any skylight or roof window. Never delete a window, never turn a window into a plain wall, and never invent a window that is not in the input.
-- Doors and openings: keep every door, doorway, archway, pass-through, sliding/balcony door and closet opening at its existing position, size and shape.
-- Walls, partitions, corners and wall angles; ceiling height and ceiling shape including slopes, exposed beams, coffers and bulkheads; columns, pillars and posts; niches, alcoves, chimney breasts and fireplaces — all unchanged.
-- Fixed services stay put: radiators, air-conditioning units, vents, sockets, switches, thermostats, ceiling roses and light points. Their cover or finish may be updated to suit the style, their position may not.
+  const structure = `LOCKED ELEMENTS — COPY THESE THROUGH UNCHANGED (highest priority, overrides the style):
+Treat the following as a locked mask over the input photograph. Reproduce these pixels as they are. You may only clean dirt, dust, rubble and construction debris off them — nothing else about them may change.
+
+1. WINDOWS AND GLAZED OPENINGS — DO NOT TOUCH.
+- Every window, glazed door, balcony door and skylight stays exactly as photographed: same count, same position in the frame, same width, same height, same shape, same sill height, same head height, same frame profile, same glazing bars/mullions, same reveals.
+- Do NOT enlarge a window, extend it down to the floor, or turn a window into a French door, a sliding door or a glass wall. Do NOT shrink a window, split it, merge two windows into one, or square off an arched one.
+- Do NOT delete a window, wall over it, or invent a window, skylight or opening that is not in the input.
+- Do NOT add curtains, drapes, blinds, shutters, valances, curtain poles or any other window covering. Every opening must stay fully visible and unobstructed.
+- Keep the existing balcony railings, guard rails and juliet balconies visible through and around the openings, and keep the real outside view exactly as it is — same buildings, trees, sky and light.
+- Do NOT place furniture, plants, lamps, shelving or decor where it covers, crosses or partly hides an opening.
+
+2. STAIRS AND STAIRWELLS — DO NOT TOUCH.
+- Every staircase, step, tread, riser, landing, mezzanine and change of floor level stays exactly where it is, at the same size and angle, and must remain clearly VISIBLE in the output.
+- A stairwell or floor opening where stairs arrive from the level below stays OPEN: never floor it over, never wall it in, never cover it with a rug, sofa, table or any other object, and never hide it behind furniture or in shadow.
+- Keep the existing railings, banisters, balustrades, newel posts, spindles and handrails, in place and in view.
+- Do NOT relocate, rotate, shorten, lengthen or re-shape a staircase, and do NOT invent a staircase that is not in the input photograph.
+
+3. THE REST OF THE SHELL — same position, same size, same shape.
+- Doors, doorways, archways, pass-throughs and closet openings.
+- Walls, partitions, corners, wall angles and room proportions; ceiling height and ceiling shape including slopes, exposed beams, coffers and bulkheads; columns, pillars, posts, niches, alcoves, chimney breasts and fireplaces.
+- Fixed services: radiators, air-conditioning units, vents, sockets, switches, thermostats and light points stay in place; their cover or finish may be updated, their position may not.
 - Do NOT open up walls, merge rooms, extend the space, "square off" an irregular room or otherwise improve the layout.
-- If a feature looks awkward, dated or oddly placed, KEEP IT ANYWAY. This is a real photo of a real property for sale and must stay an honest picture of that same space.`;
+- If a feature looks awkward, dated, unfinished or oddly placed, KEEP IT ANYWAY. This is a real photo of a real property for sale and must stay an honest picture of that same space.`;
 
   const subjectPreservation = `SUBJECT PRESERVATION (critical):
-- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door locations and sizes, staircases, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions, external steps and number of floors. The structural shell must be unchanged.
+- Change as LITTLE as possible beyond adding furnishings and updating surface finishes. When in doubt about an element, leave it exactly as it is.
+- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door openings, staircases, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions, external steps and number of floors. The structural shell must be unchanged.
 - Built-in fixtures (bathtub, shower, sink, toilet, tiles, kitchen cabinets/counters, etc.) are NOT part of the structure: keep them in their existing POSITIONS with realistic plumbing, but their style, material and finish SHOULD change to match the chosen style.
 - Keep the SAME camera angle, perspective and framing as the original photo.
 - NEVER invent or hallucinate a different room, building, or scene, and never change the type of space.
-- Preserve any real view visible through the windows and the real surroundings.
 - Do NOT add people, pets, on-image text, logos, watermarks, or captions.`;
 
   const framing = `FRAMING — KEEP IT IDENTICAL (critical):
@@ -585,9 +599,9 @@ STYLE BRIEF — ${styleLabel}: ${stylePrompt}
   } else {
     task = `TASK — FURNISH & STYLE THE INTERIOR in the "${styleLabel}" style:
 STYLE BRIEF — ${styleLabel}: ${stylePrompt}
-- Work ADDITIVELY. Your main job is to ADD what the style needs into the space that is already there: furniture, seating, tables, storage, rugs, cushions and textiles, curtains or blinds, lighting and lamps, artwork, mirrors, plants and decor — all clearly belonging to the "${styleLabel}" style and arranged the way the room would really be used.
-- Place the new furnishings so they respect what already exists: leave staircases, stair landings, doorways and walkways clear, do not block or cover windows, and do not stand furniture in front of radiators, fireplaces or doors.
-- You may also update SURFACE FINISHES to suit the style — wall paint/treatment, flooring finish, ceiling finish and the overall color palette — but a finish change must never make an element disappear: repainting a wall keeps its windows, refinishing a floor keeps the stairs, and window frames, door frames, skirting, mouldings and railings are refinished in place, never removed.
+- Work ADDITIVELY. Your main job is to ADD what the style needs into the space that is already there: furniture, seating, tables, storage, rugs, cushions and textiles, lighting and lamps, artwork, mirrors, plants and decor — all clearly belonging to the "${styleLabel}" style and arranged the way the room would really be used.
+- Place the new furnishings in the OPEN FLOOR AREA only. Keep every window, staircase, stairwell opening, landing, doorway and walkway completely clear and fully visible, and do not stand furniture in front of radiators, fireplaces or doors. Add no window coverings of any kind.
+- You may also update SURFACE FINISHES to suit the style — wall paint/treatment, flooring finish, ceiling finish and the overall color palette. A finish is a thin skin over what is already there: it may never move, resize, cover or delete anything. Repainting a wall keeps every window in that wall at its exact size and shape; laying a new floor keeps the stairs and leaves the stairwell opening open; window frames, door frames, skirting, mouldings, beams and railings are refinished in place, never removed or reshaped.
 - Also restyle the built-in fixtures and fittings that are present in the room:
   · Bathroom: the bathtub, shower, vanity, sink/basin, faucets and taps, toilet, wall & floor tiles, mirror, towel rails, radiators and all hardware.
   · Kitchen: the cabinetry, countertops, backsplash, sink, faucet and visible appliances.
@@ -613,11 +627,12 @@ PHOTOREALISM (this is critical — the result must look like a REAL photo, not A
 - Preserve subtle real-world imperfections and fine surface detail. Add a very slight, natural photographic grain.
 - It MUST NOT look like a 3D render, CGI, a video-game screenshot, an illustration, or digital art. Avoid the over-smooth, waxy, plastic, "too perfect" AI look.
 
-FINAL CHECK before you output — compare your result against the input photograph:
-- Same number of windows, in the same places? Same doors and openings? Every staircase, step and railing still there?
-- Same walls, corners, ceiling shape, columns, beams, fireplaces and radiators, in the same positions?
-- Same camera angle, same framing, nothing cropped or added beyond the original edges?
-If anything structural is missing, moved or resized, fix it and put it back before answering.
+FINAL CHECK before you output — put your result side by side with the input photograph and verify, one by one:
+- WINDOWS: same number, same positions, same width and height, same sill and head height, same shape and frame divisions? None enlarged, extended to the floor, turned into a door, walled over, invented, curtained or blocked by furniture?
+- STAIRS: every staircase, step and railing still present, in the same place and still clearly visible? Any stairwell opening still open, not floored over and not covered by furniture? No staircase invented?
+- SHELL: same doors and openings, walls, corners, ceiling shape, beams, columns, fireplaces and radiators, in the same positions?
+- FRAMING: same camera angle, same zoom, nothing cropped or added beyond the original edges?
+If any of these differs from the input, correct it and restore the original element before answering. Preserving the real room matters more than achieving the style.
 
 Output only the edited photograph.`;
 
