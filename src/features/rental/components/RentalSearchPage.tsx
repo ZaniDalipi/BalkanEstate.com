@@ -9,7 +9,8 @@ import { interleaveInFeedAds } from '@/features/promo';
 import RentalFilters from './RentalFilters';
 import Toast from '@/components/shared/Toast';
 import { useRentalSearch } from '../hooks/useRentalSearch';
-import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon } from '@/constants';
+import UniversalSearchBox from '@/src/features/search/universal/UniversalSearchBox';
+import { Squares2x2Icon, MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, Bars3Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { Button } from '@/components/ui/liquid-glass-button';
@@ -76,6 +77,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         isLoading,
         error,
         filters,
+        activeFilters,
+        rentalProperties,
         isAuthenticated,
         mobileView,
         setMobileView,
@@ -100,13 +103,12 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         handleRecenterOnUser,
         handleResetView,
         onFlyComplete,
-        // City search
-        suggestions,
-        searchWrapperRef,
+        // City / address search
+        mapCentre,
         isSearchingLocation,
-        isQueryInputFocused,
-        setIsQueryInputFocused,
-        handleSuggestionClick,
+        fallbackLocation,
+        isTextRelaxed,
+        handleSelectSuggestion,
         // Save search
         isSaving,
         handleSaveSearchArea,
@@ -135,8 +137,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
-    // Stable filter key for change detection
-    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+    // Stable filter key for change detection. Keyed on the *applied* filters,
+    // not the boxes: a half-typed place name should not flash the skeletons.
+    const filtersKey = useMemo(() => JSON.stringify(activeFilters), [activeFilters]);
 
     // Reset pagination when filters change
     useEffect(() => {
@@ -285,58 +288,21 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             </div>
                         </div>
 
-                        {/* City Search Bar */}
+                        {/* Location search — the app's one search box, so a
+                            city, a village, a street address or a listing all
+                            answer here exactly as they do on the buy page. */}
                         <div className="px-4 pb-2">
-                            <div ref={searchWrapperRef} className="relative">
-                                <div className="relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                                    <input
-                                        type="text"
-                                        value={filters.query}
-                                        onChange={(e) => handleFilterChange('query', e.target.value)}
-                                        onFocus={() => setIsQueryInputFocused(true)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                                        placeholder={t('rental:filters.searchCity', 'Search by location...')}
-                                        className="w-full pl-9 pr-9 py-2 text-sm rounded-xl outline-none transition-all bg-black/[0.03] border border-black/[0.08] text-neutral-800 placeholder:text-neutral-400 focus:bg-white focus:border-primary/40 focus:ring-[3px] focus:ring-primary/10"
-                                        aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
-                                    />
-                                    {filters.query && (
-                                        <button
-                                            onClick={() => handleFilterChange('query', '')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                                            aria-label={t('common:aria.clearSearch')}
-                                        >
-                                            <XMarkIcon className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                </div>
-
-                                {/* Location Suggestions Dropdown */}
-                                {isQueryInputFocused && suggestions.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar">
-                                        {suggestions.map((suggestion) => (
-                                            <button
-                                                key={suggestion.id}
-                                                onClick={() => handleSuggestionClick(suggestion)}
-                                                className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
-                                            >
-                                                <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                                <span className="truncate text-gray-600">
-                                                    {suggestion.title}
-                                                    {suggestion.subtitle && (
-                                                        <span className="text-gray-400"> · {suggestion.subtitle}</span>
-                                                    )}
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                                {isSearchingLocation && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto" />
-                                    </div>
-                                )}
-                            </div>
+                            <UniversalSearchBox
+                                value={filters.query}
+                                onValueChange={(value) => handleFilterChange('query', value)}
+                                onSelect={handleSelectSuggestion}
+                                onSubmit={handleSearch}
+                                properties={rentalProperties}
+                                country={filters.country !== 'any' ? filters.country : undefined}
+                                near={mapCentre}
+                                placeholder={t('rental:filters.searchCity', 'Search by location...')}
+                                aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
+                            />
                         </div>
 
                         {/* Quick-filter chips (view type + key amenities) */}
@@ -420,6 +386,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             <div className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-2 min-w-0">
                                     <p className="text-xs text-neutral-500 font-semibold flex-shrink-0">{t('search:resultsFound', { count: listProperties.length })}</p>
+                                    {isSearchingLocation && (
+                                        <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary flex-shrink-0" aria-hidden="true" />
+                                    )}
                                     {filters.query && (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium truncate max-w-[140px]">
                                             <MapIcon className="w-3 h-3 flex-shrink-0" />
@@ -465,6 +434,24 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     </div>
                                 </div>
                             </div>
+                            {/* The list is answering a looser question than the
+                                one typed — say so instead of passing the
+                                results off as exact matches. */}
+                            {(isTextRelaxed || fallbackLocation) && (
+                                <div className="px-4 pb-2 -mt-1">
+                                    <p className="text-xs text-neutral-500">
+                                        {isTextRelaxed
+                                            ? t('search:showingInArea', {
+                                                query: filters.query,
+                                                defaultValue: 'No rental matches “{{query}}” — showing what is available in this area',
+                                            })
+                                            : t('search:showingNearby', {
+                                                location: fallbackLocation,
+                                                defaultValue: 'No rentals in this area — showing the nearest ones in {{location}}',
+                                            })}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                         <div className="p-3">
                         {!mountList ? null : (isLoading || isSearchFiltering) ? (
@@ -476,7 +463,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         ) : error ? (
                             <div className="text-center py-12">
                                 <p className="text-sm text-red-400 mb-2">{error}</p>
-                                <button onClick={handleSearch} className="text-sm text-blue-600 hover:underline">
+                                <button onClick={() => handleSearch()} className="text-sm text-blue-600 hover:underline">
                                     {t('common:tryAgain')}
                                 </button>
                             </div>
@@ -551,7 +538,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
                                 }}
                             >
-                                <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
+                                <div className="pointer-events-auto w-full space-y-2">
                                     <div
                                         className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
                                         style={{
@@ -565,55 +552,19 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800"/>
                                         </button>
-                                        <div className="flex-1 min-w-0 relative">
-                                            <div className="relative">
-                                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                <input
-                                                    type="text"
-                                                    value={filters.query}
-                                                    onChange={(e) => handleFilterChange('query', e.target.value)}
-                                                    onFocus={() => setIsQueryInputFocused(true)}
-                                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                                                    placeholder={t('rental:filters.searchCity', 'Search city...')}
-                                                    className="w-full pl-9 pr-8 py-2 text-sm bg-transparent border-none outline-none placeholder-gray-400"
-                                                    aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
-                                                />
-                                                {filters.query && (
-                                                    <button
-                                                        onClick={() => handleFilterChange('query', '')}
-                                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                                        aria-label={t('common:aria.clearSearch')}
-                                                    >
-                                                        <XMarkIcon className="w-4 h-4" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                            {/* Location Suggestions Dropdown */}
-                                            {isQueryInputFocused && suggestions.length > 0 && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar rounded-xl">
-                                                    {suggestions.map((suggestion) => (
-                                                        <button
-                                                            key={suggestion.id}
-                                                            onClick={() => handleSuggestionClick(suggestion)}
-                                                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
-                                                        >
-                                                            <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                                            <span className="truncate text-gray-600">
-                                                                {suggestion.title}
-                                                                {suggestion.subtitle && (
-                                                                    <span className="text-gray-400"> · {suggestion.subtitle}</span>
-                                                                )}
-                                                            </span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {isSearchingLocation && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center rounded-xl">
-                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400 mx-auto" />
-                                                </div>
-                                            )}
-                                        </div>
+                                        <UniversalSearchBox
+                                            value={filters.query}
+                                            onValueChange={(value) => handleFilterChange('query', value)}
+                                            onSelect={handleSelectSuggestion}
+                                            onSubmit={handleSearch}
+                                            properties={rentalProperties}
+                                            country={filters.country !== 'any' ? filters.country : undefined}
+                                            near={mapCentre}
+                                            variant="bare"
+                                            className="flex-1 min-w-0"
+                                            placeholder={t('rental:filters.searchCity', 'Search city...')}
+                                            aria-label={t('rental:filters.searchCity', 'Search by city or location...')}
+                                        />
                                         <button
                                             onClick={() => setIsFiltersOpen(true)}
                                             className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"

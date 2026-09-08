@@ -135,7 +135,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                                 {isSaving ? t('search:saving', 'Saving...') : t('search:saveSearch', 'Save Search')}
                             </button>
                         )}
-                        <Button variant="cool" size="sm" onClick={onSearch} className="text-xs font-semibold whitespace-nowrap rounded-xl">
+                        <Button variant="cool" size="sm" onClick={() => onSearch()} className="text-xs font-semibold whitespace-nowrap rounded-xl">
                             {t('rental:filters.search')}
                         </Button>
                     </div>
@@ -248,7 +248,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
 
             {/* Actions */}
             <div className="flex gap-2 pt-1">
-                <Button variant="cool" onClick={onSearch} className="flex-1 text-sm font-semibold rounded-xl">
+                <Button variant="cool" onClick={() => onSearch()} className="flex-1 text-sm font-semibold rounded-xl">
                     {t('rental:filters.search')}
                 </Button>
                 {onSaveSearch && (
