@@ -156,7 +156,11 @@
     "toilets": "Toalete (WC)",
     "storageRooms": "Debarale",
     "offices": "Birou / cameră de lucru",
-    "propertyType": "Tip Proprietate"
+    "propertyType": "Tip Proprietate",
+    "landArea": "Suprafață teren",
+    "buildingArea": "Suprafață construită",
+    "grossArea": "Suprafață brută",
+    "netArea": "Suprafață utilă"
   },
   "distances": {
     "title": "Distanțe",

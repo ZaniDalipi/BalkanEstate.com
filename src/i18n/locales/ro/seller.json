@@ -139,6 +139,10 @@
       "description": "Descriere",
       "addTags": "Adaugă etichete...",
       "openPlanArea": "Spațiu deschis (m²)",
+      "landArea": "Suprafață teren (m²)",
+      "buildingArea": "Suprafață construită (m²)",
+      "grossArea": "Suprafață brută (m²)",
+      "netArea": "Suprafață utilă (m²)",
       "parkingType": "Tip parcare",
       "parkingSpaces": "Locuri",
       "officeRooms": "Birouri"

@@ -2,13 +2,19 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { Property, Filters, initialFilters, SavedSearch } from '@/types';
-import { useUniversalSearch } from '@/src/features/search/universal/useUniversalSearch';
 import type { Suggestion } from '@/src/features/search/universal/types';
+import { applyQueryToFilters } from '@/src/features/search/universal/queryToFilters';
+import { searchPlaces } from '@/src/features/search/universal/places';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
+import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties } from '@/utils/propertyUtils';
+import { narrowToMapView } from '@/src/features/search/mapList';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { getCountryData } from '@/constants/countries';
+import { generatePropertySlug } from '@/utils/slug';
+import { buildLocalizedPath } from '@/src/utils/languageRouting';
 
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
     const sw = bounds.getSouthWest();
@@ -45,6 +51,28 @@ export function useRentalSearch() {
         };
     });
 
+    // What the list is actually filtered by. Same split the buy page keeps:
+    // `filters` is what the boxes show, `activeFilters` is what has been
+    // applied, so a half-typed place name ("Tir") does not empty the list
+    // before the word is finished. Everything but the text query moves both
+    // at once; the query is debounced into `activeFilters`.
+    const [activeFilters, setActiveFilters] = useState<Filters>(filters);
+    const queryDebounceRef = useRef<number | null>(null);
+
+    /** Apply a filter set immediately, cancelling any pending query debounce. */
+    const applyFilters = useCallback((next: Filters) => {
+        if (queryDebounceRef.current) {
+            clearTimeout(queryDebounceRef.current);
+            queryDebounceRef.current = null;
+        }
+        setFilters(next);
+        setActiveFilters(next);
+    }, []);
+
+    useEffect(() => () => {
+        if (queryDebounceRef.current) clearTimeout(queryDebounceRef.current);
+    }, []);
+
     // Local state
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
@@ -53,13 +81,14 @@ export function useRentalSearch() {
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(null);
-    const searchWrapperRef = useRef<HTMLDivElement>(null);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
-    const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [mapBoundsJSON, setMapBoundsJSON] = useState<string | null>(null);
     const [drawnBoundsJSON, setDrawnBoundsJSON] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    // True while the geocoder is being asked about a place the app's own
+    // gazetteer did not know.
+    const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
     // Fetch ALL rental properties once on mount — no filter params sent to API.
     // Filtering & sorting happen client-side via useMemo (same pattern as buy page).
@@ -160,17 +189,6 @@ export function useRentalSearch() {
         }
     }, []);
 
-    // Close suggestions when clicking outside the search wrapper
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target as Node)) {
-                setIsQueryInputFocused(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
     // Handle focusing map on a specific property (e.g., from property details "View on Map")
     const focusMapOnProperty = state.searchPageState.focusMapOnProperty;
     useEffect(() => {
@@ -211,67 +229,65 @@ export function useRentalSearch() {
         } catch { return null; }
     }, [drawnBoundsJSON]);
 
-    // Client-side filtering + sorting (same pattern as buy page — instant, no API call)
-    const baseFilteredProperties = useMemo(() => {
-        // 1. Apply all user filters client-side
-        const filtered = filterProperties(rentalProperties, filters);
-        const now = Date.now();
+    /** Map centre, used to break ties between same-named places in the box. */
+    const mapCentre = useMemo(() => {
+        if (!mapBounds) return null;
+        const centre = mapBounds.getCenter();
+        return { lat: centre.lat, lng: centre.lng };
+    }, [mapBounds]);
 
-        // 2. Narrow by map/drawn bounds
-        const boundsToUse = drawnBounds || mapBounds;
-        const bounded = boundsToUse
-            ? filtered.filter(p => p.lat && p.lng && boundsToUse.contains(L.latLng(p.lat, p.lng)))
-            : filtered;
+    // Client-side filtering + sorting (same pattern as buy page — instant, no API call).
+    // Bounds are deliberately NOT applied here: the map draws every rental that
+    // matches the filters, and only the list follows the viewport (below).
+    const baseFilteredProperties = useMemo(
+        () => filterAndSortProperties(rentalProperties, activeFilters),
+        [rentalProperties, activeFilters]
+    );
 
-        // 3. Promotion-aware sorting (matches buy page)
-        const getPromotionScore = (p: Property) => {
-            const isActive = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
-            if (!isActive) return 0;
-            const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
-            return (tierScores[p.promotionTier || 'standard'] || 0) + (p.hasUrgentBadge ? 5 : 0);
-        };
+    /**
+     * The same search with the typed text dropped.
+     *
+     * A street address is a place, not a word any listing contains: "Rruga e
+     * Kavajës 12" locates a point on the map and matches no listing text at
+     * all. Rather than answer that with an empty page, the text is relaxed
+     * once the strict search has come back with nothing and the map view
+     * becomes the search — which is what a person who typed an address was
+     * asking for. Computed only in that case, never on the common path.
+     */
+    const needsRelaxedText = baseFilteredProperties.length === 0 && activeFilters.query.trim() !== '';
+    const relaxedProperties = useMemo(() => {
+        if (!needsRelaxedText) return null;
+        const relaxed = filterAndSortProperties(rentalProperties, { ...activeFilters, query: '' });
+        return relaxed.length > 0 ? relaxed : null;
+    }, [needsRelaxedText, rentalProperties, activeFilters]);
 
-        const toTimestamp = (v: number | string | Date | undefined | null): number => {
-            if (!v) return 0;
-            if (typeof v === 'number') return v;
-            if (typeof v === 'string') return new Date(v).getTime();
-            if (v instanceof Date) return v.getTime();
-            return 0;
-        };
+    /**
+     * What the list shows: the rentals inside the current view.
+     *
+     * Same rules as the buy page, so a search behaves identically on both
+     * tabs. A drawn area wins over the viewport; and when the viewport holds
+     * nothing — flying to a town with no rentals in it — the nearest rentals
+     * are shown instead of an empty screen, with `fallbackLocation` naming
+     * where they actually are.
+     */
+    const { listProperties, fallbackLocation } = useMemo(
+        () => narrowToMapView({
+            // The strict search, or — when it found nothing for the typed
+            // text — everything the other filters allow, located by the map.
+            properties: relaxedProperties ?? baseFilteredProperties,
+            drawnBounds,
+            mapBounds,
+            ready: !isLoading,
+        }),
+        [baseFilteredProperties, relaxedProperties, drawnBounds, mapBounds, isLoading]
+    );
 
-        const getPropertyTime = (p: Property) => Math.max(toTimestamp(p.lastRenewed), toTimestamp(p.createdAt));
-
-        const sorted = [...bounded].sort((a, b) => {
-            const sA = getPromotionScore(a);
-            const sB = getPromotionScore(b);
-            if (sA !== sB) return sB - sA;
-
-            switch (filters.sortBy) {
-                case 'price_asc': return a.price - b.price;
-                case 'price_desc': return b.price - a.price;
-                case 'sqft_asc': return a.sqft - b.sqft;
-                case 'sqft_desc': return b.sqft - a.sqft;
-                case 'beds_desc': return b.beds - a.beds;
-                case 'baths_desc': return b.baths - a.baths;
-                case 'oldest': return (a.createdAt || 0) - (b.createdAt || 0);
-                case 'year_built_desc': return (b.yearBuilt || 0) - (a.yearBuilt || 0);
-                case 'price_reduced': {
-                    const dA = a.hasDiscount ? 1 : 0;
-                    const dB = b.hasDiscount ? 1 : 0;
-                    if (dA !== dB) return dB - dA;
-                    return getPropertyTime(b) - getPropertyTime(a);
-                }
-                case 'featured':
-                case 'newest':
-                default:
-                    return getPropertyTime(b) - getPropertyTime(a);
-            }
-        });
-
-        return sorted;
-    }, [rentalProperties, filters, mapBounds, drawnBounds]);
-
-    const listProperties = baseFilteredProperties;
+    /**
+     * True when the list is answering a looser question than the one typed —
+     * the text matched no rental, so the map view is doing the searching. The
+     * page says so rather than letting the results look like an exact match.
+     */
+    const isTextRelaxed = relaxedProperties !== null && listProperties.length > 0;
 
     // --- Handlers ---
 
@@ -281,21 +297,106 @@ export function useRentalSearch() {
     }, []);
 
     const handleFilterChange = useCallback((key: keyof Filters, value: any) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
-    }, []);
+        const next = { ...filters, [key]: value } as Filters;
 
-    // No-op: filtering is now reactive via useMemo, no API call needed
-    const handleSearch = useCallback(() => {}, []);
+        // Picking a country moves the map to it — the filter and the view
+        // should never disagree about where the user is looking. The select
+        // carries country names ("Albania"), so it is resolved by either
+        // spelling rather than by key.
+        if (key === 'country' && value && value !== 'any') {
+            const countryData = getCountryData(String(value));
+            if (countryData) {
+                applyFilters(next);
+                setDrawnBoundsJSON(null);
+                setFlyToTarget({ center: countryData.center, zoom: countryData.zoom });
+                return;
+            }
+        }
+
+        // Typing is not searching: the box updates on every keystroke, the
+        // list a beat later, so a name being typed out does not empty it.
+        if (key === 'query') {
+            setFilters(next);
+            if (queryDebounceRef.current) clearTimeout(queryDebounceRef.current);
+            queryDebounceRef.current = window.setTimeout(() => setActiveFilters(next), 300);
+            return;
+        }
+
+        applyFilters(next);
+    }, [filters, applyFilters]);
+
+    /**
+     * Run whatever is in the box — the buy page's search, on rentals.
+     *
+     * The sentence is read first, so "2 bed furnished apartment in Tirana
+     * under 600" moves the bedroom, furnishing, type and price filters and
+     * leaves "Tirana" as the place to find. Then the app's own gazetteer is
+     * asked — it answers from memory, so a known city or village flies the
+     * map with no network round trip — and only a place it has never heard of
+     * goes to the geocoder, which is what makes a street address work.
+     *
+     * A place that cannot be resolved is not an error: the filters have
+     * already been applied, so the text search runs and the user sees
+     * listings rather than an empty screen with a toast.
+     */
+    const handleSearch = useCallback(async (searchQuery?: string) => {
+        const query = (typeof searchQuery === 'string' ? searchQuery : filters.query).trim();
+
+        if (!query) {
+            applyFilters({ ...filters, query: '' });
+            setDrawnBoundsJSON(null);
+            return;
+        }
+
+        const { filters: parsedFilters, parsed } = applyQueryToFilters(filters, query);
+        // This tab is rentals: a sentence saying otherwise ("for sale") moves
+        // every other filter but never takes the user off the rent listings.
+        const nextFilters: Filters = { ...parsedFilters, listingType: 'rent' };
+        applyFilters(nextFilters);
+        setDrawnBoundsJSON(null);
+
+        const placeQuery = parsed.text.trim();
+        // A sentence that was entirely filters ("furnished under 500") has no
+        // place in it, and the map should stay where it is.
+        if (!placeQuery) return;
+
+        const [local] = searchPlaces(placeQuery, {
+            limit: 1,
+            country: nextFilters.country !== 'any' ? nextFilters.country : undefined,
+        });
+
+        if (local && Number.isFinite(local.place.lat) && Number.isFinite(local.place.lng)) {
+            setFlyToTarget({
+                center: [local.place.lat as number, local.place.lng as number],
+                zoom: local.place.zoom,
+            });
+            return;
+        }
+
+        setIsSearchingLocation(true);
+        try {
+            const results = await searchLocation(placeQuery);
+            if (results.length > 0) {
+                const [best] = results;
+                setFlyToTarget({
+                    center: [Number(best.lat), Number(best.lon)],
+                    zoom: getZoomFromBoundingBox(best.boundingbox),
+                });
+            }
+        } finally {
+            setIsSearchingLocation(false);
+        }
+    }, [filters, applyFilters]);
 
     const handleResetFilters = useCallback(() => {
-        setFilters({ ...initialFilters, listingType: 'rent' });
+        applyFilters({ ...initialFilters, listingType: 'rent' });
         setDrawnBoundsJSON(null);
         setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
-    }, []);
+    }, [applyFilters]);
 
     const handleSortChange = useCallback((sortBy: string) => {
-        setFilters(prev => ({ ...prev, sortBy }));
-    }, []);
+        applyFilters({ ...filters, sortBy });
+    }, [filters, applyFilters]);
 
     // Matches MapComponentProps signature: (bounds: L.LatLngBounds, center: L.LatLng) => void
     const handleMapMove = useCallback((_bounds: L.LatLngBounds, _center?: L.LatLng) => {
@@ -315,10 +416,10 @@ export function useRentalSearch() {
         setDrawnBoundsJSON(bounds ? serializeBounds(bounds) : null);
         // Clear query when area is drawn (matches buy page behavior)
         if (bounds) {
-            setFilters(prev => ({ ...prev, query: '' }));
+            applyFilters({ ...filters, query: '' });
         }
         setIsDrawing(false);
-    }, []);
+    }, [filters, applyFilters]);
 
     const handleRecenterOnUser = useCallback(() => {
         if (userLocation) {
@@ -410,43 +511,55 @@ export function useRentalSearch() {
 
     const handleSaveSearchArea = useCallback(() => handleSaveSearch(true), [handleSaveSearch]);
 
-    // Location search with debounce
     /**
-     * A row picked in the search box.
+     * A row picked in the omnibox — the buy page's three cases, unchanged.
      *
-     * Places fly the map; a listing row is handled by the caller; the query
-     * row is the text as typed. The canonical spelling of whatever was picked
-     * goes back into the box, so what the user reads is what was searched.
+     * A place flies the map, a listing opens it, and a query row is run as a
+     * search with whatever filters the sentence carried already applied. The
+     * box has already resolved a Google Places row to coordinates by the time
+     * it gets here, so a street address arrives with a position like any
+     * other place.
      */
-    const handleSuggestionClick = useCallback((suggestion: Suggestion) => {
-        setIsQueryInputFocused(false);
-
+    const handleSelectSuggestion = useCallback((suggestion: Suggestion) => {
         if (suggestion.type === 'property') {
-            setFilters(prev => ({ ...prev, query: suggestion.property.city }));
+            // Same route a listing card opens, so a rental found through the
+            // search box lands exactly where one found by scrolling does.
+            const property = suggestion.property;
+            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
+            window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
             return;
         }
 
-        const value = suggestion.type === 'place' ? suggestion.searchValue : suggestion.title;
-        setFilters(prev => ({ ...prev, query: value }));
-        setDrawnBoundsJSON(null);
+        if (suggestion.type === 'place') {
+            const { filters: parsedFilters } = applyQueryToFilters(filters, suggestion.searchValue);
+            applyFilters({ ...parsedFilters, listingType: 'rent' });
+            setDrawnBoundsJSON(null); // A picked place replaces any drawn area.
 
-        if (suggestion.type === 'place' && Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
-            setFlyToTarget({
-                center: [suggestion.lat as number, suggestion.lng as number],
-                zoom: suggestion.zoom ?? 12,
-            });
+            if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
+                setFlyToTarget({
+                    center: [suggestion.lat as number, suggestion.lng as number],
+                    zoom: suggestion.zoom ?? 12,
+                });
+            }
+            return;
         }
-    }, []);
 
-    /**
-     * Suggestions come from the app-wide engine, so this page offers the same
-     * places, under the same names, as every other search box in the app.
-     */
-    const { suggestions, isSearching: isSearchingLocation } = useUniversalSearch({
-        query: filters.query,
-        properties: rentalProperties,
-        enabled: isQueryInputFocused,
-    });
+        // 'query' and 'recent' are both "search for this text".
+        void handleSearch(suggestion.type === 'query' ? suggestion.text : suggestion.title);
+    }, [filters, applyFilters, dispatch, handleSearch]);
+
+    // A `?q=` arriving with the page is a search, not just a filter: the map
+    // should open on the place that was linked to, exactly as if it had been
+    // typed. Runs once, after the first render has the query in the box.
+    const hasRunInitialQuery = useRef(false);
+    useEffect(() => {
+        if (hasRunInitialQuery.current) return;
+        hasRunInitialQuery.current = true;
+        const initialQuery = filters.query.trim();
+        if (initialQuery) void handleSearch(initialQuery);
+        // Mount-only: `handleSearch` is re-created on every filter change.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return {
         t,
@@ -456,29 +569,29 @@ export function useRentalSearch() {
         isLoading,
         error,
         filters,
+        activeFilters,
         isAuthenticated,
         currentUser,
         mobileView,
         setMobileView,
         isMobile,
         isTablet,
-        isQueryInputFocused,
-        setIsQueryInputFocused,
         toast,
         setToast,
         isDrawing,
         flyToTarget,
-        suggestions,
-        searchWrapperRef,
         isSearchingLocation,
         hoveredPropertyId,
         setHoveredPropertyId,
         userLocation,
         mapBounds,
+        mapCentre,
         drawnBounds,
         baseFilteredProperties,
         listProperties,
-        handleSuggestionClick,
+        fallbackLocation,
+        isTextRelaxed,
+        handleSelectSuggestion,
         toggleDrawing,
         handleDrawComplete,
         handleFilterChange,

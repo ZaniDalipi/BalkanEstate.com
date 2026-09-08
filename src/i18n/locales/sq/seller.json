@@ -139,6 +139,10 @@
       "description": "Përshkrimi",
       "addTags": "Shto etiketa...",
       "openPlanArea": "Hapësirë e hapur (m²)",
+      "landArea": "Sipërfaqja e truallit (m²)",
+      "buildingArea": "Sipërfaqja e ndërtimit (m²)",
+      "grossArea": "Sipërfaqja bruto (m²)",
+      "netArea": "Sipërfaqja neto (m²)",
       "parkingType": "Lloji i parkimit",
       "parkingSpaces": "Vende",
       "officeRooms": "Zyra"

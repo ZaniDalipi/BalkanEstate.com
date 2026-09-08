@@ -2,14 +2,17 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { Property, Filters, initialFilters, SavedSearch } from '@/types';
-import { useUniversalSearch } from '@/src/features/search/universal/useUniversalSearch';
 import type { Suggestion } from '@/src/features/search/universal/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
-import { filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties } from '@/utils/propertyUtils';
+import { narrowToMapView } from '@/src/features/search/mapList';
+import { applyQueryToFilters } from '@/src/features/search/universal/queryToFilters';
+import { getCountryData } from '@/constants/countries';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
+import { resolveVillaSearchTarget } from './villaSearchTarget';
 
 const VILLA_DEFAULTS: Partial<Filters> = {
     listingType: 'rent',
@@ -92,19 +95,41 @@ export function useVillaSearch() {
         ...(deepLink.destination ? { query: deepLink.destination } : {}),
     });
 
+    // What the list is actually filtered by. Same split the buy and rent pages
+    // keep: `filters` is what the boxes show, `activeFilters` is what has been
+    // applied, so a half-typed place name ("Bud") does not empty the list
+    // before the word is finished. Everything but the text query moves both at
+    // once; the query is debounced into `activeFilters`.
+    const [activeFilters, setActiveFilters] = useState<Filters>(filters);
+    const queryDebounceRef = useRef<number | null>(null);
+
+    /** Apply a filter set immediately, cancelling any pending query debounce. */
+    const applyFilters = useCallback((next: Filters) => {
+        if (queryDebounceRef.current) {
+            clearTimeout(queryDebounceRef.current);
+            queryDebounceRef.current = null;
+        }
+        setFilters(next);
+        setActiveFilters(next);
+    }, []);
+
+    useEffect(() => () => {
+        if (queryDebounceRef.current) clearTimeout(queryDebounceRef.current);
+    }, []);
+
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
     const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
     const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(deepLink.focus);
-    const searchWrapperRef = useRef<HTMLDivElement>(null);
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
-    const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [mapBoundsJSON, setMapBoundsJSON] = useState<string | null>(null);
     const [drawnBoundsJSON, setDrawnBoundsJSON] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    // True while a searched place is still being resolved to a position.
+    const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
     const abortRef = useRef<AbortController | null>(null);
 
@@ -221,16 +246,6 @@ export function useVillaSearch() {
         }
     }, []);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target as Node)) {
-                setIsQueryInputFocused(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
     const focusMapOnProperty = state.searchPageState.focusMapOnProperty;
     useEffect(() => {
         if (focusMapOnProperty) {
@@ -265,93 +280,176 @@ export function useVillaSearch() {
         } catch { return null; }
     }, [drawnBoundsJSON]);
 
-    const baseFilteredProperties = useMemo(() => {
-        const filtered = filterProperties(villaProperties, {
-            ...filters,
-            propertyType: 'luxury-villa',
-            listingType: listingMode === 'any' ? 'any' : listingMode,
-        });
-        const now = Date.now();
+    /**
+     * The villa collection, filtered and sorted — but never narrowed by the
+     * map: the map draws every villa that matches the filters, and only the
+     * list follows the viewport (below), which is how the buy page has always
+     * worked.
+     *
+     * The two locked filters are applied here rather than trusted from state,
+     * so nothing typed or deep-linked can take this page off luxury villas or
+     * out of the market the visitor picked with the tabs.
+     */
+    const collectionFilters = useMemo((): Filters => ({
+        ...activeFilters,
+        propertyType: 'luxury-villa',
+        listingType: listingMode === 'any' ? 'any' : listingMode,
+    }), [activeFilters, listingMode]);
 
-        const boundsToUse = drawnBounds || mapBounds;
-        const bounded = boundsToUse
-            ? filtered.filter(p => p.lat && p.lng && boundsToUse.contains(L.latLng(p.lat, p.lng)))
-            : filtered;
+    const baseFilteredProperties = useMemo(
+        () => filterAndSortProperties(villaProperties, collectionFilters),
+        [villaProperties, collectionFilters]
+    );
 
-        const getPromotionScore = (p: Property) => {
-            const isActive = p.isPromoted && p.promotionEndDate && p.promotionEndDate > now;
-            if (!isActive) return 0;
-            const tierScores: Record<string, number> = { premium: 100, highlight: 70, featured: 40, standard: 10 };
-            return (tierScores[p.promotionTier || 'standard'] || 0) + (p.hasUrgentBadge ? 5 : 0);
-        };
+    /**
+     * The same search with the typed text dropped.
+     *
+     * A street address is a place, not a word any listing contains: "Obala
+     * Iva Novakovića 3" locates a point on the map and matches no villa's
+     * text at all. Rather than answer that with an empty page, the text is
+     * relaxed once the strict search has come back with nothing and the map
+     * view becomes the search — which is what a person who typed an address
+     * was asking for. Computed only in that case, never on the common path.
+     */
+    const needsRelaxedText = baseFilteredProperties.length === 0 && collectionFilters.query.trim() !== '';
+    const relaxedProperties = useMemo(() => {
+        if (!needsRelaxedText) return null;
+        const relaxed = filterAndSortProperties(villaProperties, { ...collectionFilters, query: '' });
+        return relaxed.length > 0 ? relaxed : null;
+    }, [needsRelaxedText, villaProperties, collectionFilters]);
 
-        const toTimestamp = (v: number | string | Date | undefined | null): number => {
-            if (!v) return 0;
-            if (typeof v === 'number') return v;
-            if (typeof v === 'string') return new Date(v).getTime();
-            if (v instanceof Date) return v.getTime();
-            return 0;
-        };
+    /**
+     * What the list shows: the villas inside the current view, with the buy
+     * page's rules — a drawn area wins over the viewport, and a view holding
+     * nothing shows the nearest villas instead of an empty screen.
+     */
+    const { listProperties, fallbackLocation } = useMemo(
+        () => narrowToMapView({
+            properties: relaxedProperties ?? baseFilteredProperties,
+            drawnBounds,
+            mapBounds,
+            ready: !isLoading,
+        }),
+        [baseFilteredProperties, relaxedProperties, drawnBounds, mapBounds, isLoading]
+    );
 
-        const getPropertyTime = (p: Property) => Math.max(toTimestamp(p.lastRenewed), toTimestamp(p.createdAt));
-
-        return [...bounded].sort((a, b) => {
-            const sA = getPromotionScore(a);
-            const sB = getPromotionScore(b);
-            if (sA !== sB) return sB - sA;
-
-            switch (filters.sortBy) {
-                case 'price_asc': return a.price - b.price;
-                case 'price_desc': return b.price - a.price;
-                case 'sqft_asc': return a.sqft - b.sqft;
-                case 'sqft_desc': return b.sqft - a.sqft;
-                case 'beds_desc': return b.beds - a.beds;
-                case 'baths_desc': return b.baths - a.baths;
-                case 'oldest': return (a.createdAt || 0) - (b.createdAt || 0);
-                case 'year_built_desc': return (b.yearBuilt || 0) - (a.yearBuilt || 0);
-                case 'price_reduced': {
-                    const dA = a.hasDiscount ? 1 : 0;
-                    const dB = b.hasDiscount ? 1 : 0;
-                    if (dA !== dB) return dB - dA;
-                    return getPropertyTime(b) - getPropertyTime(a);
-                }
-                case 'featured':
-                case 'newest':
-                default:
-                    return getPropertyTime(b) - getPropertyTime(a);
-            }
-        });
-    }, [villaProperties, filters, mapBounds, drawnBounds, listingMode]);
-
-    const listProperties = baseFilteredProperties;
+    /**
+     * True when the list is answering a looser question than the one typed —
+     * the text matched no villa, so the map view is doing the searching. The
+     * page says so rather than letting the results look like an exact match.
+     */
+    const isTextRelaxed = relaxedProperties !== null && listProperties.length > 0;
 
     const showToast = useCallback((message: string, type: 'success' | 'error') => {
         setToast({ show: true, message, type });
     }, []);
 
     const handleFilterChange = useCallback((key: keyof Filters, value: Filters[keyof Filters]) => {
-        if (key === 'propertyType' || key === 'listingType') return; // locked to luxury-villa + rent
-        setFilters(prev => ({ ...prev, [key]: value }));
-    }, []);
+        if (key === 'propertyType' || key === 'listingType') return; // locked to luxury-villa; the market is the tabs
+        const next = { ...filters, [key]: value } as Filters;
 
-    // Filtering is client side, so a search is a refetch of the collection —
-    // which also makes this usable as the error state's "Try Again".
-    const handleSearch = useCallback(() => { void fetchVillas(); }, [fetchVillas]);
+        // Picking a country moves the map to it — the filter and the view
+        // should never disagree about where the visitor is looking.
+        if (key === 'country' && value && value !== 'any') {
+            const countryData = getCountryData(String(value));
+            if (countryData) {
+                applyFilters(next);
+                setDrawnBoundsJSON(null);
+                setFlyToTarget({ center: countryData.center, zoom: countryData.zoom });
+                return;
+            }
+        }
 
-    const handleResetFilters = useCallback(() => {
-        setFilters({ ...initialFilters, ...VILLA_DEFAULTS });
-        setListingMode('any');
-        setDrawnBoundsJSON(null);
-        setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
-    }, []);
+        // Typing is not searching: the box updates on every keystroke, the
+        // list a beat later, so a name being typed out does not empty it.
+        if (key === 'query') {
+            setFilters(next);
+            if (queryDebounceRef.current) clearTimeout(queryDebounceRef.current);
+            queryDebounceRef.current = window.setTimeout(() => setActiveFilters(next), 300);
+            return;
+        }
+
+        applyFilters(next);
+    }, [filters, applyFilters]);
 
     const handleListingModeChange = useCallback((mode: VillaListingMode) => {
         setListingMode(mode);
     }, []);
 
+    /**
+     * Run whatever is in the box, and take the map with it.
+     *
+     * The sentence is read first, the way the buy and rent pages read it, so
+     * "4 bedroom villa in Budva with a pool under 5000" moves the bedroom,
+     * pool and price filters and leaves "Budva" as the place to find. The page
+     * stays on luxury villas whatever the sentence says; the market it *can*
+     * honour, because the tabs are a control for exactly that.
+     *
+     * Filtering is client side, so a search is also a refetch of the
+     * collection — which is what makes this usable as the error state's
+     * "Try Again".
+     *
+     * Where the map goes is `resolveVillaSearchTarget`'s decision; a query it
+     * cannot place is not an error, because the filters have already been
+     * applied and the text search stands — the map simply stays where it was.
+     */
+    const handleSearch = useCallback(async (searchQuery?: unknown) => {
+        // Also wired straight to onClick (the error state's "Try Again") and to
+        // VillaFilters, so the first argument is not always the query.
+        const query = (typeof searchQuery === 'string' ? searchQuery : filters.query).trim();
+
+        void fetchVillas();
+
+        if (!query) {
+            applyFilters({ ...filters, query: '' });
+            return;
+        }
+
+        const { filters: parsedFilters, parsed } = applyQueryToFilters(filters, query);
+        applyFilters({ ...parsedFilters, ...VILLA_DEFAULTS });
+        if (parsed.intent.listingType) setListingMode(parsed.intent.listingType);
+
+        // A sentence that was entirely filters ("with a pool under 5000") has
+        // no place in it, and the map should stay where it is.
+        const placeQuery = parsed.text.trim();
+        if (!placeQuery) return;
+
+        setIsSearchingLocation(true);
+        try {
+            const target = await resolveVillaSearchTarget(placeQuery, villaProperties);
+            if (!target) return;
+
+            setDrawnBoundsJSON(null); // A searched place replaces any drawn area.
+            setFlyToTarget(target);
+        } finally {
+            setIsSearchingLocation(false);
+        }
+    }, [filters, applyFilters, fetchVillas, villaProperties]);
+
+    /**
+     * A destination chip in the hero.
+     *
+     * The chip already knows exactly where it is, so this searches for its
+     * name without asking the gazetteer or the geocoder about it — and
+     * toggles off when the chip that is already active is clicked again.
+     */
+    const handleDestinationSelect = useCallback((destination: { query: string; center: [number, number]; zoom: number }) => {
+        const isActive = (filters.query ?? '').trim() === destination.query;
+        applyFilters({ ...filters, query: isActive ? '' : destination.query });
+        setDrawnBoundsJSON(null);
+        if (!isActive) setFlyToTarget({ center: destination.center, zoom: destination.zoom });
+    }, [filters, applyFilters]);
+
+    const handleResetFilters = useCallback(() => {
+        applyFilters({ ...initialFilters, ...VILLA_DEFAULTS });
+        setListingMode('any');
+        setDrawnBoundsJSON(null);
+        setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
+    }, [applyFilters]);
+
     const handleSortChange = useCallback((sortBy: string) => {
-        setFilters(prev => ({ ...prev, sortBy }));
-    }, []);
+        applyFilters({ ...filters, sortBy });
+    }, [filters, applyFilters]);
 
     const handleMapMove = useCallback((_bounds: L.LatLngBounds, _center?: L.LatLng) => {
         setMapBoundsJSON(serializeBounds(_bounds));
@@ -366,9 +464,9 @@ export function useVillaSearch() {
 
     const handleDrawComplete = useCallback((bounds: L.LatLngBounds | null) => {
         setDrawnBoundsJSON(bounds ? serializeBounds(bounds) : null);
-        if (bounds) setFilters(prev => ({ ...prev, query: '' }));
+        if (bounds) applyFilters({ ...filters, query: '' });
         setIsDrawing(false);
-    }, []);
+    }, [filters, applyFilters]);
 
     const handleRecenterOnUser = useCallback(() => {
         if (userLocation) {
@@ -441,39 +539,62 @@ export function useVillaSearch() {
     /**
      * A row picked in the search box.
      *
-     * Places fly the map; a listing row is handled by the caller; the query
-     * row is the text as typed. The canonical spelling of whatever was picked
-     * goes back into the box, so what the user reads is what was searched.
+     * Every row ends with the map somewhere: a place flies to its coordinates,
+     * a villa flies to the villa, and the two text rows — the query row that
+     * says what Enter will do, and a recent search — are run through
+     * `handleSearch`, which resolves the place itself. The canonical spelling
+     * of whatever was picked goes back into the box, so what the user reads is
+     * what was searched.
+     *
+     * A Google Places row reaches this already carrying its coordinates: the
+     * box makes the second lookup before handing the pick over, so nothing
+     * here has to know which source answered.
      */
     const handleSuggestionClick = useCallback((suggestion: Suggestion) => {
-        setIsQueryInputFocused(false);
-
         if (suggestion.type === 'property') {
-            setFilters(prev => ({ ...prev, query: suggestion.property.city }));
+            // Stays on the villas page — the point of picking a villa here is
+            // to see where it is among the others, not to leave the map.
+            const { city, lat, lng } = suggestion.property;
+            applyFilters({ ...filters, query: city });
+            setDrawnBoundsJSON(null);
+            if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                setFlyToTarget({ center: [lat, lng], zoom: 15 });
+            }
             return;
         }
 
-        const value = suggestion.type === 'place' ? suggestion.searchValue : suggestion.title;
-        setFilters(prev => ({ ...prev, query: value }));
-        setDrawnBoundsJSON(null);
+        if (suggestion.type === 'place') {
+            const { filters: parsedFilters } = applyQueryToFilters(filters, suggestion.searchValue);
+            applyFilters({ ...parsedFilters, ...VILLA_DEFAULTS });
+            setDrawnBoundsJSON(null);
 
-        if (suggestion.type === 'place' && Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
-            setFlyToTarget({
-                center: [suggestion.lat as number, suggestion.lng as number],
-                zoom: suggestion.zoom ?? 12,
-            });
+            if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
+                setFlyToTarget({
+                    center: [suggestion.lat as number, suggestion.lng as number],
+                    zoom: suggestion.zoom ?? 12,
+                });
+            }
+            return;
         }
-    }, []);
 
-    /**
-     * Suggestions come from the app-wide engine, so this page offers the same
-     * places, under the same names, as every other search box in the app.
-     */
-    const { suggestions, isSearching: isSearchingLocation } = useUniversalSearch({
-        query: filters.query,
-        properties: villaProperties,
-        enabled: isQueryInputFocused,
-    });
+        // 'query' and 'recent' are both "search for this text" — including
+        // finding where it is. Passed explicitly rather than read back off
+        // `filters`, which this render has not seen updated yet.
+        const value = suggestion.type === 'query' ? suggestion.text : suggestion.title;
+        void handleSearch(value);
+    }, [filters, applyFilters, handleSearch]);
+
+    // A `?destination=` arriving without coordinates is still a search: the
+    // map opens on the place that was linked to rather than on the Balkans.
+    // Runs once, and only when the link did not carry its own position.
+    const hasRunInitialQuery = useRef(false);
+    useEffect(() => {
+        if (hasRunInitialQuery.current) return;
+        hasRunInitialQuery.current = true;
+        if (!deepLink.focus && deepLink.destination) void handleSearch(deepLink.destination);
+        // Mount-only: `handleSearch` is re-created on every filter change.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return {
         t,
@@ -484,6 +605,7 @@ export function useVillaSearch() {
         isLoading,
         error,
         filters,
+        activeFilters,
         listingMode,
         handleListingModeChange,
         isAuthenticated,
@@ -492,15 +614,10 @@ export function useVillaSearch() {
         setMobileView,
         isMobile,
         isTablet,
-        isQueryInputFocused,
-        setIsQueryInputFocused,
         toast,
         setToast,
         isDrawing,
         flyToTarget,
-        suggestions,
-        searchWrapperRef,
-        isSearchingLocation,
         hoveredPropertyId,
         setHoveredPropertyId,
         userLocation,
@@ -508,7 +625,11 @@ export function useVillaSearch() {
         drawnBounds,
         baseFilteredProperties,
         listProperties,
+        fallbackLocation,
+        isTextRelaxed,
+        isSearchingLocation,
         handleSuggestionClick,
+        handleDestinationSelect,
         toggleDrawing,
         handleDrawComplete,
         handleFilterChange,

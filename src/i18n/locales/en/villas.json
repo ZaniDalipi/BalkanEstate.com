@@ -3,6 +3,8 @@
   "villa": "villa",
   "villas": "villas",
   "exclusiveVillas": "exclusive villas",
+  "showingNearby": "No villas in this area — showing the nearest ones in {{location}}",
+  "showingInArea": "No villa matches “{{query}}” — showing what is available in this area",
   "propertiesFound": "{{count}} exclusive villas",
   "createListing": "List Your Villa",
   "noProperties": "No luxury villas found",

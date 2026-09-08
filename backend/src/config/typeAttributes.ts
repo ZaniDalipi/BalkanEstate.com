@@ -26,6 +26,10 @@ export const TYPE_ATTRIBUTES = [
   'storageRooms',
   'offices',
   'openPlanArea',
+  'landArea',
+  'buildingArea',
+  'grossArea',
+  'netArea',
   'parking',
   'parkingType',
   'floorNumber',
@@ -44,6 +48,16 @@ export const isParkingType = (value: unknown): value is ParkingType =>
 export const MAX_ATTRIBUTE_COUNT = 999;
 
 /**
+ * The largest area a listing may claim, in m² — 100 hectares.
+ *
+ * Areas need their own ceiling: a villa's land runs to thousands of square
+ * metres and a shop's open-plan floor to hundreds, so `MAX_ATTRIBUTE_COUNT`
+ * would reject honest measurements. It is still bounded, because a plot the
+ * size of a city is a mistyped digit rather than a listing.
+ */
+export const MAX_ATTRIBUTE_AREA = 1_000_000;
+
+/**
  * Attributes that measure an area rather than count things.
  *
  * A count has to be whole — there is no half an office — but an area does
@@ -51,18 +65,27 @@ export const MAX_ATTRIBUTE_COUNT = 999;
  * "whole number" rule rejected an honest measurement, and mirrors the
  * client's `MEASURED_ATTRIBUTES`.
  */
-const MEASURED_ATTRIBUTES = new Set<string>(['openPlanArea']);
+const MEASURED_ATTRIBUTES = new Set<string>([
+  'openPlanArea', 'landArea', 'buildingArea', 'grossArea', 'netArea',
+]);
 
 const RESIDENTIAL_ATTRIBUTES: readonly TypeAttribute[] = [
   'beds', 'baths', 'livingRooms', 'kitchens', 'diningRooms',
   'toilets', 'storageRooms', 'offices', 'totalFloors',
 ];
 
+/** Ground stood on and ground built over — how two villas are compared. */
+const VILLA_ATTRIBUTES: readonly TypeAttribute[] = [
+  'landArea', 'buildingArea', ...RESIDENTIAL_ATTRIBUTES,
+];
+
 const ATTRIBUTES_BY_TYPE: Record<PropertyType, readonly TypeAttribute[]> = {
   house: RESIDENTIAL_ATTRIBUTES,
-  apartment: [...RESIDENTIAL_ATTRIBUTES, 'floorNumber'],
-  villa: RESIDENTIAL_ATTRIBUTES,
-  'luxury-villa': RESIDENTIAL_ATTRIBUTES,
+  // Gross includes the flat's share of walls and common parts, net is the
+  // floor actually walked on; a buyer is quoted both.
+  apartment: ['grossArea', 'netArea', ...RESIDENTIAL_ATTRIBUTES, 'floorNumber'],
+  villa: VILLA_ATTRIBUTES,
+  'luxury-villa': VILLA_ATTRIBUTES,
   commercial: ['offices', 'openPlanArea', 'kitchens', 'toilets', 'storageRooms', 'floorNumber', 'totalFloors'],
   parking: ['parking', 'parkingType', 'floorNumber'],
   land: [],
@@ -125,20 +148,21 @@ export function normalizeTypeAttributes(
 
     const measured = typeof value === 'string' ? Number(value.trim()) : value;
     const mustBeWhole = !MEASURED_ATTRIBUTES.has(key);
+    const max = mustBeWhole ? MAX_ATTRIBUTE_COUNT : MAX_ATTRIBUTE_AREA;
     if (
       typeof measured !== 'number'
       || !Number.isFinite(measured)
       || (mustBeWhole && !Number.isInteger(measured))
       || measured < 0
-      || measured > MAX_ATTRIBUTE_COUNT
+      || measured > max
     ) {
       return {
         ok: false,
         fields: {},
         dropped,
         error: mustBeWhole
-          ? `${key} must be a whole number between 0 and ${MAX_ATTRIBUTE_COUNT}`
-          : `${key} must be a number between 0 and ${MAX_ATTRIBUTE_COUNT}`,
+          ? `${key} must be a whole number between 0 and ${max}`
+          : `${key} must be a number between 0 and ${max}`,
       };
     }
     fields[key] = measured;
