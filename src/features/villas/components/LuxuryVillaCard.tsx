@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
@@ -32,20 +32,43 @@ interface LuxuryVillaCardProps {
     priority?: boolean;
 }
 
+/** Cross-fade length for an image change, shared by the JS and the CSS below. */
+const FADE_MS = 420;
+
+/** Hard cap on the card carousel. Kept in step with the dot row: every image
+ *  the arrows/swipe can reach must have a dot, or the indicator lies. */
+const MAX_IMAGES = 6;
+
 const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priority }) => {
     const { t } = useTranslation(['villas', 'property', 'rental', 'common']);
     const { state, dispatch, toggleSavedHome } = useAppContext();
     const [imgIndex, setImgIndex] = useState(0);
-    const [seenImages, setSeenImages] = useState<Set<number>>(() => new Set([0]));
-    const [touchStart, setTouchStart] = useState<number | null>(null);
     const [bookingOpen, setBookingOpen] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
+    const touchRef = useRef<{ x: number; y: number } | null>(null);
+    // A swipe ends in a synthetic click on most mobile browsers; without this
+    // guard flicking through the gallery navigated to the property page.
+    const swipedRef = useRef(false);
 
-    // Remember every image the user has landed on so it stays mounted and can
-    // cross-fade back in instantly (no reload flash) when revisited.
-    useEffect(() => {
-        setSeenImages(prev => (prev.has(imgIndex) ? prev : new Set(prev).add(imgIndex)));
-    }, [imgIndex]);
+    // Every image the user has landed on, oldest first. Doubles as the paint
+    // order: the incoming image is always stacked directly on top of the one
+    // that was on screen a moment ago, so the fade never reveals a third image
+    // (or the backdrop) in between.
+    const orderRef = useRef<number[]>([0]);
+    if (orderRef.current[orderRef.current.length - 1] !== imgIndex) {
+        orderRef.current = [...orderRef.current.filter(i => i !== imgIndex), imgIndex];
+    }
+    const layerZ = (i: number) => orderRef.current.indexOf(i) + 1; // 0 = never visited
+    const visited = (i: number) => orderRef.current.includes(i);
+
+    // Recycled cards (pagination, filter changes) must not keep showing image 4
+    // of the listing that used to live in this slot.
+    const [renderedId, setRenderedId] = useState(property.id);
+    if (renderedId !== property.id) {
+        setRenderedId(property.id);
+        setImgIndex(0);
+        orderRef.current = [0];
+    }
 
     // Inner controls stop click bubbling; without the same guard on keydown a
     // keyboard Enter on the heart/arrows also triggered the card's navigation.
@@ -63,10 +86,15 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     const allImages = useMemo(() => {
         const base = property.imageUrl ? [property.imageUrl] : [];
         const extras = (property.images || []).map(img => img.url).filter(Boolean);
-        return [...base, ...extras.filter(u => !base.includes(u))].slice(0, 8);
+        return [...base, ...extras.filter(u => !base.includes(u))].slice(0, MAX_IMAGES);
     }, [property.imageUrl, property.images]);
 
+    // Always at least one layer so the card renders PropertyImage's placeholder
+    // state rather than an empty black box when a listing has no photo.
+    const layers: (string | undefined)[] = allImages.length ? allImages : [property.imageUrl];
+
     const handleClick = useCallback(() => {
+        if (swipedRef.current) return;
         const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
         if (shouldOpenInNewTab()) {
             window.open(url, '_blank', 'noopener,noreferrer');
@@ -87,33 +115,45 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
 
     // Every index computation below is guarded on a non-empty gallery: with no
     // images `% 0` yields NaN, and an opacity keyed off NaN renders nothing.
+    const step = useCallback((dir: 1 | -1) => {
+        if (allImages.length < 2) return;
+        setImgIndex(i => (i + dir + allImages.length) % allImages.length);
+    }, [allImages.length]);
+
     const prevImg = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        if (allImages.length < 2) return;
-        setImgIndex(i => (i - 1 + allImages.length) % allImages.length);
-    }, [allImages.length]);
+        step(-1);
+    }, [step]);
 
     const nextImg = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        if (allImages.length < 2) return;
-        setImgIndex(i => (i + 1) % allImages.length);
-    }, [allImages.length]);
+        step(1);
+    }, [step]);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        setTouchStart(e.touches[0].clientX);
+        const t = e.touches[0];
+        touchRef.current = { x: t.clientX, y: t.clientY };
+        // Cleared here rather than only in handleClick: browsers that suppress
+        // the synthetic click after a swipe would otherwise leave the flag set
+        // and eat the *next* genuine tap on the card.
+        swipedRef.current = false;
     }, []);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-        if (touchStart === null) return;
-        const diff = touchStart - e.changedTouches[0].clientX;
-        if (allImages.length > 1 && Math.abs(diff) > 40) {
-            setImgIndex(i => diff > 0
-                ? (i + 1) % allImages.length
-                : (i - 1 + allImages.length) % allImages.length
-            );
-        }
-        setTouchStart(null);
-    }, [touchStart, allImages.length]);
+        const start = touchRef.current;
+        touchRef.current = null;
+        if (!start || allImages.length < 2) return;
+        const t = e.changedTouches[0];
+        const dx = start.x - t.clientX;
+        const dy = start.y - t.clientY;
+        // A mostly-vertical drag is the page scrolling past the card, not a
+        // swipe — it used to flip the image on every scroll that grazed a card.
+        if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+        swipedRef.current = true;
+        step(dx > 0 ? 1 : -1);
+    }, [allImages.length, step]);
+
+    const handleTouchCancel = useCallback(() => { touchRef.current = null; }, []);
 
     // 3D magnetic tilt — updates CSS custom props directly, zero re-renders
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -173,16 +213,20 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
             onMouseLeave={handleMouseLeave}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchCancel}
             role="link"
             tabIndex={0}
             aria-label={`${property.title || t('villas:card.defaultTitle', 'Luxury Villa')} — ${property.city}, ${property.country}`}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
         >
-            {/* ── Gold SVG border traces around the card on hover ── */}
+            {/* ── Gold SVG border traces around the card on hover ──
+                Inset by a pixel and drawn with a percentage-free rect: the old
+                0.5%/99% box scaled with the card's width, so on a phone the
+                trace sat several pixels off the actual rounded edge. */}
             <svg
-                className="absolute inset-0 z-50 pointer-events-none rounded-2xl"
-                width="100%" height="100%"
-                style={{ overflow: 'visible' }}
+                className="absolute inset-[1px] z-50 pointer-events-none"
+                style={{ width: 'calc(100% - 2px)', height: 'calc(100% - 2px)' }}
+                aria-hidden="true"
             >
                 <defs>
                     <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
@@ -193,8 +237,8 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                     </linearGradient>
                 </defs>
                 <rect
-                    x="0.5%" y="0.5%"
-                    width="99%" height="99%"
+                    x="0" y="0"
+                    width="100%" height="100%"
                     rx="15" ry="15"
                     fill="none"
                     stroke={`url(#${gradId})`}
@@ -207,35 +251,57 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
             {/* ── Specular highlight follows cursor ── */}
             <div className="villa-specular absolute inset-0 z-40 pointer-events-none rounded-2xl" />
 
-            {/* ── Image hero ── */}
-            <div className="relative w-full aspect-[3/2] overflow-hidden bg-neutral-900">
+            {/* ── Image hero ──
+                villa-img-clip re-clips the media with clip-path: the card's
+                own overflow-hidden is not honoured by WebKit for transformed
+                descendants, so the parallax layer (and PropertyImage's
+                scale-150 blur backdrop) used to spill outside the card. */}
+            <div className="villa-img-clip relative w-full aspect-[3/2] overflow-hidden bg-neutral-900">
 
-                {/* Parallax wrapper (hover zoom/shift). Images are stacked and
-                    cross-fade between each other for a seamless switch. */}
+                {/* Parallax wrapper (hover zoom/shift). Images are stacked; the
+                    incoming one fades in ON TOP of the outgoing one, which is
+                    only dropped once that fade has finished. A symmetric
+                    cross-fade left both layers half-transparent mid-way and
+                    the dark backdrop showed through as a flicker. */}
                 <div className="villa-img-wrap absolute inset-0">
-                    {(allImages.length ? allImages : [property.imageUrl]).map((src, i) => {
+                    {layers.map((src, i) => {
                         const active = i === imgIndex;
-                        // Mount current, already-seen, and the immediate neighbours so
-                        // the next/prev image is preloaded and the fade never pops.
+                        // Mount the current image, everything already visited, and
+                        // the immediate neighbours, so arrows/swipes fade into an
+                        // image that is already decoded. The wrapper itself always
+                        // renders: the fade needs an element that was painted at
+                        // opacity 0 to animate from, otherwise a jump straight to a
+                        // far-away dot would pop instead of fade.
                         const neighbour = Math.abs(i - imgIndex) <= 1
-                            || (imgIndex === 0 && i === allImages.length - 1)
-                            || (imgIndex === allImages.length - 1 && i === 0);
-                        if (!active && !seenImages.has(i) && !neighbour) return null;
+                            || (imgIndex === 0 && i === layers.length - 1)
+                            || (imgIndex === layers.length - 1 && i === 0);
+                        const mounted = active || visited(i) || neighbour;
                         return (
                             <div
-                                key={`${src}-${i}`}
-                                className="absolute inset-0 transition-opacity duration-[550ms] ease-out"
-                                style={{ opacity: active ? 1 : 0, zIndex: active ? 2 : 1 }}
+                                key={`${src ?? 'placeholder'}-${i}`}
+                                className="villa-img-layer absolute inset-0"
+                                style={{
+                                    opacity: active ? 1 : 0,
+                                    zIndex: layerZ(i),
+                                    // Outgoing layers hold full opacity for the length
+                                    // of the fade and then cut out underneath the
+                                    // image that has just covered them.
+                                    transition: active
+                                        ? `opacity ${FADE_MS}ms ease-out`
+                                        : `opacity 0s linear ${FADE_MS}ms`,
+                                }}
                                 aria-hidden={!active}
                             >
-                                <PropertyImage
-                                    src={src ?? property.imageUrl}
-                                    alt={property.title || t('villas:card.defaultTitle', 'Luxury Villa')}
-                                    priority={priority && i === 0}
-                                    widths={[400, 640, 800]}
-                                    sizes="(max-width: 640px) 100vw, 50vw"
-                                    imgClassName={`object-cover w-full h-full ${isSold || isRented ? 'grayscale opacity-70' : ''}`}
-                                />
+                                {mounted && (
+                                    <PropertyImage
+                                        src={src ?? property.imageUrl}
+                                        alt={property.title || t('villas:card.defaultTitle', 'Luxury Villa')}
+                                        priority={priority && i === 0}
+                                        widths={[400, 640, 800]}
+                                        sizes="(max-width: 640px) 100vw, 50vw"
+                                        imgClassName={`object-cover w-full h-full ${isSold || isRented ? 'grayscale opacity-70' : ''}`}
+                                    />
+                                )}
                             </div>
                         );
                     })}
@@ -312,13 +378,14 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                             </span>
                         )}
                         <button
+                            type="button"
                             onClick={handleFav}
                             onKeyDown={stopKeys}
                             aria-label={isFavorited
                                 ? t('common:removeFromFavorites', 'Remove from favourites')
                                 : t('common:addToFavorites', 'Add to favourites')}
                             aria-pressed={isFavorited}
-                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 shadow-lg focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none active:scale-90 ${
+                            className={`villa-fav-btn w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-200 shadow-lg focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none active:scale-90 ${
                                 isFavorited
                                     ? 'bg-red-500 text-white shadow-red-500/30'
                                     : 'bg-black/30 backdrop-blur-sm text-white border border-white/20 hover:border-white/40'
@@ -331,36 +398,52 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                     </div>
                 </div>
 
-                {/* Image dots */}
-                {allImages.length > 1 && (
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1 z-20">
-                        {allImages.slice(0, Math.min(allImages.length, 6)).map((_, i) => (
+                {/* Image dots — one per reachable image.
+                    The dot is a child span rather than the button box itself:
+                    index.html gives every <button> a 44px min-height on coarse
+                    pointers, which stretched the bare dots into tall white bars
+                    on phones. .villa-dots (see VillaSearchPage) sizes the hit
+                    box back down; the span keeps the dot the size it looks. */}
+                {layers.length > 1 && (
+                    <div className="villa-dots absolute top-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1 z-20">
+                        {layers.map((_, i) => (
                             <button
                                 key={i}
+                                type="button"
                                 onClick={(e) => { e.stopPropagation(); setImgIndex(i); }}
-                                className={`transition-all duration-200 rounded-full ${
-                                    i === imgIndex ? 'w-5 h-1.5 bg-white shadow-sm' : 'w-1.5 h-1.5 bg-white/40 hover:bg-white/70'
-                                }`}
+                                className="h-6 px-1 flex items-center justify-center focus-visible:outline-none"
                                 onKeyDown={stopKeys}
                                 aria-label={t('villas:card.goToImage', 'Go to image {{n}}', { n: i + 1 })}
-                            />
+                                aria-current={i === imgIndex}
+                            >
+                                <span
+                                    className={`block h-1.5 rounded-full transition-all duration-300 ease-out ${
+                                        i === imgIndex
+                                            ? 'w-5 bg-white shadow-sm'
+                                            : 'w-1.5 bg-white/45 hover:bg-white/75'
+                                    }`}
+                                />
+                            </button>
                         ))}
                     </div>
                 )}
 
-                {/* Arrow nav */}
-                {allImages.length > 1 && (
+                {/* Arrow nav — pointer devices only. villa-nav-arrow hides them
+                    outright on touch, where they were invisible (opacity-0 with
+                    no hover to reveal them) yet still swallowed taps meant for
+                    the card, and the 44px touch rule stretched them into ovals. */}
+                {layers.length > 1 && (
                     <>
-                        <button onClick={prevImg}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                        <button type="button" onClick={prevImg}
+                            className="villa-nav-arrow absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                             onKeyDown={stopKeys}
                             aria-label={t('property:imageViewer.previous', 'Previous image')}>
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
-                        <button onClick={nextImg}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                        <button type="button" onClick={nextImg}
+                            className="villa-nav-arrow absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                             onKeyDown={stopKeys}
                             aria-label={t('property:imageViewer.next', 'Next image')}>
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

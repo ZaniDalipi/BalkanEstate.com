@@ -61,6 +61,45 @@ const VillaAnimationStyles = () => (
         0 0 80px rgba(232,184,32,0.22);
     }
 
+    /* ── Media clip ──
+       The card is a 3D-transformed element (.villa-tilt-card), and WebKit does
+       not clip transformed descendants to a transformed ancestor's rounded
+       overflow box. That let the parallax layer — and PropertyImage's blurred
+       scale(1.5) backdrop — paint outside the card on iOS. clip-path is
+       honoured in that situation, so the media gets its own clip that matches
+       the card's 1rem radius. */
+    .villa-img-clip {
+      clip-path: inset(0 round 1rem);
+      -webkit-clip-path: inset(0 round 1rem);
+    }
+
+    /* ── Image cross-fade layers ── */
+    .villa-img-layer {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* ── Opting the card's small controls out of the global touch-target rule ──
+       index.html sets button { min-height: 44px } under (pointer: coarse).
+       That rule is unlayered, so it beats every Tailwind utility — those live
+       in @layer utilities, and layered styles always lose to unlayered ones no
+       matter how specific they are. min-h-0 in the markup therefore does
+       nothing, and on phones the indicators stretched into tall white bars and
+       the heart into an oval. These selectors are unlayered too, and a class
+       out-specifies a bare element, so they win. Only the floor is lifted here
+       — the elements' own sizes stay in the markup. */
+    .villa-dots button,
+    .villa-nav-arrow,
+    .villa-fav-btn {
+      min-height: 0;
+    }
+
+    /* Arrows are hover-only affordances. On touch they can never be revealed,
+       so they must not sit invisibly over the image eating taps. */
+    @media (hover: none), (pointer: coarse) {
+      .villa-nav-arrow { display: none; }
+    }
+
     /* ── Parallax image layer ── */
     .villa-img-wrap {
       transform: translate(var(--imgX,0px), var(--imgY,0px)) scale(1.0);
@@ -156,9 +195,11 @@ const VillaAnimationStyles = () => (
       .villa-tilt-card,
       .villa-border-trace,
       .villa-img-wrap,
+      .villa-img-layer,
       .villa-cta-btn,
       .luxury-chip {
         animation: none !important;
+        /* !important also overrides the per-layer inline fade timing */
         transition: none !important;
       }
       .villa-card-fly { opacity: 1; }
