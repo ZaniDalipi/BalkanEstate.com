@@ -94,10 +94,22 @@ const VillaAnimationStyles = () => (
       min-height: 0;
     }
 
-    /* Arrows are hover-only affordances. On touch they can never be revealed,
-       so they must not sit invisibly over the image eating taps. */
+    /* Arrows reveal on hover, which touch devices never fire. Rather than
+       leaving them invisible-but-tappable there, they are shown permanently and
+       sized up to a proper thumb target: on a phone the dots and a swipe were
+       otherwise the only way through the gallery. Unlayered, so these win over
+       the opacity/size utilities in the markup without !important. */
     @media (hover: none), (pointer: coarse) {
-      .villa-nav-arrow { display: none; }
+      .villa-nav-arrow {
+        opacity: 1;
+        width: 36px;
+        height: 36px;
+        background: rgba(0,0,0,0.45);
+      }
+      .villa-nav-arrow svg { width: 16px; height: 16px; }
+      /* Clear of the 24px dot row above and the CTA in the middle. */
+      .villa-nav-arrow-prev { left: 8px; }
+      .villa-nav-arrow-next { right: 8px; }
     }
 
     /* ── Parallax image layer ── */

@@ -428,14 +428,16 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                     </div>
                 )}
 
-                {/* Arrow nav — pointer devices only. villa-nav-arrow hides them
-                    outright on touch, where they were invisible (opacity-0 with
-                    no hover to reveal them) yet still swallowed taps meant for
-                    the card, and the 44px touch rule stretched them into ovals. */}
+                {/* Arrow nav. Revealed on hover for pointer devices; touch has no
+                    hover, so villa-nav-arrow (see VillaSearchPage) keeps them
+                    permanently visible and thumb-sized there — otherwise a phone
+                    was left with only the dots and a swipe to move through the
+                    gallery, and the arrows sat invisible over the image eating
+                    taps meant for the card. */}
                 {layers.length > 1 && (
                     <>
                         <button type="button" onClick={prevImg}
-                            className="villa-nav-arrow absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                            className="villa-nav-arrow villa-nav-arrow-prev absolute left-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                             onKeyDown={stopKeys}
                             aria-label={t('property:imageViewer.previous', 'Previous image')}>
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -443,7 +445,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                             </svg>
                         </button>
                         <button type="button" onClick={nextImg}
-                            className="villa-nav-arrow absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+                            className="villa-nav-arrow villa-nav-arrow-next absolute right-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
                             onKeyDown={stopKeys}
                             aria-label={t('property:imageViewer.next', 'Next image')}>
                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
