@@ -663,8 +663,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         <div className="flex-shrink-0" style={{ height: headerHeight }} aria-hidden />
                     )}
 
-                    {/* Desktop header — sticky, new 3-tier design */}
-                    <div className="hidden lg:block sticky top-0 z-20">
+                    {/* Desktop header — sticky, new 3-tier design.
+                        Above the results bar's z-[100], not because the two
+                        ever overlap — the bar sticks to the top of the scroll
+                        container below this — but because the search box's
+                        suggestion list hangs out of this header and down over
+                        it. `sticky` + a z-index makes this header a stacking
+                        context, so the dropdown's own z-index is confined to
+                        it: at z-20 the whole subtree painted under the bar, and
+                        the bar cut a white stripe through the suggestions. */}
+                    <div className="hidden lg:block sticky top-0 z-[110]">
 
                         {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div
