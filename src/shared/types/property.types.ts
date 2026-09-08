@@ -173,6 +173,14 @@ export interface Property {
   propertyType: PropertyType;
   /** Commercial: how much of the floor area is open plan. */
   openPlanArea?: number;
+  /** Villa / luxury villa: the plot the building stands on, in m². */
+  landArea?: number;
+  /** Villa / luxury villa: how much of that plot is built over, in m². */
+  buildingArea?: number;
+  /** Apartment: floor area including its share of walls and common parts, in m². */
+  grossArea?: number;
+  /** Apartment: the floor area actually walked on, in m². */
+  netArea?: number;
   /** Parking: how the space is arranged. Absent on every other type. */
   parkingType?: ParkingType;
   floorNumber?: number;

@@ -29,6 +29,12 @@ export interface ListingData {
     offices: number;
     /** Commercial: how much of the area is open plan rather than cellular. */
     openPlanArea: number;
+    /** Villa: the plot, and how much of it is built over. */
+    landArea: number;
+    buildingArea: number;
+    /** Apartment: with and without its share of walls and common parts. */
+    grossArea: number;
+    netArea: number;
     /** Parking: how the space is arranged. */
     parkingType: ParkingType;
     sq_meters: number;
@@ -108,6 +114,10 @@ export const initialListingData: ListingData = {
     storageRooms: 0,
     offices: 0,
     openPlanArea: 0,
+    landArea: 0,
+    buildingArea: 0,
+    grossArea: 0,
+    netArea: 0,
     parkingType: 'garage',
     sq_meters: 0,
     year_built: new Date().getFullYear(),
@@ -202,6 +212,7 @@ export type FieldErrors = Record<string, string>;
 export const FIELD_ERROR_ORDER = [
     'country', 'city', 'title', 'price',
     'propertyType',
+    'landArea', 'buildingArea', 'grossArea', 'netArea',
     'bedrooms', 'bathrooms', 'livingRooms', 'kitchens', 'diningRooms',
     'toilets', 'storageRooms', 'offices', 'openPlanArea',
     'parkingType', 'parking_spots',
@@ -227,6 +238,10 @@ export const ATTRIBUTE_FIELDS: Record<string, string> = {
     storageRooms: 'storageRooms',
     offices: 'offices',
     openPlanArea: 'openPlanArea',
+    landArea: 'landArea',
+    buildingArea: 'buildingArea',
+    grossArea: 'grossArea',
+    netArea: 'netArea',
     parking: 'parking_spots',
     parkingType: 'parkingType',
     floorNumber: 'floorNumber',
@@ -357,6 +372,10 @@ export const validateListing = (
         storageRooms: listingData.storageRooms,
         offices: listingData.offices,
         openPlanArea: listingData.openPlanArea,
+        landArea: listingData.landArea,
+        buildingArea: listingData.buildingArea,
+        grossArea: listingData.grossArea,
+        netArea: listingData.netArea,
         parking: listingData.parking_spots,
         parkingType: listingData.parkingType,
         floorNumber: listingData.floorNumber,

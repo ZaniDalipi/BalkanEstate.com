@@ -3,7 +3,7 @@ process.env.SKIP_TEST_DB = 'true';
 import Property from '../models/Property';
 import { SUBSCRIPTION_STORES } from '../models/Subscription';
 import Subscription from '../models/Subscription';
-import { TYPE_ATTRIBUTES, attributesForType, normalizeTypeAttributes } from '../config/typeAttributes';
+import { TYPE_ATTRIBUTES, attributesForType, normalizeTypeAttributes, MAX_ATTRIBUTE_AREA } from '../config/typeAttributes';
 import { ALLOWED_PROPERTY_FIELDS, ALLOWED_UPDATE_FIELDS } from '../controllers/propertyController';
 
 /**
@@ -141,7 +141,14 @@ describe('areas may be fractional, counts may not', () => {
 
   it('refuses a negative or absurd area', () => {
     expect(normalizeTypeAttributes('commercial', { openPlanArea: -1 }).ok).toBe(false);
-    expect(normalizeTypeAttributes('commercial', { openPlanArea: 100000 }).ok).toBe(false);
+    expect(normalizeTypeAttributes('commercial', { openPlanArea: MAX_ATTRIBUTE_AREA + 1 }).ok).toBe(false);
+  });
+
+  it('bounds an area by the area limit, not by the room-count limit', () => {
+    // 999 is a sane ceiling for bedrooms and far too low for a floor plate or
+    // a plot, so the two are bounded separately.
+    expect(normalizeTypeAttributes('commercial', { openPlanArea: 5000 }).ok).toBe(true);
+    expect(normalizeTypeAttributes('commercial', { offices: 5000 }).ok).toBe(false);
   });
 
   it('saves a shop with its offices and open-plan area intact', async () => {

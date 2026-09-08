@@ -139,6 +139,10 @@
       "description": "Opis",
       "addTags": "Dodajte oznake...",
       "openPlanArea": "Otvoreni prostor (m²)",
+      "landArea": "Površina zemljišta (m²)",
+      "buildingArea": "Površina objekta (m²)",
+      "grossArea": "Bruto površina (m²)",
+      "netArea": "Neto površina (m²)",
       "parkingType": "Vrsta parkinga",
       "parkingSpaces": "Mjesta",
       "officeRooms": "Kancelarije"

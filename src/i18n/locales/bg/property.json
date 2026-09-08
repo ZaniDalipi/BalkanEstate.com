@@ -156,7 +156,11 @@
     "toilets": "Тоалетни (WC)",
     "storageRooms": "Складови помещения",
     "offices": "Офис / кабинет",
-    "propertyType": "Тип имот"
+    "propertyType": "Тип имот",
+    "landArea": "Площ на парцела",
+    "buildingArea": "Застроена площ",
+    "grossArea": "Бруто площ",
+    "netArea": "Нето площ"
   },
   "distances": {
     "title": "Разстояния",

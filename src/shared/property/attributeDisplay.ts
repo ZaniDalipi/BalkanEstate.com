@@ -39,6 +39,10 @@ export const ATTRIBUTE_DISPLAY: Record<TypeAttribute, AttributeDisplay> = {
   storageRooms: { key: 'details.storageRooms', fallback: 'Storage rooms', icon: '📦' },
   offices: { key: 'details.offices', fallback: 'Offices', icon: '💼' },
   openPlanArea: { key: 'details.openPlanArea', fallback: 'Open-plan area', icon: '🪟', unit: 'm²' },
+  landArea: { key: 'details.landArea', fallback: 'Land area', icon: '🌳', unit: 'm²' },
+  buildingArea: { key: 'details.buildingArea', fallback: 'Building area', icon: '🏗️', unit: 'm²' },
+  grossArea: { key: 'details.grossArea', fallback: 'Gross area', icon: '📐', unit: 'm²' },
+  netArea: { key: 'details.netArea', fallback: 'Net area', icon: '📏', unit: 'm²' },
   parking: { key: 'features.parking', fallback: 'Parking', icon: '🅿️' },
   parkingType: {
     key: 'details.parkingType',

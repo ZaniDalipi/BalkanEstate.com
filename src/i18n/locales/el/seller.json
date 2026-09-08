@@ -139,6 +139,10 @@
       "description": "Περιγραφή",
       "addTags": "Προσθήκη ετικετών...",
       "openPlanArea": "Ενιαίος χώρος (m²)",
+      "landArea": "Εμβαδόν οικοπέδου (m²)",
+      "buildingArea": "Εμβαδόν κτίσματος (m²)",
+      "grossArea": "Μικτό εμβαδόν (m²)",
+      "netArea": "Καθαρό εμβαδόν (m²)",
       "parkingType": "Τύπος στάθμευσης",
       "parkingSpaces": "Θέσεις",
       "officeRooms": "Γραφεία"

@@ -87,6 +87,10 @@ export interface IProperty extends Document {
   storageRooms?: number;
   offices?: number;
   openPlanArea?: number;
+  landArea?: number;
+  buildingArea?: number;
+  grossArea?: number;
+  netArea?: number;
   parkingType?: ParkingType;
   sqft: number;
   /** On an under-construction listing this mirrors `expectedCompletionYear`. */
@@ -373,6 +377,28 @@ const PropertySchema: Schema = new Schema(
     },
     /** Commercial: how much of the floor area is open plan rather than cellular. */
     openPlanArea: {
+      type: Number,
+      min: 0,
+    },
+    /**
+     * Villa / luxury villa: the plot, and how much of it is built over.
+     * No `default` on any of these four — an area the seller did not give is
+     * absent, not 0 m², which would print a measurement nobody entered.
+     */
+    landArea: {
+      type: Number,
+      min: 0,
+    },
+    buildingArea: {
+      type: Number,
+      min: 0,
+    },
+    /** Apartment: gross includes the share of walls and common parts, net does not. */
+    grossArea: {
+      type: Number,
+      min: 0,
+    },
+    netArea: {
       type: Number,
       min: 0,
     },
