@@ -85,6 +85,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         mapCentre,
         drawnBounds,
         baseFilteredProperties,
+        mapProperties,
+        isTextRelaxed,
         listProperties,
         seoTitle,
         seoDescription,
@@ -134,7 +136,9 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const mountList = useDeferredMount(!isListOnScreen);
 
     const mapProps = {
-        properties: baseFilteredProperties,
+        // The same set the list is drawn from, so a search never lists
+        // properties over a map with no pins on it.
+        properties: mapProperties,
         onMapMove: handleMapMove,
         userLocation: userLocation,
         onSaveSearch: handleSaveSearchArea,
@@ -178,6 +182,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         onPropertyHover: setHoveredPropertyId,
         onSelectSuggestion: handleSelectSuggestion,
         fallbackLocation: fallbackLocation,
+        isTextRelaxed: isTextRelaxed,
         // Passed directly to avoid PropertyList subscribing to AppContext
         isLoadingProperties: isLoadingProperties,
         isAuthenticated: isAuthenticated,

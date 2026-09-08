@@ -33,6 +33,10 @@ interface PropertyListProps {
   onDrawStart: () => void;
   isDrawing: boolean;
   isSearchingLocation: boolean;
+  /** Where the listings are, when nothing was in view and the nearest are shown. */
+  fallbackLocation?: string | null;
+  /** True when the typed text matched nothing and the map view is answering. */
+  isTextRelaxed?: boolean;
   onPropertyHover?: (propertyId: string | null) => void;
   /** A row picked in the search box — a place, a listing, or the query itself. */
   onSelectSuggestion?: (suggestion: Suggestion) => void;
@@ -42,6 +46,35 @@ interface PropertyListProps {
   isAuthenticated?: boolean;
   onOpenAuthModal?: () => void;
 }
+
+/**
+ * One line under the results count, for when the list is answering a looser
+ * question than the one that was asked — the typed text matched nothing and
+ * the map view is answering, or nothing was in view and the nearest listings
+ * are shown. Silent when the results are an honest answer to the search.
+ */
+const SearchScopeNote: React.FC<{
+  query: string;
+  isTextRelaxed?: boolean;
+  fallbackLocation?: string | null;
+}> = ({ query, isTextRelaxed, fallbackLocation }) => {
+  const { t } = useTranslation(['search']);
+  if (!isTextRelaxed && !fallbackLocation) return null;
+
+  return (
+    <p className="text-[11px] text-neutral-400 mt-0.5 truncate">
+      {isTextRelaxed
+        ? t('search:showingInArea', {
+            query,
+            defaultValue: 'Nothing matches “{{query}}” — showing what is available in this area',
+          })
+        : t('search:showingNearby', {
+            location: fallbackLocation,
+            defaultValue: 'Nothing in this area — showing the nearest listings in {{location}}',
+          })}
+    </p>
+  );
+};
 
 const FilterButton: React.FC<{
   onClick: () => void;
@@ -716,7 +749,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
     // Use props instead of useAppContext() to avoid re-rendering the
     // entire property list when unrelated context state changes (e.g. savedHomes).
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
 
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
@@ -938,7 +971,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         reset on a push and restore on a back. */}
                     <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container>
                         <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
-                            <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                            <div className="min-w-0">
+                                <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                                <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} fallbackLocation={fallbackLocation} />
+                            </div>
                             <div className="relative z-[101]">
                                 <select
                                     id="sortBy"
@@ -1079,7 +1115,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     {showList && (
                         <div className="flex-grow min-h-0 overflow-y-auto relative z-0" data-scroll-container>
                             <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
-                                <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                                <div className="min-w-0">
+                                    <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                                    <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} fallbackLocation={fallbackLocation} />
+                                </div>
                                 <div className="relative z-[101]">
                                     <select
                                         id="sortBy"

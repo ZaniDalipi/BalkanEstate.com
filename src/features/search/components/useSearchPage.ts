@@ -6,13 +6,14 @@ import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, Searc
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { filterAndSortProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
 import { generatePropertySlug } from '@/utils/slug';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { applyQueryToFilters } from '../universal/queryToFilters';
+import { frameSearchTarget } from '../frameSearch';
 import { searchPlaces } from '../universal/places';
 import type { Suggestion } from '../universal/types';
 import { isPropertyTypeFilter } from '@/shared/types/property.types';
@@ -446,7 +447,37 @@ export function useSearchPage() {
         [properties, activeFilters]
     );
 
+    /**
+     * The same search with the typed text dropped.
+     *
+     * A street address is a place, not a word any listing contains: "Sukth,
+     * Durrës, Albania" locates a point on the map and may match no listing's
+     * text at all. Rather than answer that with an empty page over an empty
+     * map, the text is relaxed once the strict search has come back with
+     * nothing and the map view becomes the search — which is what a person who
+     * typed an address was asking for. Computed only in that case, never on
+     * the common path.
+     */
+    const needsRelaxedText = baseFilteredProperties.length === 0 && activeFilters.query.trim() !== '';
+    const relaxedProperties = useMemo(() => {
+        if (!needsRelaxedText) return null;
+        const relaxed = filterAndSortProperties(properties, { ...activeFilters, query: '' });
+        return relaxed.length > 0 ? relaxed : null;
+    }, [needsRelaxedText, properties, activeFilters]);
+
+    /**
+     * What the map draws — and the set the list is drawn from, so the two
+     * always answer the same question. Handing the map the strict set while
+     * the list answered from another is how a search ended up listing
+     * properties over a map with no pins on it.
+     */
+    const mapProperties = relaxedProperties ?? baseFilteredProperties;
+
     const { listProperties, fallbackLocationValue } = useMemo(() => {
+        // The strict search, or — when it found nothing for the typed text —
+        // everything the other filters allow, located by the map instead.
+        const baseFilteredProperties = mapProperties;
+
         // Helper to calculate distance between two points
         const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
             return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
@@ -544,7 +575,14 @@ export function useSearchPage() {
 
         // Fallback to all filtered properties if no bounds set (initial load)
         return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
-    }, [baseFilteredProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile, isLoadingProperties]);
+    }, [mapProperties, drawnBounds, mapBounds, isMobile, showAllOnMobile, isLoadingProperties]);
+
+    /**
+     * True when the list is answering a looser question than the one typed —
+     * the text matched nothing, so the map view is doing the searching. The
+     * page says so rather than letting the results look like exact matches.
+     */
+    const isTextRelaxed = relaxedProperties !== null && listProperties.length > 0;
 
     // Update fallback location state when computed value changes
     useEffect(() => {
@@ -583,6 +621,19 @@ export function useSearchPage() {
         // Apply other filters in real-time
         updateSearchPageState({ filters: newFilters, activeFilters: newFilters });
     }, [filters, updateSearchPageState]);
+
+    /**
+     * Fly to a searched place, framed so the listings it found are on screen.
+     *
+     * A geocoder answers with the centre of the place at the zoom of the
+     * place, which is not the same thing as a view of what is for sale there:
+     * a match two kilometres up the coast lands outside that viewport, and the
+     * visitor reads a card over an empty map. `frameSearchTarget` widens the
+     * view until the listings around the place are in it.
+     */
+    const flyToSearched = useCallback((target: { center: [number, number]; zoom: number }, forFilters: Filters) => {
+        setFlyToTarget(frameSearchTarget(target, filterProperties(properties, forFilters)) ?? target);
+    }, [properties]);
 
     /**
      * Run whatever is in the box.
@@ -626,10 +677,10 @@ export function useSearchPage() {
 
         if (local && Number.isFinite(local.place.lat) && Number.isFinite(local.place.lng)) {
             setShowAllOnMobile(false);
-            setFlyToTarget({
+            flyToSearched({
                 center: [local.place.lat as number, local.place.lng as number],
                 zoom: local.place.zoom,
-            });
+            }, nextFilters);
             return;
         }
 
@@ -640,12 +691,12 @@ export function useSearchPage() {
         if (results.length > 0) {
             const [best] = results;
             setShowAllOnMobile(false);
-            setFlyToTarget({
+            flyToSearched({
                 center: [Number(best.lat), Number(best.lon)],
                 zoom: getZoomFromBoundingBox(best.boundingbox),
-            });
+            }, nextFilters);
         }
-    }, [filters, updateSearchPageState]);
+    }, [filters, updateSearchPageState, flyToSearched]);
 
     /**
      * A row picked in the omnibox.
@@ -680,17 +731,17 @@ export function useSearchPage() {
             setShowAllOnMobile(false);
 
             if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
-                setFlyToTarget({
+                flyToSearched({
                     center: [suggestion.lat as number, suggestion.lng as number],
                     zoom: suggestion.zoom ?? 12,
-                });
+                }, nextFilters);
             }
             return;
         }
 
         // 'query' and 'recent' are both "search for this text".
         void handleSearch(suggestion.type === 'query' ? suggestion.text : suggestion.title);
-    }, [filters, updateSearchPageState, dispatch, handleSearch]);
+    }, [filters, updateSearchPageState, dispatch, handleSearch, flyToSearched]);
 
 
     const handleLocalFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
@@ -1058,7 +1109,9 @@ export function useSearchPage() {
         mapCentre,
         drawnBounds,
         baseFilteredProperties,
+        mapProperties,
         listProperties,
+        isTextRelaxed,
         seoTitle,
         seoDescription,
         // Handlers

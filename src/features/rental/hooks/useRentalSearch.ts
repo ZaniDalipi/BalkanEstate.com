@@ -8,8 +8,9 @@ import { searchPlaces } from '@/src/features/search/universal/places';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { filterAndSortProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
 import { narrowToMapView } from '@/src/features/search/mapList';
+import { frameSearchTarget } from '@/src/features/search/frameSearch';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { getCountryData } from '@/constants/countries';
@@ -262,6 +263,18 @@ export function useRentalSearch() {
     }, [needsRelaxedText, rentalProperties, activeFilters]);
 
     /**
+     * What the map draws — and the set the list is drawn from, so the two
+     * always answer the same question.
+     *
+     * The strict search, or — when it found nothing for the typed text —
+     * everything the other filters allow, located by the map. Handing the map
+     * the strict set instead is how a search for an address ended up listing
+     * rentals over an empty map: nothing text-matched the street name, so
+     * every pin disappeared while the cards stayed.
+     */
+    const mapProperties = relaxedProperties ?? baseFilteredProperties;
+
+    /**
      * What the list shows: the rentals inside the current view.
      *
      * Same rules as the buy page, so a search behaves identically on both
@@ -272,14 +285,12 @@ export function useRentalSearch() {
      */
     const { listProperties, fallbackLocation } = useMemo(
         () => narrowToMapView({
-            // The strict search, or — when it found nothing for the typed
-            // text — everything the other filters allow, located by the map.
-            properties: relaxedProperties ?? baseFilteredProperties,
+            properties: mapProperties,
             drawnBounds,
             mapBounds,
             ready: !isLoading,
         }),
-        [baseFilteredProperties, relaxedProperties, drawnBounds, mapBounds, isLoading]
+        [mapProperties, drawnBounds, mapBounds, isLoading]
     );
 
     /**
@@ -326,6 +337,23 @@ export function useRentalSearch() {
     }, [filters, applyFilters]);
 
     /**
+     * Fly to a searched place, framed so the rentals it found are on screen.
+     *
+     * The gazetteer and the geocoder both answer with the centre of a place at
+     * the zoom of the place, which is not the same thing as a view of what is
+     * available there: a rental two kilometres out of town lands outside that
+     * viewport, and the visitor reads cards over an empty map.
+     *
+     * The listings it frames around are the ones the list will draw from,
+     * including the relaxed set, so the map and the list never disagree.
+     */
+    const flyToSearched = useCallback((target: { center: [number, number]; zoom: number }, forFilters: Filters) => {
+        const strict = filterProperties(rentalProperties, forFilters);
+        const answering = strict.length > 0 ? strict : filterProperties(rentalProperties, { ...forFilters, query: '' });
+        setFlyToTarget(frameSearchTarget(target, answering) ?? target);
+    }, [rentalProperties]);
+
+    /**
      * Run whatever is in the box — the buy page's search, on rentals.
      *
      * The sentence is read first, so "2 bed furnished apartment in Tirana
@@ -366,10 +394,10 @@ export function useRentalSearch() {
         });
 
         if (local && Number.isFinite(local.place.lat) && Number.isFinite(local.place.lng)) {
-            setFlyToTarget({
+            flyToSearched({
                 center: [local.place.lat as number, local.place.lng as number],
                 zoom: local.place.zoom,
-            });
+            }, nextFilters);
             return;
         }
 
@@ -378,15 +406,15 @@ export function useRentalSearch() {
             const results = await searchLocation(placeQuery);
             if (results.length > 0) {
                 const [best] = results;
-                setFlyToTarget({
+                flyToSearched({
                     center: [Number(best.lat), Number(best.lon)],
                     zoom: getZoomFromBoundingBox(best.boundingbox),
-                });
+                }, nextFilters);
             }
         } finally {
             setIsSearchingLocation(false);
         }
-    }, [filters, applyFilters]);
+    }, [filters, applyFilters, flyToSearched]);
 
     const handleResetFilters = useCallback(() => {
         applyFilters({ ...initialFilters, listingType: 'rent' });
@@ -532,21 +560,22 @@ export function useRentalSearch() {
 
         if (suggestion.type === 'place') {
             const { filters: parsedFilters } = applyQueryToFilters(filters, suggestion.searchValue);
-            applyFilters({ ...parsedFilters, listingType: 'rent' });
+            const nextFilters: Filters = { ...parsedFilters, listingType: 'rent' };
+            applyFilters(nextFilters);
             setDrawnBoundsJSON(null); // A picked place replaces any drawn area.
 
             if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
-                setFlyToTarget({
+                flyToSearched({
                     center: [suggestion.lat as number, suggestion.lng as number],
                     zoom: suggestion.zoom ?? 12,
-                });
+                }, nextFilters);
             }
             return;
         }
 
         // 'query' and 'recent' are both "search for this text".
         void handleSearch(suggestion.type === 'query' ? suggestion.text : suggestion.title);
-    }, [filters, applyFilters, dispatch, handleSearch]);
+    }, [filters, applyFilters, dispatch, handleSearch, flyToSearched]);
 
     // A `?q=` arriving with the page is a search, not just a filter: the map
     // should open on the place that was linked to, exactly as if it had been
@@ -588,6 +617,7 @@ export function useRentalSearch() {
         mapCentre,
         drawnBounds,
         baseFilteredProperties,
+        mapProperties,
         listProperties,
         fallbackLocation,
         isTextRelaxed,
