@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import {
@@ -38,6 +38,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { AgentStats, MarketInsights } from './useAgentProfile';
+import { filterPropertiesByQuery, parseSearchTerms } from '../utils/propertySearch';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
 
@@ -121,6 +122,28 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
 }) => {
     const { t } = useTranslation(['agents']);
     const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
+    const [listingSearch, setListingSearch] = useState('');
+
+    // Terms are derived once per keystroke rather than per property: the
+    // sanitising in parseSearchTerms would otherwise run for every card.
+    const searchTerms = useMemo(() => parseSearchTerms(listingSearch), [listingSearch]);
+    const isSearching = searchTerms.length > 0;
+
+    // One source of truth for what the listings tab shows: the count printed
+    // under the search box and the grids below are the same lists.
+    const visibleListings = useMemo(() => {
+        const byType = (list: any[]) => (listingTypeFilter === 'all'
+            ? list
+            : list.filter(p => (p?.listingType || 'sale') === listingTypeFilter));
+        return {
+            active: filterPropertiesByQuery(byType(activeListings || []), listingSearch),
+            sold: filterPropertiesByQuery(byType(soldProperties || []), listingSearch),
+            rented: filterPropertiesByQuery(byType(rentedProperties || []), listingSearch),
+        };
+    }, [activeListings, soldProperties, rentedProperties, listingTypeFilter, listingSearch]);
+
+    const listingMatchCount = visibleListings.active.length + visibleListings.sold.length + visibleListings.rented.length;
+    const totalListingCount = (activeListings?.length || 0) + (soldProperties?.length || 0) + (rentedProperties?.length || 0);
 
     return (
         <div className="bg-white rounded-lg sm:rounded-xl lg:rounded-2xl shadow-sm border border-gray-200 mb-4 sm:mb-6 lg:mb-8 overflow-hidden sticky top-0 md:top-16 z-30">
@@ -693,6 +716,44 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </button>
                         </div>
 
+                        {/* Search this agent's listings. Filters in place — the
+                            "Search all properties" link above is the way out to
+                            the global search. */}
+                        <div className="relative">
+                            <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            <input
+                                type="search"
+                                value={listingSearch}
+                                onChange={(e) => setListingSearch(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Escape') setListingSearch(''); }}
+                                maxLength={200}
+                                placeholder={t('profilePage.listingsTab.searchPlaceholder', 'Search by title, city, address or ID')}
+                                aria-label={t('profilePage.listingsTab.searchLabel', "Search this agent's properties")}
+                                /* The native search cancel button is hidden: the
+                                   field already has one that matches the app. */
+                                className="w-full h-11 pl-11 pr-11 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors [&::-webkit-search-cancel-button]:appearance-none"
+                            />
+                            {listingSearch.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setListingSearch('')}
+                                    aria-label={t('profilePage.listingsTab.clearSearch', 'Clear search')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                                >
+                                    <span aria-hidden="true" className="text-lg leading-none">&times;</span>
+                                </button>
+                            )}
+                        </div>
+                        {isSearching && (
+                            <p className="mt-2 text-xs text-gray-500" role="status" aria-live="polite">
+                                {t('profilePage.listingsTab.searchResults', {
+                                    matches: listingMatchCount,
+                                    total: totalListingCount,
+                                    defaultValue: 'Showing {{matches}} of {{total}} properties',
+                                })}
+                            </p>
+                        )}
+
                         {/* Listing Type Filter (Sale / Rent) */}
                         {(() => {
                             const allProps = [...activeListings, ...soldProperties, ...rentedProperties];
@@ -733,9 +794,30 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
 
                         {/* Active Listings */}
                         {(() => {
-                            const filteredActive = listingTypeFilter === 'all' ? activeListings : activeListings.filter(p => (p.listingType || 'sale') === listingTypeFilter);
-                            const filteredSold = listingTypeFilter === 'all' ? soldProperties : soldProperties.filter(p => (p.listingType || 'sale') === listingTypeFilter);
-                            const filteredRented = listingTypeFilter === 'all' ? rentedProperties : rentedProperties.filter(p => (p.listingType || 'sale') === listingTypeFilter);
+                            const { active: filteredActive, sold: filteredSold, rented: filteredRented } = visibleListings;
+
+                            // A search that matches nothing needs its own answer:
+                            // the "no listings" copy below reads as if the agent
+                            // has none at all.
+                            if (isSearching && listingMatchCount === 0) {
+                                return (
+                                    <div className="text-center py-12 bg-gray-50 rounded-2xl">
+                                        <p className="text-gray-900 font-medium">
+                                            {t('profilePage.listingsTab.noMatches', 'No properties match your search')}
+                                        </p>
+                                        <p className="text-gray-500 text-sm mt-1">
+                                            {t('profilePage.listingsTab.noMatchesHint', 'Try a city, a property type, or part of the title.')}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setListingSearch('')}
+                                            className="mt-4 px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                                        >
+                                            {t('profilePage.listingsTab.clearSearch', 'Clear search')}
+                                        </button>
+                                    </div>
+                                );
+                            }
 
                             return (
                                 <>

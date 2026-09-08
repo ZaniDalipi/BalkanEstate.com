@@ -10,6 +10,13 @@ import { hasHabitableInterior } from '@/shared/constants/propertyTypes';
 // --- Types ---
 
 export type Step = 'init' | 'loading' | 'form' | 'preview' | 'floorplan' | 'payment' | 'success';
+
+/**
+ * How long the success celebration stays on screen before the seller is sent to
+ * their dashboard. Shared so the countdown bar in ListingSuccessCelebration and
+ * the redirect timer in useListingForm can never drift apart.
+ */
+export const SUCCESS_REDIRECT_MS = 4500;
 export type Mode = 'ai' | 'manual';
 
 export interface ListingData {

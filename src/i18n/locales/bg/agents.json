@@ -695,7 +695,13 @@
       "forSale": "За продажба",
       "forRent": "Под наем",
       "noListings": "Няма налични обяви",
-      "allTypes": "Всички типове"
+      "allTypes": "Всички типове",
+      "searchPlaceholder": "Търсене по заглавие, град, адрес или ID",
+      "searchLabel": "Търсене в имотите на този агент",
+      "clearSearch": "Изчисти търсенето",
+      "searchResults": "Показани {{matches}} от {{total}} имота",
+      "noMatches": "Няма имоти, които да отговарят на търсенето",
+      "noMatchesHint": "Опитайте с град, тип имот или част от заглавието."
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани отзиви",

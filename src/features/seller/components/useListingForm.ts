@@ -12,7 +12,7 @@ import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
-import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing } from './ListingFormHelpers';
+import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
 import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
@@ -23,6 +23,22 @@ import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
  * makes multer abort the multipart request with "Unexpected field".
  */
 const MAX_IMAGES = FILE_LIMITS.MAX_IMAGES_PER_PROPERTY;
+
+/**
+ * Scrolls the listing flow back to the top of the page. The app scrolls inside
+ * `main#main-content` (see App.tsx) rather than the window, so resetting the
+ * window alone leaves the new step rendered wherever the previous, much taller
+ * step had been scrolled to.
+ */
+function scrollPageToTop() {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    document.querySelectorAll<HTMLElement>('[data-scroll-container]').forEach(el => {
+        el.scrollTop = 0;
+    });
+}
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
@@ -203,14 +219,38 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     // highlighted in red in the form until the user fixes them.
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
+    // The success screen redirects to the dashboard on a timer. Keeping the id
+    // lets us cancel it if the seller navigates away first — otherwise the
+    // pending dispatch yanks them back to the dashboard from wherever they went.
+    const redirectTimerRef = useRef<number | null>(null);
+
+    const scheduleDashboardRedirect = useCallback(() => {
+        if (redirectTimerRef.current !== null) {
+            window.clearTimeout(redirectTimerRef.current);
+        }
+        redirectTimerRef.current = window.setTimeout(() => {
+            redirectTimerRef.current = null;
+            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+        }, SUCCESS_REDIRECT_MS);
+    }, [dispatch]);
+
+    useEffect(() => () => {
+        if (redirectTimerRef.current !== null) {
+            window.clearTimeout(redirectTimerRef.current);
+            redirectTimerRef.current = null;
+        }
+    }, []);
+
     // Jump back to the top whenever the flow lands on a terminal/interstitial
     // step. Without this the page keeps the scroll position from the long form,
     // which left the success message off-screen with only the footer visible.
     useEffect(() => {
         if (step !== 'success' && step !== 'loading' && step !== 'payment') return;
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
+        scrollPageToTop();
+        // Run again after the shorter step has painted: the container shrinks as
+        // the form unmounts, and some browsers restore the old offset on reflow.
+        const raf = requestAnimationFrame(scrollPageToTop);
+        return () => cancelAnimationFrame(raf);
     }, [step]);
 
     // Track modal state to react to it closing
@@ -662,7 +702,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             return;
         }
         // Scroll to top and show generating modal
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollPageToTop();
         setIsGenerating(true);
         try {
             const allImageFiles = images.map(img => img.file).filter((f): f is File => f !== null);
@@ -718,7 +758,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             setIsGenerating(false);
             setStep('form');
             // Scroll to top after generation completes
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollPageToTop();
         } catch (e) {
             setIsGenerating(false);
             if (e instanceof Error) {
@@ -853,12 +893,12 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         );
         setPreviewProperty(preview);
         setStep('preview');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollPageToTop();
     }, [runValidation, listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
 
     const handleBackToForm = useCallback(() => {
         setStep('form');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollPageToTop();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -1207,9 +1247,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 await updateListing(newProperty);
                 // For edits, go directly to success
                 setStep('success');
-                setTimeout(() => {
-                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                }, 3000);
+                scheduleDashboardRedirect();
             } else {
                 // For new properties, check if user wants to promote
                 if (wantToPromote) {
@@ -1223,9 +1261,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                         await updateUser({ role: UserRole.PRIVATE_SELLER });
                     }
                     setStep('success');
-                    setTimeout(() => {
-                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                    }, 3000);
+                    scheduleDashboardRedirect();
                 }
             }
         } catch (err: any) {
@@ -1445,9 +1481,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
             setPendingPropertyData(null);
             setStep('success');
-            setTimeout(() => {
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-            }, 3000);
+            scheduleDashboardRedirect();
         } catch (err) {
             // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));
@@ -1471,9 +1505,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
             setPendingPropertyData(null);
             setStep('success');
-            setTimeout(() => {
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-            }, 3000);
+            scheduleDashboardRedirect();
         } catch (err) {
             // Error removed
             showError(t('newListing:errors.failedToCreate'), t('newListing:errors.failedToCreateMessage'));

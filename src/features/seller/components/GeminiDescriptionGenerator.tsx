@@ -17,12 +17,14 @@ import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
 import ListingSubmitOverlay from './ListingSubmitOverlay';
 import ListingPreview from './ListingPreview';
+import ListingSuccessCelebration from './ListingSuccessCelebration';
+import { ErrorBoundary } from '@/src/app/components/ErrorBoundary';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
-    LANGUAGES, CheckCircleIcon, UploadIcon, TagListInput,
+    LANGUAGES, UploadIcon, TagListInput,
     inputBaseClasses, labelClasses, selectClasses,
     errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark, FIELD_ERROR_ORDER,
 } from './ListingFormHelpers';
@@ -87,14 +89,27 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
     // Payment step is now rendered as a modal overlay (see bottom of component)
 
     if (step === 'success') {
+        // The listing is already saved by this point, so a crash in the
+        // celebration must never be what the seller is left looking at: fall
+        // back to the plain confirmation and let the redirect carry on.
         return (
-            <div className="text-center py-12 flex flex-col items-center justify-center min-h-[60vh]" aria-live="polite">
-                <div className="p-4 rounded-full bg-emerald-50 border border-emerald-200 mb-4">
-                    <CheckCircleIcon className="w-16 h-16 text-emerald-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">Listing {propertyToEdit ? 'Updated' : 'Published'} Successfully!</h3>
-                <p className="text-gray-400 mt-2">Redirecting you to your dashboard...</p>
-            </div>
+            <ErrorBoundary
+                level="feature"
+                fallback={
+                    <div className="text-center py-12 min-h-[40vh] flex flex-col items-center justify-center" aria-live="polite">
+                        <h3 className="text-2xl font-semibold tracking-tight text-neutral-900">
+                            {propertyToEdit
+                                ? t('newListing:success.updatedTitle', 'Listing updated')
+                                : t('newListing:success.publishedTitle', 'Your listing is live')}
+                        </h3>
+                        <p className="text-neutral-500 mt-2">
+                            {t('newListing:success.redirecting', 'Taking you to your dashboard...')}
+                        </p>
+                    </div>
+                }
+            >
+                <ListingSuccessCelebration isEdit={!!propertyToEdit} />
+            </ErrorBoundary>
         );
     }
 

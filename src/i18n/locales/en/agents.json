@@ -724,7 +724,13 @@
       "forSale": "For Sale",
       "forRent": "For Rent",
       "noListings": "No listings available",
-      "allTypes": "All Types"
+      "allTypes": "All Types",
+      "searchPlaceholder": "Search by title, city, address or ID",
+      "searchLabel": "Search this agent's properties",
+      "clearSearch": "Clear search",
+      "searchResults": "Showing {{matches}} of {{total}} properties",
+      "noMatches": "No properties match your search",
+      "noMatchesHint": "Try a city, a property type, or part of the title."
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",
