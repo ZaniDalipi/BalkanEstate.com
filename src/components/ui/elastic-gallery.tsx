@@ -15,7 +15,25 @@ export interface ElasticGalleryItem {
     imageUrl: string;
     /** Responsive candidates; paired with `imageSizes`. */
     imageSrcSet?: string;
+    /** Slot width while this panel is the expanded one. */
     imageSizes?: string;
+    /**
+     * Slot width while this panel is a collapsed sliver — a fraction of the
+     * expanded one, so five of the six panels are fetched at a fraction of the
+     * bytes.
+     *
+     * Declaring the expanded width for every panel is what made the gallery
+     * slow to appear: a collapsed panel is roughly a quarter the width of the
+     * expanded one, and the browser has no way to know that from the layout, so
+     * it downloaded six full-size photos to paint one full-size panel and five
+     * slivers. Expanding a panel then re-picks against the wider slot and
+     * fetches the larger candidate — a moment of softness under a 700ms width
+     * animation, paid once per panel, in exchange for a first paint that is
+     * several times lighter.
+     *
+     * Omitted, the panel keeps `imageSizes` at both sizes and nothing re-fetches.
+     */
+    imageSizesCollapsed?: string;
     /** Low-quality placeholder painted behind the photo while it loads. */
     placeholderUrl?: string;
     alt: string;
@@ -45,6 +63,19 @@ interface ElasticGalleryProps {
     defaultActionId?: string;
     /** Accessible name for the group, e.g. "Explore cities". */
     label: string;
+    /**
+     * The gallery is above the fold and its photos are the page's largest
+     * paint.
+     *
+     * Set it and the panels load eagerly, the first one — the panel that starts
+     * expanded — at high fetch priority and the slivers behind it at low, so
+     * the photo a visitor is actually looking at gets the connection first.
+     * Left unset, every panel is lazy, which is right for a gallery further
+     * down a page and wrong for one in a hero: a lazy image waits for layout
+     * and is fetched at low priority, which is exactly the delay a visitor
+     * reads as "the pictures take a while to show up".
+     */
+    priority?: boolean;
     className?: string;
 }
 
@@ -94,7 +125,7 @@ const TEXT_SHADOW = '[text-shadow:0_2px_10px_rgba(0,0,0,0.65)]';
  * action buttons, and nesting them breaks keyboard and screen-reader
  * behaviour long before it breaks the markup.
  */
-export function ElasticGallery({ items, actions, defaultActionId, label, className }: ElasticGalleryProps) {
+export function ElasticGallery({ items, actions, defaultActionId, label, priority = false, className }: ElasticGalleryProps) {
     const [requestedId, setRequestedId] = useState<string | null>(null);
     // Panels whose photo failed to load. Their labels still render over a
     // neutral background, so a dead image URL costs a photo, not a panel.
@@ -142,8 +173,15 @@ export function ElasticGallery({ items, actions, defaultActionId, label, classNa
                 className,
             )}
         >
-            {items.map(item => {
+            {items.map((item, index) => {
                 const isActive = item.id === activeId;
+                /*
+                 * Priority follows the panel that starts expanded, not the one
+                 * expanded right now: a fetch priority is read when the request
+                 * is queued, and by the time a visitor hovers a sliver its photo
+                 * has long since been asked for.
+                 */
+                const isLeadPanel = index === 0;
                 const isBroken = brokenIds.has(item.id);
                 const expand = () => setRequestedId(item.id);
                 // Touch has no hover, but a touchstart still dispatches
@@ -191,10 +229,16 @@ export function ElasticGallery({ items, actions, defaultActionId, label, classNa
                             <img
                                 src={item.imageUrl}
                                 srcSet={item.imageSrcSet || undefined}
-                                sizes={item.imageSizes || undefined}
+                                sizes={
+                                    (isActive ? item.imageSizes : item.imageSizesCollapsed || item.imageSizes) ||
+                                    undefined
+                                }
                                 alt={item.alt}
-                                loading="lazy"
-                                decoding="async"
+                                loading={priority ? 'eager' : 'lazy'}
+                                decoding={priority && isLeadPanel ? 'sync' : 'async'}
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // @ts-ignore fetchpriority is a valid perf hint not yet in all TS lib defs
+                                fetchpriority={priority ? (isLeadPanel ? 'high' : 'low') : 'auto'}
                                 onError={() => markBroken(item.id)}
                                 className={cn(
                                     'absolute inset-0 transition-transform duration-1000 motion-reduce:transition-none',

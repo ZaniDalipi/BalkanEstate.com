@@ -211,6 +211,16 @@ export const optimizeCloudinaryUrl = (
     gravity?: 'auto' | 'center';
     /** Fill colour for `crop: 'pad'` — a CSS colour name or `rgb:RRGGBB`. */
     background?: string;
+    /**
+     * Gaussian blur radius (`e_blur`), 1–2000, applied after the resize.
+     *
+     * This is what a blur-up placeholder wants. A photo asked for at a few
+     * dozen pixels wide arrives as visible blocks, and a browser painting it
+     * across a full panel enlarges the blocks rather than hiding them — the
+     * result reads as a broken image, not as a photo on its way. Blurring the
+     * downscale turns the same bytes into a soft colour wash.
+     */
+    blur?: number;
   } = {}
 ): string => {
   if (!url || typeof url !== 'string') return '';
@@ -235,6 +245,7 @@ export const optimizeCloudinaryUrl = (
     crop,
     gravity,
     background,
+    blur,
   } = options;
 
   const width = clampDimension(rawWidth, 4096);
@@ -244,6 +255,15 @@ export const optimizeCloudinaryUrl = (
   // so only accept a colour name or an explicit rgb:hex value.
   const safeBackground =
     background && /^(?:[a-z]{3,20}|rgb:[0-9a-f]{3,8})$/i.test(background) ? background : undefined;
+
+  // Cloudinary rejects a blur above 2000, and the value goes straight into the
+  // URL, so cap rather than trust the caller. Anything under 1 is not a blur
+  // Cloudinary can apply, and clamping it up to 1 would put a transform on a
+  // URL whose caller asked for none — so it means the same as omitting it.
+  const blurRadius =
+    typeof blur === 'number' && Number.isFinite(blur) && blur >= 1
+      ? Math.min(Math.round(blur), 2000)
+      : undefined;
 
   // Handle Cloudinary upload URLs — including those with existing transforms baked in.
   // We find the version segment (v{digits}) to separate any pre-existing transforms
@@ -261,6 +281,8 @@ export const optimizeCloudinaryUrl = (
       if (crop) transforms.push(`c_${crop}`);
       if (gravity) transforms.push(`g_${gravity}`);
       if (safeBackground) transforms.push(`b_${safeBackground}`);
+      // Last, so Cloudinary blurs the downscaled image rather than the source.
+      if (blurRadius) transforms.push(`e_blur:${blurRadius}`);
       return `${base}${transforms.join(',')}/${cleanPath}`;
     }
     return url;

@@ -70,6 +70,33 @@ initPressFeedback();
 // Shared stale-deploy chunk recovery (unregister SW + clear caches + reload once)
 import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
 
+/**
+ * Warm the home page's city gallery before React mounts.
+ *
+ * The gallery's photos are the first thing on the page and cannot start
+ * downloading until the curated list naming them has arrived. That request is
+ * otherwise only issued once the whole app has mounted — i18n, auth, router and
+ * all — so the browser sits idle through the boot with an open, preconnected
+ * Cloudinary connection and nothing to ask it for. Firing the fetch here runs it
+ * alongside the boot instead of after it, and the section usually finds the list
+ * already cached: it renders panels rather than a skeleton, and the images are
+ * requested that much sooner.
+ *
+ * Nothing else changes — the same query key and freshness window as the hook, so
+ * this is the hook's own first fetch moved earlier, not a second one. A failure
+ * is deliberately swallowed: the hook mounts, sees no cached entry, and requests
+ * it again with its own retry and error state, which is where that belongs.
+ *
+ * Home only. The path is `/` or a language prefix (`/en`, `/sq`), matched with a
+ * local regex rather than the router's helper so this does not drag i18n into
+ * the boot path just to ask a question about a string.
+ */
+import { queryClient } from './src/app/config/queryClient';
+import { showcaseCitiesQuery } from './src/features/home/hooks/useShowcaseCities';
+if (/^\/(?:[a-z]{2}\/?)?$/.test(window.location.pathname)) {
+  queryClient.prefetchQuery(showcaseCitiesQuery).catch(() => { /* the hook owns retry and error state */ });
+}
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");

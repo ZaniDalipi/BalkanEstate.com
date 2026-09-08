@@ -10,16 +10,40 @@ import { CITY_SHOWCASE_MAX_PANELS } from '@/src/shared/constants/app.constants';
 import { useShowcaseCities } from '../hooks/useShowcaseCities';
 import { pickShowcaseCities } from '../utils/pickShowcaseCities';
 
-/** Delivery widths for a panel. The largest covers an expanded panel at 2x. */
-const PANEL_WIDTHS = [320, 480, 640, 960, 1280, 1600];
+/**
+ * Delivery widths for a panel.
+ *
+ * The gallery is `max-w-6xl` (1152px) with five 16px gaps, so on a desktop wide
+ * enough to fill it the expanded panel is ~476px and each collapsed sliver
+ * ~119px. 960 therefore covers the expanded panel on a 2x display and nothing
+ * needs more — the 1280 and 1600 candidates that used to be here were only ever
+ * downloaded because `sizes` claimed every panel was half the viewport, and
+ * they cost roughly three times the bytes of the file the panel actually paints.
+ * The small end exists for the slivers, which pick from it.
+ */
+const PANEL_WIDTHS = [160, 240, 320, 480, 640, 960];
 
 /**
- * An expanded panel is about half the 1152px container on desktop and the full
- * width of the screen on mobile. Collapsed panels are far narrower, so this
- * over-serves them slightly — the alternative is re-requesting a larger file
- * every time a visitor expands one.
+ * The expanded panel: ~476px once the container is at its 1152px cap, a little
+ * under half the viewport before that, and the full width of the screen below
+ * `md`, where the panels stack instead of sitting side by side.
  */
-const PANEL_SIZES = '(min-width: 768px) 50vw, 100vw';
+const PANEL_SIZES = '(min-width: 1200px) 480px, (min-width: 768px) 45vw, 100vw';
+
+/**
+ * A collapsed sliver: a ninth of the track on desktop, which is what stops the
+ * browser fetching a full-width photo for each of the five panels showing
+ * nothing but a vertical city name.
+ *
+ * The mobile figure is deliberately half the width the sliver really occupies.
+ * Stacked, a collapsed panel is the full width of the screen but only a ninth
+ * of the gallery's height — a ~50px strip under a 45% black overlay with the
+ * city name across it. Asking for the honest `100vw` there means a phone at 3x
+ * downloading the largest candidate for all six panels; half that resolution is
+ * indistinguishable through the overlay at that height and is what keeps the
+ * mobile first paint down.
+ */
+const PANEL_SIZES_COLLAPSED = '(min-width: 1200px) 120px, (min-width: 768px) 12vw, 50vw';
 
 interface CityShowcaseSectionProps {
     onNavigate: (view: string, path: string) => void;
@@ -86,7 +110,13 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                 imageUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 960, quality: 'auto', crop: 'limit' }) || city.imageUrl,
                 imageSrcSet: cloudinarySrcSet(city.imageUrl, PANEL_WIDTHS, { quality: 'auto', crop: 'limit' }) || undefined,
                 imageSizes: PANEL_SIZES,
-                placeholderUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 40, quality: 'auto:eco' }) || undefined,
+                imageSizesCollapsed: PANEL_SIZES_COLLAPSED,
+                // Blurred, and smaller than it was. Painted across a whole
+                // panel, an unblurred 40px thumbnail reads as a broken image
+                // rather than as a photo arriving; blurring it makes the same
+                // ~1KB look like a deliberate colour wash, so the wait — however
+                // short it now is — stops looking like a failure.
+                placeholderUrl: optimizeCloudinaryUrl(city.imageUrl, { width: 24, quality: 'auto:eco', blur: 400 }) || undefined,
                 alt: t('home:cityGallery.imageAlt', 'Property in {{city}}, {{country}}', {
                     city: city.city,
                     country: city.country,
@@ -156,6 +186,12 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
                     label={t('home:cityGallery.title', 'Explore Balkan Cities')}
                     actions={actions}
                     defaultActionId="buy"
+                    /* The gallery sits inside the hero, so these photos are the
+                       first thing on the page and usually its largest paint.
+                       Lazy loading them — the gallery's own default, right for a
+                       gallery further down a page — held them behind layout and
+                       behind every other request the page makes. */
+                    priority
                 />
             )}
         </section>

@@ -11,6 +11,7 @@ import { ElasticGallery, type ElasticGalleryItem } from '../components/ui/elasti
 import { validateCityShowcase } from '../shared/utils/validation';
 import { pickShowcaseCities } from '../features/home/utils/pickShowcaseCities';
 import type { ShowcaseCity } from '../features/home/api/cityShowcaseApi';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 
 vi.mock('@/src/shared/api', () => ({
     apiRequest: vi.fn(),
@@ -295,6 +296,129 @@ describe('ElasticGallery', () => {
         renderGallery(); // neither item carries a `credit`
 
         expect(screen.queryByText(/photo by/i)).not.toBeInTheDocument();
+    });
+
+    /*
+     * How the photos are asked for, rather than how they look. These are the
+     * knobs that decide whether the gallery appears at once or a second later,
+     * and nothing about the rendered output would notice if one of them were
+     * quietly turned back — hence the assertions.
+     */
+    describe('loading strategy', () => {
+        const photos = () => Array.from(document.querySelectorAll('img'));
+
+        it('leaves the photos lazy by default', () => {
+            renderGallery();
+
+            for (const img of photos()) {
+                expect(img).toHaveAttribute('loading', 'lazy');
+                expect(img).toHaveAttribute('fetchpriority', 'auto');
+            }
+        });
+
+        it('loads every panel eagerly when the gallery is above the fold', () => {
+            render(
+                <ElasticGallery items={items} label="Explore cities" actions={[]} priority />,
+            );
+
+            for (const img of photos()) {
+                expect(img).toHaveAttribute('loading', 'eager');
+            }
+        });
+
+        it('gives the connection to the panel that starts expanded', () => {
+            render(
+                <ElasticGallery items={items} label="Explore cities" actions={[]} priority />,
+            );
+
+            // The lead panel is the one a visitor is actually looking at; the
+            // slivers behind it must not compete with it for bandwidth.
+            expect(photos().map(img => img.getAttribute('fetchpriority'))).toEqual(['high', 'low']);
+        });
+
+        it('keeps the priority on the lead panel after another is expanded', () => {
+            render(
+                <ElasticGallery items={items} label="Explore cities" actions={[]} priority />,
+            );
+
+            fireEvent.click(panelOf(/^Ohrid/));
+
+            // A fetch priority is read when the request is queued, and by now
+            // both photos have long since been asked for — re-labelling them
+            // on hover would buy nothing and churn the DOM.
+            expect(photos().map(img => img.getAttribute('fetchpriority'))).toEqual(['high', 'low']);
+        });
+
+        it('asks for a collapsed panel at the width a sliver actually occupies', () => {
+            const sized: ElasticGalleryItem[] = items.map(item => ({
+                ...item,
+                imageSrcSet: `${item.imageUrl} 240w, ${item.imageUrl} 960w`,
+                imageSizes: '480px',
+                imageSizesCollapsed: '120px',
+            }));
+            render(<ElasticGallery items={sized} label="Explore cities" actions={[]} />);
+
+            expect(photos().map(img => img.getAttribute('sizes'))).toEqual(['480px', '120px']);
+        });
+
+        it('grows a panel\'s declared width as it expands', () => {
+            const sized: ElasticGalleryItem[] = items.map(item => ({
+                ...item,
+                imageSrcSet: `${item.imageUrl} 240w, ${item.imageUrl} 960w`,
+                imageSizes: '480px',
+                imageSizesCollapsed: '120px',
+            }));
+            render(<ElasticGallery items={sized} label="Explore cities" actions={[]} />);
+
+            fireEvent.click(panelOf(/^Ohrid/));
+
+            expect(photos().map(img => img.getAttribute('sizes'))).toEqual(['120px', '480px']);
+        });
+
+        it('holds one width for both states when no collapsed width is given', () => {
+            const sized: ElasticGalleryItem[] = items.map(item => ({
+                ...item,
+                imageSrcSet: `${item.imageUrl} 960w`,
+                imageSizes: '480px',
+            }));
+            render(<ElasticGallery items={sized} label="Explore cities" actions={[]} />);
+
+            // Nothing to re-pick against, so expanding a panel never triggers a
+            // second request for the same photo.
+            expect(photos().map(img => img.getAttribute('sizes'))).toEqual(['480px', '480px']);
+            fireEvent.click(panelOf(/^Ohrid/));
+            expect(photos().map(img => img.getAttribute('sizes'))).toEqual(['480px', '480px']);
+        });
+    });
+});
+
+/**
+ * The blur-up placeholder behind each panel. A photo asked for at 24px and
+ * painted across a whole panel is a grid of blocks unless the CDN blurs it, so
+ * the blur is the difference between "loading" and "broken".
+ */
+describe('optimizeCloudinaryUrl blur', () => {
+    const source = 'https://res.cloudinary.com/demo/image/upload/v1/belgrade.jpg';
+
+    it('blurs the placeholder after the resize', () => {
+        const url = optimizeCloudinaryUrl(source, { width: 24, quality: 'auto:eco', blur: 400 });
+
+        // Order matters: Cloudinary applies the transforms as listed, and
+        // blurring the full-size source before shrinking it costs the work the
+        // small request was meant to avoid.
+        expect(url).toBe(
+            'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto:eco,w_24,e_blur:400/v1/belgrade.jpg',
+        );
+    });
+
+    it('leaves a photo unblurred when no blur is asked for', () => {
+        expect(optimizeCloudinaryUrl(source, { width: 960 })).not.toContain('e_blur');
+    });
+
+    it('clamps a blur Cloudinary would reject', () => {
+        expect(optimizeCloudinaryUrl(source, { blur: 99999 })).toContain('e_blur:2000');
+        expect(optimizeCloudinaryUrl(source, { blur: 0 })).not.toContain('e_blur');
+        expect(optimizeCloudinaryUrl(source, { blur: Number.NaN })).not.toContain('e_blur');
     });
 });
 
