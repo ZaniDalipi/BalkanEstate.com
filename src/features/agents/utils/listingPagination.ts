@@ -5,8 +5,14 @@
  * the card count bounded and give a visitor a sense of where they are.
  */
 
-/** Listings per page in the profile's listings tab. */
-export const LISTINGS_PER_PAGE = 25;
+/**
+ * Listings per page in the profile's listings tab.
+ *
+ * Six rather than five: the tab's grid is two-up, and a wide card measures
+ * 544px, so six is three complete rows — about two screens before the pager,
+ * the same height five would take while leaving a lone card in the last row.
+ */
+export const LISTINGS_PER_PAGE = 6;
 
 /** Total pages needed for `total` items — always at least one, so an empty
  *  list is page 1 of 1 rather than page 1 of 0. */

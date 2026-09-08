@@ -1,5 +1,5 @@
 /**
- * Paging an agent's listings. The tab shows 25 at a time; the awkward cases
+ * Paging an agent's listings. The tab shows 6 at a time; the awkward cases
  * are the edges — a page that stops being valid because the list under it
  * shrank, and the window of page numbers on a long list.
  */
@@ -10,12 +10,12 @@ import { LISTINGS_PER_PAGE, pageCount, pageSlice, pageWindow } from '@/src/featu
 const listings = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
 
 describe('pageCount', () => {
-    it('caps a page at 25 listings', () => {
-        expect(LISTINGS_PER_PAGE).toBe(25);
-        expect(pageCount(25)).toBe(1);
-        expect(pageCount(26)).toBe(2);
-        expect(pageCount(34)).toBe(2);
-        expect(pageCount(100)).toBe(4);
+    it('caps a page at 6 listings — three complete rows of the two-up grid', () => {
+        expect(LISTINGS_PER_PAGE).toBe(6);
+        expect(pageCount(6)).toBe(1);
+        expect(pageCount(7)).toBe(2);
+        expect(pageCount(34)).toBe(6);
+        expect(pageCount(100)).toBe(17);
     });
 
     it('calls an empty list page 1 of 1, not page 1 of 0', () => {
@@ -24,19 +24,21 @@ describe('pageCount', () => {
 });
 
 describe('pageSlice', () => {
-    it('hands out 25 per page and the remainder on the last one', () => {
+    it('hands out 6 per page and the remainder on the last one', () => {
         const all = listings(34);
 
         const first = pageSlice(all, 1);
-        expect(first.items).toHaveLength(25);
-        expect(first.items[0]).toBe(1);
+        expect(first.items).toEqual([1, 2, 3, 4, 5, 6]);
         expect(first.firstIndex).toBe(0);
-        expect(first.totalPages).toBe(2);
+        expect(first.totalPages).toBe(6);
 
         const second = pageSlice(all, 2);
-        expect(second.items).toHaveLength(9);
-        expect(second.items[0]).toBe(26);
-        expect(second.firstIndex).toBe(25);
+        expect(second.items).toEqual([7, 8, 9, 10, 11, 12]);
+        expect(second.firstIndex).toBe(6);
+
+        const last = pageSlice(all, 6);
+        expect(last.items).toEqual([31, 32, 33, 34]);
+        expect(last.firstIndex).toBe(30);
     });
 
     it('every listing appears exactly once across the pages', () => {
@@ -48,11 +50,11 @@ describe('pageSlice', () => {
     });
 
     it('clamps a page the list has shrunk past instead of showing nothing', () => {
-        // A visitor on page 4 narrows the filter down to a single page.
-        const narrowed = pageSlice(listings(10), 4);
+        // A visitor on page 9 narrows the filter down to two pages of results.
+        const narrowed = pageSlice(listings(10), 9);
 
-        expect(narrowed.page).toBe(1);
-        expect(narrowed.items).toHaveLength(10);
+        expect(narrowed.page).toBe(2);
+        expect(narrowed.items).toEqual([7, 8, 9, 10]);
     });
 
     it('clamps a page below one', () => {
