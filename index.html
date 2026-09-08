@@ -20,6 +20,26 @@
       })();
     </script>
 
+    <!--
+      WebKit compositing budget. Safari (and every browser on iOS, which is
+      WebKit underneath) pays far more for `backdrop-filter` than Blink does,
+      so src/index.css trims blur radii and drops the blurs that are invisible
+      anyway behind an `html.is-webkit` guard. Setting the class here rather
+      than waiting for src/utils/perfMode.ts means the first paint is already
+      the cheap one — no flash of the expensive style. perfMode re-applies it
+      on boot, so the two stay in step.
+    -->
+    <script>
+      (function() {
+        try {
+          var ua = navigator.userAgent;
+          var webkit = navigator.vendor === 'Apple Computer, Inc.' ||
+            (/Safari/.test(ua) && !/Chrome|Chromium|Android|Edg\/|Firefox|CriOS|FxiOS|EdgiOS/.test(ua));
+          if (webkit) document.documentElement.classList.add('is-webkit');
+        } catch (e) { /* detection is an optimisation; never block the page */ }
+      })();
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="/icons/logo-3d.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 

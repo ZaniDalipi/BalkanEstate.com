@@ -174,11 +174,14 @@ fieldset {
     0 6px 20px rgba(15, 23, 42, 0.12),
     inset 1px 1px 1px rgba(255, 255, 255, 0.7),
     inset -1px -1px 1px rgba(255, 255, 255, 0.4);
+  /* `backdrop-filter` is deliberately NOT transitioned: interpolating a blur
+     radius forces the browser to re-render the blurred backdrop every frame,
+     which WebKit does on the main thread. The radius still changes on hover —
+     it just snaps, under the background fade that carries the effect. */
   transition:
     background 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    backdrop-filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Specular highlight — a soft diagonal light streak across the glass */
@@ -219,7 +222,13 @@ fieldset {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   color: rgba(0, 0, 0, 0.85);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Named properties, not `all`: `all` includes `backdrop-filter`, and a
+     transitioning backdrop-filter makes WebKit re-blur the surface on every
+     frame of the transition. Nothing here needed that. */
+  transition:
+    background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-input::placeholder {
@@ -246,7 +255,10 @@ fieldset {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   color: rgba(0, 0, 0, 0.85);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-select:focus {
@@ -275,7 +287,13 @@ fieldset {
     0 0 20px rgba(0, 0, 0, 0.04),
     inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
     inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
-  transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+  /* The spring curve is the point of this button; `all` was not. Animating
+     `all` here meant every hover ran a 700ms backdrop-filter animation. */
+  transition:
+    background 0.7s cubic-bezier(0.175, 0.885, 0.32, 2.2),
+    border-color 0.7s cubic-bezier(0.175, 0.885, 0.32, 2.2),
+    box-shadow 0.7s cubic-bezier(0.175, 0.885, 0.32, 2.2),
+    transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 2.2);
 }
 
 .glass-btn:hover {
@@ -297,7 +315,11 @@ fieldset {
   border: 1px solid rgba(0, 122, 255, 0.3);
   border-radius: 10px;
   color: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 12px rgba(0, 122, 255, 0.2);
 }
 
@@ -316,7 +338,11 @@ fieldset {
   border: 1px solid rgba(255, 149, 0, 0.3);
   border-radius: 10px;
   color: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 12px rgba(255, 149, 0, 0.15);
 }
 
@@ -1556,6 +1582,156 @@ html[data-zoom] {
 }
 
 /* ============================================================================
+   WebKit compositing budget
+   ---------------------------------------------------------------------------
+   `html.is-webkit` is set before first paint by the inline script in
+   index.html and re-applied by src/utils/perfMode.ts. It covers Safari on
+   macOS and iOS, plus every other iOS browser — they all run WebKit.
+
+   Why this section exists: the app leans hard on `backdrop-filter`. Blink
+   promotes each blurred element to a compositor layer and blurs it on the GPU,
+   so a page full of them scrolls fine in Chrome. WebKit re-samples the
+   backdrop behind each blurred element and does much of that work per frame,
+   so the same page scrolls at a fraction of the frame rate in Safari. A
+   property grid is the worst case: every card carries a handful of blurred
+   badges over its photo, so one screenful is well over a hundred blurred
+   surfaces.
+
+   Three levers, in the order they appear below:
+
+     1. Cap the radius. WebKit's blur cost grows with the radius, and a 24px
+        backdrop blur reads almost identically to an 8px one once there is any
+        fill in front of it.
+     2. Drop the blur entirely where it was never visible — the bigger win.
+        A blur behind a fill of 80% opacity or more contributes
+        essentially nothing, because the fill already hides the backdrop.
+        Those surfaces become plain translucent fills, which cost nothing to
+        composite.
+     3. Drop it from the hand-written .glass-* classes, which Chrome has not
+        been rendering at all — see the long note on that below.
+
+   Chrome, Firefox and Edge on the desktop are untouched — they keep the design
+   exactly as it is today.
+   ============================================================================ */
+
+/* --- 1. Everything that keeps its blur: cap the radius. --------------------
+   Tailwind's scale runs 4/8/12/16/24/40/64px. Past roughly 8px the extra
+   radius is invisible through a fill but keeps costing WebKit sample work. */
+html.is-webkit .backdrop-blur-3xl,
+html.is-webkit .backdrop-blur-2xl,
+html.is-webkit .backdrop-blur-xl,
+html.is-webkit .backdrop-blur-lg {
+  --tw-backdrop-blur: blur(8px);
+}
+
+html.is-webkit .backdrop-blur-md {
+  --tw-backdrop-blur: blur(6px);
+}
+
+html.is-webkit .backdrop-blur-sm,
+html.is-webkit .backdrop-blur-xs,
+html.is-webkit .backdrop-blur {
+  --tw-backdrop-blur: blur(4px);
+}
+
+/* --- 2. Blurs hidden behind a near-opaque fill: remove them outright. -------
+   `--tw-backdrop-blur: initial` unsets just the blur, so an element that also
+   uses backdrop-saturate/brightness keeps those. This list is the set of fills
+   the app actually pairs with a blur today; anything not listed simply falls
+   through to the radius cap above, so adding a new colour never breaks — it
+   only misses this optimisation until it is added here.
+
+   This block has to stay AFTER that cap. The two carry the same specificity,
+   so whichever is written last wins, and a cap moved below would quietly put
+   the blur back on exactly the surfaces meant to lose it.
+
+   Regenerate the list with:
+     grep -rIoh 'className="[^"]*backdrop-blur[^"]*"' --include=*.tsx . \
+       | grep -oE 'bg-[a-z0-9-]+/(8[0-9]|9[0-9]|100)' | sort -u
+   ------------------------------------------------------------------------- */
+html.is-webkit .bg-amber-50\/80,
+html.is-webkit .bg-amber-500\/90,
+html.is-webkit .bg-black\/80,
+html.is-webkit .bg-black\/95,
+html.is-webkit .bg-blue-50\/80,
+html.is-webkit .bg-blue-500\/80,
+html.is-webkit .bg-blue-500\/85,
+html.is-webkit .bg-emerald-500\/85,
+html.is-webkit .bg-gray-900\/95,
+html.is-webkit .bg-green-100\/80,
+html.is-webkit .bg-green-50\/80,
+html.is-webkit .bg-green-500\/80,
+html.is-webkit .bg-green-500\/90,
+html.is-webkit .bg-neutral-800\/80,
+html.is-webkit .bg-neutral-900\/80,
+html.is-webkit .bg-orange-500\/85,
+html.is-webkit .bg-primary\/80,
+html.is-webkit .bg-primary\/90,
+html.is-webkit .bg-purple-500\/85,
+html.is-webkit .bg-red-50\/80,
+html.is-webkit .bg-red-500\/80,
+html.is-webkit .bg-red-500\/85,
+html.is-webkit .bg-red-500\/90,
+html.is-webkit .bg-red-600\/80,
+html.is-webkit .bg-slate-900\/85,
+html.is-webkit .bg-slate-900\/90,
+html.is-webkit .bg-slate-900\/95,
+html.is-webkit .bg-white\/80,
+html.is-webkit .bg-white\/85,
+html.is-webkit .bg-white\/90,
+html.is-webkit .bg-white\/95,
+html.is-webkit .bg-yellow-600\/80 {
+  --tw-backdrop-blur: initial;
+}
+
+/* --- 3. The hand-written .glass-* classes: no blur here at all. ------------
+   These are the one case where Safari was not merely slower than Chrome — it
+   was doing work Chrome never does.
+
+   Every .glass-* rule above writes the pair
+
+       backdrop-filter: blur(...);
+       -webkit-backdrop-filter: blur(...);
+
+   and the production build runs that through lightningcss (Tailwind v4's
+   optimiser). lightningcss treats the two as one property and keeps whichever
+   is written last, so the standard `backdrop-filter` is dropped and only the
+   `-webkit-` form ships. Blink has never supported `-webkit-backdrop-filter`,
+   so on the live site these surfaces render completely flat in Chrome, Edge
+   and Firefox while Safari renders the full 8–28px blur. Same page, and only
+   one of the two browsers pays for it. (It does not happen in `npm run dev`,
+   which skips that optimiser — which is why the difference is invisible while
+   developing.)
+
+   So this is not a trade-off, it is alignment: Safari renders what Chrome has
+   been rendering all along.
+
+   If you ever want the frosted glass back, it takes BOTH halves — write
+   `-webkit-backdrop-filter` BEFORE `backdrop-filter` in the rules above (or
+   drop the prefixed line entirely; lightningcss adds the prefix itself, and
+   correctly, when only the standard property is present), AND delete this
+   block. Half the change on its own just re-creates the split, pointing the
+   other way. Only the standard property is written below for the same reason.
+
+   The Tailwind `backdrop-blur-*` utilities are NOT affected by any of this:
+   Tailwind emits the pair in the order that survives, so Chrome renders those
+   normally, and sections 1 and 2 above trim them for WebKit alone. */
+html.is-webkit .glass-panel,
+html.is-webkit .glass-panel-light,
+html.is-webkit .glass-rail,
+html.is-webkit .group:hover .glass-rail,
+html.is-webkit .group:focus-within .glass-rail,
+html.is-webkit .glass-btn,
+html.is-webkit .glass-btn-primary,
+html.is-webkit .glass-btn-accent,
+html.is-webkit .glass-fieldset,
+html.is-webkit .glass-input,
+html.is-webkit .glass-select,
+html.is-webkit .glass-badge {
+  backdrop-filter: none;
+}
+
+/* ============================================================================
    Performance / Power Governor
    Classes on <html> are toggled by src/utils/perfMode.ts:
      .app-hidden   – app is backgrounded → pause ALL animation (GPU goes idle)
@@ -1582,6 +1758,11 @@ html.app-hidden *::after {
    load. Disabled for reduce-motion (all devices) and save-power (mobile). --- */
 html.reduce-motion .animate-aurora,
 html.save-power   .animate-aurora,
+/* The aurora is applied through Tailwind's `after:` variant
+   (`after:animate-aurora`), so it lands on the pseudo-element — the bare
+   `.animate-aurora` selector above matches nothing in this app on its own. */
+html.reduce-motion [class*="animate-aurora"]::after,
+html.save-power   [class*="animate-aurora"]::after,
 html.reduce-motion .glass-orb,
 html.save-power   .glass-orb,
 html.reduce-motion .glass-shimmer-border::before,
@@ -1626,6 +1807,37 @@ html.reduce-motion .animate-shimmer,
 html.reduce-motion .liquid-glass-bg,
 html.reduce-motion [style*="animation"][class*="infinite"] {
   animation: none !important;
+}
+
+/* --- WebKit: the ambient loops that are expensive specifically here. --------
+   Phones and tablets already lose these to `save-power`; desktop Safari never
+   qualified for that class and kept paying for them. Each of these animates a
+   blurred, glowing or blended surface forever, on every page, on or off
+   screen — which is the sustained compositor load WebKit is worst at. Motion
+   that means something (page transitions, spinners, hovers, the press ripple)
+   is untouched. */
+html.is-webkit .animate-aurora,
+html.is-webkit [class*="animate-aurora"]::after,
+html.is-webkit .glass-orb,
+html.is-webkit .glass-shimmer-border::before,
+html.is-webkit .animate-pulse-glow,
+html.is-webkit .animate-glow-pulse,
+html.is-webkit .animate-twinkle,
+html.is-webkit .animate-window,
+html.is-webkit .animate-float-sparkle {
+  animation: none !important;
+}
+
+/* The aurora layer pairs a fixed-attachment background with
+   `mix-blend-mode: difference`. A fixed background cannot be scrolled by the
+   compositor, so WebKit repaints the whole layer on every scroll frame, and
+   the blend mode forces that repaint onto the main thread. Scrolling it
+   normally looks the same here — the layer is a full-bleed gradient wash —
+   and costs nothing. */
+html.is-webkit .animate-aurora,
+html.is-webkit [class*="animate-aurora"]::after {
+  background-attachment: scroll !important;
+  mix-blend-mode: normal !important;
 }
 
 /* Off-screen decorative wrappers opt into this via IntersectionObserver

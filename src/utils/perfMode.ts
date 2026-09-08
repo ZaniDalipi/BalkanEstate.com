@@ -19,11 +19,18 @@
  *                        UI motion (page transitions, spinners, hovers) is kept.
  *   - `app-hidden`     – the tab / PWA is backgrounded. ALL animations pause so
  *                        the GPU goes idle instead of animating an unseen page.
+ *   - `is-webkit`      – the page is running on WebKit (Safari, and every
+ *                        browser on iOS). WebKit composites `backdrop-filter`
+ *                        far more expensively than Blink does, so CSS trims
+ *                        blur radii and drops the blurs that are invisible
+ *                        anyway. Set from an inline script in index.html too,
+ *                        so the first paint is already the cheap one.
  */
 
 const REDUCE_MOTION = 'reduce-motion';
 const SAVE_POWER = 'save-power';
 const APP_HIDDEN = 'app-hidden';
+const IS_WEBKIT = 'is-webkit';
 
 let initialized = false;
 
@@ -46,6 +53,27 @@ function isPowerSensitiveDevice(): boolean {
 }
 
 /**
+ * Is this WebKit? Safari on macOS/iOS, and — because iOS forces every browser
+ * onto WebKit — Chrome, Firefox and Edge on iPhone/iPad too. All of them share
+ * the compositing behaviour we are trimming for.
+ *
+ * `navigator.vendor` is the cleanest signal left: WebKit reports
+ * "Apple Computer, Inc." and nothing else does. Blink reports "Google Inc."
+ * even on iOS-shaped user agents, so we fall back to a UA sniff that accepts
+ * Safari's own string while rejecting the Chrome/Chromium/Edge/Firefox strings
+ * that also carry the word "Safari".
+ *
+ * Getting this wrong is cheap in both directions: a false positive costs a
+ * browser a few pixels of blur, a false negative just leaves it as it is today.
+ */
+function isWebKit(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  if (navigator.vendor === 'Apple Computer, Inc.') return true;
+  const ua = navigator.userAgent;
+  return /Safari/.test(ua) && !/Chrome|Chromium|Android|Edg\/|Firefox|CriOS|FxiOS|EdgiOS/.test(ua);
+}
+
+/**
  * Initialise the governor. Idempotent — safe to call more than once.
  */
 export function initPerfMode(): void {
@@ -53,6 +81,13 @@ export function initPerfMode(): void {
   initialized = true;
 
   const root = document.documentElement;
+
+  // --- WebKit compositing budget ----------------------------------------
+  // index.html sets this before first paint; repeating it here keeps the class
+  // correct in tests and any host that serves the app without that script.
+  if (isWebKit()) {
+    root.classList.add(IS_WEBKIT);
+  }
 
   // --- prefers-reduced-motion (reactive) --------------------------------
   if (typeof window.matchMedia === 'function') {
