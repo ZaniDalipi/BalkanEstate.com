@@ -824,8 +824,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {loadingProperties ? (
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                <PropertyCardSkeleton />
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                                                 <PropertyCardSkeleton />
                                                 <PropertyCardSkeleton />
                                             </div>
@@ -833,9 +832,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     ) : filteredActive.length > 0 ? (
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                                                 {filteredActive.map(prop => (
-                                                    <PropertyCard key={prop.id} property={prop} />
+                                                    <PropertyCard key={prop.id} property={prop} wide />
                                                 ))}
                                             </div>
                                         </div>
@@ -848,10 +847,10 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {filteredSold.length > 0 && (
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.soldProperties')} ({filteredSold.length})</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                                                 {filteredSold.map(prop => (
                                                     <div key={prop.id} className="relative">
-                                                        <PropertyCard property={prop} />
+                                                        <PropertyCard property={prop} wide />
                                                         <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
                                                             {t('profilePage.listingsTab.soldBadge')}
                                                         </div>
@@ -864,10 +863,10 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {filteredRented.length > 0 && (
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.rentedProperties', 'Rented Properties')} ({filteredRented.length})</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                                                 {filteredRented.map(prop => (
                                                     <div key={prop.id} className="relative">
-                                                        <PropertyCard property={prop} />
+                                                        <PropertyCard property={prop} wide />
                                                         <div className="absolute top-3 right-3 bg-orange-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
                                                             {t('profilePage.listingsTab.rentedBadge', 'RENTED')}
                                                         </div>

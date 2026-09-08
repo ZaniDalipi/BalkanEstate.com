@@ -39,6 +39,12 @@ interface PropertyCardProps {
   showCompareButton?: boolean;
   /** Pass true for cards visible above the fold so the browser prioritises their images */
   priority?: boolean;
+  /**
+   * Opt into the roomier treatment for grids that give a card real width —
+   * a two-up layout rather than the usual three or four. Everything scales
+   * from `.property-card--wide` in src/index.css; nothing here changes.
+   */
+  wide?: boolean;
 }
 
 // Props for the pure inner component
@@ -51,6 +57,7 @@ interface PropertyCardInnerProps {
   showToast?: (message: string, type: 'success' | 'error') => void;
   showCompareButton?: boolean;
   priority?: boolean;
+  wide?: boolean;
   onCardClick: (e: React.MouseEvent) => void;
   onFavoriteClick: (e: React.MouseEvent) => void;
   onCompareClick: (e: React.MouseEvent) => void;
@@ -70,6 +77,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   showToast,
   showCompareButton,
   priority = false,
+  wide = false,
   onCardClick,
   onFavoriteClick,
   onCompareClick,
@@ -291,7 +299,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   return (
     <div
-      className={`group property-card bg-white rounded-2xl overflow-hidden border text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
+      className={`group property-card ${wide ? 'property-card--wide' : ''} bg-white rounded-2xl overflow-hidden border text-left w-full flex flex-col cursor-pointer isolate ${getCardStyles()} ${
         // Sold and rented listings keep the shadow but not the lift — they are
         // there to be read, not clicked through.
         isSold || isRented ? '' : 'property-card--interactive'
@@ -317,7 +325,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       {/* Image Section */}
       <div className="relative overflow-hidden">
         <div
-          className="relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
+          className="property-card__media relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
           onTouchStart={handleImageTouchStart}
           onTouchEnd={handleImageTouchEnd}
         >
@@ -543,12 +551,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       </div>
 
       {/* Content Section */}
-      <div className="relative p-2.5 sm:p-3.5 flex flex-col flex-grow bg-white">
+      <div className="property-card__content relative p-2.5 sm:p-3.5 flex flex-col flex-grow bg-white">
         <div className="flex flex-col flex-grow">
         {/* Property Type & Price Row - iOS style */}
         <div className="flex items-center justify-between gap-2 mb-2">
           {/* Property Type Badge */}
-          <span className="bg-neutral-100 text-neutral-600 text-[11px] font-medium px-2 py-[3px] rounded-full">
+          <span className="property-card__type bg-neutral-100 text-neutral-600 text-[11px] font-medium px-2 py-[3px] rounded-full">
             {propertyTypeLabel}
           </span>
           {/* Price Badge */}
@@ -574,7 +582,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                       {formatPrice(priceInfo.originalPrice, property.country)}
                     </span>
                   )}
-                  <span className={`text-sm sm:text-base font-bold tracking-tight ${isLuxuryVilla ? 'text-[#0252CD]' : 'text-primary'}`}>
+                  <span className={`property-card__price text-sm sm:text-base font-bold tracking-tight ${isLuxuryVilla ? 'text-[#0252CD]' : 'text-primary'}`}>
                     {formatPrice(property.price, property.country)}
                     {isRental && <span className="text-[11px] font-normal text-neutral-400">/{property.rentPeriod === 'weekly' ? t('common:wk', 'wk') : property.rentPeriod === 'daily' ? (isLuxuryVilla ? 'night' : t('common:day', 'day')) : t('common:mo', 'mo')}</span>}
                   </span>
@@ -613,12 +621,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           })()}
         </div>
         {/* Title */}
-        <h3 className="text-sm sm:text-base font-bold text-neutral-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors duration-[420ms] ease-out">
+        <h3 className="property-card__title text-sm sm:text-base font-bold text-neutral-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors duration-[420ms] ease-out">
           {property.title || `${safeProperty.beds > 0 ? safeProperty.beds + '-Bed ' : ''}${propertyTypeLabel} ${isRental ? t('property:forRent', 'for Rent') : t('property:forSale', 'for Sale')}`}
         </h3>
 
         {/* Location - Clickable for navigation */}
-        <div className="flex items-center gap-1.5 mb-3">
+        <div className="property-card__location flex items-center gap-1.5 mb-3">
           <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
           <div className="text-xs sm:text-sm text-neutral-600 truncate flex items-center gap-1">
             <button
@@ -729,7 +737,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
         <div className="flex-grow"></div>
 
         {/* Seller/Agent Info Section */}
-        <div className="pt-3 border-t border-neutral-100">
+        <div className="property-card__seller pt-3 border-t border-neutral-100">
           <div className="flex items-center gap-2">
             {/* Seller Avatar */}
             <div className="relative flex-shrink-0">
@@ -763,8 +771,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           </div>
 
           {/* Agency (if agent with agency). On its own row: sharing one line
-              with the name squeezed both to a single letter in any narrow grid
-              — three columns on an agent profile, for instance. */}
+              with the name squeezed both to a single letter in any narrow
+              grid — a four-column search result, for instance. */}
           {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
             <div className="mt-2 flex items-center gap-1.5 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
               {safeProperty.seller.agencyLogo ? (
@@ -819,7 +827,7 @@ PropertyCardInner.displayName = 'PropertyCardInner';
  * When context changes (e.g., savedHomes toggle), this wrapper re-renders but
  * PropertyCardInner only re-renders if its specific props actually changed.
  */
-const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton, priority }) => {
+const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton, priority, wide }) => {
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
   const { setDirection } = useNavigationDirection();
 
@@ -971,6 +979,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       showToast={showToast}
       showCompareButton={showCompareButton}
       priority={priority}
+      wide={wide}
       onCardClick={handleCardClick}
       onFavoriteClick={handleFavoriteClick}
       onCompareClick={handleCompareClick}
