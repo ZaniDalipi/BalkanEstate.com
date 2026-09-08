@@ -9,6 +9,7 @@ import { filterProperties } from '@/utils/propertyUtils';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
+import { resolveVillaSearchTarget } from './villaSearchTarget';
 
 const VILLA_DEFAULTS: Partial<Filters> = {
     listingType: 'rent',
@@ -321,9 +322,30 @@ export function useVillaSearch() {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 
-    // Filtering is client side, so a search is a refetch of the collection —
-    // which also makes this usable as the error state's "Try Again".
-    const handleSearch = useCallback(() => { void fetchVillas(); }, [fetchVillas]);
+    /**
+     * Run whatever is in the box, and take the map with it.
+     *
+     * Filtering is client side, so a search is a refetch of the collection —
+     * which also makes this usable as the error state's "Try Again".
+     *
+     * Where the map goes is `resolveVillaSearchTarget`'s decision; a query it
+     * cannot place is not an error, because the refetch has already run and the
+     * text search stands — the map simply stays where it was.
+     */
+    const handleSearch = useCallback(async (searchQuery?: unknown) => {
+        // Also wired straight to onClick (the error state's "Try Again") and to
+        // VillaFilters, so the first argument is not always the query.
+        const query = (typeof searchQuery === 'string' ? searchQuery : filters.query).trim();
+
+        void fetchVillas();
+        if (!query) return;
+
+        const target = await resolveVillaSearchTarget(query, villaProperties);
+        if (!target) return;
+
+        setDrawnBoundsJSON(null); // A searched place replaces any drawn area.
+        setFlyToTarget(target);
+    }, [filters.query, fetchVillas, villaProperties]);
 
     const handleResetFilters = useCallback(() => {
         setFilters({ ...initialFilters, ...VILLA_DEFAULTS });
@@ -428,9 +450,12 @@ export function useVillaSearch() {
     /**
      * A row picked in the search box.
      *
-     * Places fly the map; a listing row is handled by the caller; the query
-     * row is the text as typed. The canonical spelling of whatever was picked
-     * goes back into the box, so what the user reads is what was searched.
+     * Every row ends with the map somewhere: a place flies to its coordinates,
+     * a villa flies to the villa, and the two text rows — the query row that
+     * says what Enter will do, and a recent search — are run through
+     * `handleSearch`, which resolves the place itself. The canonical spelling
+     * of whatever was picked goes back into the box, so what the user reads is
+     * what was searched.
      *
      * A Google Places row reaches this already carrying its coordinates: the
      * box makes the second lookup before handing the pick over, so nothing
@@ -438,21 +463,37 @@ export function useVillaSearch() {
      */
     const handleSuggestionClick = useCallback((suggestion: Suggestion) => {
         if (suggestion.type === 'property') {
-            setFilters(prev => ({ ...prev, query: suggestion.property.city }));
+            // Stays on the villas page — the point of picking a villa here is
+            // to see where it is among the others, not to leave the map.
+            const { city, lat, lng } = suggestion.property;
+            setFilters(prev => ({ ...prev, query: city }));
+            setDrawnBoundsJSON(null);
+            if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                setFlyToTarget({ center: [lat, lng], zoom: 15 });
+            }
             return;
         }
 
-        const value = suggestion.type === 'place' ? suggestion.searchValue : suggestion.title;
-        setFilters(prev => ({ ...prev, query: value }));
-        setDrawnBoundsJSON(null);
+        if (suggestion.type === 'place') {
+            setFilters(prev => ({ ...prev, query: suggestion.searchValue }));
+            setDrawnBoundsJSON(null);
 
-        if (suggestion.type === 'place' && Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
-            setFlyToTarget({
-                center: [suggestion.lat as number, suggestion.lng as number],
-                zoom: suggestion.zoom ?? 12,
-            });
+            if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
+                setFlyToTarget({
+                    center: [suggestion.lat as number, suggestion.lng as number],
+                    zoom: suggestion.zoom ?? 12,
+                });
+            }
+            return;
         }
-    }, []);
+
+        // 'query' and 'recent' are both "search for this text" — including
+        // finding where it is. Passed explicitly rather than read back off
+        // `filters`, which this render has not seen updated yet.
+        const value = suggestion.type === 'query' ? suggestion.text : suggestion.title;
+        setFilters(prev => ({ ...prev, query: value }));
+        void handleSearch(value);
+    }, [handleSearch]);
 
     return {
         t,
