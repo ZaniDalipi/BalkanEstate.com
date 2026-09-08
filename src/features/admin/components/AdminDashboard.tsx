@@ -35,6 +35,7 @@ import { tokenService } from '@/src/shared/api/tokenService';
 // Map URL sections to AdminView types
 const urlToAdminView: Record<AdminSection, AdminView> = {
   'dashboard': 'dashboard',
+  'ad-banners': 'adBanners',
   'heatmap': 'heatmap',
   'users': 'users',
   'inquiries': 'inquiries',

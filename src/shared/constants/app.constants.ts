@@ -156,6 +156,7 @@ export const PROMOTION_TIERS = {
  */
 export const ADMIN_SECTIONS = [
   'dashboard',
+  'ad-banners',
   'users',
   'inquiries',
   'agent-requests',
