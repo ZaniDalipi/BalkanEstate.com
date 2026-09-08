@@ -16,7 +16,7 @@ export const ROOM_STYLES: RoomStyleDefinition[] = [
     id: 'no-furniture',
     label: 'No Furniture',
     prompt:
-      'An empty, unfurnished room. Remove ALL furniture, rugs, decor, wall art, plants, curtains and clutter, leaving the room completely empty — keep the existing wall color/finish and flooring exactly as they are.',
+      'An empty, unfurnished room. Remove only the loose contents — furniture, rugs, decor, wall art, plants, curtains and clutter — leaving the room empty. Keep every structural and built-in element: staircases and railings, windows, doors, radiators, fitted cabinetry and fixtures. Keep the existing wall color/finish and flooring exactly as they are.',
   },
   {
     id: 'scandinavian',

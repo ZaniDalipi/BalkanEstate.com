@@ -541,8 +541,18 @@ export const restyleRoomImage = async (
   const isExterior = category === 'exterior';
   const isExtRefresh = styleId === 'ext-refresh';
 
+  const structure = `EXISTING STRUCTURE — NEVER REMOVE, NEVER MOVE (highest priority):
+- The shell of this space is FIXED. You may NOT add, delete, move, resize, reshape, hide or "tidy away" any architectural element. Everything structural in the input photo must still be there, in the same place, in the output.
+- Staircases: keep every staircase, step, tread, riser, landing, mezzanine and change of floor level, plus its railing, banister, balustrade, newel posts and spindles. A staircase may be refinished, but it may NEVER be removed, relocated, shortened, walled over or replaced by furniture.
+- Windows: keep the SAME number of windows, in the same positions, at the same size and shape, with the same frame divisions/mullions, sills, reveals and any skylight or roof window. Never delete a window, never turn a window into a plain wall, and never invent a window that is not in the input.
+- Doors and openings: keep every door, doorway, archway, pass-through, sliding/balcony door and closet opening at its existing position, size and shape.
+- Walls, partitions, corners and wall angles; ceiling height and ceiling shape including slopes, exposed beams, coffers and bulkheads; columns, pillars and posts; niches, alcoves, chimney breasts and fireplaces — all unchanged.
+- Fixed services stay put: radiators, air-conditioning units, vents, sockets, switches, thermostats, ceiling roses and light points. Their cover or finish may be updated to suit the style, their position may not.
+- Do NOT open up walls, merge rooms, extend the space, "square off" an irregular room or otherwise improve the layout.
+- If a feature looks awkward, dated or oddly placed, KEEP IT ANYWAY. This is a real photo of a real property for sale and must stay an honest picture of that same space.`;
+
   const subjectPreservation = `SUBJECT PRESERVATION (critical):
-- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door locations and sizes, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions and number of floors. The structural shell must be unchanged.
+- Keep the EXACT same space as the input photo: for interiors keep wall positions, window and door locations and sizes, staircases, ceiling height, floor plan and proportions; for exteriors keep the building's footprint, rooflines, window/door positions, external steps and number of floors. The structural shell must be unchanged.
 - Built-in fixtures (bathtub, shower, sink, toilet, tiles, kitchen cabinets/counters, etc.) are NOT part of the structure: keep them in their existing POSITIONS with realistic plumbing, but their style, material and finish SHOULD change to match the chosen style.
 - Keep the SAME camera angle, perspective and framing as the original photo.
 - NEVER invent or hallucinate a different room, building, or scene, and never change the type of space.
@@ -558,30 +568,36 @@ export const restyleRoomImage = async (
   let task: string;
   if (isEmptyRoom) {
     task = `TASK — EMPTY THE ROOM:
-- Remove ALL furniture, rugs, decor, wall art, plants, curtains and clutter so the room is completely empty and unfurnished.
+- Remove ONLY loose, movable contents: furniture, rugs, decor, wall art, plants, curtains and clutter, so the room reads as empty and unfurnished.
+- Keep everything structural and built-in exactly as it is: staircases and their railings, windows, doors, radiators, fitted/built-in cabinetry, kitchen and bathroom fixtures, fireplaces and light fixtures all stay.
 - Keep the existing wall color/finish and flooring exactly as they are — do NOT repaint or re-floor.
-- Result: a clean, bright, empty real-estate photograph of the same space.`;
+- Result: a clean, bright, empty real-estate photograph of the same space, with the same architecture still clearly visible.`;
   } else if (isExtRefresh) {
     task = `TASK — REFRESH & LANDSCAPING (exterior):
 - Keep the same house exactly as it is. Only tidy and refresh the outdoors: healthy green lawn and plants, trimmed hedges, clean driveway and paths, and remove clutter, cars, bins and debris. Clean the facade.
-- Do NOT restyle or change the architecture, materials or colours of the building.`;
+- Do NOT restyle or change the architecture, materials or colours of the building, and do not remove steps, stairs, railings, balconies, chimneys or windows.`;
   } else if (isExterior) {
     task = `TASK — RESTYLE THE EXTERIOR of the house in the "${styleLabel}" architectural style:
 STYLE BRIEF — ${styleLabel}: ${stylePrompt}
 - Restyle the facade cladding/paint, roof material and colour, front door, window frames and trim, garage, driveway/path and landscaping so the house convincingly matches the "${styleLabel}" style.
-- Keep the building's structure, footprint, rooflines, window and door positions and number of floors unchanged — never add or remove floors or change the building's shape.`;
+- Keep the building's structure, footprint, rooflines, window and door positions and number of floors unchanged — never add or remove floors or change the building's shape.
+- Keep every external step, staircase, railing, porch, balcony, terrace, chimney and window exactly where it is; you may refinish them in the new style, never delete or relocate them.`;
   } else {
-    task = `TASK — RESTYLE THE INTERIOR in the "${styleLabel}" style:
+    task = `TASK — FURNISH & STYLE THE INTERIOR in the "${styleLabel}" style:
 STYLE BRIEF — ${styleLabel}: ${stylePrompt}
-- Restyle EVERY interior element to match the style: furniture, decor, textiles, rugs, wall treatment/paint, flooring finish, lighting fixtures and the overall color palette.
+- Work ADDITIVELY. Your main job is to ADD what the style needs into the space that is already there: furniture, seating, tables, storage, rugs, cushions and textiles, curtains or blinds, lighting and lamps, artwork, mirrors, plants and decor — all clearly belonging to the "${styleLabel}" style and arranged the way the room would really be used.
+- Place the new furnishings so they respect what already exists: leave staircases, stair landings, doorways and walkways clear, do not block or cover windows, and do not stand furniture in front of radiators, fireplaces or doors.
+- You may also update SURFACE FINISHES to suit the style — wall paint/treatment, flooring finish, ceiling finish and the overall color palette — but a finish change must never make an element disappear: repainting a wall keeps its windows, refinishing a floor keeps the stairs, and window frames, door frames, skirting, mouldings and railings are refinished in place, never removed.
 - Also restyle the built-in fixtures and fittings that are present in the room:
   · Bathroom: the bathtub, shower, vanity, sink/basin, faucets and taps, toilet, wall & floor tiles, mirror, towel rails, radiators and all hardware.
   · Kitchen: the cabinetry, countertops, backsplash, sink, faucet and visible appliances.
 - Update each fixture's design, material and finish to suit the "${styleLabel}" style, and update or neatly conceal any exposed pipes/plumbing to match. Keep every fixture in its EXISTING position and keep the plumbing layout realistic.
-- Do NOT leave any element in the original style — the whole room should convincingly read as "${styleLabel}".`;
+- The room should convincingly read as "${styleLabel}" through its furnishings, materials and colors — achieved by dressing and refinishing the existing space, never by rebuilding it.`;
   }
 
-  const prompt = `You are an expert interior designer and architectural photographer. Edit the provided real-estate photograph exactly as instructed.
+  const prompt = `You are an expert interior designer and architectural photographer. Edit the provided real-estate photograph exactly as instructed. You are DRESSING an existing real room, not designing a new one: the architecture stays, the contents and finishes change.
+
+${structure}
 
 ${subjectPreservation}
 
@@ -596,6 +612,12 @@ PHOTOREALISM (this is critical — the result must look like a REAL photo, not A
 - Keep natural color balance and realistic dynamic range; avoid over-saturation and over-sharpening.
 - Preserve subtle real-world imperfections and fine surface detail. Add a very slight, natural photographic grain.
 - It MUST NOT look like a 3D render, CGI, a video-game screenshot, an illustration, or digital art. Avoid the over-smooth, waxy, plastic, "too perfect" AI look.
+
+FINAL CHECK before you output — compare your result against the input photograph:
+- Same number of windows, in the same places? Same doors and openings? Every staircase, step and railing still there?
+- Same walls, corners, ceiling shape, columns, beams, fireplaces and radiators, in the same positions?
+- Same camera angle, same framing, nothing cropped or added beyond the original edges?
+If anything structural is missing, moved or resized, fix it and put it back before answering.
 
 Output only the edited photograph.`;
 
