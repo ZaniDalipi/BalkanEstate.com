@@ -701,7 +701,12 @@
       "clearSearch": "Καθαρισμός αναζήτησης",
       "searchResults": "Εμφάνιση {{matches}} από {{total}} ακίνητα",
       "noMatches": "Κανένα ακίνητο δεν ταιριάζει με την αναζήτηση",
-      "noMatchesHint": "Δοκιμάστε μια πόλη, έναν τύπο ακινήτου ή μέρος του τίτλου."
+      "noMatchesHint": "Δοκιμάστε μια πόλη, έναν τύπο ακινήτου ή μέρος του τίτλου.",
+      "showingRange": "Εμφάνιση {{from}}–{{to}} από {{total}}",
+      "pagination": "Σελίδες καταχωρίσεων",
+      "previousPage": "Προηγούμενη",
+      "nextPage": "Επόμενη",
+      "goToPage": "Σελίδα {{page}}"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

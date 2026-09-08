@@ -701,7 +701,12 @@
       "clearSearch": "Očisti pretragu",
       "searchResults": "Prikazano {{matches}} od {{total}} nekretnina",
       "noMatches": "Nijedna nekretnina ne odgovara pretrazi",
-      "noMatchesHint": "Pokušajte sa gradom, vrstom nekretnine ili dijelom naslova."
+      "noMatchesHint": "Pokušajte sa gradom, vrstom nekretnine ili dijelom naslova.",
+      "showingRange": "Prikazano {{from}}–{{to}} od {{total}}",
+      "pagination": "Stranice oglasa",
+      "previousPage": "Prethodna",
+      "nextPage": "Sljedeća",
+      "goToPage": "Stranica {{page}}"
     },
     "reviewsTab": {
       "verifiedReviews": "verificiranih recenzija",

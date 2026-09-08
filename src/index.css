@@ -1976,6 +1976,77 @@ html.reduce-motion .submit-overlay-backdrop {
   transform-origin: 50% 42%;
 }
 
+/* Two-up grids (an agent's listings, for instance) hand each card roughly half
+   again the width of the three- and four-column grids the card is tuned for.
+   At that size the default type reads as a thumbnail blown up: the title
+   truncates mid-word, the stat labels wrap to two lines, and the photo sits in
+   a card with too much air around it. `--wide` is the opt-in that spends the
+   extra width — bigger photo, room for a full title, stat tiles that fit their
+   own labels.
+
+   Gated at 768px because the grid that opts in is still two-up below it, where
+   a column is narrower than a full-width phone card and the compact type is
+   the right type. */
+@media (min-width: 768px) {
+  /* A shorter frame than 4:3 — at this width the photo is already large, and
+     3:2 keeps the card from running past the fold on its own. */
+  .property-card--wide .property-card__media {
+    aspect-ratio: 3 / 2;
+  }
+
+  .property-card--wide .property-card__content {
+    padding: 1.125rem 1.25rem 1.25rem;
+  }
+
+  .property-card--wide .property-card__type {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.625rem;
+  }
+
+  .property-card--wide .property-card__price {
+    font-size: 1.375rem;
+    line-height: 1.15;
+  }
+
+  /* Two lines instead of one: the width is there, and "Nord Tower Kamez…" on
+     every card tells a visitor nothing. The min-height keeps titles of
+     different lengths from staggering the rows below them. */
+  .property-card--wide .property-card__title {
+    font-size: 1.0625rem;
+    line-height: 1.35;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    min-height: 2.7em;
+  }
+
+  .property-card--wide .property-card__location {
+    margin-bottom: 0.875rem;
+  }
+
+  .property-card--wide .property-card__location > div {
+    font-size: 0.9375rem;
+  }
+
+  .property-card--wide .property-card__stats {
+    gap: 0.5rem;
+  }
+
+  .property-card--wide .property-card__stats > * {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  /* The label is what suffers most in a narrow tile — "living rooms" broke
+     across two lines at 9px. */
+  .property-card--wide .property-card__stats > * > span:last-child {
+    font-size: 0.6875rem;
+  }
+
+  .property-card--wide .property-card__seller {
+    padding-top: 0.875rem;
+  }
+}
+
 /* Keyboard focus earns the same lift the pointer gets. */
 .property-card--interactive:focus-visible {
   transform: translate3d(0, -6px, 0);

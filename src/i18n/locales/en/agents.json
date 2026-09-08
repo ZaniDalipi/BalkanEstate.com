@@ -730,7 +730,12 @@
       "clearSearch": "Clear search",
       "searchResults": "Showing {{matches}} of {{total}} properties",
       "noMatches": "No properties match your search",
-      "noMatchesHint": "Try a city, a property type, or part of the title."
+      "noMatchesHint": "Try a city, a property type, or part of the title.",
+      "showingRange": "Showing {{from}}–{{to}} of {{total}}",
+      "pagination": "Listing pages",
+      "previousPage": "Previous",
+      "nextPage": "Next",
+      "goToPage": "Page {{page}}"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",

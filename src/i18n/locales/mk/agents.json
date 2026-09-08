@@ -701,7 +701,12 @@
       "clearSearch": "Исчисти пребарување",
       "searchResults": "Прикажани {{matches}} од {{total}} имоти",
       "noMatches": "Ниту еден имот не одговара на пребарувањето",
-      "noMatchesHint": "Обидете се со град, тип на имот или дел од насловот."
+      "noMatchesHint": "Обидете се со град, тип на имот или дел од насловот.",
+      "showingRange": "Прикажани {{from}}–{{to}} од {{total}}",
+      "pagination": "Страници со огласи",
+      "previousPage": "Претходна",
+      "nextPage": "Следна",
+      "goToPage": "Страница {{page}}"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани рецензии",

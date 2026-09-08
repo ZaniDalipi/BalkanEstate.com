@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import {
@@ -39,6 +39,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { AgentStats, MarketInsights } from './useAgentProfile';
 import { filterPropertiesByQuery, parseSearchTerms } from '../utils/propertySearch';
+import { pageSlice, pageWindow } from '../utils/listingPagination';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
 
@@ -63,6 +64,124 @@ const MapInvalidator: React.FC = () => {
     }, [map]);
 
     return null;
+};
+
+interface PaginatedListingGridProps {
+    heading: string;
+    items: any[];
+    /** Corner stamp for listings that are no longer on the market. */
+    badge?: { label: string; className: string };
+    /**
+     * Changing this sends the grid back to page one — a new filter or search
+     * describes a different list, and page 3 of the old one means nothing.
+     */
+    resetKey: string;
+}
+
+/**
+ * One section of the listings tab: a heading, a page of cards, and the pager
+ * that moves between pages. Owns its own page so the sold and rented sections
+ * can be browsed without disturbing the active one.
+ */
+const PaginatedListingGrid: React.FC<PaginatedListingGridProps> = ({ heading, items, badge, resetKey }) => {
+    const { t } = useTranslation(['agents']);
+    const [page, setPage] = useState(1);
+    const topRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => { setPage(1); }, [resetKey]);
+
+    // The stored page is clamped rather than corrected: a list that shrinks
+    // under the page a visitor is on would otherwise show them nothing.
+    const { page: currentPage, totalPages, firstIndex, items: shown } = pageSlice(items, page);
+
+    const goToPage = (next: number) => {
+        setPage(Math.min(Math.max(1, next), totalPages));
+        // Back to the top of this section, not the top of the document: the
+        // next page starts where the heading is, and landing mid-grid reads
+        // as if nothing happened.
+        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const pagerButton = 'min-w-[2.5rem] h-10 px-3 rounded-xl border text-sm font-medium transition-colors';
+
+    return (
+        <div>
+            <div ref={topRef} className="scroll-mt-24 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">{heading}</h3>
+                {totalPages > 1 && (
+                    <p className="text-sm text-gray-500">
+                        {t('profilePage.listingsTab.showingRange', {
+                            from: firstIndex + 1,
+                            to: firstIndex + shown.length,
+                            total: items.length,
+                            defaultValue: 'Showing {{from}}–{{to}} of {{total}}',
+                        })}
+                    </p>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
+                {shown.map(prop => (
+                    badge ? (
+                        <div key={prop.id} className="relative">
+                            <PropertyCard property={prop} wide />
+                            <div className={`absolute top-3 right-3 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10 ${badge.className}`}>
+                                {badge.label}
+                            </div>
+                        </div>
+                    ) : (
+                        <PropertyCard key={prop.id} property={prop} wide />
+                    )
+                ))}
+            </div>
+
+            {totalPages > 1 && (
+                <nav
+                    className="flex flex-wrap justify-center items-center gap-2 mt-8"
+                    aria-label={t('profilePage.listingsTab.pagination', { defaultValue: 'Listing pages' })}
+                >
+                    <button
+                        type="button"
+                        onClick={() => goToPage(currentPage - 1)}
+                        disabled={currentPage <= 1}
+                        className={`${pagerButton} border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white`}
+                    >
+                        {t('profilePage.listingsTab.previousPage', { defaultValue: 'Previous' })}
+                    </button>
+
+                    {pageWindow(currentPage, totalPages).map((pageNumber, i) => (
+                        pageNumber === null ? (
+                            <span key={`gap-${i}`} className="px-1 text-gray-400 select-none" aria-hidden="true">…</span>
+                        ) : (
+                            <button
+                                key={pageNumber}
+                                type="button"
+                                onClick={() => goToPage(pageNumber)}
+                                aria-current={pageNumber === currentPage ? 'page' : undefined}
+                                aria-label={t('profilePage.listingsTab.goToPage', { page: pageNumber, defaultValue: 'Page {{page}}' })}
+                                className={`${pagerButton} ${
+                                    pageNumber === currentPage
+                                        ? 'border-blue-600 bg-blue-600 text-white'
+                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                }`}
+                            >
+                                {pageNumber}
+                            </button>
+                        )
+                    ))}
+
+                    <button
+                        type="button"
+                        onClick={() => goToPage(currentPage + 1)}
+                        disabled={currentPage >= totalPages}
+                        className={`${pagerButton} border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white`}
+                    >
+                        {t('profilePage.listingsTab.nextPage', { defaultValue: 'Next' })}
+                    </button>
+                </nav>
+            )}
+        </div>
+    );
 };
 
 interface AgentProfileTabsProps {
@@ -141,6 +260,10 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
             rented: filterPropertiesByQuery(byType(rentedProperties || []), listingSearch),
         };
     }, [activeListings, soldProperties, rentedProperties, listingTypeFilter, listingSearch]);
+
+    // Either control describes a different list, so every grid starts over at
+    // page one when one of them changes.
+    const listingsResetKey = `${listingTypeFilter}|${listingSearch}`;
 
     const listingMatchCount = visibleListings.active.length + visibleListings.sold.length + visibleListings.rented.length;
     const totalListingCount = (activeListings?.length || 0) + (soldProperties?.length || 0) + (rentedProperties?.length || 0);
@@ -824,21 +947,17 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {loadingProperties ? (
                                         <div>
                                             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                <PropertyCardSkeleton />
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                                                 <PropertyCardSkeleton />
                                                 <PropertyCardSkeleton />
                                             </div>
                                         </div>
                                     ) : filteredActive.length > 0 ? (
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.activeListings')}</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                {filteredActive.map(prop => (
-                                                    <PropertyCard key={prop.id} property={prop} />
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <PaginatedListingGrid
+                                            heading={`${t('profilePage.listingsTab.activeListings')} (${filteredActive.length})`}
+                                            items={filteredActive}
+                                            resetKey={listingsResetKey}
+                                        />
                                     ) : filteredSold.length === 0 && filteredRented.length === 0 ? (
                                         <div className="text-center py-12 bg-gray-50 rounded-2xl">
                                             <p className="text-gray-500">{t('profilePage.listingsTab.noListings', 'No listings available')}</p>
@@ -846,35 +965,21 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     ) : null}
 
                                     {filteredSold.length > 0 && (
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.soldProperties')} ({filteredSold.length})</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                {filteredSold.map(prop => (
-                                                    <div key={prop.id} className="relative">
-                                                        <PropertyCard property={prop} />
-                                                        <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
-                                                            {t('profilePage.listingsTab.soldBadge')}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <PaginatedListingGrid
+                                            heading={`${t('profilePage.listingsTab.soldProperties')} (${filteredSold.length})`}
+                                            items={filteredSold}
+                                            badge={{ label: t('profilePage.listingsTab.soldBadge'), className: 'bg-red-600' }}
+                                            resetKey={listingsResetKey}
+                                        />
                                     )}
 
                                     {filteredRented.length > 0 && (
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profilePage.listingsTab.rentedProperties', 'Rented Properties')} ({filteredRented.length})</h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                {filteredRented.map(prop => (
-                                                    <div key={prop.id} className="relative">
-                                                        <PropertyCard property={prop} />
-                                                        <div className="absolute top-3 right-3 bg-orange-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg z-10">
-                                                            {t('profilePage.listingsTab.rentedBadge', 'RENTED')}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <PaginatedListingGrid
+                                            heading={`${t('profilePage.listingsTab.rentedProperties', 'Rented Properties')} (${filteredRented.length})`}
+                                            items={filteredRented}
+                                            badge={{ label: t('profilePage.listingsTab.rentedBadge', 'RENTED'), className: 'bg-orange-600' }}
+                                            resetKey={listingsResetKey}
+                                        />
                                     )}
                                 </>
                             );
