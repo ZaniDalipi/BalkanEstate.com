@@ -825,7 +825,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           className={`px-3 sm:px-4 overflow-hidden transition-all duration-300 ease-in-out hidden sm:block ${
             isBreadcrumbCollapsed
               ? 'max-h-0 opacity-0 py-0'
-              : 'max-h-20 opacity-100 pt-2 pb-1'
+              : 'max-h-20 opacity-100 pt-1.5 pb-0.5'
           }`}
         >
           <Breadcrumbs
@@ -838,8 +838,12 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           />
         </div>
 
-        {/* Single row header on mobile: Back + Stats + Actions */}
-        <div className="px-2 xs:px-3 sm:px-4 py-2 sm:py-3 md:py-5 md:mt-2 flex items-center justify-between gap-1 xs:gap-2">
+        {/* Single row header on mobile: Back + Stats + Actions.
+             Padding stays tight at every width — this bar is sticky, so every
+             pixel of it is taken off the photo below for the whole page. The
+             48px touch target on the Back button is kept for phones and relaxed
+             to 40px from `md`, where the pointer is a mouse. */}
+        <div className="px-2 xs:px-3 sm:px-4 py-1.5 sm:py-2 md:py-2.5 flex items-center justify-between gap-1 xs:gap-2">
           {/* Back button - larger tap target for PWA */}
           <button
             {...backTapProps}
@@ -848,7 +852,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             // button's visual bounds, so a thumb landing just above or beside
             // the arrow still hits it. Events on a pseudo-element are the
             // button's, so this widens the target without moving the layout.
-            className="relative flex items-center justify-start gap-1.5 sm:gap-2 text-primary font-semibold rounded-full text-sm sm:text-base min-h-[48px] min-w-[48px] px-2 -ml-2 touch-manipulation select-none transition-[transform,background-color] duration-150 active:scale-[0.96] active:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 before:content-[''] before:absolute before:-inset-x-2 before:-inset-y-1.5"
+            className="relative flex items-center justify-start gap-1.5 sm:gap-2 text-primary font-semibold rounded-full text-sm sm:text-base min-h-[48px] md:min-h-[40px] min-w-[48px] px-2 -ml-2 touch-manipulation select-none transition-[transform,background-color] duration-150 active:scale-[0.96] active:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 before:content-[''] before:absolute before:-inset-x-2 before:-inset-y-1.5"
             aria-label={t('property:navigation.goBackToSearch')}
           >
             <ArrowLeftIcon className="w-5 h-5" />
@@ -928,13 +932,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* Share Button */}
             <button
               onClick={handleShare}
-              className="bg-white p-2 sm:p-2 md:p-2.5 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
+              className="bg-white p-2 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
               aria-label={t('property:actions.share')}
               title={t('property:actions.share')}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-[18px] w-[18px] sm:h-6 sm:w-6 md:h-7 md:w-7 text-neutral-500 hover:text-primary transition-colors"
+                className="h-[18px] w-[18px] sm:h-5 sm:w-5 md:h-[22px] md:w-[22px] text-neutral-500 hover:text-primary transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -951,7 +955,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* Favorite Button */}
             <div
               onClick={property.status === 'sold' ? undefined : handleFavoriteClick}
-              className={`bg-white p-2 sm:p-2 md:p-2.5 rounded-full border border-neutral-200 ${
+              className={`bg-white p-2 rounded-full border border-neutral-200 ${
                 property.status === 'sold'
                   ? 'opacity-50 cursor-not-allowed'
                   : 'cursor-pointer hover:shadow-md'
@@ -959,7 +963,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className={`h-[18px] w-[18px] sm:h-6 sm:w-6 md:h-7 md:w-7 transition-colors duration-300 ${
+                className={`h-[18px] w-[18px] sm:h-5 sm:w-5 md:h-[22px] md:w-[22px] transition-colors duration-300 ${
                   property.status === 'sold'
                     ? 'text-neutral-300'
                     : isFavorited
@@ -982,7 +986,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* Profile Button - compact avatar for PWA navigation */}
             <button
               onClick={handleProfileClick}
-              className="rounded-full border-2 border-neutral-200 bg-white cursor-pointer hover:shadow-md hover:border-primary/30 transition-all overflow-hidden flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 md:w-10 md:h-10"
+              className="rounded-full border-2 border-neutral-200 bg-white cursor-pointer hover:shadow-md hover:border-primary/30 transition-all overflow-hidden flex-shrink-0 w-9 h-9"
               aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
             >
               {currentUser?.avatarUrl ? (

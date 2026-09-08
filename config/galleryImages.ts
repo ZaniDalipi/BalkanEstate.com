@@ -34,11 +34,39 @@ export const isCloudinaryUrl = (url: string | undefined): url is string =>
  * Keeping one list for both matters: on a phone both surfaces resolve to
  * `100vw`, so they pick the *same* candidate and opening fullscreen reuses the
  * bytes the gallery already downloaded.
+ *
+ * The list runs to 2560 because the frame is full-bleed: on a 1920px desktop
+ * the Ken Burns zoom asks for ~2200 device pixels, and stopping at 1920 left
+ * the browser upscaling its widest candidate.
  */
-export const GALLERY_WIDTHS = [480, 768, 1080, 1440, 1920];
+export const GALLERY_WIDTHS = [480, 768, 1080, 1440, 1920, 2560];
 
-/** The gallery frame is edge-to-edge on a phone and capped at ~1280px on desktop. */
-export const GALLERY_SIZES = '(max-width: 640px) 100vw, (max-width: 1280px) 95vw, 1280px';
+/**
+ * The gallery frame is edge-to-edge at every width — it is rendered outside the
+ * page container precisely so it spans the full page.
+ *
+ * It used to declare `1280px` above that breakpoint, so a 1920px display was
+ * told 1280 device pixels were enough, picked the 1440w candidate and stretched
+ * it across the frame. That upscale is the softness on the first photo.
+ *
+ * Above phone width the declaration is 115vw rather than 100vw: the active
+ * photo is under a 1.14x Ken Burns zoom, so the frame shows ~14% fewer of the
+ * photo's pixels than its CSS width suggests. Overstating by that margin makes
+ * the browser pick the candidate that is still sharp once zoomed. Phones keep
+ * 100vw — they carry the same photo on a metered connection and their high DPR
+ * already lands on a generous candidate.
+ */
+export const GALLERY_SIZES = '(max-width: 640px) 100vw, 115vw';
+
+/**
+ * Delivery quality for the photos a buyer actually studies.
+ *
+ * `q_auto` resolves to `auto:good`, which is tuned for thumbnails and leaves
+ * visible ringing on the large flat gradients a property photo is full of —
+ * sky, render backdrops, white facades. `auto:best` keeps Cloudinary's
+ * per-image analysis and just holds a higher floor.
+ */
+export const GALLERY_QUALITY = 'auto:best' as const;
 
 /** The fullscreen viewer always spans the viewport. */
 export const VIEWER_SIZES = '100vw';
@@ -64,7 +92,7 @@ export const getGallerySources = (
   url: string | undefined,
   options: { widths?: number[]; sizes?: string; fallbackWidth?: number } = {}
 ): ImageSources => {
-  const { widths = GALLERY_WIDTHS, sizes = GALLERY_SIZES, fallbackWidth = 1200 } = options;
+  const { widths = GALLERY_WIDTHS, sizes = GALLERY_SIZES, fallbackWidth = 1920 } = options;
 
   if (!url) return { src: '', srcSet: '', sizes, placeholder: '' };
 
@@ -74,8 +102,8 @@ export const getGallerySources = (
   }
 
   return {
-    src: optimizeCloudinaryUrl(url, { width: fallbackWidth, quality: 'auto' }),
-    srcSet: cloudinarySrcSet(url, widths),
+    src: optimizeCloudinaryUrl(url, { width: fallbackWidth, quality: GALLERY_QUALITY }),
+    srcSet: cloudinarySrcSet(url, widths, { quality: GALLERY_QUALITY }),
     sizes,
     placeholder: getPropertyImagePlaceholder(url),
     crossOrigin: 'anonymous',
