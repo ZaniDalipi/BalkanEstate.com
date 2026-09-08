@@ -5,8 +5,9 @@ import { Property, Filters, initialFilters, SavedSearch } from '@/types';
 import type { Suggestion } from '@/src/features/search/universal/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
-import { filterAndSortProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
 import { narrowToMapView } from '@/src/features/search/mapList';
+import { frameSearchTarget } from '@/src/features/search/frameSearch';
 import { applyQueryToFilters } from '@/src/features/search/universal/queryToFilters';
 import { getCountryData } from '@/constants/countries';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
@@ -319,18 +320,29 @@ export function useVillaSearch() {
     }, [needsRelaxedText, villaProperties, collectionFilters]);
 
     /**
+     * What the map draws — and the set the list is drawn from, so the two
+     * always answer the same question.
+     *
+     * Handing the map the strict set while the list answered from the relaxed
+     * one is how a search for an address ended up listing three villas over an
+     * empty map: nothing text-matched "Sun Palasë Residence", so the strict
+     * set was empty and every pin disappeared while the cards stayed.
+     */
+    const mapProperties = relaxedProperties ?? baseFilteredProperties;
+
+    /**
      * What the list shows: the villas inside the current view, with the buy
      * page's rules — a drawn area wins over the viewport, and a view holding
      * nothing shows the nearest villas instead of an empty screen.
      */
     const { listProperties, fallbackLocation } = useMemo(
         () => narrowToMapView({
-            properties: relaxedProperties ?? baseFilteredProperties,
+            properties: mapProperties,
             drawnBounds,
             mapBounds,
             ready: !isLoading,
         }),
-        [baseFilteredProperties, relaxedProperties, drawnBounds, mapBounds, isLoading]
+        [mapProperties, drawnBounds, mapBounds, isLoading]
     );
 
     /**
@@ -377,6 +389,23 @@ export function useVillaSearch() {
     }, []);
 
     /**
+     * Fly to a searched place, framed so the villas it found are on screen.
+     *
+     * A place resolves to its own centre at its own zoom, which is not the
+     * same thing as a view of the villas there: a resort development on the
+     * edge of the town named lands outside that viewport, and the visitor
+     * reads cards over an empty map.
+     *
+     * The listings it frames around are the ones the list will draw from,
+     * including the relaxed set, so the map and the list never disagree.
+     */
+    const flyToSearched = useCallback((target: { center: [number, number]; zoom: number }, forFilters: Filters) => {
+        const strict = filterProperties(villaProperties, forFilters);
+        const answering = strict.length > 0 ? strict : filterProperties(villaProperties, { ...forFilters, query: '' });
+        setFlyToTarget(frameSearchTarget(target, answering) ?? target);
+    }, [villaProperties]);
+
+    /**
      * Run whatever is in the box, and take the map with it.
      *
      * The sentence is read first, the way the buy and rent pages read it, so
@@ -407,6 +436,7 @@ export function useVillaSearch() {
 
         const { filters: parsedFilters, parsed } = applyQueryToFilters(filters, query);
         applyFilters({ ...parsedFilters, ...VILLA_DEFAULTS });
+        const nextMode = parsed.intent.listingType ?? listingMode;
         if (parsed.intent.listingType) setListingMode(parsed.intent.listingType);
 
         // A sentence that was entirely filters ("with a pool under 5000") has
@@ -420,11 +450,15 @@ export function useVillaSearch() {
             if (!target) return;
 
             setDrawnBoundsJSON(null); // A searched place replaces any drawn area.
-            setFlyToTarget(target);
+            flyToSearched(target, {
+                ...parsedFilters,
+                ...VILLA_DEFAULTS,
+                listingType: nextMode === 'any' ? 'any' : nextMode,
+            });
         } finally {
             setIsSearchingLocation(false);
         }
-    }, [filters, applyFilters, fetchVillas, villaProperties]);
+    }, [filters, applyFilters, fetchVillas, villaProperties, listingMode, flyToSearched]);
 
     /**
      * A destination chip in the hero.
@@ -569,9 +603,13 @@ export function useVillaSearch() {
             setDrawnBoundsJSON(null);
 
             if (Number.isFinite(suggestion.lat) && Number.isFinite(suggestion.lng)) {
-                setFlyToTarget({
+                flyToSearched({
                     center: [suggestion.lat as number, suggestion.lng as number],
                     zoom: suggestion.zoom ?? 12,
+                }, {
+                    ...parsedFilters,
+                    ...VILLA_DEFAULTS,
+                    listingType: listingMode === 'any' ? 'any' : listingMode,
                 });
             }
             return;
@@ -582,7 +620,7 @@ export function useVillaSearch() {
         // `filters`, which this render has not seen updated yet.
         const value = suggestion.type === 'query' ? suggestion.text : suggestion.title;
         void handleSearch(value);
-    }, [filters, applyFilters, handleSearch]);
+    }, [filters, applyFilters, handleSearch, flyToSearched, listingMode]);
 
     // A `?destination=` arriving without coordinates is still a search: the
     // map opens on the place that was linked to rather than on the Balkans.
@@ -624,6 +662,7 @@ export function useVillaSearch() {
         mapBounds,
         drawnBounds,
         baseFilteredProperties,
+        mapProperties,
         listProperties,
         fallbackLocation,
         isTextRelaxed,

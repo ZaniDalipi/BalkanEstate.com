@@ -154,6 +154,23 @@ describe('useVillaSearch — searching', () => {
     expect(result.current.isTextRelaxed).toBe(true);
   });
 
+  it('draws on the map exactly what the list is answering from', async () => {
+    const { result } = await mountHook();
+
+    // The reported bug: searching an address the villas do not spell out left
+    // three cards in the list and not one pin on the map, because the map was
+    // handed the strict set while the list answered from the relaxed one.
+    await act(async () => {
+      await result.current.handleSearch('Sun Palase Residence, Palase, Albania');
+    });
+
+    expect(result.current.isTextRelaxed).toBe(true);
+    expect(result.current.mapProperties).toHaveLength(1);
+    expect(result.current.mapProperties).toEqual(
+      expect.arrayContaining(result.current.listProperties)
+    );
+  });
+
   it('searches a destination chip without a lookup, and toggles it off', async () => {
     const { result } = await mountHook();
     const destination = { query: 'Budva', center: [42.2911, 18.8401] as [number, number], zoom: 12 };

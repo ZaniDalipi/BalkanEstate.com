@@ -108,7 +108,7 @@ describe('useRentalSearch — searching', () => {
     expect(searchLocation).not.toHaveBeenCalled();
   });
 
-  it('geocodes an address the gazetteer has never heard of, and flies there', async () => {
+  it('geocodes an address the gazetteer has never heard of, and frames it with the rentals nearby', async () => {
     searchLocation.mockResolvedValue([
       { lat: '41.3200', lon: '19.8100', boundingbox: ['0', '0', '0', '0'], display_name: 'Rruga e Kavajes 12' },
     ]);
@@ -119,7 +119,14 @@ describe('useRentalSearch — searching', () => {
     });
 
     expect(searchLocation).toHaveBeenCalledWith('Rruga e Kavajes 12');
-    expect(result.current.flyToTarget).toEqual({ center: [41.32, 19.81], zoom: 13 });
+    // The geocoded point alone would leave the rental up the road off screen,
+    // so the view is nudged to hold both it and the address.
+    const { center, zoom } = result.current.flyToTarget!;
+    expect(center[0]).toBeGreaterThan(41.32);
+    expect(center[0]).toBeLessThan(41.3275);
+    expect(center[1]).toBeGreaterThan(19.81);
+    expect(center[1]).toBeLessThan(19.8187);
+    expect(zoom).toBeLessThanOrEqual(13);
   });
 
   it('reads filters out of the sentence but never leaves the rent listings', async () => {
@@ -165,5 +172,10 @@ describe('useRentalSearch — searching', () => {
     // empty page — and the page is told the answer is a looser one.
     expect(result.current.listProperties).toHaveLength(1);
     expect(result.current.isTextRelaxed).toBe(true);
+    // And the map draws that same set: cards over a map with no pins on it is
+    // the bug this pairing exists to prevent.
+    expect(result.current.mapProperties).toEqual(
+      expect.arrayContaining(result.current.listProperties)
+    );
   });
 });

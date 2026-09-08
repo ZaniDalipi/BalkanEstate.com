@@ -468,7 +468,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         drawnBounds,
         villaProperties,
         totalVillaCount,
-        baseFilteredProperties,
+        mapProperties,
         listProperties,
         activeFilters,
         fallbackLocation,
@@ -614,7 +614,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     const mountList = useDeferredMount(!isListOnScreen);
 
     const mapProps = {
-        properties: baseFilteredProperties,
+        // The same set the list is drawn from, so a search never lists
+        // properties over a map with no pins on it.
+        properties: mapProperties,
         onMapMove: handleMapMove,
         userLocation,
         onSaveSearch: handleSaveSearchArea,

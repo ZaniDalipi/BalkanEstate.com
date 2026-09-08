@@ -5,6 +5,8 @@
   "createListing": "List for Rent",
   "loading": "Loading rental properties...",
   "noProperties": "No rental properties found",
+  "showingNearby": "No rentals in this area — showing the nearest ones in {{location}}",
+  "showingInArea": "No rental matches “{{query}}” — showing what is available in this area",
   "noPropertiesHint": "Try adjusting your filters or search in a different area",
   "forRent": "For Rent",
   "rented": "Rented",

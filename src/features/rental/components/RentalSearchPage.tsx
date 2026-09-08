@@ -91,7 +91,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
         userLocation,
         mapBounds,
         drawnBounds,
-        baseFilteredProperties,
+        mapProperties,
         listProperties,
         toggleDrawing,
         handleDrawComplete,
@@ -204,7 +204,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     const mountList = useDeferredMount(!isListOnScreen);
 
     const mapProps = {
-        properties: baseFilteredProperties,
+        // The same set the list is drawn from, so a search never lists
+        // properties over a map with no pins on it.
+        properties: mapProperties,
         onMapMove: handleMapMove,
         userLocation,
         onSaveSearch: handleSaveSearchArea,
@@ -441,11 +443,11 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 <div className="px-4 pb-2 -mt-1">
                                     <p className="text-xs text-neutral-500">
                                         {isTextRelaxed
-                                            ? t('search:showingInArea', {
+                                            ? t('rental:showingInArea', {
                                                 query: filters.query,
                                                 defaultValue: 'No rental matches “{{query}}” — showing what is available in this area',
                                             })
-                                            : t('search:showingNearby', {
+                                            : t('rental:showingNearby', {
                                                 location: fallbackLocation,
                                                 defaultValue: 'No rentals in this area — showing the nearest ones in {{location}}',
                                             })}
