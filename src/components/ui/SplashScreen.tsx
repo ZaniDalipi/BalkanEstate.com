@@ -100,15 +100,23 @@ const HelloGreeting: React.FC<HelloGreetingProps> = ({ onComplete, userName }) =
           <motion.p
             /* Written on left-to-right like the "hello" stroke, rather than
                faded in: same easing, and no `tracking-*`, which would pull the
-               joined script letters apart. */
-            initial={{ clipPath: 'inset(0 100% -20% 0)', opacity: 0 }}
-            animate={{ clipPath: 'inset(0 0% -20% 0)', opacity: 1 }}
+               joined script letters apart.
+
+               Every inset but the animating one is negative, and the line box
+               is padded out: Pacifico's ascenders, descenders and entry/exit
+               swashes all overhang the text box, and a clip pinned to that box
+               shaves them — the tail of a `g`, the top of an `l`. */
+            initial={{ clipPath: 'inset(-30% 100% -30% -10%)', opacity: 0 }}
+            animate={{ clipPath: 'inset(-30% -10% -30% -10%)', opacity: 1 }}
             transition={{
               clipPath: { duration: 0.9, ease: 'easeInOut' },
               opacity: { duration: 0.25 },
             }}
-            className="mt-1 px-2 text-4xl sm:text-5xl md:text-6xl text-neutral-500"
-            style={{ fontFamily: "'Pacifico', 'Snell Roundhand', 'Brush Script MT', cursive" }}
+            className="mt-3 px-6 py-2 leading-[1.6] text-4xl sm:text-5xl md:text-6xl"
+            style={{
+              fontFamily: "'Pacifico', 'Snell Roundhand', 'Brush Script MT', cursive",
+              color: '#0252CD',
+            }}
             onAnimationComplete={() => {
               setTimeout(() => onComplete?.(), 150);
             }}
