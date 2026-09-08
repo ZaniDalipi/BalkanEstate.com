@@ -156,7 +156,11 @@
     "toilets": "Τουαλέτες (WC)",
     "storageRooms": "Αποθήκες",
     "offices": "Γραφείο / σπουδαστήριο",
-    "propertyType": "Τύπος Ακινήτου"
+    "propertyType": "Τύπος Ακινήτου",
+    "landArea": "Εμβαδόν οικοπέδου",
+    "buildingArea": "Εμβαδόν κτίσματος",
+    "grossArea": "Μικτό εμβαδόν",
+    "netArea": "Καθαρό εμβαδόν"
   },
   "distances": {
     "title": "Αποστάσεις",

@@ -8,9 +8,10 @@ import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
+import VillaLocationBar from './VillaLocationBar';
 import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
-import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, MagnifyingGlassIcon, Bars3Icon, Squares2x2Icon } from '@/constants';
+import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, Bars3Icon, Squares2x2Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { SEO } from '@/src/components/seo';
@@ -59,6 +60,57 @@ const VillaAnimationStyles = () => (
         0 0 0 1.5px rgba(232,184,32,0.95),
         0 0 44px rgba(232,184,32,0.42),
         0 0 80px rgba(232,184,32,0.22);
+    }
+
+    /* ── Media clip ──
+       The card is a 3D-transformed element (.villa-tilt-card), and WebKit does
+       not clip transformed descendants to a transformed ancestor's rounded
+       overflow box. That let the parallax layer — and PropertyImage's blurred
+       scale(1.5) backdrop — paint outside the card on iOS. clip-path is
+       honoured in that situation, so the media gets its own clip that matches
+       the card's 1rem radius. */
+    .villa-img-clip {
+      clip-path: inset(0 round 1rem);
+      -webkit-clip-path: inset(0 round 1rem);
+    }
+
+    /* ── Image cross-fade layers ── */
+    .villa-img-layer {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* ── Opting the card's small controls out of the global touch-target rule ──
+       index.html sets button { min-height: 44px } under (pointer: coarse).
+       That rule is unlayered, so it beats every Tailwind utility — those live
+       in @layer utilities, and layered styles always lose to unlayered ones no
+       matter how specific they are. min-h-0 in the markup therefore does
+       nothing, and on phones the indicators stretched into tall white bars and
+       the heart into an oval. These selectors are unlayered too, and a class
+       out-specifies a bare element, so they win. Only the floor is lifted here
+       — the elements' own sizes stay in the markup. */
+    .villa-dots button,
+    .villa-nav-arrow,
+    .villa-fav-btn {
+      min-height: 0;
+    }
+
+    /* Arrows reveal on hover, which touch devices never fire. Rather than
+       leaving them invisible-but-tappable there, they are shown permanently and
+       sized up to a proper thumb target: on a phone the dots and a swipe were
+       otherwise the only way through the gallery. Unlayered, so these win over
+       the opacity/size utilities in the markup without !important. */
+    @media (hover: none), (pointer: coarse) {
+      .villa-nav-arrow {
+        opacity: 1;
+        width: 36px;
+        height: 36px;
+        background: rgba(0,0,0,0.45);
+      }
+      .villa-nav-arrow svg { width: 16px; height: 16px; }
+      /* Clear of the 24px dot row above and the CTA in the middle. */
+      .villa-nav-arrow-prev { left: 8px; }
+      .villa-nav-arrow-next { right: 8px; }
     }
 
     /* ── Parallax image layer ── */
@@ -156,9 +208,11 @@ const VillaAnimationStyles = () => (
       .villa-tilt-card,
       .villa-border-trace,
       .villa-img-wrap,
+      .villa-img-layer,
       .villa-cta-btn,
       .luxury-chip {
         animation: none !important;
+        /* !important also overrides the per-layer inline fade timing */
         transition: none !important;
       }
       .villa-card-fly { opacity: 1; }
@@ -428,11 +482,6 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         handleRecenterOnUser,
         handleResetView,
         onFlyComplete,
-        suggestions,
-        searchWrapperRef,
-        isSearchingLocation,
-        isQueryInputFocused,
-        setIsQueryInputFocused,
         handleSuggestionClick,
         isSaving,
         handleSaveSearchArea,
@@ -614,8 +663,16 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         <div className="flex-shrink-0" style={{ height: headerHeight }} aria-hidden />
                     )}
 
-                    {/* Desktop header — sticky, new 3-tier design */}
-                    <div className="hidden lg:block sticky top-0 z-20">
+                    {/* Desktop header — sticky, new 3-tier design.
+                        Above the results bar's z-[100], not because the two
+                        ever overlap — the bar sticks to the top of the scroll
+                        container below this — but because the search box's
+                        suggestion list hangs out of this header and down over
+                        it. `sticky` + a z-index makes this header a stacking
+                        context, so the dropdown's own z-index is confined to
+                        it: at z-20 the whole subtree painted under the bar, and
+                        the bar cut a white stripe through the suggestions. */}
+                    <div className="hidden lg:block sticky top-0 z-[110]">
 
                         {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div
@@ -661,52 +718,14 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             className="flex items-center px-4"
                             style={{ height: '44px', background: 'rgba(255,255,255,0.9)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
                         >
-                            <div ref={searchWrapperRef} className="relative w-full">
-                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                                <input
-                                    type="text"
-                                    value={filters.query}
-                                    onChange={(e) => handleFilterChange('query', e.target.value)}
-                                    onFocus={() => setIsQueryInputFocused(true)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                                    placeholder={t('villas:filters.searchCity', 'Search by location...')}
-                                    className="w-full pl-9 pr-9 py-1.5 text-sm bg-transparent border-none outline-none placeholder-gray-300 text-gray-800"
-                                    aria-label={t('villas:filters.searchCity', 'Search by location...')}
-                                />
-                                {filters.query && (
-                                    <button
-                                        onClick={() => handleFilterChange('query', '')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 transition-colors"
-                                        aria-label={t('common:aria.clearSearch')}
-                                    >
-                                        <XMarkIcon className="w-4 h-4" />
-                                    </button>
-                                )}
-                                {isQueryInputFocused && suggestions.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar">
-                                        {suggestions.map((suggestion) => (
-                                            <button
-                                                key={suggestion.id}
-                                                onClick={() => handleSuggestionClick(suggestion)}
-                                                className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
-                                            >
-                                                <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                                <span className="truncate text-gray-600">
-                                                    {suggestion.title}
-                                                    {suggestion.subtitle && (
-                                                        <span className="text-gray-400"> · {suggestion.subtitle}</span>
-                                                    )}
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                                {isSearchingLocation && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center">
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--color-villa-gold-bright)] mx-auto" />
-                                    </div>
-                                )}
-                            </div>
+                            <VillaLocationBar
+                                query={filters.query}
+                                properties={villaProperties}
+                                onQueryChange={(value) => handleFilterChange('query', value)}
+                                onSelectSuggestion={handleSuggestionClick}
+                                onSearch={handleSearch}
+                                variant="desktop"
+                            />
                         </div>
 
                         {/* Tier 3: VillaFilters compact chip row — ~52px */}
@@ -996,7 +1015,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
                                 }}
                             >
-                                <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-1.5">
+                                <div className="pointer-events-auto w-full space-y-1.5">
                                     {/* Search pill bar */}
                                     <div
                                         className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
@@ -1009,53 +1028,15 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800" />
                                         </button>
-                                        <div className="flex-1 min-w-0 relative">
-                                            <div className="relative">
-                                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                <input
-                                                    type="text"
-                                                    value={filters.query}
-                                                    onChange={(e) => handleFilterChange('query', e.target.value)}
-                                                    onFocus={() => setIsQueryInputFocused(true)}
-                                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                                                    placeholder={t('villas:filters.searchCity', 'Search by location...')}
-                                                    className="w-full pl-9 pr-8 py-2 text-sm bg-transparent border-none outline-none placeholder-gray-400"
-                                                    aria-label={t('villas:filters.searchCity', 'Search by location...')}
-                                                />
-                                                {filters.query && (
-                                                    <button
-                                                        onClick={() => handleFilterChange('query', '')}
-                                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                                        aria-label={t('common:aria.clearSearch')}
-                                                    >
-                                                        <XMarkIcon className="w-4 h-4" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                            {isQueryInputFocused && suggestions.length > 0 && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 max-h-60 overflow-y-auto glass-scrollbar rounded-xl">
-                                                    {suggestions.map((suggestion) => (
-                                                        <button
-                                                            key={suggestion.id}
-                                                            onClick={() => handleSuggestionClick(suggestion)}
-                                                            className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 border-b border-gray-200 last:border-b-0"
-                                                        >
-                                                            <MapIcon className="w-4 h-4 text-gray-300 flex-shrink-0" />
-                                                            <span className="truncate text-gray-600">
-                                                                {suggestion.title}
-                                                                {suggestion.subtitle && (
-                                                                    <span className="text-gray-400"> · {suggestion.subtitle}</span>
-                                                                )}
-                                                            </span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {isSearchingLocation && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 glass-panel-light z-50 p-3 text-center rounded-xl">
-                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-secondary mx-auto" />
-                                                </div>
-                                            )}
+                                        <div className="flex-1 min-w-0">
+                                            <VillaLocationBar
+                                                query={filters.query}
+                                                properties={villaProperties}
+                                                onQueryChange={(value) => handleFilterChange('query', value)}
+                                                onSelectSuggestion={handleSuggestionClick}
+                                                onSearch={handleSearch}
+                                                variant="mobile"
+                                            />
                                         </div>
                                         {/* Filter button with active count badge */}
                                         <div className="relative">

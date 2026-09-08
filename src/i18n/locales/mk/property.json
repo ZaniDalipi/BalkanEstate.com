@@ -156,7 +156,11 @@
     "toilets": "Тоалети (WC)",
     "storageRooms": "Оставa простории",
     "offices": "Канцеларија / работна соба",
-    "propertyType": "Тип на Недвижност"
+    "propertyType": "Тип на Недвижност",
+    "landArea": "Површина на земјиште",
+    "buildingArea": "Површина на објект",
+    "grossArea": "Бруто површина",
+    "netArea": "Нето површина"
   },
   "distances": {
     "title": "Растојанија",

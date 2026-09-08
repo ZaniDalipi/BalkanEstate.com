@@ -166,6 +166,10 @@
     },
     "propertyType": "Property Type",
     "openPlanArea": "Open-plan area",
+    "landArea": "Land area",
+    "buildingArea": "Building area",
+    "grossArea": "Gross area",
+    "netArea": "Net area",
     "parkingType": "Parking type",
     "parkingTypes": {
       "garage": "Garage",

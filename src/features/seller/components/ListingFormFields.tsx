@@ -460,6 +460,22 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                     bedrooms. The list comes from the same table the write path
                     filters by, so the form cannot offer a field the database
                     would then throw away. */}
+                {/* Areas lead, as they do in the type table: a villa is compared
+                    on its plot and its footprint, a flat on gross vs net, before
+                    either is compared on room counts. All four are measured, not
+                    counted, so they take decimals — a plot really is 101.5 m². */}
+                {has('landArea') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.landArea', 'Land (m²)')} value={listingData.landArea} step={10} allowDecimals onChange={(val) => setListingData(p => ({ ...p, landArea: val }))} error={fieldErrors.landArea} anchorId={fieldAnchorId('landArea')} />
+                )}
+                {has('buildingArea') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.buildingArea', 'Building (m²)')} value={listingData.buildingArea} step={10} allowDecimals onChange={(val) => setListingData(p => ({ ...p, buildingArea: val }))} error={fieldErrors.buildingArea} anchorId={fieldAnchorId('buildingArea')} />
+                )}
+                {has('grossArea') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.grossArea', 'Gross (m²)')} value={listingData.grossArea} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, grossArea: val }))} error={fieldErrors.grossArea} anchorId={fieldAnchorId('grossArea')} />
+                )}
+                {has('netArea') && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.netArea', 'Net (m²)')} value={listingData.netArea} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, netArea: val }))} error={fieldErrors.netArea} anchorId={fieldAnchorId('netArea')} />
+                )}
                 {has('beds') && (
                     <NumberInputWithSteppers label={t('seller:createListing.fields.bedrooms')} value={listingData.bedrooms} onChange={(val) => setListingData(p => ({ ...p, bedrooms: val }))} error={fieldErrors.bedrooms} anchorId={fieldAnchorId('bedrooms')} />
                 )}

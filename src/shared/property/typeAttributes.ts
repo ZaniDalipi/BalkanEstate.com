@@ -42,6 +42,10 @@ export const TYPE_ATTRIBUTES = [
   'storageRooms',
   'offices',
   'openPlanArea',
+  'landArea',
+  'buildingArea',
+  'grossArea',
+  'netArea',
   'parking',
   'parkingType',
   'floorNumber',
@@ -49,6 +53,25 @@ export const TYPE_ATTRIBUTES = [
 ] as const;
 
 export type TypeAttribute = (typeof TYPE_ATTRIBUTES)[number];
+
+/**
+ * Attributes that measure an area rather than count things.
+ *
+ * A count has to be whole — there is no half an office — but an area does not:
+ * a plot really can be 101.5 m². They are also not bounded by
+ * `MAX_ATTRIBUTE_COUNT`: a villa's land can run to thousands of square metres,
+ * where a room count that large is a typo.
+ *
+ * Mirrored by `MEASURED_ATTRIBUTES` in `validation.ts` and in the backend's own
+ * copy of this table.
+ */
+export const MEASURED_ATTRIBUTES: ReadonlySet<TypeAttribute> = new Set([
+  'openPlanArea',
+  'landArea',
+  'buildingArea',
+  'grossArea',
+  'netArea',
+]);
 
 /** How a parking space is arranged. */
 export const PARKING_TYPES = ['garage', 'underground', 'covered', 'outdoor'] as const;
@@ -82,16 +105,28 @@ const RESIDENTIAL_ATTRIBUTES = [
 
 const RESIDENTIAL_STATS = ['beds', 'baths', 'livingRooms', 'sqft'] as const satisfies readonly StatKey[];
 
+/**
+ * A villa is sold as two measurements, not one: how much ground it stands on
+ * and how much of it is built. Listed before the room counts because that pair
+ * is what a buyer compares two villas by.
+ */
+const VILLA_ATTRIBUTES = [
+  'landArea', 'buildingArea', ...RESIDENTIAL_ATTRIBUTES,
+] as const satisfies readonly TypeAttribute[];
+
 const PROFILES: Record<PropertyType, TypeProfile> = {
   house: { attributes: RESIDENTIAL_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#0252CD' },
+  // A flat is measured gross (its share of the walls and common parts included)
+  // and net (the floor actually walked on). Buyers are quoted both and the two
+  // differ by 10-25%, so carrying only one of them misstates the flat.
   apartment: {
-    attributes: [...RESIDENTIAL_ATTRIBUTES, 'floorNumber'],
+    attributes: ['grossArea', 'netArea', ...RESIDENTIAL_ATTRIBUTES, 'floorNumber'],
     stats: RESIDENTIAL_STATS,
     color: '#28a745',
   },
-  villa: { attributes: RESIDENTIAL_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#6f42c1' },
+  villa: { attributes: VILLA_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#6f42c1' },
   'luxury-villa': {
-    attributes: RESIDENTIAL_ATTRIBUTES,
+    attributes: VILLA_ATTRIBUTES,
     stats: RESIDENTIAL_STATS,
     color: '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
   },

@@ -151,6 +151,10 @@
       "description": "Description",
       "addTags": "Add tags...",
       "openPlanArea": "Open-plan area (m²)",
+      "landArea": "Land area (m²)",
+      "buildingArea": "Building area (m²)",
+      "grossArea": "Gross area (m²)",
+      "netArea": "Net area (m²)",
       "parkingType": "Parking type",
       "parkingSpaces": "Spaces",
       "officeRooms": "Offices"
