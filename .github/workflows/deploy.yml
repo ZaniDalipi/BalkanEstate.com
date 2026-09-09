@@ -53,6 +53,14 @@ jobs:
           VITE_MAP_KEYLESS_PROVIDER: ${{ secrets.VITE_MAP_KEYLESS_PROVIDER || 'osm' }}
           VITE_CARTO_API_KEY: ${{ secrets.VITE_CARTO_API_KEY }}
           VITE_STADIA_API_KEY: ${{ secrets.VITE_STADIA_API_KEY }}
+          # AdSense fill for unbooked ad slots (src/features/promo/components/NetworkFill.tsx).
+          # Client defaults to this site's publisher id in code; slots have no
+          # default, so an ad unit's id must be set here for it to fill at all.
+          VITE_ADSENSE_CLIENT: ${{ secrets.VITE_ADSENSE_CLIENT }}
+          VITE_ADSENSE_SLOT: ${{ secrets.VITE_ADSENSE_SLOT }}
+          VITE_ADSENSE_SLOT_LEADERBOARD: ${{ secrets.VITE_ADSENSE_SLOT_LEADERBOARD }}
+          VITE_ADSENSE_SLOT_SIDEBAR: ${{ secrets.VITE_ADSENSE_SLOT_SIDEBAR }}
+          VITE_ADSENSE_SLOT_STICKY: ${{ secrets.VITE_ADSENSE_SLOT_STICKY }}
 
       - name: Build backend
         working-directory: ./backend
