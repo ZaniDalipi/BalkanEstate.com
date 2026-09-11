@@ -27,6 +27,7 @@ import {
   createFullDiscountCode,
   deleteDiscountCode,
   deactivateDiscountCode,
+  markDiscountCodeSent,
   generateBulkDiscountCodes,
   getPromotionPlans,
   createPromotionPlan,
@@ -453,6 +454,42 @@ export function useDeactivateDiscountCode() {
 
   return useMutation({
     mutationFn: (codeId: string) => deactivateDiscountCode(codeId),
+    onSettled: () => {
+      invalidateAllDiscountCaches(queryClient);
+    },
+  });
+}
+
+/**
+ * useMarkDiscountCodeSent - Mark a discount code as sent (or not sent) to a recipient
+ */
+export function useMarkDiscountCodeSent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ codeId, sent }: { codeId: string; sent: boolean }) => markDiscountCodeSent(codeId, sent),
+
+    // Optimistic update so the checkbox responds instantly
+    onMutate: async ({ codeId, sent }) => {
+      await queryClient.cancelQueries({ queryKey: adminKeys.discountCodes() });
+      const previousCodes = queryClient.getQueryData(adminKeys.discountCodes());
+
+      queryClient.setQueryData(adminKeys.discountCodes(), (old: any) => ({
+        ...old,
+        discountCodes: old?.discountCodes?.map((c: any) =>
+          c.id === codeId ? { ...c, isSent: sent, sentAt: sent ? new Date().toISOString() : undefined } : c
+        ),
+      }));
+
+      return { previousCodes };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousCodes) {
+        queryClient.setQueryData(adminKeys.discountCodes(), context.previousCodes);
+      }
+    },
+
     onSettled: () => {
       invalidateAllDiscountCaches(queryClient);
     },

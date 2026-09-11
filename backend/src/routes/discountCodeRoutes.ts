@@ -6,6 +6,7 @@ import {
   redeemDiscountCode,
   getAllDiscountCodes,
   deactivateDiscountCode,
+  markDiscountCodeSent,
   deleteDiscountCode,
 } from '../controllers/discountCodeController';
 import { protect } from '../middleware/auth';
@@ -25,6 +26,7 @@ router.post('/', protect, createDiscountCode);
 router.post('/generate', protect, generateDiscountCodes);
 router.get('/', protect, getAllDiscountCodes);
 router.patch('/:id/deactivate', protect, deactivateDiscountCode);
+router.patch('/:id/mark-sent', protect, markDiscountCodeSent);
 router.delete('/:id', protect, deleteDiscountCode);
 
 export default router;

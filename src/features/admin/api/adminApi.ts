@@ -194,6 +194,14 @@ export const deactivateDiscountCode = async (codeId: string): Promise<any> => {
   });
 };
 
+export const markDiscountCodeSent = async (codeId: string, sent: boolean): Promise<any> => {
+  return apiRequest(`/admin/discount-codes/${codeId}/mark-sent`, {
+    method: 'PATCH',
+    body: { sent },
+    requiresAuth: true,
+  });
+};
+
 export interface CreateDiscountCodeData {
   code: string;
   discountType: 'percentage' | 'fixed';

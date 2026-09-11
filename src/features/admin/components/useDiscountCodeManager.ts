@@ -5,6 +5,7 @@ import {
   useCreateFullDiscountCode,
   useDeleteDiscountCode,
   useDeactivateDiscountCode,
+  useMarkDiscountCodeSent,
   useBulkGenerateDiscountCodes,
 } from '../hooks/useAdminData';
 
@@ -19,6 +20,8 @@ export interface DiscountCode {
   usedCount: number;
   usedBy: string[];
   isActive: boolean;
+  isSent?: boolean;
+  sentAt?: string;
   applicablePlans?: string[];
   minimumPurchaseAmount?: number;
   description?: string;
@@ -74,6 +77,7 @@ export function useDiscountCodeManager() {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
   // Filter states
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
@@ -84,6 +88,7 @@ export function useDiscountCodeManager() {
   const createCodeMutation = useCreateFullDiscountCode();
   const deleteCodeMutation = useDeleteDiscountCode();
   const deactivateCodeMutation = useDeactivateDiscountCode();
+  const markSentMutation = useMarkDiscountCodeSent();
   const bulkGenerateMutation = useBulkGenerateDiscountCodes();
 
   const codes = codesData?.discountCodes || [];
@@ -201,6 +206,21 @@ export function useDiscountCodeManager() {
     });
   };
 
+  const handleToggleSent = (id: string, currentlySent: boolean) => {
+    markSentMutation.mutate({ codeId: id, sent: !currentlySent });
+  };
+
+  const handleCopyCode = async (code: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCodeId(id);
+      setTimeout(() => setCopiedCodeId((current) => (current === id ? null : current)), 2000);
+    } catch {
+      setLocalError('Failed to copy code to clipboard');
+      setTimeout(() => setLocalError(null), 3000);
+    }
+  };
+
   const openListingPromoCreate = () => {
     setNewCode({
       code: `PROMO${Date.now().toString().slice(-6)}`,
@@ -258,6 +278,9 @@ export function useDiscountCodeManager() {
     handleBulkGenerate,
     handleDeactivate,
     handleDelete,
+    handleToggleSent,
+    handleCopyCode,
+    copiedCodeId,
     openListingPromoCreate,
     formatDate,
   };

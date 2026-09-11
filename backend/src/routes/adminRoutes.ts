@@ -40,6 +40,7 @@ import {
   createDiscountCode,
   generateDiscountCodes,
   deactivateDiscountCode,
+  markDiscountCodeSent,
   deleteDiscountCode,
 } from '../controllers/discountCodeController';
 import {
@@ -179,6 +180,7 @@ router.get('/discount-codes', logAdminAction('VIEW_DISCOUNT_CODES'), getAllDisco
 router.post('/discount-codes', logAdminAction('CREATE_DISCOUNT_CODE'), createDiscountCode);
 router.post('/discount-codes/generate', logAdminAction('GENERATE_DISCOUNT_CODES'), generateDiscountCodes);
 router.patch('/discount-codes/:id/deactivate', logAdminAction('DEACTIVATE_DISCOUNT_CODE'), deactivateDiscountCode);
+router.patch('/discount-codes/:id/mark-sent', logAdminAction('MARK_DISCOUNT_CODE_SENT'), markDiscountCodeSent);
 router.delete('/discount-codes/:id', logAdminAction('DELETE_DISCOUNT_CODE'), deleteDiscountCode);
 
 // ===== Inquiry Management =====

@@ -16,6 +16,8 @@ export interface IDiscountCode extends Document {
   isActive: boolean;
   description?: string; // Internal note about this code
   source?: string; // Where this code came from (e.g., 'gamification', 'admin', 'promotion')
+  isSent: boolean; // Whether an admin has marked this code as already sent to a recipient
+  sentAt?: Date; // When the code was marked as sent
   createdAt: Date;
   updatedAt: Date;
 
@@ -97,6 +99,13 @@ const discountCodeSchema = new Schema<IDiscountCode>(
       type: String,
       enum: ['gamification', 'admin', 'promotion', 'referral', 'seasonal'],
       default: 'admin',
+    },
+    isSent: {
+      type: Boolean,
+      default: false,
+    },
+    sentAt: {
+      type: Date,
     },
   },
   {

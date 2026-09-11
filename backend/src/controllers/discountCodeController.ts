@@ -353,6 +353,8 @@ export const getAllDiscountCodes = async (req: Request, res: Response): Promise<
         source: code.source,
         description: code.description,
         isActive: code.isActive,
+        isSent: code.isSent || false,
+        sentAt: code.sentAt,
         createdBy: code.createdBy,
         createdAt: code.createdAt,
       })),
@@ -411,6 +413,55 @@ export const deactivateDiscountCode = async (req: Request, res: Response): Promi
   } catch (error: any) {
     apiLogger.error('Deactivate discount code error:', error);
     res.status(500).json({ message: 'Error deactivating discount code' });
+  }
+};
+
+// @desc    Mark a discount code as sent/unsent (Admin only)
+// @route   PATCH /api/discount-codes/:id/mark-sent
+// @access  Private/Admin
+export const markDiscountCodeSent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const currentUser = req.user as IUser;
+    const isAdmin = await isUserAdmin(String(currentUser._id));
+
+    if (!isAdmin) {
+      res.status(403).json({ message: 'Admin access required' });
+      return;
+    }
+
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const sent = req.body?.sent !== false;
+
+    const discountCode = await DiscountCode.findById(id);
+
+    if (!discountCode) {
+      res.status(404).json({ message: 'Discount code not found' });
+      return;
+    }
+
+    discountCode.isSent = sent;
+    discountCode.sentAt = sent ? new Date() : undefined;
+    await discountCode.save();
+
+    res.json({
+      message: sent ? 'Discount code marked as sent' : 'Discount code marked as not sent',
+      discountCode: {
+        id: String(discountCode._id),
+        code: discountCode.code,
+        isSent: discountCode.isSent,
+        sentAt: discountCode.sentAt,
+      },
+    });
+  } catch (error: any) {
+    apiLogger.error('Mark discount code sent error:', error);
+    res.status(500).json({ message: 'Error updating discount code' });
   }
 };
 

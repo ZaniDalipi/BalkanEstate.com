@@ -30,6 +30,9 @@ const DiscountCodeManager: React.FC = () => {
     handleBulkGenerate,
     handleDeactivate,
     handleDelete,
+    handleToggleSent,
+    handleCopyCode,
+    copiedCodeId,
     openListingPromoCreate,
     formatDate,
   } = useDiscountCodeManager();
@@ -138,6 +141,7 @@ const DiscountCodeManager: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.validUntil')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.source')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.status')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.sent', 'Sent')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:discountCodes.actions')}</th>
             </tr>
           </thead>
@@ -145,7 +149,26 @@ const DiscountCodeManager: React.FC = () => {
             {filteredCodes.map((code, index) => (
               <tr key={code.id || `discount-code-${index}`} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-mono font-bold text-gray-900">{code.code}</div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyCode(code.code, code.id)}
+                    className="font-mono font-bold text-gray-900 hover:text-blue-600 hover:underline flex items-center gap-1.5 text-left"
+                    title={t('admin:discountCodes.clickToCopy', 'Click to copy')}
+                  >
+                    {code.code}
+                    {copiedCodeId === code.id ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-normal text-green-600">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {t('admin:discountCodes.copied', 'Copied!')}
+                      </span>
+                    ) : (
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                  </button>
                   {code.description && (
                     <div className="text-xs text-gray-500 mt-1">{code.description}</div>
                   )}
@@ -177,6 +200,21 @@ const DiscountCodeManager: React.FC = () => {
                   }`}>
                     {code.isActive ? t('admin:discountCodes.active') : t('admin:discountCodes.inactive')}
                   </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={!!code.isSent}
+                      onChange={() => handleToggleSent(code.id, !!code.isSent)}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className={code.isSent ? 'text-xs text-green-700 font-medium' : 'text-xs text-gray-400'}>
+                      {code.isSent
+                        ? t('admin:discountCodes.sentLabel', 'Sent')
+                        : t('admin:discountCodes.notSentLabel', 'Not sent')}
+                    </span>
+                  </label>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex gap-2">
