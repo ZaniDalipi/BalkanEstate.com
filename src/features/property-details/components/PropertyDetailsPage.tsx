@@ -1178,7 +1178,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {/* Sticky Bottom Action Bar - Mobile Only (Zillow-style) */}
       {!isOwner && property.status !== 'sold' && (
         <div
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] px-3 py-2.5 flex items-center gap-2.5"
+          className="lg:hidden fixed bottom-0 left-0 right-0 md:left-20 z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] px-3 py-2.5 flex items-center gap-2.5"
           style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
         >
           {/* Agent avatar + info - tap to view profile, long-press to preview other listings */}
