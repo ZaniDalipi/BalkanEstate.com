@@ -491,6 +491,13 @@ export function ImageStreamHero({
       // already dropped mid-flight by its negative delay, so it freezes as a
       // finished still instead of collapsing onto the axis.
       `@media(prefers-reduced-motion:reduce){.${card}{animation-play-state:paused}}` +
+      // The corridor is 14 continuously 3D-transformed cards, run at all
+      // times it's on screen — the heaviest sustained GPU load on the home
+      // page. `html.save-power` (src/utils/perfMode.ts) marks touch/phone
+      // devices, where that cost shows up as device heat and battery drain;
+      // freeze the same way reduced-motion does rather than unmount the
+      // corridor, so the layout and the interactive tap targets stay intact.
+      `html.save-power .${card}{animation-play-state:paused}` +
       // LOCAL ADDITION: interactive rails.
       //
       // The active card is chosen in JS, not by :hover. Chromium cannot
