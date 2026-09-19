@@ -5,6 +5,8 @@ import { getCurrencySymbol } from '@/utils/currency';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import {
     PARKING_TYPES,
+    MEASURED_ATTRIBUTES,
+    attributesForType,
     typeHasAttribute,
     type ParkingType,
     type TypeAttribute,
@@ -117,6 +119,24 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
     /** Does the chosen type carry this attribute? */
 
     const has = (attribute: TypeAttribute) => typeHasAttribute(listingData.propertyType, attribute);
+
+    /**
+     * Does the chosen type already ask for a breakdown that adds up to a
+     * total area — an apartment's gross and net, a villa's plot and build, a
+     * shop's open-plan floor?
+     *
+     * Asking those three questions and then a fourth, generic "Area", left a
+     * seller staring at land, building *and* total-area boxes for one villa
+     * with no indication which one the listing is actually sized by — and
+     * filling the breakdown while skipping the one that looked redundant is
+     * exactly how a real villa ended up stored as "0 m²". The generic field
+     * below is now only asked where there is nothing else to derive a total
+     * from; everywhere else the total is combined from the breakdown at
+     * submit time (see `resolveTotalArea`), the same figure the type's own
+     * fields already describe.
+     */
+    const hasMeasuredBreakdown = attributesForType(listingData.propertyType)
+        .some((attribute) => MEASURED_ATTRIBUTES.has(attribute));
 
 
     return (
@@ -533,7 +553,14 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         <FieldError message={fieldErrors.parkingType} />
                     </div>
                 )}
-                <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} />
+                {/* Only asked where the type has no breakdown to derive a
+                    total from — a house, a parking space, a plot of land.
+                    An apartment, a villa/luxury-villa and business premises
+                    already ask for their own measurements above; this box
+                    would only duplicate them. */}
+                {!hasMeasuredBreakdown && (
+                    <NumberInputWithSteppers label={t('seller:createListing.fields.area')} value={listingData.sq_meters} step={5} allowDecimals onChange={(val) => setListingData(p => ({ ...p, sq_meters: val }))} error={fieldErrors.sq_meters} anchorId={fieldAnchorId('sq_meters')} />
+                )}
                 {listingData.propertyType !== 'land' && (
                     <div id={fieldAnchorId('expectedCompletionYear')} className="min-w-0">
                         {/* Build status decides which year the seller is asked for:
