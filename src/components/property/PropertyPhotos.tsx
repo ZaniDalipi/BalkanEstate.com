@@ -4,7 +4,16 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Property, PropertyImageTag } from '../../../types';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { PhotoThumbnail } from './PhotoThumbnail';
+
+/**
+ * Tile sizing for the grid below: 3 columns on a phone, 4 from `sm`, 5 from
+ * `lg`, inside a padded card. The candidates are 1x/2x/3x of the widest a tile
+ * gets, so a high-DPR phone is not handed a file it has to stretch.
+ */
+const TILE_MAX_WIDTH = 220;
+const TILE_WIDTHS = [TILE_MAX_WIDTH, TILE_MAX_WIDTH * 2, TILE_MAX_WIDTH * 3];
+const TILE_SIZES = `(max-width: 640px) 30vw, (max-width: 1024px) 23vw, ${TILE_MAX_WIDTH}px`;
 
 // Category emoji map
 const categoryEmojis: Record<string, string> = {
@@ -148,11 +157,17 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
           {imagesForCurrentCategory.map((img, index) => (
             <button
-              key={img.url}
+              // A listing with a blank `imageUrl` keeps its slot so the indices
+              // stay aligned with the gallery it drives — but it has no URL to
+              // key on, and two blanks would collide.
+              key={img.url || `blank-${index}`}
               onClick={() => onImageSelect(index)}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
-              className={`group relative aspect-square rounded-xl overflow-hidden transition-all duration-300 ${
+              // 4:3, not square: it is the shape `THUMB_FRAME_ASPECT` describes
+              // and the one most listing photos already arrive in, so it is what
+              // leaves the fewest of them with bars to fill.
+              className={`group relative aspect-[4/3] bg-neutral-900 rounded-xl overflow-hidden transition-all duration-300 ${
                 index === currentImageIndex
                   ? 'ring-2 ring-primary ring-offset-2 scale-[1.02] shadow-lg z-10'
                   : hoveredIndex === index
@@ -160,14 +175,18 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
                     : 'opacity-80 hover:opacity-100'
               }`}
             >
-              <img
-                src={optimizeCloudinaryUrl(img.url, { width: 200, quality: 'auto', crop: 'fill' })}
+              {/* No hover zoom on the photo itself: the card is clipped, so
+                  scaling the photo inside it would crop away the edges this
+                  grid exists to show. The card's own ring and lift carry the
+                  hover feedback instead. */}
+              <PhotoThumbnail
+                url={img.url}
                 alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} ${img.tag || 'photo'} - ${property.city}, ${property.country}`}
-                loading={index < 9 ? 'eager' : 'lazy'}
-                decoding="async"
-                width={200}
-                height={200}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                sizes={TILE_SIZES}
+                widths={TILE_WIDTHS}
+                fallbackWidth={TILE_MAX_WIDTH * 2}
+                // The first two rows are on screen without scrolling.
+                eager={index < 9}
               />
 
               {/* Active indicator overlay */}

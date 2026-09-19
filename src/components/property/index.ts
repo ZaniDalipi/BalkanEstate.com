@@ -7,6 +7,7 @@ export { PropertyGallery } from './PropertyGallery';
 export { PropertyInfo } from './PropertyInfo';
 export { PropertyContact } from './PropertyContact';
 export { PropertyPhotos } from './PropertyPhotos';
+export { PhotoThumbnail, THUMB_FRAME_ASPECT } from './PhotoThumbnail';
 export { PropertyMapLink } from './PropertyMapLink';
 export { PropertyGuide } from './PropertyGuide';
 export { SocialVideoEmbed } from './SocialVideoEmbed';

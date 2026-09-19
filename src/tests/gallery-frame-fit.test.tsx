@@ -5,23 +5,17 @@
  * is sky, so a strip of three different photos rendered as three near-identical
  * blue rectangles with a black bar on top.
  *
- * The carousel still crops the shapes it can crop without losing the subject,
- * so `shouldCoverFrame` is pinned here. The thumbnail strip does not crop at
- * all: a thumbnail is the only place a listing shows every photo at once, so
- * each one is shown whole in a 4:3 card over a blurred copy of itself. These
- * tests pin both rules and the fill that stands behind the bars.
+ * Nothing is cropped to its frame any more. The thumbnail strip shows every
+ * photo whole in a 4:3 card over a blurred copy of itself, so a buyer sees what
+ * the seller actually uploaded. These tests pin the rule that decides when
+ * those bars need filling, and the fill itself.
  */
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, cleanup, fireEvent } from '@testing-library/react';
 import { PropertyGallery } from '@/src/components/property/PropertyGallery';
-import {
-  coveredFraction,
-  shouldCoverFrame,
-  needsBlurredBackdrop,
-  MIN_VISIBLE_ON_COVER,
-} from '@/config/galleryImages';
+import { coveredFraction, needsBlurredBackdrop } from '@/config/galleryImages';
 import type { Property } from '@/types';
 
 vi.mock('react-i18next', () => ({
@@ -39,7 +33,6 @@ vi.mock('@/src/features/promo/components/Slot', () => ({ default: () => null }))
 const LANDSCAPE = 4 / 3;
 const PORTRAIT = 9 / 16;
 const FRAME_16_9 = 16 / 9;
-const THUMB = 155 / 110;
 /** The thumbnail card's own shape — 180x135 and 196x147 are both exactly this. */
 const THUMB_FRAME = 4 / 3;
 
@@ -60,50 +53,6 @@ describe('coveredFraction', () => {
   it('treats an unmeasurable aspect as lossless rather than dividing by zero', () => {
     expect(coveredFraction(0, FRAME_16_9)).toBe(1);
     expect(coveredFraction(NaN, FRAME_16_9)).toBe(1);
-  });
-});
-
-describe('shouldCoverFrame', () => {
-  it('fills the frame with the ordinary listing shapes', () => {
-    // 4:3, 3:2 and square are what a camera and a phone actually produce held
-    // landscape; a threshold that letterboxed these would put bars on almost
-    // every photo in the catalogue.
-    [LANDSCAPE, 3 / 2, 1].forEach((aspect) => {
-      expect(shouldCoverFrame(aspect, FRAME_16_9)).toBe(true);
-      expect(shouldCoverFrame(aspect, THUMB)).toBe(true);
-    });
-  });
-
-  it('judges each frame on its own shape, not the photo alone', () => {
-    // A 3:1 panorama all but matches the 16:9 hero and fills it, while the
-    // squarer thumbnail card would keep less than half of it — so the same
-    // photo is cropped in one place and shown whole in the other.
-    expect(shouldCoverFrame(3, FRAME_16_9)).toBe(true);
-    expect(shouldCoverFrame(3, THUMB)).toBe(false);
-  });
-
-  it('shows a phone portrait whole instead of cropping it to its middle band', () => {
-    expect(shouldCoverFrame(PORTRAIT, FRAME_16_9)).toBe(false);
-    expect(shouldCoverFrame(PORTRAIT, THUMB)).toBe(false);
-  });
-
-  it('shows a gentler portrait whole in a 16:9 frame too', () => {
-    // 3:4 survives a 1.4 thumbnail, but cropping it into 16:9 keeps two fifths
-    // of it — still a band, not a photo.
-    expect(shouldCoverFrame(3 / 4, THUMB)).toBe(true);
-    expect(shouldCoverFrame(3 / 4, FRAME_16_9)).toBe(false);
-  });
-
-  it('covers until the loss reaches the threshold, and stops there', () => {
-    const frame = FRAME_16_9;
-    expect(shouldCoverFrame(frame * MIN_VISIBLE_ON_COVER, frame)).toBe(true);
-    expect(shouldCoverFrame(frame * (MIN_VISIBLE_ON_COVER - 0.01), frame)).toBe(false);
-  });
-
-  it('covers a photo whose size is not known yet', () => {
-    // The first paint has no naturalWidth. Guessing "cover" matches the common
-    // case, so an ordinary photo never flips its framing after it loads.
-    expect(shouldCoverFrame(undefined, FRAME_16_9)).toBe(true);
   });
 });
 

@@ -4,11 +4,11 @@
  * own photos were the smallest thing on the page. The frame is now 4:3 up to
  * Tailwind's `sm` and 16:9 from there.
  *
- * The height is only half of it. The carousel decides whether to fill the frame
- * or show a photo whole from the frame's aspect ratio, and that number lives in
- * JS while the frame itself is a CSS class — so these tests pin both halves and,
- * more importantly, that they agree: a portrait that fits the taller phone frame
- * must actually fill it rather than be judged against the desktop shape.
+ * What goes inside it no longer depends on that shape at all: the carousel
+ * crops nothing. A buyer judging a house should see the whole photo the seller
+ * uploaded, so every photo is fitted into the frame whole and the bars it
+ * leaves are filled with a blurred copy of itself. These tests pin the frame
+ * and that rule.
  */
 
 import React from 'react';
@@ -119,27 +119,60 @@ describe('gallery frame height', () => {
   });
 });
 
-describe('framing follows the frame the photo is drawn in', () => {
-  it('fills the taller phone frame with a portrait the 16:9 frame would letterbox', () => {
+describe('the carousel never crops', () => {
+  const SHAPES: Array<[string, number, number]> = [
+    ['4:3, the commonest listing shape', 1600, 1200],
+    ['16:9, a wide room shot', 1920, 1080],
+    ['3:4, a gentle portrait', 1200, 1600],
+    ['9:16, shot on a phone held upright', 1080, 1920],
+  ];
+
+  it.each(SHAPES)('shows a %s photo whole', (_label, width, height) => {
     renderGallery();
-    reportNaturalSize(slide(), 1200, 1600); // 3:4
-    // Cropping 3:4 into 4:3 keeps well over half the photo; into 16:9 it does
-    // not. Reading the desktop number on a phone is what put bars here.
-    expect(slide().className).toContain('object-cover');
+    reportNaturalSize(slide(), width, height);
+    expect(slide().className).toContain('object-contain');
+    expect(slide().className).not.toContain('object-cover');
   });
 
-  it('still shows that portrait whole in the 16:9 frame above sm', () => {
+  it('frames a photo the same way at every width', () => {
+    // Framing used to be read from the frame's aspect ratio, which lived in JS
+    // while the frame itself was a CSS class — so a phone could judge a photo
+    // against the desktop shape and letterbox it for nothing. Nothing crops
+    // now, so there is no viewport-dependent decision left to get wrong.
     useWideViewport();
     renderGallery();
-    reportNaturalSize(slide(), 1200, 1600);
+    reportNaturalSize(slide(), 1600, 1200);
     expect(slide().className).toContain('object-contain');
   });
+});
 
-  it('shows a phone portrait whole at every width', () => {
-    // 9:16 loses roughly two thirds either way — the taller frame is not a
-    // licence to crop anything.
+describe('the bars the fit leaves', () => {
+  /** The blurred fill sits behind the photo, inside the same slide. */
+  const backdrop = (): HTMLImageElement | null =>
+    document.querySelector<HTMLImageElement>('img[aria-hidden="true"][class*="blur-3xl"]');
+
+  it('is filled with a blurred copy of the same photo', () => {
     renderGallery();
-    reportNaturalSize(slide(), 1080, 1920);
-    expect(slide().className).toContain('object-contain');
+    const fill = backdrop();
+    expect(fill).not.toBeNull();
+    // It must cover — a contained backdrop would leave the same bars it is
+    // there to hide — and be this photo, not a generic placeholder.
+    expect(fill!.className).toContain('object-cover');
+    expect(fill!.getAttribute('src')).toContain('e_blur');
+    expect(fill!.getAttribute('src')).toContain('/listing/p0');
+    // A CSS blur samples past the element as transparent, so the fill has to
+    // overflow by more than its blur radius or the edges fade back to black.
+    expect(fill!.className).toContain('scale-150');
+  });
+
+  it('stands the photo in for its own fill when the CDN has no placeholder', () => {
+    // An off-CDN photo has no LQIP to blur. Reusing the photo the slide is
+    // already fetching costs no second request and keeps the bars off black.
+    const external = 'https://example.com/listing/photo.jpg';
+    renderGallery({ ...baseProperty, imageUrl: external } as Property);
+
+    const fill = backdrop();
+    expect(fill).not.toBeNull();
+    expect(fill!.getAttribute('src')).toContain(encodeURIComponent(external));
   });
 });

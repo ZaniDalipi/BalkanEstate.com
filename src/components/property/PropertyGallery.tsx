@@ -10,11 +10,10 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
-import { getGallerySources, warmGallery, shouldCoverFrame, needsBlurredBackdrop, GALLERY_QUALITY } from '../../../config/galleryImages';
+import { getGallerySources, warmGallery } from '../../../config/galleryImages';
+import { PhotoThumbnail } from './PhotoThumbnail';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
-import { useMediaQuery } from '@/src/hooks/useMediaQuery';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -52,27 +51,6 @@ interface PropertyGalleryProps {
  * />
  * ```
  */
-const KEN_BURNS_DURATION = 6;
-
-/**
- * Shape of the hero frame.
- *
- * A phone gets the taller 4:3 window: 16:9 across a 390px screen is barely
- * 220px of photo, less height than the controls stacked over and under it, so
- * the listing's own images were the smallest thing on the page. From `sm` up
- * there is width to spare and the frame keeps the 16:9 Zillow standard.
- *
- * These are the JS half of a rule the markup states as
- * `aspect-[4/3] sm:aspect-[16/9]`; the two must move together, because the
- * carousel picks cover vs. contain from the frame it is actually drawn in — a
- * photo judged against the wrong frame gets bars it does not need.
- */
-const CONTAINER_ASPECT_MOBILE = 4 / 3;
-const CONTAINER_ASPECT_DESKTOP = 16 / 9;
-
-/** Tailwind's `sm`, as a query `useMediaQuery` can subscribe to. */
-const WIDE_VIEWPORT_QUERY = '(min-width: 640px)';
-
 /**
  * How many slides either side of the visible one stay mounted.
  *
@@ -99,18 +77,13 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
 };
 
 /**
- * Shape of one card in the thumbnail strip, and the two widths it is rendered
- * at: 180x135 on a phone, 196x147 above it. Both are exactly 4:3.
- *
- * 4:3 is the shape a listing photo arrives in more often than any other, so it
- * is the frame that leaves the fewest photos with bars to fill at all.
- *
- * `THUMB_FRAME_ASPECT` is what decides whether a photo needs a backdrop, so it
- * has to stay in step with the `w-[...] h-[...]` classes on the card below.
+ * Shape of one card in the thumbnail strip: 180x135 on a phone, 196x147 above
+ * it. Both are exactly `THUMB_FRAME_ASPECT` (4:3), which is what decides
+ * whether the photo inside needs a blurred backdrop — so these numbers and the
+ * `w-[...] h-[...]` classes on the card have to move together.
  */
 const THUMB_CARD_WIDTH_SM = 180;
 const THUMB_CARD_WIDTH = 196;
-const THUMB_FRAME_ASPECT = 4 / 3;
 
 /**
  * Candidate widths for a thumbnail card: 1x, 2x and 3x its 196px frame.
@@ -120,93 +93,8 @@ const THUMB_FRAME_ASPECT = 4 / 3;
  */
 const THUMB_WIDTHS = [THUMB_CARD_WIDTH, THUMB_CARD_WIDTH * 2, THUMB_CARD_WIDTH * 3];
 
-/**
- * One card in the thumbnail strip.
- *
- * A thumbnail is the only place a listing shows every photo at once, so every
- * photo is shown *whole* — scaled to fit the card, never cropped to fill it.
- * Cropping is what made the strip unreadable: a 16:9 room shot lost a third of
- * its width to the sides, and a phone portrait was cut down to whichever
- * horizontal band sat in the middle, usually ceiling or sky, so a dozen
- * different photos rendered as a dozen near-identical tiles.
- *
- * Whatever the fit leaves over is filled with a blurred copy of that same
- * photo, so the bars carry the photo's own colours rather than a black slab.
- * A photo already shaped like the card fills it edge to edge and mounts no
- * backdrop, so the common case still costs a single request.
- */
-const GalleryThumbnail: React.FC<{
-  url: string | undefined;
-  alt: string;
-  eager: boolean;
-}> = ({ url, alt, eager }) => {
-  // Undefined until the photo reports its natural size. `needsBlurredBackdrop`
-  // reads that as "bars are coming", so they are never briefly black while the
-  // photo decodes.
-  const [aspect, setAspect] = useState<number | undefined>(undefined);
-  const [failed, setFailed] = useState(false);
-
-  // '' for a missing URL and for anything that is not plain http(s) — a blank
-  // listing photo and a rejected one land here together.
-  const src = optimizeCloudinaryUrl(url, {
-    // `limit` never crops and never upscales, so the card decides the framing
-    // rather than the CDN guessing at it.
-    width: THUMB_CARD_WIDTH * 2,
-    quality: GALLERY_QUALITY,
-    crop: 'limit',
-  });
-
-  // A photo that cannot be requested, or that the CDN will not serve, gets the
-  // same placeholder tile the carousel shows — never an empty `src` and never
-  // the browser's broken-image glyph.
-  if (!src || failed) {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-700 to-neutral-800">
-        <BuildingOfficeIcon className="w-8 h-8 text-neutral-500" aria-hidden="true" />
-        <span className="sr-only">{alt}</span>
-      </div>
-    );
-  }
-
-  // A Cloudinary photo has a 20px LQIP to blur behind the bars. Anything else
-  // (an external URL the CDN never ingested) reuses the photo the card has
-  // already fetched, so the fill still costs no second request — and an
-  // off-shape photo never falls back to bare black bars.
-  const backdropSrc = getPropertyImagePlaceholder(url) || src;
-  const showBackdrop = needsBlurredBackdrop(aspect, THUMB_FRAME_ASPECT);
-
-  return (
-    <>
-      {/* Blurred fill behind the bars. Only mounted once the photo is known to
-          need it, so a full-bleed thumbnail costs no extra request. */}
-      {showBackdrop && (
-        <img
-          src={backdropSrc}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
-          decoding="async"
-        />
-      )}
-      <img
-        src={src}
-        srcSet={cloudinarySrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
-        sizes={`(max-width: 640px) ${THUMB_CARD_WIDTH_SM}px, ${THUMB_CARD_WIDTH}px`}
-        alt={alt}
-        className="relative w-full h-full object-contain"
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        onLoad={(e) => {
-          const { naturalWidth, naturalHeight } = e.currentTarget;
-          // A failed or still-empty decode reports 0x0; treating that as a
-          // shape would divide by zero and put bars on a photo that is fine.
-          if (naturalWidth > 0 && naturalHeight > 0) setAspect(naturalWidth / naturalHeight);
-        }}
-        onError={() => setFailed(true)}
-      />
-    </>
-  );
-};
+/** The strip's cards are fixed-width, so `sizes` can name their exact pixels. */
+const THUMB_SIZES = `(max-width: 640px) ${THUMB_CARD_WIDTH_SM}px, ${THUMB_CARD_WIDTH}px`;
 
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
@@ -256,17 +144,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   const [viewMode, setViewMode] = useState<'photos' | 'streetview' | 'video'>('photos');
 
-  // Slides persist, so load state, aspect ratio and failures are tracked per
-  // photo rather than as one flag for "the current image".
+  // Slides persist, so load state and failures are tracked per photo rather
+  // than as one flag for "the current image".
   const [loadedUrls, setLoadedUrls] = useState<Record<string, true>>({});
   const [failedUrls, setFailedUrls] = useState<Record<string, true>>({});
-  const [aspects, setAspects] = useState<Record<string, number>>({});
 
-  const markLoaded = useCallback((url: string, img: HTMLImageElement) => {
-    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-      const ratio = img.naturalWidth / img.naturalHeight;
-      setAspects((prev) => (prev[url] === ratio ? prev : { ...prev, [url]: ratio }));
-    }
+  const markLoaded = useCallback((url: string) => {
     setLoadedUrls((prev) => (prev[url] ? prev : { ...prev, [url]: true }));
   }, []);
 
@@ -281,7 +164,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
    */
   const registerSlideImage = useCallback((img: HTMLImageElement | null) => {
     const url = img?.dataset.galleryUrl;
-    if (url && img.complete && img.naturalWidth > 0) markLoaded(url, img);
+    if (url && img.complete && img.naturalWidth > 0) markLoaded(url);
   }, [markLoaded]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -308,8 +191,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   // below is made against the box the photo is actually drawn in. Where
   // `matchMedia` is unavailable this reads false, which is the mobile-first
   // default the stylesheet applies for the same reason.
-  const isWideViewport = useMediaQuery(WIDE_VIEWPORT_QUERY);
-  const containerAspect = isWideViewport ? CONTAINER_ASPECT_DESKTOP : CONTAINER_ASPECT_MOBILE;
 
   // YouTube, Vimeo, Facebook, TikTok, and Instagram can be embedded via iframe
   // TikTok uses their official player embed: tiktok.com/player/v1/{videoId}
@@ -660,20 +541,6 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 const sources = getGallerySources(item.url);
                 const isLoaded = !!loadedUrls[item.url];
 
-                // Photos that fill the frame get the Ken Burns pan; ones sitting
-                // inside letterbox bars must stay perfectly still. Filling is
-                // judged by how much of the photo the crop keeps, not by whether
-                // it is wider than 16:9 — that test letterboxed a plain 4:3
-                // photo, the commonest shape a listing has.
-                const isWide = shouldCoverFrame(aspects[item.url], containerAspect);
-
-                // Camera pan L↔R. Scale 1.14 overflows 7% each side, exactly
-                // matching the 7% travel, so an edge never shows. The direction
-                // alternates per photo so consecutive slides don't pan alike.
-                const sign = index % 2 === 0 ? 1 : -1;
-                const kbFrom = isWide ? { scale: 1.14, x: `${7 * sign}%` } : { scale: 1, x: '0%' };
-                const kbTo = isWide ? { scale: 1.14, x: `${-7 * sign}%` } : { scale: 1, x: '0%' };
-
                 return (
                   <motion.div
                     key={item.url}
@@ -685,10 +552,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     aria-hidden={!isActive}
                   >
                     {/* Blurred LQIP — the instant first paint, and the filler
-                        behind the letterbox bars of a portrait photo. */}
-                    {sources.placeholder && (
+                        behind the bars of any photo that is not exactly the
+                        shape of the frame. An off-CDN photo has no LQIP, so it
+                        stands in for itself: the same request the slide is
+                        already making, rather than bare black bars. */}
+                    {(sources.placeholder || sources.src) && (
                       <img
-                        src={sources.placeholder}
+                        src={sources.placeholder || sources.src}
                         alt=""
                         aria-hidden="true"
                         // scale-150, not 110: a CSS blur samples past the element as
@@ -705,13 +575,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                       <div className="gallery-shimmer absolute inset-0 pointer-events-none" aria-hidden="true" />
                     )}
 
-                    <motion.div
-                      className="absolute inset-0 flex items-center justify-center"
-                      initial={kbFrom}
-                      animate={isActive ? kbTo : kbFrom}
-                      transition={isActive ? { duration: KEN_BURNS_DURATION, ease: 'linear' } : { duration: 0 }}
-                      style={{ willChange: 'transform' }}
-                    >
+                    {/* The photo is shown whole, so there is no overflow to pan
+                        across: the Ken Burns drift that used to live here could
+                        only run by cropping into the frame. */}
+                    <div className="absolute inset-0 flex items-center justify-center">
                       <img
                         ref={registerSlideImage}
                         data-gallery-url={item.url}
@@ -729,7 +596,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         // Never lazy: every mounted slide is one swipe away, and
                         // lazy would defer exactly the fetch we are racing.
                         loading="eager"
-                        className={`pointer-events-none select-none w-full h-full ${isWide ? 'object-cover' : 'object-contain'}`}
+                        // Always contained: the buyer sees the whole photo,
+                        // whatever shape it was shot in, and the blurred copy
+                        // behind it fills whatever the fit leaves over.
+                        className="pointer-events-none select-none w-full h-full object-contain"
                         // Reveal: the photo settles out of the blur rather than
                         // snapping in. Written inline because the transition has
                         // to name the exact properties being animated.
@@ -739,10 +609,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                           transition: 'opacity 320ms ease-out, transform 320ms ease-out',
                         }}
                         draggable={false}
-                        onLoad={(e) => markLoaded(item.url, e.currentTarget)}
+                        onLoad={() => markLoaded(item.url)}
                         onError={() => setFailedUrls((prev) => ({ ...prev, [item.url]: true }))}
                       />
-                    </motion.div>
+                    </div>
                   </motion.div>
                 );
               })
@@ -1306,9 +1176,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     : 'border-transparent hover:border-neutral-300'
                 }`}
               >
-                <GalleryThumbnail
+                <PhotoThumbnail
                   url={img.url}
                   alt={`${photoAltPrefix} — ${t('property:photos.title', 'Photos')} ${index + 1}/${imagesForCurrentCategory.length}`}
+                  sizes={THUMB_SIZES}
+                  widths={THUMB_WIDTHS}
+                  fallbackWidth={THUMB_CARD_WIDTH * 2}
                   // The strip scrolls horizontally, so lazy thumbnails past the
                   // fold pop in as the user drags. The first screenful is cheap
                   // enough to fetch up front; the tail stays lazy.

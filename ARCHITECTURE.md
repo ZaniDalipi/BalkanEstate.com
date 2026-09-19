@@ -37,7 +37,8 @@ src/components/property/  # Shared property UI (used by multiple features)
 ├── PropertyGallery.tsx   # Image carousel + video + street view
 ├── PropertyInfo.tsx      # Stats grid + description + amenities
 ├── PropertyContact.tsx   # Seller sidebar (desktop) + contact actions
-├── PropertyPhotos.tsx    # Thumbnail strip
+├── PropertyPhotos.tsx    # Thumbnail grid (seller listing preview)
+├── PhotoThumbnail.tsx    # One thumbnail card: photo whole, blurred fill
 ├── PropertyMapLink.tsx
 └── NeighborhoodInsights.tsx
 ```
@@ -56,11 +57,64 @@ src/components/property/  # Shared property UI (used by multiple features)
 
 ---
 
-## Property Gallery — Dynamic Aspect Ratio
+## Property Photos — nothing is cropped
 
-**Problem**: fixed-height containers cause dark letterbox bars or cropped images when the image aspect ratio doesn't match.
+**Problem**: a photo that is not shaped like the frame it is drawn in has to
+either be cropped to fill it or shown whole inside bars. Cropping is what the
+site used to do, and it cost the listing its subject: a 16:9 room shot lost a
+third of its width, and a phone portrait was cut to whichever horizontal band
+sat in the middle — usually ceiling or sky, so a dozen different photos
+rendered as a dozen near-identical tiles.
 
-**Solution**: the container height is derived from each image's actual pixel dimensions.
+**Solution**: every surface shows the photo whole (`object-contain`) and fills
+what the fit leaves over with a blurred, over-scaled copy of that same photo,
+so the bars carry its own colours instead of a black slab.
+
+| Surface | Frame | Component |
+|---------|-------|-----------|
+| Carousel (hero) | `4/3` → `16/9` at `sm` | `PropertyGallery` |
+| Thumbnail strip | `4/3` — 180×135 / 196×147 | `PropertyGallery` → `PhotoThumbnail` |
+| Seller preview grid | `4/3` — 3/4/5 columns | `PropertyPhotos` → `PhotoThumbnail` |
+| Fullscreen viewer | viewport | `ImageViewerModal` |
+
+Key decisions:
+- **`PhotoThumbnail` (`src/components/property/PhotoThumbnail.tsx`) is the one
+  thumbnail card.** Callers shape their own container and pass `sizes`/`widths`
+  for their layout; the card owns the fit, the fill and the failure states.
+  Its `alt` is not decorative — thumbnails sit in bare `<button>`s, so it is
+  what gives those buttons an accessible name.
+- **`needsBlurredBackdrop(photoAspect, frameAspect)`** (`config/galleryImages.ts`)
+  decides whether a contained photo leaves bars worth filling. A photo already
+  shaped like its frame mounts no backdrop and costs no extra request; an
+  unmeasured one gets the backdrop up front, so bars never flash black while
+  the photo decodes. `BACKDROP_ASPECT_TOLERANCE` (1%) is the "close enough".
+- **The fill is `object-cover blur-* scale-150`.** A CSS blur samples past the
+  element as transparent, so a backdrop that only overflowed a few percent
+  would fade back to black at the very edges it exists to hide.
+- **`THUMB_FRAME_ASPECT` (4:3) and the card's CSS must move together** — the
+  constant decides whether a backdrop is needed, the classes shape the card.
+  `property-photos-grid.test.tsx` and `gallery-frame-fit.test.tsx` pin both.
+- **`crop: 'limit'` on every request.** It never crops and never upscales, so
+  framing is the component's decision rather than the CDN's.
+- **No Ken Burns pan.** The hero used to drift across photos that filled the
+  frame; a contained photo has no overflow to pan across, so the pan could only
+  run by cropping back in. It was removed rather than left dead.
+- **No hover zoom inside a tile.** Same reason: the tile clips, so scaling the
+  photo crops away the edges the grid exists to show. The card's ring and lift
+  carry the hover feedback.
+- **A photo that will not load never renders a broken-image glyph.** The card
+  falls back to the `BuildingOfficeIcon` tile, keeping its `alt` as
+  screen-reader text. A URL the optimiser rejects (anything not plain http(s))
+  and a blank `imageUrl` get that tile too, rather than an empty `src`.
+- **A blank entry keeps its slot** in the image list. `PropertyDetailsPage`,
+  `PropertyGallery` and `PropertyPhotos` index into the same array, so dropping
+  it would shift every index after it; it is keyed by position instead.
+- **An off-CDN photo stands in for its own fill.** It has no LQIP, so the
+  backdrop reuses the photo the card already fetched — no second request, and
+  no fallback to bare black bars.
+
+The carousel additionally derives its container height from each image's pixel
+dimensions:
 
 ```
 ImageRatiosRef (useRef<Record<url, ratio>>)
@@ -70,44 +124,9 @@ ImageRatiosRef (useRef<Record<url, ratio>>)
     └── read by: container style={{ aspectRatio: ratio ?? '16/9' }}
 ```
 
-Key decisions:
 - **Never reset ratio to null** when navigating — keeps previous ratio until new one loads (avoids flash to 16/9).
 - **Cache by URL** — navigating back to a seen image applies ratio instantly.
 - **`max-h: 90vh`** prevents portrait images from overflowing the viewport.
-- `object-contain` ensures the full image is always visible; LQIP blurred background fills any bars.
-
-### Two frames, two rules (`config/galleryImages.ts`)
-
-The carousel and the thumbnail strip answer the same question — what to do
-with a photo that is not shaped like its frame — differently, because they
-are doing different jobs.
-
-| Surface | Frame | Rule | Helper |
-|---------|-------|------|--------|
-| Carousel (hero) | `4/3` → `16/9` at `sm` | Crop while at least half the photo survives, else show it whole | `shouldCoverFrame` |
-| Thumbnail strip | `4/3` fixed (180×135 / 196×147) | Never crop — always show the photo whole | — |
-
-- **The hero crops, the strip does not.** The hero shows one photo at a time
-  and a 4:3 trimmed into 16:9 loses nothing anyone misses. The strip is the
-  only place a listing shows *every* photo at once, so a crop there is what
-  turned twelve different rooms into twelve near-identical tiles of ceiling.
-- **`needsBlurredBackdrop(photoAspect, frameAspect)`** decides whether a
-  contained photo leaves bars worth filling. Bars are filled with the LQIP of
-  that same photo (`object-cover blur-lg scale-150`), so they carry the
-  photo's own colours instead of a black slab. A photo already shaped like its
-  frame mounts no backdrop and costs no extra request; an unmeasured one gets
-  the backdrop up front, so bars never flash black while the photo decodes.
-- **The card's pixel sizes and `THUMB_FRAME_ASPECT` must move together** — the
-  constant is what decides whether a backdrop is needed, the classes are what
-  actually shape the card.
-- **`crop: 'limit'` on every thumbnail request.** It never crops and never
-  upscales, so framing is the component's decision rather than the CDN's.
-- **A photo that will not load never renders a broken-image glyph.** The card
-  falls back to the same `BuildingOfficeIcon` tile the carousel uses, keeping
-  its `alt` as screen-reader text; a listing whose `imageUrl` is blank gets
-  that tile too rather than an empty `src`. The blank entry stays in the list
-  — `PropertyDetailsPage` and `PropertyGallery` index into the same array, so
-  dropping it would shift every index after it.
 
 ---
 
