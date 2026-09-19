@@ -5,8 +5,8 @@
  * once into a square, once again by the tile — and could not tell what a buyer
  * would actually get.
  *
- * It now uses the same card as everywhere else: 4:3, the photo whole, the bars
- * filled with a blurred copy of it.
+ * It now uses the same card as everywhere else: 16:9, the photo whole, the
+ * bars filled with a blurred copy of it.
  */
 
 import React from 'react';
@@ -62,11 +62,13 @@ beforeEach(() => {
 });
 
 describe('seller listing preview — photo grid', () => {
-  it('cuts its tiles to 4:3 rather than square', () => {
+  it('cuts its tiles to 16:9 rather than square', () => {
     renderGrid();
     expect(tiles()).toHaveLength(2);
     tiles().forEach((tile) => {
-      expect(tile.className).toContain('aspect-[4/3]');
+      // Wider than the 4:3 a phone shoots, so an ordinary photo sits whole
+      // inside the tile instead of filling it and looking cropped-to-fit.
+      expect(tile.className).toContain('aspect-[16/9]');
       expect(tile.className).not.toContain('aspect-square');
     });
   });
@@ -100,7 +102,9 @@ describe('seller listing preview — photo grid', () => {
   it('fills the bars of an off-shape photo with a blurred copy of it', () => {
     renderGrid();
     const tile = tiles()[0];
-    reportNaturalSize(tile.querySelector<HTMLImageElement>('img:not([aria-hidden="true"])')!, 1080, 1920);
+    // 4:3 — the commonest listing shape, and against a 16:9 tile it is the
+    // case that has to produce a fill.
+    reportNaturalSize(tile.querySelector<HTMLImageElement>('img:not([aria-hidden="true"])')!, 1600, 1200);
 
     const fill = tile.querySelector<HTMLImageElement>('img[src*="e_blur"]');
     expect(fill).not.toBeNull();

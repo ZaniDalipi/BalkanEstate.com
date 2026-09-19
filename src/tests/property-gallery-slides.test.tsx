@@ -125,8 +125,8 @@ describe('PropertyGallery slide track', () => {
   it('fetches the first screenful of thumbnails up front rather than on scroll', () => {
     renderGallery(0);
     const thumbs = Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-      // 2x the strip's 196px card — the width only the thumbnails ask for.
-      img.getAttribute('src')?.includes('w_392')
+      // 2x the strip's 208px card — the width only the thumbnails ask for.
+      img.getAttribute('src')?.includes('w_416')
     );
     expect(thumbs).toHaveLength(11);
     // The strip scrolls horizontally, so a fully lazy strip pops in under the

@@ -77,16 +77,16 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
 };
 
 /**
- * Shape of one card in the thumbnail strip: 180x135 on a phone, 196x147 above
- * it. Both are exactly `THUMB_FRAME_ASPECT` (4:3), which is what decides
+ * Shape of one card in the thumbnail strip: 192x108 on a phone, 208x117 above
+ * it. Both are exactly `THUMB_FRAME_ASPECT` (16:9), which is what decides
  * whether the photo inside needs a blurred backdrop — so these numbers and the
  * `w-[...] h-[...]` classes on the card have to move together.
  */
-const THUMB_CARD_WIDTH_SM = 180;
-const THUMB_CARD_WIDTH = 196;
+const THUMB_CARD_WIDTH_SM = 192;
+const THUMB_CARD_WIDTH = 208;
 
 /**
- * Candidate widths for a thumbnail card: 1x, 2x and 3x its 196px frame.
+ * Candidate widths for a thumbnail card: 1x, 2x and 3x its 208px frame.
  *
  * The strip used to stop at 2x, so every phone with a 3x screen — most of
  * them — stretched a 2x file across a 3x card.
@@ -1167,10 +1167,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 onClick={() => {
                   if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
                 }}
-                // 180x135 and 196x147 are exactly 4:3 — the shape
+                // 192x108 and 208x117 are exactly 16:9 — the shape
                 // `THUMB_FRAME_ASPECT` describes, which is what decides whether
                 // a photo inside needs a blurred backdrop. Move one, move both.
-                className={`relative flex-shrink-0 w-[180px] h-[135px] sm:w-[196px] sm:h-[147px] rounded-xl overflow-hidden bg-neutral-900 transition-all border-2 ${
+                className={`relative flex-shrink-0 w-[192px] h-[108px] sm:w-[208px] sm:h-[117px] rounded-xl overflow-hidden bg-neutral-900 transition-all border-2 ${
                   index === currentImageIndex
                     ? 'border-primary shadow-lg'
                     : 'border-transparent hover:border-neutral-300'
@@ -1193,7 +1193,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               <button
                 onClick={handleNextImage}
                 aria-label={t('property:gallery.nextImage', 'Next image')}
-                className="flex-shrink-0 w-10 h-[135px] sm:h-[147px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
+                className="flex-shrink-0 w-10 h-[108px] sm:h-[117px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
               >
                 <ChevronRightIcon className="w-5 h-5 text-neutral-600" aria-hidden="true" />
               </button>

@@ -9,12 +9,17 @@ import { BuildingOfficeIcon } from '../../../constants';
 /**
  * The shape every thumbnail card on the site is cut to.
  *
- * 4:3 is the shape a listing photo arrives in more often than any other, so it
- * is the frame that leaves the fewest photos with bars to fill at all. Callers
- * shape their own card, but the card's CSS and this number have to agree — it
- * is what decides whether the photo inside needs a backdrop.
+ * 16:9, deliberately wider than the 4:3 a phone camera shoots. A card cut to
+ * 4:3 would swallow the commonest listing photo edge to edge, and a photo that
+ * exactly fills its card is indistinguishable from one that was cropped to fit
+ * — there is nothing on screen to show the viewer they are seeing all of it.
+ * Against a wider card the same photo sits whole with its own blurred colour
+ * running down either side, which reads as "this is the whole picture".
+ *
+ * Callers shape their own card, but the card's CSS and this number have to
+ * agree: it is what decides whether the photo inside needs a backdrop.
  */
-export const THUMB_FRAME_ASPECT = 4 / 3;
+export const THUMB_FRAME_ASPECT = 16 / 9;
 
 export interface PhotoThumbnailProps {
   /** May be blank: a listing whose `imageUrl` never got filled in renders the tile. */
@@ -44,11 +49,11 @@ export interface PhotoThumbnailProps {
  * whichever horizontal band sat in the middle, usually ceiling or sky, so a
  * dozen different photos rendered as a dozen near-identical tiles.
  *
- * Whatever the fit leaves over — bars above and below a wide photo, bars at
- * the sides of a tall one — is filled with a blurred copy of that same photo,
- * so it carries the photo's own colours rather than a black slab. A photo
- * already shaped like the card fills it edge to edge and mounts no backdrop,
- * so the common case still costs a single request.
+ * Whatever the fit leaves over — bars down either side of an ordinary 4:3 or
+ * portrait photo, above and below a photo wider than 16:9 — is filled with a
+ * blurred copy of that same photo, so it carries the photo's own colours
+ * rather than a black slab. A photo that is already exactly 16:9 fills the
+ * card and mounts no backdrop, so that case still costs a single request.
  *
  * Renders into the caller's card, which must be `relative` and clip its
  * overflow; the blurred fill is positioned against it.

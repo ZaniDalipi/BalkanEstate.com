@@ -11,7 +11,7 @@ import { PhotoThumbnail } from './PhotoThumbnail';
  * `lg`, inside a padded card. The candidates are 1x/2x/3x of the widest a tile
  * gets, so a high-DPR phone is not handed a file it has to stretch.
  */
-const TILE_MAX_WIDTH = 220;
+const TILE_MAX_WIDTH = 224;
 const TILE_WIDTHS = [TILE_MAX_WIDTH, TILE_MAX_WIDTH * 2, TILE_MAX_WIDTH * 3];
 const TILE_SIZES = `(max-width: 640px) 30vw, (max-width: 1024px) 23vw, ${TILE_MAX_WIDTH}px`;
 
@@ -164,10 +164,10 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
               onClick={() => onImageSelect(index)}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
-              // 4:3, not square: it is the shape `THUMB_FRAME_ASPECT` describes
-              // and the one most listing photos already arrive in, so it is what
-              // leaves the fewest of them with bars to fill.
-              className={`group relative aspect-[4/3] bg-neutral-900 rounded-xl overflow-hidden transition-all duration-300 ${
+              // 16:9, not square: the shape `THUMB_FRAME_ASPECT` describes,
+              // deliberately wider than the 4:3 a phone shoots so an ordinary
+              // photo sits whole with its own blurred colour down either side.
+              className={`group relative aspect-[16/9] bg-neutral-900 rounded-xl overflow-hidden transition-all duration-300 ${
                 index === currentImageIndex
                   ? 'ring-2 ring-primary ring-offset-2 scale-[1.02] shadow-lg z-10'
                   : hoveredIndex === index

@@ -6,9 +6,11 @@
  * blue rectangles with a black bar on top.
  *
  * Nothing is cropped to its frame any more. The thumbnail strip shows every
- * photo whole in a 4:3 card over a blurred copy of itself, so a buyer sees what
- * the seller actually uploaded. These tests pin the rule that decides when
- * those bars need filling, and the fill itself.
+ * photo whole in a 16:9 card over a blurred copy of itself — wider than the
+ * 4:3 a phone shoots, so an ordinary listing photo visibly sits inside its
+ * card rather than filling it, which is what tells a viewer they are seeing
+ * all of it. These tests pin the rule that decides when those bars need
+ * filling, and the fill itself.
  */
 
 import React from 'react';
@@ -33,8 +35,8 @@ vi.mock('@/src/features/promo/components/Slot', () => ({ default: () => null }))
 const LANDSCAPE = 4 / 3;
 const PORTRAIT = 9 / 16;
 const FRAME_16_9 = 16 / 9;
-/** The thumbnail card's own shape — 180x135 and 196x147 are both exactly this. */
-const THUMB_FRAME = 4 / 3;
+/** The thumbnail card's own shape — 192x108 and 208x117 are both exactly this. */
+const THUMB_FRAME = 16 / 9;
 
 describe('coveredFraction', () => {
   it('is 1 when the photo already matches the frame', () => {
@@ -64,10 +66,20 @@ describe('needsBlurredBackdrop', () => {
   });
 
   it('fills the bars a contained photo leaves, whichever way they run', () => {
-    // 16:9 leaves them above and below; a phone portrait leaves them at the
-    // sides. Both are the black slab the backdrop exists to replace.
-    expect(needsBlurredBackdrop(FRAME_16_9, THUMB_FRAME)).toBe(true);
+    // The card is 16:9, so an ordinary 4:3 photo and a phone portrait both
+    // leave bars at the sides; only something wider than 16:9 leaves them
+    // above and below. All of them are the black slab the fill replaces.
+    expect(needsBlurredBackdrop(LANDSCAPE, THUMB_FRAME)).toBe(true);
     expect(needsBlurredBackdrop(PORTRAIT, THUMB_FRAME)).toBe(true);
+    expect(needsBlurredBackdrop(3, THUMB_FRAME)).toBe(true);
+  });
+
+  it('gives the commonest listing photo a fill — the point of a wider card', () => {
+    // A phone shoots 4:3. Against a 4:3 card that photo filled edge to edge
+    // and looked exactly like one cropped to fit; against 16:9 it sits whole
+    // with its own colour down either side.
+    expect(needsBlurredBackdrop(LANDSCAPE, THUMB_FRAME)).toBe(true);
+    expect(THUMB_FRAME).toBeGreaterThan(LANDSCAPE);
   });
 
   it('ignores a difference too small to see', () => {
@@ -104,10 +116,10 @@ const property = {
   lng: 19.8,
 } as unknown as Property;
 
-/** The thumbnail strip renders at w_392 (2x its 196px card); the carousel does not. */
+/** The thumbnail strip renders at w_416 (2x its 208px card); the carousel does not. */
 const thumbnails = (): HTMLImageElement[] =>
   Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-    img.getAttribute('src')?.includes('w_392')
+    img.getAttribute('src')?.includes('w_416')
   );
 
 /** Fakes a decode so the component learns the photo's real shape. */
@@ -158,8 +170,8 @@ describe('thumbnail strip', () => {
   it('adds no backdrop behind a photo already shaped like the card', () => {
     renderStrip();
     const thumb = thumbnails()[0];
-    // Exactly 4:3 — it fills the card, so there are no bars to hide.
-    reportNaturalSize(thumb, 1600, 1200);
+    // Exactly 16:9 — it fills the card, so there are no bars to hide.
+    reportNaturalSize(thumb, 1920, 1080);
 
     // Scoped to the card: the carousel above keeps its own blurred backdrop.
     expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(0);
@@ -195,12 +207,12 @@ describe('thumbnail strip', () => {
     expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(1);
   });
 
-  it('shapes the card as the 4:3 the backdrop rule assumes', () => {
+  it('shapes the card as the 16:9 the backdrop rule assumes', () => {
     renderStrip();
     // The classes are what actually shape the card and the constant is what
     // decides whether a photo inside needs a backdrop, so a card that drifted
     // off 4:3 would silently start letterboxing photos that fit it.
-    const card = document.querySelector<HTMLElement>('button.w-\\[180px\\]')!;
+    const card = document.querySelector<HTMLElement>('button.w-\\[192px\\]')!;
     const classes = Array.from(card.classList);
     const px = (prefix: string, axis: 'w' | 'h') => {
       const cls = classes.find((c) => c.startsWith(`${prefix}${axis}-[`));
@@ -228,7 +240,7 @@ describe('thumbnail strip', () => {
       />
     );
 
-    const card = document.querySelector<HTMLElement>('button.w-\\[180px\\]')!;
+    const card = document.querySelector<HTMLElement>('button.w-\\[192px\\]')!;
     const [backdrop, photo] = Array.from(card.querySelectorAll('img'));
     expect(backdrop.getAttribute('src')).toBe(external);
     expect(backdrop.className).toContain('object-cover');
@@ -251,7 +263,7 @@ describe('thumbnail strip', () => {
       />
     );
 
-    const card = document.querySelector<HTMLElement>('button.w-\\[180px\\]')!;
+    const card = document.querySelector<HTMLElement>('button.w-\\[192px\\]')!;
     expect(card.querySelectorAll('img')).toHaveLength(0);
     expect(card.querySelector('svg')).not.toBeNull();
   });
@@ -286,7 +298,7 @@ describe('thumbnail strip', () => {
       />
     );
 
-    const cards = document.querySelectorAll<HTMLElement>('button.w-\\[180px\\]');
+    const cards = document.querySelectorAll<HTMLElement>('button.w-\\[192px\\]');
     expect(cards).toHaveLength(2);
     // The blank one shows the tile; its neighbour is a real photo, so the
     // fallback is the missing URL's doing and not the whole strip giving up.

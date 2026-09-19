@@ -38,7 +38,7 @@ src/components/property/  # Shared property UI (used by multiple features)
 ├── PropertyInfo.tsx      # Stats grid + description + amenities
 ├── PropertyContact.tsx   # Seller sidebar (desktop) + contact actions
 ├── PropertyPhotos.tsx    # Thumbnail grid (seller listing preview)
-├── PhotoThumbnail.tsx    # One thumbnail card: photo whole, blurred fill
+├── PhotoThumbnail.tsx    # One 16:9 thumbnail card: photo whole, blurred fill
 ├── PropertyMapLink.tsx
 └── NeighborhoodInsights.tsx
 ```
@@ -73,8 +73,8 @@ so the bars carry its own colours instead of a black slab.
 | Surface | Frame | Component |
 |---------|-------|-----------|
 | Carousel (hero) | `4/3` → `16/9` at `sm` | `PropertyGallery` |
-| Thumbnail strip | `4/3` — 180×135 / 196×147 | `PropertyGallery` → `PhotoThumbnail` |
-| Seller preview grid | `4/3` — 3/4/5 columns | `PropertyPhotos` → `PhotoThumbnail` |
+| Thumbnail strip | `16/9` — 192×108 / 208×117 | `PropertyGallery` → `PhotoThumbnail` |
+| Seller preview grid | `16/9` — 3/4/5 columns | `PropertyPhotos` → `PhotoThumbnail` |
 | Fullscreen viewer | viewport | `ImageViewerModal` |
 
 Key decisions:
@@ -91,7 +91,12 @@ Key decisions:
 - **The fill is `object-cover blur-* scale-150`.** A CSS blur samples past the
   element as transparent, so a backdrop that only overflowed a few percent
   would fade back to black at the very edges it exists to hide.
-- **`THUMB_FRAME_ASPECT` (4:3) and the card's CSS must move together** — the
+- **A thumbnail card is 16:9, wider than the 4:3 a phone shoots.** Against a
+  4:3 card the commonest listing photo filled edge to edge, and a photo that
+  exactly fills its card is indistinguishable from one cropped to fit — there
+  is nothing on screen telling the viewer they are seeing all of it. Against
+  16:9 the same photo sits whole with its own blurred colour down either side.
+- **`THUMB_FRAME_ASPECT` (16:9) and the card's CSS must move together** — the
   constant decides whether a backdrop is needed, the classes shape the card.
   `property-photos-grid.test.tsx` and `gallery-frame-fit.test.tsx` pin both.
 - **`crop: 'limit'` on every request.** It never crops and never upscales, so
