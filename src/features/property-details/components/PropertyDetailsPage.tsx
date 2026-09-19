@@ -543,16 +543,22 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     const shareUrl = `${window.location.origin}/property/${propertySlug}`;
     try {
       const isLand = property.propertyType === 'land';
-      const bedroomText = isLand ? '' : `${property.beds === 1 ? '1 bedroom' : `${property.beds} bedrooms`}, `;
-      const bathroomText = isLand ? '' : `${property.baths === 1 ? '1 bathroom' : `${property.baths} bathrooms`}, `;
-      const livingRoomText = !isLand && property.livingRooms
-        ? property.livingRooms === 1
-          ? '1 living room, '
-          : `${property.livingRooms} living rooms, `
-        : '';
-      const mapText = ` Check out the 3D map: ${shareUrl}`;
-      const shareText = `Check out this property: ${bedroomText}${bathroomText}${livingRoomText}${property.sqft}m².${mapText}`;
+      const details: string[] = [];
+      if (!isLand) {
+        details.push(property.beds === 1 ? '1 bedroom' : `${property.beds} bedrooms`);
+        details.push(property.baths === 1 ? '1 bathroom' : `${property.baths} bathrooms`);
+        if (property.livingRooms) {
+          details.push(property.livingRooms === 1 ? '1 living room' : `${property.livingRooms} living rooms`);
+        }
+      }
+      if (property.sqft) {
+        details.push(`${property.sqft}m²`);
+      }
+      const shareText = `Check out this property: ${details.join(', ')}. See the 3D map tour and full details.`;
       if (navigator.share) {
+        // Pass the URL only via `url`, not embedded in `text` too — many share
+        // targets (e.g. Facebook's composer) append `url` on top of `text`,
+        // so including it in both produced a duplicated link in the post.
         await navigator.share({
           title: `${property.address}, ${property.city}`,
           text: shareText,
