@@ -15,7 +15,7 @@ import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
-import { resolveTotalArea } from '@/shared/property/area';
+import { resolveTotalArea, typeHasMeasuredBreakdown } from '@/shared/property/area';
 import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
 
 /**
@@ -40,6 +40,23 @@ function scrollPageToTop() {
         el.scrollTop = 0;
     });
 }
+
+/**
+ * The total-area box's value, but only where the seller was actually shown it.
+ *
+ * A type that describes its own size (an apartment's gross and net, a villa's
+ * plot and build, a shop's open-plan floor) does not get the generic "Area"
+ * box on the form, so its `sq_meters` holds whatever was loaded into state
+ * behind the seller's back — the stored `sqft` when editing a listing, or the
+ * AI's guess after generating one from photos. Letting that win would mean a
+ * seller who corrects an apartment's gross area from 79 to 85 saves 79 again,
+ * with no visible field explaining why. Where the breakdown is what they can
+ * see and edit, the breakdown is what the listing is sized by.
+ */
+const totalAreaInput = (listingData: ListingData): number | undefined =>
+    typeHasMeasuredBreakdown(listingData.propertyType)
+        ? undefined
+        : Number(listingData.sq_meters) || undefined;
 
 /** Builds a preview Property object from form state (no API calls, no uploads). */
 export function buildPreviewProperty(
@@ -91,7 +108,7 @@ export function buildPreviewProperty(
         // and the submitted listing never show "0 m²" next to a real number.
         sqft: resolveTotalArea({
             propertyType: listingData.propertyType,
-            sqft: Number(listingData.sq_meters) || undefined,
+            sqft: totalAreaInput(listingData),
             grossArea: Number(listingData.grossArea) || undefined,
             netArea: Number(listingData.netArea) || undefined,
             buildingArea: Number(listingData.buildingArea) || undefined,
@@ -1135,7 +1152,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     // breakdown rather than submitted as a literal 0.
                     sqft: resolveTotalArea({
                         propertyType: listingData.propertyType,
-                        sqft: Number(listingData.sq_meters) || undefined,
+                        sqft: totalAreaInput(listingData),
                         grossArea: Number(listingData.grossArea) || undefined,
                         netArea: Number(listingData.netArea) || undefined,
                         buildingArea: Number(listingData.buildingArea) || undefined,

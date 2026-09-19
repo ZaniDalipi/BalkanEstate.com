@@ -19,7 +19,7 @@
  */
 
 import type { PropertyType } from '@/shared/types/property.types';
-import type { TypeAttribute } from './typeAttributes';
+import { MEASURED_ATTRIBUTES, attributesForType, type TypeAttribute } from './typeAttributes';
 
 /**
  * Which type-specific measurement stands in for `sqft`, and in what order,
@@ -46,6 +46,19 @@ const AREA_FALLBACKS: Partial<Record<PropertyType, readonly TypeAttribute[]>> = 
 /** A measurement worth showing: a finite, positive number. Zero is "not measured", not "0 m²". */
 const isUsableArea = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value) && value > 0;
+
+/**
+ * Does this type describe its own size, rather than being given a plain total?
+ *
+ * The listing form asks a type with a breakdown for that breakdown and hides
+ * the generic "Area" box, so for those types the breakdown is the only thing
+ * a seller can see and correct — and therefore the only thing allowed to
+ * decide the total when a listing is written. Asked here rather than by each
+ * caller listing the types out, so the form and the write path cannot come to
+ * different conclusions about which boxes a seller was shown.
+ */
+export const typeHasMeasuredBreakdown = (propertyType: unknown): boolean =>
+  attributesForType(propertyType).some((attribute) => MEASURED_ATTRIBUTES.has(attribute));
 
 export interface ResolvedArea {
   /** The figure to show, in m². Always > 0 — see `resolveDisplayArea`'s null case. */

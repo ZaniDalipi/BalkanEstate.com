@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { resolveDisplayArea, resolveTotalArea } from '@/shared/property/area';
+import { resolveDisplayArea, resolveTotalArea, typeHasMeasuredBreakdown } from '@/shared/property/area';
 import { resolveTotalArea as resolveTotalAreaBackend } from '@/backend/src/config/propertyArea';
 
 describe('resolveDisplayArea', () => {
@@ -58,6 +58,34 @@ describe('resolveTotalArea', () => {
   it('is the plain-number form of resolveDisplayArea, defaulting to 0', () => {
     expect(resolveTotalArea({ propertyType: 'apartment', sqft: 0, grossArea: 79 })).toBe(79);
     expect(resolveTotalArea({ propertyType: 'parking', sqft: 0 })).toBe(0);
+  });
+});
+
+describe('typeHasMeasuredBreakdown', () => {
+  it('is true for the types the form asks for their own measurements', () => {
+    expect(typeHasMeasuredBreakdown('apartment')).toBe(true);
+    expect(typeHasMeasuredBreakdown('villa')).toBe(true);
+    expect(typeHasMeasuredBreakdown('luxury-villa')).toBe(true);
+    expect(typeHasMeasuredBreakdown('commercial')).toBe(true);
+    expect(typeHasMeasuredBreakdown('other')).toBe(true);
+  });
+
+  it('is false for the types shown a single plain area box', () => {
+    expect(typeHasMeasuredBreakdown('house')).toBe(false);
+    expect(typeHasMeasuredBreakdown('parking')).toBe(false);
+    expect(typeHasMeasuredBreakdown('land')).toBe(false);
+    expect(typeHasMeasuredBreakdown('nonsense')).toBe(true); // unknown reads as 'other'
+  });
+
+  it('agrees with the types that have a fallback to resolve from', () => {
+    // The form hides the generic box exactly where the resolver has
+    // something to fall back to; a type where those two disagreed would
+    // either be asked nothing, or asked twice.
+    for (const propertyType of ['apartment', 'villa', 'luxury-villa', 'commercial']) {
+      expect(typeHasMeasuredBreakdown(propertyType), propertyType).toBe(true);
+      expect(resolveDisplayArea({ propertyType, sqft: 0, grossArea: 50, buildingArea: 50, openPlanArea: 50 }))
+        .not.toBeNull();
+    }
   });
 });
 

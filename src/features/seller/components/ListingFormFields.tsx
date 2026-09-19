@@ -5,12 +5,11 @@ import { getCurrencySymbol } from '@/utils/currency';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import {
     PARKING_TYPES,
-    MEASURED_ATTRIBUTES,
-    attributesForType,
     typeHasAttribute,
     type ParkingType,
     type TypeAttribute,
 } from '@/shared/property/typeAttributes';
+import { typeHasMeasuredBreakdown } from '@/shared/property/area';
 
 /** English shown while a locale still lacks the parking-type keys. */
 const PARKING_TYPE_FALLBACKS: Record<ParkingType, string> = {
@@ -135,8 +134,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
      * submit time (see `resolveTotalArea`), the same figure the type's own
      * fields already describe.
      */
-    const hasMeasuredBreakdown = attributesForType(listingData.propertyType)
-        .some((attribute) => MEASURED_ATTRIBUTES.has(attribute));
+    const hasMeasuredBreakdown = typeHasMeasuredBreakdown(listingData.propertyType);
 
 
     return (
