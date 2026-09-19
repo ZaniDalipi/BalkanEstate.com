@@ -15,6 +15,7 @@ import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
+import { resolveTotalArea } from '@/shared/property/area';
 import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
 
 /**
@@ -85,7 +86,18 @@ export function buildPreviewProperty(
         grossArea: Number(listingData.grossArea),
         netArea: Number(listingData.netArea),
         parkingType: listingData.parkingType,
-        sqft: Number(listingData.sq_meters),
+        // A blank total-area box is backfilled from whichever breakdown the
+        // type collects (gross/net, land/building, open-plan), so the preview
+        // and the submitted listing never show "0 m²" next to a real number.
+        sqft: resolveTotalArea({
+            propertyType: listingData.propertyType,
+            sqft: Number(listingData.sq_meters) || undefined,
+            grossArea: Number(listingData.grossArea) || undefined,
+            netArea: Number(listingData.netArea) || undefined,
+            buildingArea: Number(listingData.buildingArea) || undefined,
+            landArea: Number(listingData.landArea) || undefined,
+            openPlanArea: Number(listingData.openPlanArea) || undefined,
+        }),
         ...buildConstructionFields({
             constructionStatus: listingData.constructionStatus,
             expectedCompletionYear: listingData.expected_completion_year,
@@ -1118,7 +1130,18 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     grossArea: Number(listingData.grossArea),
                     netArea: Number(listingData.netArea),
                     parkingType: listingData.parkingType,
-                    sqft: Number(listingData.sq_meters),
+                    // See the matching comment in buildPreviewProperty above:
+                    // a blank total-area box is backfilled from the type's own
+                    // breakdown rather than submitted as a literal 0.
+                    sqft: resolveTotalArea({
+                        propertyType: listingData.propertyType,
+                        sqft: Number(listingData.sq_meters) || undefined,
+                        grossArea: Number(listingData.grossArea) || undefined,
+                        netArea: Number(listingData.netArea) || undefined,
+                        buildingArea: Number(listingData.buildingArea) || undefined,
+                        landArea: Number(listingData.landArea) || undefined,
+                        openPlanArea: Number(listingData.openPlanArea) || undefined,
+                    }),
                     ...buildConstructionFields({
                         constructionStatus: listingData.constructionStatus,
                         expectedCompletionYear: listingData.expected_completion_year,

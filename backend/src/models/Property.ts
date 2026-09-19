@@ -8,6 +8,7 @@ import {
   type ParkingType,
   type TypeAttribute,
 } from '../config/typeAttributes';
+import { resolveTotalArea } from '../config/propertyArea';
 import {
   CONSTRUCTION_STATUSES,
   ConstructionStatus,
@@ -782,6 +783,28 @@ PropertySchema.pre('validate', function (next) {
   for (const attribute of TYPE_ATTRIBUTES) {
     document.set(attribute, attribute in result.fields ? result.fields[attribute] : undefined);
   }
+
+  next();
+});
+
+/**
+ * Backfill `sqft` from a listing's own type-specific breakdown.
+ *
+ * Runs after the type-attributes hook above so it reads the breakdown once it
+ * has already been normalised. `sqft` is required by the schema, so a seller
+ * who filled an apartment's gross and net area (or a villa's plot and build)
+ * and left the separate total-area box empty would otherwise have it stored
+ * as a literal 0 — a real measurement on the document, printed everywhere as
+ * "0 m²". See `resolveTotalArea` for which field stands in for which type.
+ */
+PropertySchema.pre('validate', function (next) {
+  const doc = this as unknown as IProperty;
+  const document = this as unknown as mongoose.Document;
+
+  const areaInputs: { sqft?: unknown } & Partial<Record<TypeAttribute, unknown>> = { sqft: doc.sqft };
+  for (const attribute of TYPE_ATTRIBUTES) areaInputs[attribute] = document.get(attribute);
+
+  document.set('sqft', resolveTotalArea(doc.propertyType, areaInputs));
 
   next();
 });
