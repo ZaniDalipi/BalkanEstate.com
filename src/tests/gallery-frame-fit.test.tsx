@@ -190,9 +190,13 @@ describe('thumbnail strip', () => {
     // same photo rather than a generic placeholder.
     expect(backdrop!.className).toContain('object-cover');
     expect(backdrop!.getAttribute('src')).toContain('/listing/p0');
-    // A CSS blur samples past the element as transparent, so the backdrop has
-    // to overflow by more than its blur radius or the edges fade back to black.
-    expect(backdrop!.className).toContain('scale-150');
+    // A CSS blur samples past the element as transparent, so the fill has to
+    // overflow by more than its blur radius or the edges fade back to black.
+    expect(backdrop!.className).toContain('scale-[1.75]');
+    // And it has to recede: a lightly blurred, full-strength copy of the photo
+    // merges with the photo in front and the card reads as one zoomed image.
+    expect(backdrop!.className).toContain('blur-2xl');
+    expect(backdrop!.className).toContain('opacity-60');
   });
 
   it('ignores a load event that carries no usable size', () => {

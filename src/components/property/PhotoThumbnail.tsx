@@ -105,15 +105,25 @@ export const PhotoThumbnail: React.FC<PhotoThumbnailProps> = ({
     <>
       {/* Blurred fill behind the bars. Only mounted once the photo is known to
           need it, so a full-bleed thumbnail costs no extra request.
-          scale-150, not 110: a CSS blur samples past the element as
-          transparent, so a blur over a 5% overflow fades the card's edges back
-          to black — the very bars this backdrop exists to hide. */}
+
+          It has to read as *backdrop*, never as a second copy of the photo. A
+          lightly blurred, full-size copy magnified across the card is legible
+          enough that the eye merges it with the photo in front and the whole
+          card reads as one zoomed, soft image — the exact thing showing the
+          photo whole is meant to fix. So: the tiny LQIP rather than the photo
+          where one exists, a heavy blur, and dimmed, so the sharp photo in
+          front is unmistakably the subject.
+
+          scale-[1.75], not 1.1: a CSS blur samples past the element as
+          transparent, so the overflow has to exceed the blur radius or the
+          card's edges fade back to black — the very bars this fill exists to
+          hide. 37.5% each side clears a 40px blur down to a ~110px tile. */}
       {showBackdrop && (
         <img
           src={backdropSrc}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
+          className="absolute inset-0 w-full h-full object-cover blur-2xl scale-[1.75] opacity-60 pointer-events-none select-none"
           decoding="async"
         />
       )}

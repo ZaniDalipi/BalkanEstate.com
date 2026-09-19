@@ -88,9 +88,26 @@ Key decisions:
   shaped like its frame mounts no backdrop and costs no extra request; an
   unmeasured one gets the backdrop up front, so bars never flash black while
   the photo decodes. `BACKDROP_ASPECT_TOLERANCE` (1%) is the "close enough".
-- **The fill is `object-cover blur-* scale-150`.** A CSS blur samples past the
+- **The fill must read as backdrop, never as a second copy of the photo.**
+  It is the tiny LQIP (not the photo), heavily blurred and dimmed
+  (`object-cover blur-2xl scale-[1.75] opacity-60` on a thumbnail). A lightly
+  blurred full-size copy magnified across the card is legible enough that the
+  eye merges it with the photo in front, and the card reads as one zoomed soft
+  image — indistinguishable from the crop the fit exists to avoid.
+- **The overflow has to exceed the blur radius.** A CSS blur samples past the
   element as transparent, so a backdrop that only overflowed a few percent
-  would fade back to black at the very edges it exists to hide.
+  would fade back to black at the very edges it exists to hide. 37.5% each
+  side clears a 40px blur down to a ~110px tile.
+- **`getPropertyImagePlaceholder` goes through `optimizeCloudinaryUrl`.** It
+  used to assemble the URL from a regex requiring the path after `/upload/` to
+  begin `v<digits>/`. Real Cloudinary URLs often do not — an upload into a
+  folder has no version segment, and one carrying transforms has them first —
+  so it returned `''` for most listings. Callers fall back to the full-size
+  photo, which is how the blurred fill silently became a magnified copy of the
+  photo and thumbnails looked cropped. `optimizeCloudinaryUrl` already
+  normalises every URL shape (`stripCloudinaryTransforms`), and CLAUDE.md
+  requires building Cloudinary URLs through it rather than by hand.
+  `cloudinary-placeholder.test.ts` pins every shape.
 - **A thumbnail card is 16:9, wider than the 4:3 a phone shoots.** Against a
   4:3 card the commonest listing photo filled edge to edge, and a photo that
   exactly fills its card is indistinguishable from one cropped to fit — there

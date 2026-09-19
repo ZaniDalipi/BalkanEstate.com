@@ -85,21 +85,6 @@ export const getCityImageUrl = (
 };
 
 /**
- * Generates a low-quality placeholder URL for property images (blur-up / LQIP effect).
- * Returns a tiny (20px wide), heavily blurred version of the image for use as a
- * placeholder while the full-resolution image loads.
- *
- * @param imageUrl - A Cloudinary upload URL (e.g. https://res.cloudinary.com/.../upload/v123/...)
- * @returns Optimized placeholder URL, or empty string for non-Cloudinary URLs
- */
-export const getPropertyImagePlaceholder = (imageUrl: string | undefined): string => {
-  if (!imageUrl) return '';
-  const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
-  if (!uploadMatch) return '';
-  return `${uploadMatch[1]}w_20,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
-};
-
-/**
  * Generates a low-quality placeholder URL for blur-up effect
  * @param cityName - The city name
  * @param country - The country name (optional)
@@ -297,6 +282,67 @@ export const optimizeCloudinaryUrl = (
   }
 
   return url;
+};
+
+/**
+ * Whether a URL is a Cloudinary *upload* URL, the only kind we can ask for a
+ * derived size of.
+ *
+ * Deliberately says nothing about what follows `/upload/`: a version segment,
+ * a folder, transforms already baked in, or any combination. Those all name
+ * the same asset, and `optimizeCloudinaryUrl` normalises them.
+ */
+export const isCloudinaryUploadUrl = (url: string | undefined): url is string =>
+  typeof url === 'string' && /^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+/i.test(url);
+
+/** LQIP geometry, per CLAUDE.md: 40px wide at `auto:eco`, blurred on the CDN. */
+export const LQIP_WIDTH = 40;
+export const LQIP_BLUR = 1000;
+
+/**
+ * A tiny, heavily blurred stand-in for a property photo — the blur-up frame
+ * while the real one loads, and the fill behind the bars of a photo that does
+ * not match its frame.
+ *
+ * WHY IT GOES THROUGH `optimizeCloudinaryUrl`
+ *
+ * This used to build the URL by hand from a regex that required the path after
+ * `/upload/` to begin `v<digits>/`. Cloudinary URLs very often do not: an
+ * upload into a folder has no version segment, and a URL that already carries
+ * transforms has them before it. Every one of those returned '' — no
+ * placeholder at all.
+ *
+ * An empty placeholder is not a cosmetic loss. Callers fall back to the
+ * full-size photo, so the "blurred backdrop" behind a contained photo became a
+ * *full-resolution copy of it*, cover-cropped and scaled up. On a 208px
+ * thumbnail that reads as one zoomed, softened image rather than a photo shown
+ * whole against a wash — which is exactly the "it's still cropped" bug this
+ * replaces.
+ *
+ * `optimizeCloudinaryUrl` already normalises every one of those URL shapes
+ * (`stripCloudinaryTransforms`), and CLAUDE.md requires going through it
+ * rather than assembling Cloudinary URLs by hand. So it does.
+ *
+ * @param imageUrl - Any URL; only Cloudinary upload URLs can produce a placeholder.
+ * @returns The placeholder URL, or '' when one cannot be derived.
+ */
+export const getPropertyImagePlaceholder = (imageUrl: string | undefined): string => {
+  if (!isCloudinaryUploadUrl(imageUrl)) return '';
+
+  const placeholder = optimizeCloudinaryUrl(imageUrl, {
+    width: LQIP_WIDTH,
+    quality: 'auto:eco',
+    // `limit` so a source narrower than 40px is never upscaled into the
+    // placeholder; `blur` last, so Cloudinary blurs the 40px downscale rather
+    // than the original.
+    crop: 'limit',
+    blur: LQIP_BLUR,
+  });
+
+  // `optimizeCloudinaryUrl` returns '' for a URL it rejects and the input
+  // unchanged for anything it cannot transform. Either would hand the caller a
+  // full-size photo dressed up as a placeholder, so neither counts as one.
+  return placeholder && placeholder !== imageUrl ? placeholder : '';
 };
 
 /**
