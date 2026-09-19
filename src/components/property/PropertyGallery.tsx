@@ -11,7 +11,7 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
-import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } from '../../../config/galleryImages';
+import { getGallerySources, warmGallery, shouldCoverFrame, needsBlurredBackdrop, GALLERY_QUALITY } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
@@ -99,49 +99,89 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
 };
 
 /**
- * Shape of one card in the thumbnail strip: 180x128 on a phone, 195x140 above
- * it. Both land within a hair of 1.4, so one number describes the frame.
+ * Shape of one card in the thumbnail strip, and the two widths it is rendered
+ * at: 180x135 on a phone, 196x147 above it. Both are exactly 4:3.
+ *
+ * 4:3 is the shape a listing photo arrives in more often than any other, so it
+ * is the frame that leaves the fewest photos with bars to fill at all.
+ *
+ * `THUMB_FRAME_ASPECT` is what decides whether a photo needs a backdrop, so it
+ * has to stay in step with the `w-[...] h-[...]` classes on the card below.
  */
-const THUMB_ASPECT = 180 / 128;
+const THUMB_CARD_WIDTH_SM = 180;
+const THUMB_CARD_WIDTH = 196;
+const THUMB_FRAME_ASPECT = 4 / 3;
 
 /**
- * Candidate widths for a thumbnail card: 1x, 2x and 3x its 195px frame.
+ * Candidate widths for a thumbnail card: 1x, 2x and 3x its 196px frame.
  *
- * The strip used to stop at 390 (2x), so every phone with a 3x screen — most of
- * them — stretched a 2x file across a 3x card. 585 is that missing candidate.
+ * The strip used to stop at 2x, so every phone with a 3x screen — most of
+ * them — stretched a 2x file across a 3x card.
  */
-const THUMB_WIDTHS = [195, 390, 585];
+const THUMB_WIDTHS = [THUMB_CARD_WIDTH, THUMB_CARD_WIDTH * 2, THUMB_CARD_WIDTH * 3];
 
 /**
  * One card in the thumbnail strip.
  *
- * A thumbnail is the only place a listing shows every photo at once, so a photo
- * that does not match the card's shape has to stay recognisable rather than be
- * cropped down to whichever band sat in the middle — for a phone-shot portrait
- * that band is sky, which is how a strip of three photos ends up looking like
- * three identical blue rectangles.
+ * A thumbnail is the only place a listing shows every photo at once, so every
+ * photo is shown *whole* — scaled to fit the card, never cropped to fill it.
+ * Cropping is what made the strip unreadable: a 16:9 room shot lost a third of
+ * its width to the sides, and a phone portrait was cut down to whichever
+ * horizontal band sat in the middle, usually ceiling or sky, so a dozen
+ * different photos rendered as a dozen near-identical tiles.
  *
- * So an off-shape photo is shown whole over a blurred copy of itself, which
- * fills the side bars with that photo's own colours instead of a black slab.
- * Ordinary landscape photos are unaffected: they still fill the card edge to
- * edge, because cropping a 4:3 into a 1.4 card loses almost nothing.
+ * Whatever the fit leaves over is filled with a blurred copy of that same
+ * photo, so the bars carry the photo's own colours rather than a black slab.
+ * A photo already shaped like the card fills it edge to edge and mounts no
+ * backdrop, so the common case still costs a single request.
  */
-const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eager }) => {
-  // Undefined until the photo reports its natural size. `shouldCoverFrame`
-  // reads that as "cover", the answer for the common case, so the card never
-  // flips layout after the fact for an ordinary photo.
+const GalleryThumbnail: React.FC<{
+  url: string | undefined;
+  alt: string;
+  eager: boolean;
+}> = ({ url, alt, eager }) => {
+  // Undefined until the photo reports its natural size. `needsBlurredBackdrop`
+  // reads that as "bars are coming", so they are never briefly black while the
+  // photo decodes.
   const [aspect, setAspect] = useState<number | undefined>(undefined);
+  const [failed, setFailed] = useState(false);
 
-  const cover = shouldCoverFrame(aspect, THUMB_ASPECT);
-  const placeholder = getPropertyImagePlaceholder(url);
+  // '' for a missing URL and for anything that is not plain http(s) — a blank
+  // listing photo and a rejected one land here together.
+  const src = optimizeCloudinaryUrl(url, {
+    // `limit` never crops and never upscales, so the card decides the framing
+    // rather than the CDN guessing at it.
+    width: THUMB_CARD_WIDTH * 2,
+    quality: GALLERY_QUALITY,
+    crop: 'limit',
+  });
+
+  // A photo that cannot be requested, or that the CDN will not serve, gets the
+  // same placeholder tile the carousel shows — never an empty `src` and never
+  // the browser's broken-image glyph.
+  if (!src || failed) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-700 to-neutral-800">
+        <BuildingOfficeIcon className="w-8 h-8 text-neutral-500" aria-hidden="true" />
+        <span className="sr-only">{alt}</span>
+      </div>
+    );
+  }
+
+  // A Cloudinary photo has a 20px LQIP to blur behind the bars. Anything else
+  // (an external URL the CDN never ingested) reuses the photo the card has
+  // already fetched, so the fill still costs no second request — and an
+  // off-shape photo never falls back to bare black bars.
+  const backdropSrc = getPropertyImagePlaceholder(url) || src;
+  const showBackdrop = needsBlurredBackdrop(aspect, THUMB_FRAME_ASPECT);
 
   return (
     <>
-      {/* Blurred fill behind the bars. Only mounted once we know the photo
-          needs it, so a full-bleed thumbnail costs no extra request. */}
-      {!cover && placeholder && (
+      {/* Blurred fill behind the bars. Only mounted once the photo is known to
+          need it, so a full-bleed thumbnail costs no extra request. */}
+      {showBackdrop && (
         <img
-          src={placeholder}
+          src={backdropSrc}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
@@ -149,19 +189,20 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
         />
       )}
       <img
-        // `limit` never crops and never upscales, so the card decides the
-        // framing rather than the CDN guessing at it.
-        src={optimizeCloudinaryUrl(url, { width: 390, quality: GALLERY_QUALITY, crop: 'limit' })}
+        src={src}
         srcSet={cloudinarySrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
-        sizes="(max-width: 640px) 180px, 195px"
-        alt=""
-        className={`relative w-full h-full ${cover ? 'object-cover' : 'object-contain'}`}
+        sizes={`(max-width: 640px) ${THUMB_CARD_WIDTH_SM}px, ${THUMB_CARD_WIDTH}px`}
+        alt={alt}
+        className="relative w-full h-full object-contain"
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         onLoad={(e) => {
           const { naturalWidth, naturalHeight } = e.currentTarget;
+          // A failed or still-empty decode reports 0x0; treating that as a
+          // shape would divide by zero and put bars on a photo that is fine.
           if (naturalWidth > 0 && naturalHeight > 0) setAspect(naturalWidth / naturalHeight);
         }}
+        onError={() => setFailed(true)}
       />
     </>
   );
@@ -446,6 +487,18 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     return combined.filter((v, i, a) => a.findIndex((t) => t.url === v.url) === i);
   }, [property.imageUrl, property.images]);
 
+  /**
+   * Describes the listing once, so every photo on this surface — carousel and
+   * thumbnail alike — is announced the same way. A thumbnail's `alt` is also
+   * what names its button, which otherwise has no accessible label at all.
+   */
+  const photoAltPrefix = useMemo(() => {
+    const type = property.propertyType
+      ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)
+      : 'Property';
+    return `${type} in ${property.city}, ${property.country}`;
+  }, [property.propertyType, property.city, property.country]);
+
   // Categorize images by tag
   const categorizedImages = useMemo(() => {
     return allImages.reduce((acc, img) => {
@@ -665,7 +718,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                         src={sources.src}
                         srcSet={sources.srcSet || undefined}
                         sizes={sources.srcSet ? sources.sizes : undefined}
-                        alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} in ${property.city}, ${property.country}`}
+                        alt={photoAltPrefix}
                         width={1200}
                         height={800}
                         crossOrigin={sources.crossOrigin}
@@ -1237,11 +1290,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 sm:-mx-5 px-4 sm:px-5 pb-1">
             {imagesForCurrentCategory.map((img, index) => (
               <button
-                key={img.url}
+                // A listing with a blank `imageUrl` keeps its slot in the list
+                // so the indices stay aligned with the carousel — but it has no
+                // URL to key on, and two blanks would collide.
+                key={img.url || `blank-${index}`}
                 onClick={() => {
                   if (onImageIndexChange) { onImageIndexChange(index); } else { setInternalIndex(index); }
                 }}
-                className={`relative flex-shrink-0 w-[180px] h-[128px] sm:w-[195px] sm:h-[140px] rounded-xl overflow-hidden bg-neutral-900 transition-all border-2 ${
+                // 180x135 and 196x147 are exactly 4:3 — the shape
+                // `THUMB_FRAME_ASPECT` describes, which is what decides whether
+                // a photo inside needs a blurred backdrop. Move one, move both.
+                className={`relative flex-shrink-0 w-[180px] h-[135px] sm:w-[196px] sm:h-[147px] rounded-xl overflow-hidden bg-neutral-900 transition-all border-2 ${
                   index === currentImageIndex
                     ? 'border-primary shadow-lg'
                     : 'border-transparent hover:border-neutral-300'
@@ -1249,6 +1308,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               >
                 <GalleryThumbnail
                   url={img.url}
+                  alt={`${photoAltPrefix} — ${t('property:photos.title', 'Photos')} ${index + 1}/${imagesForCurrentCategory.length}`}
                   // The strip scrolls horizontally, so lazy thumbnails past the
                   // fold pop in as the user drags. The first screenful is cheap
                   // enough to fetch up front; the tail stays lazy.
@@ -1259,9 +1319,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             {imagesForCurrentCategory.length > 5 && (
               <button
                 onClick={handleNextImage}
-                className="flex-shrink-0 w-10 h-[128px] sm:h-[140px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
+                aria-label={t('property:gallery.nextImage', 'Next image')}
+                className="flex-shrink-0 w-10 h-[135px] sm:h-[147px] bg-neutral-100 hover:bg-neutral-200 rounded-xl flex items-center justify-center transition-colors"
               >
-                <ChevronRightIcon className="w-5 h-5 text-neutral-600" />
+                <ChevronRightIcon className="w-5 h-5 text-neutral-600" aria-hidden="true" />
               </button>
             )}
           </div>

@@ -76,6 +76,39 @@ Key decisions:
 - **`max-h: 90vh`** prevents portrait images from overflowing the viewport.
 - `object-contain` ensures the full image is always visible; LQIP blurred background fills any bars.
 
+### Two frames, two rules (`config/galleryImages.ts`)
+
+The carousel and the thumbnail strip answer the same question — what to do
+with a photo that is not shaped like its frame — differently, because they
+are doing different jobs.
+
+| Surface | Frame | Rule | Helper |
+|---------|-------|------|--------|
+| Carousel (hero) | `4/3` → `16/9` at `sm` | Crop while at least half the photo survives, else show it whole | `shouldCoverFrame` |
+| Thumbnail strip | `4/3` fixed (180×135 / 196×147) | Never crop — always show the photo whole | — |
+
+- **The hero crops, the strip does not.** The hero shows one photo at a time
+  and a 4:3 trimmed into 16:9 loses nothing anyone misses. The strip is the
+  only place a listing shows *every* photo at once, so a crop there is what
+  turned twelve different rooms into twelve near-identical tiles of ceiling.
+- **`needsBlurredBackdrop(photoAspect, frameAspect)`** decides whether a
+  contained photo leaves bars worth filling. Bars are filled with the LQIP of
+  that same photo (`object-cover blur-lg scale-150`), so they carry the
+  photo's own colours instead of a black slab. A photo already shaped like its
+  frame mounts no backdrop and costs no extra request; an unmeasured one gets
+  the backdrop up front, so bars never flash black while the photo decodes.
+- **The card's pixel sizes and `THUMB_FRAME_ASPECT` must move together** — the
+  constant is what decides whether a backdrop is needed, the classes are what
+  actually shape the card.
+- **`crop: 'limit'` on every thumbnail request.** It never crops and never
+  upscales, so framing is the component's decision rather than the CDN's.
+- **A photo that will not load never renders a broken-image glyph.** The card
+  falls back to the same `BuildingOfficeIcon` tile the carousel uses, keeping
+  its `alt` as screen-reader text; a listing whose `imageUrl` is blank gets
+  that tile too rather than an empty `src`. The blank entry stays in the list
+  — `PropertyDetailsPage` and `PropertyGallery` index into the same array, so
+  dropping it would shift every index after it.
+
 ---
 
 ## Home-Page City Gallery (Elastic Gallery)

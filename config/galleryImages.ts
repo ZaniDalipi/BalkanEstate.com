@@ -260,3 +260,34 @@ export const shouldCoverFrame = (
   frameAspect: number
 ): boolean =>
   photoAspect === undefined || coveredFraction(photoAspect, frameAspect) >= MIN_VISIBLE_ON_COVER;
+
+/**
+ * How far a photo's shape may drift from its frame's before the leftover bars
+ * are worth filling.
+ *
+ * 1% of the frame is roughly a pixel of bar on a thumbnail — below anything a
+ * viewer can see, and not worth a second request.
+ */
+export const BACKDROP_ASPECT_TOLERANCE = 0.01;
+
+/**
+ * Whether a photo shown whole (`object-contain`) leaves bars that need a
+ * blurred copy of itself behind them.
+ *
+ * Only exactly-shaped photos fill their frame edge to edge; everything else
+ * leaves a strip of the container showing, and an empty strip renders as the
+ * black slab this backdrop exists to replace.
+ *
+ * A photo whose size is not known yet is assumed to need one: that is the
+ * common case, and mounting the backdrop up front means the bars are never
+ * briefly black while the photo decodes.
+ */
+export const needsBlurredBackdrop = (
+  photoAspect: number | undefined,
+  frameAspect: number
+): boolean => {
+  if (!(frameAspect > 0)) return false;
+  // Catches undefined, 0 and NaN — an unmeasurable photo gets the backdrop.
+  if (!(photoAspect > 0)) return true;
+  return coveredFraction(photoAspect, frameAspect) < 1 - BACKDROP_ASPECT_TOLERANCE;
+};

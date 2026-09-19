@@ -5,16 +5,23 @@
  * is sky, so a strip of three different photos rendered as three near-identical
  * blue rectangles with a black bar on top.
  *
- * These tests pin the two halves of the fix: the rule that decides when a photo
- * is too far off-shape to crop, and the blurred fill that stands behind the
- * bars once it is shown whole.
+ * The carousel still crops the shapes it can crop without losing the subject,
+ * so `shouldCoverFrame` is pinned here. The thumbnail strip does not crop at
+ * all: a thumbnail is the only place a listing shows every photo at once, so
+ * each one is shown whole in a 4:3 card over a blurred copy of itself. These
+ * tests pin both rules and the fill that stands behind the bars.
  */
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, cleanup, fireEvent } from '@testing-library/react';
 import { PropertyGallery } from '@/src/components/property/PropertyGallery';
-import { coveredFraction, shouldCoverFrame, MIN_VISIBLE_ON_COVER } from '@/config/galleryImages';
+import {
+  coveredFraction,
+  shouldCoverFrame,
+  needsBlurredBackdrop,
+  MIN_VISIBLE_ON_COVER,
+} from '@/config/galleryImages';
 import type { Property } from '@/types';
 
 vi.mock('react-i18next', () => ({
@@ -33,6 +40,8 @@ const LANDSCAPE = 4 / 3;
 const PORTRAIT = 9 / 16;
 const FRAME_16_9 = 16 / 9;
 const THUMB = 155 / 110;
+/** The thumbnail card's own shape — 180x135 and 196x147 are both exactly this. */
+const THUMB_FRAME = 4 / 3;
 
 describe('coveredFraction', () => {
   it('is 1 when the photo already matches the frame', () => {
@@ -98,6 +107,39 @@ describe('shouldCoverFrame', () => {
   });
 });
 
+describe('needsBlurredBackdrop', () => {
+  it('leaves an exactly-shaped photo alone', () => {
+    // It fills the card edge to edge, so there is nothing to fill behind it and
+    // no reason to pay for a second request.
+    expect(needsBlurredBackdrop(THUMB_FRAME, THUMB_FRAME)).toBe(false);
+  });
+
+  it('fills the bars a contained photo leaves, whichever way they run', () => {
+    // 16:9 leaves them above and below; a phone portrait leaves them at the
+    // sides. Both are the black slab the backdrop exists to replace.
+    expect(needsBlurredBackdrop(FRAME_16_9, THUMB_FRAME)).toBe(true);
+    expect(needsBlurredBackdrop(PORTRAIT, THUMB_FRAME)).toBe(true);
+  });
+
+  it('ignores a difference too small to see', () => {
+    // A hair off 4:3 is a pixel of bar on a 147px card.
+    expect(needsBlurredBackdrop(THUMB_FRAME * 1.005, THUMB_FRAME)).toBe(false);
+  });
+
+  it('assumes bars for a photo whose size is not known yet', () => {
+    // Mounting the backdrop before the decode is what stops the bars flashing
+    // black on first paint; an unmeasurable photo is treated the same way.
+    expect(needsBlurredBackdrop(undefined, THUMB_FRAME)).toBe(true);
+    expect(needsBlurredBackdrop(0, THUMB_FRAME)).toBe(true);
+    expect(needsBlurredBackdrop(NaN, THUMB_FRAME)).toBe(true);
+  });
+
+  it('has nothing to fill when the frame itself is unmeasurable', () => {
+    expect(needsBlurredBackdrop(LANDSCAPE, 0)).toBe(false);
+    expect(needsBlurredBackdrop(LANDSCAPE, NaN)).toBe(false);
+  });
+});
+
 const photo = (n: number) => `https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/p${n}.jpg`;
 
 const property = {
@@ -113,10 +155,10 @@ const property = {
   lng: 19.8,
 } as unknown as Property;
 
-/** The thumbnail strip renders at w_390; the carousel does not. */
+/** The thumbnail strip renders at w_392 (2x its 196px card); the carousel does not. */
 const thumbnails = (): HTMLImageElement[] =>
   Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-    img.getAttribute('src')?.includes('w_390')
+    img.getAttribute('src')?.includes('w_392')
   );
 
 /** Fakes a decode so the component learns the photo's real shape. */
@@ -151,19 +193,30 @@ describe('thumbnail strip', () => {
     thumbnails().forEach((img) => expect(img.getAttribute('src')).toContain('c_limit'));
   });
 
-  it('fills the card with a landscape photo and adds no backdrop', () => {
+  it('never crops a photo to the card, whatever shape it arrives in', () => {
+    renderStrip();
+    // 4:3, 16:9 and a phone portrait: the whole photo stays on screen in every
+    // one. Cropping is what turned a strip of twelve rooms into twelve
+    // identical close-ups of a ceiling.
+    [[1600, 1200], [1920, 1080], [1080, 1920]].forEach(([w, h]) => {
+      const thumb = thumbnails()[0];
+      reportNaturalSize(thumb, w, h);
+      expect(thumb.className).toContain('object-contain');
+      expect(thumb.className).not.toContain('object-cover');
+    });
+  });
+
+  it('adds no backdrop behind a photo already shaped like the card', () => {
     renderStrip();
     const thumb = thumbnails()[0];
+    // Exactly 4:3 — it fills the card, so there are no bars to hide.
     reportNaturalSize(thumb, 1600, 1200);
 
-    expect(thumb.className).toContain('object-cover');
-    expect(thumb.className).not.toContain('object-contain');
-    // A full-bleed card has nothing to fill, so it pays for no extra request.
     // Scoped to the card: the carousel above keeps its own blurred backdrop.
     expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(0);
   });
 
-  it('shows a portrait photo whole over a blurred copy of itself', () => {
+  it('shows an off-shape photo whole over a blurred copy of itself', () => {
     renderStrip();
     const thumb = thumbnails()[0];
     reportNaturalSize(thumb, 1080, 1920);
@@ -184,9 +237,112 @@ describe('thumbnail strip', () => {
   it('ignores a load event that carries no usable size', () => {
     renderStrip();
     const thumb = thumbnails()[0];
-    // A failed or still-empty decode reports 0x0; treating that as an aspect
-    // would divide by zero and letterbox a photo that is perfectly fine.
+    // A failed or still-empty decode reports 0x0. Recording that as the photo's
+    // shape would divide by zero, so the card keeps waiting — still contained,
+    // still backed by the fill it was given before the decode.
     reportNaturalSize(thumb, 0, 0);
-    expect(thumb.className).toContain('object-cover');
+
+    expect(thumb.className).toContain('object-contain');
+    expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(1);
+  });
+
+  it('shapes the card as the 4:3 the backdrop rule assumes', () => {
+    renderStrip();
+    // The classes are what actually shape the card and the constant is what
+    // decides whether a photo inside needs a backdrop, so a card that drifted
+    // off 4:3 would silently start letterboxing photos that fit it.
+    const card = document.querySelector<HTMLElement>('button.w-\\[180px\\]')!;
+    const classes = Array.from(card.classList);
+    const px = (prefix: string, axis: 'w' | 'h') => {
+      const cls = classes.find((c) => c.startsWith(`${prefix}${axis}-[`));
+      expect(cls, `${prefix}${axis}-[...] on the thumbnail card`).toBeDefined();
+      return Number(cls!.match(/\[(\d+)px\]/)![1]);
+    };
+
+    expect(px('', 'w') / px('', 'h')).toBeCloseTo(THUMB_FRAME, 10);
+    expect(px('sm:', 'w') / px('sm:', 'h')).toBeCloseTo(THUMB_FRAME, 10);
+  });
+
+  it('fills the bars of an off-CDN photo with the photo itself', () => {
+    // An external URL has no LQIP to blur. Reusing the photo the card already
+    // fetched costs no second request and keeps the bars off bare black.
+    const external = 'https://example.com/listing/photo.jpg';
+    render(
+      <PropertyGallery
+        property={{ ...property, imageUrl: external } as unknown as Property}
+        onOpenEditor={() => {}}
+        onOpenViewer={() => {}}
+        activeCategory="all"
+        currentImageIndex={0}
+        onCategoryChange={() => {}}
+        onImageIndexChange={() => {}}
+      />
+    );
+
+    const card = document.querySelector<HTMLElement>('button.w-\\[180px\\]')!;
+    const [backdrop, photo] = Array.from(card.querySelectorAll('img'));
+    expect(backdrop.getAttribute('src')).toBe(external);
+    expect(backdrop.className).toContain('object-cover');
+    expect(photo.className).toContain('object-contain');
+  });
+
+  it('shows the tile rather than requesting a URL the optimiser rejects', () => {
+    // `optimizeCloudinaryUrl` returns '' for anything that is not plain
+    // http(s) — a `javascript:` or `data:` URL that reached the listing must
+    // not be handed to an <img> at all.
+    render(
+      <PropertyGallery
+        property={{ ...property, imageUrl: 'javascript:alert(1)' } as unknown as Property}
+        onOpenEditor={() => {}}
+        onOpenViewer={() => {}}
+        activeCategory="all"
+        currentImageIndex={0}
+        onCategoryChange={() => {}}
+        onImageIndexChange={() => {}}
+      />
+    );
+
+    const card = document.querySelector<HTMLElement>('button.w-\\[180px\\]')!;
+    expect(card.querySelectorAll('img')).toHaveLength(0);
+    expect(card.querySelector('svg')).not.toBeNull();
+  });
+
+  it('falls back to a placeholder tile when a photo will not load', () => {
+    renderStrip();
+    const card = thumbnails()[0].closest('button')!;
+    fireEvent.error(thumbnails()[0]);
+
+    // A dead URL used to leave the browser's own broken-image glyph sitting in
+    // the strip. Nothing of that photo is requested any more — not even the
+    // blurred fill, which is the same dead upload.
+    expect(card.querySelectorAll('img')).toHaveLength(0);
+    expect(card.querySelector('svg')).not.toBeNull();
+    // The card still says which photo it is, so its button keeps a name.
+    expect(card.textContent).toContain('Tirana');
+  });
+
+  it('renders the same tile for a listing with no main photo at all', () => {
+    // `imageUrl` is part of the list the carousel and the strip index into, so
+    // a blank one cannot simply be dropped — it would shift every index after
+    // it. The card absorbs it instead of requesting an empty src.
+    render(
+      <PropertyGallery
+        property={{ ...property, imageUrl: undefined } as unknown as Property}
+        onOpenEditor={() => {}}
+        onOpenViewer={() => {}}
+        activeCategory="all"
+        currentImageIndex={0}
+        onCategoryChange={() => {}}
+        onImageIndexChange={() => {}}
+      />
+    );
+
+    const cards = document.querySelectorAll<HTMLElement>('button.w-\\[180px\\]');
+    expect(cards).toHaveLength(2);
+    // The blank one shows the tile; its neighbour is a real photo, so the
+    // fallback is the missing URL's doing and not the whole strip giving up.
+    expect(cards[0].querySelectorAll('img')).toHaveLength(0);
+    expect(cards[0].querySelector('svg')).not.toBeNull();
+    expect(cards[1].querySelector('img')!.getAttribute('src')).toContain('/listing/p1');
   });
 });
