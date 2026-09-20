@@ -117,6 +117,52 @@ describe('gallery frame height', () => {
     expect(frame().className).toContain('aspect-[16/9]');
     expect(frame().className).not.toContain('aspect-[4/3]');
   });
+
+  it.each([
+    ['Instagram', 'https://www.instagram.com/reel/Dc_lH3uM8lj/'],
+    ['TikTok', 'https://www.tiktok.com/@someone/video/7412345678901234567'],
+  ])('gives a %s tour a portrait frame on a phone', (_platform, tourUrl) => {
+    // These are authored vertically, so the 16:9 frame did not letterbox them —
+    // on a 390px phone it cropped the reel to a ~220px strip.
+    renderGallery({ ...baseProperty, tourUrl } as Property);
+    expect(frame().className).toContain('aspect-[9/16]');
+    expect(frame().className).toContain('sm:aspect-[16/9]');
+  });
+
+  it('takes the height Instagram reports for its own embed', () => {
+    renderGallery({ ...baseProperty, tourUrl: 'https://www.instagram.com/reel/Dc_lH3uM8lj/' } as Property);
+
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="Property Video Tour"]');
+    if (!iframe) throw new Error('instagram embed not found');
+    const box = iframe.closest<HTMLElement>('[class*="bg-neutral-900"]');
+    if (!box) throw new Error('gallery frame not found');
+
+    fireEvent(window, new MessageEvent('message', {
+      data: JSON.stringify({ type: 'MEASURE', details: { height: 812 } }),
+      origin: 'https://www.instagram.com',
+      source: iframe.contentWindow,
+    }));
+
+    // The post's real height wins over the fallback box, so the reel is neither
+    // cropped nor sat in dead space.
+    expect(box.style.height).toBe('812px');
+    expect(box.className).not.toContain('aspect-[');
+  });
+
+  it('ignores a height sent by anything other than the embed', () => {
+    renderGallery({ ...baseProperty, tourUrl: 'https://www.instagram.com/reel/Dc_lH3uM8lj/' } as Property);
+    const box = document.querySelector<HTMLElement>('[class*="bg-neutral-900"]');
+    if (!box) throw new Error('gallery frame not found');
+
+    fireEvent(window, new MessageEvent('message', {
+      data: JSON.stringify({ type: 'MEASURE', details: { height: 812 } }),
+      origin: 'https://evil.example.com',
+      source: window,
+    }));
+
+    expect(box.style.height).toBe('');
+    expect(box.className).toContain('aspect-[9/16]');
+  });
 });
 
 describe('framing follows the frame the photo is drawn in', () => {

@@ -29,7 +29,6 @@ import {
   PropertyContact,
   PropertyMapLink,
   NeighborhoodInsights,
-  SocialVideoEmbed,
 } from '@/src/components/property';
 import SimilarProperties from '@/src/components/property/SimilarProperties';
 import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
@@ -1078,17 +1077,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             {/* 360 Virtual Tour is now shown as a badge in the gallery and can be opened from there */}
             {/* Video Tour (YouTube/Vimeo) is now integrated in the PropertyGallery as the first view */}
 
-            {/* Social Video Embed - TikTok, Instagram (fallback embed below gallery) */}
-            {(() => {
-              const socialVideoUrl = [property.tourUrl, property.videoUrl].find(
-                url => url && (url.includes('tiktok.com') || url.includes('instagram.com'))
-              );
-              return socialVideoUrl ? (
-                <div className="animate-slide-up" style={{ animationDelay: '125ms' }}>
-                  <SocialVideoEmbed videoUrl={socialVideoUrl} />
-                </div>
-              ) : null;
-            })()}
+            {/* TikTok and Instagram tours play in the PropertyGallery's video view,
+                so there is no second copy of the same reel further down the page. */}
 
             {/* Property Info (Desktop only - mobile version shown above) */}
             <div data-section="details" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
