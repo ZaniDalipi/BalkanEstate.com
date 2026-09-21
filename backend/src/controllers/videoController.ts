@@ -10,6 +10,7 @@ import {
 } from '../services/videoGenerationService';
 import { videoLogger } from '../utils/logger';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
+import { extractInstagramVideoUrl } from '../utils/instagramEmbed';
 
 /**
  * @desc    Generate video for a property (synchronous - for smaller videos)
@@ -382,6 +383,94 @@ export const addVideoToListing = async (req: Request, res: Response): Promise<vo
   } catch (error: any) {
     videoLogger.error('❌ Failed to add video to listing:', error);
     res.status(500).json({ message: 'Failed to add video to listing' });
+  }
+};
+
+const INSTAGRAM_SHORTCODE = /^[A-Za-z0-9_-]{1,32}$/;
+
+/** Long enough to serve a browsing session, short enough that a signed CDN URL is still live. */
+const RESOLVED_TTL_MS = 20 * 60 * 1000;
+/** A reel that will not resolve should not be retried on every page view. */
+const UNRESOLVED_TTL_MS = 10 * 60 * 1000;
+const INSTAGRAM_FETCH_TIMEOUT_MS = 6000;
+const INSTAGRAM_CACHE_LIMIT = 500;
+
+const instagramVideoCache = new Map<string, { videoUrl: string | null; expiresAt: number }>();
+
+const rememberInstagramVideo = (shortcode: string, videoUrl: string | null): void => {
+  // Insertion-ordered, so the oldest key is the first one out.
+  if (instagramVideoCache.size >= INSTAGRAM_CACHE_LIMIT) {
+    const oldest = instagramVideoCache.keys().next().value;
+    if (oldest) instagramVideoCache.delete(oldest);
+  }
+  instagramVideoCache.set(shortcode, {
+    videoUrl,
+    expiresAt: Date.now() + (videoUrl ? RESOLVED_TTL_MS : UNRESOLVED_TTL_MS),
+  });
+};
+
+/**
+ * @desc    Resolve an Instagram reel to the CDN file its embed plays, for autoplay
+ * @route   GET /api/videos/instagram/:shortcode
+ * @access  Public (no auth required)
+ */
+export const resolveInstagramVideo = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const shortcode = getParam(req, 'shortcode');
+
+    // The shortcode is the only part of the URL a caller controls, and it is
+    // confined to the shape Instagram issues, so this cannot be pointed at
+    // another host.
+    if (!shortcode || !INSTAGRAM_SHORTCODE.test(shortcode)) {
+      res.status(400).json({ message: 'Invalid Instagram shortcode' });
+      return;
+    }
+
+    const cached = instagramVideoCache.get(shortcode);
+    if (cached && cached.expiresAt > Date.now()) {
+      res.set('Cache-Control', `public, max-age=${Math.floor((cached.expiresAt - Date.now()) / 1000)}`);
+      res.status(200).json({ videoUrl: cached.videoUrl });
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), INSTAGRAM_FETCH_TIMEOUT_MS);
+
+    let videoUrl: string | null = null;
+    try {
+      const response = await fetch(`https://www.instagram.com/reel/${shortcode}/embed/`, {
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Sec-Fetch-Dest': 'iframe',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'cross-site',
+        },
+      });
+
+      if (response.ok) {
+        videoUrl = extractInstagramVideoUrl(await response.text());
+      } else {
+        videoLogger.warn(`Instagram returned status ${response.status} for reel ${shortcode}`);
+      }
+    } catch (fetchError: any) {
+      // A reel that cannot be read is not an error the page needs to hear
+      // about — the gallery simply keeps Instagram's own embed.
+      videoLogger.warn(`Could not read Instagram reel ${shortcode}: ${fetchError.message}`);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    rememberInstagramVideo(shortcode, videoUrl);
+
+    res.set('Cache-Control', `public, max-age=${Math.floor((videoUrl ? RESOLVED_TTL_MS : UNRESOLVED_TTL_MS) / 1000)}`);
+    res.status(200).json({ videoUrl });
+  } catch (error: any) {
+    videoLogger.error('❌ Failed to resolve Instagram video:', error);
+    res.status(500).json({ message: 'Failed to resolve Instagram video' });
   }
 };
 

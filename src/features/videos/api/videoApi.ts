@@ -189,3 +189,19 @@ export const pollJobUntilComplete = async (
 
   throw new Error('Video generation timed out');
 };
+
+// --- Instagram reel playback ---
+
+export interface InstagramVideoResolution {
+  /** Direct CDN URL, or null when the reel could not be read and the embed should be kept. */
+  videoUrl: string | null;
+}
+
+/**
+ * Asks the backend for the file Instagram's own embed would play for a reel.
+ * Instagram's embed iframe waits for a tap, so this is what lets a reel used as
+ * a property tour autoplay inline. Nothing is hosted — the CDN URL is used directly.
+ */
+export const resolveInstagramVideo = async (shortcode: string): Promise<InstagramVideoResolution> => {
+  return apiRequest<InstagramVideoResolution>(`/videos/instagram/${encodeURIComponent(shortcode)}`);
+};

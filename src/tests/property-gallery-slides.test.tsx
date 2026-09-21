@@ -11,7 +11,8 @@
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, cleanup } from '@testing-library/react';
+import { cleanup } from '@testing-library/react';
+import { render } from './test-utils';
 import { PropertyGallery } from '@/src/components/property/PropertyGallery';
 import { GALLERY_WIDTHS } from '@/config/galleryImages';
 import type { Property } from '@/types';

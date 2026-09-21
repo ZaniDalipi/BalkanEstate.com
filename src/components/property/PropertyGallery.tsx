@@ -15,6 +15,8 @@ import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } fro
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
+import { useElementSize, type ElementSize } from '@/src/hooks/useElementSize';
+import { useInstagramReelVideo } from '@/src/features/videos/hooks/useInstagramReel';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -167,6 +169,57 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
   );
 };
 
+/**
+ * Facebook's video plugin lays itself out from the `width` it is given, not from
+ * the iframe it lands in — left to its default it overflowed a phone and sat in
+ * a pool of white space on a desktop. Handing it the frame's real size is what
+ * makes it fit at every breakpoint.
+ *
+ * `mute` rides along because no browser grants autoplay to a video with sound,
+ * so `autoplay` on its own was never going to start anything.
+ */
+const buildFacebookEmbedUrl = (url: string, size: ElementSize): string => {
+  const params = new URLSearchParams({
+    href: url,
+    show_text: 'false',
+    autoplay: 'true',
+    mute: '1',
+    allowfullscreen: 'true',
+  });
+
+  if (size.width > 0) {
+    params.set('width', String(size.width));
+    params.set('height', String(size.height));
+  }
+
+  return `https://www.facebook.com/plugins/video.php?${params.toString()}`;
+};
+
+/** Shared by the two videos the gallery plays itself, both of which start muted to autoplay. */
+const SoundToggle: React.FC<{ isMuted: boolean; onToggle: () => void; label: string }> = ({
+  isMuted,
+  onToggle,
+  label,
+}) => (
+  <button
+    onClick={onToggle}
+    className="absolute top-3 right-3 z-20 flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-sm text-white rounded-full hover:bg-black/80 transition-colors"
+    title={label}
+    aria-label={label}
+  >
+    {isMuted ? (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+      </svg>
+    ) : (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+      </svg>
+    )}
+  </button>
+);
+
 export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   property,
   onOpenEditor,
@@ -249,6 +302,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   const tiktokBlockquoteRef = useRef<HTMLDivElement>(null);
   const instagramIframeRef = useRef<HTMLIFrameElement>(null);
   const [instagramHeight, setInstagramHeight] = useState<number | null>(null);
+  const reelVideoRef = useRef<HTMLVideoElement>(null);
+  const [reelPlaybackFailed, setReelPlaybackFailed] = useState(false);
+  // Facebook's plugin needs the frame's size in its URL to lay itself out.
+  const [frameRef, frameSize] = useElementSize();
 
   // Determine video platform from URL
   const getVideoPlatform = useCallback((url: string): string => {
@@ -386,32 +443,31 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
     }
 
     // --- Facebook ---
-    // facebook.com/video.php?v=ID (legacy)
-    const fbVideoPhpMatch = url.match(/facebook\.com\/video\.php\?v=(\d+)/);
-    if (fbVideoPhpMatch) {
-      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
-    }
-    // facebook.com/share/v/CODE/ (share links)
-    const fbShareMatch = cleanUrl.match(/facebook\.com\/share\/v\/([A-Za-z0-9_-]+)/);
-    if (fbShareMatch) {
-      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
-    }
-    // facebook.com/watch/?v=ID, /videos/ID, /reel/ID
-    const fbVideoMatch = cleanUrl.match(/facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)(\d+)/);
-    if (fbVideoMatch) {
-      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
-    }
-    // fb.watch/CODE/ (short links)
-    const fbWatchMatch = cleanUrl.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
-    if (fbWatchMatch) {
-      return { embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`, platform: 'facebook' };
+    // video.php?v=ID (legacy) · /share/v/CODE/ · /watch/?v=ID · /videos/ID ·
+    // /reel/ID · fb.watch/CODE/. Every one of these is played by the same
+    // plugin, which takes the original URL as its href.
+    const facebookPatterns = [
+      /facebook\.com\/video\.php\?v=\d+/,
+      /facebook\.com\/share\/v\/[A-Za-z0-9_-]+/,
+      /facebook\.com\/(?:watch\/?\?v=|[\w.]+\/videos\/|reel\/)\d+/,
+      /fb\.watch\/[A-Za-z0-9_-]+/,
+    ];
+    if (facebookPatterns.some((pattern) => pattern.test(url) || pattern.test(cleanUrl))) {
+      return { embedUrl: buildFacebookEmbedUrl(url, frameSize), platform: 'facebook' };
     }
 
     // Default - return original URL
     return { embedUrl: url, platform: 'other' };
-  }, []);
+  }, [frameSize]);
 
   const videoInfo = useMemo(() => getVideoEmbedUrl(externalVideoUrl), [externalVideoUrl, getVideoEmbedUrl]);
+
+  // Looked up only for an Instagram tour, cached for the session, and never a
+  // blocker: until it answers the embed shows, exactly as it does today.
+  const { videoUrl: reelVideoUrl } = useInstagramReelVideo(
+    externalVideoUrl,
+    videoPlatform === 'instagram'
+  );
 
   // Load TikTok embed script for blockquote rendering
   useEffect(() => {
@@ -450,6 +506,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
    */
   useEffect(() => {
     setInstagramHeight(null);
+    setReelPlaybackFailed(false);
     if (videoPlatform !== 'instagram' || viewMode !== 'video') return;
 
     const onMessage = (event: MessageEvent) => {
@@ -588,9 +645,20 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       .filter(({ item, offset }) => !!item.url && Math.abs(offset) <= SLIDE_WINDOW);
   }, [imagesForCurrentCategory, currentImageIndex]);
 
-  // TikTok and Instagram author vertically, so a 16:9 frame does not letterbox
-  // them — on a phone it crops them to a strip. Both get a portrait frame.
-  const isPortraitVideo = videoPlatform === 'tiktok' || videoPlatform === 'instagram';
+  const awaitingFrameSize = videoPlatform === 'facebook' && frameSize.width === 0;
+
+  // A reel that resolves to a playable file is played here rather than in
+  // Instagram's embed, which would sit on a still frame waiting for a tap. If it
+  // does not resolve, or the CDN refuses to serve it, the embed stays.
+  const playsReelInline = videoPlatform === 'instagram' && !!reelVideoUrl && !reelPlaybackFailed;
+
+  // Vertically authored video — TikTok, Instagram, and Facebook's own reels —
+  // is not letterboxed by a 16:9 frame; on a phone that frame crops it to a
+  // strip. Everything else on Facebook is landscape and keeps 16:9.
+  const isPortraitVideo =
+    videoPlatform === 'tiktok' ||
+    videoPlatform === 'instagram' ||
+    (videoPlatform === 'facebook' && /facebook\.com\/reel\//.test(externalVideoUrl));
   const frameAspectClass =
     viewMode === 'video'
       ? isPortraitVideo
@@ -600,7 +668,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   // An Instagram embed that has reported its own height gets that height
   // exactly, so nothing is cropped and no dead bars are left above or below.
-  const sizedToInstagram = viewMode === 'video' && videoPlatform === 'instagram' && !!instagramHeight;
+  // Playing the reel ourselves needs none of that — it is a plain 9:16 video.
+  const sizedToInstagram =
+    viewMode === 'video' && videoPlatform === 'instagram' && !!instagramHeight && !playsReelInline;
 
   return (
     // data-no-swipe-back: a horizontal drag in here changes photo. It sits at
@@ -614,6 +684,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
            for the vertical platforms, so a taller box round one would add letterboxing,
            not picture. An Instagram embed that reports its height overrides both. ── */}
       <div
+        ref={frameRef}
         className={`relative w-full bg-neutral-900 overflow-hidden ${sizedToInstagram ? '' : frameAspectClass}`}
         style={sizedToInstagram ? { height: `${instagramHeight}px`, maxHeight: '90vh' } : { maxHeight: '90vh' }}
       >
@@ -789,28 +860,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   </svg>
                   <span>{t('property:gallery.propertyShowcase', 'Property Showcase')}</span>
                 </div>
-                {/* Sound toggle button */}
-                <button
-                  onClick={() => {
+                <SoundToggle
+                  isMuted={isMuted}
+                  onToggle={() => {
                     setIsMuted(!isMuted);
-                    if (videoRef.current) {
-                      videoRef.current.muted = !isMuted;
-                    }
+                    if (videoRef.current) videoRef.current.muted = !isMuted;
                   }}
-                  className="absolute top-3 right-3 z-20 flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-sm text-white rounded-full hover:bg-black/80 transition-colors"
-                  title={isMuted ? t('property:gallery.unmute') : t('property:gallery.mute')}
-                >
-                  {isMuted ? (
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                    </svg>
-                  )}
-                </button>
+                  label={isMuted ? t('property:gallery.unmute') : t('property:gallery.mute')}
+                />
                 {/* Skip button */}
                 <button
                   onClick={() => {
@@ -865,7 +922,41 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 ) : (
                   <>
                     {/* External video player for YouTube, Vimeo, Facebook, Instagram, and full TikTok URLs */}
-                    {videoInfo.platform === 'instagram' ? (
+                    {playsReelInline ? (
+                      <>
+                        {/* Instagram's own embed will not autoplay, so where the reel
+                            resolves to a playable file the page plays it itself. */}
+                        <video
+                          ref={reelVideoRef}
+                          src={reelVideoUrl}
+                          autoPlay
+                          muted={isMuted}
+                          playsInline
+                          loop
+                          className="w-full h-full object-contain"
+                          onError={() => setReelPlaybackFailed(true)}
+                        />
+                        <SoundToggle
+                          isMuted={isMuted}
+                          onToggle={() => {
+                            setIsMuted(!isMuted);
+                            if (reelVideoRef.current) reelVideoRef.current.muted = !isMuted;
+                          }}
+                          label={isMuted ? t('property:gallery.unmute') : t('property:gallery.mute')}
+                        />
+                        <a
+                          href={externalVideoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute bottom-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-medium rounded-full hover:bg-black/80 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          Instagram
+                        </a>
+                      </>
+                    ) : videoInfo.platform === 'instagram' ? (
                       <div className="absolute inset-0 flex items-center justify-center bg-black">
                         <iframe
                           ref={instagramIframeRef}
@@ -878,6 +969,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                           scrolling="no"
                         />
                       </div>
+                    ) : awaitingFrameSize ? (
+                      // Facebook's plugin bakes its layout in at load from the
+                      // size in its URL, so it waits one paint for the real
+                      // measurement rather than loading twice.
+                      <div className="absolute inset-0 bg-black" />
                     ) : (
                       <iframe
                         src={videoInfo.embedUrl}

@@ -7,6 +7,7 @@ import {
   addVideoToListing,
   getVideoPreview,
   resolveTikTokShortLink,
+  resolveInstagramVideo,
 } from '../controllers/videoController';
 import { protect } from '../middleware/auth';
 
@@ -62,6 +63,43 @@ const router = express.Router();
  *         description: Failed to follow redirect
  */
 router.post('/resolve-tiktok-short-link', resolveTikTokShortLink);
+
+/**
+ * @swagger
+ * /api/videos/instagram/{shortcode}:
+ *   get:
+ *     summary: Resolve an Instagram reel to the CDN file its embed plays
+ *     tags: [Videos]
+ *     description: >
+ *       Instagram's embed iframe waits for a tap before it plays, so a reel used as a
+ *       property tour cannot autoplay. This reads the file that embed would itself play
+ *       so the gallery can play it inline. Nothing is downloaded or stored — only the
+ *       URL is passed on, and only when it points at Instagram's own CDN. Responses are
+ *       cached, including misses, so a reel is read at most once per cache window.
+ *     parameters:
+ *       - in: path
+ *         name: shortcode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The reel's shortcode, as it appears in instagram.com/reel/{shortcode}/
+ *         example: Dc_lH3uM8lj
+ *     responses:
+ *       200:
+ *         description: Lookup completed. A null videoUrl means the caller should keep Instagram's embed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 videoUrl:
+ *                   type: string
+ *                   nullable: true
+ *                   description: Direct CDN URL, or null when the reel could not be read
+ *       400:
+ *         description: Invalid shortcode
+ */
+router.get('/instagram/:shortcode', resolveInstagramVideo);
 
 /**
  * @swagger

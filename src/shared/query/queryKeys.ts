@@ -333,3 +333,13 @@ export const adBannerKeys = {
   // Admin endpoint (all banners)
   admin: () => [...adBannerKeys.all, 'admin'] as const,
 };
+
+// ============================================================================
+// Social Video Query Keys
+// Used by: PropertyGallery, to play an Instagram reel tour inline
+// ============================================================================
+
+export const instagramReelKeys = {
+  all: ['instagramReel'] as const,
+  video: (shortcode: string) => [...instagramReelKeys.all, 'video', shortcode] as const,
+};

@@ -11,6 +11,7 @@ export {
   useDeleteVideo,
   useVideoJobStatus,
 } from './hooks/useVideoGeneration';
+export { useInstagramReelVideo, getInstagramShortcode } from './hooks/useInstagramReel';
 
 // API
 export {
@@ -20,6 +21,7 @@ export {
   getJobStatus,
   deletePropertyVideo,
   pollJobUntilComplete,
+  resolveInstagramVideo,
 } from './api/videoApi';
 
 // Types

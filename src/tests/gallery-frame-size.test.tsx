@@ -13,7 +13,8 @@
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, cleanup, fireEvent } from '@testing-library/react';
+import { cleanup, fireEvent } from '@testing-library/react';
+import { render } from './test-utils';
 import { PropertyGallery } from '@/src/components/property/PropertyGallery';
 import type { Property } from '@/types';
 
