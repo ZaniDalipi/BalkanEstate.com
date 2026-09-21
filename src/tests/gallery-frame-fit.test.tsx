@@ -5,9 +5,10 @@
  * is sky, so a strip of three different photos rendered as three near-identical
  * blue rectangles with a black bar on top.
  *
- * These tests pin the two halves of the fix: the rule that decides when a photo
- * is too far off-shape to crop, and the blurred fill that stands behind the
- * bars once it is shown whole.
+ * These tests pin the two places that answer it: the hero frame, which crops a
+ * photo only while most of it survives, and the thumbnail strip, which never
+ * crops at all — a thumbnail exists to tell one photo from another, so it shows
+ * each one whole over a blurred copy of itself.
  */
 
 import React from 'react';
@@ -151,24 +152,28 @@ describe('thumbnail strip', () => {
     thumbnails().forEach((img) => expect(img.getAttribute('src')).toContain('c_limit'));
   });
 
-  it('fills the card with a landscape photo and adds no backdrop', () => {
+  it('shows every photo whole, whatever its shape', () => {
+    renderStrip();
+    // Cropping a card that is 195px wide is how a kitchen becomes a ceiling:
+    // there is no room in a thumbnail to lose part of the picture and still
+    // have it read as the room it is.
+    thumbnails().forEach((img) => {
+      expect(img.className).toContain('object-contain');
+      expect(img.className).not.toContain('object-cover');
+    });
+  });
+
+  it('never crops even a landscape photo the card would almost fit', () => {
     renderStrip();
     const thumb = thumbnails()[0];
     reportNaturalSize(thumb, 1600, 1200);
-
-    expect(thumb.className).toContain('object-cover');
-    expect(thumb.className).not.toContain('object-contain');
-    // A full-bleed card has nothing to fill, so it pays for no extra request.
-    // Scoped to the card: the carousel above keeps its own blurred backdrop.
-    expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(0);
+    expect(thumb.className).toContain('object-contain');
   });
 
-  it('shows a portrait photo whole over a blurred copy of itself', () => {
+  it('stands a blurred copy of the same photo behind the bars', () => {
     renderStrip();
     const thumb = thumbnails()[0];
     reportNaturalSize(thumb, 1080, 1920);
-
-    expect(thumb.className).toContain('object-contain');
 
     const backdrop = thumb.closest('button')!.querySelector<HTMLImageElement>('img[src*="e_blur"]');
     expect(backdrop).not.toBeNull();
@@ -179,14 +184,5 @@ describe('thumbnail strip', () => {
     // A CSS blur samples past the element as transparent, so the backdrop has
     // to overflow by more than its blur radius or the edges fade back to black.
     expect(backdrop!.className).toContain('scale-150');
-  });
-
-  it('ignores a load event that carries no usable size', () => {
-    renderStrip();
-    const thumb = thumbnails()[0];
-    // A failed or still-empty decode reports 0x0; treating that as an aspect
-    // would divide by zero and letterbox a photo that is perfectly fine.
-    reportNaturalSize(thumb, 0, 0);
-    expect(thumb.className).toContain('object-cover');
   });
 });

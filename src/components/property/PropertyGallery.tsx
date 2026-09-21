@@ -99,12 +99,6 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
 };
 
 /**
- * Shape of one card in the thumbnail strip: 180x128 on a phone, 195x140 above
- * it. Both land within a hair of 1.4, so one number describes the frame.
- */
-const THUMB_ASPECT = 180 / 128;
-
-/**
  * Candidate widths for a thumbnail card: 1x, 2x and 3x its 195px frame.
  *
  * The strip used to stop at 390 (2x), so every phone with a 3x screen — most of
@@ -115,31 +109,26 @@ const THUMB_WIDTHS = [195, 390, 585];
 /**
  * One card in the thumbnail strip.
  *
- * A thumbnail is the only place a listing shows every photo at once, so a photo
- * that does not match the card's shape has to stay recognisable rather than be
- * cropped down to whichever band sat in the middle — for a phone-shot portrait
- * that band is sky, which is how a strip of three photos ends up looking like
- * three identical blue rectangles.
+ * The strip is the only place a listing shows every photo at once, so its job
+ * is to let someone tell the photos apart — which means each card shows its
+ * photo whole. Cropping to fill the card reads as a zoomed-in detail: a kitchen
+ * becomes a ceiling, and a phone-held portrait becomes whichever horizontal
+ * band sat in the middle, usually sky.
  *
- * So an off-shape photo is shown whole over a blurred copy of itself, which
- * fills the side bars with that photo's own colours instead of a black slab.
- * Ordinary landscape photos are unaffected: they still fill the card edge to
- * edge, because cropping a 4:3 into a 1.4 card loses almost nothing.
+ * So every photo is contained, never cropped, and the leftover bars are filled
+ * with a blurred copy of that same photo rather than a black slab. The card
+ * still looks full-bleed at a glance; the difference is that what it shows is
+ * the whole picture.
  */
 const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eager }) => {
-  // Undefined until the photo reports its natural size. `shouldCoverFrame`
-  // reads that as "cover", the answer for the common case, so the card never
-  // flips layout after the fact for an ordinary photo.
-  const [aspect, setAspect] = useState<number | undefined>(undefined);
-
-  const cover = shouldCoverFrame(aspect, THUMB_ASPECT);
   const placeholder = getPropertyImagePlaceholder(url);
 
   return (
     <>
-      {/* Blurred fill behind the bars. Only mounted once we know the photo
-          needs it, so a full-bleed thumbnail costs no extra request. */}
-      {!cover && placeholder && (
+      {/* Blurred fill behind the bars, so an off-shape photo sits on its own
+          colours instead of black. It is the LQIP the listing already loads,
+          so it costs no extra request. */}
+      {placeholder && (
         <img
           src={placeholder}
           alt=""
@@ -155,13 +144,9 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
         srcSet={cloudinarySrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
         sizes="(max-width: 640px) 180px, 195px"
         alt=""
-        className={`relative w-full h-full ${cover ? 'object-cover' : 'object-contain'}`}
+        className="relative w-full h-full object-contain"
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
-        onLoad={(e) => {
-          const { naturalWidth, naturalHeight } = e.currentTarget;
-          if (naturalWidth > 0 && naturalHeight > 0) setAspect(naturalWidth / naturalHeight);
-        }}
       />
     </>
   );

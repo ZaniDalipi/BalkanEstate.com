@@ -4,7 +4,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Property, PropertyImageTag } from '../../../types';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
 
 // Category emoji map
 const categoryEmojis: Record<string, string> = {
@@ -160,14 +160,29 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
                     : 'opacity-80 hover:opacity-100'
               }`}
             >
+              {/* Blurred fill behind the letterbox bars, so a photo that is not
+                  square sits on its own colours rather than a grey slab. It is
+                  the LQIP the listing already loads, so it costs no request. */}
+              {getPropertyImagePlaceholder(img.url) && (
+                <img
+                  src={getPropertyImagePlaceholder(img.url)}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
+                  decoding="async"
+                />
+              )}
+
+              {/* `limit` never crops and never upscales, and `object-contain`
+                  keeps the whole photo inside the square. A thumbnail is how
+                  someone tells one photo from another, so cropping it to fill
+                  the tile — which reads as a zoomed-in detail — defeats it. */}
               <img
-                src={optimizeCloudinaryUrl(img.url, { width: 200, quality: 'auto', crop: 'fill' })}
+                src={optimizeCloudinaryUrl(img.url, { width: 400, quality: 'auto', crop: 'limit' })}
                 alt={`${property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'Property'} ${img.tag || 'photo'} - ${property.city}, ${property.country}`}
                 loading={index < 9 ? 'eager' : 'lazy'}
                 decoding="async"
-                width={200}
-                height={200}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                className="relative w-full h-full object-contain transition-opacity duration-300"
               />
 
               {/* Active indicator overlay */}
