@@ -161,17 +161,16 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
               }`}
             >
               {/* Blurred fill behind the letterbox bars, so a photo that is not
-                  square sits on its own colours rather than a grey slab. It is
-                  the LQIP the listing already loads, so it costs no request. */}
-              {getPropertyImagePlaceholder(img.url) && (
-                <img
-                  src={getPropertyImagePlaceholder(img.url)}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
-                  decoding="async"
-                />
-              )}
+                  square sits on its own colours rather than a grey slab. The
+                  LQIP where there is one, otherwise the tile's own photo —
+                  which the browser is fetching anyway. */}
+              <img
+                src={getPropertyImagePlaceholder(img.url) || optimizeCloudinaryUrl(img.url, { width: 400, quality: 'auto', crop: 'limit' })}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
+                decoding="async"
+              />
 
               {/* `limit` never crops and never upscales, and `object-contain`
                   keeps the whole photo inside the square. A thumbnail is how

@@ -121,16 +121,23 @@ const THUMB_WIDTHS = [195, 390, 585];
  * the whole picture.
  */
 const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eager }) => {
-  const placeholder = getPropertyImagePlaceholder(url);
+  // `limit` never crops and never upscales, so the card decides the framing
+  // rather than the CDN guessing at it.
+  const src = optimizeCloudinaryUrl(url, { width: 390, quality: GALLERY_QUALITY, crop: 'limit' });
+
+  // The tiny blurred LQIP where there is one. A photo hosted anywhere but
+  // Cloudinary has none, and black bars are the thing this backdrop exists to
+  // avoid — so it falls back to the card's own photo, which the browser is
+  // fetching anyway, and pays for no second request either way.
+  const backdrop = getPropertyImagePlaceholder(url) || src;
 
   return (
     <>
       {/* Blurred fill behind the bars, so an off-shape photo sits on its own
-          colours instead of black. It is the LQIP the listing already loads,
-          so it costs no extra request. */}
-      {placeholder && (
+          colours rather than a black slab. */}
+      {backdrop && (
         <img
-          src={placeholder}
+          src={backdrop}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover blur-lg scale-150 pointer-events-none select-none"
@@ -138,9 +145,7 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
         />
       )}
       <img
-        // `limit` never crops and never upscales, so the card decides the
-        // framing rather than the CDN guessing at it.
-        src={optimizeCloudinaryUrl(url, { width: 390, quality: GALLERY_QUALITY, crop: 'limit' })}
+        src={src}
         srcSet={cloudinarySrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
         sizes="(max-width: 640px) 180px, 195px"
         alt=""

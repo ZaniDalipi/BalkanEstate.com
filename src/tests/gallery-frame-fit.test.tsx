@@ -170,6 +170,32 @@ describe('thumbnail strip', () => {
     expect(thumb.className).toContain('object-contain');
   });
 
+  it('blurs the photo itself behind the bars when the host offers no LQIP', () => {
+    // Only Cloudinary URLs yield a w_20 placeholder. A photo hosted anywhere
+    // else used to get no backdrop at all, which is the black bar this whole
+    // arrangement exists to avoid — so it falls back to the card's own photo.
+    const offsite = 'https://storage.example.com/listing/p9.jpg';
+    render(
+      <PropertyGallery
+        property={{ ...property, imageUrl: offsite, images: [] } as unknown as Property}
+        onOpenEditor={() => {}}
+        onOpenViewer={() => {}}
+        activeCategory="all"
+        currentImageIndex={0}
+        onCategoryChange={() => {}}
+        onImageIndexChange={() => {}}
+      />
+    );
+
+    // `.relative` is what separates a strip card's photo from the hero's,
+    // which is also contained when it is off-shape.
+    const card = document.querySelector<HTMLImageElement>('img.relative.object-contain')!.closest('button')!;
+    const backdrop = card.querySelector<HTMLImageElement>('img[aria-hidden="true"]');
+    expect(backdrop).not.toBeNull();
+    expect(backdrop!.className).toContain('object-cover');
+    expect(backdrop!.getAttribute('src')).toBe(offsite);
+  });
+
   it('stands a blurred copy of the same photo behind the bars', () => {
     renderStrip();
     const thumb = thumbnails()[0];
