@@ -83,16 +83,21 @@ Key decisions:
   for their layout; the card owns the fit, the fill and the failure states.
   Its `alt` is not decorative — thumbnails sit in bare `<button>`s, so it is
   what gives those buttons an accessible name.
-- **`needsBlurredBackdrop(photoAspect, frameAspect)`** (`config/galleryImages.ts`)
-  decides whether a contained photo leaves bars worth filling. A photo already
-  shaped like its frame mounts no backdrop and costs no extra request; an
-  unmeasured one gets the backdrop up front, so bars never flash black while
-  the photo decodes. `BACKDROP_ASPECT_TOLERANCE` (1%) is the "close enough".
-- **The fill must read as backdrop, never as a second copy of the photo.**
-  It is the tiny LQIP (not the photo), heavily blurred and dimmed
-  (`object-cover blur-2xl scale-[1.75] opacity-60` on a thumbnail). A lightly
-  blurred full-size copy magnified across the card is legible enough that the
-  eye merges it with the photo in front, and the card reads as one zoomed soft
+- **Every thumbnail holds its photo off the card's edges** (`p-[6%]`), so a
+  blurred margin is always visible. "Never cropped" is not something a viewer
+  can *see* when the photo happens to match the card: it fills the card edge to
+  edge and looks exactly like one zoomed to fit. The inset is what makes the
+  card read as "this is the whole picture, and here is where it ends".
+  It is padding, not `inset-[6%]`: an absolutely positioned *replaced* element
+  takes its intrinsic size when width/height are auto and ignores the insets
+  that would size it, rendering the photo full-size in the corner. Padding
+  shrinks the content box `object-contain` fits into, and `box-sizing:
+  border-box` keeps the element itself card-sized.
+- **The fill is unconditional, and must read as backdrop** rather than as a
+  second copy of the photo: the tiny LQIP (not the photo), heavily blurred and
+  dimmed (`object-cover blur-2xl scale-[1.75] opacity-60`). A lightly blurred
+  full-size copy magnified across the card is legible enough that the eye
+  merges it with the photo in front, and the card reads as one zoomed soft
   image — indistinguishable from the crop the fit exists to avoid.
 - **The overflow has to exceed the blur radius.** A CSS blur samples past the
   element as transparent, so a backdrop that only overflowed a few percent
@@ -108,14 +113,6 @@ Key decisions:
   normalises every URL shape (`stripCloudinaryTransforms`), and CLAUDE.md
   requires building Cloudinary URLs through it rather than by hand.
   `cloudinary-placeholder.test.ts` pins every shape.
-- **A thumbnail card is 16:9, wider than the 4:3 a phone shoots.** Against a
-  4:3 card the commonest listing photo filled edge to edge, and a photo that
-  exactly fills its card is indistinguishable from one cropped to fit — there
-  is nothing on screen telling the viewer they are seeing all of it. Against
-  16:9 the same photo sits whole with its own blurred colour down either side.
-- **`THUMB_FRAME_ASPECT` (16:9) and the card's CSS must move together** — the
-  constant decides whether a backdrop is needed, the classes shape the card.
-  `property-photos-grid.test.tsx` and `gallery-frame-fit.test.tsx` pin both.
 - **`crop: 'limit'` on every request.** It never crops and never upscales, so
   framing is the component's decision rather than the CDN's.
 - **No Ken Burns pan.** The hero used to drift across photos that filled the

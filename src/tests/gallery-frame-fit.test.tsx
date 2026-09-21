@@ -1,23 +1,19 @@
 /**
- * A listing's photos do not all share a shape. Phone portraits and video stills
- * come in at 9:16, and `object-cover` into a landscape frame kept whichever
- * horizontal band happened to sit in the middle — for an outdoor shot that band
- * is sky, so a strip of three different photos rendered as three near-identical
- * blue rectangles with a black bar on top.
+ * Nothing is cropped to its frame. A thumbnail shows the whole photo, held off
+ * the card's edges so there is always a blurred margin around it — not only
+ * when the photo's shape happens to differ from the card's. A photo that fills
+ * its card edge to edge is indistinguishable from one zoomed to fit, which is
+ * what kept these reading as "still cropped" however correct the fit was.
  *
- * Nothing is cropped to its frame any more. The thumbnail strip shows every
- * photo whole in a 16:9 card over a blurred copy of itself — wider than the
- * 4:3 a phone shoots, so an ordinary listing photo visibly sits inside its
- * card rather than filling it, which is what tells a viewer they are seeing
- * all of it. These tests pin the rule that decides when those bars need
- * filling, and the fill itself.
+ * These tests pin the card's shape, that the photo is fitted and inset, that
+ * the fill is always there and reads as backdrop, and the failure paths.
  */
 
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, cleanup, fireEvent } from '@testing-library/react';
 import { PropertyGallery } from '@/src/components/property/PropertyGallery';
-import { coveredFraction, needsBlurredBackdrop } from '@/config/galleryImages';
+import { THUMB_FRAME_ASPECT } from '@/src/components/property/PhotoThumbnail';
 import type { Property } from '@/types';
 
 vi.mock('react-i18next', () => ({
@@ -31,75 +27,6 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('@/src/features/promo/components/Slot', () => ({ default: () => null }));
-
-const LANDSCAPE = 4 / 3;
-const PORTRAIT = 9 / 16;
-const FRAME_16_9 = 16 / 9;
-/** The thumbnail card's own shape — 192x108 and 208x117 are both exactly this. */
-const THUMB_FRAME = 16 / 9;
-
-describe('coveredFraction', () => {
-  it('is 1 when the photo already matches the frame', () => {
-    expect(coveredFraction(FRAME_16_9, FRAME_16_9)).toBe(1);
-  });
-
-  it('is symmetric — a frame too tall costs the same as a frame too wide', () => {
-    expect(coveredFraction(1, 2)).toBeCloseTo(coveredFraction(2, 1), 10);
-  });
-
-  it('reports how little of a phone portrait survives a landscape frame', () => {
-    // Roughly a third: the reason the crop was unusable, not merely tight.
-    expect(coveredFraction(PORTRAIT, FRAME_16_9)).toBeCloseTo(0.316, 3);
-  });
-
-  it('treats an unmeasurable aspect as lossless rather than dividing by zero', () => {
-    expect(coveredFraction(0, FRAME_16_9)).toBe(1);
-    expect(coveredFraction(NaN, FRAME_16_9)).toBe(1);
-  });
-});
-
-describe('needsBlurredBackdrop', () => {
-  it('leaves an exactly-shaped photo alone', () => {
-    // It fills the card edge to edge, so there is nothing to fill behind it and
-    // no reason to pay for a second request.
-    expect(needsBlurredBackdrop(THUMB_FRAME, THUMB_FRAME)).toBe(false);
-  });
-
-  it('fills the bars a contained photo leaves, whichever way they run', () => {
-    // The card is 16:9, so an ordinary 4:3 photo and a phone portrait both
-    // leave bars at the sides; only something wider than 16:9 leaves them
-    // above and below. All of them are the black slab the fill replaces.
-    expect(needsBlurredBackdrop(LANDSCAPE, THUMB_FRAME)).toBe(true);
-    expect(needsBlurredBackdrop(PORTRAIT, THUMB_FRAME)).toBe(true);
-    expect(needsBlurredBackdrop(3, THUMB_FRAME)).toBe(true);
-  });
-
-  it('gives the commonest listing photo a fill — the point of a wider card', () => {
-    // A phone shoots 4:3. Against a 4:3 card that photo filled edge to edge
-    // and looked exactly like one cropped to fit; against 16:9 it sits whole
-    // with its own colour down either side.
-    expect(needsBlurredBackdrop(LANDSCAPE, THUMB_FRAME)).toBe(true);
-    expect(THUMB_FRAME).toBeGreaterThan(LANDSCAPE);
-  });
-
-  it('ignores a difference too small to see', () => {
-    // A hair off 4:3 is a pixel of bar on a 147px card.
-    expect(needsBlurredBackdrop(THUMB_FRAME * 1.005, THUMB_FRAME)).toBe(false);
-  });
-
-  it('assumes bars for a photo whose size is not known yet', () => {
-    // Mounting the backdrop before the decode is what stops the bars flashing
-    // black on first paint; an unmeasurable photo is treated the same way.
-    expect(needsBlurredBackdrop(undefined, THUMB_FRAME)).toBe(true);
-    expect(needsBlurredBackdrop(0, THUMB_FRAME)).toBe(true);
-    expect(needsBlurredBackdrop(NaN, THUMB_FRAME)).toBe(true);
-  });
-
-  it('has nothing to fill when the frame itself is unmeasurable', () => {
-    expect(needsBlurredBackdrop(LANDSCAPE, 0)).toBe(false);
-    expect(needsBlurredBackdrop(LANDSCAPE, NaN)).toBe(false);
-  });
-});
 
 const photo = (n: number) => `https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/p${n}.jpg`;
 
@@ -167,17 +94,30 @@ describe('thumbnail strip', () => {
     });
   });
 
-  it('adds no backdrop behind a photo already shaped like the card', () => {
+  it('holds the photo off the card edges so the margin is always visible', () => {
     renderStrip();
     const thumb = thumbnails()[0];
-    // Exactly 16:9 — it fills the card, so there are no bars to hide.
-    reportNaturalSize(thumb, 1920, 1080);
-
-    // Scoped to the card: the carousel above keeps its own blurred backdrop.
-    expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(0);
+    // Padding, not inset: an absolutely positioned replaced element takes its
+    // intrinsic size when width/height are auto and ignores the insets, which
+    // renders the photo full-size in the corner. Padding shrinks the content
+    // box `object-contain` fits into instead.
+    expect(thumb.className).toContain('p-[6%]');
+    expect(thumb.className).toContain('inset-0');
+    expect(thumb.className).toContain('w-full');
+    expect(thumb.className).toContain('h-full');
   });
 
-  it('shows an off-shape photo whole over a blurred copy of itself', () => {
+  it('always puts a fill behind the photo, even one shaped like the card', () => {
+    renderStrip();
+    const thumb = thumbnails()[0];
+    // Exactly 16:9 \u2014 it used to mount no fill at all, so the photo ran to the
+    // card's edges and read as zoomed-to-fit. The inset means there is always
+    // a margin, so there is always something to fill.
+    reportNaturalSize(thumb, 1920, 1080);
+    expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(1);
+  });
+
+  it('shows a photo whole over a blurred copy of itself', () => {
     renderStrip();
     const thumb = thumbnails()[0];
     reportNaturalSize(thumb, 1080, 1920);
@@ -199,19 +139,7 @@ describe('thumbnail strip', () => {
     expect(backdrop!.className).toContain('opacity-60');
   });
 
-  it('ignores a load event that carries no usable size', () => {
-    renderStrip();
-    const thumb = thumbnails()[0];
-    // A failed or still-empty decode reports 0x0. Recording that as the photo's
-    // shape would divide by zero, so the card keeps waiting — still contained,
-    // still backed by the fill it was given before the decode.
-    reportNaturalSize(thumb, 0, 0);
-
-    expect(thumb.className).toContain('object-contain');
-    expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(1);
-  });
-
-  it('shapes the card as the 16:9 the backdrop rule assumes', () => {
+  it('shapes the card as the 16:9 THUMB_FRAME_ASPECT declares', () => {
     renderStrip();
     // The classes are what actually shape the card and the constant is what
     // decides whether a photo inside needs a backdrop, so a card that drifted
@@ -224,8 +152,8 @@ describe('thumbnail strip', () => {
       return Number(cls!.match(/\[(\d+)px\]/)![1]);
     };
 
-    expect(px('', 'w') / px('', 'h')).toBeCloseTo(THUMB_FRAME, 10);
-    expect(px('sm:', 'w') / px('sm:', 'h')).toBeCloseTo(THUMB_FRAME, 10);
+    expect(px('', 'w') / px('', 'h')).toBeCloseTo(THUMB_FRAME_ASPECT, 10);
+    expect(px('sm:', 'w') / px('sm:', 'h')).toBeCloseTo(THUMB_FRAME_ASPECT, 10);
   });
 
   it('fills the bars of an off-CDN photo with the photo itself', () => {

@@ -5,8 +5,8 @@
  * once into a square, once again by the tile — and could not tell what a buyer
  * would actually get.
  *
- * It now uses the same card as everywhere else: 16:9, the photo whole, the
- * bars filled with a blurred copy of it.
+ * It now uses the same card as everywhere else: 16:9, the photo whole and held
+ * off the edges, the margin filled with a blurred copy of it.
  */
 
 import React from 'react';
@@ -99,13 +99,15 @@ describe('seller listing preview — photo grid', () => {
     });
   });
 
-  it('fills the bars of an off-shape photo with a blurred copy of it', () => {
+  it('holds the photo off the tile edges and always fills the margin', () => {
     renderGrid();
     const tile = tiles()[0];
-    // 4:3 — the commonest listing shape, and against a 16:9 tile it is the
-    // case that has to produce a fill.
-    reportNaturalSize(tile.querySelector<HTMLImageElement>('img:not([aria-hidden="true"])')!, 1600, 1200);
+    const img = tile.querySelector<HTMLImageElement>('img:not([aria-hidden="true"])')!;
+    // Even at exactly the tile's own shape, the photo is inset — a photo that
+    // runs to the edges cannot be told apart from one zoomed to fit.
+    reportNaturalSize(img, 1920, 1080);
 
+    expect(img.className).toContain('p-[6%]');
     const fill = tile.querySelector<HTMLImageElement>('img[src*="e_blur"]');
     expect(fill).not.toBeNull();
     expect(fill!.className).toContain('object-cover');
