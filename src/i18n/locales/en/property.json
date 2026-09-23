@@ -505,7 +505,11 @@
     "reset": "Reset",
     "tip": "Watch how shadows move throughout the day to understand sunlight exposure",
     "timeOfDay": "Time of day",
-    "date": "Date",
+    "prevMonth": "Previous month",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
+    "nextMonth": "Next month",
+    "today": "Today",
     "sunDirection": "Sun direction",
     "sunElevation": "Sun elevation",
     "belowHorizon": "Below horizon"

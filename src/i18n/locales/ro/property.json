@@ -476,7 +476,11 @@
     "reset": "Resetare",
     "tip": "Urmăriți cum se mișcă umbrele pentru a înțelege expunerea la lumina soarelui",
     "timeOfDay": "Ora din zi",
-    "date": "Data",
+    "prevMonth": "Luna anterioară",
+    "prevDay": "Ziua anterioară",
+    "nextDay": "Ziua următoare",
+    "nextMonth": "Luna următoare",
+    "today": "Astăzi",
     "sunDirection": "Direcția soarelui",
     "sunElevation": "Înălțimea soarelui",
     "belowHorizon": "Sub orizont"

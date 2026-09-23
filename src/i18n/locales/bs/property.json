@@ -476,7 +476,11 @@
     "reset": "Resetuj",
     "tip": "Gledajte kako se sjenke kreću da biste razumjeli izloženost sunčevoj svjetlosti",
     "timeOfDay": "Doba dana",
-    "date": "Datum",
+    "prevMonth": "Prethodni mjesec",
+    "prevDay": "Prethodni dan",
+    "nextDay": "Sljedeći dan",
+    "nextMonth": "Sljedeći mjesec",
+    "today": "Danas",
     "sunDirection": "Smjer sunca",
     "sunElevation": "Visina sunca",
     "belowHorizon": "Ispod horizonta"

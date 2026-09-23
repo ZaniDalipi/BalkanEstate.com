@@ -476,7 +476,11 @@
     "reset": "Rivendos",
     "tip": "Shikoni si lëvizin hijet për të kuptuar ekspozimin ndaj dritës së diellit",
     "timeOfDay": "Ora e ditës",
-    "date": "Data",
+    "prevMonth": "Muaji i kaluar",
+    "prevDay": "Dita e kaluar",
+    "nextDay": "Dita tjetër",
+    "nextMonth": "Muaji tjetër",
+    "today": "Sot",
     "sunDirection": "Drejtimi i diellit",
     "sunElevation": "Lartësia e diellit",
     "belowHorizon": "Nën horizont"

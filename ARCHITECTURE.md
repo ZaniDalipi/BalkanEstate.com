@@ -569,6 +569,11 @@ Key decisions:
   `guessBalkanTimeZone` places the point in CET or EET from border polylines;
   sunrise, sunset and solar noon are solved from the same ephemeris the shadows
   use, so "Sunset" on the slider is where the shadows actually vanish.
+- **No native inputs over the map.** The time scrubber and date stepper
+  (`SunTimeScrubber.tsx`) are drawn by us rather than `<input type="range">` /
+  `<input type="date">`: newer Safari renders those with "liquid glass"
+  overlays (a magnifying thumb while dragging, a picker popover) that float
+  over the map and hide the very shadows being inspected.
 - **Bounded cost.** Shadows cover a zoom-dependent disc (400–1100 m) that
   fades at its edge; the depth map is 4096² on desktop and 2048² on small
   screens, and is only re-rendered when the sun or the buildings change.

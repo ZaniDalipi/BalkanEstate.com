@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import type { UseShadowTimelapseReturn } from '../hooks/useShadowTimelapse';
 import { TIME_LIGHTING, PERIOD_ICONS } from './Map3DConstants';
 import { MAP_DESTINATIONS, type MapDestination } from '@/shared/map/mapDestination';
+import { SunTimeScrubber, SunDateStepper } from './SunTimeScrubber';
 
 export interface Map3DControlsProps {
   // State
@@ -59,9 +60,6 @@ export interface Map3DControlsProps {
 
 const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
 
-const toDateInputValue = (date: Date): string =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-
 const Map3DControls: React.FC<Map3DControlsProps> = ({
   is3DMode,
   showShadows,
@@ -93,7 +91,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   setShadowDate,
   sunPosition,
 }) => {
-  const { t } = useTranslation(['property']);
+  const { t, i18n } = useTranslation(['property']);
 
   // A missing destination is a caller that has no market to name, not an
   // error: the neutral entry keeps the button reading "Full Map".
@@ -387,34 +385,27 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                     </div>
 
                     {/* Time-of-day scrubber */}
-                    <input
-                      type="range"
-                      min={0}
-                      max={1000}
-                      value={Math.round(Math.max(0, Math.min(100, timelapse.progress)) * 10)}
-                      onChange={(e) => {
-                        timelapse.pause();
-                        timelapse.seekToProgress(Number(e.target.value) / 10);
-                      }}
-                      aria-label={t('property:shadowTimelapse.timeOfDay', 'Time of day')}
-                      className="w-full h-1.5 sm:h-2 rounded-full appearance-none cursor-pointer bg-slate-700 accent-blue-500
-                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
-                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md
-                        [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full
-                        [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
+                    <SunTimeScrubber
+                      progress={timelapse.progress}
+                      onScrubStart={timelapse.pause}
+                      onScrub={timelapse.seekToProgress}
+                      label={t('property:shadowTimelapse.timeOfDay', 'Time of day')}
+                      valueText={timelapse.formattedTime}
                     />
 
                     {/* Date the sun is simulated for — shadows are far longer in winter */}
                     {shadowDate && setShadowDate && (
-                      <input
-                        type="date"
-                        value={toDateInputValue(shadowDate)}
-                        onChange={(e) => {
-                          const [y, m, d] = e.target.value.split('-').map(Number);
-                          if (y && m && d) setShadowDate(new Date(y, m - 1, d));
+                      <SunDateStepper
+                        date={shadowDate}
+                        onChange={setShadowDate}
+                        locale={i18n.language}
+                        labels={{
+                          prevMonth: t('property:shadowTimelapse.prevMonth', 'Previous month'),
+                          prevDay: t('property:shadowTimelapse.prevDay', 'Previous day'),
+                          nextDay: t('property:shadowTimelapse.nextDay', 'Next day'),
+                          nextMonth: t('property:shadowTimelapse.nextMonth', 'Next month'),
+                          today: t('property:shadowTimelapse.today', 'Today'),
                         }}
-                        aria-label={t('property:shadowTimelapse.date', 'Date')}
-                        className="w-full px-2 py-1 text-[10px] sm:text-xs rounded-md bg-slate-800 text-slate-100 border border-slate-600 [color-scheme:dark]"
                       />
                     )}
 
