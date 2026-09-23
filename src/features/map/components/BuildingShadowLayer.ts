@@ -155,6 +155,9 @@ uniform vec3 u_color;
 uniform float u_opacity;
 uniform float u_radius;
 uniform float u_bias;
+// Fraction of the texture the last shadow pass covered (smaller while animating)
+uniform float u_uv_scale;
+uniform float u_fast;
 varying vec3 v_light_pos;
 varying vec3 v_normal;
 varying vec2 v_local;
@@ -167,16 +170,22 @@ void main() {
   float ndl = dot(normalize(v_normal), u_sun_dir);
   float shade = 0.0;
   if (ndl > 0.0) {
-    // 4x4 percentage-closer filter for soft, anti-aliased shadow edges
+    // Percentage-closer filter for soft, anti-aliased shadow edges: 4x4 at
+    // rest, 2x2 while the sun is moving (a quarter of the texture reads)
     float lit = 0.0;
+    float taps = 0.0;
+    float span = u_fast > 0.5 ? 2.0 : 4.0;
     for (int x = 0; x < 4; x++) {
       for (int y = 0; y < 4; y++) {
-        vec2 offset = (vec2(float(x), float(y)) - 1.5) * u_texel;
-        float closest = unpackDepth(texture2D(u_shadow_map, v_light_pos.xy + offset));
+        if (float(x) >= span || float(y) >= span) continue;
+        vec2 offset = (vec2(float(x), float(y)) - (span - 1.0) * 0.5) * u_texel;
+        vec2 uv = clamp((v_light_pos.xy + offset) * u_uv_scale, vec2(0.0), vec2(u_uv_scale * (1.0 - u_texel * 0.5)));
+        float closest = unpackDepth(texture2D(u_shadow_map, uv));
         lit += v_light_pos.z - u_bias > closest ? 0.0 : 1.0;
+        taps += 1.0;
       }
     }
-    shade = 1.0 - lit / 16.0;
+    shade = 1.0 - lit / taps;
   }
   // Faces turned away from the sun (and grazing ones) are in their own shade
   shade = max(shade, 1.0 - smoothstep(0.0, 0.12, ndl));
@@ -300,6 +309,13 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
   private onStatus?: (status: ShadowLayerStatus) => void;
   private status: ShadowLayerStatus = { state: 'initialising', buildings: 0 };
   private checkedFirstFrame = false;
+  // While the sun is moving (playback, scrubbing) the shadow map is redrawn
+  // every frame, so it is rendered at half resolution — a quarter of the fill
+  // cost — and redrawn at full resolution once the sun settles.
+  private interactive = false;
+  private renderedSize = 0;
+  private lastSunChange = 0;
+  private settleTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(options: BuildingShadowLayerOptions = {}) {
     this.id = options.id ?? 'building-sun-shadows';
@@ -316,6 +332,19 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
     this.sunDir = [Math.sin(az) * Math.cos(alt), -Math.cos(az) * Math.cos(alt), Math.sin(alt)];
     this.sunUp = altitudeDeg > 0.5;
     this.shadowMapDirty = true;
+
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    if (now - this.lastSunChange < 250) this.interactive = true;
+    this.lastSunChange = now;
+    if (this.settleTimer) clearTimeout(this.settleTimer);
+    this.settleTimer = setTimeout(() => {
+      this.settleTimer = null;
+      if (!this.interactive) return;
+      this.interactive = false;
+      this.shadowMapDirty = true;
+      this.map?.triggerRepaint();
+    }, 250);
+
     this.map?.triggerRepaint();
   }
 
@@ -516,6 +545,8 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
   }
 
   onRemove(): void {
+    if (this.settleTimer) clearTimeout(this.settleTimer);
+    this.settleTimer = null;
     const gl = this.gl;
     if (gl) {
       gl.deleteProgram(this.depthProgram);
@@ -578,8 +609,13 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
 
     this.lightMatrix = this.computeLightMatrix();
 
+    const size = this.interactive ? this.shadowSize / 2 : this.shadowSize;
+    this.renderedSize = size;
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.viewport(0, 0, this.shadowSize, this.shadowSize);
+    gl.viewport(0, 0, size, size);
+    // Clear only the region we draw into
+    gl.enable(gl.SCISSOR_TEST);
+    gl.scissor(0, 0, size, size);
     gl.disable(gl.BLEND);
     gl.disable(gl.STENCIL_TEST);
     gl.disable(gl.CULL_FACE);
@@ -591,6 +627,7 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
     gl.clearColor(1, 1, 1, 1); // "infinitely far": nothing blocks the sun
     gl.clearDepth(1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.disable(gl.SCISSOR_TEST);
 
     const depthProgram = this.depthProgram!;
     if (this.buildingVertexCount > 0) {
@@ -610,7 +647,7 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
 
   render(glContext: WebGLRenderingContext | WebGL2RenderingContext, options: maplibregl.CustomRenderMethodInput): void {
     const gl = glContext as WebGLRenderingContext;
-    if (!this.visible || !this.sunUp || !this.origin || !this.shadeProgram || !this.lightMatrix) return;
+    if (!this.visible || !this.sunUp || !this.origin || !this.shadeProgram || !this.lightMatrix || !this.renderedSize) return;
     if (this.status.state === 'failed') return;
     // Drain errors raised by earlier layers so the first-frame check below
     // only sees our own
@@ -634,9 +671,11 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
     gl.uniform3fv(gl.getUniformLocation(program, 'u_color'), this.color);
     gl.uniform1f(gl.getUniformLocation(program, 'u_opacity'), this.opacity);
     gl.uniform1f(gl.getUniformLocation(program, 'u_radius'), this.radius);
-    gl.uniform1f(gl.getUniformLocation(program, 'u_texel'), 1 / this.shadowSize);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_texel'), 1 / this.renderedSize);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_uv_scale'), this.renderedSize / this.shadowSize);
+    gl.uniform1f(gl.getUniformLocation(program, 'u_fast'), this.interactive ? 1 : 0);
     // One shadow-map texel in metres drives both acne guards
-    const texelMetres = (this.radius * 2 + this.maxHeight) / this.shadowSize;
+    const texelMetres = (this.radius * 2 + this.maxHeight) / this.renderedSize;
     gl.uniform1f(gl.getUniformLocation(program, 'u_normal_offset'), texelMetres * 1.5);
     gl.uniform1f(gl.getUniformLocation(program, 'u_bias'), 0.0005);
 

@@ -90,6 +90,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     shadowDate,
     setShadowDate,
     sunPosition,
+    sunTrack,
     shadowStatus,
     showPOI,
     setShowPOI,
@@ -127,7 +128,12 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
 
       {/* The sun, where it really is relative to the camera */}
       {showShadows && !show360Tour && (
-        <SunIndicator azimuth={sunPosition.azimuth} altitude={sunPosition.altitude} bearing={currentBearing} />
+        <SunIndicator
+          altitude={sunPosition.altitude}
+          hour={sunTrack.hour}
+          sunrise={sunTrack.sunrise}
+          sunset={sunTrack.sunset}
+        />
       )}
 
       {/* Property info card - top left */}

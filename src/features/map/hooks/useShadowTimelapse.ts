@@ -133,8 +133,10 @@ export function getTimePeriod(hour: number, sunInfo?: SunInfo): TimePeriod {
  * Format time for display
  */
 export function formatTime(hour: number): string {
-  const h = Math.floor(hour);
-  const m = Math.round((hour - h) * 60);
+  // Round to whole minutes first so 6:59.7 becomes 7:00, not "6:60"
+  const totalMinutes = Math.round(hour * 60);
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = totalMinutes % 60;
   const period = h >= 12 ? 'PM' : 'AM';
   const hour12 = h % 12 || 12;
   return `${hour12}:${m.toString().padStart(2, '0')} ${period}`;
@@ -219,7 +221,13 @@ export function useShadowTimelapse(
   const effectiveEnd = config.endHour ?? Math.min(24, Math.ceil(sunInfo.sunset + 1));
 
   // Start at noon so shadows are immediately visible
-  const [currentTime, setCurrentTime] = useState(12);
+  const [currentTime, setCurrentTimeState] = useState(12);
+  // Mirror of currentTime the animation loop can read synchronously
+  const timeRef = useRef(12);
+  const setCurrentTime = useCallback((hour: number) => {
+    timeRef.current = hour;
+    setCurrentTimeState(hour);
+  }, []);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<TimelapseSpeed>('normal');
 
@@ -244,59 +252,47 @@ export function useShadowTimelapse(
     }
   }, [currentTime, timePeriod, onTimeChange]);
 
-  // Animation loop
-  const animate = useCallback((timestamp: number) => {
-    if (!lastFrameTimeRef.current) {
-      lastFrameTimeRef.current = timestamp;
-    }
+  // Latest values for the animation loop, read through a ref so the loop is
+  // started once per play and never restarted by the re-renders it causes.
+  // (Restarting it every frame reset the frame clock, so time advanced in
+  // uneven jumps and the sun and shadows stuttered.)
+  const loopStateRef = useRef({ speed, config: mergedConfig, start: effectiveStart, end: effectiveEnd });
+  loopStateRef.current = { speed, config: mergedConfig, start: effectiveStart, end: effectiveEnd };
 
-    const deltaTime = timestamp - lastFrameTimeRef.current;
-    const frameInterval = 1000 / mergedConfig.frameRate;
-
-    if (deltaTime >= frameInterval) {
-      lastFrameTimeRef.current = timestamp;
-
-      // Calculate time increment based on speed
-      const speedMultiplier = SPEED_MULTIPLIERS[speed];
-      const minuteIncrement = mergedConfig.minutesPerFrame * speedMultiplier;
-      const hourIncrement = minuteIncrement / 60;
-
-      setCurrentTime((prev) => {
-        const next = prev + hourIncrement;
-
-        if (next >= effectiveEnd) {
-          if (mergedConfig.loop) {
-            return effectiveStart;
-          }
-          setIsPlaying(false);
-          return effectiveEnd;
-        }
-
-        return next;
-      });
-    }
-
-    animationRef.current = requestAnimationFrame(animate);
-  }, [speed, mergedConfig, effectiveStart, effectiveEnd]);
-
-  // Start/stop animation
+  // Animation loop: advance by real elapsed time every display frame, so the
+  // motion is continuous at any refresh rate. The average rate is unchanged:
+  // minutesPerFrame × frameRate simulated minutes per second at 1x.
   useEffect(() => {
-    if (isPlaying) {
-      lastFrameTimeRef.current = 0;
-      animationRef.current = requestAnimationFrame(animate);
-    } else {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-    }
+    if (!isPlaying) return;
+    lastFrameTimeRef.current = 0;
 
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+    const tick = (timestamp: number) => {
+      const last = lastFrameTimeRef.current || timestamp;
+      lastFrameTimeRef.current = timestamp;
+      // Clamp so a backgrounded tab doesn't leap hours on return
+      const seconds = Math.min(0.1, (timestamp - last) / 1000);
+      const { speed: s, config, start, end } = loopStateRef.current;
+      const hoursPerSecond = (config.minutesPerFrame * config.frameRate * SPEED_MULTIPLIERS[s]) / 60;
+
+      const next = timeRef.current + seconds * hoursPerSecond;
+      if (next >= end) {
+        setCurrentTime(config.loop ? start : end);
+        if (!config.loop) {
+          setIsPlaying(false);
+          return;
+        }
+      } else {
+        setCurrentTime(next);
       }
+      animationRef.current = requestAnimationFrame(tick);
     };
-  }, [isPlaying, animate]);
+
+    animationRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    };
+  }, [isPlaying, setCurrentTime]);
 
   // Control functions
   const play = useCallback(() => {

@@ -22,6 +22,10 @@ import {
 const escapeHtml = (str: string): string =>
   str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
+// One simulated hour per real second at 1x: a whole day plays in ~15s, slow
+// enough to follow each shadow sweeping round its building.
+const TIMELAPSE_CONFIG = { minutesPerFrame: 2 };
+
 export function use3DMap(props: Map3DBuildingsProps) {
   const {
     lat,
@@ -89,7 +93,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const times = getLocalSunTimes(shadowDate, lat, lng, timeZone);
     return { sunrise: times.sunrise, sunset: times.sunset, dayLength: times.dayLength, solarNoon: times.solarNoon };
   }, [shadowDate, lat, lng, timeZone]);
-  const timelapse = useShadowTimelapse(lat, undefined, {}, sunTimes);
+  const timelapse = useShadowTimelapse(lat, undefined, TIMELAPSE_CONFIG, sunTimes);
   const [liveHour, setLiveHour] = useState(() => currentHourInZone(timeZone));
   const shadowLayerRef = useRef<BuildingShadowLayer | null>(null);
   const [shadowStatus, setShadowStatus] = useState<ShadowLayerStatus>({ state: 'initialising', buildings: 0 });
@@ -1437,11 +1441,11 @@ export function use3DMap(props: Map3DBuildingsProps) {
       );
     }
 
-    // Subtle bearing rotation for sun movement
-    const targetBearing = (lighting.sunAzimuth - 180) * 0.1;
-    map.current.easeTo({ bearing: targetBearing, duration: 800 });
-
-  }, [timelapse.timePeriod, timelapse.currentTime, mapLoaded, showTimelapse]);
+    // Only when the period changes: this used to depend on currentTime and
+    // also ease the camera bearing, which restarted a camera animation and a
+    // full restyle on every frame of playback (jittering camera, stuttering
+    // shadows, and the map turning under the user's hands).
+  }, [timelapse.timePeriod, mapLoaded, showTimelapse]);
 
   // Toggle 2D/3D mode
   const toggle3DMode = useCallback(() => {
@@ -1686,6 +1690,13 @@ export function use3DMap(props: Map3DBuildingsProps) {
     return getSunPosition(zonedDateAtHour(day, shadowHour, timeZone), lat, lng);
   }, [showTimelapse, shadowDate, shadowHour, timeZone, lat, lng]);
 
+  // Where the simulated moment sits in its day, for the sun's sky track
+  const todaySunTimes = useMemo(() => getLocalSunTimes(new Date(), lat, lng, timeZone), [lat, lng, timeZone]);
+  const sunTrack = useMemo(() => {
+    const times = showTimelapse ? sunTimes : todaySunTimes;
+    return { hour: shadowHour, sunrise: times.sunrise, sunset: times.sunset };
+  }, [showTimelapse, sunTimes, todaySunTimes, shadowHour]);
+
   useEffect(() => {
     const mapInstance = map.current;
     const layer = shadowLayerRef.current;
@@ -1746,6 +1757,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     shadowDate,
     setShadowDate,
     sunPosition,
+    sunTrack,
     shadowStatus,
     // Handlers
     handleEnterBuilding,

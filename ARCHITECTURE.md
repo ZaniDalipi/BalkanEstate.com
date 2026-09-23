@@ -580,11 +580,21 @@ Key decisions:
   `prerender`, never in `onAdd`: MapLibre caches which texture and
   renderbuffer are bound and only resynchronises after prerender/render.
   The shadow target steps down 4096² → 2048² → 1024² if a GPU refuses a size.
-- **The sun is where the sun is.** `SunIndicator` draws the sun from the same
-  azimuth/altitude as the shadows, relative to the map bearing, so it moves as
-  the map rotates and warms to orange near the horizon. A sun behind the
-  camera waits (dimmer) at the nearest side, inside a band clear of the
-  title card and the right-hand controls.
+- **The sun rides a straight day track.** `SunIndicator` travels a horizontal
+  line across the sky from sunrise (left) to sunset (right), positioned by the
+  simulated time between that day's sunrise and sunset; its colour follows the
+  real solar altitude (orange near the horizon). It moves by CSS transform, so
+  it glides without layout work.
+- **Smooth playback.** `useShadowTimelapse` starts one rAF loop per play and
+  advances by real elapsed time, reading speed/range through a ref — the old
+  loop was re-created on every render, which reset its clock and made time
+  jump unevenly. The 3D map plays one simulated hour per second at 1x. A
+  former effect that eased the camera bearing and restyled every building on
+  each frame is gone; the map no longer turns by itself during playback.
+- **Cheaper while moving.** When the sun changes again within 250 ms
+  (playback, scrubbing) the shadow map is drawn at half resolution into a
+  corner of the same texture with a 2×2 filter, and redrawn at full
+  resolution with 4×4 filtering once the sun settles.
 - **The page's section rail steps aside.** `PropertySectionNav`'s floating
   "On this page" rail fades out while the 3D map fills the viewport, so it
   never sits over the map's controls or the shadows being inspected.
