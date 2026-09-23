@@ -588,6 +588,13 @@ Key decisions:
   It glides as time passes or the map turns, never jumping edge to edge; the
   🌅/🌇 markers sit at that day's sunrise/sunset directions. Colour follows the
   solar altitude (orange near the horizon); it moves by CSS transform.
+- **Phones and tablets get their own layout.** Below `lg` the Sun & Shadows
+  controls open as a compact bar docked to the bottom of the map (time, play,
+  speed, close / scrubber / date + sun direction) instead of stacking in the
+  right-hand button column, where it overflowed a 420–520px map and squashed
+  the buttons. Opening it tucks the floor panel into its "Floors" button and
+  hides Fly/Full Map while open. The sun's track and size are per breakpoint
+  so it always sits between the title card and the compass.
 - **Smooth playback.** `useShadowTimelapse` starts one rAF loop per play and
   advances by real elapsed time, reading speed/range through a ref — the old
   loop was re-created on every render, which reset its clock and made time

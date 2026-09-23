@@ -20,12 +20,15 @@ interface SunIndicatorProps {
   sunsetAzimuth: number;
 }
 
-// Track spans 12–84% of the width: clear of the title card on the left and
-// the control column on the right
-const TRACK_LEFT = 12;
-const TRACK_WIDTH = 72;
-const TRACK_TOP = 13;
-const SIZE = 60;
+// Where the track runs, per breakpoint: always in the free strip between the
+// title card (top-left) and the compass/control column (top-right). Phones
+// have the least room, so the track is shorter and the sun smaller there.
+const TRACK_CLASSES =
+  'left-[42%] w-[36%] top-[6%] [--sun-size:34px] ' +
+  'sm:left-[30%] sm:w-[56%] sm:top-[7%] sm:[--sun-size:46px] ' +
+  'lg:left-[12%] lg:w-[72%] lg:top-[13%] lg:[--sun-size:60px]';
+const SIZE = 'var(--sun-size)';
+const size = (factor: number) => `calc(var(--sun-size) * ${factor})`;
 
 /**
  * 0 (left edge) … 1 (right edge): the sideways component of a compass
@@ -51,8 +54,7 @@ export const SunIndicator: React.FC<SunIndicatorProps> = ({ azimuth, altitude, b
   return (
     <div
       aria-hidden="true"
-      className="absolute pointer-events-none z-[1]"
-      style={{ left: `${TRACK_LEFT}%`, width: `${TRACK_WIDTH}%`, top: `${TRACK_TOP}%` }}
+      className={`absolute pointer-events-none z-[1] ${TRACK_CLASSES}`}
     >
       {/* The day's path: a faint horizontal line from sunrise to sunset */}
       <div
@@ -68,12 +70,12 @@ export const SunIndicator: React.FC<SunIndicatorProps> = ({ azimuth, altitude, b
         className="absolute left-0 top-0 w-full transition-transform duration-150 ease-linear motion-reduce:transition-none"
         style={{ transform: `translateX(${fraction * 100}%)`, willChange: 'transform' }}
       >
-        <div className="absolute" style={{ width: SIZE, height: SIZE, left: -SIZE / 2, top: -SIZE / 2 }}>
+        <div className="absolute" style={{ width: SIZE, height: SIZE, left: size(-0.5), top: size(-0.5) }}>
           {/* Wide atmospheric halo */}
           <div
             className="absolute rounded-full"
             style={{
-              inset: -SIZE * 1.4,
+              inset: size(-1.4),
               background: `radial-gradient(circle, ${glow} 0%, rgba(255,220,150,0.18) 35%, rgba(255,220,150,0) 70%)`,
             }}
           />
@@ -81,7 +83,7 @@ export const SunIndicator: React.FC<SunIndicatorProps> = ({ azimuth, altitude, b
           <div
             className="absolute rounded-full animate-[spin_40s_linear_infinite] motion-reduce:animate-none"
             style={{
-              inset: -SIZE * 0.55,
+              inset: size(-0.55),
               background: `repeating-conic-gradient(from 0deg, ${glow} 0deg 4deg, rgba(255,255,255,0) 4deg 22.5deg)`,
               maskImage: 'radial-gradient(circle, transparent 38%, black 45%, transparent 72%)',
               WebkitMaskImage: 'radial-gradient(circle, transparent 38%, black 45%, transparent 72%)',
@@ -92,7 +94,7 @@ export const SunIndicator: React.FC<SunIndicatorProps> = ({ azimuth, altitude, b
             className="absolute inset-0 rounded-full"
             style={{
               background: `radial-gradient(circle at 45% 42%, #ffffff 0%, ${core} 35%, ${mid} 75%, rgba(255,190,90,0.9) 100%)`,
-              boxShadow: `0 0 ${SIZE * 0.5}px ${SIZE * 0.2}px ${glow}, 0 0 ${SIZE}px ${SIZE * 0.4}px rgba(255,210,120,0.35)`,
+              boxShadow: `0 0 ${size(0.5)} ${size(0.2)} ${glow}, 0 0 ${SIZE} ${size(0.4)} rgba(255,210,120,0.35)`,
             }}
           />
         </div>

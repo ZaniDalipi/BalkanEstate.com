@@ -102,6 +102,79 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   const destination = mapDestination ?? MAP_DESTINATIONS.unknown;
   const destinationLabel = t(destination.labelKey, destination.labelFallback);
 
+  // Pieces shared by the desktop panel and the docked tablet/phone bar
+  const scrubber = (
+    <SunTimeScrubber
+      progress={timelapse.progress}
+      onScrubStart={timelapse.pause}
+      onScrub={timelapse.seekToProgress}
+      label={t('property:shadowTimelapse.timeOfDay', 'Time of day')}
+      valueText={timelapse.formattedTime}
+    />
+  );
+
+  // Date the sun is simulated for — shadows are far longer in winter
+  const dateStepper = shadowDate && setShadowDate ? (
+    <SunDateStepper
+      date={shadowDate}
+      onChange={setShadowDate}
+      locale={i18n.language}
+      labels={{
+        prevMonth: t('property:shadowTimelapse.prevMonth', 'Previous month'),
+        prevDay: t('property:shadowTimelapse.prevDay', 'Previous day'),
+        nextDay: t('property:shadowTimelapse.nextDay', 'Next day'),
+        nextMonth: t('property:shadowTimelapse.nextMonth', 'Next month'),
+        today: t('property:shadowTimelapse.today', 'Today'),
+      }}
+    />
+  ) : null;
+
+  // Say so when shadows can't be shown, instead of silently showing none
+  const statusNotice = showShadows && shadowStatus?.state === 'failed' ? (
+    <p className="text-[10px] sm:text-xs text-amber-300 leading-snug" title={shadowStatus.reason}>
+      {'\u26A0\uFE0F'} {t('property:shadowTimelapse.unavailable', 'Shadows are not supported in this browser')}
+    </p>
+  ) : showShadows && shadowStatus?.state === 'ready' && shadowStatus.buildings === 0 ? (
+    <p className="text-[10px] sm:text-xs text-slate-400 leading-snug">
+      {t('property:shadowTimelapse.noBuildings', 'No 3D building data around here yet')}
+    </p>
+  ) : null;
+
+  // Where the sun is
+  const cardinal = sunPosition ? CARDINALS[Math.round(sunPosition.azimuth / 45) % 8] : 'S';
+  const sunReadout = sunPosition ? (
+    <div className="flex items-center justify-between gap-2 text-[10px] sm:text-xs text-slate-300 whitespace-nowrap">
+      <span title={t('property:shadowTimelapse.sunDirection', 'Sun direction')}>
+        {'\u{1F9ED}'} {t(`property:map3d.cardinalDirections.${cardinal}`, cardinal)} {Math.round(sunPosition.azimuth)}°
+      </span>
+      <span title={t('property:shadowTimelapse.sunElevation', 'Sun elevation')}>
+        {sunPosition.altitude > 0
+          ? `\u2600\uFE0F ${Math.round(sunPosition.altitude)}°`
+          : `\u{1F319} ${t('property:shadowTimelapse.belowHorizon', 'Below horizon')}`}
+      </span>
+    </div>
+  ) : null;
+
+  const speedLabel = (s: typeof timelapse.speed) => (s === 'slow' ? '0.5x' : s === 'normal' ? '1x' : s === 'fast' ? '2x' : '4x');
+  const SPEEDS = ['slow', 'normal', 'fast', 'ultra'] as const;
+  const cycleSpeed = () => timelapse.setSpeed(SPEEDS[(SPEEDS.indexOf(timelapse.speed) + 1) % SPEEDS.length]);
+
+  const playIcon = (className: string) => timelapse.isPlaying ? (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /></svg>
+  ) : (
+    <svg className={`${className} ml-0.5`} fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+  );
+
+  // Phones and tablets: the stacked panel does not fit next to the other
+  // controls, so it opens as a bar docked to the bottom of the map instead
+  // and tucks the floor panel away to leave the view clear.
+  const openSunPanel = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024 && showFloorIndicator) {
+      setShowFloorIndicator(false);
+    }
+    setShowTimelapse(true);
+  };
+
   return (
     <>
       {/* Floor Level Panel - left side of map */}
@@ -318,17 +391,21 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
           {/* Shadow Timelapse - inline below control buttons to avoid overlap */}
           {enableShadowTimelapse && (
-            <div className={showTimelapse ? 'w-36 sm:w-52 max-w-[calc(100vw-4rem)]' : 'w-8 sm:w-auto'}>
-              {!showTimelapse ? (
-                <button
-                  onClick={() => setShowTimelapse(true)}
-                  className="w-full flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 sm:px-4 py-2 sm:py-3 bg-slate-900/90 text-white font-medium rounded-lg shadow-lg hover:bg-slate-800 transition-all border border-slate-700/50"
-                >
-                  <span className="text-xs sm:text-base">{'\u2600\uFE0F'}</span>
-                  <span className="hidden sm:inline text-sm">{t('property:shadowTimelapse.title', 'Sun & Shadows')}</span>
-                </button>
-              ) : (
-                <div className="w-36 sm:w-52 max-w-[calc(100vw-4rem)] bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-slate-700/50">
+            <div className={showTimelapse ? 'w-8 sm:w-auto lg:w-52' : 'w-8 sm:w-auto'}>
+              {/* Toggle: always here on phones/tablets (the panel docks at the
+                  bottom there); replaced by the panel itself on desktop */}
+              <button
+                onClick={() => (showTimelapse ? setShowTimelapse(false) : openSunPanel())}
+                aria-pressed={showTimelapse}
+                className={`w-full flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 sm:px-4 py-2 sm:py-3 font-medium rounded-lg shadow-lg transition-all border ${
+                  showTimelapse ? 'lg:hidden bg-blue-600 text-white border-blue-500' : 'bg-slate-900/90 text-white hover:bg-slate-800 border-slate-700/50'
+                }`}
+              >
+                <span className="text-xs sm:text-base">{'\u2600\uFE0F'}</span>
+                <span className="hidden sm:inline text-sm">{t('property:shadowTimelapse.title', 'Sun & Shadows')}</span>
+              </button>
+              {showTimelapse && (
+                <div className="hidden lg:block w-52 bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-slate-700/50">
                   {/* Header with time */}
                   <div
                     className="p-2 sm:p-3 transition-all duration-500"
@@ -388,56 +465,10 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                       </button>
                     </div>
 
-                    {/* Time-of-day scrubber */}
-                    <SunTimeScrubber
-                      progress={timelapse.progress}
-                      onScrubStart={timelapse.pause}
-                      onScrub={timelapse.seekToProgress}
-                      label={t('property:shadowTimelapse.timeOfDay', 'Time of day')}
-                      valueText={timelapse.formattedTime}
-                    />
-
-                    {/* Date the sun is simulated for — shadows are far longer in winter */}
-                    {shadowDate && setShadowDate && (
-                      <SunDateStepper
-                        date={shadowDate}
-                        onChange={setShadowDate}
-                        locale={i18n.language}
-                        labels={{
-                          prevMonth: t('property:shadowTimelapse.prevMonth', 'Previous month'),
-                          prevDay: t('property:shadowTimelapse.prevDay', 'Previous day'),
-                          nextDay: t('property:shadowTimelapse.nextDay', 'Next day'),
-                          nextMonth: t('property:shadowTimelapse.nextMonth', 'Next month'),
-                          today: t('property:shadowTimelapse.today', 'Today'),
-                        }}
-                      />
-                    )}
-
-                    {/* Say so when shadows can't be shown, instead of silently showing none */}
-                    {showShadows && shadowStatus?.state === 'failed' && (
-                      <p className="text-[10px] sm:text-xs text-amber-300 leading-snug" title={shadowStatus.reason}>
-                        {'\u26A0\uFE0F'} {t('property:shadowTimelapse.unavailable', 'Shadows are not supported in this browser')}
-                      </p>
-                    )}
-                    {showShadows && shadowStatus?.state === 'ready' && shadowStatus.buildings === 0 && (
-                      <p className="text-[10px] sm:text-xs text-slate-400 leading-snug">
-                        {t('property:shadowTimelapse.noBuildings', 'No 3D building data around here yet')}
-                      </p>
-                    )}
-
-                    {/* Where the sun is */}
-                    {sunPosition && (
-                      <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-300">
-                        <span title={t('property:shadowTimelapse.sunDirection', 'Sun direction')}>
-                          {'\u{1F9ED}'} {t(`property:map3d.cardinalDirections.${CARDINALS[Math.round(sunPosition.azimuth / 45) % 8]}`, CARDINALS[Math.round(sunPosition.azimuth / 45) % 8])} {Math.round(sunPosition.azimuth)}°
-                        </span>
-                        <span title={t('property:shadowTimelapse.sunElevation', 'Sun elevation')}>
-                          {sunPosition.altitude > 0
-                            ? `\u2600\uFE0F ${Math.round(sunPosition.altitude)}°`
-                            : `\u{1F319} ${t('property:shadowTimelapse.belowHorizon', 'Below horizon')}`}
-                        </span>
-                      </div>
-                    )}
+                    {scrubber}
+                    {dateStepper}
+                    {statusNotice}
+                    {sunReadout}
 
                     {/* Speed controls */}
                     <div className="flex items-center justify-center gap-0.5 sm:gap-1">
@@ -463,9 +494,57 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
         </div>
       )}
 
+      {/* Phones & tablets: Sun & Shadows docked along the bottom of the map */}
+      {enableShadowTimelapse && showTimelapse && !show360Tour && (
+        <div className="lg:hidden absolute inset-x-2 bottom-2 z-30 bg-slate-900/95 backdrop-blur-sm rounded-xl shadow-xl border border-slate-700/50 p-2 sm:p-3 space-y-1.5 sm:space-y-2">
+          <div className="flex items-center gap-2">
+            <div
+              className="min-w-0 rounded-lg px-2 py-1 text-white"
+              style={{ background: `linear-gradient(135deg, ${TIME_LIGHTING[timelapse.timePeriod].skyColor}cc, ${TIME_LIGHTING[timelapse.timePeriod].fogColor}99)` }}
+            >
+              <div className="text-sm sm:text-lg font-bold leading-tight whitespace-nowrap">{timelapse.formattedTime}</div>
+              <div className="text-[10px] sm:text-xs opacity-90 leading-tight truncate">
+                {PERIOD_ICONS[timelapse.timePeriod]} {t(`property:shadowTimelapse.periods.${timelapse.timePeriod}`, timelapse.timePeriod)}
+              </div>
+            </div>
+            <button onClick={timelapse.goToSunrise} className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm" title={t('property:map3d.sunrise', 'Sunrise')}>{'\u{1F305}'}</button>
+            <button
+              onClick={timelapse.toggle}
+              aria-label={timelapse.isPlaying ? t('search:map.pauseAnimation', 'Pause') : t('search:map.playAnimation', 'Play')}
+              className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white shadow"
+            >
+              {playIcon('w-4 h-4')}
+            </button>
+            <button onClick={timelapse.goToSunset} className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm" title={t('property:map3d.sunset', 'Sunset')}>{'\u{1F307}'}</button>
+            <button
+              onClick={cycleSpeed}
+              title={t('property:shadowTimelapse.speed', 'Speed')}
+              className="ml-auto px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] sm:text-xs font-semibold tabular-nums"
+            >
+              {speedLabel(timelapse.speed)}
+            </button>
+            <button
+              onClick={() => setShowTimelapse(false)}
+              aria-label={t('common:close', 'Close')}
+              className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-200"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {scrubber}
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">{dateStepper}</div>
+            <div className="flex-shrink-0">{sunReadout}</div>
+          </div>
+          {statusNotice}
+        </div>
+      )}
+
       {/* Bottom controls */}
       {!show360Tour && (
-        <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 sm:gap-2">
+        <div className={`absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 items-center gap-1.5 sm:gap-2 ${showTimelapse ? 'hidden lg:flex' : 'flex'}`}>
           <button
             onClick={flyToProperty}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs sm:text-sm rounded-lg shadow-lg transition-all"
