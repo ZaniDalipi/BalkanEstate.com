@@ -1690,12 +1690,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
     return getSunPosition(zonedDateAtHour(day, shadowHour, timeZone), lat, lng);
   }, [showTimelapse, shadowDate, shadowHour, timeZone, lat, lng]);
 
-  // Where the simulated moment sits in its day, for the sun's sky track
-  const todaySunTimes = useMemo(() => getLocalSunTimes(new Date(), lat, lng, timeZone), [lat, lng, timeZone]);
+  // Compass directions of sunrise and sunset on the simulated day, to mark
+  // the ends of the sun's path in the sky
   const sunTrack = useMemo(() => {
-    const times = showTimelapse ? sunTimes : todaySunTimes;
-    return { hour: shadowHour, sunrise: times.sunrise, sunset: times.sunset };
-  }, [showTimelapse, sunTimes, todaySunTimes, shadowHour]);
+    const day = showTimelapse ? shadowDate : new Date();
+    const times = getLocalSunTimes(day, lat, lng, timeZone);
+    const azimuthAt = (hour: number) => getSunPosition(zonedDateAtHour(day, hour, timeZone), lat, lng).azimuth;
+    return { sunriseAzimuth: azimuthAt(times.sunrise), sunsetAzimuth: azimuthAt(times.sunset) };
+  }, [showTimelapse, shadowDate, lat, lng, timeZone]);
 
   useEffect(() => {
     const mapInstance = map.current;

@@ -580,11 +580,14 @@ Key decisions:
   `prerender`, never in `onAdd`: MapLibre caches which texture and
   renderbuffer are bound and only resynchronises after prerender/render.
   The shadow target steps down 4096² → 2048² → 1024² if a GPU refuses a size.
-- **The sun rides a straight day track.** `SunIndicator` travels a horizontal
-  line across the sky from sunrise (left) to sunset (right), positioned by the
-  simulated time between that day's sunrise and sunset; its colour follows the
-  real solar altitude (orange near the horizon). It moves by CSS transform, so
-  it glides without layout work.
+- **The sun rides a straight line, on the side it really is.** `SunIndicator`
+  sits on a horizontal line across the sky at `0.5 + 0.5·sin(azimuth − bearing)`:
+  the sun's sideways direction as seen from the camera, so a sun east of the
+  view is on the right, and it is always on the opposite side from where the
+  shadows fall (tested for every bearing in `src/tests/sun-indicator.test.ts`).
+  It glides as time passes or the map turns, never jumping edge to edge; the
+  🌅/🌇 markers sit at that day's sunrise/sunset directions. Colour follows the
+  solar altitude (orange near the horizon); it moves by CSS transform.
 - **Smooth playback.** `useShadowTimelapse` starts one rAF loop per play and
   advances by real elapsed time, reading speed/range through a ref — the old
   loop was re-created on every render, which reset its clock and made time
