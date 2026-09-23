@@ -9,7 +9,7 @@ import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
 import { mapLogger } from '@/src/shared/utils/logger';
 import type { Map3DBuildingsProps } from './Map3DConstants';
 import { TIME_LIGHTING } from './Map3DConstants';
-import { BuildingShadowLayer, collectBuildingCasters } from './BuildingShadowLayer';
+import { BuildingShadowLayer, collectBuildingCasters, type ShadowLayerStatus } from './BuildingShadowLayer';
 import {
   currentHourInZone,
   getLocalSunTimes,
@@ -92,6 +92,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const timelapse = useShadowTimelapse(lat, undefined, {}, sunTimes);
   const [liveHour, setLiveHour] = useState(() => currentHourInZone(timeZone));
   const shadowLayerRef = useRef<BuildingShadowLayer | null>(null);
+  const [shadowStatus, setShadowStatus] = useState<ShadowLayerStatus>({ state: 'initialising', buildings: 0 });
 
   // POI markers reference for cleanup
   const poiMarkersRef = useRef<maplibregl.Marker[]>([]);
@@ -1612,7 +1613,10 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const mapInstance = map.current;
     if (!mapInstance || !mapLoaded) return;
 
-    const layer = new BuildingShadowLayer();
+    // Status arrives from inside MapLibre's render loop; defer the React update
+    const layer = new BuildingShadowLayer({
+      onStatus: (status) => { queueMicrotask(() => setShadowStatus(status)); },
+    });
     try {
       // Directly after the building extrusions: their depth must already be in
       // the buffer, and labels drawn later stay crisp inside shadows
@@ -1622,6 +1626,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
       mapInstance.addLayer(layer, styleLayers[lastExtrusion + 1]?.id);
     } catch (error) {
       mapLogger.warn('[SHADOWS] could not add shadow layer', error);
+      setShadowStatus({ state: 'failed', reason: error instanceof Error ? error.message : String(error), buildings: 0 });
       return;
     }
     shadowLayerRef.current = layer;
@@ -1741,6 +1746,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
     shadowDate,
     setShadowDate,
     sunPosition,
+    shadowStatus,
     // Handlers
     handleEnterBuilding,
     handleClose360Tour,

@@ -23,8 +23,18 @@ export interface ShadowCaster {
   base?: number;
 }
 
+export interface ShadowLayerStatus {
+  state: 'initialising' | 'ready' | 'failed';
+  /** Why the GPU path is unavailable, when `state` is 'failed'. */
+  reason?: string;
+  /** Buildings currently casting shadows. */
+  buildings: number;
+}
+
 export interface BuildingShadowLayerOptions {
   id?: string;
+  /** Called whenever readiness or the simulated building count changes. */
+  onStatus?: (status: ShadowLayerStatus) => void;
   /** Opacity of a fully shadowed surface, 0-1. */
   opacity?: number;
   /** Shadow tint (RGB, 0-1). */
@@ -287,9 +297,13 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
 
   private opacity: number;
   private color: [number, number, number];
+  private onStatus?: (status: ShadowLayerStatus) => void;
+  private status: ShadowLayerStatus = { state: 'initialising', buildings: 0 };
+  private checkedFirstFrame = false;
 
   constructor(options: BuildingShadowLayerOptions = {}) {
     this.id = options.id ?? 'building-sun-shadows';
+    this.onStatus = options.onStatus;
     this.opacity = options.opacity ?? 0.45;
     this.color = options.color ?? [0.04, 0.07, 0.16];
   }
@@ -414,25 +428,65 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
 
     this.maxHeight = maxHeight;
     this.pendingGeometry = { building: new Float32Array(out), ground };
+    this.setStatus({ buildings: solids.length });
     this.shadowMapDirty = true;
     this.map?.triggerRepaint();
   }
 
+  getStatus(): ShadowLayerStatus {
+    return this.status;
+  }
+
+  private setStatus(patch: Partial<ShadowLayerStatus>): void {
+    const next = { ...this.status, ...patch };
+    if (next.state === this.status.state && next.reason === this.status.reason && next.buildings === this.status.buildings) return;
+    this.status = next;
+    this.onStatus?.(next);
+  }
+
   onAdd(map: maplibregl.Map, gl: WebGLRenderingContext | WebGL2RenderingContext): void {
+    // GL objects are created lazily in prerender: MapLibre caches which
+    // texture/renderbuffer is bound and only resynchronises after prerender
+    // and render, so binding anything here would leave its cache stale.
     this.map = map;
     this.gl = gl as WebGLRenderingContext;
-    this.depthProgram = compile(this.gl, DEPTH_VS, DEPTH_FS);
-    this.shadeProgram = compile(this.gl, SHADE_VS, SHADE_FS);
+    this.shadowMapDirty = true;
+  }
 
-    // 4096² gives ~0.3 m texels over the default area; phones get 2048² to
-    // stay well inside mobile GPU memory.
-    const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
-    const isSmallScreen = typeof window !== 'undefined' && Math.min(window.innerWidth, window.innerHeight) < 700;
-    this.shadowSize = Math.min(maxTex, isSmallScreen ? 2048 : 4096);
+  /** Create programs, buffers and the shadow render target. False = unusable. */
+  private ensureResources(gl: WebGLRenderingContext): boolean {
+    if (this.status.state === 'failed') return false;
+    if (this.framebuffer) return true;
+    try {
+      this.depthProgram = compile(gl, DEPTH_VS, DEPTH_FS);
+      this.shadeProgram = compile(gl, SHADE_VS, SHADE_FS);
+      this.buildingBuffer = gl.createBuffer();
+      this.groundBuffer = gl.createBuffer();
 
+      // 4096² gives ~0.3 m texels over the default area; phones get 2048² to
+      // stay well inside mobile GPU memory. Step down if a size is refused.
+      const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
+      const isSmallScreen = typeof window !== 'undefined' && Math.min(window.innerWidth, window.innerHeight) < 700;
+      const sizes = [4096, 2048, 1024].filter((size) => size <= maxTex && (!isSmallScreen || size <= 2048));
+      for (const size of sizes) {
+        if (this.createRenderTarget(gl, size)) {
+          this.shadowSize = size;
+          this.setStatus({ state: 'ready', reason: undefined });
+          return true;
+        }
+      }
+      throw new Error(`shadow render target incomplete (max texture ${maxTex})`);
+    } catch (error) {
+      this.setStatus({ state: 'failed', reason: error instanceof Error ? error.message : String(error) });
+      return false;
+    }
+  }
+
+  private createRenderTarget(gl: WebGLRenderingContext, size: number): boolean {
+    this.deleteRenderTarget(gl);
     this.shadowTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.shadowTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.shadowSize, this.shadowSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -440,17 +494,25 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
 
     this.depthBuffer = gl.createRenderbuffer();
     gl.bindRenderbuffer(gl.RENDERBUFFER, this.depthBuffer);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.shadowSize, this.shadowSize);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, size, size);
 
     this.framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.shadowTexture, 0);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.depthBuffer);
+    const complete = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (!complete) this.deleteRenderTarget(gl);
+    return complete;
+  }
 
-    this.buildingBuffer = gl.createBuffer();
-    this.groundBuffer = gl.createBuffer();
-    this.shadowMapDirty = true;
+  private deleteRenderTarget(gl: WebGLRenderingContext): void {
+    if (this.framebuffer) gl.deleteFramebuffer(this.framebuffer);
+    if (this.shadowTexture) gl.deleteTexture(this.shadowTexture);
+    if (this.depthBuffer) gl.deleteRenderbuffer(this.depthBuffer);
+    this.framebuffer = null;
+    this.shadowTexture = null;
+    this.depthBuffer = null;
   }
 
   onRemove(): void {
@@ -509,7 +571,8 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
 
   prerender(glContext: WebGLRenderingContext | WebGL2RenderingContext): void {
     const gl = glContext as WebGLRenderingContext;
-    if (!this.visible || !this.sunUp || !this.origin || !this.depthProgram) return;
+    if (!this.visible || !this.sunUp || !this.origin) return;
+    if (!this.ensureResources(gl)) return;
     this.uploadPendingGeometry(gl);
     if (!this.shadowMapDirty) return;
 
@@ -529,15 +592,16 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
     gl.clearDepth(1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    const depthProgram = this.depthProgram!;
     if (this.buildingVertexCount > 0) {
-      gl.useProgram(this.depthProgram);
-      gl.uniformMatrix4fv(gl.getUniformLocation(this.depthProgram, 'u_light'), false, new Float32Array(this.lightMatrix));
-      gl.uniform3fv(gl.getUniformLocation(this.depthProgram, 'u_sun_dir'), this.sunDir);
+      gl.useProgram(depthProgram);
+      gl.uniformMatrix4fv(gl.getUniformLocation(depthProgram, 'u_light'), false, new Float32Array(this.lightMatrix));
+      gl.uniform3fv(gl.getUniformLocation(depthProgram, 'u_sun_dir'), this.sunDir);
       gl.bindBuffer(gl.ARRAY_BUFFER, this.buildingBuffer);
-      this.bindAttributes(gl, this.depthProgram);
+      this.bindAttributes(gl, depthProgram);
       gl.drawArrays(gl.TRIANGLES, 0, this.buildingVertexCount);
-      gl.disableVertexAttribArray(gl.getAttribLocation(this.depthProgram, 'a_pos'));
-      gl.disableVertexAttribArray(gl.getAttribLocation(this.depthProgram, 'a_normal'));
+      gl.disableVertexAttribArray(gl.getAttribLocation(depthProgram, 'a_pos'));
+      gl.disableVertexAttribArray(gl.getAttribLocation(depthProgram, 'a_normal'));
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -547,6 +611,12 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
   render(glContext: WebGLRenderingContext | WebGL2RenderingContext, options: maplibregl.CustomRenderMethodInput): void {
     const gl = glContext as WebGLRenderingContext;
     if (!this.visible || !this.sunUp || !this.origin || !this.shadeProgram || !this.lightMatrix) return;
+    if (this.status.state === 'failed') return;
+    // Drain errors raised by earlier layers so the first-frame check below
+    // only sees our own
+    if (!this.checkedFirstFrame) {
+      for (let i = 0; i < 8 && gl.getError() !== gl.NO_ERROR; i++) { /* drain */ }
+    }
 
     // Model: local metres -> mercator units, then MapLibre's float64 camera
     // matrix. Composing on the CPU in float64 avoids jitter at building scale.
@@ -610,6 +680,16 @@ export class BuildingShadowLayer implements maplibregl.CustomLayerInterface {
     gl.disable(gl.POLYGON_OFFSET_FILL);
     gl.polygonOffset(0, 0);
     gl.disable(gl.STENCIL_TEST);
+
+    // A driver that rejects any of the above does so silently; check once so
+    // the UI can say shadows are unavailable instead of showing nothing.
+    if (!this.checkedFirstFrame) {
+      this.checkedFirstFrame = true;
+      const error = gl.getError();
+      if (error !== gl.NO_ERROR && error !== gl.CONTEXT_LOST_WEBGL) {
+        this.setStatus({ state: 'failed', reason: `WebGL error 0x${error.toString(16)} while drawing shadows` });
+      }
+    }
     gl.disableVertexAttribArray(gl.getAttribLocation(program, 'a_pos'));
     gl.disableVertexAttribArray(gl.getAttribLocation(program, 'a_normal'));
   }

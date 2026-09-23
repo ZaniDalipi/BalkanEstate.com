@@ -9,6 +9,7 @@ import type { UseShadowTimelapseReturn } from '../hooks/useShadowTimelapse';
 import { TIME_LIGHTING, PERIOD_ICONS } from './Map3DConstants';
 import { MAP_DESTINATIONS, type MapDestination } from '@/shared/map/mapDestination';
 import { SunTimeScrubber, SunDateStepper } from './SunTimeScrubber';
+import type { ShadowLayerStatus } from './BuildingShadowLayer';
 
 export interface Map3DControlsProps {
   // State
@@ -56,6 +57,8 @@ export interface Map3DControlsProps {
   setShadowDate?: (date: Date) => void;
   /** Current simulated sun position, degrees. */
   sunPosition?: { azimuth: number; altitude: number };
+  /** Whether the GPU shadow layer is running, and on how many buildings. */
+  shadowStatus?: ShadowLayerStatus;
 }
 
 const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
@@ -90,6 +93,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   shadowDate,
   setShadowDate,
   sunPosition,
+  shadowStatus,
 }) => {
   const { t, i18n } = useTranslation(['property']);
 
@@ -407,6 +411,18 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                           today: t('property:shadowTimelapse.today', 'Today'),
                         }}
                       />
+                    )}
+
+                    {/* Say so when shadows can't be shown, instead of silently showing none */}
+                    {showShadows && shadowStatus?.state === 'failed' && (
+                      <p className="text-[10px] sm:text-xs text-amber-300 leading-snug" title={shadowStatus.reason}>
+                        {'\u26A0\uFE0F'} {t('property:shadowTimelapse.unavailable', 'Shadows are not supported in this browser')}
+                      </p>
+                    )}
+                    {showShadows && shadowStatus?.state === 'ready' && shadowStatus.buildings === 0 && (
+                      <p className="text-[10px] sm:text-xs text-slate-400 leading-snug">
+                        {t('property:shadowTimelapse.noBuildings', 'No 3D building data around here yet')}
+                      </p>
                     )}
 
                     {/* Where the sun is */}

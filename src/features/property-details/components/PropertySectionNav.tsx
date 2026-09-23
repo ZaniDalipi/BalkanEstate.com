@@ -155,6 +155,9 @@ const getScrollContainer = (): HTMLElement | Window => {
 const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) => {
   const { t } = useTranslation(['property']);
   const [activeKey, setActiveKey] = useState<string>('top');
+  // The rail floats over the page; get out of the way while the 3D map fills
+  // the viewport so it never covers the map's own controls or its shadows.
+  const [overMap, setOverMap] = useState(false);
   // Keys whose target section is actually present in the DOM (never a dead link).
   const [availableKeys, setAvailableKeys] = useState<Set<string>>(
     () => new Set(SECTION_DEFS.map((s) => s.key))
@@ -217,6 +220,14 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
           if (el && el.getBoundingClientRect().top <= 140) current = s.key;
         }
         setActiveKey(current);
+        const mapEl = findTarget('map');
+        if (mapEl) {
+          const rect = mapEl.getBoundingClientRect();
+          const mid = window.innerHeight / 2;
+          setOverMap(rect.top < mid && rect.bottom > mid);
+        } else {
+          setOverMap(false);
+        }
       });
     };
     onScroll();
@@ -274,7 +285,10 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
   return (
     <nav
       aria-label={ariaLabel}
-      className="hidden min-[1500px]:block fixed z-40 group print:hidden"
+      aria-hidden={overMap || undefined}
+      className={`hidden min-[1500px]:block fixed z-40 group print:hidden transition-[opacity,visibility] duration-300 motion-reduce:transition-none ${
+        overMap ? 'opacity-0 invisible pointer-events-none' : 'opacity-100 visible'
+      }`}
       // Sit in the far-right gutter, close to the viewport edge (the left side
       // is occupied by the global app sidebar). Hugs further right as the
       // viewport widens, clamped to a small margin on narrower screens.

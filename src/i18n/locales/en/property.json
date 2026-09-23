@@ -510,6 +510,8 @@
     "nextDay": "Next day",
     "nextMonth": "Next month",
     "today": "Today",
+    "unavailable": "Shadows are not supported in this browser",
+    "noBuildings": "No 3D building data around here yet",
     "sunDirection": "Sun direction",
     "sunElevation": "Sun elevation",
     "belowHorizon": "Below horizon"

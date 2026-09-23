@@ -481,6 +481,8 @@
     "nextDay": "Ziua următoare",
     "nextMonth": "Luna următoare",
     "today": "Astăzi",
+    "unavailable": "Umbrele nu sunt acceptate în acest browser",
+    "noBuildings": "Încă nu există date 3D despre clădiri aici",
     "sunDirection": "Direcția soarelui",
     "sunElevation": "Înălțimea soarelui",
     "belowHorizon": "Sub orizont"

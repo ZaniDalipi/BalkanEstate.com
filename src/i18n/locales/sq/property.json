@@ -481,6 +481,8 @@
     "nextDay": "Dita tjetër",
     "nextMonth": "Muaji tjetër",
     "today": "Sot",
+    "unavailable": "Hijet nuk mbështeten në këtë shfletues",
+    "noBuildings": "Ende nuk ka të dhëna 3D për ndërtesat këtu",
     "sunDirection": "Drejtimi i diellit",
     "sunElevation": "Lartësia e diellit",
     "belowHorizon": "Nën horizont"

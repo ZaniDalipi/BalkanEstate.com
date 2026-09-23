@@ -89,6 +89,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     shadowDate,
     setShadowDate,
     sunPosition,
+    shadowStatus,
     showPOI,
     setShowPOI,
     // Handlers
@@ -216,6 +217,7 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
         shadowDate={shadowDate}
         setShadowDate={setShadowDate}
         sunPosition={sunPosition}
+        shadowStatus={shadowStatus}
       />
 
       {/* 360 Virtual Tour overlay and entering animation */}

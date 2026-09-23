@@ -481,6 +481,8 @@
     "nextDay": "Sljedeći dan",
     "nextMonth": "Sljedeći mjesec",
     "today": "Danas",
+    "unavailable": "Sjenke nijesu podržane u ovom pregledaču",
+    "noBuildings": "Ovdje još nema 3D podataka o zgradama",
     "sunDirection": "Smjer sunca",
     "sunElevation": "Visina sunca",
     "belowHorizon": "Ispod horizonta"

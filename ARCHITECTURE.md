@@ -574,6 +574,15 @@ Key decisions:
   `<input type="date">`: newer Safari renders those with "liquid glass"
   overlays (a magnifying thumb while dragging, a picker popover) that float
   over the map and hide the very shadows being inspected.
+- **Never fail silently.** Production strips `console`, so the layer reports a
+  `ShadowLayerStatus` (ready / failed with a reason / building count) that the
+  panel turns into a one-line notice. GL objects are created lazily in
+  `prerender`, never in `onAdd`: MapLibre caches which texture and
+  renderbuffer are bound and only resynchronises after prerender/render.
+  The shadow target steps down 4096² → 2048² → 1024² if a GPU refuses a size.
+- **The page's section rail steps aside.** `PropertySectionNav`'s floating
+  "On this page" rail fades out while the 3D map fills the viewport, so it
+  never sits over the map's controls or the shadows being inspected.
 - **Bounded cost.** Shadows cover a zoom-dependent disc (400–1100 m) that
   fades at its edge; the depth map is 4096² on desktop and 2048² on small
   screens, and is only re-rendered when the sun or the buildings change.
