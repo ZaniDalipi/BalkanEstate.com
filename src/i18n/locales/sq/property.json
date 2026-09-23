@@ -474,7 +474,12 @@
     "sunset": "Perëndimi",
     "speed": "Shpejtësia",
     "reset": "Rivendos",
-    "tip": "Shikoni si lëvizin hijet për të kuptuar ekspozimin ndaj dritës së diellit"
+    "tip": "Shikoni si lëvizin hijet për të kuptuar ekspozimin ndaj dritës së diellit",
+    "timeOfDay": "Ora e ditës",
+    "date": "Data",
+    "sunDirection": "Drejtimi i diellit",
+    "sunElevation": "Lartësia e diellit",
+    "belowHorizon": "Nën horizont"
   },
   "floorIndicator": {
     "title": "Kati",

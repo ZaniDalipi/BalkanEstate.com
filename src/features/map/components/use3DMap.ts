@@ -2,13 +2,21 @@
 // Custom hook extracted from Map3DBuildings.tsx
 // Contains all state, refs, callbacks, and effects for the 3D map
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as maplibregl from 'maplibre-gl';
 import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
 import { mapLogger } from '@/src/shared/utils/logger';
 import type { Map3DBuildingsProps } from './Map3DConstants';
-import { TIME_LIGHTING, calculateBuildingShadow, calculateSunPosition, getCurrentDayOfYear } from './Map3DConstants';
+import { TIME_LIGHTING } from './Map3DConstants';
+import { BuildingShadowLayer, collectBuildingCasters } from './BuildingShadowLayer';
+import {
+  currentHourInZone,
+  getLocalSunTimes,
+  getSunPosition,
+  guessBalkanTimeZone,
+  zonedDateAtHour,
+} from '../utils/solarPosition';
 
 /** Escape HTML special characters to prevent XSS in innerHTML templates */
 const escapeHtml = (str: string): string =>
@@ -73,8 +81,17 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const buildingHeightMeters = hasFloorInfo ? totalFloors * floorHeightMeters : 0;
   const floorPositionPercent = hasFloorInfo ? ((floorNumber - 0.5) / totalFloors) * 100 : 0;
 
-  // Shadow timelapse hook
-  const timelapse = useShadowTimelapse(lat);
+  // Sun & shadow simulation. Times on the slider are the property's local
+  // clock time, so a viewer abroad still sees what 3pm looks like there.
+  const timeZone = useMemo(() => guessBalkanTimeZone(lat, lng), [lat, lng]);
+  const [shadowDate, setShadowDate] = useState<Date>(() => new Date());
+  const sunTimes = useMemo(() => {
+    const times = getLocalSunTimes(shadowDate, lat, lng, timeZone);
+    return { sunrise: times.sunrise, sunset: times.sunset, dayLength: times.dayLength, solarNoon: times.solarNoon };
+  }, [shadowDate, lat, lng, timeZone]);
+  const timelapse = useShadowTimelapse(lat, undefined, {}, sunTimes);
+  const [liveHour, setLiveHour] = useState(() => currentHourInZone(timeZone));
+  const shadowLayerRef = useRef<BuildingShadowLayer | null>(null);
 
   // POI markers reference for cleanup
   const poiMarkersRef = useRef<maplibregl.Marker[]>([]);
@@ -1394,6 +1411,8 @@ export function use3DMap(props: Map3DBuildingsProps) {
       poiMarkersRef.current = [];
       mapInstance.remove();
       map.current = null;
+      // Let map-bound effects (shadow layer, etc.) re-attach to the next map
+      setMapLoaded(false);
     };
   }, [lat, lng, zoom, pitch, bearing, addPropertyMarker, addCustomBuilding3D, fetchAndDisplayPOI, floorNumber, totalFloors, propertyType, virtualTour360Url, handleEnterBuilding, orientation]);
 
@@ -1579,263 +1598,113 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
   }, [mapLoaded, showFloorLabels, updateFloorLabels]);
 
-  // Update building shadows based on sun position
-  const updateBuildingShadows = useCallback(() => {
-    if (!map.current || !mapLoaded) return;
+  // Keep the "live" clock moving while the time-lapse panel is closed
+  useEffect(() => {
+    if (showTimelapse) return;
+    setLiveHour(currentHourInZone(timeZone));
+    const interval = setInterval(() => setLiveHour(currentHourInZone(timeZone)), 60000);
+    return () => clearInterval(interval);
+  }, [showTimelapse, timeZone]);
 
+  // GPU shadow layer (ShadeMap-style shadow mapping): buildings cast shadows
+  // onto the ground AND onto each other's walls and roofs.
+  useEffect(() => {
     const mapInstance = map.current;
-    const dayOfYear = getCurrentDayOfYear();
-    // Use timelapse time when active, otherwise use current real time
-    const now = new Date();
-    const realHour = now.getHours() + now.getMinutes() / 60;
-    const shadowHour = showTimelapse ? timelapse.currentTime : realHour;
-    const sunPos = calculateSunPosition(shadowHour, lat, dayOfYear);
-    const lighting = TIME_LIGHTING[timelapse.timePeriod];
+    if (!mapInstance || !mapLoaded) return;
 
-    // Only show shadows if sun is above horizon and shadows are enabled
-    if (!showShadows || sunPos.altitude <= 0) {
-      // Remove shadow layers if they exist
-      ['building-shadows', 'building-shadows-soft', 'building-shadows-ambient'].forEach(layerId => {
-        if (mapInstance.getLayer(layerId)) {
-          mapInstance.removeLayer(layerId);
-        }
-      });
-      ['shadow-data', 'shadow-data-soft', 'shadow-data-ambient'].forEach(sourceId => {
-        if (mapInstance.getSource(sourceId)) {
-          mapInstance.removeSource(sourceId);
-        }
-      });
+    const layer = new BuildingShadowLayer();
+    try {
+      // Directly after the building extrusions: their depth must already be in
+      // the buffer, and labels drawn later stay crisp inside shadows
+      const styleLayers = mapInstance.getStyle().layers || [];
+      let lastExtrusion = -1;
+      styleLayers.forEach((l, i) => { if (l.type === 'fill-extrusion') lastExtrusion = i; });
+      mapInstance.addLayer(layer, styleLayers[lastExtrusion + 1]?.id);
+    } catch (error) {
+      mapLogger.warn('[SHADOWS] could not add shadow layer', error);
       return;
     }
+    shadowLayerRef.current = layer;
 
-    // Query visible buildings - limit to improve performance
-    const features = mapInstance.queryRenderedFeatures(undefined, {
-      layers: ['3d-buildings']
-    }).slice(0, 100); // Limit to 100 buildings for performance
+    const buildingLayer = mapInstance.getLayer('3d-buildings') as { source?: string } | undefined;
+    const sourceId = buildingLayer?.source ?? 'openmaptiles';
+    let lastCenter: maplibregl.LngLat | null = null;
+    let lastRadius = 0;
 
-    const shadowFeatures: GeoJSON.Feature[] = [];
-    const softShadowFeatures: GeoJSON.Feature[] = [];
-    const ambientFeatures: GeoJSON.Feature[] = [];
-    const processedBuildings = new Set<string>();
+    // Simulated radius: wide enough to cover what a pitched camera shows,
+    // tight enough to keep shadow-map texels sub-metre.
+    const radiusForZoom = (z: number) => (z >= 17.5 ? 400 : z >= 16.5 ? 600 : z >= 15.5 ? 850 : 1100);
 
-    features.forEach(feature => {
-      const props = feature.properties;
-      let height = 10; // Default height
-
-      if (props?.render_height) {
-        height = props.render_height;
-      } else if (props?.['building:levels']) {
-        height = props['building:levels'] * 3.5;
-      }
-
-      let coords: number[][] = [];
-      if (feature.geometry.type === 'Polygon') {
-        coords = (feature.geometry as GeoJSON.Polygon).coordinates[0];
-      } else if (feature.geometry.type === 'MultiPolygon') {
-        coords = (feature.geometry as GeoJSON.MultiPolygon).coordinates[0][0];
-      }
-
-      if (coords.length < 3) return;
-
-      // Create unique key for building
-      const key = coords.slice(0, 3).map(c => `${c[0].toFixed(5)},${c[1].toFixed(5)}`).join('|');
-      if (processedBuildings.has(key)) return;
-      processedBuildings.add(key);
-
-      // Calculate main shadow polygon using dynamic sun position
-      const shadowCoords = calculateBuildingShadow(
-        coords,
-        height,
-        sunPos.azimuth,
-        sunPos.altitude,
-        lat
-      );
-
-      // Calculate soft/extended shadow (1.4x longer for soft edge)
-      const softShadowCoords = calculateBuildingShadow(
-        coords,
-        height * 1.4,
-        sunPos.azimuth,
-        sunPos.altitude,
-        lat
-      );
-
-      if (shadowCoords.length > 0) {
-        shadowFeatures.push({
-          type: 'Feature',
-          properties: { height },
-          geometry: {
-            type: 'Polygon',
-            coordinates: [shadowCoords]
-          }
-        });
-      }
-
-      if (softShadowCoords.length > 0) {
-        softShadowFeatures.push({
-          type: 'Feature',
-          properties: { height },
-          geometry: {
-            type: 'Polygon',
-            coordinates: [softShadowCoords]
-          }
-        });
-      }
-
-      // Add ambient occlusion around building base (small dark ring)
-      const ambientCoords = coords.map(coord => [...coord]);
-      ambientFeatures.push({
-        type: 'Feature',
-        properties: { height },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [ambientCoords]
-        }
-      });
-    });
-
-    // Shadow color based on time of day - cooler blue tint
-    const getShadowColor = () => {
-      switch (timelapse.timePeriod) {
-        case 'dawn':
-        case 'sunset':
-          return '#1a1a3d'; // Purple tint for golden hour
-        case 'noon':
-          return '#0a1628'; // Deep blue for harsh midday
-        default:
-          return '#0f172a'; // Standard dark blue
-      }
+    const rebuild = (force: boolean) => {
+      if (!mapInstance.getLayer(layer.id)) return;
+      const center = mapInstance.getCenter();
+      const radius = radiusForZoom(mapInstance.getZoom());
+      if (!force && lastCenter && radius === lastRadius && lastCenter.distanceTo(center) < radius * 0.25) return;
+      lastCenter = center;
+      lastRadius = radius;
+      const casters = collectBuildingCasters(mapInstance, sourceId, 'building', [center.lng, center.lat], radius);
+      layer.setCasters(casters, [center.lng, center.lat], radius);
     };
 
-    const shadowColor = getShadowColor();
-
-    // Helper to update or create source/layer
-    const updateOrCreateShadowLayer = (
-      sourceId: string,
-      layerId: string,
-      features: GeoJSON.Feature[],
-      layerConfig: Omit<maplibregl.LayerSpecification, 'id' | 'source'>
-    ) => {
-      if (features.length === 0) return;
-
-      const featureCollection: GeoJSON.FeatureCollection = {
-        type: 'FeatureCollection',
-        features
-      };
-
-      // Update existing source or create new one
-      const existingSource = mapInstance.getSource(sourceId) as maplibregl.GeoJSONSource;
-      if (existingSource) {
-        existingSource.setData(featureCollection);
-      } else {
-        mapInstance.addSource(sourceId, {
-          type: 'geojson',
-          data: featureCollection
-        });
-      }
-
-      // Add layer if it doesn't exist
-      if (!mapInstance.getLayer(layerId)) {
-        mapInstance.addLayer({
-          id: layerId,
-          source: sourceId,
-          ...layerConfig
-        } as maplibregl.LayerSpecification, '3d-buildings');
-      }
-    };
-
-    // Update soft shadow layer
-    updateOrCreateShadowLayer('shadow-data-soft', 'building-shadows-soft', softShadowFeatures, {
-      type: 'fill',
-      paint: {
-        'fill-color': shadowColor,
-        'fill-opacity': [
-          'interpolate',
-          ['linear'],
-          ['get', 'height'],
-          5, 0.12,
-          20, 0.18,
-          50, 0.22,
-          100, 0.25
-        ]
-      }
-    });
-
-    // Update main shadow layer
-    updateOrCreateShadowLayer('shadow-data', 'building-shadows', shadowFeatures, {
-      type: 'fill',
-      paint: {
-        'fill-color': shadowColor,
-        'fill-opacity': [
-          'interpolate',
-          ['linear'],
-          ['get', 'height'],
-          5, 0.25,
-          20, 0.40,
-          50, 0.50,
-          100, 0.55
-        ]
-      }
-    });
-
-    // Update ambient occlusion layer
-    updateOrCreateShadowLayer('shadow-data-ambient', 'building-shadows-ambient', ambientFeatures, {
-      type: 'line',
-      paint: {
-        'line-color': '#000000',
-        'line-width': [
-          'interpolate',
-          ['linear'],
-          ['get', 'height'],
-          5, 2,
-          20, 4,
-          50, 6,
-          100, 8
-        ],
-        'line-blur': [
-          'interpolate',
-          ['linear'],
-          ['get', 'height'],
-          5, 3,
-          20, 5,
-          50, 8,
-          100, 10
-        ],
-        'line-opacity': 0.4
-      }
-    });
-  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, showTimelapse, lat]);
-
-  // Update shadows when timelapse changes or showShadows toggles
-  // Use debounced updates to prevent performance issues
-  useEffect(() => {
-    if (!map.current || !mapLoaded) return;
-
-    // Initial shadow render (delayed to let map settle)
-    const initialTimeout = setTimeout(() => {
-      updateBuildingShadows();
-    }, 500);
-
-    // Debounced shadow update - only update after map stops moving for 300ms
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const debouncedUpdate = () => {
+    const scheduleRebuild = (force: boolean) => {
       if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        updateBuildingShadows();
-      }, 300);
+      debounceTimer = setTimeout(() => rebuild(force), 200);
+    };
+    const onMoveEnd = () => scheduleRebuild(false);
+    // New building tiles arrived (initial load, or panning into new tiles)
+    const onSourceData = (e: maplibregl.MapSourceDataEvent) => {
+      if (e.sourceId === sourceId && e.tile) scheduleRebuild(true);
     };
 
-    // Only update on moveend (not idle) to reduce frequency
-    map.current.on('moveend', debouncedUpdate);
+    rebuild(true);
+    mapInstance.on('moveend', onMoveEnd);
+    mapInstance.on('sourcedata', onSourceData);
 
     return () => {
-      clearTimeout(initialTimeout);
       if (debounceTimer) clearTimeout(debounceTimer);
-      if (map.current) {
-        map.current.off('moveend', debouncedUpdate);
+      mapInstance.off('moveend', onMoveEnd);
+      mapInstance.off('sourcedata', onSourceData);
+      shadowLayerRef.current = null;
+      try {
+        if (mapInstance.getLayer(layer.id)) mapInstance.removeLayer(layer.id);
+      } catch {
+        // Map already torn down
       }
     };
-  }, [mapLoaded, timelapse.timePeriod, timelapse.currentTime, showShadows, showTimelapse, updateBuildingShadows]);
+  }, [mapLoaded]);
+
+  // Sun position for the chosen date/time → shadow direction and wall lighting
+  const shadowHour = showTimelapse ? timelapse.currentTime : liveHour;
+  const sunPosition = useMemo(() => {
+    const day = showTimelapse ? shadowDate : new Date();
+    return getSunPosition(zonedDateAtHour(day, shadowHour, timeZone), lat, lng);
+  }, [showTimelapse, shadowDate, shadowHour, timeZone, lat, lng]);
+
+  useEffect(() => {
+    const mapInstance = map.current;
+    const layer = shadowLayerRef.current;
+    if (!mapInstance || !mapLoaded || !layer) return;
+
+    const sunUp = sunPosition.altitude > 0;
+    layer.setSun(sunPosition.azimuth, sunPosition.altitude);
+    layer.setVisible(showShadows && sunUp);
+
+    // Light the extrusions from the real sun so sunny faces are brighter
+    try {
+      if (showShadows && sunUp) {
+        mapInstance.setLight({
+          anchor: 'map',
+          position: [1.15, sunPosition.azimuth, Math.min(89, 90 - sunPosition.altitude)],
+          intensity: 0.45,
+        });
+      } else {
+        mapInstance.setLight({ anchor: 'viewport', position: [1.15, 210, 30], intensity: 0.5 });
+      }
+    } catch {
+      // Style not ready
+    }
+  }, [mapLoaded, showShadows, sunPosition]);
 
   // Toggle POI visibility
   useEffect(() => {
@@ -1869,6 +1738,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
     currentBearing,
     // Timelapse
     timelapse,
+    shadowDate,
+    setShadowDate,
+    sunPosition,
     // Handlers
     handleEnterBuilding,
     handleClose360Tour,

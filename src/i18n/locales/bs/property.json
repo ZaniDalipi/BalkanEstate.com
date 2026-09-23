@@ -474,7 +474,12 @@
     "sunset": "Zalazak sunca",
     "speed": "Brzina",
     "reset": "Resetuj",
-    "tip": "Gledajte kako se sjenke kreću da biste razumjeli izloženost sunčevoj svjetlosti"
+    "tip": "Gledajte kako se sjenke kreću da biste razumjeli izloženost sunčevoj svjetlosti",
+    "timeOfDay": "Doba dana",
+    "date": "Datum",
+    "sunDirection": "Smjer sunca",
+    "sunElevation": "Visina sunca",
+    "belowHorizon": "Ispod horizonta"
   },
   "floorIndicator": {
     "title": "Sprat",

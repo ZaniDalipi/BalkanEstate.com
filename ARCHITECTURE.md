@@ -531,6 +531,53 @@ Key decisions:
 
 ---
 
+## 3D Property Map — Sun & Shadows
+
+The 3D building view on a listing (`Map3DBuildings`, MapLibre) simulates where
+the sun is and which surfaces it reaches, ShadeMap-style: buildings cast shadows
+onto the street **and onto each other's walls and roofs**, for any date and time.
+
+```
+use3DMap
+  ├── guessBalkanTimeZone(lat, lng)        src/features/map/utils/solarPosition.ts
+  ├── getLocalSunTimes(date, …)  → useShadowTimelapse(…, sunInfoOverride)
+  ├── getSunPosition(zonedDateAtHour(date, sliderHour, tz), lat, lng)
+  │     ├── BuildingShadowLayer.setSun(azimuth, altitude)
+  │     └── map.setLight(...)             — sunlit faces brighten
+  └── on moveend / building tiles loaded
+        └── collectBuildingCasters(map, source, 'building', center, radius)
+              └── BuildingShadowLayer.setCasters(...)
+                    src/features/map/components/BuildingShadowLayer.ts
+```
+
+Key decisions:
+- **Real shadow mapping, not flat polygons.** The old version pushed each
+  footprint along the sun direction and painted it flat under the buildings, so
+  a shadow could never climb a neighbour's facade. `BuildingShadowLayer` is a
+  MapLibre custom WebGL layer: `prerender` draws the buildings into a depth map
+  seen from the sun (orthographic), and `render` redraws ground, walls and roofs
+  with the map camera, darkening every fragment the sun cannot see (4×4 PCF for
+  soft edges). Walls facing away from the sun are shaded too.
+- **Acne-free by construction.** Only faces turned away from the sun go into
+  the depth map, so a sunlit surface never compares against its own depth.
+- **Tile artefacts are handled explicitly.** Vector tiles split buildings at
+  tile edges and repeat them in the buffer of neighbouring tiles. Walls with
+  another solid directly outside them are skipped (no seams through facades),
+  and each pixel is shaded once using MapLibre's own 3D stencil IDs (no
+  doubled darkness where copies overlap).
+- **The slider is the property's wall clock.** Listings carry no time zone, so
+  `guessBalkanTimeZone` places the point in CET or EET from border polylines;
+  sunrise, sunset and solar noon are solved from the same ephemeris the shadows
+  use, so "Sunset" on the slider is where the shadows actually vanish.
+- **Bounded cost.** Shadows cover a zoom-dependent disc (400–1100 m) that
+  fades at its edge; the depth map is 4096² on desktop and 2048² on small
+  screens, and is only re-rendered when the sun or the buildings change.
+- **The maths is separate from the map.** `solarPosition.ts` has no MapLibre or
+  DOM dependency and is covered by `src/tests/solar-position.test.ts`
+  (published Belgrade sun times, DST, 32 towns' time zones).
+
+---
+
 ## Under Construction — a promise, not a fact
 
 A listing that is still going up carries a *promise* ("finished in 2028") where

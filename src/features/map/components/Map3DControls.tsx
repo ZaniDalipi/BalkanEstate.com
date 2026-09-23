@@ -50,7 +50,17 @@ export interface Map3DControlsProps {
 
   // Timelapse
   timelapse: UseShadowTimelapseReturn;
+  /** Day the sun simulation runs for (local calendar date). */
+  shadowDate?: Date;
+  setShadowDate?: (date: Date) => void;
+  /** Current simulated sun position, degrees. */
+  sunPosition?: { azimuth: number; altitude: number };
 }
+
+const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
+
+const toDateInputValue = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
 const Map3DControls: React.FC<Map3DControlsProps> = ({
   is3DMode,
@@ -79,6 +89,9 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
   onNavigateToMap,
   mapDestination,
   timelapse,
+  shadowDate,
+  setShadowDate,
+  sunPosition,
 }) => {
   const { t } = useTranslation(['property']);
 
@@ -373,24 +386,51 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
                       </button>
                     </div>
 
-                    {/* Progress bar */}
-                    <div
-                      className="relative h-1.5 sm:h-2 bg-slate-700 rounded-full cursor-pointer overflow-hidden"
-                      onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const percent = ((e.clientX - rect.left) / rect.width) * 100;
-                        timelapse.seekToProgress(Math.max(0, Math.min(100, percent)));
+                    {/* Time-of-day scrubber */}
+                    <input
+                      type="range"
+                      min={0}
+                      max={1000}
+                      value={Math.round(Math.max(0, Math.min(100, timelapse.progress)) * 10)}
+                      onChange={(e) => {
+                        timelapse.pause();
+                        timelapse.seekToProgress(Number(e.target.value) / 10);
                       }}
-                    >
-                      <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-blue-500 transition-all duration-100"
-                        style={{ width: `${timelapse.progress}%` }}
+                      aria-label={t('property:shadowTimelapse.timeOfDay', 'Time of day')}
+                      className="w-full h-1.5 sm:h-2 rounded-full appearance-none cursor-pointer bg-slate-700 accent-blue-500
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md
+                        [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full
+                        [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
+                    />
+
+                    {/* Date the sun is simulated for — shadows are far longer in winter */}
+                    {shadowDate && setShadowDate && (
+                      <input
+                        type="date"
+                        value={toDateInputValue(shadowDate)}
+                        onChange={(e) => {
+                          const [y, m, d] = e.target.value.split('-').map(Number);
+                          if (y && m && d) setShadowDate(new Date(y, m - 1, d));
+                        }}
+                        aria-label={t('property:shadowTimelapse.date', 'Date')}
+                        className="w-full px-2 py-1 text-[10px] sm:text-xs rounded-md bg-slate-800 text-slate-100 border border-slate-600 [color-scheme:dark]"
                       />
-                      <div
-                        className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md"
-                        style={{ left: `calc(${timelapse.progress}% - 6px)` }}
-                      />
-                    </div>
+                    )}
+
+                    {/* Where the sun is */}
+                    {sunPosition && (
+                      <div className="flex items-center justify-between text-[10px] sm:text-xs text-slate-300">
+                        <span title={t('property:shadowTimelapse.sunDirection', 'Sun direction')}>
+                          {'\u{1F9ED}'} {t(`property:map3d.cardinalDirections.${CARDINALS[Math.round(sunPosition.azimuth / 45) % 8]}`, CARDINALS[Math.round(sunPosition.azimuth / 45) % 8])} {Math.round(sunPosition.azimuth)}°
+                        </span>
+                        <span title={t('property:shadowTimelapse.sunElevation', 'Sun elevation')}>
+                          {sunPosition.altitude > 0
+                            ? `\u2600\uFE0F ${Math.round(sunPosition.altitude)}°`
+                            : `\u{1F319} ${t('property:shadowTimelapse.belowHorizon', 'Below horizon')}`}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Speed controls */}
                     <div className="flex items-center justify-center gap-0.5 sm:gap-1">

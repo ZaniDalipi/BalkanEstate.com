@@ -67,6 +67,8 @@ export interface SunInfo {
   sunrise: number;
   sunset: number;
   dayLength: number;
+  /** Clock hour of solar noon, when known (defaults to 12). */
+  solarNoon?: number;
 }
 
 /**
@@ -195,20 +197,26 @@ export interface UseShadowTimelapseReturn {
  * @param latitude - Location latitude for accurate sun calculations
  * @param onTimeChange - Callback fired on each time update
  * @param config - Animation configuration
+ * @param sunInfoOverride - Precomputed sun times (e.g. for a chosen date and
+ *   the property's time zone); replaces the latitude-only estimate
  */
 export function useShadowTimelapse(
   latitude: number = 42, // Default to Balkans
   onTimeChange?: (hour: number, period: TimePeriod) => void,
-  config: Partial<TimelapseConfig> = {}
+  config: Partial<TimelapseConfig> = {},
+  sunInfoOverride?: SunInfo
 ): UseShadowTimelapseReturn {
   const mergedConfig: TimelapseConfig = { ...DEFAULT_TIMELAPSE_CONFIG, ...config };
 
   // Calculate sun info for this latitude
-  const sunInfo = useMemo(() => calculateSunriseSunset(latitude), [latitude]);
+  const sunInfo = useMemo(
+    () => sunInfoOverride ?? calculateSunriseSunset(latitude),
+    [sunInfoOverride, latitude]
+  );
 
   // Adjust start/end to sun times if not specified
-  const effectiveStart = config.startHour ?? Math.floor(sunInfo.sunrise - 1);
-  const effectiveEnd = config.endHour ?? Math.ceil(sunInfo.sunset + 1);
+  const effectiveStart = config.startHour ?? Math.max(0, Math.floor(sunInfo.sunrise - 1));
+  const effectiveEnd = config.endHour ?? Math.min(24, Math.ceil(sunInfo.sunset + 1));
 
   // Start at noon so shadows are immediately visible
   const [currentTime, setCurrentTime] = useState(12);
@@ -331,8 +339,8 @@ export function useShadowTimelapse(
   }, [sunInfo.sunrise, seekTo]);
 
   const goToNoon = useCallback(() => {
-    seekTo(12);
-  }, [seekTo]);
+    seekTo(sunInfo.solarNoon ?? 12);
+  }, [sunInfo.solarNoon, seekTo]);
 
   const goToSunset = useCallback(() => {
     seekTo(sunInfo.sunset);

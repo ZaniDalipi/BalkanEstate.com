@@ -474,7 +474,12 @@
     "sunset": "Apus",
     "speed": "Viteză",
     "reset": "Resetare",
-    "tip": "Urmăriți cum se mișcă umbrele pentru a înțelege expunerea la lumina soarelui"
+    "tip": "Urmăriți cum se mișcă umbrele pentru a înțelege expunerea la lumina soarelui",
+    "timeOfDay": "Ora din zi",
+    "date": "Data",
+    "sunDirection": "Direcția soarelui",
+    "sunElevation": "Înălțimea soarelui",
+    "belowHorizon": "Sub orizont"
   },
   "floorIndicator": {
     "title": "Etaj",

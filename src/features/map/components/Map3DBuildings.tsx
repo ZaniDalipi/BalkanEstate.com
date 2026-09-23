@@ -86,6 +86,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
     currentBearing,
     // Timelapse
     timelapse,
+    shadowDate,
+    setShadowDate,
+    sunPosition,
     showPOI,
     setShowPOI,
     // Handlers
@@ -210,6 +213,9 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
         onNavigateToMap={onNavigateToMap}
         mapDestination={mapDestination}
         timelapse={timelapse}
+        shadowDate={shadowDate}
+        setShadowDate={setShadowDate}
+        sunPosition={sunPosition}
       />
 
       {/* 360 Virtual Tour overlay and entering animation */}

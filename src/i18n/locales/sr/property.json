@@ -474,7 +474,12 @@
     "sunset": "Залазак сунца",
     "speed": "Брзина",
     "reset": "Ресетуј",
-    "tip": "Гледајте како се сенке крећу да бисте разумели изложеност сунчевој светлости"
+    "tip": "Гледајте како се сенке крећу да бисте разумели изложеност сунчевој светлости",
+    "timeOfDay": "Doba dana",
+    "date": "Datum",
+    "sunDirection": "Smer sunca",
+    "sunElevation": "Visina sunca",
+    "belowHorizon": "Ispod horizonta"
   },
   "floorIndicator": {
     "title": "Спрат",
