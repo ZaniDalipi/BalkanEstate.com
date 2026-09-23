@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon } from '@/constants';
 import { useTranslation } from 'react-i18next';
 
@@ -41,6 +41,15 @@ interface Annotation {
 type InteractionMode = 'pan' | 'annotate';
 
 const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 5, 8];
+const MAX_SCALE = 8;
+// Smallest zoom, as a fraction of the fitted size.
+const MIN_FIT_RATIO = 0.5;
+
+interface View {
+    scale: number; // natural image pixels → screen pixels
+    x: number;
+    y: number;
+}
 
 const getStorageKey = (propertyId?: string) =>
     propertyId ? `floorplan-annotations-${propertyId}` : null;
@@ -104,10 +113,21 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         return labels[type];
     };
 
-    // Transform state
-    const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+    // View transform. Pan/zoom lives in a ref and is written straight to the
+    // DOM once per animation frame; React state only follows the settled
+    // zoom level (for the % label, slider and pixel rendering). Re-rendering
+    // the whole viewer on every pointer move is what made it laggy.
+    const viewRef = useRef<View>({ scale: 1, x: 0, y: 0 });
+    // Natural-pixel → on-screen scale that fits the plan in the frame. The
+    // plan is laid out at this size and CSS-scaled relative to it, so the
+    // browser never composites a full-resolution (often 4000px+) layer.
+    const fitScaleRef = useRef(1);
+    const [baseScale, setBaseScale] = useState(1);
+    const [viewScale, setViewScale] = useState(1);
     const [isPanning, setIsPanning] = useState(false);
-    const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+    const frameRef = useRef<number | null>(null);
+    const animateRef = useRef(false);
+    const commitTimerRef = useRef<number | null>(null);
 
     // Image state
     const [isLoading, setIsLoading] = useState(true);
@@ -120,14 +140,15 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
     const [editingAnnotation, setEditingAnnotation] = useState<string | null>(null);
     const [detailAnnotation, setDetailAnnotation] = useState<string | null>(null);
 
-    // Touch state
-    const [touchStartDistance, setTouchStartDistance] = useState<number | null>(null);
-    const [touchStartScale, setTouchStartScale] = useState(1);
-    const [touchStartCenter, setTouchStartCenter] = useState({ x: 0, y: 0 });
+    // Pointer gesture state (mouse, pen and touch alike)
+    const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+    const gestureRef = useRef<{ start: View; mid: { x: number; y: number }; dist: number; left: number; top: number } | null>(null);
     const lastTapRef = useRef(0);
+    const lastPointerTypeRef = useRef('mouse');
 
     // Refs
     const imageContainerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
     const annotationInputRef = useRef<HTMLInputElement>(null);
 
@@ -136,22 +157,97 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         saveAnnotations(propertyId, annotations);
     }, [annotations, propertyId]);
 
-    // Fit image to container on load
-    const fitToScreen = useCallback(() => {
-        if (!imageContainerRef.current || imageDimensions.width === 0) return;
+    const writeTransform = useCallback(() => {
+        const el = contentRef.current;
+        if (!el) return;
+        const v = viewRef.current;
+        const base = fitScaleRef.current || 1;
+        el.style.transition = animateRef.current ? 'transform 0.18s ease-out' : 'none';
+        el.style.transform = `translate3d(${v.x}px, ${v.y}px, 0) scale(${v.scale / base})`;
+        // Pins keep a constant on-screen size.
+        el.style.setProperty('--pin-scale', String(base / v.scale));
+    }, []);
+
+    const scheduleWrite = useCallback(() => {
+        if (frameRef.current !== null) return;
+        frameRef.current = requestAnimationFrame(() => {
+            frameRef.current = null;
+            writeTransform();
+        });
+    }, [writeTransform]);
+
+    // Sync React with the settled zoom and let the browser re-raster sharply.
+    const commitView = useCallback((immediate: boolean) => {
+        if (commitTimerRef.current !== null) window.clearTimeout(commitTimerRef.current);
+        const run = () => {
+            commitTimerRef.current = null;
+            setViewScale(viewRef.current.scale);
+            if (contentRef.current) contentRef.current.style.willChange = 'auto';
+        };
+        if (immediate) run();
+        else commitTimerRef.current = window.setTimeout(run, 150);
+    }, []);
+
+    useEffect(() => () => {
+        if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+        if (commitTimerRef.current !== null) window.clearTimeout(commitTimerRef.current);
+    }, []);
+
+    // Keep the plan inside the frame: a plan smaller than the frame can move
+    // only within it, a larger one can't be dragged past its own edges. The
+    // picture can never be flung off-screen.
+    const clampView = useCallback((v: View): View => {
         const container = imageContainerRef.current;
-        const containerW = container.clientWidth;
-        const containerH = container.clientHeight;
-        const scaleX = containerW / imageDimensions.width;
-        const scaleY = containerH / imageDimensions.height;
-        const fitScale = Math.min(scaleX, scaleY, 1) * 0.9;
-        const centerX = (containerW - imageDimensions.width * fitScale) / 2;
-        const centerY = (containerH - imageDimensions.height * fitScale) / 2;
-        setTransform({ scale: fitScale, x: centerX, y: centerY });
+        const { width, height } = imageDimensions;
+        if (!container || width === 0 || height === 0) return v;
+        const cw = container.clientWidth;
+        const ch = container.clientHeight;
+        const fit = fitScaleRef.current;
+        const scale = Math.min(Math.max(v.scale, fit * MIN_FIT_RATIO), Math.max(MAX_SCALE, fit));
+        const axis = (pos: number, size: number, frame: number) =>
+            size <= frame
+                ? Math.min(Math.max(pos, 0), frame - size)
+                : Math.min(Math.max(pos, frame - size), 0);
+        return { scale, x: axis(v.x, width * scale, cw), y: axis(v.y, height * scale, ch) };
     }, [imageDimensions]);
 
+    const setView = useCallback((next: View, opts: { animate?: boolean; commit?: boolean } = {}) => {
+        viewRef.current = clampView(next);
+        animateRef.current = !!opts.animate;
+        if (!opts.animate && contentRef.current) contentRef.current.style.willChange = 'transform';
+        scheduleWrite();
+        commitView(!!opts.commit);
+    }, [clampView, scheduleWrite, commitView]);
+
+    // Scale about a point (container coordinates) so it stays under the cursor.
+    const zoomAt = useCallback((targetScale: number, pivotX: number, pivotY: number, from: View = viewRef.current, animate = false) => {
+        const scale = clampView({ ...from, scale: targetScale }).scale;
+        const ratio = scale / from.scale;
+        setView({
+            scale,
+            x: pivotX - (pivotX - from.x) * ratio,
+            y: pivotY - (pivotY - from.y) * ratio,
+        }, { animate });
+    }, [clampView, setView]);
+
+    // Fit image to container
+    const fitToScreen = useCallback((animate = false) => {
+        const container = imageContainerRef.current;
+        if (!container || imageDimensions.width === 0) return;
+        const containerW = container.clientWidth;
+        const containerH = container.clientHeight;
+        const fitScale = Math.min(containerW / imageDimensions.width, containerH / imageDimensions.height, 1) * 0.9;
+        fitScaleRef.current = fitScale;
+        setBaseScale(fitScale);
+        setView({
+            scale: fitScale,
+            x: (containerW - imageDimensions.width * fitScale) / 2,
+            y: (containerH - imageDimensions.height * fitScale) / 2,
+        }, { animate, commit: true });
+    }, [imageDimensions, setView]);
+
     const resetTransform = useCallback(() => {
-        fitToScreen();
+        fitToScreen(true);
     }, [fitToScreen]);
 
     useEffect(() => {
@@ -160,228 +256,191 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         }
     }, [isLoading, imageDimensions, fitToScreen]);
 
-    // Zoom with pivot point
+    // Refit when the window (and with it the frame) changes size.
+    useEffect(() => {
+        const onResize = () => fitToScreen();
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, [fitToScreen]);
+
+    // The laid-out size changes with baseScale; rewrite before paint so the
+    // plan doesn't jump for a frame.
+    useLayoutEffect(() => {
+        writeTransform();
+    }, [baseScale, imageDimensions, writeTransform]);
+
+    // Zoom buttons / keyboard: one step about the frame centre (or a point)
     const zoom = useCallback((direction: 'in' | 'out', clientX?: number, clientY?: number) => {
-        setTransform(prev => {
-            const scaleFactor = 1.3;
-            const newScale = direction === 'in'
-                ? prev.scale * scaleFactor
-                : prev.scale / scaleFactor;
-
-            if (newScale < 0.1 || newScale > 15) return prev;
-
-            const container = imageContainerRef.current;
-            if (!container) return prev;
-
-            const rect = container.getBoundingClientRect();
-            const pivotX = clientX !== undefined ? clientX - rect.left : rect.width / 2;
-            const pivotY = clientY !== undefined ? clientY - rect.top : rect.height / 2;
-
-            const newX = pivotX - (pivotX - prev.x) * (newScale / prev.scale);
-            const newY = pivotY - (pivotY - prev.y) * (newScale / prev.scale);
-
-            return { scale: newScale, x: newX, y: newY };
-        });
-    }, []);
-
-    // Zoom to specific level
-    const zoomToLevel = useCallback((level: number) => {
-        setTransform(prev => {
-            const container = imageContainerRef.current;
-            if (!container) return prev;
-
-            const rect = container.getBoundingClientRect();
-            const pivotX = rect.width / 2;
-            const pivotY = rect.height / 2;
-
-            const newX = pivotX - (pivotX - prev.x) * (level / prev.scale);
-            const newY = pivotY - (pivotY - prev.y) * (level / prev.scale);
-
-            return { scale: level, x: newX, y: newY };
-        });
-    }, []);
-
-    // Mouse wheel zoom
-    const handleWheel = useCallback((e: React.WheelEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        zoom(e.deltaY < 0 ? 'in' : 'out', e.clientX, e.clientY);
-    }, [zoom]);
-
-    // Mouse pan
-    const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        if (e.button !== 0) return;
-
-        if (mode === 'annotate') {
-            // Prevent browser default focus behavior — without this, the browser
-            // steals focus from the annotation input on the subsequent click event,
-            // triggering onBlur which removes the empty-label annotation instantly.
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Add annotation at clicked position
-            const container = imageContainerRef.current;
-            if (!container) return;
-            const rect = container.getBoundingClientRect();
-            const imgX = ((e.clientX - rect.left - transform.x) / transform.scale / imageDimensions.width) * 100;
-            const imgY = ((e.clientY - rect.top - transform.y) / transform.scale / imageDimensions.height) * 100;
-
-            if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
-                const newId = `ann-${Date.now()}`;
-                setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '', roomType: 'other', area: '', notes: '' }]);
-                setEditingAnnotation(newId);
-                setDetailAnnotation(null);
-            }
-            return;
-        }
-
-        e.preventDefault();
-        setDetailAnnotation(null);
-        setIsPanning(true);
-        setPanStart({ x: e.clientX - transform.x, y: e.clientY - transform.y });
-    }, [mode, transform, imageDimensions]);
-
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        if (!isPanning) return;
-        e.preventDefault();
-        setTransform(prev => ({
-            ...prev,
-            x: e.clientX - panStart.x,
-            y: e.clientY - panStart.y,
-        }));
-    }, [isPanning, panStart]);
-
-    const handleMouseUp = useCallback(() => {
-        setIsPanning(false);
-    }, []);
-
-    // Touch handlers for mobile pinch-to-zoom and pan
-    const getTouchDistance = (touches: React.TouchList) => {
-        if (touches.length < 2) return 0;
-        const dx = touches[0].clientX - touches[1].clientX;
-        const dy = touches[0].clientY - touches[1].clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    const getTouchCenter = (touches: React.TouchList) => {
-        if (touches.length < 2) {
-            return { x: touches[0].clientX, y: touches[0].clientY };
-        }
-        return {
-            x: (touches[0].clientX + touches[1].clientX) / 2,
-            y: (touches[0].clientY + touches[1].clientY) / 2,
-        };
-    };
-
-    const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        e.preventDefault();
-
-        if (e.touches.length === 1) {
-            // In annotate mode, single tap creates an annotation
-            if (mode === 'annotate') {
-                const container = imageContainerRef.current;
-                if (!container) return;
-                const rect = container.getBoundingClientRect();
-                const touch = e.touches[0];
-                const imgX = ((touch.clientX - rect.left - transform.x) / transform.scale / imageDimensions.width) * 100;
-                const imgY = ((touch.clientY - rect.top - transform.y) / transform.scale / imageDimensions.height) * 100;
-
-                if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
-                    const newId = `ann-${Date.now()}`;
-                    setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '', roomType: 'other', area: '', notes: '' }]);
-                    setEditingAnnotation(newId);
-                    setDetailAnnotation(null);
-                }
-                return;
-            }
-
-            // Double-tap detection
-            const now = Date.now();
-            if (now - lastTapRef.current < 300) {
-                // Double tap - toggle zoom
-                const container = imageContainerRef.current;
-                if (container) {
-                    const nextScale = transform.scale < 2 ? 3 : 1;
-                    const rect = container.getBoundingClientRect();
-                    const pivotX = e.touches[0].clientX - rect.left;
-                    const pivotY = e.touches[0].clientY - rect.top;
-                    const newX = pivotX - (pivotX - transform.x) * (nextScale / transform.scale);
-                    const newY = pivotY - (pivotY - transform.y) * (nextScale / transform.scale);
-                    setTransform({ scale: nextScale, x: newX, y: newY });
-                }
-                lastTapRef.current = 0;
-                return;
-            }
-            lastTapRef.current = now;
-
-            // Single finger pan
-            setIsPanning(true);
-            setPanStart({ x: e.touches[0].clientX - transform.x, y: e.touches[0].clientY - transform.y });
-        } else if (e.touches.length === 2) {
-            // Pinch zoom
-            setIsPanning(false);
-            const dist = getTouchDistance(e.touches);
-            setTouchStartDistance(dist);
-            setTouchStartScale(transform.scale);
-            setTouchStartCenter(getTouchCenter(e.touches));
-        }
-    }, [mode, transform, imageDimensions]);
-
-    const handleTouchMove = useCallback((e: React.TouchEvent) => {
-        e.preventDefault();
-
-        if (e.touches.length === 1 && isPanning) {
-            setTransform(prev => ({
-                ...prev,
-                x: e.touches[0].clientX - panStart.x,
-                y: e.touches[0].clientY - panStart.y,
-            }));
-        } else if (e.touches.length === 2 && touchStartDistance !== null) {
-            const currentDist = getTouchDistance(e.touches);
-            const currentCenter = getTouchCenter(e.touches);
-            const scaleDelta = currentDist / touchStartDistance;
-            const newScale = Math.min(Math.max(touchStartScale * scaleDelta, 0.1), 15);
-
-            const container = imageContainerRef.current;
-            if (!container) return;
-
-            const rect = container.getBoundingClientRect();
-            const pivotX = touchStartCenter.x - rect.left;
-            const pivotY = touchStartCenter.y - rect.top;
-
-            // Calculate new position with both scale and pan applied
-            const dx = currentCenter.x - touchStartCenter.x;
-            const dy = currentCenter.y - touchStartCenter.y;
-
-            const baseX = pivotX - (pivotX - transform.x) * (newScale / transform.scale);
-            const baseY = pivotY - (pivotY - transform.y) * (newScale / transform.scale);
-
-            setTransform({ scale: newScale, x: baseX + dx, y: baseY + dy });
-        }
-    }, [isPanning, panStart, touchStartDistance, touchStartScale, touchStartCenter, transform]);
-
-    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-        if (e.touches.length < 2) {
-            setTouchStartDistance(null);
-        }
-        if (e.touches.length === 0) {
-            setIsPanning(false);
-        }
-    }, []);
-
-    // Double-click zoom (desktop)
-    const handleDoubleClick = useCallback((e: React.MouseEvent) => {
-        if (mode === 'annotate') return;
-        const nextScale = transform.scale < 2 ? 3 : 1;
         const container = imageContainerRef.current;
         if (!container) return;
         const rect = container.getBoundingClientRect();
-        const pivotX = e.clientX - rect.left;
-        const pivotY = e.clientY - rect.top;
-        const newX = pivotX - (pivotX - transform.x) * (nextScale / transform.scale);
-        const newY = pivotY - (pivotY - transform.y) * (nextScale / transform.scale);
-        setTransform({ scale: nextScale, x: newX, y: newY });
-    }, [transform, mode]);
+        const pivotX = clientX !== undefined ? clientX - rect.left : rect.width / 2;
+        const pivotY = clientY !== undefined ? clientY - rect.top : rect.height / 2;
+        const factor = direction === 'in' ? 1.3 : 1 / 1.3;
+        zoomAt(viewRef.current.scale * factor, pivotX, pivotY, viewRef.current, true);
+    }, [zoomAt]);
+
+    // Zoom to specific level
+    const zoomToLevel = useCallback((level: number) => {
+        const container = imageContainerRef.current;
+        if (!container) return;
+        zoomAt(level, container.clientWidth / 2, container.clientHeight / 2, viewRef.current, true);
+    }, [zoomAt]);
+
+    // Toggle between the fitted view and a close-up at a point
+    const toggleZoomAt = useCallback((clientX: number, clientY: number) => {
+        const container = imageContainerRef.current;
+        if (!container) return;
+        if (viewRef.current.scale > fitScaleRef.current * 1.5) {
+            fitToScreen(true);
+            return;
+        }
+        const rect = container.getBoundingClientRect();
+        zoomAt(fitScaleRef.current * 3, clientX - rect.left, clientY - rect.top, viewRef.current, true);
+    }, [zoomAt, fitToScreen]);
+
+    // Wheel / trackpad zoom. Registered natively as non-passive (React's
+    // onWheel is passive, so preventDefault was ignored). The zoom is
+    // proportional to the scroll distance, so a trackpad's burst of small
+    // events zooms smoothly instead of 1.3x per event.
+    useEffect(() => {
+        const container = imageContainerRef.current;
+        if (!container) return;
+        const onWheel = (e: WheelEvent) => {
+            // Let a room's notes box scroll normally.
+            if ((e.target as HTMLElement).closest?.('input, textarea, select')) return;
+            e.preventDefault();
+            e.stopPropagation();
+            let delta = e.deltaY;
+            if (e.deltaMode === 1) delta *= 16;
+            else if (e.deltaMode === 2) delta *= container.clientHeight;
+            delta = Math.max(-120, Math.min(120, delta));
+            // ctrlKey marks a trackpad pinch, whose deltas are small.
+            const factor = Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.002));
+            const rect = container.getBoundingClientRect();
+            zoomAt(viewRef.current.scale * factor, e.clientX - rect.left, e.clientY - rect.top);
+        };
+        container.addEventListener('wheel', onWheel, { passive: false });
+        return () => container.removeEventListener('wheel', onWheel);
+    }, [zoomAt]);
+
+    // Snapshot the view and pointers at the start of a pan/pinch (and again
+    // whenever a finger is added or lifted, so nothing jumps).
+    const beginGesture = useCallback(() => {
+        const container = imageContainerRef.current;
+        const pts = Array.from(pointersRef.current.values());
+        if (!container || pts.length === 0) {
+            gestureRef.current = null;
+            return;
+        }
+        const rect = container.getBoundingClientRect();
+        const [a, b] = pts;
+        gestureRef.current = {
+            start: { ...viewRef.current },
+            mid: b ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } : { x: a.x, y: a.y },
+            dist: b ? Math.hypot(a.x - b.x, a.y - b.y) : 0,
+            left: rect.left,
+            top: rect.top,
+        };
+    }, []);
+
+    const handlePointerDown = useCallback((e: React.PointerEvent) => {
+        lastPointerTypeRef.current = e.pointerType;
+        if (mode === 'annotate') return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+        setDetailAnnotation(null);
+        imageContainerRef.current?.setPointerCapture(e.pointerId);
+        pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (e.pointerType === 'touch' && pointersRef.current.size === 1) {
+            const now = Date.now();
+            if (now - lastTapRef.current < 300) {
+                lastTapRef.current = 0;
+                toggleZoomAt(e.clientX, e.clientY);
+            } else {
+                lastTapRef.current = now;
+            }
+        }
+
+        beginGesture();
+        setIsPanning(true);
+    }, [mode, beginGesture, toggleZoomAt]);
+
+    const handlePointerMove = useCallback((e: React.PointerEvent) => {
+        if (!pointersRef.current.has(e.pointerId)) return;
+        pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        const g = gestureRef.current;
+        if (!g) return;
+        const [a, b] = Array.from(pointersRef.current.values());
+        const mid = b ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } : a;
+        const targetScale = b && g.dist > 0
+            ? g.start.scale * (Math.hypot(a.x - b.x, a.y - b.y) / g.dist)
+            : g.start.scale;
+        const scale = clampView({ ...g.start, scale: targetScale }).scale;
+        const ratio = scale / g.start.scale;
+        // The plan point under the gesture's start midpoint follows the fingers.
+        const startMidX = g.mid.x - g.left;
+        const startMidY = g.mid.y - g.top;
+        setView({
+            scale,
+            x: (mid.x - g.left) - (startMidX - g.start.x) * ratio,
+            y: (mid.y - g.top) - (startMidY - g.start.y) * ratio,
+        });
+    }, [clampView, setView]);
+
+    const handlePointerUp = useCallback((e: React.PointerEvent) => {
+        if (!pointersRef.current.delete(e.pointerId)) return;
+        if (imageContainerRef.current?.hasPointerCapture(e.pointerId)) {
+            imageContainerRef.current.releasePointerCapture(e.pointerId);
+        }
+        if (pointersRef.current.size > 0) {
+            beginGesture();
+        } else {
+            gestureRef.current = null;
+            setIsPanning(false);
+            commitView(true);
+        }
+    }, [beginGesture, commitView]);
+
+    // Annotate mode: a click/tap drops a pin where it lands on the plan
+    const addAnnotationAt = useCallback((clientX: number, clientY: number) => {
+        const container = imageContainerRef.current;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const v = viewRef.current;
+        const imgX = ((clientX - rect.left - v.x) / v.scale / imageDimensions.width) * 100;
+        const imgY = ((clientY - rect.top - v.y) / v.scale / imageDimensions.height) * 100;
+
+        if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
+            const newId = `ann-${Date.now()}`;
+            setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '', roomType: 'other', area: '', notes: '' }]);
+            setEditingAnnotation(newId);
+            setDetailAnnotation(null);
+        }
+    }, [imageDimensions]);
+
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        if (mode !== 'annotate' || e.button !== 0) return;
+        // Prevent browser default focus behavior — without this, the browser
+        // steals focus from the annotation input on the subsequent click event,
+        // triggering onBlur which removes the empty-label annotation instantly.
+        e.preventDefault();
+        e.stopPropagation();
+        addAnnotationAt(e.clientX, e.clientY);
+    }, [mode, addAnnotationAt]);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        if (mode !== 'annotate' || e.touches.length !== 1) return;
+        e.preventDefault();
+        addAnnotationAt(e.touches[0].clientX, e.touches[0].clientY);
+    }, [mode, addAnnotationAt]);
+
+    // Double-click zoom (desktop; touch double-tap is handled on pointerdown)
+    const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+        if (mode === 'annotate' || lastPointerTypeRef.current !== 'mouse') return;
+        toggleZoomAt(e.clientX, e.clientY);
+    }, [mode, toggleZoomAt]);
 
     // Annotation handlers
     const handleAnnotationLabelChange = useCallback((id: string, label: string) => {
@@ -495,11 +554,11 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
     }, []);
 
     // Current zoom percentage
-    const zoomPercent = Math.round(transform.scale * 100);
+    const zoomPercent = Math.round(viewScale * 100);
 
     // Find closest zoom preset index for the slider
     const closestZoomIndex = ZOOM_LEVELS.reduce((closest, level, i) =>
-        Math.abs(level - transform.scale) < Math.abs(ZOOM_LEVELS[closest] - transform.scale) ? i : closest
+        Math.abs(level - viewScale) < Math.abs(ZOOM_LEVELS[closest] - viewScale) ? i : closest
     , 0);
 
     return (
@@ -671,30 +730,22 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                 className={`flex-1 overflow-hidden ${
                     mode === 'annotate' ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'
                 }`}
-                onWheel={handleWheel}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
                 onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
                 onDoubleClick={handleDoubleClick}
                 onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
                 style={{ touchAction: 'none' }}
             >
-                <div
-                    className="origin-top-left"
-                    style={{
-                        transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
-                        transition: isPanning || touchStartDistance !== null ? 'none' : 'transform 0.15s ease-out',
-                        willChange: 'transform',
-                    }}
-                >
+                {/* transform is written directly by writeTransform */}
+                <div ref={contentRef} style={{ transformOrigin: '0 0' }}>
                     <div
                         className="relative"
                         style={{
-                            width: imageDimensions.width || 'auto',
-                            height: imageDimensions.height || 'auto',
+                            width: imageDimensions.width ? imageDimensions.width * baseScale : 'auto',
+                            height: imageDimensions.height ? imageDimensions.height * baseScale : 'auto',
                             boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.5), 0 10px 20px -5px rgba(0, 0, 0, 0.3)',
                             borderRadius: '4px',
                         }}
@@ -705,10 +756,13 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                             alt={t('property:floorPlan.viewer.floorPlanAlt', 'Floor Plan')}
                             className={`block select-none ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                             style={{
-                                imageRendering: transform.scale > 2 ? 'pixelated' : 'auto',
+                                imageRendering: viewScale > 2 ? 'pixelated' : 'auto',
                                 maxWidth: 'none',
+                                width: imageDimensions.width ? '100%' : undefined,
+                                height: imageDimensions.height ? '100%' : undefined,
                                 borderRadius: '4px',
                             }}
+                            draggable={false}
                             onLoad={handleImageLoad}
                             onError={handleImageError}
                             onDragStart={(e) => e.preventDefault()}
@@ -724,12 +778,13 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                             <div
                                 key={ann.id}
                                 className="absolute"
+                                onPointerDown={(e) => e.stopPropagation()}
                                 onMouseDown={(e) => e.stopPropagation()}
                                 onTouchStart={(e) => e.stopPropagation()}
                                 style={{
                                     left: `${ann.x}%`,
                                     top: `${ann.y}%`,
-                                    transform: `translate(-50%, -50%) scale(${1 / transform.scale})`,
+                                    transform: 'translate(-50%, -50%) scale(var(--pin-scale, 1))',
                                     transformOrigin: 'center',
                                     pointerEvents: 'auto',
                                     zIndex: isEditing || isDetailOpen ? 20 : 10,
