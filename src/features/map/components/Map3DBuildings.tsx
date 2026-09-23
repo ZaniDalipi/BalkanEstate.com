@@ -16,6 +16,7 @@ import { TIME_LIGHTING } from './Map3DConstants';
 import { use3DMap } from './use3DMap';
 import Map3DControls from './Map3DControls';
 import Map3DTourViewer from './Map3DTourViewer';
+import SunIndicator from './SunIndicator';
 import { reverseGeocode } from '@/services/osmService';
 
 /**
@@ -121,26 +122,12 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
               )`,
             }}
           />
-          {/* Sun indicator */}
-          {TIME_LIGHTING[timelapse.timePeriod].sunAltitude > 0 && (
-            <div
-              className="absolute w-12 h-12 pointer-events-none transition-all duration-700"
-              style={{
-                left: `${50 + Math.cos((TIME_LIGHTING[timelapse.timePeriod].sunAzimuth - 90) * Math.PI / 180) * 35}%`,
-                top: `${8 + (90 - TIME_LIGHTING[timelapse.timePeriod].sunAltitude) * 0.25}%`,
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              <div
-                className="w-full h-full rounded-full"
-                style={{
-                  background: `radial-gradient(circle, #fff8e0 0%, ${TIME_LIGHTING[timelapse.timePeriod].skyColor}00 70%)`,
-                  boxShadow: `0 0 40px 20px rgba(255,248,200,0.3)`,
-                }}
-              />
-            </div>
-          )}
         </>
+      )}
+
+      {/* The sun, where it really is relative to the camera */}
+      {showShadows && !show360Tour && (
+        <SunIndicator azimuth={sunPosition.azimuth} altitude={sunPosition.altitude} bearing={currentBearing} />
       )}
 
       {/* Property info card - top left */}

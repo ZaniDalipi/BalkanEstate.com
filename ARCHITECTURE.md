@@ -580,6 +580,11 @@ Key decisions:
   `prerender`, never in `onAdd`: MapLibre caches which texture and
   renderbuffer are bound and only resynchronises after prerender/render.
   The shadow target steps down 4096² → 2048² → 1024² if a GPU refuses a size.
+- **The sun is where the sun is.** `SunIndicator` draws the sun from the same
+  azimuth/altitude as the shadows, relative to the map bearing, so it moves as
+  the map rotates and warms to orange near the horizon. A sun behind the
+  camera waits (dimmer) at the nearest side, inside a band clear of the
+  title card and the right-hand controls.
 - **The page's section rail steps aside.** `PropertySectionNav`'s floating
   "On this page" rail fades out while the 3D map fills the viewport, so it
   never sits over the map's controls or the shadows being inspected.
