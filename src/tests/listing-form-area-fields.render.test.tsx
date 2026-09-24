@@ -79,6 +79,18 @@ describe('an apartment is asked for gross and net, and nothing else', () => {
     });
 });
 
+describe('a house is asked for its plot and its footprint', () => {
+    it('shows the same pair a villa is described by', () => {
+        const { areaBoxes } = renderFormFor('house');
+        expect(areaBoxes).toEqual(['Land (m²)', 'Building (m²)']);
+    });
+
+    it('no longer asks for one plain "Area" that could mean either', () => {
+        renderFormFor('house');
+        expect(screen.queryByLabelText('area')).toBeNull();
+    });
+});
+
 describe('a parking space is asked for one plain area', () => {
     it('shows the generic area box, because it has no breakdown to combine', () => {
         const { areaBoxes } = renderFormFor('parking');
@@ -93,7 +105,8 @@ describe('a parking space is asked for one plain area', () => {
 
 describe('every other type asks for its own measurements', () => {
     const expected: Record<PropertyType, string[]> = {
-        house: ['area'],
+        // A house stands on a plot exactly as a villa does.
+        house: ['Land (m²)', 'Building (m²)'],
         apartment: ['Gross (m²)', 'Net (m²)'],
         villa: ['Land (m²)', 'Building (m²)'],
         'luxury-villa': ['Land (m²)', 'Building (m²)'],

@@ -11,7 +11,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { resolveDisplayArea, resolveTotalArea, typeHasMeasuredBreakdown } from '@/shared/property/area';
+import {
+  resolveDisplayArea,
+  resolveSubmittedArea,
+  resolveTotalArea,
+  typeHasMeasuredBreakdown,
+} from '@/shared/property/area';
 import { resolveTotalArea as resolveTotalAreaBackend } from '@/backend/src/config/propertyArea';
 
 describe('resolveDisplayArea', () => {
@@ -41,7 +46,12 @@ describe('resolveDisplayArea', () => {
       .toEqual({ value: 102.5, source: 'openPlanArea' });
   });
 
-  it('has nothing to fall back to for a house, a parking space or a plot of land', () => {
+  it("falls back to a house's building area before its plot", () => {
+    expect(resolveDisplayArea({ propertyType: 'house', sqft: 0, landArea: 600, buildingArea: 140 }))
+      .toEqual({ value: 140, source: 'buildingArea' });
+  });
+
+  it('has nothing to fall back to for a parking space or a plot of land', () => {
     expect(resolveDisplayArea({ propertyType: 'house', sqft: 0 })).toBeNull();
     expect(resolveDisplayArea({ propertyType: 'parking', sqft: 0, parking: 1 })).toBeNull();
     expect(resolveDisplayArea({ propertyType: 'land', sqft: 0, landArea: 400 })).toBeNull();
@@ -61,17 +71,37 @@ describe('resolveTotalArea', () => {
   });
 });
 
+describe('resolveSubmittedArea reverses the precedence for the write side', () => {
+  it('prefers the breakdown a seller can see over the total they cannot', () => {
+    // Reading the same record keeps the stored total; saving the form does not.
+    const record = { propertyType: 'apartment', sqft: 79, grossArea: 85 };
+    expect(resolveTotalArea(record)).toBe(79);
+    expect(resolveSubmittedArea(record)).toBe(85);
+  });
+
+  it('keeps the total when the breakdown was never filled in', () => {
+    expect(resolveSubmittedArea({ propertyType: 'apartment', sqft: 79 })).toBe(79);
+    expect(resolveSubmittedArea({ propertyType: 'house', sqft: 150 })).toBe(150);
+  });
+
+  it('is just the total for a type with no breakdown at all', () => {
+    expect(resolveSubmittedArea({ propertyType: 'parking', sqft: 18 })).toBe(18);
+    expect(resolveSubmittedArea({ propertyType: 'parking' })).toBe(0);
+  });
+});
+
 describe('typeHasMeasuredBreakdown', () => {
   it('is true for the types the form asks for their own measurements', () => {
     expect(typeHasMeasuredBreakdown('apartment')).toBe(true);
+    // A house stands on a plot and is built over part of it, same as a villa.
+    expect(typeHasMeasuredBreakdown('house')).toBe(true);
     expect(typeHasMeasuredBreakdown('villa')).toBe(true);
     expect(typeHasMeasuredBreakdown('luxury-villa')).toBe(true);
     expect(typeHasMeasuredBreakdown('commercial')).toBe(true);
     expect(typeHasMeasuredBreakdown('other')).toBe(true);
   });
 
-  it('is false for the types shown a single plain area box', () => {
-    expect(typeHasMeasuredBreakdown('house')).toBe(false);
+  it('is false only for the types with nothing but a plain area box', () => {
     expect(typeHasMeasuredBreakdown('parking')).toBe(false);
     expect(typeHasMeasuredBreakdown('land')).toBe(false);
     expect(typeHasMeasuredBreakdown('nonsense')).toBe(true); // unknown reads as 'other'
@@ -81,7 +111,7 @@ describe('typeHasMeasuredBreakdown', () => {
     // The form hides the generic box exactly where the resolver has
     // something to fall back to; a type where those two disagreed would
     // either be asked nothing, or asked twice.
-    for (const propertyType of ['apartment', 'villa', 'luxury-villa', 'commercial']) {
+    for (const propertyType of ['apartment', 'house', 'villa', 'luxury-villa', 'commercial']) {
       expect(typeHasMeasuredBreakdown(propertyType), propertyType).toBe(true);
       expect(resolveDisplayArea({ propertyType, sqft: 0, grossArea: 50, buildingArea: 50, openPlanArea: 50 }))
         .not.toBeNull();
@@ -99,6 +129,7 @@ describe('the client and server resolvers agree', () => {
     ['parking', { sqft: 0, parking: 2 }],
     ['land', { sqft: 0, landArea: 400 }],
     ['house', { sqft: 120 }],
+    ['house', { sqft: 0, landArea: 600, buildingArea: 140 }],
   ];
 
   for (const [propertyType, input] of cases) {

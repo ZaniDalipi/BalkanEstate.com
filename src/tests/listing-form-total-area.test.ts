@@ -66,6 +66,33 @@ describe('a type that shows its own breakdown is sized by that breakdown', () =>
     it('falls back to net when only net was filled in', () => {
         expect(submittedArea({ propertyType: 'apartment', netArea: 70 })).toBe(70);
     });
+
+    it("takes a house's building area over its plot", () => {
+        expect(submittedArea({ propertyType: 'house', landArea: 600, buildingArea: 140 })).toBe(140);
+    });
+});
+
+describe('a listing that predates its breakdown keeps the area it has', () => {
+    // The edit path loads sq_meters from the stored sqft and the breakdown
+    // fields as 0. A listing first published before gross/net (or land/
+    // building) were asked for therefore arrives with a real total and an
+    // empty breakdown — and must not be saved back as 0 m², which is the
+    // very fault this whole change set exists to fix.
+    it('keeps an apartment that only ever had a total', () => {
+        expect(submittedArea({ propertyType: 'apartment', sq_meters: 79 })).toBe(79);
+    });
+
+    it('keeps a villa that only ever had a total', () => {
+        expect(submittedArea({ propertyType: 'villa', sq_meters: 220 })).toBe(220);
+    });
+
+    it('keeps a house that only ever had a total', () => {
+        expect(submittedArea({ propertyType: 'house', sq_meters: 150 })).toBe(150);
+    });
+
+    it('still prefers the breakdown the moment the seller fills one in', () => {
+        expect(submittedArea({ propertyType: 'house', sq_meters: 150, buildingArea: 140 })).toBe(140);
+    });
 });
 
 describe('a type with no breakdown is sized by the plain area box', () => {

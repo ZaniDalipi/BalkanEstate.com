@@ -28,11 +28,16 @@ describe('resolveTotalArea', () => {
     expect(resolveTotalArea('luxury-villa', { sqft: 0, landArea: 5550.5 })).toBe(5550.5);
   });
 
+  it('describes a house by the same pair as a villa', () => {
+    expect(resolveTotalArea('house', { sqft: 0, landArea: 600, buildingArea: 140 })).toBe(140);
+    expect(resolveTotalArea('house', { sqft: 0, landArea: 600 })).toBe(600);
+  });
+
   it("backfills a shop's total area from its open-plan floor", () => {
     expect(resolveTotalArea('commercial', { sqft: 0, openPlanArea: 102.5 })).toBe(102.5);
   });
 
-  it('has nothing to backfill from for a house, a parking space or a plot of land', () => {
+  it('has nothing to backfill from for a parking space or a plot of land', () => {
     expect(resolveTotalArea('house', { sqft: 0 })).toBe(0);
     expect(resolveTotalArea('parking', { sqft: 0, parking: 2 })).toBe(0);
     expect(resolveTotalArea('land', { sqft: 0, landArea: 400 })).toBe(0);
