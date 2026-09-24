@@ -670,6 +670,15 @@ Buyer:  PropertyGallery mini-plan ⇄ FloorPlanViewerModal
   mounted under the Photos tab so it keeps its zoom and listeners.
 - The placer sizes the plan to its stage with a `ResizeObserver`; the mini plans
   fit their cards with container query units (`cqw`/`cqh`).
+- **Photo switching** (Photos tab) uses framer-motion: the photo slides in from
+  the side it comes from (direction kept in `photoDir`), crossfading with a
+  blurred copy behind it, and follows a finger swipe (`drag="x"`, a fifth of the
+  width or a fling changes photo). Reduced-motion users get a plain fade.
+  Neighbouring photos are preloaded. The photo is centred with flexbox and
+  `max-w-full max-h-full` — an absolutely positioned `h-full` image was drawn at
+  its natural height, top-aligned, on iOS Safari.
+- **Mini plan zoom** follows the slider frame by frame while it is dragged
+  (`step 0.01`, no transition) and glides for the +/− buttons and photo changes.
 
 ---
 

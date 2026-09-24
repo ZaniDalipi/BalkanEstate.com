@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from '@/constants';
 import { createPortal } from 'react-dom';
+import { AnimatePresence, motion, useReducedMotion, type PanInfo } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import type { FloorplanLevel, PropertyImage } from '@/types';
 import { spotFloor } from '@/shared/utils/floorplans';
@@ -483,17 +484,38 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
         setView({ scale: v.scale, x: v.x + (cw / 2 - sx), y: v.y + (ch / 2 - sy) }, { animate: true, commit: true });
     }, [imageDimensions, setView]);
 
+    // Which way the last photo change went (+1 next, -1 previous), so the
+    // photo slides in from the side it is coming from.
+    const [photoDir, setPhotoDir] = useState(1);
+
     const showPhoto = useCallback((index: number) => {
         if (!hasPhotos) return;
         const n = allPhotos.length;
+        setPhotoDir(index >= activePhoto ? 1 : -1);
         setActivePhoto(((index % n) + n) % n);
-    }, [hasPhotos, allPhotos.length]);
+    }, [hasPhotos, allPhotos.length, activePhoto]);
+
+    /** Show a photo picked directly (a square or a mini plan). */
+    const selectPhoto = useCallback((index: number) => {
+        setPhotoDir(index >= activePhoto ? 1 : -1);
+        setActivePhoto(index);
+    }, [activePhoto]);
 
     // A square on the big plan jumps to its photo.
     const jumpToPhoto = useCallback((index: number) => {
-        setActivePhoto(index);
+        selectPhoto(index);
         setTab('photos');
-    }, []);
+    }, [selectPhoto]);
+
+    // Warm the neighbours so sliding to them never waits on the network.
+    useEffect(() => {
+        if (allPhotos.length < 2) return;
+        for (const i of [activePhoto + 1, activePhoto - 1]) {
+            const p = allPhotos[(i + allPhotos.length) % allPhotos.length];
+            const img = new Image();
+            img.src = optimizeCloudinaryUrl(p.url, { width: 1920, quality: 'auto' }) || p.url;
+        }
+    }, [activePhoto, allPhotos]);
 
     // Tell the caller (the page's gallery) which photo is on screen.
     useEffect(() => {
@@ -509,19 +531,13 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
         if (tab === 'plan' && spot && spotFloor(spot) === floor) revealSpot(spot);
     }, [tab, currentPhoto, revealSpot, floor]);
 
-    // Swipe the photo panel to step through photos.
-    const photoSwipeRef = useRef<{ x: number; y: number } | null>(null);
-    const handlePhotoPointerDown = useCallback((e: React.PointerEvent) => {
-        photoSwipeRef.current = { x: e.clientX, y: e.clientY };
-    }, []);
-    const handlePhotoPointerUp = useCallback((e: React.PointerEvent) => {
-        const start = photoSwipeRef.current;
-        photoSwipeRef.current = null;
-        if (!start) return;
-        const dx = e.clientX - start.x;
-        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
-            showPhoto(activePhoto + (dx < 0 ? 1 : -1));
-        }
+    // Swipe the photo to step through photos: a short fling or a drag past
+    // a fifth of the width changes photo; anything less springs back.
+    const reduceMotion = useReducedMotion();
+    const handlePhotoDragEnd = useCallback((_: unknown, info: PanInfo) => {
+        const width = imageContainerRef.current?.clientWidth || window.innerWidth;
+        const swipe = info.offset.x + info.velocity.x * 0.2;
+        if (Math.abs(swipe) > width * 0.2) showPhoto(activePhoto + (swipe < 0 ? 1 : -1));
     }, [showPhoto, activePhoto]);
 
     // Annotate mode: a click/tap drops a pin where it lands on the plan
@@ -1133,47 +1149,91 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
 
                     {/* Photos tab: the photo, over the plan */}
                     {tab === 'photos' && currentPhoto && (
-                        <div
-                            className="absolute inset-0 z-40 bg-black select-none"
-                            style={{ touchAction: 'pan-y' }}
-                            onPointerDown={handlePhotoPointerDown}
-                            onPointerUp={handlePhotoPointerUp}
-                            onPointerCancel={() => { photoSwipeRef.current = null; }}
-                        >
-                            <div
-                                className="absolute inset-0 scale-110 bg-cover bg-center blur-2xl opacity-50"
-                                style={{ backgroundImage: `url("${optimizeCloudinaryUrl(currentPhoto.url, { width: 40, quality: 'auto:eco' }) || currentPhoto.url}")` }}
-                                aria-hidden="true"
-                            />
-                            <img
-                                key={currentPhoto.url}
-                                src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1920, quality: 'auto' }) || currentPhoto.url}
-                                alt={t('property:floorPlan.viewer.photoAlt', 'Photo {{current}} of {{total}}', { current: activePhoto + 1, total: allPhotos.length })}
-                                className="absolute inset-0 w-full h-full object-contain animate-[fadeIn_0.2s_ease-out]"
-                                draggable={false}
-                            />
+                        <div className="absolute inset-0 z-40 bg-neutral-950 overflow-hidden select-none">
+                            {/* Blurred copy of the photo fills the bars; it crossfades too */}
+                            <AnimatePresence initial={false}>
+                                <motion.div
+                                    key={currentPhoto.url}
+                                    className="absolute inset-0 scale-125 bg-cover bg-center blur-2xl"
+                                    style={{ backgroundImage: `url("${optimizeCloudinaryUrl(currentPhoto.url, { width: 40, quality: 'auto:eco' }) || currentPhoto.url}")` }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 0.55 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.45 }}
+                                    aria-hidden="true"
+                                />
+                            </AnimatePresence>
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/40" aria-hidden="true" />
+
+                            {/* The photo: slides in from the side it comes from, and follows a swipe */}
+                            <AnimatePresence initial={false} custom={photoDir}>
+                                <motion.div
+                                    key={currentPhoto.url}
+                                    custom={photoDir}
+                                    className="absolute inset-0 flex items-center justify-center p-0 md:p-6"
+                                    variants={{
+                                        enter: (dir: number) => (reduceMotion ? { opacity: 0 } : { x: `${dir * 55}%`, opacity: 0, scale: 0.96 }),
+                                        center: { x: 0, opacity: 1, scale: 1 },
+                                        exit: (dir: number) => (reduceMotion ? { opacity: 0 } : { x: `${dir * -35}%`, opacity: 0, scale: 0.94 }),
+                                    }}
+                                    initial="enter"
+                                    animate="center"
+                                    exit="exit"
+                                    transition={{
+                                        x: { type: 'spring', stiffness: 320, damping: 34, mass: 0.9 },
+                                        scale: { type: 'spring', stiffness: 320, damping: 34 },
+                                        opacity: { duration: 0.28, ease: 'easeOut' },
+                                    }}
+                                    drag={allPhotos.length > 1 ? 'x' : false}
+                                    dragConstraints={{ left: 0, right: 0 }}
+                                    dragElastic={0.7}
+                                    dragMomentum={false}
+                                    onDragEnd={handlePhotoDragEnd}
+                                    style={{ touchAction: 'pan-y' }}
+                                >
+                                    <img
+                                        src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1920, quality: 'auto' }) || currentPhoto.url}
+                                        alt={t('property:floorPlan.viewer.photoAlt', 'Photo {{current}} of {{total}}', { current: activePhoto + 1, total: allPhotos.length })}
+                                        className="block max-w-full max-h-full w-auto h-auto object-contain md:rounded-lg md:shadow-2xl pointer-events-none"
+                                        draggable={false}
+                                    />
+                                </motion.div>
+                            </AnimatePresence>
+
                             {allPhotos.length > 1 && (
                                 <>
                                     <button
                                         type="button"
                                         onClick={() => showPhoto(activePhoto - 1)}
-                                        className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                                        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 hover:bg-white text-neutral-800 flex items-center justify-center shadow-lg active:scale-90 transition"
                                         aria-label={t('property:floorPlan.viewer.prevPhoto', 'Previous photo')}
                                     >
-                                        <ChevronLeftIcon className="w-6 h-6" />
+                                        <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => showPhoto(activePhoto + 1)}
-                                        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/85 hover:bg-white text-neutral-800 flex items-center justify-center shadow-lg transition-colors"
+                                        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 hover:bg-white text-neutral-800 flex items-center justify-center shadow-lg active:scale-90 transition"
                                         aria-label={t('property:floorPlan.viewer.nextPhoto', 'Next photo')}
                                     >
-                                        <ChevronRightIcon className="w-6 h-6" />
+                                        <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                                     </button>
                                 </>
                             )}
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md bg-black/60 text-white text-sm font-semibold tabular-nums backdrop-blur-sm">
-                                {t('property:floorPlan.viewer.photoCounter', '{{current}} of {{total}}', { current: activePhoto + 1, total: allPhotos.length })}
+
+                            {/* Counter + progress */}
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5">
+                                <span className="px-3 py-1 rounded-full bg-black/60 text-white text-xs sm:text-sm font-semibold tabular-nums backdrop-blur-md">
+                                    {t('property:floorPlan.viewer.photoCounter', '{{current}} of {{total}}', { current: activePhoto + 1, total: allPhotos.length })}
+                                </span>
+                                {allPhotos.length > 1 && (
+                                    <span className="block w-24 h-0.5 rounded-full bg-white/25 overflow-hidden" aria-hidden="true">
+                                        <span
+                                            className="block h-full bg-white rounded-full transition-[width] duration-300 ease-out"
+                                            style={{ width: `${((activePhoto + 1) / allPhotos.length) * 100}%` }}
+                                        />
+                                    </span>
+                                )}
                             </div>
                         </div>
                     )}
@@ -1181,7 +1241,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
 
                 {/* Sidebar: facts, then the plan card (Photos) or room labels (Floor Plan) */}
                 <aside
-                    className={`${tab === 'plan' ? 'hidden md:flex' : 'flex'} flex-col gap-4 flex-shrink-0 min-h-0 h-[40%] md:h-auto md:w-[360px] lg:w-[400px] p-3 md:p-5 bg-[#2a2d33] border-t md:border-t-0 md:border-l border-black/60`}
+                    className={`${tab === 'plan' ? 'hidden md:flex' : 'flex'} flex-col gap-3 md:gap-4 flex-shrink-0 min-h-0 h-[55%] md:h-auto md:w-[380px] lg:w-[420px] p-2 md:p-5 bg-[#2a2d33] border-t md:border-t-0 md:border-l border-black/60`}
                 >
                     {summary && summary.length > 0 && (
                         <div className="hidden md:block space-y-1 text-sm text-white/85 flex-shrink-0">
@@ -1206,7 +1266,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
                                             floor={i}
                                             photos={allPhotos}
                                             activeIndex={activePhoto}
-                                            onSelect={setActivePhoto}
+                                            onSelect={selectPhoto}
                                             onExpand={() => { selectFloor(i); setTab('plan'); }}
                                         />
                                     </div>
