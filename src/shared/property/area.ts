@@ -82,8 +82,21 @@ type AreaSource = Partial<Record<TypeAttribute, unknown>> & {
 };
 
 /**
- * The total area to show for a listing, or `null` when nothing on the record
- * says how big it is.
+ * The total area of a listing, or `null` when nothing on the record says how
+ * big it is.
+ *
+ * One precedence, used reading and writing alike: **the type's own breakdown
+ * if it has one, and only then the plain `sqft` total.** The breakdown is what
+ * the seller is shown and edits — for a type that has one the form does not
+ * even offer the plain box — so a `sqft` sitting behind it is either a figure
+ * our own write path derived from that breakdown, or a legacy value from
+ * before the breakdown was asked for. Neither should outrank the fields on
+ * screen: a villa on a 1500 m² plot reads 1500, whatever total was stored for
+ * it when the priority ran the other way.
+ *
+ * The plain total still wins where there is no breakdown to prefer — a
+ * parking space, a plot, or a listing whose breakdown was never filled in —
+ * so an older listing never loses the one measurement it has.
  *
  * Takes the loose fields rather than a `Property` so it can run on a raw API
  * payload, form state or a fully-typed record alike — the same reason
@@ -95,20 +108,13 @@ export function resolveDisplayArea(
 ): ResolvedArea | null {
   if (!property) return null;
 
-  if (isUsableArea(property.sqft)) return { value: property.sqft, source: 'sqft' };
+  const fromBreakdown = resolveBreakdownArea(property);
+  if (fromBreakdown) return fromBreakdown;
 
-  return resolveBreakdownArea(property);
+  return isUsableArea(property.sqft) ? { value: property.sqft, source: 'sqft' } : null;
 }
 
-/**
- * The same figure read from the type's own breakdown alone, ignoring whatever
- * total the record carries.
- *
- * Split out because the two sides want opposite precedence. Reading a stored
- * listing, the total wins: it is a measurement someone entered, and it may
- * count things the breakdown does not. Writing one from the form, the
- * breakdown wins — see `resolveSubmittedArea`.
- */
+/** The figure read from the type's own breakdown alone, ignoring any total. */
 export function resolveBreakdownArea(
   property: AreaSource | null | undefined,
 ): ResolvedArea | null {
@@ -124,37 +130,14 @@ export function resolveBreakdownArea(
 }
 
 /**
- * `sqft` as it should be stored or displayed: the entered total, or the
- * type's own breakdown combined into one figure, or 0 when the record
- * genuinely has neither.
+ * `sqft` as it should be stored or displayed, or 0 when the record states no
+ * size anywhere.
  *
- * A thin wrapper over `resolveDisplayArea` for the many call sites that want
- * a plain number rather than the `{ value, source }` pair — the write path
- * backfilling `sqft` on submit, and a transform boundary normalising `sqft`
- * on the way in from the API.
+ * A thin wrapper over `resolveDisplayArea` for the many call sites that want a
+ * plain number rather than the `{ value, source }` pair — the form on submit,
+ * the schema hook, and the transform boundaries normalising `sqft` on the way
+ * in from the API.
  */
 export function resolveTotalArea(property: AreaSource | null | undefined): number {
   return resolveDisplayArea(property)?.value ?? 0;
-}
-
-/**
- * The total area a listing should be **saved** with, from the state of the
- * form that was filled in.
- *
- * The breakdown goes first here, and the total-area box second — the reverse
- * of the read side, because on the form the two are not equally trustworthy.
- * Where a type describes its own size, the generic "Area" box is not shown at
- * all, and `sq_meters` holds only what was loaded into state out of sight: the
- * stored total when editing, or the AI's guess after generating from photos.
- * A seller who corrects an apartment's gross area from 79 to 85 has to get 85,
- * not the 79 still sitting in a box they were never shown.
- *
- * Falling back to that box rather than ignoring it is what keeps the older
- * listings safe. A flat first listed before gross and net were asked for has a
- * real total and an empty breakdown; dropping the total would wipe the one
- * measurement it has the moment anything else on it was edited. So: what the
- * seller can see, if they gave it; otherwise what the listing already knew.
- */
-export function resolveSubmittedArea(property: AreaSource | null | undefined): number {
-  return resolveBreakdownArea(property)?.value ?? resolveTotalArea(property);
 }

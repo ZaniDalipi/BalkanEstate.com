@@ -45,11 +45,28 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan
  * Dry run unless `--apply` is passed:
  *   npm run backfill:areas          # report what would change
  *   npm run backfill:areas:apply    # write it
+ *
+ * With `--resync` it also corrects a stored total that disagrees with the
+ * breakdown, which is what makes the database say what the pages show:
+ *
+ *   npm run backfill:areas:resync         # report
+ *   npm run backfill:areas:resync:apply   # write it
  */
 
 interface Options {
   /** Write the changes. Without it the script only reports them. */
   apply: boolean;
+  /**
+   * Also correct listings whose stored total disagrees with their breakdown,
+   * not just the ones that state no total at all.
+   *
+   * Off by default, because it rewrites values somebody may have entered on
+   * purpose. On, it makes the stored field say what every screen shows — the
+   * point being that search, the area sorts and price-per-m² read the stored
+   * field and nothing else, so a database that disagrees with the page is a
+   * listing that cannot be found by its own size.
+   */
+  resync: boolean;
   /** How many example rows to print. */
   samples: number;
 }
@@ -59,6 +76,7 @@ const parseOptions = (argv: string[]): Options => {
 
   return {
     apply: argv.includes('--apply'),
+    resync: argv.includes('--resync'),
     samples: samplesArg ? Number(samplesArg.split('=')[1]) : 10,
   };
 };
@@ -84,15 +102,26 @@ const HAS_BREAKDOWN = {
 
 export const CANDIDATE_FILTER = { $and: [MISSING_TOTAL, HAS_BREAKDOWN] };
 
+/**
+ * In resync mode every listing with a breakdown is a candidate, whatever its
+ * stored total says; which of them actually changes is decided per row.
+ */
+export const RESYNC_FILTER = HAS_BREAKDOWN;
+
 interface Change {
   id: string;
   propertyType: string;
+  /** What the row stores today; 0 when it states no size. */
+  from: number;
   sqft: number;
 }
 
 export async function backfillPropertyAreas(options: Options): Promise<void> {
   log.info(`🌍 Environment: ${env.toUpperCase()}`);
   log.info(options.apply ? '✍️  APPLY — changes will be written' : '🔍 DRY RUN — nothing will be written');
+  log.info(options.resync
+    ? '🔁 RESYNC — stored totals that disagree with their breakdown are corrected too'
+    : '➕ Filling blanks only — a listing that states a size is left alone (--resync to correct those too)');
 
   await mongoose.connect(MONGODB_URI);
   log.info('✅ Connected to MongoDB');
@@ -117,18 +146,20 @@ export async function backfillPropertyAreas(options: Options): Promise<void> {
     operations = [];
   };
 
-  const cursor = Property.find(CANDIDATE_FILTER)
+  const cursor = Property.find(options.resync ? RESYNC_FILTER : CANDIDATE_FILTER)
     .select('_id propertyType sqft grossArea netArea buildingArea landArea openPlanArea')
     .lean()
     .cursor();
 
   for await (const doc of cursor) {
-    // The filter already excludes these, but the guarantee belongs in the
-    // code that writes rather than only in the query that feeds it: a row
-    // that states a size is never re-measured, and never written at all —
-    // even `$set`ting the value it already has would bump `updatedAt` on a
-    // listing this has no business touching.
-    if (typeof doc.sqft === 'number' && doc.sqft > 0) {
+    const current = typeof doc.sqft === 'number' && doc.sqft > 0 ? doc.sqft : 0;
+
+    // Without --resync a row that states a size is never re-measured, and
+    // never written at all — even `$set`ting the value it already has would
+    // bump `updatedAt` on a listing this has no business touching. The
+    // guarantee belongs in the code that writes rather than only in the query
+    // that feeds it.
+    if (current > 0 && !options.resync) {
       stated += 1;
       continue;
     }
@@ -140,8 +171,14 @@ export async function backfillPropertyAreas(options: Options): Promise<void> {
       continue;
     }
 
+    // Nothing to say for a row that already agrees.
+    if (sqft === current) {
+      stated += 1;
+      continue;
+    }
+
     byType[doc.propertyType] = (byType[doc.propertyType] ?? 0) + 1;
-    changes.push({ id: String(doc._id), propertyType: doc.propertyType, sqft });
+    changes.push({ id: String(doc._id), propertyType: doc.propertyType, from: current, sqft });
 
     operations.push({ updateOne: { filter: { _id: doc._id }, update: { $set: { sqft } } } });
     if (operations.length >= BATCH_SIZE) await flush();
@@ -149,7 +186,7 @@ export async function backfillPropertyAreas(options: Options): Promise<void> {
 
   await flush();
 
-  log.info(`📊 ${changes.length} listing(s) with a breakdown but no stated size`);
+  log.info(`📊 ${changes.length} listing(s) to correct`);
 
   if (changes.length === 0 && unresolved === 0) {
     log.info('✨ Nothing to do — every listing with a breakdown already states its size.');
@@ -165,7 +202,7 @@ export async function backfillPropertyAreas(options: Options): Promise<void> {
   if (changes.length > 0 && options.samples > 0) {
     log.info(`First ${Math.min(options.samples, changes.length)} changes:`);
     for (const change of changes.slice(0, options.samples)) {
-      log.info(`   ${change.id}  ${change.propertyType.padEnd(14)} 0 → ${change.sqft} m²`);
+      log.info(`   ${change.id}  ${change.propertyType.padEnd(14)} ${change.from} → ${change.sqft} m²`);
     }
   }
 
@@ -174,7 +211,7 @@ export async function backfillPropertyAreas(options: Options): Promise<void> {
   }
 
   if (stated > 0) {
-    log.info(`↩️  ${stated} listing(s) left alone — they already state a size`);
+    log.info(`↩️  ${stated} listing(s) left alone — their stored size already agrees`);
   }
 
   if (options.apply) {

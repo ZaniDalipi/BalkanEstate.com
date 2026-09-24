@@ -40,22 +40,25 @@ const isUsableArea = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value) && value > 0;
 
 /**
- * `sqft` as it should be stored: the entered total when it is a real
- * measurement, otherwise the type's own breakdown, otherwise 0 — a record
- * that genuinely gives no area anywhere keeps stating that, rather than
- * having one invented for it.
+ * `sqft` as it should be stored: the type's own breakdown when it has one,
+ * otherwise the entered total, otherwise 0 — a record that genuinely gives no
+ * area anywhere keeps stating that, rather than having one invented for it.
  */
 export function resolveTotalArea(
   propertyType: unknown,
   input: { sqft?: unknown } & Partial<Record<TypeAttribute, unknown>>,
 ): number {
-  if (isUsableArea(input.sqft)) return input.sqft;
-
+  // The breakdown first, the plain total second — the client's rule exactly.
+  // For a type that has a breakdown the form does not offer the plain box, so
+  // a `sqft` behind it is either derived from that breakdown or predates it;
+  // the fields the seller sees are the ones the listing is sized by.
   const fallbacks = AREA_FALLBACKS[propertyType as PropertyType] ?? [];
   for (const attribute of fallbacks) {
     const value = input[attribute];
     if (isUsableArea(value)) return value;
   }
+
+  if (isUsableArea(input.sqft)) return input.sqft;
 
   return typeof input.sqft === 'number' && Number.isFinite(input.sqft) ? input.sqft : 0;
 }

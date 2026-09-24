@@ -18,6 +18,8 @@
     "backfill:avatar-options": "ts-node src/scripts/backfillAvatarOptions.ts",
     "backfill:areas": "ts-node src/scripts/backfillPropertyAreas.ts",
     "backfill:areas:apply": "ts-node src/scripts/backfillPropertyAreas.ts --apply",
+    "backfill:areas:resync": "ts-node src/scripts/backfillPropertyAreas.ts --resync",
+    "backfill:areas:resync:apply": "ts-node src/scripts/backfillPropertyAreas.ts --resync --apply",
     "seed:villa-destinations": "ts-node src/scripts/seedVillaDestinations.ts",
     "seed:destination-images": "ts-node src/scripts/seedDestinationImages.ts",
     "seed:destination-images:dry": "ts-node src/scripts/seedDestinationImages.ts --dry-run",

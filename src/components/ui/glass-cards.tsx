@@ -6,6 +6,7 @@ import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConf
 import { formatCityPlace } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { statsForType, type StatKey } from '@/shared/property/typeAttributes';
+import { resolveDisplayArea } from '@/shared/property/area';
 import type { TFunction } from 'i18next';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -82,6 +83,14 @@ type StatSource = {
     sqft?: number;
     parking?: number;
     offices?: number;
+    // The area chip resolves the listing's total from these rather than
+    // reading `sqft`, so a villa shows its plot and a flat its gross area
+    // whatever figure happens to sit in the stored total.
+    propertyType?: string;
+    grossArea?: number;
+    netArea?: number;
+    landArea?: number;
+    buildingArea?: number;
     openPlanArea?: number;
 };
 
@@ -89,10 +98,17 @@ type StatSource = {
  * Whether a listing has anything to say about a stat.
  *
  * A blank the seller never filled in is not "0" — printing it as one puts a
- * number on the card that nobody entered. Area is exempt: every listing has
- * one, and a zero there is a data problem worth seeing.
+ * number on the card that nobody entered. Area is no longer an exception to
+ * that: it used to print its zero deliberately, as a data problem worth
+ * seeing, but the problem it was surfacing was that most of those listings
+ * did state a size, in their own breakdown, which nothing here read. Now
+ * `resolveDisplayArea` finds it, and a card with a zero left is a listing
+ * that truly gives no size anywhere — which the buyer on the home page is
+ * the wrong person to be told about.
  */
 const hasStatValue = (property: StatSource, key: StatKey): boolean => {
+    if (key === 'sqft') return resolveDisplayArea(property) !== null;
+
     const value = (property as unknown as Record<string, unknown>)[key];
     return value !== undefined && value !== null && value !== '' && value !== 0;
 };
@@ -105,7 +121,7 @@ const STAT_CHIPS: Record<StatKey, (property: StatSource, t: TFunction) => StatCh
         label: t('featured.livingRoomsLabel', 'Living rooms'),
         icon: '🛋️',
     }),
-    sqft: (property) => ({ value: property.sqft ?? 0, label: 'm²', icon: '📐' }),
+    sqft: (property) => ({ value: resolveDisplayArea(property)?.value ?? 0, label: 'm²', icon: '📐' }),
     parking: (property, t) => ({
         value: property.parking ?? 0,
         label: t('featured.spacesLabel', 'Spaces'),
@@ -510,7 +526,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                 // the seller left blank — "Open plan 0" on a shop that
                                 // simply has none recorded.
                                 ...statsForType(property.propertyType)
-                                    .filter((key) => key === 'sqft' || hasStatValue(property, key))
+                                    .filter((key) => hasStatValue(property, key))
                                     .map((key) => STAT_CHIPS[key](property, t)),
                                 // "Built 2028" on a building that does not exist yet is a
                                 // claim about a year that has not happened. The same pill

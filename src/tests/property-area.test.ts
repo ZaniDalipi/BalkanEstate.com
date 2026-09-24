@@ -13,15 +13,16 @@
 import { describe, it, expect } from 'vitest';
 import {
   resolveDisplayArea,
-  resolveSubmittedArea,
   resolveTotalArea,
   typeHasMeasuredBreakdown,
 } from '@/shared/property/area';
 import { resolveTotalArea as resolveTotalAreaBackend } from '@/backend/src/config/propertyArea';
 
 describe('resolveDisplayArea', () => {
-  it('uses sqft as-is when it is a real measurement', () => {
-    expect(resolveDisplayArea({ propertyType: 'apartment', sqft: 79, grossArea: 101 }))
+  it('uses sqft when the type has no breakdown to prefer', () => {
+    expect(resolveDisplayArea({ propertyType: 'parking', sqft: 18 }))
+      .toEqual({ value: 18, source: 'sqft' });
+    expect(resolveDisplayArea({ propertyType: 'apartment', sqft: 79 }))
       .toEqual({ value: 79, source: 'sqft' });
   });
 
@@ -71,22 +72,30 @@ describe('resolveTotalArea', () => {
   });
 });
 
-describe('resolveSubmittedArea reverses the precedence for the write side', () => {
+describe('one precedence, reading and writing alike', () => {
   it('prefers the breakdown a seller can see over the total they cannot', () => {
-    // Reading the same record keeps the stored total; saving the form does not.
+    // The stored total loses on both sides now: for a type with a breakdown
+    // the form never showed that box, so it cannot outrank the fields it did.
     const record = { propertyType: 'apartment', sqft: 79, grossArea: 85 };
-    expect(resolveTotalArea(record)).toBe(79);
-    expect(resolveSubmittedArea(record)).toBe(85);
+    expect(resolveTotalArea(record)).toBe(85);
+    expect(resolveDisplayArea(record)).toEqual({ value: 85, source: 'grossArea' });
+  });
+
+  it('shows a villa its plot even when an older total says otherwise', () => {
+    // The listing from the screenshot: 1500 m² of land, a 500 m² house on it,
+    // and a stored total of 500 written when the priority ran the other way.
+    const villa = { propertyType: 'luxury-villa', sqft: 500, landArea: 1500, buildingArea: 500 };
+    expect(resolveDisplayArea(villa)).toEqual({ value: 1500, source: 'landArea' });
   });
 
   it('keeps the total when the breakdown was never filled in', () => {
-    expect(resolveSubmittedArea({ propertyType: 'apartment', sqft: 79 })).toBe(79);
-    expect(resolveSubmittedArea({ propertyType: 'house', sqft: 150 })).toBe(150);
+    expect(resolveTotalArea({ propertyType: 'apartment', sqft: 79 })).toBe(79);
+    expect(resolveTotalArea({ propertyType: 'house', sqft: 150 })).toBe(150);
   });
 
   it('is just the total for a type with no breakdown at all', () => {
-    expect(resolveSubmittedArea({ propertyType: 'parking', sqft: 18 })).toBe(18);
-    expect(resolveSubmittedArea({ propertyType: 'parking' })).toBe(0);
+    expect(resolveTotalArea({ propertyType: 'parking', sqft: 18 })).toBe(18);
+    expect(resolveTotalArea({ propertyType: 'parking' })).toBe(0);
   });
 });
 
