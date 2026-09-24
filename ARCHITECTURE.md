@@ -614,8 +614,7 @@ which printed as "0 m²" beside a description reading "79 m² gross".
 ```
 src/shared/property/area.ts                  ← the rule (pure)
   ├── typeHasMeasuredBreakdown(type)         does this type describe its own size?
-  ├── resolveBreakdownArea(record)           the breakdown alone
-  ├── resolveDisplayArea(record)             breakdown → total, as { value, source }
+  ├── resolveDisplayArea(record)             widest stated figure, as { value, source }
   └── resolveTotalArea(record)               ↑ as a plain number
         │
         ├── ListingFormFields          hides the plain box where a breakdown is asked for
@@ -632,16 +631,21 @@ Key decisions:
   *or* for a plain "Area", never both — `typeHasMeasuredBreakdown` decides, and
   the same function decides which the write path believes. A villa once showed
   Land, Building and Area together with nothing saying which one sized it.
-- **One precedence, reading and writing alike: the breakdown, then the plain
-  total.** For a type that has a breakdown the form does not offer the plain
-  box at all, so a `sqft` sitting behind it is either a figure our own write
-  path derived from that breakdown or a legacy value — neither outranks the
-  fields on screen. This also fixes the rows already stored the other way
-  round: a villa whose `sqft` says 500 while its plot says 1500 reads 1500.
-- **…but the total wins when there is no breakdown to prefer.** A listing
-  published before its breakdown was ever asked for has a real total and empty
-  breakdown fields; ignoring it would save the listing back as 0 m² — the
-  original fault, from the other direction.
+- **The total is the widest figure the seller stated, not a field chosen in
+  advance.** There is no per-type priority table: the resolver takes the
+  largest value across the area fields the type table says this type carries.
+  A flat quoted 98 gross / 77 net is 98; a villa on a 1500 m² plot with a
+  500 m² house is 1500. A table of priorities gave the same answers on
+  ordinary data but was a second thing to keep in step with the form, and it
+  outranked the seller whenever their only figure sat in the "wrong" field.
+  Adding an area to a type is now a one-word change in the type table.
+- **The plain total is consulted only when the breakdown says nothing.** For a
+  type with a breakdown the form does not show that box, so what sits in it is
+  a figure the seller was not looking at — the previously stored total, or the
+  AI's guess from photos. Letting it compete would mean a seller who *lowers*
+  a villa's plot from 1500 to 1200 silently saves 1500 again. Last in line, it
+  still keeps an older listing whole: one that states only a plain total, from
+  before its breakdown was asked for, reads exactly that rather than 0 m².
 - **The whole property first, the part inside it second.** A house or villa
   resolves to `landArea` before `buildingArea`, a flat to gross before net. The
   headline figure is the extent of what is being sold; the narrower measurement

@@ -149,3 +149,37 @@ describe('the client and server resolvers agree', () => {
     });
   }
 });
+
+
+describe('the total is whatever the seller stated, not a field we picked in advance', () => {
+  it('takes the widest figure even when it lands in the "narrower" field', () => {
+    // A villa whose building area exceeds its plot — several storeys on a
+    // small footprint. A fixed land-then-building order would have shown the
+    // smaller number; the listing says 900, so it reads 900.
+    expect(resolveDisplayArea({ propertyType: 'villa', landArea: 500, buildingArea: 900 }))
+      .toEqual({ value: 900, source: 'buildingArea' });
+
+    // Likewise a flat whose net was entered above its gross.
+    expect(resolveDisplayArea({ propertyType: 'apartment', grossArea: 70, netArea: 88 }))
+      .toEqual({ value: 88, source: 'netArea' });
+  });
+
+  it('reads a single stated figure whichever field it sits in', () => {
+    expect(resolveTotalArea({ propertyType: 'villa', buildingArea: 240 })).toBe(240);
+    expect(resolveTotalArea({ propertyType: 'apartment', netArea: 64 })).toBe(64);
+    expect(resolveTotalArea({ propertyType: 'commercial', openPlanArea: 102.5 })).toBe(102.5);
+  });
+
+  it('never lets the hidden plain total join the running against a breakdown', () => {
+    // The seller lowers the plot to 1200; sq_meters still holds the 1500 that
+    // was stored, in a box this type's form does not show.
+    expect(resolveTotalArea({ propertyType: 'luxury-villa', sqft: 1500, landArea: 1200 })).toBe(1200);
+  });
+
+  it('adapts when a type gains an area field, with nothing to update here', () => {
+    // commercial carries openPlanArea and no other area; a house carries the
+    // pair. Both come from the type table, so this file states no list.
+    expect(resolveTotalArea({ propertyType: 'house', landArea: 600, buildingArea: 140 })).toBe(600);
+    expect(resolveTotalArea({ propertyType: 'parking', landArea: 999, sqft: 18 })).toBe(18);
+  });
+});

@@ -65,7 +65,7 @@ export const MAX_ATTRIBUTE_AREA = 1_000_000;
  * "whole number" rule rejected an honest measurement, and mirrors the
  * client's `MEASURED_ATTRIBUTES`.
  */
-const MEASURED_ATTRIBUTES = new Set<string>([
+export const MEASURED_ATTRIBUTES = new Set<string>([
   'openPlanArea', 'landArea', 'buildingArea', 'grossArea', 'netArea',
 ]);
 
