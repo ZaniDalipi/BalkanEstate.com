@@ -18,34 +18,17 @@
  * side, the same split as `construction.ts` and its `buildConstructionFields`.
  */
 
-import type { PropertyType } from '@/shared/types/property.types';
 import { MEASURED_ATTRIBUTES, attributesForType, type TypeAttribute } from './typeAttributes';
 
 /**
- * Which type-specific measurement stands in for `sqft`, and in what order,
- * when the total-area box was left empty.
+ * The area fields a listing of this type describes itself by, if any.
  *
- * The rule is the same for every type: **the whole property first, the part
- * inside it second.** A house or villa is the plot you buy, so `landArea`
- * leads and `buildingArea` — how much of that plot is built over — is detail
- * beneath it; that also matches the order the pair is declared and shown in
- * everywhere else. A flat's gross area already is its whole extent, with net
- * the part actually walked on. So the headline figure never states less than
- * the property is, and the narrower measurement stays informational.
- *
- * A type with no breakdown field at all (parking, land, and anything unknown)
- * has nothing to fall back to — its `sqft` either was given or was not.
+ * Read from the type table rather than listed here, so this cannot fall out
+ * of step with what the form asks for: add an area to a type there and the
+ * total starts accounting for it, with nothing to update in this file.
  */
-const AREA_FALLBACKS: Partial<Record<PropertyType, readonly TypeAttribute[]>> = {
-  apartment: ['grossArea', 'netArea'],
-  house: ['landArea', 'buildingArea'],
-  villa: ['landArea', 'buildingArea'],
-  'luxury-villa': ['landArea', 'buildingArea'],
-  commercial: ['openPlanArea'],
-  // Every attribute is on the table for the escape-hatch type, tried widest
-  // first like everywhere else.
-  other: ['grossArea', 'netArea', 'landArea', 'buildingArea', 'openPlanArea'],
-};
+const breakdownFieldsOf = (propertyType: unknown): readonly TypeAttribute[] =>
+  attributesForType(propertyType).filter((attribute) => MEASURED_ATTRIBUTES.has(attribute));
 
 /** A measurement worth showing: a finite, positive number. Zero is "not measured", not "0 m²". */
 const isUsableArea = (value: unknown): value is number =>
@@ -82,8 +65,27 @@ type AreaSource = Partial<Record<TypeAttribute, unknown>> & {
 };
 
 /**
- * The total area to show for a listing, or `null` when nothing on the record
- * says how big it is.
+ * The total area of a listing, or `null` when nothing on the record says how
+ * big it is.
+ *
+ * **The largest measurement the seller actually gave**, taken from the fields
+ * the type describes itself by. Nothing is ranked in advance: a flat quoted
+ * 98 m² gross and 77 m² net is a 98 m² flat, a villa on a 1500 m² plot with a
+ * 500 m² house on it is 1500 m², and each is simply the widest number that
+ * listing states. The narrower measurements stay on the page as detail.
+ *
+ * This replaced a table of per-type priorities, which gave the same answers
+ * on ordinary data, was one more thing to keep in step with the form, and
+ * outranked the seller whenever their only figure sat in the "wrong" field.
+ *
+ * The plain `sqft` total is consulted only when the breakdown says nothing —
+ * never alongside it. For a type with a breakdown the form does not show that
+ * box, so what sits in it is a figure the seller was not looking at: the
+ * previously stored total, or the AI's guess from photos. Letting it into the
+ * running would mean a seller who *lowers* a villa's plot from 1500 to 1200
+ * silently saves 1500 again. Consulted last, it still keeps an older listing
+ * whole — one that states only a plain total, from before its breakdown was
+ * asked for, reads exactly that.
  *
  * Takes the loose fields rather than a `Property` so it can run on a raw API
  * payload, form state or a fully-typed record alike — the same reason
@@ -95,66 +97,28 @@ export function resolveDisplayArea(
 ): ResolvedArea | null {
   if (!property) return null;
 
-  if (isUsableArea(property.sqft)) return { value: property.sqft, source: 'sqft' };
-
-  return resolveBreakdownArea(property);
-}
-
-/**
- * The same figure read from the type's own breakdown alone, ignoring whatever
- * total the record carries.
- *
- * Split out because the two sides want opposite precedence. Reading a stored
- * listing, the total wins: it is a measurement someone entered, and it may
- * count things the breakdown does not. Writing one from the form, the
- * breakdown wins — see `resolveSubmittedArea`.
- */
-export function resolveBreakdownArea(
-  property: AreaSource | null | undefined,
-): ResolvedArea | null {
-  if (!property) return null;
-
-  const fallbacks = AREA_FALLBACKS[property.propertyType as PropertyType] ?? [];
-  for (const attribute of fallbacks) {
-    const value = property[attribute];
-    if (isUsableArea(value)) return { value, source: attribute };
+  let widest: ResolvedArea | null = null;
+  for (const field of breakdownFieldsOf(property.propertyType)) {
+    const value = property[field];
+    if (isUsableArea(value) && (widest === null || value > widest.value)) {
+      widest = { value, source: field };
+    }
   }
+  if (widest) return widest;
 
-  return null;
+  return isUsableArea(property.sqft) ? { value: property.sqft, source: 'sqft' } : null;
 }
 
+
 /**
- * `sqft` as it should be stored or displayed: the entered total, or the
- * type's own breakdown combined into one figure, or 0 when the record
- * genuinely has neither.
+ * `sqft` as it should be stored or displayed, or 0 when the record states no
+ * size anywhere.
  *
- * A thin wrapper over `resolveDisplayArea` for the many call sites that want
- * a plain number rather than the `{ value, source }` pair — the write path
- * backfilling `sqft` on submit, and a transform boundary normalising `sqft`
- * on the way in from the API.
+ * A thin wrapper over `resolveDisplayArea` for the many call sites that want a
+ * plain number rather than the `{ value, source }` pair — the form on submit,
+ * the schema hook, and the transform boundaries normalising `sqft` on the way
+ * in from the API.
  */
 export function resolveTotalArea(property: AreaSource | null | undefined): number {
   return resolveDisplayArea(property)?.value ?? 0;
-}
-
-/**
- * The total area a listing should be **saved** with, from the state of the
- * form that was filled in.
- *
- * The breakdown goes first here, and the total-area box second — the reverse
- * of the read side, because on the form the two are not equally trustworthy.
- * Where a type describes its own size, the generic "Area" box is not shown at
- * all, and `sq_meters` holds only what was loaded into state out of sight: the
- * stored total when editing, or the AI's guess after generating from photos.
- * A seller who corrects an apartment's gross area from 79 to 85 has to get 85,
- * not the 79 still sitting in a box they were never shown.
- *
- * Falling back to that box rather than ignoring it is what keeps the older
- * listings safe. A flat first listed before gross and net were asked for has a
- * real total and an empty breakdown; dropping the total would wipe the one
- * measurement it has the moment anything else on it was edited. So: what the
- * seller can see, if they gave it; otherwise what the listing already knew.
- */
-export function resolveSubmittedArea(property: AreaSource | null | undefined): number {
-  return resolveBreakdownArea(property)?.value ?? resolveTotalArea(property);
 }

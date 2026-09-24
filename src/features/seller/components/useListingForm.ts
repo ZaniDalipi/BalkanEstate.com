@@ -17,7 +17,7 @@ import { apiRequest } from '@/src/shared/api';
 import { ListingData, ImageData, FloorPlanDraft, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
-import { resolveSubmittedArea } from '@/shared/property/area';
+import { resolveTotalArea } from '@/shared/property/area';
 import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
 
 /**
@@ -44,8 +44,8 @@ function scrollPageToTop() {
 }
 
 /**
- * The area fields as the form holds them, for `resolveSubmittedArea` to pick
- * the listing's total from. A 0 is spelled `undefined`: on this form an empty
+ * The area fields as the form holds them, for `resolveTotalArea` to pick the
+ * listing's total from. A 0 is spelled `undefined`: on this form an empty
  * box reads as 0, which means "not filled in", never "0 m²".
  */
 const areaFieldsOf = (listingData: ListingData) => ({
@@ -107,7 +107,7 @@ export function buildPreviewProperty(
         // A blank total-area box is backfilled from whichever breakdown the
         // type collects (gross/net, land/building, open-plan), so the preview
         // and the submitted listing never show "0 m²" next to a real number.
-        sqft: resolveSubmittedArea(areaFieldsOf(listingData)),
+        sqft: resolveTotalArea(areaFieldsOf(listingData)),
         ...buildConstructionFields({
             constructionStatus: listingData.constructionStatus,
             expectedCompletionYear: listingData.expected_completion_year,
@@ -1226,7 +1226,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     // See the matching comment in buildPreviewProperty above:
                     // a blank total-area box is backfilled from the type's own
                     // breakdown rather than submitted as a literal 0.
-                    sqft: resolveSubmittedArea(areaFieldsOf(listingData)),
+                    sqft: resolveTotalArea(areaFieldsOf(listingData)),
                     ...buildConstructionFields({
                         constructionStatus: listingData.constructionStatus,
                         expectedCompletionYear: listingData.expected_completion_year,

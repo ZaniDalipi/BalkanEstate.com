@@ -763,17 +763,16 @@ which printed as "0 m²" beside a description reading "79 m² gross".
 ```
 src/shared/property/area.ts                  ← the rule (pure)
   ├── typeHasMeasuredBreakdown(type)         does this type describe its own size?
-  ├── resolveBreakdownArea(record)           the breakdown alone
-  ├── resolveDisplayArea(record)             total → breakdown   (read side)
-  ├── resolveTotalArea(record)               ↑ as a plain number
-  └── resolveSubmittedArea(record)           breakdown → total   (write side)
+  ├── resolveDisplayArea(record)             widest stated figure, as { value, source }
+  └── resolveTotalArea(record)               ↑ as a plain number
         │
         ├── ListingFormFields          hides the plain box where a breakdown is asked for
         ├── useListingForm             preview + submit
         ├── apiService / propertyApi transformers ← API ingestion boundary
-        ├── PropertyInfo · PropertyCard · HighlightedPropertyCard
+        ├── PropertyInfo · PropertyCard · HighlightedPropertyCard · glass-cards
+        ├── map popups · MapPropertyMarker     (raw rows: cannot trust `sqft`)
         ├── backend/src/config/propertyArea.ts (mirror) → Property pre('validate')
-        └── scripts/backfillPropertyAreas.ts   one-off, for rows written before the rule
+        └── scripts/backfillPropertyAreas.ts   one-off, to make the stored field agree
 ```
 
 Key decisions:
@@ -781,16 +780,21 @@ Key decisions:
   *or* for a plain "Area", never both — `typeHasMeasuredBreakdown` decides, and
   the same function decides which the write path believes. A villa once showed
   Land, Building and Area together with nothing saying which one sized it.
-- **The two sides have opposite precedence, deliberately.** Reading a stored
-  listing the total wins: someone entered it, and it may count what the
-  breakdown does not. Saving the form the breakdown wins, because that is what
-  the seller was shown — `sq_meters` still holds the stored total (edit) or the
-  AI's guess (generate-from-photos) in a box they never saw, and a corrected
-  gross area of 85 must not save as the 79 sitting behind it.
-- **…but the breakdown only wins when there is one.** A listing published
-  before its breakdown was ever asked for has a real total and empty breakdown
-  fields; ignoring the total there would save it back as 0 m² — the original
-  fault, from the other direction. `resolveSubmittedArea` falls back to it.
+- **The total is the widest figure the seller stated, not a field chosen in
+  advance.** There is no per-type priority table: the resolver takes the
+  largest value across the area fields the type table says this type carries.
+  A flat quoted 98 gross / 77 net is 98; a villa on a 1500 m² plot with a
+  500 m² house is 1500. A table of priorities gave the same answers on
+  ordinary data but was a second thing to keep in step with the form, and it
+  outranked the seller whenever their only figure sat in the "wrong" field.
+  Adding an area to a type is now a one-word change in the type table.
+- **The plain total is consulted only when the breakdown says nothing.** For a
+  type with a breakdown the form does not show that box, so what sits in it is
+  a figure the seller was not looking at — the previously stored total, or the
+  AI's guess from photos. Letting it compete would mean a seller who *lowers*
+  a villa's plot from 1500 to 1200 silently saves 1500 again. Last in line, it
+  still keeps an older listing whole: one that states only a plain total, from
+  before its breakdown was asked for, reads exactly that rather than 0 m².
 - **The whole property first, the part inside it second.** A house or villa
   resolves to `landArea` before `buildingArea`, a flat to gross before net. The
   headline figure is the extent of what is being sold; the narrower measurement
@@ -799,12 +803,14 @@ Key decisions:
 - **A zero is "not measured", never "0 m²".** Types with no breakdown (parking,
   land) can still have nothing on file; the cards and detail page drop the stat
   rather than print a measurement nobody gave.
-- **Display fixes cannot reach the database.** Search, sorting and
-  price-per-m² run in MongoDB against the stored field, so a row the read path
-  renders correctly is still missing from "50 m² and up". The schema hook
-  covers every future write; `backfillPropertyAreas` covers the rows already
-  written, filling blanks only and never re-measuring a listing that states a
-  size.
+- **The stored field is the source of truth, and has to be made to say so.**
+  Search, the area sorts and price-per-m² run in MongoDB against `sqft` and
+  read nothing else, so a row the pages render correctly is still missing from
+  "50 m² and up" if the stored value disagrees. The resolver keeps the screens
+  honest, but it is a safety net, not the answer: the schema hook writes the
+  right value on every future write, and `backfillPropertyAreas` brings the
+  existing rows up — filling blanks by default, and with `--resync` also
+  correcting a stored total that contradicts its own breakdown.
 
 ---
 

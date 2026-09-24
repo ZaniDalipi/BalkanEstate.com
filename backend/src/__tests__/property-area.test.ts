@@ -14,8 +14,15 @@ process.env.SKIP_TEST_DB = 'true';
 import { resolveTotalArea } from '../config/propertyArea';
 
 describe('resolveTotalArea', () => {
-  it('keeps sqft as-is when it is a real measurement', () => {
-    expect(resolveTotalArea('apartment', { sqft: 79, grossArea: 101 })).toBe(79);
+  it('prefers the breakdown over a stored total that disagrees with it', () => {
+    // The seller is shown gross and net, never the plain total, so the plain
+    // total cannot outrank them — and the pages resolve the same way.
+    expect(resolveTotalArea('apartment', { sqft: 79, grossArea: 101 })).toBe(101);
+  });
+
+  it('keeps the stored total where there is no breakdown to prefer', () => {
+    expect(resolveTotalArea('apartment', { sqft: 79 })).toBe(79);
+    expect(resolveTotalArea('parking', { sqft: 18 })).toBe(18);
   });
 
   it("backfills an apartment's total area from gross, then net", () => {

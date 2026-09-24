@@ -75,12 +75,16 @@ beforeEach(() => {
     // A plot carrying a landArea its type is not described by: nothing to
     // derive a total from, so it keeps its zero rather than being given one.
     { _id: 'plot', propertyType: 'land', sqft: 0, landArea: 400 },
+    // States a size, but the wrong one: 1500 m² of land with a 500 m² house
+    // on it, stored as 500 back when the building area won. Only --resync
+    // may correct this.
+    { _id: 'stale-villa', propertyType: 'luxury-villa', sqft: 500, landArea: 1500, buildingArea: 500 },
   ];
 });
 
 describe('backfillPropertyAreas', () => {
   it('writes nothing on a dry run', async () => {
-    await backfillPropertyAreas({ apply: false, samples: 0 });
+    await backfillPropertyAreas({ apply: false, resync: false, samples: 0 });
 
     expect(bulkWrite).not.toHaveBeenCalled();
     expect(connect).toHaveBeenCalledTimes(1);
@@ -88,7 +92,7 @@ describe('backfillPropertyAreas', () => {
   });
 
   it('fills each listing from the measurement its type is described by', async () => {
-    await backfillPropertyAreas({ apply: true, samples: 0 });
+    await backfillPropertyAreas({ apply: true, resync: false, samples: 0 });
 
     expect(writes()).toEqual([
       { _id: 'flat', sqft: 79 },           // gross, not net
@@ -100,13 +104,13 @@ describe('backfillPropertyAreas', () => {
   });
 
   it('leaves a type with nothing to derive a total from exactly as it is', async () => {
-    await backfillPropertyAreas({ apply: true, samples: 0 });
+    await backfillPropertyAreas({ apply: true, resync: false, samples: 0 });
 
     expect(writes().some((write) => write._id === 'plot')).toBe(false);
   });
 
   it('touches only the sqft field', async () => {
-    await backfillPropertyAreas({ apply: true, samples: 0 });
+    await backfillPropertyAreas({ apply: true, resync: false, samples: 0 });
 
     for (const call of bulkWrite.mock.calls) {
       for (const op of call[0] as { updateOne: { update: Record<string, object> } }[]) {
@@ -117,7 +121,7 @@ describe('backfillPropertyAreas', () => {
   });
 
   it('does nothing on a second run', async () => {
-    await backfillPropertyAreas({ apply: true, samples: 0 });
+    await backfillPropertyAreas({ apply: true, resync: false, samples: 0 });
 
     // Feed the filled-in values back, as a re-run against the same
     // collection would — except it would not see them at all, since they no
@@ -128,7 +132,7 @@ describe('backfillPropertyAreas', () => {
     }
     bulkWrite.mockClear();
 
-    await backfillPropertyAreas({ apply: true, samples: 0 });
+    await backfillPropertyAreas({ apply: true, resync: false, samples: 0 });
     expect(bulkWrite).not.toHaveBeenCalled();
   });
 
@@ -137,7 +141,7 @@ describe('backfillPropertyAreas', () => {
     // total is never replaced by a breakdown value, however they disagree.
     rows = [{ _id: 'stated', propertyType: 'apartment', sqft: 120, grossArea: 79 }];
 
-    await backfillPropertyAreas({ apply: true, samples: 0 });
+    await backfillPropertyAreas({ apply: true, resync: false, samples: 0 });
     expect(bulkWrite).not.toHaveBeenCalled();
   });
 });
@@ -158,5 +162,46 @@ describe('the rows the migration asks for', () => {
         },
       ],
     });
+  });
+});
+
+
+describe('--resync, which makes the stored field say what the pages show', () => {
+  it('corrects a total that disagrees with the breakdown', async () => {
+    await backfillPropertyAreas({ apply: true, resync: true, samples: 0 });
+
+    expect(writes()).toContainEqual({ _id: 'stale-villa', sqft: 1500 });
+  });
+
+  it('leaves that listing alone without the flag', async () => {
+    await backfillPropertyAreas({ apply: true, resync: false, samples: 0 });
+
+    expect(writes().some((write) => write._id === 'stale-villa')).toBe(false);
+  });
+
+  it('does not rewrite a row whose stored total already agrees', async () => {
+    rows = [{ _id: 'agrees', propertyType: 'apartment', sqft: 98, grossArea: 98, netArea: 77 }];
+
+    await backfillPropertyAreas({ apply: true, resync: true, samples: 0 });
+    expect(bulkWrite).not.toHaveBeenCalled();
+  });
+
+  it('still leaves a listing with no breakdown to go on exactly as it is', async () => {
+    rows = [{ _id: 'legacy', propertyType: 'apartment', sqft: 120 }];
+
+    await backfillPropertyAreas({ apply: true, resync: true, samples: 0 });
+    expect(bulkWrite).not.toHaveBeenCalled();
+  });
+
+  it('is still a no-op on a second pass', async () => {
+    await backfillPropertyAreas({ apply: true, resync: true, samples: 0 });
+    for (const write of writes()) {
+      const row = rows.find((candidate) => candidate._id === write._id);
+      if (row) row.sqft = write.sqft;
+    }
+    bulkWrite.mockClear();
+
+    await backfillPropertyAreas({ apply: true, resync: true, samples: 0 });
+    expect(bulkWrite).not.toHaveBeenCalled();
   });
 });

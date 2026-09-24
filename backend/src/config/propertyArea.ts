@@ -13,49 +13,39 @@
  * 0, which then printed as "0 m²" on a listing that gave a real measurement.
  */
 
-import type { PropertyType } from './propertyTypes';
-import type { TypeAttribute } from './typeAttributes';
+import { attributesForType, MEASURED_ATTRIBUTES, type TypeAttribute } from './typeAttributes';
 
 /**
- * Which type-specific measurement stands in for `sqft`, tried in order, when
- * the total-area field is 0 or absent.
- *
- * The whole property first, the part inside it second: a house or villa is
- * the plot it occupies, so `landArea` leads and `buildingArea` is detail
- * beneath it, and a flat's gross area leads its net. The headline figure
- * never states less than the property is. A type with no breakdown field
- * (parking, land) has nothing to fall back to.
+ * The area fields a listing of this type describes itself by, if any.
+ * Read from the type table so it cannot drift from what the form collects.
  */
-const AREA_FALLBACKS: Partial<Record<PropertyType, readonly TypeAttribute[]>> = {
-  apartment: ['grossArea', 'netArea'],
-  house: ['landArea', 'buildingArea'],
-  villa: ['landArea', 'buildingArea'],
-  'luxury-villa': ['landArea', 'buildingArea'],
-  commercial: ['openPlanArea'],
-  other: ['grossArea', 'netArea', 'landArea', 'buildingArea', 'openPlanArea'],
-};
+const breakdownFieldsOf = (propertyType: unknown): readonly TypeAttribute[] =>
+  attributesForType(propertyType).filter((attribute) => MEASURED_ATTRIBUTES.has(attribute));
 
 /** A measurement worth using: a finite, positive number. Zero means "not measured". */
 const isUsableArea = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value) && value > 0;
 
 /**
- * `sqft` as it should be stored: the entered total when it is a real
- * measurement, otherwise the type's own breakdown, otherwise 0 — a record
- * that genuinely gives no area anywhere keeps stating that, rather than
- * having one invented for it.
+ * `sqft` as it should be stored: the largest measurement the seller actually
+ * gave among the fields the type describes itself by, falling back to a plain
+ * stated total only when that breakdown says nothing — or 0 when the record
+ * gives no area anywhere, which it keeps stating rather than having one
+ * invented for it.
+ *
+ * Mirrors `resolveDisplayArea` on the client exactly, so the figure the
+ * database sorts and filters by is the figure the pages show.
  */
 export function resolveTotalArea(
   propertyType: unknown,
   input: { sqft?: unknown } & Partial<Record<TypeAttribute, unknown>>,
 ): number {
-  if (isUsableArea(input.sqft)) return input.sqft;
-
-  const fallbacks = AREA_FALLBACKS[propertyType as PropertyType] ?? [];
-  for (const attribute of fallbacks) {
-    const value = input[attribute];
-    if (isUsableArea(value)) return value;
+  let widest = 0;
+  for (const field of breakdownFieldsOf(propertyType)) {
+    const value = input[field];
+    if (isUsableArea(value) && value > widest) widest = value;
   }
+  if (widest > 0) return widest;
 
-  return typeof input.sqft === 'number' && Number.isFinite(input.sqft) ? input.sqft : 0;
+  return isUsableArea(input.sqft) ? input.sqft : 0;
 }
