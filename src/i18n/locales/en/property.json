@@ -177,7 +177,8 @@
       "covered": "Covered",
       "outdoor": "Outdoor"
     },
-    "spaces": "Spaces"
+    "spaces": "Spaces",
+    "floorPlanFloorsHint": "{{count}} floors · photos marked on the plan"
   },
   "distances": {
     "title": "Distances",
@@ -683,7 +684,16 @@
       "photosPanel": "Photos on the floor plan",
       "photoAlt": "Photo {{current}} of {{total}}",
       "prevPhoto": "Previous photo",
-      "nextPhoto": "Next photo"
+      "nextPhoto": "Next photo",
+      "photosTab": "Photos",
+      "floorPlanTab": "Floor Plan",
+      "floorPlanTitle": "Floor plan",
+      "openFloorPlan": "Open floor plan",
+      "jumpHint": "Jump to a photo by tapping on a green square",
+      "photoCounter": "{{current}} of {{total}}",
+      "labelsHint": "Tap the pin button, then tap a room to add your own label. Labels are saved on this device.",
+      "disclaimer": "Floor plans are approximate and not for design purposes.",
+      "floorN": "Floor {{n}}"
     }
   },
   "imageViewer": {

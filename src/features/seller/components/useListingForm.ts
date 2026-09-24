@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FloorplanSpot, Property, PropertyImage, PropertyImageTag, UserRole } from '@/types';
-import { sanitizeFloorplanSpot } from '@/shared/utils/validation';
+import { sanitizeFloorplanSpot, MAX_FLOORPLANS, MAX_FLOORPLAN_LABEL } from '@/shared/utils/validation';
+import { getFloorPlans, spotFloor } from '@/shared/utils/floorplans';
 import type { PropertyType } from '@/shared/types/property.types';
 import { generateDescriptionFromImages, calculatePropertyDistances, LocationContext } from '@/services/geminiService';
 import { useAppContext } from '@/context/AppContext';
@@ -13,7 +14,7 @@ import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
-import { ListingData, ImageData, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
+import { ListingData, ImageData, FloorPlanDraft, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
 import { FILE_LIMITS } from '@/src/shared/constants/app.constants';
@@ -45,7 +46,7 @@ function scrollPageToTop() {
 export function buildPreviewProperty(
     listingData: ListingData,
     images: ImageData[],
-    floorplanImage: ImageData,
+    floorplans: FloorPlanDraft[],
     selectedCountry: string,
     selectedCity: string,
     selectedRole: UserRole,
@@ -119,7 +120,8 @@ export function buildPreviewProperty(
         propertyType: listingData.propertyType,
         floorNumber: Number(listingData.floorNumber) || undefined,
         totalFloors: Number(listingData.totalFloors) || undefined,
-        floorplanUrl: floorplanImage.previewUrl || undefined,
+        floorplanUrl: floorplans[0]?.previewUrl || undefined,
+        floorplans: floorplans.map(f => ({ url: f.previewUrl, label: f.label })),
         createdAt: propertyToEdit?.createdAt || Date.now(),
         lastRenewed: Date.now(),
         views: propertyToEdit?.views || 0,
@@ -173,7 +175,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const [mode, setMode] = useState<Mode>('manual');
     const [step, setStep] = useState<Step>('init');
     const [images, setImages] = useState<ImageData[]>([]);
-    const [floorplanImage, setFloorplanImage] = useState<ImageData>({ file: null, previewUrl: '' });
+    // One entry per floor (Floor 1, Floor 2, Attic…), in order.
+    const [floorplans, setFloorplans] = useState<FloorPlanDraft[]>([]);
 
     /** Set every photo's floor plan spot at once (index-aligned with images). */
     const setPhotoSpots = useCallback((spots: (FloorplanSpot | undefined)[]) => {
@@ -183,19 +186,30 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }));
     }, []);
 
-    // Photo spots are positions on one particular plan. When that plan is
-    // replaced or removed they no longer mean anything, so drop them. (The
-    // first plan appearing — upload, or loading a listing to edit — keeps them.)
-    const prevFloorplanUrlRef = useRef(floorplanImage.previewUrl);
-    useEffect(() => {
-        const prev = prevFloorplanUrlRef.current;
-        prevFloorplanUrlRef.current = floorplanImage.previewUrl;
-        if (prev && prev !== floorplanImage.previewUrl) {
-            setImages(imgs => imgs.some(img => img.floorplanSpot)
-                ? imgs.map(({ floorplanSpot: _old, ...rest }) => rest)
-                : imgs);
-        }
-    }, [floorplanImage.previewUrl]);
+    /**
+     * Photo spots are positions on one floor's plan. Replacing that plan
+     * drops the spots on it; removing a floor drops its spots and moves the
+     * spots on later floors down one.
+     */
+    const remapPhotoSpots = useCallback((map: (floor: number) => number | null) => {
+        setImages(prev => prev.map(img => {
+            if (!img.floorplanSpot) return img;
+            const next = map(spotFloor(img.floorplanSpot));
+            const { floorplanSpot, ...rest } = img;
+            if (next === null) return rest;
+            const { floor: _f, ...spot } = floorplanSpot;
+            return { ...rest, floorplanSpot: next > 0 ? { ...spot, floor: next } : spot };
+        }));
+    }, []);
+
+    const removeFloorplan = useCallback((index: number) => {
+        setFloorplans(prev => prev.filter((_, i) => i !== index));
+        remapPhotoSpots(floor => (floor === index ? null : floor > index ? floor - 1 : floor));
+    }, [remapPhotoSpots]);
+
+    const renameFloorplan = useCallback((index: number, label: string) => {
+        setFloorplans(prev => prev.map((f, i) => (i === index ? { ...f, label: label.slice(0, MAX_FLOORPLAN_LABEL) } : f)));
+    }, []);
 
     // Determine initial listingType based on current view
     const initialType = state.activeView === 'create-rental' ? 'rent' : 'sale';
@@ -404,9 +418,11 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
             // Log removed
-            if (propertyToEdit.floorplanUrl) {
-                setFloorplanImage({ file: null, previewUrl: propertyToEdit.floorplanUrl });
-            }
+            setFloorplans(getFloorPlans(propertyToEdit).map((f, i) => ({
+                file: null,
+                previewUrl: f.url,
+                label: f.label || t('seller:createListing.floors.defaultLabel', 'Floor {{n}}', { n: i + 1 }),
+            })));
         }
     }, [propertyToEdit]);
 
@@ -581,70 +597,110 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         }
     }, [images, showWarning, showError, t]);
 
-    const handleFloorplanImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
+    /**
+     * Validate, convert (HEIC → JPEG) and compress one floor plan file.
+     * Returns null, after telling the user why, when it can't be used.
+     */
+    const prepareFloorplanFile = useCallback(async (file: File): Promise<File | null> => {
+        // Validate file format. HEIC/HEIF is accepted here because it's
+        // converted to JPEG below before compression/upload.
+        const ALLOWED_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+        if (!ALLOWED_FORMATS.includes(file.type) && !isHeicFile(file)) {
+            showError(
+                t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
+                t('newListing:floorplan.invalidFormatMessage', 'Please upload a valid image file (JPEG, PNG, WebP, GIF, HEIC, or SVG).')
+            );
+            return null;
+        }
 
-            // Validate file format. HEIC/HEIF is accepted here because it's
-            // converted to JPEG below before compression/upload.
-            const ALLOWED_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
-            if (!ALLOWED_FORMATS.includes(file.type) && !isHeicFile(file)) {
-                showError(
-                    t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
-                    t('newListing:floorplan.invalidFormatMessage', 'Please upload a valid image file (JPEG, PNG, WebP, GIF, HEIC, or SVG).')
-                );
-                return;
-            }
+        // Validate file size (max 10MB before compression)
+        const MAX_FILE_SIZE = 10 * 1024 * 1024;
+        if (file.size > MAX_FILE_SIZE) {
+            showError(
+                t('newListing:floorplan.fileTooLarge', 'File Too Large'),
+                t('newListing:floorplan.fileTooLargeMessage', 'Floor plan image must be under 10MB. Your file is {{size}}MB.', { size: (file.size / (1024 * 1024)).toFixed(1) })
+            );
+            return null;
+        }
 
-            // Validate file size (max 10MB before compression)
-            const MAX_FILE_SIZE = 10 * 1024 * 1024;
-            if (file.size > MAX_FILE_SIZE) {
-                showError(
-                    t('newListing:floorplan.fileTooLarge', 'File Too Large'),
-                    t('newListing:floorplan.fileTooLargeMessage', 'Floor plan image must be under 10MB. Your file is {{size}}MB.', { size: (file.size / (1024 * 1024)).toFixed(1) })
-                );
-                return;
-            }
+        // Convert HEIC/HEIF to JPEG before the canvas-based compressor runs.
+        const normalizedFile = await convertToUploadableImage(file);
 
-            // Compress floorplan image
-            setIsCompressing(true);
-            try {
-                const compressionOptions = {
-                    maxSizeMB: 0.5,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true,
-                    fileType: 'image/jpeg' as const,
-                    initialQuality: 0.8,
-                };
+        // Conversion failed and it's still HEIC — don't set a broken preview.
+        if (needsConversion(normalizedFile)) {
+            showError(
+                t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
+                t(
+                    'newListing:errors.heicConversionFailed',
+                    "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
+                    { files: file.name }
+                )
+            );
+            return null;
+        }
 
-                // Convert HEIC/HEIF to JPEG before the canvas-based compressor runs.
-                const normalizedFile = await convertToUploadableImage(file);
-
-                // Conversion failed and it's still HEIC — don't set a broken preview.
-                if (needsConversion(normalizedFile)) {
-                    showError(
-                        t('newListing:floorplan.invalidFormat', 'Invalid File Format'),
-                        t(
-                            'newListing:errors.heicConversionFailed',
-                            "We couldn't convert {{files}}. Please try re-saving it as JPEG or PNG and upload again.",
-                            { files: file.name }
-                        )
-                    );
-                    return;
-                }
-
-                try {
-                    const compressedFile = await imageCompression(normalizedFile, compressionOptions);
-                    setFloorplanImage({ file: compressedFile, previewUrl: URL.createObjectURL(compressedFile) });
-                } catch (error) {
-                    // Compression failed but the format is already browser-friendly.
-                    setFloorplanImage({ file: normalizedFile, previewUrl: URL.createObjectURL(normalizedFile) });
-                }
-            } finally {
-                setIsCompressing(false);
-            }
+        try {
+            return await imageCompression(normalizedFile, {
+                maxSizeMB: 0.5,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+                fileType: 'image/jpeg' as const,
+                initialQuality: 0.8,
+            });
+        } catch {
+            // Compression failed but the format is already browser-friendly.
+            return normalizedFile;
         }
     }, [showError, t]);
+
+    /** Add one floor per chosen file (Floor 1, Floor 2…). */
+    const handleFloorplanImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        e.target.value = '';
+        if (files.length === 0) return;
+        const room = MAX_FLOORPLANS - floorplans.length;
+        if (room <= 0) {
+            showWarning(
+                t('seller:createListing.floors.limitTitle', 'Floor plan limit reached'),
+                t('seller:createListing.floors.limit', 'A listing can have up to {{max}} floor plans.', { max: MAX_FLOORPLANS })
+            );
+            return;
+        }
+        setIsCompressing(true);
+        try {
+            const prepared: File[] = [];
+            for (const file of files.slice(0, room)) {
+                const ready = await prepareFloorplanFile(file);
+                if (ready) prepared.push(ready);
+            }
+            setFloorplans(prev => [
+                ...prev,
+                ...prepared.map((file, i) => ({
+                    file,
+                    previewUrl: URL.createObjectURL(file),
+                    label: t('seller:createListing.floors.defaultLabel', 'Floor {{n}}', { n: prev.length + i + 1 }),
+                })),
+            ]);
+        } finally {
+            setIsCompressing(false);
+        }
+    }, [floorplans.length, prepareFloorplanFile, showWarning, t]);
+
+    /** Swap one floor's plan image; photo spots on that floor no longer apply. */
+    const replaceFloorplan = useCallback(async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        setIsCompressing(true);
+        try {
+            const ready = await prepareFloorplanFile(file);
+            if (!ready) return;
+            setFloorplans(prev => prev.map((f, i) => (i === index ? { ...f, file: ready, previewUrl: URL.createObjectURL(ready) } : f)));
+            remapPhotoSpots(floor => (floor === index ? null : floor));
+        } finally {
+            setIsCompressing(false);
+        }
+    }, [prepareFloorplanFile, remapPhotoSpots]);
 
     const handleListingTypeChange = useCallback((val: string) => {
         setListingData(prev => ({
@@ -920,14 +976,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
         // Build a temporary Property object from the form data for preview display
         const preview = buildPreviewProperty(
-            listingData, images, floorplanImage,
+            listingData, images, floorplans,
             selectedCountry, selectedCity, selectedRole,
             currentUser, propertyToEdit,
         );
         setPreviewProperty(preview);
         setStep('preview');
         scrollPageToTop();
-    }, [runValidation, listingData, images, floorplanImage, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
+    }, [runValidation, listingData, images, floorplans, selectedCountry, selectedCity, selectedRole, currentUser, propertyToEdit]);
 
     const handleBackToForm = useCallback(() => {
         setStep('form');
@@ -1033,27 +1089,29 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                 // Warning removed
             }
 
-            // Step 2: Upload floorplan to Cloudinary if a new file was selected
-            let floorplanUrl: string | undefined = undefined;
-            if (floorplanImage.file) {
-                try {
-                    const uploadedFloorplan = await api.uploadPropertyImages([floorplanImage.file]);
-                    if (uploadedFloorplan.length > 0) {
-                        floorplanUrl = uploadedFloorplan[0].url;
-                    }
-                } catch (floorplanError: unknown) {
-                    const errorMsg = floorplanError instanceof Error ? floorplanError.message : t('common:errors.unknown');
-                    showError(
-                        t('newListing:errors.uploadFailed'),
-                        t('newListing:floorplan.uploadFailedMessage', 'Failed to upload floor plan: {{error}}', { error: errorMsg })
-                    );
-                    setIsSubmitting(false);
-                    return;
-                }
-            } else if (floorplanImage.previewUrl && !floorplanImage.previewUrl.startsWith('blob:')) {
-                // Existing Cloudinary URL from editing
-                floorplanUrl = floorplanImage.previewUrl;
+            // Step 2: Upload any new floor plans to Cloudinary (one request, in order)
+            let floorplanLevels: { url: string; label: string }[] = [];
+            try {
+                const newFiles = floorplans.filter(f => f.file).map(f => f.file!);
+                const uploaded = newFiles.length > 0 ? await api.uploadPropertyImages(newFiles) : [];
+                let next = 0;
+                floorplanLevels = floorplans
+                    .map((f, i) => ({
+                        url: f.file ? uploaded[next++]?.url ?? '' : f.previewUrl,
+                        label: f.label.trim() || t('seller:createListing.floors.defaultLabel', 'Floor {{n}}', { n: i + 1 }),
+                    }))
+                    // A blob: preview that never uploaded must not be saved.
+                    .filter(f => f.url && !f.url.startsWith('blob:'));
+            } catch (floorplanError: unknown) {
+                const errorMsg = floorplanError instanceof Error ? floorplanError.message : t('common:errors.unknown');
+                showError(
+                    t('newListing:errors.uploadFailed'),
+                    t('newListing:floorplan.uploadFailedMessage', 'Failed to upload floor plan: {{error}}', { error: errorMsg })
+                );
+                setIsSubmitting(false);
+                return;
             }
+            const floorplanUrl = floorplanLevels[0]?.url;
 
             const { lat, lng } = listingData;
 
@@ -1176,6 +1234,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     floorNumber: Number(listingData.floorNumber) || undefined,
                     totalFloors: Number(listingData.totalFloors) || undefined,
                     floorplanUrl,
+                    floorplans: floorplanLevels,
                     createdAt: propertyToEdit ? propertyToEdit.createdAt : Date.now(),
                     lastRenewed: Date.now(),
                     views: propertyToEdit?.views || 0,
@@ -1561,7 +1620,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         step, setStep,
         images, setImages,
         setPhotoSpots,
-        floorplanImage, setFloorplanImage,
+        floorplans, removeFloorplan, renameFloorplan, replaceFloorplan,
         listingData, setListingData,
         language, setLanguage,
         aiPropertyType, setAiPropertyType,

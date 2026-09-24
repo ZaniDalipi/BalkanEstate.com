@@ -160,7 +160,8 @@
     "landArea": "Površina zemljišta",
     "buildingArea": "Površina objekta",
     "grossArea": "Bruto površina",
-    "netArea": "Neto površina"
+    "netArea": "Neto površina",
+    "floorPlanFloorsHint": "{{count}} sprata · fotografije označene na tlocrtu"
   },
   "distances": {
     "title": "Udaljenosti",
@@ -666,7 +667,16 @@
       "photosPanel": "Fotografije na tlocrtu",
       "photoAlt": "Fotografija {{current}} od {{total}}",
       "prevPhoto": "Prethodna fotografija",
-      "nextPhoto": "Sljedeća fotografija"
+      "nextPhoto": "Sljedeća fotografija",
+      "photosTab": "Fotografije",
+      "floorPlanTab": "Tlocrt",
+      "floorPlanTitle": "Tlocrt",
+      "openFloorPlan": "Otvori tlocrt",
+      "jumpHint": "Pređite na fotografiju dodirom na zeleni kvadrat",
+      "photoCounter": "{{current}} od {{total}}",
+      "labelsHint": "Dodirnite dugme s iglom, pa dodirnite prostoriju da dodate svoju oznaku. Oznake se čuvaju na ovom uređaju.",
+      "disclaimer": "Tlocrti su približni i nisu namijenjeni za projektovanje.",
+      "floorN": "Sprat {{n}}"
     }
   },
   "imageViewer": {

@@ -59,6 +59,14 @@ export interface FloorplanSpot {
   x: number;
   y: number;
   angle: number;
+  /** Index into the listing's floor plans (0 = first floor plan). */
+  floor?: number;
+}
+
+/** One floor's plan (Floor 1, Floor 2, Attic…). */
+export interface FloorplanLevel {
+  url: string;
+  label?: string;
 }
 
 export interface PropertyImage {
@@ -199,6 +207,8 @@ export interface Property {
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
+  /** Every floor's plan, in order. floorplanUrl mirrors the first for older readers. */
+  floorplans?: FloorplanLevel[];
   createdAt?: number;
   lastRenewed?: number;
   views?: number;

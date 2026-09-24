@@ -23,7 +23,19 @@ export interface IFloorplanSpot {
   x: number;
   y: number;
   angle: number;
+  /** Index into floorplans (0 = first floor plan). */
+  floor?: number;
 }
+
+/** One floor's plan (Floor 1, Floor 2, Attic…). */
+export interface IFloorplanLevel {
+  url: string;
+  publicId?: string;
+  label?: string;
+}
+
+/** Most floor plans one listing can have. */
+export const MAX_FLOORPLANS = 10;
 
 export interface IPropertyImage {
   url: string;
@@ -37,6 +49,16 @@ const FloorplanSpotSchema = new Schema<IFloorplanSpot>(
     x: { type: Number, required: true, min: 0, max: 100 },
     y: { type: Number, required: true, min: 0, max: 100 },
     angle: { type: Number, required: true, min: 0, max: 360 },
+    floor: { type: Number, min: 0, max: MAX_FLOORPLANS - 1 },
+  },
+  { _id: false }
+);
+
+const FloorplanLevelSchema = new Schema<IFloorplanLevel>(
+  {
+    url: { type: String, required: true },
+    publicId: { type: String },
+    label: { type: String, trim: true, maxlength: 40 },
   },
   { _id: false }
 );
@@ -141,6 +163,8 @@ export interface IProperty extends Document {
   floorNumber?: number;
   totalFloors?: number;
   floorplanUrl?: string;
+  /** Every floor's plan, in order. floorplanUrl mirrors the first. */
+  floorplans?: IFloorplanLevel[];
   floorplanPublicId?: string; // Cloudinary public_id for floorplan
   lastRenewed: Date;
   views: number;
@@ -546,6 +570,14 @@ const PropertySchema: Schema = new Schema(
     floorplanUrl: {
       type: String,
     },
+    floorplans: {
+      type: [FloorplanLevelSchema],
+      default: undefined,
+      validate: {
+        validator: (v: IFloorplanLevel[] | undefined) => !v || v.length <= MAX_FLOORPLANS,
+        message: `A listing can have at most ${MAX_FLOORPLANS} floor plans`,
+      },
+    },
     floorplanPublicId: {
       type: String,
     },
@@ -786,6 +818,18 @@ const PropertySchema: Schema = new Schema(
  * old type are cleared rather than left behind, so an apartment converted to
  * a garage stops advertising its bathrooms.
  */
+// floorplanUrl is what older readers (cards, SEO, the single-plan viewer)
+// use, so it always mirrors the first entry of floorplans when those change.
+PropertySchema.pre('validate', function (next) {
+  const document = this as unknown as mongoose.Document & IProperty;
+  if (document.isModified('floorplans') && Array.isArray(document.floorplans)) {
+    const first = document.floorplans[0];
+    document.floorplanUrl = first?.url;
+    document.floorplanPublicId = first?.publicId;
+  }
+  next();
+});
+
 PropertySchema.pre('validate', function (next) {
   // Read and written through the document API rather than by index, so
   // Mongoose tracks the change and an unset attribute is actually removed.

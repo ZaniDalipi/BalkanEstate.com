@@ -369,7 +369,20 @@
       "cta": "Pokažite kupcima gdje je snimljena svaka fotografija",
       "ctaHint": "Kupci vide kameru na tlocrtu za svaku fotografiju, usklađeno dok pregledavaju.",
       "edit": "Uredi položaje fotografija ({{placed}}/{{total}})",
-      "start": "Postavi fotografije na tlocrt"
+      "start": "Postavi fotografije na tlocrt",
+      "onFloor": "Na: {{floor}}"
+    },
+    "floors": {
+      "defaultLabel": "Kat {{n}}",
+      "hint": "Dodajte tlocrt za svaki kat (Kat 1, Kat 2, Potkrovlje, Podrum…).",
+      "remove": "Ukloni tlocrt",
+      "name": "Naziv kata",
+      "replace": "Zamijeni sliku",
+      "replaceShort": "Zamijeni",
+      "add": "Dodaj još jedan tlocrt",
+      "limitTitle": "Dosegnuto je ograničenje tlocrta",
+      "limit": "Oglas može imati najviše {{max}} tlocrta.",
+      "switch": "Katovi"
     }
   },
   "myListings": {

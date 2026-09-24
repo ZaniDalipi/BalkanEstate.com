@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeAngle, sanitizeFloorplanSpot, validateFloorplanSpot } from '@/shared/utils/validation';
+import { normalizeAngle, sanitizeFloorplanSpot, validateFloorplanSpot, MAX_FLOORPLANS } from '@/shared/utils/validation';
+import { getFloorPlans, spotFloor } from '@/shared/utils/floorplans';
 
 describe('normalizeAngle', () => {
   it('wraps any angle into 0–359', () => {
@@ -42,5 +43,33 @@ describe('validateFloorplanSpot', () => {
     expect(validateFloorplanSpot({ x: 101, y: 50, angle: 0 }).isValid).toBe(false);
     expect(validateFloorplanSpot({ x: 50, y: 50 }).isValid).toBe(false);
     expect(validateFloorplanSpot(null).error).toBeDefined();
+  });
+});
+
+describe('floor plan floors', () => {
+  it('keeps the floor of a spot on a later floor, and drops floor 0', () => {
+    expect(sanitizeFloorplanSpot({ x: 10, y: 10, angle: 0, floor: 2 })).toEqual({ x: 10, y: 10, angle: 0, floor: 2 });
+    expect(sanitizeFloorplanSpot({ x: 10, y: 10, angle: 0, floor: 0 })).toEqual({ x: 10, y: 10, angle: 0 });
+  });
+
+  it('rejects spots on floors that cannot exist', () => {
+    expect(validateFloorplanSpot({ x: 1, y: 1, angle: 0, floor: -1 }).isValid).toBe(false);
+    expect(validateFloorplanSpot({ x: 1, y: 1, angle: 0, floor: 1.5 }).isValid).toBe(false);
+    expect(validateFloorplanSpot({ x: 1, y: 1, angle: 0, floor: MAX_FLOORPLANS }).isValid).toBe(false);
+    expect(sanitizeFloorplanSpot({ x: 1, y: 1, angle: 0, floor: MAX_FLOORPLANS })).toBeUndefined();
+  });
+
+  it('reads spots saved before floors existed as on the first floor', () => {
+    expect(spotFloor({ x: 1, y: 1, angle: 0 })).toBe(0);
+    expect(spotFloor({ x: 1, y: 1, angle: 0, floor: 1 })).toBe(1);
+    expect(spotFloor(undefined)).toBe(0);
+  });
+
+  it('prefers the floors list and falls back to the single floorplanUrl', () => {
+    const floors = [{ url: 'https://a/1.png', label: 'Floor 1' }, { url: 'https://a/2.png', label: 'Floor 2' }];
+    expect(getFloorPlans({ floorplans: floors, floorplanUrl: 'https://a/1.png' })).toEqual(floors);
+    expect(getFloorPlans({ floorplanUrl: 'https://a/old.png' })).toEqual([{ url: 'https://a/old.png' }]);
+    expect(getFloorPlans({ floorplans: [], floorplanUrl: 'https://a/old.png' })).toEqual([{ url: 'https://a/old.png' }]);
+    expect(getFloorPlans({})).toEqual([]);
   });
 });

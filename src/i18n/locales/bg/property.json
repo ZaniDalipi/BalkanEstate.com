@@ -160,7 +160,8 @@
     "landArea": "Площ на парцела",
     "buildingArea": "Застроена площ",
     "grossArea": "Бруто площ",
-    "netArea": "Нето площ"
+    "netArea": "Нето площ",
+    "floorPlanFloorsHint": "{{count}} етажа · снимки, отбелязани на плана"
   },
   "distances": {
     "title": "Разстояния",
@@ -666,7 +667,16 @@
       "photosPanel": "Снимки на плана",
       "photoAlt": "Снимка {{current}} от {{total}}",
       "prevPhoto": "Предишна снимка",
-      "nextPhoto": "Следваща снимка"
+      "nextPhoto": "Следваща снимка",
+      "photosTab": "Снимки",
+      "floorPlanTab": "План",
+      "floorPlanTitle": "План",
+      "openFloorPlan": "Отвори плана",
+      "jumpHint": "Преминете към снимка, като докоснете зелен квадрат",
+      "photoCounter": "{{current}} от {{total}}",
+      "labelsHint": "Докоснете бутона с карфица, после докоснете стая, за да добавите свой етикет. Етикетите се пазят на това устройство.",
+      "disclaimer": "Плановете са приблизителни и не са предназначени за проектиране.",
+      "floorN": "Етаж {{n}}"
     }
   },
   "imageViewer": {

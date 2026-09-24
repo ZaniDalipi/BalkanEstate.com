@@ -107,6 +107,11 @@ export interface ImageData {
     floorplanSpot?: FloorplanSpot;
 }
 
+/** A floor plan in the listing form: one per floor (Floor 1, Floor 2, Attic…). */
+export interface FloorPlanDraft extends ImageData {
+    label: string;
+}
+
 export const initialListingData: ListingData = {
     propertyId: '',
     title: '',

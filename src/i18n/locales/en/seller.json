@@ -381,7 +381,20 @@
       "cta": "Show buyers where each photo was taken",
       "ctaHint": "Buyers see a camera on the floor plan for each photo, in sync as they browse.",
       "edit": "Edit photo spots ({{placed}}/{{total}})",
-      "start": "Place photos on floor plan"
+      "start": "Place photos on floor plan",
+      "onFloor": "On {{floor}}"
+    },
+    "floors": {
+      "defaultLabel": "Floor {{n}}",
+      "hint": "Add a plan for each floor (Floor 1, Floor 2, Attic, Basement…).",
+      "remove": "Remove floor plan",
+      "name": "Floor name",
+      "replace": "Replace image",
+      "replaceShort": "Replace",
+      "add": "Add another floor plan",
+      "limitTitle": "Floor plan limit reached",
+      "limit": "A listing can have up to {{max}} floor plans.",
+      "switch": "Floors"
     }
   },
   "myListings": {

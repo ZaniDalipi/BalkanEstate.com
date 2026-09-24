@@ -10,6 +10,7 @@ import {
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
 import ImageViewerModal from '@/src/features/property-details/components/ImageViewerModal';
 import FloorPlanViewerModal from '@/src/features/property-details/components/FloorPlanViewerModal';
+import { getFloorPlans } from '@/shared/utils/floorplans';
 import ListingSubmitOverlay from './ListingSubmitOverlay';
 import { Button } from '@/components/ui/liquid-glass-button';
 
@@ -95,8 +96,9 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
             )}
             {isFloorPlanOpen && property.floorplanUrl && (
                 <FloorPlanViewerModal
-                    imageUrl={property.floorplanUrl}
+                    floors={getFloorPlans(property)}
                     photos={property.images}
+                    title={[property.address, property.city].filter(Boolean).join(', ')}
                     onClose={() => setIsFloorPlanOpen(false)}
                 />
             )}

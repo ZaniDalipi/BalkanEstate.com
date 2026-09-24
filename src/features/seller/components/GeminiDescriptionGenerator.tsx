@@ -38,7 +38,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         step, setStep,
         images,
         setPhotoSpots,
-        floorplanImage, setFloorplanImage,
+        floorplans, removeFloorplan, renameFloorplan, replaceFloorplan,
         listingData, setListingData,
         language, setLanguage,
         aiPropertyType, setAiPropertyType,
@@ -773,7 +773,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         imagesError={fieldErrors.images}
                         images={images}
                         imageTags={listingData.image_tags}
-                        floorplanImage={floorplanImage}
+                        floorplans={floorplans}
                         handleImageChange={handleImageChange}
                         handleFloorplanImageChange={handleFloorplanImageChange}
                         removeImage={removeImage}
@@ -782,7 +782,9 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         handleDragEnd={handleDragEnd}
                         handleDrop={handleDrop}
                         handleImageTagChange={handleImageTagChange}
-                        setFloorplanImage={setFloorplanImage}
+                        removeFloorplan={removeFloorplan}
+                        renameFloorplan={renameFloorplan}
+                        replaceFloorplan={replaceFloorplan}
                         setPhotoSpots={setPhotoSpots}
                     />
 

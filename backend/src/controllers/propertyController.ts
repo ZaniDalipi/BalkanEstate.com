@@ -58,7 +58,7 @@ export const ALLOWED_PROPERTY_FIELDS = [
   'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
   'imageUrl', 'imagePublicId', 'images',
   'lat', 'lng',
-  'propertyType', 'floorplanUrl', 'floorplanPublicId',
+  'propertyType', 'floorplanUrl', 'floorplanPublicId', 'floorplans',
   'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
   'hasAirConditioning', 'hasPool', 'petsAllowed',
   'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',

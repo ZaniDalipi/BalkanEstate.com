@@ -369,7 +369,20 @@
       "cta": "Arătați cumpărătorilor unde a fost făcută fiecare fotografie",
       "ctaHint": "Cumpărătorii văd o cameră pe plan pentru fiecare fotografie, sincronizat în timp ce navighează.",
       "edit": "Editează pozițiile fotografiilor ({{placed}}/{{total}})",
-      "start": "Plasează fotografiile pe plan"
+      "start": "Plasează fotografiile pe plan",
+      "onFloor": "Pe: {{floor}}"
+    },
+    "floors": {
+      "defaultLabel": "Etajul {{n}}",
+      "hint": "Adăugați un plan pentru fiecare etaj (Etajul 1, Etajul 2, Mansardă, Subsol…).",
+      "remove": "Elimină planul",
+      "name": "Numele etajului",
+      "replace": "Înlocuiește imaginea",
+      "replaceShort": "Înlocuiește",
+      "add": "Adaugă încă un plan",
+      "limitTitle": "Limita de planuri a fost atinsă",
+      "limit": "Un anunț poate avea cel mult {{max}} planuri.",
+      "switch": "Etaje"
     }
   },
   "myListings": {

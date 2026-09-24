@@ -160,7 +160,8 @@
     "landArea": "Suprafață teren",
     "buildingArea": "Suprafață construită",
     "grossArea": "Suprafață brută",
-    "netArea": "Suprafață utilă"
+    "netArea": "Suprafață utilă",
+    "floorPlanFloorsHint": "{{count}} etaje · fotografii marcate pe plan"
   },
   "distances": {
     "title": "Distanțe",
@@ -666,7 +667,16 @@
       "photosPanel": "Fotografii pe plan",
       "photoAlt": "Fotografia {{current}} din {{total}}",
       "prevPhoto": "Fotografia anterioară",
-      "nextPhoto": "Fotografia următoare"
+      "nextPhoto": "Fotografia următoare",
+      "photosTab": "Fotografii",
+      "floorPlanTab": "Plan",
+      "floorPlanTitle": "Plan",
+      "openFloorPlan": "Deschide planul",
+      "jumpHint": "Treceți la o fotografie atingând un pătrat verde",
+      "photoCounter": "{{current}} din {{total}}",
+      "labelsHint": "Atingeți butonul cu pioneză, apoi o cameră pentru a adăuga propria etichetă. Etichetele sunt salvate pe acest dispozitiv.",
+      "disclaimer": "Planurile sunt aproximative și nu sunt destinate proiectării.",
+      "floorN": "Etajul {{n}}"
     }
   },
   "imageViewer": {

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { FloorplanSpot } from '@/types';
 import { normalizeAngle } from '@/shared/utils/validation';
+import { spotFloor } from '@/shared/utils/floorplans';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { ArrowUturnLeftIcon, ArrowUturnRightIcon, TrashIcon, XMarkIcon, CheckIcon } from '@/constants';
 import PhotoSpotMarker, { PHOTO_SPOT_SIZE } from '@/src/components/property/PhotoSpotMarker';
@@ -14,7 +15,8 @@ interface PlacerPhoto {
 }
 
 interface FloorPlanPhotoPlacerProps {
-    floorplanUrl: string;
+    /** The listing's floor plans, in order (Floor 1, Floor 2…). */
+    floors: { url: string; label: string }[];
     photos: PlacerPhoto[];
     /** Index-aligned with photos; undefined = not on the plan. */
     onSave: (spots: (FloorplanSpot | undefined)[]) => void;
@@ -44,7 +46,7 @@ type Drag =
  * Tap the plan to place the selected photo and drag to aim it; drag a camera
  * to move it; drag the round handle to turn it.
  */
-const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floorplanUrl, photos, onSave, onClose }) => {
+const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floors, photos, onSave, onClose }) => {
     const { t } = useTranslation(['seller', 'common']);
     const [spots, setSpots] = useState<(FloorplanSpot | undefined)[]>(() => photos.map(p => p.floorplanSpot));
     const [selected, setSelected] = useState(() => {
@@ -55,8 +57,21 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floorplanUr
     const dragRef = useRef<Drag | null>(null);
     const listRef = useRef<HTMLDivElement>(null);
 
+    // The floor on screen. Picking a photo already placed takes you to its floor.
+    const [floor, setFloor] = useState(() => {
+        const first = photos.findIndex(p => !p.floorplanSpot);
+        return spotFloor(photos[first >= 0 ? first : 0]?.floorplanSpot);
+    });
+    const floorplanUrl = floors[Math.min(floor, floors.length - 1)]?.url ?? '';
+    const selectPhoto = (index: number) => {
+        setSelected(index);
+        const spot = spots[index];
+        if (spot) setFloor(spotFloor(spot));
+    };
+
     const placedCount = spots.filter(Boolean).length;
-    const selectedSpot = spots[selected];
+    // A spot placed on another floor isn't drawn (or turned) on this one.
+    const selectedSpot = spots[selected] && spotFloor(spots[selected]) === floor ? spots[selected] : undefined;
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -146,16 +161,16 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floorplanUr
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         e.preventDefault();
         const { x, y } = toPlan(e.clientX, e.clientY);
-        updateSpot(selected, { x, y, angle: spots[selected]?.angle ?? 0 });
+        updateSpot(selected, { x, y, angle: spots[selected]?.angle ?? 0, floor });
         planRef.current?.setPointerCapture(e.pointerId);
-        dragRef.current = { kind: 'aim', index: selected, pointerId: e.pointerId, fresh: !spots[selected] };
+        dragRef.current = { kind: 'aim', index: selected, pointerId: e.pointerId, fresh: !spots[selected] || spotFloor(spots[selected]) !== floor };
     };
 
     const startMove = (e: React.PointerEvent, index: number) => {
         if (e.pointerType === 'mouse' && e.button !== 0) return;
         e.preventDefault();
         e.stopPropagation();
-        setSelected(index);
+        selectPhoto(index);
         planRef.current?.setPointerCapture(e.pointerId);
         dragRef.current = { kind: 'move', index, pointerId: e.pointerId, moved: false };
     };
@@ -251,17 +266,46 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floorplanUr
                 </span>
                 <button
                     type="button"
-                    onClick={() => { onSave(spots); onClose(); }}
+                    onClick={() => {
+                        onSave(spots.map(sp => {
+                            if (!sp) return undefined;
+                            const { floor: f, ...rest } = sp;
+                            return f ? { ...rest, floor: f } : rest;
+                        }));
+                        onClose();
+                    }}
                     className="h-9 px-4 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 transition-colors"
                 >
                     {t('common:save', 'Save')}
                 </button>
             </header>
 
+            {/* Floors */}
+            {floors.length > 1 && (
+                <nav className="flex-shrink-0 flex gap-2 px-3 sm:px-5 py-2 border-b border-white/10 overflow-x-auto [scrollbar-width:none]" aria-label={t('seller:createListing.floors.switch', 'Floors')}>
+                    {floors.map((f, i) => {
+                        const count = spots.filter(sp => sp && spotFloor(sp) === i).length;
+                        return (
+                            <button
+                                key={f.url}
+                                type="button"
+                                onClick={() => setFloor(i)}
+                                aria-pressed={i === floor}
+                                className={`flex-shrink-0 inline-flex items-center gap-2 h-8 px-3 rounded-full text-sm transition-colors ${i === floor ? 'bg-white text-neutral-900 font-semibold' : 'bg-white/10 text-white/80 hover:bg-white/15'}`}
+                            >
+                                {f.label}
+                                <span className={`min-w-[20px] h-5 px-1.5 rounded-full text-[11px] leading-5 tabular-nums ${i === floor ? 'bg-blue-600 text-white' : 'bg-white/15'}`}>{count}</span>
+                            </button>
+                        );
+                    })}
+                </nav>
+            )}
+
             <div className="flex-1 min-h-0 flex flex-col md:flex-row">
                 {/* Plan stage — the plan is sized to fit it exactly */}
                 <div ref={stageRef} className="relative flex-1 min-h-0 min-w-0 flex items-center justify-center overflow-hidden bg-neutral-900">
                     <img
+                        key={floorplanUrl}
                         src={photoSrc(floorplanUrl, 2400)}
                         alt=""
                         className="hidden"
@@ -284,7 +328,7 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floorplanUr
                                 draggable={false}
                             />
 
-                            {spots.map((spot, i) => spot && (
+                            {spots.map((spot, i) => spot && spotFloor(spot) === floor && (
                                 <div
                                     key={photos[i].url}
                                     className="absolute"
@@ -349,7 +393,9 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floorplanUr
                                     {selectedSpot && <CheckIcon className="w-3 h-3" />}
                                     {selectedSpot
                                         ? t('seller:createListing.photoSpots.placed', 'On the plan')
-                                        : t('seller:createListing.photoSpots.notPlaced', 'Not placed yet')}
+                                        : spots[selected]
+                                            ? t('seller:createListing.photoSpots.onFloor', 'On {{floor}}', { floor: floors[spotFloor(spots[selected])]?.label ?? '' })
+                                            : t('seller:createListing.photoSpots.notPlaced', 'Not placed yet')}
                                 </span>
                             </div>
                             <p className="text-xs text-white/55 leading-snug line-clamp-2">{statusText}</p>
@@ -380,7 +426,7 @@ const FloorPlanPhotoPlacer: React.FC<FloorPlanPhotoPlacerProps> = ({ floorplanUr
                             <button
                                 key={photo.url}
                                 type="button"
-                                onClick={() => setSelected(i)}
+                                onClick={() => selectPhoto(i)}
                                 className={`relative flex-shrink-0 w-16 h-12 md:w-auto md:h-auto md:aspect-[4/3] rounded-md overflow-hidden ring-2 transition-all ${i === selected ? 'ring-blue-500' : 'ring-transparent opacity-70 hover:opacity-100'}`}
                                 aria-label={t('seller:createListing.photoSpots.photoN', 'Photo {{n}}', { n: i + 1 })}
                                 aria-current={i === selected}

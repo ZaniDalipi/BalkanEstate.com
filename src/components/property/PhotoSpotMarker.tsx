@@ -73,3 +73,55 @@ const PhotoSpotMarker: React.FC<PhotoSpotMarkerProps> = ({ angle, active = false
 };
 
 export default PhotoSpotMarker;
+
+interface PhotoSpotSquareProps {
+    /** Camera direction; the view cone is drawn only for the active photo. */
+    angle: number;
+    active?: boolean;
+    /** Side of the square in screen pixels. */
+    size?: number;
+    /** Length of the active photo's view cone in screen pixels. */
+    coneLength?: number;
+}
+
+/**
+ * Zillow-style photo spot: a green square for every photo, and for the photo
+ * being viewed a red square with a translucent yellow cone showing what the
+ * camera sees. Drawn centred on the spot, at a fixed screen size.
+ */
+export const PhotoSpotSquare: React.FC<PhotoSpotSquareProps> = ({ angle, active = false, size = 14, coneLength = 64 }) => {
+    const box = active ? coneLength * 2 + size : size + 4;
+    const half = box / 2;
+    const a = polar(-FOV / 2, coneLength);
+    const b = polar(FOV / 2, coneLength);
+    return (
+        <svg
+            width={box}
+            height={box}
+            viewBox={`${-half} ${-half} ${box} ${box}`}
+            className="block overflow-visible pointer-events-none"
+            style={{ marginLeft: -half, marginTop: -half }}
+            aria-hidden="true"
+        >
+            {active && (
+                <path
+                    d={`M0 0 L${a.x.toFixed(2)} ${a.y.toFixed(2)} A${coneLength} ${coneLength} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)} Z`}
+                    transform={`rotate(${angle})`}
+                    fill="rgba(250, 204, 21, 0.55)"
+                    stroke="rgba(234, 179, 8, 0.9)"
+                    strokeWidth={1}
+                />
+            )}
+            <rect
+                x={-size / 2}
+                y={-size / 2}
+                width={size}
+                height={size}
+                rx={2}
+                fill={active ? '#ef4444' : '#22c55e'}
+                stroke="#ffffff"
+                strokeWidth={active ? 2 : 1.5}
+            />
+        </svg>
+    );
+};

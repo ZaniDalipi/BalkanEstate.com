@@ -160,7 +160,8 @@
     "landArea": "Sipërfaqja e truallit",
     "buildingArea": "Sipërfaqja e ndërtimit",
     "grossArea": "Sipërfaqja bruto",
-    "netArea": "Sipërfaqja neto"
+    "netArea": "Sipërfaqja neto",
+    "floorPlanFloorsHint": "{{count}} kate · fotot të shënuara në plan"
   },
   "distances": {
     "title": "Distancat",
@@ -666,7 +667,16 @@
       "photosPanel": "Fotot në planimetri",
       "photoAlt": "Foto {{current}} nga {{total}}",
       "prevPhoto": "Foto e mëparshme",
-      "nextPhoto": "Foto e radhës"
+      "nextPhoto": "Foto e radhës",
+      "photosTab": "Fotot",
+      "floorPlanTab": "Planimetria",
+      "floorPlanTitle": "Planimetria",
+      "openFloorPlan": "Hap planimetrinë",
+      "jumpHint": "Kaloni te një foto duke prekur një katror të gjelbër",
+      "photoCounter": "{{current}} nga {{total}}",
+      "labelsHint": "Prekni butonin e kunjit, pastaj prekni një dhomë për të shtuar etiketën tuaj. Etiketat ruhen në këtë pajisje.",
+      "disclaimer": "Planimetritë janë të përafërta dhe jo për qëllime projektimi.",
+      "floorN": "Kati {{n}}"
     }
   },
   "imageViewer": {

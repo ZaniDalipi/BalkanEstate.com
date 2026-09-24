@@ -369,7 +369,20 @@
       "cta": "Tregojuni blerësve ku është bërë çdo foto",
       "ctaHint": "Blerësit shohin një kamerë në planimetri për çdo foto, të sinkronizuar ndërsa shfletojnë.",
       "edit": "Ndrysho pozicionet e fotove ({{placed}}/{{total}})",
-      "start": "Vendosni fotot në planimetri"
+      "start": "Vendosni fotot në planimetri",
+      "onFloor": "Në {{floor}}"
+    },
+    "floors": {
+      "defaultLabel": "Kati {{n}}",
+      "hint": "Shtoni një plan për çdo kat (Kati 1, Kati 2, Papafingo, Bodrum…).",
+      "remove": "Hiq planimetrinë",
+      "name": "Emri i katit",
+      "replace": "Zëvendëso imazhin",
+      "replaceShort": "Zëvendëso",
+      "add": "Shto një planimetri tjetër",
+      "limitTitle": "U arrit kufiri i planimetrive",
+      "limit": "Një shpallje mund të ketë deri në {{max}} planimetri.",
+      "switch": "Katet"
     }
   },
   "propertyTypes": {

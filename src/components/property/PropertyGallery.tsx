@@ -12,6 +12,7 @@ import {
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
 import PhotoSpotMarker, { PHOTO_SPOT_SIZE } from './PhotoSpotMarker';
+import { getFloorPlans, spotFloor } from '@/shared/utils/floorplans';
 import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
@@ -506,8 +507,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   // Where the current photo was taken on the floor plan, if the seller marked it.
   const currentSpot = useMemo(
-    () => (property.floorplanUrl ? property.images?.find((img) => img.url === currentImageUrl)?.floorplanSpot : undefined),
-    [property.floorplanUrl, property.images, currentImageUrl]
+    () => property.images?.find((img) => img.url === currentImageUrl)?.floorplanSpot,
+    [property.images, currentImageUrl]
+  );
+  // The plan of the floor that photo was taken on (Floor 1, Floor 2…).
+  const currentSpotPlanUrl = useMemo(
+    () => (currentSpot ? getFloorPlans(property)[spotFloor(currentSpot)]?.url : undefined),
+    [currentSpot, property]
   );
 
   /**
@@ -987,7 +993,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           <>
             {/* Mini floor plan: where this photo was taken and which way it looks.
                 The camera glides to each photo's spot as the gallery moves. */}
-            {currentSpot && property.floorplanUrl && onOpenFloorPlan && (
+            {currentSpot && currentSpotPlanUrl && onOpenFloorPlan && (
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onOpenFloorPlan(currentImageUrl); }}
@@ -997,7 +1003,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               >
                 <span className="relative block overflow-hidden rounded">
                   <img
-                    src={optimizeCloudinaryUrl(property.floorplanUrl, { width: 320 }) || property.floorplanUrl}
+                    src={optimizeCloudinaryUrl(currentSpotPlanUrl, { width: 320, quality: 'auto' }) || currentSpotPlanUrl}
                     alt=""
                     className="block w-auto h-auto max-w-[96px] max-h-[72px] sm:max-w-[150px] sm:max-h-[110px]"
                     draggable={false}

@@ -809,6 +809,11 @@ export function validateRoomCount(count: number | string, fieldName = 'Count'): 
 
 // ── Floor plan photo spots ────────────────────────────────────────────────
 
+/** Most floor plans one listing can have (mirrors the backend schema). */
+export const MAX_FLOORPLANS = 10;
+/** Longest floor plan label ("Floor 1", "Attic", "Basement"…). */
+export const MAX_FLOORPLAN_LABEL = 40;
+
 /** Wrap any angle into whole degrees 0–359 (clockwise from "up" on the plan). */
 export function normalizeAngle(deg: number): number {
   return ((Math.round(deg) % 360) + 360) % 360;
@@ -830,6 +835,10 @@ export function validateFloorplanSpot(spot: unknown): ValidationResult {
   if (typeof angle !== 'number' || !Number.isFinite(angle)) {
     return { isValid: false, error: 'Photo spot needs a camera direction' };
   }
+  const { floor } = spot as Record<string, unknown>;
+  if (floor !== undefined && !(Number.isInteger(floor) && (floor as number) >= 0 && (floor as number) < MAX_FLOORPLANS)) {
+    return { isValid: false, error: 'Photo spot is on an unknown floor' };
+  }
   return { isValid: true };
 }
 
@@ -845,10 +854,12 @@ export function sanitizeFloorplanSpot(spot: unknown): FloorplanSpot | undefined 
     return undefined;
   }
   const clamp = (v: number) => Math.min(100, Math.max(0, v));
+  const { floor } = spot as Record<string, unknown>;
   const result: FloorplanSpot = {
     x: clamp(x),
     y: clamp(y),
     angle: typeof angle === 'number' && Number.isFinite(angle) ? normalizeAngle(angle) : 0,
+    ...(typeof floor === 'number' && Number.isInteger(floor) && floor > 0 ? { floor } : {}),
   };
   return validateFloorplanSpot(result).isValid ? result : undefined;
 }

@@ -2,14 +2,16 @@ import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FloorplanSpot } from '@/types';
 import FloorPlanPhotoPlacer from './FloorPlanPhotoPlacer';
-import { ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { XMarkIcon } from '@/constants';
+import { ImageData, FloorPlanDraft, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
 
 interface ListingImageUploadProps {
     /** Validation message shown when no photo has been added yet. */
     imagesError?: string;
     images: ImageData[];
     imageTags: { index: number; tag: string }[];
-    floorplanImage: ImageData;
+    floorplans: FloorPlanDraft[];
     handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleFloorplanImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     removeImage: (index: number) => void;
@@ -18,7 +20,9 @@ interface ListingImageUploadProps {
     handleDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
     handleDrop: () => void;
     handleImageTagChange: (index: number, tag: string) => void;
-    setFloorplanImage: React.Dispatch<React.SetStateAction<ImageData>>;
+    removeFloorplan: (index: number) => void;
+    renameFloorplan: (index: number, label: string) => void;
+    replaceFloorplan: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
     /** Save where each photo was taken on the floor plan (index-aligned). */
     setPhotoSpots?: (spots: (FloorplanSpot | undefined)[]) => void;
 }
@@ -27,7 +31,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
     imagesError,
     images,
     imageTags,
-    floorplanImage,
+    floorplans,
     handleImageChange,
     handleFloorplanImageChange,
     removeImage,
@@ -36,13 +40,15 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
     handleDragEnd,
     handleDrop,
     handleImageTagChange,
-    setFloorplanImage,
+    removeFloorplan,
+    renameFloorplan,
+    replaceFloorplan,
     setPhotoSpots,
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common']);
     const [isPlacingPhotos, setIsPlacingPhotos] = useState(false);
     const placedCount = images.filter(img => img.floorplanSpot).length;
-    const canPlacePhotos = !!setPhotoSpots && !!floorplanImage.previewUrl && images.length > 0;
+    const canPlacePhotos = !!setPhotoSpots && floorplans.length > 0 && images.length > 0;
 
     return (
         <>
@@ -99,40 +105,76 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                 </div>
             </fieldset>
 
-            {/* Floorplan Upload */}
+            {/* Floor plans — one per floor */}
             <div>
-                <h4 className="font-semibold text-gray-600 mb-2 mt-4">{t('seller:createListing.floorPlan.title')}</h4>
-                <label htmlFor="floorplan-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors">
-                    <div className="flex flex-col items-center justify-center"><UploadIcon className="w-8 h-8 mb-2 text-gray-300" /><p className="text-sm text-gray-400">{t('seller:createListing.upload.uploadFloorplan')}</p></div>
-                    <input id="floorplan-upload" type="file" accept="image/*" className="hidden" onChange={handleFloorplanImageChange} />
-                </label>
-                {floorplanImage.previewUrl && (
-                    <div className="mt-2 flex flex-wrap items-start gap-3">
-                        <div className="relative inline-block"><img src={floorplanImage.previewUrl} alt="floorplan" className="w-32 h-32 object-cover rounded-lg border border-gray-200" /><button type="button" aria-label="Remove floorplan" onClick={() => setFloorplanImage({file: null, previewUrl: ''})} className="absolute -top-1 -right-1 bg-red-500/80 backdrop-blur-sm text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button></div>
-                        {canPlacePhotos && (
-                            <div className="flex-1 min-w-[200px] p-3 rounded-xl border border-blue-200 bg-blue-50/60">
-                                <p className="text-sm font-semibold text-gray-700">
-                                    {t('seller:createListing.photoSpots.cta', 'Show buyers where each photo was taken')}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {t('seller:createListing.photoSpots.ctaHint', 'Buyers see a camera on the floor plan for each photo, in sync as they browse.')}
-                                </p>
+                <h4 className="font-semibold text-gray-600 mb-1 mt-4">{t('seller:createListing.floorPlan.title')}</h4>
+                <p className="text-xs text-gray-400 mb-2">
+                    {t('seller:createListing.floors.hint', 'Add a plan for each floor (Floor 1, Floor 2, Attic, Basement…).')}
+                </p>
+
+                {floorplans.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-3">
+                        {floorplans.map((floor, index) => (
+                            <div key={floor.previewUrl} className="relative rounded-xl border border-gray-200 bg-white overflow-hidden">
+                                <img src={optimizeCloudinaryUrl(floor.previewUrl, { width: 400, quality: 'auto' }) || floor.previewUrl} alt="" className="w-full h-28 object-contain bg-gray-50" />
                                 <button
                                     type="button"
-                                    onClick={() => setIsPlacingPhotos(true)}
-                                    className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+                                    aria-label={t('seller:createListing.floors.remove', 'Remove floor plan')}
+                                    onClick={() => removeFloorplan(index)}
+                                    className="absolute top-1.5 right-1.5 bg-red-500/85 text-white rounded-full w-6 h-6 flex items-center justify-center"
                                 >
-                                    {placedCount > 0
-                                        ? t('seller:createListing.photoSpots.edit', 'Edit photo spots ({{placed}}/{{total}})', { placed: placedCount, total: images.length })
-                                        : t('seller:createListing.photoSpots.start', 'Place photos on floor plan')}
+                                    <XMarkIcon className="w-3.5 h-3.5" />
                                 </button>
+                                <div className="flex items-center gap-1 p-2 border-t border-gray-100">
+                                    <input
+                                        type="text"
+                                        value={floor.label}
+                                        maxLength={40}
+                                        onChange={(e) => renameFloorplan(index, e.target.value)}
+                                        placeholder={t('seller:createListing.floors.defaultLabel', 'Floor {{n}}', { n: index + 1 })}
+                                        aria-label={t('seller:createListing.floors.name', 'Floor name')}
+                                        className="min-w-0 flex-1 text-sm px-2 py-1 rounded-md border border-gray-200 focus:border-blue-400 focus:outline-none"
+                                    />
+                                    <label
+                                        className="flex-shrink-0 text-xs text-blue-600 hover:text-blue-700 cursor-pointer px-1.5 py-1"
+                                        title={t('seller:createListing.floors.replace', 'Replace image')}
+                                    >
+                                        {t('seller:createListing.floors.replaceShort', 'Replace')}
+                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => replaceFloorplan(index, e)} />
+                                    </label>
+                                </div>
                             </div>
-                        )}
+                        ))}
+                    </div>
+                )}
+
+                <label htmlFor="floorplan-upload" className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col items-center justify-center"><UploadIcon className="w-7 h-7 mb-1 text-gray-300" /><p className="text-sm text-gray-400">{floorplans.length > 0 ? t('seller:createListing.floors.add', 'Add another floor plan') : t('seller:createListing.upload.uploadFloorplan')}</p></div>
+                    <input id="floorplan-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleFloorplanImageChange} />
+                </label>
+
+                {canPlacePhotos && (
+                    <div className="mt-3 p-3 rounded-xl border border-blue-200 bg-blue-50/60">
+                        <p className="text-sm font-semibold text-gray-700">
+                            {t('seller:createListing.photoSpots.cta', 'Show buyers where each photo was taken')}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            {t('seller:createListing.photoSpots.ctaHint', 'Buyers see a camera on the floor plan for each photo, in sync as they browse.')}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setIsPlacingPhotos(true)}
+                            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+                        >
+                            {placedCount > 0
+                                ? t('seller:createListing.photoSpots.edit', 'Edit photo spots ({{placed}}/{{total}})', { placed: placedCount, total: images.length })
+                                : t('seller:createListing.photoSpots.start', 'Place photos on floor plan')}
+                        </button>
                     </div>
                 )}
                 {isPlacingPhotos && canPlacePhotos && (
                     <FloorPlanPhotoPlacer
-                        floorplanUrl={floorplanImage.previewUrl}
+                        floors={floorplans.map((f, i) => ({ url: f.previewUrl, label: f.label || t('seller:createListing.floors.defaultLabel', 'Floor {{n}}', { n: i + 1 }) }))}
                         photos={images.map((img, index) => ({
                             url: img.previewUrl,
                             tag: imageTags.find(tg => tg.index === index)?.tag,

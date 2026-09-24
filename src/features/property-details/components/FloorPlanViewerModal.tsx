@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
-import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from '@/constants';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import type { PropertyImage } from '@/types';
+import type { FloorplanLevel, PropertyImage } from '@/types';
+import { spotFloor } from '@/shared/utils/floorplans';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
-import PhotoSpotMarker, { PHOTO_SPOT_SIZE } from '@/src/components/property/PhotoSpotMarker';
+import { PhotoSpotSquare } from '@/src/components/property/PhotoSpotMarker';
+import FloorPlanMiniMap from './FloorPlanMiniMap';
 
 interface FloorPlanViewerModalProps {
-    imageUrl: string;
+    /** The listing's floor plans, in order (Floor 1, Floor 2, Attic…). */
+    floors: FloorplanLevel[];
     propertyId?: string;
     onClose: () => void;
     /**
@@ -21,6 +24,12 @@ interface FloorPlanViewerModalProps {
     initialPhotoUrl?: string;
     /** Called with the photo URL whenever the shown photo changes. */
     onPhotoChange?: (url: string) => void;
+    /** Tab to open on. 'photos' needs photos; falls back to 'plan'. */
+    initialTab?: 'photos' | 'plan';
+    /** Header title, e.g. the listing's address. */
+    title?: string;
+    /** Short facts for the sidebar, one line each (price, rooms, size…). */
+    summary?: string[];
 }
 
 type RoomType = 'bedroom' | 'bathroom' | 'kitchen' | 'living' | 'dining' | 'office' | 'garage' | 'storage' | 'balcony' | 'hallway' | 'other';
@@ -51,11 +60,11 @@ interface Annotation {
     roomType: RoomType;
     area: string; // stored as string to avoid NaN issues, validated on save
     notes: string;
+    floor?: number; // which floor plan the label is on (absent = first)
 }
 
 type InteractionMode = 'pan' | 'annotate';
 
-const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 5, 8];
 const MAX_SCALE = 8;
 // Smallest zoom, as a fraction of the fitted size.
 const MIN_FIT_RATIO = 0.5;
@@ -88,7 +97,8 @@ const loadAnnotations = (propertyId?: string): Annotation[] => {
                 typeof obj.label === 'string' && obj.label.length <= LABEL_MAX_LENGTH &&
                 typeof obj.roomType === 'string' && obj.roomType in ROOM_TYPE_CONFIG &&
                 typeof obj.area === 'string' &&
-                typeof obj.notes === 'string' && obj.notes.length <= NOTES_MAX_LENGTH
+                typeof obj.notes === 'string' && obj.notes.length <= NOTES_MAX_LENGTH &&
+                (obj.floor === undefined || (Number.isInteger(obj.floor) && (obj.floor as number) >= 0))
             );
         });
     } catch {
@@ -108,7 +118,7 @@ const saveAnnotations = (propertyId: string | undefined, annotations: Annotation
     }
 };
 
-const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, propertyId, onClose, photos, initialPhotoUrl, onPhotoChange }) => {
+const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, propertyId, onClose, photos, initialPhotoUrl, onPhotoChange, initialTab = 'plan', title, summary }) => {
     const { t } = useTranslation(['property', 'common']);
 
     const getRoomLabel = (type: RoomType): string => {
@@ -155,17 +165,38 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
     const [editingAnnotation, setEditingAnnotation] = useState<string | null>(null);
     const [detailAnnotation, setDetailAnnotation] = useState<string | null>(null);
 
-    // Photos placed on the plan. Only these get the synced photo panel.
-    const tourPhotos = React.useMemo(
-        () => (photos || []).filter(p => p.url && p.floorplanSpot),
-        [photos]
-    );
-    const hasPhotoTour = tourPhotos.length > 0;
+    // Every listing photo; those with a floorplanSpot also appear on the plan
+    // as squares that jump to them (Zillow style).
+    const allPhotos = React.useMemo(() => (photos || []).filter(p => p.url), [photos]);
+    const hasPhotos = allPhotos.length > 0;
+    const spottedCount = React.useMemo(() => allPhotos.filter(p => p.floorplanSpot).length, [allPhotos]);
     const [activePhoto, setActivePhoto] = useState(() => {
-        const i = initialPhotoUrl ? tourPhotos.findIndex(p => p.url === initialPhotoUrl) : -1;
+        const i = initialPhotoUrl ? allPhotos.findIndex(p => p.url === initialPhotoUrl) : -1;
         return i >= 0 ? i : 0;
     });
-    const currentPhoto = hasPhotoTour ? tourPhotos[Math.min(activePhoto, tourPhotos.length - 1)] : undefined;
+    const currentPhoto = hasPhotos ? allPhotos[Math.min(activePhoto, allPhotos.length - 1)] : undefined;
+    const [tab, setTab] = useState<'photos' | 'plan'>(() => (hasPhotos && initialTab === 'photos' ? 'photos' : 'plan'));
+
+    // The floor on the stage. It follows the photo on screen; the floor
+    // cards in the sidebar switch it by hand.
+    const [floor, setFloor] = useState(() => Math.min(spotFloor(currentPhoto?.floorplanSpot), Math.max(0, floors.length - 1)));
+    const imageUrl = floors[floor]?.url ?? '';
+    const floorLabel = (i: number) => floors[i]?.label || t('property:floorPlan.viewer.floorN', 'Floor {{n}}', { n: i + 1 });
+    const selectFloor = useCallback((i: number) => {
+        if (i === floor) return;
+        setFloor(i);
+        setIsLoading(true);
+        setHasError(false);
+        setEditingAnnotation(null);
+        setDetailAnnotation(null);
+    }, [floor]);
+    useEffect(() => {
+        const spot = currentPhoto?.floorplanSpot;
+        if (spot && spotFloor(spot) < floors.length) selectFloor(spotFloor(spot));
+    // Only when the photo changes — not when the user picks another floor.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPhoto]);
+    const [showSpots, setShowSpots] = useState(true);
 
     // Pointer gesture state (mouse, pen and touch alike)
     const pointersRef = useRef(new Map<number, { x: number; y: number }>());
@@ -283,11 +314,21 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         }
     }, [isLoading, imageDimensions, fitToScreen]);
 
-    // Refit when the window (and with it the frame) changes size.
+    // Refit when the frame changes size — the window, or the sidebar showing
+    // and hiding as tabs change on a phone.
     useEffect(() => {
-        const onResize = () => fitToScreen();
-        window.addEventListener('resize', onResize);
-        return () => window.removeEventListener('resize', onResize);
+        const container = imageContainerRef.current;
+        if (!container) return;
+        let last = { w: container.clientWidth, h: container.clientHeight };
+        const observer = new ResizeObserver(() => {
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            if (w === last.w && h === last.h) return;
+            last = { w, h };
+            fitToScreen();
+        });
+        observer.observe(container);
+        return () => observer.disconnect();
     }, [fitToScreen]);
 
     // The laid-out size changes with baseScale; rewrite before paint so the
@@ -305,13 +346,6 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         const pivotY = clientY !== undefined ? clientY - rect.top : rect.height / 2;
         const factor = direction === 'in' ? 1.3 : 1 / 1.3;
         zoomAt(viewRef.current.scale * factor, pivotX, pivotY, viewRef.current, true);
-    }, [zoomAt]);
-
-    // Zoom to specific level
-    const zoomToLevel = useCallback((level: number) => {
-        const container = imageContainerRef.current;
-        if (!container) return;
-        zoomAt(level, container.clientWidth / 2, container.clientHeight / 2, viewRef.current, true);
     }, [zoomAt]);
 
     // Toggle between the fitted view and a close-up at a point
@@ -450,30 +484,30 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
     }, [imageDimensions, setView]);
 
     const showPhoto = useCallback((index: number) => {
-        if (!hasPhotoTour) return;
-        const n = tourPhotos.length;
+        if (!hasPhotos) return;
+        const n = allPhotos.length;
         setActivePhoto(((index % n) + n) % n);
-    }, [hasPhotoTour, tourPhotos.length]);
+    }, [hasPhotos, allPhotos.length]);
 
-    // Keep the plan and the caller (the page's gallery) in step with the photo.
+    // A square on the big plan jumps to its photo.
+    const jumpToPhoto = useCallback((index: number) => {
+        setActivePhoto(index);
+        setTab('photos');
+    }, []);
+
+    // Tell the caller (the page's gallery) which photo is on screen.
     useEffect(() => {
-        if (!currentPhoto) return;
-        if (currentPhoto.floorplanSpot) revealSpot(currentPhoto.floorplanSpot);
-        onPhotoChange?.(currentPhoto.url);
+        if (currentPhoto) onPhotoChange?.(currentPhoto.url);
     // onPhotoChange is a callback prop; re-running on its identity would
-    // re-pan on every parent render.
+    // re-notify on every parent render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPhoto, revealSpot]);
+    }, [currentPhoto]);
 
-    // Keep the active thumbnail scrolled into view.
-    const thumbsRef = useRef<HTMLDivElement>(null);
+    // On the plan, keep the current photo's square in view.
     useEffect(() => {
-        const strip = thumbsRef.current;
-        const thumb = strip?.children[activePhoto] as HTMLElement | undefined;
-        if (!strip || !thumb) return;
-        const left = thumb.offsetLeft - (strip.clientWidth - thumb.offsetWidth) / 2;
-        strip.scrollTo({ left, behavior: 'smooth' });
-    }, [activePhoto]);
+        const spot = currentPhoto?.floorplanSpot;
+        if (tab === 'plan' && spot && spotFloor(spot) === floor) revealSpot(spot);
+    }, [tab, currentPhoto, revealSpot, floor]);
 
     // Swipe the photo panel to step through photos.
     const photoSwipeRef = useRef<{ x: number; y: number } | null>(null);
@@ -501,11 +535,11 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
 
         if (imgX >= 0 && imgX <= 100 && imgY >= 0 && imgY <= 100) {
             const newId = `ann-${Date.now()}`;
-            setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '', roomType: 'other', area: '', notes: '' }]);
+            setAnnotations(prev => [...prev, { id: newId, x: imgX, y: imgY, label: '', roomType: 'other', area: '', notes: '', ...(floor > 0 ? { floor } : {}) }]);
             setEditingAnnotation(newId);
             setDetailAnnotation(null);
         }
-    }, [imageDimensions]);
+    }, [imageDimensions, floor]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         if (mode !== 'annotate' || e.button !== 0) return;
@@ -598,10 +632,10 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
             if (typing && e.key !== 'Escape') return;
             switch (e.key) {
                 case 'ArrowRight':
-                    if (hasPhotoTour) { e.preventDefault(); showPhoto(activePhoto + 1); }
+                    if (hasPhotos) { e.preventDefault(); showPhoto(activePhoto + 1); }
                     break;
                 case 'ArrowLeft':
-                    if (hasPhotoTour) { e.preventDefault(); showPhoto(activePhoto - 1); }
+                    if (hasPhotos) { e.preventDefault(); showPhoto(activePhoto - 1); }
                     break;
                 case 'Escape':
                     if (detailAnnotation) {
@@ -628,7 +662,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose, zoom, resetTransform, mode, editingAnnotation, detailAnnotation, handleAnnotationLabelSubmit, hasPhotoTour, showPhoto, activePhoto]);
+    }, [onClose, zoom, resetTransform, mode, editingAnnotation, detailAnnotation, handleAnnotationLabelSubmit, hasPhotos, showPhoto, activePhoto]);
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -649,140 +683,78 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         setHasError(true);
     }, []);
 
-    // Current zoom percentage
-    const zoomPercent = Math.round(viewScale * 100);
-
-    // Find closest zoom preset index for the slider
-    const closestZoomIndex = ZOOM_LEVELS.reduce((closest, level, i) =>
-        Math.abs(level - viewScale) < Math.abs(ZOOM_LEVELS[closest] - viewScale) ? i : closest
-    , 0);
+    const labelled = annotations.filter(a => a.label.trim() && (a.floor ?? 0) === floor);
+    const backdropUrl = currentPhoto?.url || allPhotos[0]?.url;
+    const roundButton = 'w-11 h-11 rounded-full bg-white text-neutral-800 shadow-lg flex items-center justify-center hover:bg-neutral-100 active:scale-95 transition';
+    const tabButton = (active: boolean) => `px-4 sm:px-5 h-8 rounded-full text-sm transition-colors ${active ? 'bg-white text-blue-700 font-semibold shadow' : 'text-white/80 hover:text-white'}`;
 
     // Portalled to <body>: opened from inside the listing form, an ancestor's
     // backdrop-filter/transform would otherwise become the containing block
     // for `fixed`, stretching the viewer to the form's height.
     return createPortal(
         <div
-            className="fixed inset-0 h-[100dvh] overflow-hidden overscroll-none bg-neutral-950 z-[6000] flex flex-col md:flex-row"
+            className="fixed inset-0 h-[100dvh] overflow-hidden overscroll-none bg-[#1f2227] text-white z-[6000] flex flex-col"
             style={{
                 paddingTop: 'env(safe-area-inset-top)',
                 paddingBottom: 'env(safe-area-inset-bottom)',
                 paddingLeft: 'env(safe-area-inset-left)',
                 paddingRight: 'env(safe-area-inset-right)',
             }}
-            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
             role="dialog"
             aria-modal="true"
             aria-label={t('property:floorPlan.viewer.ariaLabel', 'Floor plan viewer')}
         >
-            {/* Plan stage — the toolbars below are positioned within it */}
-            <div className="relative flex-1 min-h-0 min-w-0 flex flex-col">
-            {/* Top toolbar */}
-            <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
-                <div className="pointer-events-auto flex items-center gap-2">
-                    {/* Mode toggle */}
-                    <div className="flex items-center bg-neutral-800/80 rounded-lg backdrop-blur-md border border-white/10 overflow-hidden">
-                        <button
-                            onClick={() => setMode('pan')}
-                            className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium transition-colors ${
-                                mode === 'pan'
-                                    ? 'bg-white/20 text-white'
-                                    : 'text-white/60 hover:text-white hover:bg-white/10'
-                            }`}
-                            aria-label={t('property:floorPlan.viewer.panMode', 'Pan mode')}
-                            title={t('property:floorPlan.viewer.panTitle', 'Pan & Zoom (drag to move, scroll to zoom)')}
-                        >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-                            </svg>
-                            <span className="hidden sm:inline">{t('property:floorPlan.viewer.pan', 'Pan')}</span>
-                        </button>
-                        <button
-                            onClick={() => setMode('annotate')}
-                            className={`flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium transition-colors ${
-                                mode === 'annotate'
-                                    ? 'bg-amber-500/30 text-amber-300'
-                                    : 'text-white/60 hover:text-white hover:bg-white/10'
-                            }`}
-                            aria-label={t('property:floorPlan.viewer.annotateMode', 'Annotate mode')}
-                            title={t('property:floorPlan.viewer.annotateTitle', 'Click on the floor plan to add room labels')}
-                        >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                            </svg>
-                            <span className="hidden sm:inline">{t('property:floorPlan.viewer.label', 'Label')}</span>
-                        </button>
-                    </div>
+            {/* Header: back + title · Photos / Floor Plan tabs · close */}
+            <header className="flex-shrink-0 grid grid-cols-[1fr_auto_1fr] items-center gap-2 h-14 px-2 sm:px-4 border-b border-black/60">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="justify-self-start flex items-center gap-1.5 min-w-0 max-w-full h-10 pl-1 pr-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label={t('property:floorPlan.viewer.close', 'Close floor plan viewer')}
+                >
+                    <ChevronLeftIcon className="w-5 h-5 flex-shrink-0" />
+                    <span className="hidden sm:block truncate text-sm sm:text-base">{title}</span>
+                </button>
 
-                    {/* Annotation count badge */}
-                    {annotations.length > 0 && (
-                        <button
-                            onClick={() => { setAnnotations([]); setEditingAnnotation(null); setDetailAnnotation(null); }}
-                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-lg backdrop-blur-md text-xs font-medium transition-colors border border-red-500/20"
-                            title={t('property:floorPlan.viewer.clearLabels', 'Clear all labels')}
-                        >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                            {annotations.length}
+                <div className="flex items-center p-1 rounded-full bg-white/10" role="tablist">
+                    {hasPhotos && (
+                        <button type="button" role="tab" aria-selected={tab === 'photos'} onClick={() => setTab('photos')} className={tabButton(tab === 'photos')}>
+                            {t('property:floorPlan.viewer.photosTab', 'Photos')}
                         </button>
                     )}
-                </div>
-
-                <div className="pointer-events-auto flex items-center gap-2">
-                    {/* Zoom controls */}
-                    <div className="flex items-center gap-1 bg-neutral-800/80 p-1 rounded-lg backdrop-blur-md border border-white/10">
-                        <button
-                            onClick={() => zoom('out')}
-                            className="p-1.5 sm:p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors"
-                            aria-label={t('property:floorPlan.viewer.zoomOut', 'Zoom out')}
-                        >
-                            <MagnifyingGlassMinusIcon className="w-5 h-5" />
-                        </button>
-
-                        {/* Zoom level indicator */}
-                        <button
-                            onClick={resetTransform}
-                            className="px-2 py-1 text-xs sm:text-sm font-mono text-white/80 hover:text-white hover:bg-white/10 rounded-md min-w-[3.5rem] text-center transition-colors"
-                            title={t('property:floorPlan.viewer.fitToScreen', 'Click to fit to screen')}
-                        >
-                            {zoomPercent}%
-                        </button>
-
-                        <button
-                            onClick={() => zoom('in')}
-                            className="p-1.5 sm:p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors"
-                            aria-label={t('property:floorPlan.viewer.zoomIn', 'Zoom in')}
-                        >
-                            <MagnifyingGlassPlusIcon className="w-5 h-5" />
-                        </button>
-                    </div>
-
-                    {/* Reset button */}
-                    <button
-                        onClick={resetTransform}
-                        className="p-1.5 sm:p-2 bg-neutral-800/80 text-white/70 hover:text-white hover:bg-white/10 rounded-lg backdrop-blur-md transition-colors border border-white/10"
-                        aria-label={t('property:floorPlan.viewer.fitToScreen', 'Fit to screen')}
-                        title={t('property:floorPlan.viewer.fitToScreenShortcut', 'Fit to screen (0)')}
-                    >
-                        <ArrowPathIcon className="w-5 h-5" />
-                    </button>
-
-                    {/* Close button */}
-                    <button
-                        onClick={onClose}
-                        className="p-1.5 sm:p-2 bg-neutral-800/80 text-white/70 hover:text-white hover:bg-red-500/40 rounded-lg backdrop-blur-md transition-colors border border-white/10"
-                        aria-label={t('property:floorPlan.viewer.close', 'Close floor plan viewer')}
-                        title={t('property:floorPlan.viewer.closeShortcut', 'Close (Esc)')}
-                    >
-                        <XMarkIcon className="w-5 h-5" />
+                    <button type="button" role="tab" aria-selected={tab === 'plan'} onClick={() => setTab('plan')} className={tabButton(tab === 'plan')}>
+                        {t('property:floorPlan.viewer.floorPlanTab', 'Floor Plan')}
                     </button>
                 </div>
-            </div>
+
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="justify-self-end w-10 h-10 flex items-center justify-center rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label={t('property:floorPlan.viewer.close', 'Close floor plan viewer')}
+                    title={t('property:floorPlan.viewer.closeShortcut', 'Close (Esc)')}
+                >
+                    <XMarkIcon className="w-5 h-5" />
+                </button>
+            </header>
+
+            <div className="flex-1 min-h-0 flex flex-col md:flex-row">
+                {/* Stage. The plan stays mounted under the photo view so it
+                    keeps its size, zoom and listeners across tab changes. */}
+                <main className="relative flex-1 min-h-0 min-w-0 overflow-hidden bg-neutral-800">
+                    {/* Floor Plan tab: the plan over a blurred photo of the home */}
+                    {backdropUrl && (
+                        <div
+                            className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-70"
+                            style={{ backgroundImage: `url("${optimizeCloudinaryUrl(backdropUrl, { width: 40, quality: 'auto:eco' }) || backdropUrl}")` }}
+                            aria-hidden="true"
+                        />
+                    )}
+                    <div className="absolute inset-0 bg-black/35" aria-hidden="true" />
 
             {/* Mode hint banner */}
             {mode === 'annotate' && (
-                <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
                     <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-200 text-xs sm:text-sm rounded-full backdrop-blur-md border border-amber-500/30 animate-pulse">
                         <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
@@ -834,7 +806,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
             {/* Main interactive area */}
             <div
                 ref={imageContainerRef}
-                className={`flex-1 overflow-hidden ${
+                className={`absolute inset-0 overflow-hidden ${
                     mode === 'annotate' ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'
                 }`}
                 onPointerDown={handlePointerDown}
@@ -858,6 +830,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                         }}
                     >
                         <img
+                            key={imageUrl}
                             ref={imageRef}
                             src={optimizeCloudinaryUrl(imageUrl, { width: 2400, quality: 'auto' }) || imageUrl}
                             alt={t('property:floorPlan.viewer.floorPlanAlt', 'Floor Plan')}
@@ -875,50 +848,47 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                             onDragStart={(e) => e.preventDefault()}
                         />
 
-                        {/* Photo cameras — where each photo was taken and which way it looks */}
-                        {tourPhotos.map((photo, i) => {
-                            const spot = photo.floorplanSpot!;
+                        {/* Photo squares — tap one to see the photo taken there */}
+                        {showSpots && allPhotos.map((photo, i) => {
+                            const spot = photo.floorplanSpot;
+                            if (!spot || spotFloor(spot) !== floor) return null;
                             const isActive = i === activePhoto;
                             return (
                                 <button
                                     key={photo.url}
                                     type="button"
-                                    className="absolute rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                                    className="group absolute w-6 h-6 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                                     onPointerDown={(e) => e.stopPropagation()}
                                     onMouseDown={(e) => e.stopPropagation()}
                                     onTouchStart={(e) => e.stopPropagation()}
-                                    onClick={(e) => { e.stopPropagation(); showPhoto(i); }}
+                                    onClick={(e) => { e.stopPropagation(); jumpToPhoto(i); }}
                                     aria-label={t('property:floorPlan.viewer.showPhoto', 'Show photo {{n}}', { n: i + 1 })}
                                     aria-pressed={isActive}
                                     style={{
                                         left: `${spot.x}%`,
                                         top: `${spot.y}%`,
-                                        // Only the camera dot is the hit target; the cone is decoration.
-                                        width: 28,
-                                        height: 28,
                                         transform: 'translate(-50%, -50%) scale(var(--pin-scale, 1))',
                                         zIndex: isActive ? 9 : 5,
                                     }}
                                 >
-                                    <span
-                                        className="absolute left-1/2 top-1/2 pointer-events-none"
-                                        style={{
-                                            width: PHOTO_SPOT_SIZE,
-                                            height: PHOTO_SPOT_SIZE,
-                                            marginLeft: -PHOTO_SPOT_SIZE / 2,
-                                            marginTop: -PHOTO_SPOT_SIZE / 2,
-                                            transform: isActive ? 'scale(1.15)' : undefined,
-                                            transition: 'transform 0.2s ease-out',
-                                        }}
-                                    >
-                                        <PhotoSpotMarker angle={spot.angle} active={isActive} label={i + 1} />
+                                    <span className="absolute left-1/2 top-1/2 pointer-events-none">
+                                        <PhotoSpotSquare angle={spot.angle} active={isActive} size={isActive ? 16 : 14} coneLength={72} />
+                                    </span>
+                                    {/* Hover preview of the photo */}
+                                    <span className="pointer-events-none absolute left-1/2 bottom-full mb-3 -translate-x-1/2 hidden group-hover:block group-focus-visible:block w-44 rounded-md overflow-hidden shadow-2xl ring-2 ring-white bg-black">
+                                        <img
+                                            src={optimizeCloudinaryUrl(photo.url, { width: 360, quality: 'auto' }) || photo.url}
+                                            alt=""
+                                            loading="lazy"
+                                            className="block w-full h-28 object-cover"
+                                        />
                                     </span>
                                 </button>
                             );
                         })}
 
                         {/* Annotations layer */}
-                        {annotations.map(ann => {
+                        {annotations.filter(ann => (ann.floor ?? 0) === floor).map(ann => {
                             const cfg = ROOM_TYPE_CONFIG[ann.roomType] || ROOM_TYPE_CONFIG.other;
                             const isEditing = editingAnnotation === ann.id;
                             const isDetailOpen = detailAnnotation === ann.id;
@@ -1105,155 +1075,216 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                 </div>
             </div>
 
-            {/* Bottom zoom slider */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
-                <div className="flex items-center gap-3 px-4 py-2.5 bg-neutral-800/80 rounded-xl backdrop-blur-md border border-white/10">
-                    <button
-                        onClick={() => zoom('out')}
-                        className="text-white/60 hover:text-white transition-colors"
-                        aria-label={t('property:floorPlan.viewer.zoomOut', 'Zoom out')}
-                    >
-                        <MagnifyingGlassMinusIcon className="w-4 h-4" />
-                    </button>
-                    <input
-                        type="range"
-                        min={0}
-                        max={ZOOM_LEVELS.length - 1}
-                        step={1}
-                        value={closestZoomIndex}
-                        onChange={(e) => zoomToLevel(ZOOM_LEVELS[Number(e.target.value)])}
-                        className="w-32 sm:w-48 h-1 bg-white/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
-                        aria-label={t('property:floorPlan.viewer.zoomLevel', 'Zoom level')}
-                    />
-                    <button
-                        onClick={() => zoom('in')}
-                        className="text-white/60 hover:text-white transition-colors"
-                        aria-label={t('property:floorPlan.viewer.zoomIn', 'Zoom in')}
-                    >
-                        <MagnifyingGlassPlusIcon className="w-4 h-4" />
-                    </button>
-                    <span className="text-white/50 text-xs font-mono min-w-[3rem] text-center">{zoomPercent}%</span>
-                </div>
-            </div>
 
-            {/* Annotation list panel — visible when annotations exist */}
-            {annotations.filter(a => a.label.trim()).length > 0 && (
-                <div className="absolute top-16 sm:top-20 left-3 z-30 pointer-events-auto hidden sm:block">
-                    <div className="bg-neutral-900/80 backdrop-blur-md rounded-xl border border-white/10 w-48 max-h-[50vh] overflow-y-auto">
-                        <div className="px-3 py-2 border-b border-white/10">
-                            <span className="text-white/70 text-[10px] font-semibold uppercase tracking-wider">{t('property:floorPlan.viewer.roomLabels', 'Room Labels')}</span>
-                        </div>
-                        <div className="p-1.5 space-y-0.5">
-                            {annotations.filter(a => a.label.trim()).map(ann => {
-                                const c = ROOM_TYPE_CONFIG[ann.roomType] || ROOM_TYPE_CONFIG.other;
-                                return (
-                                    <button
-                                        key={ann.id}
-                                        onClick={() => toggleDetailPanel(ann.id)}
-                                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${detailAnnotation === ann.id ? 'bg-white/15' : 'hover:bg-white/10'}`}
-                                    >
-                                        <div className={`w-2.5 h-2.5 rounded-full ${c.bg} flex-shrink-0`} />
-                                        <div className="min-w-0 flex-1">
-                                            <div className="text-white text-xs font-medium truncate">{ann.label}</div>
-                                            {ann.area && (
-                                                <div className="text-white/50 text-[10px]">{ann.area} m²</div>
-                                            )}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Keyboard shortcuts hint - hidden on mobile */}
-            <div className="absolute bottom-4 right-4 z-20 hidden lg:block pointer-events-none">
-                <div className="text-white/30 text-[10px] space-y-0.5">
-                    <div>{t('property:floorPlan.viewer.shortcuts.scroll', 'Scroll: Zoom | Drag: Pan | Double-click: Quick zoom')}</div>
-                    <div>{t('property:floorPlan.viewer.shortcuts.keys', '+/-: Zoom | 0: Reset | Esc: Close')}</div>
-                    {mode === 'annotate' && <div>{t('property:floorPlan.viewer.shortcuts.annotate', 'Click: Add label | Esc: Exit label mode')}</div>}
-                    {hasPhotoTour && <div>{t('property:floorPlan.viewer.shortcuts.photos', '←/→: Previous / next photo')}</div>}
-                </div>
-            </div>
-            </div>
-
-            {/* Photo panel — in sync with the cameras on the plan */}
-            {hasPhotoTour && currentPhoto && (
-                <aside
-                    className="relative flex flex-col bg-neutral-950 border-t md:border-t-0 md:border-l border-white/10 h-[44%] md:h-auto md:w-[min(44vw,560px)] flex-shrink-0"
-                    aria-label={t('property:floorPlan.viewer.photosPanel', 'Photos on the floor plan')}
-                >
-                    <div
-                        className="relative flex-1 min-h-0 bg-black select-none"
-                        style={{ touchAction: 'pan-y' }}
-                        onPointerDown={handlePhotoPointerDown}
-                        onPointerUp={handlePhotoPointerUp}
-                        onPointerCancel={() => { photoSwipeRef.current = null; }}
-                    >
-                        <img
-                            key={currentPhoto.url}
-                            src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1200, quality: 'auto' }) || currentPhoto.url}
-                            alt={t('property:floorPlan.viewer.photoAlt', 'Photo {{current}} of {{total}}', { current: activePhoto + 1, total: tourPhotos.length })}
-                            className="absolute inset-0 w-full h-full object-contain animate-[fadeIn_0.2s_ease-out]"
-                            draggable={false}
-                        />
-                        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-sm">
-                            {activePhoto + 1} / {tourPhotos.length}
-                            {currentPhoto.tag !== 'other' && (
-                                <span className="ml-1.5 text-white/70">
-                                    · {t(`property:photos.categories.${currentPhoto.tag}`, { defaultValue: currentPhoto.tag.replace('_', ' ') })}
-                                </span>
-                            )}
-                        </div>
-                        {tourPhotos.length > 1 && (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={() => showPhoto(activePhoto - 1)}
-                                    className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
-                                    aria-label={t('property:floorPlan.viewer.prevPhoto', 'Previous photo')}
-                                >
-                                    <ChevronLeftIcon className="w-5 h-5" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => showPhoto(activePhoto + 1)}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
-                                    aria-label={t('property:floorPlan.viewer.nextPhoto', 'Next photo')}
-                                >
-                                    <ChevronRightIcon className="w-5 h-5" />
-                                </button>
-                            </>
-                        )}
+                    {/* Zoom controls (Zillow-style round buttons) */}
+                    <div className="absolute top-4 right-4 z-30 flex flex-col items-center gap-3">
+                        <button type="button" onClick={() => zoom('in')} className={roundButton} aria-label={t('property:floorPlan.viewer.zoomIn', 'Zoom in')}>
+                            <MagnifyingGlassPlusIcon className="w-5 h-5" />
+                        </button>
+                        <button type="button" onClick={() => zoom('out')} className={roundButton} aria-label={t('property:floorPlan.viewer.zoomOut', 'Zoom out')}>
+                            <MagnifyingGlassMinusIcon className="w-5 h-5" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={resetTransform}
+                            className={`${roundButton} !w-9 !h-9`}
+                            aria-label={t('property:floorPlan.viewer.fitToScreen', 'Fit to screen')}
+                            title={t('property:floorPlan.viewer.fitToScreenShortcut', 'Fit to screen (0)')}
+                        >
+                            <ArrowPathIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setMode(m => (m === 'annotate' ? 'pan' : 'annotate'))}
+                            className={`${roundButton} !w-9 !h-9 ${mode === 'annotate' ? '!bg-amber-400 !text-neutral-900' : ''}`}
+                            aria-label={t('property:floorPlan.viewer.annotateMode', 'Annotate mode')}
+                            aria-pressed={mode === 'annotate'}
+                            title={t('property:floorPlan.viewer.annotateTitle', 'Click on the floor plan to add room labels')}
+                        >
+                            <MapPinIcon className="w-4 h-4" />
+                        </button>
                     </div>
 
-                    {/* Thumbnails */}
-                    {tourPhotos.length > 1 && (
-                        <div ref={thumbsRef} className="flex-shrink-0 flex gap-2 overflow-x-auto p-2 md:p-3 border-t border-white/10 [scrollbar-width:thin]">
-                            {tourPhotos.map((photo, i) => (
+                    {/* Floor switcher on phones (the sidebar's floor cards take over from md up) */}
+                    {floors.length > 1 && (
+                        <div className="md:hidden absolute top-4 left-4 right-20 z-30 flex gap-2 overflow-x-auto [scrollbar-width:none]">
+                            {floors.map((f, i) => (
                                 <button
-                                    key={photo.url}
+                                    key={f.url}
                                     type="button"
-                                    onClick={() => showPhoto(i)}
-                                    className={`relative flex-shrink-0 w-16 h-12 md:w-20 md:h-14 rounded-md overflow-hidden border-2 transition-all ${i === activePhoto ? 'border-blue-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                                    aria-label={t('property:floorPlan.viewer.showPhoto', 'Show photo {{n}}', { n: i + 1 })}
-                                    aria-current={i === activePhoto}
+                                    onClick={() => selectFloor(i)}
+                                    aria-pressed={i === floor}
+                                    className={`flex-shrink-0 h-9 px-4 rounded-full text-sm shadow-lg transition-colors ${i === floor ? 'bg-blue-600 text-white font-semibold' : 'bg-white text-neutral-800'}`}
                                 >
-                                    <img
-                                        src={optimizeCloudinaryUrl(photo.url, { width: 160, quality: 'auto' }) || photo.url}
-                                        alt=""
-                                        loading="lazy"
-                                        className="w-full h-full object-cover"
-                                        draggable={false}
-                                    />
-                                    <span className="absolute bottom-0.5 left-0.5 min-w-[16px] h-4 px-1 rounded-full bg-black/70 text-white text-[10px] leading-4 font-semibold text-center">{i + 1}</span>
+                                    {floorLabel(i)}
                                 </button>
                             ))}
                         </div>
                     )}
+
+                    {/* Show / hide the photo squares */}
+                    {spottedCount > 0 && (
+                        <label className="absolute bottom-4 right-4 z-30 flex items-center gap-3 px-3 py-2 rounded-full bg-black/45 backdrop-blur-sm cursor-pointer select-none">
+                            <span className="text-sm font-medium">{t('property:floorPlan.viewer.photosTab', 'Photos')}</span>
+                            <input type="checkbox" className="sr-only peer" checked={showSpots} onChange={(e) => setShowSpots(e.target.checked)} />
+                            <span className="relative w-10 h-6 rounded-full bg-white/30 peer-checked:bg-blue-600 transition-colors after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-4" />
+                        </label>
+                    )}
+
+                    {/* Photos tab: the photo, over the plan */}
+                    {tab === 'photos' && currentPhoto && (
+                        <div
+                            className="absolute inset-0 z-40 bg-black select-none"
+                            style={{ touchAction: 'pan-y' }}
+                            onPointerDown={handlePhotoPointerDown}
+                            onPointerUp={handlePhotoPointerUp}
+                            onPointerCancel={() => { photoSwipeRef.current = null; }}
+                        >
+                            <div
+                                className="absolute inset-0 scale-110 bg-cover bg-center blur-2xl opacity-50"
+                                style={{ backgroundImage: `url("${optimizeCloudinaryUrl(currentPhoto.url, { width: 40, quality: 'auto:eco' }) || currentPhoto.url}")` }}
+                                aria-hidden="true"
+                            />
+                            <img
+                                key={currentPhoto.url}
+                                src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1920, quality: 'auto' }) || currentPhoto.url}
+                                alt={t('property:floorPlan.viewer.photoAlt', 'Photo {{current}} of {{total}}', { current: activePhoto + 1, total: allPhotos.length })}
+                                className="absolute inset-0 w-full h-full object-contain animate-[fadeIn_0.2s_ease-out]"
+                                draggable={false}
+                            />
+                            {allPhotos.length > 1 && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => showPhoto(activePhoto - 1)}
+                                        className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                                        aria-label={t('property:floorPlan.viewer.prevPhoto', 'Previous photo')}
+                                    >
+                                        <ChevronLeftIcon className="w-6 h-6" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => showPhoto(activePhoto + 1)}
+                                        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/85 hover:bg-white text-neutral-800 flex items-center justify-center shadow-lg transition-colors"
+                                        aria-label={t('property:floorPlan.viewer.nextPhoto', 'Next photo')}
+                                    >
+                                        <ChevronRightIcon className="w-6 h-6" />
+                                    </button>
+                                </>
+                            )}
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md bg-black/60 text-white text-sm font-semibold tabular-nums backdrop-blur-sm">
+                                {t('property:floorPlan.viewer.photoCounter', '{{current}} of {{total}}', { current: activePhoto + 1, total: allPhotos.length })}
+                            </div>
+                        </div>
+                    )}
+                </main>
+
+                {/* Sidebar: facts, then the plan card (Photos) or room labels (Floor Plan) */}
+                <aside
+                    className={`${tab === 'plan' ? 'hidden md:flex' : 'flex'} flex-col gap-4 flex-shrink-0 min-h-0 h-[40%] md:h-auto md:w-[360px] lg:w-[400px] p-3 md:p-5 bg-[#2a2d33] border-t md:border-t-0 md:border-l border-black/60`}
+                >
+                    {summary && summary.length > 0 && (
+                        <div className="hidden md:block space-y-1 text-sm text-white/85 flex-shrink-0">
+                            {summary.map((line) => <p key={line}>{line}</p>)}
+                        </div>
+                    )}
+
+                    {tab === 'photos' ? (
+                        <>
+                            {spottedCount > 0 && (
+                                <p className="hidden md:block text-[15px] text-white flex-shrink-0">
+                                    {t('property:floorPlan.viewer.jumpHint', 'Jump to a photo by tapping on a green square')}
+                                </p>
+                            )}
+                            {/* One card per floor (Zillow style); a phone shows just the current floor */}
+                            <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+                                {floors.map((f, i) => (
+                                    <div key={f.url} className={`${i === floor ? 'flex' : 'hidden md:flex'} flex-col flex-1 ${floors.length > 2 ? 'md:min-h-[220px]' : 'min-h-0'}`}>
+                                        <FloorPlanMiniMap
+                                            planUrl={f.url}
+                                            label={floorLabel(i)}
+                                            floor={i}
+                                            photos={allPhotos}
+                                            activeIndex={activePhoto}
+                                            onSelect={setActivePhoto}
+                                            onExpand={() => { selectFloor(i); setTab('plan'); }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex-1 min-h-0 flex flex-col gap-3">
+                            {floors.length > 1 && (
+                                <div className="flex-shrink-0 grid grid-cols-2 gap-3 max-h-[60%] overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
+                                    {floors.map((f, i) => (
+                                        <button
+                                            key={f.url}
+                                            type="button"
+                                            onClick={() => selectFloor(i)}
+                                            aria-pressed={i === floor}
+                                            className={`rounded-md overflow-hidden text-left ring-2 transition-colors ${i === floor ? 'ring-blue-500' : 'ring-transparent hover:ring-white/40'}`}
+                                        >
+                                            <span className="block bg-white">
+                                                <img
+                                                    src={optimizeCloudinaryUrl(f.url, { width: 360, quality: 'auto' }) || f.url}
+                                                    alt=""
+                                                    loading="lazy"
+                                                    className="block w-full h-24 object-contain"
+                                                />
+                                            </span>
+                                            <span className={`block px-2 py-1 text-center text-xs font-semibold truncate ${i === floor ? 'bg-blue-600 text-white' : 'bg-[#3b3f46] text-white/85'}`}>
+                                                {floorLabel(i)}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between flex-shrink-0">
+                                <h3 className="text-sm font-semibold">{t('property:floorPlan.viewer.roomLabels', 'Room Labels')}</h3>
+                                {labelled.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => { setAnnotations(prev => prev.filter(a => (a.floor ?? 0) !== floor)); setEditingAnnotation(null); setDetailAnnotation(null); }}
+                                        className="text-xs text-red-300 hover:text-red-200"
+                                    >
+                                        {t('property:floorPlan.viewer.clearLabels', 'Clear all labels')}
+                                    </button>
+                                )}
+                            </div>
+                            {labelled.length > 0 ? (
+                                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain -mx-1 px-1 space-y-0.5">
+                                    {labelled.map(ann => {
+                                        const c = ROOM_TYPE_CONFIG[ann.roomType] || ROOM_TYPE_CONFIG.other;
+                                        return (
+                                            <button
+                                                key={ann.id}
+                                                type="button"
+                                                onClick={() => toggleDetailPanel(ann.id)}
+                                                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${detailAnnotation === ann.id ? 'bg-white/15' : 'hover:bg-white/10'}`}
+                                            >
+                                                <span className={`w-2.5 h-2.5 rounded-full ${c.bg} flex-shrink-0`} />
+                                                <span className="min-w-0 flex-1">
+                                                    <span className="block text-sm font-medium truncate">{ann.label}</span>
+                                                    {ann.area && <span className="block text-white/50 text-xs">{ann.area} m²</span>}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-white/60">
+                                    {t('property:floorPlan.viewer.labelsHint', 'Tap the pin button, then tap a room to add your own label. Labels are saved on this device.')}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <p className="hidden md:block mt-auto text-xs text-white/50 leading-relaxed flex-shrink-0">
+                        {t('property:floorPlan.viewer.disclaimer', 'Floor plans are approximate and not for design purposes.')}
+                    </p>
                 </aside>
-            )}
+            </div>
         </div>,
         document.body
     );

@@ -160,7 +160,8 @@
     "landArea": "Površina zemljišta",
     "buildingArea": "Površina objekta",
     "grossArea": "Bruto površina",
-    "netArea": "Neto površina"
+    "netArea": "Neto površina",
+    "floorPlanFloorsHint": "{{count}} sprata · fotografije označene na planu"
   },
   "distances": {
     "title": "Udaljenosti",
@@ -706,7 +707,16 @@
       "photosPanel": "Fotografije na planu stana",
       "photoAlt": "Fotografija {{current}} od {{total}}",
       "prevPhoto": "Prethodna fotografija",
-      "nextPhoto": "Sljedeća fotografija"
+      "nextPhoto": "Sljedeća fotografija",
+      "photosTab": "Fotografije",
+      "floorPlanTab": "Plan stana",
+      "floorPlanTitle": "Plan stana",
+      "openFloorPlan": "Otvori plan stana",
+      "jumpHint": "Pređite na fotografiju dodirom na zeleni kvadrat",
+      "photoCounter": "{{current}} od {{total}}",
+      "labelsHint": "Dodirnite dugme sa iglom, pa dodirnite prostoriju da dodate svoju oznaku. Oznake se čuvaju na ovom uređaju.",
+      "disclaimer": "Planovi su približni i nijesu namijenjeni za projektovanje.",
+      "floorN": "Sprat {{n}}"
     }
   },
   "roomStyler": {

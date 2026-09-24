@@ -12,6 +12,7 @@ import { formatPrice } from '@/utils/currency';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ImageViewerModal from './ImageViewerModal';
 import FloorPlanViewerModal from './FloorPlanViewerModal';
+import { getFloorPlans } from '@/shared/utils/floorplans';
 import PropertySectionNav from './PropertySectionNav';
 import FeaturedAgencies from '@/components/FeaturedAgencies';
 import RentalTermsSection from '@/src/features/rental/components/RentalTermsSection';
@@ -306,10 +307,31 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   // Floor plan ↔ gallery sync: the viewer opens on the photo showing in the
   // gallery, and the gallery follows whichever photo is picked in the viewer.
   const [floorPlanPhotoUrl, setFloorPlanPhotoUrl] = useState<string | undefined>(undefined);
+  const [floorPlanTab, setFloorPlanTab] = useState<'photos' | 'plan'>('plan');
+  // From the gallery's mini plan: open on that photo (Photos tab).
+  // From the floor plan section: open on the plan itself.
   const openFloorPlan = useCallback((photoUrl?: string) => {
     setFloorPlanPhotoUrl(photoUrl ?? currentImageUrl);
+    setFloorPlanTab(photoUrl ? 'photos' : 'plan');
     setIsFloorPlanOpen(true);
   }, [currentImageUrl]);
+
+  // Every photo in gallery order, each with its floor plan spot (the main
+  // image entry in allImages is synthesised, so look spots up by URL).
+  const floorPlanPhotos = useMemo(
+    () => allImages
+      .filter(img => img.url)
+      .map(img => ({ ...img, floorplanSpot: property.images?.find(i => i.url === img.url)?.floorplanSpot })),
+    [allImages, property.images]
+  );
+  const floorPlanSummary = useMemo(() => {
+    const facts = [
+      property.beds ? `${property.beds} ${t('property:features.bedrooms', 'Bedrooms')}` : '',
+      property.baths ? `${property.baths} ${t('property:features.bathrooms', 'Bathrooms')}` : '',
+      property.sqft ? `${property.sqft} m²` : '',
+    ].filter(Boolean).join(' · ');
+    return [property.price ? formatPrice(property.price, property.country) : '', facts].filter(Boolean);
+  }, [property.beds, property.baths, property.sqft, property.price, property.country, t]);
   const handleFloorPlanPhotoChange = useCallback((url: string) => {
     const inCategory = imagesForCurrentCategory.findIndex(img => img.url === url);
     if (inCategory >= 0) {
@@ -704,11 +726,14 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           propertyId={property.id}
         />
       )}
-      {isFloorPlanOpen && property.floorplanUrl && (
+      {isFloorPlanOpen && getFloorPlans(property).length > 0 && (
         <FloorPlanViewerModal
-          imageUrl={property.floorplanUrl}
-          photos={property.images}
+          floors={getFloorPlans(property)}
+          photos={floorPlanPhotos}
           initialPhotoUrl={floorPlanPhotoUrl}
+          initialTab={floorPlanTab}
+          title={[property.address, property.city].filter(Boolean).join(', ')}
+          summary={floorPlanSummary}
           onPhotoChange={handleFloorPlanPhotoChange}
           propertyId={property.id}
           onClose={() => setIsFloorPlanOpen(false)}
@@ -1045,7 +1070,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           onOpenEditor={(url) => setIsEditorOpen(true)}
           onOpenViewer={() => setIsViewerOpen(true)}
           onNavigateTo3DTour={handleNavigateTo3DTour}
-          onOpenFloorPlan={property.floorplanUrl ? openFloorPlan : undefined}
+          onOpenFloorPlan={getFloorPlans(property).length > 0 ? openFloorPlan : undefined}
           onView3DMap={
             property.lat != null && property.lng != null && !isNaN(property.lat) && !isNaN(property.lng)
               ? handleView3DMap

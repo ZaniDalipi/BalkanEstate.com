@@ -372,7 +372,20 @@
       "cta": "Pokažite kupcima gdje je snimljena svaka fotografija",
       "ctaHint": "Kupci vide kameru na planu stana za svaku fotografiju, usklađeno dok pregledaju.",
       "edit": "Uredi položaje fotografija ({{placed}}/{{total}})",
-      "start": "Postavi fotografije na plan stana"
+      "start": "Postavi fotografije na plan stana",
+      "onFloor": "Na: {{floor}}"
+    },
+    "floors": {
+      "defaultLabel": "Sprat {{n}}",
+      "hint": "Dodajte plan za svaki sprat (Sprat 1, Sprat 2, Potkrovlje, Podrum…).",
+      "remove": "Ukloni plan",
+      "name": "Naziv sprata",
+      "replace": "Zamijeni sliku",
+      "replaceShort": "Zamijeni",
+      "add": "Dodaj još jedan plan",
+      "limitTitle": "Dostignut je limit planova",
+      "limit": "Oglas može imati najviše {{max}} planova.",
+      "switch": "Spratovi"
     }
   },
   "myListings": {

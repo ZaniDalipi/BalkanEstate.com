@@ -9,6 +9,8 @@ import { resolveConstruction } from '../../shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '../../shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '../../shared/property/attributeDisplay';
 import { openExternalUrl } from '../../shared/utils/pwa';
+import { getFloorPlans } from '../../shared/utils/floorplans';
+import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
@@ -108,6 +110,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
   const [mapMenuOpen, setMapMenuOpen] = useState(false);
 
   // --- derived values ---
+  const floorPlans = useMemo(() => getFloorPlans(property), [property]);
   // lat/lng typed as number; guard 0,0 (null island) which passes range validation but is never a real Balkan listing
   const hasValidCoords = useMemo(
     () => (property.lat !== 0 || property.lng !== 0) && validateCoordinates(property.lat, property.lng).isValid,
@@ -664,7 +667,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             </DetailItem>
           )}
 
-          {property.floorplanUrl && (
+          {floorPlans.length > 0 && (
             <div className="col-span-2 sm:col-span-3 lg:col-span-4 mt-2">
               <button
                 onClick={onOpenFloorPlan}
@@ -672,7 +675,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               >
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-primary/20 flex-shrink-0 bg-white shadow-sm">
                   <img
-                    src={property.floorplanUrl}
+                    src={optimizeCloudinaryUrl(floorPlans[0].url, { width: 96, quality: 'auto' }) || floorPlans[0].url}
                     alt=""
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"
@@ -681,7 +684,11 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 </div>
                 <div className="flex flex-col items-start gap-0.5">
                   <span className="text-sm font-semibold text-primary">{t('details.viewFloorPlan')}</span>
-                  <span className="text-[11px] text-primary/50">{t('details.floorPlanInteractiveHint', 'Interactive viewer with zoom, pan & labels')}</span>
+                  <span className="text-[11px] text-primary/50">
+                    {floorPlans.length > 1
+                      ? t('details.floorPlanFloorsHint', '{{count}} floors · photos marked on the plan', { count: floorPlans.length })
+                      : t('details.floorPlanInteractiveHint', 'Interactive viewer with zoom, pan & labels')}
+                  </span>
                 </div>
                 <svg className="w-5 h-5 text-primary/40 ml-auto group-hover:text-primary/70 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
