@@ -350,6 +350,26 @@
       "bbq": "Grătar",
       "homeCinema": "Cinema acasă",
       "beachAccess": "Acces la plajă"
+    },
+    "photoSpots": {
+      "title": "Plasați fotografiile pe plan",
+      "instructions": "Alegeți o fotografie, atingeți locul unde a fost făcută și trageți spre ceea ce arată. Trageți o cameră pentru a o muta sau mânerul ei pentru a o roti.",
+      "progress": "{{placed}} din {{total}} plasate",
+      "planAlt": "Plan",
+      "moveCamera": "Mută camera pentru fotografia {{n}}",
+      "turnCamera": "Rotește camera",
+      "placedHint": "Trageți camera pentru a o muta sau mânerul pentru a o roti.",
+      "placeHint": "Atingeți planul unde a fost făcută fotografia, apoi trageți pentru a o orienta.",
+      "photoN": "Fotografia {{n}}",
+      "placed": "Pe plan",
+      "notPlaced": "Neplasată încă",
+      "turnLeft": "Rotește la stânga",
+      "turnRight": "Rotește la dreapta",
+      "remove": "Elimină",
+      "cta": "Arătați cumpărătorilor unde a fost făcută fiecare fotografie",
+      "ctaHint": "Cumpărătorii văd o cameră pe plan pentru fiecare fotografie, sincronizat în timp ce navighează.",
+      "edit": "Editează pozițiile fotografiilor ({{placed}}/{{total}})",
+      "start": "Plasează fotografiile pe plan"
     }
   },
   "myListings": {

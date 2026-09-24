@@ -38,6 +38,7 @@ src/components/property/  # Shared property UI (used by multiple features)
 ├── PropertyInfo.tsx      # Stats grid + description + amenities
 ├── PropertyContact.tsx   # Seller sidebar (desktop) + contact actions
 ├── PropertyPhotos.tsx    # Thumbnail strip
+├── PhotoSpotMarker.tsx   # Camera + view cone drawn on a floor plan
 ├── PropertyMapLink.tsx
 └── NeighborhoodInsights.tsx
 ```
@@ -607,6 +608,46 @@ Key decisions:
 - **The maths is separate from the map.** `solarPosition.ts` has no MapLibre or
   DOM dependency and is covered by `src/tests/solar-position.test.ts`
   (published Belgrade sun times, DST, 32 towns' time zones).
+
+---
+
+## Floor Plan — Photo Spots (Zillow-style)
+
+Each listing photo can record **where on the floor plan it was taken and which
+way the camera faced**. Buyers then browse the plan and the photos together.
+
+```
+PropertyImage.floorplanSpot?: { x, y, angle }
+   x, y   — % of the floor plan image (0–100, origin top-left)
+   angle  — degrees clockwise from "up" on the plan (0–359)
+
+Seller: ListingImageUpload → FloorPlanPhotoPlacer   (writes spots via setPhotoSpots)
+Buyer:  PropertyGallery mini-plan ⇄ FloorPlanViewerModal (cameras + photo panel)
+```
+
+- **Storage** — the spot lives on the image itself (`images[].floorplanSpot`,
+  a validated sub-schema in `backend/src/models/Property.ts`), so it travels
+  with the photo through reorder, delete and edit round-trips. On create,
+  `organizeListingMedia` returns images 1:1 in order, and spots are carried
+  across by index.
+- **Validation** — `validateFloorplanSpot` / `sanitizeFloorplanSpot` in
+  `src/shared/utils/validation.ts`; spots read back for editing are sanitised.
+- **Replacing or removing the floor plan clears every spot** (`useListingForm`):
+  positions on one plan mean nothing on another.
+- **Sync** — the viewer opens on the photo showing in the gallery; picking a
+  camera or stepping through photos highlights its camera and pans the plan
+  to it only when it is off screen (a fitted plan never moves); the gallery
+  follows via `onPhotoChange`. Only placed photos appear in the viewer panel.
+- **Full-screen overlays are portalled to `<body>`** and sized `100dvh` with
+  safe-area padding. Opened from the listing form, an ancestor's
+  `backdrop-filter`/`transform` otherwise becomes the containing block for
+  `position: fixed`, stretching the overlay to the form's height (scrolling).
+- **Pan/zoom** in `FloorPlanViewerModal` keeps the view in a ref and writes the
+  transform to the DOM once per animation frame; React state only follows the
+  settled zoom. The plan is laid out at its fitted size and CSS-scaled from
+  there, and the view is clamped so the plan can never leave the frame.
+- The placer sizes the plan to its stage with a `ResizeObserver`, so the whole
+  editor fits the screen at any size with nothing to scroll.
 
 ---
 

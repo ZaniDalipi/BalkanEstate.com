@@ -350,6 +350,26 @@
       "bbq": "Roštilj",
       "homeCinema": "Kućno kino",
       "beachAccess": "Pristup plaži"
+    },
+    "photoSpots": {
+      "title": "Postavite fotografije na tlocrt",
+      "instructions": "Odaberite fotografiju, dodirnite mjesto gdje je snimljena i povucite prema onome što prikazuje. Povucite kameru da je pomaknete ili njezinu ručicu da je okrenete.",
+      "progress": "Postavljeno {{placed}} od {{total}}",
+      "planAlt": "Tlocrt",
+      "moveCamera": "Pomakni kameru za fotografiju {{n}}",
+      "turnCamera": "Okreni kameru",
+      "placedHint": "Povucite kameru da je pomaknete ili ručicu da je okrenete.",
+      "placeHint": "Dodirnite tlocrt gdje je ova fotografija snimljena, zatim povucite da je usmjerite.",
+      "photoN": "Fotografija {{n}}",
+      "placed": "Na tlocrtu",
+      "notPlaced": "Još nije postavljena",
+      "turnLeft": "Okreni ulijevo",
+      "turnRight": "Okreni udesno",
+      "remove": "Ukloni",
+      "cta": "Pokažite kupcima gdje je snimljena svaka fotografija",
+      "ctaHint": "Kupci vide kameru na tlocrtu za svaku fotografiju, usklađeno dok pregledavaju.",
+      "edit": "Uredi položaje fotografija ({{placed}}/{{total}})",
+      "start": "Postavi fotografije na tlocrt"
     }
   },
   "myListings": {

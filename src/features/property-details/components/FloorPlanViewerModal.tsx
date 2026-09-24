@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImage } from '@/types';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
@@ -656,9 +657,18 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         Math.abs(level - viewScale) < Math.abs(ZOOM_LEVELS[closest] - viewScale) ? i : closest
     , 0);
 
-    return (
+    // Portalled to <body>: opened from inside the listing form, an ancestor's
+    // backdrop-filter/transform would otherwise become the containing block
+    // for `fixed`, stretching the viewer to the form's height.
+    return createPortal(
         <div
-            className="fixed inset-0 bg-black/90 z-[6000] flex flex-col md:flex-row"
+            className="fixed inset-0 h-[100dvh] overflow-hidden overscroll-none bg-neutral-950 z-[6000] flex flex-col md:flex-row"
+            style={{
+                paddingTop: 'env(safe-area-inset-top)',
+                paddingBottom: 'env(safe-area-inset-bottom)',
+                paddingLeft: 'env(safe-area-inset-left)',
+                paddingRight: 'env(safe-area-inset-right)',
+            }}
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
             role="dialog"
             aria-modal="true"
@@ -849,7 +859,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                     >
                         <img
                             ref={imageRef}
-                            src={imageUrl}
+                            src={optimizeCloudinaryUrl(imageUrl, { width: 2400, quality: 'auto' }) || imageUrl}
                             alt={t('property:floorPlan.viewer.floorPlanAlt', 'Floor Plan')}
                             className={`block select-none ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                             style={{
@@ -1183,7 +1193,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                     >
                         <img
                             key={currentPhoto.url}
-                            src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1200 }) || currentPhoto.url}
+                            src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1200, quality: 'auto' }) || currentPhoto.url}
                             alt={t('property:floorPlan.viewer.photoAlt', 'Photo {{current}} of {{total}}', { current: activePhoto + 1, total: tourPhotos.length })}
                             className="absolute inset-0 w-full h-full object-contain animate-[fadeIn_0.2s_ease-out]"
                             draggable={false}
@@ -1231,7 +1241,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                                     aria-current={i === activePhoto}
                                 >
                                     <img
-                                        src={optimizeCloudinaryUrl(photo.url, { width: 160 }) || photo.url}
+                                        src={optimizeCloudinaryUrl(photo.url, { width: 160, quality: 'auto' }) || photo.url}
                                         alt=""
                                         loading="lazy"
                                         className="w-full h-full object-cover"
@@ -1244,7 +1254,8 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                     )}
                 </aside>
             )}
-        </div>
+        </div>,
+        document.body
     );
 };
 

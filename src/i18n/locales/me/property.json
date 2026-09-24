@@ -577,7 +577,8 @@
     "skipVideo": "Preskoči video",
     "videoTour": "Video obilazak",
     "enter3DTour": "Uđi u 3D obilazak",
-    "view3DMap": "3D karta lokacije"
+    "view3DMap": "3D karta lokacije",
+    "seeOnFloorPlan": "Pogledajte gdje je ova fotografija snimljena na planu stana"
   },
   "viewings": {
     "title": "Zahtjevi za razgledanje",
@@ -698,8 +699,14 @@
       "shortcuts": {
         "scroll": "Skrolaj: Uvećaj | Povuci: Pomakni | Dvostruki klik: Brzo uvećanje",
         "keys": "+/-: Uvećaj | 0: Resetuj | Esc: Zatvori",
-        "annotate": "Klik: Dodaj oznaku | Esc: Izađi iz načina označavanja"
-      }
+        "annotate": "Klik: Dodaj oznaku | Esc: Izađi iz načina označavanja",
+        "photos": "←/→: Prethodna / sljedeća fotografija"
+      },
+      "showPhoto": "Prikaži fotografiju {{n}}",
+      "photosPanel": "Fotografije na planu stana",
+      "photoAlt": "Fotografija {{current}} od {{total}}",
+      "prevPhoto": "Prethodna fotografija",
+      "nextPhoto": "Sljedeća fotografija"
     }
   },
   "roomStyler": {

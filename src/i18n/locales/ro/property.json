@@ -577,7 +577,8 @@
     "skipVideo": "Sari peste videoclip",
     "videoTour": "Tur video",
     "enter3DTour": "Intră în turul 3D",
-    "view3DMap": "Hartă 3D a locației"
+    "view3DMap": "Hartă 3D a locației",
+    "seeOnFloorPlan": "Vedeți unde a fost făcută această fotografie pe plan"
   },
   "viewings": {
     "title": "Cereri de Vizionare",
@@ -658,8 +659,14 @@
       "shortcuts": {
         "scroll": "Derulare: Zoom | Tragere: Deplasare | Dublu clic: Zoom rapid",
         "keys": "+/-: Zoom | 0: Resetare | Esc: Închide",
-        "annotate": "Clic: Adaugă etichetă | Esc: Ieșire din modul etichetă"
-      }
+        "annotate": "Clic: Adaugă etichetă | Esc: Ieșire din modul etichetă",
+        "photos": "←/→: Fotografia anterioară / următoare"
+      },
+      "showPhoto": "Afișează fotografia {{n}}",
+      "photosPanel": "Fotografii pe plan",
+      "photoAlt": "Fotografia {{current}} din {{total}}",
+      "prevPhoto": "Fotografia anterioară",
+      "nextPhoto": "Fotografia următoare"
     }
   },
   "imageViewer": {

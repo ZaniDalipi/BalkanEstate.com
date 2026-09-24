@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FloorplanSpot, Property, PropertyImage, PropertyImageTag, UserRole } from '@/types';
-import { sanitizeSpot } from '@/src/components/property/PhotoSpotMarker';
+import { sanitizeFloorplanSpot } from '@/shared/utils/validation';
 import type { PropertyType } from '@/shared/types/property.types';
 import { generateDescriptionFromImages, calculatePropertyDistances, LocationContext } from '@/services/geminiService';
 import { useAppContext } from '@/context/AppContext';
@@ -399,7 +399,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => {
                 // Handle both {url: string} objects and plain string URLs
                 const imageUrl = typeof img === 'string' ? img : (img?.url || (img as any)?.previewUrl || '');
-                const floorplanSpot = typeof img === 'string' ? undefined : sanitizeSpot(img?.floorplanSpot);
+                const floorplanSpot = typeof img === 'string' ? undefined : sanitizeFloorplanSpot(img?.floorplanSpot);
                 return { file: null, previewUrl: imageUrl, ...(floorplanSpot ? { floorplanSpot } : {}) };
             }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);

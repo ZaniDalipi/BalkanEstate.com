@@ -1,5 +1,4 @@
 import React from 'react';
-import type { FloorplanSpot } from '@/types';
 
 /** Horizontal field of view drawn for each camera, in degrees. */
 const FOV = 70;
@@ -18,22 +17,6 @@ const CONE_PATH = (() => {
     const b = polar(FOV / 2, CONE_RADIUS);
     return `M0 0 L${a.x.toFixed(2)} ${a.y.toFixed(2)} A${CONE_RADIUS} ${CONE_RADIUS} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)} Z`;
 })();
-
-/** Normalise any angle to 0–359. */
-export const normalizeAngle = (deg: number) => ((Math.round(deg) % 360) + 360) % 360;
-
-/** Clamp a stored or client-supplied spot to valid ranges, or drop it. */
-export const sanitizeSpot = (spot: unknown): FloorplanSpot | undefined => {
-    if (!spot || typeof spot !== 'object') return undefined;
-    const { x, y, angle } = spot as Record<string, unknown>;
-    if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
-    const clamp = (v: number) => Math.min(100, Math.max(0, v));
-    return {
-        x: clamp(x),
-        y: clamp(y),
-        angle: typeof angle === 'number' && Number.isFinite(angle) ? normalizeAngle(angle) : 0,
-    };
-};
 
 interface PhotoSpotMarkerProps {
     angle: number;

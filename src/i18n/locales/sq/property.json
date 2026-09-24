@@ -577,7 +577,8 @@
     "skipVideo": "Kalo videon",
     "videoTour": "Tur me video",
     "enter3DTour": "Hyni në turin 3D",
-    "view3DMap": "Harta 3D e vendndodhjes"
+    "view3DMap": "Harta 3D e vendndodhjes",
+    "seeOnFloorPlan": "Shihni ku është bërë kjo foto në planimetri"
   },
   "viewings": {
     "title": "Kërkesat për Vizitë",
@@ -658,8 +659,14 @@
       "shortcuts": {
         "scroll": "Rrëshqit: Zmadho | Tërhiq: Lëviz | Klik dyfish: Zmadhim i shpejtë",
         "keys": "+/-: Zmadho | 0: Rivendos | Esc: Mbyll",
-        "annotate": "Klik: Shto etiketë | Esc: Dil nga modaliteti i etiketave"
-      }
+        "annotate": "Klik: Shto etiketë | Esc: Dil nga modaliteti i etiketave",
+        "photos": "←/→: Foto e mëparshme / e radhës"
+      },
+      "showPhoto": "Shfaq foton {{n}}",
+      "photosPanel": "Fotot në planimetri",
+      "photoAlt": "Foto {{current}} nga {{total}}",
+      "prevPhoto": "Foto e mëparshme",
+      "nextPhoto": "Foto e radhës"
     }
   },
   "imageViewer": {

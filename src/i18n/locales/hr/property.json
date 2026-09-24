@@ -577,7 +577,8 @@
     "skipVideo": "Preskoči videozapis",
     "videoTour": "Video obilazak",
     "enter3DTour": "Uđi u 3D obilazak",
-    "view3DMap": "3D karta lokacije"
+    "view3DMap": "3D karta lokacije",
+    "seeOnFloorPlan": "Pogledajte gdje je ova fotografija snimljena na tlocrtu"
   },
   "viewings": {
     "title": "Zahtjevi za Razgledavanje",
@@ -658,8 +659,14 @@
       "shortcuts": {
         "scroll": "Listanje: Zumiranje | Povlačenje: Pomicanje | Dvoklik: Brzo zumiranje",
         "keys": "+/-: Zumiranje | 0: Poništi | Esc: Zatvori",
-        "annotate": "Klik: Dodaj oznaku | Esc: Izlaz iz načina označavanja"
-      }
+        "annotate": "Klik: Dodaj oznaku | Esc: Izlaz iz načina označavanja",
+        "photos": "←/→: Prethodna / sljedeća fotografija"
+      },
+      "showPhoto": "Prikaži fotografiju {{n}}",
+      "photosPanel": "Fotografije na tlocrtu",
+      "photoAlt": "Fotografija {{current}} od {{total}}",
+      "prevPhoto": "Prethodna fotografija",
+      "nextPhoto": "Sljedeća fotografija"
     }
   },
   "imageViewer": {
