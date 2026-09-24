@@ -17,12 +17,12 @@ let balkanEstateLogoCache: Buffer | null = null;
 
 /**
  * Get the BalkanEstate logo as a PNG buffer.
- * Uses the SVG icon from public/icons/icon.svg, rendered at a fixed size.
+ * Uses the 3D logo from public/icons/logo-3d.svg, rendered at a fixed size.
  */
 const getBalkanEstateLogo = async (): Promise<Buffer> => {
   if (balkanEstateLogoCache) return balkanEstateLogoCache;
 
-  const svgPath = path.resolve(__dirname, '../../../public/icons/BalkanEstateAILogo.svg');
+  const svgPath = path.resolve(__dirname, '../../../public/icons/logo-3d.svg');
 
   if (!fs.existsSync(svgPath)) {
     mediaLogger.warn('⚠️  BalkanEstate logo SVG not found at', svgPath);
