@@ -37,6 +37,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         mode, setMode,
         step, setStep,
         images,
+        setPhotoSpots,
         floorplanImage, setFloorplanImage,
         listingData, setListingData,
         language, setLanguage,
@@ -782,6 +783,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         handleDrop={handleDrop}
                         handleImageTagChange={handleImageTagChange}
                         setFloorplanImage={setFloorplanImage}
+                        setPhotoSpots={setPhotoSpots}
                     />
 
                     {/* 360 Virtual Tour URL */}

@@ -50,9 +50,22 @@ export type EnergyRating = 'any' | 'A+' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G
 export type Orientation = 'any' | 'north' | 'south' | 'east' | 'west' | 'northEast' | 'northWest' | 'southEast' | 'southWest';
 export type PropertyPromotionTier = 'standard' | 'featured' | 'highlight' | 'premium';
 
+/**
+ * Where on the floor plan a photo was taken from, and which way the camera
+ * faced. x/y are percentages of the floor plan image (0–100, origin top-left);
+ * angle is degrees clockwise from "up" on the plan (0–359).
+ */
+export interface FloorplanSpot {
+  x: number;
+  y: number;
+  angle: number;
+}
+
 export interface PropertyImage {
   url: string;
   tag: PropertyImageTag;
+  /** Camera position on the floor plan, when the seller marked it. */
+  floorplanSpot?: FloorplanSpot;
 }
 
 export interface Seller {

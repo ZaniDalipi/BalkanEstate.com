@@ -1,0 +1,92 @@
+import React from 'react';
+import type { FloorplanSpot } from '@/types';
+
+/** Horizontal field of view drawn for each camera, in degrees. */
+const FOV = 70;
+/** Marker box size in screen pixels (the cone fits inside it). */
+export const PHOTO_SPOT_SIZE = 76;
+const CONE_RADIUS = 34;
+
+const polar = (deg: number, r: number) => {
+    const rad = ((deg - 90) * Math.PI) / 180;
+    return { x: r * Math.cos(rad), y: r * Math.sin(rad) };
+};
+
+/** SVG path of a view cone pointing straight up, centred on the origin. */
+const CONE_PATH = (() => {
+    const a = polar(-FOV / 2, CONE_RADIUS);
+    const b = polar(FOV / 2, CONE_RADIUS);
+    return `M0 0 L${a.x.toFixed(2)} ${a.y.toFixed(2)} A${CONE_RADIUS} ${CONE_RADIUS} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)} Z`;
+})();
+
+/** Normalise any angle to 0–359. */
+export const normalizeAngle = (deg: number) => ((Math.round(deg) % 360) + 360) % 360;
+
+/** Clamp a stored or client-supplied spot to valid ranges, or drop it. */
+export const sanitizeSpot = (spot: unknown): FloorplanSpot | undefined => {
+    if (!spot || typeof spot !== 'object') return undefined;
+    const { x, y, angle } = spot as Record<string, unknown>;
+    if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+    const clamp = (v: number) => Math.min(100, Math.max(0, v));
+    return {
+        x: clamp(x),
+        y: clamp(y),
+        angle: typeof angle === 'number' && Number.isFinite(angle) ? normalizeAngle(angle) : 0,
+    };
+};
+
+interface PhotoSpotMarkerProps {
+    angle: number;
+    active?: boolean;
+    /** Small number shown in the camera dot (photo position, 1-based). */
+    label?: number;
+}
+
+/**
+ * A camera position on a floor plan: a dot with a view cone showing which way
+ * the photo looks. Pure SVG, drawn at a fixed screen size; the caller
+ * positions it with its centre on the spot.
+ */
+const PhotoSpotMarker: React.FC<PhotoSpotMarkerProps> = ({ angle, active = false, label }) => {
+    const half = PHOTO_SPOT_SIZE / 2;
+    return (
+        <svg
+            width={PHOTO_SPOT_SIZE}
+            height={PHOTO_SPOT_SIZE}
+            viewBox={`${-half} ${-half} ${PHOTO_SPOT_SIZE} ${PHOTO_SPOT_SIZE}`}
+            className="block overflow-visible pointer-events-none"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={active ? 'spot-cone-active' : 'spot-cone'} cx="0" cy="0" r={CONE_RADIUS} gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor={active ? '#2563eb' : '#0f172a'} stopOpacity={active ? 0.55 : 0.35} />
+                    <stop offset="1" stopColor={active ? '#2563eb' : '#0f172a'} stopOpacity={0.04} />
+                </radialGradient>
+            </defs>
+            <path
+                d={CONE_PATH}
+                transform={`rotate(${angle})`}
+                fill={`url(#${active ? 'spot-cone-active' : 'spot-cone'})`}
+                stroke={active ? '#2563eb' : 'rgba(15,23,42,0.35)'}
+                strokeWidth={active ? 1.5 : 1}
+            />
+            <circle r={active ? 11 : 9} fill={active ? '#2563eb' : '#ffffff'} stroke={active ? '#ffffff' : '#0f172a'} strokeWidth={2} />
+            {label !== undefined ? (
+                <text
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize={label > 9 ? 8 : 10}
+                    fontWeight={700}
+                    fill={active ? '#ffffff' : '#0f172a'}
+                    style={{ fontFamily: 'system-ui, sans-serif' }}
+                >
+                    {label}
+                </text>
+            ) : (
+                <circle r={3} fill={active ? '#ffffff' : '#0f172a'} />
+            )}
+        </svg>
+    );
+};
+
+export default PhotoSpotMarker;

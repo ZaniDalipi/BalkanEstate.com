@@ -1,5 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { FloorplanSpot } from '@/types';
+import FloorPlanPhotoPlacer from './FloorPlanPhotoPlacer';
 import { ImageData, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
 
 interface ListingImageUploadProps {
@@ -17,6 +19,8 @@ interface ListingImageUploadProps {
     handleDrop: () => void;
     handleImageTagChange: (index: number, tag: string) => void;
     setFloorplanImage: React.Dispatch<React.SetStateAction<ImageData>>;
+    /** Save where each photo was taken on the floor plan (index-aligned). */
+    setPhotoSpots?: (spots: (FloorplanSpot | undefined)[]) => void;
 }
 
 const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
@@ -33,8 +37,12 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
     handleDrop,
     handleImageTagChange,
     setFloorplanImage,
+    setPhotoSpots,
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common']);
+    const [isPlacingPhotos, setIsPlacingPhotos] = useState(false);
+    const placedCount = images.filter(img => img.floorplanSpot).length;
+    const canPlacePhotos = !!setPhotoSpots && !!floorplanImage.previewUrl && images.length > 0;
 
     return (
         <>
@@ -99,7 +107,40 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                     <input id="floorplan-upload" type="file" accept="image/*" className="hidden" onChange={handleFloorplanImageChange} />
                 </label>
                 {floorplanImage.previewUrl && (
-                    <div className="mt-2 relative inline-block"><img src={floorplanImage.previewUrl} alt="floorplan" className="w-32 h-32 object-cover rounded-lg border border-gray-200" /><button type="button" aria-label="Remove floorplan" onClick={() => setFloorplanImage({file: null, previewUrl: ''})} className="absolute -top-1 -right-1 bg-red-500/80 backdrop-blur-sm text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button></div>
+                    <div className="mt-2 flex flex-wrap items-start gap-3">
+                        <div className="relative inline-block"><img src={floorplanImage.previewUrl} alt="floorplan" className="w-32 h-32 object-cover rounded-lg border border-gray-200" /><button type="button" aria-label="Remove floorplan" onClick={() => setFloorplanImage({file: null, previewUrl: ''})} className="absolute -top-1 -right-1 bg-red-500/80 backdrop-blur-sm text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button></div>
+                        {canPlacePhotos && (
+                            <div className="flex-1 min-w-[200px] p-3 rounded-xl border border-blue-200 bg-blue-50/60">
+                                <p className="text-sm font-semibold text-gray-700">
+                                    {t('seller:createListing.photoSpots.cta', 'Show buyers where each photo was taken')}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                    {t('seller:createListing.photoSpots.ctaHint', 'Buyers see a camera on the floor plan for each photo, in sync as they browse.')}
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPlacingPhotos(true)}
+                                    className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+                                >
+                                    {placedCount > 0
+                                        ? t('seller:createListing.photoSpots.edit', 'Edit photo spots ({{placed}}/{{total}})', { placed: placedCount, total: images.length })
+                                        : t('seller:createListing.photoSpots.start', 'Place photos on floor plan')}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {isPlacingPhotos && canPlacePhotos && (
+                    <FloorPlanPhotoPlacer
+                        floorplanUrl={floorplanImage.previewUrl}
+                        photos={images.map((img, index) => ({
+                            url: img.previewUrl,
+                            tag: imageTags.find(tg => tg.index === index)?.tag,
+                            floorplanSpot: img.floorplanSpot,
+                        }))}
+                        onSave={setPhotoSpots!}
+                        onClose={() => setIsPlacingPhotos(false)}
+                    />
                 )}
             </div>
 

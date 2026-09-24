@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Property, PropertyImage, PropertyImageTag, UserRole } from '@/types';
+import { FloorplanSpot, Property, PropertyImage, PropertyImageTag, UserRole } from '@/types';
+import { sanitizeSpot } from '@/src/components/property/PhotoSpotMarker';
 import type { PropertyType } from '@/shared/types/property.types';
 import { generateDescriptionFromImages, calculatePropertyDistances, LocationContext } from '@/services/geminiService';
 import { useAppContext } from '@/context/AppContext';
@@ -56,6 +57,7 @@ export function buildPreviewProperty(
         return {
             url: img.previewUrl,
             tag: (tagInfo?.tag as PropertyImageTag) || 'other',
+            ...(img.floorplanSpot ? { floorplanSpot: img.floorplanSpot } : {}),
         };
     });
 
@@ -172,6 +174,28 @@ export const useListingForm = (propertyToEdit: Property | null) => {
     const [step, setStep] = useState<Step>('init');
     const [images, setImages] = useState<ImageData[]>([]);
     const [floorplanImage, setFloorplanImage] = useState<ImageData>({ file: null, previewUrl: '' });
+
+    /** Set every photo's floor plan spot at once (index-aligned with images). */
+    const setPhotoSpots = useCallback((spots: (FloorplanSpot | undefined)[]) => {
+        setImages(prev => prev.map((img, i) => {
+            const { floorplanSpot: _old, ...rest } = img;
+            return spots[i] ? { ...rest, floorplanSpot: spots[i] } : rest;
+        }));
+    }, []);
+
+    // Photo spots are positions on one particular plan. When that plan is
+    // replaced or removed they no longer mean anything, so drop them. (The
+    // first plan appearing — upload, or loading a listing to edit — keeps them.)
+    const prevFloorplanUrlRef = useRef(floorplanImage.previewUrl);
+    useEffect(() => {
+        const prev = prevFloorplanUrlRef.current;
+        prevFloorplanUrlRef.current = floorplanImage.previewUrl;
+        if (prev && prev !== floorplanImage.previewUrl) {
+            setImages(imgs => imgs.some(img => img.floorplanSpot)
+                ? imgs.map(({ floorplanSpot: _old, ...rest }) => rest)
+                : imgs);
+        }
+    }, [floorplanImage.previewUrl]);
 
     // Determine initial listingType based on current view
     const initialType = state.activeView === 'create-rental' ? 'rent' : 'sale';
@@ -375,7 +399,8 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => {
                 // Handle both {url: string} objects and plain string URLs
                 const imageUrl = typeof img === 'string' ? img : (img?.url || (img as any)?.previewUrl || '');
-                return { file: null, previewUrl: imageUrl };
+                const floorplanSpot = typeof img === 'string' ? undefined : sanitizeSpot(img?.floorplanSpot);
+                return { file: null, previewUrl: imageUrl, ...(floorplanSpot ? { floorplanSpot } : {}) };
             }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
             // Log removed
@@ -975,12 +1000,14 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                                 url: cloudinaryData.url,
                                 publicId: cloudinaryData.publicId,
                                 tag,
+                                ...(img.floorplanSpot ? { floorplanSpot: img.floorplanSpot } : {}),
                             };
                         } else {
                             // This is an existing image (when editing), keep the existing URL
                             return {
                                 url: img.previewUrl,
                                 tag,
+                                ...(img.floorplanSpot ? { floorplanSpot: img.floorplanSpot } : {}),
                             };
                         }
                     });
@@ -998,6 +1025,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     return {
                         url: img.previewUrl,
                         tag: (tagInfo?.tag as PropertyImageTag) || 'other',
+                        ...(img.floorplanSpot ? { floorplanSpot: img.floorplanSpot } : {}),
                     };
                 });
                 // Log removed
@@ -1532,6 +1560,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         mode, setMode,
         step, setStep,
         images, setImages,
+        setPhotoSpots,
         floorplanImage, setFloorplanImage,
         listingData, setListingData,
         language, setLanguage,

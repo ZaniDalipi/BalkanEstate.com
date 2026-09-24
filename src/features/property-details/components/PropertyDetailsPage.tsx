@@ -303,6 +303,26 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
 
+  // Floor plan ↔ gallery sync: the viewer opens on the photo showing in the
+  // gallery, and the gallery follows whichever photo is picked in the viewer.
+  const [floorPlanPhotoUrl, setFloorPlanPhotoUrl] = useState<string | undefined>(undefined);
+  const openFloorPlan = useCallback((photoUrl?: string) => {
+    setFloorPlanPhotoUrl(photoUrl ?? currentImageUrl);
+    setIsFloorPlanOpen(true);
+  }, [currentImageUrl]);
+  const handleFloorPlanPhotoChange = useCallback((url: string) => {
+    const inCategory = imagesForCurrentCategory.findIndex(img => img.url === url);
+    if (inCategory >= 0) {
+      setCurrentImageIndex(inCategory);
+      return;
+    }
+    const inAll = allImages.findIndex(img => img.url === url);
+    if (inAll >= 0) {
+      setActiveCategory('all');
+      setCurrentImageIndex(inAll);
+    }
+  }, [imagesForCurrentCategory, allImages]);
+
   // Handlers
   const handleBack = useCallback(() => {
     // Step back through history whenever the app has an entry of its own to
@@ -687,6 +707,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {isFloorPlanOpen && property.floorplanUrl && (
         <FloorPlanViewerModal
           imageUrl={property.floorplanUrl}
+          photos={property.images}
+          initialPhotoUrl={floorPlanPhotoUrl}
+          onPhotoChange={handleFloorPlanPhotoChange}
           propertyId={property.id}
           onClose={() => setIsFloorPlanOpen(false)}
         />
@@ -1022,6 +1045,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           onOpenEditor={(url) => setIsEditorOpen(true)}
           onOpenViewer={() => setIsViewerOpen(true)}
           onNavigateTo3DTour={handleNavigateTo3DTour}
+          onOpenFloorPlan={property.floorplanUrl ? openFloorPlan : undefined}
           onView3DMap={
             property.lat != null && property.lng != null && !isNaN(property.lat) && !isNaN(property.lng)
               ? handleView3DMap
@@ -1051,7 +1075,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
             {/* Mobile Only: Property Info (description) shown early */}
             <div data-section="details" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
-              <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
+              <PropertyInfo property={property} onOpenFloorPlan={() => openFloorPlan()} />
             </div>
 
             {/* Mobile Only: Neighborhood Insights — directly under the description */}
@@ -1082,7 +1106,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
             {/* Property Info (Desktop only - mobile version shown above) */}
             <div data-section="details" className="scroll-mt-24 hidden lg:block animate-slide-up" style={{ animationDelay: '100ms' }}>
-              <PropertyInfo property={property} onOpenFloorPlan={() => setIsFloorPlanOpen(true)} />
+              <PropertyInfo property={property} onOpenFloorPlan={() => openFloorPlan()} />
             </div>
 
           </div>

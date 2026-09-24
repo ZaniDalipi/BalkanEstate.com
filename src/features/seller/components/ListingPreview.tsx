@@ -96,6 +96,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
             {isFloorPlanOpen && property.floorplanUrl && (
                 <FloorPlanViewerModal
                     imageUrl={property.floorplanUrl}
+                    photos={property.images}
                     onClose={() => setIsFloorPlanOpen(false)}
                 />
             )}

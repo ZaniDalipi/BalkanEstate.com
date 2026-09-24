@@ -362,6 +362,26 @@
       "bbq": "BBQ",
       "homeCinema": "Home Cinema",
       "beachAccess": "Beach Access"
+    },
+    "photoSpots": {
+      "title": "Place photos on the floor plan",
+      "instructions": "Pick a photo, tap where it was taken and drag towards what it shows. Drag a camera to move it, or its handle to turn it.",
+      "progress": "{{placed}} of {{total}} placed",
+      "planAlt": "Floor plan",
+      "moveCamera": "Move camera for photo {{n}}",
+      "turnCamera": "Turn camera",
+      "placedHint": "Drag the camera to move it, or the handle to turn it.",
+      "placeHint": "Tap the plan where this photo was taken, then drag to aim.",
+      "photoN": "Photo {{n}}",
+      "placed": "On the plan",
+      "notPlaced": "Tap the plan to place it",
+      "turnLeft": "Turn left",
+      "turnRight": "Turn right",
+      "remove": "Remove",
+      "cta": "Show buyers where each photo was taken",
+      "ctaHint": "Buyers see a camera on the floor plan for each photo, in sync as they browse.",
+      "edit": "Edit photo spots ({{placed}}/{{total}})",
+      "start": "Place photos on floor plan"
     }
   },
   "myListings": {

@@ -14,11 +14,32 @@ import {
   normalizeConstructionFields,
 } from '../utils/constructionStatus';
 
+/**
+ * Where on the floor plan a photo was taken, and which way the camera faced.
+ * x/y are percentages of the floor plan image (origin top-left); angle is
+ * degrees clockwise from "up" on the plan.
+ */
+export interface IFloorplanSpot {
+  x: number;
+  y: number;
+  angle: number;
+}
+
 export interface IPropertyImage {
   url: string;
   publicId?: string; // Cloudinary public_id for image management and deletion (optional for backwards compatibility)
   tag: 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
+  floorplanSpot?: IFloorplanSpot;
 }
+
+const FloorplanSpotSchema = new Schema<IFloorplanSpot>(
+  {
+    x: { type: Number, required: true, min: 0, max: 100 },
+    y: { type: Number, required: true, min: 0, max: 100 },
+    angle: { type: Number, required: true, min: 0, max: 360 },
+  },
+  { _id: false }
+);
 
 // Price interval for time-based pricing
 export interface IPriceInterval {
@@ -497,6 +518,7 @@ const PropertySchema: Schema = new Schema(
           enum: ['exterior', 'living_room', 'kitchen', 'bedroom', 'bathroom', 'other'],
           default: 'other',
         },
+        floorplanSpot: { type: FloorplanSpotSchema, default: undefined },
       },
     ],
     lat: {

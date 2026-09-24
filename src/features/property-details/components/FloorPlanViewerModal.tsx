@@ -1,11 +1,25 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
-import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon } from '@/constants';
+import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon } from '@/constants';
 import { useTranslation } from 'react-i18next';
+import type { PropertyImage } from '@/types';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import PhotoSpotMarker, { PHOTO_SPOT_SIZE } from '@/src/components/property/PhotoSpotMarker';
 
 interface FloorPlanViewerModalProps {
     imageUrl: string;
     propertyId?: string;
     onClose: () => void;
+    /**
+     * The listing's photos. When any carry a floorplanSpot, the viewer shows
+     * a camera for each on the plan and a photo panel kept in sync with it:
+     * picking a camera shows its photo, stepping through photos lights up
+     * (and pans to) their camera.
+     */
+    photos?: PropertyImage[];
+    /** Photo to open on (by URL), e.g. the one showing in the gallery. */
+    initialPhotoUrl?: string;
+    /** Called with the photo URL whenever the shown photo changes. */
+    onPhotoChange?: (url: string) => void;
 }
 
 type RoomType = 'bedroom' | 'bathroom' | 'kitchen' | 'living' | 'dining' | 'office' | 'garage' | 'storage' | 'balcony' | 'hallway' | 'other';
@@ -93,7 +107,7 @@ const saveAnnotations = (propertyId: string | undefined, annotations: Annotation
     }
 };
 
-const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, propertyId, onClose }) => {
+const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, propertyId, onClose, photos, initialPhotoUrl, onPhotoChange }) => {
     const { t } = useTranslation(['property', 'common']);
 
     const getRoomLabel = (type: RoomType): string => {
@@ -139,6 +153,18 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
     const [annotations, setAnnotations] = useState<Annotation[]>(() => loadAnnotations(propertyId));
     const [editingAnnotation, setEditingAnnotation] = useState<string | null>(null);
     const [detailAnnotation, setDetailAnnotation] = useState<string | null>(null);
+
+    // Photos placed on the plan. Only these get the synced photo panel.
+    const tourPhotos = React.useMemo(
+        () => (photos || []).filter(p => p.url && p.floorplanSpot),
+        [photos]
+    );
+    const hasPhotoTour = tourPhotos.length > 0;
+    const [activePhoto, setActivePhoto] = useState(() => {
+        const i = initialPhotoUrl ? tourPhotos.findIndex(p => p.url === initialPhotoUrl) : -1;
+        return i >= 0 ? i : 0;
+    });
+    const currentPhoto = hasPhotoTour ? tourPhotos[Math.min(activePhoto, tourPhotos.length - 1)] : undefined;
 
     // Pointer gesture state (mouse, pen and touch alike)
     const pointersRef = useRef(new Map<number, { x: number; y: number }>());
@@ -403,6 +429,66 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         }
     }, [beginGesture, commitView]);
 
+    // Pan (never zoom) so a camera sits comfortably inside the frame. A camera
+    // already well inside it stays put, so stepping through nearby photos
+    // doesn't make the plan swim.
+    const revealSpot = useCallback((spot: { x: number; y: number }) => {
+        const container = imageContainerRef.current;
+        if (!container || imageDimensions.width === 0) return;
+        const v = viewRef.current;
+        const cw = container.clientWidth;
+        const ch = container.clientHeight;
+        // The whole plan is on screen — nothing to reveal.
+        if (imageDimensions.width * v.scale <= cw && imageDimensions.height * v.scale <= ch) return;
+        const sx = v.x + (spot.x / 100) * imageDimensions.width * v.scale;
+        const sy = v.y + (spot.y / 100) * imageDimensions.height * v.scale;
+        const mx = Math.min(cw * 0.2, 120);
+        const my = Math.min(ch * 0.2, 120);
+        if (sx >= mx && sx <= cw - mx && sy >= my && sy <= ch - my) return;
+        setView({ scale: v.scale, x: v.x + (cw / 2 - sx), y: v.y + (ch / 2 - sy) }, { animate: true, commit: true });
+    }, [imageDimensions, setView]);
+
+    const showPhoto = useCallback((index: number) => {
+        if (!hasPhotoTour) return;
+        const n = tourPhotos.length;
+        setActivePhoto(((index % n) + n) % n);
+    }, [hasPhotoTour, tourPhotos.length]);
+
+    // Keep the plan and the caller (the page's gallery) in step with the photo.
+    useEffect(() => {
+        if (!currentPhoto) return;
+        if (currentPhoto.floorplanSpot) revealSpot(currentPhoto.floorplanSpot);
+        onPhotoChange?.(currentPhoto.url);
+    // onPhotoChange is a callback prop; re-running on its identity would
+    // re-pan on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPhoto, revealSpot]);
+
+    // Keep the active thumbnail scrolled into view.
+    const thumbsRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const strip = thumbsRef.current;
+        const thumb = strip?.children[activePhoto] as HTMLElement | undefined;
+        if (!strip || !thumb) return;
+        const left = thumb.offsetLeft - (strip.clientWidth - thumb.offsetWidth) / 2;
+        strip.scrollTo({ left, behavior: 'smooth' });
+    }, [activePhoto]);
+
+    // Swipe the photo panel to step through photos.
+    const photoSwipeRef = useRef<{ x: number; y: number } | null>(null);
+    const handlePhotoPointerDown = useCallback((e: React.PointerEvent) => {
+        photoSwipeRef.current = { x: e.clientX, y: e.clientY };
+    }, []);
+    const handlePhotoPointerUp = useCallback((e: React.PointerEvent) => {
+        const start = photoSwipeRef.current;
+        photoSwipeRef.current = null;
+        if (!start) return;
+        const dx = e.clientX - start.x;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
+            showPhoto(activePhoto + (dx < 0 ? 1 : -1));
+        }
+    }, [showPhoto, activePhoto]);
+
     // Annotate mode: a click/tap drops a pin where it lands on the plan
     const addAnnotationAt = useCallback((clientX: number, clientY: number) => {
         const container = imageContainerRef.current;
@@ -506,7 +592,16 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
     // Keyboard handling
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            const typing = !!target?.closest?.('input, textarea, select');
+            if (typing && e.key !== 'Escape') return;
             switch (e.key) {
+                case 'ArrowRight':
+                    if (hasPhotoTour) { e.preventDefault(); showPhoto(activePhoto + 1); }
+                    break;
+                case 'ArrowLeft':
+                    if (hasPhotoTour) { e.preventDefault(); showPhoto(activePhoto - 1); }
+                    break;
                 case 'Escape':
                     if (detailAnnotation) {
                         setDetailAnnotation(null);
@@ -532,7 +627,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose, zoom, resetTransform, mode, editingAnnotation, detailAnnotation, handleAnnotationLabelSubmit]);
+    }, [onClose, zoom, resetTransform, mode, editingAnnotation, detailAnnotation, handleAnnotationLabelSubmit, hasPhotoTour, showPhoto, activePhoto]);
 
     // Prevent body scroll when modal is open
     useEffect(() => {
@@ -563,12 +658,14 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
 
     return (
         <div
-            className="fixed inset-0 bg-black/90 z-[6000] flex flex-col"
+            className="fixed inset-0 bg-black/90 z-[6000] flex flex-col md:flex-row"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
             role="dialog"
             aria-modal="true"
             aria-label={t('property:floorPlan.viewer.ariaLabel', 'Floor plan viewer')}
         >
+            {/* Plan stage — the toolbars below are positioned within it */}
+            <div className="relative flex-1 min-h-0 min-w-0 flex flex-col">
             {/* Top toolbar */}
             <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
                 <div className="pointer-events-auto flex items-center gap-2">
@@ -767,6 +864,48 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                             onError={handleImageError}
                             onDragStart={(e) => e.preventDefault()}
                         />
+
+                        {/* Photo cameras — where each photo was taken and which way it looks */}
+                        {tourPhotos.map((photo, i) => {
+                            const spot = photo.floorplanSpot!;
+                            const isActive = i === activePhoto;
+                            return (
+                                <button
+                                    key={photo.url}
+                                    type="button"
+                                    className="absolute rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onTouchStart={(e) => e.stopPropagation()}
+                                    onClick={(e) => { e.stopPropagation(); showPhoto(i); }}
+                                    aria-label={t('property:floorPlan.viewer.showPhoto', 'Show photo {{n}}', { n: i + 1 })}
+                                    aria-pressed={isActive}
+                                    style={{
+                                        left: `${spot.x}%`,
+                                        top: `${spot.y}%`,
+                                        // Only the camera dot is the hit target; the cone is decoration.
+                                        width: 28,
+                                        height: 28,
+                                        transform: 'translate(-50%, -50%) scale(var(--pin-scale, 1))',
+                                        zIndex: isActive ? 9 : 5,
+                                    }}
+                                >
+                                    <span
+                                        className="absolute left-1/2 top-1/2 pointer-events-none"
+                                        style={{
+                                            width: PHOTO_SPOT_SIZE,
+                                            height: PHOTO_SPOT_SIZE,
+                                            marginLeft: -PHOTO_SPOT_SIZE / 2,
+                                            marginTop: -PHOTO_SPOT_SIZE / 2,
+                                            transform: isActive ? 'scale(1.15)' : undefined,
+                                            transition: 'transform 0.2s ease-out',
+                                        }}
+                                    >
+                                        <PhotoSpotMarker angle={spot.angle} active={isActive} label={i + 1} />
+                                    </span>
+                                </button>
+                            );
+                        })}
 
                         {/* Annotations layer */}
                         {annotations.map(ann => {
@@ -1024,8 +1163,87 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ imageUrl, p
                     <div>{t('property:floorPlan.viewer.shortcuts.scroll', 'Scroll: Zoom | Drag: Pan | Double-click: Quick zoom')}</div>
                     <div>{t('property:floorPlan.viewer.shortcuts.keys', '+/-: Zoom | 0: Reset | Esc: Close')}</div>
                     {mode === 'annotate' && <div>{t('property:floorPlan.viewer.shortcuts.annotate', 'Click: Add label | Esc: Exit label mode')}</div>}
+                    {hasPhotoTour && <div>{t('property:floorPlan.viewer.shortcuts.photos', '←/→: Previous / next photo')}</div>}
                 </div>
             </div>
+            </div>
+
+            {/* Photo panel — in sync with the cameras on the plan */}
+            {hasPhotoTour && currentPhoto && (
+                <aside
+                    className="relative flex flex-col bg-neutral-950 border-t md:border-t-0 md:border-l border-white/10 h-[44%] md:h-auto md:w-[min(44vw,560px)] flex-shrink-0"
+                    aria-label={t('property:floorPlan.viewer.photosPanel', 'Photos on the floor plan')}
+                >
+                    <div
+                        className="relative flex-1 min-h-0 bg-black select-none"
+                        style={{ touchAction: 'pan-y' }}
+                        onPointerDown={handlePhotoPointerDown}
+                        onPointerUp={handlePhotoPointerUp}
+                        onPointerCancel={() => { photoSwipeRef.current = null; }}
+                    >
+                        <img
+                            key={currentPhoto.url}
+                            src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1200 }) || currentPhoto.url}
+                            alt={t('property:floorPlan.viewer.photoAlt', 'Photo {{current}} of {{total}}', { current: activePhoto + 1, total: tourPhotos.length })}
+                            className="absolute inset-0 w-full h-full object-contain animate-[fadeIn_0.2s_ease-out]"
+                            draggable={false}
+                        />
+                        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-sm">
+                            {activePhoto + 1} / {tourPhotos.length}
+                            {currentPhoto.tag !== 'other' && (
+                                <span className="ml-1.5 text-white/70">
+                                    · {t(`property:photos.categories.${currentPhoto.tag}`, { defaultValue: currentPhoto.tag.replace('_', ' ') })}
+                                </span>
+                            )}
+                        </div>
+                        {tourPhotos.length > 1 && (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => showPhoto(activePhoto - 1)}
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                                    aria-label={t('property:floorPlan.viewer.prevPhoto', 'Previous photo')}
+                                >
+                                    <ChevronLeftIcon className="w-5 h-5" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => showPhoto(activePhoto + 1)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                                    aria-label={t('property:floorPlan.viewer.nextPhoto', 'Next photo')}
+                                >
+                                    <ChevronRightIcon className="w-5 h-5" />
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Thumbnails */}
+                    {tourPhotos.length > 1 && (
+                        <div ref={thumbsRef} className="flex-shrink-0 flex gap-2 overflow-x-auto p-2 md:p-3 border-t border-white/10 [scrollbar-width:thin]">
+                            {tourPhotos.map((photo, i) => (
+                                <button
+                                    key={photo.url}
+                                    type="button"
+                                    onClick={() => showPhoto(i)}
+                                    className={`relative flex-shrink-0 w-16 h-12 md:w-20 md:h-14 rounded-md overflow-hidden border-2 transition-all ${i === activePhoto ? 'border-blue-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                                    aria-label={t('property:floorPlan.viewer.showPhoto', 'Show photo {{n}}', { n: i + 1 })}
+                                    aria-current={i === activePhoto}
+                                >
+                                    <img
+                                        src={optimizeCloudinaryUrl(photo.url, { width: 160 }) || photo.url}
+                                        alt=""
+                                        loading="lazy"
+                                        className="w-full h-full object-cover"
+                                        draggable={false}
+                                    />
+                                    <span className="absolute bottom-0.5 left-0.5 min-w-[16px] h-4 px-1 rounded-full bg-black/70 text-white text-[10px] leading-4 font-semibold text-center">{i + 1}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </aside>
+            )}
         </div>
     );
 };
