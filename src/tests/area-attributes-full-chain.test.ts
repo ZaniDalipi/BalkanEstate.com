@@ -150,7 +150,7 @@ describe('the two tables and the two validators agree about areas', () => {
                 landArea: 1, buildingArea: 1, grossArea: 1, netArea: 1, openPlanArea: 1,
             }).fields).sort();
 
-        for (const type of ['villa', 'luxury-villa', 'apartment', 'commercial', 'land']) {
+        for (const type of ['house', 'villa', 'luxury-villa', 'apartment', 'commercial', 'land']) {
             const client = attributesForType(type)
                 .filter((a) => MEASURED_ATTRIBUTES.has(a))
                 .slice()

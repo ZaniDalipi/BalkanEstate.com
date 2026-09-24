@@ -106,16 +106,21 @@ const RESIDENTIAL_ATTRIBUTES = [
 const RESIDENTIAL_STATS = ['beds', 'baths', 'livingRooms', 'sqft'] as const satisfies readonly StatKey[];
 
 /**
- * A villa is sold as two measurements, not one: how much ground it stands on
- * and how much of it is built. Listed before the room counts because that pair
- * is what a buyer compares two villas by.
+ * A building on its own plot is sold as two measurements, not one: how much
+ * ground it stands on and how much of that is built. Listed before the room
+ * counts because that pair is what two of them are compared by.
+ *
+ * A house belongs here as much as a villa does. Asking a house for one plain
+ * "Area" left the seller to decide whether that meant the plot or the floor
+ * they walk on, and the buyer to guess which they had been told — the same
+ * question, asked ambiguously, that gross and net answer for a flat.
  */
-const VILLA_ATTRIBUTES = [
+const PLOTTED_HOME_ATTRIBUTES = [
   'landArea', 'buildingArea', ...RESIDENTIAL_ATTRIBUTES,
 ] as const satisfies readonly TypeAttribute[];
 
 const PROFILES: Record<PropertyType, TypeProfile> = {
-  house: { attributes: RESIDENTIAL_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#0252CD' },
+  house: { attributes: PLOTTED_HOME_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#0252CD' },
   // A flat is measured gross (its share of the walls and common parts included)
   // and net (the floor actually walked on). Buyers are quoted both and the two
   // differ by 10-25%, so carrying only one of them misstates the flat.
@@ -124,9 +129,9 @@ const PROFILES: Record<PropertyType, TypeProfile> = {
     stats: RESIDENTIAL_STATS,
     color: '#28a745',
   },
-  villa: { attributes: VILLA_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#6f42c1' },
+  villa: { attributes: PLOTTED_HOME_ATTRIBUTES, stats: RESIDENTIAL_STATS, color: '#6f42c1' },
   'luxury-villa': {
-    attributes: VILLA_ATTRIBUTES,
+    attributes: PLOTTED_HOME_ATTRIBUTES,
     stats: RESIDENTIAL_STATS,
     color: '#FFA500', // Amber/gold — exclusive to the Luxury Villas tab
   },

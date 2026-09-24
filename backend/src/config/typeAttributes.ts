@@ -74,18 +74,22 @@ const RESIDENTIAL_ATTRIBUTES: readonly TypeAttribute[] = [
   'toilets', 'storageRooms', 'offices', 'totalFloors',
 ];
 
-/** Ground stood on and ground built over — how two villas are compared. */
-const VILLA_ATTRIBUTES: readonly TypeAttribute[] = [
+/**
+ * Ground stood on and ground built over — how two buildings on their own plot
+ * are compared. A house is described this way as much as a villa is; one
+ * plain "Area" never said which of the two it meant.
+ */
+const PLOTTED_HOME_ATTRIBUTES: readonly TypeAttribute[] = [
   'landArea', 'buildingArea', ...RESIDENTIAL_ATTRIBUTES,
 ];
 
 const ATTRIBUTES_BY_TYPE: Record<PropertyType, readonly TypeAttribute[]> = {
-  house: RESIDENTIAL_ATTRIBUTES,
+  house: PLOTTED_HOME_ATTRIBUTES,
   // Gross includes the flat's share of walls and common parts, net is the
   // floor actually walked on; a buyer is quoted both.
   apartment: ['grossArea', 'netArea', ...RESIDENTIAL_ATTRIBUTES, 'floorNumber'],
-  villa: VILLA_ATTRIBUTES,
-  'luxury-villa': VILLA_ATTRIBUTES,
+  villa: PLOTTED_HOME_ATTRIBUTES,
+  'luxury-villa': PLOTTED_HOME_ATTRIBUTES,
   commercial: ['offices', 'openPlanArea', 'kitchens', 'toilets', 'storageRooms', 'floorNumber', 'totalFloors'],
   parking: ['parking', 'parkingType', 'floorNumber'],
   land: [],

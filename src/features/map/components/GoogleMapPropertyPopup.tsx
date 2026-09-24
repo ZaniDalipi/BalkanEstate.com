@@ -7,6 +7,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
+import { resolveDisplayArea } from '@/shared/property/area';
 import { PROMOTION_TIER_COLORS } from './googleMapConstants';
 
 interface GoogleMapPropertyPopupProps {
@@ -22,6 +23,10 @@ interface GoogleMapPropertyPopupProps {
 }
 
 const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ property, onClose, onViewDetails, distanceLabel, placement = 'top', tailOffsetX = 0 }) => {
+  // Resolved here rather than read off `property.sqft`: a popup is often
+  // handed a raw API row that never passed through a transform, and a flat
+  // quoted only in gross and net would show the "0 m²" the field holds.
+  const area = resolveDisplayArea(property);
   const { t } = useTranslation(['property']);
   const imageUrl = property.images?.[0]
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
@@ -174,14 +179,16 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
         {/* Property details - inline */}
         <div className="map-popup-reveal map-popup-reveal-3 flex items-center gap-2 mb-2.5 text-[11px] text-gray-600">
           {property.propertyType === 'land' ? (
-            <span className="flex items-center gap-1 bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">
-              📐 <b>{property.sqft?.toLocaleString()}</b> m²
-            </span>
+            area && (
+              <span className="flex items-center gap-1 bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">
+                📐 <b>{area.value.toLocaleString()}</b> m²
+              </span>
+            )
           ) : (
             <>
               <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🛏 {property.beds || 0}</span>
               <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">🚿 {property.baths || 0}</span>
-              <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">📐 {property.sqft || 0}</span>
+              {area && <span className="bg-gray-100 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-primary/10 hover:-translate-y-0.5">📐 {area.value.toLocaleString()}</span>}
             </>
           )}
         </div>

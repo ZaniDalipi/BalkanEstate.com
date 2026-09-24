@@ -544,16 +544,23 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               );
             })}
 
-            {/* Area — the one measure every listing has, whatever its type. */}
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-default group">
-              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                <SqftIcon className="w-5 h-5 text-emerald-500" />
+            {/* Area — the one measure every listing has, whatever its type.
+                `property.sqft` is already backfilled from the type's own
+                breakdown (gross/net, land/building, open-plan) wherever the
+                total-area box was left blank — see `resolveTotalArea`. A
+                listing with genuinely no area on file hides the tile rather
+                than print a "0 m²" that looks like a real measurement. */}
+            {property.sqft > 0 && (
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-default group">
+                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <SqftIcon className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-neutral-900 leading-none">{property.sqft}</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">m²</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xl font-bold text-neutral-900 leading-none">{property.sqft}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">m²</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

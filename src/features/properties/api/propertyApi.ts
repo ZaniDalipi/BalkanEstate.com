@@ -5,6 +5,7 @@ import { apiRequest, uploadRequest } from '@/src/shared/api';
 import type { Property, Filters, UserRole } from '@/src/shared/types';
 import { buildConstructionFields } from '@/shared/property/construction';
 import { copyTypeAttributes } from '@/shared/property/typeAttributes';
+import { resolveTotalArea } from '@/shared/property/area';
 
 // --- Transformers ---
 
@@ -25,7 +26,10 @@ export function transformBackendProperty(backendProp: any): Property {
     // Room counts, open-plan area, parking and floors, read from the type
     // table so a newly added attribute cannot be dropped here.
     ...copyTypeAttributes(backendProp),
-    sqft: backendProp.sqft,
+    // A record whose total-area box was left empty while its gross/net,
+    // land/building or open-plan area was filled in is backfilled from that
+    // breakdown, so the page never shows "0 m²" next to a real measurement.
+    sqft: resolveTotalArea(backendProp),
     // Ingestion boundary: a status the client does not know becomes 'ready',
     // and an unusable completion year is dropped rather than carried into the
     // UI as a promise nobody can render.
@@ -134,7 +138,7 @@ export function transformToBackendProperty(frontendProp: Property): any {
     city: frontendProp.city,
     country: frontendProp.country,
     ...copyTypeAttributes(frontendProp as unknown as Record<string, unknown>),
-    sqft: frontendProp.sqft,
+    sqft: resolveTotalArea(frontendProp as unknown as Record<string, unknown>),
     ...buildConstructionFields({
       constructionStatus: frontendProp.constructionStatus,
       expectedCompletionYear: frontendProp.expectedCompletionYear,

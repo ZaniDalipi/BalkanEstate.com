@@ -363,10 +363,17 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               <span className="text-sm font-semibold">{property.livingRooms ?? 0}</span>
             </div>
           )}
-          <div className="flex items-center gap-1">
-            <SqftIcon className="w-4 h-4 text-primary" />
-            <span className="text-sm font-bold text-primary">{property.sqft} {t('common:sqm')}</span>
-          </div>
+          {/* `sqft` is already backfilled from the type's own breakdown
+              (gross/net, land/building, open-plan) — see `resolveTotalArea`
+              — so a zero here means the listing genuinely has no area on
+              file anywhere, and the stat is dropped rather than shown as a
+              measurement nobody gave. */}
+          {property.sqft > 0 && (
+            <div className="flex items-center gap-1">
+              <SqftIcon className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold text-primary">{property.sqft} {t('common:sqm')}</span>
+            </div>
+          )}
         </div>
 
         {/* Description excerpt */}
