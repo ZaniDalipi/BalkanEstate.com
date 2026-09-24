@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability } from '@/types';
+import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability, FloorplanSpot } from '@/types';
 import type { ConstructionStatus } from '@/shared/property/construction';
 import { validateConstruction, validateTypeAttributes } from '@/shared/utils/validation';
 import type { ParkingType } from '@/shared/property/typeAttributes';
@@ -103,6 +103,13 @@ export interface ListingData {
 export interface ImageData {
     file: File | null;
     previewUrl: string;
+    /** Where on the floor plan this photo was taken (photos only). */
+    floorplanSpot?: FloorplanSpot;
+}
+
+/** A floor plan in the listing form: one per floor (Floor 1, Floor 2, Attic…). */
+export interface FloorPlanDraft extends ImageData {
+    label: string;
 }
 
 export const initialListingData: ListingData = {

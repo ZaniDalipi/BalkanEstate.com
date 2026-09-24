@@ -58,7 +58,7 @@ export const ALLOWED_PROPERTY_FIELDS = [
   'tourUrl', 'virtualTour360Url', 'hasVirtualTour360', 'videoUrl',
   'imageUrl', 'imagePublicId', 'images',
   'lat', 'lng',
-  'propertyType', 'floorplanUrl', 'floorplanPublicId',
+  'propertyType', 'floorplanUrl', 'floorplanPublicId', 'floorplans',
   'amenities', 'hasBalcony', 'hasGarden', 'hasElevator', 'hasSecurity',
   'hasAirConditioning', 'hasPool', 'petsAllowed',
   'distanceToCenter', 'distanceToSea', 'distanceToSchool', 'distanceToHospital',
@@ -1000,10 +1000,14 @@ export const createProperty = async (
           String(property._id),
           property.title
         );
-        property.images = organized.map((i) => ({
+        // organizeListingMedia returns one entry per input, in order, so each
+        // photo's floor plan spot is carried across by index.
+        const spots = property.images.map((i) => i.floorplanSpot);
+        property.images = organized.map((i, idx) => ({
           url: i.url,
           publicId: i.publicId,
           tag: (i.tag as 'main' | 'floorplan' | 'other') ?? 'other',
+          ...(spots[idx] ? { floorplanSpot: spots[idx] } : {}),
         })) as typeof property.images;
 
         const main = organized.find((i) => i.tag === 'main') ?? organized[0];

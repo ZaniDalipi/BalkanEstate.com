@@ -2,6 +2,7 @@
 // pulled into nearly every form, and the barrel would drag the whole
 // country/city gazetteer along with it.
 import { normalizePlaceName } from '@/shared/geo/normalize';
+import type { FloorplanSpot } from '@/shared/types/property.types';
 import {
   COMPLETION_YEAR_HORIZON,
   MIN_COMPLETION_YEAR,
@@ -806,6 +807,63 @@ export function validateRoomCount(count: number | string, fieldName = 'Count'): 
   return { isValid: true };
 }
 
+// ── Floor plan photo spots ────────────────────────────────────────────────
+
+/** Most floor plans one listing can have (mirrors the backend schema). */
+export const MAX_FLOORPLANS = 10;
+/** Longest floor plan label ("Floor 1", "Attic", "Basement"…). */
+export const MAX_FLOORPLAN_LABEL = 40;
+
+/** Wrap any angle into whole degrees 0–359 (clockwise from "up" on the plan). */
+export function normalizeAngle(deg: number): number {
+  return ((Math.round(deg) % 360) + 360) % 360;
+}
+
+/**
+ * A photo's floor plan spot: x/y are percentages of the plan (0–100) and
+ * angle is the camera direction in degrees. Mirrors the backend sub-schema.
+ */
+export function validateFloorplanSpot(spot: unknown): ValidationResult {
+  if (!spot || typeof spot !== 'object') {
+    return { isValid: false, error: 'Photo spot must be an object' };
+  }
+  const { x, y, angle } = spot as Record<string, unknown>;
+  const inRange = (v: unknown) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100;
+  if (!inRange(x) || !inRange(y)) {
+    return { isValid: false, error: 'Photo spot must lie on the floor plan' };
+  }
+  if (typeof angle !== 'number' || !Number.isFinite(angle)) {
+    return { isValid: false, error: 'Photo spot needs a camera direction' };
+  }
+  const { floor } = spot as Record<string, unknown>;
+  if (floor !== undefined && !(Number.isInteger(floor) && (floor as number) >= 0 && (floor as number) < MAX_FLOORPLANS)) {
+    return { isValid: false, error: 'Photo spot is on an unknown floor' };
+  }
+  return { isValid: true };
+}
+
+/**
+ * Coerce a spot read from the API into a valid one, or drop it: positions
+ * are clamped onto the plan, a missing direction faces up, anything that
+ * isn't a pair of numbers is discarded.
+ */
+export function sanitizeFloorplanSpot(spot: unknown): FloorplanSpot | undefined {
+  if (!spot || typeof spot !== 'object') return undefined;
+  const { x, y, angle } = spot as Record<string, unknown>;
+  if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) {
+    return undefined;
+  }
+  const clamp = (v: number) => Math.min(100, Math.max(0, v));
+  const { floor } = spot as Record<string, unknown>;
+  const result: FloorplanSpot = {
+    x: clamp(x),
+    y: clamp(y),
+    angle: typeof angle === 'number' && Number.isFinite(angle) ? normalizeAngle(angle) : 0,
+    ...(typeof floor === 'number' && Number.isInteger(floor) && floor > 0 ? { floor } : {}),
+  };
+  return validateFloorplanSpot(result).isValid ? result : undefined;
+}
+
 export default {
   validateEmail,
   validatePhone,
@@ -825,4 +883,6 @@ export default {
   validateConstruction,
   validateTypeAttributes,
   validateRoomCount,
+  validateFloorplanSpot,
+  sanitizeFloorplanSpot,
 };

@@ -11,6 +11,8 @@ import {
   BuildingOfficeIcon,
 } from '../../../constants';
 import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import PhotoSpotMarker, { PHOTO_SPOT_SIZE } from './PhotoSpotMarker';
+import { getFloorPlans, spotFloor } from '@/shared/utils/floorplans';
 import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } from '../../../config/galleryImages';
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
@@ -22,6 +24,8 @@ interface PropertyGalleryProps {
   onOpenViewer: () => void;
   onNavigateTo3DTour?: () => void;
   onView3DMap?: () => void;
+  /** Open the floor plan viewer on this photo (shown when it has a floor plan spot). */
+  onOpenFloorPlan?: (photoUrl: string) => void;
   // Controlled mode props
   activeCategory?: PropertyImageTag | 'all';
   currentImageIndex?: number;
@@ -173,6 +177,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   onOpenViewer,
   onNavigateTo3DTour,
   onView3DMap,
+  onOpenFloorPlan,
   activeCategory: controlledCategory,
   currentImageIndex: controlledIndex,
   onCategoryChange,
@@ -499,6 +504,17 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [activeCategory, allImages, categorizedImages]);
 
   const currentImageUrl = imagesForCurrentCategory[currentImageIndex]?.url || property.imageUrl;
+
+  // Where the current photo was taken on the floor plan, if the seller marked it.
+  const currentSpot = useMemo(
+    () => property.images?.find((img) => img.url === currentImageUrl)?.floorplanSpot,
+    [property.images, currentImageUrl]
+  );
+  // The plan of the floor that photo was taken on (Floor 1, Floor 2…).
+  const currentSpotPlanUrl = useMemo(
+    () => (currentSpot ? getFloorPlans(property)[spotFloor(currentSpot)]?.url : undefined),
+    [currentSpot, property]
+  );
 
   /**
    * Warm the whole listing the moment it opens, not just the active category.
@@ -975,6 +991,42 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         {/* ── OVERLAYS (photos mode only) ── */}
         {viewMode === 'photos' && (
           <>
+            {/* Mini floor plan: where this photo was taken and which way it looks.
+                The camera glides to each photo's spot as the gallery moves. */}
+            {currentSpot && currentSpotPlanUrl && onOpenFloorPlan && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onOpenFloorPlan(currentImageUrl); }}
+                className="absolute bottom-3 left-3 z-[4] rounded-lg bg-white/95 p-1 shadow-lg ring-1 ring-black/10 hover:scale-[1.03] active:scale-95 transition-transform"
+                aria-label={t('property:gallery.seeOnFloorPlan', 'See where this photo was taken on the floor plan')}
+                title={t('property:gallery.seeOnFloorPlan', 'See where this photo was taken on the floor plan')}
+              >
+                <span className="relative block overflow-hidden rounded">
+                  <img
+                    src={optimizeCloudinaryUrl(currentSpotPlanUrl, { width: 320, quality: 'auto' }) || currentSpotPlanUrl}
+                    alt=""
+                    className="block w-auto h-auto max-w-[96px] max-h-[72px] sm:max-w-[150px] sm:max-h-[110px]"
+                    draggable={false}
+                  />
+                  <span
+                    className="absolute pointer-events-none"
+                    style={{
+                      left: `${currentSpot.x}%`,
+                      top: `${currentSpot.y}%`,
+                      width: PHOTO_SPOT_SIZE,
+                      height: PHOTO_SPOT_SIZE,
+                      marginLeft: -PHOTO_SPOT_SIZE / 2,
+                      marginTop: -PHOTO_SPOT_SIZE / 2,
+                      transform: 'scale(0.5)',
+                      transition: 'left 0.35s ease-out, top 0.35s ease-out',
+                    }}
+                  >
+                    <PhotoSpotMarker angle={currentSpot.angle} active />
+                  </span>
+                </span>
+              </button>
+            )}
+
             {/* Top-left badge stack: 3D Tour + 3D Map */}
             {((videoEnded && property.virtualTour360Url) || onView3DMap) && (
               <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">

@@ -353,6 +353,39 @@
       "bbq": "Roštilj",
       "homeCinema": "Kućni bioskop",
       "beachAccess": "Pristup plaži"
+    },
+    "photoSpots": {
+      "title": "Postavite fotografije na plan stana",
+      "instructions": "Izaberite fotografiju, dodirnite mjesto gdje je snimljena i povucite prema onome što prikazuje. Povucite kameru da je pomjerite ili njenu ručicu da je okrenete.",
+      "progress": "Postavljeno {{placed}} od {{total}}",
+      "planAlt": "Plan stana",
+      "moveCamera": "Pomjeri kameru za fotografiju {{n}}",
+      "turnCamera": "Okreni kameru",
+      "placedHint": "Povucite kameru da je pomjerite ili ručicu da je okrenete.",
+      "placeHint": "Dodirnite plan gdje je ova fotografija snimljena, pa povucite da je usmjerite.",
+      "photoN": "Fotografija {{n}}",
+      "placed": "Na planu",
+      "notPlaced": "Još nije postavljena",
+      "turnLeft": "Okreni lijevo",
+      "turnRight": "Okreni desno",
+      "remove": "Ukloni",
+      "cta": "Pokažite kupcima gdje je snimljena svaka fotografija",
+      "ctaHint": "Kupci vide kameru na planu stana za svaku fotografiju, usklađeno dok pregledaju.",
+      "edit": "Uredi položaje fotografija ({{placed}}/{{total}})",
+      "start": "Postavi fotografije na plan stana",
+      "onFloor": "Na: {{floor}}"
+    },
+    "floors": {
+      "defaultLabel": "Sprat {{n}}",
+      "hint": "Dodajte plan za svaki sprat (Sprat 1, Sprat 2, Potkrovlje, Podrum…).",
+      "remove": "Ukloni plan",
+      "name": "Naziv sprata",
+      "replace": "Zamijeni sliku",
+      "replaceShort": "Zamijeni",
+      "add": "Dodaj još jedan plan",
+      "limitTitle": "Dostignut je limit planova",
+      "limit": "Oglas može imati najviše {{max}} planova.",
+      "switch": "Spratovi"
     }
   },
   "myListings": {

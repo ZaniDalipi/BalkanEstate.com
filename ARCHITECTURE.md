@@ -38,6 +38,7 @@ src/components/property/  # Shared property UI (used by multiple features)
 ├── PropertyInfo.tsx      # Stats grid + description + amenities
 ├── PropertyContact.tsx   # Seller sidebar (desktop) + contact actions
 ├── PropertyPhotos.tsx    # Thumbnail strip
+├── PhotoSpotMarker.tsx   # Camera + view cone drawn on a floor plan
 ├── PropertyMapLink.tsx
 └── NeighborhoodInsights.tsx
 ```
@@ -614,6 +615,68 @@ Key decisions:
 - **The maths is separate from the map.** `solarPosition.ts` has no MapLibre or
   DOM dependency and is covered by `src/tests/solar-position.test.ts`
   (published Belgrade sun times, DST, 32 towns' time zones).
+
+---
+
+## Floor Plan — Floors & Photo Spots (Zillow-style)
+
+A listing can have **several floor plans** (Floor 1, Floor 2, Attic,
+Basement…), and each photo can record **where on which floor it was taken and
+which way the camera faced**. Buyers browse the plans and the photos together.
+
+```
+Property.floorplans?: { url, publicId?, label? }[]   (max 10, in order)
+Property.floorplanUrl   — mirrors floorplans[0] (pre-validate hook) for older readers
+PropertyImage.floorplanSpot?: { x, y, angle, floor? }
+   x, y   — % of that floor's plan image (0–100, origin top-left)
+   angle  — degrees clockwise from "up" on the plan (0–359)
+   floor  — index into floorplans; absent = first floor
+
+Read floors with getFloorPlans(property) and a spot's floor with spotFloor(spot)
+(src/shared/utils/floorplans.ts): listings saved before floors existed only have
+floorplanUrl and spots without `floor`, and still work.
+
+Seller: ListingImageUpload (floor cards: name / replace / remove)
+          → FloorPlanPhotoPlacer (floor chips; spots via setPhotoSpots)
+Buyer:  PropertyGallery mini-plan ⇄ FloorPlanViewerModal
+          ├── Photos tab     — big photo, sidebar with one FloorPlanMiniMap per floor
+          └── Floor Plan tab — pan/zoom plan over a blurred photo, floor cards,
+                               green squares that jump to their photo
+```
+
+- **Storage** — the spot lives on the image itself (`images[].floorplanSpot`,
+  a validated sub-schema in `backend/src/models/Property.ts`), so it travels
+  with the photo through reorder, delete and edit round-trips. On create,
+  `organizeListingMedia` returns images 1:1 in order, and spots are carried
+  across by index.
+- **Validation** — `validateFloorplanSpot` / `sanitizeFloorplanSpot` and the
+  `MAX_FLOORPLANS` / `MAX_FLOORPLAN_LABEL` limits in
+  `src/shared/utils/validation.ts`; spots read back for editing are sanitised.
+- **Floors change → spots follow** (`useListingForm`): replacing a floor's plan
+  drops the spots on that floor; removing a floor drops its spots and moves
+  spots on later floors down one.
+- **Markers** — buyers see Zillow's green squares, with the photo on screen as a
+  red square plus a yellow view cone (`PhotoSpotSquare`); the seller's editor
+  uses numbered cameras with an aim handle (`PhotoSpotMarker`). Both live in
+  `src/components/property/PhotoSpotMarker.tsx`.
+- **Sync** — the viewer opens on the photo showing in the gallery (Photos tab)
+  or on the plan (Floor Plan tab, from the details section). The stage floor
+  follows the photo on screen; tapping a square jumps to its photo; the plan
+  pans to the current square only when it is off screen; the gallery follows
+  via `onPhotoChange`. Room labels (saved on the device) are per floor.
+- **Full-screen overlays are portalled to `<body>`** and sized `100dvh` with
+  safe-area padding. Opened from the listing form, an ancestor's
+  `backdrop-filter`/`transform` otherwise becomes the containing block for
+  `position: fixed`, stretching the overlay to the form's height (scrolling).
+  Nothing in them scrolls except a list that genuinely overflows (3+ floors).
+- **Pan/zoom** in `FloorPlanViewerModal` keeps the view in a ref and writes the
+  transform to the DOM once per animation frame; React state only follows the
+  settled zoom. The plan is laid out at its fitted size and CSS-scaled from
+  there, the view is clamped so the plan can never leave the frame, and a
+  `ResizeObserver` refits it when the stage changes size. The plan stays
+  mounted under the Photos tab so it keeps its zoom and listeners.
+- The placer sizes the plan to its stage with a `ResizeObserver`; the mini plans
+  fit their cards with container query units (`cqw`/`cqh`).
 
 ---
 

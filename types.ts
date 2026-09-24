@@ -294,9 +294,30 @@ export interface Agency {
     scoreBreakdown?: { listings: number; team: number; experience: number; featured: number };
 }
 
+/**
+ * Where on the floor plan a photo was taken from, and which way the camera
+ * faced. x/y are percentages of the floor plan image (0–100, origin top-left);
+ * angle is degrees clockwise from "up" on the plan (0–359).
+ */
+export interface FloorplanSpot {
+    x: number;
+    y: number;
+    angle: number;
+    /** Index into the listing's floor plans (0 = first floor plan). */
+    floor?: number;
+}
+
+/** One floor's plan (Floor 1, Floor 2, Attic…). */
+export interface FloorplanLevel {
+    url: string;
+    label?: string;
+}
+
 export interface PropertyImage {
     url: string;
     tag: PropertyImageTag;
+    /** Camera position on the floor plan, when the seller marked it. */
+    floorplanSpot?: FloorplanSpot;
 }
 
 export type FurnishingStatus = 'any' | 'furnished' | 'semi-furnished' | 'unfurnished';
@@ -383,6 +404,8 @@ export interface Property {
     floorNumber?: number;
     totalFloors?: number;
     floorplanUrl?: string;
+    /** Every floor's plan, in order. floorplanUrl mirrors the first for older readers. */
+    floorplans?: FloorplanLevel[];
     createdAt?: number;
     lastRenewed?: number;
     views?: number;
