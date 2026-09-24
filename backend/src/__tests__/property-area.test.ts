@@ -23,14 +23,14 @@ describe('resolveTotalArea', () => {
     expect(resolveTotalArea('apartment', { sqft: 0, netArea: 87.25 })).toBe(87.25);
   });
 
-  it("prefers a villa's built area over its plot", () => {
-    expect(resolveTotalArea('villa', { sqft: 0, landArea: 5550.5, buildingArea: 220 })).toBe(220);
-    expect(resolveTotalArea('luxury-villa', { sqft: 0, landArea: 5550.5 })).toBe(5550.5);
+  it("prefers a villa's whole plot over its built area", () => {
+    expect(resolveTotalArea('villa', { sqft: 0, landArea: 5550.5, buildingArea: 220 })).toBe(5550.5);
+    expect(resolveTotalArea('luxury-villa', { sqft: 0, buildingArea: 516 })).toBe(516);
   });
 
   it('describes a house by the same pair as a villa', () => {
-    expect(resolveTotalArea('house', { sqft: 0, landArea: 600, buildingArea: 140 })).toBe(140);
-    expect(resolveTotalArea('house', { sqft: 0, landArea: 600 })).toBe(600);
+    expect(resolveTotalArea('house', { sqft: 0, landArea: 600, buildingArea: 140 })).toBe(600);
+    expect(resolveTotalArea('house', { sqft: 0, buildingArea: 140 })).toBe(140);
   });
 
   it("backfills a shop's total area from its open-plan floor", () => {

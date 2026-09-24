@@ -33,7 +33,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/balkan
  * A listing that already states a size keeps it, whatever its breakdown says
  * — this fills blanks, it does not re-measure. The value written is the one
  * the cards and the detail page already show (`resolveTotalArea`: gross before
- * net for a flat, built area before plot for a house or villa), so nothing on
+ * net for a flat, the whole plot before the building for a house or villa), so nothing on
  * screen changes; the listing simply becomes findable. That also makes it
  * re-runnable: a row it fixes stops matching the filter.
  *

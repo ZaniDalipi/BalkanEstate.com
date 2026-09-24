@@ -53,10 +53,10 @@ describe('a type that shows its own breakdown is sized by that breakdown', () =>
         })).toBe(85);
     });
 
-    it("takes a villa's building area over the plot and over a stale total", () => {
+    it("takes a villa's whole plot over its building area and over a stale total", () => {
         expect(submittedArea({
-            propertyType: 'luxury-villa', sq_meters: 5550, landArea: 5550, buildingArea: 516,
-        })).toBe(516);
+            propertyType: 'luxury-villa', sq_meters: 9999, landArea: 1500, buildingArea: 500,
+        })).toBe(1500);
     });
 
     it("takes a shop's open-plan floor", () => {
@@ -67,8 +67,8 @@ describe('a type that shows its own breakdown is sized by that breakdown', () =>
         expect(submittedArea({ propertyType: 'apartment', netArea: 70 })).toBe(70);
     });
 
-    it("takes a house's building area over its plot", () => {
-        expect(submittedArea({ propertyType: 'house', landArea: 600, buildingArea: 140 })).toBe(140);
+    it("takes a house's whole plot over its building area", () => {
+        expect(submittedArea({ propertyType: 'house', landArea: 600, buildingArea: 140 })).toBe(600);
     });
 });
 
@@ -91,7 +91,7 @@ describe('a listing that predates its breakdown keeps the area it has', () => {
     });
 
     it('still prefers the breakdown the moment the seller fills one in', () => {
-        expect(submittedArea({ propertyType: 'house', sq_meters: 150, buildingArea: 140 })).toBe(140);
+        expect(submittedArea({ propertyType: 'house', sq_meters: 150, landArea: 600 })).toBe(600);
     });
 });
 
