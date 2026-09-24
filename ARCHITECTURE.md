@@ -601,6 +601,62 @@ Key decisions:
 
 ---
 
+## Total Area — one size, asked for once
+
+Every listing states one size, `sqft`, and everything compares listings by it:
+the stat on the card, the price-per-m² line, the `minSqft`/`maxSqft` filter and
+the area sorts. But most types are *described* by a breakdown instead — a flat
+by gross and net, a house or villa by its plot and its footprint, business
+premises by their open-plan floor — and those are separate fields. A seller who
+filled the breakdown and left the plain total-area box blank stored `sqft: 0`,
+which printed as "0 m²" beside a description reading "79 m² gross".
+
+```
+src/shared/property/area.ts                  ← the rule (pure)
+  ├── typeHasMeasuredBreakdown(type)         does this type describe its own size?
+  ├── resolveBreakdownArea(record)           the breakdown alone
+  ├── resolveDisplayArea(record)             total → breakdown   (read side)
+  ├── resolveTotalArea(record)               ↑ as a plain number
+  └── resolveSubmittedArea(record)           breakdown → total   (write side)
+        │
+        ├── ListingFormFields          hides the plain box where a breakdown is asked for
+        ├── useListingForm             preview + submit
+        ├── apiService / propertyApi transformers ← API ingestion boundary
+        ├── PropertyInfo · PropertyCard · HighlightedPropertyCard
+        ├── backend/src/config/propertyArea.ts (mirror) → Property pre('validate')
+        └── scripts/backfillPropertyAreas.ts   one-off, for rows written before the rule
+```
+
+Key decisions:
+- **Asked once, not three times.** The form asks a type for its own breakdown
+  *or* for a plain "Area", never both — `typeHasMeasuredBreakdown` decides, and
+  the same function decides which the write path believes. A villa once showed
+  Land, Building and Area together with nothing saying which one sized it.
+- **The two sides have opposite precedence, deliberately.** Reading a stored
+  listing the total wins: someone entered it, and it may count what the
+  breakdown does not. Saving the form the breakdown wins, because that is what
+  the seller was shown — `sq_meters` still holds the stored total (edit) or the
+  AI's guess (generate-from-photos) in a box they never saw, and a corrected
+  gross area of 85 must not save as the 79 sitting behind it.
+- **…but the breakdown only wins when there is one.** A listing published
+  before its breakdown was ever asked for has a real total and empty breakdown
+  fields; ignoring the total there would save it back as 0 m² — the original
+  fault, from the other direction. `resolveSubmittedArea` falls back to it.
+- **Built area before plot.** A house or villa resolves to `buildingArea`
+  before `landArea`. Taking the plot first would divide the price by a garden
+  and call the result a price per m².
+- **A zero is "not measured", never "0 m²".** Types with no breakdown (parking,
+  land) can still have nothing on file; the cards and detail page drop the stat
+  rather than print a measurement nobody gave.
+- **Display fixes cannot reach the database.** Search, sorting and
+  price-per-m² run in MongoDB against the stored field, so a row the read path
+  renders correctly is still missing from "50 m² and up". The schema hook
+  covers every future write; `backfillPropertyAreas` covers the rows already
+  written, filling blanks only and never re-measuring a listing that states a
+  size.
+
+---
+
 ## Sticky Bottom Action Bar
 
 Mobile-only companion to the desktop `PropertyContact` sidebar.

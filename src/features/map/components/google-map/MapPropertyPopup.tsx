@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { resolveDisplayArea } from '@/shared/property/area';
 
 // Promotion tier colors
 const PROMOTION_TIER_COLORS: Record<string, string> = {
@@ -24,6 +25,9 @@ interface MapPropertyPopupProps {
 }
 
 const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, onViewDetails }) => {
+  // See GoogleMapPropertyPopup: resolved, not read off `sqft`, because a
+  // popup is often handed a raw API row that skipped the transforms.
+  const area = resolveDisplayArea(property);
   const { t } = useTranslation(['property']);
   const allImages = (() => {
     const base = property.imageUrl ? [property.imageUrl] : [];
@@ -228,10 +232,10 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
               <span>{property.baths}</span>
             </span>
           )}
-          {property.sqft && (
+          {area && (
             <span className="flex items-center gap-0.5">
               <span>📐</span>
-              <span>{property.sqft}m²</span>
+              <span>{area.value.toLocaleString()}m²</span>
             </span>
           )}
         </div>

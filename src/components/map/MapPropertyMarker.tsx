@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { typeLabel, type TranslateFn } from '@/shared/constants/propertyTypes';
 import { ALL_PROPERTY_TYPES, colorForType } from '@/shared/property/typeAttributes';
+import { resolveDisplayArea } from '@/shared/property/area';
 import { Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '@/types';
@@ -739,6 +740,11 @@ const PropertyPopup: React.FC<{
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const isRental = (property.listingType || 'sale') === 'rent';
 
+  // Resolved rather than read off `property.sqft`: a marker popup is handed
+  // whatever row the map loaded, which may not have passed through an API
+  // transform, and a flat quoted only in gross and net would show "0 m²".
+  const area = resolveDisplayArea(property);
+
   // Check if property is actively promoted
   const isActivelyPromoted = property.isPromoted &&
     property.promotionEndDate &&
@@ -897,7 +903,7 @@ const PropertyPopup: React.FC<{
           {/* Property stats - compact */}
           {property.propertyType === 'land' ? (
             <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
-              <span className="font-semibold">{property.sqft?.toLocaleString()} m²</span>
+              {area && <span className="font-semibold">{area.value.toLocaleString()} m²</span>}
             </div>
           ) : (
             <div className="flex items-center gap-2 text-[10px] text-neutral-600 mb-1.5">
@@ -907,7 +913,7 @@ const PropertyPopup: React.FC<{
               {typeHasAttribute(property.propertyType, 'baths') && (
                 <span><b>{property.baths ?? 0}</b> {t('map.popup.bath')}</span>
               )}
-              <span><b>{property.sqft}</b> m²</span>
+              {area && <span><b>{area.value.toLocaleString()}</b> m²</span>}
             </div>
           )}
 
@@ -985,7 +991,7 @@ const PropertyPopup: React.FC<{
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
             </svg>
-            <span className="font-semibold">{property.sqft?.toLocaleString()}</span>
+            <span className="font-semibold">{area ? area.value.toLocaleString() : '—'}</span>
             <span>m²</span>
           </div>
         ) : (
@@ -1010,7 +1016,7 @@ const PropertyPopup: React.FC<{
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
-              <span className="font-semibold">{property.sqft}</span>
+              <span className="font-semibold">{area ? area.value.toLocaleString() : '—'}</span>
             </div>
           </div>
         )}
