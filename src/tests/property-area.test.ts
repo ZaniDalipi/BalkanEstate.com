@@ -33,12 +33,12 @@ describe('resolveDisplayArea', () => {
       .toEqual({ value: 70, source: 'netArea' });
   });
 
-  it("falls back to a villa's building area before its land area", () => {
+  it("falls back to a villa's land area before its building area", () => {
     expect(resolveDisplayArea({ propertyType: 'villa', sqft: 0, landArea: 5550.5, buildingArea: 220 }))
-      .toEqual({ value: 220, source: 'buildingArea' });
-
-    expect(resolveDisplayArea({ propertyType: 'luxury-villa', sqft: undefined, landArea: 5550.5 }))
       .toEqual({ value: 5550.5, source: 'landArea' });
+
+    expect(resolveDisplayArea({ propertyType: 'luxury-villa', sqft: undefined, buildingArea: 516 }))
+      .toEqual({ value: 516, source: 'buildingArea' });
   });
 
   it("falls back to a shop's open-plan area", () => {
@@ -46,9 +46,9 @@ describe('resolveDisplayArea', () => {
       .toEqual({ value: 102.5, source: 'openPlanArea' });
   });
 
-  it("falls back to a house's building area before its plot", () => {
+  it("falls back to a house's whole plot before its building area", () => {
     expect(resolveDisplayArea({ propertyType: 'house', sqft: 0, landArea: 600, buildingArea: 140 }))
-      .toEqual({ value: 140, source: 'buildingArea' });
+      .toEqual({ value: 600, source: 'landArea' });
   });
 
   it('has nothing to fall back to for a parking space or a plot of land', () => {
@@ -130,6 +130,7 @@ describe('the client and server resolvers agree', () => {
     ['land', { sqft: 0, landArea: 400 }],
     ['house', { sqft: 120 }],
     ['house', { sqft: 0, landArea: 600, buildingArea: 140 }],
+    ['villa', { sqft: 0, buildingArea: 516 }],
   ];
 
   for (const [propertyType, input] of cases) {

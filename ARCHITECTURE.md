@@ -642,9 +642,11 @@ Key decisions:
   before its breakdown was ever asked for has a real total and empty breakdown
   fields; ignoring the total there would save it back as 0 m² — the original
   fault, from the other direction. `resolveSubmittedArea` falls back to it.
-- **Built area before plot.** A house or villa resolves to `buildingArea`
-  before `landArea`. Taking the plot first would divide the price by a garden
-  and call the result a price per m².
+- **The whole property first, the part inside it second.** A house or villa
+  resolves to `landArea` before `buildingArea`, a flat to gross before net. The
+  headline figure is the extent of what is being sold; the narrower measurement
+  is detail shown beneath it. Note this is also what price-per-m² divides by,
+  so a villa is priced against its plot, not its footprint.
 - **A zero is "not measured", never "0 m²".** Types with no breakdown (parking,
   land) can still have nothing on file; the cards and detail page drop the stat
   rather than print a measurement nobody gave.

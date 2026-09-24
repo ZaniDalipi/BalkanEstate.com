@@ -20,19 +20,19 @@ import type { TypeAttribute } from './typeAttributes';
  * Which type-specific measurement stands in for `sqft`, tried in order, when
  * the total-area field is 0 or absent.
  *
- * A house or villa's built area is tried before its plot: "total area" and its
- * price-per-m² mean the built size everywhere else in the app, and the plot
- * can be an order of magnitude larger, so falling back to it first would
- * understate price-per-m² rather than leave it correctly unknown. A type with
- * no breakdown field (parking, land) has nothing to fall back to.
+ * The whole property first, the part inside it second: a house or villa is
+ * the plot it occupies, so `landArea` leads and `buildingArea` is detail
+ * beneath it, and a flat's gross area leads its net. The headline figure
+ * never states less than the property is. A type with no breakdown field
+ * (parking, land) has nothing to fall back to.
  */
 const AREA_FALLBACKS: Partial<Record<PropertyType, readonly TypeAttribute[]>> = {
   apartment: ['grossArea', 'netArea'],
-  house: ['buildingArea', 'landArea'],
-  villa: ['buildingArea', 'landArea'],
-  'luxury-villa': ['buildingArea', 'landArea'],
+  house: ['landArea', 'buildingArea'],
+  villa: ['landArea', 'buildingArea'],
+  'luxury-villa': ['landArea', 'buildingArea'],
   commercial: ['openPlanArea'],
-  other: ['grossArea', 'netArea', 'buildingArea', 'landArea', 'openPlanArea'],
+  other: ['grossArea', 'netArea', 'landArea', 'buildingArea', 'openPlanArea'],
 };
 
 /** A measurement worth using: a finite, positive number. Zero means "not measured". */

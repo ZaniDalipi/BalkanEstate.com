@@ -25,25 +25,26 @@ import { MEASURED_ATTRIBUTES, attributesForType, type TypeAttribute } from './ty
  * Which type-specific measurement stands in for `sqft`, and in what order,
  * when the total-area box was left empty.
  *
- * A house or villa lists `landArea` before `buildingArea` everywhere else —
- * that pair is how two of them are compared, plot first — but the *built* area
- * is what "total area" and its price-per-m² mean for every other type, so it is
- * tried first here; the plot is a last resort, not the everyday case. Taking
- * the plot first would divide the price by a garden and call the result a price
- * per m². An apartment's gross area is what a listing is headlined by, net a
- * close second. A type with no breakdown field at all (parking, land, and
- * anything unknown) has nothing to fall back to — its `sqft` either was given
- * or was not.
+ * The rule is the same for every type: **the whole property first, the part
+ * inside it second.** A house or villa is the plot you buy, so `landArea`
+ * leads and `buildingArea` — how much of that plot is built over — is detail
+ * beneath it; that also matches the order the pair is declared and shown in
+ * everywhere else. A flat's gross area already is its whole extent, with net
+ * the part actually walked on. So the headline figure never states less than
+ * the property is, and the narrower measurement stays informational.
+ *
+ * A type with no breakdown field at all (parking, land, and anything unknown)
+ * has nothing to fall back to — its `sqft` either was given or was not.
  */
 const AREA_FALLBACKS: Partial<Record<PropertyType, readonly TypeAttribute[]>> = {
   apartment: ['grossArea', 'netArea'],
-  house: ['buildingArea', 'landArea'],
-  villa: ['buildingArea', 'landArea'],
-  'luxury-villa': ['buildingArea', 'landArea'],
+  house: ['landArea', 'buildingArea'],
+  villa: ['landArea', 'buildingArea'],
+  'luxury-villa': ['landArea', 'buildingArea'],
   commercial: ['openPlanArea'],
-  // Every attribute is on the table for the escape-hatch type, tried in the
-  // same built-before-plot order as everywhere else.
-  other: ['grossArea', 'netArea', 'buildingArea', 'landArea', 'openPlanArea'],
+  // Every attribute is on the table for the escape-hatch type, tried widest
+  // first like everywhere else.
+  other: ['grossArea', 'netArea', 'landArea', 'buildingArea', 'openPlanArea'],
 };
 
 /** A measurement worth showing: a finite, positive number. Zero is "not measured", not "0 m²". */

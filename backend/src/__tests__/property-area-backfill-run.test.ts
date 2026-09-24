@@ -93,8 +93,8 @@ describe('backfillPropertyAreas', () => {
     expect(writes()).toEqual([
       { _id: 'flat', sqft: 79 },           // gross, not net
       { _id: 'flat-no-field', sqft: 64 },
-      { _id: 'villa', sqft: 516 },         // built, not the plot
-      { _id: 'house', sqft: 140 },
+      { _id: 'villa', sqft: 5550.5 },      // the whole plot, not just the build
+      { _id: 'house', sqft: 600 },
       { _id: 'shop', sqft: 102.5 },
     ]);
   });
