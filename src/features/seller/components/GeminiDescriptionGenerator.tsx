@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { SparklesIcon, MapPinIcon } from '@/constants';
+import { SparklesIcon, MapPinIcon, XMarkIcon } from '@/constants';
 import MarketInsightsAnimation from './MarketInsightsAnimation';
 import MapLocationPicker from './MapLocationPicker';
 import PromotionSelector from '@/src/features/promotions/components/PromotionSelector';
@@ -387,7 +387,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
                         </label>
                         <FieldError message={fieldErrors.images} />
                         {images.length > 0 && (
-                            <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={index} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-gray-200" /><button type="button" onClick={() => removeImage(index)} className="absolute -top-1 -right-1 bg-red-500/80 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">&times;</button></div>))}</div></div>
+                            <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={img.previewUrl} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-gray-200" />{/* Always shown on touch screens (no hover there) */}<button type="button" onClick={() => removeImage(index)} aria-label={t('seller:createListing.imageManagement.removePhoto', 'Delete photo {{n}}', { n: index + 1 })} title={t('seller:createListing.imageManagement.removePhoto', 'Delete photo {{n}}', { n: index + 1 })} className="absolute top-1 right-1 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-md transition-opacity opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><XMarkIcon className="w-4 h-4" /></button></div>))}</div></div>
                         )}
                          <Button type="button" variant="cool" size="xl" onClick={handleGenerate} className="w-full mt-6 text-lg font-bold rounded-xl" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>{t('seller:createListing.generate')}</Button>
                     </div>

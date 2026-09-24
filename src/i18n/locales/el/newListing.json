@@ -245,7 +245,12 @@
     "formats": "PDF, JPG, ή PNG",
     "uploadFloorplan": "Upload Floor Plan",
     "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan"
+    "skip": "Skip Floor Plan",
+    "invalidFormat": "Μη έγκυρη μορφή αρχείου",
+    "invalidFormatMessage": "Ανεβάστε μια έγκυρη εικόνα (JPEG, PNG, WebP, GIF, HEIC ή SVG).",
+    "fileTooLarge": "Το αρχείο είναι πολύ μεγάλο",
+    "fileTooLargeMessage": "Η εικόνα της κάτοψης πρέπει να είναι κάτω από 10MB. Το αρχείο σας είναι {{size}}MB.",
+    "uploadFailedMessage": "Η μεταφόρτωση της κάτοψης απέτυχε: {{error}}"
   },
   "language": {
     "title": "Γλώσσα Καταχώρισης",
@@ -318,7 +323,11 @@
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "fixHighlighted": "Συμπληρώστε τα πεδία που επισημαίνονται με κόκκινο:",
+    "apartmentTotalFloors": "Για διαμερίσματα, εισαγάγετε τον συνολικό αριθμό ορόφων (1 ή περισσότερους).",
+    "attributesInvalid": "Ελέγξτε τα στοιχεία για αυτόν τον τύπο ακινήτου.",
+    "atLeastOnePhoto": "Απαιτείται τουλάχιστον μία φωτογραφία για τη δημοσίευση αγγελίας."
   },
   "success": {
     "title": "Η Καταχώριση Δημοσιεύτηκε!",

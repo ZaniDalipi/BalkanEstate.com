@@ -245,7 +245,12 @@
     "formats": "PDF, JPG, или PNG",
     "uploadFloorplan": "Upload Floor Plan",
     "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan"
+    "skip": "Skip Floor Plan",
+    "invalidFormat": "Невалиден формат на файла",
+    "invalidFormatMessage": "Моля, качете валидно изображение (JPEG, PNG, WebP, GIF, HEIC или SVG).",
+    "fileTooLarge": "Файлът е твърде голям",
+    "fileTooLargeMessage": "Изображението на плана трябва да е под 10MB. Вашият файл е {{size}}MB.",
+    "uploadFailedMessage": "Качването на плана не бе успешно: {{error}}"
   },
   "language": {
     "title": "Език на Обявата",
@@ -318,7 +323,11 @@
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "fixHighlighted": "Моля, попълнете полетата, маркирани в червено:",
+    "apartmentTotalFloors": "За апартаменти въведете общия брой етажи (1 или повече).",
+    "attributesInvalid": "Моля, проверете данните за този вид имот.",
+    "atLeastOnePhoto": "За публикуване на обява е нужна поне една снимка."
   },
   "success": {
     "title": "Обявата е Публикувана!",

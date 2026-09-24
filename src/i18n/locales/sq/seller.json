@@ -97,7 +97,8 @@
     "imageManagement": {
       "title": "Menaxhimi i Imazheve",
       "dragToReorder": "Tërhiqni dhe lëshoni imazhet për t'i rirenditur. Imazhi i parë do të jetë foto kryesore e kopertinës për listimin tuaj.",
-      "selectTag": "Zgjidh Etiketën"
+      "selectTag": "Zgjidh Etiketën",
+      "removePhoto": "Fshi foton {{n}}"
     },
     "generate": "Gjenero Listimin",
     "location": {

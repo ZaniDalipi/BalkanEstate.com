@@ -172,7 +172,12 @@
     "title": "Osnova",
     "uploadFloorplan": "Učitajte Osnovu",
     "optional": "Opciono - Dodajte sliku osnove",
-    "skip": "Preskočite Osnovu"
+    "skip": "Preskočite Osnovu",
+    "invalidFormat": "Nevažeći format datoteke",
+    "invalidFormatMessage": "Molimo učitajte ispravnu sliku (JPEG, PNG, WebP, GIF, HEIC ili SVG).",
+    "fileTooLarge": "Datoteka je prevelika",
+    "fileTooLargeMessage": "Slika tlocrta mora biti manja od 10MB. Vaša datoteka ima {{size}}MB.",
+    "uploadFailedMessage": "Učitavanje tlocrta nije uspjelo: {{error}}"
   },
   "language": {
     "title": "Jezik Oglasa",
@@ -225,7 +230,13 @@
     "houseTotalFloors": "Za kuće i vile, molimo unesite ukupan broj spratova (1 ili veći).",
     "apartmentElevator": "Za stanove, molimo navedite da li postoji lift (Da ili Ne).",
     "floorExceedsTotal": "Broj sprata ne može biti veći od ukupnog broja spratova.",
-    "completionYearInvalid": "Molimo unesite ispravnu godinu završetka ili ostavite prazno."
+    "completionYearInvalid": "Molimo unesite ispravnu godinu završetka ili ostavite prazno.",
+    "fixHighlighted": "Molimo popunite polja označena crvenom bojom:",
+    "titleRequired": "Molimo unesite naslov oglasa",
+    "descriptionRequired": "Molimo dodajte opis nekretnine",
+    "apartmentTotalFloors": "Za stanove unesite ukupan broj spratova (1 ili više).",
+    "attributesInvalid": "Molimo provjerite detalje za ovu vrstu nekretnine.",
+    "atLeastOnePhoto": "Za objavu oglasa potrebna je najmanje jedna fotografija."
   },
   "success": {
     "title": "Oglas Objavljen!",

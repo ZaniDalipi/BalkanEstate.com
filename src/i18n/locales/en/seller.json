@@ -104,7 +104,8 @@
     "imageManagement": {
       "title": "Image Management",
       "dragToReorder": "Drag and drop images to reorder them. The first image will be the main cover photo for your listing.",
-      "selectTag": "Select Tag"
+      "selectTag": "Select Tag",
+      "removePhoto": "Delete photo {{n}}"
     },
     "generate": "Generate Listing",
     "location": {

@@ -245,7 +245,12 @@
     "formats": "PDF, JPG, ili PNG",
     "uploadFloorplan": "Upload Floor Plan",
     "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan"
+    "skip": "Skip Floor Plan",
+    "invalidFormat": "Nevažeći format datoteke",
+    "invalidFormatMessage": "Učitajte ispravnu sliku (JPEG, PNG, WebP, GIF, HEIC ili SVG).",
+    "fileTooLarge": "Datoteka je prevelika",
+    "fileTooLargeMessage": "Slika tlocrta mora biti manja od 10MB. Vaša datoteka ima {{size}}MB.",
+    "uploadFailedMessage": "Učitavanje tlocrta nije uspjelo: {{error}}"
   },
   "language": {
     "title": "Jezik Oglasa",
@@ -318,7 +323,11 @@
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "fixHighlighted": "Ispunite polja označena crvenom bojom:",
+    "apartmentTotalFloors": "Za stanove unesite ukupan broj katova (1 ili više).",
+    "attributesInvalid": "Provjerite podatke za ovu vrstu nekretnine.",
+    "atLeastOnePhoto": "Za objavu oglasa potrebna je barem jedna fotografija."
   },
   "success": {
     "title": "Oglas Objavljen!",
