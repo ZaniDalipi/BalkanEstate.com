@@ -13,6 +13,7 @@ import { createMockUser } from './setup';
 import '../models/User';
 import '../models/Agency';
 import '../models/AgencyFavorite';
+import '../models/Property';
 
 const createTestApp = () => {
   const app = express();
@@ -213,6 +214,53 @@ describe('Agency Favorites API', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.favorites).toHaveLength(2);
+    });
+
+    it('should return live listing and agent counts from the database', async () => {
+      const owner = await createTestUser();
+      const agent = await createTestUser();
+      const agency = await createTestAgency(String(owner._id));
+      await mongoose.model('Agency').updateOne({ _id: agency._id }, { agents: [agent._id] });
+
+      const Property = mongoose.model('Property');
+      const baseProperty = {
+        price: 150000,
+        address: 'Test Street 123',
+        city: 'Tirana',
+        country: 'Albania',
+        beds: 3,
+        baths: 2,
+        livingRooms: 1,
+        sqft: 100,
+        yearBuilt: 2020,
+        parking: 1,
+        description: 'Test property',
+        imageUrl: 'https://example.com/image.jpg',
+        lat: 41.3275,
+        lng: 19.8187,
+        propertyType: 'house',
+      };
+      await Property.create([
+        { ...baseProperty, sellerId: owner._id, status: 'active' },
+        { ...baseProperty, sellerId: agent._id, status: 'active' },
+        { ...baseProperty, sellerId: agent._id, status: 'pending' },
+        { ...baseProperty, sellerId: agent._id, status: 'sold' },
+      ]);
+
+      const token = createToken(String(owner._id));
+      await request(app)
+        .post('/api/agency-favorites/toggle')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ agencyId: String(agency._id) });
+
+      const response = await request(app)
+        .get('/api/agency-favorites')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.favorites).toHaveLength(1);
+      expect(response.body.favorites[0].agencyId.totalProperties).toBe(3);
+      expect(response.body.favorites[0].agencyId.totalAgents).toBe(1);
     });
 
     it('should not return other users favourites', async () => {

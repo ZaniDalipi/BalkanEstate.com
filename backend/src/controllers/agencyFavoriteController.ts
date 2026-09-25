@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import AgencyFavorite from '../models/AgencyFavorite';
 import Agency from '../models/Agency';
+import Property from '../models/Property';
 import { IUser } from '../models/User';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
@@ -23,13 +24,56 @@ export const getAgencyFavorites = async (
     const favorites = await AgencyFavorite.find({ userId })
       .populate({
         path: 'agencyId',
-        select: 'name slug logo city country totalAgents totalProperties isFeatured',
+        select: 'name slug logo city country ownerId agents isFeatured',
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
-    const validFavorites = favorites.filter((fav) => fav.agencyId != null);
+    const validFavorites = favorites.filter((fav: any) => fav.agencyId != null);
 
-    res.json({ favorites: validFavorites });
+    // The stored totalProperties/totalAgents fields are legacy and not kept in
+    // sync, so compute live counts from the DB (owner + agents, active/pending),
+    // mirroring the agency detail and top-agencies endpoints.
+    const sellerIdsFor = (agency: any): unknown[] => [
+      ...(agency.ownerId ? [agency.ownerId] : []),
+      ...(agency.agents || []),
+    ];
+
+    const allSellerIds = validFavorites.flatMap((fav: any) => sellerIdsFor(fav.agencyId));
+    const propertyCounts = allSellerIds.length
+      ? await Property.aggregate([
+          {
+            $match: {
+              sellerId: { $in: allSellerIds },
+              status: { $in: ['active', 'pending'] },
+            },
+          },
+          { $group: { _id: '$sellerId', count: { $sum: 1 } } },
+        ])
+      : [];
+    const countBySeller = new Map(
+      propertyCounts.map((pc: { _id: unknown; count: number }) => [String(pc._id), pc.count])
+    );
+
+    const favoritesWithCounts = validFavorites.map((fav: any) => {
+      const { ownerId, agents, ...agency } = fav.agencyId;
+      const uniqueSellerIds = new Set(sellerIdsFor(fav.agencyId).map(String));
+      const totalProperties = [...uniqueSellerIds].reduce(
+        (sum, id) => sum + (countBySeller.get(id) || 0),
+        0
+      );
+      return {
+        ...fav,
+        agencyId: {
+          ...agency,
+          id: String(agency._id),
+          totalProperties,
+          totalAgents: agents?.length || 0,
+        },
+      };
+    });
+
+    res.json({ favorites: favoritesWithCounts });
   } catch (error: any) {
     apiLogger.error('Get agency favorites error:', error);
     res.status(500).json({ message: 'Error fetching agency favorites' });
