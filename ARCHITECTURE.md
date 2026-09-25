@@ -677,8 +677,16 @@ Buyer:  PropertyGallery mini-plan ⇄ FloorPlanViewerModal
   Neighbouring photos are preloaded. The photo is centred with flexbox and
   `max-w-full max-h-full` — an absolutely positioned `h-full` image was drawn at
   its natural height, top-aligned, on iOS Safari.
-- **Mini plan zoom** follows the slider frame by frame while it is dragged
-  (`step 0.01`, no transition) and glides for the +/− buttons and photo changes.
+- **Mini plans pan and zoom freely** (`FloorPlanMiniMap`): drag with a finger or
+  mouse, pinch / trackpad-pinch about the fingers, double-tap to toggle a
+  close-up, or the slider. Same pattern as the big viewer — the view
+  `{ z, x, y }` lives in a ref, is clamped to the card, and is written to the DOM
+  once per frame; squares counter-scale via `--mini-inv`. A press only becomes a
+  drag after 5 px (pointer capture starts then), so a tap still reaches its
+  square, and the click ending a drag is swallowed. When zoomed, a new photo
+  glides its square into view. The slider is drawn (`role="slider"`, arrow /
+  Home / End keys) rather than an `<input type="range">`, which iOS Safari
+  paints as a tall pill whatever its styled height.
 
 ---
 
