@@ -49,6 +49,7 @@ import * as api from '@/services/apiService';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { AdSlot } from '@/src/features/promo';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
+import { buildGalleryImages, groupGalleryImagesByTag } from '@/shared/property/galleryImages';
 
 /**
  * PropertyDetailsPage Component
@@ -277,22 +278,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   }, [daysListed, t]);
 
   // Get current image URL for editor
-  const allImages = React.useMemo(() => {
-    const images = property.images || [];
-    const mainImage = { url: property.imageUrl, tag: 'exterior' as PropertyImageTag };
-    const combined = [mainImage, ...images];
-    return combined.filter((v, i, a) => a.findIndex((t) => t.url === v.url) === i);
-  }, [property.imageUrl, property.images]);
+  const allImages = React.useMemo(
+    () => buildGalleryImages(property.imageUrl, property.images),
+    [property.imageUrl, property.images],
+  );
 
   const categorizedImages = React.useMemo(() => {
-    return allImages.reduce((acc, img) => {
-      const tag = img.tag || 'other';
-      if (!acc[tag]) {
-        acc[tag] = [];
-      }
-      acc[tag].push(img);
-      return acc;
-    }, {} as Record<PropertyImageTag, { url: string; tag: PropertyImageTag }[]>);
+    return groupGalleryImagesByTag(allImages);
   }, [allImages]);
 
   const imagesForCurrentCategory = React.useMemo(() => {

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
 import Property from '../models/Property';
+import type { PropertyImageTag } from '../config/propertyImageTags';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
@@ -1006,7 +1007,7 @@ export const createProperty = async (
         property.images = organized.map((i, idx) => ({
           url: i.url,
           publicId: i.publicId,
-          tag: (i.tag as 'main' | 'floorplan' | 'other') ?? 'other',
+          tag: (i.tag as PropertyImageTag) ?? 'other',
           ...(spots[idx] ? { floorplanSpot: spots[idx] } : {}),
         })) as typeof property.images;
 

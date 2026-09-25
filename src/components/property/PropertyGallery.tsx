@@ -17,6 +17,7 @@ import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } fro
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
+import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_EMOJI } from '@/shared/property/galleryImages';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -476,23 +477,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   }, [videoPlatform, viewMode, videoInfo.embedUrl]);
 
   // Combine all images
-  const allImages = useMemo(() => {
-    const images = property.images || [];
-    const mainImage = { url: property.imageUrl, tag: 'exterior' as PropertyImageTag };
-    const combined = [mainImage, ...images];
-    return combined.filter((v, i, a) => a.findIndex((t) => t.url === v.url) === i);
-  }, [property.imageUrl, property.images]);
+  const allImages = useMemo(
+    () => buildGalleryImages(property.imageUrl, property.images),
+    [property.imageUrl, property.images],
+  );
 
   // Categorize images by tag
   const categorizedImages = useMemo(() => {
-    return allImages.reduce((acc, img) => {
-      const tag = img.tag || 'other';
-      if (!acc[tag]) {
-        acc[tag] = [];
-      }
-      acc[tag].push(img);
-      return acc;
-    }, {} as Record<PropertyImageTag, { url: string; tag: PropertyImageTag }[]>);
+    return groupGalleryImagesByTag(allImages);
   }, [allImages]);
 
   // Get images for current category
@@ -1316,9 +1308,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
               }`}
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-              </svg>
+              <span aria-hidden="true" className="text-sm leading-none">{IMAGE_TAG_EMOJI[tag] ?? IMAGE_TAG_EMOJI.other}</span>
               {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })} {categorizedImages[tag]?.length || 0}
             </button>
           ))}

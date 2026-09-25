@@ -13,6 +13,7 @@ import FloorPlanViewerModal from '@/src/features/property-details/components/Flo
 import { getFloorPlans } from '@/shared/utils/floorplans';
 import ListingSubmitOverlay from './ListingSubmitOverlay';
 import { Button } from '@/components/ui/liquid-glass-button';
+import { buildGalleryImages } from '@/shared/property/galleryImages';
 
 interface ListingPreviewProps {
     property: Property;
@@ -45,12 +46,10 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [isFloorPlanOpen, setIsFloorPlanOpen] = useState(false);
 
-    const allImages = useMemo(() => {
-        const imgs = property.images || [];
-        const mainImage = { url: property.imageUrl, tag: 'exterior' as PropertyImageTag };
-        const combined = [mainImage, ...imgs];
-        return combined.filter((v, i, a) => a.findIndex(item => item.url === v.url) === i);
-    }, [property.imageUrl, property.images]);
+    const allImages = useMemo(
+      () => buildGalleryImages(property.imageUrl, property.images),
+      [property.imageUrl, property.images],
+    );
 
     const imagesForCurrentCategory = useMemo(() => {
         if (activeCategory === 'all') return allImages;
