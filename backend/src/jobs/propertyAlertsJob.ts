@@ -9,6 +9,7 @@
  */
 
 import Property, { IProperty } from '../models/Property';
+import { AREA_SELECT, resolveTotalArea } from '../config/propertyArea';
 import SavedSearch, { IFilters } from '../models/SavedSearch';
 import { cronLogger } from '../utils/logger';
 import Favorite from '../models/Favorite';
@@ -326,7 +327,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
                 price: property.price,
                 beds: property.beds ?? 0,
                 baths: property.baths ?? 0,
-                sqft: property.sqft,
+                sqft: resolveTotalArea(property.propertyType, property),
                 imageUrl: property.imageUrl,
               },
             });
@@ -361,7 +362,7 @@ export async function processNewListingAlerts(frequency: 'instant' | 'daily' | '
               price: p.price,
               beds: p.beds ?? 0,
               baths: p.baths ?? 0,
-              sqft: p.sqft,
+              sqft: resolveTotalArea(p.propertyType, p),
               imageUrl: p.imageUrl,
             })),
             frequency,
@@ -405,7 +406,7 @@ export async function processPriceDropAlerts(): Promise<void> {
     // Get all favorites with price alerts enabled
     const favorites = await Favorite.find({
       priceAlertEnabled: true,
-    }).populate('userId', 'email name subscription').populate('propertyId', 'title address city price beds baths sqft imageUrl');
+    }).populate('userId', 'email name subscription').populate('propertyId', `title address city price beds baths imageUrl ${AREA_SELECT}`);
 
     if (favorites.length === 0) {
       cronLogger.info('   No favorites with price alerts enabled');
@@ -481,7 +482,7 @@ export async function processPriceDropAlerts(): Promise<void> {
             percentageDrop,
             beds: property.beds ?? 0,
             baths: property.baths ?? 0,
-            sqft: property.sqft,
+            sqft: resolveTotalArea(property.propertyType, property),
             imageUrl: property.imageUrl,
           },
         });
@@ -639,7 +640,7 @@ async function processSavedSearchPriceDropAlerts(): Promise<void> {
               isPriceIncrease: !isPriceDrop,
               beds: property.beds ?? 0,
               baths: property.baths ?? 0,
-              sqft: property.sqft,
+              sqft: resolveTotalArea(property.propertyType, property),
               imageUrl: property.imageUrl,
             },
           });
@@ -933,7 +934,7 @@ export async function processInstantAlertsForProperty(propertyId: string): Promi
             price: property.price,
             beds: property.beds ?? 0,
             baths: property.baths ?? 0,
-            sqft: property.sqft,
+            sqft: resolveTotalArea(property.propertyType, property),
             imageUrl: property.imageUrl,
           },
         });
@@ -1047,7 +1048,7 @@ export async function processInstantPriceDropForProperty(
             isPriceIncrease: !isPriceDrop,
             beds: property.beds ?? 0,
             baths: property.baths ?? 0,
-            sqft: property.sqft,
+            sqft: resolveTotalArea(property.propertyType, property),
             imageUrl: property.imageUrl,
           },
         });
@@ -1115,7 +1116,7 @@ export async function processInstantPriceDropForProperty(
             isPriceIncrease: !isPriceDrop,
             beds: property.beds ?? 0,
             baths: property.baths ?? 0,
-            sqft: property.sqft,
+            sqft: resolveTotalArea(property.propertyType, property),
             imageUrl: property.imageUrl,
           },
         });

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AREA_SELECT, resolveTotalArea } from '../config/propertyArea';
 import mongoose from 'mongoose';
 import { escapeRegex } from '../utils/escapeRegex';
 import Property from '../models/Property';
@@ -1602,7 +1603,7 @@ export const deleteProperty = async (
         beds: property.beds,
         baths: property.baths,
         livingRooms: property.livingRooms,
-        sqft: property.sqft,
+        sqft: resolveTotalArea(property.propertyType, property),
         yearBuilt: property.yearBuilt,
         description: property.description,
         thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
@@ -1851,7 +1852,7 @@ export const markAsSold = async (
         soldAt: soldDate,
         beds: property.beds,
         baths: property.baths,
-        sqft: property.sqft,
+        sqft: resolveTotalArea(property.propertyType, property),
         totalViews: property.views || 0,
         totalSaves: property.saves || 0,
         daysOnMarket,
@@ -1882,7 +1883,7 @@ export const markAsSold = async (
           beds: property.beds,
           baths: property.baths,
           livingRooms: property.livingRooms,
-          sqft: property.sqft,
+          sqft: resolveTotalArea(property.propertyType, property),
           yearBuilt: property.yearBuilt,
           description: property.description,
           thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
@@ -1997,7 +1998,7 @@ export const markAsRented = async (
         beds: property.beds,
         baths: property.baths,
         livingRooms: property.livingRooms,
-        sqft: property.sqft,
+        sqft: resolveTotalArea(property.propertyType, property),
         yearBuilt: property.yearBuilt,
         description: property.description,
         thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
@@ -2317,7 +2318,7 @@ export const getPropertyPriceHistory = async (
     if (!id) return;
 
     const property = await Property.findById(id)
-      .select('price originalPrice priceReducedAt priceIntervals sqft createdAt listingType rentPeriod status soldAt')
+      .select(`price originalPrice priceReducedAt priceIntervals createdAt listingType rentPeriod status soldAt ${AREA_SELECT}`)
       .lean();
 
     if (!property) {
@@ -2357,7 +2358,7 @@ export const getPropertyPriceHistory = async (
       originalPrice: p.originalPrice,
       priceReducedAt: p.priceReducedAt ? p.priceReducedAt.toISOString() : undefined,
       priceIntervals: p.priceIntervals ?? [],
-      sqft: p.sqft,
+      sqft: resolveTotalArea(p.propertyType, p),
       createdAt: p.createdAt ? (p.createdAt as Date).toISOString() : undefined,
       listingType: p.listingType,
       rentPeriod: p.rentPeriod,

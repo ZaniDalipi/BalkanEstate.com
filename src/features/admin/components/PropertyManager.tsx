@@ -279,10 +279,14 @@ const PropertyManager: React.FC = () => {
                           {property.bathrooms || property.baths} baths
                         </div>
                       )}
-                      {(property.area || property.sqft) && (
+                      {/* The API's own figure, so the admin table states the
+                          same size the listing shows everywhere else. It used
+                          to prefer a legacy `area` field that is not on the
+                          Property type at all, which could only disagree. */}
+                      {property.sqft > 0 && (
                         <div className="flex items-center gap-1">
                           <SqftIcon className="w-3.5 h-3.5" />
-                          {property.area || property.sqft} m²
+                          {property.sqft} m²
                         </div>
                       )}
                     </div>

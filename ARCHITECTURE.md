@@ -619,11 +619,14 @@ src/shared/property/area.ts                  ← the rule (pure)
         │
         ├── ListingFormFields          hides the plain box where a breakdown is asked for
         ├── useListingForm             preview + submit
-        ├── apiService / propertyApi transformers ← API ingestion boundary
-        ├── PropertyInfo · PropertyCard · HighlightedPropertyCard · glass-cards
-        ├── map popups · MapPropertyMarker     (raw rows: cannot trust `sqft`)
-        ├── backend/src/config/propertyArea.ts (mirror) → Property pre('validate')
-        └── scripts/backfillPropertyAreas.ts   one-off, to make the stored field agree
+        ├── useRecentlyViewed          re-resolves its localStorage snapshots
+        └── backend/src/config/propertyArea.ts (mirror)
+              ├── Property pre('validate')        every write
+              ├── responseSanitizer               every response ← settles it once
+              ├── AREA_SELECT + resolveTotalArea  hand-built payloads:
+              │     agency dashboard · analytics export · share cards ·
+              │     generated video · buyer alert emails · price history
+              └── scripts/backfillPropertyAreas.ts   makes the stored field agree
 ```
 
 Key decisions:
@@ -654,6 +657,12 @@ Key decisions:
 - **A zero is "not measured", never "0 m²".** Types with no breakdown (parking,
   land) can still have nothing on file; the cards and detail page drop the stat
   rather than print a measurement nobody gave.
+- **A projection that narrows the fields must still ask for the area ones.**
+  `.select()` returns only what it names, so a hand-built payload that asked
+  for `sqft` alone had no breakdown left to resolve from and served the stored
+  figure — an agency reading its own villa at 500 m² while the public page
+  said 1500. `AREA_SELECT` is that field list, kept beside the rule that needs
+  it, and a test asserts every such payload uses both it and `resolveTotalArea`.
 - **The stored field is the source of truth, and has to be made to say so.**
   Search, the area sorts and price-per-m² run in MongoDB against `sqft` and
   read nothing else, so a row the pages render correctly is still missing from

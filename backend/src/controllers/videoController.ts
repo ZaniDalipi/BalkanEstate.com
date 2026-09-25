@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { resolveTotalArea } from '../config/propertyArea';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
 import {
@@ -102,7 +103,7 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
       city: property.city,
       beds: property.beds,
       baths: property.baths,
-      sqft: property.sqft,
+      sqft: resolveTotalArea(property.propertyType, property),
       sellerName,
       sellerPhone,
       agencyName,
@@ -214,7 +215,7 @@ export const startAsyncVideoGeneration = async (req: Request, res: Response): Pr
       city: property.city,
       beds: property.beds,
       baths: property.baths,
-      sqft: property.sqft,
+      sqft: resolveTotalArea(property.propertyType, property),
       sellerName,
       sellerPhone,
       agencyName,

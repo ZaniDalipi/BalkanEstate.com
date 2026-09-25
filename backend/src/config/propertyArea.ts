@@ -49,3 +49,26 @@ export function resolveTotalArea(
 
   return isUsableArea(input.sqft) ? input.sqft : 0;
 }
+
+/**
+ * The fields a query must return for `resolveTotalArea` to work.
+ *
+ * A hand-built response that projects with `.select()` gets only the fields
+ * it names, so one that asked for `sqft` alone had no breakdown left to
+ * resolve from and served the stored figure — which is how the agency
+ * dashboard came to show a villa at 500 m² while every other screen read
+ * 1500. Spread this into the projection and the total resolves the same way
+ * there as everywhere else.
+ */
+export const AREA_FIELDS: readonly string[] = [
+  'propertyType',
+  'sqft',
+  'grossArea',
+  'netArea',
+  'landArea',
+  'buildingArea',
+  'openPlanArea',
+];
+
+/** The same list as a Mongoose projection string. */
+export const AREA_SELECT = AREA_FIELDS.join(' ');

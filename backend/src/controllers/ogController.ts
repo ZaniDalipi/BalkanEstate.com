@@ -13,6 +13,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+import { AREA_SELECT, resolveTotalArea } from '../config/propertyArea';
 import { Types } from 'mongoose';
 import Property, { IProperty } from '../models/Property';
 import Article from '../models/Article';
@@ -179,7 +180,7 @@ function buildOgHtml(
 // ─── Shared fetch helper ──────────────────────────────────────────────────────
 
 const PROPERTY_OG_SELECT =
-  'title price isNegotiable listingType propertyType beds baths sqft city country description imageUrl images' as const;
+  `title price isNegotiable listingType beds baths city country description imageUrl images ${AREA_SELECT}` as const;
 
 async function fetchPropertyForOg(
   slug: string,
@@ -187,9 +188,15 @@ async function fetchPropertyForOg(
   const resolvedId = resolveId(slug);
   if (!resolvedId || !isValidObjectId(resolvedId)) return null;
 
-  return Property.findById(resolvedId)
+  const property = await Property.findById(resolvedId)
     .select(PROPERTY_OG_SELECT)
     .lean<PropertyOgProjection>();
+
+  if (!property) return null;
+
+  // A share card is the listing as the rest of the world first sees it, so
+  // it states the same size the page does rather than the stored field.
+  return { ...property, sqft: resolveTotalArea(property.propertyType, property) };
 }
 
 // ─── Route handlers ───────────────────────────────────────────────────────────

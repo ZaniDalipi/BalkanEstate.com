@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Agency, { IAgency } from '../models/Agency';
 import Property from '../models/Property';
+import { AREA_SELECT, resolveTotalArea } from '../config/propertyArea';
 import User, { IUser } from '../models/User';
 import Inquiry from '../models/Inquiry';
 import Notification from '../models/Notification';
@@ -440,10 +441,10 @@ export const getProperties = async (
     const sortOrder = order === 'asc' ? 1 : -1;
     const sortField = typeof sortBy === 'string' ? sortBy : 'createdAt';
 
-    const [properties, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       Property.find(filter)
         .select(
-          'title status listingType price city country beds baths sqft imageUrl views saves inquiries isPromoted promotionTier sellerId createdByName createdAt updatedAt'
+          `title status listingType price city country beds baths imageUrl views saves inquiries isPromoted promotionTier sellerId createdByName createdAt updatedAt ${AREA_SELECT}`
         )
         .sort({ [sortField]: sortOrder })
         .skip(skip)
@@ -451,6 +452,15 @@ export const getProperties = async (
         .lean(),
       Property.countDocuments(filter),
     ]);
+
+    // The same total every other screen states. This list is hand-projected
+    // rather than passed through sanitizeProperty, so it resolves the size
+    // itself — otherwise an agency saw its own villa as 500 m² while the
+    // public page read 1500.
+    const properties = rows.map((row) => ({
+      ...row,
+      sqft: resolveTotalArea(row.propertyType, row),
+    }));
 
     res.status(200).json({
       properties,
@@ -995,10 +1005,15 @@ export const exportAnalytics = async (
         sellerId: { $in: agentUserIds },
       })
         .select(
-          'title status listingType price city country beds baths sqft views saves inquiries createdByName sellerId createdAt updatedAt'
+          `title status listingType price city country beds baths views saves inquiries createdByName sellerId createdAt updatedAt ${AREA_SELECT}`
         )
         .sort({ createdAt: -1 })
-        .lean(),
+        .lean()
+        .then((rows) =>
+          // An exported spreadsheet has to agree with the dashboard it was
+          // exported from, so the same rule applies on the way out.
+          rows.map((row) => ({ ...row, sqft: resolveTotalArea(row.propertyType, row) }))
+        ),
 
       Inquiry.find({
         recipientId: { $in: agentUserIds },
