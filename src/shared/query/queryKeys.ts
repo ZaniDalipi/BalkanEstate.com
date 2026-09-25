@@ -339,6 +339,31 @@ export const adBannerKeys = {
 };
 
 // ============================================================================
+// Imported Listing Review Query Keys
+// Used by: ImportReviewQueue, MyAccountPage (pending badge)
+// ============================================================================
+
+export const importReviewKeys = {
+  all: ['importReview'] as const,
+  lists: () => [...importReviewKeys.all, 'list'] as const,
+  list: (filters: { status: string; sourceId?: string; page: number }) =>
+    [...importReviewKeys.lists(), filters] as const,
+  count: () => [...importReviewKeys.all, 'count'] as const,
+  sources: () => [...importReviewKeys.all, 'sources'] as const,
+  detail: (id: string) => [...importReviewKeys.all, 'detail', id] as const,
+};
+
+// ============================================================================
+// Unfinished Listing Draft Query Keys (kept on the device, see listingDraftStorage)
+// Used by: MyListings (unfinished listing banner)
+// ============================================================================
+
+export const listingDraftKeys = {
+  all: ['listingDrafts'] as const,
+  forUser: (userId: string) => [...listingDraftKeys.all, userId] as const,
+};
+
+// ============================================================================
 // Discount Game Query Keys
 // Used by: ListingLimitWarningModal (eligibility), DiscountGameModal (invalidate after claim)
 // ============================================================================
