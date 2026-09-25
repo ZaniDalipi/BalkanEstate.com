@@ -41,7 +41,7 @@ export const MAX_FLOORPLANS = 10;
 export interface IPropertyImage {
   url: string;
   publicId?: string; // Cloudinary public_id for image management and deletion (optional for backwards compatibility)
-  tag: 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
+  tag: 'exterior' | 'living_room' | 'kitchen' | 'dining_room' | 'bedroom' | 'kids_room' | 'bathroom' | 'wc' | 'hallway' | 'office' | 'laundry' | 'storage' | 'balcony' | 'terrace' | 'garden' | 'pool' | 'garage' | 'basement' | 'attic' | 'view' | 'other';
   floorplanSpot?: IFloorplanSpot;
 }
 
@@ -540,7 +540,11 @@ const PropertySchema: Schema = new Schema(
         publicId: { type: String }, // Optional for backwards compatibility
         tag: {
           type: String,
-          enum: ['exterior', 'living_room', 'kitchen', 'bedroom', 'bathroom', 'other'],
+          enum: [
+            'exterior', 'living_room', 'kitchen', 'dining_room', 'bedroom', 'kids_room',
+            'bathroom', 'wc', 'hallway', 'office', 'laundry', 'storage', 'balcony',
+            'terrace', 'garden', 'pool', 'garage', 'basement', 'attic', 'view', 'other',
+          ],
           default: 'other',
         },
         floorplanSpot: { type: FloorplanSpotSchema, default: undefined },

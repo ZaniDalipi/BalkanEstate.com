@@ -451,6 +451,18 @@
       "garden": "Garden",
       "pool": "Pool",
       "view": "View",
+      "dining_room": "Dining Room",
+      "kids_room": "Kids Room",
+      "wc": "WC / Toilet",
+      "hallway": "Hallway",
+      "office": "Office",
+      "laundry": "Laundry Room",
+      "storage": "Storage",
+      "balcony": "Balcony",
+      "terrace": "Terrace",
+      "garage": "Garage",
+      "basement": "Basement",
+      "attic": "Attic",
       "other": "Other"
     }
   },

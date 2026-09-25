@@ -31,7 +31,7 @@ export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
 export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
-export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
+export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'dining_room' | 'bedroom' | 'kids_room' | 'bathroom' | 'wc' | 'hallway' | 'office' | 'laundry' | 'storage' | 'balcony' | 'terrace' | 'garden' | 'pool' | 'garage' | 'basement' | 'attic' | 'view' | 'other';
 
 export type AppView = 'home' | 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'villas' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'guides' | 'business-directory' | 'blog' | 'not-found';
 

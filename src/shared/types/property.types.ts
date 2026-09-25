@@ -12,7 +12,7 @@ import type { ConstructionStatus } from '@/shared/property/construction';
 export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
 export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
-export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
+export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'dining_room' | 'bedroom' | 'kids_room' | 'bathroom' | 'wc' | 'hallway' | 'office' | 'laundry' | 'storage' | 'balcony' | 'terrace' | 'garden' | 'pool' | 'garage' | 'basement' | 'attic' | 'view' | 'other';
 /**
  * Every property type a listing may be filed under, in the order pickers show
  * them. Declared as a tuple so the union below can never drift from the list

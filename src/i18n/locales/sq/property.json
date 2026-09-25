@@ -421,6 +421,18 @@
       "garden": "Kopshti",
       "pool": "Pishinë",
       "view": "Pamje",
+      "dining_room": "Dhomë Ngrënieje",
+      "kids_room": "Dhomë Fëmijësh",
+      "wc": "WC / Tualet",
+      "hallway": "Korridor",
+      "office": "Zyrë",
+      "laundry": "Lavanderi",
+      "storage": "Depo",
+      "balcony": "Ballkon",
+      "terrace": "Tarracë",
+      "garage": "Garazh",
+      "basement": "Bodrum",
+      "attic": "Papafingo",
       "other": "Tjetër"
     }
   },

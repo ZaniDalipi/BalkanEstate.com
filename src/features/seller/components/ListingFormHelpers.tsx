@@ -206,7 +206,11 @@ export const LANGUAGES = [
     'Bulgarian',
     'Romanian'
 ];
-export const ALL_VALID_TAGS: PropertyImageTag[] = ['exterior', 'living_room', 'kitchen', 'bedroom', 'bathroom', 'other'];
+export const ALL_VALID_TAGS: PropertyImageTag[] = [
+    'exterior', 'living_room', 'kitchen', 'dining_room', 'bedroom', 'kids_room',
+    'bathroom', 'wc', 'hallway', 'office', 'laundry', 'storage', 'balcony',
+    'terrace', 'garden', 'pool', 'garage', 'basement', 'attic', 'view', 'other',
+];
 
 // --- CSS Class Constants (Liquid Glass Design) ---
 
@@ -464,7 +468,7 @@ export const ImageTagSelector: React.FC<{
     options: string[];
     onChange: (tag: string) => void;
 }> = memo(({ value, options, onChange }) => {
-    const { t } = useTranslation(['seller']);
+    const { t } = useTranslation(['seller', 'property']);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -485,17 +489,9 @@ export const ImageTagSelector: React.FC<{
         };
     }, []);
 
-    const getTagLabel = (tag: string) => {
-        const tagMap: Record<string, string> = {
-            'exterior': t('seller:createListing.imageTags.exterior', 'Exterior'),
-            'living_room': t('seller:createListing.imageTags.livingRoom', 'Living Room'),
-            'kitchen': t('seller:createListing.imageTags.kitchen', 'Kitchen'),
-            'bedroom': t('seller:createListing.imageTags.bedroom', 'Bedroom'),
-            'bathroom': t('seller:createListing.imageTags.bathroom', 'Bathroom'),
-            'other': t('seller:createListing.imageTags.other', 'Other'),
-        };
-        return tagMap[tag] || tag.replace(/_/g, ' ');
-    };
+    // Labels shared with the property gallery filters (property:photos.categories)
+    const getTagLabel = (tag: string) =>
+        t(`property:photos.categories.${tag}`, { defaultValue: tag.replace(/_/g, ' ') });
 
     const selectedLabel = value ? getTagLabel(value) : t('seller:createListing.imageTags.selectTag', 'Select Tag');
 
@@ -510,12 +506,12 @@ export const ImageTagSelector: React.FC<{
                 <svg className={`w-4 h-4 ml-2 transition-transform text-gray-400 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
             {isOpen && (
-                <ul className="absolute z-50 w-full mt-1 glass-panel-light max-h-40 overflow-y-auto shadow-lg">
+                <ul className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl max-h-64 overflow-y-auto shadow-xl py-1">
                     {options.map(tag => (
                         <li
                             key={tag}
                             onClick={() => handleSelect(tag)}
-                            className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                            className={`px-3 py-2 text-sm cursor-pointer transition-colors ${tag === value ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'}`}
                         >
                             {getTagLabel(tag)}
                         </li>
