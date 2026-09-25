@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Property } from '@/types';
 import { hasSellerName } from '@/src/shared/utils/seller';
 import { copyTypeAttributes } from '@/shared/property/typeAttributes';
+import { resolveTotalArea } from '@/shared/property/area';
 
 const STORAGE_KEY = 'balkan_recently_viewed';
 const MAX_ITEMS = 10;
@@ -72,7 +73,16 @@ function readStorage(): StoredProperty[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isUsableEntry).slice(0, MAX_ITEMS);
+    // Re-resolve the size on the way out. This snapshot outlives the listing
+    // it was taken from — it sits in localStorage until the browser is
+    // cleared — so an entry captured when a villa's stored total said 500
+    // would keep saying 500 long after the listing itself reads 1500. The
+    // breakdown travels in the snapshot, so the size can simply be worked out
+    // again rather than trusted.
+    return parsed
+      .filter(isUsableEntry)
+      .map((entry: StoredProperty) => ({ ...entry, sqft: resolveTotalArea(entry) }))
+      .slice(0, MAX_ITEMS);
   } catch {
     // Corrupt or unreadable (private mode, quota, hand-edited JSON) — start clean.
     return [];
@@ -128,7 +138,7 @@ export function useRecentlyViewed() {
         // Room counts, open-plan area, parking and floors — whatever this
         // listing's type carries, without this snapshot having to know.
         ...copyTypeAttributes(property as unknown as Record<string, unknown>),
-        sqft: property.sqft,
+        sqft: resolveTotalArea(property as unknown as Record<string, unknown>),
         address: property.address,
         propertyType: property.propertyType,
         listingType: property.listingType,

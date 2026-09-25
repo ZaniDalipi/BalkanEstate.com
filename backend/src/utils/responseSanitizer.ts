@@ -7,6 +7,7 @@
  */
 
 import { encodeId } from './idObfuscation';
+import { resolveTotalArea } from '../config/propertyArea';
 
 /** Fields that should NEVER appear in any public-facing API response */
 const ALWAYS_STRIP_FIELDS = ['__v', 'password', 'resetPasswordToken', 'resetPasswordExpires',
@@ -131,6 +132,20 @@ export const sanitizeProperty = (property: any, context: 'list' | 'detail' = 'li
   if (typeof cleaned.lng === 'number') {
     cleaned.lng = roundCoordinate(cleaned.lng);
   }
+
+  // One official size, decided here.
+  //
+  // Every property leaving this API passes through this function, so this is
+  // the one place that can guarantee each of them states the same total —
+  // whichever screen asked, and whether the caller runs the row through a
+  // transform or spreads it as it arrived. Doing it per component meant each
+  // one could disagree: the same villa read 1500 m² on its detail page and
+  // 500 on a card, because the card read the stored field and the page did
+  // not. The value is what the stored record says about itself, so a row the
+  // schema hook has already normalised is returned unchanged; a row written
+  // before the rule is served correctly while the backfill catches up.
+  const total = resolveTotalArea(cleaned.propertyType, cleaned);
+  if (total > 0 || typeof cleaned.sqft === 'number') cleaned.sqft = total;
 
   return stripInternalFields(cleaned);
 };
