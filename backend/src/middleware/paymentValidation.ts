@@ -95,6 +95,12 @@ export const validateCreatePayment: (ValidationChain | typeof handleValidationEr
     .trim()
     .isIn(SUPPORTED_PROVIDERS).withMessage('Invalid payment provider'),
 
+  body('discountCode')
+    .optional()
+    .trim()
+    .isLength({ max: 50 }).withMessage('Discount code too long')
+    .matches(/^[A-Za-z0-9_-]+$/).withMessage('Discount code contains invalid characters'),
+
   handleValidationErrors,
 ];
 

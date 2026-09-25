@@ -77,6 +77,9 @@ export interface IUser extends Document {
   listingsCount: number,
   totalListingsCreated: number
 
+  // Last time the user claimed a reward from the listing-limit discount game
+  gameRewardClaimedAt?: Date;
+
   // Real-time Statistics (auto-updated)
   stats?: {
     totalViews: number;        // Total views across all properties
@@ -447,6 +450,9 @@ const UserSchema: Schema = new Schema(
     totalListingsCreated: {
       type: Number,
       default: 0,
+    },
+    gameRewardClaimedAt: {
+      type: Date,
     },
     stats: {
       totalViews: {

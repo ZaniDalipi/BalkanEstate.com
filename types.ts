@@ -833,7 +833,7 @@ export interface AppState {
     pendingSubscription: PendingSubscription | null;
     pendingAgencyData: any | null; // Agency form data to be created after payment
     searchPageState: SearchPageState;
-    activeDiscount: { proYearly: number; proMonthly: number; enterprise: number; } | null;
+    activeDiscount: { proYearly: number; proMonthly: number; enterprise: number; code?: string; validUntil?: string; } | null;
     isListingLimitWarningOpen: boolean;
     isDiscountGameOpen: boolean;
     isEnterpriseModalOpen: boolean;
@@ -913,7 +913,7 @@ export type AppAction =
     | { type: 'SET_PENDING_SUBSCRIPTION', payload: PendingSubscription | null }
     | { type: 'SET_PENDING_AGENCY_DATA', payload: any | null }
     | { type: 'UPDATE_SEARCH_PAGE_STATE', payload: Partial<SearchPageState> }
-    | { type: 'SET_ACTIVE_DISCOUNT', payload: { proYearly: number; proMonthly: number; enterprise: number; } | null }
+    | { type: 'SET_ACTIVE_DISCOUNT', payload: { proYearly: number; proMonthly: number; enterprise: number; code?: string; validUntil?: string; } | null }
     | { type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: boolean }
     | { type: 'TOGGLE_DISCOUNT_GAME', payload: boolean }
     | { type: 'UPDATE_SAVED_SEARCH_ACCESS_TIME', payload: { searchId: string; seenPropertyIds?: string[] } }
