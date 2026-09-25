@@ -114,8 +114,8 @@ const AnalyticsPage: React.FC = () => {
 
   // Navigation helpers
   const navigateToProperty = (propertyId: string) => {
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
+    // Open listings in a new tab so the analytics dashboard stays in place
+    window.open(buildLocalizedPath(`/property/${propertyId}`), '_blank', 'noopener,noreferrer');
   };
 
   const navigateToView = (view: AppView) => {
