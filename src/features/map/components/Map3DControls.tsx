@@ -312,7 +312,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
       {/* 2D/3D Toggle, Floor Labels Toggle, Shadow Toggle, Nearby, Floors overlay, and Timelapse - top right */}
       {!show360Tour && (
-        <div className="absolute top-[4.25rem] sm:top-[5.25rem] right-1.5 sm:right-4 z-10 flex flex-col items-end gap-1 sm:gap-2 max-h-[calc(100%-120px)] max-w-[calc(100%-1rem)] sm:max-w-none overflow-y-auto">
+        <div className="absolute top-[3.5rem] sm:top-[5.25rem] right-1.5 sm:right-4 z-10 flex flex-col items-end gap-1 sm:gap-2 max-h-[calc(100%-120px)] max-w-[calc(100%-1rem)] sm:max-w-none overflow-y-auto">
           <button
             onClick={toggle3DMode}
             className={`w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow-lg transition-all flex items-center justify-center ${
@@ -544,10 +544,10 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
 
       {/* Bottom controls */}
       {!show360Tour && (
-        <div className={`absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 items-center gap-1.5 sm:gap-2 ${showTimelapse ? 'hidden lg:flex' : 'flex'}`}>
+        <div className={`absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 items-center gap-1.5 sm:gap-2 ${showTimelapse ? 'hidden lg:flex' : 'flex'}`}>
           <button
             onClick={flyToProperty}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs sm:text-sm rounded-lg shadow-lg transition-all"
+            className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-5 py-1.5 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs sm:text-sm rounded-lg shadow-lg transition-all"
           >
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" />
@@ -560,7 +560,7 @@ const Map3DControls: React.FC<Map3DControlsProps> = ({
               onClick={onNavigateToMap}
               aria-label={destinationLabel}
               title={destinationLabel}
-              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-900/90 hover:bg-slate-800 font-medium text-xs sm:text-sm rounded-lg shadow-lg transition-all border ${destination.accentClassName}`}
+              className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2.5 bg-slate-900/90 hover:bg-slate-800 font-medium text-xs sm:text-sm rounded-lg shadow-lg transition-all border ${destination.accentClassName}`}
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />

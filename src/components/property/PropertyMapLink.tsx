@@ -175,8 +175,8 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
 
   // Responsive map heights — taller in full-bleed (full-screen) placement.
   const heightClassName = fullBleed
-    ? 'h-[460px] sm:h-[600px] lg:h-[78vh]'
-    : 'h-[420px] sm:h-[520px] lg:h-[650px]';
+    ? 'h-[540px] sm:h-[600px] lg:h-[78vh]'
+    : 'h-[520px] lg:h-[650px]';
 
   const containerRef = useRef<HTMLDivElement>(null);
   const isNearViewport = useNearViewport(containerRef);
@@ -193,11 +193,11 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
       }
     >
       {/* Header */}
-      <div className="p-4 border-b border-neutral-100 bg-gradient-to-r from-blue-50 to-purple-50">
+      <div className="px-3 py-2.5 sm:p-4 border-b border-neutral-100 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
             <svg
-              className="w-5 h-5 text-white"
+              className="w-4 h-4 sm:w-5 sm:h-5 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -217,10 +217,10 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-neutral-800">
+            <h3 className="text-base sm:text-lg font-bold text-neutral-800">
               {t('cinematicMap.title', 'Property Location')}
             </h3>
-            <p className="text-sm text-neutral-600">
+            <p className="hidden sm:block text-sm text-neutral-600">
               {t('cinematicMap.description', 'Experience a cinematic journey to this property')}
             </p>
           </div>

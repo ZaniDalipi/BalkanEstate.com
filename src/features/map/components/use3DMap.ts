@@ -64,12 +64,20 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const facingCardinalRef = useRef<HTMLElement | null>(null);
   const facingDirectionLabelRef = useRef<HTMLElement | null>(null);
 
+  // Phones get a lighter first view: the map card is small there, so the
+  // floor panel starts tucked into its button and nearby places start hidden
+  // (both one tap away) to leave the map itself usable.
+  const isPhone = useMemo(
+    () => typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 639px)').matches,
+    [],
+  );
+
   // State
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentBearing, setCurrentBearing] = useState(bearing);
   const [showTimelapse, setShowTimelapse] = useState(false);
   const [is3DMode, setIs3DMode] = useState(true);
-  const [showFloorIndicator, setShowFloorIndicator] = useState(true);
+  const [showFloorIndicator, setShowFloorIndicator] = useState(!isPhone);
   const [showFloorLabels, setShowFloorLabels] = useState(false);
   const [showShadows, setShowShadows] = useState(true);
   const [show360Tour, setShow360Tour] = useState(false);
@@ -100,7 +108,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
   // POI markers reference for cleanup
   const poiMarkersRef = useRef<maplibregl.Marker[]>([]);
-  const [showPOI, setShowPOI] = useState(true);
+  const [showPOI, setShowPOI] = useState(!isPhone);
 
   // POI category styling
   const POI_CATEGORIES: Record<string, { icon: string; color: string; label: string }> = {
@@ -384,6 +392,9 @@ export function use3DMap(props: Map3DBuildingsProps) {
       const mapBearing = mapInstance.getBearing();
       const arrowRotation = facing - mapBearing;
 
+      // Phones show just the arrow and cardinal; the two caption lines
+      // make the badge cover the building it describes.
+      const compactFacing = !!window.matchMedia?.('(max-width: 639px)').matches;
       const facingEl = document.createElement('div');
       facingEl.innerHTML = `
         <div style="
@@ -405,7 +416,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             text-align: center;
             white-space: nowrap;
           ">
-            <div class="facing-label" style="font-size: 8px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
+            <div class="facing-label" style="${compactFacing ? 'display: none; ' : ''}font-size: 8px; color: #94a3b8; font-weight: 500;">${t('property:map3d.facing', 'Facing')}</div>
             <div style="display: flex; align-items: center; gap: 3px; justify-content: center;">
               <div class="facing-arrow" style="
                 width: 16px; height: 16px;
@@ -419,7 +430,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
               </div>
               <span class="facing-cardinal" style="font-size: 11px; font-weight: 700; color: #60a5fa;">${cardinal}</span>
             </div>
-            <div class="facing-direction-label" style="font-size: 8px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
+            <div class="facing-direction-label" style="${compactFacing ? 'display: none; ' : ''}font-size: 8px; color: #64748b;">${t('property:map3d.facingDirection', '{{direction}}-facing', { direction: cardinalFull })}</div>
           </div>
         </div>
       `;
@@ -1399,11 +1410,14 @@ export function use3DMap(props: Map3DBuildingsProps) {
       );
     });
 
-    // Add navigation controls
-    mapInstance.addControl(
-      new maplibregl.NavigationControl({ visualizePitch: true }),
-      'bottom-right'
-    );
+    // Add navigation controls. Phones zoom and tilt with gestures, and the
+    // buttons would sit on top of the side toolbar there.
+    if (!window.matchMedia?.('(max-width: 639px)').matches) {
+      mapInstance.addControl(
+        new maplibregl.NavigationControl({ visualizePitch: true }),
+        'bottom-right'
+      );
+    }
 
     return () => {
       // Stop observing container resize

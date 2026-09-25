@@ -140,9 +140,10 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
       {/* Property info card - top left */}
       {(title || resolvedAddress) && !show360Tour && (
         <div className="absolute top-3 sm:top-4 left-2 sm:left-4 z-10">
-          <div className="bg-white/15 backdrop-blur-xl backdrop-saturate-150 px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] max-w-[200px] sm:max-w-[300px] border border-white/25">
+          <div className="bg-slate-900/40 sm:bg-white/15 backdrop-blur-xl backdrop-saturate-150 px-2.5 sm:px-4 py-1.5 sm:py-3 rounded-lg sm:rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] max-w-[150px] sm:max-w-[300px] border border-white/25">
             {title && <p className="font-semibold text-white text-xs sm:text-sm truncate">{title}</p>}
-            {resolvedAddress && <p className="text-[10px] sm:text-sm text-slate-300 truncate" title={resolvedAddress}>{resolvedAddress}</p>}
+            {/* The address is already on the page; phones keep just the title */}
+            {resolvedAddress && <p className={`${title ? 'hidden sm:block' : ''} text-[10px] sm:text-sm text-slate-300 truncate`} title={resolvedAddress}>{resolvedAddress}</p>}
           </div>
         </div>
       )}
@@ -151,26 +152,26 @@ const Map3DBuildings: React.FC<Map3DBuildingsProps> = (props) => {
       {mapLoaded && !show360Tour && (
         <div className="absolute top-2 sm:top-3 right-2 sm:right-4 z-20">
           <div
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-900/85 backdrop-blur-sm border border-slate-600/50 shadow-lg flex items-center justify-center transition-transform"
+            className="w-11 h-11 sm:w-16 sm:h-16 rounded-full bg-slate-900/85 backdrop-blur-sm border border-slate-600/50 shadow-lg flex items-center justify-center transition-transform"
             style={{ transform: `rotate(${-currentBearing}deg)` }}
           >
             {/* North indicator - red */}
-            <div className="absolute top-1 sm:top-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <div className="absolute top-0.5 sm:top-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center">
               <span className="text-[9px] sm:text-[10px] font-bold text-red-400 leading-none">N</span>
               <div className="w-0.5 h-2 sm:h-2.5 bg-red-400 rounded-full mt-px" />
             </div>
             {/* South indicator */}
-            <div className="absolute bottom-1 sm:bottom-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <div className="absolute bottom-0.5 sm:bottom-1.5 left-1/2 -translate-x-1/2 flex flex-col items-center">
               <div className="w-0.5 h-2 sm:h-2.5 bg-slate-400 rounded-full mb-px" />
               <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 leading-none">S</span>
             </div>
             {/* East indicator */}
-            <div className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 flex items-center">
+            <div className="absolute right-0.5 sm:right-1.5 top-1/2 -translate-y-1/2 flex items-center">
               <div className="w-2 sm:w-2.5 h-0.5 bg-slate-400 rounded-full mr-px" />
               <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 leading-none">E</span>
             </div>
             {/* West indicator */}
-            <div className="absolute left-1 sm:left-1.5 top-1/2 -translate-y-1/2 flex items-center">
+            <div className="absolute left-0.5 sm:left-1.5 top-1/2 -translate-y-1/2 flex items-center">
               <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 leading-none">W</span>
               <div className="w-2 sm:w-2.5 h-0.5 bg-slate-400 rounded-full ml-px" />
             </div>
