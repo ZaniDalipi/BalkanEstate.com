@@ -5,33 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Property, PropertyImageTag } from '../../../types';
 import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
-
-// Category emoji map
-const categoryEmojis: Record<string, string> = {
-  all: '📷',
-  exterior: '🏠',
-  interior: '🛋️',
-  bedroom: '🛏️',
-  bathroom: '🚿',
-  kitchen: '🍳',
-  living_room: '🛋️',
-  dining_room: '🍽️',
-  kids_room: '🧸',
-  wc: '🚽',
-  hallway: '🚪',
-  office: '💼',
-  laundry: '🧺',
-  storage: '📦',
-  balcony: '🪴',
-  terrace: '☀️',
-  garage: '🚗',
-  basement: '🧱',
-  attic: '🪜',
-  garden: '🌳',
-  pool: '🏊',
-  view: '🌅',
-  other: '📸',
-};
+import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_EMOJI } from '@/shared/property/galleryImages';
 
 interface PropertyPhotosProps {
   property: Property;
@@ -70,23 +44,14 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
   const { t } = useTranslation(['property']);
 
   // Combine all images with main image
-  const allImages = useMemo(() => {
-    const images = property.images || [];
-    const mainImage = { url: property.imageUrl, tag: 'exterior' as PropertyImageTag };
-    const combined = [mainImage, ...images];
-    return combined.filter((v, i, a) => a.findIndex((t) => t.url === v.url) === i);
-  }, [property.imageUrl, property.images]);
+  const allImages = useMemo(
+    () => buildGalleryImages(property.imageUrl, property.images),
+    [property.imageUrl, property.images],
+  );
 
   // Categorize images by tag
   const categorizedImages = useMemo(() => {
-    return allImages.reduce((acc, img) => {
-      const tag = img.tag || 'other';
-      if (!acc[tag]) {
-        acc[tag] = [];
-      }
-      acc[tag].push(img);
-      return acc;
-    }, {} as Record<PropertyImageTag, { url: string; tag: PropertyImageTag }[]>);
+    return groupGalleryImagesByTag(allImages);
   }, [allImages]);
 
   // Get images for current category
@@ -126,7 +91,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
                   : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 hover:scale-102'
               }`}
             >
-              <span>{categoryEmojis.all}</span>
+              <span>{IMAGE_TAG_EMOJI.all}</span>
               <span>{t('photos.all')}</span>
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                 activeCategory === 'all' ? 'bg-white/20' : 'bg-neutral-200'
@@ -144,7 +109,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 hover:scale-102'
                 }`}
               >
-                <span>{categoryEmojis[tag] || '📷'}</span>
+                <span>{IMAGE_TAG_EMOJI[tag as PropertyImageTag] ?? IMAGE_TAG_EMOJI.all}</span>
                 <span>{t(`photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })}</span>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                   activeCategory === tag ? 'bg-white/20' : 'bg-neutral-200'
