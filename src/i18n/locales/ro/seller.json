@@ -97,7 +97,8 @@
     "imageManagement": {
       "title": "Gestionare Imagini",
       "dragToReorder": "Trage și plasează imaginile pentru a le reordona. Prima imagine va fi fotografia principală de copertă a anunțului tău.",
-      "selectTag": "Selectează Eticheta"
+      "selectTag": "Selectează Eticheta",
+      "removePhoto": "Șterge fotografia {{n}}"
     },
     "generate": "Generează Anunțul",
     "location": {

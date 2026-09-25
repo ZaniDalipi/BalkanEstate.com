@@ -100,7 +100,8 @@
     "imageManagement": {
       "title": "Upravljanje Slikama",
       "dragToReorder": "Prevucite i ispustite slike da ih promijenite redoslijed. Prva slika će biti glavna naslovna fotografija za Vaš oglas.",
-      "selectTag": "Odaberite Oznaku"
+      "selectTag": "Odaberite Oznaku",
+      "removePhoto": "Obriši fotografiju {{n}}"
     },
     "generate": "Generiši Oglas",
     "location": {

@@ -91,7 +91,18 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                                         onDragOver={(e) => e.preventDefault()}
                                     >
                                         <img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg mb-2 border border-gray-200" />
-                                        <button type="button" aria-label="Remove image" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500/80 backdrop-blur-sm text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity z-10">&times;</button>
+                                        {/* Always shown on touch screens (no hover there); on hover or keyboard focus with a mouse. */}
+                                        <button
+                                            type="button"
+                                            aria-label={t('seller:createListing.imageManagement.removePhoto', 'Delete photo {{n}}', { n: index + 1 })}
+                                            title={t('seller:createListing.imageManagement.removePhoto', 'Delete photo {{n}}', { n: index + 1 })}
+                                            onClick={(e) => { e.stopPropagation(); removeImage(index); }}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            draggable={false}
+                                            className="absolute top-1.5 right-1.5 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-md transition-opacity opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                        >
+                                            <XMarkIcon className="w-4 h-4" />
+                                        </button>
                                         <ImageTagSelector
                                             value={imageTags.find(t => t.index === index)?.tag || 'other'}
                                             options={ALL_VALID_TAGS}

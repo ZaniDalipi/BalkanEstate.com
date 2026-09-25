@@ -245,7 +245,12 @@
     "formats": "PDF, JPG, sau PNG",
     "uploadFloorplan": "Upload Floor Plan",
     "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan"
+    "skip": "Skip Floor Plan",
+    "invalidFormat": "Format de fișier invalid",
+    "invalidFormatMessage": "Încărcați o imagine validă (JPEG, PNG, WebP, GIF, HEIC sau SVG).",
+    "fileTooLarge": "Fișier prea mare",
+    "fileTooLargeMessage": "Imaginea planului trebuie să aibă sub 10MB. Fișierul dvs. are {{size}}MB.",
+    "uploadFailedMessage": "Încărcarea planului a eșuat: {{error}}"
   },
   "language": {
     "title": "Limba Anunțului",
@@ -318,7 +323,11 @@
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "fixHighlighted": "Completați câmpurile marcate cu roșu:",
+    "apartmentTotalFloors": "Pentru apartamente, introduceți numărul total de etaje (1 sau mai mult).",
+    "attributesInvalid": "Verificați detaliile pentru acest tip de proprietate.",
+    "atLeastOnePhoto": "Este necesară cel puțin o fotografie pentru a publica un anunț."
   },
   "success": {
     "title": "Anunț Publicat!",

@@ -172,7 +172,12 @@
     "title": "Floor Plan",
     "uploadFloorplan": "Upload Floor Plan",
     "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan"
+    "skip": "Skip Floor Plan",
+    "invalidFormat": "Invalid File Format",
+    "invalidFormatMessage": "Please upload a valid image file (JPEG, PNG, WebP, GIF, HEIC, or SVG).",
+    "fileTooLarge": "File Too Large",
+    "fileTooLargeMessage": "Floor plan image must be under 10MB. Your file is {{size}}MB.",
+    "uploadFailedMessage": "Failed to upload floor plan: {{error}}"
   },
   "language": {
     "title": "Listing Language",
@@ -230,7 +235,8 @@
     "descriptionRequired": "Please add a description of the property",
     "atLeastOnePhoto": "At least one photo is required to publish a listing.",
     "fixHighlighted": "Please complete the fields highlighted in red:",
-    "apartmentTotalFloors": "For apartments, please enter the total number of floors (1 or greater)."
+    "apartmentTotalFloors": "For apartments, please enter the total number of floors (1 or greater).",
+    "attributesInvalid": "Please check the details for this property type."
   },
   "success": {
     "title": "Listing Published!",

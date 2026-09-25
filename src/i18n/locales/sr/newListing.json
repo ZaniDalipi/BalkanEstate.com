@@ -172,7 +172,12 @@
     "title": "План Етаже",
     "uploadFloorplan": "Отпреми План Етаже",
     "optional": "Опционално - Додајте слику плана етаже",
-    "skip": "Прескочи План Етаже"
+    "skip": "Прескочи План Етаже",
+    "invalidFormat": "Неважећи формат датотеке",
+    "invalidFormatMessage": "Молимо отпремите исправну слику (JPEG, PNG, WebP, GIF, HEIC или SVG).",
+    "fileTooLarge": "Датотека је превелика",
+    "fileTooLargeMessage": "Слика основе мора бити мања од 10MB. Ваша датотека има {{size}}MB.",
+    "uploadFailedMessage": "Отпремање основе није успело: {{error}}"
   },
   "language": {
     "title": "Језик Огласа",
@@ -225,7 +230,13 @@
     "selectCountry": "Please select a country",
     "selectCity": "Please select a city",
     "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price"
+    "invalidPrice": "Please enter a valid price",
+    "fixHighlighted": "Молимо попуните поља означена црвеном бојом:",
+    "titleRequired": "Молимо унесите наслов огласа",
+    "descriptionRequired": "Молимо додајте опис некретнине",
+    "apartmentTotalFloors": "За станове унесите укупан број спратова (1 или више).",
+    "attributesInvalid": "Молимо проверите детаље за ову врсту некретнине.",
+    "atLeastOnePhoto": "За објаву огласа потребна је најмање једна фотографија."
   },
   "success": {
     "title": "Оглас Објављен!",
