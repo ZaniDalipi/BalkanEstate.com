@@ -27,7 +27,7 @@ interface ListingLimitWarningModalProps {
     listingLimit?: number; // The actual limit for this tier
     isSubscriber?: boolean; // Paying users win bonus listings instead of a discount
     onUseCode: (code: GameRewardCode) => void; // Already holds an unused game code
-    onViewPlans: () => void; // Can't play today: go straight to the plans
+    onViewPlans: () => void; // Can't play this week: go straight to the plans
 }
 
 const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
@@ -83,7 +83,7 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
                     </p>
                 </div>
 
-                {/* Game offer, or what is left of today's reward */}
+                {/* Game offer, or what is left of this week's reward */}
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-4 mb-6">
                     {activeCode ? (
                         <>
@@ -97,7 +97,7 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
                     ) : onCooldown ? (
                         <>
                             <p className="font-bold text-amber-800 text-lg mb-1">
-                                {t('listingLimit.playedTodayTitle', "You've already played today")}
+                                {t('listingLimit.playedTodayTitle', "You've already played this week")}
                             </p>
                             <p className="text-sm text-amber-700">
                                 {t('listingLimit.playedTodayDescription', 'You can play for another reward after {{date}}.', { date: nextGameDate })}

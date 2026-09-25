@@ -82,7 +82,7 @@
     "haveCodeTitle": "You already won {{percent}}% off!",
     "haveCodeDescription": "Your code {{code}} is still valid. Use it on a Pro plan to keep listing.",
     "useMyDiscount": "Use my {{percent}}% discount",
-    "playedTodayTitle": "You've already played today",
+    "playedTodayTitle": "You've already played this week",
     "playedTodayDescription": "You can play for another reward after {{date}}.",
     "viewPlans": "View plans"
   },
@@ -353,7 +353,7 @@
     "instructionsSubscriber": "You have 20 seconds. Every icon you hit = 1 extra listing!",
     "claiming": "Calculating your reward...",
     "youWon": "You won!",
-    "alreadyClaimed": "You already won a code today — here it is again",
+    "alreadyClaimed": "You already won a code this week — here it is again",
     "percentOff": "{{percent}}% OFF",
     "discountDescription": "Use this code on any Pro or Enterprise seller plan.",
     "copy": "Copy",
@@ -369,9 +369,9 @@
     "noHitsSubscriber": "Every icon you hit is one extra listing. Give it another go!",
     "noHitsFree": "Every icon you hit adds to your discount. Give it another go!",
     "playAgain": "Play again",
-    "cooldownTitle": "Reward already claimed today",
+    "cooldownTitle": "Reward already claimed this week",
     "cooldownUntil": "You can win another reward after {{date}}.",
-    "cooldown": "You can win one reward per day. Come back tomorrow!",
+    "cooldown": "You can win one reward per week. Come back next week!",
     "errorTitle": "Something went wrong",
     "error": "We could not save your reward. Please try again."
   }

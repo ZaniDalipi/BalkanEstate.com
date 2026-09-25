@@ -9,7 +9,7 @@ import { apiLogger } from '../utils/logger';
  *
  * The score is reported by the client, so everything here is bounded:
  * - hits are capped at what a 20s round can physically produce,
- * - one reward per user per cooldown window,
+ * - one reward per user per week, whichever kind it was,
  * - discount codes are single-use, short-lived and limited to seller plans.
  *
  * Reward depends on whether the user already pays for listings:
@@ -22,7 +22,7 @@ export const GAME_MAX_HITS = 16;
 export const DISCOUNT_PER_HIT = 5; // % per hit
 export const MAX_GAME_DISCOUNT = 50; // %
 export const LISTINGS_PER_HIT = 1;
-export const GAME_REWARD_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+export const GAME_REWARD_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // one reward per week
 export const GAME_CODE_VALIDITY_MS = 48 * 60 * 60 * 1000;
 export const GAME_CODE_PLANS = ['seller_pro_monthly', 'seller_pro_yearly', 'seller_enterprise_yearly'];
 
@@ -213,7 +213,7 @@ async function respondOnCooldown(res: Response, user: IUser, isSubscriber: boole
   const fresh = await User.findById(user._id).select('gameRewardClaimedAt').lean();
   const lastClaim = fresh?.gameRewardClaimedAt ? new Date(fresh.gameRewardClaimedAt).getTime() : Date.now();
   res.status(429).json({
-    message: 'You have already claimed a game reward today. Try again later.',
+    message: 'You have already claimed a game reward this week. Try again later.',
     code: 'GAME_REWARD_COOLDOWN',
     nextAvailableAt: new Date(lastClaim + GAME_REWARD_COOLDOWN_MS),
     isSubscriber,

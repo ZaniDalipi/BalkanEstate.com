@@ -116,7 +116,7 @@ describe('POST /api/game-rewards/claim', () => {
     expect(retry.statusCode).toBe(201);
   });
 
-  it('only rewards a subscriber once per day', async () => {
+  it('only rewards a subscriber once per week', async () => {
     const user = await proUser();
     await claim(user, 5);
     const second = await claim(user, 5);
@@ -139,7 +139,7 @@ describe('POST /api/game-rewards/claim', () => {
   it('allows a new reward once the cooldown has passed', async () => {
     const user = await proUser();
     await claim(user, 2);
-    await User.updateOne({ _id: user._id }, { gameRewardClaimedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
+    await User.updateOne({ _id: user._id }, { gameRewardClaimedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) });
 
     const res = await claim(user, 3);
     expect(res.body.reward.totalBonusListings).toBe(5);

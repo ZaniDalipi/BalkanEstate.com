@@ -100,7 +100,7 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, isSubscri
                 <div className="text-center p-4 sm:p-6">
                     <p className="text-sm font-semibold text-amber-700 uppercase tracking-wide">
                         {reward.alreadyClaimed
-                            ? t('gameReward.alreadyClaimed', 'You already won a code today — here it is again')
+                            ? t('gameReward.alreadyClaimed', 'You already won a code this week — here it is again')
                             : t('gameReward.youWon', 'You won!')}
                     </p>
                     <p className="text-5xl font-extrabold text-orange-600 mt-2">
@@ -203,11 +203,11 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, isSubscri
 
             {phase.name === 'cooldown' && (
                 <div className="text-center p-4 sm:p-6">
-                    <p className="text-2xl font-bold text-neutral-800">{t('gameReward.cooldownTitle', 'Reward already claimed today')}</p>
+                    <p className="text-2xl font-bold text-neutral-800">{t('gameReward.cooldownTitle', 'Reward already claimed this week')}</p>
                     <p className="text-neutral-600 mt-2">
                         {phase.nextAvailableAt
                             ? t('gameReward.cooldownUntil', 'You can win another reward after {{date}}.', { date: formatDate(phase.nextAvailableAt) })
-                            : t('gameReward.cooldown', 'You can win one reward per day. Come back tomorrow!')}
+                            : t('gameReward.cooldown', 'You can win one reward per week. Come back next week!')}
                     </p>
                     <div className="mt-6">
                         <button onClick={onClose} className={secondaryBtn}>{t('common:actions.close', 'Close')}</button>
