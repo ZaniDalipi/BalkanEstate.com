@@ -654,5 +654,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Σημείωση",
-  "loadMore": "Φόρτωση περισσότερων"
+  "pagination": {
+    "label": "Σελιδοποίηση",
+    "pageOf": "Σελίδα {{page}} από {{total}}",
+    "goToPage": "Σελίδα {{page}}"
+  }
 }

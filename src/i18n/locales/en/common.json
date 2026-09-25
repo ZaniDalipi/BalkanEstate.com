@@ -654,5 +654,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Note",
-  "loadMore": "Load more"
+  "pagination": {
+    "label": "Pagination",
+    "pageOf": "Page {{page}} of {{total}}",
+    "goToPage": "Page {{page}}"
+  }
 }

@@ -940,30 +940,33 @@ keys in `importReviewKeys`; the prefill hook-in is `ListingPrefill` in
 
 ---
 
-## My Listings — loaded in chunks
+## My Listings — one page at a time
 
 An agent can have hundreds of listings, so **My Listings never fetches them all
-at once**: it shows the first 20 and loads the next 20 as the seller scrolls.
+at once**: it shows 20 per page with "Page 2 of 5" navigation.
 
 ```
 MyListings (components/shared/MyListings.tsx)
-  └── useMyListingsInfinite(filters)                 src/features/properties/hooks/
-        └── useInfiniteQuery  propertyKeys.myListingsPages(filters)
-              └── getMyListingsPage({ offset, limit: 20, status, listingType, role, search })
-                    └── GET /api/properties/my/listings?offset=&limit=&…
-                          ├── $match seller + filters, $sort status group → newest renewed/created
-                          ├── $skip/$limit → ids → find + populate (same shape as before)
-                          └── counts (all / sale / rent / private_seller / agent) on offset 0
+  ├── useMyListingsPaged(filters, page)              src/features/properties/hooks/
+  │     └── useQuery  propertyKeys.myListingsPages({ ...filters, page })
+  │           └── getMyListingsPage({ offset: (page-1)·20, limit: 20, status, listingType, role, search })
+  │                 └── GET /api/properties/my/listings?offset=&limit=&…
+  │                       ├── $match seller + filters, $sort status group → newest renewed/created
+  │                       ├── $skip/$limit → ids → find + populate (same shape as before)
+  │                       └── total + counts (all / sale / rent / private_seller / agent)
+  └── <Pagination>                                   src/components/ui/Pagination.tsx
 ```
 
-- **Filtering, search and sort run on the server**, so each chunk is in the
-  final order and the tab counts cover every listing, not just the loaded ones.
-  Search is debounced (300 ms) and regex-escaped.
-- **Infinite scroll**: an `IntersectionObserver` sentinel under the list (600 px
-  ahead) calls `fetchNextPage`; a "Load more" button is the fallback.
+- **Filtering, search and sort run on the server**, so every page is in the
+  final order and the tab counts cover every listing. Search is debounced
+  (300 ms) and regex-escaped. Any filter change goes back to page 1.
+- **Changing page** keeps the current page on screen, dimmed, until the next one
+  arrives (`keepPreviousData`), then scrolls to the top of the list.
+- **Mobile**: the page bar collapses to `‹ Previous · Page 2 of 5 · Next ›` with
+  44 px touch targets; numbered pages (`1 … 4 5 6 … 12`) appear from `sm` up.
 - **Optimistic updates** go through `setListings` / `setCounts`, which patch
-  every cached chunk. The next offset counts only loaded listings that still
-  match the filters, so marking one sold under "Active" doesn't skip a listing.
+  every cached page. After a delete the page is refetched so it refills, and
+  if the last page empties the view steps back to the new last page.
 - Without `limit` the endpoint still returns every listing (analytics and
   promotions use that).
 

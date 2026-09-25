@@ -69,7 +69,7 @@ describe('getMyListings pagination', () => {
       const { body } = await call({ offset: String(offset), limit: '20' });
       seen.push(...body.properties);
       offset += body.properties.length;
-      if (offset > 0) expect(body.counts === undefined).toBe(offset > 20);
+      expect(body.counts.all).toBe(48);
       if (!body.pagination.hasMore) break;
     }
     expect(seen).toHaveLength(48);

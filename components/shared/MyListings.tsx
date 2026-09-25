@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
-import { useRealtimeProperties, useMyListingsInfinite } from '../../src/features/properties/hooks';
+import { useRealtimeProperties, useMyListingsPaged, MY_LISTINGS_PAGE_SIZE } from '../../src/features/properties/hooks';
 import { EyeIcon, HeartIcon, InquiriesIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon, CalendarIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
+import Pagination from '@/src/components/ui/Pagination';
 import * as api from '../../services/apiService';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import { VideoGenerator } from '../../src/features/videos';
@@ -328,7 +329,9 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [propertyForVideo, setPropertyForVideo] = useState<Property | null>(null);
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+    const [page, setPage] = useState(1);
+    // Top of the list, scrolled to when changing page
+    const listTopRef = useRef<HTMLDivElement | null>(null);
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
     const skipNextRefetchRef = useRef(false);
 
@@ -353,26 +356,41 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         return { canRenew: false, hoursRemaining, minutesRemaining };
     };
 
-    // Listings are loaded in chunks of 20 as the user scrolls; filtering,
-    // search and sorting happen on the server
+    // One page of 20 listings at a time ("Page 2 of 5"); filtering, search
+    // and sorting happen on the server
     const {
         listings: myProperties,
         counts,
+        total,
+        totalPages,
         isLoading,
-        isFetchingNextPage: isLoadingMore,
-        hasMore,
-        fetchNextPage,
+        isChangingPage,
         refetch,
         setListings: setMyProperties,
         setCounts,
-    } = useMyListingsInfinite({
+    } = useMyListingsPaged({
         status: statusFilter,
         listingType: listingTypeFilter === 'all' ? undefined : listingTypeFilter,
         role: roleFilter === 'all' ? undefined : roleFilter,
         search: debouncedSearch,
-    });
+    }, page);
     const fetchMyListings = useCallback(() => { refetch(); }, [refetch]);
-    const loadMore = useCallback(() => { fetchNextPage(); }, [fetchNextPage]);
+
+    // Back to page 1 whenever the filters or search change
+    useEffect(() => {
+        setPage(1);
+    }, [statusFilter, listingTypeFilter, roleFilter, debouncedSearch]);
+
+    // Deleting the last listings of the last page: step back to the new last page
+    useEffect(() => {
+        if (!isLoading && page > totalPages) setPage(totalPages);
+    }, [isLoading, page, totalPages]);
+
+    const goToPage = useCallback((next: number) => {
+        setPage(Math.min(Math.max(1, next), totalPages));
+        // Start reading the new page from its top (the page bar sits at the bottom)
+        listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, [totalPages]);
 
     // Delayed refetch for real-time updates - skips if an optimistic update just happened
     const realtimeRefetch = useCallback(() => {
@@ -502,21 +520,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             return bTime - aTime;
         });
     }, [myProperties, statusFilter, roleFilter, listingTypeFilter, propertyIdSearch]);
-
-    // Infinite scroll: load the next chunk when the sentinel nears the viewport.
-    // Re-created after each chunk so it keeps loading while the sentinel stays visible.
-    useEffect(() => {
-        const sentinel = loadMoreSentinelRef.current;
-        if (!sentinel || !hasMore || isLoading || isLoadingMore) return;
-        const observer = new IntersectionObserver(
-            entries => {
-                if (entries[0]?.isIntersecting) loadMore();
-            },
-            { rootMargin: '600px 0px' }
-        );
-        observer.observe(sentinel);
-        return () => observer.disconnect();
-    }, [hasMore, isLoading, isLoadingMore, myProperties.length, loadMore]);
 
     const handleRenew = async (id: string) => {
         // Optimistic: update UI immediately
@@ -748,6 +751,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             // Then delete from backend in background
             try {
                 const result = await api.deleteProperty(deletingId);
+                // Refill the page with the next listing
+                fetchMyListings();
 
                 // Update user's subscription counts if returned from backend
                 if (result.updatedSubscription) {
@@ -1123,6 +1128,9 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 ))}
             </div>
 
+            {/* Scroll target when changing page; offset so the sticky header doesn't cover it */}
+            <div ref={listTopRef} className="scroll-mt-24" />
+
             {isLoading ? (
                 <div className="space-y-4">
                     <ListingCardSkeleton />
@@ -1131,44 +1139,45 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 </div>
             ) : filteredAndSortedProperties.length > 0 ? (
                 <div className="space-y-4">
-                    {filteredAndSortedProperties.map(prop =>
-                        <ListingCard
-                            key={prop.id}
-                            property={prop}
-                            onRenew={handleRenew}
-                            onMarkAsSold={handleMarkAsSoldClick}
-                            onMarkAsAvailable={handleMarkAsAvailableClick}
-                            onDelete={handleDeleteClick}
-                            onPromote={handlePromote}
-                            onExtend={handleExtend}
-                            onVideo={handleVideo}
-                            onReassignRole={handleReassignRoleClick}
-                            canReassignToAgency={canActAsAgent}
-                            renewalStatus={renewalStatuses[prop.id] || null}
-                        />
-                    )}
-                    {hasMore && (
-                        <div ref={loadMoreSentinelRef} className="flex justify-center py-4">
-                            {isLoadingMore ? (
-                                <ListingCardSkeleton />
-                            ) : (
-                                <button
-                                    onClick={loadMore}
-                                    className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100 text-sm"
-                                >
-                                    {t('common:loadMore', 'Load more')}
-                                </button>
+                    {total > 0 && (
+                        <p className="text-xs sm:text-sm text-neutral-500" aria-live="polite">
+                            {t('seller:myListings.showingRange', 'Showing {{from}}–{{to}} of {{total}}', {
+                                from: (page - 1) * MY_LISTINGS_PAGE_SIZE + 1,
+                                to: Math.min(page * MY_LISTINGS_PAGE_SIZE, total),
+                                total,
+                            })}
+                            {totalPages > 1 && (
+                                <span className="hidden sm:inline">
+                                    {' · '}{t('common:pagination.pageOf', 'Page {{page}} of {{total}}', { page, total: totalPages })}
+                                </span>
                             )}
-                        </div>
+                        </p>
                     )}
-                </div>
-            ) : hasMore ? (
-                // Everything loaded so far was filtered out locally; fetch the next chunk
-                <div ref={loadMoreSentinelRef} className="flex justify-center py-4">
-                    <ListingCardSkeleton />
+                    {/* Previous page stays visible (dimmed) while the next one loads */}
+                    <div
+                        className={`space-y-4 transition-opacity ${isChangingPage ? 'opacity-50 pointer-events-none' : ''}`}
+                        aria-busy={isChangingPage}
+                    >
+                        {filteredAndSortedProperties.map(prop =>
+                            <ListingCard
+                                key={prop.id}
+                                property={prop}
+                                onRenew={handleRenew}
+                                onMarkAsSold={handleMarkAsSoldClick}
+                                onMarkAsAvailable={handleMarkAsAvailableClick}
+                                onDelete={handleDeleteClick}
+                                onPromote={handlePromote}
+                                onExtend={handleExtend}
+                                onVideo={handleVideo}
+                                onReassignRole={handleReassignRoleClick}
+                                canReassignToAgency={canActAsAgent}
+                                renewalStatus={renewalStatuses[prop.id] || null}
+                            />
+                        )}
+                    </div>
                 </div>
             ) : (
-                <div className="text-center p-12 border-2 border-dashed rounded-lg bg-neutral-50">
+                <div className="text-center p-6 sm:p-12 border-2 border-dashed rounded-lg bg-neutral-50">
                     {counts.all > 0 ? (
                          <>
                             <h4 className="text-xl font-semibold text-neutral-700">No Listings Found</h4>
@@ -1185,6 +1194,16 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                         </>
                     )}
                 </div>
+            )}
+
+            {!isLoading && (
+                <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    onPageChange={goToPage}
+                    disabled={isChangingPage}
+                    className="pt-2"
+                />
             )}
         </div>
     );

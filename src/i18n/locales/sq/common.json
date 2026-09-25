@@ -654,5 +654,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Shënim",
-  "loadMore": "Ngarko më shumë"
+  "pagination": {
+    "label": "Faqosja",
+    "pageOf": "Faqja {{page}} nga {{total}}",
+    "goToPage": "Faqja {{page}}"
+  }
 }

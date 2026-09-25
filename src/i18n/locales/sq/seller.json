@@ -574,7 +574,8 @@
     "moveToPrivateHint": "Kaloje këtë listim te profili juaj si shitës privat",
     "moveToAgencyConfirm": "Ta kaloni këtë listim te agjencia juaj? Do të shfaqet me të dhënat tuaja si agjent.",
     "moveToAgencyConfirmNamed": "Ta kaloni këtë listim te \"{{agency}}\"? Do të shfaqet nën agjencinë tuaj me të dhënat tuaja si agjent.",
-    "moveToPrivateConfirm": "Ta ktheni këtë listim te profili juaj si shitës privat? Të dhënat e agjencisë do të hiqen prej tij."
+    "moveToPrivateConfirm": "Ta ktheni këtë listim te profili juaj si shitës privat? Të dhënat e agjencisë do të hiqen prej tij.",
+    "showingRange": "Po shfaqen {{from}}–{{to}} nga {{total}}"
   },
   "form": {
     "basicInfo": "Informacione Bazë",

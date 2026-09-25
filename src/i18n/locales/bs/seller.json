@@ -465,7 +465,8 @@
     "moveToPrivateHint": "Premjestite ovaj oglas na svoj privatni prodajni profil",
     "moveToAgencyConfirm": "Premjestiti ovaj oglas u vašu agenciju? Bit će prikazan s vašim agentskim podacima.",
     "moveToAgencyConfirmNamed": "Premjestiti ovaj oglas u \"{{agency}}\"? Bit će prikazan pod vašom agencijom s vašim agentskim podacima.",
-    "moveToPrivateConfirm": "Vratiti ovaj oglas na vaš privatni prodajni profil? Podaci o agenciji bit će uklonjeni."
+    "moveToPrivateConfirm": "Vratiti ovaj oglas na vaš privatni prodajni profil? Podaci o agenciji bit će uklonjeni.",
+    "showingRange": "Prikazano {{from}}–{{to}} od {{total}}"
   },
   "actions": {
     "subscribeToPro": "Pretplatite se na Pro",

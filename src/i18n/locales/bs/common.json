@@ -654,5 +654,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Napomena",
-  "loadMore": "Učitaj više"
+  "pagination": {
+    "label": "Stranice",
+    "pageOf": "Stranica {{page}} od {{total}}",
+    "goToPage": "Stranica {{page}}"
+  }
 }

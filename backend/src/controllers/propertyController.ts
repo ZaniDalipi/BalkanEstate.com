@@ -1684,8 +1684,8 @@ export const getMyListings = async (
 
     const sellerFields = 'name email phone avatarUrl avatarOptions gender role agencyName';
 
-    // Paginated mode (opt-in via ?limit=): the My Listings page loads listings in
-    // chunks as the user scrolls instead of pulling every listing at once.
+    // Paginated mode (opt-in via ?limit=): the My Listings page shows one page
+    // of listings at a time instead of pulling every listing at once.
     // Filtering, search and ordering happen here so each chunk is correct.
     if (req.query.limit !== undefined) {
       const limit = Math.min(Math.max(parseInt(String(req.query.limit), 10) || 20, 1), 200);
@@ -1760,34 +1760,31 @@ export const getMyListings = async (
         .filter((d): d is (typeof docs)[number] => d !== undefined);
       const totalCount = total[0]?.n || 0;
 
-      // Tab/filter counts across all of the user's listings (first chunk only)
-      let counts: Record<string, number> | undefined;
-      if (offset === 0) {
-        const [c] = await Property.aggregate<{ all: number; rent: number; private_seller: number; agent: number }>([
-          { $match: baseMatch },
-          {
-            $group: {
-              _id: null,
-              all: { $sum: 1 },
-              rent: { $sum: { $cond: [{ $eq: ['$listingType', 'rent'] }, 1, 0] } },
-              private_seller: { $sum: { $cond: [{ $eq: ['$createdAsRole', 'private_seller'] }, 1, 0] } },
-              agent: { $sum: { $cond: [{ $eq: ['$createdAsRole', 'agent'] }, 1, 0] } },
-            },
+      // Tab/filter counts across all of the user's listings
+      const [c] = await Property.aggregate<{ all: number; rent: number; private_seller: number; agent: number }>([
+        { $match: baseMatch },
+        {
+          $group: {
+            _id: null,
+            all: { $sum: 1 },
+            rent: { $sum: { $cond: [{ $eq: ['$listingType', 'rent'] }, 1, 0] } },
+            private_seller: { $sum: { $cond: [{ $eq: ['$createdAsRole', 'private_seller'] }, 1, 0] } },
+            agent: { $sum: { $cond: [{ $eq: ['$createdAsRole', 'agent'] }, 1, 0] } },
           },
-        ]);
-        counts = {
-          all: c?.all || 0,
-          sale: (c?.all || 0) - (c?.rent || 0),
-          rent: c?.rent || 0,
-          private_seller: c?.private_seller || 0,
-          agent: c?.agent || 0,
-        };
-      }
+        },
+      ]);
+      const counts = {
+        all: c?.all || 0,
+        sale: (c?.all || 0) - (c?.rent || 0),
+        rent: c?.rent || 0,
+        private_seller: c?.private_seller || 0,
+        agent: c?.agent || 0,
+      };
 
       res.json({
         properties: ordered.map(p => sanitizeProperty(p.toObject(), 'list')),
         pagination: { offset, limit, total: totalCount, hasMore: offset + ordered.length < totalCount },
-        ...(counts && { counts }),
+        counts,
       });
       return;
     }

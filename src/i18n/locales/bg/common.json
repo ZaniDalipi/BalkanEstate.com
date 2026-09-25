@@ -654,5 +654,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Забележка",
-  "loadMore": "Зареди още"
+  "pagination": {
+    "label": "Страници",
+    "pageOf": "Страница {{page}} от {{total}}",
+    "goToPage": "Страница {{page}}"
+  }
 }

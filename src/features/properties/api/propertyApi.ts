@@ -406,7 +406,7 @@ export interface MyListingsPage {
   properties: Property[];
   total: number;
   hasMore: boolean;
-  /** Counts across all of the user's listings; only on the first page (offset 0) */
+  /** Counts across all of the user's listings (for the filter tabs) */
   counts?: MyListingsCounts;
 }
 

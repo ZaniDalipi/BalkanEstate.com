@@ -7,7 +7,7 @@ export { useCreateProperty } from './useCreateProperty';
 export { useUpdateProperty } from './useUpdateProperty';
 export { useDeleteProperty } from './useDeleteProperty';
 export { useMyListings } from './useMyListings';
-export { useMyListingsInfinite, MY_LISTINGS_PAGE_SIZE } from './useMyListingsInfinite';
+export { useMyListingsPaged, MY_LISTINGS_PAGE_SIZE } from './useMyListingsPaged';
 export { useFavorites, useToggleFavorite } from './useFavorites';
 export {
   useMarkPropertyAsSold,

@@ -654,5 +654,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Notă",
-  "loadMore": "Încarcă mai multe"
+  "pagination": {
+    "label": "Paginare",
+    "pageOf": "Pagina {{page}} din {{total}}",
+    "goToPage": "Pagina {{page}}"
+  }
 }
