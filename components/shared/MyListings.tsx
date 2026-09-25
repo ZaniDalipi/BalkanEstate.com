@@ -811,6 +811,33 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         fetchMyListings();
     };
 
+    // Unfinished new listing kept on this device (see listingDraftStorage)
+    const renderLocalDraft = (draft: typeof localDrafts[number]) => (
+        <div key={draft.kind} className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm">
+            <div className="flex-1 text-amber-900">
+                <p className="font-semibold">
+                    {draft.kind === 'rent'
+                        ? t('seller:draft.unfinishedRental', 'Unfinished rental listing')
+                        : t('seller:draft.unfinishedSale', 'Unfinished sale listing')}
+                    {draft.title && `: ${draft.title}`}
+                </p>
+                <p className="text-amber-800/80">
+                    {t('seller:draft.keptUntil', 'Saved as a draft on this device until {{date}}.', {
+                        date: new Date(draft.expiresAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+                    })}
+                </p>
+            </div>
+            <div className="flex gap-2">
+                <button onClick={() => continueDraft(draft.kind)} className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark">
+                    {t('seller:draft.continue', 'Continue')}
+                </button>
+                <button onClick={() => discardLocalDraft(draft.kind)} className="px-4 py-2 border border-amber-300 text-amber-900 font-semibold rounded-lg hover:bg-amber-100">
+                    {t('seller:draft.discard', 'Discard')}
+                </button>
+            </div>
+        </div>
+    );
+
     const statusFilterOptions: { label: string, value: PropertyStatus | 'all' }[] = [
         { label: t('seller:myListings.filters.all', 'All'), value: 'all' },
         { label: t('seller:myListings.filters.active', 'Active'), value: 'active' },
@@ -983,32 +1010,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 </div>
             </div>
 
-            {/* Unfinished listings saved on this device */}
-            {localDrafts.map(draft => (
-                <div key={draft.kind} className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm">
-                    <div className="flex-1 text-amber-900">
-                        <p className="font-semibold">
-                            {draft.kind === 'rent'
-                                ? t('seller:draft.unfinishedRental', 'Unfinished rental listing')
-                                : t('seller:draft.unfinishedSale', 'Unfinished sale listing')}
-                            {draft.title && `: ${draft.title}`}
-                        </p>
-                        <p className="text-amber-800/80">
-                            {t('seller:draft.keptUntil', 'Saved as a draft on this device until {{date}}.', {
-                                date: new Date(draft.expiresAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
-                            })}
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <button onClick={() => continueDraft(draft.kind)} className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark">
-                            {t('seller:draft.continue', 'Continue')}
-                        </button>
-                        <button onClick={() => discardLocalDraft(draft.kind)} className="px-4 py-2 border border-amber-300 text-amber-900 font-semibold rounded-lg hover:bg-amber-100">
-                            {t('seller:draft.discard', 'Discard')}
-                        </button>
-                    </div>
-                </div>
-            ))}
+            {/* Unfinished listings saved on this device (listed in the Drafts tab instead when it is open) */}
+            {statusFilter !== 'draft' && localDrafts.map(renderLocalDraft)}
 
             {/* Property ID Search */}
             <div className="relative max-w-sm">
@@ -1123,6 +1126,10 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 ))}
             </div>
 
+            {statusFilter === 'draft' && localDrafts.length > 0 && (
+                <div className="space-y-4">{localDrafts.map(renderLocalDraft)}</div>
+            )}
+
             {isLoading ? (
                 <div className="space-y-4">
                     <ListingCardSkeleton />
@@ -1167,7 +1174,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 <div ref={loadMoreSentinelRef} className="flex justify-center py-4">
                     <ListingCardSkeleton />
                 </div>
-            ) : (
+            ) : statusFilter === 'draft' && localDrafts.length > 0 ? null : (
                 <div className="text-center p-12 border-2 border-dashed rounded-lg bg-neutral-50">
                     {counts.all > 0 ? (
                          <>
