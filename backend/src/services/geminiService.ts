@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import { apiLogger } from '../utils/logger';
+import { PROPERTY_IMAGE_TAGS, type PropertyImageTag } from '../config/propertyImageTags';
 
 // Target long-edge (px) for the high-quality downloadable restyle image.
 const HQ_LONG_EDGE = 2048;
@@ -33,7 +34,7 @@ const getAI = (): GoogleGenAI => {
 
 export interface ImageTag {
   index: number;
-  tag: 'exterior' | 'living_room' | 'kitchen' | 'bedroom' | 'bathroom' | 'other';
+  tag: PropertyImageTag;
 }
 
 export interface PropertyAnalysisResult {
@@ -242,12 +243,27 @@ export const generateDescriptionFromImages = async (
     10. **materials**: Identify prominent building and finishing materials visible in the images (e.g., "brick exterior", "marble floors", "wood beams", "stainless steel appliances", "ceramic tiles", "stone facade", "parquet flooring").
 
     11. **image_tags**: CAREFULLY analyze each image and assign the MOST APPROPRIATE tag. Guidelines:
-        - 'exterior': Outside views of the building, facade, entrance, yard, or outdoor areas
+        - 'exterior': Outside views of the building, facade, entrance, or yard
         - 'living_room': Main living areas with sofas, TV, or social seating
-        - 'kitchen': Kitchen areas with appliances, counters, or dining tables
-        - 'bedroom': Bedrooms with beds or sleeping areas
-        - 'bathroom': Bathrooms with toilet, sink, shower, or bathtub
-        - 'other': Hallways, storage, laundry, balconies, or unclear rooms
+        - 'kitchen': Kitchen areas with appliances or counters
+        - 'dining_room': A room or area centred on a dining table
+        - 'bedroom': Bedrooms with a bed or sleeping area
+        - 'kids_room': Children's bedrooms or playrooms (toys, bunk/small beds)
+        - 'bathroom': Rooms with a shower or bathtub
+        - 'wc': Separate toilets with only a toilet and small sink (no shower/bath)
+        - 'hallway': Corridors, entrance halls, or stairways inside the home
+        - 'office': Studies or home offices with a desk
+        - 'laundry': Laundry rooms with washer/dryer
+        - 'storage': Storage rooms, pantries, or walk-in closets
+        - 'balcony': Balconies or loggias
+        - 'terrace': Terraces, patios, or roof terraces
+        - 'garden': Gardens, lawns, or landscaped yards
+        - 'pool': Swimming pools
+        - 'garage': Garages or covered parking spaces
+        - 'basement': Basements or cellars
+        - 'attic': Attics or loft spaces under the roof
+        - 'view': Photos whose main subject is the view from the property
+        - 'other': Anything that fits none of the above or is unclear
 
         The output must be an array where EVERY image gets a tag. Array length must equal number of images. Each object has 'index' (0-based) and 'tag'.
 
@@ -298,7 +314,7 @@ export const generateDescriptionFromImages = async (
             index: { type: Type.INTEGER },
             tag: {
               type: Type.STRING,
-              enum: ['exterior', 'living_room', 'kitchen', 'bedroom', 'bathroom', 'other'],
+              enum: [...PROPERTY_IMAGE_TAGS],
             },
           },
           required: ['index', 'tag'],

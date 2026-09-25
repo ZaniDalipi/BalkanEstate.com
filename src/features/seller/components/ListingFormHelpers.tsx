@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PropertyImageTag, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation, ListingType, RentPeriod, VisitAvailability, FloorplanSpot } from '@/types';
 import type { ConstructionStatus } from '@/shared/property/construction';
+import { PROPERTY_IMAGE_TAGS } from '@/shared/types/property.types';
 import { validateConstruction, validateTypeAttributes } from '@/shared/utils/validation';
 import type { ParkingType } from '@/shared/property/typeAttributes';
 import { Button } from '@/components/ui/liquid-glass-button';
@@ -206,11 +207,7 @@ export const LANGUAGES = [
     'Bulgarian',
     'Romanian'
 ];
-export const ALL_VALID_TAGS: PropertyImageTag[] = [
-    'exterior', 'living_room', 'kitchen', 'dining_room', 'bedroom', 'kids_room',
-    'bathroom', 'wc', 'hallway', 'office', 'laundry', 'storage', 'balcony',
-    'terrace', 'garden', 'pool', 'garage', 'basement', 'attic', 'view', 'other',
-];
+export const ALL_VALID_TAGS: readonly PropertyImageTag[] = PROPERTY_IMAGE_TAGS;
 
 // --- CSS Class Constants (Liquid Glass Design) ---
 
@@ -465,7 +462,7 @@ export const InfoIcon: React.FC<{className?: string}> = ({className}) => (
 
 export const ImageTagSelector: React.FC<{
     value: string;
-    options: string[];
+    options: readonly string[];
     onChange: (tag: string) => void;
 }> = memo(({ value, options, onChange }) => {
     const { t } = useTranslation(['seller', 'property']);

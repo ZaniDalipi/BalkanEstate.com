@@ -12,7 +12,17 @@ import type { ConstructionStatus } from '@/shared/property/construction';
 export type PropertyStatus = 'active' | 'pending' | 'sold' | 'rented' | 'draft';
 export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
-export type PropertyImageTag = 'exterior' | 'living_room' | 'kitchen' | 'dining_room' | 'bedroom' | 'kids_room' | 'bathroom' | 'wc' | 'hallway' | 'office' | 'laundry' | 'storage' | 'balcony' | 'terrace' | 'garden' | 'pool' | 'garage' | 'basement' | 'attic' | 'view' | 'other';
+/**
+ * The room/area tags a listing photo may carry, in the order the tag picker
+ * shows them. Mirrors `PROPERTY_IMAGE_TAGS` in
+ * `backend/src/config/propertyImageTags.ts` (the Mongoose enum).
+ */
+export const PROPERTY_IMAGE_TAGS = [
+  'exterior', 'living_room', 'kitchen', 'dining_room', 'bedroom', 'kids_room',
+  'bathroom', 'wc', 'hallway', 'office', 'laundry', 'storage', 'balcony',
+  'terrace', 'garden', 'pool', 'garage', 'basement', 'attic', 'view', 'other',
+] as const;
+export type PropertyImageTag = (typeof PROPERTY_IMAGE_TAGS)[number];
 /**
  * Every property type a listing may be filed under, in the order pickers show
  * them. Declared as a tuple so the union below can never drift from the list
