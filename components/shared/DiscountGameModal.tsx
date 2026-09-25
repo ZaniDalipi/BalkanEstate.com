@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import Modal from './Modal';
 import WhackAnIconAnimation from '@/features/seller/components/WhackAnIconAnimation';
 import { apiRequest } from '../../src/shared/api/httpClient';
+import { gameRewardKeys } from '../../src/shared/query/queryKeys';
 
 export type GameReward =
     | { type: 'discount'; code: string; discountPercent: number; validUntil: string; hits?: number; alreadyClaimed?: boolean }
@@ -29,6 +31,7 @@ type Phase =
 
 const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, isSubscriber, onClose, onViewPlans, onListingsAdded }) => {
     const { t, i18n } = useTranslation(['modals', 'common']);
+    const queryClient = useQueryClient();
     const [phase, setPhase] = useState<Phase>({ name: 'playing' });
     const [round, setRound] = useState(0);
     const [copied, setCopied] = useState(false);
@@ -47,6 +50,7 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, isSubscri
                 try { localStorage.setItem('balkan_estate_ad_views', '0'); } catch { /* storage unavailable */ }
             }
             setPhase({ name: 'result', reward: data.reward });
+            queryClient.invalidateQueries({ queryKey: gameRewardKeys.status() });
         } catch (err: any) {
             if (err?.code === 'GAME_REWARD_COOLDOWN') {
                 setPhase({ name: 'cooldown', nextAvailableAt: err.details?.nextAvailableAt });

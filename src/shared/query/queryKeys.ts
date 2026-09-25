@@ -333,3 +333,13 @@ export const adBannerKeys = {
   // Admin endpoint (all banners)
   admin: () => [...adBannerKeys.all, 'admin'] as const,
 };
+
+// ============================================================================
+// Discount Game Query Keys
+// Used by: ListingLimitWarningModal (eligibility), DiscountGameModal (invalidate after claim)
+// ============================================================================
+
+export const gameRewardKeys = {
+  all: ['gameRewards'] as const,
+  status: () => [...gameRewardKeys.all, 'status'] as const,
+};

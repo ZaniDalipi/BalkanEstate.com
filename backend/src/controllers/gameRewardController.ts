@@ -150,6 +150,51 @@ export const claimGameReward = async (req: Request, res: Response): Promise<void
   }
 };
 
+/** The user's newest game code that can still be used, if any. */
+const findActiveGameCode = (userId: unknown) =>
+  DiscountCode.findOne({
+    createdBy: userId,
+    source: 'gamification',
+    isActive: true,
+    validUntil: { $gt: new Date() },
+    $expr: { $lt: ['$usedCount', '$usageLimit'] },
+  }).sort({ createdAt: -1 });
+
+// @desc    Whether the user can win a game reward right now (checked before playing)
+// @route   GET /api/game-rewards/status
+// @access  Private
+export const getGameRewardStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const currentUser = req.user as IUser | undefined;
+    if (!currentUser) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    const user = await User.findById(currentUser._id);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const isSubscriber = hasListingSubscription(user);
+    const lastClaim = user.gameRewardClaimedAt ? new Date(user.gameRewardClaimedAt).getTime() : 0;
+    const nextAvailable = lastClaim + GAME_REWARD_COOLDOWN_MS;
+    const canPlay = nextAvailable <= Date.now();
+    const activeCode = isSubscriber ? null : await findActiveGameCode(user._id);
+
+    res.json({
+      isSubscriber,
+      canPlay,
+      nextAvailableAt: canPlay ? null : new Date(nextAvailable),
+      activeCode: activeCode ? serializeCode(activeCode) : null,
+    });
+  } catch (error: any) {
+    apiLogger.error('Game reward status error:', error);
+    res.status(500).json({ message: 'Error checking game reward status' });
+  }
+};
+
 /**
  * The user already claimed within the cooldown window. If that claim was a
  * discount code that is still usable, hand it back instead of an error so a
@@ -157,13 +202,7 @@ export const claimGameReward = async (req: Request, res: Response): Promise<void
  */
 async function respondOnCooldown(res: Response, user: IUser, isSubscriber: boolean): Promise<void> {
   if (!isSubscriber) {
-    const existing = await DiscountCode.findOne({
-      createdBy: user._id,
-      source: 'gamification',
-      isActive: true,
-      validUntil: { $gt: new Date() },
-      $expr: { $lt: ['$usedCount', '$usageLimit'] },
-    }).sort({ createdAt: -1 });
+    const existing = await findActiveGameCode(user._id);
 
     if (existing) {
       res.json({ reward: { ...serializeCode(existing), alreadyClaimed: true }, isSubscriber });

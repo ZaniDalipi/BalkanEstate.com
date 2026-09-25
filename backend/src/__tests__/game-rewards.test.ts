@@ -12,6 +12,7 @@ import User from '../models/User';
 import DiscountCode from '../models/DiscountCode';
 import {
   claimGameReward,
+  getGameRewardStatus,
   GAME_MAX_HITS,
   GAME_CODE_PLANS,
   discountForHits,
@@ -142,5 +143,34 @@ describe('POST /api/game-rewards/claim', () => {
 
     const res = await claim(user, 3);
     expect(res.body.reward.totalBonusListings).toBe(5);
+  });
+});
+
+describe('GET /api/game-rewards/status', () => {
+  const status = async (user: any) => {
+    const res = makeRes();
+    await getGameRewardStatus({ user } as unknown as Request, res);
+    return res.body;
+  };
+
+  it('lets a new player play', async () => {
+    const user = await freeUser();
+    expect(await status(user)).toMatchObject({ isSubscriber: false, canPlay: true, nextAvailableAt: null, activeCode: null });
+  });
+
+  it('returns the unused code while the cooldown runs', async () => {
+    const user = await freeUser();
+    const won = await claim(user, 4);
+    const body = await status(user);
+    expect(body.canPlay).toBe(false);
+    expect(body.activeCode).toMatchObject({ code: won.body.reward.code, discountPercent: 20 });
+  });
+
+  it('tells a subscriber when they can play again', async () => {
+    const user = await proUser();
+    await claim(user, 4);
+    const body = await status(user);
+    expect(body).toMatchObject({ isSubscriber: true, canPlay: false, activeCode: null });
+    expect(new Date(body.nextAvailableAt).getTime()).toBeGreaterThan(Date.now());
   });
 });

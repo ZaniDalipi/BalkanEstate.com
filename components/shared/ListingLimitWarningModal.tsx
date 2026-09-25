@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
+import { useGameRewardStatus, type GameRewardCode } from '@/src/features/seller/hooks/useGameRewardStatus';
 
 // Game controller icon for play
 const GameIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -16,6 +17,8 @@ const GiftIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
+const primaryButtonClass = 'flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-lg shadow-lg hover:from-amber-600 hover:to-orange-600 transition-all transform hover:scale-105';
+
 interface ListingLimitWarningModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -23,6 +26,8 @@ interface ListingLimitWarningModalProps {
     tierName?: string; // e.g., "Free", "Pro Monthly", "Pro Yearly"
     listingLimit?: number; // The actual limit for this tier
     isSubscriber?: boolean; // Paying users win bonus listings instead of a discount
+    onUseCode: (code: GameRewardCode) => void; // Already holds an unused game code
+    onViewPlans: () => void; // Can't play today: go straight to the plans
 }
 
 const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
@@ -32,8 +37,18 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
     tierName = 'Free',
     listingLimit = 3,
     isSubscriber = false,
+    onUseCode,
+    onViewPlans,
 }) => {
-    const { t } = useTranslation(['modals', 'common']);
+    const { t, i18n } = useTranslation(['modals', 'common']);
+    // Checked before playing so nobody plays a whole round only to hit the daily limit.
+    // If the check fails, offer the game anyway; the claim enforces the limit.
+    const { data: status } = useGameRewardStatus(isOpen);
+    const activeCode = status && !status.canPlay ? status.activeCode : null;
+    const onCooldown = !!status && !status.canPlay && !activeCode;
+    const nextGameDate = status?.nextAvailableAt
+        ? new Date(status.nextAvailableAt).toLocaleString(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })
+        : '';
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="">
@@ -68,31 +83,62 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
                     </p>
                 </div>
 
-                {/* Discount offer */}
+                {/* Game offer, or what is left of today's reward */}
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-4 mb-6">
-                    <p className="font-bold text-amber-800 text-lg mb-1">
-                        {isSubscriber
-                            ? t('listingLimit.bonusOffer', 'Win extra listings!')
-                            : t('listingLimit.discountOffer')}
-                    </p>
-                    <p className="text-sm text-amber-700">
-                        {isSubscriber
-                            ? t('listingLimit.bonusGameDescription', 'Play a quick game: every icon you hit adds 1 extra listing to your account.')
-                            : t('listingLimit.gameDescription')}
-                    </p>
+                    {activeCode ? (
+                        <>
+                            <p className="font-bold text-amber-800 text-lg mb-1">
+                                {t('listingLimit.haveCodeTitle', 'You already won {{percent}}% off!', { percent: activeCode.discountPercent })}
+                            </p>
+                            <p className="text-sm text-amber-700">
+                                {t('listingLimit.haveCodeDescription', 'Your code {{code}} is still valid. Use it on a Pro plan to keep listing.', { code: activeCode.code })}
+                            </p>
+                        </>
+                    ) : onCooldown ? (
+                        <>
+                            <p className="font-bold text-amber-800 text-lg mb-1">
+                                {t('listingLimit.playedTodayTitle', "You've already played today")}
+                            </p>
+                            <p className="text-sm text-amber-700">
+                                {t('listingLimit.playedTodayDescription', 'You can play for another reward after {{date}}.', { date: nextGameDate })}
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <p className="font-bold text-amber-800 text-lg mb-1">
+                                {isSubscriber
+                                    ? t('listingLimit.bonusOffer', 'Win extra listings!')
+                                    : t('listingLimit.discountOffer')}
+                            </p>
+                            <p className="text-sm text-amber-700">
+                                {isSubscriber
+                                    ? t('listingLimit.bonusGameDescription', 'Play a quick game: every icon you hit adds 1 extra listing to your account.')
+                                    : t('listingLimit.gameDescription')}
+                            </p>
+                        </>
+                    )}
                 </div>
 
                 {/* Action buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                    <button
-                        onClick={onConfirm}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-lg shadow-lg hover:from-amber-600 hover:to-orange-600 transition-all transform hover:scale-105"
-                    >
-                        <GameIcon className="w-5 h-5" />
-                        {isSubscriber
-                            ? t('listingLimit.playForListings', 'Play for Listings')
-                            : t('listingLimit.playForDiscount')}
-                    </button>
+                    {activeCode ? (
+                        <button onClick={() => onUseCode(activeCode)} className={primaryButtonClass}>
+                            {t('listingLimit.useMyDiscount', 'Use my {{percent}}% discount', { percent: activeCode.discountPercent })}
+                        </button>
+                    ) : onCooldown ? (
+                        !isSubscriber && (
+                            <button onClick={onViewPlans} className={primaryButtonClass}>
+                                {t('listingLimit.viewPlans', 'View plans')}
+                            </button>
+                        )
+                    ) : (
+                        <button onClick={onConfirm} className={primaryButtonClass}>
+                            <GameIcon className="w-5 h-5" />
+                            {isSubscriber
+                                ? t('listingLimit.playForListings', 'Play for Listings')
+                                : t('listingLimit.playForDiscount')}
+                        </button>
+                    )}
                     <button
                         onClick={onClose}
                         className="flex-1 px-6 py-3 bg-neutral-100 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-200 transition-colors"

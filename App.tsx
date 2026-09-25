@@ -1224,6 +1224,14 @@ const MainLayout: React.FC = () => {
                 tierName={listingTierName}
                 listingLimit={listingTierLimit}
                 isSubscriber={isListingSubscriber}
+                onUseCode={(code) => {
+                    dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: false });
+                    handleGameViewPlans(code);
+                }}
+                onViewPlans={() => {
+                    dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: false });
+                    navigateToPricing();
+                }}
             />
           )}
           {state.isDiscountGameOpen && (

@@ -78,7 +78,13 @@
     "messageMonthly": "You've used all {{limit}} listings in your {{tierName}} plan this month.",
     "bonusOffer": "Win extra listings!",
     "bonusGameDescription": "Play a quick game: every icon you hit adds 1 extra listing to your account.",
-    "playForListings": "Play for Listings"
+    "playForListings": "Play for Listings",
+    "haveCodeTitle": "You already won {{percent}}% off!",
+    "haveCodeDescription": "Your code {{code}} is still valid. Use it on a Pro plan to keep listing.",
+    "useMyDiscount": "Use my {{percent}}% discount",
+    "playedTodayTitle": "You've already played today",
+    "playedTodayDescription": "You can play for another reward after {{date}}.",
+    "viewPlans": "View plans"
   },
   "agentLicense": {
     "title": "Agent License Verification",
