@@ -1344,7 +1344,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
                     const createdThisMonth = isNewMonth ? 0 : (sub?.listingsCreatedThisMonth || 0);
 
-                    if (createdThisMonth >= monthlyAllowance && !(sub?.bonusListings && sub.bonusListings > 0)) {
+                    if (createdThisMonth >= monthlyAllowance) {
                         dispatch({ type: 'SET_PENDING_PROPERTY', payload: newProperty });
                         dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: true });
                         setIsSubmitting(false);

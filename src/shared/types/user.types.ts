@@ -55,7 +55,6 @@ export interface UserSubscription {
   // Monthly reset tracking (for pro/agency monthly model)
   listingsCreatedThisMonth?: number; // Counter resets at calendar month boundary
   monthResetDate?: Date | string; // When the counter was last reset
-  bonusListings?: number; // Extra listing credits (e.g. won in the discount game)
 
   // Promotion coupons
   promotionCoupons?: PromotionCoupons;

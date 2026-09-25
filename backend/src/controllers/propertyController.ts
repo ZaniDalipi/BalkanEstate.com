@@ -820,8 +820,6 @@ export const createProperty = async (
     const tier = user.subscription.tier || 'free';
     const isProUser = !!(user.subscriptionPlan && (tier === 'pro' || tier === 'agency_agent' || tier === 'agency_owner'));
     let monthlyAllowance = 0;
-    // Monthly allowance used up, but the user has bonus listing credits (e.g. won in the discount game)
-    let useBonusListing = false;
 
     if (isProUser) {
       // MONTHLY MODEL: Pro/agency users — check listingsCreatedThisMonth against product allowance
@@ -845,9 +843,7 @@ export const createProperty = async (
 
         const created = user.subscription.listingsCreatedThisMonth || 0;
 
-        if (created >= monthlyAllowance && (user.subscription.bonusListings || 0) > 0) {
-          useBonusListing = true;
-        } else if (created >= monthlyAllowance) {
+        if (created >= monthlyAllowance) {
           res.status(403).json({
             message: `You have reached your monthly listing limit (${created}/${monthlyAllowance}). Resets at the start of next month.`,
             code: 'MONTHLY_LISTING_LIMIT_REACHED',
@@ -881,14 +877,7 @@ export const createProperty = async (
 
     let atomicFilter: Record<string, any>;
 
-    if (useBonusListing) {
-      // Pro/agency past the monthly allowance: atomically spend one bonus credit
-      incrementFields['subscription.bonusListings'] = -1;
-      atomicFilter = {
-        _id: user._id,
-        'subscription.bonusListings': { $gt: 0 },
-      };
-    } else if (isProUser && monthlyAllowance > 0) {
+    if (isProUser && monthlyAllowance > 0) {
       // Pro/agency: atomically check and increment the monthly counter
       incrementFields['subscription.listingsCreatedThisMonth'] = 1;
       atomicFilter = {

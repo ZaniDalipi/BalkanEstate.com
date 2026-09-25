@@ -3,6 +3,7 @@ import DiscountCode from '../models/DiscountCode';
 import User, { IUser } from '../models/User';
 import { generateSecureRandomString } from '../utils/secureRandom';
 import { apiLogger } from '../utils/logger';
+import listingLimitService from '../services/listingLimitService';
 
 /**
  * Listing-limit discount game ("Whack-an-Icon") rewards.
@@ -14,7 +15,7 @@ import { apiLogger } from '../utils/logger';
  *
  * Reward depends on whether the user already pays for listings:
  * - no subscription  -> a discount code for the seller plans (DISCOUNT_PER_HIT % per hit)
- * - has subscription -> LISTINGS_PER_HIT bonus listing credits per hit
+ * - has subscription -> listing limit raised by LISTINGS_PER_HIT per hit
  */
 
 // A round lasts 20s with a new icon every 1.5s, so ~14 icons appear.
@@ -89,12 +90,22 @@ export const claimGameReward = async (req: Request, res: Response): Promise<void
     };
 
     if (isSubscriber) {
-      const bonus = hits * LISTINGS_PER_HIT;
+      const added = hits * LISTINGS_PER_HIT;
+      // subscription.listingsLimit is the single source of truth for the limit.
+      // It is written together with activeListingsLimit, the same way an admin
+      // override is, so the /auth/me product sync keeps the raised value.
+      const currentLimit = user.subscription?.listingsLimit ||
+        await listingLimitService.getMonthlyAllowance(user.subscriptionPlan as string).catch(() => 0);
+      const newLimit = currentLimit + added;
+
       const updated = await User.findOneAndUpdate(
         cooldownFilter,
         {
-          $set: { gameRewardClaimedAt: now },
-          $inc: { 'subscription.bonusListings': bonus },
+          $set: {
+            gameRewardClaimedAt: now,
+            'subscription.listingsLimit': newLimit,
+            activeListingsLimit: newLimit,
+          },
         },
         { new: true }
       );
@@ -108,8 +119,8 @@ export const claimGameReward = async (req: Request, res: Response): Promise<void
         reward: {
           type: 'listings',
           hits,
-          bonusListings: bonus,
-          totalBonusListings: updated.subscription?.bonusListings || bonus,
+          addedListings: added,
+          listingsLimit: updated.subscription?.listingsLimit ?? newLimit,
         },
         isSubscriber,
       });

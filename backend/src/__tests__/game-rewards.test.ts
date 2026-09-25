@@ -75,30 +75,32 @@ describe('POST /api/game-rewards/claim', () => {
     expect(code!.isValid(String(user._id), 'buyer_monthly', 5).valid).toBe(false);
   });
 
-  it('gives a subscriber one bonus listing per hit, usable after the monthly allowance', async () => {
+  it('raises a subscriber\'s stored listing limit by one per hit', async () => {
     const user = await proUser();
     expect(await listingLimitService.canCreateListing(String(user._id))).toBe(false);
 
     const res = await claim(user, 10);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.reward).toMatchObject({ type: 'listings', bonusListings: 10, totalBonusListings: 10 });
+    expect(res.body.reward).toMatchObject({ type: 'listings', addedListings: 10, listingsLimit: 30 });
     expect(await DiscountCode.countDocuments()).toBe(0);
     const updated = await User.findById(user._id);
-    expect(updated!.subscription.bonusListings).toBe(10);
+    expect(updated!.subscription.listingsLimit).toBe(30);
+    // Written like an admin override so the /auth/me product sync keeps it
+    expect(updated!.activeListingsLimit).toBe(30);
     expect(await listingLimitService.canCreateListing(String(user._id))).toBe(true);
   });
 
   it('caps hits at what one round can produce', async () => {
     const user = await proUser();
     const res = await claim(user, 500, 500);
-    expect(res.body.reward.bonusListings).toBe(GAME_MAX_HITS);
+    expect(res.body.reward.addedListings).toBe(GAME_MAX_HITS);
   });
 
   it('never counts more hits than icons shown', async () => {
     const user = await proUser();
     const res = await claim(user, 12, 3);
-    expect(res.body.reward.bonusListings).toBe(3);
+    expect(res.body.reward.addedListings).toBe(3);
   });
 
   it('rejects malformed results', async () => {
@@ -123,7 +125,7 @@ describe('POST /api/game-rewards/claim', () => {
 
     expect(second.statusCode).toBe(429);
     expect(second.body.code).toBe('GAME_REWARD_COOLDOWN');
-    expect((await User.findById(user._id))!.subscription.bonusListings).toBe(5);
+    expect((await User.findById(user._id))!.subscription.listingsLimit).toBe(25);
   });
 
   it('hands back the unused code instead of minting a second one', async () => {
@@ -142,7 +144,7 @@ describe('POST /api/game-rewards/claim', () => {
     await User.updateOne({ _id: user._id }, { gameRewardClaimedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) });
 
     const res = await claim(user, 3);
-    expect(res.body.reward.totalBonusListings).toBe(5);
+    expect(res.body.reward.listingsLimit).toBe(25);
   });
 });
 

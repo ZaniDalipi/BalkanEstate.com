@@ -161,7 +161,6 @@ export interface User {
         agentCount: number;
         listingsCreatedThisMonth?: number; // Monthly counter for listing creation
         monthResetDate?: Date | string; // When the monthly counter resets
-        bonusListings?: number; // Extra listing credits (e.g. won in the discount game)
         promotionCoupons?: {
             monthly: number;
             available: number;

@@ -8,7 +8,7 @@ import { gameRewardKeys } from '../../src/shared/query/queryKeys';
 
 export type GameReward =
     | { type: 'discount'; code: string; discountPercent: number; validUntil: string; hits?: number; alreadyClaimed?: boolean }
-    | { type: 'listings'; hits: number; bonusListings: number; totalBonusListings: number }
+    | { type: 'listings'; hits: number; addedListings: number; listingsLimit: number }
     | { type: 'none'; hits: 0 };
 
 interface DiscountGameModalProps {
@@ -144,16 +144,11 @@ const DiscountGameModal: React.FC<DiscountGameModalProps> = ({ isOpen, isSubscri
                         {t('gameReward.youWon', 'You won!')}
                     </p>
                     <p className="text-5xl font-extrabold text-emerald-600 mt-2">
-                        {t('gameReward.plusListings', '+{{count}} listings', { count: reward.bonusListings })}
+                        {t('gameReward.plusListings', '+{{count}} listings', { count: reward.addedListings })}
                     </p>
                     <p className="text-neutral-600 mt-3">
-                        {t('gameReward.listingsDescription', '{{hits}} hits = {{count}} extra listings, added to your account. They are used once your monthly allowance runs out.', { hits: reward.hits, count: reward.bonusListings })}
+                        {t('gameReward.listingsDescription', '{{hits}} hits = {{count}} extra listings. Your listing limit is now {{limit}}.', { hits: reward.hits, count: reward.addedListings, limit: reward.listingsLimit })}
                     </p>
-                    {reward.totalBonusListings > reward.bonusListings && (
-                        <p className="text-sm text-neutral-500 mt-1">
-                            {t('gameReward.totalBonus', 'You now have {{total}} bonus listings.', { total: reward.totalBonusListings })}
-                        </p>
-                    )}
                     <div className="mt-6">
                         <button onClick={finishListings} disabled={finishing} className={primaryBtn}>
                             {t('gameReward.continueListing', 'Continue listing')}

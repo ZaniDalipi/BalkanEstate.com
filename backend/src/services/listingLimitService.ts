@@ -99,8 +99,8 @@ class ListingLimitService {
         listingsCreatedThisMonth = 0;
       }
 
-      // Can create if under limit, or if bonus listing credits remain
-      return listingsCreatedThisMonth < monthlyAllowance || (user.subscription.bonusListings || 0) > 0;
+      // Can create if under limit
+      return listingsCreatedThisMonth < monthlyAllowance;
     } catch (error) {
       logger.error('Error checking if can create listing', {
         userId,
