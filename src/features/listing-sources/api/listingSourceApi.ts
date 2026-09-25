@@ -47,6 +47,10 @@ export interface IngestStats {
   durationMs: number;
   /** Count of all properties from this source currently missing address, city, or price. */
   incompleteCount?: number;
+  /** True for user-owned feeds: imported/updated were sent to the review queue, not published. */
+  reviewMode?: boolean;
+  /** Owner's pending review count after the run (review mode only). */
+  pendingReview?: number;
   monthlyUsage?: {
     monthlyAllowance: number;
     created: number;

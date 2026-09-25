@@ -5,6 +5,7 @@ import User from '../models/User';
 import listingLimitService from './listingLimitService';
 import { getAdapter } from './listingAdapters';
 import { normalize } from './listingNormalizerService';
+import { countPending, queueForReview } from './importReviewService';
 import {
   emitPropertyCreated,
   emitPropertyUpdated,
@@ -24,6 +25,13 @@ export interface IngestStats {
   durationMs: number;
   /** Count of imported properties that are missing address, city, or price. */
   incompleteCount?: number;
+  /**
+   * True for user-owned feeds: nothing was published, `imported`/`updated`
+   * count listings sent to the owner's review queue instead.
+   */
+  reviewMode?: boolean;
+  /** Owner's total pending review queue after this run (review mode only). */
+  pendingReview?: number;
   monthlyUsage?: {
     monthlyAllowance: number;
     created: number;
@@ -158,11 +166,20 @@ export const runSource = async (
     errors: [],
     durationMs: 0,
   };
+  // Listings from a user's own feed are parsed heuristically and are often
+  // wrong, so they go to the owner's review queue instead of going live.
+  // System (admin) sources keep publishing directly.
+  const reviewMode = Boolean(source.userId);
+  if (reviewMode) stats.reviewMode = true;
 
   source.lastRunAt = new Date();
   await source.save();
 
-  const capacity = await getRemainingMonthlyCapacity(source);
+  // In review mode the limit is charged when the owner publishes a draft,
+  // not when the feed is fetched.
+  const capacity = reviewMode
+    ? { remaining: Number.POSITIVE_INFINITY, allowance: 0, created: 0 }
+    : await getRemainingMonthlyCapacity(source);
   let remaining = capacity.remaining;
   if (capacity.allowance > 0) {
     stats.monthlyUsage = {
@@ -235,6 +252,32 @@ export const runSource = async (
     for (let i = 0; i < raws.length; i++) {
       const raw = raws[i];
       try {
+        if (reviewMode) {
+          const normalized = await normalize(raw, source, { rehostImages });
+          const outcome = await queueForReview(source, raw.id, normalized);
+          if (outcome === 'queuedNew') stats.imported++;
+          else if (outcome === 'queuedUpdate') stats.updated++;
+          // A replayed deferred item now lives in the review queue instead.
+          await DeferredListing.deleteOne({
+            source: source._id,
+            sourceListingId: raw.id,
+          }).catch(() => undefined);
+          emitListingIngestProgress(String(source._id), {
+            fetched: stats.fetched,
+            processed: i + 1,
+            imported: stats.imported,
+            updated: stats.updated,
+            failed: stats.failed,
+            deferred: stats.deferred,
+            currentItem: {
+              id: raw.id,
+              title: (raw.raw as Record<string, unknown>)?.title as string | undefined,
+              url: raw.url,
+            },
+          });
+          continue;
+        }
+
         const existing = await Property.findOne({
           source: source.slug,
           sourceListingId: raw.id,
@@ -301,25 +344,37 @@ export const runSource = async (
       });
     }
 
-    source.listingsImported += stats.imported;
-    source.listingsUpdated += stats.updated;
+    // In review mode `listingsImported` is bumped as the owner publishes drafts.
+    if (!reviewMode) {
+      source.listingsImported += stats.imported;
+      source.listingsUpdated += stats.updated;
+    }
     source.listingsFailed += stats.failed;
     // Only mark a clean success when something was actually imported/updated.
     // A run that fetched 0 items (e.g. blocked by the site) should not reset lastSuccessAt.
-    if (stats.imported > 0 || stats.updated > 0) {
+    const processedOk = reviewMode
+      ? stats.fetched > 0 && stats.failed < stats.fetched
+      : stats.imported > 0 || stats.updated > 0;
+    if (processedOk) {
       source.lastSuccessAt = new Date();
     }
     if (stats.deferred > 0) {
       source.lastErrorMessage =
         `Reached monthly limit — ${stats.deferred} listing(s) deferred to ${deferUntil.toISOString().slice(0, 10)}.`;
-    } else if (stats.imported > 0 || stats.updated > 0) {
+    } else if (processedOk) {
       source.lastErrorMessage = undefined;
     }
     await source.save();
 
+    if (reviewMode && source.userId) {
+      try {
+        stats.pendingReview = (await countPending(source.userId)).total;
+      } catch { /* non-critical */ }
+    }
+
     // Calculate how many of this source's properties are still missing key fields.
     // Drives the "some listings need attention" UI in the progress modal.
-    if (stats.imported > 0) {
+    if (stats.imported > 0 && !reviewMode) {
       try {
         stats.incompleteCount = await Property.countDocuments({
           source: source.slug,
@@ -355,6 +410,8 @@ export const runSource = async (
     deferred: stats.deferred,
     done: true,
     message: stats.errors.length > 0 ? stats.errors[0] : undefined,
+    reviewMode: stats.reviewMode,
+    pendingReview: stats.pendingReview,
     monthlyUsage: stats.monthlyUsage
       ? {
           monthlyAllowance: stats.monthlyUsage.monthlyAllowance,

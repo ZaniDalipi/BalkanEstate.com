@@ -333,3 +333,18 @@ export const adBannerKeys = {
   // Admin endpoint (all banners)
   admin: () => [...adBannerKeys.all, 'admin'] as const,
 };
+
+// ============================================================================
+// Imported Listing Review Query Keys
+// Used by: ImportReviewQueue, MyAccountPage (pending badge)
+// ============================================================================
+
+export const importReviewKeys = {
+  all: ['importReview'] as const,
+  lists: () => [...importReviewKeys.all, 'list'] as const,
+  list: (filters: { status: string; sourceId?: string; page: number }) =>
+    [...importReviewKeys.lists(), filters] as const,
+  count: () => [...importReviewKeys.all, 'count'] as const,
+  sources: () => [...importReviewKeys.all, 'sources'] as const,
+  detail: (id: string) => [...importReviewKeys.all, 'detail', id] as const,
+};

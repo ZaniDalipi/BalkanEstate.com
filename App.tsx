@@ -372,6 +372,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
       // Create listing route (new listing, not edit)
       if (path === '/create-listing') {
         dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+        dispatch({ type: 'SET_IMPORT_DRAFT_TO_PUBLISH', payload: null });
         dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
         dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
         dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });

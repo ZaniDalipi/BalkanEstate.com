@@ -4,10 +4,13 @@ import { SparklesIcon } from '@/constants';
 import GeminiDescriptionGenerator from './GeminiDescriptionGenerator';
 import { useAppContext } from '@/context/AppContext';
 import Footer from '@/components/shared/Footer';
+import { useImportDraftPrefill } from '@/src/features/listing-sources/hooks/useDraftListingForm';
 
 const CreateListingPage: React.FC = () => {
-  const { t } = useTranslation(['seller']);
+  const { t } = useTranslation(['seller', 'listingFeeds']);
   const { state } = useAppContext();
+  // A listing fetched from an external feed, opened here to be edited like a new one.
+  const importPrefill = useImportDraftPrefill();
 
   return (
     <div className="liquid-glass-bg min-h-full">
@@ -17,8 +20,15 @@ const CreateListingPage: React.FC = () => {
 
       <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-glow">
-          {state.propertyToEdit ? t('seller:createListing.editTitle') : t('seller:createListing.title')}
+          {state.propertyToEdit
+            ? t('seller:createListing.editTitle')
+            : importPrefill
+              ? t('listingFeeds:review.formTitle')
+              : t('seller:createListing.title')}
         </h2>
+        {importPrefill && (
+          <p className="text-sm text-gray-600 mb-2">{t('listingFeeds:review.formHint')}</p>
+        )}
         <div className="glass-divider mb-8" />
 
         <div className="glass-panel p-4 sm:p-6 lg:p-8 glass-shimmer-border overflow-hidden">
@@ -31,7 +41,12 @@ const CreateListingPage: React.FC = () => {
           <p className="text-gray-400 mb-6 text-sm">
             {t('seller:createListing.aiDescription')}
           </p>
-          <GeminiDescriptionGenerator propertyToEdit={state.propertyToEdit} />
+          <GeminiDescriptionGenerator
+            // A different draft is a different listing — start its form afresh.
+            key={state.importDraftToPublish?.draftId ?? 'listing'}
+            propertyToEdit={state.propertyToEdit}
+            prefill={importPrefill}
+          />
         </div>
       </main>
 

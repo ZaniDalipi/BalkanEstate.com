@@ -17,6 +17,9 @@ export interface ListingIngestProgressEvent {
   deferred?: number;
   done?: boolean;
   message?: string;
+  /** User-owned feed: counts are listings sent to the review queue. */
+  reviewMode?: boolean;
+  pendingReview?: number;
   currentItem?: {
     id: string;
     title?: string;

@@ -11,8 +11,9 @@ import UserListingsSuggestions from './UserListingsSuggestions';
 const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 const MyListingFeeds = lazy(() => import('../../src/features/listing-sources/components/MyListingFeeds'));
+const ImportReviewQueue = lazy(() => import('../../src/features/listing-sources/components/review/ImportReviewQueue'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, GlobeAltIcon, BellIcon } from '../../constants';
+import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, GlobeAltIcon, BellIcon, DocumentCheckIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -33,6 +34,7 @@ import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
 import NotificationSettingsSection from '../../src/features/notifications/components/NotificationSettingsSection';
+import { usePendingImportCount } from '../../src/features/listing-sources/hooks/useImportReview';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -56,7 +58,7 @@ const BALKAN_COUNTRIES = [
   { code: 'SI', name: 'Slovenia' },
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds' | 'notifications';
+type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds' | 'importReview' | 'notifications';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
@@ -81,6 +83,9 @@ const tabRouteMap: Record<string, AccountTab> = {
     'feeds': 'feeds',
     'listing-feeds': 'feeds',
     'external-feeds': 'feeds',
+    'import-review': 'importReview',
+    'importReview': 'importReview',
+    'imported-drafts': 'importReview',
     'notifications': 'notifications',
     'notification-settings': 'notifications',
     'email-preferences': 'notifications',
@@ -99,6 +104,7 @@ const tabToRouteMap: Record<AccountTab, string> = {
     'viewings': 'viewings',
     'businesses': 'businesses',
     'feeds': 'feeds',
+    'importReview': 'import-review',
     'notifications': 'notifications',
 };
 
@@ -109,7 +115,8 @@ const TabButton: React.FC<{
     onClick: () => void;
     tabKey: AccountTab;
     hasUnread?: boolean;
-}> = ({ label, icon, isActive, onClick, tabKey, hasUnread }) => {
+    badgeCount?: number;
+}> = ({ label, icon, isActive, onClick, tabKey, hasUnread, badgeCount }) => {
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();
         onClick();
@@ -129,6 +136,11 @@ const TabButton: React.FC<{
             <span className="flex-1">{label}</span>
             {hasUnread && (
                 <span className="w-2.5 h-2.5 bg-red-500 rounded-full flex-shrink-0 animate-pulse" />
+            )}
+            {!!badgeCount && (
+                <span className="min-w-[1.5rem] h-6 px-1.5 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    {badgeCount > 99 ? '99+' : badgeCount}
+                </span>
             )}
         </a>
     );
@@ -2186,11 +2198,13 @@ const MyAccountPage: React.FC = () => {
     // Buyer Pro users (listingsLimit > 0) get the same account tabs as sellers
     const isBuyerPro = state.currentUser?.role === UserRole.BUYER && (state.currentUser?.subscription?.listingsLimit ?? 0) > 0;
     const hasSellerTabs = isSellerProfile || isBuyerPro;
+    // Listings fetched from external feeds that are waiting for the owner's approval
+    const { data: pendingImportCount } = usePendingImportCount(hasSellerTabs);
 
     // Redirect users without seller tabs to profile if they land on a seller-only tab
     useEffect(() => {
         if (!state.currentUser) return;
-        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds')) {
+        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds' || activeTab === 'importReview')) {
             setActiveTab('profile');
         }
     }, [hasSellerTabs, activeTab, setActiveTab, state.currentUser]);
@@ -2287,6 +2301,8 @@ const MyAccountPage: React.FC = () => {
                  return <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><MyBusinessListings /></Suspense>;
             case 'feeds':
                  return hasSellerTabs ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><MyListingFeeds /></Suspense> : null;
+            case 'importReview':
+                 return hasSellerTabs ? <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}><ImportReviewQueue /></Suspense> : null;
             default:
                 return null;
         }
@@ -2362,6 +2378,7 @@ const MyAccountPage: React.FC = () => {
                                         <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
                                         <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
                                         <TabButton label={t('account:tabs.feeds', 'External Feeds')} icon={<GlobeAltIcon className="w-6 h-6"/>} isActive={activeTab === 'feeds'} onClick={() => setActiveTab('feeds')} tabKey="feeds" />
+                                        <TabButton label={t('account:tabs.importReview', 'Imported Drafts')} icon={<DocumentCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'importReview'} onClick={() => setActiveTab('importReview')} tabKey="importReview" badgeCount={pendingImportCount?.total} />
                                     </>
                                 )}
                                 <TabButton label={t('account:tabs.myBusinesses', 'My Businesses')} icon={<BuildingStorefrontIcon className="w-6 h-6"/>} isActive={activeTab === 'businesses'} onClick={() => setActiveTab('businesses')} tabKey="businesses" />

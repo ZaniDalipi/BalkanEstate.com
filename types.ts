@@ -789,6 +789,12 @@ export interface PendingSubscription {
     modalType: 'buyer' | 'seller' | 'listing' | 'agency'; // which tab to open
 }
 
+/** An imported feed draft prefilled into the create-listing form. */
+export interface ImportDraftToPublish {
+    draftId: string;
+    property: Property;
+}
+
 export interface AppState {
     user: any;
     onboardingComplete: boolean;
@@ -806,6 +812,11 @@ export interface AppState {
     propertiesError: string | null;
     selectedProperty: Property | null;
     propertyToEdit: Property | null;
+    /**
+     * A listing fetched from an external feed, opened in the create-listing
+     * form so the owner edits it exactly like a new listing before publishing.
+     */
+    importDraftToPublish: ImportDraftToPublish | null;
     isAuthenticated: boolean;
     isLoadingUserData: boolean;
     currentUser: User | null;
@@ -865,6 +876,7 @@ export type AppAction =
     | { type: 'SET_SELECTED_PROPERTY', payload: string | null }
     | { type: 'SET_SELECTED_PROPERTY_OBJECT', payload: Property | null }
     | { type: 'SET_PROPERTY_TO_EDIT', payload: Property | null }
+    | { type: 'SET_IMPORT_DRAFT_TO_PUBLISH', payload: ImportDraftToPublish | null }
     | { type: 'SET_SELECTED_AGENT', payload: string | null }
     | { type: 'SET_SELECTED_AGENCY', payload: string | Agency | null }
     | { type: 'SET_SELECTED_BUSINESS_LISTING', payload: string | null }

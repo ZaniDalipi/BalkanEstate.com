@@ -12,7 +12,8 @@
     "feeds": "External Feeds",
     "myBusinesses": "Моите бизнеси",
     "measurements": "Измервания",
-    "promotions": "Моите промоции"
+    "promotions": "Моите промоции",
+    "importReview": "Импортирани чернови"
   },
   "roles": {
     "buyer": "Купувач",
