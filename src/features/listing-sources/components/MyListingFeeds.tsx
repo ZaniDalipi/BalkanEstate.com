@@ -7,6 +7,7 @@ import AddFeedWizard from './AddFeedWizard';
 import ListingFeedForm from './ListingFeedForm';
 import ListingFeedRow from './ListingFeedRow';
 import ListingSourcesAlphaTerms from './ListingSourcesAlphaTerms';
+import ImportReviewBanner from './review/ImportReviewBanner';
 
 type View = 'list' | 'add' | 'edit';
 
@@ -163,6 +164,9 @@ const MyListingFeeds: React.FC = () => {
           )}
         </span>
       </div>
+
+      {/* Fetched listings waiting for approval */}
+      <ImportReviewBanner />
 
       {/* Error banner */}
       {error && (

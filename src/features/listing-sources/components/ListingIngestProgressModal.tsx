@@ -5,6 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useSocket } from '@/shared/hooks/useSocket';
 import type { ListingIngestProgressEvent, ProcessedItem, SyncSession } from '../context/ListingIngestProgressContext';
 import type { IngestStats, ListingSource } from '../api/listingSourceApi';
+import { useOpenImportReview } from '../hooks/useOpenImportReview';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -243,6 +244,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
   const { dispatch } = useAppContext();
+  const openReview = useOpenImportReview();
   const feedRef = useRef<HTMLDivElement>(null);
   const socket = useSocket();
 
@@ -331,6 +333,9 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   ];
 
   const incompleteCount = resolvedFinalStats?.incompleteCount ?? 0;
+  // User-owned feeds don't publish: new/updated listings went to the review queue.
+  const reviewMode = Boolean(resolvedFinalStats?.reviewMode ?? current?.reviewMode);
+  const queuedForReview = stats.imported + stats.updated;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
@@ -458,7 +463,20 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         </div>
 
         {/* ── Completion banners ── */}
-        {phase === 'finished' && stats.imported > 0 && incompleteCount > 0 && (
+        {phase === 'finished' && reviewMode && queuedForReview > 0 && (
+          <div className="bg-primary/5 border border-primary/30 rounded-xl px-4 py-3 flex gap-3">
+            <div className="text-primary w-4 h-4 flex-shrink-0 mt-0.5">{Ico.check}</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900">{t('listingFeeds:review.syncQueuedTitle')}</p>
+              <p className="text-xs text-gray-600 mt-0.5">{t('listingFeeds:review.syncQueuedBody', { count: queuedForReview })}</p>
+              <button type="button" onClick={() => { onClose(); openReview(); }}
+                      className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary underline underline-offset-2 hover:text-primary-dark">
+                {t('listingFeeds:review.bannerCta')} {Ico.ext}
+              </button>
+            </div>
+          </div>
+        )}
+        {phase === 'finished' && !reviewMode && stats.imported > 0 && incompleteCount > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-3">
             <div className="text-amber-500 w-4 h-4 flex-shrink-0 mt-0.5">{Ico.warn}</div>
             <div className="flex-1 min-w-0">
@@ -471,7 +489,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
             </div>
           </div>
         )}
-        {phase === 'finished' && stats.imported > 0 && !incompleteCount && (
+        {phase === 'finished' && !reviewMode && stats.imported > 0 && !incompleteCount && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex gap-3">
             <div className="text-emerald-500 w-4 h-4 flex-shrink-0 mt-0.5">{Ico.check}</div>
             <div className="flex-1 min-w-0">

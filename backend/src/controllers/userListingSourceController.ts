@@ -4,6 +4,7 @@ import ListingSource from '../models/ListingSource';
 import ListingSourceTermsAcceptance from '../models/ListingSourceTermsAcceptance';
 import Property from '../models/Property';
 import { runSource } from '../services/listingIngestService';
+import { deleteDraftsForSources } from '../services/importReviewService';
 import { previewSource, getPreviewSession, deletePreviewSession } from '../services/listingPreviewService';
 import {
   detectFeedForUrl,
@@ -150,6 +151,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
     return;
   }
   await Property.deleteMany({ source: source.slug });
+  await deleteDraftsForSources([source._id]);
   res.json({ ok: true });
 };
 
@@ -183,6 +185,7 @@ export const bulkDelete = async (req: Request, res: Response): Promise<void> => 
   const ids = sources.map((s) => s._id);
 
   await Property.deleteMany({ source: { $in: slugs } });
+  await deleteDraftsForSources(ids);
   const result = await ListingSource.deleteMany({ _id: { $in: ids }, userId });
 
   res.json({ ok: true, deleted: result.deletedCount ?? 0, deletedSlugs: slugs });
@@ -206,6 +209,8 @@ export const clearImports = async (req: Request, res: Response): Promise<void> =
   }
 
   const result = await Property.deleteMany({ source: source.slug });
+  // Also forget review decisions so the next sync re-queues everything.
+  await deleteDraftsForSources([source._id]);
 
   source.listingsImported = 0;
   source.listingsUpdated = 0;
