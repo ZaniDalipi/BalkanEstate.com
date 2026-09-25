@@ -288,5 +288,10 @@
     "subtitle": "Limited-time deals on listing promotions",
     "selectOffer": "Select Offer",
     "daysLeft": "{{days}} days left"
+  },
+  "gameDiscount": {
+    "title": "You won {{percent}}% off!",
+    "description": "Your code {{code}} is applied automatically at checkout on Pro and Enterprise plans.",
+    "validUntil": "Valid until {{date}}."
   }
 }

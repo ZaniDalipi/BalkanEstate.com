@@ -25,7 +25,7 @@ import {
   DocumentTextIcon,
   LockClosedIcon,
 } from '@/constants';
-import { usePricingPage } from './usePricingPage';
+import { usePricingPage, GAME_DISCOUNT_PLANS } from './usePricingPage';
 import SellerPlansSection from './SellerPlansSection';
 import BuyerPlansSection from './BuyerPlansSection';
 import ListingPromotionSection from './ListingPromotionSection';
@@ -86,6 +86,7 @@ const PricingPage: React.FC = () => {
     setSelectedOfferId,
     handleSelectOffer,
     handlePurchaseSpecialOffer,
+    gameDiscount,
   } = usePricingPage();
 
   return (
@@ -311,8 +312,25 @@ const PricingPage: React.FC = () => {
           )}
 
           {/* Seller Plans */}
+          {!loading && !error && activeTab === 'seller' && gameDiscount && (
+            <div className="max-w-6xl mx-auto mb-8 rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 p-4 sm:p-5 text-center">
+              <p className="text-lg font-bold text-amber-900">
+                {t('pricing:gameDiscount.title', 'You won {{percent}}% off!', { percent: gameDiscount.percent })}
+              </p>
+              <p className="text-sm text-amber-800 mt-1">
+                {t('pricing:gameDiscount.description', 'Your code {{code}} is applied automatically at checkout on Pro and Enterprise plans.', { code: gameDiscount.code })}
+                {gameDiscount.validUntil && (
+                  <> {t('pricing:gameDiscount.validUntil', 'Valid until {{date}}.', {
+                    date: new Date(gameDiscount.validUntil).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+                  })}</>
+                )}
+              </p>
+            </div>
+          )}
+
           {!loading && !error && activeTab === 'seller' && (
             <SellerPlansSection
+              discountPercent={gameDiscount?.percent || 0}
               t={t}
               proYearlyProduct={proYearlyProduct}
               proMonthlyProduct={proMonthlyProduct}
@@ -598,6 +616,9 @@ const PricingPage: React.FC = () => {
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
           productId={selectedPlan.productId}
+          initialDiscountCode={
+            gameDiscount && GAME_DISCOUNT_PLANS.includes(selectedPlan.productId) ? gameDiscount.code : undefined
+          }
         />
       )}
     </div>

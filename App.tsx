@@ -62,6 +62,7 @@ import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } 
 
 // Stale-deploy chunk recovery (unregister SW + clear caches + reload once)
 import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
+import type { GameReward } from './components/shared/DiscountGameModal';
 
 // Retry wrapper for lazy imports — handles stale chunk hashes after deployments.
 // A stale build requests a chunk whose hashed filename no longer exists; the SPA
@@ -859,7 +860,7 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
 };
 
 const MainLayout: React.FC = () => {
-  const { state, dispatch, updateUser, createListing } = useAppContext();
+  const { state, dispatch, updateUser, createListing, checkAuthStatus } = useAppContext();
   const { t, i18n } = useTranslation(['nav', 'common']);
   const currentLang = (i18n.language || 'en').split('-')[0];
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -1053,10 +1054,37 @@ const MainLayout: React.FC = () => {
     dispatch({ type: 'TOGGLE_DISCOUNT_GAME', payload: true });
   };
 
-  const handleGameComplete = (discounts: { proYearly: number; proMonthly: number; enterprise: number; }) => {
-    dispatch({ type: 'SET_ACTIVE_DISCOUNT', payload: discounts });
-    dispatch({ type: 'TOGGLE_DISCOUNT_GAME', payload: false });
+  // Users already paying for listings win bonus listings; everyone else wins a discount code.
+  // Mirrors the backend rule in propertyController / gameRewardController.
+  const listingSubscription = state.currentUser?.subscription;
+  const listingTier = listingSubscription?.tier || 'free';
+  const isListingSubscriber = !!(
+    (state.currentUser?.subscriptionPlan || listingSubscription?.plan) &&
+    ['pro', 'agency_agent', 'agency_owner'].includes(listingTier)
+  );
+  const listingTierName = isListingSubscriber
+    ? (listingTier === 'pro' ? 'Pro' : 'Agency')
+    : 'Free';
+  const listingTierLimit = isListingSubscriber ? (listingSubscription?.listingsLimit || 20) : 3;
+
+  const closeDiscountGame = () => dispatch({ type: 'TOGGLE_DISCOUNT_GAME', payload: false });
+
+  const handleGameViewPlans = (reward: Extract<GameReward, { type: 'discount' }>) => {
+    const percent = reward.discountPercent;
+    dispatch({
+      type: 'SET_ACTIVE_DISCOUNT',
+      payload: { proYearly: percent, proMonthly: percent, enterprise: percent, code: reward.code, validUntil: reward.validUntil },
+    });
+    closeDiscountGame();
     navigateToPricing();
+  };
+
+  const handleGameListingsAdded = async () => {
+    try {
+      await checkAuthStatus();
+    } finally {
+      closeDiscountGame();
+    }
   };
 
   return (
@@ -1193,12 +1221,18 @@ const MainLayout: React.FC = () => {
                     dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: false });
                 }}
                 onConfirm={handleWarningConfirm}
+                tierName={listingTierName}
+                listingLimit={listingTierLimit}
+                isSubscriber={isListingSubscriber}
             />
           )}
           {state.isDiscountGameOpen && (
             <DiscountGameModal
                 isOpen={state.isDiscountGameOpen}
-                onGameComplete={handleGameComplete}
+                isSubscriber={isListingSubscriber}
+                onClose={closeDiscountGame}
+                onViewPlans={handleGameViewPlans}
+                onListingsAdded={handleGameListingsAdded}
             />
           )}
           {state.isEnterpriseModalOpen && (

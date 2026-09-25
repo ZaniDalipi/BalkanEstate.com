@@ -22,6 +22,7 @@ interface ListingLimitWarningModalProps {
     onConfirm: () => void;
     tierName?: string; // e.g., "Free", "Pro Monthly", "Pro Yearly"
     listingLimit?: number; // The actual limit for this tier
+    isSubscriber?: boolean; // Paying users win bonus listings instead of a discount
 }
 
 const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
@@ -30,6 +31,7 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
     onConfirm,
     tierName = 'Free',
     listingLimit = 3,
+    isSubscriber = false,
 }) => {
     const { t } = useTranslation(['modals', 'common']);
 
@@ -51,7 +53,9 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
 
                 {/* Message - Dynamic based on tier */}
                 <p className="text-neutral-600 mb-4">
-                    {t('listingLimit.messageDynamic', { tierName, limit: listingLimit })}
+                    {isSubscriber
+                        ? t('listingLimit.messageMonthly', "You've used all {{limit}} listings in your {{tierName}} plan this month.", { tierName, limit: listingLimit })
+                        : t('listingLimit.messageDynamic', { tierName, limit: listingLimit })}
                 </p>
 
                 {/* Draft saved notice */}
@@ -67,10 +71,14 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
                 {/* Discount offer */}
                 <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-4 mb-6">
                     <p className="font-bold text-amber-800 text-lg mb-1">
-                        {t('listingLimit.discountOffer')}
+                        {isSubscriber
+                            ? t('listingLimit.bonusOffer', 'Win extra listings!')
+                            : t('listingLimit.discountOffer')}
                     </p>
                     <p className="text-sm text-amber-700">
-                        {t('listingLimit.gameDescription')}
+                        {isSubscriber
+                            ? t('listingLimit.bonusGameDescription', 'Play a quick game: every icon you hit adds 1 extra listing to your account.')
+                            : t('listingLimit.gameDescription')}
                     </p>
                 </div>
 
@@ -81,7 +89,9 @@ const ListingLimitWarningModal: React.FC<ListingLimitWarningModalProps> = ({
                         className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-lg shadow-lg hover:from-amber-600 hover:to-orange-600 transition-all transform hover:scale-105"
                     >
                         <GameIcon className="w-5 h-5" />
-                        {t('listingLimit.playForDiscount')}
+                        {isSubscriber
+                            ? t('listingLimit.playForListings', 'Play for Listings')
+                            : t('listingLimit.playForDiscount')}
                     </button>
                     <button
                         onClick={onClose}

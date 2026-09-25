@@ -214,6 +214,7 @@ interface PaymentWindowProps {
   discountPercent?: number;
   productId?: string;
   onEnterpriseSelected?: () => void; // Callback when enterprise plan needs agency creation
+  initialDiscountCode?: string; // Code to pre-fill and validate when the window opens (e.g. won in the discount game)
 }
 
 const PaymentWindow: React.FC<PaymentWindowProps> = ({
@@ -230,6 +231,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
   discountPercent = 0,
   productId,
   onEnterpriseSelected,
+  initialDiscountCode,
 }) => {
   const { t } = useTranslation(['payment', 'common']);
   const { state } = useAppContext();
@@ -423,8 +425,9 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
     }
   };
 
-  const handleValidateDiscountCode = async () => {
-    const trimmedCode = discountCode.trim();
+  const handleValidateDiscountCode = async (codeOverride?: unknown) => {
+    // Called from buttons (event argument) or with an explicit code
+    const trimmedCode = (typeof codeOverride === 'string' ? codeOverride : discountCode).trim();
     if (!trimmedCode) {
       setCodeValidation({ valid: false, message: t('payment:checkout.enterDiscountCode') });
       return;
@@ -493,7 +496,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           discountAmount: data.discount.discountAmount,
           finalPrice: data.discount.finalPrice,
         });
-        setAppliedDiscountCode(discountCode.trim());
+        setAppliedDiscountCode(trimmedCode);
       } else {
         setCodeValidation({
           valid: false,
@@ -509,6 +512,15 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       setValidatingCode(false);
     }
   };
+
+  // Pre-fill and apply a code handed in by the caller as soon as the window opens
+  useEffect(() => {
+    if (isOpen && initialDiscountCode) {
+      setDiscountCode(initialDiscountCode);
+      handleValidateDiscountCode(initialDiscountCode);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialDiscountCode]);
 
   const handleRemoveDiscountCode = () => {
     setDiscountCode('');

@@ -6,11 +6,13 @@
  */
 
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { payseraService } from '../services/payseraService';
 import { processSubscriptionPayment } from '../services/subscriptionPaymentService';
 import User from '../models/User';
 import Product from '../models/Product';
 import Subscription from '../models/Subscription';
+import DiscountCode from '../models/DiscountCode';
 import { paymentLogger } from '../utils/logger';
 import { getParam } from '../utils/validateParams';
 
@@ -88,11 +90,29 @@ export const handlePayseraWebhook = async (req: Request, res: Response): Promise
 };
 
 /**
+ * Mark the discount code used for a paid order. The payment already went
+ * through at the discounted price, so a failure here is only logged.
+ */
+async function redeemDiscountCodeForPayment(code: string, userId: string, orderId: string): Promise<void> {
+  try {
+    const result = await DiscountCode.updateOne(
+      { code: code.toUpperCase(), $expr: { $lt: ['$usedCount', '$usageLimit'] } },
+      { $inc: { usedCount: 1 }, $push: { usedBy: new mongoose.Types.ObjectId(userId) } }
+    );
+    if (result.modifiedCount === 0) {
+      paymentLogger.warn(`⚠️ PaySera webhook: discount code ${code} could not be redeemed for order ${orderId} (already used up?)`);
+    }
+  } catch (error: any) {
+    paymentLogger.error(`❌ PaySera webhook: failed to redeem discount code ${code} for order ${orderId}:`, error);
+  }
+}
+
+/**
  * Process a successful PaySera payment
  */
 async function handleSuccessfulPayment(
   callbackData: any,
-  metadata: { userId: string; productId: string; planName: string; planInterval: string } | null
+  metadata: { userId: string; productId: string; planName: string; planInterval: string; discountCode?: string } | null
 ): Promise<void> {
   try {
     // Extract userId from verified metadata only (personcode is no longer sent)
@@ -153,7 +173,12 @@ async function handleSuccessfulPayment(
       currency: callbackData.paycurrency || 'EUR',
       transactionId: callbackData.orderid,
       purchaseToken: callbackData.requestid,
+      ...(metadata?.discountCode ? { discountCode: metadata.discountCode, originalAmount: product.price } : {}),
     });
+
+    if (metadata?.discountCode) {
+      await redeemDiscountCodeForPayment(metadata.discountCode, userId, callbackData.orderid);
+    }
 
     paymentLogger.info(`✅ PaySera subscription activated for user ${user._id}`);
     paymentLogger.info(`   Subscription ID: ${result.subscription._id}`);

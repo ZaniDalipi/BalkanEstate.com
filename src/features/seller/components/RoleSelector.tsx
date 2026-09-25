@@ -130,7 +130,8 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
             return {
                 plan: isActiveSubscription ? tier : 'free',
-                limit: monthlyAllowance, // Monthly allowance, resets at calendar month boundary
+                // Monthly allowance (resets at calendar month boundary) plus any bonus listing credits
+                limit: monthlyAllowance + (isPro ? (sub.bonusListings || 0) : 0),
                 used,
                 roleCount,
                 isActive: isActiveSubscription,

@@ -116,7 +116,7 @@ export const createCheckoutSession = async (req: Request, res: Response): Promis
  */
 export const createUnifiedPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { planName, planInterval, amount, productId, countryCode, language } = req.body;
+    const { planName, planInterval, amount, productId, countryCode, language, discountCode } = req.body;
     const userId = (req as any).user?._id;
 
     if (!userId) {
@@ -141,11 +141,28 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       return;
     }
 
-    // SECURITY: Validate amount against product price to prevent client-side manipulation
+    // SECURITY: Validate amount against product price (minus a valid discount code)
+    // to prevent client-side manipulation
+    let appliedDiscountCode: string | undefined;
     if (productId) {
       const product = await Product.findOne({ productId });
-      if (product && Math.abs(amount - product.price) > 0.50) {
-        paymentLogger.warn(`Price mismatch: client sent ${amount}, product price is ${product.price} (user ${userId})`);
+      let expectedAmount = product?.price;
+
+      if (product && discountCode) {
+        const code = await DiscountCode.findOne({ code: String(discountCode).trim().toUpperCase() });
+        const validation = code
+          ? code.isValid(String(userId), productId, product.price)
+          : { valid: false, reason: 'Invalid discount code' };
+        if (!code || !validation.valid) {
+          res.status(400).json({ message: validation.reason || 'Invalid discount code' });
+          return;
+        }
+        expectedAmount = product.price - code.calculateDiscount(product.price);
+        appliedDiscountCode = code.code;
+      }
+
+      if (product && expectedAmount !== undefined && Math.abs(amount - expectedAmount) > 0.50) {
+        paymentLogger.warn(`Price mismatch: client sent ${amount}, expected ${expectedAmount} (product price ${product.price}, user ${userId})`);
         res.status(400).json({ message: 'Amount does not match product price' });
         return;
       }
@@ -171,6 +188,7 @@ export const createUnifiedPayment = async (req: Request, res: Response): Promise
       language: language || 'en',
       firstName: user.name?.split(' ')[0],
       lastName: user.name?.split(' ').slice(1).join(' '),
+      discountCode: appliedDiscountCode,
     });
 
     if (!result.success) {

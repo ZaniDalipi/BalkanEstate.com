@@ -22,6 +22,9 @@ export interface UserListing {
 }
 
 // Format limit value for display (-1 = unlimited)
+/** Plans a discount-game code is valid for (matches GAME_CODE_PLANS in the backend) */
+export const GAME_DISCOUNT_PLANS = ['seller_pro_monthly', 'seller_pro_yearly', 'seller_enterprise_yearly'];
+
 export const formatLimit = (value?: number): string => {
   if (value === undefined || value === null) return '0';
   if (value === -1) return 'Unlimited';
@@ -377,8 +380,18 @@ export function usePricingPage() {
     setShowPaymentWindow(true);
   };
 
+  // Discount code won in the listing-limit game, while it is still valid
+  const gameDiscount = state.activeDiscount?.code &&
+    (!state.activeDiscount.validUntil || new Date(state.activeDiscount.validUntil) > new Date())
+    ? { code: state.activeDiscount.code, percent: state.activeDiscount.proYearly, validUntil: state.activeDiscount.validUntil }
+    : null;
+
   const handlePaymentSuccess = async (paymentIntentId: string) => {
     setShowPaymentWindow(false);
+    // A game code is single-use; once a plan is bought it is spent
+    if (gameDiscount && selectedPlan && GAME_DISCOUNT_PLANS.includes(selectedPlan.productId)) {
+      dispatch({ type: 'SET_ACTIVE_DISCOUNT', payload: null });
+    }
     setSelectedPlan(null);
 
     // Refresh user data to get updated subscription state (buttons will now reflect new plan)
@@ -606,6 +619,7 @@ export function usePricingPage() {
   const sellerProducts = [proYearlyProduct, proMonthlyProduct].filter(Boolean) as Product[];
 
   return {
+    gameDiscount,
     // Translation
     t,
     // Context & state

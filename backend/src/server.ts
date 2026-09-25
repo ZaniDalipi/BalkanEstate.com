@@ -97,6 +97,7 @@ import geocodingRoutes from './routes/geocodingRoutes';
 import neighborhoodInsightsRoutes from './routes/neighborhoodInsightsRoutes';
 import salesHistoryRoutes from './routes/salesHistoryRoutes';
 import discountCodeRoutes from './routes/discountCodeRoutes';
+import gameRewardRoutes from './routes/gameRewardRoutes';
 import agencyFeaturedSubscriptionRoutes from './routes/agencyFeaturedSubscriptionRoutes';
 import adminRoutes from './routes/adminRoutes';
 import cityMarketDataRoutes from './routes/cityMarketDataRoutes';
@@ -366,6 +367,7 @@ app.use('/api/neighborhood-insights', aiRateLimiter, neighborhoodInsightsRoutes)
 app.use('/api/ai', aiRateLimiter, aiRoutes); // AI-powered endpoints (description, distances, chat, search names)
 app.use('/api/sales-history', salesHistoryRoutes);
 app.use('/api/discount-codes', discountCodeRoutes);
+app.use('/api/game-rewards', gameRewardRoutes);
 app.use('/api/cities', cityMarketDataRoutes); // City market data and recommendations
 app.use('/api/admin', sensitiveRateLimiter, adminRoutes); // Admin panel routes (VPN + admin role required)
 app.use('/api/license', licenseRoutes); // Agent license verification

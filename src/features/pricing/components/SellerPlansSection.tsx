@@ -17,7 +17,33 @@ interface SellerPlansSectionProps {
   onPlanSelection: (product: Product) => void;
   isActivePlan: (productId: string) => boolean;
   isPlanDisabled: (productId: string) => boolean;
+  /** Percentage off won in the discount game; shown on the Pro plans */
+  discountPercent?: number;
 }
+
+// Same rounding as the backend's DiscountCode.calculateDiscount
+const discounted = (price: number, percent: number) =>
+  Math.round((price - price * (percent / 100)) * 100) / 100;
+
+const PlanPrice: React.FC<{ price: number; percent: number; period: string; t: any }> = ({ price, percent, period, t }) => (
+  <div className="mt-6">
+    {percent > 0 ? (
+      <>
+        <span className="text-2xl font-bold text-gray-400 line-through mr-2">€{price}</span>
+        <span className="text-5xl font-extrabold text-red-600">€{discounted(price, percent)}</span>
+        <span className="text-lg text-gray-600">{period}</span>
+        <p className="mt-1 text-sm font-bold text-red-600">
+          {t('pricing:discount.off', '{{percent}}% OFF', { percent })}
+        </p>
+      </>
+    ) : (
+      <>
+        <span className="text-5xl font-extrabold text-gray-900">€{price}</span>
+        <span className="text-lg text-gray-600">{period}</span>
+      </>
+    )}
+  </div>
+);
 
 const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
   t,
@@ -27,7 +53,11 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
   onPlanSelection,
   isActivePlan,
   isPlanDisabled,
+  discountPercent = 0,
 }) => {
+  const yearlyDiscount = proYearlyProduct && !isActivePlan(proYearlyProduct.productId) ? discountPercent : 0;
+  const monthlyDiscount = proMonthlyProduct && !isActivePlan(proMonthlyProduct.productId) ? discountPercent : 0;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
 
@@ -46,10 +76,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           <div className="text-center pt-2">
             <h3 className="text-2xl font-bold text-gray-900">{proYearlyProduct.name}</h3>
             <p className="mt-2 text-sm text-gray-600">{proYearlyProduct.description || 'Best value for serious sellers'}</p>
-            <div className="mt-6">
-              <span className="text-5xl font-extrabold text-gray-900">€{proYearlyProduct.price}</span>
-              <span className="text-lg text-gray-600">/year</span>
-            </div>
+            <PlanPrice price={proYearlyProduct.price} percent={yearlyDiscount} period="/year" t={t} />
             {proMonthlyProduct && proMonthlyProduct.price > 0 && (
               <p className="mt-2 text-sm text-emerald-600 font-medium">
                 {t('pricing:plans.proYearly.saveVsMonthlyDynamic', 'Save {{percent}}% vs monthly', {
@@ -104,7 +131,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           >
             {isActivePlan(proYearlyProduct.productId)
               ? t('pricing:buttons.currentPlan', 'Current Plan')
-              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{proYearlyProduct.price}{t('pricing:billing.perYear', '/year')}</>
+              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{discounted(proYearlyProduct.price, yearlyDiscount)}{t('pricing:billing.perYear', '/year')}</>
             }
           </button>
         </div>
@@ -118,10 +145,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           <div className="text-center pt-2">
             <h3 className="text-2xl font-bold text-gray-900">{proMonthlyProduct.name}</h3>
             <p className="mt-2 text-sm text-gray-600">{proMonthlyProduct.description || 'Great for getting started'}</p>
-            <div className="mt-6">
-              <span className="text-5xl font-extrabold text-gray-900">€{proMonthlyProduct.price}</span>
-              <span className="text-lg text-gray-600">/month</span>
-            </div>
+            <PlanPrice price={proMonthlyProduct.price} percent={monthlyDiscount} period="/month" t={t} />
           </div>
 
           {/* Key Metrics */}
@@ -168,7 +192,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
           >
             {isActivePlan(proMonthlyProduct.productId)
               ? t('pricing:buttons.currentPlan', 'Current Plan')
-              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{proMonthlyProduct.price}{t('pricing:billing.perMonth', '/month')}</>
+              : <>{t('pricing:buttons.getStarted', 'Get Started')} - €{discounted(proMonthlyProduct.price, monthlyDiscount)}{t('pricing:billing.perMonth', '/month')}</>
             }
           </button>
         </div>

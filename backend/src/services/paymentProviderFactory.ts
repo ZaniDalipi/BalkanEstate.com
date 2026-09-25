@@ -58,6 +58,8 @@ export interface CreatePaymentParams {
   preferredProvider?: PaymentProvider;
   /** Preferred payment method (e.g. 'google_pay', 'apple_pay', 'card', 'bank') */
   paymentMethod?: string;
+  /** Discount code already applied to `amount`; redeemed when the payment succeeds */
+  discountCode?: string;
 }
 
 export interface PaymentResult {
@@ -164,6 +166,7 @@ class PaymentProviderFactory {
       lastName: params.lastName,
       language: params.language,
       paymentMethod: params.paymentMethod as PayseraPaymentMethod,
+      discountCode: params.discountCode,
     });
 
     if (result.success) {

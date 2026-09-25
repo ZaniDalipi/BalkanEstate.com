@@ -77,6 +77,9 @@ export interface IUser extends Document {
   listingsCount: number,
   totalListingsCreated: number
 
+  // Last time the user claimed a reward from the listing-limit discount game
+  gameRewardClaimedAt?: Date;
+
   // Real-time Statistics (auto-updated)
   stats?: {
     totalViews: number;        // Total views across all properties
@@ -191,6 +194,7 @@ export interface IUser extends Document {
     // Monthly listing tracking
     listingsCreatedThisMonth?: number; // Count of listings created this calendar month
     monthResetDate?: Date; // When the monthly counter was last reset
+    bonusListings?: number; // Extra listing credits (e.g. won in the discount game), used once the monthly allowance runs out
 
     // Buyer-specific features
     savedSearchesLimit?: number; // 1 free, 10 pro, unlimited buyer
@@ -447,6 +451,9 @@ const UserSchema: Schema = new Schema(
     totalListingsCreated: {
       type: Number,
       default: 0,
+    },
+    gameRewardClaimedAt: {
+      type: Date,
     },
     stats: {
       totalViews: {
@@ -724,6 +731,11 @@ const UserSchema: Schema = new Schema(
       },
       monthResetDate: {
         type: Date, // When the monthly counter was last reset
+      },
+      bonusListings: {
+        type: Number,
+        default: 0, // Extra listing credits, consumed after the monthly allowance is used up
+        min: 0,
       },
 
       // Buyer features

@@ -92,6 +92,10 @@ export interface ActiveDiscount {
   proYearly: number;
   proMonthly: number;
   enterprise: number;
+  /** Single-use discount code won in the listing-limit game; applied at checkout */
+  code?: string;
+  /** ISO date after which the code stops working */
+  validUntil?: string;
 }
 
 export interface AppState {

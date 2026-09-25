@@ -61,6 +61,8 @@ export interface PayseraPaymentRequest {
   language?: string;
   /** Preferred payment method — filters checkout to show only this type */
   paymentMethod?: PayseraPaymentMethod;
+  /** Discount code applied to `amount`, carried in the signed metadata */
+  discountCode?: string;
 }
 
 export interface PayseraPaymentResponse {
@@ -180,6 +182,7 @@ class PayseraService {
         productId: request.productId,
         planName: request.planName,
         planInterval: request.planInterval,
+        ...(request.discountCode ? { discountCode: request.discountCode } : {}),
       };
       const metaPayload = Buffer.from(JSON.stringify(metadata)).toString('base64');
       const metaSignature = crypto

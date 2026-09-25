@@ -18,9 +18,11 @@ const MOLE_DOWN_TIME = 300; // Time between moles (ms)
 interface WhackAnIconAnimationProps {
     mode?: 'loading' | 'game';
     onGameEnd?: (score: number, totalMoles: number) => void;
+    /** Overrides the instructions shown above the board in game mode */
+    description?: string;
 }
 
-const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loading', onGameEnd }) => {
+const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loading', onGameEnd, description }) => {
     const [activeMole, setActiveMole] = useState<number | null>(null);
     const [score, setScore] = useState(0);
     const [hitIndex, setHitIndex] = useState<number | null>(null);
@@ -152,7 +154,7 @@ const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loa
                 <div className="text-center animate-fade-in">
                     <h3 className="text-2xl font-bold text-primary">Game Over!</h3>
                     <p className="text-lg mt-2">Your Score: <span className="font-bold">{score} / {totalMoles} ({percentage}%)</span></p>
-                    <p className="mt-4 text-neutral-600">Calculating your discount...</p>
+                    <p className="mt-4 text-neutral-600">Calculating your reward...</p>
                 </div>
             );
         }
@@ -201,7 +203,7 @@ const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loa
                 {mode === 'game' ? 'Whack-an-Icon!' : 'Analyzing Property...'}
             </h3>
             <p className="text-neutral-600 mt-2 mb-6 max-w-sm mx-auto text-center">
-                {mode === 'game' && onGameEnd ? `You have ${GAME_DURATION} seconds to click as many icons as you can. Your score determines your discount!` : 'Our AI is hard at work. Feel free to play a game while you wait!'}
+                {mode === 'game' && description ? description : mode === 'game' && onGameEnd ? `You have ${GAME_DURATION} seconds to click as many icons as you can. Your score determines your discount!` : 'Our AI is hard at work. Feel free to play a game while you wait!'}
             </p>
             {renderGameContent()}
         </div>

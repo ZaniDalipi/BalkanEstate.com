@@ -25,8 +25,12 @@ export const createDiscountCode = async (req: Request, res: Response): Promise<v
 
     const currentUser = req.user as IUser;
 
-    // Check if user is admin (you might want to add an isAdmin field to User model)
-    // For now, we'll allow agents and sellers to create codes
+    // SECURITY: any user minting codes could create 100%-off codes and get free
+    // subscriptions. Game rewards are issued server-side by gameRewardController.
+    if (!(await isUserAdmin(String(currentUser._id)))) {
+      res.status(403).json({ message: 'Admin access required' });
+      return;
+    }
 
     const {
       code,
@@ -108,6 +112,11 @@ export const generateDiscountCodes = async (req: Request, res: Response): Promis
     }
 
     const currentUser = req.user as IUser;
+    if (!(await isUserAdmin(String(currentUser._id)))) {
+      res.status(403).json({ message: 'Admin access required' });
+      return;
+    }
+
     const {
       count,
       discountType,
@@ -316,6 +325,11 @@ export const getAllDiscountCodes = async (req: Request, res: Response): Promise<
   try {
     if (!req.user) {
       res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+
+    if (!(await isUserAdmin(String((req.user as IUser)._id)))) {
+      res.status(403).json({ message: 'Admin access required' });
       return;
     }
 

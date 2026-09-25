@@ -74,7 +74,11 @@
     "gameDescription": "Play a quick game to win a discount on your Pro subscription. Get up to 250 listings + promotions!",
     "playForDiscount": "Play for Discount",
     "maybeLater": "Maybe Later",
-    "draftNote": "Your draft will be waiting for you when you come back."
+    "draftNote": "Your draft will be waiting for you when you come back.",
+    "messageMonthly": "You've used all {{limit}} listings in your {{tierName}} plan this month.",
+    "bonusOffer": "Win extra listings!",
+    "bonusGameDescription": "Play a quick game: every icon you hit adds 1 extra listing to your account.",
+    "playForListings": "Play for Listings"
   },
   "agentLicense": {
     "title": "Agent License Verification",
@@ -337,5 +341,32 @@
     "marketing": "Marketing",
     "savePreferences": "Save Preferences",
     "learnMore": "Learn More"
+  },
+  "gameReward": {
+    "instructionsFree": "You have 20 seconds. Every icon you hit = 5% off a Pro plan (up to 50%)!",
+    "instructionsSubscriber": "You have 20 seconds. Every icon you hit = 1 extra listing!",
+    "claiming": "Calculating your reward...",
+    "youWon": "You won!",
+    "alreadyClaimed": "You already won a code today — here it is again",
+    "percentOff": "{{percent}}% OFF",
+    "discountDescription": "Use this code on any Pro or Enterprise seller plan.",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "validUntil": "Single use · valid until {{date}}",
+    "viewPlans": "See plans with my discount",
+    "later": "I'll use it later",
+    "plusListings": "+{{count}} listings",
+    "listingsDescription": "{{hits}} hits = {{count}} extra listings, added to your account. They are used once your monthly allowance runs out.",
+    "totalBonus": "You now have {{total}} bonus listings.",
+    "continueListing": "Continue listing",
+    "noHits": "No hits this time",
+    "noHitsSubscriber": "Every icon you hit is one extra listing. Give it another go!",
+    "noHitsFree": "Every icon you hit adds to your discount. Give it another go!",
+    "playAgain": "Play again",
+    "cooldownTitle": "Reward already claimed today",
+    "cooldownUntil": "You can win another reward after {{date}}.",
+    "cooldown": "You can win one reward per day. Come back tomorrow!",
+    "errorTitle": "Something went wrong",
+    "error": "We could not save your reward. Please try again."
   }
 }
