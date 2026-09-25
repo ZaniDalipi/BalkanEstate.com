@@ -304,6 +304,11 @@ const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) =
     );
 };
 
+// Listings are loaded in chunks of this size as the user scrolls
+const PAGE_SIZE = 20;
+// Upper bound when silently re-fetching everything already on screen
+const MAX_REFRESH_SIZE = 200;
+
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const { t } = useTranslation(['rental', 'common', 'seller', 'account']);
     const { state, dispatch } = useAppContext();
@@ -328,6 +333,19 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [propertyForVideo, setPropertyForVideo] = useState<Property | null>(null);
     const [myProperties, setMyProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [counts, setCounts] = useState<api.MyListingsCounts>({ all: 0, sale: 0, rent: 0, private_seller: 0, agent: 0 });
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    // Guards against out-of-order responses when filters change quickly
+    const requestIdRef = useRef(0);
+    const loadedCountRef = useRef(0);
+    const myPropertiesRef = useRef<Property[]>([]);
+    myPropertiesRef.current = myProperties;
+    const isLoadingMoreRef = useRef(false);
+    const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
+    const filtersRef = useRef({ statusFilter, listingTypeFilter, roleFilter, search: debouncedSearch });
+    filtersRef.current = { statusFilter, listingTypeFilter, roleFilter, search: debouncedSearch };
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
     const skipNextRefetchRef = useRef(false);
 
@@ -352,26 +370,80 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         return { canRenew: false, hoursRemaining, minutesRemaining };
     };
 
-    // Refetch function - can be called manually or on view change
-    const fetchMyListings = useCallback(async () => {
-        setIsLoading(true);
+    const buildPageParams = () => {
+        const f = filtersRef.current;
+        return {
+            status: f.statusFilter,
+            listingType: f.listingTypeFilter === 'all' ? undefined : f.listingTypeFilter,
+            role: f.roleFilter === 'all' ? undefined : f.roleFilter,
+            search: f.search,
+        };
+    };
+
+    // Load the first chunk. With `reset`, only the first PAGE_SIZE listings are
+    // loaded (filters changed). Otherwise it silently refreshes everything
+    // already on screen so the user keeps their scroll position.
+    const fetchMyListings = useCallback(async (opts: { reset?: boolean } = {}) => {
+        const requestId = ++requestIdRef.current;
+        const limit = opts.reset
+            ? PAGE_SIZE
+            : Math.min(Math.max(PAGE_SIZE, loadedCountRef.current), MAX_REFRESH_SIZE);
+        if (opts.reset || loadedCountRef.current === 0) setIsLoading(true);
         try {
+            const result = await api.getMyListingsPage({ ...buildPageParams(), offset: 0, limit });
+            if (requestId !== requestIdRef.current) return;
 
-            // Fetch ALL listings without role filter
-            const listings = await api.getMyListings();
-
-            setMyProperties(listings);
+            setMyProperties(result.properties);
+            setHasMore(result.hasMore);
+            if (result.counts) setCounts(result.counts);
 
             // Calculate renewal statuses
             const statuses: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
-            listings.forEach(p => {
+            result.properties.forEach(p => {
                 statuses[p.id] = calculateRenewalStatus(p.lastRenewed);
             });
             setRenewalStatuses(statuses);
         } catch (error) {
+            if (requestId !== requestIdRef.current) return;
             setMyProperties([]);
+            setHasMore(false);
         } finally {
-            setIsLoading(false);
+            if (requestId === requestIdRef.current) setIsLoading(false);
+        }
+    }, []);
+
+    // Load the next chunk (infinite scroll)
+    const loadMore = useCallback(async () => {
+        if (isLoadingMoreRef.current) return;
+        const requestId = requestIdRef.current;
+        isLoadingMoreRef.current = true;
+        setIsLoadingMore(true);
+        try {
+            const result = await api.getMyListingsPage({
+                ...buildPageParams(),
+                offset: loadedCountRef.current,
+                limit: PAGE_SIZE,
+            });
+            // Filters changed or a refresh happened meanwhile - drop this chunk
+            if (requestId !== requestIdRef.current) return;
+
+            const seen = new Set(myPropertiesRef.current.map(p => p.id));
+            const fresh = result.properties.filter(p => !seen.has(p.id));
+            setMyProperties(prev => [...prev, ...fresh.filter(p => !prev.some(x => x.id === p.id))]);
+            // Stop if the chunk brought nothing new, so we never loop on the same offset
+            setHasMore(result.hasMore && fresh.length > 0);
+            setRenewalStatuses(prev => {
+                const next = { ...prev };
+                result.properties.forEach(p => {
+                    next[p.id] = calculateRenewalStatus(p.lastRenewed);
+                });
+                return next;
+            });
+        } catch (error) {
+            if (requestId === requestIdRef.current) setHasMore(false);
+        } finally {
+            isLoadingMoreRef.current = false;
+            setIsLoadingMore(false);
         }
     }, []);
 
@@ -398,10 +470,17 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         },
     });
 
-    // Fetch on mount and when navigating back to this view (after editing)
+    // Debounce the search box so we don't hit the server on every keystroke
     useEffect(() => {
-        fetchMyListings();
-    }, [state.activeView, fetchMyListings]); // Refetch when view changes (e.g., returning from edit-listing)
+        const timeout = setTimeout(() => setDebouncedSearch(propertyIdSearch.trim()), 300);
+        return () => clearTimeout(timeout);
+    }, [propertyIdSearch]);
+
+    // Fetch the first chunk on mount, when filters change, and when navigating
+    // back to this view (e.g., returning from edit-listing)
+    useEffect(() => {
+        fetchMyListings({ reset: true });
+    }, [state.activeView, statusFilter, listingTypeFilter, roleFilter, debouncedSearch, fetchMyListings]);
 
     // Update renewal statuses every minute
     useEffect(() => {
@@ -418,27 +497,9 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         return () => clearInterval(interval);
     }, [myProperties]);
 
-    // Calculate counts for each role
-    const roleCounts = useMemo(() => {
-        const privateSellerCount = myProperties.filter(p =>
-            p.createdAsRole === 'private_seller'
-        ).length;
-        const agentCount = myProperties.filter(p =>
-            p.createdAsRole === 'agent'
-        ).length;
-        return {
-            all: myProperties.length,
-            private_seller: privateSellerCount,
-            agent: agentCount,
-        };
-    }, [myProperties]);
-
-    // Calculate listing type counts
-    const listingTypeCounts = useMemo(() => ({
-        all: myProperties.length,
-        sale: myProperties.filter(p => (p.listingType || 'sale') === 'sale').length,
-        rent: myProperties.filter(p => p.listingType === 'rent').length,
-    }), [myProperties]);
+    // Counts across all of the user's listings (from the server, not just loaded chunks)
+    const roleCounts = { all: counts.all, private_seller: counts.private_seller, agent: counts.agent };
+    const listingTypeCounts = { all: counts.all, sale: counts.sale, rent: counts.rent };
 
     const showListingTypeFilter = listingTypeCounts.sale > 0 && listingTypeCounts.rent > 0;
 
@@ -505,6 +566,25 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             return bTime - aTime;
         });
     }, [myProperties, statusFilter, roleFilter, listingTypeFilter, propertyIdSearch]);
+
+    // Next chunk starts after the loaded listings that still match the filters
+    // (a listing whose status changed locally no longer counts toward the offset)
+    loadedCountRef.current = filteredAndSortedProperties.length;
+
+    // Infinite scroll: load the next chunk when the sentinel nears the viewport.
+    // Re-created after each chunk so it keeps loading while the sentinel stays visible.
+    useEffect(() => {
+        const sentinel = loadMoreSentinelRef.current;
+        if (!sentinel || !hasMore || isLoading || isLoadingMore) return;
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0]?.isIntersecting) loadMore();
+            },
+            { rootMargin: '600px 0px' }
+        );
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [hasMore, isLoading, isLoadingMore, myProperties.length, loadMore]);
 
     const handleRenew = async (id: string) => {
         // Optimistic: update UI immediately
@@ -716,7 +796,17 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
 
             // Optimistic: remove from UI immediately
             dispatch({ type: 'DELETE_PROPERTY', payload: deletingId });
+            const deleted = myProperties.find(p => p.id === deletingId);
             setMyProperties(prev => prev.filter(p => p.id !== deletingId));
+            if (deleted) {
+                setCounts(prev => ({
+                    all: Math.max(0, prev.all - 1),
+                    sale: Math.max(0, prev.sale - (deleted.listingType === 'rent' ? 0 : 1)),
+                    rent: Math.max(0, prev.rent - (deleted.listingType === 'rent' ? 1 : 0)),
+                    private_seller: Math.max(0, prev.private_seller - (deleted.createdAsRole === 'private_seller' ? 1 : 0)),
+                    agent: Math.max(0, prev.agent - (deleted.createdAsRole === 'agent' ? 1 : 0)),
+                }));
+            }
             setShowDeleteConfirm(false);
             setPropertyToDelete(null);
             // Notify other pages (rental search, search page) to update instantly
@@ -786,11 +876,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         setPropertyToPromote(null);
 
         // Re-fetch listings to get updated promotion status
-        try {
-            const listings = await api.getMyListings();
-            setMyProperties(listings);
-        } catch (error) {
-        }
+        fetchMyListings();
     };
 
     const statusFilterOptions: { label: string, value: PropertyStatus | 'all' }[] = [
@@ -938,7 +1024,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             </Modal>
 
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('seller:myListings.titleWithCount', 'My Listings ({{count}})', { count: myProperties.length })}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('seller:myListings.titleWithCount', 'My Listings ({{count}})', { count: counts.all })}</h3>
                 <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => {
@@ -1102,10 +1188,29 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             renewalStatus={renewalStatuses[prop.id] || null}
                         />
                     )}
+                    {hasMore && (
+                        <div ref={loadMoreSentinelRef} className="flex justify-center py-4">
+                            {isLoadingMore ? (
+                                <ListingCardSkeleton />
+                            ) : (
+                                <button
+                                    onClick={loadMore}
+                                    className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100 text-sm"
+                                >
+                                    {t('common:loadMore', 'Load more')}
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            ) : hasMore ? (
+                // Everything loaded so far was filtered out locally; fetch the next chunk
+                <div ref={loadMoreSentinelRef} className="flex justify-center py-4">
+                    <ListingCardSkeleton />
                 </div>
             ) : (
                 <div className="text-center p-12 border-2 border-dashed rounded-lg bg-neutral-50">
-                    {myProperties.length > 0 ? (
+                    {counts.all > 0 ? (
                          <>
                             <h4 className="text-xl font-semibold text-neutral-700">No Listings Found</h4>
                             <p className="text-neutral-500 mt-2">

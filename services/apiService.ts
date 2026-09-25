@@ -859,6 +859,57 @@ export const getMyListings = async (role?: 'agent' | 'private_seller'): Promise<
   return response.properties.map(transformBackendProperty);
 };
 
+export interface MyListingsPageParams {
+  offset?: number;
+  limit?: number;
+  status?: string;
+  listingType?: 'sale' | 'rent';
+  role?: 'agent' | 'private_seller';
+  search?: string;
+}
+
+export interface MyListingsCounts {
+  all: number;
+  sale: number;
+  rent: number;
+  private_seller: number;
+  agent: number;
+}
+
+export interface MyListingsPage {
+  properties: Property[];
+  total: number;
+  hasMore: boolean;
+  counts?: MyListingsCounts;
+}
+
+/**
+ * Fetch one chunk of the current user's listings (server-side filtered and sorted).
+ * Counts across all listings are included when offset is 0.
+ */
+export const getMyListingsPage = async (params: MyListingsPageParams = {}): Promise<MyListingsPage> => {
+  const qs = new URLSearchParams();
+  qs.set('offset', String(params.offset ?? 0));
+  qs.set('limit', String(params.limit ?? 20));
+  if (params.status && params.status !== 'all') qs.set('status', params.status);
+  if (params.listingType) qs.set('listingType', params.listingType);
+  if (params.role) qs.set('role', params.role);
+  if (params.search?.trim()) qs.set('search', params.search.trim());
+
+  const response = await apiRequest<{
+    properties: any[];
+    pagination: { total: number; hasMore: boolean };
+    counts?: MyListingsCounts;
+  }>(`/properties/my/listings?${qs.toString()}`, { requiresAuth: true });
+
+  return {
+    properties: response.properties.map(transformBackendProperty),
+    total: response.pagination.total,
+    hasMore: response.pagination.hasMore,
+    counts: response.counts,
+  };
+};
+
 /**
  * Upload property images to Cloudinary
  * @param images - Array of image files to upload

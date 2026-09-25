@@ -1682,8 +1682,113 @@ export const getMyListings = async (
       propertyLogger.info(`📋 Fetching all listings for user ${userId}`);
     }
 
+    const sellerFields = 'name email phone avatarUrl avatarOptions gender role agencyName';
+
+    // Paginated mode (opt-in via ?limit=): the My Listings page loads listings in
+    // chunks as the user scrolls instead of pulling every listing at once.
+    // Filtering, search and ordering happen here so each chunk is correct.
+    if (req.query.limit !== undefined) {
+      const limit = Math.min(Math.max(parseInt(String(req.query.limit), 10) || 20, 1), 200);
+      const offset = Math.max(parseInt(String(req.query.offset), 10) || 0, 0);
+
+      const baseMatch: any = { sellerId: new mongoose.Types.ObjectId(userId) };
+      const match: any = { ...baseMatch };
+      if (query.createdAsRole) match.createdAsRole = query.createdAsRole;
+
+      const status = req.query.status as string | undefined;
+      if (status && ['active', 'pending', 'sold', 'rented', 'draft'].includes(status)) {
+        match.status = status;
+      }
+
+      const listingType = req.query.listingType as string | undefined;
+      if (listingType === 'rent') {
+        match.listingType = 'rent';
+      } else if (listingType === 'sale') {
+        // Legacy listings without a listingType are sales
+        match.listingType = { $ne: 'rent' };
+      }
+
+      const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 100) : '';
+      if (search) {
+        const regex = new RegExp(escapeRegex(search), 'i');
+        match.$or = [{ propertyId: regex }, { title: regex }, { address: regex }, { city: regex }];
+      }
+
+      // Same ordering as the UI: status group first, then most recently renewed/created
+      const [{ page, total }] = await Property.aggregate([
+        { $match: match },
+        {
+          $facet: {
+            page: [
+              {
+                $addFields: {
+                  _statusOrder: {
+                    $switch: {
+                      branches: [
+                        { case: { $eq: ['$status', 'active'] }, then: 1 },
+                        { case: { $eq: ['$status', 'pending'] }, then: 2 },
+                        { case: { $eq: ['$status', 'rented'] }, then: 3 },
+                        { case: { $eq: ['$status', 'draft'] }, then: 4 },
+                        { case: { $eq: ['$status', 'sold'] }, then: 5 },
+                      ],
+                      default: 6,
+                    },
+                  },
+                  _sortTime: { $max: [{ $ifNull: ['$lastRenewed', new Date(0)] }, { $ifNull: ['$createdAt', new Date(0)] }] },
+                },
+              },
+              { $sort: { _statusOrder: 1, _sortTime: -1, _id: -1 } },
+              { $skip: offset },
+              { $limit: limit },
+              { $project: { _id: 1 } },
+            ],
+            total: [{ $count: 'n' }],
+          },
+        },
+      ]);
+
+      const ids = page.map((d: any) => d._id);
+      const docs = ids.length
+        ? await Property.find({ _id: { $in: ids } }).populate('sellerId', sellerFields)
+        : [];
+      const byId = new Map(docs.map(d => [String(d._id), d]));
+      const ordered = ids.map((id: any) => byId.get(String(id))).filter(Boolean) as typeof docs;
+      const totalCount = total[0]?.n || 0;
+
+      // Tab/filter counts across all of the user's listings (first chunk only)
+      let counts: Record<string, number> | undefined;
+      if (offset === 0) {
+        const [c] = await Property.aggregate([
+          { $match: baseMatch },
+          {
+            $group: {
+              _id: null,
+              all: { $sum: 1 },
+              rent: { $sum: { $cond: [{ $eq: ['$listingType', 'rent'] }, 1, 0] } },
+              private_seller: { $sum: { $cond: [{ $eq: ['$createdAsRole', 'private_seller'] }, 1, 0] } },
+              agent: { $sum: { $cond: [{ $eq: ['$createdAsRole', 'agent'] }, 1, 0] } },
+            },
+          },
+        ]);
+        counts = {
+          all: c?.all || 0,
+          sale: (c?.all || 0) - (c?.rent || 0),
+          rent: c?.rent || 0,
+          private_seller: c?.private_seller || 0,
+          agent: c?.agent || 0,
+        };
+      }
+
+      res.json({
+        properties: ordered.map(p => sanitizeProperty(p.toObject(), 'list')),
+        pagination: { offset, limit, total: totalCount, hasMore: offset + ordered.length < totalCount },
+        ...(counts && { counts }),
+      });
+      return;
+    }
+
     const properties = await Property.find(query)
-      .populate('sellerId', 'name email phone avatarUrl avatarOptions gender role agencyName')
+      .populate('sellerId', sellerFields)
       .sort({ lastRenewed: -1, createdAt: -1 }); // Renewed listings appear first
 
     propertyLogger.info(`✅ Found ${properties.length} listings`);
