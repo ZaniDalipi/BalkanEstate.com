@@ -858,8 +858,18 @@ Imported Drafts tab (ImportReviewQueue)
         ├── toPreviewProperty(draft, patch)  → transformBackendProperty (ingestion boundary)
         ├── DraftListingPreview              → PropertyGallery · PropertyPhotos · PropertyInfo
         │                                      · RentalTermsSection · PropertyMapLink
-        ├── edit mode: DraftEditForm beside the preview, which follows every keystroke
+        ├── new draft → "Edit in listing form" (below)
+        ├── update draft → quick DraftEditForm beside a preview that follows every keystroke
         └── Publish → PATCH unsaved edits → POST …/accept → next draft in the queue
+
+New draft → the regular create-listing page
+  ├── useOpenDraftInListingForm  → AppState.importDraftToPublish { draftId, property }
+  ├── CreateListingPage          → useImportDraftPrefill() → GeminiDescriptionGenerator prefill
+  ├── useListingForm(null, prefill) — seeded like an edit, submitted as a NEW listing
+  │     (all fields, photo tags, map pin, own uploads, validation, limit checks, preview)
+  └── prefill.onCreated(created) → POST …/review/:id/link { propertyId }
+        stamps source/sourceListingId on the listing, marks the draft accepted,
+        and the post-publish redirect lands back on Imported Drafts
 ```
 
 Key decisions:
@@ -880,8 +890,19 @@ Key decisions:
   flow's `ListingPreview`), fed through `transformBackendProperty`, so what the
   owner approves is what buyers get. There is no separate "draft" renderer to
   drift out of sync.
-- **Publishing saves first.** Unsaved edits are what the live preview shows, so
-  Publish becomes "Save & publish" and PATCHes them before accepting.
+- **A new draft is edited in the create-listing form, not a lookalike.**
+  `useListingForm` takes an optional `prefill` that seeds the form the way an
+  edit does but still submits through `createListing`, so an imported listing
+  gets every field, check and step a hand-typed one does, and nothing needs
+  re-implementing when the form grows. The quick editor stays only for feed
+  *updates*, where a handful of changed values are being confirmed.
+- **Linking, not re-creating.** The listing created by the form carries no
+  feed identity of its own; `…/link` stamps `source`/`sourceListingId` (and the
+  feed's original photo URLs) onto it, so the next sync diffs it against the
+  feed instead of queueing the same item again. A failed link is surfaced but
+  never undoes the created listing.
+- **Publishing saves first.** Unsaved quick edits are what the live preview
+  shows, so the publish button saves them before accepting.
 - **The limit is charged at publish.** `listingLimitService` is checked when a
   draft is accepted (`LISTING_LIMIT_REACHED`), not when the feed is fetched —
   fetching creates nothing. Title and city are required to publish; other
@@ -896,7 +917,9 @@ Backend: `models/ImportedListingDraft.ts`, `services/importReviewService.ts`,
 `controllers/importReviewController.ts`, routes under
 `/api/listing-sources/review`. Frontend: `src/features/listing-sources/`
 (`api/importReviewApi.ts`, `hooks/useImportReview*.ts`, `hooks/useDraftViewer.ts`,
-`hooks/useDraftForm.ts`, `components/review/`), keys in `importReviewKeys`.
+`hooks/useDraftForm.ts`, `hooks/useDraftListingForm.ts`, `components/review/`),
+keys in `importReviewKeys`; the prefill hook-in is `ListingPrefill` in
+`src/features/seller/components/useListingForm.ts`.
 
 ---
 

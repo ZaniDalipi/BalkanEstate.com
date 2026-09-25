@@ -250,6 +250,9 @@
     "backToPreview": "Back to preview",
     "saveAndPublish": "Save & publish",
     "discardChanges": "Discard your unsaved changes?",
-    "unsavedHint": "You have unsaved changes. Publishing will save them first."
+    "unsavedHint": "You have unsaved changes. Publishing will save them first.",
+    "editInForm": "Edit in listing form",
+    "formTitle": "Edit imported listing",
+    "formHint": "This listing came from your external feed. Fix anything that was read wrong — it's checked and published like any new listing, then you're taken back to Imported drafts."
   }
 }

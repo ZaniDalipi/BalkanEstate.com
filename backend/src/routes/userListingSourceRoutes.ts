@@ -41,6 +41,7 @@ router.post('/review/bulk', review.bulk);
 router.get('/review/:draftId', review.get);
 router.patch('/review/:draftId', review.edit);
 router.post('/review/:draftId/accept', review.accept);
+router.post('/review/:draftId/link', review.link);
 router.post('/review/:draftId/reject', review.reject);
 router.post('/review/:draftId/restore', review.restore);
 

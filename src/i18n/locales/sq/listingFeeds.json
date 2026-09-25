@@ -250,6 +250,9 @@
     "backToPreview": "Kthehu te pamja",
     "saveAndPublish": "Ruaj dhe publiko",
     "discardChanges": "Të hidhen ndryshimet e paruajtura?",
-    "unsavedHint": "Keni ndryshime të paruajtura. Publikimi do t'i ruajë së pari."
+    "unsavedHint": "Keni ndryshime të paruajtura. Publikimi do t'i ruajë së pari.",
+    "editInForm": "Ndrysho në formularin e listimit",
+    "formTitle": "Ndrysho listimin e importuar",
+    "formHint": "Ky listim erdhi nga burimi juaj i jashtëm. Korrigjoni çdo gjë që është lexuar gabim — kontrollohet dhe publikohet si çdo listim i ri, pastaj ktheheni te Draftet e importuara."
   }
 }

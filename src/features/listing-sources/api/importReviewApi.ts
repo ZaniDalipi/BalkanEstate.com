@@ -119,6 +119,10 @@ export const updateImportDraft = async (id: string, data: DraftPatch): Promise<I
 export const acceptImportDraft = (id: string): Promise<{ propertyId: string; kind: DraftKind }> =>
   apiRequest(`${BASE}/${id}/accept`, { method: 'POST', requiresAuth: true });
 
+/** Link a listing published through the create-listing form back to its draft. */
+export const linkImportDraft = (id: string, propertyId: string): Promise<{ propertyId: string }> =>
+  apiRequest(`${BASE}/${id}/link`, { method: 'POST', body: { propertyId }, requiresAuth: true });
+
 export const rejectImportDraft = (id: string): Promise<{ ok: true }> =>
   apiRequest(`${BASE}/${id}/reject`, { method: 'POST', requiresAuth: true });
 

@@ -186,7 +186,18 @@ export function buildPreviewProperty(
     } as Property;
 }
 
-export const useListingForm = (propertyToEdit: Property | null) => {
+/**
+ * Values to start a *new* listing from, instead of an empty form — e.g. a
+ * listing fetched from the owner's external feed. The form behaves exactly as
+ * for any new listing (validation, limit checks, create); `onCreated` runs
+ * once the listing exists.
+ */
+export interface ListingPrefill {
+    property: Property;
+    onCreated: (created: Property) => Promise<void> | void;
+}
+
+export const useListingForm = (propertyToEdit: Property | null, prefill?: ListingPrefill | null) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
     const { state, dispatch, updateUser, createListing, updateListing } = useAppContext();
     const { currentUser, properties, isPricingModalOpen, pendingProperty, isAuthenticating, isLoadingUserData } = state;
@@ -328,87 +339,99 @@ export const useListingForm = (propertyToEdit: Property | null) => {
         wasModalOpen.current = isPricingModalOpen;
     }, [isPricingModalOpen, pendingProperty, currentUser?.subscription, dispatch, showError]);
 
-    // Populate form if editing
+    const seed = propertyToEdit ?? prefill?.property ?? null;
+
+    /** Tell the prefill's owner the listing now exists. Its failure must not undo the create. */
+    const notifyCreated = useCallback(async (created: Property) => {
+        if (!prefill) return;
+        try {
+            await prefill.onCreated(created);
+        } catch (err) {
+            showWarning(t('common:errors.generic', 'Something went wrong'), (err as Error).message);
+        }
+    }, [prefill, showWarning, t]);
+
+    // Populate form when editing, or when prefilling a new listing (imported feed draft)
     useEffect(() => {
-        if (propertyToEdit) {
+        if (seed) {
             setMode('manual');
             setStep('form');
 
             setListingData({
-                propertyId: propertyToEdit.propertyId || '',
-                title: propertyToEdit.title || '',
-                listingType: propertyToEdit.listingType || 'sale',
-                streetAddress: propertyToEdit.address || '',
-                price: propertyToEdit.price,
-                isNegotiable: propertyToEdit.isNegotiable || false,
-                bedrooms: propertyToEdit.beds,
-                bathrooms: propertyToEdit.baths,
-                livingRooms: propertyToEdit.livingRooms,
-                kitchens: propertyToEdit.kitchens || 0,
-                diningRooms: propertyToEdit.diningRooms || 0,
-                toilets: propertyToEdit.toilets || 0,
-                storageRooms: propertyToEdit.storageRooms || 0,
-                offices: propertyToEdit.offices || 0,
-                openPlanArea: propertyToEdit.openPlanArea || 0,
-                landArea: propertyToEdit.landArea || 0,
-                buildingArea: propertyToEdit.buildingArea || 0,
-                grossArea: propertyToEdit.grossArea || 0,
-                netArea: propertyToEdit.netArea || 0,
-                parkingType: propertyToEdit.parkingType || 'garage',
-                sq_meters: propertyToEdit.sqft,
-                year_built: propertyToEdit.yearBuilt,
-                constructionStatus: normalizeConstructionStatus(propertyToEdit.constructionStatus),
-                expected_completion_year: propertyToEdit.expectedCompletionYear || 0,
-                parking_spots: propertyToEdit.parking,
-                specialFeatures: propertyToEdit.specialFeatures,
-                materials: propertyToEdit.materials,
-                amenities: propertyToEdit.amenities || [],
-                description: propertyToEdit.description || '',
-                tourUrl: propertyToEdit.tourUrl || '',
-                virtualTour360Url: propertyToEdit.virtualTour360Url || '',
-                propertyType: propertyToEdit.propertyType || 'house',
-                floorNumber: propertyToEdit.floorNumber || 0,
-                totalFloors: propertyToEdit.totalFloors || 0,
-                image_tags: (propertyToEdit.images || []).map((img, index) => ({
+                propertyId: seed.propertyId || '',
+                title: seed.title || '',
+                listingType: seed.listingType || 'sale',
+                streetAddress: seed.address || '',
+                price: seed.price,
+                isNegotiable: seed.isNegotiable || false,
+                bedrooms: seed.beds,
+                bathrooms: seed.baths,
+                livingRooms: seed.livingRooms,
+                kitchens: seed.kitchens || 0,
+                diningRooms: seed.diningRooms || 0,
+                toilets: seed.toilets || 0,
+                storageRooms: seed.storageRooms || 0,
+                offices: seed.offices || 0,
+                openPlanArea: seed.openPlanArea || 0,
+                landArea: seed.landArea || 0,
+                buildingArea: seed.buildingArea || 0,
+                grossArea: seed.grossArea || 0,
+                netArea: seed.netArea || 0,
+                parkingType: seed.parkingType || 'garage',
+                sq_meters: seed.sqft,
+                year_built: seed.yearBuilt,
+                constructionStatus: normalizeConstructionStatus(seed.constructionStatus),
+                expected_completion_year: seed.expectedCompletionYear || 0,
+                parking_spots: seed.parking,
+                specialFeatures: seed.specialFeatures,
+                materials: seed.materials,
+                amenities: seed.amenities || [],
+                description: seed.description || '',
+                tourUrl: seed.tourUrl || '',
+                virtualTour360Url: seed.virtualTour360Url || '',
+                propertyType: seed.propertyType || 'house',
+                floorNumber: seed.floorNumber || 0,
+                totalFloors: seed.totalFloors || 0,
+                image_tags: (seed.images || []).map((img, index) => ({
                     index,
                     tag: (typeof img === 'object' && img?.tag) || 'other'
                 })),
-                lat: propertyToEdit.lat || 0,
-                lng: propertyToEdit.lng || 0,
-                hasBalcony: propertyToEdit.hasBalcony,
-                hasGarden: propertyToEdit.hasGarden,
-                hasElevator: propertyToEdit.hasElevator,
-                hasSecurity: propertyToEdit.hasSecurity,
-                hasAirConditioning: propertyToEdit.hasAirConditioning,
-                hasPool: propertyToEdit.hasPool,
-                petsAllowed: propertyToEdit.petsAllowed,
+                lat: seed.lat || 0,
+                lng: seed.lng || 0,
+                hasBalcony: seed.hasBalcony,
+                hasGarden: seed.hasGarden,
+                hasElevator: seed.hasElevator,
+                hasSecurity: seed.hasSecurity,
+                hasAirConditioning: seed.hasAirConditioning,
+                hasPool: seed.hasPool,
+                petsAllowed: seed.petsAllowed,
                 // Advanced property features
-                furnishing: propertyToEdit.furnishing || 'any',
-                heatingType: propertyToEdit.heatingType || 'any',
-                condition: propertyToEdit.condition || 'any',
-                viewType: propertyToEdit.viewType || 'any',
-                energyRating: propertyToEdit.energyRating || 'any',
-                orientation: propertyToEdit.orientation || 'any',
+                furnishing: seed.furnishing || 'any',
+                heatingType: seed.heatingType || 'any',
+                condition: seed.condition || 'any',
+                viewType: seed.viewType || 'any',
+                energyRating: seed.energyRating || 'any',
+                orientation: seed.orientation || 'any',
                 // Rental-specific fields
-                rentPeriod: propertyToEdit.rentPeriod || 'monthly',
-                securityDeposit: propertyToEdit.securityDeposit || 0,
-                minimumLeaseDuration: propertyToEdit.minimumLeaseDuration || 1,
-                maximumLeaseDuration: propertyToEdit.maximumLeaseDuration || 12,
-                availableFrom: propertyToEdit.availableFrom ? new Date(propertyToEdit.availableFrom).toISOString().split('T')[0] : '',
-                utilitiesIncluded: propertyToEdit.utilitiesIncluded || false,
-                internetIncluded: propertyToEdit.internetIncluded || false,
-                tenantRequirements: propertyToEdit.tenantRequirements || [],
-                maxOccupants: propertyToEdit.maxOccupants || 1,
+                rentPeriod: seed.rentPeriod || 'monthly',
+                securityDeposit: seed.securityDeposit || 0,
+                minimumLeaseDuration: seed.minimumLeaseDuration || 1,
+                maximumLeaseDuration: seed.maximumLeaseDuration || 12,
+                availableFrom: seed.availableFrom ? new Date(seed.availableFrom).toISOString().split('T')[0] : '',
+                utilitiesIncluded: seed.utilitiesIncluded || false,
+                internetIncluded: seed.internetIncluded || false,
+                tenantRequirements: seed.tenantRequirements || [],
+                maxOccupants: seed.maxOccupants || 1,
                 // Daily rental fields (short-stay / luxury villa)
-                checkInTime: propertyToEdit.checkInTime || '14:00',
-                checkOutTime: propertyToEdit.checkOutTime || '11:00',
-                cleaningFee: propertyToEdit.cleaningFee || 0,
-                cancellationPolicy: propertyToEdit.cancellationPolicy || '',
-                breakfastIncluded: propertyToEdit.breakfastIncluded || false,
-                towelsIncluded: propertyToEdit.towelsIncluded || false,
-                parkingIncluded: propertyToEdit.parkingIncluded || false,
+                checkInTime: seed.checkInTime || '14:00',
+                checkOutTime: seed.checkOutTime || '11:00',
+                cleaningFee: seed.cleaningFee || 0,
+                cancellationPolicy: seed.cancellationPolicy || '',
+                breakfastIncluded: seed.breakfastIncluded || false,
+                towelsIncluded: seed.towelsIncluded || false,
+                parkingIncluded: seed.parkingIncluded || false,
                 // Visit availability
-                visitAvailability: propertyToEdit.visitAvailability || {
+                visitAvailability: seed.visitAvailability || {
                     enabled: false,
                     days: [1, 2, 3, 4, 5],
                     startTime: '09:00',
@@ -419,17 +442,17 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             });
 
             // Set country and city from property
-            setSelectedCountry(propertyToEdit.country || '');
-            setSelectedCity(propertyToEdit.city || '');
+            setSelectedCountry(seed.country || '');
+            setSelectedCity(seed.city || '');
 
             // Load cities for the country
-            const country = BALKAN_LOCATIONS.find(c => c.name === propertyToEdit.country);
+            const country = BALKAN_LOCATIONS.find(c => c.name === seed.country);
             if (country) {
                 setAvailableCities(country.cities);
             }
 
             // Robustly load existing images - handle both object and string formats
-            const existingImages: ImageData[] = (propertyToEdit.images || []).map(img => {
+            const existingImages: ImageData[] = (seed.images || []).map(img => {
                 // Handle both {url: string} objects and plain string URLs
                 const imageUrl = typeof img === 'string' ? img : (img?.url || (img as any)?.previewUrl || '');
                 const floorplanSpot = typeof img === 'string' ? undefined : sanitizeFloorplanSpot(img?.floorplanSpot);
@@ -437,13 +460,13 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             }).filter(img => img.previewUrl); // Filter out any empty URLs
             setImages(existingImages);
             // Log removed
-            setFloorplans(getFloorPlans(propertyToEdit).map((f, i) => ({
+            setFloorplans(getFloorPlans(seed).map((f, i) => ({
                 file: null,
                 previewUrl: f.url,
                 label: f.label || t('seller:createListing.floors.defaultLabel', 'Floor {{n}}', { n: i + 1 }),
             })));
         }
-    }, [propertyToEdit]);
+    }, [seed]);
 
     // Handle country selection
     const handleCountryChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -1377,7 +1400,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
                     setStep('payment');
                 } else {
                     // Create listing immediately without promotion
-                    await createListing(newProperty);
+                    await notifyCreated(await createListing(newProperty));
                     if (currentUser.role === UserRole.BUYER) {
                         await updateUser({ role: UserRole.PRIVATE_SELLER });
                     }
@@ -1582,6 +1605,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
             setIsSubmitting(true);
             // Create listing first
             const createdProperty = await createListing(pendingPropertyData);
+            await notifyCreated(createdProperty);
 
             if (currentUser.role === UserRole.BUYER) {
                 await updateUser({ role: UserRole.PRIVATE_SELLER });
@@ -1618,7 +1642,7 @@ export const useListingForm = (propertyToEdit: Property | null) => {
 
         try {
             setIsSubmitting(true);
-            await createListing(pendingPropertyData);
+            await notifyCreated(await createListing(pendingPropertyData));
 
             if (currentUser.role === UserRole.BUYER) {
                 await updateUser({ role: UserRole.PRIVATE_SELLER });

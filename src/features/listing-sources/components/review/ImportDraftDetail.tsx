@@ -15,11 +15,12 @@ interface ImportDraftDetailProps {
   onNext?: () => void;
   onClose: () => void;
   onDecision: (decision: ReviewDecision) => void;
+  onEditInForm: () => void;
 }
 
 /** Full-screen review of one imported draft, loaded with its complete listing. */
 const ImportDraftDetail: React.FC<ImportDraftDetailProps> = ({
-  draftId, position, initialMode, busy, error, onPrev, onNext, onClose, onDecision,
+  draftId, position, initialMode, busy, error, onPrev, onNext, onClose, onDecision, onEditInForm,
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
   const { data: draft, isLoading, isError } = useImportDraft(draftId);
@@ -44,6 +45,7 @@ const ImportDraftDetail: React.FC<ImportDraftDetailProps> = ({
           onPrev={onPrev}
           onNext={onNext}
           onDecision={onDecision}
+          onEditInForm={onEditInForm}
         />
       )}
     </Modal>

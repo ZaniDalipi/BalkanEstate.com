@@ -250,6 +250,9 @@
     "backToPreview": "Înapoi la previzualizare",
     "saveAndPublish": "Salvează și publică",
     "discardChanges": "Renunți la modificările nesalvate?",
-    "unsavedHint": "Ai modificări nesalvate. Publicarea le va salva mai întâi."
+    "unsavedHint": "Ai modificări nesalvate. Publicarea le va salva mai întâi.",
+    "editInForm": "Editează în formularul de anunț",
+    "formTitle": "Editează anunțul importat",
+    "formHint": "Acest anunț provine din sursa ta externă. Corectează ce a fost citit greșit — este verificat și publicat ca orice anunț nou, apoi revii la Ciorne importate."
   }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useImportReviewQueue } from '../../hooks/useImportReviewQueue';
+import { useOpenDraftInListingForm } from '../../hooks/useDraftListingForm';
 import ImportDraftCard from './ImportDraftCard';
 import ImportDraftDetail from './ImportDraftDetail';
 import ImportReviewToolbar from './ImportReviewToolbar';
@@ -13,6 +14,10 @@ import ImportReviewToolbar from './ImportReviewToolbar';
 const ImportReviewQueue: React.FC = () => {
   const { t } = useTranslation(['listingFeeds', 'common']);
   const q = useImportReviewQueue();
+  const openInListingForm = useOpenDraftInListingForm();
+  const viewingId = q.viewer.viewing?.id;
+  const editInForm = (id: string) =>
+    void openInListingForm(id).catch((err: Error) => q.showError(err.message));
 
   return (
     <div>
@@ -62,7 +67,7 @@ const ImportReviewQueue: React.FC = () => {
               busy={q.busyIds.has(draft.id) || q.bulkBusy}
               onSelect={() => q.toggleSelected(draft.id)}
               onOpen={() => q.viewer.open(draft.id)}
-              onEdit={() => q.viewer.open(draft.id, 'edit')}
+              onEdit={() => (draft.kind === 'new' ? editInForm(draft.id) : q.viewer.open(draft.id, 'edit'))}
               onAccept={() => void q.acceptDraft(draft.id)}
               onReject={() => void q.rejectDraft(draft.id)}
               onRestore={() => void q.restoreDraft(draft.id)}
@@ -94,6 +99,7 @@ const ImportReviewQueue: React.FC = () => {
           onNext={q.viewer.hasNext ? q.viewer.next : undefined}
           onClose={q.viewer.close}
           onDecision={(decision) => void q.viewer.onDecision(decision)}
+          onEditInForm={() => viewingId && editInForm(viewingId)}
         />
       )}
     </div>

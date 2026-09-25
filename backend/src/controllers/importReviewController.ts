@@ -6,6 +6,7 @@ import {
   bulkReview,
   countPending,
   getDraft,
+  linkPublishedDraft,
   listDrafts,
   rejectDraft,
   restoreDraft,
@@ -139,6 +140,27 @@ export const accept = async (req: Request, res: Response): Promise<void> => {
   if (!draftId) return;
   try {
     res.json(await acceptDraft(userId, draftId));
+  } catch (err) {
+    sendError(res, err);
+  }
+};
+
+/**
+ * POST /api/listing-sources/review/:draftId/link — Body: { propertyId }
+ * The draft was published through the regular create-listing form; link it.
+ */
+export const link = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const draftId = requireDraftId(req, res);
+  if (!draftId) return;
+  const propertyId = decodeId(req.body?.propertyId);
+  if (!propertyId) {
+    res.status(400).json({ message: 'propertyId is required' });
+    return;
+  }
+  try {
+    res.json(await linkPublishedDraft(userId, draftId, propertyId));
   } catch (err) {
     sendError(res, err);
   }

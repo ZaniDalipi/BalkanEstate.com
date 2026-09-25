@@ -122,6 +122,7 @@ const initialState: AppState = {
   propertiesError: null,
   selectedProperty: null,
   propertyToEdit: null,
+  importDraftToPublish: null,
   isAuthenticated: false,
   isLoadingUserData: false,
   currentUser: null,
@@ -167,7 +168,10 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, onboardingComplete: true };
     case 'SET_ACTIVE_VIEW': {
         const newState: AppState = { ...state, activeView: action.payload, selectedProperty: null };
-        if (action.payload !== 'create-listing') newState.propertyToEdit = null;
+        if (action.payload !== 'create-listing') {
+          newState.propertyToEdit = null;
+          newState.importDraftToPublish = null;
+        }
         if (action.payload !== 'agents') newState.selectedAgentId = null;
         if (action.payload !== 'business-directory') newState.selectedBusinessListingId = null;
         return newState;
@@ -197,6 +201,8 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, selectedProperty: action.payload };
     case 'SET_PROPERTY_TO_EDIT':
       return { ...state, propertyToEdit: action.payload };
+    case 'SET_IMPORT_DRAFT_TO_PUBLISH':
+      return { ...state, importDraftToPublish: action.payload };
     case 'SET_SELECTED_AGENT':
       return { ...state, selectedAgentId: action.payload };
     case 'SET_SELECTED_AGENCY':

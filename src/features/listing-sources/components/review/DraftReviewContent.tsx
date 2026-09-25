@@ -20,6 +20,8 @@ interface DraftReviewContentProps {
   onPrev?: () => void;
   onNext?: () => void;
   onDecision: (decision: ReviewDecision) => void;
+  /** Open this (new) draft in the full create-listing form. */
+  onEditInForm: () => void;
 }
 
 /**
@@ -27,10 +29,12 @@ interface DraftReviewContentProps {
  * mode — the form beside a preview that follows every keystroke.
  */
 const DraftReviewContent: React.FC<DraftReviewContentProps> = ({
-  draft, position, initialMode, busy, error, onPrev, onNext, onDecision,
+  draft, position, initialMode, busy, error, onPrev, onNext, onDecision, onEditInForm,
 }) => {
   const { t } = useTranslation('listingFeeds');
-  const [mode, setMode] = useState<ReviewMode>(draft.status === 'pending' ? initialMode : 'preview');
+  // New drafts are edited in the create-listing form; the quick editor is for feed updates.
+  const quickEdit = draft.kind === 'update';
+  const [mode, setMode] = useState<ReviewMode>(draft.status === 'pending' && quickEdit ? initialMode : 'preview');
   const [saveError, setSaveError] = useState<string | null>(null);
   const form = useDraftForm(draft);
   const { edit } = useImportReviewActions();
@@ -71,6 +75,7 @@ const DraftReviewContent: React.FC<DraftReviewContentProps> = ({
         onPrev={guardDirty(onPrev)}
         onNext={guardDirty(onNext)}
         onModeChange={setMode}
+        onEditInForm={quickEdit ? undefined : guardDirty(onEditInForm)}
         onAccept={() => void accept()}
         onReject={() => onDecision('reject')}
         onRestore={() => onDecision('restore')}

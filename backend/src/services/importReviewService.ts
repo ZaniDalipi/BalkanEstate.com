@@ -454,6 +454,55 @@ export const acceptDraft = async (
   return { propertyId: encodeId(String(property._id)), kind: 'new' };
 };
 
+/**
+ * The owner published a new draft through the regular create-listing form
+ * (full editor, validation, limit checks — `POST /api/properties`). Tie the
+ * created listing back to the feed item: mark the draft accepted and stamp
+ * the source fields, so later syncs recognise the listing instead of
+ * re-queueing it, and can still propose updates from the feed.
+ */
+export const linkPublishedDraft = async (
+  userId: Types.ObjectId,
+  draftId: string,
+  propertyId: string
+): Promise<{ propertyId: string }> => {
+  const draft = await loadOwnDraft(userId, draftId);
+  requirePending(draft);
+  if (draft.kind !== 'new') {
+    throw new ReviewError('Only new listings are published through the listing form', 409, 'DRAFT_NOT_NEW');
+  }
+  const property = await Property.findOne({ _id: propertyId, sellerId: userId }).select('_id source');
+  if (!property) throw new ReviewError('Listing not found', 404, 'PROPERTY_NOT_FOUND');
+  if (property.source) {
+    throw new ReviewError('This listing is already linked to a feed', 409, 'PROPERTY_ALREADY_LINKED');
+  }
+  const taken = await Property.exists({ source: draft.sourceSlug, sourceListingId: draft.sourceListingId });
+  if (taken) throw new ReviewError('This feed listing is already published', 409, 'DRAFT_ALREADY_PUBLISHED');
+
+  const now = new Date();
+  const data = asObject(draft.data);
+  await Property.updateOne(
+    { _id: property._id },
+    {
+      $set: {
+        source: draft.sourceSlug,
+        sourceListingId: draft.sourceListingId,
+        sourceUrl: draft.sourceUrl,
+        sourceFetchedAt: now,
+        // The feed's original photo URLs, so the next sync's diff compares like with like.
+        sourceMetadata: data.sourceMetadata,
+      },
+    }
+  );
+  await ListingSource.updateOne({ _id: draft.source }, { $inc: { listingsImported: 1 } });
+
+  draft.status = 'accepted';
+  draft.reviewedAt = now;
+  draft.propertyId = property._id as Types.ObjectId;
+  await draft.save();
+  return { propertyId: encodeId(String(property._id)) };
+};
+
 export const rejectDraft = async (userId: Types.ObjectId, draftId: string): Promise<void> => {
   const draft = await loadOwnDraft(userId, draftId);
   requirePending(draft);

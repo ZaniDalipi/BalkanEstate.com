@@ -250,6 +250,9 @@
     "backToPreview": "Nazad na prikaz",
     "saveAndPublish": "Spremi i objavi",
     "discardChanges": "Odbaciti nespremljene izmjene?",
-    "unsavedHint": "Imate nespremljene izmjene. Objava će ih prvo spremiti."
+    "unsavedHint": "Imate nespremljene izmjene. Objava će ih prvo spremiti.",
+    "editInForm": "Uredi u obrascu oglasa",
+    "formTitle": "Uredi uvezeni oglas",
+    "formHint": "Ovaj oglas je stigao iz vašeg vanjskog izvora. Ispravite sve što je pogrešno pročitano — provjerava se i objavljuje kao svaki novi oglas, a zatim se vraćate na Uvezene nacrte."
   }
 }

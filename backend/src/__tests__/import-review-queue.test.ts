@@ -5,6 +5,7 @@ import { Types } from 'mongoose';
 const mockPropertyFindOne = jest.fn();
 const mockPropertyUpdateOne = jest.fn();
 const mockPropertyFindOneAndUpdate = jest.fn();
+const mockPropertyExists = jest.fn();
 const mockDraftFindOne = jest.fn();
 const mockDraftFindOneAndUpdate = jest.fn();
 const mockDraftCreate = jest.fn();
@@ -18,6 +19,7 @@ jest.mock('../models/Property', () => ({
     findOne: (...a: unknown[]) => mockPropertyFindOne(...a),
     updateOne: (...a: unknown[]) => mockPropertyUpdateOne(...a),
     findOneAndUpdate: (...a: unknown[]) => mockPropertyFindOneAndUpdate(...a),
+    exists: (...a: unknown[]) => mockPropertyExists(...a),
   },
 }));
 jest.mock('../models/ImportedListingDraft', () => ({
@@ -54,7 +56,7 @@ jest.mock('../sockets/propertySocket', () => ({
 }));
 jest.mock('../middleware/cache', () => ({ invalidateCache: jest.fn(async () => undefined) }));
 
-import { acceptDraft, getDraft, queueForReview } from '../services/importReviewService';
+import { acceptDraft, getDraft, linkPublishedDraft, queueForReview } from '../services/importReviewService';
 import { hashReviewFields } from '../services/importReviewFields';
 
 const userId = new Types.ObjectId();
@@ -237,5 +239,54 @@ describe('getDraft', () => {
     for (const hidden of ['sellerId', 'createdByEmail', 'createdByName', 'sourceMetadata']) {
       expect(draft.listing).not.toHaveProperty(hidden);
     }
+  });
+});
+
+describe('linkPublishedDraft', () => {
+  const pendingNew = () =>
+    draftDoc({
+      _id: new Types.ObjectId(),
+      source: new Types.ObjectId(),
+      sourceSlug: 'user-feed',
+      sourceListingId: 'ext-1',
+      sourceUrl: 'https://src.example/1',
+      kind: 'new',
+      status: 'pending',
+      data: { ...incoming, sourceMetadata: { originalImages: ['https://src.example/a.jpg'] } },
+    });
+  const created = { _id: new Types.ObjectId(), source: undefined };
+
+  it('ties a listing published through the listing form back to its feed item', async () => {
+    const draft = pendingNew();
+    mockDraftFindOne.mockResolvedValue(draft);
+    mockPropertyFindOne.mockReturnValue({ select: async () => created });
+    mockPropertyExists.mockResolvedValue(null);
+
+    await linkPublishedDraft(userId, 'id', 'pid');
+    expect(mockPropertyUpdateOne).toHaveBeenCalledWith(
+      { _id: created._id },
+      {
+        $set: expect.objectContaining({
+          source: 'user-feed',
+          sourceListingId: 'ext-1',
+          sourceMetadata: { originalImages: ['https://src.example/a.jpg'] },
+        }),
+      }
+    );
+    expect(draft).toMatchObject({ status: 'accepted', propertyId: created._id });
+  });
+
+  it('refuses a listing that belongs to someone else', async () => {
+    mockDraftFindOne.mockResolvedValue(pendingNew());
+    mockPropertyFindOne.mockReturnValue({ select: async () => null });
+    await expect(linkPublishedDraft(userId, 'id', 'pid')).rejects.toMatchObject({ code: 'PROPERTY_NOT_FOUND' });
+    expect(mockPropertyUpdateOne).not.toHaveBeenCalled();
+  });
+
+  it('refuses when the feed item was already published', async () => {
+    mockDraftFindOne.mockResolvedValue(pendingNew());
+    mockPropertyFindOne.mockReturnValue({ select: async () => created });
+    mockPropertyExists.mockResolvedValue({ _id: new Types.ObjectId() });
+    await expect(linkPublishedDraft(userId, 'id', 'pid')).rejects.toMatchObject({ code: 'DRAFT_ALREADY_PUBLISHED' });
   });
 });

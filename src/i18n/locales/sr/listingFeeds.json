@@ -250,6 +250,9 @@
     "backToPreview": "Nazad na prikaz",
     "saveAndPublish": "Sačuvaj i objavi",
     "discardChanges": "Odbaciti nesačuvane izmene?",
-    "unsavedHint": "Imate nesačuvane izmene. Objava će ih prvo sačuvati."
+    "unsavedHint": "Imate nesačuvane izmene. Objava će ih prvo sačuvati.",
+    "editInForm": "Uredi u obrascu oglasa",
+    "formTitle": "Uredi uvezeni oglas",
+    "formHint": "Ovaj oglas je stigao iz vašeg spoljnog izvora. Ispravite sve što je pogrešno pročitano — proverava se i objavljuje kao svaki novi oglas, a zatim se vraćate na Uvezene nacrte."
   }
 }

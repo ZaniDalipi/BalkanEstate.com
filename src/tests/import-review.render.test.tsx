@@ -157,20 +157,32 @@ describe('toPreviewProperty', () => {
 });
 
 describe('DraftReviewContent', () => {
-    const renderReview = (initialMode: 'preview' | 'edit' = 'preview') => {
+    // The quick editor is for feed updates; new drafts edit in the listing form.
+    const updateDraft = () => detail({ kind: 'update', current: fields(), changedFields: [] });
+    const renderReview = (initialMode: 'preview' | 'edit' = 'preview', d: ImportedDraftDetail = detail()) => {
         const onDecision = vi.fn();
+        const onEditInForm = vi.fn();
         render(
             <DraftReviewContent
-                draft={detail()}
+                draft={d}
                 position={{ index: 2, total: 24 }}
                 initialMode={initialMode}
                 busy={false}
                 error={null}
                 onDecision={onDecision}
+                onEditInForm={onEditInForm}
             />
         );
-        return { onDecision };
+        return { onDecision, onEditInForm };
     };
+
+    it('edits a new draft in the full create-listing form', () => {
+        const { onEditInForm } = renderReview('edit');
+        // No quick editor for a new draft, even when asked to open in edit mode.
+        expect(screen.queryByLabelText('review.fields.price')).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'review.editInForm' }));
+        expect(onEditInForm).toHaveBeenCalled();
+    });
 
     it('shows the listing as buyers will see it, with its place in the queue', () => {
         renderReview();
@@ -180,25 +192,25 @@ describe('DraftReviewContent', () => {
     });
 
     it('updates the preview while the owner types', () => {
-        renderReview('edit');
+        renderReview('edit', updateDraft());
         fireEvent.change(screen.getByLabelText('review.fields.price'), { target: { value: '135000' } });
         fireEvent.change(screen.getByLabelText('review.fields.city'), { target: { value: 'Kotor' } });
         expect(screen.getByTestId('listing')).toHaveTextContent('Sea view flat | Kotor | 135000');
     });
 
-    it('saves unsaved edits before publishing', async () => {
+    it('saves unsaved edits before applying an update', async () => {
         mockEdit.mockResolvedValue({});
-        const { onDecision } = renderReview('edit');
+        const { onDecision } = renderReview('edit', updateDraft());
         fireEvent.change(screen.getByLabelText('review.fields.price'), { target: { value: '135000' } });
-        fireEvent.click(screen.getByRole('button', { name: 'review.saveAndPublish' }));
+        fireEvent.click(screen.getByRole('button', { name: 'review.applyUpdate' }));
         await waitFor(() => expect(onDecision).toHaveBeenCalledWith('accept'));
         expect(mockEdit).toHaveBeenCalledWith({ id: 'd1', data: { price: 135000 } });
     });
 
-    it('will not publish once the city is cleared', () => {
-        renderReview('edit');
+    it('will not apply an update once the city is cleared', () => {
+        renderReview('edit', updateDraft());
         fireEvent.change(screen.getByLabelText('review.fields.city'), { target: { value: '' } });
-        expect(screen.getByRole('button', { name: 'review.saveAndPublish' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'review.applyUpdate' })).toBeDisabled();
     });
 
     it('rejects from the full view', () => {

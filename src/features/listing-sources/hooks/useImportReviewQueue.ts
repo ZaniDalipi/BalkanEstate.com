@@ -126,6 +126,7 @@ export const useImportReviewQueue = () => {
     bulkBusy: bulk.isPending,
     notice,
     dismissNotice: () => setNotice(null),
+    showError: (text: string) => setNotice({ tone: 'error', text }),
     acceptDraft: (id: string) => decide('accept', id),
     rejectDraft: (id: string) => decide('reject', id),
     restoreDraft: (id: string) => decide('restore', id),

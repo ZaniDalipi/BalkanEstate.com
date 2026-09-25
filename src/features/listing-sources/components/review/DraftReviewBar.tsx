@@ -15,6 +15,8 @@ interface DraftReviewBarProps {
   onPrev?: () => void;
   onNext?: () => void;
   onModeChange: (mode: ReviewMode) => void;
+  /** New drafts are edited in the full create-listing form instead of the quick editor. */
+  onEditInForm?: () => void;
   onAccept: () => void;
   onReject: () => void;
   onRestore: () => void;
@@ -24,7 +26,7 @@ const btn = 'px-3 py-2 text-sm rounded-xl border font-semibold disabled:opacity-
 
 /** Sticky header of the full-size review: where you are in the queue and the decision buttons. */
 const DraftReviewBar: React.FC<DraftReviewBarProps> = ({
-  draft, position, mode, busy, dirty, blocked, onPrev, onNext, onModeChange, onAccept, onReject, onRestore,
+  draft, position, mode, busy, dirty, blocked, onPrev, onNext, onModeChange, onEditInForm, onAccept, onReject, onRestore,
 }) => {
   const { t } = useTranslation('listingFeeds');
   const isUpdate = draft.kind === 'update';
@@ -56,14 +58,20 @@ const DraftReviewBar: React.FC<DraftReviewBarProps> = ({
 
         {pending ? (
           <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => onModeChange(mode === 'edit' ? 'preview' : 'edit')}
-              disabled={busy}
-              className={`${btn} border-gray-200 bg-white hover:bg-gray-50`}
-            >
-              {t(mode === 'edit' ? 'review.backToPreview' : 'review.edit')}
-            </button>
+            {onEditInForm ? (
+              <button type="button" onClick={onEditInForm} disabled={busy} className={`${btn} border-gray-200 bg-white hover:bg-gray-50`}>
+                {t('review.editInForm')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onModeChange(mode === 'edit' ? 'preview' : 'edit')}
+                disabled={busy}
+                className={`${btn} border-gray-200 bg-white hover:bg-gray-50`}
+              >
+                {t(mode === 'edit' ? 'review.backToPreview' : 'review.edit')}
+              </button>
+            )}
             <button type="button" onClick={onReject} disabled={busy} className={`${btn} border-red-200 text-red-600 bg-white hover:bg-red-50`}>
               {t(isUpdate ? 'review.keepCurrent' : 'review.reject')}
             </button>

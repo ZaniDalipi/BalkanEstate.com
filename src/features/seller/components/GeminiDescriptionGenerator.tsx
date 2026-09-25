@@ -11,7 +11,7 @@ import RoleSelector from './RoleSelector';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import { isPropertyType } from '@/shared/types/property.types';
-import { useListingForm } from './useListingForm';
+import { useListingForm, type ListingPrefill } from './useListingForm';
 import ListingFormFields from './ListingFormFields';
 import ListingPropertyFeatures from './ListingPropertyFeatures';
 import ListingImageUpload from './ListingImageUpload';
@@ -30,7 +30,11 @@ import {
 } from './ListingFormHelpers';
 
 // --- Main Component ---
-const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> = ({ propertyToEdit }) => {
+const GeminiDescriptionGenerator: React.FC<{
+    propertyToEdit: Property | null;
+    /** Start a new listing from these values (e.g. an imported feed draft). */
+    prefill?: ListingPrefill | null;
+}> = ({ propertyToEdit, prefill }) => {
     const { t } = useTranslation(['newListing', 'seller', 'rental', 'common', 'validation']);
 
     const {
@@ -67,7 +71,7 @@ const GeminiDescriptionGenerator: React.FC<{ propertyToEdit: Property | null }> 
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
         formContainerRef,
         currentUser, isAuthenticating, isLoadingUserData,
-    } = useListingForm(propertyToEdit);
+    } = useListingForm(propertyToEdit, prefill);
 
     // --- Step-based rendering ---
 
