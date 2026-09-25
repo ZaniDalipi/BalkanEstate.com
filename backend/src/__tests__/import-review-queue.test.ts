@@ -32,6 +32,7 @@ jest.mock('../models/ListingSource', () => ({
   __esModule: true,
   default: {
     findOne: (...a: unknown[]) => ({ select: () => mockSourceFindOne(...a) }),
+    findById: () => ({ select: () => ({ lean: async () => ({ name: 'century21albania.com' }) }) }),
     updateOne: (...a: unknown[]) => mockSourceUpdateOne(...a),
   },
 }));
@@ -53,7 +54,7 @@ jest.mock('../sockets/propertySocket', () => ({
 }));
 jest.mock('../middleware/cache', () => ({ invalidateCache: jest.fn(async () => undefined) }));
 
-import { acceptDraft, queueForReview } from '../services/importReviewService';
+import { acceptDraft, getDraft, queueForReview } from '../services/importReviewService';
 import { hashReviewFields } from '../services/importReviewFields';
 
 const userId = new Types.ObjectId();
@@ -205,5 +206,36 @@ describe('acceptDraft', () => {
   it('will not accept a draft twice', async () => {
     mockDraftFindOne.mockResolvedValue({ ...pendingNew(), status: 'accepted' });
     await expect(acceptDraft(userId, 'id')).rejects.toMatchObject({ code: 'DRAFT_NOT_PENDING' });
+  });
+});
+
+describe('getDraft', () => {
+  it('returns the listing as it would be published, without owner or scrape internals', async () => {
+    mockDraftFindOne.mockResolvedValue(
+      draftDoc({
+        _id: new Types.ObjectId(),
+        source: new Types.ObjectId(),
+        kind: 'new',
+        status: 'pending',
+        changedFields: [],
+        fetchedAt: new Date(),
+        data: {
+          ...incoming,
+          amenities: ['pool'],
+          sellerId: new Types.ObjectId(),
+          createdByEmail: 'agent@example.com',
+          createdByName: 'Agent',
+          sourceMetadata: { raw: '<html>' },
+        },
+        original: incoming,
+      })
+    );
+
+    const draft = await getDraft(userId, 'id');
+    expect(draft.sourceName).toBe('century21albania.com');
+    expect(draft.listing).toMatchObject({ title: 'Flat', amenities: ['pool'] });
+    for (const hidden of ['sellerId', 'createdByEmail', 'createdByName', 'sourceMetadata']) {
+      expect(draft.listing).not.toHaveProperty(hidden);
+    }
   });
 });

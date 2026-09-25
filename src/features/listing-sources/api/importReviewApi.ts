@@ -59,6 +59,11 @@ export interface ImportedDraft {
   propertyId?: string;
 }
 
+export interface ImportedDraftDetail extends ImportedDraft {
+  /** The listing exactly as it would be published (backend property shape). */
+  listing: Record<string, unknown>;
+}
+
 export interface DraftPage {
   drafts: ImportedDraft[];
   total: number;
@@ -92,6 +97,11 @@ export const listImportDrafts = (params: {
   if (params.page) qs.set('page', String(params.page));
   if (params.limit) qs.set('limit', String(params.limit));
   return apiRequest<DraftPage>(`${BASE}?${qs.toString()}`, { requiresAuth: true });
+};
+
+export const getImportDraft = async (id: string): Promise<ImportedDraftDetail> => {
+  const res = await apiRequest<{ draft: ImportedDraftDetail }>(`${BASE}/${id}`, { requiresAuth: true });
+  return res.draft;
 };
 
 export const getPendingImportCount = (): Promise<PendingCount> =>

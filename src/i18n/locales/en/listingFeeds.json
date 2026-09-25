@@ -127,8 +127,8 @@
     "enableNow": "Enable this feed immediately"
   },
   "preview": {
-    "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
+    "title": "Choose listings to add to your drafts",
+    "subtitle": "Found {{total}} listings from {{source}}. Nothing is published yet — the ones you check go to Imported drafts, where you can review, edit and publish each one.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -139,8 +139,8 @@
     "selectedCount": "{{count}} of {{total}} selected",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "confirmImport": "Import {{count}} listings",
-    "noSelection": "Check the listings you want to import",
+    "confirmImport": "Add {{count}} to drafts",
+    "noSelection": "Check the listings you want to review",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
@@ -243,6 +243,13 @@
       "images": "Photos",
       "sale": "For sale",
       "rent": "For rent"
-    }
+    },
+    "openFull": "Full preview",
+    "position": "{{index}} of {{total}}",
+    "livePreview": "Live preview — what buyers will see",
+    "backToPreview": "Back to preview",
+    "saveAndPublish": "Save & publish",
+    "discardChanges": "Discard your unsaved changes?",
+    "unsavedHint": "You have unsaved changes. Publishing will save them first."
   }
 }

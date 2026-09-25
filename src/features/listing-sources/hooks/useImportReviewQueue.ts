@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { importReviewKeys } from '@/src/shared/query/queryKeys';
-import type { DraftPatch, DraftStatus, ImportedDraft } from '../api/importReviewApi';
+import type { DraftStatus } from '../api/importReviewApi';
+import type { ReviewDecision } from '../types/review';
 import { listMyListingSources } from '../api/listingSourceApi';
 import { IMPORT_REVIEW_PAGE_SIZE, useImportDrafts, useImportReviewActions } from './useImportReview';
+import { useDraftViewer } from './useDraftViewer';
 
 export interface ReviewNotice {
   tone: 'success' | 'error';
@@ -20,14 +22,12 @@ export const useImportReviewQueue = () => {
   const [sourceId, setSourceIdState] = useState('');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [editing, setEditing] = useState<ImportedDraft | null>(null);
-  const [editError, setEditError] = useState<string | null>(null);
   const [notice, setNotice] = useState<ReviewNotice | null>(null);
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
 
   const query = useImportDrafts({ status, sourceId: sourceId || undefined, page });
   const sourcesQuery = useQuery({ queryKey: importReviewKeys.sources(), queryFn: listMyListingSources });
-  const { accept, reject, restore, edit, bulk } = useImportReviewActions();
+  const { accept, reject, restore, bulk } = useImportReviewActions();
 
   const drafts = useMemo(() => query.data?.drafts ?? [], [query.data]);
   const total = query.data?.total ?? 0;
@@ -56,14 +56,18 @@ export const useImportReviewQueue = () => {
     [t]
   );
 
+  /** Resolves to the error message shown to the owner, or null on success. */
   const runSingle = useCallback(
-    async (id: string, action: (id: string) => Promise<unknown>) => {
+    async (id: string, action: (id: string) => Promise<unknown>): Promise<string | null> => {
       setBusyIds((prev) => new Set(prev).add(id));
       setNotice(null);
       try {
         await action(id);
+        return null;
       } catch (err) {
-        setNotice({ tone: 'error', text: messageFor(err) });
+        const text = messageFor(err);
+        setNotice({ tone: 'error', text });
+        return text;
       } finally {
         setBusyIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
       }
@@ -92,19 +96,13 @@ export const useImportReviewQueue = () => {
     [selected, bulk, t, messageFor]
   );
 
-  const saveEdit = useCallback(
-    async (patch: DraftPatch) => {
-      if (!editing) return;
-      setEditError(null);
-      try {
-        await edit.mutateAsync({ id: editing.id, data: patch });
-        setEditing(null);
-      } catch (err) {
-        setEditError((err as Error).message);
-      }
-    },
-    [editing, edit]
+  const decide = useCallback(
+    (decision: ReviewDecision, id: string) =>
+      runSingle(id, decision === 'accept' ? accept.mutateAsync : decision === 'reject' ? reject.mutateAsync : restore.mutateAsync),
+    [runSingle, accept, reject, restore]
   );
+
+  const viewer = useDraftViewer({ drafts, page, loadedPage: query.data?.page, pages, total, setPage, decide });
 
   return {
     status,
@@ -128,15 +126,10 @@ export const useImportReviewQueue = () => {
     bulkBusy: bulk.isPending,
     notice,
     dismissNotice: () => setNotice(null),
-    acceptDraft: (id: string) => runSingle(id, accept.mutateAsync),
-    rejectDraft: (id: string) => runSingle(id, reject.mutateAsync),
-    restoreDraft: (id: string) => runSingle(id, restore.mutateAsync),
+    acceptDraft: (id: string) => decide('accept', id),
+    rejectDraft: (id: string) => decide('reject', id),
+    restoreDraft: (id: string) => decide('restore', id),
     runBulk,
-    editing,
-    editError,
-    editSaving: edit.isPending,
-    startEdit: (draft: ImportedDraft) => { setEditError(null); setEditing(draft); },
-    cancelEdit: () => setEditing(null),
-    saveEdit,
+    viewer,
   };
 };

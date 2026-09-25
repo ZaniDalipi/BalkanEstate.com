@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import type { ImportedDraft } from '../../api/importReviewApi';
 import { formatDraftValue } from '../../utils/draftFormat';
+import DraftIssueList from './DraftIssueList';
 import ImportDraftChanges from './ImportDraftChanges';
 
 interface ImportDraftCardProps {
@@ -10,6 +11,8 @@ interface ImportDraftCardProps {
   selected: boolean;
   busy: boolean;
   onSelect: () => void;
+  /** Open the full-size review of this draft. */
+  onOpen: () => void;
   onEdit: () => void;
   onAccept: () => void;
   onReject: () => void;
@@ -20,7 +23,7 @@ const btn = 'px-3 py-1.5 text-sm rounded-lg border font-medium disabled:opacity-
 
 /** One fetched listing waiting for the owner's decision. */
 const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
-  draft, selected, busy, onSelect, onEdit, onAccept, onReject, onRestore,
+  draft, selected, busy, onSelect, onOpen, onEdit, onAccept, onReject, onRestore,
 }) => {
   const { t } = useTranslation(['listingFeeds', 'property']);
   const { data } = draft;
@@ -46,11 +49,19 @@ const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
           aria-label={data.title ?? draft.id}
         />
       )}
-      <div className="w-28 h-24 sm:w-36 sm:h-28 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center text-xs text-gray-400">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={t('listingFeeds:review.openFull')}
+        className="relative w-28 h-24 sm:w-36 sm:h-28 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center text-xs text-gray-400 group"
+      >
         {cover ? (
-          <img src={optimizeCloudinaryUrl(cover, { width: 288, quality: 'auto' })} alt="" loading="lazy" className="w-full h-full object-cover" />
+          <img src={optimizeCloudinaryUrl(cover, { width: 288, quality: 'auto' })} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
         ) : t('listingFeeds:review.noPhotos')}
-      </div>
+        {data.images.length > 1 && (
+          <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px]">{data.images.length}</span>
+        )}
+      </button>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -62,7 +73,11 @@ const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
           )}
           {draft.sourceName && <span className="text-xs text-gray-500">{t('listingFeeds:review.fromFeed', { name: draft.sourceName })}</span>}
         </div>
-        <h3 className="font-semibold text-gray-900 truncate">{data.title || '—'}</h3>
+        <h3 className="font-semibold text-gray-900 truncate">
+          <button type="button" onClick={onOpen} className="max-w-full truncate text-left hover:text-primary hover:underline">
+            {data.title || '—'}
+          </button>
+        </h3>
         <p className="text-sm text-gray-700">
           <strong>{formatDraftValue('price', data, t)}</strong>
           {location && <span className="text-gray-500"> · {location}</span>}
@@ -70,16 +85,7 @@ const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
         {facts.length > 0 && <p className="text-xs text-gray-500 mt-0.5">{facts.join(' · ')}</p>}
 
         {draft.issues.length > 0 && (
-          <ul className="flex flex-wrap gap-1.5 mt-2" aria-label={t('listingFeeds:review.blockingHint')}>
-            {draft.issues.map((issue) => (
-              <li
-                key={issue}
-                className={`px-2 py-0.5 rounded-md text-xs ${draft.blockingIssues.includes(issue) ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}
-              >
-                {t(`listingFeeds:review.issues.${issue}`)}
-              </li>
-            ))}
-          </ul>
+          <div className="mt-2"><DraftIssueList issues={draft.issues} blocking={draft.blockingIssues} /></div>
         )}
 
         {isUpdate && pending && draft.current && (
@@ -96,6 +102,9 @@ const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
             )}
           </div>
           <div className="flex gap-2">
+            <button type="button" onClick={onOpen} disabled={busy} className={`${btn} border-gray-200 bg-white hover:bg-gray-50`}>
+              {t('listingFeeds:review.openFull')}
+            </button>
             {pending ? (
               <>
                 <button type="button" onClick={onEdit} disabled={busy} className={`${btn} border-gray-200 bg-white hover:bg-gray-50`}>

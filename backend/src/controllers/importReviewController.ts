@@ -5,6 +5,7 @@ import {
   acceptDraft,
   bulkReview,
   countPending,
+  getDraft,
   listDrafts,
   rejectDraft,
   restoreDraft,
@@ -99,6 +100,19 @@ export const count = async (req: Request, res: Response): Promise<void> => {
   if (!userId) return;
   try {
     res.json(await countPending(userId));
+  } catch (err) {
+    sendError(res, err);
+  }
+};
+
+/** GET /api/listing-sources/review/:draftId — one draft with its full listing. */
+export const get = async (req: Request, res: Response): Promise<void> => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+  const draftId = requireDraftId(req, res);
+  if (!draftId) return;
+  try {
+    res.json({ draft: await getDraft(userId, draftId) });
   } catch (err) {
     sendError(res, err);
   }

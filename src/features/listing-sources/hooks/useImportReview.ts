@@ -5,6 +5,7 @@ import {
   type DraftStatus,
   acceptImportDraft,
   bulkReviewImportDrafts,
+  getImportDraft,
   getPendingImportCount,
   listImportDrafts,
   rejectImportDraft,
@@ -19,6 +20,14 @@ export const useImportDrafts = (filters: { status: DraftStatus; sourceId?: strin
     queryKey: importReviewKeys.list(filters),
     queryFn: () => listImportDrafts({ ...filters, limit: IMPORT_REVIEW_PAGE_SIZE }),
     placeholderData: keepPreviousData,
+  });
+
+/** One draft with its full listing, for the full-size review view. */
+export const useImportDraft = (id: string | null) =>
+  useQuery({
+    queryKey: importReviewKeys.detail(id ?? ''),
+    queryFn: () => getImportDraft(id as string),
+    enabled: Boolean(id),
   });
 
 /** Pending-review count for the account sidebar badge. */

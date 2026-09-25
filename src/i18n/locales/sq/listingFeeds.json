@@ -79,8 +79,8 @@
     "enableNow": "Enable this feed immediately"
   },
   "preview": {
-    "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
+    "title": "Zgjidhni listimet për t'i shtuar te draftet",
+    "subtitle": "U gjetën {{total}} listime nga {{source}}. Asgjë nuk publikohet ende — të zgjedhurat shkojnë te Draftet e importuara, ku mund t'i rishikoni, ndryshoni dhe publikoni një nga një.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -91,8 +91,8 @@
     "selectedCount": "{{count}} of {{total}} selected",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "confirmImport": "Import {{count}} listings",
-    "noSelection": "Check the listings you want to import",
+    "confirmImport": "Shto {{count}} te draftet",
+    "noSelection": "Zgjidhni listimet që doni të rishikoni",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
@@ -243,6 +243,13 @@
       "images": "Foto",
       "sale": "Në shitje",
       "rent": "Me qira"
-    }
+    },
+    "openFull": "Pamja e plotë",
+    "position": "{{index}} nga {{total}}",
+    "livePreview": "Pamje e drejtpërdrejtë — çfarë do të shohin blerësit",
+    "backToPreview": "Kthehu te pamja",
+    "saveAndPublish": "Ruaj dhe publiko",
+    "discardChanges": "Të hidhen ndryshimet e paruajtura?",
+    "unsavedHint": "Keni ndryshime të paruajtura. Publikimi do t'i ruajë së pari."
   }
 }

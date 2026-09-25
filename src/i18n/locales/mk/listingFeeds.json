@@ -79,8 +79,8 @@
     "enableNow": "Enable this feed immediately"
   },
   "preview": {
-    "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
+    "title": "Изберете огласи за нацрти",
+    "subtitle": "Пронајдени {{total}} огласи од {{source}}. Ништо уште не се објавува — избраните одат во Увезени нацрти, каде секој можете да го прегледате, уредите и објавите.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -91,8 +91,8 @@
     "selectedCount": "{{count}} of {{total}} selected",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "confirmImport": "Import {{count}} listings",
-    "noSelection": "Check the listings you want to import",
+    "confirmImport": "Додај во нацрти ({{count}})",
+    "noSelection": "Изберете ги огласите што сакате да ги прегледате",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
@@ -243,6 +243,13 @@
       "images": "Фотографии",
       "sale": "Продажба",
       "rent": "Изнајмување"
-    }
+    },
+    "openFull": "Целосен преглед",
+    "position": "{{index}} од {{total}}",
+    "livePreview": "Преглед во живо — што ќе видат купувачите",
+    "backToPreview": "Назад кон прегледот",
+    "saveAndPublish": "Зачувај и објави",
+    "discardChanges": "Да се отфрлат незачуваните промени?",
+    "unsavedHint": "Имате незачувани промени. Објавувањето прво ќе ги зачува."
   }
 }

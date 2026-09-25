@@ -346,4 +346,5 @@ export const importReviewKeys = {
     [...importReviewKeys.lists(), filters] as const,
   count: () => [...importReviewKeys.all, 'count'] as const,
   sources: () => [...importReviewKeys.all, 'sources'] as const,
+  detail: (id: string) => [...importReviewKeys.all, 'detail', id] as const,
 };

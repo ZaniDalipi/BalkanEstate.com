@@ -1,15 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PROPERTY_TYPES } from '@/shared/types/property.types';
-import type { DraftFields } from '../../api/importReviewApi';
-
-export type EditableField = Exclude<keyof DraftFields, 'images' | 'currency'>;
-export type FormValue = string | boolean;
-
-export const TEXT_FIELDS: EditableField[] = ['title', 'address', 'city', 'country'];
-export const NUMBER_FIELDS: EditableField[] = [
-  'price', 'sqft', 'beds', 'baths', 'livingRooms', 'parking', 'yearBuilt', 'floorNumber', 'totalFloors',
-];
+import { type EditableField, type FormValue, NUMBER_FIELDS } from '../../utils/draftFields';
 
 interface DraftFieldInputProps {
   field: EditableField;

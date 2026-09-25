@@ -79,8 +79,8 @@
     "enableNow": "Enable this feed immediately"
   },
   "preview": {
-    "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
+    "title": "Επιλέξτε αγγελίες για τα πρόχειρα",
+    "subtitle": "Βρέθηκαν {{total}} αγγελίες από {{source}}. Τίποτα δεν δημοσιεύεται ακόμη — όσες επιλέξετε πηγαίνουν στα Εισαγόμενα πρόχειρα, όπου μπορείτε να τις ελέγξετε, να τις επεξεργαστείτε και να τις δημοσιεύσετε.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -91,8 +91,8 @@
     "selectedCount": "{{count}} of {{total}} selected",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "confirmImport": "Import {{count}} listings",
-    "noSelection": "Check the listings you want to import",
+    "confirmImport": "Προσθήκη στα πρόχειρα ({{count}})",
+    "noSelection": "Επιλέξτε τις αγγελίες που θέλετε να ελέγξετε",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
@@ -243,6 +243,13 @@
       "images": "Φωτογραφίες",
       "sale": "Πώληση",
       "rent": "Ενοικίαση"
-    }
+    },
+    "openFull": "Πλήρης προεπισκόπηση",
+    "position": "{{index}} από {{total}}",
+    "livePreview": "Ζωντανή προεπισκόπηση — τι θα δουν οι αγοραστές",
+    "backToPreview": "Πίσω στην προεπισκόπηση",
+    "saveAndPublish": "Αποθήκευση και δημοσίευση",
+    "discardChanges": "Απόρριψη των μη αποθηκευμένων αλλαγών;",
+    "unsavedHint": "Έχετε μη αποθηκευμένες αλλαγές. Η δημοσίευση θα τις αποθηκεύσει πρώτα."
   }
 }

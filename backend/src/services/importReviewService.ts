@@ -210,6 +210,33 @@ const toDto = (draft: IImportedListingDraft, sourceName?: string, current?: Doc)
   };
 };
 
+/**
+ * Fields of the draft's listing that never reach the client: ownership and
+ * contact fields are the server's to set, and `sourceMetadata` is the raw
+ * scrape (large, and not part of what gets published).
+ */
+const PRIVATE_LISTING_FIELDS = ['sellerId', 'createdByEmail', 'createdByName', 'sourceMetadata'];
+
+export interface DraftDetailDto extends DraftDto {
+  /** The listing exactly as it would be published, for the full-size preview. */
+  listing: Doc;
+}
+
+/** One draft with its full listing, for the review detail view. */
+export const getDraft = async (userId: Types.ObjectId, draftId: string): Promise<DraftDetailDto> => {
+  const draft = await loadOwnDraft(userId, draftId);
+  const [source, live] = await Promise.all([
+    ListingSource.findById(draft.source).select('name').lean(),
+    draft.kind === 'update' && draft.propertyId ? Property.findById(draft.propertyId).lean() : null,
+  ]);
+  const listing: Doc = { ...asObject(draft.data) };
+  for (const f of PRIVATE_LISTING_FIELDS) delete listing[f];
+  return {
+    ...toDto(draft, source?.name, live ? (live as unknown as Doc) : undefined),
+    listing,
+  };
+};
+
 export interface ListDraftsOptions {
   status?: ImportedListingDraftStatus;
   sourceId?: string;

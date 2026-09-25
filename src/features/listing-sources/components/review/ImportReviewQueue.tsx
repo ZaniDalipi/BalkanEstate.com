@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useImportReviewQueue } from '../../hooks/useImportReviewQueue';
 import ImportDraftCard from './ImportDraftCard';
-import ImportDraftEditor from './ImportDraftEditor';
+import ImportDraftDetail from './ImportDraftDetail';
 import ImportReviewToolbar from './ImportReviewToolbar';
 
 /**
@@ -61,7 +61,8 @@ const ImportReviewQueue: React.FC = () => {
               selected={q.selected.has(draft.id)}
               busy={q.busyIds.has(draft.id) || q.bulkBusy}
               onSelect={() => q.toggleSelected(draft.id)}
-              onEdit={() => q.startEdit(draft)}
+              onOpen={() => q.viewer.open(draft.id)}
+              onEdit={() => q.viewer.open(draft.id, 'edit')}
               onAccept={() => void q.acceptDraft(draft.id)}
               onReject={() => void q.rejectDraft(draft.id)}
               onRestore={() => void q.restoreDraft(draft.id)}
@@ -82,13 +83,17 @@ const ImportReviewQueue: React.FC = () => {
         </nav>
       )}
 
-      {q.editing && (
-        <ImportDraftEditor
-          draft={q.editing}
-          saving={q.editSaving}
-          error={q.editError}
-          onCancel={q.cancelEdit}
-          onSave={(patch) => void q.saveEdit(patch)}
+      {q.viewer.viewing && (
+        <ImportDraftDetail
+          draftId={q.viewer.viewing.id}
+          initialMode={q.viewer.viewing.mode}
+          position={q.viewer.position}
+          busy={q.viewer.busy}
+          error={q.viewer.error}
+          onPrev={q.viewer.hasPrev ? q.viewer.prev : undefined}
+          onNext={q.viewer.hasNext ? q.viewer.next : undefined}
+          onClose={q.viewer.close}
+          onDecision={(decision) => void q.viewer.onDecision(decision)}
         />
       )}
     </div>

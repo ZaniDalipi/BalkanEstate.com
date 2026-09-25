@@ -38,6 +38,7 @@ router.post('/bulk-delete', bulkDelete);
 router.get('/review', review.list);
 router.get('/review/count', review.count);
 router.post('/review/bulk', review.bulk);
+router.get('/review/:draftId', review.get);
 router.patch('/review/:draftId', review.edit);
 router.post('/review/:draftId/accept', review.accept);
 router.post('/review/:draftId/reject', review.reject);

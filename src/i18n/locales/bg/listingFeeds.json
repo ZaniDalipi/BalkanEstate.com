@@ -79,8 +79,8 @@
     "enableNow": "Enable this feed immediately"
   },
   "preview": {
-    "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
+    "title": "Изберете обяви за черновите",
+    "subtitle": "Намерени {{total}} обяви от {{source}}. Нищо не се публикува още — избраните отиват в Импортирани чернови, където можете да прегледате, редактирате и публикувате всяка.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -91,8 +91,8 @@
     "selectedCount": "{{count}} of {{total}} selected",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "confirmImport": "Import {{count}} listings",
-    "noSelection": "Check the listings you want to import",
+    "confirmImport": "Добави в черновите ({{count}})",
+    "noSelection": "Изберете обявите, които искате да прегледате",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
@@ -243,6 +243,13 @@
       "images": "Снимки",
       "sale": "Продажба",
       "rent": "Наем"
-    }
+    },
+    "openFull": "Пълен преглед",
+    "position": "{{index}} от {{total}}",
+    "livePreview": "Преглед на живо — какво ще видят купувачите",
+    "backToPreview": "Обратно към прегледа",
+    "saveAndPublish": "Запази и публикувай",
+    "discardChanges": "Да се отхвърлят незапазените промени?",
+    "unsavedHint": "Имате незапазени промени. Публикуването първо ще ги запази."
   }
 }

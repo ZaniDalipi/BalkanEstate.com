@@ -833,6 +833,73 @@ Visibility rules:
 
 ---
 
+## External Listing Feeds — Review Before Publish
+
+A user's own feed (RSS, JSON, XML, JSON-LD, custom API or an HTML scrape) is
+parsed heuristically, and it regularly gets a price, an area or a city wrong.
+So **nothing a user-owned feed fetches goes live on its own**: every fetched
+listing waits in the owner's review queue ("Imported Drafts" account tab)
+until they publish it.
+
+```
+Sync now / scheduled run
+  └── runSource(source)                      listingIngestService — adapter → normalize()
+        ├── source.userId unset (admin feed) → upsert Property directly (unchanged)
+        └── source.userId set                → queueForReview()            importReviewService
+              ├── not on the platform yet     → ImportedListingDraft kind:'new'
+              ├── live, feed values changed   → ImportedListingDraft kind:'update'
+              │                                  (changedFields: current vs incoming)
+              └── live, unchanged             → touch sourceFetchedAt only
+
+Imported Drafts tab (ImportReviewQueue)
+  ├── card list · bulk publish/reject · feed filter · Rejected tab (restore)
+  └── full-size review (ImportDraftDetail, full-screen Modal)
+        ├── GET /listing-sources/review/:id  → draft + `listing` (owner/scrape fields stripped)
+        ├── toPreviewProperty(draft, patch)  → transformBackendProperty (ingestion boundary)
+        ├── DraftListingPreview              → PropertyGallery · PropertyPhotos · PropertyInfo
+        │                                      · RentalTermsSection · PropertyMapLink
+        ├── edit mode: DraftEditForm beside the preview, which follows every keystroke
+        └── Publish → PATCH unsaved edits → POST …/accept → next draft in the queue
+```
+
+Key decisions:
+- **Drafts are their own collection, not `Property` with `status: 'draft'`.**
+  Search, the map, sitemaps, "My Listings" and the listing-count recounts all
+  read `Property`; a separate `ImportedListingDraft` means an unreviewed
+  listing can't leak into any of them, however they filter.
+- **One draft per (source, sourceListingId), decided once.** `incomingHash`
+  fingerprints the feed's reviewable values: a listing the owner rejected, or
+  an update they accepted with their own corrections, is not re-queued until
+  the feed actually sends something different. Rejected new listings stay
+  rejected (the owner can restore them).
+- **The owner's edits win over re-syncs.** A pending draft the owner edited
+  (`editedAt`) keeps their values; the feed's latest values only go to
+  `original`, which the editor shows as "Feed: …" next to each changed field.
+- **The preview is the real listing page.** The full-size review composes the
+  same shared property components as the published page (and as the seller
+  flow's `ListingPreview`), fed through `transformBackendProperty`, so what the
+  owner approves is what buyers get. There is no separate "draft" renderer to
+  drift out of sync.
+- **Publishing saves first.** Unsaved edits are what the live preview shows, so
+  Publish becomes "Save & publish" and PATCHes them before accepting.
+- **The limit is charged at publish.** `listingLimitService` is checked when a
+  draft is accepted (`LISTING_LIMIT_REACHED`), not when the feed is fetched —
+  fetching creates nothing. Title and city are required to publish; other
+  gaps (price, address, area, photos, map pin) are warnings.
+- **Walking the queue.** `useDraftViewer` moves to the next draft after each
+  decision and pages across the 20-per-page boundary; drafts decided in the
+  current session are skipped until the list refetches, so a fast reviewer
+  can't be shown a listing they just published.
+
+Backend: `models/ImportedListingDraft.ts`, `services/importReviewService.ts`,
+`services/importReviewFields.ts` (diff, fingerprint, patch validation),
+`controllers/importReviewController.ts`, routes under
+`/api/listing-sources/review`. Frontend: `src/features/listing-sources/`
+(`api/importReviewApi.ts`, `hooks/useImportReview*.ts`, `hooks/useDraftViewer.ts`,
+`hooks/useDraftForm.ts`, `components/review/`), keys in `importReviewKeys`.
+
+---
+
 ## Internationalisation (i18n)
 
 **Library**: `react-i18next`

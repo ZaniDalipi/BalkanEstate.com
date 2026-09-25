@@ -79,8 +79,8 @@
     "enableNow": "Enable this feed immediately"
   },
   "preview": {
-    "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
+    "title": "Odaberite oglase za nacrte",
+    "subtitle": "Pronađeno {{total}} oglasa sa {{source}}. Ništa se još ne objavljuje — odabrani idu u Uvezene nacrte, gdje svaki možete pregledati, urediti i objaviti.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -91,8 +91,8 @@
     "selectedCount": "{{count}} of {{total}} selected",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "confirmImport": "Import {{count}} listings",
-    "noSelection": "Check the listings you want to import",
+    "confirmImport": "Dodaj u nacrte ({{count}})",
+    "noSelection": "Odaberite oglase koje želite pregledati",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
@@ -243,6 +243,13 @@
       "images": "Fotografije",
       "sale": "Prodaja",
       "rent": "Izdavanje"
-    }
+    },
+    "openFull": "Puni prikaz",
+    "position": "{{index}} od {{total}}",
+    "livePreview": "Prikaz uživo — ono što će kupci vidjeti",
+    "backToPreview": "Nazad na prikaz",
+    "saveAndPublish": "Sačuvaj i objavi",
+    "discardChanges": "Odbaciti nesačuvane izmjene?",
+    "unsavedHint": "Imate nesačuvane izmjene. Objava će ih prvo sačuvati."
   }
 }

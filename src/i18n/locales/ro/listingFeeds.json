@@ -79,8 +79,8 @@
     "enableNow": "Enable this feed immediately"
   },
   "preview": {
-    "title": "Review listings before importing",
-    "subtitle": "Found {{total}} listings from {{source}}. Check the ones you want to import.",
+    "title": "Alege anunțurile de adăugat la ciorne",
+    "subtitle": "Am găsit {{total}} anunțuri pe {{source}}. Nimic nu este publicat încă — cele bifate ajung în Ciorne importate, unde le poți verifica, edita și publica pe rând.",
     "fetching": "Fetching listings from source…",
     "fetchingShort": "Fetching…",
     "modalLabel": "Review listings",
@@ -91,8 +91,8 @@
     "selectedCount": "{{count}} of {{total}} selected",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "confirmImport": "Import {{count}} listings",
-    "noSelection": "Check the listings you want to import",
+    "confirmImport": "Adaugă {{count}} la ciorne",
+    "noSelection": "Bifează anunțurile pe care vrei să le verifici",
     "cancel": "Cancel",
     "empty": "No listings found on this source.",
     "untitled": "Untitled listing",
@@ -243,6 +243,13 @@
       "images": "Fotografii",
       "sale": "De vânzare",
       "rent": "De închiriat"
-    }
+    },
+    "openFull": "Previzualizare completă",
+    "position": "{{index}} din {{total}}",
+    "livePreview": "Previzualizare live — ce vor vedea cumpărătorii",
+    "backToPreview": "Înapoi la previzualizare",
+    "saveAndPublish": "Salvează și publică",
+    "discardChanges": "Renunți la modificările nesalvate?",
+    "unsavedHint": "Ai modificări nesalvate. Publicarea le va salva mai întâi."
   }
 }
