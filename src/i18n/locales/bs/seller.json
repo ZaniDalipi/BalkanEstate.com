@@ -808,5 +808,15 @@
     "underground": "Podzemna",
     "covered": "Natkrivena",
     "outdoor": "Otvorena"
+  },
+  "draft": {
+    "restoredTitle": "Vratili smo vaš nedovršeni oglas.",
+    "restoredMessage": "Čuva se na ovom uređaju do {{date}}.",
+    "startOver": "Odbaci i počni ispočetka",
+    "unfinishedSale": "Nedovršeni oglas za prodaju",
+    "unfinishedRental": "Nedovršeni oglas za izdavanje",
+    "keptUntil": "Sačuvano kao nacrt na ovom uređaju do {{date}}.",
+    "continue": "Nastavi",
+    "discard": "Odbaci"
   }
 }

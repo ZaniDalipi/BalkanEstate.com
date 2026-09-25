@@ -940,6 +940,62 @@ keys in `importReviewKeys`; the prefill hook-in is `ListingPrefill` in
 
 ---
 
+## My Listings — loaded in chunks
+
+An agent can have hundreds of listings, so **My Listings never fetches them all
+at once**: it shows the first 20 and loads the next 20 as the seller scrolls.
+
+```
+MyListings (components/shared/MyListings.tsx)
+  └── useMyListingsInfinite(filters)                 src/features/properties/hooks/
+        └── useInfiniteQuery  propertyKeys.myListingsPages(filters)
+              └── getMyListingsPage({ offset, limit: 20, status, listingType, role, search })
+                    └── GET /api/properties/my/listings?offset=&limit=&…
+                          ├── $match seller + filters, $sort status group → newest renewed/created
+                          ├── $skip/$limit → ids → find + populate (same shape as before)
+                          └── counts (all / sale / rent / private_seller / agent) on offset 0
+```
+
+- **Filtering, search and sort run on the server**, so each chunk is in the
+  final order and the tab counts cover every listing, not just the loaded ones.
+  Search is debounced (300 ms) and regex-escaped.
+- **Infinite scroll**: an `IntersectionObserver` sentinel under the list (600 px
+  ahead) calls `fetchNextPage`; a "Load more" button is the fallback.
+- **Optimistic updates** go through `setListings` / `setCounts`, which patch
+  every cached chunk. The next offset counts only loaded listings that still
+  match the filters, so marking one sold under "Active" doesn't skip a listing.
+- Without `limit` the endpoint still returns every listing (analytics and
+  promotions use that).
+
+---
+
+## Unfinished Listings — kept for 3 days
+
+A seller who leaves the create-listing form (back button, navigation, closed
+tab) doesn't lose their work: **a new listing is autosaved on the device and
+restored when they come back, for 3 days.**
+
+```
+useListingForm (new listing only — not edits, not imported prefills)
+  ├── on open:   loadListingDraft(userId:sale|rent) → restore fields, photos, floor plans
+  │              → amber "We restored your unfinished listing" banner + "Discard and start over"
+  ├── on change: saveListingDraft (debounced 800 ms, steps init/form/preview)
+  ├── on leave:  save immediately (unmount + pagehide)
+  └── on publish (step 'success'): clearListingDraft
+MyListings
+  └── useUnfinishedListingDrafts → "Unfinished sale/rental listing" banner (Continue / Discard)
+```
+
+- Storage is **IndexedDB** (`src/features/seller/utils/listingDraftStorage.ts`)
+  so photo `File`s are kept as-is; hosted photos are kept by URL, `blob:` URLs
+  never. Drafts older than `LISTING_DRAFT_TTL_MS` (3 days) are deleted on read.
+- One draft per user per kind (sale / rent). It lives on that device only and
+  does not count toward listing limits — it is not a server `draft` listing.
+- Every call is a no-op where IndexedDB is unavailable; a draft is a
+  convenience, never a reason for the form to fail.
+
+---
+
 ## Internationalisation (i18n)
 
 **Library**: `react-i18next`

@@ -1691,8 +1691,8 @@ export const getMyListings = async (
       const limit = Math.min(Math.max(parseInt(String(req.query.limit), 10) || 20, 1), 200);
       const offset = Math.max(parseInt(String(req.query.offset), 10) || 0, 0);
 
-      const baseMatch: any = { sellerId: new mongoose.Types.ObjectId(userId) };
-      const match: any = { ...baseMatch };
+      const baseMatch: Record<string, unknown> = { sellerId: new mongoose.Types.ObjectId(userId) };
+      const match: Record<string, unknown> = { ...baseMatch };
       if (query.createdAsRole) match.createdAsRole = query.createdAsRole;
 
       const status = req.query.status as string | undefined;
@@ -1715,7 +1715,10 @@ export const getMyListings = async (
       }
 
       // Same ordering as the UI: status group first, then most recently renewed/created
-      const [{ page, total }] = await Property.aggregate([
+      const [{ page, total }] = await Property.aggregate<{
+        page: { _id: mongoose.Types.ObjectId }[];
+        total: { n: number }[];
+      }>([
         { $match: match },
         {
           $facet: {
@@ -1747,18 +1750,20 @@ export const getMyListings = async (
         },
       ]);
 
-      const ids = page.map((d: any) => d._id);
+      const ids = page.map(d => d._id);
       const docs = ids.length
         ? await Property.find({ _id: { $in: ids } }).populate('sellerId', sellerFields)
         : [];
       const byId = new Map(docs.map(d => [String(d._id), d]));
-      const ordered = ids.map((id: any) => byId.get(String(id))).filter(Boolean) as typeof docs;
+      const ordered = ids
+        .map(id => byId.get(String(id)))
+        .filter((d): d is (typeof docs)[number] => d !== undefined);
       const totalCount = total[0]?.n || 0;
 
       // Tab/filter counts across all of the user's listings (first chunk only)
       let counts: Record<string, number> | undefined;
       if (offset === 0) {
-        const [c] = await Property.aggregate([
+        const [c] = await Property.aggregate<{ all: number; rent: number; private_seller: number; agent: number }>([
           { $match: baseMatch },
           {
             $group: {

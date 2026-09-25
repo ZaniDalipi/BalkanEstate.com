@@ -808,5 +808,15 @@
     "underground": "Nëntokësor",
     "covered": "I mbuluar",
     "outdoor": "I hapur"
+  },
+  "draft": {
+    "restoredTitle": "E rikthyem njoftimin tuaj të papërfunduar.",
+    "restoredMessage": "Ruhet në këtë pajisje deri më {{date}}.",
+    "startOver": "Hidhe dhe fillo nga e para",
+    "unfinishedSale": "Njoftim shitjeje i papërfunduar",
+    "unfinishedRental": "Njoftim qiraje i papërfunduar",
+    "keptUntil": "Ruajtur si draft në këtë pajisje deri më {{date}}.",
+    "continue": "Vazhdo",
+    "discard": "Hidhe"
   }
 }

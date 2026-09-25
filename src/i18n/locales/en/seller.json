@@ -816,5 +816,15 @@
     "underground": "Underground",
     "covered": "Covered",
     "outdoor": "Outdoor"
+  },
+  "draft": {
+    "restoredTitle": "We restored your unfinished listing.",
+    "restoredMessage": "It is kept on this device until {{date}}.",
+    "startOver": "Discard and start over",
+    "unfinishedSale": "Unfinished sale listing",
+    "unfinishedRental": "Unfinished rental listing",
+    "keptUntil": "Saved as a draft on this device until {{date}}.",
+    "continue": "Continue",
+    "discard": "Discard"
   }
 }

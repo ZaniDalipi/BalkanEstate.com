@@ -71,6 +71,7 @@ const GeminiDescriptionGenerator: React.FC<{
         handlePromotionPaymentSuccess, handlePostWithoutPromotion,
         formContainerRef,
         currentUser, isAuthenticating, isLoadingUserData,
+        restoredDraft, discardDraft,
     } = useListingForm(propertyToEdit, prefill);
 
     // --- Step-based rendering ---
@@ -180,6 +181,23 @@ const GeminiDescriptionGenerator: React.FC<{
         {/* noValidate: validation is handled in useListingForm so every missing
             field is highlighted at once instead of one native browser tooltip */}
         <form className="listing-form" noValidate onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') e.preventDefault(); }}>
+            {restoredDraft && (
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm" role="status">
+                    <p className="flex-1 text-amber-900">
+                        <span className="font-semibold">{t('seller:draft.restoredTitle', 'We restored your unfinished listing.')}</span>{' '}
+                        {t('seller:draft.restoredMessage', 'It is kept on this device until {{date}}.', {
+                            date: new Date(restoredDraft.expiresAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+                        })}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={discardDraft}
+                        className="self-start sm:self-auto px-4 py-2 border border-amber-300 text-amber-900 font-semibold rounded-lg hover:bg-amber-100"
+                    >
+                        {t('seller:draft.startOver', 'Discard and start over')}
+                    </button>
+                </div>
+            )}
             {/* Listing Type Toggle: Sale / Rent */}
             <div className="flex justify-center mb-6">
                 <LiquidGlassControl

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
-import { useRealtimeProperties } from '../../src/features/properties/hooks';
+import { useRealtimeProperties, useMyListingsInfinite } from '../../src/features/properties/hooks';
 import { EyeIcon, HeartIcon, InquiriesIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon, CalendarIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
@@ -11,6 +11,7 @@ import * as api from '../../services/apiService';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import { VideoGenerator } from '../../src/features/videos';
 import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { useUnfinishedListingDrafts } from '@/src/features/seller/hooks/useUnfinishedListingDrafts';
 
 // Video Icon component
 const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -304,11 +305,6 @@ const ListingTypeBadge: React.FC<{ listingType?: string }> = ({ listingType }) =
     );
 };
 
-// Listings are loaded in chunks of this size as the user scrolls
-const PAGE_SIZE = 20;
-// Upper bound when silently re-fetching everything already on screen
-const MAX_REFRESH_SIZE = 200;
-
 const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const { t } = useTranslation(['rental', 'common', 'seller', 'account']);
     const { state, dispatch } = useAppContext();
@@ -331,21 +327,8 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const [isExtensionMode, setIsExtensionMode] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [propertyForVideo, setPropertyForVideo] = useState<Property | null>(null);
-    const [myProperties, setMyProperties] = useState<Property[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [hasMore, setHasMore] = useState(false);
-    const [counts, setCounts] = useState<api.MyListingsCounts>({ all: 0, sale: 0, rent: 0, private_seller: 0, agent: 0 });
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    // Guards against out-of-order responses when filters change quickly
-    const requestIdRef = useRef(0);
-    const loadedCountRef = useRef(0);
-    const myPropertiesRef = useRef<Property[]>([]);
-    myPropertiesRef.current = myProperties;
-    const isLoadingMoreRef = useRef(false);
     const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
-    const filtersRef = useRef({ statusFilter, listingTypeFilter, roleFilter, search: debouncedSearch });
-    filtersRef.current = { statusFilter, listingTypeFilter, roleFilter, search: debouncedSearch };
     const [renewalStatuses, setRenewalStatuses] = useState<Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }>>({});
     const skipNextRefetchRef = useRef(false);
 
@@ -370,82 +353,26 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         return { canRenew: false, hoursRemaining, minutesRemaining };
     };
 
-    const buildPageParams = () => {
-        const f = filtersRef.current;
-        return {
-            status: f.statusFilter,
-            listingType: f.listingTypeFilter === 'all' ? undefined : f.listingTypeFilter,
-            role: f.roleFilter === 'all' ? undefined : f.roleFilter,
-            search: f.search,
-        };
-    };
-
-    // Load the first chunk. With `reset`, only the first PAGE_SIZE listings are
-    // loaded (filters changed). Otherwise it silently refreshes everything
-    // already on screen so the user keeps their scroll position.
-    const fetchMyListings = useCallback(async (opts: { reset?: boolean } = {}) => {
-        const requestId = ++requestIdRef.current;
-        const limit = opts.reset
-            ? PAGE_SIZE
-            : Math.min(Math.max(PAGE_SIZE, loadedCountRef.current), MAX_REFRESH_SIZE);
-        if (opts.reset || loadedCountRef.current === 0) setIsLoading(true);
-        try {
-            const result = await api.getMyListingsPage({ ...buildPageParams(), offset: 0, limit });
-            if (requestId !== requestIdRef.current) return;
-
-            setMyProperties(result.properties);
-            setHasMore(result.hasMore);
-            if (result.counts) setCounts(result.counts);
-
-            // Calculate renewal statuses
-            const statuses: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
-            result.properties.forEach(p => {
-                statuses[p.id] = calculateRenewalStatus(p.lastRenewed);
-            });
-            setRenewalStatuses(statuses);
-        } catch (error) {
-            if (requestId !== requestIdRef.current) return;
-            setMyProperties([]);
-            setHasMore(false);
-        } finally {
-            if (requestId === requestIdRef.current) setIsLoading(false);
-        }
-    }, []);
-
-    // Load the next chunk (infinite scroll)
-    const loadMore = useCallback(async () => {
-        if (isLoadingMoreRef.current) return;
-        const requestId = requestIdRef.current;
-        isLoadingMoreRef.current = true;
-        setIsLoadingMore(true);
-        try {
-            const result = await api.getMyListingsPage({
-                ...buildPageParams(),
-                offset: loadedCountRef.current,
-                limit: PAGE_SIZE,
-            });
-            // Filters changed or a refresh happened meanwhile - drop this chunk
-            if (requestId !== requestIdRef.current) return;
-
-            const seen = new Set(myPropertiesRef.current.map(p => p.id));
-            const fresh = result.properties.filter(p => !seen.has(p.id));
-            setMyProperties(prev => [...prev, ...fresh.filter(p => !prev.some(x => x.id === p.id))]);
-            // Stop if the chunk brought nothing new, so we never loop on the same offset
-            setHasMore(result.hasMore && fresh.length > 0);
-            setRenewalStatuses(prev => {
-                const next = { ...prev };
-                result.properties.forEach(p => {
-                    next[p.id] = calculateRenewalStatus(p.lastRenewed);
-                });
-                return next;
-            });
-        } catch (error) {
-            if (requestId === requestIdRef.current) setHasMore(false);
-        } finally {
-            isLoadingMoreRef.current = false;
-            setIsLoadingMore(false);
-        }
-    }, []);
+    // Listings are loaded in chunks of 20 as the user scrolls; filtering,
+    // search and sorting happen on the server
+    const {
+        listings: myProperties,
+        counts,
+        isLoading,
+        isFetchingNextPage: isLoadingMore,
+        hasMore,
+        fetchNextPage,
+        refetch,
+        setListings: setMyProperties,
+        setCounts,
+    } = useMyListingsInfinite({
+        status: statusFilter,
+        listingType: listingTypeFilter === 'all' ? undefined : listingTypeFilter,
+        role: roleFilter === 'all' ? undefined : roleFilter,
+        search: debouncedSearch,
+    });
+    const fetchMyListings = useCallback(() => { refetch(); }, [refetch]);
+    const loadMore = useCallback(() => { fetchNextPage(); }, [fetchNextPage]);
 
     // Delayed refetch for real-time updates - skips if an optimistic update just happened
     const realtimeRefetch = useCallback(() => {
@@ -470,30 +397,39 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
         },
     });
 
+    // Unfinished new listings kept on this device (see listingDraftStorage)
+    const { drafts: localDrafts, discardDraft: discardLocalDraft } = useUnfinishedListingDrafts(state.currentUser?.id);
+
+    const continueDraft = (kind: 'sale' | 'rent') => {
+        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
+        window.history.pushState({}, '', kind === 'rent' ? '/create-rental' : '/create-listing');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+    };
+
     // Debounce the search box so we don't hit the server on every keystroke
     useEffect(() => {
         const timeout = setTimeout(() => setDebouncedSearch(propertyIdSearch.trim()), 300);
         return () => clearTimeout(timeout);
     }, [propertyIdSearch]);
 
-    // Fetch the first chunk on mount, when filters change, and when navigating
-    // back to this view (e.g., returning from edit-listing)
+    // Refresh when navigating back to this view (e.g., returning from edit-listing)
+    const previousViewRef = useRef(state.activeView);
     useEffect(() => {
-        fetchMyListings({ reset: true });
-    }, [state.activeView, statusFilter, listingTypeFilter, roleFilter, debouncedSearch, fetchMyListings]);
+        if (previousViewRef.current !== state.activeView) fetchMyListings();
+        previousViewRef.current = state.activeView;
+    }, [state.activeView, fetchMyListings]);
 
-    // Update renewal statuses every minute
+    // Renewal statuses: recalculated whenever listings change, and every minute
     useEffect(() => {
-        const interval = setInterval(() => {
-            setRenewalStatuses(prev => {
-                const updated: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
-                myProperties.forEach(p => {
-                    updated[p.id] = calculateRenewalStatus(p.lastRenewed);
-                });
-                return updated;
+        const recalculate = () => {
+            const updated: Record<string, { canRenew: boolean; hoursRemaining?: number; minutesRemaining?: number }> = {};
+            myProperties.forEach(p => {
+                updated[p.id] = calculateRenewalStatus(p.lastRenewed);
             });
-        }, 60000);
-
+            setRenewalStatuses(updated);
+        };
+        recalculate();
+        const interval = setInterval(recalculate, 60000);
         return () => clearInterval(interval);
     }, [myProperties]);
 
@@ -566,10 +502,6 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             return bTime - aTime;
         });
     }, [myProperties, statusFilter, roleFilter, listingTypeFilter, propertyIdSearch]);
-
-    // Next chunk starts after the loaded listings that still match the filters
-    // (a listing whose status changed locally no longer counts toward the offset)
-    loadedCountRef.current = filteredAndSortedProperties.length;
 
     // Infinite scroll: load the next chunk when the sentinel nears the viewport.
     // Re-created after each chunk so it keeps loading while the sentinel stays visible.
@@ -1050,6 +982,33 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Unfinished listings saved on this device */}
+            {localDrafts.map(draft => (
+                <div key={draft.kind} className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm">
+                    <div className="flex-1 text-amber-900">
+                        <p className="font-semibold">
+                            {draft.kind === 'rent'
+                                ? t('seller:draft.unfinishedRental', 'Unfinished rental listing')
+                                : t('seller:draft.unfinishedSale', 'Unfinished sale listing')}
+                            {draft.title && `: ${draft.title}`}
+                        </p>
+                        <p className="text-amber-800/80">
+                            {t('seller:draft.keptUntil', 'Saved as a draft on this device until {{date}}.', {
+                                date: new Date(draft.expiresAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }),
+                            })}
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={() => continueDraft(draft.kind)} className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark">
+                            {t('seller:draft.continue', 'Continue')}
+                        </button>
+                        <button onClick={() => discardLocalDraft(draft.kind)} className="px-4 py-2 border border-amber-300 text-amber-900 font-semibold rounded-lg hover:bg-amber-100">
+                            {t('seller:draft.discard', 'Discard')}
+                        </button>
+                    </div>
+                </div>
+            ))}
 
             {/* Property ID Search */}
             <div className="relative max-w-sm">

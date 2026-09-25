@@ -14,6 +14,11 @@ import { convertToUploadableImage, isHeicFile, needsConversion } from '@/shared/
 import { PLAN_LISTING_LIMITS } from '@/shared/utils/subscriptionHelpers';
 import { SubscriptionPlan } from '@/shared/types/user.types';
 import { apiRequest } from '@/src/shared/api';
+import {
+    draftKey, draftHasContent, saveListingDraft, loadListingDraft, clearListingDraft,
+    toStoredImage, fromStoredImage, fromStoredFloorplan, LISTING_DRAFT_TTL_MS,
+    type ListingDraft, type StoredImage,
+} from '../utils/listingDraftStorage';
 import { ListingData, ImageData, FloorPlanDraft, Step, Mode, initialListingData, ALL_VALID_TAGS, FieldErrors, orderedErrorFields, fieldAnchorId, validateListing, SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 import { buildConstructionFields, normalizeConstructionStatus } from '@/shared/property/construction';
 import { stripAttributesForType } from '@/shared/property/typeAttributes';
@@ -825,6 +830,109 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
         dragOverItem.current = null;
     }, []);
 
+
+    // --- Unfinished listing drafts ---
+    // A new listing (not an edit or an imported prefill) is autosaved on this
+    // device while the seller works on it and restored when they come back,
+    // for up to LISTING_DRAFT_TTL_MS (3 days).
+    const draftStorageKey = !propertyToEdit && !prefill && currentUser?.id
+        ? draftKey(currentUser.id, initialType)
+        : null;
+    // Saving starts only after any stored draft was restored, so an empty form
+    // never overwrites it on first render
+    const [draftReady, setDraftReady] = useState(false);
+    const [restoredDraft, setRestoredDraft] = useState<{ savedAt: number; expiresAt: number } | null>(null);
+    const draftDoneRef = useRef(false);
+
+    useEffect(() => {
+        if (!draftStorageKey) return;
+        let cancelled = false;
+        setDraftReady(false);
+        loadListingDraft(draftStorageKey).then(draft => {
+            if (cancelled) return;
+            if (draft) {
+                setListingData({ ...initialListingData, ...draft.listingData });
+                setImages(draft.images.map(fromStoredImage));
+                setFloorplans(draft.floorplans.map(fromStoredFloorplan));
+                setSelectedCountry(draft.selectedCountry || '');
+                setSelectedCity(draft.selectedCity || '');
+                const country = BALKAN_LOCATIONS.find(c => c.name === draft.selectedCountry);
+                if (country) setAvailableCities(country.cities);
+                if (draft.selectedRole) setSelectedRole(draft.selectedRole as UserRole);
+                setMode(draft.mode || 'manual');
+                setStep(draft.step === 'init' ? 'init' : 'form');
+                setRestoredDraft({ savedAt: draft.savedAt, expiresAt: draft.savedAt + LISTING_DRAFT_TTL_MS });
+            }
+            setDraftReady(true);
+        });
+        return () => { cancelled = true; };
+    }, [draftStorageKey]);
+
+    const buildDraft = (): ListingDraft => ({
+        savedAt: Date.now(),
+        listingData,
+        images: images.map(toStoredImage).filter((i): i is StoredImage => i !== null),
+        floorplans: floorplans
+            .map(fp => { const stored = toStoredImage(fp); return stored ? { ...stored, label: fp.label } : null; })
+            .filter((f): f is StoredImage & { label: string } => f !== null),
+        selectedCountry,
+        selectedCity,
+        selectedRole,
+        mode,
+        step: step === 'init' ? 'init' : 'form',
+    });
+    const latestDraftRef = useRef<() => ListingDraft>(buildDraft);
+    latestDraftRef.current = buildDraft;
+
+    const persistDraft = useCallback(() => {
+        if (!draftStorageKey || draftDoneRef.current) return;
+        const draft = latestDraftRef.current();
+        if (draftHasContent(draft)) {
+            saveListingDraft(draftStorageKey, draft);
+        } else {
+            clearListingDraft(draftStorageKey);
+        }
+    }, [draftStorageKey]);
+
+    // Autosave shortly after each change while the seller is filling the form
+    useEffect(() => {
+        if (!draftStorageKey || !draftReady || draftDoneRef.current) return;
+        if (step !== 'init' && step !== 'form' && step !== 'preview') return;
+        const timeout = window.setTimeout(persistDraft, 800);
+        return () => window.clearTimeout(timeout);
+    }, [draftStorageKey, draftReady, persistDraft, step, listingData, images, floorplans, selectedCountry, selectedCity, selectedRole, mode]);
+
+    // Save right away when leaving the form (back button, navigation, closing the tab)
+    useEffect(() => {
+        if (!draftStorageKey || !draftReady) return;
+        window.addEventListener('pagehide', persistDraft);
+        return () => {
+            window.removeEventListener('pagehide', persistDraft);
+            persistDraft();
+        };
+    }, [draftStorageKey, draftReady, persistDraft]);
+
+    // Once the listing is created the draft is done
+    useEffect(() => {
+        if (!draftStorageKey || step !== 'success') return;
+        draftDoneRef.current = true;
+        clearListingDraft(draftStorageKey);
+    }, [step, draftStorageKey]);
+
+    /** Throw away the restored draft and start with an empty form */
+    const discardDraft = useCallback(() => {
+        if (draftStorageKey) clearListingDraft(draftStorageKey);
+        setRestoredDraft(null);
+        setListingData({ ...initialListingData, listingType: initialType as ListingData['listingType'] });
+        setImages([]);
+        setFloorplans([]);
+        setSelectedCountry('');
+        setSelectedCity('');
+        setAvailableCities([]);
+        setFieldErrors({});
+        setMode('manual');
+        setStep('init');
+    }, [draftStorageKey, initialType]);
 
     const handleGenerate = async () => {
         if (images.length === 0) {
@@ -1681,6 +1789,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
         selectedCountry, selectedCity, availableCities,
         previewProperty,
         fieldErrors,
+        restoredDraft, discardDraft,
         // Computed
         getZoomLevel, cityData,
         // Handlers

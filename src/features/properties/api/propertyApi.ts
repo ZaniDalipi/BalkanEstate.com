@@ -387,6 +387,56 @@ export const getMyListings = async (role?: 'agent' | 'private_seller'): Promise<
   return response.properties.map(transformBackendProperty);
 };
 
+export interface MyListingsFilters {
+  status?: string;
+  listingType?: 'sale' | 'rent';
+  role?: 'agent' | 'private_seller';
+  search?: string;
+}
+
+export interface MyListingsCounts {
+  all: number;
+  sale: number;
+  rent: number;
+  private_seller: number;
+  agent: number;
+}
+
+export interface MyListingsPage {
+  properties: Property[];
+  total: number;
+  hasMore: boolean;
+  /** Counts across all of the user's listings; only on the first page (offset 0) */
+  counts?: MyListingsCounts;
+}
+
+/**
+ * One chunk of the current user's listings, filtered and sorted on the server
+ * (active first, then newest renewed/created).
+ */
+export const getMyListingsPage = async (
+  params: MyListingsFilters & { offset: number; limit: number }
+): Promise<MyListingsPage> => {
+  const qs = new URLSearchParams({ offset: String(params.offset), limit: String(params.limit) });
+  if (params.status && params.status !== 'all') qs.set('status', params.status);
+  if (params.listingType) qs.set('listingType', params.listingType);
+  if (params.role) qs.set('role', params.role);
+  if (params.search?.trim()) qs.set('search', params.search.trim());
+
+  const response = await apiRequest<{
+    properties: any[];
+    pagination: { total: number; hasMore: boolean };
+    counts?: MyListingsCounts;
+  }>(`/properties/my/listings?${qs.toString()}`, { requiresAuth: true });
+
+  return {
+    properties: response.properties.map(transformBackendProperty),
+    total: response.pagination.total,
+    hasMore: response.pagination.hasMore,
+    counts: response.counts,
+  };
+};
+
 export const renewProperty = async (
   propertyId: string
 ): Promise<{

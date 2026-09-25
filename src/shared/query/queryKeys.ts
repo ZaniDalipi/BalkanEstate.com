@@ -112,6 +112,10 @@ export const propertyKeys = {
 
   // User's own properties
   myListings: () => [...propertyKeys.all, 'my'] as const,
+  // Chunked My Listings page (infinite scroll), one cache entry per filter set
+  myListingsPagesAll: () => [...propertyKeys.myListings(), 'pages'] as const,
+  myListingsPages: (filters: Record<string, unknown>) =>
+    [...propertyKeys.myListingsPagesAll(), filters] as const,
 
   // Price history for a single property
   priceHistory: (propertyId: string) => [...propertyKeys.all, propertyId, 'price-history'] as const,
@@ -347,4 +351,14 @@ export const importReviewKeys = {
   count: () => [...importReviewKeys.all, 'count'] as const,
   sources: () => [...importReviewKeys.all, 'sources'] as const,
   detail: (id: string) => [...importReviewKeys.all, 'detail', id] as const,
+};
+
+// ============================================================================
+// Unfinished Listing Draft Query Keys (kept on the device, see listingDraftStorage)
+// Used by: MyListings (unfinished listing banner)
+// ============================================================================
+
+export const listingDraftKeys = {
+  all: ['listingDrafts'] as const,
+  forUser: (userId: string) => [...listingDraftKeys.all, userId] as const,
 };

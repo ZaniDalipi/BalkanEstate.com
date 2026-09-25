@@ -808,5 +808,15 @@
     "underground": "Подземна",
     "covered": "Наткривена",
     "outdoor": "Отворена"
+  },
+  "draft": {
+    "restoredTitle": "Вратили смо ваш недовршени оглас.",
+    "restoredMessage": "Чува се на овом уређају до {{date}}.",
+    "startOver": "Одбаци и почни испочетка",
+    "unfinishedSale": "Недовршени оглас за продају",
+    "unfinishedRental": "Недовршени оглас за издавање",
+    "keptUntil": "Сачувано као нацрт на овом уређају до {{date}}.",
+    "continue": "Настави",
+    "discard": "Одбаци"
   }
 }

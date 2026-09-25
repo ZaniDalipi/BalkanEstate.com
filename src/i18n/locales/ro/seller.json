@@ -808,5 +808,15 @@
     "underground": "Subteran",
     "covered": "Acoperit",
     "outdoor": "Descoperit"
+  },
+  "draft": {
+    "restoredTitle": "Am restaurat anunțul tău neterminat.",
+    "restoredMessage": "Este păstrat pe acest dispozitiv până la {{date}}.",
+    "startOver": "Renunță și începe din nou",
+    "unfinishedSale": "Anunț de vânzare neterminat",
+    "unfinishedRental": "Anunț de închiriere neterminat",
+    "keptUntil": "Salvat ca ciornă pe acest dispozitiv până la {{date}}.",
+    "continue": "Continuă",
+    "discard": "Renunță"
   }
 }
