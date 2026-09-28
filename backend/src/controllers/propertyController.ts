@@ -12,11 +12,9 @@ import { geocodeProperty } from '../services/geocodingService';
 import { incrementViewCount, updateSoldStats, incrementActiveListings } from '../utils/statsUpdater';
 import {
   uploadPropertyImages,
-  deleteImages,
-  deleteFolder,
+  deleteListingMedia,
   organizeListingMedia,
 } from '../services/cloudinaryService';
-import cloudinary from '../config/cloudinary';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
@@ -991,7 +989,7 @@ export const createProperty = async (
 
     // The frontend uploads images to a temp folder before the property exists,
     // so relocate them now into the listing's own folder
-    // (balkan-estate/users/{userId}/listings/{propertyId}-{slug}/photos) so
+    // (balkan-estate/users/{a-z}/{name}_{userId}/listings/{title}_{propertyId}/photos) so
     // Cloudinary stays organized by user + listing. Best-effort: a failure here
     // must not fail listing creation.
     try {
@@ -1471,49 +1469,24 @@ export const deleteProperty = async (
       return;
     }
 
-    // Delete images from Cloudinary before deleting property
+    // Delete the listing's media from Cloudinary, keeping one thumbnail for
+    // the archive record below. The retention job clears that thumbnail once
+    // the archive is old enough (see mediaRetentionService).
+    const archiveThumbnailPublicId = property.imagePublicId || property.images?.[0]?.publicId;
     try {
-      const userId = currentUser._id.toString();
-      const propertyId = String(property._id);
+      const publicIds = [
+        property.imagePublicId,
+        property.floorplanPublicId,
+        ...(property.images || []).map((img) => img.publicId),
+        ...(property.floorplans || []).map((plan) => plan.publicId),
+      ].filter((id): id is string => Boolean(id));
 
-      // Option 1: Delete entire property folder (most efficient).
-      // Prefix match, so it also covers the `{propertyId}-{slug}` folders.
-      await deleteFolder(`balkan-estate/users/${userId}/listings/${propertyId}`);
-      // Legacy layout from before the users/ folder structure.
-      await deleteFolder(`balkan-estate/properties/user-${userId}/listing-${propertyId}`);
-
-      // Generated showcase video (a video resource, so not in the image sweep).
-      if (property.generatedVideoPublicId) {
-        await cloudinary.uploader
-          .destroy(property.generatedVideoPublicId, { resource_type: 'video' })
-          .catch(() => undefined);
-      }
-
-      // Option 2 (fallback): Delete individual images if they exist
-      const publicIdsToDelete: string[] = [];
-
-      // Collect all public IDs
-      if (property.imagePublicId) {
-        publicIdsToDelete.push(property.imagePublicId);
-      }
-
-      if (property.floorplanPublicId) {
-        publicIdsToDelete.push(property.floorplanPublicId);
-      }
-
-      if (property.images && property.images.length > 0) {
-        const imagePublicIds = property.images
-          .map((img: any) => img.publicId)
-          .filter((id: string) => id);
-        publicIdsToDelete.push(...imagePublicIds);
-      }
-
-      // Delete any remaining images that weren't in the folder
-      if (publicIdsToDelete.length > 0) {
-        await deleteImages(publicIdsToDelete);
-      }
-
-      propertyLogger.info(`✅ Cleaned up all images for property ${propertyId}`);
+      await deleteListingMedia(String(property.sellerId), String(property._id), {
+        publicIds,
+        videoPublicIds: property.generatedVideoPublicId ? [property.generatedVideoPublicId] : [],
+        keepPublicIds: archiveThumbnailPublicId ? [archiveThumbnailPublicId] : [],
+      });
+      propertyLogger.info(`✅ Cleaned up media for property ${property._id}`);
     } catch (cloudinaryError: any) {
       propertyLogger.error('⚠️  Error deleting images from Cloudinary:', cloudinaryError);
       // Continue with property deletion even if Cloudinary cleanup fails
@@ -1621,7 +1594,7 @@ export const deleteProperty = async (
         yearBuilt: property.yearBuilt,
         description: property.description,
         thumbnailUrl: property.imageUrl || (property.images?.[0]?.url),
-        thumbnailPublicId: property.imagePublicId || (property.images?.[0]?.publicId),
+        thumbnailPublicId: archiveThumbnailPublicId,
         totalViews: (property as any).views || 0,
         totalSaves: (property as any).saves || 0,
         daysOnMarket,
@@ -1881,7 +1854,7 @@ export const uploadImages = async (
     }
 
     // Upload images using the centralized service (with watermarking)
-    // Images will be organized in: balkan-estate/properties/user-{userId}/listing-{propertyId}/
+    // Folder layout: see services/media/mediaNaming.ts
     const uploadedImages = await uploadPropertyImages(files, userId, propertyId, watermarkOptions, propertyTitle);
 
     res.json({

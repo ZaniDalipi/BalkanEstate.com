@@ -1069,15 +1069,89 @@ Availability source priority:
 
 ## Cloudinary Image Pipeline
 
+Goal: stay inside Cloudinary's free 25 credits/month (1 credit = 1,000
+transformations **or** 1 GB storage **or** 1 GB bandwidth).
+
+### Delivery (frontend)
+
 ```
 Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
-                                                          → cloudinarySrcSet([480,768,1200,1920])
+            ├── res.cloudinary.com  → f_auto,q_auto,w_{bucket}[,c_limit]
+            ├── googleusercontent   → =s{size}
+            ├── unsplash / wikimedia / own site → unchanged
+            └── anything else (feeds) → {API_URL}/image-proxy?url=…&w={bucket}
+        cloudinarySrcSet(url, widths)  (deduped after snapping)
 ```
 
-- LQIP (Low-Quality Image Placeholder): `width: 40, quality: 'auto:eco'` loaded immediately
-- Full image: `width: 1200, quality: 'auto'` with srcSet for responsive delivery
-- Avatar thumbnails: `width: 80-96, quality: 'auto', crop: 'fill'`
-- Never use raw Cloudinary URLs — always go through the helper.
+- **Width buckets** (`CLOUDINARY_WIDTH_BUCKETS`: 32, 64, 128, 240, 320, 480,
+  640, 800, 1080, 1280, 1600, 1920). Width-only requests round *up* to a
+  bucket, so components share derivatives instead of each minting their own
+  — every distinct URL is a billed transformation. Explicit width×height
+  boxes (e.g. 1200×630 share cards) stay exact.
+- Nothing above 1920 (the stored master's max edge); no crop ⇒ `c_limit`, so
+  Cloudinary never upscales.
+- LQIP: `width: 40, quality: 'auto:eco'` (snaps to 64).
+
+### Upload (backend)
+
+- `sharp` resizes + re-encodes every upload on our server (mozjpeg q82, max
+  1920; `preserveQuality` q90 4:4:4). No incoming or eager transformations —
+  both are billed per upload. Decodes are capped at 50 MP.
+- Chat images: compressed to 1600px before upload (`compressImageForUpload`).
+- Generated videos: one per listing (`public_id: showcase`, overwrite); older
+  renders are removed when a new one lands.
+
+### Naming — `backend/src/services/media/mediaNaming.ts`
+
+```
+balkan-estate/
+├── agencies/{a-z}/{agency-name}_{agencyId}/{logo|cover}
+├── businesses/{a-z}/{business-name}_{businessId}/{logo|banner}
+├── external-feeds/{source}/{listingId}      (only with ALLOW_EXTERNAL_IMAGE_REHOST)
+├── messages/…   news/covers   site/…
+└── users/{a-z}/{user-name}_{userId}/
+    ├── avatar   documents/{license|credentials/{id}}
+    └── listings/{temp | {listing-title}_{propertyId}/{photos|floorplans|videos}}
+```
+
+Names come first so the Media Library sorts A–Z; the id always follows so a
+folder stays unique and searchable. Names are looked up from the ids at
+upload time (`mediaOwnerResolver`); a failed lookup falls back to the id.
+
+**Every asset is tagged** `owner_{userId}`, `listing_{propertyId}`,
+`agency_{id}`, `business_{id}`, `kind_{type}`. Cleanup deletes **by tag**
+(`deleteByTag`), then sweeps the pre-tag folder layouts — so renames and
+layout changes never strand files.
+
+### Lifecycle — what gets removed, when
+
+| Event | Removed |
+|---|---|
+| Listing deleted | all media except one archive thumbnail |
+| Deleted listing older than `MEDIA_RETENTION_DELETED_YEARS` (1) | that thumbnail |
+| Sold listing older than `MEDIA_RETENTION_SOLD_YEARS` (2) | all photos, plans, video → placeholder image |
+| Abandoned listing form (temp upload > 48h, unreferenced) | the uploads |
+| Account closed | avatar + verification documents |
+| User removed by admin | their listings' media + avatar and documents |
+| Agency deleted | logo + cover |
+
+Retention runs daily (`cron/index.ts`, 4:15 AM) in batches of 50 and marks
+records with `mediaPurgedAt`, respecting the Admin API rate limit.
+
+### External feed images — `/api/image-proxy`
+
+Feed photos are **never stored on Cloudinary**. `GET /api/image-proxy?url=&w=`
+(`services/imageProxy/`) fetches the source, resizes to WebP (q72) and caches:
+memory LRU (`IMAGE_PROXY_MEMORY_MB`, 64) → disk (`IMAGE_PROXY_CACHE_DIR`,
+`IMAGE_PROXY_DISK_MB` 512, `IMAGE_PROXY_CACHE_DAYS` 7) → browser/CDN
+(`max-age` 7d, `s-maxage` 30d, ETag/304). Concurrent requests share one
+fetch; failures are remembered for 10 minutes.
+
+Security: `utils/ssrfGuard.ts` resolves DNS and rejects any non-public
+address (private, loopback, link-local/metadata, CGNAT, IPv6 ULA, mapped
+IPv4), pins the socket to the vetted address, and re-checks every redirect
+hop. SVG is refused. Own rate limiter (1,500 / 5 min / IP), excluded from
+the general API limiter.
 
 ---
 

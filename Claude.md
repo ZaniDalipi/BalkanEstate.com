@@ -110,5 +110,8 @@ Every new translation key must be added to all 10 locale files simultaneously.
 
 ## Images
 
-Always use `optimizeCloudinaryUrl(url, { width, quality })` and `cloudinarySrcSet()` — never raw Cloudinary URLs.
-LQIP uses `width: 40, quality: 'auto:eco'`.
+Always use `optimizeCloudinaryUrl(url, { width, quality })` and `cloudinarySrcSet()` — never raw image URLs.
+It snaps widths to shared buckets (fewer billed Cloudinary transformations) and routes external feed
+images through the resizing `/api/image-proxy`. LQIP uses `width: 40, quality: 'auto:eco'`.
+Backend uploads go through `uploadImage` (sharp-compressed, tagged, A–Z folders from
+`services/media/mediaNaming.ts`) — see "Cloudinary Image Pipeline" in ARCHITECTURE.md.

@@ -15,6 +15,8 @@
  * 3. Set Public ID to: city-{country}-{city}
  */
 
+import { API_URL } from '../src/shared/api/config';
+
 // Cloudinary cloud name
 export const CLOUDINARY_CLOUD_NAME = 'dh8tbq8wy';
 
@@ -212,6 +214,48 @@ export const snapCloudinaryWidth = (width: number): number => {
   return CLOUDINARY_MAX_WIDTH;
 };
 
+// ============================================================================
+// External images → our resizing proxy (zero Cloudinary credits)
+// ============================================================================
+
+/**
+ * Hosts served directly: they have their own CDN/resizing and are allowed by
+ * the CSP. Everything else external (listing feeds, scraped sites) goes
+ * through `/api/image-proxy`, which resizes to WebP and caches on our server.
+ */
+const DIRECT_IMAGE_HOSTS = new Set(['images.unsplash.com', 'upload.wikimedia.org']);
+
+const isOwnSiteUrl = (url: URL): boolean =>
+  typeof window !== 'undefined' && url.host === window.location.host;
+
+/** Proxy URL for an external image at a bucketed width. */
+export const buildImageProxyUrl = (url: string, width?: number): string => {
+  const params = new URLSearchParams({ url });
+  if (width) params.set('w', String(snapCloudinaryWidth(width)));
+  return `${API_URL}/image-proxy?${params.toString()}`;
+};
+
+/** True for http(s) images we should resize through the proxy. */
+export const shouldProxyImage = (rawUrl: string): boolean => {
+  // Only in the browser. Server contexts (Pages Functions building share
+  // cards) have no API origin to point at and keep the source URL.
+  if (typeof window === 'undefined') return false;
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+  const host = url.hostname.toLowerCase();
+  if (host === 'res.cloudinary.com' || host.endsWith('googleusercontent.com')) return false;
+  if (DIRECT_IMAGE_HOSTS.has(host) || isOwnSiteUrl(url)) return false;
+  if (rawUrl.startsWith(`${API_URL}/image-proxy`)) return false;
+  // SVGs are never proxied (the proxy rejects them — they can carry script).
+  if (/\.svg(?:$|\?)/i.test(url.pathname)) return false;
+  return true;
+};
+
 /**
  * Optimizes a Cloudinary-uploaded image URL by injecting transformation parameters.
  *
@@ -333,6 +377,11 @@ export const optimizeCloudinaryUrl = (
     // Remove any existing size suffix and add our own
     const cleaned = url.replace(/=s\d+-c$/, '').replace(/=s\d+$/, '');
     return `${cleaned}=s${size}`;
+  }
+
+  // Other external images (listing feeds): resized + cached by our proxy.
+  if (shouldProxyImage(url)) {
+    return buildImageProxyUrl(url, requestedWidth);
   }
 
   return url;

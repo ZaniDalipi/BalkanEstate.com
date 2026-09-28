@@ -10,6 +10,7 @@
  * watched a blurred placeholder for seconds.
  */
 
+import { API_URL } from '../shared/api/config';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getGallerySources,
@@ -116,10 +117,12 @@ describe('getGallerySources', () => {
     expect(getGallerySources(CLOUDINARY).crossOrigin).toBe('anonymous');
   });
 
-  it('routes external URLs through the proxy with no srcSet', () => {
+  it('routes external URLs through the resizing proxy on the API host', () => {
     const sources = getGallerySources('https://example.com/house.jpg');
-    expect(sources.src).toBe(`/api/image-proxy?url=${encodeURIComponent('https://example.com/house.jpg')}`);
-    expect(sources.srcSet).toBe('');
+    const encoded = encodeURIComponent('https://example.com/house.jpg');
+    expect(sources.src).toBe(`${API_URL}/image-proxy?url=${encoded}&w=1920`);
+    // One candidate per width, so phones don't download the desktop size.
+    expect(sources.srcSet).toContain(`${API_URL}/image-proxy?url=${encoded}&w=480 480w`);
     expect(sources.crossOrigin).toBeUndefined();
   });
 

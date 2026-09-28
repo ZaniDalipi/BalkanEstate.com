@@ -23,7 +23,14 @@
  * `crossOrigin`). A warmed photo is then a guaranteed cache hit on display.
  */
 
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from './cloudinaryConfig';
+import {
+  optimizeCloudinaryUrl,
+  cloudinarySrcSet,
+  getPropertyImagePlaceholder,
+  buildImageProxyUrl,
+  shouldProxyImage,
+  snapCloudinaryWidth,
+} from './cloudinaryConfig';
 
 export const isCloudinaryUrl = (url: string | undefined): url is string =>
   typeof url === 'string' && url.includes('res.cloudinary.com');
@@ -98,8 +105,16 @@ export const getGallerySources = (
   if (!url) return { src: '', srcSet: '', sizes, placeholder: '' };
 
   if (!isCloudinaryUrl(url)) {
-    // External URLs go through the backend proxy, which serves a single size.
-    return { src: `/api/image-proxy?url=${encodeURIComponent(url)}`, srcSet: '', sizes, placeholder: '' };
+    // External URLs go through the backend proxy, which resizes and caches
+    // each width on our server (no Cloudinary credits).
+    if (!shouldProxyImage(url)) return { src: url, srcSet: '', sizes, placeholder: '' };
+    const seen = new Set<number>();
+    const srcSet = widths
+      .map(snapCloudinaryWidth)
+      .filter((w) => (seen.has(w) ? false : (seen.add(w), true)))
+      .map((w) => `${buildImageProxyUrl(url, w)} ${w}w`)
+      .join(', ');
+    return { src: buildImageProxyUrl(url, fallbackWidth), srcSet, sizes, placeholder: '' };
   }
 
   return {

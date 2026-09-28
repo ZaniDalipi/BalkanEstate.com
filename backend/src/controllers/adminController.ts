@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { deleteAgencyMedia, deleteListingMedia, deleteUserPersonalMedia } from '../services/cloudinaryService';
 import User from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';
@@ -229,8 +230,20 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
       await Agent.deleteMany({ userId: id });
     }
 
+    const listingIds = (await Property.find({ sellerId: id }).select('_id').lean()).map((p) => String(p._id));
     await Property.deleteMany({ sellerId: id });
     await user.deleteOne();
+
+    // The user and their listings are gone: remove the listings' media and the
+    // user's personal files. Best-effort — logged, never blocks the delete.
+    try {
+      for (const propertyId of listingIds) {
+        await deleteListingMedia(id, propertyId);
+      }
+      await deleteUserPersonalMedia(id);
+    } catch (mediaError) {
+      adminLogger.error('⚠️ Failed to delete media for removed user:', mediaError);
+    }
 
     // Invalidate related caches so deletion reflects immediately across the app
     invalidateCache('/api/agents');
@@ -484,6 +497,12 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
 
     // Delete the agency
     await agency.deleteOne();
+
+    try {
+      await deleteAgencyMedia(id);
+    } catch (mediaError) {
+      adminLogger.error('⚠️ Failed to delete media for removed agency:', mediaError);
+    }
 
     res.json({ message: 'Agency deleted successfully and agents unassigned' });
   } catch (error: any) {

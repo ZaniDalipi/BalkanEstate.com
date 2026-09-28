@@ -334,9 +334,24 @@ export const generalRateLimiter = rateLimit({
   skip: (req: Request) => {
     // Skip rate limiting entirely in development for easier testing
     if (isDevelopment) return true;
-    // Skip rate limiting for health checks only
-    return req.path === '/health';
+    // Health checks skip; image-proxy has its own limiter (a results page can
+    // load dozens of images and must not eat the browsing budget).
+    return req.path === '/health' || req.path.startsWith('/image-proxy');
   },
+  validate: { xForwardedForHeader: false },
+});
+
+/**
+ * Image proxy limiter. Generous (pages load many images, and most requests
+ * are cache hits) but stops one client from using us as a free resizer.
+ */
+export const imageProxyRateLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 1500,
+  message: { error: 'Too many image requests. Please try again shortly.' },
+  standardHeaders: !isProduction,
+  legacyHeaders: false,
+  skip: () => isDevelopment,
   validate: { xForwardedForHeader: false },
 });
 

@@ -62,9 +62,9 @@ export function cityImageSources(
 
   const stored = usableUrl(subject.imageUrl);
   if (stored) {
-    // Cloudinary URLs get resized to the box they fill; anything else (a
-    // Wikipedia or Unsplash original) comes back unchanged, since we cannot
-    // transform a host we don't control.
+    // Cloudinary URLs get resized to the box they fill; Wikipedia and
+    // Unsplash originals come back unchanged; any other host is resized by
+    // our image proxy.
     sources.push(optimizeCloudinaryUrl(stored, {
       width, height, quality, crop: 'fill', gravity: 'auto',
     }) || stored);

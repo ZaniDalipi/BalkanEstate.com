@@ -4,6 +4,7 @@ import {
   optimizeCloudinaryUrl,
   snapCloudinaryWidth,
   CLOUDINARY_MAX_WIDTH,
+  shouldProxyImage,
 } from '../../config/cloudinaryConfig';
 
 const SRC = 'https://res.cloudinary.com/demo/image/upload/v1/house.jpg';
@@ -40,5 +41,19 @@ describe('Cloudinary transformation budget', () => {
     expect(set.split(', ')).toHaveLength(2);
     expect(set).toContain(' 320w');
     expect(set).toContain(' 480w');
+  });
+});
+
+describe('external images', () => {
+  it('sends feed photos through the resizing proxy at a bucketed width', () => {
+    const url = optimizeCloudinaryUrl('https://feed.example.com/photos/1.jpg', { width: 300 });
+    expect(url).toContain('/image-proxy?url=https%3A%2F%2Ffeed.example.com%2Fphotos%2F1.jpg&w=320');
+  });
+
+  it('leaves hosts with their own CDN and SVGs alone', () => {
+    expect(shouldProxyImage('https://upload.wikimedia.org/a.jpg')).toBe(false);
+    expect(shouldProxyImage('https://images.unsplash.com/photo-1')).toBe(false);
+    expect(shouldProxyImage('https://feed.example.com/logo.svg')).toBe(false);
+    expect(shouldProxyImage('https://feed.example.com/a.jpg')).toBe(true);
   });
 });

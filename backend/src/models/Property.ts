@@ -112,6 +112,8 @@ export interface IProperty extends Document {
   villaApprovalReviewedAt?: Date;
   villaApprovalReason?: string;
   soldAt?: Date;
+  /** Set when the retention job cleared this listing's media from Cloudinary. */
+  mediaPurgedAt?: Date;
   price: number;
   isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
   // Price discount fields
@@ -340,6 +342,7 @@ const PropertySchema: Schema = new Schema(
       type: Date,
       index: true,
     },
+    mediaPurgedAt: { type: Date },
     price: {
       type: Number,
       required: true,

@@ -15,6 +15,7 @@ import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proB
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
 import { cleanupOrphanedTempImages } from '../services/cloudinaryService';
+import { runMediaRetention } from '../services/media/mediaRetentionService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
@@ -56,6 +57,7 @@ let deferredReplayTask: cron.ScheduledTask | null = null;
 let scoreRefreshTask: cron.ScheduledTask | null = null;
 let cityMarketDigestTask: cron.ScheduledTask | null = null;
 let tempImageCleanupTask: cron.ScheduledTask | null = null;
+let mediaRetentionTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -434,6 +436,22 @@ export const startCronJobs = () => {
     });
   });
 
+  // Media retention - daily at 4:15 AM. Clears Cloudinary media of listings
+  // deleted/sold longer ago than MEDIA_RETENTION_*_YEARS (defaults 1 / 2).
+  // Runs in small batches, so a backlog drains over several nights.
+  mediaRetentionTask = cron.schedule('15 4 * * *', async () => {
+    await withDbConnection('media retention', async () => {
+      try {
+        const result = await runMediaRetention();
+        cronLogger.info(
+          `🧹 Media retention completed: ${result.deletedArchivesPurged} deleted, ${result.soldListingsPurged} sold listings cleared (${result.failures} failures)`
+        );
+      } catch (error) {
+        cronLogger.error('Media retention cron error:', error);
+      }
+    });
+  });
+
   // ===============================
   // RENTAL EXPIRY AUTO-RELEASE
   // ===============================
@@ -544,6 +562,7 @@ export const stopCronJobs = () => {
   if (scoreRefreshTask) scoreRefreshTask.stop();
   if (cityMarketDigestTask) cityMarketDigestTask.stop();
   if (tempImageCleanupTask) tempImageCleanupTask.stop();
+  if (mediaRetentionTask) mediaRetentionTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

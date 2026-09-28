@@ -7,6 +7,8 @@ import https from 'https';
 import http from 'http';
 import cloudinary from '../config/cloudinary';
 import { videoLogger } from '../utils/logger';
+import { buildMediaFolder, listingTag, mediaTags } from './media/mediaNaming';
+import { resolveMediaOwner } from './media/mediaOwnerResolver';
 
 // Set FFmpeg path from installer
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -828,12 +830,15 @@ const uploadVideoToCloudinary = async (
   userId: string,
   propertyId: string
 ): Promise<{ url: string; publicId: string }> => {
-  return new Promise((resolve, reject) => {
-    const folder = `balkan-estate/users/${userId}/listings/${propertyId}/videos`;
+  const owner = await resolveMediaOwner('video', { userId, propertyId });
+  const folder = buildMediaFolder('video', owner);
+  const tags = mediaTags('video', owner);
 
+  const uploaded = await new Promise<{ url: string; publicId: string }>((resolve, reject) => {
     cloudinary.uploader.upload(videoPath, {
       resource_type: 'video',
       folder,
+      tags,
       // One video per listing: regenerating replaces the previous file
       // instead of leaving it behind to be billed for storage forever.
       public_id: 'showcase',
@@ -852,6 +857,28 @@ const uploadVideoToCloudinary = async (
       }
     });
   });
+
+  await removeSupersededVideos(propertyId, uploaded.publicId);
+  return uploaded;
+};
+
+/**
+ * A listing keeps one video. If its title changed since the last render, the
+ * new video landed in a new folder — delete the older ones it replaced.
+ */
+const removeSupersededVideos = async (propertyId: string, keepPublicId: string): Promise<void> => {
+  try {
+    const page: any = await cloudinary.api.resources_by_tag(listingTag(propertyId), {
+      resource_type: 'video',
+      max_results: 50,
+    });
+    const stale = (page.resources || [])
+      .map((r: { public_id: string }) => r.public_id)
+      .filter((id: string) => id !== keepPublicId);
+    for (const id of stale) await deleteGeneratedVideo(id);
+  } catch (error: any) {
+    videoLogger.warn(`⚠️ Could not check for superseded videos of ${propertyId}: ${error.message}`);
+  }
 };
 
 /**
