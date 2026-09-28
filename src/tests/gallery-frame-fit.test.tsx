@@ -113,10 +113,10 @@ const property = {
   lng: 19.8,
 } as unknown as Property;
 
-/** The thumbnail strip renders at w_390; the carousel does not. */
+/** The thumbnail strip renders at w_480; the carousel does not. */
 const thumbnails = (): HTMLImageElement[] =>
   Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-    img.getAttribute('src')?.includes('w_390')
+    img.getAttribute('src')?.includes('w_480')
   );
 
 /** Fakes a decode so the component learns the photo's real shape. */

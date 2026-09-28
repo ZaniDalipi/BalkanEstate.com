@@ -4,7 +4,7 @@ import cloudinary from '../config/cloudinary';
 import CityMarketData from '../models/CityMarketData';
 import { apiLogger } from '../utils/logger';
 
-const IMAGE_MAX_AGE_DAYS = 30; // Re-fetch images older than 30 days
+const IMAGE_MAX_AGE_DAYS = 365; // Wikipedia photos rarely change; each refresh re-bills every derived size
 const MAX_IMAGE_WIDTH = 1200;
 const MAX_IMAGE_HEIGHT = 800;
 
@@ -88,10 +88,8 @@ async function uploadBufferToCloudinary(
           public_id: publicId,
           overwrite: true,
           resource_type: 'image',
-          transformation: [
-            { quality: 'auto:good' },
-            { fetch_format: 'auto' },
-          ],
+          // The buffer is already resized by sharp; an incoming transformation
+          // here would only add a billed transformation per upload.
         },
         (error, result) => {
           if (error) reject(error);

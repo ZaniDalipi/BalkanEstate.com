@@ -834,8 +834,13 @@ const uploadVideoToCloudinary = async (
     cloudinary.uploader.upload(videoPath, {
       resource_type: 'video',
       folder,
-      eager: [{ width: 720, height: 1280, crop: 'limit', format: 'mp4' }],
-      eager_async: true,
+      // One video per listing: regenerating replaces the previous file
+      // instead of leaving it behind to be billed for storage forever.
+      public_id: 'showcase',
+      overwrite: true,
+      invalidate: true,
+      // No eager transcode — FFmpeg already produced a web-ready MP4 at the
+      // target size, and video transcoding is billed per second.
     }, (error, result) => {
       if (error) {
         videoLogger.error('Cloudinary error:', error);

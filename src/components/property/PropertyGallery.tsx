@@ -110,12 +110,11 @@ const cyclicOffset = (index: number, current: number, length: number): number =>
 const THUMB_ASPECT = 180 / 128;
 
 /**
- * Candidate widths for a thumbnail card: 1x, 2x and 3x its 195px frame.
- *
- * The strip used to stop at 390 (2x), so every phone with a 3x screen — most of
- * them — stretched a 2x file across a 3x card. 585 is that missing candidate.
+ * Candidate widths for a thumbnail card: roughly 1x, 2x and 3x its 195px frame,
+ * rounded up to the shared Cloudinary width buckets so the strip reuses the
+ * same derivatives as the rest of the app (see CLOUDINARY_WIDTH_BUCKETS).
  */
-const THUMB_WIDTHS = [195, 390, 585];
+const THUMB_WIDTHS = [240, 480, 640];
 
 /**
  * One card in the thumbnail strip.
@@ -156,7 +155,7 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
       <img
         // `limit` never crops and never upscales, so the card decides the
         // framing rather than the CDN guessing at it.
-        src={optimizeCloudinaryUrl(url, { width: 390, quality: GALLERY_QUALITY, crop: 'limit' })}
+        src={optimizeCloudinaryUrl(url, { width: 480, quality: GALLERY_QUALITY, crop: 'limit' })}
         srcSet={cloudinarySrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
         sizes="(max-width: 640px) 180px, 195px"
         alt=""

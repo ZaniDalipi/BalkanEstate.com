@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { createHash } from 'crypto';
 import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
 import { mediaLogger } from '../utils/logger';
@@ -242,47 +243,35 @@ export const uploadImage = async (
     maxWidth = 1920,
     maxHeight = 1080,
     preserveQuality = false,
-    // Note: quality parameter not used - using optimized fixed values (90/95) based on compression strategy
+    // Note: quality parameter not used - using fixed values (82/90) tuned for size
   } = options;
 
   try {
     // Step 1: Light processing using sharp (frontend already compresses)
     // Just ensure correct format and basic optimization
     // Images are already compressed on frontend, so minimal processing needed
+    // Every upload is resized to fit the max box and re-encoded here, for
+    // free, so Cloudinary never has to run a billed incoming transformation
+    // and the stored master stays small (storage is billed per GB too).
     const imageMetadata = await sharp(fileBuffer).metadata();
+    mediaLogger.info(`⚡ Processing image: ${imageMetadata.width}x${imageMetadata.height} -> max ${maxWidth}x${maxHeight}`);
 
-    let processedBuffer: Buffer;
-
-    // Only resize if image is significantly larger than max dimensions
-    // This reduces processing time since frontend already compresses
-    if (imageMetadata.width && imageMetadata.height &&
-        (imageMetadata.width > maxWidth * 1.5 || imageMetadata.height > maxHeight * 1.5)) {
-      mediaLogger.info(`⚡ Image needs resizing: ${imageMetadata.width}x${imageMetadata.height} -> max ${maxWidth}x${maxHeight}`);
-      processedBuffer = await sharp(fileBuffer)
-        .resize(maxWidth, maxHeight, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .jpeg({
-          // 4:4:4 keeps full colour resolution for images shown large —
-          // JPEG's default 4:2:0 halves the chroma and shows up as coloured
-          // fringing along hard edges once the picture fills the screen.
-          quality: preserveQuality ? 95 : 90,
-          ...(preserveQuality ? { chromaSubsampling: '4:4:4' } : {}),
-          progressive: true,
-        })
-        .toBuffer();
-    } else {
-      // Image is already good size, just ensure JPEG format
-      mediaLogger.info(`✨ Image already optimized: ${imageMetadata.width}x${imageMetadata.height}, skipping resize`);
-      processedBuffer = await sharp(fileBuffer)
-        .jpeg({
-          quality: preserveQuality ? 98 : 95, // Minimal quality loss
-          ...(preserveQuality ? { chromaSubsampling: '4:4:4' } : {}),
-          progressive: true,
-        })
-        .toBuffer();
-    }
+    const processedBuffer: Buffer = await sharp(fileBuffer)
+      .rotate() // honour EXIF orientation before the metadata is dropped
+      .resize(maxWidth, maxHeight, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .jpeg({
+        // 4:4:4 keeps full colour resolution for images shown large —
+        // JPEG's default 4:2:0 halves the chroma and shows up as coloured
+        // fringing along hard edges once the picture fills the screen.
+        quality: preserveQuality ? 90 : 82,
+        ...(preserveQuality ? { chromaSubsampling: '4:4:4' } : {}),
+        progressive: true,
+        mozjpeg: true,
+      })
+      .toBuffer();
 
     const compressedBuffer = processedBuffer;
 
@@ -300,36 +289,19 @@ export const uploadImage = async (
           folder,
           resource_type: 'image',
           type: deliveryType,
-          // Cloudinary transformations for automatic optimization.
-          //
-          // This is an *incoming* transformation: it rewrites the asset being
-          // stored, so the master itself is compressed, not just the copies
-          // served from it. That is the right trade for most uploads, and the
-          // wrong one for an image displayed nearly full-bleed, which is then
-          // compressed again on delivery. `preserveQuality` keeps the master
-          // as uploaded; delivery still applies `q_auto`/`f_auto` per request
+          // No incoming `transformation` here: sharp above already sized and
+          // compressed the master, and an incoming transformation would be
+          // billed on every upload. Delivery applies f_auto/q_auto per request
           // via `optimizeCloudinaryUrl`, so nothing is served unoptimised.
-          ...(preserveQuality
-            ? {}
-            : {
-              transformation: [
-                { quality: 'auto:good' }, // Auto quality adjustment
-                { fetch_format: 'auto' }, // Serve WebP to supported browsers
-              ],
-            }),
           // Add metadata for better organization
           context: {
             type,
             user_id: userId,
             ...(propertyId && { property_id: propertyId }),
           },
-          // Enable eager transformations for commonly used sizes
-          // This pre-generates optimized versions
-          eager: type === 'property' ? [
-            { width: 800, height: 600, crop: 'fill', quality: 'auto:good' }, // Thumbnail
-            { width: 1200, height: 800, crop: 'fill', quality: 'auto:good' }, // Medium
-          ] : undefined,
-          eager_async: true, // Generate eagerly in background
+          // No eager transformations: they pre-generated sizes the frontend
+          // never requests (it builds its own f_auto,q_auto,w_… URLs), so
+          // each upload paid for two derivatives nobody downloaded.
         },
         (error, result) => {
           if (error) reject(error);
@@ -425,7 +397,7 @@ export const uploadPropertyImages = async (
 /**
  * Context for re-hosting an external (scraped) image, used to organize it under
  * the user the listing is attributed to — mirroring the user-uploaded layout:
- *   balkan-estate/users/{userId}/external-listings/{listingId}-{slug}
+ *   balkan-estate/users/{userId}/external-listings/{listingId}
  * When no attribution is available it falls back to a flat shared folder.
  */
 export interface ExternalImageContext {
@@ -440,9 +412,9 @@ export interface ExternalImageContext {
 const buildExternalFolder = (ctx: ExternalImageContext): string => {
   const ROOT = 'balkan-estate';
   if (ctx.userId) {
-    const listing = ctx.listingId
-      ? `/${idSlugSegment(ctx.listingId, slugify(ctx.listingTitle))}`
-      : '';
+    // ID only (no title slug): the folder is part of the public_id, and a
+    // title edited at the source would otherwise re-upload every photo.
+    const listing = ctx.listingId ? `/${ctx.listingId}` : '';
     return `${ROOT}/users/${ctx.userId}/external-listings${listing}`;
   }
   return `${ROOT}/external-listings`;
@@ -475,12 +447,18 @@ export const uploadFromUrl = async (
     };
   }
 
+  // The ingest job re-normalizes existing listings on every run. A public_id
+  // derived from the source URL plus `overwrite: false` makes a repeat upload
+  // resolve to the asset we already have instead of storing another copy.
+  const publicId = createHash('sha1').update(remoteUrl).digest('hex').slice(0, 20);
   const result = await cloudinary.uploader.upload(remoteUrl, {
     folder: buildExternalFolder(context),
+    public_id: publicId,
+    overwrite: false,
     resource_type: 'image',
+    // Scraped photos are often huge; cap the stored master like our own uploads.
     transformation: [
-      { quality: 'auto:good' },
-      { fetch_format: 'auto' },
+      { width: 1920, height: 1920, crop: 'limit', quality: 'auto:good' },
     ],
   });
   mediaLogger.info(`✅ Re-hosted external image to Cloudinary: ${result.public_id}`);
@@ -797,6 +775,68 @@ export const deleteBusinessListingImages = async (
 export const cleanupTempImages = async (userId: string): Promise<void> => {
   const folderPath = `balkan-estate/users/${userId}/listings/temp`;
   await deleteFolder(folderPath);
+};
+
+/**
+ * Sweep listing photos that were uploaded but never attached to a listing.
+ *
+ * The listing form uploads photos to `.../listings/temp` before the property
+ * exists; if the seller abandons the form, those files stay in Cloudinary and
+ * are billed as storage forever. This deletes temp uploads older than
+ * `maxAgeHours` that no Property still references (a failed move on create
+ * can leave a live listing pointing at a temp file, so we check first).
+ *
+ * Uses the Admin API (rate-limited, but not billed as credits).
+ */
+export const cleanupOrphanedTempImages = async (maxAgeHours = 48): Promise<number> => {
+  // Lazy import keeps this service free of a model dependency at load time.
+  const { default: Property } = await import('../models/Property');
+  const cutoff = Date.now() - maxAgeHours * 60 * 60 * 1000;
+  const candidates: string[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const page: any = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: 'balkan-estate/users/',
+      max_results: 500,
+      ...(cursor ? { next_cursor: cursor } : {}),
+    });
+    for (const r of page.resources || []) {
+      if (r.public_id.includes('/listings/temp/') && new Date(r.created_at).getTime() < cutoff) {
+        candidates.push(r.public_id);
+      }
+    }
+    cursor = page.next_cursor;
+  } while (cursor);
+
+  if (candidates.length === 0) return 0;
+
+  const inUse = new Set<string>();
+  for (let i = 0; i < candidates.length; i += 100) {
+    const batch = candidates.slice(i, i + 100);
+    const docs = await Property.find({
+      $or: [
+        { 'images.publicId': { $in: batch } },
+        { 'floorplans.publicId': { $in: batch } },
+        { imagePublicId: { $in: batch } },
+        { floorplanPublicId: { $in: batch } },
+      ],
+    }).select('images.publicId floorplans.publicId imagePublicId floorplanPublicId').lean();
+    for (const d of docs as any[]) {
+      [d.imagePublicId, d.floorplanPublicId, ...(d.images || []).map((x: any) => x.publicId), ...(d.floorplans || []).map((x: any) => x.publicId)]
+        .filter(Boolean)
+        .forEach((id: string) => inUse.add(id));
+    }
+  }
+
+  const orphans = candidates.filter((id) => !inUse.has(id));
+  // delete_resources accepts at most 100 ids per call.
+  for (let i = 0; i < orphans.length; i += 100) {
+    await deleteImages(orphans.slice(i, i + 100));
+  }
+  mediaLogger.info(`🧹 Removed ${orphans.length} orphaned temp listing images (${inUse.size} still in use)`);
+  return orphans.length;
 };
 
 // Export types for use in other modules

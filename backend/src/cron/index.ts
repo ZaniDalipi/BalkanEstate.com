@@ -14,6 +14,7 @@ import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propert
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
+import { cleanupOrphanedTempImages } from '../services/cloudinaryService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
@@ -54,6 +55,7 @@ let listingIngestTask: cron.ScheduledTask | null = null;
 let deferredReplayTask: cron.ScheduledTask | null = null;
 let scoreRefreshTask: cron.ScheduledTask | null = null;
 let cityMarketDigestTask: cron.ScheduledTask | null = null;
+let tempImageCleanupTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -419,6 +421,19 @@ export const startCronJobs = () => {
     });
   });
 
+  // Orphaned listing uploads - daily at 3:30 AM. Photos uploaded to the temp
+  // folder by abandoned listing forms are otherwise billed as storage forever.
+  tempImageCleanupTask = cron.schedule('30 3 * * *', async () => {
+    await withDbConnection('temp image cleanup', async () => {
+      try {
+        const count = await cleanupOrphanedTempImages(48);
+        cronLogger.info(`🧹 Temp image cleanup completed: ${count} orphaned uploads removed`);
+      } catch (error) {
+        cronLogger.error('Temp image cleanup cron error:', error);
+      }
+    });
+  });
+
   // ===============================
   // RENTAL EXPIRY AUTO-RELEASE
   // ===============================
@@ -528,6 +543,7 @@ export const stopCronJobs = () => {
   if (deferredReplayTask) deferredReplayTask.stop();
   if (scoreRefreshTask) scoreRefreshTask.stop();
   if (cityMarketDigestTask) cityMarketDigestTask.stop();
+  if (tempImageCleanupTask) tempImageCleanupTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

@@ -16,6 +16,7 @@ import {
   deleteFolder,
   organizeListingMedia,
 } from '../services/cloudinaryService';
+import cloudinary from '../config/cloudinary';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
@@ -1475,9 +1476,18 @@ export const deleteProperty = async (
       const userId = currentUser._id.toString();
       const propertyId = String(property._id);
 
-      // Option 1: Delete entire property folder (most efficient)
-      // This deletes all images in balkan-estate/properties/user-{userId}/listing-{propertyId}/
+      // Option 1: Delete entire property folder (most efficient).
+      // Prefix match, so it also covers the `{propertyId}-{slug}` folders.
+      await deleteFolder(`balkan-estate/users/${userId}/listings/${propertyId}`);
+      // Legacy layout from before the users/ folder structure.
       await deleteFolder(`balkan-estate/properties/user-${userId}/listing-${propertyId}`);
+
+      // Generated showcase video (a video resource, so not in the image sweep).
+      if (property.generatedVideoPublicId) {
+        await cloudinary.uploader
+          .destroy(property.generatedVideoPublicId, { resource_type: 'video' })
+          .catch(() => undefined);
+      }
 
       // Option 2 (fallback): Delete individual images if they exist
       const publicIdsToDelete: string[] = [];

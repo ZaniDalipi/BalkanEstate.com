@@ -407,7 +407,7 @@ describe('optimizeCloudinaryUrl blur', () => {
         // blurring the full-size source before shrinking it costs the work the
         // small request was meant to avoid.
         expect(url).toBe(
-            'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto:eco,w_24,e_blur:400/v1/belgrade.jpg',
+            'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto:eco,w_32,c_limit,e_blur:400/v1/belgrade.jpg',
         );
     });
 

@@ -96,7 +96,8 @@ export const getPropertyImagePlaceholder = (imageUrl: string | undefined): strin
   if (!imageUrl) return '';
   const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
   if (!uploadMatch) return '';
-  return `${uploadMatch[1]}w_20,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
+  // Same 32px bucket the other blur-up placeholders snap to.
+  return `${uploadMatch[1]}w_32,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
 };
 
 /**
@@ -183,6 +184,34 @@ const stripCloudinaryTransforms = (rest: string): string => {
   return firstNonTransform !== -1 ? parts.slice(firstNonTransform).join('/') : rest;
 };
 
+// ============================================================================
+// Transformation budget
+// ============================================================================
+//
+// Cloudinary bills every *distinct* derived image (URL) as a transformation,
+// and f_auto multiplies that by each output format a browser asks for. Before
+// this list existed the app requested ~35 different widths (20, 24, 40, 48,
+// 56, 80, 96, 128, 160, 192, 195, 200, 216 …), so every photo spawned dozens
+// of near-identical derivatives. Snapping each request up to the nearest
+// bucket keeps the set small and lets the CDN cache serve repeats for free.
+//
+// Masters are stored at ≤1920px, so nothing above that is ever useful — a
+// larger request would only upscale and ship more bytes.
+
+/** Widths a delivery URL may use. Requests are rounded *up* to the next one. */
+export const CLOUDINARY_WIDTH_BUCKETS = [32, 64, 128, 240, 320, 480, 640, 800, 1080, 1280, 1600, 1920] as const;
+
+/** Largest width ever requested — matches the stored master's max edge. */
+export const CLOUDINARY_MAX_WIDTH = 1920;
+
+/** Round a requested width up to the nearest bucket (capped at the max). */
+export const snapCloudinaryWidth = (width: number): number => {
+  for (const bucket of CLOUDINARY_WIDTH_BUCKETS) {
+    if (width <= bucket) return bucket;
+  }
+  return CLOUDINARY_MAX_WIDTH;
+};
+
 /**
  * Optimizes a Cloudinary-uploaded image URL by injecting transformation parameters.
  *
@@ -248,8 +277,8 @@ export const optimizeCloudinaryUrl = (
     blur,
   } = options;
 
-  const width = clampDimension(rawWidth, 4096);
-  const height = clampDimension(rawHeight, 4096);
+  const requestedWidth = clampDimension(rawWidth, 4096);
+  const requestedHeight = clampDimension(rawHeight, 4096);
 
   // Security: the background goes straight into the URL's transform segment,
   // so only accept a colour name or an explicit rgb:hex value.
@@ -275,10 +304,20 @@ export const optimizeCloudinaryUrl = (
       const [, base, rest] = uploadBaseMatch;
       const cleanPath = stripCloudinaryTransforms(rest);
 
+      // Width-only requests (nearly all of them) snap to a shared bucket so
+      // different components reuse one derivative. An explicit width×height
+      // box is left exact — share cards, for one, must be 1200×630.
+      const width =
+        requestedWidth && !requestedHeight ? snapCloudinaryWidth(requestedWidth) : requestedWidth;
+      const height = requestedHeight;
+
       const transforms: string[] = [`f_${format}`, `q_${quality}`];
       if (width) transforms.push(`w_${width}`);
       if (height) transforms.push(`h_${height}`);
+      // No crop means a plain resize, which Cloudinary would happily upscale
+      // past the master. `c_limit` only ever shrinks.
       if (crop) transforms.push(`c_${crop}`);
+      else if (width || height) transforms.push('c_limit');
       if (gravity) transforms.push(`g_${gravity}`);
       if (safeBackground) transforms.push(`b_${safeBackground}`);
       // Last, so Cloudinary blurs the downscaled image rather than the source.
@@ -290,7 +329,7 @@ export const optimizeCloudinaryUrl = (
 
   // Handle Google user content URLs (avatars) - resize via URL param
   if (url.includes('lh3.googleusercontent.com') || url.includes('googleusercontent.com')) {
-    const size = clampDimension(rawWidth, 512) || 96;
+    const size = clampDimension(requestedWidth, 512) || 96;
     // Remove any existing size suffix and add our own
     const cleaned = url.replace(/=s\d+-c$/, '').replace(/=s\d+$/, '');
     return `${cleaned}=s${size}`;
@@ -305,7 +344,7 @@ export const optimizeCloudinaryUrl = (
  */
 export const cloudinarySrcSet = (
   url: string | undefined,
-  widths: number[] = [400, 640, 800, 1200, 1920],
+  widths: number[] = [480, 800, 1280, 1920],
   options: {
     quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best';
     format?: 'auto' | 'webp';
@@ -321,11 +360,13 @@ export const cloudinarySrcSet = (
   const uploadMatch = url.match(/^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/);
   if (!uploadMatch) return '';
 
+  // Widths are snapped to buckets, so two candidates can collapse into one —
+  // describe each by its real width and list it once.
+  const seen = new Set<number>();
   return widths
-    .map((w) => {
-      const optimized = optimizeCloudinaryUrl(url, { ...options, width: w });
-      return `${optimized} ${w}w`;
-    })
+    .map(snapCloudinaryWidth)
+    .filter((w) => (seen.has(w) ? false : (seen.add(w), true)))
+    .map((w) => `${optimizeCloudinaryUrl(url, { ...options, width: w })} ${w}w`)
     .join(', ');
 };
 
