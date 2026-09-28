@@ -395,29 +395,31 @@ export const uploadPropertyImages = async (
 };
 
 /**
- * Context for re-hosting an external (scraped) image, used to organize it under
- * the user the listing is attributed to — mirroring the user-uploaded layout:
- *   balkan-estate/users/{userId}/external-listings/{listingId}
- * When no attribution is available it falls back to a flat shared folder.
+ * Context for re-hosting an external feed image. Feed images live in their own
+ * tree, apart from anything a user uploaded, so they can be audited or wiped
+ * per source in one go:
+ *   balkan-estate/external-feeds/{sourceSlug}/{listingId}
  */
 export interface ExternalImageContext {
-  /** The user the imported listing is attributed to (source owner or external seller). */
-  userId?: string;
+  /** The ListingSource slug the image came from. */
+  sourceSlug?: string;
   /** Stable per-source listing id (e.g. sourceListingId) for the listing folder. */
   listingId?: string;
-  /** Human-readable listing title, appended as a slug for browsability. */
-  listingTitle?: string;
 }
 
+/** Keep a folder segment to characters Cloudinary accepts in a public_id. */
+const safeSegment = (value: string): string =>
+  value.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
+
+/** Root folder for every image that came from an external feed. */
+export const EXTERNAL_FEEDS_FOLDER = 'balkan-estate/external-feeds';
+
 const buildExternalFolder = (ctx: ExternalImageContext): string => {
-  const ROOT = 'balkan-estate';
-  if (ctx.userId) {
-    // ID only (no title slug): the folder is part of the public_id, and a
-    // title edited at the source would otherwise re-upload every photo.
-    const listing = ctx.listingId ? `/${ctx.listingId}` : '';
-    return `${ROOT}/users/${ctx.userId}/external-listings${listing}`;
-  }
-  return `${ROOT}/external-listings`;
+  const source = safeSegment(ctx.sourceSlug || 'unknown-source');
+  // ID only (no title slug): the folder is part of the public_id, and a
+  // title edited at the source would otherwise re-upload every photo.
+  const listing = ctx.listingId ? `/${safeSegment(ctx.listingId)}` : '';
+  return `${EXTERNAL_FEEDS_FOLDER}/${source}${listing}`;
 };
 
 /**
