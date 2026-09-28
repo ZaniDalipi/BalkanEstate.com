@@ -21,6 +21,7 @@ import { emitPropertyCreated, emitPropertyUpdated } from '../sockets/propertySoc
 import { invalidateCache } from '../middleware/cache';
 import { encodeId } from '../utils/idObfuscation';
 import { cronLogger } from '../utils/logger';
+import { MAX_IMPORTED_IMAGES, isJunkImageUrl } from './listingImageFilter';
 
 /**
  * Review queue for listings fetched from user-owned external feeds.
@@ -51,6 +52,26 @@ type Doc = Record<string, unknown>;
 
 const asObject = (value: unknown): Doc =>
   value && typeof value === 'object' ? (value as Doc) : {};
+
+/**
+ * Drafts queued before feed photos were filtered can hold flags/logos and more
+ * photos than a listing may carry; clean them wherever a draft is shown or
+ * published.
+ */
+const capImages = (doc: Doc): Doc => {
+  if (!Array.isArray(doc.images)) return doc;
+  const images = doc.images
+    .filter((img) => {
+      const url = asObject(img).url;
+      return typeof url === 'string' && !isJunkImageUrl(url);
+    })
+    .slice(0, MAX_IMPORTED_IMAGES);
+  if (images.length === doc.images.length) return doc;
+  const first = asObject(images[0]).url;
+  const imageUrl =
+    typeof doc.imageUrl === 'string' && !isJunkImageUrl(doc.imageUrl) ? doc.imageUrl : (first ?? '');
+  return { ...doc, images, imageUrl };
+};
 
 /**
  * Decide what a freshly fetched (and normalized) feed item means for the
@@ -152,7 +173,8 @@ export const queueForReview = async (
 
 // ── Read ─────────────────────────────────────────────────────────────────────
 
-const pickReview = (doc: Doc): Doc => {
+const pickReview = (raw: Doc): Doc => {
+  const doc = capImages(raw);
   const out: Doc = {};
   for (const f of REVIEW_FIELDS) {
     if (f === 'images') {
@@ -229,7 +251,7 @@ export const getDraft = async (userId: Types.ObjectId, draftId: string): Promise
     ListingSource.findById(draft.source).select('name').lean(),
     draft.kind === 'update' && draft.propertyId ? Property.findById(draft.propertyId).lean() : null,
   ]);
-  const listing: Doc = { ...asObject(draft.data) };
+  const listing: Doc = { ...capImages(asObject(draft.data)) };
   for (const f of PRIVATE_LISTING_FIELDS) delete listing[f];
   return {
     ...toDto(draft, source?.name, live ? (live as unknown as Doc) : undefined),
@@ -391,7 +413,7 @@ export const acceptDraft = async (
   const source = await ListingSource.findOne({ _id: draft.source, userId }).select('slug');
   if (!source) throw new ReviewError('The feed for this listing was deleted', 410, 'SOURCE_GONE');
 
-  const data = { ...asObject(draft.data) };
+  const data = { ...capImages(asObject(draft.data)) };
   const blocking = detectIssues(data).filter((i) => BLOCKING_ISSUES.includes(i));
   if (blocking.length > 0) {
     throw new ReviewError('Fill in the missing details before publishing', 422, 'DRAFT_INCOMPLETE', {

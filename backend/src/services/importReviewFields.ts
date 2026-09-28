@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { isPropertyType } from '../config/propertyTypes';
+import { MAX_IMPORTED_IMAGES } from './listingImageFilter';
 
 /**
  * Field-level helpers for the imported-listing review queue: which fields a
@@ -205,7 +206,7 @@ export const sanitizeDraftPatch = (patch: unknown, current: Draft): PatchResult 
       }
       const unknownUrl = (value as string[]).find((u) => !known.has(u));
       if (unknownUrl) return { ok: false, error: 'images may only keep or reorder existing photos' };
-      const kept = Array.from(new Set(value as string[]));
+      const kept = Array.from(new Set(value as string[])).slice(0, MAX_IMPORTED_IMAGES);
       set.images = kept.map((u) => known.get(u));
       set.imageUrl = kept[0] ?? '';
       continue;

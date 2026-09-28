@@ -14,6 +14,7 @@
  */
 import * as cheerio from 'cheerio';
 import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
+import { isJunkImageUrl } from './listingImageFilter';
 
 type Mapped = Record<string, unknown>;
 
@@ -208,11 +209,29 @@ const deduplicateImageUrls = (urls: string[]): string[] => {
   return Array.from(groups.values()).map(g => g.url);
 };
 
+/**
+ * Page regions whose images are site chrome or other listings, never photos
+ * of this property: navigation, footers, language switchers (flags), agent
+ * cards, logos, social links and "related / similar properties" carousels.
+ */
+const NON_LISTING_REGIONS = [
+  'nav', 'footer', 'aside', '#masthead', '.site-header', '.site-footer', '.navbar', '.menu',
+  '.wpml-ls', '.trp-language-switcher', '.gtranslate_wrapper',
+  '[class*="lang"]', '[class*="flag"]', '[id*="lang"]',
+  '[class*="logo"]', '[class*="avatar"]', '[class*="agent"]', '[class*="author"]',
+  '[class*="social"]', '[class*="share"]', '[class*="advert"]',
+  '[class*="related"]', '[class*="similar"]', '[class*="recent"]', '[class*="other-propert"]',
+].join(', ');
+
 /** Pull every reasonable image URL from <img> tags on the page (with srcset & lazy-load support). */
 const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mapped): void => {
   const found: string[] = [];
+  // Stops below <body>: themes put language/layout classes on <body> itself.
+  const inNonListingRegion = (el: Parameters<typeof $>[0]): boolean =>
+    $(el).parentsUntil('body').addBack().filter(NON_LISTING_REGIONS).length > 0;
   $('img').each((_, el) => {
     const $el = $(el);
+    if (inNonListingRegion(el)) return;
     // Try every common lazy-load attr in priority order
     const candidate =
       $el.attr('src') ??
@@ -238,6 +257,7 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
   });
   // <source srcset> inside <picture> — prefer the largest descriptor
   $('picture source').each((_, el) => {
+    if (inNonListingRegion(el)) return;
     const srcset = $(el).attr('srcset');
     if (!srcset) return;
     const parts = srcset.split(',').map(p => p.trim());
@@ -263,6 +283,7 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
   ];
   for (const selector of galleryAttrSelectors) {
     $(selector).each((_, el) => {
+      if (inNonListingRegion(el)) return;
       const $el = $(el);
       const tag = (el as { tagName?: string }).tagName?.toLowerCase();
       // For anchor tags pointing to images — use href
@@ -287,43 +308,27 @@ const extractGalleryImages = ($: cheerio.CheerioAPI, base: string, target: Mappe
     });
   }
 
-  // Also scan for JSON gallery arrays embedded in page scripts (common in WP/custom RE sites)
-  $('script:not([src])').each((_, el) => {
-    const src = $(el).html() ?? '';
-    // Look for arrays of image URLs in JS variables
-    const urlPattern = /["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))["']/gi;
-    let m: RegExpExecArray | null;
-    while ((m = urlPattern.exec(src)) !== null) {
-      found.push(m[1]);
-    }
-  });
+  // Drop flags, logos, icons, trackers, map tiles and thumbnails.
+  let meaningful = found.filter((u) => !isJunkImageUrl(u));
 
-  // Filter out tracking pixels, icons, thumbnails, and non-listing images.
-  const meaningful = found.filter((u) => {
-    const lower = u.toLowerCase();
-    // Skip tracking pixels and 1x1 spacers
-    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
-    // Skip common icon/logo/avatar paths
-    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
-    // Skip known tracker domains
-    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
-    // Skip very small thumbnail hints in URL parameters
-    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
-    return true;
-  });
+  // Script-embedded URL arrays (common in WP/custom RE sites) are a fallback
+  // only: scripts also carry every other listing's photos, so scanning them
+  // when the DOM already has a gallery inflates the photo count.
+  if (meaningful.length === 0) {
+    $('script:not([src])').each((_, el) => {
+      const src = $(el).html() ?? '';
+      const urlPattern = /["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))["']/gi;
+      let m: RegExpExecArray | null;
+      while ((m = urlPattern.exec(src)) !== null) {
+        if (!isJunkImageUrl(m[1])) meaningful.push(m[1]);
+      }
+    });
+  }
 
   // Deduplicate: prefer higher-resolution variant when a URL appears in multiple
   // sizes via query params (e.g. ?w=400 vs ?w=1200 — keep ?w=1200).
-  const deduped = deduplicateImageUrls(found.filter((u) => {
-    const lower = u.toLowerCase();
-    if (/[?&](w|width|h|height)=1\b/.test(lower)) return false;
-    if (/(\/icon|\/logo|\/avatar|\/sprite|\/blank|\/pixel|\/spacer|\/placeholder|\/thumb[s]?\/[^/]*[_-]\d{1,3}x\d{1,3})/i.test(lower)) return false;
-    if (/(doubleclick|google-analytics|facebook\.net\/tr|pixel\.)/i.test(lower)) return false;
-    if (/[?&](size|dim|thumb|resize)=\d{1,3}\b/i.test(lower)) return false;
-    return true;
-  }));
-  pushImages(target, deduped);
-  void meaningful; // meaningful kept for potential future use
+  meaningful = deduplicateImageUrls(meaningful);
+  pushImages(target, meaningful);
 };
 
 const extractStructuredPriceFromHtml = ($: cheerio.CheerioAPI, target: Mapped): void => {

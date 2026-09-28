@@ -6,6 +6,7 @@ import type { RawListing } from './listingAdapters';
 import { geocodeAddress } from './geocodingService';
 import { uploadFromUrl } from './cloudinaryService';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
+import { cleanImportedImageUrls } from './listingImageFilter';
 import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 import User from '../models/User';
 import { cronLogger } from '../utils/logger';
@@ -458,6 +459,10 @@ interface NormalizeOptions {
   rehostImages?: boolean;
 }
 
+/**
+ * The listing's photo URLs: junk (flags, logos, icons, thumbnails) removed and
+ * capped at the platform's per-listing photo limit, before any re-hosting.
+ */
 const collectImageUrls = (mapped: Record<string, unknown>): string[] => {
   const urls: string[] = [];
   const main = mapped.imageUrl;
@@ -471,7 +476,7 @@ const collectImageUrls = (mapped: Record<string, unknown>): string[] => {
       }
     }
   }
-  return Array.from(new Set(urls.filter(Boolean)));
+  return cleanImportedImageUrls(urls);
 };
 
 const knownPropertyKeys = new Set<string>([
