@@ -3,10 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { MapPinIcon, BedIcon, BathIcon, SqftIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
-import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { preloadRoute } from '@/app/navigation/routePreload';
 import { generatePropertySlug } from '@/utils/slug';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
@@ -21,6 +19,8 @@ import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '@/shared/property/attributeDisplay';
+import { navigate, localizePath } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 /**
  * Column counts as literal classes: Tailwind scans source text, so an
@@ -835,7 +835,6 @@ PropertyCardInner.displayName = 'PropertyCardInner';
  */
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton, priority, wide }) => {
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
-  const { setDirection } = useNavigationDirection();
 
   // Defensive check for required fields
   const hasRequiredFields = property && property.id && property.price !== undefined;
@@ -869,7 +868,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         console.warn('PropertyCard: Failed to generate property slug');
         return null;
       }
-      return buildLocalizedPath(`/property/${slug}`);
+      return localizePath(paths.property(slug));
     } catch (error) {
       console.error('PropertyCard: Error generating property URL:', error);
       return null;
@@ -879,14 +878,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
   // Stable handlers using refs - won't cause PropertyCardInner re-renders
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    const path = paths.property(generatePropertySlug(property));
     if (shouldOpenInNewTab()) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(localizePath(path), '_blank', 'noopener,noreferrer');
     } else {
-      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-      window.history.pushState({}, '', url);
+      // The card's copy lets the detail page render at once; it refreshes itself.
+      navigate(path, { state: { property } });
     }
-  }, [dispatch, property]);
+  }, [property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -921,7 +920,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       key => BALKAN_COUNTRIES[key].name.toLowerCase() === property.country.toLowerCase()
     ) || '';
 
-    setDirection('back');
     if (type === 'city') {
       const newFilters = {
         ...stateRef.current.searchPageState.filters,
@@ -932,9 +930,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         filters: newFilters,
         activeFilters: newFilters,
       });
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
+      navigate(paths.search({ city: property.city, country: countryKey }), { direction: 'back' });
     } else {
       const newFilters = {
         ...stateRef.current.searchPageState.filters,
@@ -945,11 +941,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
         filters: newFilters,
         activeFilters: newFilters,
       });
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
+      navigate(paths.search({ country: countryKey }), { direction: 'back' });
     }
-  }, [property.city, property.country, dispatch]);
+  }, [property.city, property.country]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();

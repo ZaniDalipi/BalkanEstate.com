@@ -2,8 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/shared/Modal';
 import { useAppContext } from '@/context/AppContext';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { UserRole } from '@/types';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface AiMessageLimitInfo {
   limit: number;
@@ -36,8 +37,7 @@ const AiMessageLimitModal: React.FC<AiMessageLimitModalProps> = ({
   limitInfo,
 }) => {
   const { t } = useTranslation(['search', 'modals']);
-  const { state, dispatch } = useAppContext();
-  const { getLocalizedPath } = useLocalizedNavigation();
+  const { state } = useAppContext();
 
   const userRole = state.currentUser?.role;
   const isSeller = userRole === UserRole.PRIVATE_SELLER || userRole === UserRole.AGENT;
@@ -52,8 +52,7 @@ const AiMessageLimitModal: React.FC<AiMessageLimitModalProps> = ({
   const handleUpgrade = () => {
     onClose();
     setTimeout(() => {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-      window.history.pushState({ view: 'pricing' }, '', getLocalizedPath('/subscribe'));
+      navigate(paths.pricing());
     }, 150);
   };
 

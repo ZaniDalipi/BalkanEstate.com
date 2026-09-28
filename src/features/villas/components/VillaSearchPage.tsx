@@ -16,9 +16,10 @@ import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Property } from '@/types';
 import { VILLA_DESTINATIONS } from '@/src/features/home/data/villaDestinations';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -419,7 +420,6 @@ interface VillaSearchPageProps {
 
 const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) => {
     const { t } = useTranslation(['villas', 'search', 'common']);
-    const { getLocalizedPath } = useLocalizedNavigation();
 
     /*
      * The floating mobile header sits above the list rather than in it, so the
@@ -450,7 +450,6 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
     const {
         state,
-        dispatch,
         isLoading,
         error,
         filters,
@@ -637,9 +636,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     };
 
     const handleListVilla = () => {
-        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-rental' });
-        window.history.pushState({}, '', getLocalizedPath('/create-rental'));
+        navigate(paths.createRental());
     };
 
     const hasActiveFilters = activeFilterCount > 0;
@@ -1073,7 +1070,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         </div>
                                         {isAuthenticated && state.currentUser && (
                                             <button
-                                                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
+                                                onClick={() => navigate(paths.account())}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50 mr-0.5"
                                                 aria-label={t('common:aria.myAccount')}
                                             >

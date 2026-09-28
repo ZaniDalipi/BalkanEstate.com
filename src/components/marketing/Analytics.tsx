@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useLocation } from 'react-router-dom';
 
 interface AnalyticsProps {
   googleAnalyticsId?: string;
@@ -34,33 +35,22 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   facebookPixelId,
   hotjarId,
 }) => {
-  // Track page views on route change
+  // Track a page view on every navigation (and on the first render).
+  const { pathname } = useLocation();
   useEffect(() => {
-    const handleRouteChange = () => {
-      // Google Analytics page view
-      if (googleAnalyticsId && window.gtag) {
-        window.gtag('config', googleAnalyticsId, {
-          page_path: window.location.pathname,
-          page_title: document.title,
-        });
-      }
+    // Google Analytics page view
+    if (googleAnalyticsId && window.gtag) {
+      window.gtag('config', googleAnalyticsId, {
+        page_path: pathname,
+        page_title: document.title,
+      });
+    }
 
-      // Facebook Pixel page view
-      if (facebookPixelId && window.fbq) {
-        window.fbq('track', 'PageView');
-      }
-    };
-
-    // Initial page view
-    handleRouteChange();
-
-    // Listen for popstate (browser navigation)
-    window.addEventListener('popstate', handleRouteChange);
-
-    return () => {
-      window.removeEventListener('popstate', handleRouteChange);
-    };
-  }, [googleAnalyticsId, facebookPixelId]);
+    // Facebook Pixel page view
+    if (facebookPixelId && window.fbq) {
+      window.fbq('track', 'PageView');
+    }
+  }, [pathname, googleAnalyticsId, facebookPixelId]);
 
   return (
     <Helmet>

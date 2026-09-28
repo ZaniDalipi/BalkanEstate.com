@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bell, BellOff, Mail, MessageSquare, TrendingDown, Home, BarChart2, Megaphone, Globe2, CheckCircle, AlertTriangle, Loader2, ShieldCheck } from 'lucide-react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { apiRequest } from '@/src/shared/api';
+import { replaceQueryString } from '@/src/app/router/navigation';
 
 interface EmailPreferences {
   weeklyStats: boolean;
@@ -435,8 +436,7 @@ const UnsubscribeBanner: React.FC = () => {
     if (val) {
       setType(val);
       // Clean the query param from the URL without a page reload
-      const clean = window.location.pathname;
-      window.history.replaceState(null, '', clean);
+      replaceQueryString('');
     }
   }, []);
 

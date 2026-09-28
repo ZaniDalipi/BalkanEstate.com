@@ -7,7 +7,7 @@ import { useCityPriceHistory, useEconomicIndicators } from '../hooks/useCityInsi
 import PriceHistoryChart from './PriceHistoryChart';
 import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
 import { formatPrice } from '@/utils/currency';
-import { parseLanguageFromPath, buildLocalizedPath } from '@/src/utils/languageRouting';
+import { useParams } from 'react-router-dom';
 import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
 import { cityImageSources } from '../utils/cityImage';
 import { useAppContext } from '@/context/AppContext';
@@ -37,6 +37,8 @@ import {
   ShieldCheckIcon,
   InformationCircleIcon,
 } from '@/constants';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const isDev = import.meta.env?.DEV ?? false;
 
@@ -60,44 +62,17 @@ function safeFormatDate(dateStr: string | undefined | null, locale = 'en-US'): s
   return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-/** Extract city & country from the current URL path */
-function parseCityFromUrl(): { city: string; country: string } | null {
-  const { path } = parseLanguageFromPath(window.location.pathname);
-  const match = path.match(/^\/explore-cities\/([^/]+)\/([^/]+)$/);
-  if (!match) return null;
-  try {
-    return {
-      city: decodeURIComponent(match[1]),
-      country: decodeURIComponent(match[2]),
-    };
-  } catch {
-    return null;
-  }
-}
-
 const CityDashboard: React.FC = () => {
   const { t } = useTranslation(['exploreCities']);
-  const { dispatch, updateSearchPageState } = useAppContext();
+  const { updateSearchPageState } = useAppContext();
 
-  const [params, setParams] = useState(parseCityFromUrl);
+  // The city is the URL's: /explore-cities/:city/:country
+  const { city: cityParam, country: countryParam } = useParams();
+  const params = cityParam && countryParam ? { city: cityParam, country: countryParam } : null;
   const [showListingPrice, setShowListingPrice] = useState(false);
   const [showOfficialPrice, setShowOfficialPrice] = useState(false);
   const [suburbView, setSuburbView] = useState<'map' | 'list'>('map');
   const [selectedSuburb, setSelectedSuburb] = useState<SuburbEntry | null>(null);
-
-  // Re-parse URL when navigating between cities (popstate or pushState)
-  useEffect(() => {
-    const handleUrlChange = () => {
-      const next = parseCityFromUrl();
-      // Navigating away from the dashboard is App's routing to handle: this
-      // view is about to be replaced, and blanking it out first only costs the
-      // page transition the snapshot it animates out.
-      if (!next) return;
-      setParams(next);
-    };
-    window.addEventListener('popstate', handleUrlChange);
-    return () => window.removeEventListener('popstate', handleUrlChange);
-  }, []);
 
   const { data: city, isLoading, error } = useCityMarketData(params?.city, params?.country);
   const { data: countryCities } = useCitiesByCountry(params?.country);
@@ -113,8 +88,7 @@ const CityDashboard: React.FC = () => {
   }, [params?.city, params?.country]);
 
   const navigateBack = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'explore-cities' });
-    window.history.pushState({}, '', buildLocalizedPath('/explore-cities'));
+    navigate(paths.exploreCities());
   };
 
   const handleViewListings = async () => {
@@ -191,7 +165,7 @@ const CityDashboard: React.FC = () => {
       focusMapOnProperty: { lat, lng, address: displayName, zoom: 12 },
       mobileView: 'map',
     });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    navigate(paths.search());
   };
 
   // Navigate to search focused on a specific neighbourhood —
@@ -240,7 +214,7 @@ const CityDashboard: React.FC = () => {
       },
       mobileView: 'map',
     });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    navigate(paths.search());
   };
 
   // Trend helpers
@@ -1299,9 +1273,7 @@ const CityDashboard: React.FC = () => {
                   );
                   const otherFallback = getCityFallbackGradient(otherCity.city);
                   const handleNavigate = () => {
-                    const path = `/explore-cities/${encodeURIComponent(otherCity.city)}/${encodeURIComponent(otherCity.country)}`;
-                    window.history.pushState({}, '', buildLocalizedPath(path));
-                    window.dispatchEvent(new PopStateEvent('popstate'));
+                    navigate(paths.cityDashboard(otherCity.city, otherCity.country));
                   };
                   return (
                     <button

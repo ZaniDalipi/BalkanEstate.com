@@ -5,9 +5,10 @@
 ```
 Browser
   └── React SPA (Vite)
-        ├── AppContext (useReducer — global state)
-        ├── react-i18next (10 languages)
-        ├── React Router v6
+        ├── React Router 7 (the URL decides the page)
+        ├── TanStack Query (server data) · Zustand (filters, UI)
+        ├── AppContext (useReducer — session, user data, modals)
+        ├── react-i18next (10 languages, prefixed in the URL)
         └── Feature modules
               └── HTTP / WebSocket
                     └── Express API (Node.js)
@@ -43,12 +44,52 @@ src/components/property/  # Shared property UI (used by multiple features)
 └── NeighborhoodInsights.tsx
 ```
 
+### Routing
+The URL is the only record of which page is on screen. React Router renders
+the route that matches it; nothing else decides the page.
+
+```
+src/app/router/
+├── paths.ts          # every in-app URL, built by one function each
+├── navigation.ts     # navigate() · goBack() · localizePath() · changeLanguage()
+├── routes.tsx        # the route table (under /:lang) → page components
+├── routeElements.tsx # language gate, detail-page loaders, guards, redirects
+└── useRouteView.ts   # which view / detail page is showing (from route handles)
+```
+
+- **Navigate with `navigate(paths.x())`.** It adds the language prefix and
+  records the page-transition direction. Never call `history.pushState`, and
+  never keep "which page" in state. It works outside React too (AppContext's
+  auth flows use it).
+- **Pages read their own ids and tabs** with `useParams()`: `/agents/:agentId`,
+  `/account/:tab`, `/admin/:section`, `/explore-cities/:city/:country`.
+- **Pass data a page can show at once as navigation state**, e.g.
+  `navigate(paths.property(id), { state: { property } })`. The page must still
+  load it itself: a reload or a shared link carries no state (`PropertyRoute`,
+  `AgencyRoute` and `ListingEditorRoute` do both).
+- **Every page lives under `/:lang`.** A URL without a language (`/agents/12`,
+  an old email link) is redirected by `LanguageGate` to the preferred one;
+  switching language (`changeLanguage`) is a navigation to the same page under
+  the new prefix, so the UI language and the URL can never disagree.
+- **Each route's `handle` names its view** (`view`, `detail`, `noindex`). The
+  layout reads it through `useRouteView()` for the sidebar highlight, page
+  title, ad targeting and `noindex`.
+- **Query strings that mirror live UI state** (filters, a map viewport) are
+  rewritten with `replaceQueryString()`, which does not re-render the tree.
+- `navHistory.ts` sits underneath the router on `window.history`: back/forward
+  direction and per-entry scroll restoration.
+
+To add a page: a builder in `paths.ts`, a lazy import and a route in
+`routes.tsx`. If the sidebar lists it, add it to `VIEW_ORDER` in
+`sidebarNavigation.ts`.
+
 ### Global State
-`AppContext` (React Context + `useReducer`) holds:
-- `currentUser` / `user`
-- `savedHomes`, `comparisonList`
-- Active view / selected property / agent / agency
-- Alert / notification queue
+| Layer | Tool | Holds |
+|-------|------|-------|
+| Page | React Router | which page, ids, tabs, sections |
+| Server data | TanStack Query | properties, agents, listings |
+| Client state | Zustand | `filterStore` (persisted), `uiStore` |
+| App state | `AppContext` (`useReducer`) | session and user, saved homes, comparison list, conversations, modals, alerts |
 
 ### Data Fetching
 - Custom hooks in `src/features/*/hooks/` (e.g. `useProperty`, `useRealtimeProperties`)

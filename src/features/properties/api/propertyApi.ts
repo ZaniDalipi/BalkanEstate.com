@@ -20,6 +20,7 @@ export function transformBackendProperty(backendProp: any): Property {
     title: backendProp.title,
     soldAt: backendProp.soldAt ? new Date(backendProp.soldAt).getTime() : undefined,
     price: backendProp.price,
+    isNegotiable: backendProp.isNegotiable,
     address: backendProp.address,
     city: backendProp.city,
     country: backendProp.country,

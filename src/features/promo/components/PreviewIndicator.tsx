@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAdPreview, exitAdPreview } from '../hooks/usePreview';
+import { replaceQueryString } from '@/src/app/router/navigation';
 
 /**
  * Floating banner shown while ad-preview mode is active (opened from an admin
@@ -15,14 +16,10 @@ const AdPreviewIndicator: React.FC = () => {
   const handleExit = () => {
     exitAdPreview();
     // Drop the preview params from the URL without a reload.
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('adPreview');
-      url.searchParams.delete('adFocus');
-      window.history.replaceState({}, '', url.toString());
-    } catch {
-      /* ignore */
-    }
+    const params = new URLSearchParams(window.location.search);
+    params.delete('adPreview');
+    params.delete('adFocus');
+    replaceQueryString(params);
   };
 
   return (

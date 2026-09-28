@@ -13,6 +13,8 @@ import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { BellDotIcon } from 'lucide-react';
 import { decodeHtmlEntities } from '@/src/shared/utils/sanitize';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface SavedSearchAccordionProps {
   search: SavedSearch;
@@ -372,11 +374,7 @@ const SavedSearchAccordion: React.FC<SavedSearchAccordionProps> = ({ search, onO
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!hasBuyerSubscription) {
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                      const currentLang = window.location.pathname.split('/')[1] || 'en';
-                      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-                      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-                      window.history.pushState({}, '', `/${lang}/subscribe`);
+                      navigate(paths.pricing());
                       return;
                     }
                     setShowAlertSettings(!showAlertSettings);

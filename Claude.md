@@ -36,6 +36,7 @@ Three layers — pick the right one:
 |-------|------|---------|
 | Server state | TanStack Query v5 | API data (properties, agents, listings) |
 | Client state | Zustand | `filterStore` (persisted) · `uiStore` (modals, selections) |
+| Page | React Router | which page, ids, tabs — never duplicated in state |
 | Local state | `useState` | Component-only ephemeral state |
 
 ### Feature-Sliced Design
@@ -43,6 +44,24 @@ Each feature owns its slice: `src/features/[feature]/{api,components,hooks,types
 Shared UI goes in `src/components/`, shared utilities in `src/shared/`.
 
 Query keys are centralised in `src/shared/query/queryKeys.ts` — always use that file instead of inline strings.
+
+### Routing
+React Router 7; the URL alone decides the page. See `src/app/router/` and
+ARCHITECTURE.md → Routing.
+
+```ts
+import { navigate, goBack } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
+
+navigate(paths.agent(agentId));                              // add the language prefix, push
+navigate(paths.property(id), { state: { property } });       // hand over data the page can show at once
+navigate(paths.search({ city }), { replace: true, direction: 'back' });
+goBack(paths.agencies());                                    // history back, or this page when there is none
+```
+
+- Never `window.history.pushState`, never `dispatch` a view: there is no view state.
+- Read ids and tabs with `useParams()`; read "which page is showing" with `useRouteView()`.
+- New page → builder in `paths.ts` + route in `routes.tsx`.
 
 ### HTTP Client
 All API calls go through `src/shared/api/httpClient.ts`. It handles:

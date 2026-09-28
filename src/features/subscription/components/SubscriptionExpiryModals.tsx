@@ -8,6 +8,8 @@ import {
   hasUserDismissedWarning,
   markWarningDismissed,
 } from '../hooks/useSubscriptionExpiry';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface Props {
   expiryInfo: ExpiryCheckResult;
@@ -55,7 +57,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
     try {
       const token = tokenService.getAccessToken();
       if (!token) {
-        window.location.href = '/account';
+        navigate(paths.account());
         return;
       }
 
@@ -124,7 +126,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
       setProductInfo(found);
       setShowPaymentWindow(true);
     } catch {
-      window.location.href = '/account';
+      navigate(paths.account());
     } finally {
       setLoadingProduct(false);
     }

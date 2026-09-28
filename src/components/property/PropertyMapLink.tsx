@@ -145,7 +145,7 @@ function useNearViewport<T extends HTMLElement>(ref: React.RefObject<T | null>):
  *   property={property}
  *   onNavigateToMap={() => {
  *     dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { focusMapOnProperty: {...} } });
- *     dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+ *     navigate(paths.search());
  *   }}
  * />
  * ```

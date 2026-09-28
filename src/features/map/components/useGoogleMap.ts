@@ -15,7 +15,6 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '@/context/AppContext';
 import { Property } from '@/types';
 import L from 'leaflet';
 import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
@@ -46,7 +45,6 @@ import {
   injectClusterZoomStyles,
   type ClusterActivation,
 } from '../utils/clusterZoom';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 import { useMapServices, weatherTileProxyUrl, firmsWmsProxyUrl } from '../hooks/useMapServices';
@@ -65,6 +63,8 @@ import {
   latLngToWebMercator,
   formatMarkerPrice,
 } from './googleMapConstants';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // Inject CSS for marker entrance fly-in animation (Google Maps variant)
 if (typeof window !== 'undefined') {
@@ -135,7 +135,6 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     hoveredPropertyId,
   } = props;
 
-  const { dispatch } = useAppContext();
   const { t } = useTranslation(['search', 'property']);
 
   // Map state
@@ -1450,20 +1449,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
 
   // Handle view details click.
   //
-  // The popup already holds the full property, so hand the object straight to
-  // the store the way every property card does. The old path dispatched only
-  // the id, and SET_SELECTED_PROPERTY resolves an id against `state.properties`
-  // — the global buy-listings array. Villas (and rentals) are fetched by their
-  // own page hooks and never land there, so the lookup returned null and the
-  // card fell back to a synthetic popstate that re-fetched the listing over the
-  // network: a full-page loader on a phone, and a bounce to /not-found whenever
-  // that request failed. Dispatching the object opens the listing immediately
-  // and offline, with the URL still pushed so the page is shareable.
+  // The popup already holds the full property, so it rides along with the
+  // navigation the way every property card's does: the detail page renders it
+  // immediately (and offline) instead of re-fetching it first.
   const handleViewDetails = useCallback((property: Property) => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${property.id}`));
+    navigate(paths.property(property.id), { state: { property } });
     setSelectedProperty(null);
-  }, [dispatch]);
+  }, []);
 
   // Handle recenter
   const handleRecenter = useCallback(() => {

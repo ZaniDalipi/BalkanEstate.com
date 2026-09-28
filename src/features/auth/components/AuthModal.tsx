@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useAppContext } from '@/context/AppContext';
 import { AppleIcon, EnvelopeIcon, GoogleIcon, LogoIcon, XMarkIcon, EyeIcon } from '@/constants';
 import SocialLoginPopup from './SocialLoginPopup';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { ALL_PHONE_COUNTRY_CODES, PHONE_FORMAT_PATTERNS, formatPhoneNumber, getPhonePlaceholder, BALKAN_PHONE_CODES, getDefaultPhoneCountryCode } from '@/constants/phoneCountryCodes';
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
 import { getAvailableOAuthProviders } from '@/services/apiService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 type SocialProvider = 'google' | 'apple';
 
@@ -303,31 +305,14 @@ const AuthPage: React.FC = () => {
         setHasUnsavedChanges(hasChanges);
     }, [email, password, confirmPassword, phoneNumber]);
 
-    // Keep the browser URL in sync with the auth modal state
-    const prevPathRef = useRef<string | null>(null);
-
-    useEffect(() => {
-        if (state.isAuthModalOpen) {
-            const authPath = state.authModalView === 'signup' ? '/register' : '/login';
-            const currentPath = window.location.pathname.replace(/^\/[a-z]{2}(?=\/)/, '');
-            // Save the path we came from so we can restore it on close
-            if (currentPath !== '/login' && currentPath !== '/register') {
-                prevPathRef.current = window.location.pathname;
-            }
-            // Only push if URL doesn't already match
-            if (currentPath !== authPath) {
-                window.history.pushState({}, '', buildLocalizedPath(authPath));
-            }
-        }
-    }, [state.isAuthModalOpen, state.authModalView]);
+    // The modal is an overlay, not a page: opening it leaves the URL alone.
+    // `/login` and `/register` are entry points that open it over the search
+    // page; closing it there moves the URL on to that page.
+    const { pathname } = useLocation();
 
     const handleClose = () => {
-        // Restore the previous URL when closing the modal
-        if (prevPathRef.current) {
-            window.history.pushState({}, '', prevPathRef.current);
-            prevPathRef.current = null;
-        } else {
-            window.history.pushState({}, '', buildLocalizedPath('/search'));
+        if (/\/(login|register)\/?$/.test(pathname)) {
+            navigate(paths.search(), { replace: true });
         }
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: false } });
         // Reset form state

@@ -20,6 +20,8 @@ import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import NotificationCenter from '@/shared/components/NotificationCenter';
 import { AgentStats } from './useAgentProfile';
 import { useAppContext } from '@/context/AppContext';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface AgentProfileHeaderProps {
     agent: Agent;
@@ -64,10 +66,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
 
     const handleAccountClick = useCallback(() => {
         if (isAuthenticated) {
-            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-            window.history.pushState({}, '', '/account');
+            navigate(paths.account());
         } else {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
         }
@@ -75,33 +74,19 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
 
     const handleNewListingClick = useCallback(() => {
         if (isAuthenticated) {
-            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-            window.history.pushState({}, '', '/create-listing');
+            navigate(paths.createListing());
         } else {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
         }
     }, [isAuthenticated, dispatch]);
 
-    const handleSubscribeClick = useCallback(() => {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-        const currentLang = window.location.pathname.split('/')[1] || 'en';
-        const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-        const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-        window.history.pushState({}, '', `/${lang}/subscribe`);
-    }, [dispatch]);
+    const handleSubscribeClick = useCallback(() => navigate(paths.pricing()), []);
 
+    // The agent's canonical profile URL (this page, however it was reached).
+    const agentIdentifier = agent.agentId || agent.id;
     const handleNameClick = useCallback(() => {
-        if (agent.userId) {
-            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-            dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'profile' });
-            window.history.pushState({}, '', `/profile/${agent.userId}`);
-        }
-    }, [agent.userId, dispatch]);
+        if (agentIdentifier) navigate(paths.agent(String(agentIdentifier)), { replace: true });
+    }, [agentIdentifier]);
 
     const accountButton = useMemo(() => {
         if (isAuthenticated && currentUser) {

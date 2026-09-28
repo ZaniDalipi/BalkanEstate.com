@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '@/types';
-import { useAppContext } from '@/context/AppContext';
 import {
     LISTING_LIMITS,
     PLAN_LISTING_LIMITS,
 } from '@/shared/utils/subscriptionHelpers';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface RoleSelectorProps {
     currentUser: User;
@@ -15,7 +16,6 @@ interface RoleSelectorProps {
 
 const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, onRoleSelect }) => {
     const { t } = useTranslation(['seller']);
-    const { dispatch } = useAppContext();
     const subscription = currentUser.subscription;
 
     // Determine which roles to show based on user registration and subscription
@@ -319,7 +319,6 @@ const RoleCard: React.FC<RoleCardProps> = ({
     agencyName
 }) => {
     const { t } = useTranslation(['seller']);
-    const { dispatch } = useAppContext();
     const remaining = subscription ? subscription.limit - subscription.used : 0;
     const isLimitReached = subscription ? (subscription.plan === 'none' || subscription.used >= subscription.limit) : false;
 
@@ -373,7 +372,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                     className="w-full px-3 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-500 hover:to-orange-600 transition-all"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                                        navigate(paths.pricing());
                                     }}
                                 >
                                     {t('seller:roleSelector.proRequired.button')}

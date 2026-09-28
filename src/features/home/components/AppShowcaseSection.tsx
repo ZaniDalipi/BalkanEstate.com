@@ -7,7 +7,7 @@ import { useHowItWorksContent, HowItWorksContent } from '../hooks/useHowItWorksC
 import { getProperties } from '@/src/features/properties/api/propertyApi';
 
 interface AppShowcaseSectionProps {
-  onNavigate: (view: string, path: string) => void;
+  onNavigate: (path: string) => void;
 }
 
 /* ─── Route config for each static feature ─── */
@@ -440,11 +440,11 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
     : content.filter((item) => item.subsection === activeTab);
 
   const handleFeatureClick = useCallback((route: { view: string; path: string }) => {
-    onNavigate(route.view, route.path);
+    onNavigate(route.path);
   }, [onNavigate]);
 
   const handleCMSClick = useCallback(() => {
-    onNavigate('how-it-works', '/how-it-works');
+    onNavigate('/how-it-works');
   }, [onNavigate]);
 
   return (
@@ -497,7 +497,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
             </div>
             <motion.button
               whileHover={{ x: 3 }}
-              onClick={() => onNavigate('how-it-works', '/how-it-works')}
+              onClick={() => onNavigate('/how-it-works')}
               className="text-[10px] md:text-xs text-slate-600 font-medium hover:text-slate-800 transition-colors"
             >
               {t('home:showcase.viewFullGuide', 'View Full Guide')} &rarr;
@@ -629,7 +629,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => onNavigate('how-it-works', '/how-it-works')}
+                  onClick={() => onNavigate('/how-it-works')}
                   className="px-4 py-2 rounded-lg bg-slate-800 text-white text-[10px] md:text-xs font-semibold hover:bg-slate-900 transition-colors"
                 >
                   {t('home:showcase.exploreGuide', 'Explore Full Guide')}
@@ -637,7 +637,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => onNavigate('search', '/search')}
+                  onClick={() => onNavigate('/search')}
                   className="px-4 py-2 rounded-lg border border-neutral-200 text-slate-700 text-[10px] md:text-xs font-semibold hover:bg-neutral-50 transition-colors"
                 >
                   {t('home:showcase.browseProperties', 'Browse Properties')}

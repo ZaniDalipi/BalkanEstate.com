@@ -7,6 +7,9 @@ import { Property } from '../../../types';
 import { useAppContext } from '../../../context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../services/apiService';
 import { ArrowUturnLeftIcon, XMarkIcon, ArrowDownTrayIcon } from '../../../constants';
+import { navigate } from '@/src/app/router/navigation';
+// Aliased: this file's own `paths` are the strokes drawn on the image.
+import { paths as appPaths } from '@/src/app/router/paths';
 
 type Point = { x: number; y: number };
 type Path = { points: Point[]; color: string; lineWidth: number };
@@ -282,7 +285,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
   const handleGoToChat = () => {
     if (sentConversationId) {
       dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: sentConversationId });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+      navigate(appPaths.inbox());
     }
     onClose();
   };

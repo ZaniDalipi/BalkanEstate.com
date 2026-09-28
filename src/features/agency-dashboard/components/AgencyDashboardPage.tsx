@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '../../../utils/languageRouting';
+import { useParams } from 'react-router-dom';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 import AgencyDashboardLayout from './AgencyDashboardLayout';
 import type { AgencyDashboardSection } from '@/types';
 import { AGENCY_DASHBOARD_SECTIONS } from '@/src/shared/constants/app.constants';
@@ -18,20 +20,21 @@ import TeamCommunicationSection from './team/TeamCommunicationSection';
 
 const AgencyDashboardPage: React.FC = () => {
   const { t } = useTranslation(['agencyDashboard', 'common']);
-  const { state, dispatch } = useAppContext();
+  const { state } = useAppContext();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [agencyId, setAgencyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const activeSection = state.agencyDashboardSection || 'overview';
+  // The section is the URL's: /agency-dashboard/:section
+  const { section } = useParams();
+  const activeSection: AgencyDashboardSection =
+    AGENCY_DASHBOARD_SECTIONS.includes(section as typeof AGENCY_DASHBOARD_SECTIONS[number])
+      ? (section as AgencyDashboardSection)
+      : 'overview';
 
-  const handleSectionChange = useCallback((section: AgencyDashboardSection) => {
-    dispatch({ type: 'SET_AGENCY_DASHBOARD_SECTION', payload: section });
-    const newPath = section === 'overview'
-      ? '/agency-dashboard'
-      : `/agency-dashboard/${section}`;
-    window.history.pushState({}, '', buildLocalizedPath(newPath));
-  }, [dispatch]);
+  const handleSectionChange = useCallback((next: AgencyDashboardSection) => {
+    navigate(paths.agencyDashboard(next));
+  }, []);
 
   useEffect(() => {
     if (!state.currentUser) return;
@@ -70,7 +73,7 @@ const AgencyDashboardPage: React.FC = () => {
             {t('agencyDashboard:errors.pleaseLogin', 'Please log in to access the agency dashboard.')}
           </p>
           <button
-            onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
+            onClick={() => navigate(paths.search())}
             className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
           >
             {t('common:goHome', 'Go Home')}
@@ -94,7 +97,7 @@ const AgencyDashboardPage: React.FC = () => {
           </h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
+            onClick={() => navigate(paths.search())}
             className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
           >
             {t('common:goHome', 'Go Home')}

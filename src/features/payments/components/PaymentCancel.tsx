@@ -1,23 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '@/context/AppContext';
 import { XCircleIcon, ArrowLeftIcon } from '@/constants';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const PaymentCancel: React.FC = () => {
   const { t } = useTranslation(['payment']);
-  const { dispatch } = useAppContext();
-
+  
   const handleReturnToSubscriptions = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    const currentLang = window.location.pathname.split('/')[1] || 'en';
-    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-    window.history.pushState({}, '', `/${lang}/subscribe`);
+    navigate(paths.pricing());
   };
 
   const handleReturnHome = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    window.history.pushState({}, '', '/');
+    navigate(paths.home());
   };
 
   return (
@@ -83,8 +78,7 @@ const PaymentCancel: React.FC = () => {
               {t('cancel.havingTrouble')}{' '}
               <button
                 onClick={() => {
-                  dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-                  window.history.pushState({}, '', '/inbox');
+                  navigate(paths.inbox());
                 }}
                 className="text-primary hover:underline font-medium"
               >

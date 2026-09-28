@@ -23,6 +23,8 @@ import { API_URL } from '@/src/shared/api/config';
 import { Upload, ImageIcon, X } from 'lucide-react';
 import PhoneInput, { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const AGENCY_TYPES = [
   { value: 'standard', label: 'Standard' },
@@ -352,12 +354,10 @@ const CreateAgencyPage: React.FC = () => {
 
     if (canSkipPayment) {
       // User has enterprise subscription, redirect to confirmation/creation
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'createAgencyConfirm' });
-      window.history.pushState({}, '', '/create-agency/confirm');
+      navigate(paths.createAgencyConfirm());
     } else {
       // Navigate to payment page
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'createAgencyPayment' });
-      window.history.pushState({}, '', '/create-agency/payment');
+      navigate(paths.createAgencyPayment());
     }
   };
 
@@ -365,8 +365,7 @@ const CreateAgencyPage: React.FC = () => {
     if (hasUnsavedChanges) {
       setShowCloseConfirmation(true);
     } else {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      window.history.pushState({}, '', '/account');
+      navigate(paths.account());
     }
   };
 
@@ -374,8 +373,7 @@ const CreateAgencyPage: React.FC = () => {
     setShowCloseConfirmation(false);
     // Clear pending agency data when confirming to leave
     dispatch({ type: 'SET_PENDING_AGENCY_DATA', payload: null });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-    window.history.pushState({}, '', '/account');
+    navigate(paths.account());
   };
 
   const inputClasses = "w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-all duration-200 hover:border-neutral-400";
@@ -497,9 +495,7 @@ const CreateAgencyPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-                      window.history.pushState({}, '', '/account');
+                      navigate(paths.account('profile'));
                     }}
                     className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
                   >
@@ -509,8 +505,7 @@ const CreateAgencyPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                      window.history.pushState({}, '', '/pricing');
+                      navigate(paths.pricing());
                     }}
                     className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
                   >

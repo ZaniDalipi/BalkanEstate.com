@@ -9,7 +9,8 @@ import { SEO } from '@/src/components/seo';
 import { Helmet } from 'react-helmet-async';
 import ExploreCitiesHeroBanner from '@/components/shared/ExploreCitiesHeroBanner';
 import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
-import { navigateWithLanguage } from '@/src/utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 import { searchLocation } from '@/services/osmService';
 import { findPlace } from '@/src/features/search/universal/places';
 import { useSavedCities } from '../hooks/useSavedCities';
@@ -29,7 +30,7 @@ const CityRecommendations: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get('country') || 'all';
   });
-  const { state, dispatch, updateSearchPageState } = useAppContext();
+  const { state, updateSearchPageState } = useAppContext();
 
   const isSignedIn = Boolean(state.isAuthenticated && state.currentUser);
   const saved = useSavedCities(isSignedIn);
@@ -39,7 +40,7 @@ const CityRecommendations: React.FC = () => {
   }, [saved]);
 
   const openEmailSettings = useCallback(() => {
-    navigateWithLanguage('/account/notifications');
+    navigate(paths.account('notifications'));
   }, []);
 
   // Listen for country filter changes from footer (when component is already mounted)
@@ -82,8 +83,7 @@ const CityRecommendations: React.FC = () => {
   const countries = Array.from(new Set(cities.map(c => c.country))).sort();
 
   const handleCityClick = (city: CityMarketData) => {
-    const path = `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`;
-    navigateWithLanguage(path);
+    navigate(paths.cityDashboard(city.city, city.country));
   };
 
   const handleViewListingsOnMap = async (e: React.MouseEvent, city: CityMarketData) => {
@@ -160,7 +160,7 @@ const CityRecommendations: React.FC = () => {
       focusMapOnProperty: { lat, lng, address: displayName, zoom: 12 },
       mobileView: 'map',
     });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    navigate(paths.search());
   };
 
   if (loading) {

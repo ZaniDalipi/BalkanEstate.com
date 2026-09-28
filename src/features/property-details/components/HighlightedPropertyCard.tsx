@@ -6,10 +6,11 @@ import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { typeHasAttribute } from '@/shared/property/typeAttributes';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
+import { navigate, localizePath } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // Chevron Icons
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -437,14 +438,14 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
 
   const handleCardClick = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
-    const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    const path = paths.property(generatePropertySlug(property));
     if (shouldOpenInNewTab()) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(localizePath(path), '_blank', 'noopener,noreferrer');
     } else {
-      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-      window.history.pushState({}, '', url);
+      // The card's copy lets the detail page render at once; it refreshes itself.
+      navigate(path, { state: { property } });
     }
-  }, [dispatch, property]);
+  }, [property]);
 
   const handleFavoriteClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();

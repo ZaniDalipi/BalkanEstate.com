@@ -10,6 +10,8 @@ import { authApiClient } from '@/src/data/api/AuthApiClient';
 import { trackEcommerce, trackEvent } from '@/src/components/marketing/Analytics';
 import { propertyKeys } from '@/src/features/properties/api';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface PaymentDetails {
   paymentStatus?: string;
@@ -274,14 +276,10 @@ const PaymentSuccess: React.FC = () => {
 
   const handleViewAgency = () => {
     if (agencyResult?.agency?.slug) {
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyResult.agency.slug });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-      window.history.pushState({}, '', `/agencies/${agencyResult.agency.slug}`);
+      navigate(paths.agency(agencyResult.agency.slug));
     } else if (agencyResult?.agency?.id || agencyResult?.agency?._id) {
       const agencyId = agencyResult.agency.id || agencyResult.agency._id;
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyId });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-      window.history.pushState({}, '', `/agencies/${agencyId}`);
+      navigate(paths.agency(agencyId));
     }
   };
 
@@ -296,8 +294,7 @@ const PaymentSuccess: React.FC = () => {
   };
 
   const handleReturnHome = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-    window.history.pushState({}, '', '/account');
+    navigate(paths.account());
   };
 
   if (isVerifying || creatingAgency) {
@@ -555,8 +552,7 @@ const PaymentSuccess: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-                window.history.pushState({}, '', '/');
+                navigate(paths.home());
               }}
               className="w-full text-neutral-600 hover:text-neutral-800 font-medium transition-colors py-2"
             >

@@ -59,96 +59,43 @@ export function buildLocalizedPath(path: string, lang?: LanguageCode): string {
 }
 
 /**
- * Navigate to a path with the current language prefix
+ * The language to use when the URL does not name one: the user's last choice,
+ * then the browser's, then English.
  */
-export function navigateWithLanguage(path: string, options?: { replace?: boolean }): void {
-  const localizedPath = buildLocalizedPath(path);
-
-  if (options?.replace) {
-    window.history.replaceState({}, '', localizedPath);
-  } else {
-    window.history.pushState({}, '', localizedPath);
+export function detectPreferredLanguage(): LanguageCode {
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem('balkanestate_language');
+  } catch {
+    // Storage blocked (private mode): fall through to the browser language.
   }
-
-  // Dispatch popstate event to trigger route handling
-  window.dispatchEvent(new PopStateEvent('popstate'));
+  const browserLang = (typeof navigator !== 'undefined' ? navigator.language : 'en').split('-')[0];
+  if (stored && isLanguageSupported(stored)) return stored as LanguageCode;
+  if (isLanguageSupported(browserLang)) return browserLang as LanguageCode;
+  return 'en';
 }
 
 /**
- * Change language and update URL
- * Preserves query parameters when changing language
+ * Make `lang` — the language the URL names — the active one: remember it, and
+ * load its bundle before switching so text never flashes through the keys.
+ *
+ * Only switches when it actually differs: `i18n.changeLanguage()` with the
+ * same value still fires 'languageChanged', which re-renders every
+ * `useTranslation()` consumer — visible as a "page refresh" a moment after load.
  */
-export function changeLanguageWithUrl(newLang: LanguageCode): void {
-  const currentPath = window.location.pathname;
-  const { path } = parseLanguageFromPath(currentPath);
-  // Preserve query parameters
-  const queryString = window.location.search;
-
-  // Update URL immediately for responsive feel
-  const newPath = buildLocalizedPath(path, newLang) + queryString;
-  window.history.replaceState({}, '', newPath);
-  localStorage.setItem('balkanestate_language', newLang);
-
-  // Load language bundle then switch (falls back to English until loaded)
-  loadLanguageResources(newLang).then(() => {
-    i18n.changeLanguage(newLang);
-  });
-}
-
-/**
- * Initialize language from URL on app load
- * Returns the detected language and clean path
- * Preserves query parameters when redirecting to add language prefix
- */
-export function initializeLanguageFromUrl(): { lang: LanguageCode; path: string } {
-  const { lang, path } = parseLanguageFromPath(window.location.pathname);
-  // Preserve query parameters (e.g., ?token=xxx for password reset)
-  const queryString = window.location.search;
-
-  if (lang && isLanguageSupported(lang)) {
-    // URL has valid language prefix - use it
+export function activateLanguage(lang: LanguageCode): void {
+  try {
     localStorage.setItem('balkanestate_language', lang);
-    // Only switch language when it actually differs from the current one.
-    // Calling i18n.changeLanguage() even with the same value triggers a
-    // 'languageChanged' event that causes every useTranslation() component
-    // to re-render, producing the visible "page refresh" after a few seconds.
-    const currentLang = (i18n.language || 'en').split('-')[0];
-    if (currentLang !== lang) {
-      loadLanguageResources(lang).then(() => {
-        // Re-check after async load to guard against concurrent language switches
-        const nowLang = (i18n.language || 'en').split('-')[0];
-        if (nowLang !== lang) {
-          i18n.changeLanguage(lang);
-        }
-      });
-    }
-    return { lang, path };
+  } catch {
+    // Storage blocked: the URL still carries the language.
   }
-
-  // No language in URL - get from storage or browser
-  const storedLang = localStorage.getItem('balkanestate_language');
-  const browserLang = navigator.language.split('-')[0];
-  const detectedLang: LanguageCode =
-    (storedLang && isLanguageSupported(storedLang) ? storedLang :
-     isLanguageSupported(browserLang) ? browserLang : 'en') as LanguageCode;
-
-  // Redirect to language-prefixed URL, preserving query parameters
-  const newPath = buildLocalizedPath(path, detectedLang) + queryString;
-  window.history.replaceState({}, '', newPath);
-
-  localStorage.setItem('balkanestate_language', detectedLang);
-  // Only switch language when it actually differs from the current one
-  const currentLang = (i18n.language || 'en').split('-')[0];
-  if (currentLang !== detectedLang) {
-    loadLanguageResources(detectedLang).then(() => {
-      const nowLang = (i18n.language || 'en').split('-')[0];
-      if (nowLang !== detectedLang) {
-        i18n.changeLanguage(detectedLang);
-      }
-    });
-  }
-
-  return { lang: detectedLang, path };
+  const current = (i18n.language || 'en').split('-')[0];
+  if (current === lang) return;
+  loadLanguageResources(lang).then(() => {
+    // Re-check after the async load to guard against a concurrent switch.
+    const now = (i18n.language || 'en').split('-')[0];
+    if (now !== lang) i18n.changeLanguage(lang);
+  });
 }
 
 /**

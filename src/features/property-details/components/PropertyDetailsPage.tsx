@@ -32,8 +32,6 @@ import {
   NeighborhoodInsights,
 } from '@/src/components/property';
 import SimilarProperties from '@/src/components/property/SimilarProperties';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
-import { canNavigateBack } from '@/src/app/navigation/navHistory';
 import { useFastTap } from '@/src/shared/interaction/useFastTap';
 import { useTrackView } from '@/src/features/view-stats/hooks';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
@@ -50,6 +48,8 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { AdSlot } from '@/src/features/promo';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import { buildGalleryImages, groupGalleryImagesByTag } from '@/shared/property/galleryImages';
+import { paths } from '@/src/app/router/paths';
+import { navigate, goBack } from '@/src/app/router/navigation';
 
 /**
  * PropertyDetailsPage Component
@@ -69,7 +69,6 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const { state, dispatch, createConversation, toggleSavedHome, fetchProperties } = useAppContext();
   const { error } = useNotification();
-  const { navigate } = useLocalizedNavigation();
 
   // Fetch fresh property data to ensure we have latest fields (e.g., generated video)
   // This fixes the issue where video doesn't show when opening from search (stale cache)
@@ -116,7 +115,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       // If the property being viewed was deleted, go back to the appropriate listing page
       if (data.propertyId === property.id) {
         const isRental = property.listingType === 'rent';
-        navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
+        navigate(isRental ? paths.rentals() : paths.search(), { direction: 'back', replace: true });
       }
     },
   });
@@ -342,25 +341,10 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     // Step back through history whenever the app has an entry of its own to
     // step back to, so the button returns the visitor wherever they actually
     // came from — the results, saved homes, an agent's page — and unwinds the
-    // stack instead of growing it.
-    //
-    // `canNavigateBack` asks the app's own history index, not
-    // `window.history.length`. The two disagree exactly where it matters: an
-    // installed PWA opened straight onto a shared listing already reports a
-    // length above 1, so that test sent `history.back()` to an entry belonging
-    // to whatever the app was launched from — which either did nothing visible
-    // or dropped the visitor out of the app entirely.
-    if (canNavigateBack()) {
-      window.history.back();
-      return;
-    }
-
-    // Nothing behind this page (a shared link, a fresh install): fall back to
-    // its parent list, animated as though we had stepped back to it.
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    const isRental = property.listingType === 'rent';
-    navigate(isRental ? '/rentals' : '/search', { direction: 'back' });
-  }, [dispatch, navigate, property.listingType]);
+    // stack instead of growing it. Nothing behind this page (a shared link, a
+    // fresh install): fall back to its parent list, animated as a step back.
+    goBack(property.listingType === 'rent' ? paths.rentals() : paths.search());
+  }, [property.listingType]);
 
   // Back resolves on the finger lifting rather than on the browser's click.
   // This button sits in the same left-edge strip the swipe-back gesture
@@ -390,11 +374,8 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     setIsCreatingConversation(true);
     try {
       const conversation = await createConversation(property.id);
-      // Clear selected property so App.tsx stops rendering PropertyDetailsPage
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
       dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-      window.history.pushState({}, '', '/inbox');
+      navigate(paths.inbox());
     } catch (err) {
       await error(t('property:errors.errorTitle', 'Error'), t('property:errors.conversationFailed', 'Failed to start conversation. Please try again.'));
     } finally {
@@ -415,16 +396,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     const destination = resolveMapDestination(property);
     const focusMapOnProperty = buildMapFocusTarget(property);
 
-    // Set the focus target *before* navigating: the route handler switches the
-    // view synchronously, and the destination page reads this on mount.
+    // Set the focus target *before* navigating: the destination page reads it
+    // on mount.
     if (focusMapOnProperty) {
       dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { focusMapOnProperty } });
     }
-    // Routed rather than dispatched, so the address bar and the back button
-    // end up on the map the visitor is now looking at. The route handler
-    // clears the selected property itself.
     navigate(destination.path);
-  }, [property, dispatch, navigate]);
+  }, [property, dispatch]);
 
   // Navigate to 3D tour - scroll to map section and open 360 tour
   const handleNavigateTo3DTour = () => {
@@ -450,26 +428,18 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
 
   const handleProfileClick = useCallback(() => {
     if (state.isAuthenticated) {
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      navigate('/account');
+      navigate(paths.account());
     } else {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     }
-  }, [state.isAuthenticated, dispatch, navigate]);
+  }, [state.isAuthenticated, dispatch]);
 
   // Navigate to the seller's agent profile page (from the sticky bottom bar)
   const handleSellerProfileClick = useCallback(() => {
     if (property.seller?.type !== 'agent') return;
     const agentIdentifier = property.seller?.agentId || property.sellerId;
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agentProfile' });
-    window.history.pushState({}, '', `/agents/${agentIdentifier}`);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  }, [property.seller, property.sellerId, dispatch]);
+    navigate(paths.agent(agentIdentifier));
+  }, [property.seller, property.sellerId]);
 
   // Long-press on the seller avatar/name reveals a quick preview of their other listings
   const handleSellerPressStart = useCallback(() => {
@@ -1325,7 +1295,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                     type="button"
                     onClick={() => {
                       setShowAgentPreview(false);
-                      navigate(`/property/${generatePropertySlug(p)}`);
+                      navigate(paths.property(generatePropertySlug(p)), { state: { property: p } });
                     }}
                     className="flex-shrink-0 w-32 snap-start text-left rounded-xl border border-neutral-100 hover:border-blue-300 hover:shadow-md transition-all overflow-hidden bg-white"
                   >

@@ -15,7 +15,8 @@ import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { getCountryData } from '@/constants/countries';
 import { generatePropertySlug } from '@/utils/slug';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
     const sw = bounds.getSouthWest();
@@ -553,8 +554,7 @@ export function useRentalSearch() {
             // Same route a listing card opens, so a rental found through the
             // search box lands exactly where one found by scrolling does.
             const property = suggestion.property;
-            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-            window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+            navigate(paths.property(generatePropertySlug(property)), { state: { property } });
             return;
         }
 

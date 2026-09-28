@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { isPWA } from '../utils/pwa';
+import { navigate } from '@/src/app/router/navigation';
 
 const EXTERNAL_PREFIXES = ['http://', 'https://', 'mailto:', 'tel:', 'sms:', '#'];
 
@@ -27,9 +28,7 @@ export function usePWALinkInterceptor(): void {
       ) return;
 
       e.preventDefault();
-      window.history.pushState({}, '', href);
-      // Trigger the app's popstate-based router
-      window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+      navigate(href);
     };
 
     document.addEventListener('click', handleClick);

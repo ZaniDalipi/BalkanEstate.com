@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { getFeaturedAgencies } from '@/services/apiService';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const AD_VIEW_THRESHOLD = 3; // Trigger gamification after 3 ad views
 const AD_VIEW_STORAGE_KEY = 'balkan_estate_ad_views';
@@ -111,11 +113,10 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
         identifier = identifier.replace(',', '/');
       }
 
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: identifier });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+      navigate(paths.agencies());
 
       // Update browser URL with normalized slug (consistent with /agencies route)
-      window.history.pushState({}, '', `/agencies/${identifier}`);
+      navigate(paths.agency(identifier));
     }
   };
 

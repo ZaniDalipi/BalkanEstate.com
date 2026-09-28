@@ -6,7 +6,7 @@ import { User } from '@/types';
 
 interface QuickAccessSectionProps {
   user: User;
-  onNavigate: (view: string, path: string) => void;
+  onNavigate: (path: string) => void;
   savedSearchesCount: number;
   savedHomesCount: number;
   unreadMessagesCount: number;
@@ -133,7 +133,7 @@ const QuickAccessSection: React.FC<QuickAccessSectionProps> = ({
             <motion.button
               whileHover={{ y: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => onNavigate(link.view, link.path)}
+              onClick={() => onNavigate(link.path)}
               className="relative flex w-full flex-col items-center gap-2 p-3.5 rounded-xl border border-white/30 hover:border-white/50 hover:shadow-sm bg-white/65 backdrop-blur-sm transition-all group"
             >
               <motion.div

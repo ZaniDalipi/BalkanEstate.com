@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from '@/src/components/seo';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Property } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProperties } from '@/src/features/properties/api/propertyApi';
@@ -11,7 +10,6 @@ import { getAgencies } from '@/src/features/agencies/api/agencyApi';
 import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { generatePropertySlug } from '@/utils/slug';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import HeroSection from './HeroSection';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import AppShowcaseSection from './AppShowcaseSection';
@@ -19,6 +17,8 @@ import CityShowcaseSection from './CityShowcaseSection';
 import QuickAccessSection from './QuickAccessSection';
 import Footer from '@/components/shared/Footer';
 import { AdSlot, SideRailAds } from '@/src/features/promo';
+import { paths } from '@/src/app/router/paths';
+import { navigate, localizePath } from '@/src/app/router/navigation';
 
 // Lazy-load below-fold sections to reduce initial bundle
 const StackedCards = lazy(() => import('@/src/components/ui/glass-cards').then(m => ({ default: m.StackedCards })));
@@ -47,7 +47,6 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
   const { t } = useTranslation(['home', 'common']);
   const { state, dispatch } = useAppContext();
-  const { navigate } = useLocalizedNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryRef = useRef(searchQuery);
 
@@ -189,24 +188,21 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
           : null,
       },
     });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    navigate(query ? `/search?q=${encodeURIComponent(query)}` : '/search', { direction: 'forward' });
-  }, [dispatch, state.searchPageState.filters, navigate]);
+    navigate(paths.search({ q: query || undefined }), { direction: 'forward' });
+  }, [dispatch, state.searchPageState.filters]);
 
-  const handleNavigate = useCallback((view: string, path: string) => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as any });
+  const handleNavigate = useCallback((path: string) => {
     navigate(path, { direction: 'forward' });
-  }, [dispatch, navigate]);
+  }, []);
 
   const handlePropertyClick = useCallback((property: Property) => {
-    const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+    const path = paths.property(generatePropertySlug(property));
     if (shouldOpenInNewTab()) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(localizePath(path), '_blank', 'noopener,noreferrer');
     } else {
-      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-      navigate(`/property/${generatePropertySlug(property)}`, { direction: 'up' });
+      navigate(path, { state: { property }, direction: 'up' });
     }
-  }, [dispatch, navigate]);
+  }, []);
 
   const handleCategoryClick = useCallback((propertyType: string, listingType?: string) => {
     const filters = { ...state.searchPageState.filters };
@@ -220,9 +216,8 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       type: 'UPDATE_SEARCH_PAGE_STATE',
       payload: { filters, activeFilters: filters },
     });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: listingType === 'rent' ? 'rentals' : 'search' });
-    navigate(listingType === 'rent' ? '/rent' : '/search', { direction: 'forward' });
-  }, [dispatch, state.searchPageState, navigate]);
+    navigate(listingType === 'rent' ? paths.rentals() : paths.search(), { direction: 'forward' });
+  }, [dispatch, state.searchPageState]);
 
   const isAuthenticated = state.isAuthenticated;
   const currentUser = state.currentUser;
@@ -279,7 +274,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
           <StackedCards
             properties={featuredProperties}
             onPropertyClick={handlePropertyClick}
-            onViewAll={() => handleNavigate('search', '/search')}
+            onViewAll={() => handleNavigate('/search')}
           />
         </Suspense>
       </div>
@@ -338,7 +333,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
 
       <div className="content-below-fold">
         <Suspense fallback={<SectionFallback />}>
-          <HowItWorksSection onLearnMore={() => handleNavigate('how-it-works', '/how-it-works')} />
+          <HowItWorksSection onLearnMore={() => handleNavigate('/how-it-works')} />
         </Suspense>
       </div>
 

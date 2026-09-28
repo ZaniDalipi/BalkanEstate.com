@@ -1,51 +1,10 @@
-import React, { memo, useRef, createContext, useContext, useCallback, useMemo } from 'react';
-import {
-  installNavigationHistory,
-  setNavigationDirection,
-  type NavigationDirection,
-} from '@/app/navigation/navHistory';
+import React, { memo, useRef, useCallback } from 'react';
+import { installNavigationHistory } from '@/app/navigation/navHistory';
 import { useSwipeBack } from '@/app/navigation/useSwipeBack';
 
-// Patch history and start tracking direction before React renders anything, so
-// our popstate listener is ahead of the app's own routing listener.
+// Patch history and start tracking direction before the router is created, so
+// our popstate listener runs ahead of React Router's own.
 installNavigationHistory();
-
-// ============================================================================
-// Navigation Direction Tracking
-// ============================================================================
-
-interface NavigationContextType {
-  setDirection: (dir: NavigationDirection) => void;
-}
-
-const NavigationContext = createContext<NavigationContextType>({
-  setDirection: setNavigationDirection,
-});
-
-export function useNavigationDirection() {
-  return useContext(NavigationContext);
-}
-
-// ============================================================================
-// NavigationProvider — exposes the direction setter
-// ============================================================================
-
-export const NavigationProvider = memo(function NavigationProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  // Stable for the life of the app: setting a direction writes to module state
-  // (see navHistory) instead of React state, so telling the app which way it is
-  // moving costs nothing on top of the navigation itself.
-  const contextValue = useMemo(() => ({ setDirection: setNavigationDirection }), []);
-
-  return (
-    <NavigationContext.Provider value={contextValue}>
-      {children}
-    </NavigationContext.Provider>
-  );
-});
 
 // ============================================================================
 // ViewTransition — the page wrapper

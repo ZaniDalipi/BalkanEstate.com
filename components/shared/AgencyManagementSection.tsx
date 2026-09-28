@@ -9,6 +9,8 @@ import { TicketIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowRightIcon } 
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { tokenService } from '../../src/shared/api/tokenService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 /** Check if an error message is subscription-related */
 const isSubscriptionError = (msg: string): boolean =>
@@ -485,9 +487,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                       type="button"
                       onClick={() => {
                         // Navigate to the agency page
-                        dispatch({ type: 'SET_SELECTED_AGENCY', payload: couponRedemptionSuccess.agencyId });
-                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-                        window.history.pushState({}, '', `/agencies/${couponRedemptionSuccess.agencyId}`);
+                        navigate(paths.agency(couponRedemptionSuccess.agencyId));
                         handleCancel();
                       }}
                       className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
@@ -601,8 +601,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                           <button
                             type="button"
                             onClick={() => {
-                              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                              window.history.pushState({}, '', '/pricing');
+                              navigate(paths.pricing());
                             }}
                             className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
                           >
@@ -697,8 +696,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
                           <button
                             type="button"
                             onClick={() => {
-                              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                              window.history.pushState({}, '', '/pricing');
+                              navigate(paths.pricing());
                             }}
                             className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
                           >

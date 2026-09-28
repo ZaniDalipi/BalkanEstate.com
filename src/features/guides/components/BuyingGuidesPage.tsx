@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { AdSlot } from '@/src/features/promo';
+import { navigate } from '@/src/app/router/navigation';
 
 // Country guide data — structured for SEO with rich content
 const COUNTRY_GUIDES = [
@@ -313,7 +313,6 @@ const COUNTRY_GUIDES = [
 
 const BuyingGuidesPage: React.FC = () => {
   const { t } = useTranslation(['common']);
-  const { navigateTo } = useLocalizedNavigation();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
@@ -400,7 +399,7 @@ const BuyingGuidesPage: React.FC = () => {
                 <p className="text-neutral-500 mt-1">{t('common:guides.completeGuide', 'Complete guide for foreign buyers')}</p>
               </div>
               <button
-                onClick={() => navigateTo(guide.searchLink)}
+                onClick={() => navigate(guide.searchLink)}
                 className="px-5 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors text-sm"
               >
                 {t('common:guides.browseProperties', 'Browse {{country}} Properties', { country: guide.country })}
@@ -484,7 +483,7 @@ const BuyingGuidesPage: React.FC = () => {
                 {guide.topCities.map(city => (
                   <button
                     key={city}
-                    onClick={() => navigateTo(`${guide.searchLink}&city=${encodeURIComponent(city)}`)}
+                    onClick={() => navigate(`${guide.searchLink}&city=${encodeURIComponent(city)}`)}
                     className="px-3 py-1.5 bg-neutral-100 hover:bg-primary-50 hover:text-primary-700 rounded-full text-sm transition-colors"
                   >
                     {city}
@@ -506,7 +505,7 @@ const BuyingGuidesPage: React.FC = () => {
             {t('common:guides.ctaDescription', 'Search across all 11 Balkan countries with AI-powered matching. 10 languages, verified agents, instant valuations.')}
           </p>
           <button
-            onClick={() => navigateTo('/search')}
+            onClick={() => navigate('/search')}
             className="px-8 py-3 bg-white text-primary-700 rounded-xl font-semibold hover:bg-primary-50 transition-colors text-lg"
           >
             {t('common:guides.ctaButton', 'Start Searching')}

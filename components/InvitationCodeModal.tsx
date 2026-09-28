@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from './shared/Modal';
-import { useAppContext } from '../context/AppContext';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface InvitationCodeModalProps {
   isOpen: boolean;
@@ -29,7 +30,6 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
   hasProSubscription = true,
 }) => {
   const { t } = useTranslation(['modals', 'common']);
-  const { dispatch } = useAppContext();
   const [code, setCode] = useState('');
   const [codeType, setCodeType] = useState<CodeType>('coupon');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -219,8 +219,7 @@ const InvitationCodeModal: React.FC<InvitationCodeModalProps> = ({
                 type="button"
                 onClick={() => {
                   onClose();
-                  dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                  window.history.pushState({}, '', '/pricing');
+                  navigate(paths.pricing());
                 }}
                 className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
               >

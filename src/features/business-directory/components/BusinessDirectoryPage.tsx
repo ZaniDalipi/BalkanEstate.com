@@ -13,12 +13,15 @@ import { BUSINESS_CATEGORIES, type BusinessCategory, type BusinessListing, type 
 import { SearchIcon, PlusIcon, BuildingStorefrontIcon, UserGroupIcon, UserIcon, MicrophoneIcon, ArrowPathIcon, BoltIcon, ChartBarIcon, MapIcon } from '@/constants';
 import { AnimatedNumber } from '@/src/components/ui/Animations';
 
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 import { generateBusinessSlug } from '@/utils/slug';
 import Footer from '@/components/shared/Footer';
 
 interface BusinessDirectoryPageProps {
   selectedListingId?: string | null;
+  /** The tab the URL names; the "all" tab when absent. */
+  initialTab?: Exclude<TabType, 'all'>;
 }
 
 type SubView = 'list' | 'detail' | 'create';
@@ -161,40 +164,33 @@ const scaleInVariants = {
   visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 28 } },
 };
 
-const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedListingId: propListingId }) => {
+const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedListingId: propListingId, initialTab }) => {
   const { t } = useTranslation('businessDirectory');
   const { state, dispatch } = useAppContext();
 
 
-  const [subView, setSubView] = useState<SubView>(propListingId ? 'detail' : 'list');
-  const [selectedListingId, setSelectedListingId] = useState<string | null>(propListingId ?? null);
-
-  // Sync with prop when URL-based navigation changes the prop
-  useEffect(() => {
-    if (propListingId) {
-      setSelectedListingId(propListingId);
-      setSubView('detail');
-    } else if (propListingId === null && subView === 'detail') {
-      setSubView('list');
-      setSelectedListingId(null);
-    }
-  }, [propListingId]);
+  // The open listing is the URL's; creating one is a local step on the list.
+  const selectedListingId = propListingId ?? null;
+  const [subView, setSubView] = useState<SubView>('list');
 
   // Filters
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<BusinessCategory | ''>('');
-  const [activeTab, setActiveTab] = useState<TabType>(state.businessDirectoryTab || 'all');
+  const urlTab: TabType = initialTab ?? 'all';
+  const [activeTab, setActiveTab] = useState<TabType>(urlTab);
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
-  // Sync tab from context (URL-based navigation)
+  // Follow the URL's tab (back/forward, links). A listing's URL names no tab,
+  // so opening one leaves the list's tab as it was.
   useEffect(() => {
-    if (state.businessDirectoryTab && state.businessDirectoryTab !== activeTab) {
-      setActiveTab(state.businessDirectoryTab);
+    if (propListingId) return;
+    if (urlTab !== activeTab) {
+      setActiveTab(urlTab);
       setPage(1);
     }
-  }, [state.businessDirectoryTab]);
+  }, [urlTab, propListingId]);
 
   // Voice search
   const [isListening, setIsListening] = useState(false);
@@ -252,13 +248,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   const effectiveLoading = activeTab === 'mine' ? myListingsLoading : isLoading;
 
   const navigateToListing = useCallback((listing: BusinessListing) => {
-    const identifier = listing.id;
-    const urlSlug = generateBusinessSlug(listing);
-    setSelectedListingId(identifier);
-    setSubView('detail');
-    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: identifier });
-    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${urlSlug}`));
-  }, [dispatch]);
+    navigate(paths.businessListing(generateBusinessSlug(listing)));
+  }, []);
 
   // Surprise Me - random business discovery
   const handleSurpriseMe = useCallback(() => {
@@ -310,9 +301,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
     }
     setActiveTab(tab);
     setPage(1);
-    dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: tab });
-    const tabPath = tab === 'all' ? '/business-directory' : `/business-directory/${tab}`;
-    window.history.pushState({}, '', buildLocalizedPath(tabPath));
+    navigate(paths.businessDirectory(tab === 'all' ? undefined : tab));
   }, [dispatch, state.currentUser]);
 
   const handleCardClick = useCallback((listing: BusinessListing) => {
@@ -342,12 +331,8 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   }, []);
 
   const handleBackToList = useCallback(() => {
-    setSubView('list');
-    setSelectedListingId(null);
-    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-    const tabPath = activeTab === 'all' ? '/business-directory' : `/business-directory/${activeTab}`;
-    window.history.pushState({}, '', buildLocalizedPath(tabPath));
-  }, [dispatch, activeTab]);
+    navigate(paths.businessDirectory(activeTab === 'all' ? undefined : activeTab), { direction: 'back' });
+  }, [activeTab]);
 
   // Auth-guarded create click - require login for any create/list action
   const requireAuth = useCallback((action: () => void) => {
@@ -379,12 +364,12 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
   const categoryCount = useMemo(() => new Set(listings.map(l => l.category)).size, [listings]);
 
   // Sub-view routing
-  if (subView === 'detail' && selectedListingId) {
+  if (selectedListingId) {
     return <BusinessDetailPage listingId={selectedListingId} onBack={handleBackToList} />;
   }
 
   if (subView === 'create') {
-    return <CreateBusinessListingForm onBack={handleBackToList} onSuccess={handleCreateSuccess} />;
+    return <CreateBusinessListingForm onBack={() => setSubView('list')} onSuccess={handleCreateSuccess} />;
   }
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [

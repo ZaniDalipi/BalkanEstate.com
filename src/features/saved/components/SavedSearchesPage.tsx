@@ -13,6 +13,8 @@ import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 // Decorative3D imports removed - using liquid glass style instead
 import SavedSearchesHeroBanner from '@/components/shared/SavedSearchesHeroBanner';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const initialFilters: Filters = {
     query: '',
@@ -104,11 +106,7 @@ const SavedSearchesPage: React.FC = () => {
   const handleToggleEmailAlerts = async () => {
     // If not Pro, navigate to pricing page
     if (!isPro) {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-      const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      window.history.pushState({}, '', `/${lang}/subscribe`);
+      navigate(paths.pricing());
       return;
     }
 
@@ -305,7 +303,7 @@ const SavedSearchesPage: React.FC = () => {
                   </div>
 
                   <button
-                      onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
+                      onClick={() => navigate(paths.search())}
                       className="mt-8 px-6 py-3 bg-primary text-white font-medium rounded-xl shadow-md hover:bg-primary-dark transition-colors"
                   >
                       {t('empty.startSearch')}

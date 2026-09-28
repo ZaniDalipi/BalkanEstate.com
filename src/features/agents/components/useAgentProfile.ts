@@ -18,7 +18,8 @@ import { Credential, getCredentials, getAgentPublicCredentials } from '@/src/fea
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { sendMessage } from '@/src/features/conversations/api/conversationApi';
 import { API_URL } from '@/src/shared/api/config';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // ─── Shared Types ────────────────────────────────────────────────────────────
 
@@ -453,8 +454,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     // ─── Handlers ────────────────────────────────────────────────────────────
 
     const handleBack = () => {
-        dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-        window.history.pushState({}, '', '/agents');
+        navigate(paths.agents());
     };
 
     const handleSaveAgent = async () => {
@@ -522,8 +522,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             }
             const conversation = await createConversation({ sellerId });
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-            window.history.pushState({ page: 'inbox' }, '', '/inbox');
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+            navigate(paths.inbox());
         } catch (error) {
             // Error removed
         }
@@ -555,8 +554,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
             // Redirect to inbox
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-            window.history.pushState({ page: 'inbox' }, '', '/inbox');
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+            navigate(paths.inbox());
             setShowAppraisalModal(false);
             setAppraisalForm({ address: '', propertyType: '', notes: '' });
         } catch (error) {
@@ -591,8 +589,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             await sendMessage(conversation.id, { text: messageText } as any);
 
             dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: conversation.id });
-            window.history.pushState({ page: 'inbox' }, '', '/inbox');
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+            navigate(paths.inbox());
             setShowConsultationModal(false);
             setConsultationForm({ date: '', time: '', topic: '', notes: '' });
         } catch (error) {
@@ -612,31 +609,23 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
     };
 
     const handleSearchAllProperties = () => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        window.history.pushState({}, '', '/search');
+        navigate(paths.search());
     };
 
     const handleVisitAgency = () => {
         if (agencyData) {
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyData });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-            const urlSlug = agencyData.slug || agencyData._id;
-            window.history.pushState({}, '', `/agencies/${urlSlug}`);
+            navigate(paths.agencyOf(agencyData), { state: { agency: agencyData } });
         }
     };
 
     const handleViewMoreAgents = () => {
-        dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-        window.history.pushState({}, '', '/agents');
+        navigate(paths.agents());
     };
 
     const handleSelectSimilarAgent = (selectedAgent: Agent) => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         const agentIdentifier = selectedAgent.agentId || selectedAgent.id;
-        dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-        window.history.pushState({}, '', `/agents/${agentIdentifier}`);
+        navigate(paths.agent(agentIdentifier));
     };
 
     const handleAgencyClick = async () => {
@@ -646,10 +635,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
             const response = await fetch(`${API_URL}/agencies/${agent.agencyId}`);
             if (response.ok) {
                 const data = await response.json();
-                dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-                const urlSlug = data.agency.slug || data.agency._id;
-                window.history.pushState({}, '', `/agencies/${urlSlug}`);
+                navigate(paths.agencyOf(data.agency), { state: { agency: data.agency } });
             }
         } catch (error) {
             // Error removed
@@ -811,9 +797,7 @@ export function useAgentProfile({ agent }: { agent: Agent }) {
 
     // Handler for viewing a property from the map popup
     const handleViewProperty = useCallback((propertyId: string) => {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-        window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
-        window.dispatchEvent(new PopStateEvent('popstate'));
+        navigate(paths.property(propertyId));
     }, [dispatch]);
 
     // Refresh agent data after license submission

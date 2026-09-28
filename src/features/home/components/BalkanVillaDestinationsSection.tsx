@@ -20,7 +20,7 @@ import { useDestinationImages } from '../hooks/useDestinationImages';
 const MOBILE_CHIP_LIMIT = 12;
 
 interface BalkanVillaDestinationsSectionProps {
-    onNavigate: (view: string, path: string) => void;
+    onNavigate: (path: string) => void;
 }
 
 /**
@@ -130,7 +130,7 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
     const openDestination = useCallback(
         (dest: VillaDestination | undefined) => {
             if (!dest) return;
-            onNavigate('villas', buildVillaDestinationPath(dest));
+            onNavigate(buildVillaDestinationPath(dest));
         },
         [onNavigate],
     );
@@ -268,7 +268,7 @@ const BalkanVillaDestinationsSection: React.FC<BalkanVillaDestinationsSectionPro
                 ))}
                 <button
                     type="button"
-                    onClick={() => onNavigate('villas', '/villas')}
+                    onClick={() => onNavigate('/villas')}
                     className="min-h-[44px] touch-manipulation rounded-full border border-[var(--color-villa-gold)]/40 bg-[var(--color-villa-gold)]/10 px-4 py-2.5 text-[13px] font-semibold text-[var(--color-villa-gold-deep)] shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-villa-gold)]"
                 >
                     {t('villas:destinationsHero.seeAll', 'See all')}

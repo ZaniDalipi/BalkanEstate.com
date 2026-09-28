@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { tokenService } from '../../src/shared/api/tokenService';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 type ViewingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
 type StatusFilter = ViewingStatus | 'all';
@@ -53,7 +53,6 @@ const statusConfig: Record<ViewingStatus, { labelKey: string; defaultLabel: stri
 
 const ViewingRequestsTab: React.FC = () => {
   const { t } = useTranslation(['common', 'property']);
-  const { dispatch } = useAppContext();
   const [viewings, setViewings] = useState<ViewingRequest[]>([]);
   const [counts, setCounts] = useState<ViewingCounts>({ pending: 0, confirmed: 0, cancelled: 0, completed: 0, total: 0 });
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -174,9 +173,7 @@ const ViewingRequestsTab: React.FC = () => {
   };
 
   const navigateToProperty = (propertyId: string) => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    navigate(paths.property(propertyId));
   };
 
   const filterTabs: { key: StatusFilter; label: string; count?: number }[] = [

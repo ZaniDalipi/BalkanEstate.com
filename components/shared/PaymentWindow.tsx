@@ -16,6 +16,8 @@ import { trackEcommerce, trackEvent } from '../../src/components/marketing/Analy
 import { encryptSensitiveFields } from '../../src/shared/api/payloadEncryption';
 import { validatePaymentRedirectUrl } from '../../src/utils/security';
 import { tokenService } from '../../src/shared/api/tokenService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // ====== Encrypted Session Storage ======
 // AES-256-GCM encryption for payment data stored in sessionStorage.
@@ -776,8 +778,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               type="button"
               onClick={() => {
                 onClose();
-                // Navigate to account settings
-                window.location.href = '/account?tab=subscription';
+                navigate(paths.account('subscription'));
               }}
               className="w-full py-4 px-6 rounded-xl font-bold text-lg shadow-lg bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >

@@ -18,6 +18,8 @@ import {
 import { apiRequest } from '@/src/shared/api';
 import { validatePaymentRedirectUrl } from '@/src/utils/security';
 import { replacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface EnterprisePlan {
   name: string;
@@ -75,8 +77,7 @@ const AgencyPaymentPage: React.FC = () => {
   // Redirect if no pending agency data
   useEffect(() => {
     if (!pendingAgencyData) {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'createAgency' });
-      window.history.pushState({}, '', '/create-agency');
+      navigate(paths.createAgency());
     }
   }, [pendingAgencyData, dispatch]);
 
@@ -237,12 +238,9 @@ const AgencyPaymentPage: React.FC = () => {
       const agencySlug = data.agency?.slug;
       setTimeout(() => {
         if (agencySlug) {
-          dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
-          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-          window.history.pushState({}, '', `/agencies/${agencySlug}`);
+          navigate(paths.agency(agencySlug));
         } else {
-          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-          window.history.pushState({}, '', '/agency-dashboard');
+          navigate(paths.agencyDashboard());
         }
       }, 2000);
     } catch (err: any) {
@@ -253,8 +251,7 @@ const AgencyPaymentPage: React.FC = () => {
   };
 
   const handleGoBack = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'createAgency' });
-    window.history.pushState({}, '', '/create-agency');
+    navigate(paths.createAgency());
   };
 
   if (!pendingAgencyData) {

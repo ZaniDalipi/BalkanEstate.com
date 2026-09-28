@@ -17,6 +17,8 @@ import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
 import SearchMobileFilters from './SearchMobileFilters';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -391,7 +393,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         </button>
                                         {isAuthenticated && currentUser && (
                                             <button
-                                                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
+                                                onClick={() => navigate(paths.account())}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
                                                 aria-label="My account"
                                             >

@@ -1,6 +1,8 @@
 import React from 'react';
 import AgencyCreationModal from '@/components/shared/AgencyCreationModal';
 import { useAppContext } from '@/context/AppContext';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface EnterpriseCreationFormProps {
   isOpen: boolean;
@@ -20,7 +22,7 @@ const EnterpriseCreationForm: React.FC<EnterpriseCreationFormProps> = ({ isOpen,
         message: 'Your agency has been created successfully. You now have a dedicated agency page.',
       },
     });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
+    navigate(paths.agencies());
   };
 
 

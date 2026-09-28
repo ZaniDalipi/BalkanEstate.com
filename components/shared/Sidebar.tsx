@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView, UserRole } from '../../types';
-import { setNavigationDirection, type NavigationDirection } from '@/app/navigation/navHistory';
+import type { NavigationDirection } from '@/app/navigation/navHistory';
+import { navigate } from '@/src/app/router/navigation';
+import { useRouteView } from '@/src/app/router/useRouteView';
 import { preloadView } from '@/app/navigation/routePreload';
 import {
   AUTH_REQUIRED_VIEWS,
@@ -13,7 +15,6 @@ import {
 import { createLogger } from '@/shared/utils/logger';
 import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import UserAvatar from './UserAvatar';
 
 const navLogger = createLogger('SidebarNav');
@@ -134,8 +135,8 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation(['nav', 'common', 'auth']);
     const { state, dispatch, logout } = useAppContext();
-    const { activeView, isAuthenticated, currentUser, conversations } = state;
-    const { getLocalizedPath } = useLocalizedNavigation();
+    const { isAuthenticated, currentUser, conversations } = state;
+    const { view: activeView, detail } = useRouteView();
 
     // Calculate total unread messages using the per-conversation unread count fields
     const totalUnreadCount = conversations.reduce((total, conversation) => {
@@ -148,9 +149,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
      * Navigate to a sidebar destination.
      *
      * Everything a tap has to do happens in one place, in one commit, with no
-     * animation in front of it: the view changes, the URL is pushed and the
-     * drawer closes together, so the destination is on screen in the frame
-     * after the tap rather than at the end of a transition.
+     * animation in front of it: the route changes and the drawer closes
+     * together, so the destination is on screen in the frame after the tap
+     * rather than at the end of a transition.
      */
     const navigateTo = useCallback((
         view: AppView,
@@ -174,13 +175,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         // Tapping the entry you are already on: no history entry, no
         // transition against an identical page, just close the drawer.
-        const needed = isNavigationNeeded(view, {
-            activeView,
-            hasSelectedProperty: !!state.selectedProperty,
-            hasSelectedAgency: !!state.selectedAgencyId,
-            hasSelectedAgent: !!state.selectedAgentId,
-            hasSelectedBusinessListing: !!state.selectedBusinessListingId,
-        });
+        const needed = isNavigationNeeded(view, { activeView, detail });
         if (!needed) {
             onClose();
             return;
@@ -192,13 +187,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         preloadView(view);
 
         const direction = options?.direction ?? directionFor(activeView, view);
-        const localizedPath = getLocalizedPath(route.path);
-
-        // Still recorded, because `navHistory` classifies the history entry off
-        // it — it no longer selects any motion, since a navigation plays none.
-        setNavigationDirection(direction);
-
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
 
         // On mobile/tablet, always open the property search on the map
         // first so users land on the map when navigating in from the
@@ -208,30 +196,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             dispatch({ type: 'UPDATE_SEARCH_PAGE_STATE', payload: { mobileView: 'map' } });
         }
 
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
-
-        try {
-            window.history.pushState({}, '', localizedPath);
-        } catch (error) {
-            // pushState throws in a handful of real situations (a sandboxed
-            // frame, a rate-limited burst). The view has already changed, so
-            // losing the URL is a worse-but-working navigation, not a
-            // failed one — never let it take the page down with it.
-            navLogger.warn('Could not update the URL for a sidebar navigation', { path: localizedPath, error });
-        }
+        navigate(route.path, { direction });
 
         onClose();
-    }, [
-        activeView,
-        dispatch,
-        getLocalizedPath,
-        isAuthenticated,
-        onClose,
-        state.selectedAgencyId,
-        state.selectedAgentId,
-        state.selectedBusinessListingId,
-        state.selectedProperty,
-    ]);
+    }, [activeView, detail, dispatch, isAuthenticated, onClose]);
 
     const handleNavClick = useCallback((view: AppView) => navigateTo(view), [navigateTo]);
 

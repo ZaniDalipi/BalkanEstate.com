@@ -34,7 +34,9 @@ const GeminiDescriptionGenerator: React.FC<{
     propertyToEdit: Property | null;
     /** Start a new listing from these values (e.g. an imported feed draft). */
     prefill?: ListingPrefill | null;
-}> = ({ propertyToEdit, prefill }) => {
+    /** A new listing's type when nothing else decides it. */
+    initialListingType?: 'sale' | 'rent';
+}> = ({ propertyToEdit, prefill, initialListingType = 'sale' }) => {
     const { t } = useTranslation(['newListing', 'seller', 'rental', 'common', 'validation']);
 
     const {
@@ -72,7 +74,7 @@ const GeminiDescriptionGenerator: React.FC<{
         formContainerRef,
         currentUser, isAuthenticating, isLoadingUserData,
         restoredDraft, discardDraft,
-    } = useListingForm(propertyToEdit, prefill);
+    } = useListingForm(propertyToEdit, prefill, initialListingType);
 
     // --- Step-based rendering ---
 

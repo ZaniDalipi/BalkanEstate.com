@@ -38,6 +38,8 @@ import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DSt
 import MagneticTiltCard from '../src/features/business-directory/components/MagneticTiltCard';
 import { API_URL } from '../src/shared/api/config';
 import { tokenService } from '../src/shared/api/tokenService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // Gradient presets for agency banners (same as AgencyDetailPage)
 const GRADIENT_PRESETS = [
@@ -195,8 +197,7 @@ const AgenciesListPage: React.FC = () => {
         },
       });
       // Navigate to profile page where they can become an agent
-      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      navigate(paths.account('profile'));
       return;
     }
 
@@ -205,11 +206,7 @@ const AgenciesListPage: React.FC = () => {
   };
 
   const handleViewAgency = (agency: Agency) => {
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agency._id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-    let urlSlug = agency.slug || agency._id;
-    urlSlug = urlSlug.replace(',', '/');
-    window.history.pushState({}, '', `/agencies/${urlSlug}`);
+    navigate(paths.agencyOf(agency), { state: { agency } });
   };
 
   const getRankStyle = (index: number) => {

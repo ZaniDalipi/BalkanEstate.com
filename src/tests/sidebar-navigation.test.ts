@@ -91,18 +91,18 @@ describe('deciding whether a tap navigates at all', () => {
     // 'search', but the page on screen is the listing, so tapping Search is a
     // real navigation back out to the results.
     expect(
-      isNavigationNeeded('search', { activeView: 'search', hasSelectedProperty: true }),
+      isNavigationNeeded('search', { activeView: 'search', detail: 'property' }),
     ).toBe(true);
     expect(
-      isNavigationNeeded('agencies', { activeView: 'agencies', hasSelectedAgency: true }),
+      isNavigationNeeded('agencies', { activeView: 'agencies', detail: 'agency' }),
     ).toBe(true);
     expect(
-      isNavigationNeeded('agents', { activeView: 'agents', hasSelectedAgent: true }),
+      isNavigationNeeded('agents', { activeView: 'agents', detail: 'agent' }),
     ).toBe(true);
     expect(
       isNavigationNeeded('business-directory', {
         activeView: 'business-directory',
-        hasSelectedBusinessListing: true,
+        detail: 'business-listing',
       }),
     ).toBe(true);
   });

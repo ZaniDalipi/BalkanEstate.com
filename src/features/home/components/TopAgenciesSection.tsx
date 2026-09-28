@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { getTopAgencies } from '@/src/features/agencies/api/agencyApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
-import { useAppContext } from '@/context/AppContext';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import type { Agency } from '@/src/shared/types';
 import { calcAgencyScore, getAgencyAchievementBadge, AGENCY_SCORING_METRIC_DEFS, AGENCY_MAX_SCORE } from '@/src/features/agencies/utils/agencyScoring';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const MEDAL_COLORS = {
   0: { bg: '#FFD700', text: '#92710A', glow: 'rgba(255, 215, 0, 0.4)', gradient: 'linear-gradient(135deg, #FFD700, #FFC107)' },
@@ -332,14 +332,9 @@ const TopAgenciesSection: React.FC = () => {
   const { t: rawT } = useTranslation('home');
   const t = useCallback((key: string, fallback?: string): string =>
     rawT(key, { defaultValue: fallback }) as string, [rawT]);
-  const { dispatch } = useAppContext();
-  const { navigate } = useLocalizedNavigation();
-
   const handleAgencyClick = useCallback((agency: Agency) => {
-    const agencyIdentifier = agency.slug || agency._id;
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyIdentifier });
-    navigate(`/agencies/${agencyIdentifier}`, { direction: 'up' });
-  }, [dispatch, navigate]);
+    navigate(paths.agencyOf(agency), { direction: 'up' });
+  }, []);
 
   const { data: agencies = [], isLoading } = useQuery<Agency[]>({
     queryKey: ['topAgenciesMonth'],

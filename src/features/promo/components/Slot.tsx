@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
-import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useAdBanners, selectByPlacement } from '../hooks/useBanners';
 import { useAdPreview } from '../hooks/usePreview';
 import { trackClick, trackImpression } from '../api/bannerApi';
 import NetworkAd, { useNetworkAdFill } from './NetworkFill';
 import type { AdPage, AdPlacement } from '../types';
+import { navigate, localizePath } from '@/src/app/router/navigation';
+import { paths, withQuery } from '@/src/app/router/paths';
 
 /**
  * Standard IAB display-ad units. Slots reserve the exact aspect ratio so the
@@ -64,7 +64,6 @@ const AdSlot: React.FC<AdSlotProps> = ({
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
   const preview = useAdPreview();
-  const { dispatch } = useAppContext();
   const trackedRef = useRef<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   // Natural aspect ratio of the loaded creative, so horizontal slots size to
@@ -78,13 +77,13 @@ const AdSlot: React.FC<AdSlotProps> = ({
   const handleNetworkUnfilled = React.useCallback(() => setNetworkUnfilled(true), []);
 
   // "Your Ad Here" placeholder → open the contact form as an advertising lead.
-  const contactHref = `${buildLocalizedPath('/contact')}?topic=advertise`;
+  const contactPath = withQuery(paths.contact(), { topic: 'advertise' });
+  const contactHref = localizePath(contactPath);
   const goToAdvertise = (e: React.MouseEvent) => {
     // Let modified clicks (new tab) use the href; otherwise navigate in-app.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
     e.preventDefault();
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'contact' });
-    window.history.pushState({}, '', contactHref);
+    navigate(contactPath);
     window.scrollTo({ top: 0, behavior: 'auto' });
   };
 

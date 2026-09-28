@@ -26,6 +26,8 @@ import {
 } from '@/constants';
 import Footer from '@/components/shared/Footer';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface BusinessDetailPageProps {
   listingId: string;
@@ -219,10 +221,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
   // Global nav handlers (matching AgentProfileHeader pattern)
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      window.history.pushState({}, '', '/account');
+      navigate(paths.account());
     } else {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     }
@@ -230,23 +229,14 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
 
   const handleNewListingClick = useCallback(() => {
     if (isAuthenticated) {
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-      window.history.pushState({}, '', '/create-listing');
+      navigate(paths.createListing());
     } else {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
     }
   }, [isAuthenticated, dispatch]);
 
   const handleSubscribeClick = useCallback(() => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    const currentLang = window.location.pathname.split('/')[1] || 'en';
-    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-    window.history.pushState({}, '', `/${lang}/subscribe`);
+    navigate(paths.pricing());
   }, [dispatch]);
 
   const accountButton = useMemo(() => {
