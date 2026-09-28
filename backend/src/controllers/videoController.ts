@@ -1,22 +1,87 @@
 import { Request, Response } from 'express';
 import Property from '../models/Property';
 import User, { IUser } from '../models/User';
-import {
-  generatePropertyVideo,
-  startVideoGenerationJob,
-  getVideoGenerationJobStatus,
-  deleteGeneratedVideo,
-  VideoGenerationOptions,
-} from '../services/videoGenerationService';
+import { generatePropertyVideo, VideoGenerationOptions } from '../services/videoGenerationService';
 import { videoLogger } from '../utils/logger';
-import { getParam, getObjectIdParam } from '../utils/validateParams';
+import { getObjectIdParam } from '../utils/validateParams';
+
+const VIDEO_FORMATS = ['vertical', 'horizontal', 'square'] as const;
+const VIDEO_QUALITIES = ['standard', 'mobile'] as const;
+const MUSIC_STYLES = ['elegant', 'upbeat', 'calm', 'modern'] as const;
+const BACKGROUND_STYLES = ['gradient', 'blur', 'dark', 'elegant'] as const;
+
+type VideoRequestOptions = Pick<
+  VideoGenerationOptions,
+  'format' | 'quality' | 'duration' | 'includeWatermark' | 'musicStyle' | 'backgroundStyle'
+>;
+
+/** Validate the generator options from the request body. Never throws. */
+export const validateVideoRequest = (
+  body: Record<string, unknown> | undefined
+): { isValid: true; value: VideoRequestOptions } | { isValid: false; error: string } => {
+  const {
+    format = 'vertical',
+    quality = 'mobile',
+    duration = 3,
+    includeWatermark = true,
+    musicStyle = 'elegant',
+    backgroundStyle = 'elegant',
+  } = body || {};
+
+  if (!VIDEO_FORMATS.includes(format as never)) {
+    return { isValid: false, error: 'Invalid format. Must be vertical, horizontal, or square' };
+  }
+  if (!VIDEO_QUALITIES.includes(quality as never)) {
+    return { isValid: false, error: 'Invalid quality. Must be standard or mobile' };
+  }
+  if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 2 || duration > 10) {
+    return { isValid: false, error: 'Duration must be between 2 and 10 seconds per image' };
+  }
+  if (!MUSIC_STYLES.includes(musicStyle as never)) {
+    return { isValid: false, error: 'Invalid music style' };
+  }
+  if (!BACKGROUND_STYLES.includes(backgroundStyle as never)) {
+    return { isValid: false, error: 'Invalid background style. Must be gradient, blur, dark, or elegant' };
+  }
+  if (typeof includeWatermark !== 'boolean') {
+    return { isValid: false, error: 'includeWatermark must be true or false' };
+  }
+
+  return {
+    isValid: true,
+    value: {
+      format: format as VideoRequestOptions['format'],
+      quality: quality as VideoRequestOptions['quality'],
+      duration,
+      includeWatermark,
+      musicStyle: musicStyle as VideoRequestOptions['musicStyle'],
+      backgroundStyle: backgroundStyle as VideoRequestOptions['backgroundStyle'],
+    },
+  };
+};
+
+/** "Sea View Villa" → "sea-view-villa-video.mp4" */
+const downloadName = (title: string | undefined): string => {
+  const slug = (title || 'listing')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return `${slug || 'listing'}-video.mp4`;
+};
 
 /**
- * @desc    Generate video for a property (synchronous - for smaller videos)
+ * @desc    Render a showcase video for a listing and send it as a download.
+ *          Nothing is stored: the seller posts it to TikTok/YouTube/Instagram
+ *          and pastes that link into the listing.
  * @route   POST /api/videos/generate/:propertyId
  * @access  Private (property owner only)
  */
 export const generateVideo = async (req: Request, res: Response): Promise<void> => {
+  let cleanup: (() => void) | undefined;
+
   try {
     const propertyId = getObjectIdParam(req, res, 'propertyId');
     if (!propertyId) return;
@@ -29,359 +94,67 @@ export const generateVideo = async (req: Request, res: Response): Promise<void> 
     const currentUser = req.user as IUser;
     const userId = String(currentUser._id);
 
-    // Find property and verify ownership
     const property = await Property.findById(propertyId);
-
     if (!property) {
       res.status(404).json({ message: 'Property not found' });
       return;
     }
-
     if (property.sellerId.toString() !== userId) {
       res.status(403).json({ message: 'Not authorized to generate video for this property' });
       return;
     }
-
-    // Check if property has images
     if (!property.images || property.images.length === 0) {
       res.status(400).json({ message: 'Property must have at least one image to generate a video' });
       return;
     }
 
-    // Get options from request body
-    const {
-      format = 'vertical',
-      quality = 'mobile', // Default to mobile-optimized
-      duration = 3,
-      includeWatermark = true,
-      musicStyle = 'elegant',
-      backgroundStyle = 'elegant', // Professional background style
-      embedInListing = true, // Save video to property for auto-play on listing
-    } = req.body;
-
-    // Validate format
-    if (!['vertical', 'horizontal', 'square'].includes(format)) {
-      res.status(400).json({ message: 'Invalid format. Must be vertical, horizontal, or square' });
+    const validation = validateVideoRequest(req.body);
+    if (!validation.isValid) {
+      res.status(400).json({ message: validation.error });
       return;
     }
 
-    // Validate quality
-    if (!['standard', 'mobile'].includes(quality)) {
-      res.status(400).json({ message: 'Invalid quality. Must be standard or mobile' });
-      return;
-    }
-
-    // Validate duration
-    if (duration < 2 || duration > 10) {
-      res.status(400).json({ message: 'Duration must be between 2 and 10 seconds per image' });
-      return;
-    }
-
-    // Validate background style
-    if (!['gradient', 'blur', 'dark', 'elegant'].includes(backgroundStyle)) {
-      res.status(400).json({ message: 'Invalid background style. Must be gradient, blur, dark, or elegant' });
-      return;
-    }
-
-    // Prepare image URLs
-    const imageUrls = property.images.map(img => img.url);
-
-    // Get seller info
     const seller = await User.findById(property.sellerId);
-    const sellerName = property.createdByName || seller?.name || '';
-    const sellerPhone = seller?.phone || '';
-    const agencyName = seller?.agencyName || '';
-
-    // Generate video options with full property details
     const options: VideoGenerationOptions = {
       propertyId: String(property._id),
       userId,
-      imageUrls,
+      imageUrls: property.images.map((img) => img.url),
       title: property.title,
       price: property.price,
       city: property.city,
       beds: property.beds,
       baths: property.baths,
       sqft: property.sqft,
-      sellerName,
-      sellerPhone,
-      agencyName,
-      format,
-      quality,
-      duration,
-      includeWatermark,
-      musicStyle,
-      backgroundStyle,
-      embedInListing,
+      sellerName: property.createdByName || seller?.name || '',
+      sellerPhone: seller?.phone || '',
+      agencyName: seller?.agencyName || '',
+      ...validation.value,
     };
 
-    videoLogger.info(`🎬 Starting video generation for property ${propertyId} by user ${userId} (quality: ${quality}, background: ${backgroundStyle})`);
-
-    // Generate video
+    videoLogger.info(`🎬 Generating download video for property ${propertyId} (quality: ${options.quality})`);
     const result = await generatePropertyVideo(options);
+    cleanup = result.cleanup;
 
-    // Update property with generated video information
-    if (embedInListing) {
-      // Save to generated video fields for auto-play in listing
-      property.generatedVideoUrl = result.url;
-      property.generatedVideoPublicId = result.publicId;
-      property.generatedVideoFormat = format;
-      property.generatedVideoDuration = result.duration;
-      property.hasGeneratedVideo = true;
-    }
-    // Also store in videoUrl for backwards compatibility
-    property.videoUrl = result.url;
-    await property.save();
+    res.set('X-Video-Duration', String(result.duration));
+    res.set('X-Video-Width', String(result.width));
+    res.set('X-Video-Height', String(result.height));
+    res.set('Access-Control-Expose-Headers', 'X-Video-Duration, X-Video-Width, X-Video-Height, Content-Disposition');
+    res.set('Cache-Control', 'no-store');
 
-    videoLogger.info(`✅ Video generated successfully for property ${propertyId}`);
-
-    res.status(200).json({
-      message: 'Video generated successfully',
-      video: result,
-    });
-  } catch (error: any) {
-    videoLogger.error('❌ Video generation error:', error);
-    res.status(500).json({
-      message: 'Failed to generate video',
-    });
-  }
-};
-
-/**
- * @desc    Start async video generation job (for larger videos)
- * @route   POST /api/videos/generate-async/:propertyId
- * @access  Private (property owner only)
- */
-export const startAsyncVideoGeneration = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const propertyId = getObjectIdParam(req, res, 'propertyId');
-    if (!propertyId) return;
-
-    if (!req.user) {
-      res.status(401).json({ message: 'Unauthorized' });
-      return;
-    }
-
-    const currentUser = req.user as IUser;
-    const userId = String(currentUser._id);
-
-    // Find property and verify ownership
-    const property = await Property.findById(propertyId);
-
-    if (!property) {
-      res.status(404).json({ message: 'Property not found' });
-      return;
-    }
-
-    if (property.sellerId.toString() !== userId) {
-      res.status(403).json({ message: 'Not authorized to generate video for this property' });
-      return;
-    }
-
-    // Check if property has images
-    if (!property.images || property.images.length === 0) {
-      res.status(400).json({ message: 'Property must have at least one image to generate a video' });
-      return;
-    }
-
-    // Get options from request body
-    const {
-      format = 'vertical',
-      quality = 'mobile', // Default to mobile-optimized
-      duration = 3,
-      includeWatermark = true,
-      musicStyle = 'elegant',
-      backgroundStyle = 'elegant', // Professional background style
-      embedInListing = true, // Save video to property for auto-play on listing
-    } = req.body;
-
-    // Prepare image URLs
-    const imageUrls = property.images.map(img => img.url);
-
-    // Get seller info
-    const seller = await User.findById(property.sellerId);
-    const sellerName = property.createdByName || seller?.name || '';
-    const sellerPhone = seller?.phone || '';
-    const agencyName = seller?.agencyName || '';
-
-    // Generate video options with full property details
-    const options: VideoGenerationOptions = {
-      propertyId: String(property._id),
-      userId,
-      imageUrls,
-      title: property.title,
-      price: property.price,
-      city: property.city,
-      beds: property.beds,
-      baths: property.baths,
-      sqft: property.sqft,
-      sellerName,
-      sellerPhone,
-      agencyName,
-      format,
-      quality,
-      duration,
-      includeWatermark,
-      musicStyle,
-      backgroundStyle,
-      embedInListing,
-    };
-
-    // Start async job
-    const jobId = await startVideoGenerationJob(options);
-
-    res.status(202).json({
-      message: 'Video generation started',
-      jobId,
-      statusUrl: `/api/videos/status/${jobId}`,
-    });
-  } catch (error: any) {
-    videoLogger.error('❌ Failed to start video generation:', error);
-    res.status(500).json({
-      message: 'Failed to start video generation',
-    });
-  }
-};
-
-/**
- * @desc    Get video generation job status
- * @route   GET /api/videos/status/:jobId
- * @access  Private
- */
-export const getJobStatus = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const jobId = getParam(req, 'jobId');
-
-    const job = getVideoGenerationJobStatus(jobId);
-
-    if (!job) {
-      res.status(404).json({ message: 'Job not found' });
-      return;
-    }
-
-    res.status(200).json(job);
-  } catch (error: any) {
-    videoLogger.error('❌ Failed to get job status:', error);
-    res.status(500).json({
-      message: 'Failed to get job status',
-    });
-  }
-};
-
-/**
- * @desc    Delete generated video
- * @route   DELETE /api/videos/:propertyId
- * @access  Private (property owner only)
- */
-export const deleteVideo = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const propertyId = getObjectIdParam(req, res, 'propertyId');
-    if (!propertyId) return;
-
-    if (!req.user) {
-      res.status(401).json({ message: 'Unauthorized' });
-      return;
-    }
-
-    const currentUser = req.user as IUser;
-    const userId = String(currentUser._id);
-
-    // Find property and verify ownership
-    const property = await Property.findById(propertyId);
-
-    if (!property) {
-      res.status(404).json({ message: 'Property not found' });
-      return;
-    }
-
-    if (property.sellerId.toString() !== userId) {
-      res.status(403).json({ message: 'Not authorized to delete video for this property' });
-      return;
-    }
-
-    // If property has a generated video with public ID, delete from Cloudinary
-    if (property.generatedVideoPublicId) {
-      await deleteGeneratedVideo(property.generatedVideoPublicId);
-    } else if (property.videoUrl && property.videoUrl.includes('cloudinary')) {
-      // Fallback: Extract public_id from Cloudinary URL
-      const urlParts = property.videoUrl.split('/');
-      const versionIndex = urlParts.findIndex(part => part.startsWith('v') && !isNaN(parseInt(part.substring(1))));
-      if (versionIndex !== -1) {
-        const publicIdWithExtension = urlParts.slice(versionIndex + 1).join('/');
-        const publicId = publicIdWithExtension.replace(/\.[^/.]+$/, ''); // Remove extension
-        await deleteGeneratedVideo(publicId);
+    res.download(result.filePath, downloadName(property.title), (error) => {
+      result.cleanup();
+      if (error && !res.headersSent) {
+        res.status(500).json({ message: 'Failed to send video' });
+      } else if (error) {
+        videoLogger.warn(`⚠️ Video download interrupted for ${propertyId}: ${error.message}`);
       }
-    }
-
-    // Clear all video fields from property
-    property.videoUrl = undefined;
-    property.generatedVideoUrl = undefined;
-    property.generatedVideoPublicId = undefined;
-    property.generatedVideoFormat = undefined;
-    property.generatedVideoDuration = undefined;
-    property.hasGeneratedVideo = false;
-    await property.save();
-
-    res.status(200).json({ message: 'Video deleted successfully' });
-  } catch (error: any) {
-    videoLogger.error('❌ Failed to delete video:', error);
-    res.status(500).json({
-      message: 'Failed to delete video',
-    });
-  }
-};
-
-/**
- * @desc    Add generated video to listing (sets videoUrl, replacing YouTube/Instagram if present)
- * @route   PATCH /api/videos/:propertyId/add-to-listing
- * @access  Private (property owner only)
- */
-export const addVideoToListing = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const propertyId = getObjectIdParam(req, res, 'propertyId');
-    if (!propertyId) return;
-
-    if (!req.user) {
-      res.status(401).json({ message: 'Unauthorized' });
-      return;
-    }
-
-    const currentUser = req.user as IUser;
-    const userId = String(currentUser._id);
-
-    const property = await Property.findById(propertyId);
-    if (!property) {
-      res.status(404).json({ message: 'Property not found' });
-      return;
-    }
-
-    if (property.sellerId.toString() !== userId) {
-      res.status(403).json({ message: 'Not authorized to modify this property' });
-      return;
-    }
-
-    // Use the generated video URL, or accept a videoUrl from the request body
-    const videoUrl = req.body.videoUrl || property.generatedVideoUrl;
-    if (!videoUrl) {
-      res.status(400).json({ message: 'No generated video found. Generate a video first.' });
-      return;
-    }
-
-    const previousVideoUrl = property.videoUrl;
-    property.videoUrl = videoUrl;
-    await property.save();
-
-    videoLogger.info(`🎬 Added generated video to listing ${propertyId} (replaced: ${previousVideoUrl || 'none'})`);
-
-    res.status(200).json({
-      success: true,
-      message: previousVideoUrl ? 'Video replaced on listing' : 'Video added to listing',
-      videoUrl,
-      previousVideoUrl: previousVideoUrl || null,
     });
   } catch (error: any) {
-    videoLogger.error('❌ Failed to add video to listing:', error);
-    res.status(500).json({ message: 'Failed to add video to listing' });
+    cleanup?.();
+    videoLogger.error('❌ Video generation error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ message: 'Failed to generate video' });
+    }
   }
 };
 

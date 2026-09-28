@@ -1,10 +1,6 @@
 import express from 'express';
 import {
   generateVideo,
-  startAsyncVideoGeneration,
-  getJobStatus,
-  deleteVideo,
-  addVideoToListing,
   getVideoPreview,
   resolveTikTokShortLink,
 } from '../controllers/videoController';
@@ -122,7 +118,12 @@ router.get('/preview/:propertyId', protect, getVideoPreview);
  * @swagger
  * /api/videos/generate/{propertyId}:
  *   post:
- *     summary: Generate a property showcase video (synchronous)
+ *     summary: Render a property showcase video and return it as a download
+ *     description: >
+ *       The MP4 (video/mp4) is streamed to the caller and deleted from the
+ *       server — it is never stored. Sellers post it to TikTok/YouTube/Instagram
+ *       and paste that link into the listing. Headers X-Video-Duration,
+ *       X-Video-Width and X-Video-Height describe the file.
  *     tags: [Videos]
  *     security:
  *       - bearerAuth: []
@@ -161,29 +162,12 @@ router.get('/preview/:propertyId', protect, getVideoPreview);
  *                 description: Background music style
  *     responses:
  *       200:
- *         description: Video generated successfully
+ *         description: The rendered video file
  *         content:
- *           application/json:
+ *           video/mp4:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 video:
- *                   type: object
- *                   properties:
- *                     url:
- *                       type: string
- *                     publicId:
- *                       type: string
- *                     duration:
- *                       type: number
- *                     format:
- *                       type: string
- *                     width:
- *                       type: integer
- *                     height:
- *                       type: integer
+ *               type: string
+ *               format: binary
  *       400:
  *         description: Bad request (no images or invalid format)
  *       401:
@@ -194,179 +178,5 @@ router.get('/preview/:propertyId', protect, getVideoPreview);
  *         $ref: '#/components/responses/NotFound'
  */
 router.post('/generate/:propertyId', protect, generateVideo);
-
-/**
- * @swagger
- * /api/videos/generate-async/{propertyId}:
- *   post:
- *     summary: Start async video generation job (for larger videos)
- *     tags: [Videos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: propertyId
- *         required: true
- *         schema:
- *           type: string
- *         description: Property ID
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               format:
- *                 type: string
- *                 enum: [vertical, horizontal, square]
- *                 default: vertical
- *               duration:
- *                 type: integer
- *                 minimum: 2
- *                 maximum: 10
- *                 default: 3
- *               includeWatermark:
- *                 type: boolean
- *                 default: true
- *               musicStyle:
- *                 type: string
- *                 enum: [elegant, upbeat, calm, modern]
- *                 default: elegant
- *     responses:
- *       202:
- *         description: Video generation started
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 jobId:
- *                   type: string
- *                 statusUrl:
- *                   type: string
- *       400:
- *         description: Bad request
- *       401:
- *         $ref: '#/components/responses/Unauthorized'
- *       403:
- *         description: Not authorized
- *       404:
- *         $ref: '#/components/responses/NotFound'
- */
-router.post('/generate-async/:propertyId', protect, startAsyncVideoGeneration);
-
-/**
- * @swagger
- * /api/videos/status/{jobId}:
- *   get:
- *     summary: Get video generation job status
- *     tags: [Videos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: jobId
- *         required: true
- *         schema:
- *           type: string
- *         description: Job ID returned from generate-async endpoint
- *     responses:
- *       200:
- *         description: Job status
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 propertyId:
- *                   type: string
- *                 status:
- *                   type: string
- *                   enum: [pending, processing, completed, failed]
- *                 progress:
- *                   type: integer
- *                 result:
- *                   type: object
- *                 error:
- *                   type: string
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                 updatedAt:
- *                   type: string
- *                   format: date-time
- *       404:
- *         description: Job not found
- */
-router.get('/status/:jobId', protect, getJobStatus);
-
-/**
- * @swagger
- * /api/videos/{propertyId}:
- *   delete:
- *     summary: Delete generated video for a property
- *     tags: [Videos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: propertyId
- *         required: true
- *         schema:
- *           type: string
- *         description: Property ID
- *     responses:
- *       200:
- *         description: Video deleted successfully
- *       401:
- *         $ref: '#/components/responses/Unauthorized'
- *       403:
- *         description: Not authorized
- *       404:
- *         $ref: '#/components/responses/NotFound'
- */
-router.delete('/:propertyId', protect, deleteVideo);
-
-/**
- * @swagger
- * /api/videos/{propertyId}/add-to-listing:
- *   patch:
- *     summary: Add generated video to listing (replaces existing YouTube/Instagram URL)
- *     tags: [Videos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: propertyId
- *         required: true
- *         schema:
- *           type: string
- *         description: Property ID
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               videoUrl:
- *                 type: string
- *                 description: Optional video URL to use (defaults to generated video)
- *     responses:
- *       200:
- *         description: Video added to listing
- *       400:
- *         description: No generated video found
- *       401:
- *         $ref: '#/components/responses/Unauthorized'
- *       403:
- *         description: Not authorized
- *       404:
- *         $ref: '#/components/responses/NotFound'
- */
-router.patch('/:propertyId/add-to-listing', protect, addVideoToListing);
 
 export default router;

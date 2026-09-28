@@ -1098,8 +1098,30 @@ Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
   1920; `preserveQuality` q90 4:4:4). No incoming or eager transformations —
   both are billed per upload. Decodes are capped at 50 MP.
 - Chat images: compressed to 1600px before upload (`compressImageForUpload`).
-- Generated videos: one per listing (`public_id: showcase`, overwrite); older
-  renders are removed when a new one lands.
+
+### Video — links only, never stored
+
+Cloudinary bills video by the second and by the GB, so **no video is ever
+uploaded**:
+
+- **Listings** link to YouTube / TikTok / Instagram (`videoUrl`).
+- **"How it works"** items take a YouTube link only — the upload endpoint is
+  gone and `siteContentController` rejects anything else
+  (`utils/videoLinks.ts`, `validateYouTubeUrl` on the client).
+- **Video generator** (My Listings → Generate video) renders the MP4 with
+  FFmpeg and streams it back as a download (`POST /api/videos/generate/:id`,
+  `video/mp4`), then deletes the temp file. The seller posts it and pastes the
+  link into the listing.
+- `npm run cleanup:videos` (dry run) / `cleanup:videos:apply` removes videos
+  stored before this rule.
+
+### News covers — `backend/src/services/news/newsCover.ts`
+
+Chosen once, when the article is saved, and stored as a **link** (no upload):
+1. City Gallery photo for a city the article names (same country only —
+   "Split"/"Bar" are also English words),
+2. the article's own `og:image` (shown through `/api/image-proxy`),
+3. a City Gallery photo from the article's country.
 
 ### Naming — `backend/src/services/media/mediaNaming.ts`
 

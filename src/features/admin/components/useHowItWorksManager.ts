@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { apiRequest, uploadRequest } from '@/src/shared/api';
+import { useState, useEffect } from 'react';
+import { apiRequest } from '@/src/shared/api';
+import { validateYouTubeUrl } from '@/src/shared/utils/validation';
 
 export interface Step {
   stepNumber: number;
@@ -147,10 +148,9 @@ export function useHowItWorksManager() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<SiteContent | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  // Validation error shown inside the form (the page-level error sits behind the modal).
+  const [formError, setFormError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'video' | 'guide' | 'faq'>('all');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<HowItWorksFormData>({
     key: '',
@@ -188,30 +188,19 @@ export function useHowItWorksManager() {
     fetchContent();
   }, []);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('video', file);
-
-      // Use uploadRequest for proper auth + credentials
-      const response = await uploadRequest<{ url: string }>('/admin/site-content/upload-video', formDataUpload);
-      setFormData((prev) => ({ ...prev, url: response.url }));
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
+    // Videos are YouTube links only — nothing is uploaded.
+    if (formData.contentType === 'video') {
+      const check = validateYouTubeUrl(formData.url);
+      if (!check.isValid) {
+        setFormError(check.error ?? 'Invalid link');
+        return;
+      }
+    }
+
     try {
       const endpoint = editingItem
         ? `/admin/site-content/${editingItem.id}`
@@ -238,11 +227,12 @@ export function useHowItWorksManager() {
       resetForm();
       fetchContent();
     } catch (err: any) {
-      setError(err.message);
+      setFormError(err.message);
     }
   };
 
   const resetForm = () => {
+    setFormError(null);
     setFormData({
       key: '',
       type: 'video',
@@ -441,12 +431,9 @@ export function useHowItWorksManager() {
     editingItem,
     formData,
     setFormData,
-    isUploading,
-    uploadProgress,
-    fileInputRef,
+    formError,
 
     // Handlers
-    handleFileUpload,
     handleSubmit,
     handleDelete,
     handleToggleActive,

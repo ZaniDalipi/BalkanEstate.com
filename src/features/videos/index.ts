@@ -1,26 +1,15 @@
 // Video Generation Feature Module
-// Exports all video-related components, hooks, and API functions
+// Renders a showcase video the seller downloads and posts themselves —
+// videos are never stored by us; listings link to TikTok/YouTube/Instagram.
 
 // Components
 export { default as VideoGenerator } from './components/VideoGenerator';
 
 // Hooks
-export {
-  useVideoPreview,
-  useGenerateVideo,
-  useDeleteVideo,
-  useVideoJobStatus,
-} from './hooks/useVideoGeneration';
+export { useVideoPreview, useGenerateVideo } from './hooks/useVideoGeneration';
 
 // API
-export {
-  getVideoPreview,
-  generatePropertyVideo,
-  startAsyncVideoGeneration,
-  getJobStatus,
-  deletePropertyVideo,
-  pollJobUntilComplete,
-} from './api/videoApi';
+export { getVideoPreview, generatePropertyVideo, saveVideoToDevice } from './api/videoApi';
 
 // Types
 export type {
@@ -28,7 +17,6 @@ export type {
   VideoQuality,
   MusicStyle,
   VideoGenerationOptions,
-  GeneratedVideo,
-  VideoGenerationJob,
+  DownloadedVideo,
   VideoPreview,
 } from './api/videoApi';
