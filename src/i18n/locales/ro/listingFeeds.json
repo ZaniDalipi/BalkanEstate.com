@@ -176,6 +176,7 @@
     "edited": "Editat",
     "fromFeed": "Din {{name}}",
     "viewSource": "Vezi originalul",
+    "createdAt": "Adăugat {{date}}",
     "fetchedAt": "Preluat {{date}}",
     "publish": "Publică",
     "applyUpdate": "Aplică actualizarea",

@@ -176,6 +176,7 @@
     "edited": "Επεξεργασμένη",
     "fromFeed": "Από {{name}}",
     "viewSource": "Δείτε το πρωτότυπο",
+    "createdAt": "Προστέθηκε {{date}}",
     "fetchedAt": "Λήφθηκε {{date}}",
     "publish": "Δημοσίευση",
     "applyUpdate": "Εφαρμογή ενημέρωσης",

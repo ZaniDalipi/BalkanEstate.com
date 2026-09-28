@@ -176,6 +176,7 @@
     "edited": "E ndryshuar",
     "fromFeed": "Nga {{name}}",
     "viewSource": "Shiko origjinalin",
+    "createdAt": "Shtuar më {{date}}",
     "fetchedAt": "Marrë më {{date}}",
     "publish": "Publiko",
     "applyUpdate": "Apliko përditësimin",

@@ -176,6 +176,7 @@
     "edited": "Edited",
     "fromFeed": "From {{name}}",
     "viewSource": "View original",
+    "createdAt": "Added {{date}}",
     "fetchedAt": "Fetched {{date}}",
     "publish": "Publish",
     "applyUpdate": "Apply update",

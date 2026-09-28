@@ -204,6 +204,8 @@ export interface DraftDto {
   issues: string[];
   blockingIssues: string[];
   edited: boolean;
+  /** When the feed item first entered the review queue. */
+  createdAt: Date;
   fetchedAt: Date;
   reviewedAt?: Date;
   propertyId?: string;
@@ -226,6 +228,7 @@ const toDto = (draft: IImportedListingDraft, sourceName?: string, current?: Doc)
     issues,
     blockingIssues: issues.filter((i) => BLOCKING_ISSUES.includes(i)),
     edited: Boolean(draft.editedAt),
+    createdAt: draft.createdAt,
     fetchedAt: draft.fetchedAt,
     reviewedAt: draft.reviewedAt,
     propertyId: draft.propertyId ? encodeId(String(draft.propertyId)) : undefined,

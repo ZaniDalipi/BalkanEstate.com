@@ -176,6 +176,7 @@
     "edited": "Uređeno",
     "fromFeed": "Iz {{name}}",
     "viewSource": "Pogledaj original",
+    "createdAt": "Dodato {{date}}",
     "fetchedAt": "Preuzeto {{date}}",
     "publish": "Objavi",
     "applyUpdate": "Primijeni izmjenu",

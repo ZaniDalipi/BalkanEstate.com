@@ -54,6 +54,8 @@ export interface ImportedDraft {
   issues: DraftIssue[];
   blockingIssues: DraftIssue[];
   edited: boolean;
+  /** When the listing first entered the review queue. */
+  createdAt: string;
   fetchedAt: string;
   reviewedAt?: string;
   propertyId?: string;

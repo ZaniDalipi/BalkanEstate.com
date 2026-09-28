@@ -33,6 +33,7 @@ vi.mock('@sentry/react', () => {
 const { toPreviewProperty } = await import('@/src/features/listing-sources/utils/draftPreview');
 const draftProperty = toPreviewProperty({
     id: 'draft-1',
+    createdAt: '2026-09-25T10:00:00.000Z',
     fetchedAt: '2026-09-25T10:00:00.000Z',
     listing: {
         title: 'Luksuzan stan s privatnim vrtom', listingType: 'sale', propertyType: 'apartment',

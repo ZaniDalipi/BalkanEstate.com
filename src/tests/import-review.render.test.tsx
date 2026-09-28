@@ -76,6 +76,7 @@ const draft = (overrides: Partial<ImportedDraft> = {}): ImportedDraft => ({
     issues: [],
     blockingIssues: [],
     edited: false,
+    createdAt: '2026-09-20T10:00:00.000Z',
     fetchedAt: '2026-09-20T10:00:00.000Z',
     ...overrides,
 });

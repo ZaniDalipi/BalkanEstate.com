@@ -19,14 +19,21 @@ interface ImportDraftCardProps {
   onRestore: () => void;
 }
 
+/** Date and time down to the minute, in the viewer's locale. */
+const formatDateTime = (iso: string, locale?: string): string =>
+  new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
+
 const btn = 'px-3 py-1.5 text-sm rounded-lg border font-medium disabled:opacity-50 transition-colors';
 
 /** One fetched listing waiting for the owner's decision. */
 const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
   draft, selected, busy, onSelect, onOpen, onEdit, onAccept, onReject, onRestore,
 }) => {
-  const { t } = useTranslation(['listingFeeds', 'property']);
+  const { t, i18n } = useTranslation(['listingFeeds', 'property']);
   const { data } = draft;
+  // Only worth a separate "Added" stamp once a later sync re-fetched it.
+  const refetched =
+    Boolean(draft.createdAt) && new Date(draft.fetchedAt).getTime() - new Date(draft.createdAt).getTime() > 60_000;
   const isUpdate = draft.kind === 'update';
   const pending = draft.status === 'pending';
   const cover = data.images[0];
@@ -93,8 +100,15 @@ const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
         )}
 
         <div className="flex items-center justify-between gap-3 flex-wrap mt-3">
-          <div className="text-xs text-gray-400 flex gap-3">
-            <span>{t('listingFeeds:review.fetchedAt', { date: new Date(draft.fetchedAt).toLocaleDateString() })}</span>
+          <div className="text-xs text-gray-400 flex flex-wrap gap-x-3 gap-y-1">
+            {refetched && (
+              <time dateTime={draft.createdAt} title={new Date(draft.createdAt).toISOString()}>
+                {t('listingFeeds:review.createdAt', { date: formatDateTime(draft.createdAt, i18n.language) })}
+              </time>
+            )}
+            <time dateTime={draft.fetchedAt} title={new Date(draft.fetchedAt).toISOString()}>
+              {t('listingFeeds:review.fetchedAt', { date: formatDateTime(draft.fetchedAt, i18n.language) })}
+            </time>
             {draft.sourceUrl && (
               <a href={draft.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" className="text-primary hover:underline">
                 {t('listingFeeds:review.viewSource')}

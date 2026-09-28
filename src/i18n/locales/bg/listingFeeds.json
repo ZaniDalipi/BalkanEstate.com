@@ -176,6 +176,7 @@
     "edited": "Редактирана",
     "fromFeed": "От {{name}}",
     "viewSource": "Виж оригинала",
+    "createdAt": "Добавена {{date}}",
     "fetchedAt": "Изтеглена {{date}}",
     "publish": "Публикувай",
     "applyUpdate": "Приложи промяната",
