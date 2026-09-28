@@ -44,7 +44,8 @@
     "villaApprovals": "Villa Approvals",
     "villaDestinations": "Villa Destinations",
     "cityShowcase": "City Gallery",
-    "cityPhotos": "City Photos"
+    "cityPhotos": "City Photos",
+    "socialShare": "Social Sharing"
   },
   "properties": {
     "title": "Property Manager",
@@ -1389,5 +1390,33 @@
     "specialtiesCommaSeparated": "Specialties (comma separated)",
     "certificationsCommaSeparated": "Certifications (comma separated)",
     "editNote": "Changes are saved immediately and are visible to all users."
+  },
+  "socialShare": {
+    "title": "Social Sharing",
+    "subtitle": "New listings wait here for your approval before anything is posted.",
+    "pending": "To review",
+    "approved": "Approved",
+    "rejected": "Skipped",
+    "addPlaceholder": "Listing ID or link",
+    "addToQueue": "Add to queue",
+    "loadError": "Could not load the share queue.",
+    "empty": "Nothing here right now.",
+    "untitled": "Untitled listing",
+    "caption": "Caption",
+    "approveAndPost": "Approve & post",
+    "approve": "Approve",
+    "skip": "Skip",
+    "copyAndOpenGroup": "Copy text & open group",
+    "copyForGroup": "Copy text for group",
+    "retryFailed": "Retry failed",
+    "restore": "Move back to pending",
+    "sharedToGroup": "Shared to group",
+    "undo": "Undo",
+    "view": "View",
+    "facebookGroup": "Facebook group link",
+    "connected": "connected",
+    "notConnected": "not set up",
+    "setupHint": "Missing accounts are set up on the server (see docs/SOCIAL_SHARING.md). Until then, approve posts and share them to the group by hand.",
+    "groupHint": "Facebook does not allow apps to post in groups. \"Copy text & open group\" copies the post so you can paste it in."
   }
 }

@@ -44,7 +44,8 @@
     "villaApprovals": "Aprobări vile",
     "villaDestinations": "Destinații vile",
     "cityShowcase": "Galerie de orașe",
-    "cityPhotos": "Fotografii orașe"
+    "cityPhotos": "Fotografii orașe",
+    "socialShare": "Distribuire pe rețele"
   },
   "properties": {
     "title": "Property Manager",
@@ -1284,5 +1285,33 @@
     "specialtiesCommaSeparated": "Specializări (separate prin virgulă)",
     "certificationsCommaSeparated": "Certificări (separate prin virgulă)",
     "editNote": "Modificările sunt salvate imediat și sunt vizibile pentru toți utilizatorii."
+  },
+  "socialShare": {
+    "title": "Distribuire pe rețele",
+    "subtitle": "Anunțurile noi așteaptă aici aprobarea ta înainte să fie publicat ceva.",
+    "pending": "De verificat",
+    "approved": "Aprobate",
+    "rejected": "Omise",
+    "addPlaceholder": "ID sau link anunț",
+    "addToQueue": "Adaugă în coadă",
+    "loadError": "Coada de distribuire nu s-a încărcat.",
+    "empty": "Nimic aici momentan.",
+    "untitled": "Anunț fără titlu",
+    "caption": "Text",
+    "approveAndPost": "Aprobă și publică",
+    "approve": "Aprobă",
+    "skip": "Omite",
+    "copyAndOpenGroup": "Copiază textul și deschide grupul",
+    "copyForGroup": "Copiază textul pentru grup",
+    "retryFailed": "Reîncearcă eșuatele",
+    "restore": "Mută înapoi la așteptare",
+    "sharedToGroup": "Distribuit în grup",
+    "undo": "Anulează",
+    "view": "Vezi",
+    "facebookGroup": "Link grup Facebook",
+    "connected": "conectat",
+    "notConnected": "neconfigurat",
+    "setupHint": "Conturile lipsă se configurează pe server (vezi docs/SOCIAL_SHARING.md). Până atunci, aprobă postările și distribuie-le manual în grup.",
+    "groupHint": "Facebook nu permite aplicațiilor să posteze în grupuri. „Copiază textul și deschide grupul” copiază postarea ca s-o poți lipi."
   }
 }

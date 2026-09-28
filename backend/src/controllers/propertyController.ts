@@ -32,6 +32,7 @@ import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
 import { respondIfValidationError } from '../middleware/propertyValidation';
 import { TYPE_ATTRIBUTES } from '../config/typeAttributes';
+import { queueListingForSocial } from '../services/social/socialQueueService';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -1050,6 +1051,9 @@ export const createProperty = async (
       processInstantAlertsForProperty(String(property._id)).catch(err => {
         propertyLogger.error('Error processing instant alerts:', err);
       });
+
+      // Offer the new listing in the admin's social share queue (nothing is posted until approved)
+      queueListingForSocial(String(property._id));
     }
 
     // Update agent activeListings count if user is an agent
@@ -1225,6 +1229,7 @@ export const updateProperty = async (
       processInstantAlertsForProperty(String(property._id)).catch(err => {
         propertyLogger.error('Error processing instant alerts:', err);
       });
+      queueListingForSocial(String(property._id));
     }
 
     // Populate seller info

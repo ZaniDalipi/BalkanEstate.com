@@ -372,3 +372,14 @@ export const gameRewardKeys = {
   all: ['gameRewards'] as const,
   status: () => [...gameRewardKeys.all, 'status'] as const,
 };
+
+// ============================================================================
+// Social Share Queue Query Keys
+// Used by: Admin SocialShareQueue
+// ============================================================================
+
+export const socialPostKeys = {
+  all: ['socialPosts'] as const,
+  config: () => [...socialPostKeys.all, 'config'] as const,
+  list: (status: string) => [...socialPostKeys.all, 'list', status] as const,
+};

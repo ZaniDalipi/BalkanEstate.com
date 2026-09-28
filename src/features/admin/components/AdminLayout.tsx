@@ -17,6 +17,7 @@ interface AdminStats {
     newInquiries?: number;
     unverifiedUsers?: number;
     pendingVillas?: number;
+    pendingSocialPosts?: number;
   };
 }
 
@@ -43,7 +44,8 @@ export type AdminView =
   | 'villaDestinations'
   | 'cityShowcase'
   | 'adBanners'
-  | 'cityPhotos';
+  | 'cityPhotos'
+  | 'socialShare';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

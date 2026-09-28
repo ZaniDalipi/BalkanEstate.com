@@ -44,7 +44,8 @@
     "villaApprovals": "Odobrenja vila",
     "villaDestinations": "Destinacije vila",
     "cityShowcase": "Галерија Градова",
-    "cityPhotos": "Фотографије градова"
+    "cityPhotos": "Фотографије градова",
+    "socialShare": "Deljenje na mrežama"
   },
   "properties": {
     "title": "Управљање Некретнинама",
@@ -1181,5 +1182,33 @@
     "specialtiesCommaSeparated": "Специјалности (одвојене зарезом)",
     "certificationsCommaSeparated": "Сертификати (одвојени зарезом)",
     "editNote": "Измене се чувају одмах и видљиве су свим корисницима."
+  },
+  "socialShare": {
+    "title": "Deljenje na mrežama",
+    "subtitle": "Novi oglasi ovde čekaju vaše odobrenje pre nego što se išta objavi.",
+    "pending": "Za pregled",
+    "approved": "Odobreno",
+    "rejected": "Preskočeno",
+    "addPlaceholder": "ID ili link oglasa",
+    "addToQueue": "Dodaj u red",
+    "loadError": "Red za deljenje nije učitan.",
+    "empty": "Trenutno nema ničega.",
+    "untitled": "Oglas bez naslova",
+    "caption": "Tekst",
+    "approveAndPost": "Odobri i objavi",
+    "approve": "Odobri",
+    "skip": "Preskoči",
+    "copyAndOpenGroup": "Kopiraj tekst i otvori grupu",
+    "copyForGroup": "Kopiraj tekst za grupu",
+    "retryFailed": "Ponovi neuspele",
+    "restore": "Vrati na čekanje",
+    "sharedToGroup": "Podeljeno u grupi",
+    "undo": "Poništi",
+    "view": "Pogledaj",
+    "facebookGroup": "Link Facebook grupe",
+    "connected": "povezano",
+    "notConnected": "nije podešeno",
+    "setupHint": "Nalozi koji nedostaju podešavaju se na serveru (vidi docs/SOCIAL_SHARING.md). Do tada odobravajte objave i ručno ih delite u grupi.",
+    "groupHint": "Facebook ne dozvoljava aplikacijama da objavljuju u grupama. \"Kopiraj tekst i otvori grupu\" kopira objavu da je nalepite."
   }
 }

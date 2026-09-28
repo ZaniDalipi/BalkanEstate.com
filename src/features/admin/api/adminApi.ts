@@ -767,3 +767,64 @@ export const ensureCityInDirectory = async (
   entry: CityDirectoryEntry & { countryCode: string }
 ): Promise<{ city: CityDirectoryEntry; created: boolean }> =>
   apiRequest('/admin/cities', { method: 'POST', body: entry, requiresAuth: true });
+
+// --- Social Share Queue ---
+
+export type SocialPostStatus = 'pending' | 'approved' | 'rejected';
+export type SocialChannel = 'facebookPage' | 'instagram';
+
+export interface SocialChannelResult {
+  state: 'not_sent' | 'posted' | 'failed';
+  postId?: string;
+  postUrl?: string;
+  error?: string;
+  postedAt?: string;
+}
+
+export interface SocialPost {
+  _id: string;
+  propertyId: string;
+  status: SocialPostStatus;
+  caption: string;
+  listingUrl: string;
+  imageUrls: string[];
+  title: string;
+  city?: string;
+  price?: number;
+  listingType?: 'sale' | 'rent';
+  channels: Record<SocialChannel, SocialChannelResult>;
+  groupSharedAt?: string;
+  createdAt: string;
+}
+
+export interface SocialConfig {
+  facebookPage: boolean;
+  instagram: boolean;
+  facebookGroupUrl: string | null;
+}
+
+export const getSocialConfig = (): Promise<SocialConfig> =>
+  apiRequest('/admin/social-posts/config', { requiresAuth: true });
+
+export const getSocialPosts = (
+  status: SocialPostStatus
+): Promise<{ posts: SocialPost[]; total: number; hasMore: boolean }> =>
+  apiRequest(`/admin/social-posts?status=${status}`, { requiresAuth: true });
+
+export const approveSocialPost = (
+  id: string,
+  body: { caption?: string; channels: SocialChannel[] }
+): Promise<{ post: SocialPost }> =>
+  apiRequest(`/admin/social-posts/${id}/approve`, { method: 'POST', body, requiresAuth: true });
+
+export const rejectSocialPost = (id: string): Promise<{ post: SocialPost }> =>
+  apiRequest(`/admin/social-posts/${id}/reject`, { method: 'POST', requiresAuth: true });
+
+export const restoreSocialPost = (id: string): Promise<{ post: SocialPost }> =>
+  apiRequest(`/admin/social-posts/${id}/restore`, { method: 'POST', requiresAuth: true });
+
+export const markSocialPostGroupShared = (id: string, shared: boolean): Promise<{ post: SocialPost }> =>
+  apiRequest(`/admin/social-posts/${id}/group-shared`, { method: 'POST', body: { shared }, requiresAuth: true });
+
+export const queuePropertyForSocial = (propertyId: string): Promise<{ post: SocialPost }> =>
+  apiRequest('/admin/social-posts/queue', { method: 'POST', body: { propertyId }, requiresAuth: true });

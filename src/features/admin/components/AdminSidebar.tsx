@@ -20,6 +20,7 @@ import {
   RocketLaunchIcon,
   BuildingStorefrontIcon,
   PhotoIcon,
+  ShareIcon,
 } from '@/constants';
 import type { AdminView } from './AdminLayout';
 
@@ -37,6 +38,7 @@ interface AdminSidebarProps {
     newInquiries?: number;
     unverifiedUsers?: number;
     pendingVillas?: number;
+    pendingSocialPosts?: number;
   };
 }
 
@@ -174,6 +176,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       id: 'marketing',
       label: t('admin:sidebar.marketing', 'Marketing'),
       items: [
+        {
+          id: 'socialShare',
+          label: t('admin:sidebar.socialShare', 'Social Sharing'),
+          icon: <ShareIcon className="w-5 h-5" />,
+          badge: stats?.pendingSocialPosts,
+          badgeColor: 'bg-blue-600'
+        },
         {
           id: 'pricing',
           label: t('admin:sidebar.pricing', 'Pricing & Plans'),

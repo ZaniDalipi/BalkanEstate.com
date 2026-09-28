@@ -14,6 +14,7 @@ import { migratePropertySchema } from '../utils/migratePropertySchema';
 import { getObjectIdParam } from '../utils/validateParams';
 import { escapeRegex } from '../utils/escapeRegex';
 import { sendLicenseRejectionEmail } from '../services/emailService';
+import { countPendingSocialPosts } from '../services/social/socialQueueService';
 
 
 // @desc    Get admin dashboard statistics
@@ -32,6 +33,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       totalInquiries,
       newInquiries,
       pendingVillas,
+      pendingSocialPosts,
     ] = await Promise.all([
       User.countDocuments(),
       Agent.countDocuments({ isActive: true }),
@@ -47,6 +49,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
       Inquiry.countDocuments(),
       Inquiry.countDocuments({ status: 'new' }),
       Property.countDocuments({ propertyType: 'luxury-villa', villaApprovalStatus: 'pending' }),
+      countPendingSocialPosts(),
     ]);
 
     // User role breakdown
@@ -75,6 +78,7 @@ export const getAdminStats = async (req: Request, res: Response): Promise<void> 
         totalInquiries,
         newInquiries,
         pendingVillas,
+        pendingSocialPosts,
       },
       usersByRole: usersByRole.reduce((acc: any, item: any) => {
         acc[item._id] = item.count;

@@ -23,6 +23,7 @@ import EmailManager from './EmailManager';
 import SiteSettingsManager from './SiteSettingsManager';
 import PendingLicenses from './PendingLicenses';
 import VillaApprovals from './VillaApprovals';
+import SocialShareQueue from './SocialShareQueue';
 import VillaDestinationsManager from './VillaDestinationsManager';
 import CityShowcaseManager from './CityShowcaseManager';
 import CityPhotosManager from './CityPhotosManager';
@@ -57,6 +58,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'villa-destinations': 'villaDestinations',
   'city-showcase': 'cityShowcase',
   'city-photos': 'cityPhotos',
+  'social-share': 'socialShare',
 };
 
 // Map AdminView to URL sections
@@ -84,6 +86,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'villaDestinations': 'villa-destinations',
   'cityShowcase': 'city-showcase',
   'cityPhotos': 'city-photos',
+  'socialShare': 'social-share',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -238,6 +241,8 @@ const AdminDashboard: React.FC = () => {
         );
       case 'villaApprovals':
         return <VillaApprovals />;
+      case 'socialShare':
+        return <SocialShareQueue />;
       case 'villaDestinations':
         return <VillaDestinationsManager />;
       case 'cityShowcase':

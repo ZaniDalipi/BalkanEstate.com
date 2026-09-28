@@ -44,7 +44,8 @@
     "villaApprovals": "Miratimi i Vilave",
     "villaDestinations": "Destinacionet e Vilave",
     "cityShowcase": "Galeria e Qyteteve",
-    "cityPhotos": "Fotot e Qyteteve"
+    "cityPhotos": "Fotot e Qyteteve",
+    "socialShare": "Ndarja në rrjete sociale"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -1180,5 +1181,33 @@
     "specialtiesCommaSeparated": "Specialitetet (të ndara me presje)",
     "certificationsCommaSeparated": "Certifikimet (të ndara me presje)",
     "editNote": "Ndryshimet ruhen menjëherë dhe janë të dukshme për të gjithë përdoruesit."
+  },
+  "socialShare": {
+    "title": "Ndarja në rrjete sociale",
+    "subtitle": "Njoftimet e reja presin këtu për miratimin tuaj para se të publikohet diçka.",
+    "pending": "Për shqyrtim",
+    "approved": "Miratuar",
+    "rejected": "Anashkaluar",
+    "addPlaceholder": "ID ose lidhja e njoftimit",
+    "addToQueue": "Shto në radhë",
+    "loadError": "Radha e ndarjes nuk u ngarkua.",
+    "empty": "Asgjë këtu për momentin.",
+    "untitled": "Njoftim pa titull",
+    "caption": "Teksti",
+    "approveAndPost": "Mirato dhe publiko",
+    "approve": "Mirato",
+    "skip": "Anashkalo",
+    "copyAndOpenGroup": "Kopjo tekstin dhe hap grupin",
+    "copyForGroup": "Kopjo tekstin për grupin",
+    "retryFailed": "Riprovo të dështuarat",
+    "restore": "Kthe në pritje",
+    "sharedToGroup": "U nda në grup",
+    "undo": "Zhbëj",
+    "view": "Shiko",
+    "facebookGroup": "Lidhja e grupit në Facebook",
+    "connected": "lidhur",
+    "notConnected": "pa konfiguruar",
+    "setupHint": "Llogaritë që mungojnë konfigurohen në server (shih docs/SOCIAL_SHARING.md). Deri atëherë, miratoni postimet dhe ndajini në grup manualisht.",
+    "groupHint": "Facebook nuk lejon aplikacionet të postojnë në grupe. \"Kopjo tekstin dhe hap grupin\" kopjon postimin që ta ngjisni vetë."
   }
 }
