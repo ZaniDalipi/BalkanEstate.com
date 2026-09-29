@@ -280,6 +280,21 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
 const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_IMAGE_HOSTS = new Set(['res.cloudinary.com']);
 
+/**
+ * The URLs to try for a restyle source: the one the client sent, then the same
+ * photo with every Cloudinary transform removed (the stored original).
+ */
+const restyleSourceCandidates = (imageUrl: string): string[] => {
+  const match = imageUrl.match(/^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  if (!match) return [imageUrl];
+  const [, base, rest] = match;
+  const parts = rest.split('/');
+  const versionIdx = parts.findIndex((p) => /^v\d+$/.test(p));
+  if (versionIdx <= 0) return [imageUrl];
+  const original = base + parts.slice(versionIdx).join('/');
+  return original === imageUrl ? [imageUrl] : [imageUrl, original];
+};
+
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!isApiKeyConfigured()) {
@@ -343,38 +358,48 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       }
     }
 
-    // Fetch the source image server-side.
-    let imageBase64: string;
-    let sourceMime: string;
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15_000);
-      const upstream = await fetch(imageUrl, {
-        signal: controller.signal,
-        headers: { 'User-Agent': 'BalkanEstate/1.0 (+https://balkanestateai.com)' },
-      });
-      clearTimeout(timeout);
+    // Fetch the source image server-side. The client asks for a resized
+    // derivative; if Cloudinary will not produce it (e.g. transformation quota
+    // spent, or strict transformations on), fall back to the untransformed
+    // original, which it always serves.
+    let imageBase64 = '';
+    let sourceMime = '';
+    let fetchError = 'Could not fetch the source image.';
+    for (const candidate of restyleSourceCandidates(imageUrl)) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15_000);
+        const upstream = await fetch(candidate, {
+          signal: controller.signal,
+          headers: { 'User-Agent': 'BalkanEstate/1.0 (+https://balkanestateai.com)' },
+        });
+        clearTimeout(timeout);
 
-      if (!upstream.ok) {
-        res.status(400).json({ message: 'Could not fetch the source image.' });
-        return;
-      }
+        if (!upstream.ok) {
+          apiLogger.warn(`Restyle source fetch failed (${upstream.status}): ${candidate}`);
+          continue;
+        }
 
-      sourceMime = (upstream.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-      if (!sourceMime.startsWith('image/')) {
-        res.status(400).json({ message: 'imageUrl does not point to an image.' });
-        return;
-      }
+        const mime = (upstream.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+        if (!mime.startsWith('image/')) {
+          fetchError = 'imageUrl does not point to an image.';
+          continue;
+        }
 
-      const arrayBuffer = await upstream.arrayBuffer();
-      if (arrayBuffer.byteLength > MAX_RESTYLE_IMAGE_BYTES) {
-        res.status(400).json({ message: 'Source image is too large (max 10 MB).' });
-        return;
+        const arrayBuffer = await upstream.arrayBuffer();
+        if (arrayBuffer.byteLength > MAX_RESTYLE_IMAGE_BYTES) {
+          fetchError = 'Source image is too large (max 10 MB).';
+          continue;
+        }
+        imageBase64 = Buffer.from(arrayBuffer).toString('base64');
+        sourceMime = mime;
+        break;
+      } catch (fetchErr) {
+        apiLogger.error('Error fetching source image for restyle:', fetchErr instanceof Error ? fetchErr.message : String(fetchErr));
       }
-      imageBase64 = Buffer.from(arrayBuffer).toString('base64');
-    } catch (fetchErr) {
-      apiLogger.error('Error fetching source image for restyle:', fetchErr instanceof Error ? fetchErr.message : String(fetchErr));
-      res.status(400).json({ message: 'Could not fetch the source image.' });
+    }
+    if (!imageBase64) {
+      res.status(400).json({ message: fetchError });
       return;
     }
 

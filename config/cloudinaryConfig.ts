@@ -184,6 +184,16 @@ const stripCloudinaryTransforms = (rest: string): string => {
 };
 
 /**
+ * The stored original of a Cloudinary upload URL, with every transform removed.
+ * Cloudinary serves originals without generating a derivative, so this still
+ * loads when it refuses to create new ones. Other URLs are returned unchanged.
+ */
+export const cloudinaryOriginalUrl = (url: string): string => {
+  const match = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  return match ? `${match[1]}${stripCloudinaryTransforms(match[2])}` : url;
+};
+
+/**
  * Optimizes a Cloudinary-uploaded image URL by injecting transformation parameters.
  *
  * Cloudinary upload URLs follow this format:

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, cloudinaryOriginalUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
 import { UsageMeter } from '@/src/shared/components/ui';
 import { roomStylerKeys } from '@/src/shared/query/queryKeys';
@@ -48,7 +48,12 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
     }, [mode]);
 
     // Send a high-res version to the AI for a better result (still a Cloudinary URL).
-    const sourceUrl = optimizeCloudinaryUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
+    // If Cloudinary will not produce that size (transformation quota spent, or
+    // strict transformations on), fall back to the untransformed original.
+    const resizedUrl = optimizeCloudinaryUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
+    const [useOriginal, setUseOriginal] = useState(false);
+    const sourceUrl = useOriginal ? cloudinaryOriginalUrl(imageUrl) : resizedUrl;
+    const [backdropFailed, setBackdropFailed] = useState(false);
 
     // A thumbnail of the same photo, blurred up behind it to fill whatever the
     // picture does not cover — nicer than black bars, and it lets us show the
@@ -142,12 +147,15 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                         into a landscape box, and a blurred copy of the photo fills whatever
                         room is left over. */}
                     <div className="relative mb-3 flex h-[46vh] items-center justify-center overflow-hidden rounded-xl bg-neutral-900 sm:h-[58vh] lg:h-[68vh]">
-                        <img
-                            src={backdropUrl}
-                            alt=""
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-0 h-full w-full scale-110 select-none object-cover opacity-60 blur-2xl"
-                        />
+                        {!backdropFailed && (
+                            <img
+                                src={backdropUrl}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-0 h-full w-full scale-110 select-none object-cover opacity-60 blur-2xl"
+                                onError={() => setBackdropFailed(true)}
+                            />
+                        )}
 
                         <div
                             className="relative h-full max-w-full"
@@ -167,6 +175,7 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                                     alt={t('property:roomStyler.roomPhoto', 'Room photo')}
                                     className="h-full w-full object-contain"
                                     crossOrigin="anonymous"
+                                    onError={() => setUseOriginal(true)}
                                 />
                             )}
                         </div>

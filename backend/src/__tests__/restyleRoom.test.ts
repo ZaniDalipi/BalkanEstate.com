@@ -123,6 +123,38 @@ describe('restyleRoom controller', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ style: 'ext-modern' }));
   });
 
+  it('falls back to the untransformed original when the resized image fails', async () => {
+    mockFindById.mockResolvedValue(null);
+    (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 400, headers: { get: () => null } });
+    const res = makeRes();
+    await restyleRoom(
+      makeReq({ imageUrl: 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,w_1600/v1/room.jpg', style: 'scandinavian' }),
+      res
+    );
+
+    expect((global.fetch as jest.Mock).mock.calls.map((c) => c[0])).toEqual([
+      'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,w_1600/v1/room.jpg',
+      CLOUDINARY_URL,
+    ]);
+    expect(mockGenerate).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ style: 'scandinavian' }));
+  });
+
+  it('returns 400 when neither the resized image nor the original can be fetched', async () => {
+    mockFindById.mockResolvedValue(null);
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404, headers: { get: () => null } });
+    const res = makeRes();
+    await restyleRoom(
+      makeReq({ imageUrl: 'https://res.cloudinary.com/demo/image/upload/w_1600/v1/room.jpg', style: 'scandinavian' }),
+      res
+    );
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Could not fetch the source image.' });
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
   it('returns 200 and atomically increments usage for a FREE user', async () => {
     mockFindById.mockResolvedValue({
       _id: 'u3',
