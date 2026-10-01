@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition, useReducer } from 'react';
+import { RouterProvider, Outlet, useLocation } from 'react-router-dom';
 import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { MotionConfig } from 'framer-motion';
 import { AppProvider, useAppContext } from './context/AppContext';
-import { tokenService } from './src/shared/api/tokenService';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
 import { NotificationProvider } from './src/shared/hooks/useNotification';
@@ -13,22 +13,19 @@ import { QueryProvider } from './src/app/providers/QueryProvider';
 import { ListingIngestProgressProvider } from './src/features/listing-sources/context/ListingIngestProgressContext';
 import ListingIngestDock from './src/features/listing-sources/components/ListingIngestDock';
 import { ErrorBoundary } from './src/app/components/ErrorBoundary';
-import { QueryErrorBoundary } from './src/app/components/QueryErrorBoundary';
 import { AnimationProvider } from './src/components/ui/Animations';
-import { ViewTransition, NavigationProvider } from './src/components/ui/ViewTransition';
-import {
-  takePendingScrollRestore,
-  applyScrollSnapshot,
-  consumePageChange,
-  canNavigateBack,
-  setNavigationDirection,
-} from './src/app/navigation/navHistory';
-import { routeImporters, preloadRouteWhenIdle } from './src/app/navigation/routePreload';
+import { ViewTransition } from './src/components/ui/ViewTransition';
+import { takePendingScrollRestore, applyScrollSnapshot } from './src/app/navigation/navHistory';
+import { preloadRouteWhenIdle } from './src/app/navigation/routePreload';
+import { createAppRouter } from './src/app/router/routes';
+import { navigate, goBack } from './src/app/router/navigation';
+import { paths } from './src/app/router/paths';
+import { useRouteView } from './src/app/router/useRouteView';
+import { OpenSidebarContext } from './src/app/router/layoutContext';
+import { lazyWithRetry } from './src/app/router/lazyWithRetry';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 import { useCookieConsent } from './src/shared/utils/cookieConsent';
-import { propertyLogger } from './src/shared/utils/logger';
-import { transformBackendProperty } from './src/features/properties/api/propertyApi';
 // Lazy load SEO components (don't block initial render)
 const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
@@ -37,18 +34,6 @@ import { realEstateFAQs } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
-import { UserRole, HowItWorksTab, AdminSection, AgencyDashboardSection, Agency, AppView } from './types';
-import { API_CONFIG, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, ROUTES, HOW_IT_WORKS_TABS, ADMIN_SECTIONS, AGENCY_DASHBOARD_SECTIONS } from './src/shared/constants/app.constants';
-
-// Inline LogoIcon to avoid importing all icons from constants
-const LogoIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <g fillRule="evenodd">
-      <path fill="#003A96" d="M12 21V5L10 7V23L12 21Z M4 21V10L2 12V23L4 21Z" />
-      <path fill="#0252CD" d="M12 5H20V21H12V5Z M4 10H10V21H4V10Z" />
-    </g>
-  </svg>
-);
 
 // Initialize i18n
 import './src/i18n';
@@ -57,93 +42,24 @@ import './src/i18n';
 import { initSecurity } from './src/utils/security';
 initSecurity();
 
-// Language routing utilities
-import { parseLanguageFromPath, initializeLanguageFromUrl, buildLocalizedPath } from './src/utils/languageRouting';
-
-// Stale-deploy chunk recovery (unregister SW + clear caches + reload once)
-import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
 import type { GameReward } from './components/shared/DiscountGameModal';
-
-// Retry wrapper for lazy imports — handles stale chunk hashes after deployments.
-// A stale build requests a chunk whose hashed filename no longer exists; the SPA
-// fallback then returns index.html (text/html) and the module fails to parse. We
-// retry once for a transient blip, then hand off to recoverFromStaleChunk, which
-// tears down the service worker + caches and reloads to a clean bundle (the only
-// thing that reliably fixes a precached-SW stale HTML).
-function lazyWithRetry(importFn: () => Promise<{ default: React.ComponentType<any> }>) {
-  return lazy(() =>
-    importFn().catch(() =>
-      importFn().catch((err) => {
-        void recoverFromStaleChunk();
-        throw err;
-      })
-    )
-  );
-}
 
 // Core layout components (lazy loaded - can render after initial paint)
 const Sidebar = lazyWithRetry(() => import('./components/shared/Sidebar'));
 const Header = lazyWithRetry(() => import('./components/shared/Header'));
 
-
-// Lazy load all pages and conditional components to reduce initial bundle
-const SearchPage = lazy(() => import('./src/features/search/components').then(m => ({ default: m.SearchPage })));
+// App-wide components that are not pages. Pages are declared in the route
+// table (src/app/router/routes.tsx).
 const AuthPage = lazyWithRetry(() => import('./src/features/auth/components/AuthModal'));
 const EmailVerificationRequired = lazyWithRetry(() => import('./src/features/auth/components/EmailVerificationRequired'));
 const AlertDialog = lazy(() => import('./components/shared/AlertDialog'));
 const SessionExpiredModal = lazyWithRetry(() => import('./src/features/auth/components/SessionExpiredModal'));
 const SubscriptionExpiryModals = lazy(() => import('./src/features/subscription/components/SubscriptionExpiryModals'));
-
-// Lazy loaded components (loaded on demand)
-// All these components use default exports
-const CityRecommendations = lazy(() => import('./src/features/cities/components/CityRecommendations'));
-const CityDashboard = lazy(() => import('./src/features/cities/components/CityDashboard'));
-const CreateListingPage = lazy(() => import('./src/features/seller/components/SellerDashboard'));
-const RentalSearchPage = lazy(() => import('./src/features/rental/components/RentalSearchPage'));
-const VillaSearchPage = lazy(() => import('./src/features/villas/components/VillaSearchPage'));
-const SavedSearchesPage = lazy(() => import('./src/features/saved/components/SavedSearchesPage'));
-const SavedPropertiesPage = lazy(() => import('./src/features/saved/components/SavedHomesPage'));
-const InboxPage = lazy(() => import('./src/features/messaging/components/InboxPage'));
-const MyAccountPage = lazy(() => import('./components/shared/MyAccountPage'));
-const AgentsPage = lazy(() => import('./src/features/agents/components/AgentsPage'));
-const AgenciesListPage = lazy(() => import('./components/AgenciesListPage'));
-// The two detail routes import through routeImporters so a card can warm the
-// same chunk on hover/touch — see src/app/navigation/routePreload.ts.
-const AgencyDetailPage = lazyWithRetry(routeImporters.agencyDetail);
 const EnterpriseCreationForm = lazy(() => import('./src/features/seller/components/EnterpriseCreationForm'));
-const PropertyDetailsPage = lazyWithRetry(routeImporters.propertyDetails);
-const PaymentSuccess = lazy(() => import('./src/features/payments/components/PaymentSuccess'));
-const PaymentCancel = lazy(() => import('./src/features/payments/components/PaymentCancel'));
 const ListingLimitWarningModal = lazy(() => import('./components/shared/ListingLimitWarningModal'));
 const DiscountGameModal = lazy(() => import('./components/shared/DiscountGameModal'));
-const AdminDashboard = lazy(() => import('./src/features/admin/components/AdminDashboard'));
 const StickyAdBanner = lazy(() => import('./src/features/promo/components/StickyBar'));
 const AdPreviewIndicator = lazy(() => import('./src/features/promo/components/PreviewIndicator'));
-const AgencyDashboardPage = lazy(() => import('./src/features/agency-dashboard/components/AgencyDashboardPage'));
-const NotFoundPage = lazy(() => import('./src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
-const ResetPasswordPage = lazyWithRetry(() => import('./src/features/auth/components/ResetPasswordPage'));
-const VerifyEmailPage = lazyWithRetry(() => import('./src/features/auth/components/VerifyEmailPage'));
-// LoginPage and RegisterPage are no longer used as standalone pages.
-// The /login and /register routes now open the AuthModal over the search page.
-const AnalyticsPage = lazy(() => import('./src/features/analytics/components/AnalyticsPage'));
-const HowItWorksPage = lazy(() => import('./components/shared/HowItWorksPage'));
-const ValuationPage = lazy(() => import('./src/features/valuation/components/ValuationPage'));
-const MortgageCalculatorPage = lazy(() => import('./src/features/calculators/components/MortgageCalculatorPage'));
-const PricingPage = lazy(() => import('./src/features/pricing/components/PricingPage'));
-const PrivacyPolicyPage = lazy(() => import('./src/features/legal/components/PrivacyPolicyPage'));
-const TermsOfServicePage = lazy(() => import('./src/features/legal/components/TermsOfServicePage'));
-const CookiePolicyPage = lazy(() => import('./src/features/legal/components/CookiePolicyPage'));
-const RefundPolicyPage = lazy(() => import('./src/features/legal/components/RefundPolicyPage'));
-const ContactUsPage = lazy(() => import('./src/features/contact/components/ContactUsPage'));
-const BuyingGuidesPage = lazy(() => import('./src/features/guides/components/BuyingGuidesPage'));
-const HomePage = lazyWithRetry(() => import('./src/features/home/components/HomePage'));
-const BusinessDirectoryPage = lazy(() => import('./src/features/business-directory/components/BusinessDirectoryPage'));
-const BlogPage = lazy(() => import('./src/features/blog/components/BlogPage'));
-const ArticlePage = lazy(() => import('./src/features/blog/components/ArticlePage'));
-
-// Agency creation pages
-const CreateAgencyPage = lazy(() => import('./src/features/agencies/components/CreateAgencyPage'));
-const AgencyPaymentPage = lazy(() => import('./src/features/agencies/components/AgencyPaymentPage'));
 
 // Google Maps API is deferred - only loads when map pages are visited (see MapComponent.tsx)
 
@@ -170,12 +86,18 @@ const ClarityInit = lazy(() => import('./src/app/components/ClarityInit'));
 // every stage of a navigation.
 const PageLoader: React.FC = () => <RouteLoader />;
 
-const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar }) => {
-  const { state, dispatch } = useAppContext();
-  const { t } = useTranslation('common');
-  const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
-  const [isLoadingAgency, setIsLoadingAgency] = useState(false);
-  const [isLoadingPropertyFromUrl, setIsLoadingPropertyFromUrl] = useState(false);
+/**
+ * The page the URL names, inside the shared page chrome.
+ *
+ * Every route — detail pages included — renders through this one
+ * ViewTransition, so the direction-aware entrance and the edge swipe-back it
+ * owns apply everywhere. The ErrorBoundary is keyed by the page's identity so
+ * switching pages gets a clean mount (and clears any error from the last one),
+ * while a tab or section change within a page keeps it mounted.
+ */
+const PageOutlet: React.FC = () => {
+  const { state } = useAppContext();
+  const { pageKey, scrollKey, noindex } = useRouteView();
 
   // In PWA standalone mode, intercept <a href> clicks to internal pages so the
   // OS never opens a second browser window — navigation stays within the app.
@@ -189,466 +111,6 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     preloadRouteWhenIdle('propertyDetails');
   }, []);
 
-  // Listen for session expiration events from httpClient
-  useEffect(() => {
-    const handleSessionExpired = () => {
-      dispatch({ type: 'SESSION_EXPIRED' });
-    };
-
-    window.addEventListener('session-expired', handleSessionExpired);
-    return () => {
-      window.removeEventListener('session-expired', handleSessionExpired);
-    };
-  }, [dispatch]);
-
-  // Check URL for routing on mount and when URL changes (handles browser/mobile back button)
-  useEffect(() => {
-    const checkUrlForRouting = () => {
-      // Wrap routing dispatches in startTransition to avoid blocking user interactions
-      startTransition(() => { checkUrlForRoutingInner(); });
-    };
-    const checkUrlForRoutingInner = () => {
-      // Initialize language from URL (handles redirect if no language prefix)
-      const { lang, path: cleanPath } = initializeLanguageFromUrl();
-
-      // Normalize path: remove trailing slashes (except for root '/')
-      let path = cleanPath;
-      if (path.length > 1 && path.endsWith('/')) {
-        path = path.slice(0, -1);
-      }
-
-      // Payment callback routes (highest priority)
-      if (path === '/payment/success' || path === '/payment/cancel') {
-        // Don't change active view, let the component handle it
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        return;
-      }
-
-      // Property detail route: /property/:id
-      const propertyMatch = path.match(/^\/property\/(.+)$/);
-      if (propertyMatch) {
-        const propertyId = decodeURIComponent(propertyMatch[1]);
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        // Show loader immediately so we don't flash the home page
-        setIsLoadingPropertyFromUrl(true);
-
-        // Fetch property from API to ensure we have full data
-        fetch(`${API_CONFIG.BASE_URL}/properties/${propertyId}`)
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`Property not found (${res.status})`);
-            }
-            return res.json();
-          })
-          .then(data => {
-            setIsLoadingPropertyFromUrl(false);
-            if (!data?.property) {
-              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
-              return;
-            }
-            // Run the same transformer every other read path uses. Hand-rolling
-            // the shape here used to drop `seller` entirely, so a listing opened
-            // from a shared link or a page refresh showed no seller name — on the
-            // detail page, on its card, and in the recently-viewed carousel it
-            // was cached into. The raw payload is kept underneath so fields the
-            // transformer does not map yet (e.g. `isNegotiable`) still survive.
-            try {
-              dispatch({
-                type: 'SET_SELECTED_PROPERTY_OBJECT',
-                payload: {
-                  ...data.property,
-                  ...transformBackendProperty(data.property),
-                },
-              });
-            } catch (transformError) {
-              propertyLogger.error('Failed to transform property from URL', transformError);
-              dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
-            }
-          })
-          .catch(() => {
-            setIsLoadingPropertyFromUrl(false);
-            dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'not-found' });
-          });
-        return;
-      }
-
-      // Edit listing route: /edit-listing/:id
-      const editListingMatch = path.match(/^\/edit-listing\/(.+)$/);
-      if (editListingMatch) {
-        const propertyId = decodeURIComponent(editListingMatch[1]);
-        // Find the property and set it for editing
-        fetch(`${API_CONFIG.BASE_URL}/properties/${propertyId}`)
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`Property not found (${res.status})`);
-            }
-            return res.json();
-          })
-          .then(data => {
-            if (data.property) {
-              // Transform backend property to frontend format (backend now uses obfuscated id)
-              const property = {
-                ...data.property,
-                id: data.property.id || data.property._id,
-                sellerId: data.property.sellerId?.id || data.property.sellerId?._id || data.property.sellerId,
-              };
-              dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: property });
-              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-            }
-          })
-          .catch(() => {
-            // Property not found - redirect to search
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-          });
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        return;
-      }
-
-      // Agent profile route: /agents/:id
-      const agentMatch = path.match(/^\/agents\/(.+)$/);
-      if (agentMatch) {
-        const agentId = decodeURIComponent(agentMatch[1]);
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENT', payload: agentId });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-        return;
-      }
-
-      // Agency detail route: /agencies/:slug
-      const agencyMatch = path.match(/^\/agencies\/(.+)$/);
-      if (agencyMatch) {
-        let agencySlug = decodeURIComponent(agencyMatch[1]);
-
-        // Normalize slug: remove country prefix with comma if present
-        // Handles old format: "serbia,belgrade-premium-properties" -> "belgrade-premium-properties"
-        if (agencySlug.includes(',')) {
-          agencySlug = agencySlug.split(',')[1];
-        }
-
-        // Clear property selection when viewing agency
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-        return;
-      }
-
-      // Business directory tab routes: /business-directory/businesses, /business-directory/individuals
-      if (path === '/business-directory/businesses') {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-        dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'businesses' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-        return;
-      }
-      if (path === '/business-directory/individuals') {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-        dispatch({ type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'individuals' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-        return;
-      }
-
-      // Business directory detail route: /business-directory/:slugOrId
-      // Supports SEO slugs like "company-name-category-in-city_EncodedId" and plain encoded IDs
-      const businessMatch = path.match(/^\/business-directory\/(.+)$/);
-      if (businessMatch) {
-        const rawParam = decodeURIComponent(businessMatch[1]);
-        // Extract the encoded ID from slug suffix (after last underscore), or use the full param
-        const underscoreIdx = rawParam.lastIndexOf('_');
-        const listingId = underscoreIdx > 0 ? rawParam.slice(underscoreIdx + 1) : rawParam;
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: listingId });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-        return;
-      }
-
-      // Create listing route (new listing, not edit)
-      if (path === '/create-listing') {
-        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-        dispatch({ type: 'SET_IMPORT_DRAFT_TO_PUBLISH', payload: null });
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-        return;
-      }
-
-      // Create rental listing route
-      if (path === '/create-rental') {
-        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-rental' });
-        return;
-      }
-
-      // Redirect legacy /settings/notifications to /account/notifications
-      if (path === '/settings/notifications' || path === '/settings/notifications/') {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'notifications' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        window.history.replaceState(null, '', '/account/notifications');
-        return;
-      }
-
-      // Account sub-routes: /account/:tab
-      const accountMatch = path.match(/^\/account(?:\/(.+))?$/);
-      if (accountMatch) {
-        const tab = accountMatch[1] || 'listings'; // Default to listings
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: tab });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        return;
-      }
-
-      // How-it-works routes with tab support: /how-it-works/:tab
-      const howItWorksMatch = path.match(/^\/how-it-works(?:\/(.+))?$/);
-      if (howItWorksMatch) {
-        const tab = howItWorksMatch[1] || 'getting-started'; // Default to getting-started tab
-        const validTab: HowItWorksTab = HOW_IT_WORKS_TABS.includes(tab as typeof HOW_IT_WORKS_TABS[number])
-          ? tab as HowItWorksTab
-          : 'getting-started';
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: validTab });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'how-it-works' });
-        return;
-      }
-
-      // Admin routes with section support: /admin/:section
-      const adminMatch = path.match(/^\/admin(?:\/(.+))?$/);
-      if (adminMatch) {
-        const section = adminMatch[1] || 'dashboard'; // Default to dashboard
-        const validSection: AdminSection = ADMIN_SECTIONS.includes(section as typeof ADMIN_SECTIONS[number])
-          ? section as AdminSection
-          : 'dashboard';
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ADMIN_SECTION', payload: validSection });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'admin' });
-        return;
-      }
-
-      // Agency dashboard routes with section support: /agency-dashboard/:section
-      const agencyDashboardMatch = path.match(/^\/agency-dashboard(?:\/(.+))?$/);
-      if (agencyDashboardMatch) {
-        const section = agencyDashboardMatch[1] || 'overview';
-        const validSection: AgencyDashboardSection = AGENCY_DASHBOARD_SECTIONS.includes(section as typeof AGENCY_DASHBOARD_SECTIONS[number])
-          ? section as AgencyDashboardSection
-          : 'overview';
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_AGENCY_DASHBOARD_SECTION', payload: validSection });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-        return;
-      }
-
-      // City dashboard route: /explore-cities/:city/:country
-      const cityDashboardMatch = path.match(/^\/explore-cities\/([^/]+)\/([^/]+)$/);
-      if (cityDashboardMatch) {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'city-dashboard' });
-        return;
-      }
-
-      // Blog article route: /blog/:slug
-      const blogArticleMatch = path.match(/^\/blog\/(.+)$/);
-      if (blogArticleMatch && path !== '/blog') {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
-        return;
-      }
-
-      // Main navigation routes
-      const routeMap: Record<string, AppView> = {
-        '/': 'home',
-        '/home': 'home',
-        '/search': 'search',
-        '/explore-cities': 'explore-cities',
-        '/saved-searches': 'saved-searches',
-        '/saved-properties': 'saved-properties',
-        '/inbox': 'inbox',
-        '/agents': 'agents',
-        '/agencies': 'agencies',
-        '/reset-password': 'reset-password',
-        '/verify-email': 'verify-email',
-        '/analytics': 'analytics',
-        '/valuation': 'valuation',
-        '/mortgage-calculator': 'mortgage-calculator',
-        '/subscribe': 'pricing',
-        '/privacy': 'privacy',
-        '/privacy-policy': 'privacy',
-        '/terms': 'terms',
-        '/terms-of-service': 'terms',
-        '/cookies': 'cookies',
-        '/cookie-policy': 'cookies',
-        '/refund': 'refund',
-        '/refund-policy': 'refund',
-        '/contact': 'contact',
-        '/guides': 'guides',
-        '/business-directory': 'business-directory',
-        '/blog': 'blog',
-        '/rent': 'rentals',
-        '/rentals': 'rentals',
-        '/villas': 'villas',
-        '/luxury-villas': 'villas',
-        '/create-agency': 'createAgency',
-        '/create-agency/payment': 'createAgencyPayment',
-        '/create-agency/confirm': 'createAgencyConfirm',
-      };
-
-      // /auth/callback is handled by AppWrapper's OAuth useEffect — preserve the URL and token
-      if (path === '/auth/callback') {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        return;
-      }
-
-      // /login and /register open the AuthModal over the search page
-      if (path === '/login' || path === '/register') {
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: path === '/register' ? 'signup' : 'login' } });
-        return;
-      }
-
-      // Redirect /pricing to /subscribe
-      if (path === '/pricing') {
-        window.history.replaceState({}, '', buildLocalizedPath('/subscribe'));
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-        return;
-      }
-
-      const view = routeMap[path];
-      if (view) {
-        // Clear selected items when navigating to main routes
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        // Clear selected agent when navigating to agents list (not agent profile)
-        if (view === 'agents') {
-          dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-        }
-        // Clear selected business listing when navigating to directory list (not detail)
-        if (view === 'business-directory') {
-          dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-        }
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
-      } else {
-        // Unknown route - redirect to landing page
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
-        window.history.replaceState({}, '', buildLocalizedPath('/'));
-      }
-    };
-
-    checkUrlForRouting();
-
-    // Listen for browser back/forward navigation (works on web and mobile)
-    // This includes:
-    // - Browser back button
-    // - Browser forward button
-    // - Mobile swipe back gesture
-    // - History API navigation
-    //
-    // A page change swaps the view on the spot: no animation is played and
-    // nothing is held back waiting for one, so the new page is on screen in the
-    // frame after the tap.
-    const handlePopState = () => {
-      const pageChange = consumePageChange();
-      if (!pageChange) {
-        // Same page, different entry — a filter in the query string. Nothing
-        // swaps, so this stays a transition: it must not block whatever the
-        // user is still doing on the page.
-        checkUrlForRouting();
-        return;
-      }
-      // A page change routes at default priority, not inside `startTransition`.
-      // A transition is deliberately interruptible and yields between slices,
-      // and React holds the *old* screen while one is in flight — which on a
-      // back press is precisely the wrong trade: the user has already left, and
-      // every slice React defers is another frame of a page they dismissed.
-      checkUrlForRoutingInner();
-    };
-    window.addEventListener('popstate', handlePopState);
-
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [dispatch]);
-
-  // Fetch selected agency when selectedAgencyId changes
-  useEffect(() => {
-    const fetchAgency = async () => {
-      if (state.selectedAgencyId) {
-        // Check if selectedAgencyId is already an agency object
-        const agencyId = state.selectedAgencyId;
-        if (typeof agencyId === 'object' && agencyId !== null && '_id' in agencyId && 'name' in agencyId) {
-          setSelectedAgency(agencyId as Agency);
-          setIsLoadingAgency(false);
-          return;
-        }
-
-        setIsLoadingAgency(true);
-        try {
-          const agencyIdentifier = state.selectedAgencyId;
-
-          // Include auth token so backend can identify current user and auto-add owner as member
-          const token = tokenService.getAccessToken();
-          const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-          };
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          }
-
-          const response = await fetch(`${API_CONFIG.BASE_URL}/agencies/${agencyIdentifier}`, { headers });
-
-          // Check content type before parsing
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            setSelectedAgency(null);
-            setIsLoadingAgency(false);
-            return;
-          }
-
-          if (!response.ok) {
-            setSelectedAgency(null);
-          } else {
-            const data = await response.json();
-            setSelectedAgency(data.agency as Agency);
-          }
-        } catch {
-          setSelectedAgency(null);
-        } finally {
-          setIsLoadingAgency(false);
-        }
-      } else {
-        setSelectedAgency(null);
-        setIsLoadingAgency(false);
-      }
-    };
-    fetchAgency();
-  }, [state.selectedAgencyId]);
-
-  // A stable identity for "which page is on screen", used both to key the page
-  // transition and to decide when scroll position needs handling. Declared
-  // before the effects below so they can depend on it.
-  const viewKey = state.selectedProperty
-    ? `property-${state.selectedProperty.id || 'detail'}`
-    : state.selectedAgencyId
-      ? `agency-${state.selectedAgencyId}`
-      : state.activeView;
-
   // Scroll handling on navigation.
   //
   // Layout effect, not passive: this runs in the commit that swapped the page,
@@ -656,68 +118,29 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
   // wrong offset first — the top of a list the reader was halfway down — and a
   // paired transition can capture that frame as the arriving page, which is
   // what made going back jump after it had already animated.
+  //
+  // The viewport meta is deliberately left alone here: rewriting it (to undo
+  // iOS input zoom) makes iOS recompute `env(safe-area-inset-*)`, which moved
+  // every notch-aligned element on each navigation in the installed app.
   useLayoutEffect(() => {
-    /*
-     * The viewport meta is deliberately left alone here.
-     *
-     * This used to set `maximum-scale=1.0` and then drop it again 300ms later,
-     * to snap out of the zoom iOS applies when a small input is focused. The
-     * cost was paid on every view change, including the first render: the tag
-     * that is rewritten also carries `viewport-fit=cover`, which is what makes
-     * `env(safe-area-inset-*)` resolve to the real notch inset, so touching it
-     * makes iOS recompute the safe area. Anything positioned off that inset —
-     * `.hero-top-pad` is `max(3rem, env(safe-area-inset-top) + 3.25rem)` —
-     * moves by the inset and then moves back 300ms later. In a browser tab the
-     * inset is 0 and nothing visibly happens, which is why this only ever
-     * showed up once the app was installed.
-     *
-     * The zoom it was reset from comes from inputs under 16px, so the fix for
-     * that belongs on the inputs, not on a tag the whole layout is measured
-     * against.
-     */
-
     // Coming back to an entry we have offsets for: put the user where they
-    // were. Opening a listing from halfway down the results and then going back
-    // used to land at the top of the list, which on a results page is the
-    // difference between resuming and starting over.
+    // were, instead of at the top of a list they were halfway down.
     const restore = takePendingScrollRestore();
     if (restore) {
       return applyScrollSnapshot(restore);
     }
 
-    // Scroll window to top
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-
-    // Also scroll main content container if it exists
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
       mainContent.scrollTop = 0;
     }
-
-    // Scroll any data-scroll-container elements
     document.querySelectorAll('[data-scroll-container]').forEach(el => {
       el.scrollTop = 0;
     });
-  }, [viewKey, state.selectedBusinessListingId]);
+  }, [scrollKey]);
 
-  // Payment callback routes (highest priority)
-  const path = window.location.pathname;
-  if (path === '/payment/success') {
-    return (
-      <Suspense fallback={<PageLoader />}>
-        <PaymentSuccess />
-      </Suspense>
-    );
-  }
-  if (path === '/payment/cancel') {
-    return (
-      <Suspense fallback={<PageLoader />}>
-        <PaymentCancel />
-      </Suspense>
-    );
-  }
-
-  // Show email verification required before any other view (highest priority)
+  // Show email verification required before any page (highest priority)
   if (state.pendingEmailVerification) {
     return (
       <Suspense fallback={<PageLoader />}>
@@ -726,145 +149,71 @@ const AppContent: React.FC<{ onToggleSidebar: () => void }> = ({ onToggleSidebar
     );
   }
 
-  // Wrap lazy loaded views in Suspense
-  const renderView = () => {
-    // Detail routes are resolved before the view switch: they are driven by a
-    // selection rather than by `activeView`, but they still have to render from
-    // inside the shared ViewTransition + Suspense below. Returning them early
-    // from the component — which is what used to happen — meant the single most
-    // travelled navigation in the app, opening a listing, was the one with no
-    // transition at all.
-    if (isLoadingPropertyFromUrl) {
-      // Deep link straight to a listing: hold the frame while the property is
-      // fetched rather than flashing the home page behind it.
-      return <PageLoader />;
-    }
-
-    if (state.selectedProperty) {
-      return (
-        <QueryErrorBoundary>
-          <PropertyDetailsPage property={state.selectedProperty} />
-        </QueryErrorBoundary>
-      );
-    }
-
-    if (state.selectedAgencyId) {
-      if (isLoadingAgency || !selectedAgency) {
-        return <PageLoader />;
-      }
-      return (
-        <QueryErrorBoundary>
-          <AgencyDetailPage agency={selectedAgency} />
-        </QueryErrorBoundary>
-      );
-    }
-
-    switch (state.activeView) {
-      case 'home':
-        return <QueryErrorBoundary><HomePage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
-      case 'explore-cities':
-        return <CityRecommendations />;
-      case 'city-dashboard':
-        return <CityDashboard />;
-      case 'saved-searches':
-        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><SavedSearchesPage /></>;
-      case 'saved-properties':
-        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><SavedPropertiesPage /></>;
-      case 'inbox':
-        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><InboxPage /></>;
-      case 'account':
-        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><MyAccountPage /></>;
-      case 'create-listing':
-        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><CreateListingPage /></>;
-      case 'rentals':
-        return <QueryErrorBoundary><RentalSearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
-      case 'villas':
-        return <QueryErrorBoundary><VillaSearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
-      case 'create-rental':
-        return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><CreateListingPage /></>;
-      case 'agents':
-        return <QueryErrorBoundary><AgentsPage /></QueryErrorBoundary>;
-      case 'agencies':
-        return <QueryErrorBoundary><AgenciesListPage /></QueryErrorBoundary>;
-      case 'business-directory':
-        return <QueryErrorBoundary><BusinessDirectoryPage selectedListingId={state.selectedBusinessListingId} /></QueryErrorBoundary>;
-      case 'admin':
-        // Only load admin dashboard for admin/super_admin users
-        if (state.currentUser?.role === UserRole.ADMIN || state.currentUser?.role === UserRole.SUPER_ADMIN) {
-          return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><QueryErrorBoundary><AdminDashboard /></QueryErrorBoundary></>;
-        }
-        // Redirect non-admins to search
-        return <SearchPage onToggleSidebar={onToggleSidebar} />;
-      case 'agency-dashboard':
-        // Only load agency dashboard for authenticated users (component handles owner/admin check)
-        if (state.isAuthenticated) {
-          return <><Helmet><meta name="robots" content="noindex, nofollow" /></Helmet><QueryErrorBoundary><AgencyDashboardPage /></QueryErrorBoundary></>;
-        }
-        return <SearchPage onToggleSidebar={onToggleSidebar} />;
-      case 'reset-password':
-        return <ResetPasswordPage />;
-      case 'verify-email':
-        return <VerifyEmailPage />;
-      case 'analytics':
-        return <QueryErrorBoundary><AnalyticsPage /></QueryErrorBoundary>;
-      case 'how-it-works':
-        return <HowItWorksPage />;
-      case 'valuation':
-        return <ValuationPage />;
-      case 'mortgage-calculator':
-        return <MortgageCalculatorPage />;
-      case 'pricing':
-        return <PricingPage />;
-      case 'privacy':
-        return <PrivacyPolicyPage />;
-      case 'terms':
-        return <TermsOfServicePage />;
-      case 'cookies':
-        return <CookiePolicyPage />;
-      case 'refund':
-        return <RefundPolicyPage />;
-      case 'contact':
-        return <ContactUsPage />;
-      case 'guides':
-        return <BuyingGuidesPage />;
-      case 'blog':
-        return <QueryErrorBoundary><BlogPage /></QueryErrorBoundary>;
-      case 'createAgency':
-        return <CreateAgencyPage />;
-      case 'createAgencyPayment':
-        return <AgencyPaymentPage />;
-      case 'createAgencyConfirm':
-        return <AgencyPaymentPage />;
-      case 'not-found':
-        return <NotFoundPage />;
-      case 'search':
-      default:
-        return <QueryErrorBoundary><SearchPage onToggleSidebar={onToggleSidebar} /></QueryErrorBoundary>;
-    }
-  };
-
-  // Every route — detail pages included — renders through this one
-  // ViewTransition, so the direction-aware entrance and the edge swipe-back it
-  // owns apply everywhere. The ErrorBoundary carries the view key so switching
-  // pages still gets a clean mount (and clears any error from the last one);
-  // the wrapper itself deliberately does not, since the swipe listeners need a
-  // node that outlives the view.
   return (
     <ViewTransition>
-      <ErrorBoundary level="route" key={viewKey}>
+      <ErrorBoundary level="route" key={pageKey}>
+        {noindex && (
+          <Helmet>
+            <meta name="robots" content="noindex, nofollow" />
+          </Helmet>
+        )}
         <Suspense fallback={<PageLoader />}>
-          {renderView()}
+          <Outlet />
         </Suspense>
       </ErrorBoundary>
     </ViewTransition>
   );
 };
 
-const MainLayout: React.FC = () => {
-  const { state, dispatch, updateUser, createListing, checkAuthStatus } = useAppContext();
-  const { t, i18n } = useTranslation(['nav', 'common']);
+/**
+ * Site-wide head tags and analytics. Inside the router so they re-render — and
+ * analytics records a page view — on every navigation, not only on the
+ * browser's back and forward buttons.
+ */
+const GlobalHead: React.FC = () => {
+  const { i18n } = useTranslation();
   const currentLang = (i18n.language || 'en').split('-')[0];
+  const { pathname } = useLocation();
+
+  // Get analytics IDs from environment variables
+  const googleAnalyticsId = import.meta.env.VITE_GA_ID;
+  const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
+
+  // Analytics and marketing tags may only load once the user has consented to
+  // that category — they are not strictly necessary, so they need prior consent.
+  const cookieConsent = useCookieConsent();
+
+  return (
+    <Suspense fallback={null}>
+      <SEO key={pathname} />
+      <OrganizationSchema language={currentLang} />
+      <FAQSchema faqs={realEstateFAQs} language={currentLang} />
+      {/* Analytics - only loaded if IDs are provided AND the user consented */}
+      {((googleAnalyticsId && cookieConsent.analytics) ||
+        (facebookPixelId && cookieConsent.marketing)) && (
+        <Analytics
+          googleAnalyticsId={cookieConsent.analytics ? googleAnalyticsId : undefined}
+          facebookPixelId={cookieConsent.marketing ? facebookPixelId : undefined}
+        />
+      )}
+      {/* Microsoft Clarity - Heatmaps & Session Recordings (analytics consent) */}
+      {cookieConsent.analytics && <ClarityInit />}
+    </Suspense>
+  );
+};
+
+const MainLayout: React.FC = () => {
+  const { state, dispatch, checkAuthStatus } = useAppContext();
+  const { t } = useTranslation(['nav', 'common']);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const openSidebar = useCallback(() => setIsSidebarOpen(true), []);
+
+  // Which page is on screen comes from the matched route, never from state.
+  const { view, detail } = useRouteView();
+  const isPropertyDetail = detail === 'property';
+  const isAgentDetail = detail === 'agent';
+  const isAgencyDetail = detail === 'agency';
+  const isBusinessDetail = detail === 'business-listing';
 
   // Subscription expiry modals
   const userId = state.currentUser?.id || state.currentUser?._id || state.currentUser?.email || '';
@@ -884,41 +233,40 @@ const MainLayout: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  const isSearchPage = state.activeView === 'search';
-  const isRentalPage = state.activeView === 'rentals';
-  const isVillaPage = state.activeView === 'villas';
+  const isSearchPage = view === 'search';
+  const isRentalPage = view === 'rentals';
+  const isVillaPage = view === 'villas';
   const isFloatingHeaderView = true;
-  const isAgencyDetailView = !!state.selectedAgencyId;
   // Agency pages should allow scrolling to show all agents and details
-  const isFullHeightView = isSearchPage || isRentalPage || isVillaPage || state.activeView === 'inbox' || !!state.selectedProperty;
+  const isFullHeightView = isSearchPage || isRentalPage || isVillaPage || view === 'inbox' || isPropertyDetail;
   // On mobile: floating header hidden, PWA top bar handles navigation
   // On desktop: floating header shown (except property details which has its own)
   // Agency dashboard has its own full header bar (Browse Properties / Back to Agency /
   // Back to Site / account), so the global floating header is suppressed there to avoid
   // it overlapping and covering those controls.
-  const hasOwnHeader = state.activeView === 'agency-dashboard';
-  const showHeader = !isMobile && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && !hasOwnHeader;
+  const hasOwnHeader = view === 'agency-dashboard';
+  const showHeader = !isMobile && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !isBusinessDetail && !hasOwnHeader;
 
   // PWA top bar: shown on mobile for internal pages only
   // NOT shown on: search/rental (have their own search headers), property details (has its own header)
-  const isHomeView = state.activeView === 'home';
+  const isHomeView = view === 'home';
   const isHomePage = isSearchPage || isRentalPage || isVillaPage || isHomeView;
-  const showPWATopBar = isMobile && !state.selectedProperty && !state.selectedBusinessListingId && !isHomePage;
+  const showPWATopBar = isMobile && !isPropertyDetail && !isBusinessDetail && !isHomePage;
 
   // Main tab views show hamburger menu; detail views show back button
-  const isMainTabView = !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && [
+  const isMainTabView = !isAgentDetail && !isAgencyDetail && !isBusinessDetail && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
     'account', 'blog', 'guides',
-  ].includes(state.activeView);
+  ].includes(view);
 
   // Map the current view to an ad-banner "page" so advertisers can target placements.
   // Admin / dashboard / auth / checkout style views never show ads.
   const adPage = useMemo<import('./src/features/promo/types').AdPage | null>(() => {
-    if (state.selectedProperty) return 'property-details';
-    if (state.selectedAgentId || state.activeView === 'agents' || state.activeView === 'agentProfile') return 'agents';
-    if (state.selectedAgencyId || state.activeView === 'agencies' || state.activeView === 'agencyDetail') return 'agencies';
-    switch (state.activeView) {
+    if (isPropertyDetail) return 'property-details';
+    if (view === 'agents') return 'agents';
+    if (view === 'agencies') return 'agencies';
+    switch (view) {
       case 'home': return 'home';
       case 'search': return 'search';
       case 'rentals': return 'rentals';
@@ -943,13 +291,13 @@ const MainLayout: React.FC = () => {
         return null;
       default: return 'all';
     }
-  }, [state.activeView, state.selectedProperty, state.selectedAgentId, state.selectedAgencyId]);
+  }, [view, isPropertyDetail]);
 
 
   // Map activeView to readable page title
   const pageTitle = useMemo(() => {
-    if (state.selectedAgencyId) return t('nav:pageTitles.agency');
-    if (state.selectedAgentId) return t('nav:pageTitles.agent');
+    if (isAgencyDetail) return t('nav:pageTitles.agency');
+    if (isAgentDetail) return t('nav:pageTitles.agent');
     const titleKeys: Record<string, string> = {
       home: 'nav:pageTitles.home',
       search: 'nav:pageTitles.search',
@@ -976,50 +324,24 @@ const MainLayout: React.FC = () => {
       blog: 'nav:pageTitles.blog',
       guides: 'nav:pageTitles.guides',
     };
-    const key = titleKeys[state.activeView];
+    const key = titleKeys[view];
     return key ? t(key) : t('nav:pageTitles.default');
-  }, [state.activeView, state.selectedAgencyId, state.selectedAgentId, t]);
+  }, [view, isAgencyDetail, isAgentDetail, t]);
 
   const handlePWABack = useCallback(() => {
     // Step back through history whenever there is an in-app entry to step back
-    // to. This is what makes the bar's back button behave like the platform's:
-    // it returns to wherever the user actually came from, it animates as a
-    // step back, and it unwinds the stack instead of growing it.
-    //
-    // Detail views used to push their parent list instead — a *forward*
-    // navigation dressed up as back, which animated the wrong way, buried the
-    // page the user came from one entry deeper, and left the real back button
-    // walking through pages they had already dismissed.
-    if (canNavigateBack()) {
-      window.history.back();
-      return;
-    }
-
-    // Opened straight onto a detail page (a shared link, a fresh install):
-    // there is nothing behind it, so fall back to its parent list and animate
-    // as if we had stepped back to it.
-    setNavigationDirection('back');
-    if (state.selectedAgencyId) {
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-      window.history.pushState({}, '', buildLocalizedPath('/agencies'));
-      return;
-    }
-    if (state.selectedAgentId) {
-      dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-      window.history.pushState({}, '', buildLocalizedPath('/agents'));
-      return;
-    }
-    if (state.selectedBusinessListingId) {
-      dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-      window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
-      return;
-    }
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    window.history.pushState({}, '', buildLocalizedPath('/search'));
-  }, [state.selectedAgencyId, state.selectedAgentId, state.selectedBusinessListingId, dispatch]);
+    // to, like the platform's own back button. Opened straight onto a detail
+    // page (a shared link, a fresh install) there is nothing behind it, so fall
+    // back to its parent list, animated as a step back.
+    const parent = isAgencyDetail
+      ? paths.agencies()
+      : isAgentDetail
+        ? paths.agents()
+        : isBusinessDetail
+          ? paths.businessDirectory()
+          : paths.search();
+    goBack(parent);
+  }, [isAgencyDetail, isAgentDetail, isBusinessDetail]);
 
   const anyNonAuthModalOpen = state.isListingLimitWarningOpen || state.isDiscountGameOpen;
 
@@ -1045,10 +367,7 @@ const MainLayout: React.FC = () => {
     (isMobile && isSidebarOpen);
 
 
-  const navigateToPricing = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    window.history.pushState({}, '', buildLocalizedPath('/subscribe'));
-  };
+  const navigateToPricing = () => navigate(paths.pricing());
   
   const handleWarningConfirm = () => {
     dispatch({ type: 'TOGGLE_LISTING_LIMIT_WARNING', payload: false });
@@ -1099,7 +418,7 @@ const MainLayout: React.FC = () => {
             admin/dashboard/auth views (adPage === null), and on the property
             details page which has its own in-content + sidebar ad slots (so the
             sticky bar doesn't overlap them). */}
-        {adPage && !state.selectedProperty && (
+        {adPage && !isPropertyDetail && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>
@@ -1113,7 +432,7 @@ const MainLayout: React.FC = () => {
 
         {/* Mobile floating hamburger for home page — rendered outside all scroll/overflow containers
             so position:fixed works correctly in iOS Safari PWA standalone mode */}
-        {isMobile && isHomeView && !state.selectedProperty && !state.selectedAgentId && !state.selectedAgencyId && !state.selectedBusinessListingId && (
+        {isMobile && isHomeView && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !isBusinessDetail && (
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}
@@ -1178,13 +497,7 @@ const MainLayout: React.FC = () => {
                   {/* Right: Home button - quick shortcut to search from deep navigation */}
                   <button
                     type="button"
-                    onClick={() => {
-                      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-                      dispatch({ type: 'SET_SELECTED_AGENT', payload: null });
-                      dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: null });
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'home' });
-                      window.history.pushState({}, '', buildLocalizedPath('/'));
-                    }}
+                    onClick={() => navigate(paths.home())}
                     className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"
                     aria-label={t('common:aria.goHome', 'Go to home')}
                   >
@@ -1207,7 +520,9 @@ const MainLayout: React.FC = () => {
               className={`relative flex flex-col flex-1 overflow-x-hidden ${isFullHeightView ? 'overflow-y-hidden h-full min-h-0' : 'overflow-y-auto'}`}
               style={!isFullHeightView && isMobile ? { paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' } : undefined}
             >
-                <AppContent onToggleSidebar={() => setIsSidebarOpen(true)} />
+                <OpenSidebarContext.Provider value={openSidebar}>
+                  <PageOutlet />
+                </OpenSidebarContext.Provider>
             </main>
 
         </div>
@@ -1296,9 +611,25 @@ const FullScreenLoader: React.FC = () => {
 };
 
 
-const AppWrapper: React.FC = () => {
+/**
+ * The app shell: the router's root element. Resolves the session, gates on
+ * email verification, and renders the layout whose outlet hosts the page.
+ */
+const AppShell: React.FC = () => {
     const { state, dispatch, checkAuthStatus, handleOAuthCallback } = useAppContext();
     const { t } = useTranslation('common');
+    const { view } = useRouteView();
+
+    // Listen for session expiration events from httpClient
+    useEffect(() => {
+        const handleSessionExpired = () => {
+            dispatch({ type: 'SESSION_EXPIRED' });
+        };
+        window.addEventListener('session-expired', handleSessionExpired);
+        return () => {
+            window.removeEventListener('session-expired', handleSessionExpired);
+        };
+    }, [dispatch]);
 
     const hasVisited = useRef(localStorage.getItem('balkanestate_visited') === 'true');
     const [showSplash, setShowSplash] = useState(!hasVisited.current);
@@ -1379,8 +710,7 @@ const AppWrapper: React.FC = () => {
     }, [checkAuthStatus, handleOAuthCallback, dispatch]);
 
     // Allow password reset and email verification pages to bypass onboarding and verification check
-    const isAuthFlowPage = window.location.pathname.includes('reset-password') ||
-                           window.location.pathname.includes('verify-email');
+    const isAuthFlowPage = view === 'reset-password' || view === 'verify-email';
 
     // Check if user needs to verify their email
     // Only applies to authenticated local users (not OAuth users like Google/Apple)
@@ -1410,12 +740,6 @@ const AppWrapper: React.FC = () => {
                 <EmailVerificationRequired email={state.currentUser.email} />
             </Suspense>
         );
-    } else if (state.activeView === 'not-found') {
-        appBody = (
-            <Suspense fallback={<FullScreenLoader />}>
-                <NotFoundPage />
-            </Suspense>
-        );
     } else {
         appBody = (
             <>
@@ -1434,6 +758,7 @@ const AppWrapper: React.FC = () => {
     // stays mounted in the same position the whole time and resources load during the splash.
     return (
         <>
+            <GlobalHead />
             {appBody}
             {shouldShowSplash && !state.pendingEmailVerification && (
                 <Suspense fallback={<FullScreenLoader />}>
@@ -1447,20 +772,13 @@ const AppWrapper: React.FC = () => {
     );
 }
 
+// Created once: the route table is static, and the shell renders inside every
+// provider below, so the router itself needs no React context.
+const router = createAppRouter(<AppShell />);
+
 const App: React.FC = () => {
   // Compensate for browser zoom so UI remains usable at 125%+
   useZoomCompensation();
-
-  const { i18n } = useTranslation();
-  const currentLang = (i18n.language || 'en').split('-')[0];
-
-  // Get analytics IDs from environment variables
-  const googleAnalyticsId = import.meta.env.VITE_GA_ID;
-  const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
-
-  // Analytics and marketing tags may only load once the user has consented to
-  // that category — they are not strictly necessary, so they need prior consent.
-  const cookieConsent = useCookieConsent();
 
   return (
     <ErrorBoundary level="app">
@@ -1474,31 +792,12 @@ const App: React.FC = () => {
               <NotificationProvider>
                 <ConfirmationProvider>
                   <AnimationProvider>
-                    <NavigationProvider>
                       <ListingIngestProgressProvider>
                       {/* Global SVG filter for liquid glass effects */}
                       <LiquidGlassFilter />
-                      {/* Lazy loaded SEO & Analytics components (don't block initial render) */}
-                      <Suspense fallback={null}>
-                        <SEO />
-                        <OrganizationSchema language={currentLang} />
-                        <FAQSchema faqs={realEstateFAQs} language={currentLang} />
-                        {/* Analytics - only loaded if IDs are provided AND the user consented */}
-                        {((googleAnalyticsId && cookieConsent.analytics) ||
-                          (facebookPixelId && cookieConsent.marketing)) && (
-                          <Analytics
-                            googleAnalyticsId={cookieConsent.analytics ? googleAnalyticsId : undefined}
-                            facebookPixelId={cookieConsent.marketing ? facebookPixelId : undefined}
-                          />
-                        )}
-                        {/* Microsoft Clarity - Heatmaps & Session Recordings (analytics consent) */}
-                        {cookieConsent.analytics && <ClarityInit />}
-                      </Suspense>
-
-                      <AppWrapper />
+                      <RouterProvider router={router} />
                       <ListingIngestDock />
                       </ListingIngestProgressProvider>
-                    </NavigationProvider>
                   </AnimationProvider>
                 </ConfirmationProvider>
               </NotificationProvider>

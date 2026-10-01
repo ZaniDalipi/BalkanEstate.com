@@ -4,10 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRealEstateNews, NewsItem } from '../hooks/useRealEstateNews';
 import { useArticles } from '../../blog/hooks/useArticles';
 import { ArticleListItem } from '../../blog/types/article.types';
-import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import UserAvatar from '@/components/shared/UserAvatar';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'All': '🌍',
@@ -217,20 +216,17 @@ const ArticleMiniCard: React.FC<{ article: ArticleListItem; index: number; onNav
 
 const NewsSection: React.FC = () => {
   const { t } = useTranslation('home');
-  const { dispatch } = useAppContext();
   const { news, countries, selectedCountry, setSelectedCountry, isLoading } = useRealEstateNews();
   const [activeTab, setActiveTab] = useState<'news' | 'articles'>('articles');
 
   const { articles, isLoading: articlesLoading } = useArticles({ limit: 6 });
 
   const handleArticleNavigate = (slug: string) => {
-    window.history.pushState({}, '', buildLocalizedPath(`/blog/${slug}`));
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
+    navigate(paths.blogArticle(slug));
   };
 
   const handleViewAllArticles = () => {
-    window.history.pushState({}, '', buildLocalizedPath('/blog'));
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
+    navigate(paths.blog());
   };
 
   return (

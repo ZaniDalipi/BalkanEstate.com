@@ -4,10 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getTopAgents } from '@/src/features/agents/api/agentApi';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
-import { useAppContext } from '@/context/AppContext';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import type { Agent } from '@/src/shared/types';
 import { calcScore, getAchievementBadge, SCORING_METRIC_DEFS } from '@/src/features/agents/utils/agentScoring';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const MEDAL = {
   0: {
@@ -335,14 +335,9 @@ const TopAgentsSection: React.FC = () => {
   const { t: rawT }  = useTranslation('home');
   const t = useCallback((key: string, fallback?: string): string =>
     rawT(key, { defaultValue: fallback }) as string, [rawT]);
-  const { dispatch } = useAppContext();
-  const { navigate } = useLocalizedNavigation();
-
   const handleAgentClick = useCallback((agent: Agent) => {
-    const id = agent.agentId || agent.id;
-    dispatch({ type: 'SET_SELECTED_AGENT', payload: id });
-    navigate(`/agents/${id}`, { direction: 'up' });
-  }, [dispatch, navigate]);
+    navigate(paths.agent(String(agent.agentId || agent.id)), { direction: 'up' });
+  }, []);
 
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
     queryKey: ['topAgentsWeek'],

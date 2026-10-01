@@ -28,6 +28,7 @@ const appContext = {
     dispatch: vi.fn(),
 };
 vi.mock('@/context/AppContext', () => ({ useAppContext: () => appContext }));
+vi.mock('@/src/app/router/navigation', () => ({ navigate: vi.fn(), localizePath: (path: string) => path }));
 
 const { PropertyInfo } = await import('@/src/components/property/PropertyInfo');
 

@@ -14,6 +14,8 @@ import {
   ChevronRightIcon,
 } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface AgencyPropertyCardProps {
   agencyId: string;
@@ -53,8 +55,7 @@ const AgencyPropertyCard: React.FC<AgencyPropertyCardProps> = ({
     if (onNavigateToAgency) {
       onNavigateToAgency(target);
     } else {
-      window.history.pushState({}, '', `/agencies/${target}`);
-      window.dispatchEvent(new PopStateEvent('popstate'));
+      navigate(paths.agency(target));
     }
   };
 

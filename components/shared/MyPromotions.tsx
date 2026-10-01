@@ -8,7 +8,6 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../types';
-import { useAppContext } from '../../context/AppContext';
 import { SparklesIcon, ArrowPathIcon } from '../../constants';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import PromotionHistoryModal from '../../src/features/promotions/components/PromotionHistoryModal';
@@ -22,10 +21,11 @@ import {
 } from '../../src/features/promotions/hooks/usePromotionData';
 import { useMyListings } from '../../src/features/properties/hooks/useMyListings';
 import { formatPrice } from '../../utils/currency';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const MyPromotions: React.FC = () => {
   const { t } = useTranslation(['account', 'property']);
-  const { dispatch } = useAppContext();
 
   // React Query hooks for real-time data
   const {
@@ -109,13 +109,7 @@ const MyPromotions: React.FC = () => {
   };
 
   const handleViewProperty = (propertyId: string) => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-    // Get current language from URL path
-    const currentLang = window.location.pathname.split('/')[1] || 'en';
-    const validLangs = ['en', 'sq', 'sr', 'de', 'mk', 'hr', 'bs', 'sl', 'bg', 'ro', 'el', 'tr', 'it', 'fr'];
-    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-    window.history.pushState({}, '', `/${lang}/property/${propertyId}`);
+    navigate(paths.property(propertyId));
   };
 
   const handleExtend = (property: Property) => {

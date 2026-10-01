@@ -11,6 +11,8 @@ import { ROOM_STYLE_OPTIONS, EXTERIOR_STYLE_OPTIONS } from '../data/styles';
 import { useImageAspect } from '../hooks/useImageAspect';
 import { useRoomStylerUsage } from '../hooks/useRoomStylerUsage';
 import BeforeAfterSlider from './BeforeAfterSlider';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface RoomStylerModalProps {
     /** Full Cloudinary URL of the room photo to restyle */
@@ -23,7 +25,7 @@ type Mode = 'interior' | 'exterior';
 
 const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) => {
     const { t } = useTranslation(['property']);
-    const { state, dispatch } = useAppContext();
+    const { state} = useAppContext();
     const queryClient = useQueryClient();
 
     // Fetch the user's real quota FIRST so we only show "limit reached" when the
@@ -85,10 +87,8 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
 
     const goToPricing = useCallback(() => {
         onClose();
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-        window.history.pushState({}, '', '/subscribe');
-    }, [dispatch, onClose]);
+        navigate(paths.pricing());
+    }, [onClose]);
 
     const selectedLabel = styleOptions.find(s => s.id === selectedStyle)?.label ?? '';
     const showUpgrade = isExhausted || (status === 'error' && !!errorMsg?.toLowerCase().includes('limit'));

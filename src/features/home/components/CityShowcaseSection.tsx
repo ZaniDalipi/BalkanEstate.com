@@ -46,7 +46,7 @@ const PANEL_SIZES = '(min-width: 1200px) 480px, (min-width: 768px) 45vw, 100vw';
 const PANEL_SIZES_COLLAPSED = '(min-width: 1200px) 120px, (min-width: 768px) 12vw, 50vw';
 
 interface CityShowcaseSectionProps {
-    onNavigate: (view: string, path: string) => void;
+    onNavigate: (path: string) => void;
 }
 
 const GallerySkeleton: React.FC = () => (
@@ -137,7 +137,7 @@ const CityShowcaseSection: React.FC<CityShowcaseSectionProps> = ({ onNavigate })
         (item: ElasticGalleryItem, view: 'search' | 'rentals', path: string) => {
             const city = shown.find(c => c.id === item.id);
             if (!city) return;
-            onNavigate(view, `${path}?q=${encodeURIComponent(city.searchQuery)}`);
+            onNavigate(`${path}?q=${encodeURIComponent(city.searchQuery)}`);
         },
         [shown, onNavigate],
     );

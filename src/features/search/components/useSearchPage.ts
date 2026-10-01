@@ -11,12 +11,13 @@ import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
 import { generatePropertySlug } from '@/utils/slug';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { applyQueryToFilters } from '../universal/queryToFilters';
 import { frameSearchTarget } from '../frameSearch';
 import { searchPlaces } from '../universal/places';
 import type { Suggestion } from '../universal/types';
 import { isPropertyTypeFilter } from '@/shared/types/property.types';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // Helper to serialize Leaflet bounds to a consistent JSON format
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -713,8 +714,7 @@ export function useSearchPage() {
             // Same route a listing card opens, so a listing found through the
             // search box lands exactly where one found by scrolling does.
             const property = suggestion.property;
-            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-            window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+            navigate(paths.property(generatePropertySlug(property)), { state: { property } });
             return;
         }
 

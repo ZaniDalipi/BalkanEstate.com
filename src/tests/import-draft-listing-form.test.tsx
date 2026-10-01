@@ -25,12 +25,10 @@ const mockDispatch = vi.fn();
 const appState: Record<string, unknown> = {
     currentUser: null,
     properties: [],
-    activeView: 'create-listing',
     isPricingModalOpen: false,
     pendingProperty: null,
     isAuthenticating: false,
     isLoadingUserData: false,
-    importDraftToPublish: null,
 };
 vi.mock('@/context/AppContext', () => ({
     useAppContext: () => ({
@@ -80,7 +78,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 beforeEach(() => {
     vi.clearAllMocks();
-    appState.importDraftToPublish = null;
 });
 
 describe('the create-listing form with an imported draft', () => {
@@ -107,17 +104,18 @@ describe('the create-listing form with an imported draft', () => {
 
 describe('useImportDraftPrefill', () => {
     it('is empty when no draft is being published', () => {
-        const { result } = renderHook(() => useImportDraftPrefill(), { wrapper });
+        const { result } = renderHook(() => useImportDraftPrefill(null), { wrapper });
         expect(result.current).toBeNull();
     });
 
     it('links the created listing to its draft and returns to Imported Drafts', async () => {
-        appState.importDraftToPublish = { draftId: 'draft-1', property: draftProperty };
         mockLink.mockResolvedValue({ propertyId: 'p1' });
-        const { result } = renderHook(() => useImportDraftPrefill(), { wrapper });
+        const draft = { draftId: 'draft-1', property: draftProperty };
+        const { result } = renderHook(() => useImportDraftPrefill(draft), { wrapper });
 
         await result.current!.onCreated({ id: 'p1' } as never);
         expect(mockLink).toHaveBeenCalledWith('draft-1', 'p1');
-        expect(mockDispatch).toHaveBeenCalledWith({ type: 'SET_ACCOUNT_TAB', payload: 'importReview' });
+        // The success screen then lands on the Imported Drafts tab.
+        expect(result.current!.redirectTo).toBe('/account/import-review');
     });
 });

@@ -11,8 +11,10 @@ import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
 import PromotionModal from '../../src/features/promotions/components/PromotionModal';
 import { VideoGenerator } from '../../src/features/videos';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { useUnfinishedListingDrafts } from '@/src/features/seller/hooks/useUnfinishedListingDrafts';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
+import { useRouteView } from '@/src/app/router/useRouteView';
 
 // Video Icon component
 const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -89,15 +91,13 @@ const ListingCard: React.FC<{
     const [imageError, setImageError] = useState(false);
 
     const handleCardClick = () => {
-        dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-        window.history.pushState({}, '', buildLocalizedPath(`/property/${property.id}`));
+        navigate(paths.property(property.id), { state: { property } });
     };
 
     const handleEditClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         // Navigate to edit listing URL
-        window.history.pushState({}, '', `/edit-listing/${property.id}`);
-        window.dispatchEvent(new PopStateEvent('popstate'));
+        navigate(paths.editListing(property.id), { state: { property } });
     };
 
     const isActionable = property.status === 'active' || property.status === 'pending';
@@ -402,9 +402,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     const { drafts: localDrafts, discardDraft: discardLocalDraft } = useUnfinishedListingDrafts(state.currentUser?.id);
 
     const continueDraft = (kind: 'sale' | 'rent') => {
-        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-        window.history.pushState({}, '', kind === 'rent' ? '/create-rental' : '/create-listing');
-        window.dispatchEvent(new PopStateEvent('popstate'));
+        navigate(kind === 'rent' ? paths.createRental() : paths.createListing());
     };
 
     // Debounce the search box so we don't hit the server on every keystroke
@@ -414,11 +412,12 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
     }, [propertyIdSearch]);
 
     // Refresh when navigating back to this view (e.g., returning from edit-listing)
-    const previousViewRef = useRef(state.activeView);
+    const { view } = useRouteView();
+    const previousViewRef = useRef(view);
     useEffect(() => {
-        if (previousViewRef.current !== state.activeView) fetchMyListings();
-        previousViewRef.current = state.activeView;
-    }, [state.activeView, fetchMyListings]);
+        if (previousViewRef.current !== view) fetchMyListings();
+        previousViewRef.current = view;
+    }, [view, fetchMyListings]);
 
     // Renewal statuses: recalculated whenever listings change, and every minute
     useEffect(() => {
@@ -988,9 +987,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => {
-                          dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-                          window.history.pushState({}, '', '/create-listing');
-                          window.dispatchEvent(new PopStateEvent('popstate'));
+                          navigate(paths.createListing());
                       }}
                       className="flex-1 sm:flex-initial px-4 py-2.5 bg-primary text-white font-semibold rounded-lg shadow-sm hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 text-sm"
                     >
@@ -999,9 +996,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                     </button>
                     <button
                       onClick={() => {
-                          dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-                          window.history.pushState({}, '', '/create-rental');
-                          window.dispatchEvent(new PopStateEvent('popstate'));
+                          navigate(paths.createRental());
                       }}
                       className="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
                     >

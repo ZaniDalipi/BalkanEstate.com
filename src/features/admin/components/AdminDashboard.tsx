@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '../../../utils/languageRouting';
+import { useParams } from 'react-router-dom';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 import AdminLayout from './AdminLayout';
 import type { AdminView } from './AdminLayout';
 import DiscountCodeManager from './DiscountCodeManager';
@@ -88,21 +90,17 @@ const adminViewToUrl: Record<AdminView, string> = {
 
 const AdminDashboard: React.FC = () => {
   const { t } = useTranslation(['admin']);
-  const { state, dispatch } = useAppContext();
+  const { state } = useAppContext();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get current section from state, map to AdminView
-  const activeSection: AdminView = urlToAdminView[state.adminSection] || 'dashboard';
+  // The section is the URL's: /admin/:section
+  const { section: urlSection } = useParams();
+  const activeSection: AdminView = urlToAdminView[urlSection as AdminSection] || 'dashboard';
 
-  // Update URL when section changes
   const handleSectionChange = useCallback((section: AdminView) => {
-    const urlSection = adminViewToUrl[section];
-    dispatch({ type: 'SET_ADMIN_SECTION', payload: urlSection as AdminSection });
-    // Update URL without full reload
-    const newPath = urlSection === 'dashboard' ? '/admin' : `/admin/${urlSection}`;
-    window.history.pushState({}, '', buildLocalizedPath(newPath));
-  }, [dispatch]);
+    navigate(paths.admin(adminViewToUrl[section] as AdminSection));
+  }, []);
 
   // Check if user has admin access
   useEffect(() => {
@@ -144,7 +142,7 @@ const AdminDashboard: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:errors.accessDenied')}</h2>
           <p className="text-gray-600 mb-6">{t('admin:errors.pleaseLogin')}</p>
           <button
-            onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
+            onClick={() => navigate(paths.search())}
             className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
           >
             {t('admin:errors.goHome')}
@@ -179,7 +177,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
           <button
-            onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' })}
+            onClick={() => navigate(paths.search())}
             className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors"
           >
             {t('admin:errors.goHome')}

@@ -1,7 +1,6 @@
 // Seller feature components barrel export
 
 export { default as SellerDashboard } from './SellerDashboard';
-export { default as PricingPlans } from './PricingPlans';
 export { default as RoleSelector } from './RoleSelector';
 export { default as MapLocationPicker } from './MapLocationPicker';
 export { default as PropertyCalculator } from './PropertyCalculator';

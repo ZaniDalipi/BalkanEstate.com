@@ -2,10 +2,8 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMyBusinessListings, useDeleteBusinessListing } from '@/src/features/business-directory/hooks';
-import { useAppContext } from '@/context/AppContext';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { generateBusinessSlug } from '@/utils/slug';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import {
@@ -17,6 +15,8 @@ import {
   CheckBadgeIcon,
   ArrowLeftIcon,
 } from '@/constants';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const EditBusinessListingForm = lazy(() => import('@/src/features/business-directory/components/EditBusinessListingForm'));
 
@@ -45,7 +45,6 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 
 const MyBusinessListings: React.FC = () => {
   const { t } = useTranslation(['businessDirectory', 'account']);
-  const { dispatch } = useAppContext();
   const { listings, isLoading, error, refetch } = useMyBusinessListings(true);
   const { deleteListing } = useDeleteBusinessListing();
   const { confirm } = useConfirmation();
@@ -54,10 +53,8 @@ const MyBusinessListings: React.FC = () => {
 
   const navigateToListing = useCallback((listing: BusinessListing) => {
     const urlSlug = generateBusinessSlug(listing);
-    dispatch({ type: 'SET_SELECTED_BUSINESS_LISTING', payload: listing.id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-    window.history.pushState({}, '', buildLocalizedPath(`/business-directory/${urlSlug}`));
-  }, [dispatch]);
+    navigate(paths.businessListing(urlSlug));
+  }, []);
 
   const handleEdit = useCallback((listing: BusinessListing) => {
     setEditingListing(listing);
@@ -98,9 +95,8 @@ const MyBusinessListings: React.FC = () => {
   }, [deleteListing, confirm, success, notifyError, t]);
 
   const handleCreateNew = useCallback(() => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'business-directory' });
-    window.history.pushState({}, '', buildLocalizedPath('/business-directory'));
-  }, [dispatch]);
+    navigate(paths.businessDirectory());
+  }, []);
 
   // Loading skeleton
   if (isLoading) {

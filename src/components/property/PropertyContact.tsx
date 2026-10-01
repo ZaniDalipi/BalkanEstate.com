@@ -16,6 +16,8 @@ import MoveInCostBreakdown from '@/src/features/rental/components/MoveInCostBrea
 import ScheduleViewingModal from '@/src/features/rental/components/ScheduleViewingModal';
 import { formatCityPlace } from '@/shared/geo';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface PropertyContactProps {
   property: Property;
@@ -73,12 +75,8 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
 
   const handleVisitAgency = useCallback(() => {
     if (!agencyData) return;
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyData._id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-    const urlSlug = (agencyData.slug || agencyData._id).replace(',', '/');
-    window.history.pushState({}, '', `/agencies/${urlSlug}`);
-  }, [agencyData, dispatch]);
+    navigate(paths.agencyOf(agencyData), { state: { agency: agencyData } });
+  }, [agencyData]);
 
   const isInComparison = state.comparisonList.includes(property.id);
   const currentUser = state.currentUser || state.user;
@@ -259,12 +257,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
           <button
             onClick={() => {
               const agentIdentifier = property.seller?.agentId || property.sellerId;
-              dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-              dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-              dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-              dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agentProfile' });
-              window.history.pushState({}, '', `/agents/${agentIdentifier}`);
-              window.dispatchEvent(new PopStateEvent('popstate'));
+              navigate(paths.agent(agentIdentifier));
             }}
             className="flex items-center gap-4 mb-4 w-full p-2 -m-2 rounded-xl hover:bg-blue-50 transition-colors group cursor-pointer text-left"
           >

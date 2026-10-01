@@ -6,6 +6,8 @@ import { useAppContext } from '@/context/AppContext';
 import { LogoIcon, SearchIcon, HomeIcon } from '@/constants';
 import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
 import { getAgencies } from '@/services/apiService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 /* ---------------- CONSTANTS ---------------- */
 
@@ -69,7 +71,7 @@ const Onboarding: React.FC = () => {
     setActiveCard('buy');
     setTimeout(() => {
       completeOnboarding();
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+      navigate(paths.search());
     }, 300);
   };
 

@@ -1,17 +1,19 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { AppView } from '../../types';
 import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '../../constants';
 import UserAvatar from './UserAvatar';
 import { usePWAEnvironment } from '@/src/app/hooks/usePWAEnvironment';
+import { navigate, localizePath } from '@/src/app/router/navigation';
+import { paths, pathForView } from '@/src/app/router/paths';
+import { useRouteView } from '@/src/app/router/useRouteView';
 
 const BottomNav: React.FC = () => {
     const { t } = useTranslation(['nav']);
     const { state, dispatch } = useAppContext();
-    const { getLocalizedPath } = useLocalizedNavigation();
-    const { activeView, isAuthenticated, currentUser, conversations } = state;
+    const { isAuthenticated, currentUser, conversations } = state;
+    const { view: activeView } = useRouteView();
     const { orientation } = usePWAEnvironment();
 
     // Calculate total unread messages using the per-conversation unread count fields
@@ -26,19 +28,13 @@ const BottomNav: React.FC = () => {
         if (needsAuth && !isAuthenticated) {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true } });
         } else {
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
-
-            const route = view === 'home' ? '/' : view === 'search' ? '/search' : `/${view}`;
-            window.history.pushState({}, '', getLocalizedPath(route));
+            navigate(pathForView(view) ?? paths.home());
         }
     };
 
     const handleNewListingClick = () => {
         if (isAuthenticated) {
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-            window.history.pushState({}, '', getLocalizedPath('/create-listing'));
+            navigate(paths.createListing());
         } else {
             dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
         }

@@ -5,6 +5,8 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { getGallerySources, warmGallery, VIEWER_SIZES } from '@/config/galleryImages';
 import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const RoomStylerModal = lazy(() => import('../../room-styler/components/RoomStylerModal'));
 
@@ -198,10 +200,8 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         timestamp: Date.now(),
                         isRead: false,
                     } as Parameters<typeof sendMessage>[1]);
-                    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
                     dispatch({ type: 'SET_ACTIVE_CONVERSATION', payload: convId });
-                    window.history.pushState({}, '', '/inbox');
+                    navigate(paths.inbox());
                     onClose();
                 } catch (err) {
                     console.error('Failed to send annotated image:', err);

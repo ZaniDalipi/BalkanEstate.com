@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/shared/components/ui/Modal';
-import { useAppContext } from '@/context/AppContext';
 import { useSocket } from '@/shared/hooks/useSocket';
 import type { ListingIngestProgressEvent, ProcessedItem, SyncSession } from '../context/ListingIngestProgressContext';
 import type { IngestStats, ListingSource } from '../api/listingSourceApi';
 import { useOpenImportReview } from '../hooks/useOpenImportReview';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -243,7 +244,6 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   source, isOpen, isRunning, session, finalStats, onClose, onMinimize, onRetry,
 }) => {
   const { t } = useTranslation(['listingFeeds', 'common']);
-  const { dispatch } = useAppContext();
   const openReview = useOpenImportReview();
   const feedRef = useRef<HTMLDivElement>(null);
   const socket = useSocket();
@@ -482,7 +482,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-amber-900">{t('listingFeeds:incompleteListingsTitle')}</p>
               <p className="text-xs text-amber-700 mt-0.5">{t('listingFeeds:incompleteListingsBody', { count: incompleteCount })}</p>
-              <button type="button" onClick={() => { onClose(); dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' }); }}
+              <button type="button" onClick={() => { onClose(); navigate(paths.account('listings')); }}
                       className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-900">
                 {t('listingFeeds:incompleteListingsReview')} {Ico.ext}
               </button>
@@ -495,7 +495,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-emerald-900">{t('listingFeeds:incompleteListingsTitle')}</p>
               <p className="text-xs text-emerald-700 mt-0.5">{t('listingFeeds:incompleteListingsBodyGeneric')}</p>
-              <button type="button" onClick={() => { onClose(); dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'my-listings' }); }}
+              <button type="button" onClick={() => { onClose(); navigate(paths.account('listings')); }}
                       className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 underline underline-offset-2 hover:text-emerald-900">
                 {t('listingFeeds:incompleteListingsReview')} {Ico.ext}
               </button>

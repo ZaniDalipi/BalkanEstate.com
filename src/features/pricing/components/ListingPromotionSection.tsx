@@ -2,7 +2,9 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React from 'react';
 import { Animated } from '@/src/components/ui/Animations';
 import { CheckIcon, SparklesIcon } from '@/constants';
-import { type UserListing, buildLocalizedPath } from './usePricingPage';
+import { type UserListing } from './usePricingPage';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface ListingPromotionSectionProps {
   t: any;
@@ -107,8 +109,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
               <p className="text-gray-600 mb-4">{t('pricing:listing.noListings', 'You don\'t have any listings yet')}</p>
               <button
                 onClick={() => {
-                  dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-                  window.history.pushState({}, '', buildLocalizedPath('/create-listing'));
+                  navigate(paths.createListing());
                 }}
                 className="px-6 py-2.5 bg-secondary text-white rounded-xl font-medium hover:bg-opacity-90 transition-colors"
               >

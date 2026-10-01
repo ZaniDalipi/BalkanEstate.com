@@ -25,6 +25,10 @@ import { MUNICIPALITY_DATA } from '../services/propertyService';
 import { socketService } from '../services/socketService';
 import { notificationService } from '../services/notificationService';
 import { tokenService, hasLikelyValidSession } from '../src/shared/api/tokenService';
+import { navigate } from '../src/app/router/navigation';
+import { paths, pathForView } from '../src/app/router/paths';
+import { queryClient } from '../src/app/config/queryClient';
+import { propertyKeys } from '../src/features/properties/api/propertyKeys';
 
 const initialSearchPageState: SearchPageState = {
     filters: initialFilters,
@@ -49,58 +53,6 @@ const isOAuthCallbackInProgress =
   window.location.pathname.includes('auth/callback') &&
   !!new URLSearchParams(window.location.search).get('token');
 
-// Derive the correct initial view from the current URL synchronously so the
-// first paint already shows the right page — avoids a one-frame flash of the
-// home page before the checkUrlForRouting effect fires (FOIV).
-function getInitialView(): AppView {
-  if (typeof window === 'undefined') return 'home';
-  let path = window.location.pathname;
-  // Strip language prefix: /en/search → /search
-  const langMatch = path.match(/^\/(en|sq|sr|mk|bs|hr|bg|ro|el|me)(\/|$)/);
-  if (langMatch) {
-    path = path.slice(langMatch[1].length + 1) || '/';
-    if (!path.startsWith('/')) path = '/' + path;
-  }
-  // Remove trailing slash except for root
-  if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
-
-  if (path === '/' || path === '' || path === '/home') return 'home';
-  if (path === '/search') return 'search';
-  if (path === '/rentals' || path === '/rent') return 'rentals';
-  if (path === '/subscribe' || path === '/pricing') return 'pricing';
-  if (path === '/valuation') return 'valuation';
-  if (path === '/mortgage-calculator') return 'mortgage-calculator';
-  if (path === '/contact') return 'contact';
-  if (path === '/guides') return 'guides';
-  if (path === '/analytics') return 'analytics';
-  if (path === '/inbox') return 'inbox';
-  if (path === '/create-listing') return 'create-listing';
-  if (path === '/create-rental') return 'create-rental';
-  if (path === '/explore-cities') return 'explore-cities';
-  if (path === '/blog') return 'blog';
-  if (path === '/business-directory') return 'business-directory';
-  if (path === '/reset-password') return 'reset-password';
-  if (path === '/verify-email') return 'verify-email';
-  if (path.startsWith('/agents')) return 'agents';
-  if (path.startsWith('/agencies')) return 'agencies';
-  if (path.startsWith('/account')) return 'account';
-  if (path.startsWith('/admin')) return 'admin';
-  if (path.startsWith('/agency-dashboard')) return 'agency-dashboard';
-  if (path.startsWith('/business-directory')) return 'business-directory';
-  if (path.startsWith('/explore-cities')) return 'explore-cities';
-  if (path.startsWith('/how-it-works')) return 'how-it-works';
-  if (path.startsWith('/saved-properties')) return 'saved-properties';
-  if (path.startsWith('/saved-searches')) return 'saved-searches';
-  if (path.startsWith('/blog')) return 'blog';
-  if (path.startsWith('/property')) return 'search'; // async load; search is shown while property fetches
-  if (path.startsWith('/create-agency')) return 'createAgency';
-  if (path.startsWith('/privacy')) return 'privacy';
-  if (path.startsWith('/terms')) return 'terms';
-  if (path.startsWith('/cookies')) return 'cookies';
-  if (path.startsWith('/refund')) return 'refund';
-  return 'search'; // safe default — search is the primary page
-}
-
 const initialState: AppState = {
   user: null,
   onboardingComplete: true,
@@ -108,7 +60,6 @@ const initialState: AppState = {
   // 1. A likely-valid session exists (session cookie present) → restoring silently
   // 2. An OAuth callback is in progress → token must be verified before rendering
   isAuthenticating: hasLikelyValidSession() || isOAuthCallbackInProgress,
-  activeView: getInitialView(),
   isPricingModalOpen: false,
   isFirstLoginOffer: false,
   isAgencyCreationMode: false,
@@ -120,9 +71,6 @@ const initialState: AppState = {
   properties: [],
   isLoadingProperties: false,
   propertiesError: null,
-  selectedProperty: null,
-  propertyToEdit: null,
-  importDraftToPublish: null,
   isAuthenticated: false,
   isLoadingUserData: false,
   currentUser: null,
@@ -131,10 +79,6 @@ const initialState: AppState = {
   comparisonList: [],
   conversations: [],
   activeConversationId: null,
-  selectedAgentId: null,
-  selectedAgencyId: null,
-  selectedBusinessListingId: null,
-  businessDirectoryTab: 'all',
   pendingProperty: null,
   pendingSubscription: null,
   pendingAgencyData: null,
@@ -147,10 +91,6 @@ const initialState: AppState = {
   allMunicipalities: MUNICIPALITY_DATA,
   pendingRedirect: null,
   alertDialog: null,
-  accountTab: 'listings',
-  howItWorksTab: 'getting-started',
-  adminSection: 'dashboard',
-  agencyDashboardSection: 'overview',
   isSessionExpiredModalOpen: false,
 };
 
@@ -166,16 +106,6 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, isAuthenticating: false, isAuthenticated: action.payload.isAuthenticated, currentUser: action.payload.user, onboardingComplete: state.onboardingComplete || action.payload.isAuthenticated };
     case 'COMPLETE_ONBOARDING':
       return { ...state, onboardingComplete: true };
-    case 'SET_ACTIVE_VIEW': {
-        const newState: AppState = { ...state, activeView: action.payload, selectedProperty: null };
-        if (action.payload !== 'create-listing') {
-          newState.propertyToEdit = null;
-          newState.importDraftToPublish = null;
-        }
-        if (action.payload !== 'agents') newState.selectedAgentId = null;
-        if (action.payload !== 'business-directory') newState.selectedBusinessListingId = null;
-        return newState;
-    }
     case 'TOGGLE_PRICING_MODAL':
       return {
         ...state,
@@ -195,22 +125,6 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       return { ...state, isAuthModalOpen: action.payload.isOpen, authModalView: action.payload.isOpen ? (action.payload.view || 'login') : state.authModalView };
     case 'SET_AUTH_MODAL_VIEW':
       return { ...state, authModalView: action.payload };
-    case 'SET_SELECTED_PROPERTY':
-      return { ...state, selectedProperty: state.properties.find(p => p.id === action.payload) || null };
-    case 'SET_SELECTED_PROPERTY_OBJECT':
-      return { ...state, selectedProperty: action.payload };
-    case 'SET_PROPERTY_TO_EDIT':
-      return { ...state, propertyToEdit: action.payload };
-    case 'SET_IMPORT_DRAFT_TO_PUBLISH':
-      return { ...state, importDraftToPublish: action.payload };
-    case 'SET_SELECTED_AGENT':
-      return { ...state, selectedAgentId: action.payload };
-    case 'SET_SELECTED_AGENCY':
-      return { ...state, selectedAgencyId: action.payload };
-    case 'SET_SELECTED_BUSINESS_LISTING':
-      return { ...state, selectedBusinessListingId: action.payload };
-    case 'SET_BUSINESS_DIRECTORY_TAB':
-      return { ...state, businessDirectoryTab: action.payload };
     case 'PROPERTIES_LOADING':
         return { ...state, isLoadingProperties: true, propertiesError: null };
     case 'PROPERTIES_SUCCESS':
@@ -254,10 +168,6 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         properties: state.properties.map(p =>
           p.id === action.payload.id ? action.payload : p
         ),
-        // Also update selectedProperty if it matches the updated property
-        selectedProperty: state.selectedProperty?.id === action.payload.id
-          ? action.payload
-          : state.selectedProperty,
       };
     case 'RENEW_PROPERTY':
         // Find the property and update its lastRenewed timestamp.
@@ -435,14 +345,6 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         };
     case 'HIDE_ALERT':
         return { ...state, alertDialog: null };
-    case 'SET_ACCOUNT_TAB':
-        return { ...state, accountTab: action.payload };
-    case 'SET_HOW_IT_WORKS_TAB':
-        return { ...state, howItWorksTab: action.payload };
-    case 'SET_ADMIN_SECTION':
-        return { ...state, adminSection: action.payload };
-    case 'SET_AGENCY_DASHBOARD_SECTION':
-        return { ...state, agencyDashboardSection: action.payload };
     case 'SESSION_EXPIRED':
         return {
             ...state,
@@ -559,23 +461,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (state.pendingRedirect) {
       const redirectTo = state.pendingRedirect;
       dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
+      navigate(pathForView(redirectTo) ?? paths.search());
     } else if (state.pendingSubscription) {
       // Check if there's a pending subscription and navigate to pricing page
-      setTimeout(() => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-        const currentLang = window.location.pathname.split('/')[1] || 'en';
-        const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
-        const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-        window.history.pushState({}, '', `/${lang}/subscribe`);
-      }, 500);
+      setTimeout(() => navigate(paths.pricing()), 500);
     } else {
       // Default: navigate to search page after login
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
-      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      window.history.replaceState({}, '', `/${lang}/search`);
+      navigate(paths.search(), { replace: true });
     }
 
     return user;
@@ -620,23 +512,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (state.pendingRedirect) {
       const redirectTo = state.pendingRedirect;
       dispatch({ type: 'SET_PENDING_REDIRECT', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: redirectTo });
+      navigate(pathForView(redirectTo) ?? paths.search());
     } else if (state.pendingSubscription) {
       // Check if there's a pending subscription and navigate to pricing page
-      setTimeout(() => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-        const currentLang = window.location.pathname.split('/')[1] || 'en';
-        const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
-        const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-        window.history.pushState({}, '', `/${lang}/subscribe`);
-      }, 500);
+      setTimeout(() => navigate(paths.pricing()), 500);
     } else {
       // Default: navigate to search page after signup
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      const currentLang = window.location.pathname.split('/')[1] || 'en';
-      const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
-      const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-      window.history.replaceState({}, '', `/${lang}/search`);
+      navigate(paths.search(), { replace: true });
     }
 
     return user;
@@ -704,11 +586,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         dispatch({ type: 'USER_DATA_SUCCESS', payload: userData });
 
         // Navigate to search page after OAuth login
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-        const currentLang = window.location.pathname.split('/')[1] || 'en';
-        const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
-        const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-        window.history.replaceState({}, '', `/${lang}/search`);
+        navigate(paths.search(), { replace: true });
       } else {
         throw new Error('Failed to fetch user profile');
       }
@@ -799,6 +677,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const updatedProperty = await apiUpdateListing(property);
       // Sync with server response (may have server-computed fields)
       dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
+      // The listing's page reads it through the query cache; drop the old copy.
+      void queryClient.invalidateQueries({ queryKey: propertyKeys.detail(updatedProperty.id) });
       return updatedProperty;
   }, []);
   

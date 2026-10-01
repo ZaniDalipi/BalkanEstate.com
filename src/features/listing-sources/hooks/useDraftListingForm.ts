@@ -1,11 +1,13 @@
 import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
+import type { ImportDraftToPublish } from '@/types';
 import { importReviewKeys, propertyKeys } from '@/src/shared/query/queryKeys';
 import type { ListingPrefill } from '@/src/features/seller/components/useListingForm';
 import { getImportDraft, linkImportDraft } from '../api/importReviewApi';
 import { toPreviewProperty } from '../utils/draftPreview';
+import { IMPORT_REVIEW_TAB_SLUG } from './useOpenImportReview';
 
 /**
  * Open a new draft in the regular create-listing form, prefilled with what
@@ -13,7 +15,6 @@ import { toPreviewProperty } from '../utils/draftPreview';
  * field, photo tags, map pin, own uploads, validation, preview step).
  */
 export const useOpenDraftInListingForm = () => {
-  const { dispatch } = useAppContext();
   const queryClient = useQueryClient();
 
   return useCallback(
@@ -22,11 +23,10 @@ export const useOpenDraftInListingForm = () => {
         queryKey: importReviewKeys.detail(draftId),
         queryFn: () => getImportDraft(draftId),
       });
-      dispatch({ type: 'SET_IMPORT_DRAFT_TO_PUBLISH', payload: { draftId, property: toPreviewProperty(draft) } });
-      window.history.pushState({ view: 'create-listing' }, '', buildLocalizedPath('/create-listing'));
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
+      const importDraft: ImportDraftToPublish = { draftId, property: toPreviewProperty(draft) };
+      navigate(paths.createListing(), { state: { importDraft } });
     },
-    [dispatch, queryClient]
+    [queryClient]
   );
 };
 
@@ -36,10 +36,8 @@ export const useOpenDraftInListingForm = () => {
  * next sync recognises it), and the post-publish redirect lands on the
  * Imported Drafts tab to carry on with the rest.
  */
-export const useImportDraftPrefill = (): ListingPrefill | null => {
-  const { state, dispatch } = useAppContext();
+export const useImportDraftPrefill = (draft: ImportDraftToPublish | null): ListingPrefill | null => {
   const queryClient = useQueryClient();
-  const draft = state.importDraftToPublish;
 
   return useMemo(() => {
     if (!draft) return null;
@@ -51,9 +49,9 @@ export const useImportDraftPrefill = (): ListingPrefill | null => {
         } finally {
           void queryClient.invalidateQueries({ queryKey: importReviewKeys.all });
           void queryClient.invalidateQueries({ queryKey: propertyKeys.all });
-          dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'importReview' });
         }
       },
+      redirectTo: paths.account(IMPORT_REVIEW_TAB_SLUG),
     };
-  }, [draft, dispatch, queryClient]);
+  }, [draft, queryClient]);
 };

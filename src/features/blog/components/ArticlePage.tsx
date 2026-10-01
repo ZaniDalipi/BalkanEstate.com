@@ -6,11 +6,11 @@ import DOMPurify from 'dompurify';
 import { useArticle } from '../hooks/useArticle';
 import { useArticles } from '../hooks/useArticles';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
-import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import { cn } from '@/lib/utils';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface ArticlePageProps {
   slug: string;
@@ -199,7 +199,6 @@ const ArticleSkeleton: React.FC = () => (
 // ── Main component ───────────────────────────────────────────────────────────
 const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
   const { t } = useTranslation('blog');
-  const { dispatch } = useAppContext();
   const { article, isLoading, error } = useArticle(slug);
   const contentRef = useRef<HTMLDivElement>(null);
   const progress = useReadingProgress(contentRef as React.RefObject<HTMLElement>);
@@ -239,9 +238,8 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
 
   const goBack = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.history.pushState({}, '', buildLocalizedPath('/blog'));
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
-  }, [dispatch]);
+    navigate(paths.blog());
+  }, []);
 
   const copyLink = useCallback(async () => {
     try {

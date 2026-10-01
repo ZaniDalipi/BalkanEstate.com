@@ -6,7 +6,7 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languages, getCurrentLanguage, type LanguageCode } from '../i18n';
-import { changeLanguageWithUrl } from '../utils/languageRouting';
+import { changeLanguage } from '../app/router/navigation';
 
 interface LanguageSwitcherProps {
   variant?: 'dropdown' | 'compact' | 'full' | 'sidebar';
@@ -48,7 +48,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   }, []);
 
   const handleLanguageChange = useCallback((code: LanguageCode) => {
-    changeLanguageWithUrl(code);
+    changeLanguage(code);
     setIsOpen(false);
   }, []);
 

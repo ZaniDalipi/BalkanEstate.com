@@ -4,7 +4,8 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
 import AgencyDashboardSidebar from './AgencyDashboardSidebar';
 import AgencyDashboardHeader from './AgencyDashboardHeader';
-import { buildLocalizedPath } from '../../../utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 import { useAgencyOverview } from '../hooks/useAgencyOverview';
 import { agencyDashboardKeys } from '../api/agencyDashboardKeys';
 import { socketService } from '@/services/socketService';
@@ -24,7 +25,7 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
   activeSection,
   onSectionChange,
 }) => {
-  const { state, dispatch } = useAppContext();
+  const { state } = useAppContext();
   const queryClient = useQueryClient();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
@@ -61,22 +62,13 @@ const AgencyDashboardLayout: React.FC<AgencyDashboardLayoutProps> = ({
     };
   }, [agencyId, queryClient]);
 
-  const handleBackToSite = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-  };
+  const handleBackToSite = () => navigate(paths.search());
 
-  const handleBrowseProperties = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    window.history.pushState({}, '', '/search');
-  };
+  const handleBrowseProperties = () => navigate(paths.search());
 
+  // The public agency page. The backend resolves agencies by id or slug.
   const handleBackToAgency = () => {
-    // Navigate to the public agency page: set the selected agency, switch the
-    // active view, and update the URL so the route is consistent (and survives
-    // reloads / back navigation). The backend resolves agencies by id or slug.
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencyId });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-    window.history.pushState({}, '', buildLocalizedPath(`/agencies/${agencyId}`));
+    if (agencyId) navigate(paths.agency(agencyId));
   };
 
   return (

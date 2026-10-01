@@ -799,7 +799,6 @@ export interface AppState {
     user: any;
     onboardingComplete: boolean;
     isAuthenticating: boolean;
-    activeView: AppView;
     isPricingModalOpen: boolean;
     isFirstLoginOffer: boolean;
     isAgencyCreationMode: boolean; // Flag to indicate agency creation flow (only show Enterprise plan)
@@ -810,13 +809,6 @@ export interface AppState {
     properties: Property[];
     isLoadingProperties: boolean;
     propertiesError: string | null;
-    selectedProperty: Property | null;
-    propertyToEdit: Property | null;
-    /**
-     * A listing fetched from an external feed, opened in the create-listing
-     * form so the owner edits it exactly like a new listing before publishing.
-     */
-    importDraftToPublish: ImportDraftToPublish | null;
     isAuthenticated: boolean;
     isLoadingUserData: boolean;
     currentUser: User | null;
@@ -825,10 +817,6 @@ export interface AppState {
     comparisonList: string[]; // array of property IDs
     conversations: Conversation[];
     activeConversationId: string | null;
-    selectedAgentId: string | null;
-    selectedAgencyId: string | Agency | null;
-    selectedBusinessListingId: string | null;
-    businessDirectoryTab: 'all' | 'businesses' | 'individuals';
     pendingProperty: Property | null;
     pendingSubscription: PendingSubscription | null;
     pendingAgencyData: any | null; // Agency form data to be created after payment
@@ -847,14 +835,6 @@ export interface AppState {
         title: string;
         message: string;
     } | null;
-    // Account page active tab
-    accountTab: string;
-    // How It Works page active tab
-    howItWorksTab: HowItWorksTab;
-    // Admin panel active section
-    adminSection: AdminSection;
-    // Agency dashboard active section
-    agencyDashboardSection: AgencyDashboardSection;
     // Session expired modal
     isSessionExpiredModalOpen: boolean;
 }
@@ -867,20 +847,11 @@ export type AppAction =
     | { type: 'AUTH_CHECK_START' }
     | { type: 'AUTH_CHECK_COMPLETE', payload: { isAuthenticated: boolean, user: User | null } }
     | { type: 'COMPLETE_ONBOARDING' }
-    | { type: 'SET_ACTIVE_VIEW', payload: AppView }
     | { type: 'TOGGLE_PRICING_MODAL', payload: { isOpen: boolean, isOffer?: boolean, isAgencyMode?: boolean } }
     | { type: 'TOGGLE_SUBSCRIPTION_MODAL', payload: { isOpen: boolean, email?: string } }
     | { type: 'TOGGLE_ENTERPRISE_MODAL', payload: boolean }
     | { type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: boolean, view?: AuthModalView } }
     | { type: 'SET_AUTH_MODAL_VIEW', payload: AuthModalView }
-    | { type: 'SET_SELECTED_PROPERTY', payload: string | null }
-    | { type: 'SET_SELECTED_PROPERTY_OBJECT', payload: Property | null }
-    | { type: 'SET_PROPERTY_TO_EDIT', payload: Property | null }
-    | { type: 'SET_IMPORT_DRAFT_TO_PUBLISH', payload: ImportDraftToPublish | null }
-    | { type: 'SET_SELECTED_AGENT', payload: string | null }
-    | { type: 'SET_SELECTED_AGENCY', payload: string | Agency | null }
-    | { type: 'SET_SELECTED_BUSINESS_LISTING', payload: string | null }
-    | { type: 'SET_BUSINESS_DIRECTORY_TAB', payload: 'all' | 'businesses' | 'individuals' }
     | { type: 'PROPERTIES_LOADING' }
     | { type: 'PROPERTIES_SUCCESS', payload: Property[] }
     | { type: 'PROPERTIES_ERROR', payload: string }
@@ -921,10 +892,6 @@ export type AppAction =
     | { type: 'SET_PENDING_EMAIL_VERIFICATION', payload: string | null }
     | { type: 'SHOW_ALERT', payload: { type: 'error' | 'warning' | 'success' | 'info'; title: string; message: string } }
     | { type: 'HIDE_ALERT' }
-    | { type: 'SET_ACCOUNT_TAB', payload: string }
-    | { type: 'SET_HOW_IT_WORKS_TAB', payload: HowItWorksTab }
-    | { type: 'SET_ADMIN_SECTION', payload: AdminSection }
-    | { type: 'SET_AGENCY_DASHBOARD_SECTION', payload: AgencyDashboardSection }
     | { type: 'CLEAR_ALL_SAVED_SEARCHES' }
     | { type: 'SET_CURRENT_USER', payload: User }
     | { type: 'SESSION_EXPIRED' }

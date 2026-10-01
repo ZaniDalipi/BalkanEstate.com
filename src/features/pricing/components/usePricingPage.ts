@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import { UserRole } from '@/types';
 import { usePricingPageData, type Product } from '../hooks/usePricingData';
-
-// Helper to build localized path
-export const buildLocalizedPath = (path: string): string => {
-  const currentLang = window.location.pathname.split('/')[1] || 'en';
-  const validLangs = ['en', 'sq', 'sr', 'mk', 'bs', 'hr', 'bg', 'ro', 'el', 'me'];
-  const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-  return `/${lang}${path === '/' ? '' : path}`;
-};
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 export interface UserListing {
   id: string;
@@ -34,7 +27,6 @@ export const formatLimit = (value?: number): string => {
 export function usePricingPage() {
   const { t } = useTranslation(['pricing', 'common']);
   const { state, dispatch, checkAuthStatus } = useAppContext();
-  const { setDirection } = useNavigationDirection();
   const [activeTab, setActiveTab] = useState<'seller' | 'buyer' | 'listing' | 'agency'>(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
@@ -119,14 +111,11 @@ export function usePricingPage() {
   };
 
   const handleBack = () => {
-    setDirection('back');
-    window.history.pushState({}, '', buildLocalizedPath('/'));
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    navigate(paths.home(), { direction: 'back' });
   };
 
   const handleLegalNavigation = (page: 'terms' | 'privacy' | 'refund') => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: page });
-    window.history.pushState({}, '', buildLocalizedPath(`/${page}`));
+    navigate(paths[page]());
   };
 
   // Check if user is an agent (database as single source of truth)
@@ -334,9 +323,7 @@ export function usePricingPage() {
             ),
           },
         });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        window.history.pushState({}, '', buildLocalizedPath('/account'));
+        navigate(paths.account('profile'));
         return;
       }
 
@@ -353,9 +340,7 @@ export function usePricingPage() {
             ),
           },
         });
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'agency' });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-        window.history.pushState({}, '', buildLocalizedPath('/account/agency'));
+        navigate(paths.account('agency'));
         return;
       }
 

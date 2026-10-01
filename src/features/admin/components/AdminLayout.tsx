@@ -5,6 +5,8 @@ import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import { API_URL } from '@/src/shared/api/config';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface AdminStats {
   overview: {
@@ -57,7 +59,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   onSectionChange
 }) => {
   const { t } = useTranslation(['admin']);
-  const { state, dispatch } = useAppContext();
+  const { state } = useAppContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -118,7 +120,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   }, [state.currentUser?.role, state.isAuthenticating]);
 
   const handleBackToSite = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+    navigate(paths.search());
   };
 
   return (

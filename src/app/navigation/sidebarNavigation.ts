@@ -19,36 +19,8 @@
 
 import type { AppView } from '@/types';
 import type { NavigationDirection } from './navHistory';
-
-/**
- * Where each sidebar destination lives, before the language prefix is applied.
- *
- * These are the paths `App.tsx`'s route map already resolves back to the same
- * view, so a reload or a shared link lands where the tap did. A view missing
- * from here is a view the sidebar must not navigate to — see `resolveRoute`.
- */
-const VIEW_ROUTES: Partial<Record<AppView, string>> = {
-  home: '/',
-  search: '/search',
-  rentals: '/rentals',
-  villas: '/villas',
-  'explore-cities': '/explore-cities',
-  'saved-searches': '/saved-searches',
-  'saved-properties': '/saved-properties',
-  agents: '/agents',
-  agencies: '/agencies',
-  'business-directory': '/business-directory',
-  'how-it-works': '/how-it-works',
-  blog: '/blog',
-  admin: '/admin',
-  valuation: '/valuation',
-  'mortgage-calculator': '/mortgage-calculator',
-  analytics: '/analytics',
-  inbox: '/inbox',
-  account: '/account',
-  'create-listing': '/create-listing',
-  pricing: '/subscribe',
-};
+import { pathForView } from '@/src/app/router/paths';
+import type { DetailKind } from '@/src/app/router/useRouteView';
 
 /**
  * The order the entries appear in the drawer, top to bottom.
@@ -84,6 +56,18 @@ const VIEW_ORDER: AppView[] = [
 ];
 
 /** Destinations that require a signed-in user; a tap opens the auth modal instead. */
+/**
+ * Where each drawer entry goes, before the language prefix is applied — the
+ * same landing paths the rest of the app uses (`pathForView`), limited to the
+ * entries the drawer actually shows.
+ */
+const VIEW_ROUTES: Partial<Record<AppView, string>> = Object.fromEntries(
+  VIEW_ORDER.flatMap((view) => {
+    const path = pathForView(view);
+    return path ? [[view, path]] : [];
+  }),
+);
+
 export const AUTH_REQUIRED_VIEWS: ReadonlySet<AppView> = new Set<AppView>([
   'inbox',
   'account',
@@ -134,14 +118,8 @@ export function directionFor(from: AppView, to: AppView): NavigationDirection {
 
 export interface DestinationState {
   activeView: AppView;
-  /** A listing is open on top of the view — its own page, not `activeView`'s. */
-  hasSelectedProperty?: boolean;
-  /** An agency profile is open on top of the view. */
-  hasSelectedAgency?: boolean;
-  /** An agent profile is open on top of the view. */
-  hasSelectedAgent?: boolean;
-  /** A business listing is open on top of the view. */
-  hasSelectedBusinessListing?: boolean;
+  /** A detail page (a listing, a profile) open within the view. */
+  detail?: DetailKind | null;
 }
 
 /**
@@ -152,19 +130,12 @@ export interface DestinationState {
  * animation, a back button that now needs two presses, and nothing on screen
  * to show for either. It only closes the drawer now.
  *
- * A detail page open over the view is the exception — the listing you are
- * reading is not `activeView`, so "Search" while a listing is open is a real
- * navigation back out to the results.
+ * A detail page open within the view is the exception — the listing you are
+ * reading is not the results page, so "Search" while a listing is open is a
+ * real navigation back out to the results.
  */
 export function isNavigationNeeded(view: AppView, state: DestinationState): boolean {
-  if (
-    state.hasSelectedProperty ||
-    state.hasSelectedAgency ||
-    state.hasSelectedAgent ||
-    state.hasSelectedBusinessListing
-  ) {
-    return true;
-  }
+  if (state.detail) return true;
   return state.activeView !== view;
 }
 

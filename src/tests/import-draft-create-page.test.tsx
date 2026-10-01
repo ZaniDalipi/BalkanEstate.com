@@ -43,9 +43,8 @@ const draftProperty = toPreviewProperty({
     },
 } as never);
 const appState = {
-    currentUser: { id: 'u1', name: 'Agent', role: 'agent', phone: '+385' }, properties: [], activeView: 'create-listing',
+    currentUser: { id: 'u1', name: 'Agent', role: 'agent', phone: '+385' }, properties: [],
     isPricingModalOpen: false, pendingProperty: null, isAuthenticating: false, isLoadingUserData: false,
-    propertyToEdit: null, importDraftToPublish: { draftId: 'draft-1', property: draftProperty },
 };
 vi.mock('@/context/AppContext', () => ({
     useAppContext: () => ({ state: appState, dispatch: vi.fn(), updateUser: vi.fn(), createListing: vi.fn(), updateListing: vi.fn() }),
@@ -58,7 +57,9 @@ const { default: CreateListingPage } = await import('@/src/features/seller/compo
 
 describe('editing an imported draft', () => {
     it('opens the create-listing form filled with the draft', async () => {
-        render(<QueryClientProvider client={new QueryClient()}><CreateListingPage /></QueryClientProvider>);
+        // The route hands the draft to the page (see ListingEditorRoute).
+        const importDraft = { draftId: 'draft-1', property: draftProperty };
+        render(<QueryClientProvider client={new QueryClient()}><CreateListingPage importDraft={importDraft} /></QueryClientProvider>);
         expect(await screen.findByDisplayValue('Luksuzan stan s privatnim vrtom')).toBeInTheDocument();
         expect(screen.getByDisplayValue('Diklovac')).toBeInTheDocument();
         expect(screen.getByText('listingFeeds:review.formTitle')).toBeInTheDocument();

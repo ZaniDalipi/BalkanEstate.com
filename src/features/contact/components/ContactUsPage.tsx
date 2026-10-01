@@ -5,7 +5,6 @@
 
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '@/context/AppContext';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import { sendContactInquiry, uploadAdvertisingImage } from '@/services/apiService';
 import { useContactForm } from '../hooks/use-contact-form';
@@ -14,6 +13,8 @@ import ContactSuccess from './ContactSuccess';
 import LegalFooter from '@/src/features/legal/components/LegalFooter';
 import type { ContactFormData } from '../types';
 import type { AppView } from '@/types';
+import { navigate } from '@/src/app/router/navigation';
+import { paths, pathForView } from '@/src/app/router/paths';
 
 // Inline SVG icons to avoid importing full icon set
 const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -49,7 +50,6 @@ const ClockIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const ContactUsPage: React.FC = () => {
   const { t } = useTranslation(['contact', 'common']);
-  const { dispatch } = useAppContext();
 
   // Preselect the "advertising" subject (and a starter message) when arriving
   // from a "Your Ad Here" placeholder (?topic=advertise).
@@ -105,17 +105,12 @@ const ContactUsPage: React.FC = () => {
   const handleAdImageClear = useCallback(() => setField('adImageUrl', undefined), [setField]);
 
   const handleBack = useCallback(() => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-    window.history.pushState({}, '', '/');
-  }, [dispatch]);
+    navigate(paths.home());
+  }, []);
 
-  const handleNavigate = useCallback(
-    (view: AppView | string) => {
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: view as AppView });
-      window.history.pushState({}, '', `/${view}`);
-    },
-    [dispatch]
-  );
+  const handleNavigate = useCallback((view: AppView | string) => {
+    navigate(pathForView(view as AppView) ?? paths.home());
+  }, []);
 
   const onFormSubmit = useCallback(
     (e: React.FormEvent) => {

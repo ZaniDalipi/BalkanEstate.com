@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { resetPassword as resetPasswordApi } from '@/services/apiService';
 import { LogoIcon, EyeIcon } from '@/constants';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const EyeSlashIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -164,9 +166,9 @@ const ResetPasswordPage: React.FC = () => {
 
             // Redirect to home after 2 seconds
             setTimeout(() => {
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+                navigate(paths.search());
                 // Update URL without reload
-                window.history.pushState({}, '', '/');
+                navigate(paths.home());
             }, 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : t('resetPassword.errors.failedToReset'));
@@ -279,9 +281,9 @@ const ResetPasswordPage: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => {
-                            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+                            navigate(paths.search());
                             dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' });
-                            window.history.pushState({}, '', '/');
+                            navigate(paths.home());
                         }}
                         className="w-full text-sm font-semibold text-primary hover:underline mt-4"
                     >

@@ -6,7 +6,7 @@ import { getFeaturedCities } from '@/src/features/cities/api/cityApi';
 import type { CityMarketData } from '@/src/shared/types';
 
 interface PopularCitiesSectionProps {
-  onNavigate: (view: string, path: string) => void;
+  onNavigate: (path: string) => void;
 }
 
 const CityCardSkeleton: React.FC<{ large?: boolean }> = ({ large }) => (
@@ -170,7 +170,7 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
           </div>
           <motion.button
             whileHover={{ x: 3 }}
-            onClick={() => onNavigate('explore-cities', '/explore-cities')}
+            onClick={() => onNavigate('/explore-cities')}
             className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             {t('home:cities.viewAll')}
@@ -201,7 +201,7 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
                 transition={{ delay: i * 0.08, type: 'spring', stiffness: 300, damping: 30 }}
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onNavigate('explore-cities', `/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`)}
+                onClick={() => onNavigate(`/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`)}
                 className={`group relative overflow-hidden rounded-xl ${i < 2 ? 'sm:col-span-2 lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}
               >
                 {(city.imageUrl || typeof wikiImages[city.city] === 'string') ? (
@@ -252,7 +252,7 @@ const PopularCitiesSection: React.FC<PopularCitiesSectionProps> = ({ onNavigate 
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate('explore-cities', '/explore-cities')}
+            onClick={() => onNavigate('/explore-cities')}
             className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-neutral-100 hover:bg-neutral-200 transition-colors"
           >
             {t('home:cities.viewAll')}

@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import UserAvatar from './UserAvatar';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // Lazy load NotificationCenter - only needed for authenticated users
 const NotificationCenter = lazy(() => import('@/src/shared/components/NotificationCenter'));
@@ -18,40 +19,30 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   const { t } = useTranslation(['nav']);
   const { state, dispatch } = useAppContext();
   const { isAuthenticated, currentUser } = state;
-  const { getLocalizedPath } = useLocalizedNavigation();
 
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
         // Clear any selected items before navigating
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
         // Update URL with language prefix
-        window.history.pushState({}, '', getLocalizedPath('/account'));
+        navigate(paths.account());
     } else {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     }
-  }, [isAuthenticated, dispatch, getLocalizedPath]);
+  }, [isAuthenticated, dispatch]);
 
   const handleNewListingClick = useCallback(() => {
     if (isAuthenticated) {
         // Clear any selected items before navigating
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
         // Update URL with language prefix
-        window.history.pushState({}, '', getLocalizedPath('/create-listing'));
+        navigate(paths.createListing());
     } else {
         dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
     }
-  }, [isAuthenticated, dispatch, getLocalizedPath]);
+  }, [isAuthenticated, dispatch]);
 
   const handleSubscribeClick = useCallback(() => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    window.history.pushState({}, '', getLocalizedPath('/subscribe'));
-  }, [dispatch, getLocalizedPath]);
+    navigate(paths.pricing());
+  }, [dispatch]);
 
   const AuthButton: React.FC<{ floating?: boolean }> = ({ floating }) => {
     if (isAuthenticated && currentUser) {

@@ -17,12 +17,13 @@ import {
   BoltIcon
 } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
-import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { formatPrice } from '@/utils/currency';
 import { slugify } from '@/utils/slug';
 import { API_URL } from '@/src/shared/api/config';
 import { cn } from '@/lib/utils';
 import { calcScore, getAchievementBadge, MAX_SCORE } from '../utils/agentScoring';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface AgentCardProps {
   agent: Agent;
@@ -76,9 +77,7 @@ const AgentAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
 
 const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
   const { t } = useTranslation(['agents', 'common']);
-  const { dispatch } = useAppContext();
-  const { setDirection } = useNavigationDirection();
-  const cardRef = useRef<HTMLDivElement>(null);
+    const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [progressAnimated, setProgressAnimated] = useState(false);
@@ -126,9 +125,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
   const handleSelectAgent = () => {
     const agentIdentifier = agent.agentId || agent.id;
-    setDirection('up');
-    dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-    window.history.pushState({}, '', `/agents/${agentIdentifier}`);
+    navigate(paths.agent(agentIdentifier), { direction: 'up' });
   };
 
   const handleAgencyClick = async (e: React.MouseEvent) => {
@@ -145,12 +142,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setDirection('up');
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-        let urlSlug = data.agency.slug || data.agency._id;
-        urlSlug = urlSlug.replace(',', '/');
-        window.history.pushState({}, '', `/agencies/${urlSlug}`);
+        navigate(paths.agencyOf(data.agency), { state: { agency: data.agency }, direction: 'up' });
       }
     } catch (error) {
       // Error removed

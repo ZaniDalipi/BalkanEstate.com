@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
-import { buildLocalizedPath } from '../../src/utils/languageRouting';
+import { useParams } from 'react-router-dom';
+import { navigate } from '../../src/app/router/navigation';
+import { paths } from '../../src/app/router/paths';
+import { HOW_IT_WORKS_TABS } from '../../src/shared/constants/app.constants';
 import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
 import { API_URL } from '../../src/shared/api/config';
@@ -221,8 +223,10 @@ const FireIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const HowItWorksPage: React.FC = () => {
   const { t } = useTranslation(['howItWorks']);
-  const { state, dispatch } = useAppContext();
-  const activeTab = state.howItWorksTab;
+  const { tab } = useParams();
+  const activeTab: HowItWorksTab = HOW_IT_WORKS_TABS.includes(tab as typeof HOW_IT_WORKS_TABS[number])
+    ? (tab as HowItWorksTab)
+    : 'getting-started';
   const [videos, setVideos] = useState<Record<string, SiteVideo[]>>({});
   const { prices, isLoading: pricesLoading } = useHowItWorksPrices();
 
@@ -255,14 +259,9 @@ const HowItWorksPage: React.FC = () => {
   const allVideos: SiteVideo[] = Object.values(videos).flat();
 
   // Navigation helper
-  const navigateTo = (path: string) => {
-    window.location.href = buildLocalizedPath(path);
-  };
+  const navigateTo = (path: string) => navigate(path);
 
-  const handleTabChange = (tabId: HowItWorksTab) => {
-    dispatch({ type: 'SET_HOW_IT_WORKS_TAB', payload: tabId });
-    window.history.pushState({}, '', buildLocalizedPath(`/how-it-works/${tabId}`));
-  };
+  const handleTabChange = (tabId: HowItWorksTab) => navigate(paths.howItWorks(tabId));
 
   const tabs = [
     { id: 'getting-started' as HowItWorksTab, label: t('howItWorks:tabs.gettingStarted'), icon: StarIcon, color: 'cyan' },

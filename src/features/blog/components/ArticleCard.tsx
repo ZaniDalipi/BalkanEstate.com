@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ArticleListItem } from '../types/article.types';
-import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { cn } from '@/lib/utils';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 const COUNTRY_FLAGS: Record<string, string> = {
   Albania: '🇦🇱', Serbia: '🇷🇸', Croatia: '🇭🇷', Greece: '🇬🇷',
   Montenegro: '🇲🇪', 'North Macedonia': '🇲🇰', Bulgaria: '🇧🇬',
@@ -28,7 +28,6 @@ interface ArticleCardProps {
 }
 
 const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick }) => {
-  const { dispatch } = useAppContext();
   const cardRef = useRef<HTMLDivElement>(null);   // outer — only used for IntersectionObserver
   const tiltRef = useRef<HTMLDivElement>(null);   // inner — JS tilt applied here, away from image
   const glareRef = useRef<HTMLDivElement>(null);
@@ -104,8 +103,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article, index, t, onTagClick
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.history.pushState({}, '', buildLocalizedPath(`/blog/${article.slug}`));
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
+    navigate(paths.blogArticle(article.slug));
   };
 
   const publishedDate = article.publishedAt

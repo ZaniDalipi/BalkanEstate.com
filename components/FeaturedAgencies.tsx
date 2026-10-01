@@ -1,10 +1,11 @@
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../context/AppContext';
 import { BuildingStorefrontIcon, SparklesIcon, ArrowRightIcon, MapPinIcon } from '../constants';
 import { useFeaturedAgencies } from '../src/features/agencies/hooks/useAgencies';
 import { Agency } from '../types';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // Gradient presets for agency banners (shared with AgencyDetailPage)
 const GRADIENT_PRESETS = [
@@ -33,7 +34,6 @@ const resolveGradientCss = (stored?: string): string | null => {
 
 const FeaturedAgencies: React.FC = () => {
   const { t } = useTranslation('agencies');
-  const { dispatch } = useAppContext();
   const { agencies, isLoading } = useFeaturedAgencies(4);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -89,16 +89,11 @@ const FeaturedAgencies: React.FC = () => {
   };
 
   const handleAgencyClick = (agency: Agency) => {
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agency._id });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-    let urlSlug = agency.slug || agency._id;
-    urlSlug = urlSlug.replace(',', '/');
-    window.history.pushState({}, '', `/agencies/${urlSlug}`);
+    navigate(paths.agencyOf(agency), { state: { agency } });
   };
 
   const handleExploreAll = () => {
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-    window.history.pushState({}, '', '/agencies');
+    navigate(paths.agencies());
   };
 
   return (

@@ -1,6 +1,7 @@
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import MyListings from './MyListings';
 import SubscriptionManagement from './SubscriptionManagement';
@@ -28,7 +29,8 @@ import MapLocationPicker from '../../src/features/seller/components/MapLocationP
 import { SEO } from '../../src/components/seo';
 import { useConfirmation } from '../../src/shared/hooks/useConfirmation';
 import { useNotification } from '../../src/shared/hooks/useNotification';
-import { buildLocalizedPath } from '../../src/utils/languageRouting';
+import { localizePath, navigate } from '../../src/app/router/navigation';
+import { paths } from '../../src/app/router/paths';
 import { API_URL } from '../../src/shared/api/config';
 import { convertToUploadableImage, isHeicFile } from '../../src/shared/utils/imageConversion';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
@@ -125,7 +127,7 @@ const TabButton: React.FC<{
 
     return (
         <a
-            href={buildLocalizedPath(`/account/${tabToRouteMap[tabKey]}`)}
+            href={localizePath(paths.account(tabToRouteMap[tabKey]))}
             onClick={handleClick}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all w-full text-left backdrop-blur-sm border ${
                 isActive
@@ -554,8 +556,8 @@ const ChangePasswordSection: React.FC = () => {
             setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
             setTimeout(() => {
                 dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
                 dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' });
+                navigate(paths.search());
             }, 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to change password');
@@ -801,7 +803,7 @@ const DeleteAccountSection: React.FC = () => {
             localStorage.removeItem('balkan_estate_token');
             localStorage.removeItem('balkan_estate_refresh_token');
             dispatch({ type: 'SET_AUTH_STATE', payload: { isAuthenticated: false, user: null } });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+            navigate(paths.search());
         } catch {
             setError(t('security.deleteAccountFailed', 'Failed to delete account'));
         } finally {
@@ -880,7 +882,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
 
         if (confirmed) {
             await logoutAllDevices();
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+            navigate(paths.search());
         }
     };
 
@@ -1013,8 +1015,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                 const response = await fetch(`${API_URL}/agencies/${formData.agencyId}`, { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
-                    dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
-                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+                    navigate(paths.agencyOf(data.agency), { state: { agency: data.agency } });
                 }
             } catch (error) {
                 // Failed to fetch agency details
@@ -2123,8 +2124,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             onNavigateToPricing={() => {
                 setIsLicenseModalOpen(false);
                 setPendingRole(null);
-                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                window.history.pushState({}, '', '/pricing');
+                navigate(paths.pricing());
             }}
         />
         </>
@@ -2140,8 +2140,8 @@ const MyAccountPage: React.FC = () => {
     const [performanceRefreshKey, setPerformanceRefreshKey] = useState(0);
     const [unreadViewingCount, setUnreadViewingCount] = useState(0);
 
-    // Get active tab from state (set by URL routing)
-    const urlTab = state.accountTab || 'listings';
+    // The tab is the URL's: /account/:tab
+    const urlTab = useParams().tab || 'listings';
     const activeTab: AccountTab = tabRouteMap[urlTab] || 'listings';
 
     const token = tokenService.getAccessToken();
@@ -2188,12 +2188,10 @@ const MyAccountPage: React.FC = () => {
         markRead();
     }, [activeTab, unreadViewingCount, token]);
 
-    // Function to change tab and update URL
-    const setActiveTab = useCallback((tab: AccountTab) => {
-        const newPath = buildLocalizedPath(`/account/${tabToRouteMap[tab]}`);
-        window.history.pushState({}, '', newPath);
-        dispatch({ type: 'SET_ACCOUNT_TAB', payload: tab });
-    }, [dispatch]);
+    // Switching tab is a navigation: the tab lives in the URL
+    const setActiveTab = useCallback((tab: AccountTab, options?: { replace?: boolean }) => {
+        navigate(paths.account(tabToRouteMap[tab]), options);
+    }, []);
 
     const isSellerProfile = state.currentUser?.role === UserRole.AGENT || state.currentUser?.role === UserRole.PRIVATE_SELLER;
     // Buyer Pro users (listingsLimit > 0) get the same account tabs as sellers
@@ -2206,7 +2204,7 @@ const MyAccountPage: React.FC = () => {
     useEffect(() => {
         if (!state.currentUser) return;
         if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds' || activeTab === 'importReview')) {
-            setActiveTab('profile');
+            setActiveTab('profile', { replace: true });
         }
     }, [hasSellerTabs, activeTab, setActiveTab, state.currentUser]);
 
@@ -2251,7 +2249,7 @@ const MyAccountPage: React.FC = () => {
 
     const handleLogout = () => {
         logout();
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
+        navigate(paths.search());
     };
 
     const handleAgencyClick = async () => {
@@ -2261,8 +2259,7 @@ const MyAccountPage: React.FC = () => {
                 const response = await fetch(`${API_URL}/agencies/${state.currentUser.agencyId}`, { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
-                    dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
-                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+                    navigate(paths.agencyOf(data.agency), { state: { agency: data.agency } });
                 }
             } catch (error) {
                 // Silent error handling

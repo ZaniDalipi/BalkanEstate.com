@@ -18,8 +18,9 @@ import { Button } from '@/components/ui/liquid-glass-button';
 import { Helmet } from 'react-helmet-async';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
 import { Property } from '@/types';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -70,11 +71,9 @@ interface RentalSearchPageProps {
 
 const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) => {
     const { t } = useTranslation(['rental', 'search', 'common']);
-    const { getLocalizedPath } = useLocalizedNavigation();
 
     const {
         state,
-        dispatch,
         isLoading,
         error,
         filters,
@@ -228,9 +227,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     };
 
     const handleCreateRental = () => {
-        dispatch({ type: 'SET_PROPERTY_TO_EDIT', payload: null });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-rental' });
-        window.history.pushState({}, '', getLocalizedPath('/create-rental'));
+        navigate(paths.createRental());
     };
 
     return (
@@ -577,7 +574,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                         </button>
                                         {isAuthenticated && state.currentUser && (
                                             <button
-                                                onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' })}
+                                                onClick={() => navigate(paths.account())}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
                                                 aria-label={t('common:aria.myAccount')}
                                             >

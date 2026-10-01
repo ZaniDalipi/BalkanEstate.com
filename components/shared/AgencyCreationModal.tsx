@@ -18,6 +18,8 @@ import MapLocationPicker from '../../src/features/seller/components/MapLocationP
 import { ChevronLeft, ChevronRight, X, Upload, ImageIcon } from 'lucide-react';
 import PhoneInput, { validateFullPhone } from '../../src/shared/components/ui/PhoneInput';
 import ConfirmationModal from '../../src/shared/components/ui/ConfirmationModal';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -425,12 +427,9 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         // Navigate to agency details page for immediate access
         const agencySlug = result.agency?.slug;
         if (agencySlug) {
-          dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
-          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-          window.history.pushState({}, '', `/agencies/${agencySlug}`);
+          navigate(paths.agency(agencySlug));
         } else {
-          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-          window.history.pushState({}, '', '/agency-dashboard');
+          navigate(paths.agencyDashboard());
         }
         onAgencyCreated(agencyId);
       } else {
@@ -492,12 +491,9 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           // Navigate to agency details page for immediate access
           const agencySlug = result.agency?.slug;
           if (agencySlug) {
-            dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-            window.history.pushState({}, '', `/agencies/${agencySlug}`);
+            navigate(paths.agency(agencySlug));
           } else {
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-            window.history.pushState({}, '', '/agency-dashboard');
+            navigate(paths.agencyDashboard());
           }
           onAgencyCreated(agencyId);
         } else {
@@ -976,10 +972,9 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                     onClick={() => {
                       onClose();
                       if (!isUserAgent) {
-                        dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'profile' });
-                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+                        navigate(paths.account('profile'));
                       } else {
-                        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
+                        navigate(paths.pricing());
                       }
                     }}
                     className="mt-2 px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors"

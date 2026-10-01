@@ -2,11 +2,11 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import L from 'leaflet';
-import { useAppContext } from '@/context/AppContext';
 import { type Season } from './SunArcAnimation';
 import { MapOptionType, ClimateRiskType } from './MapOptionsPanel';
 import { MAP_TILE_LAYERS } from '@/config/mapStyles';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // CSS for 3D perspective camera effect
 const inject3DPerspectiveStyles = () => {
@@ -173,7 +173,6 @@ export function useMapComponent(props: MapComponentProps) {
   } = props;
 
   const { t } = useTranslation(['search']);
-  const { dispatch } = useAppContext();
 
   // State to force fallback to Leaflet if Google Maps fails
   const [forceLeaflet, setForceLeaflet] = useState(false);
@@ -331,22 +330,18 @@ export function useMapComponent(props: MapComponentProps) {
   }, [userLocation]);
 
   // Leaflet-map popup CTA. Same reasoning as the Google map's handleViewDetails:
-  // resolve the property from the markers we are already rendering and dispatch
-  // the object, because an id-only dispatch is looked up in `state.properties`
-  // and misses every listing a feature page fetched on its own (villas, rentals).
+  // resolve the property from the markers we are already rendering and hand the
+  // object to the detail page with the navigation, so it renders at once.
   const handlePopupClick = (propertyId: string) => {
     const property = propertiesInView.find((p) => p.id === propertyId);
     if (property) {
-      dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-      window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
+      navigate(paths.property(propertyId), { state: { property } });
       return;
     }
 
     // Marker gone from view between render and click — fall back to the
     // URL-driven route, which re-fetches the listing by id.
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: propertyId });
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${propertyId}`));
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    navigate(paths.property(propertyId));
   };
 
   // Set a timeout to detect if loading takes too long (30 seconds)

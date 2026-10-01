@@ -9,9 +9,10 @@ import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPin
 import { formatPrice } from '@/utils/currency';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import AiMessageLimitModal from './AiMessageLimitModal';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
+import { navigate, localizePath } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 // --- Web Speech API types ---
 interface SpeechRecognitionEvent extends Event { results: SpeechRecognitionResultList; resultIndex: number; }
@@ -337,7 +338,7 @@ const SwipeModal: React.FC<{
     onGoToFavorites: () => void;
     t: (key: string, options?: string | Record<string, unknown>) => string;
 }> = ({ isOpen, properties, onClose, onGoToFavorites, t }) => {
-    const { toggleSavedHome, state, dispatch } = useAppContext();
+    const { toggleSavedHome, state } = useAppContext();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [savedProps, setSavedProps] = useState<Property[]>([]);
     const [lastSwipeDir, setLastSwipeDir] = useState<'left' | 'right'>('left');
@@ -364,14 +365,13 @@ const SwipeModal: React.FC<{
         const property = properties[currentIndex];
         if (!property) return;
         onClose();
-        const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+        const path = paths.property(generatePropertySlug(property));
         if (shouldOpenInNewTab()) {
-            window.open(url, '_blank', 'noopener,noreferrer');
+            window.open(localizePath(path), '_blank', 'noopener,noreferrer');
         } else {
-            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-            window.history.pushState({}, '', url);
+            navigate(path, { state: { property: property } });
         }
-    }, [currentIndex, properties, onClose, dispatch]);
+    }, [currentIndex, properties, onClose]);
 
     // Close on Escape
     useEffect(() => {
@@ -607,7 +607,6 @@ function filterPropertiesByQuery(properties: Property[], query: AiSearchQuery): 
 // ============================================================================
 const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobile, history, onHistoryChange }) => {
     const { t } = useTranslation(['search']);
-    const { dispatch } = useAppContext();
     const [input, setInput] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [finalQuery, setFinalQuery] = useState<AiSearchQuery | null>(null);
@@ -767,9 +766,8 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
     const handleSuggestionSelect = (text: string) => { setInput(text); setTimeout(() => handleSendMessage(text), 50); };
 
     const handleSwipeComplete = useCallback(() => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'saved-properties' });
-        window.history.pushState({}, '', '/saved-properties');
-    }, [dispatch]);
+        navigate(paths.savedProperties());
+    }, []);
 
     const renderFilters = (query: AiSearchQuery) => {
         const fmt = (v: number) => `€${new Intl.NumberFormat('de-DE').format(v)}`;

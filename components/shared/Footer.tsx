@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppContext } from '../../context/AppContext';
 import {
     LogoIcon,
     SearchIcon,
@@ -23,7 +22,9 @@ import {
     ChartBarIcon
 } from '../../constants';
 import FooterCityscape from './FooterCityscape';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { navigate } from '@/src/app/router/navigation';
+import { paths, pathForView } from '@/src/app/router/paths';
+import type { AppView } from '@/types';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 
 interface FooterProps {
@@ -49,19 +50,13 @@ const balkanCountries = [
 const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) => {
     const { t } = useTranslation(['footer', 'common']);
     const currentYear = new Date().getFullYear();
-    const { dispatch } = useAppContext();
-    const { getLocalizedPath } = useLocalizedNavigation();
-
-    const handleNavigation = (view: 'search' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'agents' | 'agencies' | 'admin' | 'how-it-works' | 'explore-cities' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'blog') => {
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
-        const route = view === 'search' ? '/' : `/${view}`;
-        window.history.pushState({}, '', getLocalizedPath(route));
+    const handleNavigation = (view: AppView) => {
+        navigate(pathForView(view) ?? paths.home());
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleCountrySearch = (countryName: string) => {
-        window.history.pushState({}, '', getLocalizedPath(`/explore-cities?country=${encodeURIComponent(countryName)}`));
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'explore-cities' });
+        navigate(paths.exploreCities({ country: countryName }));
         // Notify already-mounted components about the country filter change
         window.dispatchEvent(new CustomEvent('country-filter-change', { detail: countryName }));
         window.scrollTo({ top: 0, behavior: 'smooth' });

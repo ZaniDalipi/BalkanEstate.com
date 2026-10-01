@@ -9,7 +9,7 @@ interface CategoriesSectionProps {
    * Used by tiles that lead to a page of their own rather than to a filtered
    * search — currently just Luxury, which has a dedicated villas page.
    */
-  onNavigate: (view: string, path: string) => void;
+  onNavigate: (path: string) => void;
 }
 
 const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, onNavigate }) => {
@@ -113,7 +113,7 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, 
               whileTap={{ scale: 0.95 }}
               onClick={() =>
                 (cat as any).path
-                  ? onNavigate((cat as any).view, (cat as any).path)
+                  ? onNavigate((cat as any).path)
                   : onCategoryClick(cat.type, cat.listingType)
               }
               className={`group flex w-full flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl transition-all relative overflow-hidden ${

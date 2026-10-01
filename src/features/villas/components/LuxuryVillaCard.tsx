@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import VillaBookingModal from './VillaBookingModal';
+import { navigate, localizePath } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 /** View types and cancellation policies keyed to the same strings VillaFilters
  *  uses, so the card and the filter chips always read identically. */
@@ -95,12 +96,11 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
 
     const handleClick = useCallback(() => {
         if (swipedRef.current) return;
-        const url = buildLocalizedPath(`/property/${generatePropertySlug(property)}`);
+        const path = paths.property(generatePropertySlug(property));
         if (shouldOpenInNewTab()) {
-            window.open(url, '_blank', 'noopener,noreferrer');
+            window.open(localizePath(path), '_blank', 'noopener,noreferrer');
         } else {
-            dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
-            window.history.pushState({}, '', url);
+            navigate(path, { state: { property: property } });
         }
     }, [dispatch, property]);
 

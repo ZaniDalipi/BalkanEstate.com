@@ -4,6 +4,7 @@ import { useMap, Polyline, Polygon, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useAppContext } from '../../../../context/AppContext';
 import * as api from '../../../../services/apiService';
+import { replaceQueryString } from '@/src/app/router/navigation';
 
 interface MeasurementPoint {
   lat: number;
@@ -208,9 +209,9 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
               }
 
               // Clean up URL
-              const url = new URL(window.location.href);
-              url.searchParams.delete('measurementId');
-              window.history.replaceState({}, '', url.toString());
+              const params = new URLSearchParams(window.location.search);
+              params.delete('measurementId');
+              replaceQueryString(params);
             }
           })
           .catch((err) => {

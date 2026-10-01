@@ -16,7 +16,7 @@ interface HeroSectionProps {
    * a specific place rather than typing free text.
    */
   onSearch: (query?: string, focus?: { lat: number; lng: number; zoom?: number } | null) => void;
-  onNavigate: (view: string, path: string) => void;
+  onNavigate: (path: string) => void;
   /**
    * Rendered directly under the Buy / Rent / List buttons, inside the hero's
    * own container. A slot rather than an import so the hero stays unaware of
@@ -450,7 +450,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         {/* CTA Buttons — liquid glass */}
         <div className="mt-5 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
           <button
-            onClick={() => onNavigate('search', '/search')}
+            onClick={() => onNavigate('/search')}
             style={{
               padding: '10px 24px', borderRadius: '14px',
               fontSize: '13px', fontWeight: 600,
@@ -466,8 +466,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             {t('home:hero.ctaBuy')}
           </button>
           {[
-            { label: t('home:hero.ctaRent'), action: () => onNavigate('rentals', '/rent') },
-            { label: t('home:hero.ctaSell'), action: () => onNavigate('create-listing', '/create-listing') },
+            { label: t('home:hero.ctaRent'), action: () => onNavigate('/rent') },
+            { label: t('home:hero.ctaSell'), action: () => onNavigate('/create-listing') },
           ].map((btn, i) => (
             <button
               key={i}

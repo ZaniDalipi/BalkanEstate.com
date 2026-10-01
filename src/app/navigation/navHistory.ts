@@ -1,9 +1,8 @@
 /**
  * Navigation history instrumentation.
  *
- * The app routes off `window.location` + `history.pushState` rather than a
- * router library, so nothing in the tree knows whether a view change is a push
- * or a pop. This module is the single source of truth for that:
+ * React Router owns the URL (see src/app/router); this module sits underneath
+ * it, on `window.history` itself, and tracks what the router does not:
  *
  *   - it stamps every history entry with a monotonic `__navIdx`, so a popstate
  *     can be classified as back or forward by comparing indices;
@@ -23,9 +22,9 @@
  * state, which meant every navigation triggered a second full-tree render on
  * top of the one the navigation itself caused.
  *
- * `install()` is called at import time from ViewTransition, before React
- * renders, so our popstate listener is registered ahead of the app's own
- * routing listener and the index is already correct when routing runs.
+ * `install()` is called at import time from ViewTransition, before the router
+ * is created, so our popstate listener is registered ahead of React Router's
+ * and the index is already correct when it routes.
  */
 
 export type NavigationDirection = 'forward' | 'back' | 'up' | 'morph';
@@ -156,12 +155,10 @@ export function installNavigationHistory(): void {
   };
 
   window.addEventListener('popstate', () => {
-    // Read the index off `window.history.state`, never off `event.state`.
-    // `useLocalizedNavigation` fires a synthetic `PopStateEvent` after its own
-    // pushState to kick routing, and a synthetic event carries `state: null` —
-    // reading that treated every programmatic forward navigation as a step
-    // back, which both animated the wrong way and walked the index downwards
-    // until back/forward detection stopped working entirely.
+    // Read the index off `window.history.state`, never off `event.state`: a
+    // synthetic `PopStateEvent` carries `state: null`, and reading that treats
+    // a programmatic forward navigation as a step back, walking the index
+    // downwards until back/forward detection stops working entirely.
     const nextIndex = readIndexFromState(window.history.state);
     const previousIndex = historyIndex;
 

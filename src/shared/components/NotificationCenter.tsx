@@ -6,10 +6,11 @@ import {
   CheckCircle, XCircle,
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
-import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { apiRequest } from '@/src/shared/api';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface NotificationData {
   propertyId?: string;
@@ -37,8 +38,7 @@ interface Notification {
 
 const NotificationCenter: React.FC = () => {
   const { t } = useTranslation(['common']);
-  const { state, dispatch, checkAuthStatus } = useAppContext();
-  const { setDirection } = useNavigationDirection();
+  const { state, checkAuthStatus } = useAppContext();
   const { isAuthenticated } = state;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -159,26 +159,16 @@ const NotificationCenter: React.FC = () => {
     const data = notification.data;
     if (!data) return;
 
-    // Navigate to agency detail page for join request (opens join requests view)
-    if (data.agencyId && notification.type === 'agency_join_request') {
-      setIsOpen(false);
-      setDirection('up');
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agencySlug || data.agencyId });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-      return;
-    }
-
-    // Navigate to agency detail page
+    // Agency activity opens the agency's page
     if (data.agencyId && (
+      notification.type === 'agency_join_request' ||
       notification.type === 'agent_joined_agency' ||
       notification.type === 'agent_left_agency' ||
       notification.type === 'agency_join_welcome' ||
       notification.type === 'agency_coupon_redeemed'
     )) {
       setIsOpen(false);
-      setDirection('up');
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agencySlug || data.agencyId });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
+      navigate(paths.agency(data.agencySlug || data.agencyId), { direction: 'up' });
       return;
     }
 
@@ -189,57 +179,31 @@ const NotificationCenter: React.FC = () => {
       notification.type === 'viewing_declined'
     ) {
       setIsOpen(false);
-      setDirection('morph');
-      dispatch({ type: 'SET_ACCOUNT_TAB', payload: 'viewings' });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+      navigate(paths.account('viewings'), { direction: 'morph' });
       return;
     }
 
     // Navigate to property detail
     if (data.propertyId) {
       setIsOpen(false);
-      setDirection('up');
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: data.propertyId });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
+      navigate(paths.property(data.propertyId), { direction: 'up' });
       return;
     }
 
     // Navigate to conversations
     if (data.conversationId) {
       setIsOpen(false);
-      setDirection('morph');
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
+      navigate(paths.inbox(), { direction: 'morph' });
       return;
     }
 
-    // Universal fallback: parse actionUrl and dispatch the right view
-    if (data.actionUrl) {
+    // Universal fallback: the notification names an in-app page. Only a
+    // same-origin path is followed — the value comes from the server.
+    if (data.actionUrl && /^\/(?!\/)/.test(data.actionUrl)) {
       setIsOpen(false);
       const url: string = data.actionUrl;
-
-      if (url.startsWith('/property/')) {
-        const id = url.replace('/property/', '');
-        setDirection('up');
-        dispatch({ type: 'SET_SELECTED_PROPERTY', payload: id });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'property-details' });
-      } else if (url.startsWith('/agencies/')) {
-        const slug = url.replace('/agencies/', '');
-        setDirection('up');
-        dispatch({ type: 'SET_SELECTED_AGENCY', payload: slug });
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-      } else if (url.startsWith('/account')) {
-        const tabMatch = url.match(/^\/account\/(.+)$/);
-        if (tabMatch) dispatch({ type: 'SET_ACCOUNT_TAB', payload: tabMatch[1] });
-        setDirection('morph');
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      } else if (url === '/inbox') {
-        setDirection('morph');
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'inbox' });
-      } else if (url.includes('/subscribe') || url === '/pricing') {
-        setDirection('forward');
-        dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-      }
-      window.history.pushState({}, '', url);
+      const isDetail = url.startsWith('/property/') || url.startsWith('/agencies/');
+      navigate(url, { direction: isDetail ? 'up' : 'morph' });
     }
   };
 

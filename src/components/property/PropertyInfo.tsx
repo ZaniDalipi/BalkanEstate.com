@@ -29,6 +29,8 @@ import {
 import { DetailItem } from './PropertyCommon';
 import { useAppContext } from '../../../context/AppContext';
 import { BALKAN_COUNTRIES } from '../../../constants/countries';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface PropertyInfoProps {
   property: Property;
@@ -103,7 +105,7 @@ const HEADLINE_STAT_ICONS: Record<string, React.ReactNode> = {
  */
 export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloorPlan }) => {
   const { t } = useTranslation(['property', 'agents']);
-  const { state, dispatch, updateSearchPageState } = useAppContext();
+  const { state, updateSearchPageState } = useAppContext();
 
   // --- state ---
   // Controls the "open in map app" chooser shown below the Directions button.
@@ -201,9 +203,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         filters: newFilters,
         activeFilters: newFilters,
       });
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.pushState({}, '', `/search?city=${encodeURIComponent(property.city)}&country=${encodeURIComponent(countryKey)}`);
+      navigate(paths.search({ city: property.city, country: countryKey }));
     } else {
       // Navigate to search with country filter only
       const newFilters = {
@@ -215,11 +215,9 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
         filters: newFilters,
         activeFilters: newFilters,
       });
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'search' });
-      window.history.pushState({}, '', `/search?country=${encodeURIComponent(countryKey)}`);
+      navigate(paths.search({ country: countryKey }));
     }
-  }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState, dispatch]);
+  }, [property.city, property.country, state.searchPageState.filters, updateSearchPageState]);
 
   // Each provider gets a deep link that all major map apps support. We do NOT
   // pre-fetch geolocation for the origin: every app below falls back to the

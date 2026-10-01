@@ -6,6 +6,8 @@ import { getFloorPlans, spotFloor } from '@/shared/utils/floorplans';
 import type { PropertyType } from '@/shared/types/property.types';
 import { generateDescriptionFromImages, calculatePropertyDistances, LocationContext } from '@/services/geminiService';
 import { useAppContext } from '@/context/AppContext';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 import { useAlert } from '@/context/AlertContext';
 import { BALKAN_LOCATIONS, CityData } from '@/utils/balkanLocations';
 import * as api from '@/services/apiService';
@@ -200,9 +202,15 @@ export function buildPreviewProperty(
 export interface ListingPrefill {
     property: Property;
     onCreated: (created: Property) => Promise<void> | void;
+    /** Where the success screen sends the seller (default: their account). */
+    redirectTo?: string;
 }
 
-export const useListingForm = (propertyToEdit: Property | null, prefill?: ListingPrefill | null) => {
+export const useListingForm = (
+    propertyToEdit: Property | null,
+    prefill?: ListingPrefill | null,
+    initialListingType: 'sale' | 'rent' = 'sale',
+) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
     const { state, dispatch, updateUser, createListing, updateListing } = useAppContext();
     const { currentUser, properties, isPricingModalOpen, pendingProperty, isAuthenticating, isLoadingUserData } = state;
@@ -246,11 +254,9 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
         setFloorplans(prev => prev.map((f, i) => (i === index ? { ...f, label: label.slice(0, MAX_FLOORPLAN_LABEL) } : f)));
     }, []);
 
-    // Determine initial listingType based on current view
-    const initialType = state.activeView === 'create-rental' ? 'rent' : 'sale';
     const [listingData, setListingData] = useState<ListingData>({
         ...initialListingData,
-        listingType: propertyToEdit?.listingType || initialType as any,
+        listingType: propertyToEdit?.listingType || initialListingType,
     });
     const [language, setLanguage] = useState('English');
     const [aiPropertyType, setAiPropertyType] = useState<PropertyType>('house');
@@ -307,9 +313,9 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
         }
         redirectTimerRef.current = window.setTimeout(() => {
             redirectTimerRef.current = null;
-            dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+            navigate(prefill?.redirectTo ?? paths.account());
         }, SUCCESS_REDIRECT_MS);
-    }, [dispatch]);
+    }, [prefill?.redirectTo]);
 
     useEffect(() => () => {
         if (redirectTimerRef.current !== null) {
@@ -836,7 +842,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
     // device while the seller works on it and restored when they come back,
     // for up to LISTING_DRAFT_TTL_MS (3 days).
     const draftStorageKey = !propertyToEdit && !prefill && currentUser?.id
-        ? draftKey(currentUser.id, initialType)
+        ? draftKey(currentUser.id, initialListingType)
         : null;
     // Saving starts only after any stored draft was restored, so an empty form
     // never overwrites it on first render
@@ -923,7 +929,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
     const discardDraft = useCallback(() => {
         if (draftStorageKey) clearListingDraft(draftStorageKey);
         setRestoredDraft(null);
-        setListingData({ ...initialListingData, listingType: initialType as ListingData['listingType'] });
+        setListingData({ ...initialListingData, listingType: initialListingType as ListingData['listingType'] });
         setImages([]);
         setFloorplans([]);
         setSelectedCountry('');
@@ -932,7 +938,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
         setFieldErrors({});
         setMode('manual');
         setStep('init');
-    }, [draftStorageKey, initialType]);
+    }, [draftStorageKey, initialListingType]);
 
     const handleGenerate = async () => {
         if (images.length === 0) {
@@ -1564,7 +1570,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
                             label: t('seller:actions.viewMyListings', 'View My Listings'),
                             onClick: () => {
                                 closeAlert();
-                                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+                                navigate(paths.account());
                             },
                             variant: 'secondary',
                         },
@@ -1607,7 +1613,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
                         {
                             label: t('seller:actions.viewMyListings'),
                             onClick: () => {
-                                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+                                navigate(paths.account());
                             },
                             variant: 'primary',
                         },
@@ -1644,7 +1650,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
                     [
                         {
                             label: t('account:tabs.profileSettings', 'Profile Settings'),
-                            onClick: () => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' }),
+                            onClick: () => navigate(paths.account()),
                             variant: 'primary',
                         },
                         {
@@ -1670,7 +1676,7 @@ export const useListingForm = (propertyToEdit: Property | null, prefill?: Listin
                             label: t('seller:actions.switchRole'),
                             onClick: () => {
                                 // User can switch roles in their account
-                                dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
+                                navigate(paths.account());
                             },
                             variant: 'primary',
                         },

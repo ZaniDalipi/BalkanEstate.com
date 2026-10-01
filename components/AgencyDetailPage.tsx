@@ -39,9 +39,9 @@ import MapLocationPicker from '../src/features/seller/components/MapLocationPick
 import { searchLocation } from '../services/osmService';
 import { toggleAgencyFavorite, checkAgencyFavorite } from '../src/features/saved/api/savedApi';
 import { SocialShare } from '../src/components/marketing/SocialShare';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
-import { canNavigateBack, setNavigationDirection } from '@/app/navigation/navHistory';
+import { goBack, navigate } from '@/src/app/router/navigation';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import { paths } from '@/src/app/router/paths';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -156,7 +156,6 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   const { t } = useTranslation(['agencyDetails', 'nav', 'common']);
   const { state, dispatch } = useAppContext();
   const { currentUser, isAuthenticated } = state;
-  const { getLocalizedPath, navigate } = useLocalizedNavigation();
   const { confirm } = useConfirmation();
   const { success, error, warning, info } = useNotification();
 
@@ -282,10 +281,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   // Global nav handlers (integrated from floating header)
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'account' });
-      window.history.pushState({}, '', '/account');
+      navigate(paths.account());
     } else {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } });
     }
@@ -293,23 +289,14 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
   const handleNewListingClick = useCallback(() => {
     if (isAuthenticated) {
-      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'create-listing' });
-      window.history.pushState({}, '', '/create-listing');
+      navigate(paths.createListing());
     } else {
       dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'signup' } });
     }
   }, [isAuthenticated, dispatch]);
 
   const handleSubscribeClick = useCallback(() => {
-    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-    const currentLang = window.location.pathname.split('/')[1] || 'en';
-    const validLangs = ['en', 'sq', 'sr', 'de', 'mk'];
-    const lang = validLangs.includes(currentLang) ? currentLang : 'en';
-    window.history.pushState({}, '', `/${lang}/subscribe`);
+    navigate(paths.pricing());
   }, [dispatch]);
 
   // Scroll to top on mount and when agency changes
@@ -647,29 +634,9 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   // Destructure for easier access
   const { salesLast12Months, totalSales, minPrice, maxPrice, averagePrice } = salesStats;
 
-  const handleBack = () => {
-    // Step back through history when there is an entry to step back to, so this
-    // returns the user to wherever they opened the agency from and animates as
-    // a step back. It used to swap the view without touching history at all:
-    // the URL stayed on the agency, the browser's own back button then landed
-    // on the page that was already showing, and the change animated forwards.
-    if (canNavigateBack()) {
-      window.history.back();
-      return;
-    }
-
-    // Opened straight onto the agency (a shared link): nothing to go back to,
-    // so fall back to the view it belongs to, still moving like a step back.
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    if (state.selectedAgentId) {
-      // Came in from an agent's profile — keep them on it rather than dropping
-      // to the list. Routing the URL here would clear the selection.
-      setNavigationDirection('back');
-      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-      return;
-    }
-    navigate('/agencies', { direction: 'back' });
-  };
+  // Back to wherever the agency was opened from — or, opened straight from a
+  // shared link, to the agency list — moving as a step back either way.
+  const handleBack = () => goBack(paths.agencies());
 
   const handleAgentClick = (agentDatabaseId: string) => {
     window.scrollTo(0, 0);
@@ -677,11 +644,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     const agent = agents.find(a => (a.id || a._id) === agentDatabaseId);
     // Use agentId if available, fallback to database id
     const agentIdentifier = agent?.agentId || agentDatabaseId;
-    // Clear selected agency first so App.tsx renders the agents view instead of agency detail
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-    dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-    window.history.pushState({}, '', `/agents/${agentIdentifier}`);
+    navigate(paths.agent(agentIdentifier));
   };
 
   const handleRequestToJoin = () => {
@@ -2764,11 +2727,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 <>
                   <button
                     onClick={() => {
-                      dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-                      dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-                      dispatch({ type: 'SET_AGENCY_DASHBOARD_SECTION', payload: 'overview' });
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-                      window.history.pushState({}, '', '/agency-dashboard');
+                      navigate(paths.agencyDashboard());
                     }}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-600/25"
                   >
@@ -2803,11 +2762,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {!isAdmin && isUserInThisAgency && (
                 <button
                   onClick={() => {
-                    dispatch({ type: 'SET_SELECTED_PROPERTY', payload: null });
-                    dispatch({ type: 'SET_SELECTED_AGENCY', payload: null });
-                    dispatch({ type: 'SET_AGENCY_DASHBOARD_SECTION', payload: 'overview' });
-                    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agency-dashboard' });
-                    window.history.pushState({}, '', '/agency-dashboard');
+                    navigate(paths.agencyDashboard());
                   }}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-600/25"
                 >
@@ -2836,8 +2791,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <button
                     type="button"
                     onClick={() => {
-                      dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'pricing' });
-                      window.history.pushState({}, '', '/pricing');
+                      navigate(paths.pricing());
                     }}
                     className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold transition-colors"
                   >
@@ -3159,8 +3113,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         className="w-[220px] cursor-pointer"
                         onClick={() => {
                           const propertyId = property.id || property._id;
-                          dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: { ...property, id: propertyId } });
-                          window.history.pushState({}, '', getLocalizedPath(`/property/${propertyId}`));
+                          navigate(paths.property(propertyId), { state: { property: { ...property, id: propertyId } } });
                         }}
                       >
                         {property.imageUrl && (

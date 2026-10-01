@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { generatePropertySlug } from '@/utils/slug';
+import { navigate } from '@/src/app/router/navigation';
 
 interface BreadcrumbItem {
   label: string;
@@ -41,8 +42,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' 
 
   const handleClick = (href: string, e: React.MouseEvent) => {
     e.preventDefault();
-    window.history.pushState({}, '', href);
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    navigate(href);
   };
 
   return (

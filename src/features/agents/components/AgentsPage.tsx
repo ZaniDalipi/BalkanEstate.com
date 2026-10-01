@@ -1,7 +1,9 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { useLocalizedNavigation } from '@/src/hooks/useLocalizedNavigation';
+import { useParams } from 'react-router-dom';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 import { Agent, Agency } from '@/types';
 import { getAllAgents, getAgencies } from '@/services/apiService';
 import { getAgent } from '../api/agentApi';
@@ -26,8 +28,8 @@ type SearchTab = 'all' | 'name' | 'location' | 'specialization';
 const AgentsPage: React.FC = () => {
   const { t } = useTranslation(['agents', 'common']);
   const { state, dispatch } = useAppContext();
-  const { getLocalizedPath } = useLocalizedNavigation();
-  const { selectedAgentId } = state;
+  // An agent's profile is the URL's: /agents/:agentId
+  const selectedAgentId = useParams().agentId ?? null;
 
   // Universal search state - searches across name, city, country, specializations, languages, bio
   const [searchQuery, setSearchQuery] = useState('');
@@ -602,9 +604,7 @@ const AgentsPage: React.FC = () => {
                   {state.currentUser?.role === 'agent' && state.currentUser?.agentId && (
                     <button
                       onClick={() => {
-                        const agentId = state.currentUser!.agentId!;
-                        dispatch({ type: 'SET_SELECTED_AGENT', payload: agentId });
-                        window.history.pushState({}, '', `/agents/${agentId}`);
+                        navigate(paths.agent(state.currentUser!.agentId!));
                       }}
                       className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm"
                     >
@@ -838,7 +838,7 @@ const AgentsPage: React.FC = () => {
                   <p className="text-neutral-600 text-sm sm:text-base">{t('agents:agencies.subtitle')}</p>
                 </div>
                 <button
-                  onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' })}
+                  onClick={() => navigate(paths.agencies())}
                   className="text-primary font-semibold hover:underline text-sm sm:text-base"
                 >
                   {t('agents:agencies.viewAll')}
@@ -862,10 +862,7 @@ const AgentsPage: React.FC = () => {
                         const agencyId = agency.id || agency._id;
                         const data = await apiRequest<any>(`/agencies/${agencyId}`);
                         if (data) {
-                          dispatch({ type: 'SET_SELECTED_AGENCY', payload: data.agency });
-                          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencyDetail' });
-                          const urlSlug = data.agency.slug || data.agency.id || data.agency._id;
-                          window.history.pushState({}, '', getLocalizedPath(`/agencies/${urlSlug}`));
+                          navigate(paths.agencyOf(data.agency), { state: { agency: data.agency } });
                         }
                       } catch (error) {
                         // Error removed
@@ -1042,7 +1039,7 @@ const AgentsPage: React.FC = () => {
                   {t('agents:cta.getStarted')}
                 </button>
                 <button
-                  onClick={() => dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' })}
+                  onClick={() => navigate(paths.agencies())}
                   className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl font-semibold transition-all text-sm sm:text-base text-primary hover:-translate-y-0.5"
                   style={{
                     background: 'rgba(255, 255, 255, 0.6)',

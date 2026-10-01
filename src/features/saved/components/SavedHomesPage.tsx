@@ -2,7 +2,6 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { useNavigationDirection } from '@/src/components/ui/ViewTransition';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
 import { Property, Agent } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
@@ -17,15 +16,15 @@ import Footer from '@/components/shared/Footer';
 import { getSavedAgents } from '@/src/features/agents/api/agentApi';
 import { getAgencyFavorites } from '@/src/features/saved/api/savedApi';
 import { generatePropertySlug } from '@/utils/slug';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import StarRating from '@/components/shared/StarRating';
 import { FloatingSphere, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import SavedItemsHeroBanner from '@/components/shared/SavedItemsHeroBanner';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const SavedPropertiesPage: React.FC = () => {
   const { t } = useTranslation(['property', 'nav', 'agents']);
   const { state, dispatch } = useAppContext();
-  const { setDirection } = useNavigationDirection();
   const { savedHomes, comparisonList, properties, isAuthenticated, isLoadingUserData } = state;
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
   const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
@@ -101,37 +100,24 @@ const SavedPropertiesPage: React.FC = () => {
 
   const handleAgentClick = (agent: Agent) => {
     const agentIdentifier = agent.agentId || agent.id;
-    setDirection('up');
-    dispatch({ type: 'SET_SELECTED_AGENT', payload: agentIdentifier });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-    window.history.pushState({}, '', `/agents/${agentIdentifier}`);
+    navigate(paths.agent(agentIdentifier), { direction: 'up' });
   };
 
   const handleBrowseAgents = () => {
-    setDirection('forward');
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agents' });
-    window.history.pushState({}, '', '/agents');
+    navigate(paths.agents(), { direction: 'forward' });
   };
 
   const handleAgencyClick = (agency: any) => {
-    const agencySlug = agency.slug || agency.id || agency._id;
-    setDirection('up');
-    dispatch({ type: 'SET_SELECTED_AGENCY', payload: agencySlug });
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-    window.history.pushState({}, '', `/agencies/${agencySlug}`);
+    navigate(paths.agencyOf(agency), { state: { agency }, direction: 'up' });
   };
 
   const handleBrowseAgencies = () => {
-    setDirection('forward');
-    dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'agencies' });
-    window.history.pushState({}, '', '/agencies');
+    navigate(paths.agencies(), { direction: 'forward' });
   };
 
   const handleViewComparedProperty = (property: Property) => {
-    setDirection('up');
-    dispatch({ type: 'SET_SELECTED_PROPERTY_OBJECT', payload: property });
     setComparisonModalOpen(false);
-    window.history.pushState({}, '', buildLocalizedPath(`/property/${generatePropertySlug(property)}`));
+    navigate(paths.property(generatePropertySlug(property)), { state: { property }, direction: 'up' });
   };
 
   const renderAgentCard = (agent: Agent) => (

@@ -2,15 +2,26 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SparklesIcon } from '@/constants';
 import GeminiDescriptionGenerator from './GeminiDescriptionGenerator';
-import { useAppContext } from '@/context/AppContext';
+import type { ImportDraftToPublish, Property } from '@/types';
 import Footer from '@/components/shared/Footer';
 import { useImportDraftPrefill } from '@/src/features/listing-sources/hooks/useDraftListingForm';
 
-const CreateListingPage: React.FC = () => {
+interface CreateListingPageProps {
+  /** Editing an existing listing (`/edit-listing/:id`). */
+  propertyToEdit?: Property | null;
+  /** A new listing's type — `/create-rental` starts as a rental. */
+  initialListingType?: 'sale' | 'rent';
+  /** A listing fetched from an external feed, opened here to be edited like a new one. */
+  importDraft?: ImportDraftToPublish | null;
+}
+
+const CreateListingPage: React.FC<CreateListingPageProps> = ({
+  propertyToEdit = null,
+  initialListingType = 'sale',
+  importDraft = null,
+}) => {
   const { t } = useTranslation(['seller', 'listingFeeds']);
-  const { state } = useAppContext();
-  // A listing fetched from an external feed, opened here to be edited like a new one.
-  const importPrefill = useImportDraftPrefill();
+  const importPrefill = useImportDraftPrefill(importDraft);
 
   return (
     <div className="liquid-glass-bg min-h-full">
@@ -20,7 +31,7 @@ const CreateListingPage: React.FC = () => {
 
       <main className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-glow">
-          {state.propertyToEdit
+          {propertyToEdit
             ? t('seller:createListing.editTitle')
             : importPrefill
               ? t('listingFeeds:review.formTitle')
@@ -42,9 +53,8 @@ const CreateListingPage: React.FC = () => {
             {t('seller:createListing.aiDescription')}
           </p>
           <GeminiDescriptionGenerator
-            // A different draft is a different listing — start its form afresh.
-            key={state.importDraftToPublish?.draftId ?? 'listing'}
-            propertyToEdit={state.propertyToEdit}
+            propertyToEdit={propertyToEdit}
+            initialListingType={initialListingType}
             prefill={importPrefill}
           />
         </div>

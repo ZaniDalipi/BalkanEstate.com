@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useArticles } from '../hooks/useArticles';
 import { ArticleCategory } from '../types/article.types';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
-import { useAppContext } from '@/context/AppContext';
-import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import ArticleCard from './ArticleCard';
 import BlogFilters from './BlogFilters';
 import ArticlePage from './ArticlePage';
 import { AdSlot } from '@/src/features/promo';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation('blog');
-  const { dispatch } = useAppContext();
   const [selectedCategory, setSelectedCategory] = useState<ArticleCategory | undefined>();
   const [selectedCountry, setSelectedCountry] = useState<string | undefined>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
@@ -23,11 +23,8 @@ const BlogPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Read URL on every render — when SET_ACTIVE_VIEW re-renders this component
-  // window.location.pathname reflects the latest pushState call, so navigation
-  // between articles and back to the list always picks up the correct path.
-  const slugMatch = window.location.pathname.match(/^(?:\/[a-z]{2})?\/blog\/(.+)$/);
-  const slug = slugMatch ? slugMatch[1] : null;
+  // An article is the URL's: /blog/:slug
+  const slug = useParams().slug ?? null;
 
   // Debounce search input — avoids firing an API call on every keystroke
   useEffect(() => {
@@ -76,10 +73,9 @@ const BlogPage: React.FC = () => {
         slug={slug}
         onTagClick={tag => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
-          window.history.pushState({}, '', buildLocalizedPath('/blog'));
           setSelectedTag(tag);
           setPage(1);
-          dispatch({ type: 'SET_ACTIVE_VIEW', payload: 'blog' });
+          navigate(paths.blog());
         }}
       />
     );
