@@ -214,13 +214,35 @@ export const originalCloudinaryUrl = (url: string | undefined | null): string | 
 };
 
 /**
- * `onError` for a Cloudinary <img>: retry once with the original image (the
- * preset may be missing or a CDN error cached). Returns false when there is
- * nothing left to try, so the caller can show its own fallback.
+ * The external image a resizing-proxy URL (`{API_URL}/image-proxy?url=…`)
+ * wraps, or null. Only http(s) sources are returned.
+ */
+export const originalProxiedUrl = (url: string | undefined | null): string | null => {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url, typeof window !== 'undefined' ? window.location.href : undefined);
+    if (!parsed.pathname.endsWith('/image-proxy')) return null;
+    const source = parsed.searchParams.get('url');
+    return source && /^https?:\/\//i.test(source) ? source : null;
+  } catch {
+    return null;
+  }
+};
+
+/** The unresized original behind a Cloudinary preset or proxy URL, or null. */
+export const originalImageUrl = (url: string | undefined | null): string | null =>
+  originalCloudinaryUrl(url) ?? originalProxiedUrl(url);
+
+/**
+ * `onError` for a resized <img>: retry once with the original image. Returns
+ * false when there is nothing left to try, so the caller can show its own
+ * fallback.
  */
 export const retryWithOriginalImage = (img: HTMLImageElement): boolean => {
   if (img.dataset.cdnFallback === 'original') return false;
-  const original = originalCloudinaryUrl(img.currentSrc || img.src);
+  // A preset may be missing (or a CDN error cached); the proxy may be down or
+  // refuse the host. Either way the source image itself is still worth a try.
+  const original = originalImageUrl(img.currentSrc || img.src);
   if (!original || original === img.src) return false;
   img.dataset.cdnFallback = 'original';
   img.removeAttribute('srcset');

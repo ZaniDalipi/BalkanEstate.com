@@ -6,9 +6,12 @@ import { retryWithOriginalImage } from '@/config/cloudinaryConfig';
  * Every Cloudinary URL uses a named transformation (`t_be_…`), which strict
  * transformations only serve once the backend has registered it. If one is
  * missing — or the CDN cached an error from before it existed — the <img>
- * fails. This listener catches that for every image on the page (load errors
+ * fails. External images go through our resizing proxy (`/api/image-proxy`),
+ * which fails when the API is down or refuses the source. This listener
+ * catches both for every image on the page (load errors
  * don't bubble, so it listens in the capture phase) and retries once with the
- * untransformed original, which strict mode always allows.
+ * untransformed original (strict mode always allows it) or the external
+ * source the proxy was asked for.
  *
  * Components with their own fallback (an icon, a generated avatar) still get
  * their onError when the original fails too.
@@ -25,11 +28,13 @@ export const installCdnImageFallback = (): void => {
       const target = event.target;
       if (!(target instanceof HTMLImageElement)) return;
       const src = target.currentSrc || target.src;
-      if (!src.includes('res.cloudinary.com') || !src.includes('/t_be_')) return;
+      const isPreset = src.includes('res.cloudinary.com') && src.includes('/t_be_');
+      const isProxied = src.includes('/image-proxy?');
+      if (!isPreset && !isProxied) return;
       if (retryWithOriginalImage(target)) {
         // Handled: keep component onError handlers from switching to their fallback.
         event.stopImmediatePropagation();
-        if (import.meta.env.DEV) console.warn('[cdn] preset failed, using original:', src);
+        if (import.meta.env.DEV) console.warn(`[cdn] ${isPreset ? 'preset' : 'image proxy'} failed, using original:`, src);
       }
     },
     true
