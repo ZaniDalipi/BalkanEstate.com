@@ -63,7 +63,12 @@
     "advancedFilters": "Напредни Филтри",
     "moreFilters": "Повеќе Филтри",
     "lessFilters": "Помалку Филтри",
-    "sortBy": "Подреди по"
+    "sortBy": "Подреди по",
+    "saleStatus": "Прикажи",
+    "saleStatusAvailable": "За продажба",
+    "saleStatusSold": "Продадени",
+    "saleStatusAll": "Двете",
+    "saleStatusHint": "Продадените домови ја покажуваат последната цена и кога се продадени — отворете еден за да ги видите цените околу него."
   },
   "options": {
     "any": "Било кој",

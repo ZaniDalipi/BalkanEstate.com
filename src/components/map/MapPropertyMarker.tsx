@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 import { typeLabel, type TranslateFn } from '@/shared/constants/propertyTypes';
 import { ALL_PROPERTY_TYPES, colorForType } from '@/shared/property/typeAttributes';
 import { resolveDisplayArea } from '@/shared/property/area';
@@ -352,13 +353,27 @@ const getPromotedMarkerInnerClass = (property: Property): string => {
 };
 
 /**
+ * Sold homes stay on the map as price history; a muted pill marked "Sold"
+ * keeps them from reading as homes still on the market.
+ */
+const SOLD_MARKER_COLOR = '#57534e';
+const pinColorFor = (property: Property): string =>
+  property.status === 'sold'
+    ? SOLD_MARKER_COLOR
+    : PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
+const markerPriceLabel = (property: Property): string =>
+  property.status === 'sold'
+    ? `${i18n.t('property:sold', 'Sold')} ${formatMarkerPrice(property)}`
+    : formatMarkerPrice(property);
+
+/**
  * Create simple circular marker for zoomed out view
  * Supports night mode with neon glow effects
  * Scales based on zoom level to avoid clutter when zoomed out
  */
 const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 12) => {
-  const price = formatMarkerPrice(property);
-  const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
+  const price = markerPriceLabel(property);
+  const color = pinColorFor(property);
   const zoomScale = getMarkerScaleForZoom(zoom);
 
   // Check if property is actively promoted
@@ -493,8 +508,8 @@ const lightenColor = (hex: string, percent: number): string => {
  * Supports night mode with neon glow effects
  */
 const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false, isNightMode: boolean = false, zoom: number = 12) => {
-  const price = formatMarkerPrice(property);
-  const color = PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
+  const price = markerPriceLabel(property);
+  const color = pinColorFor(property);
   const zoomScale = getMarkerScaleForZoom(zoom);
 
   // Check if property is actively promoted
@@ -646,6 +661,8 @@ const iconSignature = (
     property.promotionTier ?? '',
     property.promotionEndDate ?? '',
     property.hasUrgentBadge ? 'u' : '',
+    // Sold pins carry a translated word
+    property.status === 'sold' ? `sold:${i18n.language}` : '',
   ].join('|');
 
 /**

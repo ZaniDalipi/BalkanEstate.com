@@ -119,6 +119,9 @@ export const propertyKeys = {
 
   // Price history for a single property
   priceHistory: (propertyId: string) => [...propertyKeys.all, propertyId, 'price-history'] as const,
+
+  // What the homes around a property ask and sold for
+  areaPrices: (propertyId: string) => [...propertyKeys.all, propertyId, 'area-prices'] as const,
 };
 
 // ============================================================================

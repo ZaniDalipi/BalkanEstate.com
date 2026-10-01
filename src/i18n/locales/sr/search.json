@@ -63,7 +63,12 @@
     "advancedFilters": "Напредни Филтери",
     "moreFilters": "Више Филтера",
     "lessFilters": "Мање Филтера",
-    "sortBy": "Sortiraj po"
+    "sortBy": "Sortiraj po",
+    "saleStatus": "Прикажи",
+    "saleStatusAvailable": "На продају",
+    "saleStatusSold": "Продато",
+    "saleStatusAll": "Оба",
+    "saleStatusHint": "Продате некретнине приказују последњу цену и када су продате — отворите једну да видите цене око ње."
   },
   "options": {
     "any": "Било који",

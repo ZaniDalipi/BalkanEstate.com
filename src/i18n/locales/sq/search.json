@@ -63,7 +63,12 @@
     "advancedFilters": "Filtrat e Avancuar",
     "moreFilters": "Më Shumë Filtra",
     "lessFilters": "Më Pak Filtra",
-    "sortBy": "Rendit sipas"
+    "sortBy": "Rendit sipas",
+    "saleStatus": "Shfaq",
+    "saleStatusAvailable": "Në shitje",
+    "saleStatusSold": "Të shitura",
+    "saleStatusAll": "Të dyja",
+    "saleStatusHint": "Shtëpitë e shitura tregojnë çmimin e fundit dhe kur u shitën — hapni një për të parë çmimet përreth saj."
   },
   "options": {
     "any": "Çdo",

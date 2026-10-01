@@ -237,3 +237,21 @@ describe('filterAndSortProperties', () => {
     expect(filtered.map((entry) => entry.id)).toEqual(['budva-apt']);
   });
 });
+
+describe('sold filter', () => {
+  const onMarket = property({ id: 'on-market' });
+  const sold = property({ id: 'sold', status: 'sold', soldAt: Date.now() - 90 * 24 * 60 * 60 * 1000 });
+  const all = [onMarket, sold];
+  const ids = (filters: Filters) => filterProperties(all, filters).map((p) => p.id);
+
+  it('keeps whatever the page loaded by default, and with filters saved before the field existed', () => {
+    expect(ids(initialFilters)).toEqual(['on-market', 'sold']);
+    const { saleStatus: _omitted, ...legacy } = initialFilters;
+    expect(ids(legacy as Filters)).toEqual(['on-market', 'sold']);
+  });
+
+  it('narrows to sold homes, or shows both', () => {
+    expect(ids({ ...initialFilters, saleStatus: 'sold' })).toEqual(['sold']);
+    expect(ids({ ...initialFilters, saleStatus: 'all' })).toEqual(['on-market', 'sold']);
+  });
+});

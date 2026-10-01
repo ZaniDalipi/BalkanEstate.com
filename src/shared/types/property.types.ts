@@ -299,6 +299,13 @@ export interface VisitAvailability {
 
 export type SellerType = 'any' | 'agent' | 'private';
 
+/**
+ * Which listings a search shows by whether they have sold: the homes still on
+ * the market (plus anything sold in the last day), only sold homes — the
+ * street's price history — or both.
+ */
+export type SaleStatusFilter = 'available' | 'sold' | 'all';
+
 export interface Filters {
   query: string;
   country: string;
@@ -343,6 +350,8 @@ export interface Filters {
   minPricePerSqm: number | null;
   maxPricePerSqm: number | null;
   maxDaysListed: number | null;
+  /** Unset in filters saved before it existed; read as 'available'. */
+  saleStatus?: SaleStatusFilter;
 }
 
 export const initialFilters: Filters = {
@@ -387,4 +396,5 @@ export const initialFilters: Filters = {
   minPricePerSqm: null,
   maxPricePerSqm: null,
   maxDaysListed: null,
+  saleStatus: 'available',
 };

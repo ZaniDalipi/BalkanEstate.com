@@ -717,7 +717,8 @@
     "neighborhood": "Lagjja",
     "priceHistory": "Historia e Çmimeve",
     "similar": "Prona të ngjashme",
-    "onThisPage": "Në këtë faqe"
+    "onThisPage": "Në këtë faqe",
+    "areaPrices": "Çmimet përreth"
   },
   "seo": {
     "description": "{{type}} me {{beds}} dhoma gjumi, {{baths}} banjo për {{listingAction}} në {{city}}, {{country}}. {{sqft}}m² për €{{price}}.",
@@ -757,5 +758,41 @@
     "spacesLabel": "Vende",
     "officesLabel": "Zyra",
     "openPlanLabel": "Hapësirë e hapur m²"
+  },
+  "areaPrices": {
+    "title": "Çmimet në lagje",
+    "subtitle": "Shtëpi në afërsi: {{count}} brenda {{radius}} km",
+    "empty": "Ende nuk ka mjaftueshëm shtëpi në afërsi për të krahasuar çmimet.",
+    "allTypes": "Të gjitha llojet e pronave",
+    "inLine": "Në linjë me lagjen",
+    "below": "{{pct}}% nën mesataren e lagjes",
+    "above": "{{pct}}% mbi mesataren e lagjes",
+    "medianAsking": "Kërkohet €/m²",
+    "medianSold": "Shitur €/m²",
+    "medianRented": "Me qira €/m²",
+    "forSaleNearby": "Në shitje përreth",
+    "typically": "zakonisht {{price}}",
+    "soldNearby": "Të shitura përreth",
+    "rentedNearby": "Të dhëna me qira përreth",
+    "stripTitle": "Ku qëndron kjo shtëpi",
+    "stripHint": "Çdo pikë është një shtëpi përreth, sipas çmimit për m². Prekni një për ta hapur.",
+    "median": "Mesatarja",
+    "thisHome": "Kjo shtëpi",
+    "forSale": "Në shitje",
+    "sold": "Shitur",
+    "rented": "Dhënë me qira",
+    "recentlySold": "Shitur së fundmi",
+    "recentlyRented": "Dhënë me qira së fundmi",
+    "noneSold": "Ende nuk ka shtëpi të shitura përreth.",
+    "noneRented": "Ende nuk ka shtëpi të dhëna me qira përreth.",
+    "noneActive": "Aktualisht nuk ka shtëpi të tjera në shitje përreth.",
+    "trendTitle": "Çmimi për m² me kalimin e kohës",
+    "trendHintSale": "Mesatarja për tremujor: çmimi i kërkuar kur shtëpitë u listuan dhe çmimi kur u shitën.",
+    "trendHintRent": "Mesatarja për tremujor: qiraja e kërkuar kur shtëpitë u listuan dhe qiraja kur u dhanë me qira.",
+    "askingPrice": "Çmimi i kërkuar",
+    "soldPrice": "Çmimi i shitjes",
+    "rentedPrice": "Qiraja e rënë dakord",
+    "showTable": "Shfaq si tabelë",
+    "quarter": "Tremujori"
   }
 }

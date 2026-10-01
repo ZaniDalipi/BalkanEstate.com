@@ -717,7 +717,8 @@
     "neighborhood": "Susjedstvo",
     "priceHistory": "Historija cijena",
     "similar": "Slične nekretnine",
-    "onThisPage": "Na ovoj stranici"
+    "onThisPage": "Na ovoj stranici",
+    "areaPrices": "Cijene u blizini"
   },
   "seo": {
     "description": "{{type}} sa {{beds}} spavaćih soba, {{baths}} kupatila za {{listingAction}} u {{city}}, {{country}}. {{sqft}}m² za €{{price}}.",
@@ -757,5 +758,41 @@
     "spacesLabel": "Mjesta",
     "officesLabel": "Kancelarije",
     "openPlanLabel": "Otvoreni prostor m²"
+  },
+  "areaPrices": {
+    "title": "Cijene u komšiluku",
+    "subtitle": "Nekretnine u blizini: {{count}} u krugu od {{radius}} km",
+    "empty": "Još nema dovoljno nekretnina u blizini za poređenje cijena.",
+    "allTypes": "Sve vrste nekretnina",
+    "inLine": "U skladu s komšilukom",
+    "below": "{{pct}}% ispod medijana komšiluka",
+    "above": "{{pct}}% iznad medijana komšiluka",
+    "medianAsking": "Traženo €/m²",
+    "medianSold": "Prodano €/m²",
+    "medianRented": "Iznajmljeno €/m²",
+    "forSaleNearby": "Na prodaju u blizini",
+    "typically": "obično {{price}}",
+    "soldNearby": "Prodano u blizini",
+    "rentedNearby": "Iznajmljeno u blizini",
+    "stripTitle": "Gdje se ova nekretnina nalazi",
+    "stripHint": "Svaka tačka je nekretnina u blizini, po cijeni po m². Dodirnite je da je otvorite.",
+    "median": "Medijan",
+    "thisHome": "Ova nekretnina",
+    "forSale": "Na prodaju",
+    "sold": "Prodano",
+    "rented": "Iznajmljeno",
+    "recentlySold": "Nedavno prodano",
+    "recentlyRented": "Nedavno iznajmljeno",
+    "noneSold": "Još nema prodanih nekretnina u blizini.",
+    "noneRented": "Još nema iznajmljenih nekretnina u blizini.",
+    "noneActive": "Trenutno nema drugih nekretnina na prodaju u blizini.",
+    "trendTitle": "Cijena po m² kroz vrijeme",
+    "trendHintSale": "Medijan po kvartalu: tražene cijene kada su nekretnine oglašene i cijena po kojoj su prodane.",
+    "trendHintRent": "Medijan po kvartalu: tražena kirija kada su nekretnine oglašene i kirija po kojoj su iznajmljene.",
+    "askingPrice": "Tražena cijena",
+    "soldPrice": "Prodajna cijena",
+    "rentedPrice": "Dogovorena kirija",
+    "showTable": "Prikaži kao tabelu",
+    "quarter": "Kvartal"
   }
 }

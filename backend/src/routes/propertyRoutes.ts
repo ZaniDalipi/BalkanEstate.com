@@ -15,6 +15,7 @@ import {
   addRentalHistoryEntry,
   deleteRentalHistoryEntry,
   getPropertyPriceHistory,
+  getAreaPrices,
 } from '../controllers/propertyController';
 import { protect } from '../middleware/auth';
 import { upload } from '../utils/upload';
@@ -207,5 +208,6 @@ router.patch('/:id/renew', protect, mutationRateLimiter, renewProperty);
 router.post('/:id/rental-history', protect, mutationRateLimiter, addRentalHistoryEntry);
 router.delete('/:id/rental-history/:entryId', protect, mutationRateLimiter, deleteRentalHistoryEntry);
 router.get('/:id/price-history', validatePropertyId, getPropertyPriceHistory);
+router.get('/:id/area-prices', validatePropertyId, getAreaPrices);
 
 export default router;

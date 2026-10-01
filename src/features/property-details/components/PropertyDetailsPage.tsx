@@ -19,6 +19,7 @@ import RentalTermsSection from '@/src/features/rental/components/RentalTermsSect
 import RentalHistorySection from '@/src/features/rental/components/RentalHistorySection';
 import RentalRulesByCountry from '@/src/features/rental/components/RentalRulesByCountry';
 import PropertyPriceHistory from './PropertyPriceHistory';
+import NeighborhoodPrices from './area-prices/NeighborhoodPrices';
 import { QueryErrorBoundary } from '@/src/app/components';
 import { SEO, Breadcrumbs, generatePropertyBreadcrumbs } from '@/src/components/seo';
 import { generatePropertySlug } from '@/utils/slug';
@@ -1148,6 +1149,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             <div data-section="price-history" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '380ms' }}>
               <QueryErrorBoundary>
                 <PropertyPriceHistory property={property} />
+              </QueryErrorBoundary>
+            </div>
+
+            {/* Neighbourhood prices — nearby homes for sale and sold, and the area's €/m² trend */}
+            <div data-section="area-prices" className="scroll-mt-24 animate-slide-up" style={{ animationDelay: '420ms' }}>
+              <QueryErrorBoundary>
+                <NeighborhoodPrices property={property} />
               </QueryErrorBoundary>
             </div>
 

@@ -63,7 +63,12 @@
     "moreFilters": "Още филтри",
     "lessFilters": "По-малко филтри",
     "anyCountry": "Всяка държава",
-    "sortBy": "Сортирай по"
+    "sortBy": "Сортирай по",
+    "saleStatus": "Покажи",
+    "saleStatusAvailable": "За продажба",
+    "saleStatusSold": "Продадени",
+    "saleStatusAll": "И двете",
+    "saleStatusHint": "Продадените имоти показват последната цена и кога са продадени — отворете един, за да видите цените около него."
   },
   "options": {
     "any": "Всички",

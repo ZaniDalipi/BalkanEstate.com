@@ -31,6 +31,11 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             }
         }
 
+        // Sold filter: the default keeps what the server sends (on the market,
+        // plus sold in the last day); "sold" narrows to sold homes only.
+        const saleStatus = filters.saleStatus ?? 'available';
+        const saleStatusMatch = saleStatus === 'sold' ? p.status === 'sold' : true;
+
         // Listing type filter (sale vs rent)
         const listingTypeMatch = filters.listingType && filters.listingType !== 'any'
             ? (p.listingType || 'sale') === filters.listingType
@@ -124,6 +129,7 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             }) : true;
 
         return queryMatch &&
+               saleStatusMatch &&
                countryMatch &&
                listingTypeMatch &&
                minPriceMatch &&

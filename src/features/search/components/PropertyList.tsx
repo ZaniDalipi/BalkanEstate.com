@@ -291,6 +291,41 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                 </select>
             </div>
 
+            {/* Sold filter — sold homes stay on the site as the area's price history */}
+            {filters.listingType !== 'rent' && (
+                <div>
+                    <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.saleStatus', 'Show')}</label>
+                    <div role="radiogroup" aria-label={t('search:filters.saleStatus', 'Show')} className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
+                        {([
+                            ['available', t('search:filters.saleStatusAvailable', 'For sale')],
+                            ['sold', t('search:filters.saleStatusSold', 'Sold')],
+                            ['all', t('search:filters.saleStatusAll', 'Both')],
+                        ] as const).map(([value, label]) => {
+                            const selected = (filters.saleStatus ?? 'available') === value;
+                            return (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={selected}
+                                    onClick={() => onFilterChange('saleStatus', value)}
+                                    className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
+                                        selected ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-600 hover:text-neutral-900'
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {(filters.saleStatus ?? 'available') !== 'available' && (
+                        <p className="mt-1 text-[11px] text-neutral-500">
+                            {t('search:filters.saleStatusHint', 'Sold homes show their last price and when they sold — open one to see prices around it.')}
+                        </p>
+                    )}
+                </div>
+            )}
+
             {/* Price Change Filters */}
             <div className="flex gap-2">
                 <button
@@ -768,6 +803,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
         filters.maxDaysListed,
         filters.hasDiscount,
         filters.hasPriceIncrease,
+        filters.saleStatus && filters.saleStatus !== 'available' ? filters.saleStatus : null,
     ].filter(v => v !== null && v !== undefined && v !== '' && v !== false).length;
 
     // Entrance animation: check if splash screen just completed

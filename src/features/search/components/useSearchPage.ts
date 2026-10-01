@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { useRealtimeProperties } from '@/src/features/properties/hooks';
+import { useRealtimeProperties, useSoldProperties } from '@/src/features/properties/hooks';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
@@ -32,8 +32,19 @@ export const serializeBounds = (bounds: L.LatLngBounds): string => {
 export function useSearchPage() {
     const { t } = useTranslation(['search', 'common']);
     const { state, dispatch, fetchProperties, updateSearchPageState, addSavedSearch } = useAppContext();
-    const { properties, isAuthenticated, isLoadingProperties, currentUser, searchPageState } = state;
+    const { properties: availableProperties, isAuthenticated, isLoadingProperties: isLoadingAvailable, currentUser, searchPageState } = state;
     const { filters, activeFilters, mapBoundsJSON, drawnBoundsJSON, mobileView, searchMode, aiChatHistory, isAiChatModalOpen, isFiltersOpen, focusMapOnProperty } = searchPageState;
+
+    // Sold homes are fetched only once the sold filter asks for them, then
+    // searched alongside what is on the market.
+    const wantsSold = (activeFilters.saleStatus ?? 'available') !== 'available';
+    const { soldProperties, isLoadingSold } = useSoldProperties(wantsSold);
+    const properties = useMemo(() => {
+        if (!wantsSold || soldProperties.length === 0) return availableProperties;
+        const seen = new Set(availableProperties.map((p) => p.id));
+        return [...availableProperties, ...soldProperties.filter((p) => !seen.has(p.id))];
+    }, [wantsSold, availableProperties, soldProperties]);
+    const isLoadingProperties = isLoadingAvailable || isLoadingSold;
 
     // Local, non-persistent state
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

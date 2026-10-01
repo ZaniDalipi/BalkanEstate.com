@@ -717,7 +717,8 @@
     "neighborhood": "Vecinătate",
     "priceHistory": "Istoricul prețurilor",
     "similar": "Proprietăți similare",
-    "onThisPage": "Pe această pagină"
+    "onThisPage": "Pe această pagină",
+    "areaPrices": "Prețuri în zonă"
   },
   "seo": {
     "description": "{{type}} cu {{beds}} dormitoare, {{baths}} băi de {{listingAction}} în {{city}}, {{country}}. {{sqft}}m² pentru €{{price}}.",
@@ -757,5 +758,41 @@
     "spacesLabel": "Locuri",
     "officesLabel": "Birouri",
     "openPlanLabel": "Spațiu deschis m²"
+  },
+  "areaPrices": {
+    "title": "Prețuri în cartier",
+    "subtitle": "Locuințe în apropiere: {{count}} pe o rază de {{radius}} km",
+    "empty": "Încă nu sunt destule locuințe în apropiere pentru a compara prețurile.",
+    "allTypes": "Toate tipurile de proprietăți",
+    "inLine": "În linie cu cartierul",
+    "below": "Cu {{pct}}% sub mediana cartierului",
+    "above": "Cu {{pct}}% peste mediana cartierului",
+    "medianAsking": "Cerut €/m²",
+    "medianSold": "Vândut €/m²",
+    "medianRented": "Închiriat €/m²",
+    "forSaleNearby": "De vânzare în apropiere",
+    "typically": "de obicei {{price}}",
+    "soldNearby": "Vândute în apropiere",
+    "rentedNearby": "Închiriate în apropiere",
+    "stripTitle": "Unde se situează această locuință",
+    "stripHint": "Fiecare punct este o locuință din apropiere, după prețul pe m². Atingeți unul pentru a-l deschide.",
+    "median": "Mediana",
+    "thisHome": "Această locuință",
+    "forSale": "De vânzare",
+    "sold": "Vândut",
+    "rented": "Închiriat",
+    "recentlySold": "Vândute recent",
+    "recentlyRented": "Închiriate recent",
+    "noneSold": "Încă nu există locuințe vândute în apropiere.",
+    "noneRented": "Încă nu există locuințe închiriate în apropiere.",
+    "noneActive": "Momentan nu există alte locuințe de vânzare în apropiere.",
+    "trendTitle": "Prețul pe m² în timp",
+    "trendHintSale": "Mediana pe trimestru: prețurile cerute la listare și prețul la care s-au vândut locuințele.",
+    "trendHintRent": "Mediana pe trimestru: chiria cerută la listare și chiria la care s-au închiriat locuințele.",
+    "askingPrice": "Preț cerut",
+    "soldPrice": "Preț de vânzare",
+    "rentedPrice": "Chirie convenită",
+    "showTable": "Afișează ca tabel",
+    "quarter": "Trimestru"
   }
 }
