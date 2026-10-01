@@ -761,7 +761,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             </div>
 
             {/* Seller Info — keeps room for the name before the agency wraps */}
-            <div className="min-w-[6.5rem] flex-1">
+            <div className="min-w-[5rem] flex-1">
               {/* Only print the name line when we actually have one — when the
                   fallback *is* the role label the badge below already says it,
                   and repeating it reads as a bug. */}
@@ -779,32 +779,32 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </span>
             </div>
 
-            {/* Agency (if agent with agency), on the right of the seller */}
+            {/* Agency (if agent with agency), on the right of the seller. One
+                compact line — logo + name; the logo/icon already says "agency",
+                so the label is for screen readers only and fits a ~300px card. */}
             {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
-              <div className="ml-auto flex items-center gap-1.5 min-w-0 max-w-full bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
+              <div className="ml-auto flex items-center gap-1.5 min-w-0 max-w-[9.5rem] bg-neutral-50 pl-1.5 pr-2 py-1 rounded-lg border border-neutral-200" title={safeProperty.seller.agencyName}>
                 {safeProperty.seller.agencyLogo && !agencyLogoFailed ? (
                   <img
                     src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
                     alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                     loading="lazy"
                     decoding="async"
-                    width={24}
-                    height={24}
-                    className="w-6 h-6 rounded object-contain bg-white flex-shrink-0 overflow-hidden"
+                    width={20}
+                    height={20}
+                    className="w-5 h-5 rounded object-contain bg-white flex-shrink-0 overflow-hidden"
                     // Preset failed → try the original; still failing → the icon, never broken alt text.
                     onError={(e) => {
                       if (!retryWithOriginalImage(e.currentTarget)) setAgencyLogoFailed(true);
                     }}
                   />
                 ) : (
-                  <BuildingOfficeIcon className="w-5 h-5 text-primary flex-shrink-0" />
+                  <BuildingOfficeIcon className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
                 )}
-                <div className="min-w-0">
-                  <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
-                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[9rem]" title={safeProperty.seller.agencyName}>
-                    {safeProperty.seller.agencyName}
-                  </p>
-                </div>
+                <p className="min-w-0 text-[10px] font-medium text-neutral-700 truncate">
+                  <span className="sr-only">{t('property:seller.agency')}: </span>
+                  {safeProperty.seller.agencyName}
+                </p>
               </div>
             )}
           </div>
