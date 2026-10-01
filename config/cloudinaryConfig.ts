@@ -201,6 +201,33 @@ export const CLOUDINARY_MAX_WIDTH = PRESET_WIDTHS[PRESET_WIDTHS.length - 1];
 /** Round a requested width up to the nearest bucket (capped at the max). */
 export const snapCloudinaryWidth = snapPresetWidth;
 
+/**
+ * The untransformed original of a Cloudinary image URL, or null. Delivering
+ * the original is always allowed — even with strict transformations — so it
+ * is the safe fallback when a preset URL fails to load.
+ */
+export const originalCloudinaryUrl = (url: string | undefined | null): string | null => {
+  if (!url) return null;
+  const match = url.split(/[?#]/)[0].match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  if (!match) return null;
+  return `${match[1]}${stripCloudinaryTransforms(match[2])}`;
+};
+
+/**
+ * `onError` for a Cloudinary <img>: retry once with the original image (the
+ * preset may be missing or a CDN error cached). Returns false when there is
+ * nothing left to try, so the caller can show its own fallback.
+ */
+export const retryWithOriginalImage = (img: HTMLImageElement): boolean => {
+  if (img.dataset.cdnFallback === 'original') return false;
+  const original = originalCloudinaryUrl(img.currentSrc || img.src);
+  if (!original || original === img.src) return false;
+  img.dataset.cdnFallback = 'original';
+  img.removeAttribute('srcset');
+  img.src = original;
+  return true;
+};
+
 /** `t_<preset>` — the URL segment for a named transformation. */
 const presetSegment = (name: string): string => `t_${name}`;
 

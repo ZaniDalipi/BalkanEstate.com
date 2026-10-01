@@ -67,6 +67,11 @@ initPerfMode();
 import { initPressFeedback } from './src/shared/interaction/pressFeedback';
 initPressFeedback();
 
+// A Cloudinary preset that fails to load retries with the original image
+// (always allowed under strict transformations) — see cdnImageFallback.ts.
+import { installCdnImageFallback } from './src/shared/utils/cdnImageFallback';
+installCdnImageFallback();
+
 // Shared stale-deploy chunk recovery (unregister SW + clear caches + reload once)
 import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
 

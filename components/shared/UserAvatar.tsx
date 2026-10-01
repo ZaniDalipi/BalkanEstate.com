@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, retryWithOriginalImage } from '@/config/cloudinaryConfig';
 import DefaultAvatar from './DefaultAvatar';
 
 interface UserAvatarProps {
@@ -67,7 +67,10 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
-      onError={() => setFailed(true)}
+      // A failed Cloudinary size retries the original before giving up on the photo.
+      onError={(e) => {
+        if (!retryWithOriginalImage(e.currentTarget)) setFailed(true);
+      }}
     />
   );
 };

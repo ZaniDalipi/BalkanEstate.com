@@ -15,6 +15,7 @@ import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proB
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
 import { cleanupOrphanedTempImages } from '../services/cloudinaryService';
+import { syncCloudinaryPresetsOnStartup } from '../services/media/cloudinaryPresetSync';
 import { runMediaRetention } from '../services/media/mediaRetentionService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
@@ -57,6 +58,7 @@ let deferredReplayTask: cron.ScheduledTask | null = null;
 let scoreRefreshTask: cron.ScheduledTask | null = null;
 let cityMarketDigestTask: cron.ScheduledTask | null = null;
 let tempImageCleanupTask: cron.ScheduledTask | null = null;
+let presetSyncTask: cron.ScheduledTask | null = null;
 let mediaRetentionTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
@@ -425,6 +427,14 @@ export const startCronJobs = () => {
 
   // Orphaned listing uploads - daily at 3:30 AM. Photos uploaded to the temp
   // folder by abandoned listing forms are otherwise billed as storage forever.
+  // Re-check the Cloudinary delivery presets daily at 3:10 AM. Startup already
+  // registers them; this heals one that failed or was deleted in the dashboard
+  // (with strict transformations on, a missing preset is a broken image).
+  // One list call when everything is in place.
+  presetSyncTask = cron.schedule('10 3 * * *', async () => {
+    await syncCloudinaryPresetsOnStartup();
+  });
+
   tempImageCleanupTask = cron.schedule('30 3 * * *', async () => {
     await withDbConnection('temp image cleanup', async () => {
       try {
@@ -562,6 +572,7 @@ export const stopCronJobs = () => {
   if (scoreRefreshTask) scoreRefreshTask.stop();
   if (cityMarketDigestTask) cityMarketDigestTask.stop();
   if (tempImageCleanupTask) tempImageCleanupTask.stop();
+  if (presetSyncTask) presetSyncTask.stop();
   if (mediaRetentionTask) mediaRetentionTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');

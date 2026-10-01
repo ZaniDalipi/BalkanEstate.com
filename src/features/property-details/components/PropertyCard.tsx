@@ -10,7 +10,7 @@ import { buildLocalizedPath } from '@/src/utils/languageRouting';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, retryWithOriginalImage } from '@/config/cloudinaryConfig';
 import { getGallerySources, warmImage, warmGallery } from '@/config/galleryImages';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
@@ -86,6 +86,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 }) => {
   const { t, i18n } = useTranslation(['property', 'rental', 'common']);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [agencyLogoFailed, setAgencyLogoFailed] = useState(false);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
 
@@ -781,15 +782,19 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               grid — a four-column search result, for instance. */}
           {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
             <div className="mt-2 flex items-center gap-1.5 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
-              {safeProperty.seller.agencyLogo ? (
+              {safeProperty.seller.agencyLogo && !agencyLogoFailed ? (
                 <img
-                  src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48, quality: 'auto', crop: 'fill' })}
+                  src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
                   alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                   loading="lazy"
                   decoding="async"
                   width={24}
                   height={24}
-                  className="w-6 h-6 rounded object-contain bg-white flex-shrink-0"
+                  className="w-6 h-6 rounded object-contain bg-white flex-shrink-0 overflow-hidden"
+                  // Preset failed → try the original; still failing → the icon, never broken alt text.
+                  onError={(e) => {
+                    if (!retryWithOriginalImage(e.currentTarget)) setAgencyLogoFailed(true);
+                  }}
                 />
               ) : (
                 <BuildingOfficeIcon className="w-5 h-5 text-primary flex-shrink-0" />
