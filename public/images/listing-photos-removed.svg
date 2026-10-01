@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="Photos no longer available">
+  <rect width="800" height="600" fill="#e5e7eb"/>
+  <g fill="none" stroke="#9ca3af" stroke-width="14" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M250 330 L400 210 L550 330"/>
+    <path d="M290 300 V410 H510 V300"/>
+  </g>
+  <text x="400" y="480" text-anchor="middle" font-family="system-ui, sans-serif" font-size="30" fill="#6b7280">Photos no longer available</text>
+</svg>
