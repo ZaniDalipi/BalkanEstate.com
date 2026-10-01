@@ -1075,22 +1075,41 @@ transformations **or** 1 GB storage **or** 1 GB bandwidth).
 ### Delivery (frontend)
 
 ```
-Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
-            ├── res.cloudinary.com  → f_auto,q_auto,w_{bucket}[,c_limit]
+Raw URL → optimizeCloudinaryUrl(url, { width, height?, blur?, format? }) → <img src>
+            ├── res.cloudinary.com  → …/upload/t_<preset>/v123/…   (named transformation)
             ├── googleusercontent   → =s{size}
             ├── unsplash / wikimedia / own site → unchanged
             └── anything else (feeds) → {API_URL}/image-proxy?url=…&w={bucket}
         cloudinarySrcSet(url, widths)  (deduped after snapping)
 ```
 
-- **Width buckets** (`CLOUDINARY_WIDTH_BUCKETS`: 32, 64, 128, 240, 320, 480,
-  640, 800, 1080, 1280, 1600, 1920). Width-only requests round *up* to a
-  bucket, so components share derivatives instead of each minting their own
-  — every distinct URL is a billed transformation. Explicit width×height
-  boxes (e.g. 1200×630 share cards) stay exact.
-- Nothing above 1920 (the stored master's max edge); no crop ⇒ `c_limit`, so
-  Cloudinary never upscales.
-- LQIP: `width: 40, quality: 'auto:eco'` (snaps to 64).
+**Strict-transformations compatible.** Cloudinary's "Strict transformations"
+(Settings → Security) is ON, so only *named transformations allowed for strict
+mode* can be delivered — an ad-hoc `w_480,c_limit` URL is refused. Every
+Cloudinary URL the app builds therefore uses exactly one preset from
+`backend/src/config/cloudinaryPresets.ts` (imported by the frontend too, so the
+two cannot drift):
+
+| Preset | Definition | Used for |
+|---|---|---|
+| `be_w{N}` | `f_auto,q_auto,c_limit,w_N` | any width-only request |
+| `be_r{ratio}_w{N}` | `f_auto,q_auto,c_fill,g_auto,ar_{ratio},w_N` | width×height boxes (1x1, 4x3, 3x4, 3x2, 16x9, 2x1) |
+| `be_lqip` | `f_auto,q_auto:eco,w_32,e_blur:400` | blur-up placeholders |
+| `be_og` | `f_jpg,q_auto,w_1200,h_630,c_pad,b_white` | share cards |
+
+N ∈ 32, 64, 128, 240, 320, 480, 640, 800, 1080, 1280, 1600, 1920 — requests
+round *up*; boxes snap to the nearest ratio. 86 presets in all, registered by
+the backend **at startup** (`services/media/cloudinaryPresetSync.ts`,
+idempotent) or by `npm run cloudinary:sync-presets`. To change a definition,
+give the preset a new name rather than editing it in place.
+
+- A unit test (`src/tests/cloudinary-budget.test.ts`) sweeps widths and boxes
+  and fails if the app could ever build a URL with an unregistered preset.
+- Server-side fetches of Cloudinary images (e.g. the room restyler) use the
+  untransformed original (`utils/cloudinaryUrl.ts → originalCloudinaryUrl`),
+  which strict mode always allows, and resize with sharp.
+- Raw `<img src={…Url}>` is not used for Cloudinary images — originals still
+  load under strict mode but ship the full-size master.
 
 ### Upload (backend)
 

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/AppContext';
@@ -211,7 +212,7 @@ const FeaturedAgencies: React.FC = () => {
                         <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl shadow-xl flex items-center justify-center overflow-hidden ring-4 ring-white/50">
                           {agency.logo ? (
                             <img
-                              src={agency.logo}
+                              src={optimizeCloudinaryUrl(agency.logo, { width: 240 }) || agency.logo}
                               alt={agency.name}
                               className="w-full h-full object-cover"
                               loading="lazy"

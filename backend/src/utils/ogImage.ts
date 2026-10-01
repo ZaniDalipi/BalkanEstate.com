@@ -10,6 +10,8 @@
  */
 
 import { OG_BASE_URL } from '../config/ogConstants';
+import { OG_PRESET } from '../config/cloudinaryPresets';
+import { CLOUDINARY_UPLOAD_RE, stripCloudinaryTransforms } from './cloudinaryUrl';
 
 export const DEFAULT_OG_IMAGE = `${OG_BASE_URL}/og-image.jpg`;
 
@@ -32,28 +34,13 @@ export interface OgImage {
  * `f_jpg` rather than the usual `f_auto`: crawlers send no useful Accept
  * header, and a WebP some of them can't render means no preview at all. Every
  * parameter is core Cloudinary — no add-on or paid-plan feature.
+ *
+ * Delivered through the registered `be_og` preset (f_jpg,q_auto,w_1200,h_630,
+ * c_pad,b_white — see config/cloudinaryPresets.ts) so it works with strict
+ * transformations on.
  */
-const OG_CARD_TRANSFORM = 'f_jpg,q_auto,w_1200,h_630,c_pad,b_white';
+const OG_CARD_TRANSFORM = `t_${OG_PRESET}`;
 
-const CLOUDINARY_UPLOAD_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/i;
-
-/**
- * Strip the transformation segments a Cloudinary URL already carries, leaving
- * the versioned public id. Transform tokens always look like `key_value` with a
- * 1–3 character key (`c_fill`, `w_1200`, `ar_16:9`); folders and filenames
- * don't.
- */
-function stripCloudinaryTransforms(rest: string): string {
-  const parts = rest.split('/');
-
-  const versionIdx = parts.findIndex(part => /^v\d+$/.test(part));
-  if (versionIdx !== -1) return parts.slice(versionIdx).join('/');
-
-  const firstNonTransform = parts.findIndex(
-    part => !part.split(',').every(token => /^[a-z]{1,3}_/.test(token)),
-  );
-  return firstNonTransform !== -1 ? parts.slice(firstNonTransform).join('/') : rest;
-}
 
 /** Normalize one image candidate, or null if it can't be used as og:image. */
 function normalizeOgImage(raw?: string): OgImage | null {

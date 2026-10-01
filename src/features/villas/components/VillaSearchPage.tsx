@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
@@ -1079,7 +1080,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {state.currentUser.avatarUrl ? (
-                                                        <img src={state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                        <img src={optimizeCloudinaryUrl(state.currentUser.avatarUrl, { width: 64 }) || state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
                                                     ) : (
                                                         <DefaultAvatar gender={state.currentUser.gender} seed={state.currentUser.id || state.currentUser.name} avatarOptions={state.currentUser.avatarOptions} />
                                                     )}

@@ -110,7 +110,7 @@ const uniqueUrls = (count: number): string[] => {
 describe('getGallerySources', () => {
   it('offers every candidate width so the browser can match the device DPR', () => {
     const { srcSet } = getGallerySources(CLOUDINARY);
-    GALLERY_WIDTHS.forEach((w) => expect(srcSet).toContain(`w_${w}`));
+    GALLERY_WIDTHS.forEach((w) => expect(srcSet).toContain(`t_be_w${w}`));
   });
 
   it('requests CORS for Cloudinary, matching the rendered <img>', () => {
@@ -127,7 +127,7 @@ describe('getGallerySources', () => {
   });
 
   it('produces a blurred placeholder for the first paint', () => {
-    expect(getGallerySources(CLOUDINARY).placeholder).toContain('e_blur');
+    expect(getGallerySources(CLOUDINARY).placeholder).toContain('t_be_lqip');
   });
 
   it('tolerates a missing URL', () => {

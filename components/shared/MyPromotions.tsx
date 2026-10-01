@@ -4,6 +4,7 @@
  * Uses React Query for real-time updates (auto-refresh every 10s)
  */
 
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../types';
@@ -455,7 +456,7 @@ const MyPromotions: React.FC = () => {
                       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-100">
                         {property.imageUrl ? (
                           <img
-                            src={property.imageUrl}
+                            src={optimizeCloudinaryUrl(property.imageUrl, { width: 128 }) || property.imageUrl}
                             alt={property.title || property.address}
                             className="w-full h-full object-cover"
                           />

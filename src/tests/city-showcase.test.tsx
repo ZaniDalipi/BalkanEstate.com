@@ -400,27 +400,24 @@ describe('ElasticGallery', () => {
 describe('optimizeCloudinaryUrl blur', () => {
     const source = 'https://res.cloudinary.com/demo/image/upload/v1/belgrade.jpg';
 
-    it('blurs the placeholder after the resize', () => {
-        const url = optimizeCloudinaryUrl(source, { width: 24, quality: 'auto:eco', blur: 400 });
-
-        // Order matters: Cloudinary applies the transforms as listed, and
-        // blurring the full-size source before shrinking it costs the work the
-        // small request was meant to avoid.
-        expect(url).toBe(
-            'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto:eco,w_32,c_limit,e_blur:400/v1/belgrade.jpg',
+    it('serves the placeholder through the blurred 32px preset', () => {
+        // The preset (be_lqip = f_auto,q_auto:eco,w_32,e_blur:400) blurs after
+        // the resize, so a tiny photo reads as a colour wash, not blocks.
+        expect(optimizeCloudinaryUrl(source, { width: 24, quality: 'auto:eco', blur: 400 })).toBe(
+            'https://res.cloudinary.com/demo/image/upload/t_be_lqip/v1/belgrade.jpg',
         );
     });
 
     it('leaves a photo unblurred when no blur is asked for', () => {
-        expect(optimizeCloudinaryUrl(source, { width: 960 })).not.toContain('e_blur');
+        expect(optimizeCloudinaryUrl(source, { width: 960 })).not.toContain('lqip');
     });
 
-    it('clamps a blur Cloudinary would reject', () => {
-        expect(optimizeCloudinaryUrl(source, { blur: 99999 })).toContain('e_blur:2000');
-        expect(optimizeCloudinaryUrl(source, { blur: 0 })).not.toContain('e_blur');
-        expect(optimizeCloudinaryUrl(source, { blur: Number.NaN })).not.toContain('e_blur');
+    it('treats a blur below 1 or NaN as no blur', () => {
+        expect(optimizeCloudinaryUrl(source, { blur: 0 })).not.toContain('lqip');
+        expect(optimizeCloudinaryUrl(source, { blur: Number.NaN })).not.toContain('lqip');
     });
 });
+
 
 describe('pickShowcaseCities', () => {
     const city = (id: string, country: string): ShowcaseCity => ({

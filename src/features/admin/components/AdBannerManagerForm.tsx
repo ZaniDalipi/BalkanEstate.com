@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon, PhotoIcon } from '@/constants';
@@ -102,14 +103,14 @@ const AdBannerManagerForm: React.FC<Props> = ({
                   <>
                     {/* Blurred fill — mirrors how the live ad slot renders. */}
                     <img
-                      src={formData.imageUrl}
+                      src={optimizeCloudinaryUrl(formData.imageUrl, { width: 800 }) || formData.imageUrl}
                       alt=""
                       aria-hidden="true"
                       className="absolute inset-0 w-full h-full"
                       style={{ objectFit: 'cover', filter: 'blur(14px)', transform: 'scale(1.15)', opacity: 0.9 }}
                     />
                     <img
-                      src={formData.imageUrl}
+                      src={optimizeCloudinaryUrl(formData.imageUrl, { width: 800 }) || formData.imageUrl}
                       alt="preview"
                       className="relative w-full h-full"
                       style={{ objectFit: 'contain', display: 'block', zIndex: 1 }}

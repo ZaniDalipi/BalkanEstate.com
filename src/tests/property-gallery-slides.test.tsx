@@ -103,7 +103,7 @@ describe('PropertyGallery slide track', () => {
   it('offers the full candidate set and CORS mode the warm-up replays', () => {
     renderGallery(0);
     const active = slideImages().find((img) => img.dataset.galleryUrl === photo(0))!;
-    GALLERY_WIDTHS.forEach((w) => expect(active.getAttribute('srcset')).toContain(`w_${w}`));
+    GALLERY_WIDTHS.forEach((w) => expect(active.getAttribute('srcset')).toContain(`t_be_w${w}`));
     // Must match the preloader, or the warmed bytes cannot satisfy this request.
     expect(active.getAttribute('crossorigin')).toBe('anonymous');
   });
@@ -125,7 +125,7 @@ describe('PropertyGallery slide track', () => {
   it('fetches the first screenful of thumbnails up front rather than on scroll', () => {
     renderGallery(0);
     const thumbs = Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-      img.getAttribute('src')?.includes('w_480')
+      img.getAttribute('src')?.includes('t_be_w480')
     );
     expect(thumbs).toHaveLength(11);
     // The strip scrolls horizontally, so a fully lazy strip pops in under the

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
@@ -2328,7 +2329,7 @@ const MyAccountPage: React.FC = () => {
                                         <div className="relative w-full h-full">
                                             <div className="absolute inset-1 rounded-full bg-gradient-to-b from-neutral-300/50 to-neutral-400/30 blur-lg translate-y-1 scale-95" />
                                             <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
-                                                <img src={state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                <img src={optimizeCloudinaryUrl(state.currentUser.avatarUrl, { width: 320 }) || state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/25 via-transparent to-transparent pointer-events-none" />
                                             </div>
                                         </div>

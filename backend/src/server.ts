@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
+import { syncCloudinaryPresetsOnStartup } from './services/media/cloudinaryPresetSync';
 import ogRoutes from './routes/ogRoutes';
 import {
   propertyPageOgMiddleware,
@@ -183,6 +184,13 @@ connectDB().then(() => {
     serverLogger.error('Failed to seed featured cities:', err)
   );
 });
+
+// Register the Cloudinary delivery presets (named transformations allowed for
+// strict mode). Idempotent and non-blocking; images need them to load once
+// "Strict transformations" is on.
+if (process.env.NODE_ENV !== 'test') {
+  void syncCloudinaryPresetsOnStartup();
+}
 
 // Non-blocking score backfill: updates any agent/agency records with score=0 after DB is ready.
 // Runs in the background so it never delays server startup.

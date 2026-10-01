@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Conversation, Message } from '@/types';
@@ -30,7 +31,7 @@ const MessageImage: React.FC<{imageUrl: string; t: (key: string) => string}> = (
 
     return (
         <img
-            src={imageUrl}
+            src={optimizeCloudinaryUrl(imageUrl, { width: 640 }) || imageUrl}
             alt="Annotated property"
             loading="lazy"
             decoding="async"

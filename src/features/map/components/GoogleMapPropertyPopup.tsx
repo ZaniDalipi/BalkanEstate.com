@@ -3,6 +3,7 @@
  * Extracted from GoogleMapComponent.tsx
  */
 
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
@@ -28,9 +29,11 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
   // quoted only in gross and net would show the "0 m²" the field holds.
   const area = resolveDisplayArea(property);
   const { t } = useTranslation(['property']);
-  const imageUrl = property.images?.[0]
+  const rawImageUrl = property.images?.[0]
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
     : property.imageUrl;
+  // Popup hero: a 640px preset (strict-transformations safe), not the master.
+  const imageUrl = optimizeCloudinaryUrl(rawImageUrl, { width: 640 }) || rawImageUrl;
 
   const [imageLoaded, setImageLoaded] = useState(false);
 

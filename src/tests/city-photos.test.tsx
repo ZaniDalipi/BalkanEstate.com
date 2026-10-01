@@ -86,8 +86,8 @@ describe('cityImageSources', () => {
       { width: 800, height: 400 },
     );
 
-    expect(first).toContain('w_800');
-    expect(first).toContain('h_400');
+    // 800×400 → the 2:1 box preset at 800px wide (c_fill,g_auto,ar_2:1,w_800).
+    expect(first).toContain('t_be_r2x1_w800');
   });
 
   it('passes a photo on a host we cannot transform through untouched', () => {

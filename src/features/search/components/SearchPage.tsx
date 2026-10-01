@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
@@ -397,7 +398,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {currentUser.avatarUrl ? (
-                                                        <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                        <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
                                                     ) : (
                                                         <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
                                                     )}

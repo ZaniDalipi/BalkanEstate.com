@@ -5,7 +5,11 @@ import {
   snapCloudinaryWidth,
   CLOUDINARY_MAX_WIDTH,
   shouldProxyImage,
+  getPropertyImagePlaceholder,
+  getCityImageUrl,
+  getCityImagePlaceholder,
 } from '../../config/cloudinaryConfig';
+import { buildPresetDefinitions } from '../../backend/src/config/cloudinaryPresets';
 
 const SRC = 'https://res.cloudinary.com/demo/image/upload/v1/house.jpg';
 
@@ -23,7 +27,7 @@ describe('Cloudinary transformation budget', () => {
 
   it('never asks for more than the stored master', () => {
     expect(snapCloudinaryWidth(2560)).toBe(CLOUDINARY_MAX_WIDTH);
-    expect(optimizeCloudinaryUrl(SRC, { width: 2400 })).toContain(`w_${CLOUDINARY_MAX_WIDTH},c_limit`);
+    expect(optimizeCloudinaryUrl(SRC, { width: 2400 })).toContain(`t_be_w${CLOUDINARY_MAX_WIDTH}/`);
   });
 
   it('lets two components that want nearby sizes share one derivative', () => {
@@ -32,8 +36,8 @@ describe('Cloudinary transformation budget', () => {
     );
   });
 
-  it('keeps an explicit width×height box exact', () => {
-    expect(optimizeCloudinaryUrl(SRC, { width: 1200, height: 630, crop: 'pad' })).toContain('w_1200,h_630');
+  it('serves share cards (JPEG) through the 1200×630 preset', () => {
+    expect(optimizeCloudinaryUrl(SRC, { width: 1200, height: 630, crop: 'pad', format: 'jpg' })).toContain('/t_be_og/');
   });
 
   it('lists each srcSet candidate once after snapping', () => {
@@ -41,6 +45,39 @@ describe('Cloudinary transformation budget', () => {
     expect(set.split(', ')).toHaveLength(2);
     expect(set).toContain(' 320w');
     expect(set).toContain(' 480w');
+  });
+});
+
+/**
+ * With "Strict transformations" on, Cloudinary only serves named
+ * transformations the backend registered. Any URL the app builds with a name
+ * outside that set is a broken image.
+ */
+describe('strict-transformations compatibility', () => {
+  const registered = new Set(Object.keys(buildPresetDefinitions()));
+  const presetOf = (url: string): string => {
+    const match = url.match(/\/image\/upload\/t_([a-z0-9_]+)\//i);
+    if (!match) throw new Error(`no preset in ${url}`);
+    return match[1];
+  };
+
+  it('only ever produces registered presets, for any width or box', () => {
+    const urls: string[] = [];
+    for (let w = 1; w <= 2600; w += 7) {
+      urls.push(optimizeCloudinaryUrl(SRC, { width: w }));
+      for (const h of [40, 128, 224, 300, 450, 630, 1080]) urls.push(optimizeCloudinaryUrl(SRC, { width: w, height: h, crop: 'fill' }));
+    }
+    urls.push(optimizeCloudinaryUrl(SRC), optimizeCloudinaryUrl(SRC, { blur: 400 }), optimizeCloudinaryUrl(SRC, { format: 'jpg', width: 1200, height: 630 }));
+    urls.push(getPropertyImagePlaceholder(SRC), getCityImageUrl('Novi Sad', { country: 'Serbia', width: 400, height: 300 }), getCityImagePlaceholder('Tirana', 'Albania'));
+    urls.push(...cloudinarySrcSet(SRC, [195, 390, 585, 2560]).split(', ').map((c) => c.split(' ')[0]));
+
+    const unknown = [...new Set(urls.map(presetOf))].filter((name) => !registered.has(name));
+    expect(unknown).toEqual([]);
+  });
+
+  it('strips transforms already in the URL instead of stacking ad-hoc ones', () => {
+    const url = optimizeCloudinaryUrl('https://res.cloudinary.com/demo/image/upload/c_fill,w_96,h_96/v1/a.jpg', { width: 300 });
+    expect(url).toBe('https://res.cloudinary.com/demo/image/upload/t_be_w320/v1/a.jpg');
   });
 });
 

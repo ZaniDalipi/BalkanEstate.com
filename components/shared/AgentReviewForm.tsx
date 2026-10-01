@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { addAgentReview } from '../../services/apiService';
@@ -169,7 +170,7 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
                     {property.imageUrl && (
                       <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                         <img
-                          src={property.imageUrl}
+                          src={optimizeCloudinaryUrl(property.imageUrl, { width: 240 }) || property.imageUrl}
                           alt={property.title}
                           className="w-full h-full object-cover"
                         />

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -39,7 +40,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({ item, checked, onToggl
         className="w-4 h-4 flex-shrink-0 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary/30" />
       <div className="w-16 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
         {item.imageUrl && !imgFailed ? (
-          <img src={item.imageUrl} alt="" className="w-full h-full object-cover" onError={() => setImgFailed(true)} loading="lazy" referrerPolicy="no-referrer" />
+          <img src={optimizeCloudinaryUrl(item.imageUrl, { width: 480 }) || item.imageUrl} alt="" className="w-full h-full object-cover" onError={() => setImgFailed(true)} loading="lazy" referrerPolicy="no-referrer" />
         ) : (
           <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />

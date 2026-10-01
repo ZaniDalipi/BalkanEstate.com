@@ -56,7 +56,8 @@ const meta = (html: string, key: string): string | null => {
   return match ? match[1] : null;
 };
 
-const OG_CARD = 'f_jpg,q_auto,w_1200,h_630,c_pad,b_white';
+// The registered share-card preset (f_jpg,q_auto,w_1200,h_630,c_pad,b_white).
+const OG_CARD = 't_be_og';
 
 describe('isUsableSlug', () => {
   it('accepts real agent ids and two-segment agency slugs', () => {

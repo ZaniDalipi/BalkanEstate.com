@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
@@ -288,7 +289,7 @@ const ViewingRequestsTab: React.FC = () => {
                       className="w-full sm:w-24 h-32 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer group"
                     >
                       <img
-                        src={viewing.property.imageUrl}
+                        src={optimizeCloudinaryUrl(viewing.property.imageUrl, { width: 240 }) || viewing.property.imageUrl}
                         alt={propertyTitle}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

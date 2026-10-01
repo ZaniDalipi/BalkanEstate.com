@@ -23,6 +23,7 @@
     "seed:villa-destinations": "ts-node src/scripts/seedVillaDestinations.ts",
     "seed:destination-images": "ts-node src/scripts/seedDestinationImages.ts",
     "seed:destination-images:dry": "ts-node src/scripts/seedDestinationImages.ts --dry-run",
+    "cloudinary:sync-presets": "ts-node src/scripts/syncCloudinaryPresets.ts",
     "cleanup:videos": "ts-node src/scripts/removeStoredVideos.ts",
     "cleanup:videos:apply": "ts-node src/scripts/removeStoredVideos.ts --apply",
     "seed:all": "npm run seed:products && npm run seed:cities && npm run seed:coupons",
