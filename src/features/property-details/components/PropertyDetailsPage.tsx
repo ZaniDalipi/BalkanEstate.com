@@ -1005,7 +1005,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
             >
               {currentUser?.avatarUrl ? (
-                <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : currentUser ? (
                 <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
               ) : (

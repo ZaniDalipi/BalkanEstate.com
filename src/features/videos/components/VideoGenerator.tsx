@@ -1,12 +1,20 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { useVideoPreview, useGenerateVideo, useDeleteVideo } from '../hooks/useVideoGeneration';
-import { VideoFormat, VideoQuality, MusicStyle, BackgroundStyle, GeneratedVideo, addVideoToListing } from '../api/videoApi';
+import { useVideoPreview, useGenerateVideo } from '../hooks/useVideoGeneration';
+import {
+  VideoFormat,
+  VideoQuality,
+  MusicStyle,
+  BackgroundStyle,
+  DownloadedVideo,
+  VideoPreview,
+  saveVideoToDevice,
+} from '../api/videoApi';
 
 interface VideoGeneratorProps {
   property: Property;
-  onVideoGenerated?: (video: GeneratedVideo) => void;
+  onVideoGenerated?: (video: DownloadedVideo) => void;
   onClose?: () => void;
 }
 
@@ -36,21 +44,9 @@ const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-  </svg>
-);
-
 const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-  </svg>
-);
-
-const PlayIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M8 5v14l11-7z" />
   </svg>
 );
 
@@ -124,27 +120,14 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
   const [musicStyle, setMusicStyle] = useState<MusicStyle>('elegant');
   const [backgroundStyle, setBackgroundStyle] = useState<BackgroundStyle>('elegant');
   const [includeWatermark, setIncludeWatermark] = useState<boolean>(true);
-  const [embedInListing, setEmbedInListing] = useState<boolean>(true); // Auto-play video when listing opens
-  const [showVideoPreview, setShowVideoPreview] = useState<boolean>(false);
 
   // Fetch preview data
   const { data: preview, isLoading: isLoadingPreview } = useVideoPreview(property.id, { format, duration });
 
-  // Video generation mutation
-  const { generateVideo, isGenerating, progress, status, error, data: generatedVideo, reset } = useGenerateVideo({
-    onSuccess: (video) => {
-      if (onVideoGenerated) {
-        onVideoGenerated(video);
-      }
-    },
+  // Render the video (kept in the browser only — never uploaded)
+  const { generateVideo, isGenerating, status, error, data: generatedVideo, reset } = useGenerateVideo({
+    onSuccess: (video) => onVideoGenerated?.(video),
   });
-
-  // Delete video mutation
-  const deleteVideoMutation = useDeleteVideo();
-
-  // Add to listing state
-  const [isAddingToListing, setIsAddingToListing] = useState(false);
-  const [addedToListing, setAddedToListing] = useState(false);
 
   // Check if property has enough images
   const hasImages = property.images && property.images.length > 0;
@@ -167,50 +150,13 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
         musicStyle,
         backgroundStyle,
         includeWatermark,
-        embedInListing,
       },
-      useAsync: imageCount > 5, // Use async for more than 5 images
     });
-  }, [property.id, format, quality, duration, musicStyle, backgroundStyle, includeWatermark, embedInListing, imageCount, generateVideo]);
+  }, [property.id, format, quality, duration, musicStyle, backgroundStyle, includeWatermark, generateVideo]);
 
-  // Wrap reset to also clear addedToListing state
-  const handleReset = useCallback(() => {
-    setAddedToListing(false);
-    reset();
-  }, [reset]);
-
-  // Handle delete video
-  const handleDelete = useCallback(() => {
-    if (confirm('Are you sure you want to delete this video?')) {
-      deleteVideoMutation.mutate(property.id);
-    }
-  }, [property.id, deleteVideoMutation]);
-
-  // Handle add video to listing
-  const handleAddToListing = useCallback(async () => {
-    const videoUrl = generatedVideo?.url || property.generatedVideoUrl;
-    if (!videoUrl) return;
-
-    try {
-      setIsAddingToListing(true);
-      await addVideoToListing(property.id, videoUrl);
-      setAddedToListing(true);
-    } catch (err) {
-      // Silently handle - button will remain clickable
-    } finally {
-      setIsAddingToListing(false);
-    }
-  }, [generatedVideo, property.id, property.generatedVideoUrl]);
-
-  // Handle download video
   const handleDownload = useCallback(() => {
-    const videoUrl = generatedVideo?.url || property.videoUrl;
-    if (videoUrl) {
-      window.open(videoUrl, '_blank');
-    }
-  }, [generatedVideo, property.videoUrl]);
-
-  const existingVideo = preview?.existingVideo || property.videoUrl;
+    if (generatedVideo) saveVideoToDevice(generatedVideo);
+  }, [generatedVideo]);
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -238,25 +184,12 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
           </div>
         ) : isGenerating ? (
           // Generating state
-          <div className="text-center py-8">
-            <div className="relative w-24 h-24 mx-auto mb-6">
-              <SpinnerIcon className="w-24 h-24 text-primary" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xl font-bold text-primary">{Math.round(progress)}%</span>
-              </div>
-            </div>
-            <h4 className="text-lg font-medium text-neutral-700 mb-2">
-              {status === 'generating' ? 'Creating Your Video...' : 'Uploading Video...'}
-            </h4>
+          <div className="text-center py-8" role="status" aria-live="polite">
+            <SpinnerIcon className="w-16 h-16 text-primary mx-auto mb-6" />
+            <h4 className="text-lg font-medium text-neutral-700 mb-2">Creating Your Video...</h4>
             <p className="text-neutral-500 text-sm">
-              This may take a few moments. Please don't close this window.
+              This can take a minute. Please don't close this window.
             </p>
-            <div className="mt-4 w-full bg-neutral-200 rounded-full h-2 max-w-xs mx-auto">
-              <div
-                className="bg-primary h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
           </div>
         ) : status === 'completed' && generatedVideo ? (
           // Success state
@@ -264,19 +197,17 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckIcon className="w-8 h-8 text-green-600" />
             </div>
-            <h4 className="text-lg font-medium text-neutral-700 mb-2">Video Created Successfully!</h4>
+            <h4 className="text-lg font-medium text-neutral-700 mb-2">Your Video Is Ready!</h4>
             <p className="text-neutral-500 text-sm mb-6">
-              Your {Math.round(generatedVideo.duration)}s video is ready to share.
+              {Math.round(generatedVideo.duration)}s video — download it, post it, then add the link to your listing.
             </p>
 
-            {/* Video preview */}
+            {/* Local preview (plays from the file in your browser) */}
             <div className="relative bg-neutral-900 rounded-lg overflow-hidden mb-6 max-w-md mx-auto aspect-video">
               <video
-                src={generatedVideo.url}
+                src={generatedVideo.objectUrl}
                 controls
-                autoPlay
                 playsInline
-                loop
                 className="w-full h-full object-contain"
                 poster={property.imageUrl}
               />
@@ -285,111 +216,21 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
             {/* Action buttons */}
             <div className="flex flex-wrap gap-3 justify-center mb-6">
               <button
-                onClick={handleAddToListing}
-                disabled={isAddingToListing || addedToListing}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  addedToListing
-                    ? 'bg-green-100 text-green-700 cursor-default'
-                    : 'bg-primary text-white hover:bg-primary-dark'
-                } disabled:opacity-70`}
-              >
-                {isAddingToListing ? (
-                  <SpinnerIcon className="w-5 h-5" />
-                ) : addedToListing ? (
-                  <CheckIcon className="w-5 h-5" />
-                ) : (
-                  <VideoIcon className="w-5 h-5" />
-                )}
-                {addedToListing ? 'Added to Listing' : 'Add to Listing'}
-              </button>
-              <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
               >
                 <DownloadIcon className="w-5 h-5" />
-                Download
+                Download Video
               </button>
               <button
-                onClick={handleReset}
+                onClick={reset}
                 className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors"
               >
                 Create Another
               </button>
             </div>
 
-            {/* Social Media Share Section */}
-            <SocialShareButtons videoUrl={generatedVideo.url} propertyTitle={property.title || property.address} />
-          </div>
-        ) : existingVideo ? (
-          // Existing video
-          <div>
-            <div className="mb-6">
-              <h4 className="text-lg font-medium text-neutral-700 mb-2">Current Video</h4>
-              <div className="relative bg-neutral-900 rounded-lg overflow-hidden aspect-video max-w-md">
-                {showVideoPreview ? (
-                  <video
-                    src={existingVideo}
-                    controls
-                    autoPlay
-                    playsInline
-                    loop
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <div
-                    className="w-full h-full bg-cover bg-center cursor-pointer flex items-center justify-center"
-                    style={{ backgroundImage: `url(${property.imageUrl})` }}
-                    onClick={() => setShowVideoPreview(true)}
-                  >
-                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                      <PlayIcon className="w-8 h-8 text-primary ml-1" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Action buttons for existing video */}
-            <div className="flex gap-3 mb-6">
-              <button
-                onClick={handleDownload}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-              >
-                <DownloadIcon className="w-5 h-5" />
-                Download
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleteVideoMutation.isPending}
-                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
-              >
-                <TrashIcon className="w-5 h-5" />
-                Delete
-              </button>
-            </div>
-
-            <div className="border-t border-neutral-200 pt-6">
-              <h4 className="text-lg font-medium text-neutral-700 mb-4">Create New Video</h4>
-              <VideoOptionsForm
-                format={format}
-                setFormat={setFormat}
-                quality={quality}
-                setQuality={setQuality}
-                duration={duration}
-                setDuration={setDuration}
-                musicStyle={musicStyle}
-                setMusicStyle={setMusicStyle}
-                backgroundStyle={backgroundStyle}
-                setBackgroundStyle={setBackgroundStyle}
-                includeWatermark={includeWatermark}
-                setIncludeWatermark={setIncludeWatermark}
-                embedInListing={embedInListing}
-                setEmbedInListing={setEmbedInListing}
-                preview={preview}
-                isLoadingPreview={isLoadingPreview}
-                onGenerate={handleGenerate}
-              />
-            </div>
+            <PostToPlatforms />
           </div>
         ) : (
           // Options form for new video
@@ -406,8 +247,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
             setBackgroundStyle={setBackgroundStyle}
             includeWatermark={includeWatermark}
             setIncludeWatermark={setIncludeWatermark}
-            embedInListing={embedInListing}
-            setEmbedInListing={setEmbedInListing}
             preview={preview}
             isLoadingPreview={isLoadingPreview}
             onGenerate={handleGenerate}
@@ -447,9 +286,7 @@ interface VideoOptionsFormProps {
   setBackgroundStyle: (style: BackgroundStyle) => void;
   includeWatermark: boolean;
   setIncludeWatermark: (include: boolean) => void;
-  embedInListing: boolean;
-  setEmbedInListing: (embed: boolean) => void;
-  preview: any;
+  preview: VideoPreview | undefined;
   isLoadingPreview: boolean;
   onGenerate: () => void;
 }
@@ -467,8 +304,6 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
   setBackgroundStyle,
   includeWatermark,
   setIncludeWatermark,
-  embedInListing,
-  setEmbedInListing,
   preview,
   isLoadingPreview,
   onGenerate,
@@ -600,23 +435,6 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
         </label>
       </div>
 
-      {/* Embed in listing toggle */}
-      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20">
-        <div>
-          <span className="text-sm font-medium text-neutral-700">Auto-play on listing page</span>
-          <p className="text-xs text-neutral-500">Video plays automatically when visitors open your listing</p>
-        </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={embedInListing}
-            onChange={(e) => setEmbedInListing(e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="w-11 h-6 bg-neutral-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-        </label>
-      </div>
-
       {/* Preview info */}
       {preview && !isLoadingPreview && (
         <div className="bg-neutral-50 rounded-lg p-4">
@@ -654,60 +472,28 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
   );
 };
 
-// Social sharing buttons component
-interface SocialShareButtonsProps {
-  videoUrl: string;
-  propertyTitle: string;
-}
+// Where sellers post the downloaded video. We host nothing — the listing links to the post.
+const UPLOAD_PAGES: Record<'instagram' | 'tiktok' | 'youtube' | 'facebook', string> = {
+  instagram: 'https://www.instagram.com/create/select/',
+  tiktok: 'https://www.tiktok.com/upload',
+  youtube: 'https://studio.youtube.com/channel/upload',
+  facebook: 'https://www.facebook.com/reels/create/',
+};
 
-const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({ videoUrl, propertyTitle }) => {
-  const handleShare = useCallback((platform: string) => {
-    const encodedUrl = encodeURIComponent(videoUrl);
-    const encodedTitle = encodeURIComponent(`Check out this property: ${propertyTitle} | BalkanEstate`);
-    const websiteUrl = 'https://balkanestateai.com';
-
-    let shareUrl = '';
-
-    switch (platform) {
-      case 'instagram':
-        // Instagram doesn't have a direct share URL, but we can copy the link
-        navigator.clipboard.writeText(videoUrl);
-        alert('Video URL copied! Open Instagram and paste the link in your story or post.');
-        return;
-      case 'tiktok':
-        // TikTok requires the app - copy link for user
-        navigator.clipboard.writeText(videoUrl);
-        alert('Video URL copied! Open TikTok app to upload your video.');
-        return;
-      case 'youtube':
-        // YouTube Studio for uploads
-        window.open('https://studio.youtube.com/channel/upload', '_blank');
-        navigator.clipboard.writeText(videoUrl);
-        alert('Video URL copied! Upload to YouTube Studio.');
-        return;
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedTitle}`;
-        break;
-      default:
-        return;
-    }
-
-    if (shareUrl) {
-      window.open(shareUrl, '_blank', 'width=600,height=400');
-    }
-  }, [videoUrl, propertyTitle]);
-
-  const handleCopyLink = useCallback(() => {
-    navigator.clipboard.writeText(videoUrl);
-    alert('Video link copied to clipboard!');
-  }, [videoUrl]);
+const PostToPlatforms: React.FC = () => {
+  const handleShare = useCallback((platform: keyof typeof UPLOAD_PAGES) => {
+    window.open(UPLOAD_PAGES[platform], '_blank', 'noopener,noreferrer');
+  }, []);
 
   return (
     <div className="border-t border-neutral-200 pt-6">
-      <div className="flex items-center justify-center gap-2 mb-4">
+      <div className="flex items-center justify-center gap-2 mb-2">
         <ShareIcon className="w-5 h-5 text-neutral-500" />
-        <h5 className="text-sm font-medium text-neutral-700">Share to Social Media</h5>
+        <h5 className="text-sm font-medium text-neutral-700">Post it, then add the link to your listing</h5>
       </div>
+      <p className="text-xs text-neutral-500 mb-4 text-center">
+        Upload the downloaded file to one of these, copy the post link, and paste it into your listing&apos;s video field.
+      </p>
 
       <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto mb-4">
         {/* Instagram */}
@@ -751,20 +537,6 @@ const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({ videoUrl, prope
         </button>
       </div>
 
-      {/* Copy link button */}
-      <button
-        onClick={handleCopyLink}
-        className="flex items-center justify-center gap-2 w-full max-w-sm mx-auto py-2.5 px-4 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors text-sm"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-        </svg>
-        Copy Video Link
-      </button>
-
-      <p className="text-xs text-neutral-500 mt-3 text-center">
-        Download the video first, then upload to your preferred platform
-      </p>
     </div>
   );
 };

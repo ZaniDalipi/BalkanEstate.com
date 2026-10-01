@@ -1,6 +1,7 @@
 // PropertyContact Component
 // Seller contact sidebar with calculators and quick actions
 
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, Agency } from '../../../types';
@@ -435,7 +436,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
                 <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                   {agencyData.logo ? (
                     <img
-                      src={agencyData.logo}
+                      src={optimizeCloudinaryUrl(agencyData.logo, { width: 128 }) || agencyData.logo}
                       alt={agencyData.name}
                       loading="lazy"
                       decoding="async"

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -144,7 +145,7 @@ const AdBannerManager: React.FC = () => {
                   {/* Preview */}
                   <div className="w-full sm:w-40 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                     {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                      <img src={optimizeCloudinaryUrl(item.imageUrl, { width: 320 }) || item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <PhotoIcon className="w-6 h-6 text-gray-300" />

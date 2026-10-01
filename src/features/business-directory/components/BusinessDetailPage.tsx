@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -249,7 +250,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
         >
           <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
             {currentUser.avatarUrl ? (
-              <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+              <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
             ) : (
               <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
             )}
@@ -629,7 +630,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             <>
               <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
               <img
-                src={listing.bannerUrl}
+                src={optimizeCloudinaryUrl(listing.bannerUrl, { width: 1280 }) || listing.bannerUrl}
                 alt={`${listing.name} banner`}
                 className={`relative w-full h-full object-cover ${isRepositioning ? 'select-none pointer-events-none' : ''}`}
                 style={{ objectPosition: `center ${bannerPosY}%` }}
@@ -804,7 +805,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                 style={{ boxShadow: '0 10px 25px rgba(0,0,0,0.12)' }}
               >
                 {listing.logoUrl ? (
-                  <img src={listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" />
+                  <img src={optimizeCloudinaryUrl(listing.logoUrl, { width: 240 }) || listing.logoUrl} alt={listing.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <span className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white drop-shadow-lg">

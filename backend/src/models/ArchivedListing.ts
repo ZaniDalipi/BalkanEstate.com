@@ -33,6 +33,8 @@ export interface IArchivedListing extends Document {
   // Single thumbnail image (archived with reduced storage)
   thumbnailUrl?: string;
   thumbnailPublicId?: string;
+  /** Set when the retention job cleared the thumbnail from Cloudinary. */
+  mediaPurgedAt?: Date;
 
   // Sale/rental details
   soldAt?: Date;
@@ -93,6 +95,7 @@ const ArchivedListingSchema: Schema = new Schema(
       default: Date.now,
       required: true,
     },
+    mediaPurgedAt: { type: Date },
 
     title: String,
     listingType: {

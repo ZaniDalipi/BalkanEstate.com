@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useRef, useEffect } from 'react';
 import { Animated } from '@/src/components/ui/Animations';
 import { BoltIcon, CheckIcon, SparklesIcon } from '@/constants';
@@ -269,7 +270,7 @@ const SpecialOffersSection: React.FC<SpecialOffersSectionProps> = ({
                     }`}
                   >
                     <img
-                      src={listing.imageUrl}
+                      src={optimizeCloudinaryUrl(listing.imageUrl, { width: 128 }) || listing.imageUrl}
                       alt={listing.address}
                       loading="lazy"
                       decoding="async"

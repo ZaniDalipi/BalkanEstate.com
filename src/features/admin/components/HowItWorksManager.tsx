@@ -29,10 +29,7 @@ const HowItWorksManager: React.FC = () => {
     editingItem,
     formData,
     setFormData,
-    isUploading,
-    uploadProgress,
-    fileInputRef,
-    handleFileUpload,
+    formError,
     handleSubmit,
     handleDelete,
     handleToggleActive,
@@ -261,12 +258,9 @@ const HowItWorksManager: React.FC = () => {
           editingItem={editingItem}
           formData={formData}
           setFormData={setFormData}
-          isUploading={isUploading}
-          uploadProgress={uploadProgress}
-          fileInputRef={fileInputRef}
+          formError={formError}
           onClose={() => setShowModal(false)}
           onSubmit={handleSubmit}
-          onFileUpload={handleFileUpload}
           addStep={addStep}
           updateStep={updateStep}
           removeStep={removeStep}

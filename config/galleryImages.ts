@@ -23,7 +23,14 @@
  * `crossOrigin`). A warmed photo is then a guaranteed cache hit on display.
  */
 
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from './cloudinaryConfig';
+import {
+  optimizeCloudinaryUrl,
+  cloudinarySrcSet,
+  getPropertyImagePlaceholder,
+  buildImageProxyUrl,
+  shouldProxyImage,
+  snapCloudinaryWidth,
+} from './cloudinaryConfig';
 
 export const isCloudinaryUrl = (url: string | undefined): url is string =>
   typeof url === 'string' && url.includes('res.cloudinary.com');
@@ -35,11 +42,12 @@ export const isCloudinaryUrl = (url: string | undefined): url is string =>
  * `100vw`, so they pick the *same* candidate and opening fullscreen reuses the
  * bytes the gallery already downloaded.
  *
- * The list runs to 2560 because the frame is full-bleed: on a 1920px desktop
- * the Ken Burns zoom asks for ~2200 device pixels, and stopping at 1920 left
- * the browser upscaling its widest candidate.
+ * It stops at 1920 because that is the stored master's max edge: a wider
+ * candidate only upscales on Cloudinary and bills more bandwidth for no extra
+ * detail. Each entry is a CLOUDINARY_WIDTH_BUCKETS width, so these are the
+ * same derivatives the rest of the app requests.
  */
-export const GALLERY_WIDTHS = [480, 768, 1080, 1440, 1920, 2560];
+export const GALLERY_WIDTHS = [480, 800, 1280, 1920];
 
 /**
  * The gallery frame is edge-to-edge at every width — it is rendered outside the
@@ -61,12 +69,12 @@ export const GALLERY_SIZES = '(max-width: 640px) 100vw, 115vw';
 /**
  * Delivery quality for the photos a buyer actually studies.
  *
- * `q_auto` resolves to `auto:good`, which is tuned for thumbnails and leaves
- * visible ringing on the large flat gradients a property photo is full of —
- * sky, render backdrops, white facades. `auto:best` keeps Cloudinary's
- * per-image analysis and just holds a higher floor.
+ * `auto:best` holds a higher floor on flat gradients (sky, white facades) but
+ * ships noticeably heavier files, and gallery photos are the bulk of our
+ * Cloudinary bandwidth. `auto:good` keeps the per-image analysis at a cost
+ * that fits the free plan; revisit if ringing becomes visible.
  */
-export const GALLERY_QUALITY = 'auto:best' as const;
+export const GALLERY_QUALITY = 'auto:good' as const;
 
 /** The fullscreen viewer always spans the viewport. */
 export const VIEWER_SIZES = '100vw';
@@ -97,8 +105,16 @@ export const getGallerySources = (
   if (!url) return { src: '', srcSet: '', sizes, placeholder: '' };
 
   if (!isCloudinaryUrl(url)) {
-    // External URLs go through the backend proxy, which serves a single size.
-    return { src: `/api/image-proxy?url=${encodeURIComponent(url)}`, srcSet: '', sizes, placeholder: '' };
+    // External URLs go through the backend proxy, which resizes and caches
+    // each width on our server (no Cloudinary credits).
+    if (!shouldProxyImage(url)) return { src: url, srcSet: '', sizes, placeholder: '' };
+    const seen = new Set<number>();
+    const srcSet = widths
+      .map(snapCloudinaryWidth)
+      .filter((w) => (seen.has(w) ? false : (seen.add(w), true)))
+      .map((w) => `${buildImageProxyUrl(url, w)} ${w}w`)
+      .join(', ');
+    return { src: buildImageProxyUrl(url, fallbackWidth), srcSet, sizes, placeholder: '' };
   }
 
   return {

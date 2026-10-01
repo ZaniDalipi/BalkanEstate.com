@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
@@ -85,7 +86,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
         <div className={`h-20 sm:h-22 ${listing.bannerUrl ? '' : `bg-gradient-to-r ${gradient}`} relative overflow-hidden`}>
           {listing.bannerUrl ? (
             <img
-              src={listing.bannerUrl}
+              src={optimizeCloudinaryUrl(listing.bannerUrl, { width: 640 }) || listing.bannerUrl}
               alt={`${listing.name} banner`}
               className="w-full h-full object-cover"
               style={{ objectPosition: `center ${listing.bannerPosition ?? 50}%` }}
@@ -185,7 +186,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
           <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center flex-shrink-0 overflow-hidden border-[3px] border-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 ring-1 ring-neutral-100/50">
             {listing.logoUrl ? (
               <img
-                src={listing.logoUrl}
+                src={optimizeCloudinaryUrl(listing.logoUrl, { width: 128 }) || listing.logoUrl}
                 alt={listing.name}
                 className="w-full h-full object-cover rounded-lg"
                 loading="lazy"

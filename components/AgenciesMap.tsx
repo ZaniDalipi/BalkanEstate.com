@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
@@ -172,7 +173,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                 <div className="flex items-center gap-3 mb-3">
                   {agency.logo ? (
                     <img
-                      src={agency.logo}
+                      src={optimizeCloudinaryUrl(agency.logo, { width: 128 }) || agency.logo}
                       alt={agency.name}
                       className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                     />

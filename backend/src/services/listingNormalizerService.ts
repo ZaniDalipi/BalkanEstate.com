@@ -824,8 +824,6 @@ export const normalize = async (
 
   // If the source belongs to a user, attribute imported listings to them.
   // Otherwise fall back to the system "external" seller account.
-  // Computed before re-hosting so external images can be organized under the
-  // attributed user (balkan-estate/users/{userId}/external-listings/...).
   let sellerId: Types.ObjectId;
   let createdByName: string;
   let createdByEmail: string;
@@ -853,9 +851,8 @@ export const normalize = async (
 
   if (opts.rehostImages && imageUrls.length) {
     const externalContext = {
-      userId: sellerId.toString(),
+      sourceSlug: source.slug,
       listingId: raw.id,
-      listingTitle: (mapped.title as string | undefined) ?? undefined,
     };
     const rehosted: IPropertyImage[] = [];
     for (const url of imageUrls) {

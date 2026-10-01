@@ -8,7 +8,7 @@ import Property from '../models/Property';
 import Subscription from '../models/Subscription';
 import Product from '../models/Product';
 import { geocodeAgency } from '../services/geocodingService';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage, deleteAgencyMedia } from '../services/cloudinaryService';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 
@@ -3249,6 +3249,12 @@ export const deleteAgency = async (req: Request, res: Response): Promise<void> =
 
     // Delete the agency
     await Agency.findByIdAndDelete(id);
+
+    try {
+      await deleteAgencyMedia(String(id));
+    } catch (mediaError) {
+      agencyLogger.error('⚠️ Failed to delete agency media:', mediaError);
+    }
 
     agencyLogger.info(`🗑️ Agency "${agency.name}" deleted by owner ${currentUser.email}. ${agentMembers.length} agents transferred to Pro monthly.`);
 

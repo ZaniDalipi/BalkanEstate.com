@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agency } from '../types';
@@ -240,7 +241,7 @@ const AgenciesListPage: React.FC = () => {
           >
             {agency.coverImage && (
               <img
-                src={agency.coverImage}
+                src={optimizeCloudinaryUrl(agency.coverImage, { width: 640 }) || agency.coverImage}
                 alt={`${agency.name} banner`}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
@@ -315,7 +316,7 @@ const AgenciesListPage: React.FC = () => {
               style={{ width: `${logoSize}px`, height: `${logoSize}px`, minWidth: `${logoSize}px`, minHeight: `${logoSize}px` }}
             >
               {agency.logo ? (
-                <img src={agency.logo} alt={agency.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" draggable={false} />
+                <img src={optimizeCloudinaryUrl(agency.logo, { width: 240 }) || agency.logo} alt={agency.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" draggable={false} />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
                   <BuildingOfficeIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />

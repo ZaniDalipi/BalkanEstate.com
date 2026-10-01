@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
@@ -581,7 +582,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                     >
                                                         {property.imageUrl && (
                                                             <div className="w-full h-28 overflow-hidden">
-                                                                <img src={property.imageUrl} alt={property.address} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                                                                <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 480 }) || property.imageUrl} alt={property.address} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                                                             </div>
                                                         )}
                                                         <div className="p-2.5">
@@ -685,7 +686,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 <div className="text-center min-w-[200px]">
                                                     <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-gray-300 flex-shrink-0">
                                                         {agent.avatarUrl ? (
-                                                            <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
+                                                            <img src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 128 }) || agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                         ) : (
                                                             <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                                         )}
@@ -720,7 +721,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="w-full text-white text-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                             <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-indigo-300 flex-shrink-0">
                                                 {agent.avatarUrl ? (
-                                                    <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
+                                                    <img src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 128 }) || agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" decoding="async" />
                                                 ) : (
                                                     <DefaultAvatar gender={agent.gender} seed={agent.userId || agent.agentId || agent.name} avatarOptions={agent.avatarOptions} show3d />
                                                 )}
@@ -1045,7 +1046,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
                                                     {t.userId?.avatarUrl ? (
                                                         <img
-                                                            src={t.userId.avatarUrl}
+                                                            src={optimizeCloudinaryUrl(t.userId.avatarUrl, { width: 128 }) || t.userId.avatarUrl}
                                                             alt={t.userId.name || t.clientName}
                                                             loading="lazy"
                                                             decoding="async"

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User } from 'lucide-react';
@@ -98,7 +99,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                 >
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
                         {currentUser.avatarUrl ? (
-                            <img src={currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                            <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
                         ) : (
                             <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
                         )}
@@ -450,7 +451,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                                 <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                                                     {agencyData.logo ? (
                                                         <img
-                                                            src={agencyData.logo}
+                                                            src={optimizeCloudinaryUrl(agencyData.logo, { width: 128 }) || agencyData.logo}
                                                             alt={agencyData.name}
                                                             loading="lazy"
                                                             decoding="async"

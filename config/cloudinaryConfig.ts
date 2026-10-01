@@ -15,6 +15,17 @@
  * 3. Set Public ID to: city-{country}-{city}
  */
 
+import { API_URL } from '../src/shared/api/config';
+import {
+  PRESET_WIDTHS,
+  LQIP_PRESET,
+  OG_PRESET,
+  widthPresetName,
+  boxPresetName,
+  snapPresetWidth,
+  snapPresetRatio,
+} from '../backend/src/config/cloudinaryPresets';
+
 // Cloudinary cloud name
 export const CLOUDINARY_CLOUD_NAME = 'dh8tbq8wy';
 
@@ -55,33 +66,16 @@ export const getCityImageUrl = (
     gravity?: 'auto' | 'center' | 'face' | 'faces';
   } = {}
 ): string => {
-  const {
-    country,
-    width = 800,
-    height = 600,
-    quality = 'auto',
-    format = 'auto',
-    crop = 'fill',
-    gravity = 'auto',
-  } = options;
+  const { country, width = 800, height = 600 } = options;
 
   const normalizedCity = normalizeName(cityName);
   const normalizedCountry = country ? normalizeName(country) : 'unknown';
 
-  // Build transformation string
-  const transformations = [
-    `w_${width}`,
-    `h_${height}`,
-    `c_${crop}`,
-    `g_${gravity}`,
-    `q_${quality}`,
-    `f_${format}`,
-  ].join(',');
-
-  // Public ID format: city-{country}-{city}
+  // Public ID format: city-{country}-{city}. Delivered through a registered
+  // box preset (strict-transformations safe); quality/format/crop/gravity are
+  // fixed by the preset (q_auto, f_auto, c_fill, g_auto).
   const publicId = `city-${normalizedCountry}-${normalizedCity}`;
-
-  return `${CLOUDINARY_BASE_URL}/${transformations}/${publicId}`;
+  return `${CLOUDINARY_BASE_URL}/${presetSegment(presetFor({ width, height }))}/${publicId}`;
 };
 
 /**
@@ -96,7 +90,7 @@ export const getPropertyImagePlaceholder = (imageUrl: string | undefined): strin
   if (!imageUrl) return '';
   const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
   if (!uploadMatch) return '';
-  return `${uploadMatch[1]}w_20,c_fill,q_10,e_blur:500,f_auto/${uploadMatch[2]}`;
+  return `${uploadMatch[1]}${presetSegment(LQIP_PRESET)}/${uploadMatch[2]}`;
 };
 
 /**
@@ -111,7 +105,7 @@ export const getCityImagePlaceholder = (cityName: string, country?: string): str
 
   const publicId = `city-${normalizedCountry}-${normalizedCity}`;
 
-  return `${CLOUDINARY_BASE_URL}/w_50,h_38,c_fill,g_auto,q_10,e_blur:1000,f_auto/${publicId}`;
+  return `${CLOUDINARY_BASE_URL}/${presetSegment(LQIP_PRESET)}/${publicId}`;
 };
 
 /**
@@ -183,18 +177,126 @@ const stripCloudinaryTransforms = (rest: string): string => {
   return firstNonTransform !== -1 ? parts.slice(firstNonTransform).join('/') : rest;
 };
 
+// ============================================================================
+// Delivery presets (strict-transformations safe)
+// ============================================================================
+//
+// Cloudinary bills every *distinct* derived image as a transformation, and
+// with "Strict transformations" on it refuses any ad-hoc `w_480,c_limit,…`
+// URL outright. So every image the app shows uses one of a fixed set of
+// named transformations (`t_be_w480`, `t_be_r4x3_w320`, `t_be_lqip`,
+// `t_be_og`) defined in backend/src/config/cloudinaryPresets.ts — the same
+// file the backend uses to register them with Cloudinary at startup.
+//
+// Requests are snapped onto that set: widths round UP to the next bucket,
+// width×height boxes snap to the nearest preset aspect ratio. Masters are
+// stored at ≤1920px, so nothing larger is ever requested.
+
+/** Widths a delivery URL may use. Requests are rounded *up* to the next one. */
+export const CLOUDINARY_WIDTH_BUCKETS = PRESET_WIDTHS;
+
+/** Largest width ever requested — matches the stored master's max edge. */
+export const CLOUDINARY_MAX_WIDTH = PRESET_WIDTHS[PRESET_WIDTHS.length - 1];
+
+/** Round a requested width up to the nearest bucket (capped at the max). */
+export const snapCloudinaryWidth = snapPresetWidth;
+
 /**
- * Optimizes a Cloudinary-uploaded image URL by injecting transformation parameters.
+ * The untransformed original of a Cloudinary image URL, or null. Delivering
+ * the original is always allowed — even with strict transformations — so it
+ * is the safe fallback when a preset URL fails to load.
+ */
+export const originalCloudinaryUrl = (url: string | undefined | null): string | null => {
+  if (!url) return null;
+  const match = url.split(/[?#]/)[0].match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  if (!match) return null;
+  return `${match[1]}${stripCloudinaryTransforms(match[2])}`;
+};
+
+/**
+ * `onError` for a Cloudinary <img>: retry once with the original image (the
+ * preset may be missing or a CDN error cached). Returns false when there is
+ * nothing left to try, so the caller can show its own fallback.
+ */
+export const retryWithOriginalImage = (img: HTMLImageElement): boolean => {
+  if (img.dataset.cdnFallback === 'original') return false;
+  const original = originalCloudinaryUrl(img.currentSrc || img.src);
+  if (!original || original === img.src) return false;
+  img.dataset.cdnFallback = 'original';
+  img.removeAttribute('srcset');
+  img.src = original;
+  return true;
+};
+
+/** `t_<preset>` — the URL segment for a named transformation. */
+const presetSegment = (name: string): string => `t_${name}`;
+
+/**
+ * The preset for a request.
+ *  - blur        → blurred 32px placeholder
+ *  - format jpg  → 1200×630 share card (only share cards force JPEG)
+ *  - width×height→ cropped box at the nearest preset ratio
+ *  - width       → width bucket, shrink-only
+ */
+const presetFor = (req: { width?: number; height?: number; format?: string; blur?: boolean }): string => {
+  if (req.blur) return LQIP_PRESET;
+  if (req.format === 'jpg') return OG_PRESET;
+  if (req.width && req.height) return boxPresetName(snapPresetRatio(req.width, req.height), snapPresetWidth(req.width));
+  return widthPresetName(snapPresetWidth(req.width ?? CLOUDINARY_MAX_WIDTH));
+};
+
+// ============================================================================
+// External images → our resizing proxy (zero Cloudinary credits)
+// ============================================================================
+
+/**
+ * Hosts served directly: they have their own CDN/resizing and are allowed by
+ * the CSP. Everything else external (listing feeds, scraped sites) goes
+ * through `/api/image-proxy`, which resizes to WebP and caches on our server.
+ */
+const DIRECT_IMAGE_HOSTS = new Set(['images.unsplash.com', 'upload.wikimedia.org']);
+
+const isOwnSiteUrl = (url: URL): boolean =>
+  typeof window !== 'undefined' && url.host === window.location.host;
+
+/** Proxy URL for an external image at a bucketed width. */
+export const buildImageProxyUrl = (url: string, width?: number): string => {
+  const params = new URLSearchParams({ url });
+  if (width) params.set('w', String(snapCloudinaryWidth(width)));
+  return `${API_URL}/image-proxy?${params.toString()}`;
+};
+
+/** True for http(s) images we should resize through the proxy. */
+export const shouldProxyImage = (rawUrl: string): boolean => {
+  // Only in the browser. Server contexts (Pages Functions building share
+  // cards) have no API origin to point at and keep the source URL.
+  if (typeof window === 'undefined') return false;
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
+  const host = url.hostname.toLowerCase();
+  if (host === 'res.cloudinary.com' || host.endsWith('googleusercontent.com')) return false;
+  if (DIRECT_IMAGE_HOSTS.has(host) || isOwnSiteUrl(url)) return false;
+  if (rawUrl.startsWith(`${API_URL}/image-proxy`)) return false;
+  // SVGs are never proxied (the proxy rejects them — they can carry script).
+  if (/\.svg(?:$|\?)/i.test(url.pathname)) return false;
+  return true;
+};
+
+/**
+ * Size an image URL for display.
  *
- * Cloudinary upload URLs follow this format:
- *   https://res.cloudinary.com/{cloud}/image/upload/v{version}/{path}.jpg
- *
- * We inject transforms between `/upload/` and the version/path:
- *   https://res.cloudinary.com/{cloud}/image/upload/f_auto,q_auto,w_800/v{version}/{path}.jpg
- *
- * For non-Cloudinary URLs, returns the original URL unchanged.
- *
- * For Google user content URLs (avatars), appends size parameter.
+ *  - Cloudinary: rebuilt onto a registered preset, e.g.
+ *      https://res.cloudinary.com/{cloud}/image/upload/t_be_w800/v{version}/{path}.jpg
+ *    Any transforms already in the URL are stripped first. `quality`, `crop`,
+ *    `gravity` and `background` are accepted for compatibility but fixed by
+ *    the preset (q_auto/f_auto; c_limit for widths, c_fill+g_auto for boxes).
+ *  - Google avatars: size parameter.
+ *  - Other external images: our resizing proxy.
  */
 export const optimizeCloudinaryUrl = (
   url: string | undefined,
@@ -237,63 +339,37 @@ export const optimizeCloudinaryUrl = (
     return Math.max(1, Math.min(Math.round(val), max));
   };
 
-  const {
-    width: rawWidth,
-    height: rawHeight,
-    quality = 'auto',
-    format = 'auto',
-    crop,
-    gravity,
-    background,
-    blur,
-  } = options;
+  const { width: rawWidth, height: rawHeight, format = 'auto', blur } = options;
 
-  const width = clampDimension(rawWidth, 4096);
-  const height = clampDimension(rawHeight, 4096);
+  const requestedWidth = clampDimension(rawWidth, 4096);
+  const requestedHeight = clampDimension(rawHeight, 4096);
 
-  // Security: the background goes straight into the URL's transform segment,
-  // so only accept a colour name or an explicit rgb:hex value.
-  const safeBackground =
-    background && /^(?:[a-z]{3,20}|rgb:[0-9a-f]{3,8})$/i.test(background) ? background : undefined;
-
-  // Cloudinary rejects a blur above 2000, and the value goes straight into the
-  // URL, so cap rather than trust the caller. Anything under 1 is not a blur
-  // Cloudinary can apply, and clamping it up to 1 would put a transform on a
-  // URL whose caller asked for none — so it means the same as omitting it.
-  const blurRadius =
-    typeof blur === 'number' && Number.isFinite(blur) && blur >= 1
-      ? Math.min(Math.round(blur), 2000)
-      : undefined;
-
-  // Handle Cloudinary upload URLs — including those with existing transforms baked in.
-  // We find the version segment (v{digits}) to separate any pre-existing transforms
-  // from the versioned public ID, then rebuild the URL with only the requested options.
-  // This prevents pre-existing crops (e.g. c_fill,ar_16:9) from silently cropping images.
+  // Handle Cloudinary upload URLs — including those with transforms baked in.
+  // The transforms are stripped (so an earlier crop never stacks with ours)
+  // and replaced by exactly one registered preset.
   if (url.includes('res.cloudinary.com') && url.includes('/image/upload/')) {
     const uploadBaseMatch = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
     if (uploadBaseMatch) {
       const [, base, rest] = uploadBaseMatch;
       const cleanPath = stripCloudinaryTransforms(rest);
-
-      const transforms: string[] = [`f_${format}`, `q_${quality}`];
-      if (width) transforms.push(`w_${width}`);
-      if (height) transforms.push(`h_${height}`);
-      if (crop) transforms.push(`c_${crop}`);
-      if (gravity) transforms.push(`g_${gravity}`);
-      if (safeBackground) transforms.push(`b_${safeBackground}`);
-      // Last, so Cloudinary blurs the downscaled image rather than the source.
-      if (blurRadius) transforms.push(`e_blur:${blurRadius}`);
-      return `${base}${transforms.join(',')}/${cleanPath}`;
+      const wantsBlur = typeof blur === 'number' && Number.isFinite(blur) && blur >= 1;
+      const preset = presetFor({ width: requestedWidth, height: requestedHeight, format, blur: wantsBlur });
+      return `${base}${presetSegment(preset)}/${cleanPath}`;
     }
     return url;
   }
 
   // Handle Google user content URLs (avatars) - resize via URL param
   if (url.includes('lh3.googleusercontent.com') || url.includes('googleusercontent.com')) {
-    const size = clampDimension(rawWidth, 512) || 96;
+    const size = clampDimension(requestedWidth, 512) || 96;
     // Remove any existing size suffix and add our own
     const cleaned = url.replace(/=s\d+-c$/, '').replace(/=s\d+$/, '');
     return `${cleaned}=s${size}`;
+  }
+
+  // Other external images (listing feeds): resized + cached by our proxy.
+  if (shouldProxyImage(url)) {
+    return buildImageProxyUrl(url, requestedWidth);
   }
 
   return url;
@@ -305,7 +381,7 @@ export const optimizeCloudinaryUrl = (
  */
 export const cloudinarySrcSet = (
   url: string | undefined,
-  widths: number[] = [400, 640, 800, 1200, 1920],
+  widths: number[] = [480, 800, 1280, 1920],
   options: {
     quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best';
     format?: 'auto' | 'webp';
@@ -321,108 +397,19 @@ export const cloudinarySrcSet = (
   const uploadMatch = url.match(/^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/);
   if (!uploadMatch) return '';
 
+  // Widths are snapped to buckets, so two candidates can collapse into one —
+  // describe each by its real width and list it once.
+  const seen = new Set<number>();
   return widths
-    .map((w) => {
-      const optimized = optimizeCloudinaryUrl(url, { ...options, width: w });
-      return `${optimized} ${w}w`;
-    })
-    .join(', ');
-};
-
-// ============================================================================
-// External Image Optimization (Cloudinary Fetch)
-// ============================================================================
-
-/**
- * Cloudinary fetch base URL for optimizing external images
- * This fetches, caches, and optimizes images from external URLs
- */
-export const CLOUDINARY_FETCH_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/fetch`;
-
-/**
- * Optimizes an external image URL using Cloudinary's fetch feature
- * Benefits:
- * - Automatic format conversion (WebP for supported browsers)
- * - Compression and quality optimization
- * - CDN caching for faster global delivery
- * - Responsive image sizing
- *
- * @param externalUrl - The external image URL (e.g., Unsplash, Pexels)
- * @param options - Transformation options
- * @returns Optimized Cloudinary fetch URL
- */
-export const getOptimizedExternalImage = (
-  externalUrl: string,
-  options: {
-    width?: number;
-    height?: number;
-    quality?: 'auto' | 'auto:low' | 'auto:eco' | 'auto:good' | 'auto:best' | number;
-    format?: 'auto' | 'webp' | 'jpg' | 'png';
-    crop?: 'fill' | 'scale' | 'fit' | 'thumb' | 'limit';
-    gravity?: 'auto' | 'center' | 'face' | 'faces';
-  } = {}
-): string => {
-  // Security: Validate URL
-  if (!externalUrl || typeof externalUrl !== 'string' || !/^https?:\/\//i.test(externalUrl)) {
-    return '';
-  }
-
-  const {
-    width,
-    height,
-    quality = 'auto:good',
-    format = 'auto',
-    crop = 'fill',
-    gravity = 'auto',
-  } = options;
-
-  // Build transformation string
-  const transformations: string[] = [];
-
-  if (width) transformations.push(`w_${width}`);
-  if (height) transformations.push(`h_${height}`);
-  if (crop) transformations.push(`c_${crop}`);
-  if (gravity) transformations.push(`g_${gravity}`);
-  transformations.push(`q_${quality}`);
-  transformations.push(`f_${format}`);
-
-  const transformString = transformations.join(',');
-
-  // Encode the external URL
-  const encodedUrl = encodeURIComponent(externalUrl);
-
-  return `${CLOUDINARY_FETCH_URL}/${transformString}/${encodedUrl}`;
-};
-
-/**
- * Generates srcSet for responsive external images
- * @param externalUrl - The external image URL
- * @param sizes - Array of widths for srcSet (default: [300, 400, 500, 600])
- * @returns srcSet string
- */
-export const getOptimizedExternalImageSrcSet = (
-  externalUrl: string,
-  sizes: number[] = [300, 400, 500, 600],
-  height?: number
-): string => {
-  return sizes
-    .map((width) => {
-      const url = getOptimizedExternalImage(externalUrl, {
-        width,
-        height: height ? Math.round(height * (width / sizes[sizes.length - 1])) : undefined,
-        quality: 'auto:good',
-        format: 'auto',
-        crop: 'fill',
-        gravity: 'auto',
-      });
-      return `${url} ${width}w`;
-    })
+    .map(snapCloudinaryWidth)
+    .filter((w) => (seen.has(w) ? false : (seen.add(w), true)))
+    .map((w) => `${optimizeCloudinaryUrl(url, { ...options, width: w })} ${w}w`)
     .join(', ');
 };
 
 // ============================================================================
 // Pre-defined Optimized Asset URLs
-// These are commonly used images cached via Cloudinary fetch for faster loading
+// Served straight from Unsplash's CDN with its own resizing parameters
 // ============================================================================
 
 /**

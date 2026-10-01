@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ContainerScroll } from '@/src/components/ui/ContainerScroll';
 import { useHowItWorksContent, HowItWorksContent } from '../hooks/useHowItWorksContent';
 import { getProperties } from '@/src/features/properties/api/propertyApi';
+import { extractYouTubeId } from '@/src/shared/utils/validation';
 
 interface AppShowcaseSectionProps {
   onNavigate: (path: string) => void;
@@ -292,6 +293,12 @@ const TABS = [
   { id: 'agencies', labelKey: 'forAgencies' },
 ] as const;
 
+/** YouTube's hosted thumbnail for a YouTube link, or null for anything else. */
+const youTubeThumbnail = (url: string): string | null => {
+  const id = extractYouTubeId(url);
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
+};
+
 /* ─── Video card component ─── */
 const VideoCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ item, onClick }) => (
   <motion.div
@@ -302,7 +309,18 @@ const VideoCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({
     className="rounded-xl overflow-hidden border border-neutral-100 bg-white hover:shadow-lg transition-shadow group cursor-pointer"
   >
     <div className="aspect-video relative bg-neutral-100">
-      <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+      {youTubeThumbnail(item.url) ? (
+        // YouTube's own still — a <video> tag can't load a YouTube link.
+        <img
+          src={youTubeThumbnail(item.url)!}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+      )}
       <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
         <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
           <svg className="w-4 h-4 text-slate-800 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GoogleMap, OverlayViewF, OverlayView } from '@react-google-maps/api';
@@ -290,7 +291,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
                   <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-primary to-blue-600">
                     {listing.logoUrl ? (
                       <img
-                        src={listing.logoUrl}
+                        src={optimizeCloudinaryUrl(listing.logoUrl, { width: 128 }) || listing.logoUrl}
                         alt={listing.name}
                         className="w-full h-full object-cover"
                       />
@@ -332,7 +333,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
                         {/* Logo */}
                         <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
                           {selectedListing.logoUrl ? (
-                            <img src={selectedListing.logoUrl} alt={selectedListing.name} className="w-full h-full object-cover" />
+                            <img src={optimizeCloudinaryUrl(selectedListing.logoUrl, { width: 128 }) || selectedListing.logoUrl} alt={selectedListing.name} className="w-full h-full object-cover" />
                           ) : (
                             <span className="text-white font-bold text-sm">{selectedListing.name.charAt(0)}</span>
                           )}

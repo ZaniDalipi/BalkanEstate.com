@@ -178,6 +178,50 @@ export function validateUrl(url: string, allowedProtocols: string[] = ['http', '
   }
 }
 
+const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
+
+/**
+ * Extract a YouTube video id from watch, youtu.be, shorts, live or embed URLs.
+ * Returns null for anything that isn't a YouTube video link.
+ */
+export function extractYouTubeId(raw: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+  const host = url.hostname.toLowerCase().replace(/^(www\.|m\.)/, '');
+
+  let id: string | null = null;
+  if (host === 'youtu.be') {
+    id = url.pathname.slice(1).split('/')[0] || null;
+  } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    const [first, second] = url.pathname.split('/').filter(Boolean);
+    if (first === 'watch') id = url.searchParams.get('v');
+    else if (first === 'embed' || first === 'shorts' || first === 'live') id = second || null;
+  }
+  return id && YOUTUBE_ID.test(id) ? id : null;
+}
+
+/**
+ * Validate a video link. Site videos are YouTube links only — video files are
+ * never uploaded (Cloudinary bills video by the second and by the GB).
+ */
+export function validateYouTubeUrl(url: string): ValidationResult {
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    return { isValid: false, error: 'Paste a YouTube link' };
+  }
+  if (url.length > 2048) {
+    return { isValid: false, error: 'Link is too long' };
+  }
+  if (!extractYouTubeId(url)) {
+    return { isValid: false, error: 'Only YouTube links are supported (youtube.com or youtu.be)' };
+  }
+  return { isValid: true };
+}
+
 /**
  * Validate geographic coordinates
  */

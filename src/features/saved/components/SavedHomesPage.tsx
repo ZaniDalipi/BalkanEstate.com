@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
@@ -130,7 +131,7 @@ const SavedPropertiesPage: React.FC = () => {
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100">
             {agent.avatarUrl ? (
               <img
-                src={agent.avatarUrl}
+                src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 128 }) || agent.avatarUrl}
                 alt={agent.name}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -324,7 +325,7 @@ const SavedPropertiesPage: React.FC = () => {
           <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50 flex items-center justify-center flex-shrink-0">
             {agency.logo ? (
               <img
-                src={agency.logo}
+                src={optimizeCloudinaryUrl(agency.logo, { width: 128 }) || agency.logo}
                 alt={agency.name}
                 className="w-full h-full object-cover"
                 loading="lazy"

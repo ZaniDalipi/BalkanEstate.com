@@ -59,11 +59,11 @@ import type { AdminCityPhoto } from '../features/admin/api/adminApi';
 describe('cityImageSources', () => {
   it('puts the curated photo first and keeps the convention id behind it', () => {
     const sources = cityImageSources(
-      { city: 'Tirana', country: 'Albania', imageUrl: 'https://images.example/tirana.jpg' },
+      { city: 'Tirana', country: 'Albania', imageUrl: 'https://upload.wikimedia.org/tirana.jpg' },
       { width: 800, height: 400 },
     );
 
-    expect(sources[0]).toBe('https://images.example/tirana.jpg');
+    expect(sources[0]).toBe('https://upload.wikimedia.org/tirana.jpg');
     // Not merely a fallback for a broken URL: a city with no curated photo at
     // all still has to render, and that is what the convention id is for.
     expect(sources[1]).toContain('city-albania-tirana');
@@ -86,8 +86,8 @@ describe('cityImageSources', () => {
       { width: 800, height: 400 },
     );
 
-    expect(first).toContain('w_800');
-    expect(first).toContain('h_400');
+    // 800×400 → the 2:1 box preset at 800px wide (c_fill,g_auto,ar_2:1,w_800).
+    expect(first).toContain('t_be_r2x1_w800');
   });
 
   it('passes a photo on a host we cannot transform through untouched', () => {

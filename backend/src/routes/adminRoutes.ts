@@ -91,7 +91,6 @@ import {
   createContent,
   updateContent,
   deleteContent,
-  uploadVideo,
 } from '../controllers/siteContentController';
 import {
   getAllAdBanners,
@@ -404,24 +403,11 @@ router.get('/villa-approvals', logAdminAction('VIEW_VILLA_APPROVALS'), getVillaA
 router.post('/villa-approvals/:id/approve', logAdminAction('APPROVE_VILLA'), approveVilla);
 router.post('/villa-approvals/:id/reject', logAdminAction('REJECT_VILLA'), rejectVilla);
 
-// ===== Site Content Management (How It Works videos, etc.) =====
-const videoUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
-  fileFilter: (_req, file, cb) => {
-    if (file.mimetype.startsWith('video/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only video files are allowed'));
-    }
-  },
-});
-
+// ===== Site Content Management (How It Works) — YouTube links only, no video uploads =====
 router.get('/site-content', logAdminAction('VIEW_SITE_CONTENT'), getAllContent);
 router.post('/site-content', logAdminAction('CREATE_SITE_CONTENT'), createContent);
 router.patch('/site-content/:id', logAdminAction('UPDATE_SITE_CONTENT'), updateContent);
 router.delete('/site-content/:id', logAdminAction('DELETE_SITE_CONTENT'), deleteContent);
-router.post('/site-content/upload-video', logAdminAction('UPLOAD_VIDEO'), videoUpload.single('video'), uploadVideo);
 
 // ===== Site Settings Management =====
 router.get('/site-settings', logAdminAction('VIEW_SITE_SETTINGS'), getSiteSettings);

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiRequest } from '@/src/shared/api';
@@ -166,7 +167,7 @@ const BusinessListingManager: React.FC = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {listing.logoUrl ? (
-                          <img src={listing.logoUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                          <img src={optimizeCloudinaryUrl(listing.logoUrl, { width: 64 }) || listing.logoUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
                         ) : (
                           <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                             <BuildingStorefrontIcon className="w-4 h-4 text-primary" />

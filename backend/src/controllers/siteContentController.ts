@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import SiteContent from '../models/SiteContent';
 import cloudinary from '../config/cloudinary';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
+import { toYouTubeEmbedUrl, validateYouTubeLink } from '../utils/videoLinks';
 
 // Get all content for a section (public)
 export const getContentBySection = async (req: Request, res: Response) => {
@@ -58,11 +59,26 @@ export const getAllContent = async (_req: Request, res: Response) => {
   }
 };
 
+/** Guides and FAQs carry no media; their url is a placeholder. */
+const isVideoContent = (body: { contentType?: unknown; url?: unknown }): boolean =>
+  body.contentType === 'video' || (body.contentType === undefined && body.url !== undefined && body.url !== 'placeholder');
+
 // Admin: Create content
 export const createContent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { key, type, url, title, description, section, subsection, order } = req.body;
+    const { key, type, title, description, section, subsection, order } = req.body;
+    let { url } = req.body;
     const userId = (req as any).user._id;
+
+    // Videos are YouTube links only — nothing is uploaded to Cloudinary.
+    if (isVideoContent(req.body)) {
+      const check = validateYouTubeLink(url);
+      if (!check.isValid) {
+        res.status(400).json({ message: check.error });
+        return;
+      }
+      url = toYouTubeEmbedUrl(url);
+    }
 
     // Check if key already exists
     const existing = await SiteContent.findOne({ key });
@@ -95,7 +111,18 @@ export const updateContent = async (req: Request, res: Response): Promise<void> 
   try {
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
-    const updates = req.body;
+    const updates = { ...req.body };
+    // Never let an update point a record at an uploaded file.
+    delete updates.publicId;
+
+    if (updates.url !== undefined && isVideoContent(updates)) {
+      const check = validateYouTubeLink(updates.url);
+      if (!check.isValid) {
+        res.status(400).json({ message: check.error });
+        return;
+      }
+      updates.url = toYouTubeEmbedUrl(updates.url);
+    }
 
     const content = await SiteContent.findByIdAndUpdate(
       id,
@@ -139,44 +166,6 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
 
     await SiteContent.findByIdAndDelete(id);
     res.json({ message: 'Content deleted successfully' });
-  } catch (error: any) {
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
-// Admin: Upload video to Cloudinary
-export const uploadVideo = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const file = req.file;
-    if (!file) {
-      res.status(400).json({ message: 'No file uploaded' });
-      return;
-    }
-
-    // Upload to Cloudinary as video
-    const result = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'balkan-estate/site-content/how-it-works',
-          resource_type: 'video',
-          eager: [
-            { format: 'mp4', video_codec: 'h264' }
-          ],
-          eager_async: true,
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-
-      uploadStream.end(file.buffer);
-    });
-
-    res.json({
-      url: result.secure_url,
-      publicId: result.public_id,
-    });
   } catch (error: any) {
     res.status(500).json({ message: 'Internal server error' });
   }

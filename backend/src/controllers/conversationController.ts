@@ -7,6 +7,7 @@ import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import { SECURITY_WARNING } from '../utils/messageFilter';
 import cloudinary from '../config/cloudinary';
+import { compressImageForUpload } from '../services/cloudinaryService';
 import { sendNewMessageNotification } from '../services/emailService';
 import { createNotificationWithPush } from '../services/engagementService';
 import { getSocketInstance } from '../utils/socketInstance';
@@ -492,8 +493,16 @@ export const uploadMessageImage = async (
 
     // Upload to Cloudinary with organized folder structure
     // Store images by both user IDs for tracking who is in the conversation
-    const b64 = Buffer.from(req.file.buffer).toString('base64');
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    // Phone photos arrive at 3–8 MB; a chat image never needs more than 1600px.
+    // Compressing here keeps Cloudinary storage and bandwidth small.
+    let compressed: Buffer;
+    try {
+      compressed = await compressImageForUpload(req.file.buffer, { maxWidth: 1600, maxHeight: 1600, quality: 80 });
+    } catch {
+      res.status(400).json({ message: 'The file is not a valid image' });
+      return;
+    }
+    const dataURI = `data:image/jpeg;base64,${compressed.toString('base64')}`;
 
     // Create folder path that includes both users
     // Format: balkan-estate/messages/user-{userId1}-user-{userId2}/conv-{conversationId}

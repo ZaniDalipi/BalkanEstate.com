@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, PropertyStatus, UserRole } from '../../types';
@@ -119,7 +120,7 @@ const ListingCard: React.FC<{
                     </div>
                 ) : (
                     <img
-                        src={property.imageUrl}
+                        src={optimizeCloudinaryUrl(property.imageUrl, { width: 640 }) || property.imageUrl}
                         alt={property.address}
                         className="w-full h-full object-cover object-center"
                         onError={() => setImageError(true)}

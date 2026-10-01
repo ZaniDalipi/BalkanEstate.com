@@ -2451,6 +2451,16 @@ export const deleteAccount = async (req: Request, res: Response): Promise<void> 
       { $set: { status: 'inactive', isActive: false } }
     );
 
+    // Remove the avatar and verification documents from Cloudinary — personal
+    // files must not outlive the account. Best-effort: a media failure is
+    // logged and never blocks the deletion itself.
+    try {
+      const { deleteUserPersonalMedia } = await import('../services/cloudinaryService');
+      await deleteUserPersonalMedia(userId);
+    } catch (mediaError) {
+      authLogger.error('⚠️ Failed to delete personal media for closed account:', mediaError);
+    }
+
     // Delete the user
     await User.findByIdAndDelete(userId);
 

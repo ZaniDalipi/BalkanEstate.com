@@ -1,4 +1,8 @@
+// Every model is mocked below — no database needed (see `usesDatabase` in setup.ts).
+process.env.SKIP_TEST_DB = 'true';
+
 import type { Request, Response } from 'express';
+import sharp from 'sharp';
 
 // Mock the Gemini service so no real API call is made.
 jest.mock('../services/geminiService', () => ({
@@ -40,13 +44,19 @@ describe('restyleRoom controller', () => {
   const mockFindByIdAndUpdate = (User as any).findByIdAndUpdate as jest.Mock;
   const mockProductFindOne = (Product as any).findOne as jest.Mock;
 
+  // A real (tiny) JPEG — the controller decodes and resizes the source.
+  let jpeg: Buffer;
+  beforeAll(async () => {
+    jpeg = await sharp({ create: { width: 8, height: 6, channels: 3, background: '#ffffff' } }).jpeg().toBuffer();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     process.env.GOOGLE_AI_API_KEY = 'test-key';
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       headers: { get: (h: string) => (h === 'content-type' ? 'image/jpeg' : null) },
-      arrayBuffer: async () => new ArrayBuffer(64),
+      arrayBuffer: async () => jpeg.buffer.slice(jpeg.byteOffset, jpeg.byteOffset + jpeg.byteLength),
     }) as any;
     mockGenerate.mockResolvedValue({ imageBase64: 'AAAA', mimeType: 'image/png' });
     // Product lookups return a chainable .lean() by default (no override).
@@ -57,6 +67,30 @@ describe('restyleRoom controller', () => {
   it('returns 400 when imageUrl is not a Cloudinary URL', async () => {
     const res = makeRes();
     await restyleRoom(makeReq({ imageUrl: 'https://evil.example.com/x.jpg', style: 'scandinavian' }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
+  it('fetches the untransformed original (strict transformations refuse ad-hoc sizes)', async () => {
+    mockFindById.mockResolvedValue(null);
+    const res = makeRes();
+    await restyleRoom(
+      makeReq({ imageUrl: 'https://res.cloudinary.com/demo/image/upload/t_be_w1600/v1/room.jpg', style: 'scandinavian' }),
+      res
+    );
+    expect(global.fetch).toHaveBeenCalledWith(CLOUDINARY_URL, expect.anything());
+    expect(mockGenerate).toHaveBeenCalledWith(expect.any(String), 'image/jpeg', expect.anything(), expect.anything(), expect.anything(), expect.anything());
+  });
+
+  it('returns 400 when the source is not a decodable image', async () => {
+    mockFindById.mockResolvedValue(null);
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'image/jpeg' },
+      arrayBuffer: async () => new ArrayBuffer(64),
+    });
+    const res = makeRes();
+    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(mockGenerate).not.toHaveBeenCalled();
   });

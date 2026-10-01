@@ -259,3 +259,55 @@ export const uploadRequest = async <T>(
 
   return response.json();
 };
+
+/** A binary response (e.g. a generated file) plus the headers that describe it. */
+export interface BlobResponse {
+  blob: Blob;
+  headers: Headers;
+}
+
+/**
+ * Authenticated request that returns a file instead of JSON — used for
+ * server-generated downloads that are never stored anywhere. Same auth,
+ * CSRF and 401-refresh handling as `apiRequest`; error bodies are JSON.
+ */
+export const blobRequest = async (
+  endpoint: string,
+  options: { method?: 'GET' | 'POST'; body?: unknown; signal?: AbortSignal } = {},
+  retryCount = 0
+): Promise<BlobResponse> => {
+  const { method = 'POST', body, signal } = options;
+
+  if (MUTATION_METHODS.has(method)) await ensureCsrfToken();
+  const token = tokenService.getAccessToken();
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method,
+    credentials: 'include',
+    signal,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(MUTATION_METHODS.has(method) ? csrfHeaders() : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+  });
+
+  if (response.status === 401 && retryCount === 0) {
+    const newAccessToken = await refreshAccessToken();
+    if (newAccessToken) return blobRequest(endpoint, options, 1);
+    tokenService.clearTokens();
+    window.dispatchEvent(new CustomEvent('session-expired'));
+    throw new Error('Session expired. Please login again.');
+  }
+
+  if (!response.ok) {
+    const isJson = response.headers.get('content-type')?.includes('application/json');
+    const data = isJson ? await response.json().catch(() => ({})) : {};
+    const err: any = new Error(data.message || response.statusText || 'Request failed');
+    err.statusCode = response.status;
+    throw err;
+  }
+
+  return { blob: await response.blob(), headers: response.headers };
+};

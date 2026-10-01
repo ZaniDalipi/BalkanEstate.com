@@ -5,6 +5,7 @@ import { useRealEstateNews, NewsItem } from '../hooks/useRealEstateNews';
 import { useArticles } from '../../blog/hooks/useArticles';
 import { ArticleListItem } from '../../blog/types/article.types';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -64,7 +65,8 @@ const NewsCard: React.FC<{ item: NewsItem; index: number; t: (key: string, fallb
       <div className={`h-28 sm:h-36 relative overflow-hidden ${item.coverImageUrl ? '' : `bg-gradient-to-br ${item.imageGradient}`}`}>
         {item.coverImageUrl ? (
           <img
-            src={item.coverImageUrl}
+            // Gallery photos are resized by Cloudinary, article images by our proxy.
+            src={optimizeCloudinaryUrl(item.coverImageUrl, { width: 480 }) || item.coverImageUrl}
             alt={item.title}
             className="w-full h-full object-cover"
             loading="lazy"
@@ -146,7 +148,7 @@ const ArticleMiniCard: React.FC<{ article: ArticleListItem; index: number; onNav
       <div className={`h-28 sm:h-36 relative overflow-hidden ${article.coverImageUrl ? '' : `bg-gradient-to-br ${cat.gradient}`}`}>
         {article.coverImageUrl ? (
           <img
-            src={article.coverImageUrl}
+            src={optimizeCloudinaryUrl(article.coverImageUrl, { width: 480 }) || article.coverImageUrl}
             alt={article.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"

@@ -5,7 +5,6 @@ import fs from 'fs';
 import os from 'os';
 import https from 'https';
 import http from 'http';
-import cloudinary from '../config/cloudinary';
 import { videoLogger } from '../utils/logger';
 
 // Set FFmpeg path from installer
@@ -35,12 +34,16 @@ export interface VideoGenerationOptions {
   includeWatermark?: boolean;
   musicStyle?: 'elegant' | 'upbeat' | 'calm' | 'modern';
   backgroundStyle?: 'gradient' | 'blur' | 'dark' | 'elegant';
-  embedInListing?: boolean; // Save video URL to property for auto-play on listing
 }
 
+/**
+ * A rendered video on local disk. It is streamed to the seller as a download
+ * and then removed — generated videos are never stored (Cloudinary bills video
+ * by the second and by the GB). Always call `cleanup()` when done with it.
+ */
 export interface VideoGenerationResult {
-  url: string;
-  publicId: string;
+  filePath: string;
+  cleanup: () => void;
   duration: number;
   format: string;
   width: number;
@@ -223,7 +226,6 @@ export const generatePropertyVideo = async (
 ): Promise<VideoGenerationResult> => {
   const {
     propertyId,
-    userId,
     imageUrls,
     title,
     price,
@@ -303,19 +305,17 @@ export const generatePropertyVideo = async (
 
     videoLogger.info('✅ Video created successfully');
 
-    // Step 4: Upload to Cloudinary
-    videoLogger.info('☁️  Uploading to Cloudinary...');
-    const cloudinaryResult = await uploadVideoToCloudinary(outputPath, userId, propertyId);
-
-    // Step 5: Cleanup
-    videoLogger.info('🧹 Cleaning up...');
-    fs.rmSync(tempDir, { recursive: true, force: true });
-
-    videoLogger.info(`🎉 Video complete: ${cloudinaryResult.url}`);
+    videoLogger.info(`🎉 Video ready for download (${totalDuration}s)`);
 
     return {
-      url: cloudinaryResult.url,
-      publicId: cloudinaryResult.publicId,
+      filePath: outputPath,
+      cleanup: () => {
+        try {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+        } catch (cleanupError: any) {
+          videoLogger.warn(`⚠️ Could not remove temp video dir ${tempDir}: ${cleanupError.message}`);
+        }
+      },
       duration: totalDuration,
       format,
       width,
@@ -818,106 +818,4 @@ const escapeText = (text: string): string => {
     .replace(/'/g, "'\\''")
     .replace(/:/g, '\\:')
     .replace(/%/g, '\\%');
-};
-
-/**
- * Upload video to Cloudinary
- */
-const uploadVideoToCloudinary = async (
-  videoPath: string,
-  userId: string,
-  propertyId: string
-): Promise<{ url: string; publicId: string }> => {
-  return new Promise((resolve, reject) => {
-    const folder = `balkan-estate/users/${userId}/listings/${propertyId}/videos`;
-
-    cloudinary.uploader.upload(videoPath, {
-      resource_type: 'video',
-      folder,
-      eager: [{ width: 720, height: 1280, crop: 'limit', format: 'mp4' }],
-      eager_async: true,
-    }, (error, result) => {
-      if (error) {
-        videoLogger.error('Cloudinary error:', error);
-        reject(error);
-      } else if (result) {
-        resolve({ url: result.secure_url, publicId: result.public_id });
-      } else {
-        reject(new Error('No result from Cloudinary'));
-      }
-    });
-  });
-};
-
-/**
- * Delete generated video from Cloudinary
- */
-export const deleteGeneratedVideo = async (publicId: string): Promise<void> => {
-  try {
-    await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
-    videoLogger.info(`🗑️ Deleted video: ${publicId}`);
-  } catch (error: any) {
-    videoLogger.error(`❌ Failed to delete video ${publicId}:`, error.message);
-  }
-};
-
-// Job tracking for async processing
-export interface VideoGenerationJob {
-  id: string;
-  propertyId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number;
-  result?: VideoGenerationResult;
-  error?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const jobStore = new Map<string, VideoGenerationJob>();
-
-export const startVideoGenerationJob = async (options: VideoGenerationOptions): Promise<string> => {
-  const jobId = `video_${options.propertyId}_${Date.now()}`;
-
-  const job: VideoGenerationJob = {
-    id: jobId,
-    propertyId: options.propertyId,
-    status: 'pending',
-    progress: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  jobStore.set(jobId, job);
-
-  setImmediate(async () => {
-    try {
-      job.status = 'processing';
-      job.updatedAt = new Date();
-      const result = await generatePropertyVideo(options);
-      job.status = 'completed';
-      job.progress = 100;
-      job.result = result;
-      job.updatedAt = new Date();
-    } catch (error: any) {
-      job.status = 'failed';
-      job.error = error.message;
-      job.updatedAt = new Date();
-    }
-  });
-
-  return jobId;
-};
-
-export const getVideoGenerationJobStatus = (jobId: string): VideoGenerationJob | null => {
-  return jobStore.get(jobId) || null;
-};
-
-export const cleanupOldJobs = (): void => {
-  const maxAge = 24 * 60 * 60 * 1000;
-  const now = Date.now();
-  for (const [jobId, job] of jobStore.entries()) {
-    if (now - job.createdAt.getTime() > maxAge) {
-      jobStore.delete(jobId);
-    }
-  }
 };

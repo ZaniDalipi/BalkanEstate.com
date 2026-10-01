@@ -68,6 +68,6 @@ describe('SellerAvatar', () => {
         );
 
         // Requested at 2× the CSS size so it stays sharp on a retina screen.
-        expect(screen.getByRole('img').getAttribute('src')).toContain('w_64');
+        expect(screen.getByRole('img').getAttribute('src')).toContain('t_be_w64');
     });
 });

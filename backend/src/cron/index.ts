@@ -14,6 +14,9 @@ import { processNewListingAlerts, processPriceDropAlerts } from '../jobs/propert
 import { sendHotHourRecommendations, cleanupOldPatterns } from '../services/proBuyerEmailService';
 import { processMonthlyCouponRefresh } from '../services/monthlyCouponService';
 import { fetchAndStoreNews, cleanupOldNews } from '../services/newsService';
+import { cleanupOrphanedTempImages } from '../services/cloudinaryService';
+import { syncCloudinaryPresetsOnStartup } from '../services/media/cloudinaryPresetSync';
+import { runMediaRetention } from '../services/media/mediaRetentionService';
 import { startPropertyStatsJob, stopPropertyStatsJob } from '../jobs/computePropertyStatsJob';
 import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
@@ -54,6 +57,9 @@ let listingIngestTask: cron.ScheduledTask | null = null;
 let deferredReplayTask: cron.ScheduledTask | null = null;
 let scoreRefreshTask: cron.ScheduledTask | null = null;
 let cityMarketDigestTask: cron.ScheduledTask | null = null;
+let tempImageCleanupTask: cron.ScheduledTask | null = null;
+let presetSyncTask: cron.ScheduledTask | null = null;
+let mediaRetentionTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
@@ -419,6 +425,43 @@ export const startCronJobs = () => {
     });
   });
 
+  // Orphaned listing uploads - daily at 3:30 AM. Photos uploaded to the temp
+  // folder by abandoned listing forms are otherwise billed as storage forever.
+  // Re-check the Cloudinary delivery presets daily at 3:10 AM. Startup already
+  // registers them; this heals one that failed or was deleted in the dashboard
+  // (with strict transformations on, a missing preset is a broken image).
+  // One list call when everything is in place.
+  presetSyncTask = cron.schedule('10 3 * * *', async () => {
+    await syncCloudinaryPresetsOnStartup();
+  });
+
+  tempImageCleanupTask = cron.schedule('30 3 * * *', async () => {
+    await withDbConnection('temp image cleanup', async () => {
+      try {
+        const count = await cleanupOrphanedTempImages(48);
+        cronLogger.info(`🧹 Temp image cleanup completed: ${count} orphaned uploads removed`);
+      } catch (error) {
+        cronLogger.error('Temp image cleanup cron error:', error);
+      }
+    });
+  });
+
+  // Media retention - daily at 4:15 AM. Clears Cloudinary media of listings
+  // deleted/sold longer ago than MEDIA_RETENTION_*_YEARS (defaults 1 / 2).
+  // Runs in small batches, so a backlog drains over several nights.
+  mediaRetentionTask = cron.schedule('15 4 * * *', async () => {
+    await withDbConnection('media retention', async () => {
+      try {
+        const result = await runMediaRetention();
+        cronLogger.info(
+          `🧹 Media retention completed: ${result.deletedArchivesPurged} deleted, ${result.soldListingsPurged} sold listings cleared (${result.failures} failures)`
+        );
+      } catch (error) {
+        cronLogger.error('Media retention cron error:', error);
+      }
+    });
+  });
+
   // ===============================
   // RENTAL EXPIRY AUTO-RELEASE
   // ===============================
@@ -528,6 +571,9 @@ export const stopCronJobs = () => {
   if (deferredReplayTask) deferredReplayTask.stop();
   if (scoreRefreshTask) scoreRefreshTask.stop();
   if (cityMarketDigestTask) cityMarketDigestTask.stop();
+  if (tempImageCleanupTask) tempImageCleanupTask.stop();
+  if (presetSyncTask) presetSyncTask.stop();
+  if (mediaRetentionTask) mediaRetentionTask.stop();
   stopPropertyStatsJob();
   cronLogger.info('🛑 All cron jobs stopped');
 };

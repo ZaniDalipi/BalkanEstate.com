@@ -1,6 +1,8 @@
 import axios from 'axios';
 import cloudinary from '../config/cloudinary';
 import News from '../models/News';
+import CityShowcase from '../models/CityShowcase';
+import { pickNewsCover, type GalleryCity } from './news/newsCover';
 import { cronLogger } from '../utils/logger';
 
 const logger = cronLogger;
@@ -107,24 +109,19 @@ async function extractOgImage(url: string): Promise<string | null> {
 }
 
 /**
- * Upload an image URL to Cloudinary for news covers
+ * Active City Gallery photos, loaded once per fetch run. News covers reuse
+ * them (they're already on Cloudinary) instead of uploading anything new.
+ * A failure just means covers fall back to the article's own image.
  */
-async function uploadCoverToCloudinary(imageUrl: string, newsId: string): Promise<{ url: string; publicId: string } | null> {
+async function loadGalleryCities(): Promise<GalleryCity[]> {
   try {
-    const result = await cloudinary.uploader.upload(imageUrl, {
-      folder: 'balkan-estate/news/covers',
-      public_id: `news-${newsId}`,
-      overwrite: true,
-      resource_type: 'image',
-      transformation: [
-        { width: 800, height: 450, crop: 'fill', gravity: 'auto' },
-        { quality: 'auto', fetch_format: 'auto' },
-      ],
-    });
-    return { url: result.secure_url, publicId: result.public_id };
+    const rows = await CityShowcase.find({ isActive: true })
+      .select('city country imageUrl')
+      .lean<GalleryCity[]>();
+    return rows.filter((r) => r.city && r.country && r.imageUrl);
   } catch (err) {
-    logger.error(`Failed to upload news cover to Cloudinary: ${err}`);
-    return null;
+    logger.warn(`Could not load City Gallery for news covers: ${err}`);
+    return [];
   }
 }
 
@@ -262,12 +259,13 @@ async function fetchDedicatedFeed(feed: typeof DEDICATED_RSS_FEEDS[number]): Pro
 }
 
 /**
- * Save an article to the database with cover image extraction
+ * Save an article with its cover. The cover is chosen once, here, and stored
+ * as a link — nothing is uploaded (see news/newsCover.ts for the order).
  */
 async function saveArticle(article: {
   title: string; link: string; pubDate: string; source: string; description: string;
   country: string; countryCode: string;
-}): Promise<boolean> {
+}, gallery: GalleryCity[]): Promise<boolean> {
   // Skip if already exists
   const exists = await News.findOne({ sourceUrl: article.link }).lean();
   if (exists) return false;
@@ -276,7 +274,15 @@ async function saveArticle(article: {
   const excerpt = article.description.slice(0, 500) || article.title;
   const category = categorizeArticle(article.title, excerpt);
 
-  const newsDoc = await News.create({
+  // Only fetch the article page when the City Gallery has nothing for it.
+  const coverInput = { title: article.title, excerpt, country: article.country, articleUrl: article.link };
+  let cover = pickNewsCover(coverInput, gallery);
+  if (!cover || cover.source === 'country-gallery') {
+    const ogImage = await extractOgImage(article.link);
+    cover = pickNewsCover({ ...coverInput, ogImage }, gallery) ?? cover;
+  }
+
+  await News.create({
     title: article.title,
     excerpt,
     country: article.country,
@@ -286,29 +292,20 @@ async function saveArticle(article: {
     category,
     publishedAt,
     fetchedAt: new Date(),
+    ...(cover ? { coverImageUrl: cover.url } : {}),
   });
-
-  // Try to get cover image from the original article
-  const ogImage = await extractOgImage(article.link);
-  if (ogImage) {
-    const cloudResult = await uploadCoverToCloudinary(ogImage, newsDoc._id.toString());
-    if (cloudResult) {
-      newsDoc.coverImageUrl = cloudResult.url;
-      newsDoc.coverImagePublicId = cloudResult.publicId;
-      await newsDoc.save();
-    }
-  }
 
   return true;
 }
 
 /**
- * Main function: Fetch all Balkan real estate news, save to DB, upload covers.
+ * Main function: Fetch all Balkan real estate news and save it with a cover link.
  * Sources: Google News RSS (per-country queries) + dedicated real estate RSS feeds.
  */
 export async function fetchAndStoreNews(): Promise<number> {
   logger.info('📰 Starting news fetch cycle...');
   let newArticlesCount = 0;
+  const gallery = await loadGalleryCities();
 
   // 1. Fetch from Google News RSS per country
   for (const src of NEWS_SOURCES) {
@@ -321,7 +318,7 @@ export async function fetchAndStoreNews(): Promise<number> {
               ...article,
               country: src.country,
               countryCode: src.countryCode,
-            });
+            }, gallery);
             if (saved) newArticlesCount++;
           } catch (err) {
             logger.error(`Failed saving article "${article.title}": ${err}`);
@@ -340,7 +337,7 @@ export async function fetchAndStoreNews(): Promise<number> {
       const articles = await fetchDedicatedFeed(feed);
       for (const article of articles) {
         try {
-          const saved = await saveArticle(article);
+          const saved = await saveArticle(article, gallery);
           if (saved) newArticlesCount++;
         } catch (err) {
           logger.error(`Failed saving article from ${feed.source}: ${err}`);

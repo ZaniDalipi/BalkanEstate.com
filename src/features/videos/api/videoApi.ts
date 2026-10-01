@@ -1,7 +1,10 @@
 // Video Generation API module
-// Handles all video generation API calls
+//
+// The generator renders a showcase MP4 on the server and hands it straight to
+// the seller as a download. Nothing is stored: sellers post the video to
+// TikTok / YouTube / Instagram and paste that link into their listing.
 
-import { apiRequest } from '@/src/shared/api';
+import { apiRequest, blobRequest } from '@/src/shared/api';
 
 // --- Types ---
 
@@ -16,28 +19,18 @@ export interface VideoGenerationOptions {
   duration?: number; // seconds per image (2-10)
   includeWatermark?: boolean;
   musicStyle?: MusicStyle;
-  backgroundStyle?: BackgroundStyle; // Professional background style
-  embedInListing?: boolean; // Save video to property for auto-play on listing open
+  backgroundStyle?: BackgroundStyle;
 }
 
-export interface GeneratedVideo {
-  url: string;
-  publicId: string;
+/** A rendered video held in the browser only (an object URL over the blob). */
+export interface DownloadedVideo {
+  blob: Blob;
+  /** `URL.createObjectURL(blob)` — revoke it when the video is discarded. */
+  objectUrl: string;
+  fileName: string;
   duration: number;
-  format: string;
   width: number;
   height: number;
-}
-
-export interface VideoGenerationJob {
-  id: string;
-  propertyId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number;
-  result?: GeneratedVideo;
-  error?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface VideoPreview {
@@ -61,12 +54,6 @@ export interface VideoPreview {
     calm: string;
     modern: string;
   };
-  existingVideo: string | null;
-  generatedVideo: {
-    url: string;
-    format: VideoFormat;
-    duration: number;
-  } | null;
 }
 
 // --- API Functions ---
@@ -88,104 +75,53 @@ export const getVideoPreview = async (
   return apiRequest<VideoPreview>(endpoint, { requiresAuth: true });
 };
 
+/** File name from a Content-Disposition header, or a safe default. */
+const fileNameFrom = (disposition: string | null): string => {
+  const match = disposition?.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+  const name = match ? decodeURIComponent(match[1]) : '';
+  return /^[\w.-]+\.mp4$/i.test(name) ? name : 'listing-video.mp4';
+};
+
+const numberHeader = (headers: Headers, name: string): number => {
+  const value = Number(headers.get(name));
+  return Number.isFinite(value) ? value : 0;
+};
+
 /**
- * Generate video for a property (synchronous - for smaller videos)
- * Returns the generated video immediately
+ * Render a video for a listing and return it as a local file.
+ * Rendering takes a while; pass an AbortSignal to cancel.
  */
 export const generatePropertyVideo = async (
   propertyId: string,
-  options?: VideoGenerationOptions
-): Promise<{ message: string; video: GeneratedVideo }> => {
-  return apiRequest<{ message: string; video: GeneratedVideo }>(
-    `/videos/generate/${propertyId}`,
-    {
-      method: 'POST',
-      body: options || {},
-      requiresAuth: true,
-    }
-  );
-};
-
-/**
- * Start async video generation job (for larger videos)
- * Returns a job ID to poll for status
- */
-export const startAsyncVideoGeneration = async (
-  propertyId: string,
-  options?: VideoGenerationOptions
-): Promise<{ message: string; jobId: string; statusUrl: string }> => {
-  return apiRequest<{ message: string; jobId: string; statusUrl: string }>(
-    `/videos/generate-async/${propertyId}`,
-    {
-      method: 'POST',
-      body: options || {},
-      requiresAuth: true,
-    }
-  );
-};
-
-/**
- * Get video generation job status
- */
-export const getJobStatus = async (jobId: string): Promise<VideoGenerationJob> => {
-  return apiRequest<VideoGenerationJob>(`/videos/status/${jobId}`, {
-    requiresAuth: true,
+  options: VideoGenerationOptions = {},
+  signal?: AbortSignal
+): Promise<DownloadedVideo> => {
+  const { blob, headers } = await blobRequest(`/videos/generate/${propertyId}`, {
+    method: 'POST',
+    body: options,
+    signal,
   });
-};
 
-/**
- * Delete generated video for a property
- */
-export const deletePropertyVideo = async (propertyId: string): Promise<{ message: string }> => {
-  return apiRequest<{ message: string }>(`/videos/${propertyId}`, {
-    method: 'DELETE',
-    requiresAuth: true,
-  });
-};
-
-/**
- * Add generated video to listing (replaces existing YouTube/Instagram URL if any)
- */
-export const addVideoToListing = async (
-  propertyId: string,
-  videoUrl?: string
-): Promise<{ success: boolean; message: string; videoUrl: string; previousVideoUrl: string | null }> => {
-  return apiRequest<{ success: boolean; message: string; videoUrl: string; previousVideoUrl: string | null }>(
-    `/videos/${propertyId}/add-to-listing`,
-    {
-      method: 'PATCH',
-      body: videoUrl ? { videoUrl } : {},
-      requiresAuth: true,
-    }
-  );
-};
-
-/**
- * Poll for job completion
- * Polls every 2 seconds until job is completed or failed
- */
-export const pollJobUntilComplete = async (
-  jobId: string,
-  onProgress?: (job: VideoGenerationJob) => void,
-  maxAttempts = 120 // 4 minutes max
-): Promise<VideoGenerationJob> => {
-  let attempts = 0;
-
-  while (attempts < maxAttempts) {
-    const job = await getJobStatus(jobId);
-
-    if (onProgress) {
-      onProgress(job);
-    }
-
-    if (job.status === 'completed' || job.status === 'failed') {
-      return job;
-    }
-
-    // Wait 2 seconds before next poll
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    attempts++;
+  if (blob.size === 0) {
+    throw new Error('The server returned an empty video. Please try again.');
   }
 
-  throw new Error('Video generation timed out');
+  return {
+    blob,
+    objectUrl: URL.createObjectURL(blob),
+    fileName: fileNameFrom(headers.get('content-disposition')),
+    duration: numberHeader(headers, 'x-video-duration'),
+    width: numberHeader(headers, 'x-video-width'),
+    height: numberHeader(headers, 'x-video-height'),
+  };
+};
+
+/** Save a downloaded video to the seller's device. */
+export const saveVideoToDevice = (video: DownloadedVideo): void => {
+  const link = document.createElement('a');
+  link.href = video.objectUrl;
+  link.download = video.fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 };

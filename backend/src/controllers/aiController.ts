@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
+import sharp from 'sharp';
 import { apiLogger } from '../utils/logger';
+import { originalCloudinaryUrl } from '../utils/cloudinaryUrl';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
 import Product from '../models/Product';
@@ -278,6 +280,7 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
  * (restricted to Cloudinary) and sent to Gemini's image model.
  */
 const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
+const RESTYLE_MAX_EDGE = 1600;
 const ALLOWED_IMAGE_HOSTS = new Set(['res.cloudinary.com']);
 
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
@@ -317,6 +320,16 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
+    // Fetch the untransformed original, not the resized URL the browser shows:
+    // with "Strict transformations" on, Cloudinary refuses ad-hoc sizes to
+    // server requests, while the original is always allowed (and costs no
+    // transformation credit). We resize it ourselves below.
+    const originalUrl = originalCloudinaryUrl(imageUrl);
+    if (!originalUrl) {
+      res.status(400).json({ message: 'imageUrl must be a Cloudinary image URL.' });
+      return;
+    }
+
     // Enforce roomStyle monthly limit. Resolve the limit from the user's REAL
     // account status (agency/pro/buyer via embedded subscription, Subscription
     // doc, proSubscription, or the isSubscribed flag) — not just `isSubscribed`,
@@ -349,13 +362,14 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15_000);
-      const upstream = await fetch(imageUrl, {
+      const upstream = await fetch(originalUrl, {
         signal: controller.signal,
         headers: { 'User-Agent': 'BalkanEstate/1.0 (+https://balkanestateai.com)' },
       });
       clearTimeout(timeout);
 
       if (!upstream.ok) {
+        apiLogger.warn(`Restyle source fetch returned ${upstream.status} for ${originalUrl}`);
         res.status(400).json({ message: 'Could not fetch the source image.' });
         return;
       }
@@ -371,7 +385,20 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
         res.status(400).json({ message: 'Source image is too large (max 10 MB).' });
         return;
       }
-      imageBase64 = Buffer.from(arrayBuffer).toString('base64');
+
+      // 1600px is plenty for the model and keeps the request small.
+      try {
+        const resized = await sharp(Buffer.from(arrayBuffer), { limitInputPixels: 50_000_000 })
+          .rotate()
+          .resize(RESTYLE_MAX_EDGE, RESTYLE_MAX_EDGE, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 88 })
+          .toBuffer();
+        imageBase64 = resized.toString('base64');
+        sourceMime = 'image/jpeg';
+      } catch {
+        res.status(400).json({ message: 'The source image could not be read.' });
+        return;
+      }
     } catch (fetchErr) {
       apiLogger.error('Error fetching source image for restyle:', fetchErr instanceof Error ? fetchErr.message : String(fetchErr));
       res.status(400).json({ message: 'Could not fetch the source image.' });

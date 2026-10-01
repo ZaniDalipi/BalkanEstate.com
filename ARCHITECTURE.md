@@ -1110,15 +1110,130 @@ Availability source priority:
 
 ## Cloudinary Image Pipeline
 
+Goal: stay inside Cloudinary's free 25 credits/month (1 credit = 1,000
+transformations **or** 1 GB storage **or** 1 GB bandwidth).
+
+### Delivery (frontend)
+
 ```
-Raw URL → optimizeCloudinaryUrl(url, { width, quality }) → <img src>
-                                                          → cloudinarySrcSet([480,768,1200,1920])
+Raw URL → optimizeCloudinaryUrl(url, { width, height?, blur?, format? }) → <img src>
+            ├── res.cloudinary.com  → …/upload/t_<preset>/v123/…   (named transformation)
+            ├── googleusercontent   → =s{size}
+            ├── unsplash / wikimedia / own site → unchanged
+            └── anything else (feeds) → {API_URL}/image-proxy?url=…&w={bucket}
+        cloudinarySrcSet(url, widths)  (deduped after snapping)
 ```
 
-- LQIP (Low-Quality Image Placeholder): `width: 40, quality: 'auto:eco'` loaded immediately
-- Full image: `width: 1200, quality: 'auto'` with srcSet for responsive delivery
-- Avatar thumbnails: `width: 80-96, quality: 'auto', crop: 'fill'`
-- Never use raw Cloudinary URLs — always go through the helper.
+**Strict-transformations compatible.** Cloudinary's "Strict transformations"
+(Settings → Security) is ON, so only *named transformations allowed for strict
+mode* can be delivered — an ad-hoc `w_480,c_limit` URL is refused. Every
+Cloudinary URL the app builds therefore uses exactly one preset from
+`backend/src/config/cloudinaryPresets.ts` (imported by the frontend too, so the
+two cannot drift):
+
+| Preset | Definition | Used for |
+|---|---|---|
+| `be_w{N}` | `f_auto,q_auto,c_limit,w_N` | any width-only request |
+| `be_r{ratio}_w{N}` | `f_auto,q_auto,c_fill,g_auto,ar_{ratio},w_N` | width×height boxes (1x1, 4x3, 3x4, 3x2, 16x9, 2x1) |
+| `be_lqip` | `f_auto,q_auto:eco,w_32,e_blur:400` | blur-up placeholders |
+| `be_og` | `f_jpg,q_auto,w_1200,h_630,c_pad,b_white` | share cards |
+
+N ∈ 32, 64, 128, 240, 320, 480, 640, 800, 1080, 1280, 1600, 1920 — requests
+round *up*; boxes snap to the nearest ratio. 86 presets in all, registered by
+the backend **at startup** (`services/media/cloudinaryPresetSync.ts`,
+idempotent) or by `npm run cloudinary:sync-presets`. To change a definition,
+give the preset a new name rather than editing it in place.
+
+- A unit test (`src/tests/cloudinary-budget.test.ts`) sweeps widths and boxes
+  and fails if the app could ever build a URL with an unregistered preset.
+- Server-side fetches of Cloudinary images (e.g. the room restyler) use the
+  untransformed original (`utils/cloudinaryUrl.ts → originalCloudinaryUrl`),
+  which strict mode always allows, and resize with sharp.
+- Raw `<img src={…Url}>` is not used for Cloudinary images — originals still
+  load under strict mode but ship the full-size master.
+
+### Upload (backend)
+
+- `sharp` resizes + re-encodes every upload on our server (mozjpeg q82, max
+  1920; `preserveQuality` q90 4:4:4). No incoming or eager transformations —
+  both are billed per upload. Decodes are capped at 50 MP.
+- Chat images: compressed to 1600px before upload (`compressImageForUpload`).
+
+### Video — links only, never stored
+
+Cloudinary bills video by the second and by the GB, so **no video is ever
+uploaded**:
+
+- **Listings** link to YouTube / TikTok / Instagram (`videoUrl`).
+- **"How it works"** items take a YouTube link only — the upload endpoint is
+  gone and `siteContentController` rejects anything else
+  (`utils/videoLinks.ts`, `validateYouTubeUrl` on the client).
+- **Video generator** (My Listings → Generate video) renders the MP4 with
+  FFmpeg and streams it back as a download (`POST /api/videos/generate/:id`,
+  `video/mp4`), then deletes the temp file. The seller posts it and pastes the
+  link into the listing.
+- `npm run cleanup:videos` (dry run) / `cleanup:videos:apply` removes videos
+  stored before this rule.
+
+### News covers — `backend/src/services/news/newsCover.ts`
+
+Chosen once, when the article is saved, and stored as a **link** (no upload):
+1. City Gallery photo for a city the article names (same country only —
+   "Split"/"Bar" are also English words),
+2. the article's own `og:image` (shown through `/api/image-proxy`),
+3. a City Gallery photo from the article's country.
+
+### Naming — `backend/src/services/media/mediaNaming.ts`
+
+```
+balkan-estate/
+├── agencies/{a-z}/{agency-name}_{agencyId}/{logo|cover}
+├── businesses/{a-z}/{business-name}_{businessId}/{logo|banner}
+├── external-feeds/{source}/{listingId}      (only with ALLOW_EXTERNAL_IMAGE_REHOST)
+├── messages/…   news/covers   site/…
+└── users/{a-z}/{user-name}_{userId}/
+    ├── avatar   documents/{license|credentials/{id}}
+    └── listings/{temp | {listing-title}_{propertyId}/{photos|floorplans|videos}}
+```
+
+Names come first so the Media Library sorts A–Z; the id always follows so a
+folder stays unique and searchable. Names are looked up from the ids at
+upload time (`mediaOwnerResolver`); a failed lookup falls back to the id.
+
+**Every asset is tagged** `owner_{userId}`, `listing_{propertyId}`,
+`agency_{id}`, `business_{id}`, `kind_{type}`. Cleanup deletes **by tag**
+(`deleteByTag`), then sweeps the pre-tag folder layouts — so renames and
+layout changes never strand files.
+
+### Lifecycle — what gets removed, when
+
+| Event | Removed |
+|---|---|
+| Listing deleted | all media except one archive thumbnail |
+| Deleted listing older than `MEDIA_RETENTION_DELETED_YEARS` (1) | that thumbnail |
+| Sold listing older than `MEDIA_RETENTION_SOLD_YEARS` (2) | all photos, plans, video → placeholder image |
+| Abandoned listing form (temp upload > 48h, unreferenced) | the uploads |
+| Account closed | avatar + verification documents |
+| User removed by admin | their listings' media + avatar and documents |
+| Agency deleted | logo + cover |
+
+Retention runs daily (`cron/index.ts`, 4:15 AM) in batches of 50 and marks
+records with `mediaPurgedAt`, respecting the Admin API rate limit.
+
+### External feed images — `/api/image-proxy`
+
+Feed photos are **never stored on Cloudinary**. `GET /api/image-proxy?url=&w=`
+(`services/imageProxy/`) fetches the source, resizes to WebP (q72) and caches:
+memory LRU (`IMAGE_PROXY_MEMORY_MB`, 64) → disk (`IMAGE_PROXY_CACHE_DIR`,
+`IMAGE_PROXY_DISK_MB` 512, `IMAGE_PROXY_CACHE_DAYS` 7) → browser/CDN
+(`max-age` 7d, `s-maxage` 30d, ETag/304). Concurrent requests share one
+fetch; failures are remembered for 10 minutes.
+
+Security: `utils/ssrfGuard.ts` resolves DNS and rejects any non-public
+address (private, loopback, link-local/metadata, CGNAT, IPv6 ULA, mapped
+IPv4), pins the socket to the vetted address, and re-checks every redirect
+hop. SVG is refused. Own rate limiter (1,500 / 5 min / IP), excluded from
+the general API limiter.
 
 ---
 

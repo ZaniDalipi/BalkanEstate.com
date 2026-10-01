@@ -113,10 +113,10 @@ const property = {
   lng: 19.8,
 } as unknown as Property;
 
-/** The thumbnail strip renders at w_390; the carousel does not. */
+/** The thumbnail strip renders at the t_be_w480 preset; the carousel does not. */
 const thumbnails = (): HTMLImageElement[] =>
   Array.from(document.querySelectorAll<HTMLImageElement>('img')).filter((img) =>
-    img.getAttribute('src')?.includes('w_390')
+    img.getAttribute('src')?.includes('t_be_w480')
   );
 
 /** Fakes a decode so the component learns the photo's real shape. */
@@ -148,7 +148,8 @@ describe('thumbnail strip', () => {
     renderStrip();
     // c_fill at a bare width silently upscales small photos; c_limit does not,
     // and neither crops — the decision belongs to the component below.
-    thumbnails().forEach((img) => expect(img.getAttribute('src')).toContain('c_limit'));
+    // Width presets (t_be_w…) are c_limit — shrink-only, never cropped.
+    thumbnails().forEach((img) => expect(img.getAttribute('src')).toMatch(/\/t_be_w\d+\//));
   });
 
   it('fills the card with a landscape photo and adds no backdrop', () => {
@@ -160,7 +161,7 @@ describe('thumbnail strip', () => {
     expect(thumb.className).not.toContain('object-contain');
     // A full-bleed card has nothing to fill, so it pays for no extra request.
     // Scoped to the card: the carousel above keeps its own blurred backdrop.
-    expect(thumb.closest('button')!.querySelectorAll('img[src*="e_blur"]')).toHaveLength(0);
+    expect(thumb.closest('button')!.querySelectorAll('img[src*="t_be_lqip"]')).toHaveLength(0);
   });
 
   it('shows a portrait photo whole over a blurred copy of itself', () => {
@@ -170,7 +171,7 @@ describe('thumbnail strip', () => {
 
     expect(thumb.className).toContain('object-contain');
 
-    const backdrop = thumb.closest('button')!.querySelector<HTMLImageElement>('img[src*="e_blur"]');
+    const backdrop = thumb.closest('button')!.querySelector<HTMLImageElement>('img[src*="t_be_lqip"]');
     expect(backdrop).not.toBeNull();
     // Filling the bars is the whole point: it must cover, and it must be the
     // same photo rather than a generic placeholder.

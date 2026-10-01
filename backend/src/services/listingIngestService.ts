@@ -240,10 +240,13 @@ export const runSource = async (
       deferred: 0,
     });
 
-    // Scraped/external listing images are referenced directly from the source
-    // site and are NOT re-hosted on Cloudinary by default (that would flood our
-    // media storage). Opt in per-source by setting adapterConfig.rehostImages = true.
+    // Feed images are fetched live from the source site when a visitor views
+    // them — never stored on Cloudinary. Re-hosting a source
+    // (adapterConfig.rehostImages = true) is honoured only when the deployment
+    // explicitly allows it with ALLOW_EXTERNAL_IMAGE_REHOST=true, so a stray
+    // flag on one source can't quietly fill the media account.
     const rehostImages =
+      process.env.ALLOW_EXTERNAL_IMAGE_REHOST === 'true' &&
       (source.adapterConfig as Record<string, unknown> | undefined)?.rehostImages === true;
     const emitNew =
       (source.adapterConfig as Record<string, unknown> | undefined)?.emitNewListingEvents === true;

@@ -1,3 +1,4 @@
+import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useEffect, useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
@@ -293,7 +294,7 @@ const Onboarding: React.FC = () => {
                   >
                     {agency.logo ? (
                       <img
-                        src={agency.logo}
+                        src={optimizeCloudinaryUrl(agency.logo, { width: 64 }) || agency.logo}
                         alt={agency.name}
                         loading="lazy"
                         decoding="async"
