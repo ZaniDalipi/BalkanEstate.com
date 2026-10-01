@@ -745,7 +745,10 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
         {/* Seller/Agent Info Section */}
         <div className="property-card__seller pt-3 border-t border-neutral-100">
-          <div className="flex items-center gap-2">
+          {/* One row: seller left, agency right. It wraps instead of squeezing —
+              in a narrow grid the agency drops below rather than truncating the
+              name to a single letter. */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
             {/* Seller Avatar */}
             <div className="relative flex-shrink-0">
               <SellerAvatar
@@ -757,8 +760,8 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
             </div>
 
-            {/* Seller Info */}
-            <div className="min-w-0 flex-1">
+            {/* Seller Info — keeps room for the name before the agency wraps */}
+            <div className="min-w-[6.5rem] flex-1">
               {/* Only print the name line when we actually have one — when the
                   fallback *is* the role label the badge below already says it,
                   and repeating it reads as a bug. */}
@@ -775,38 +778,36 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 {sellerRoleLabel}
               </span>
             </div>
-          </div>
 
-          {/* Agency (if agent with agency). On its own row: sharing one line
-              with the name squeezed both to a single letter in any narrow
-              grid — a four-column search result, for instance. */}
-          {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
-            <div className="mt-2 flex items-center gap-1.5 bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
-              {safeProperty.seller.agencyLogo && !agencyLogoFailed ? (
-                <img
-                  src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
-                  alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
-                  loading="lazy"
-                  decoding="async"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 rounded object-contain bg-white flex-shrink-0 overflow-hidden"
-                  // Preset failed → try the original; still failing → the icon, never broken alt text.
-                  onError={(e) => {
-                    if (!retryWithOriginalImage(e.currentTarget)) setAgencyLogoFailed(true);
-                  }}
-                />
-              ) : (
-                <BuildingOfficeIcon className="w-5 h-5 text-primary flex-shrink-0" />
-              )}
-              <div className="min-w-0">
-                <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
-                <p className="text-[10px] font-medium text-neutral-700 truncate" title={safeProperty.seller.agencyName}>
-                  {safeProperty.seller.agencyName}
-                </p>
+            {/* Agency (if agent with agency), on the right of the seller */}
+            {safeProperty.seller.type === 'agent' && safeProperty.seller.agencyName && (
+              <div className="ml-auto flex items-center gap-1.5 min-w-0 max-w-full bg-neutral-50 px-2 py-1.5 rounded-lg border border-neutral-200">
+                {safeProperty.seller.agencyLogo && !agencyLogoFailed ? (
+                  <img
+                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
+                    alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
+                    loading="lazy"
+                    decoding="async"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 rounded object-contain bg-white flex-shrink-0 overflow-hidden"
+                    // Preset failed → try the original; still failing → the icon, never broken alt text.
+                    onError={(e) => {
+                      if (!retryWithOriginalImage(e.currentTarget)) setAgencyLogoFailed(true);
+                    }}
+                  />
+                ) : (
+                  <BuildingOfficeIcon className="w-5 h-5 text-primary flex-shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <p className="text-[9px] text-neutral-500 leading-none">{t('property:seller.agency')}</p>
+                  <p className="text-[10px] font-medium text-neutral-700 truncate max-w-[9rem]" title={safeProperty.seller.agencyName}>
+                    {safeProperty.seller.agencyName}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* iOS-style Compare Button */}
           {showCompareButton && (
