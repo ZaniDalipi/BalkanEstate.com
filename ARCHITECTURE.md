@@ -540,6 +540,8 @@ PropertyList → OutOfAreaBanner (role="status") above the promoted listings
   out; listings without usable coordinates rank last.
 - Buy page only; the rent and villa pages still use `narrowToMapView`.
 
+---
+
 ## Map Clusters — opening a bubble
 
 A cluster bubble is a promise: "there are N listings here". Tapping it has to
