@@ -608,7 +608,9 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
     const { period = '30d' } = req.query;
     const subscriptionInfo = getSubscriptionInfo(currentUser);
 
-    const properties = await Property.find({ sellerId: userId }).select('_id title views viewStats status isPromoted promotionTier price createdAt');
+    const properties = await Property.find({ sellerId: userId }).select(
+      '_id title views viewStats status isPromoted promotionTier price createdAt imageUrl city country beds baths sqft propertyType saves inquiries'
+    );
 
     if (properties.length === 0) {
       res.json({
@@ -659,8 +661,50 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
 
     const statsMap = new Map(aggregatedStats.map((s) => [String(s._id), s]));
 
+    // Daily views per property over this period and the one before it:
+    // the current days feed each row's sparkline, the earlier total its trend.
+    const periodMs = Date.now() - startDate.getTime();
+    const previousStart = new Date(startDate.getTime() - periodMs);
+    const dailyByProperty = await PageView.aggregate([
+      {
+        $match: {
+          entityType: 'property',
+          entityId: { $in: propertyIds },
+          createdAt: { $gte: previousStart },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            entityId: '$entityId',
+            day: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          },
+          views: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const periodDays = Math.max(1, Math.round(periodMs / (24 * 60 * 60 * 1000)));
+    const dayKeys = Array.from({ length: periodDays }, (_, i) =>
+      new Date(Date.now() - (periodDays - 1 - i) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    );
+    const startKey = startDate.toISOString().slice(0, 10);
+    const dailyMap = new Map<string, Map<string, number>>();
+    const previousMap = new Map<string, number>();
+    for (const row of dailyByProperty) {
+      const id = String(row._id.entityId);
+      if (row._id.day < startKey) {
+        previousMap.set(id, (previousMap.get(id) || 0) + row.views);
+      } else {
+        if (!dailyMap.has(id)) dailyMap.set(id, new Map());
+        dailyMap.get(id)!.set(row._id.day, row.views);
+      }
+    }
+
     const propertiesStats = properties.map((p: any) => {
-      const stats = statsMap.get(String(p._id)) || { views: 0, uniqueViews: 0, avgDuration: 0 };
+      const id = String(p._id);
+      const stats = statsMap.get(id) || { views: 0, uniqueViews: 0, avgDuration: 0 };
+      const days = dailyMap.get(id);
       return {
         propertyId: p._id,
         title: p.title || 'Untitled Property',
@@ -669,10 +713,21 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
         promotionTier: p.promotionTier,
         price: p.price,
         createdAt: p.createdAt,
+        imageUrl: p.imageUrl,
+        city: p.city,
+        country: p.country,
+        beds: p.beds,
+        baths: p.baths,
+        sqft: p.sqft,
+        propertyType: p.propertyType,
+        saves: p.saves || 0,
+        inquiries: p.inquiries || 0,
         totalViews: p.views || 0,
         periodViews: stats.views,
         periodUniqueViews: stats.uniqueViews,
         avgDuration: Math.round(stats.avgDuration || 0),
+        previousPeriodViews: previousMap.get(id) || 0,
+        dailyViews: dayKeys.map((day) => days?.get(day) || 0),
       };
     });
 
@@ -689,6 +744,14 @@ export const getMyPropertiesStats = async (req: Request, res: Response): Promise
         propertiesStats: propertiesStats.map((p) => ({
           propertyId: p.propertyId,
           title: p.title,
+          status: p.status,
+          price: p.price,
+          imageUrl: p.imageUrl,
+          city: p.city,
+          country: p.country,
+          beds: p.beds,
+          sqft: p.sqft,
+          propertyType: p.propertyType,
           totalViews: p.totalViews,
           periodViews: p.periodViews,
         })),

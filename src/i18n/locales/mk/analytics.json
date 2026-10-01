@@ -67,7 +67,14 @@
     "promoted": "Промовирано",
     "views": "{{count}} прегледи",
     "uniqueViews": "{{count}} уникатни",
-    "totalViews": "{{count}} вкупно"
+    "totalViews": "{{count}} вкупно",
+    "rented": "Издадено",
+    "draft": "Нацрт",
+    "avgTime": "{{time}} просечно време",
+    "saves": "{{count}} зачувани",
+    "inquiries": "{{count}} прашања",
+    "openProperty": "Отвори {{title}}",
+    "vsPreviousPeriod": "во однос на претходниот период"
   },
   "sidebar": {
     "topPerformers": "Топ 3",

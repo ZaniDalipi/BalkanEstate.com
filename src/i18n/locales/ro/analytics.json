@@ -67,7 +67,14 @@
     "promoted": "Promovat",
     "views": "{{count}} vizualizări",
     "uniqueViews": "{{count}} unice",
-    "totalViews": "{{count}} total"
+    "totalViews": "{{count}} total",
+    "rented": "Închiriat",
+    "draft": "Ciornă",
+    "avgTime": "{{time}} timp mediu",
+    "saves": "{{count}} salvări",
+    "inquiries": "{{count}} solicitări",
+    "openProperty": "Deschide {{title}}",
+    "vsPreviousPeriod": "față de perioada anterioară"
   },
   "sidebar": {
     "topPerformers": "Top 3",

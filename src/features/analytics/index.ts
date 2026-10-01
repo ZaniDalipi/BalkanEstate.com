@@ -5,6 +5,7 @@ export {
   DeviceChart,
   TrafficChart,
   HourlyHeatmap,
+  Sparkline,
   StatCard,
   InsightCard,
   PropertyRow,
@@ -23,4 +24,4 @@ export { PERIOD_OPTIONS, STAT_CARD_COLORS, INSIGHT_PRIORITY_CONFIG } from './con
 export type { StatCardColor, InsightPriority } from './constants';
 
 // Utils
-export { truncateText, calculatePerformanceLevel, getPerformanceColor } from './utils';
+export { truncateText, calculatePerformanceLevel, getPerformanceColor, formatDuration, calculateTrend } from './utils';

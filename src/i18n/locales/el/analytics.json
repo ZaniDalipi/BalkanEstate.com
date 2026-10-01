@@ -67,7 +67,14 @@
     "promoted": "Προωθημένο",
     "views": "{{count}} προβολές",
     "uniqueViews": "{{count}} μοναδικές",
-    "totalViews": "{{count}} συνολικά"
+    "totalViews": "{{count}} συνολικά",
+    "rented": "Ενοικιάστηκε",
+    "draft": "Πρόχειρο",
+    "avgTime": "{{time}} μέσος χρόνος",
+    "saves": "{{count}} αποθηκεύσεις",
+    "inquiries": "{{count}} ερωτήματα",
+    "openProperty": "Άνοιγμα {{title}}",
+    "vsPreviousPeriod": "σε σχέση με την προηγούμενη περίοδο"
   },
   "sidebar": {
     "topPerformers": "Κορυφαία 3",

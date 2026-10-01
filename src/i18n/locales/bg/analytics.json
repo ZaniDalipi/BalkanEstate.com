@@ -67,7 +67,14 @@
     "promoted": "Промотиран",
     "views": "{{count}} прегледа",
     "uniqueViews": "{{count}} уникални",
-    "totalViews": "{{count}} общо"
+    "totalViews": "{{count}} общо",
+    "rented": "Отдаден",
+    "draft": "Чернова",
+    "avgTime": "{{time}} средно време",
+    "saves": "{{count}} запазвания",
+    "inquiries": "{{count}} запитвания",
+    "openProperty": "Отвори {{title}}",
+    "vsPreviousPeriod": "спрямо предходния период"
   },
   "sidebar": {
     "topPerformers": "Топ 3",

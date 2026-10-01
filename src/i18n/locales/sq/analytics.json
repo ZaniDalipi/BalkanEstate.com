@@ -67,7 +67,14 @@
     "promoted": "E Promovuar",
     "views": "{{count}} shikime",
     "uniqueViews": "{{count}} unike",
-    "totalViews": "{{count}} totale"
+    "totalViews": "{{count}} totale",
+    "rented": "Me qira",
+    "draft": "Draft",
+    "avgTime": "{{time}} kohë mesatare",
+    "saves": "{{count}} ruajtje",
+    "inquiries": "{{count}} kërkesa",
+    "openProperty": "Hap {{title}}",
+    "vsPreviousPeriod": "krahasuar me periudhën e mëparshme"
   },
   "sidebar": {
     "topPerformers": "Top 3",

@@ -1,1 +1,1 @@
-export { truncateText, calculatePerformanceLevel, getPerformanceColor } from './helpers';
+export { truncateText, calculatePerformanceLevel, getPerformanceColor, formatDuration, calculateTrend } from './helpers';

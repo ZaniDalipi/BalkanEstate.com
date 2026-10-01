@@ -25,3 +25,23 @@ export const getPerformanceColor = (level: number): { text: string; bar: string 
   if (level > 0.3) return { text: 'text-amber-600', bar: 'bg-amber-500' };
   return { text: 'text-neutral-500', bar: 'bg-neutral-300' };
 };
+
+/**
+ * Formats a duration in seconds as a short label ("45s", "2m 05s")
+ */
+export const formatDuration = (seconds: number): string => {
+  const total = Math.max(0, Math.round(seconds));
+  if (total < 60) return `${total}s`;
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  return `${minutes}m ${String(rest).padStart(2, '0')}s`;
+};
+
+/**
+ * Change from the previous period as a whole percentage.
+ * `null` when there is nothing to compare against (no earlier views).
+ */
+export const calculateTrend = (current: number, previous: number): number | null => {
+  if (previous <= 0) return null;
+  return Math.round(((current - previous) / previous) * 100);
+};

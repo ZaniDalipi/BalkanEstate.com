@@ -67,7 +67,14 @@
     "promoted": "Promovirano",
     "views": "{{count}} pregleda",
     "uniqueViews": "{{count}} jedinstvenih",
-    "totalViews": "{{count}} ukupno"
+    "totalViews": "{{count}} ukupno",
+    "rented": "Iznajmljeno",
+    "draft": "Nacrt",
+    "avgTime": "{{time}} prosj. vrijeme",
+    "saves": "{{count}} spašeno",
+    "inquiries": "{{count}} upita",
+    "openProperty": "Otvori {{title}}",
+    "vsPreviousPeriod": "u odnosu na prethodni period"
   },
   "sidebar": {
     "topPerformers": "Top 3",

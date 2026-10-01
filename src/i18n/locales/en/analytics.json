@@ -67,7 +67,14 @@
     "promoted": "Promoted",
     "views": "{{count}} views",
     "uniqueViews": "{{count}} unique",
-    "totalViews": "{{count}} total"
+    "totalViews": "{{count}} total",
+    "rented": "Rented",
+    "draft": "Draft",
+    "avgTime": "{{time}} avg. time",
+    "saves": "{{count}} saves",
+    "inquiries": "{{count}} inquiries",
+    "openProperty": "Open {{title}}",
+    "vsPreviousPeriod": "vs. previous period"
   },
   "sidebar": {
     "topPerformers": "Top 3",

@@ -103,6 +103,19 @@ export interface PropertyStats {
   periodViews: number;
   periodUniqueViews?: number;
   avgDuration?: number;
+  imageUrl?: string;
+  city?: string;
+  country?: string;
+  beds?: number;
+  baths?: number;
+  sqft?: number;
+  propertyType?: string;
+  saves?: number;
+  inquiries?: number;
+  /** Views in the period before this one (premium only) — drives the trend. */
+  previousPeriodViews?: number;
+  /** Views per day across the period, oldest first (premium only). */
+  dailyViews?: number[];
 }
 
 export interface MyPropertiesStatsResponse {

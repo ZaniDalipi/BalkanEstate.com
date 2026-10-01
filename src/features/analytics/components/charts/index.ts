@@ -3,3 +3,4 @@ export { default as MiniBarChart } from './MiniBarChart';
 export { default as DeviceChart } from './DeviceChart';
 export { default as TrafficChart } from './TrafficChart';
 export { HourlyHeatmap } from './HourlyHeatmap';
+export { default as Sparkline } from './Sparkline';

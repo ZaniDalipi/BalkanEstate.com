@@ -33,6 +33,7 @@ import {
   StatCard,
   InsightCard,
   PropertyRow,
+  type PropertyRowData,
   DeviceChart,
   TrafficChart,
   HourlyHeatmap,
@@ -40,7 +41,7 @@ import {
   PERIOD_OPTIONS,
   truncateText,
 } from '@/src/features/analytics';
-import { navigate, goBack } from '@/src/app/router/navigation';
+import { navigate, goBack, localizePath } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 
 // Animated number counter hook
@@ -624,16 +625,7 @@ const InsightsSection: React.FC<InsightsSectionProps> = ({ insights, onNavigateT
 };
 
 interface PropertiesSectionProps {
-  propertiesStats?: Array<{
-    propertyId: string;
-    title: string;
-    status?: string;
-    isPromoted?: boolean;
-    price?: number;
-    periodViews: number;
-    periodUniqueViews?: number;
-    totalViews: number;
-  }>;
+  propertiesStats?: PropertyRowData[];
   isLoading: boolean;
   maxViews: number;
   onPropertyClick: (id: string) => void;
@@ -650,12 +642,12 @@ const PropertiesSection: React.FC<PropertiesSectionProps> = ({
   const { t } = useTranslation(['analytics']);
   return (
     <div className="lg:col-span-2">
-      <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
         <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
           <h2 className="font-bold text-neutral-900 text-sm">{t('analytics:properties.title')}</h2>
           <span className="text-xs text-neutral-400">{t('analytics:stats.listings', { count: propertiesStats?.length || 0 })}</span>
         </div>
-        <div className="divide-y divide-neutral-50 max-h-[400px] overflow-y-auto">
+        <div className="divide-y divide-neutral-100 max-h-[640px] overflow-y-auto">
           {isLoading ? (
             <LoadingSkeleton />
           ) : propertiesStats && propertiesStats.length > 0 ? (
@@ -665,6 +657,7 @@ const PropertiesSection: React.FC<PropertiesSectionProps> = ({
                 property={property}
                 rank={index + 1}
                 maxViews={maxViews}
+                href={localizePath(paths.property(property.propertyId))}
                 onClick={() => onPropertyClick(property.propertyId)}
               />
             ))
@@ -680,14 +673,15 @@ const PropertiesSection: React.FC<PropertiesSectionProps> = ({
 const LoadingSkeleton: React.FC = () => (
   <>
     {Array.from({ length: 4 }).map((_, i) => (
-      <div key={i} className="p-3">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-neutral-100 rounded-full animate-pulse" />
+      <div key={i} className="p-3 sm:p-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-20 h-16 sm:w-28 sm:h-20 bg-neutral-100 rounded-lg animate-pulse" />
           <div className="flex-1">
             <div className="h-4 bg-neutral-100 rounded w-3/4 mb-2 animate-pulse" />
-            <div className="h-1.5 bg-neutral-100 rounded w-1/2 animate-pulse" />
+            <div className="h-3 bg-neutral-100 rounded w-1/2 mb-2 animate-pulse" />
+            <div className="h-1.5 bg-neutral-100 rounded w-1/3 animate-pulse" />
           </div>
-          <div className="h-6 w-10 bg-neutral-100 rounded animate-pulse" />
+          <div className="h-8 w-12 bg-neutral-100 rounded animate-pulse" />
         </div>
       </div>
     ))}
