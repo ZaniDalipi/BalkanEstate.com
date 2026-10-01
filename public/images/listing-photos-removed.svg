@@ -1,8 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="Photos no longer available">
-  <rect width="800" height="600" fill="#e5e7eb"/>
-  <g fill="none" stroke="#9ca3af" stroke-width="14" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M250 330 L400 210 L550 330"/>
-    <path d="M290 300 V410 H510 V300"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="BalkanEstateAI — photos no longer available">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f1f5fb"/>
+      <stop offset="1" stop-color="#e2e8f2"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.45">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect width="800" height="600" fill="url(#glow)"/>
+
+  <!-- BalkanEstateAI mark (same paths as the app's LogoIcon, 24×24 → 144×144) -->
+  <g transform="translate(328 128) scale(6)" fill-rule="evenodd">
+    <path fill="#003A96" d="M12 21V5L10 7V23L12 21Z M4 21V10L2 12V23L4 21Z"/>
+    <path fill="#0252CD" d="M12 5H20V21H12V5Z M4 10H10V21H4V10Z"/>
   </g>
-  <text x="400" y="480" text-anchor="middle" font-family="system-ui, sans-serif" font-size="30" fill="#6b7280">Photos no longer available</text>
+
+  <text x="400" y="338" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="40" font-weight="800" letter-spacing="-0.5">
+    <tspan fill="#0f172a">Balkan</tspan><tspan fill="#0252CD">Estate</tspan><tspan fill="#003A96">AI</tspan>
+  </text>
+
+  <line x1="340" y1="374" x2="460" y2="374" stroke="#c3cddc" stroke-width="2" stroke-linecap="round"/>
+
+  <text x="400" y="420" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="28" font-weight="600" fill="#334155">Photos no longer available</text>
+  <text x="400" y="458" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" fill="#64748b">This listing's photos have been removed</text>
 </svg>
