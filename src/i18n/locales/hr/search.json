@@ -495,5 +495,12 @@
     "listings": "Oglasi",
     "remove": "Ukloni",
     "lookupFailed": "Nije moguće pronaći to mjesto. Pokušajte s drugim rezultatom."
+  },
+  "outOfArea": {
+    "title": "Trenutno nema nekretnina na ovom području",
+    "titleQuery": "Trenutno nema nekretnina u „{{query}}”",
+    "showingPromotedIn": "U međuvremenu, evo premium i istaknutih oglasa s drugih lokacija — najbliži je u {{location}}.",
+    "showingPromoted": "U međuvremenu, evo premium i istaknutih oglasa s drugih lokacija.",
+    "nothingPromoted": "Pokušajte umanjiti ili pomaknuti kartu ili poništiti filtre."
   }
 }

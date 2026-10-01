@@ -497,5 +497,12 @@
     "listings": "Listings",
     "remove": "Remove",
     "lookupFailed": "Could not look up that place. Please try another result."
+  },
+  "outOfArea": {
+    "title": "No properties in this area right now",
+    "titleQuery": "No properties in “{{query}}” right now",
+    "showingPromotedIn": "Meanwhile, here are premium and highlighted listings from elsewhere — the nearest is in {{location}}.",
+    "showingPromoted": "Meanwhile, here are premium and highlighted listings from elsewhere.",
+    "nothingPromoted": "Try zooming out, moving the map or resetting your filters."
   }
 }

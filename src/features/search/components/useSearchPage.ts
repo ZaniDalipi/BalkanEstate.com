@@ -6,6 +6,7 @@ import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, Searc
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
+import { promotedOutsideArea } from '../outOfArea';
 import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
@@ -474,67 +475,14 @@ export function useSearchPage() {
      */
     const mapProperties = relaxedProperties ?? baseFilteredProperties;
 
-    const { listProperties, fallbackLocationValue } = useMemo(() => {
+    const { listProperties, fallbackLocationValue, isOutOfArea = false } = useMemo((): {
+        listProperties: Property[];
+        fallbackLocationValue: string | null;
+        isOutOfArea?: boolean;
+    } => {
         // The strict search, or — when it found nothing for the typed text —
         // everything the other filters allow, located by the map instead.
         const baseFilteredProperties = mapProperties;
-
-        // Helper to calculate distance between two points
-        const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
-            return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
-        };
-
-        // Helper to get smart fallback properties with location priority
-        const getSmartFallback = (centerLat: number, centerLng: number): { properties: Property[], location: string | null } => {
-            if (baseFilteredProperties.length === 0) {
-                return { properties: [], location: null };
-            }
-
-            // Find the closest property to determine the search city/country
-            const propertiesWithDistance = baseFilteredProperties.map(p => ({
-                ...p,
-                distance: getDistance(centerLat, centerLng, p.lat, p.lng)
-            })).sort((a, b) => a.distance - b.distance);
-
-            const closestProperty = propertiesWithDistance[0];
-            const searchCity = closestProperty?.city;
-            const searchCountry = closestProperty?.country;
-
-            // Priority 1: Properties in the same city
-            const sameCityProps = baseFilteredProperties.filter(p =>
-                p.city?.toLowerCase() === searchCity?.toLowerCase()
-            );
-
-            if (sameCityProps.length > 0) {
-                // Sort by distance from center
-                const sorted = sameCityProps.sort((a, b) =>
-                    getDistance(centerLat, centerLng, a.lat, a.lng) -
-                    getDistance(centerLat, centerLng, b.lat, b.lng)
-                );
-                return { properties: sorted, location: searchCity || null };
-            }
-
-            // Priority 2: Properties in nearby cities (same country, sorted by distance)
-            const sameCountryProps = baseFilteredProperties.filter(p =>
-                p.country?.toLowerCase() === searchCountry?.toLowerCase()
-            );
-
-            if (sameCountryProps.length > 0) {
-                // Sort by distance to show nearest cities first
-                const sorted = sameCountryProps.sort((a, b) =>
-                    getDistance(centerLat, centerLng, a.lat, a.lng) -
-                    getDistance(centerLat, centerLng, b.lat, b.lng)
-                );
-                // Get the city of the closest property in the country
-                const nearestCity = sorted[0]?.city;
-                return { properties: sorted, location: nearestCity || searchCountry || null };
-            }
-
-            // Priority 3: All available properties (sorted by distance)
-            const sorted = propertiesWithDistance.sort((a, b) => a.distance - b.distance);
-            const nearestLocation = sorted[0]?.city || sorted[0]?.country;
-            return { properties: sorted, location: nearestLocation || null };
-        };
 
         // If a specific area is drawn/searched by the user, filter to that area
         if (drawnBounds) {
@@ -562,16 +510,13 @@ export function useSearchPage() {
                 return { listProperties: withinView, fallbackLocationValue: null };
             }
 
-            // No properties in view - use smart fallback
+            // Nothing in view: say so (the out-of-area banner) and offer only
+            // actively promoted listings from elsewhere — never ordinary ones
+            // that would read as results for the place searched. An empty
+            // list here is deliberate: the banner is the answer.
             const center = mapBounds.getCenter();
-            const fallback = getSmartFallback(center.lat, center.lng);
-
-            // Safety: never return empty if we have properties
-            if (fallback.properties.length === 0) {
-                return { listProperties: baseFilteredProperties, fallbackLocationValue: null };
-            }
-
-            return { listProperties: fallback.properties, fallbackLocationValue: fallback.location };
+            const outside = promotedOutsideArea(baseFilteredProperties, { lat: center.lat, lng: center.lng });
+            return { listProperties: outside.listProperties, fallbackLocationValue: outside.location, isOutOfArea: true };
         }
 
         // Fallback to all filtered properties if no bounds set (initial load)
@@ -584,6 +529,9 @@ export function useSearchPage() {
      * page says so rather than letting the results look like exact matches.
      */
     const isTextRelaxed = relaxedProperties !== null && listProperties.length > 0;
+
+    /** The typed text matched no listing at all — the banner names it. */
+    const isQueryUnmatched = relaxedProperties !== null;
 
     // Update fallback location state when computed value changes
     useEffect(() => {
@@ -1112,6 +1060,8 @@ export function useSearchPage() {
         mapProperties,
         listProperties,
         isTextRelaxed,
+        isOutOfArea,
+        isQueryUnmatched,
         seoTitle,
         seoDescription,
         // Handlers

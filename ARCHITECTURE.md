@@ -519,6 +519,27 @@ slug.
 
 ---
 
+## Search — nothing in the area
+
+```
+useSearchPage → listProperties
+  ├── in drawn area / map view → those listings
+  └── none in view → promotedOutsideArea(list, mapCentre)   src/features/search/outOfArea.ts
+        ├── validateActivePromotion(p)   isPromoted + end date in the future (validation.ts)
+        ├── premium > highlight > featured, urgent first, then nearest
+        └── { listProperties, location }  → isOutOfArea: true
+PropertyList → OutOfAreaBanner (role="status") above the promoted listings
+```
+
+- **Say it, then offer something.** A view with no listings used to fall back to
+  every nearest listing, so a Durrës flat read as a result for "Budva". Now the
+  banner says the area is empty and only actively promoted listings follow.
+- **An empty list is a real answer.** With nothing promoted, the list stays empty
+  and the banner offers Reset Filters instead of the generic no-results box.
+- **Bad data never throws.** Expired or unparsable promotion dates are filtered
+  out; listings without usable coordinates rank last.
+- Buy page only; the rent and villa pages still use `narrowToMapView`.
+
 ## Map Clusters — opening a bubble
 
 A cluster bubble is a promise: "there are N listings here". Tapping it has to

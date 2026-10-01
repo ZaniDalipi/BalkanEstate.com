@@ -495,5 +495,12 @@
     "listings": "Anunțuri",
     "remove": "Elimină",
     "lookupFailed": "Locul nu a putut fi găsit. Încercați alt rezultat."
+  },
+  "outOfArea": {
+    "title": "Momentan nu există proprietăți în această zonă",
+    "titleQuery": "Momentan nu există proprietăți în „{{query}}”",
+    "showingPromotedIn": "Între timp, iată anunțuri premium și evidențiate din alte zone — cel mai apropiat este în {{location}}.",
+    "showingPromoted": "Între timp, iată anunțuri premium și evidențiate din alte zone.",
+    "nothingPromoted": "Încercați să micșorați sau să mutați harta ori să resetați filtrele."
   }
 }

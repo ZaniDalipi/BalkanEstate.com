@@ -5,6 +5,7 @@ import PropertyCard from '@/src/features/property-details/components/PropertyCar
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
 import AiSearch from './AiSearch';
+import OutOfAreaBanner from './OutOfAreaBanner';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import Footer from '@/components/shared/Footer';
 import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
@@ -37,6 +38,10 @@ interface PropertyListProps {
   fallbackLocation?: string | null;
   /** True when the typed text matched nothing and the map view is answering. */
   isTextRelaxed?: boolean;
+  /** True when nothing was in the searched area — only promoted listings from elsewhere are listed. */
+  isOutOfArea?: boolean;
+  /** True when the typed text matched no listing at all. */
+  isQueryUnmatched?: boolean;
   onPropertyHover?: (propertyId: string | null) => void;
   /** A row picked in the search box — a place, a listing, or the query itself. */
   onSelectSuggestion?: (suggestion: Suggestion) => void;
@@ -749,7 +754,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
     // Use props instead of useAppContext() to avoid re-rendering the
     // entire property list when unrelated context state changes (e.g. savedHomes).
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, isOutOfArea = false, isQueryUnmatched = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
 
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
@@ -973,7 +978,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                             <div className="min-w-0">
                                 <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
-                                <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} fallbackLocation={fallbackLocation} />
+                                {!isOutOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} fallbackLocation={fallbackLocation} />}
                             </div>
                             <div className="relative z-[101]">
                                 <select
@@ -1006,6 +1011,15 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         </div>
                         <div className="p-4 md:p-3 relative z-0">
                             <PropertyListStyles />
+                            {isOutOfArea && !(isLoadingProperties || isSearchFiltering) && (
+                                <OutOfAreaBanner
+                                    query={filters.query}
+                                    isQueryUnmatched={isQueryUnmatched}
+                                    promotedCount={properties.length}
+                                    location={fallbackLocation}
+                                    onResetFilters={onResetFilters}
+                                />
+                            )}
                             {(isLoadingProperties || isSearchFiltering) ? (
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
                                     {Array.from({ length: 6 }).map((_, index) => (
@@ -1014,7 +1028,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 </div>
                             ) : properties.length > 0 ? (
                                 <>
-                                    <HighlightedPropertiesSection properties={properties} />
+                                    {!isOutOfArea && <HighlightedPropertiesSection properties={properties} />}
                                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 property-grid-transition">
                                         {interleaveInFeedAds(
                                             properties.slice(0, visibleCount).map((prop, index) => (
@@ -1041,7 +1055,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         </div>
                                     )}
                                 </>
-                            ) : (
+                            ) : isOutOfArea ? null : (
                                 <div
                                     className="text-center py-16 px-6 rounded-2xl relative overflow-hidden"
                                     style={{
@@ -1117,7 +1131,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                             <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                                 <div className="min-w-0">
                                     <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
-                                    <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} fallbackLocation={fallbackLocation} />
+                                    {!isOutOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} fallbackLocation={fallbackLocation} />}
                                 </div>
                                 <div className="relative z-[101]">
                                     <select
@@ -1150,6 +1164,15 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
                             <div className="p-4 md:p-3 relative z-0">
                                 <PropertyListStyles />
+                                {isOutOfArea && !isLoadingProperties && (
+                                    <OutOfAreaBanner
+                                        query={filters.query}
+                                        isQueryUnmatched={isQueryUnmatched}
+                                        promotedCount={properties.length}
+                                        location={fallbackLocation}
+                                        onResetFilters={onResetFilters}
+                                    />
+                                )}
                                 {isLoadingProperties ? (
                                     <div className="grid grid-cols-1 gap-6">
                                         {Array.from({ length: 4 }).map((_, index) => (
@@ -1158,7 +1181,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     </div>
                                 ) : properties.length > 0 ? (
                                     <>
-                                        <HighlightedPropertiesSection properties={properties} />
+                                        {!isOutOfArea && <HighlightedPropertiesSection properties={properties} />}
                                         <div className="grid grid-cols-1 gap-6 property-grid-transition">
                                             {interleaveInFeedAds(
                                                 properties.slice(0, visibleCount).map((prop, index) => (
@@ -1185,7 +1208,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                             </div>
                                         )}
                                     </>
-                                ) : (
+                                ) : isOutOfArea ? null : (
                                     <div
                                         className="text-center py-16 px-6 rounded-2xl relative overflow-hidden"
                                         style={{

@@ -495,5 +495,12 @@
     "listings": "Listimet",
     "remove": "Hiq",
     "lookupFailed": "Nuk u gjet dot ai vend. Ju lutemi provoni një rezultat tjetër."
+  },
+  "outOfArea": {
+    "title": "Aktualisht nuk ka prona në këtë zonë",
+    "titleQuery": "Aktualisht nuk ka prona në “{{query}}”",
+    "showingPromotedIn": "Ndërkohë, ja disa prona premium dhe të theksuara nga zona të tjera — më e afërta është në {{location}}.",
+    "showingPromoted": "Ndërkohë, ja disa prona premium dhe të theksuara nga zona të tjera.",
+    "nothingPromoted": "Provoni të zvogëloni hartën, ta lëvizni atë ose të rivendosni filtrat."
   }
 }

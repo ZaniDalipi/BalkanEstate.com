@@ -908,12 +908,44 @@ export function sanitizeFloorplanSpot(spot: unknown): FloorplanSpot | undefined 
   return validateFloorplanSpot(result).isValid ? result : undefined;
 }
 
+/**
+ * Is a listing's paid promotion running right now?
+ *
+ * Read at the API-ingestion boundary, so it is strict about what came back:
+ * the flag alone is not enough — an `isPromoted` listing whose end date is
+ * missing, unparsable or already past is an expired promotion, not a live
+ * one. Accepts epoch milliseconds or an ISO date string (older payloads
+ * serialised the date). Never throws.
+ */
+export function validateActivePromotion(
+  listing: { isPromoted?: unknown; promotionEndDate?: unknown } | null | undefined,
+  now: number = Date.now()
+): ValidationResult {
+  if (!listing || listing.isPromoted !== true) {
+    return { isValid: false, error: 'Listing is not promoted' };
+  }
+  const raw = listing.promotionEndDate;
+  const end = typeof raw === 'number'
+    ? raw
+    : typeof raw === 'string' && raw.trim() !== ''
+      ? Date.parse(raw)
+      : NaN;
+  if (!Number.isFinite(end)) {
+    return { isValid: false, error: 'Promotion end date is missing or invalid' };
+  }
+  if (end <= now) {
+    return { isValid: false, error: 'Promotion has ended' };
+  }
+  return { isValid: true };
+}
+
 export default {
   validateEmail,
   validatePhone,
   validatePassword,
   validateUrl,
   validateCoordinates,
+  validateActivePromotion,
   validatePrice,
   validateTextLength,
   validatePropertyTitle,
