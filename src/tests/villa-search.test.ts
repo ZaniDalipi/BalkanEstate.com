@@ -24,8 +24,15 @@ vi.mock('@/services/geminiService', () => ({
   generateSearchNameFromCoords: vi.fn().mockResolvedValue('Area'),
 }));
 
+// Sold and let villas, as the server would hand them over once asked for.
+const closed = vi.hoisted(() => ({ villas: [] as unknown[], askedFor: [] as boolean[] }));
+
 vi.mock('@/src/features/properties/hooks', () => ({
   useRealtimeProperties: () => {},
+  useClosedProperties: (enabled: boolean) => {
+    closed.askedFor.push(enabled);
+    return { closedProperties: enabled ? closed.villas : [], isLoadingClosed: false };
+  },
 }));
 
 // One stable `t`, and one stable object around it: a hook that re-creates
@@ -75,6 +82,8 @@ const villa = (overrides: Record<string, unknown> = {}) => ({
 });
 
 beforeEach(() => {
+  closed.villas = [];
+  closed.askedFor = [];
   searchLocation.mockReset().mockResolvedValue([]);
   dispatch.mockReset();
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
@@ -187,5 +196,24 @@ describe('useVillaSearch — searching', () => {
       result.current.handleDestinationSelect(destination);
     });
     expect(result.current.activeFilters.query).toBe('');
+  });
+});
+
+describe('useVillaSearch — sold and let villas', () => {
+  it('only fetches them when asked, then shows them alone or alongside the rest', async () => {
+    closed.villas = [
+      villa({ id: 'sold', listingType: 'sale', status: 'sold' }),
+      villa({ id: 'let', status: 'rented' }),
+    ];
+    const { result } = await mountHook();
+
+    expect(closed.askedFor.every((asked) => asked === false)).toBe(true);
+    expect(result.current.listProperties.map((p) => p.id)).toEqual(['v1']);
+
+    act(() => result.current.handleFilterChange('saleStatus', 'closed'));
+    expect(result.current.listProperties.map((p) => p.id).sort()).toEqual(['let', 'sold']);
+
+    act(() => result.current.handleFilterChange('saleStatus', 'all'));
+    expect(result.current.listProperties.map((p) => p.id).sort()).toEqual(['let', 'sold', 'v1']);
   });
 });

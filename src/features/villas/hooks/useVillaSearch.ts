@@ -5,12 +5,12 @@ import { Property, Filters, initialFilters, SavedSearch } from '@/types';
 import type { Suggestion } from '@/src/features/search/universal/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import L from 'leaflet';
-import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
 import { narrowToMapView } from '@/src/features/search/mapList';
 import { frameSearchTarget } from '@/src/features/search/frameSearch';
 import { applyQueryToFilters } from '@/src/features/search/universal/queryToFilters';
 import { getCountryData } from '@/constants/countries';
-import { useRealtimeProperties } from '@/src/features/properties/hooks';
+import { useRealtimeProperties, useClosedProperties } from '@/src/features/properties/hooks';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 import { resolveVillaSearchTarget } from './villaSearchTarget';
@@ -69,7 +69,8 @@ export function useVillaSearch() {
     const { state, dispatch, updateSearchPageState, addSavedSearch } = useAppContext();
     const { isAuthenticated, currentUser } = state;
 
-    const [villaProperties, setVillaProperties] = useState<Property[]>([]);
+    // What is on the market; sold and let villas are folded in on demand below.
+    const [availableVillas, setVillaProperties] = useState<Property[]>([]);
     // The DB's own countDocuments for the whole villa collection, straight off
     // `pagination.total`. villaProperties.length is only ever one page of it.
     const [totalVillaCount, setTotalVillaCount] = useState(0);
@@ -102,6 +103,18 @@ export function useVillaSearch() {
     // before the word is finished. Everything but the text query moves both at
     // once; the query is debounced into `activeFilters`.
     const [activeFilters, setActiveFilters] = useState<Filters>(filters);
+
+    // Sold and let villas stay as the price history of their area. They are
+    // fetched — both markets — only once the status filter asks for them.
+    const wantsClosed = (activeFilters.saleStatus ?? 'available') !== 'available';
+    const { closedProperties: closedVillas, isLoadingClosed } = useClosedProperties(wantsClosed, {
+        listingType: 'any',
+        propertyType: 'luxury-villa',
+    });
+    const villaProperties = useMemo(
+        () => (wantsClosed ? mergeById(availableVillas, closedVillas) : availableVillas),
+        [wantsClosed, availableVillas, closedVillas]
+    );
     const queryDebounceRef = useRef<number | null>(null);
 
     /** Apply a filter set immediately, cancelling any pending query debounce. */
@@ -640,7 +653,7 @@ export function useVillaSearch() {
         dispatch,
         villaProperties,
         totalVillaCount,
-        isLoading,
+        isLoading: isLoading || isLoadingClosed,
         error,
         filters,
         activeFilters,

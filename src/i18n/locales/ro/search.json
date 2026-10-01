@@ -63,7 +63,12 @@
     "moreFilters": "Mai Multe Filtre",
     "lessFilters": "Mai Puține Filtre",
     "anyCountry": "Orice țară",
-    "sortBy": "Sortează după"
+    "sortBy": "Sortează după",
+    "saleStatus": "Afișează",
+    "saleStatusAvailable": "De vânzare",
+    "saleStatusSold": "Vândute",
+    "saleStatusAll": "Ambele",
+    "saleStatusHint": "Locuințele vândute își arată ultimul preț și când s-au vândut — deschideți una pentru a vedea prețurile din jur."
   },
   "options": {
     "any": "Oricare",

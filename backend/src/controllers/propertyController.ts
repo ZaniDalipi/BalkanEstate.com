@@ -31,6 +31,22 @@ import { invalidateCache } from '../middleware/cache';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
 import { respondIfValidationError } from '../middleware/propertyValidation';
 import { TYPE_ATTRIBUTES } from '../config/typeAttributes';
+import {
+  AREA_RADII_KM,
+  MIN_NEIGHBOURS,
+  MAX_NEIGHBOURS,
+  boundingBox,
+  distanceMeters,
+  basisFor,
+  fallbackTypesFor,
+  normalizePrice,
+  valueOf,
+  toNeighbour,
+  buildTrend,
+  buildStats,
+  pricePerSqm,
+  type AreaListing,
+} from '../services/areaPricesService';
 
 /**
  * Single source of truth for the client-settable property fields.
@@ -2464,5 +2480,108 @@ export const getPropertyPriceHistory = async (
   } catch (error: unknown) {
     propertyLogger.error('Get price history error:', error);
     res.status(500).json({ message: 'Error fetching price history' });
+  }
+};
+// @desc    Prices of the homes around a property: nearby listings, recent
+//          sales and the area's €/m² trend
+// @route   GET /api/properties/:id/area-prices
+// @access  Public
+export const getAreaPrices = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = getObjectIdParam(req, res, 'id');
+    if (!id) return;
+
+    const subject = await Property.findById(id)
+      .select('lat lng price sqft listingType propertyType rentPeriod')
+      .lean();
+
+    if (!subject) {
+      res.status(404).json({ message: 'Property not found' });
+      return;
+    }
+
+    const basis = basisFor(subject.listingType, subject.rentPeriod);
+    const closedStatus = basis.listingType === 'rent' ? 'rented' : 'sold';
+    const subjectPrice = normalizePrice(subject.price, subject.rentPeriod, basis);
+    const subjectValue = valueOf(subjectPrice, subject.sqft, basis);
+    const hasLocation = Number.isFinite(subject.lat) && Number.isFinite(subject.lng);
+
+    const findWithin = async (radiusKm: number, types: string[] | null): Promise<AreaListing[]> => {
+      const box = boundingBox(subject.lat, subject.lng, radiusKm);
+      const filter: Record<string, unknown> = {
+        _id: { $ne: subject._id },
+        listingType: basis.listingType,
+        status: { $in: ['active', closedStatus] },
+        price: { $gt: 0 },
+        lat: { $gte: box.minLat, $lte: box.maxLat },
+        lng: { $gte: box.minLng, $lte: box.maxLng },
+        // Villas an admin has not approved are not public anywhere else either.
+        villaApprovalStatus: { $nin: ['pending', 'rejected'] },
+      };
+      if (types) filter.propertyType = { $in: types };
+      // Like with like: nightly lets against nightly lets, monthly and weekly
+      // lets against each other (an unset period is monthly).
+      if (basis.rentUnit) filter.rentPeriod = basis.rentUnit === 'night' ? 'daily' : { $ne: 'daily' };
+
+      const rows = (await Property.find(filter)
+        // Only the rent and start of past lets — never tenant names or notes.
+        .select('title address city price sqft beds propertyType status lat lng imageUrl createdAt soldAt rentedAt rentPeriod rentalHistory.startDate rentalHistory.monthlyRent')
+        .limit(500)
+        .lean()) as unknown as AreaListing[];
+
+      // The box's corners reach past the radius; keep the circle.
+      return rows.filter((r) => distanceMeters(subject.lat, subject.lng, r.lat, r.lng) <= radiusKm * 1000);
+    };
+
+    let listings: AreaListing[] = [];
+    let radiusKm: number = AREA_RADII_KM[AREA_RADII_KM.length - 1];
+    let sameTypeOnly = true;
+
+    if (hasLocation) {
+      for (const r of AREA_RADII_KM) {
+        listings = await findWithin(r, [subject.propertyType]);
+        radiusKm = r;
+        if (listings.length >= MIN_NEIGHBOURS) break;
+      }
+      // Too few of the same kind even at the widest radius: widen the types
+      // rather than show an empty section.
+      if (listings.length < MIN_NEIGHBOURS) {
+        const wider = await findWithin(radiusKm, fallbackTypesFor(subject.propertyType));
+        if (wider.length > listings.length) {
+          listings = wider;
+          sameTypeOnly = false;
+        }
+      }
+    }
+
+    const neighbours = listings
+      .map((l) => toNeighbour(l, subject.lat, subject.lng, basis))
+      .sort((a, b) => a.distanceM - b.distanceM);
+
+    res.json({
+      center: { lat: subject.lat, lng: subject.lng },
+      radiusKm,
+      listingType: basis.listingType,
+      rentUnit: basis.rentUnit,
+      metric: basis.metric,
+      propertyType: subject.propertyType,
+      sameTypeOnly,
+      subject: {
+        id: String(subject._id),
+        price: subjectPrice,
+        sqft: subject.sqft,
+        pricePerSqm: pricePerSqm(subjectPrice, subject.sqft),
+        value: subjectValue,
+      },
+      stats: buildStats(neighbours, subjectValue),
+      trend: buildTrend(listings, basis),
+      neighbours: neighbours.slice(0, MAX_NEIGHBOURS),
+    });
+  } catch (error: unknown) {
+    propertyLogger.error('Get area prices error:', error);
+    res.status(500).json({ message: 'Error fetching area prices' });
   }
 };

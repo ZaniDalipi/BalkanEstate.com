@@ -54,7 +54,12 @@
     "search": "Search Rentals",
     "reset": "Reset",
     "searchCity": "Search by city or location...",
-    "acShort": "AC"
+    "acShort": "AC",
+    "status": "Show",
+    "statusAvailable": "Available",
+    "statusRented": "Rented",
+    "statusBoth": "Both",
+    "statusHint": "Rented homes show the rent they were let for — open one to compare rents around it."
   },
   "form": {
     "title": "List Your Property for Rent",

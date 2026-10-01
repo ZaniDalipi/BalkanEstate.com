@@ -63,7 +63,12 @@
     "advancedFilters": "Napredni Filteri",
     "moreFilters": "Više Filtera",
     "lessFilters": "Manje Filtera",
-    "sortBy": "Sortiraj po"
+    "sortBy": "Sortiraj po",
+    "saleStatus": "Prikaži",
+    "saleStatusAvailable": "Na prodaju",
+    "saleStatusSold": "Prodato",
+    "saleStatusAll": "Oboje",
+    "saleStatusHint": "Prodate nekretnine prikazuju posljednju cijenu i kada su prodate — otvorite jednu da vidite cijene oko nje."
   },
   "options": {
     "any": "Bilo Koji",

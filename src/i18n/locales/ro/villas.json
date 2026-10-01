@@ -138,7 +138,13 @@
     "allListings": "Toate",
     "priceRangeInvalid": "Prețul minim este mai mare decât cel maxim.",
     "gardenView": "Vedere la Grădină",
-    "streetView": "Vedere la Stradă"
+    "streetView": "Vedere la Stradă",
+    "status": "Afișează",
+    "statusAvailable": "Disponibile",
+    "statusRented": "Închiriate",
+    "statusSold": "Vândute",
+    "statusSoldOrRented": "Vândute și închiriate",
+    "statusBoth": "Ambele"
   },
   "seo": {
     "title": "Vile de Lux de Închiriat în Balcani | BalkanEstate",

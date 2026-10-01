@@ -32,7 +32,8 @@ export type ListingType = 'sale' | 'rent';
 export type RentPeriod = 'monthly' | 'weekly' | 'daily';
 
 export type { PropertyImageTag } from './src/shared/types/property.types';
-import type { PropertyImageTag } from './src/shared/types/property.types';
+import type { PropertyImageTag, SaleStatusFilter } from './src/shared/types/property.types';
+export type { SaleStatusFilter } from './src/shared/types/property.types';
 
 export type AppView = 'home' | 'search' | 'explore-cities' | 'city-dashboard' | 'saved-searches' | 'saved-properties' | 'inbox' | 'account' | 'create-listing' | 'create-rental' | 'rentals' | 'villas' | 'my-listings' | 'agents' | 'agencies' | 'agentProfile' | 'agencyDetail' | 'admin' | 'agency-dashboard' | 'analytics' | 'reset-password' | 'verify-email' | 'valuation' | 'mortgage-calculator' | 'pricing' | 'how-it-works' | 'privacy' | 'terms' | 'cookies' | 'refund' | 'contact' | 'createAgency' | 'createAgencyPayment' | 'createAgencyConfirm' | 'guides' | 'business-directory' | 'blog' | 'not-found';
 
@@ -578,6 +579,7 @@ export interface Filters {
     maxDistanceToSchool: number | null; // in km
     maxDistanceToHospital: number | null; // in km
     amenities: string[]; // Array of amenity tags to filter by
+    saleStatus?: SaleStatusFilter; // Unset in filters saved before it existed; read as 'available'
 }
 
 export const initialFilters: Filters = {
@@ -623,6 +625,7 @@ export const initialFilters: Filters = {
     maxDistanceToSchool: null,
     maxDistanceToHospital: null,
     amenities: [],
+    saleStatus: 'available',
 };
 
 export interface SavedSearch {

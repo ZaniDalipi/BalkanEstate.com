@@ -35,7 +35,14 @@ export const VILLA_GOLD = { light: '#FFEFB0', mid: '#E8B820', deep: '#B8860B', i
  */
 export const VILLA_EMERALD = { light: '#6EE7B7', mid: '#10B981', deep: '#047857', ink: '#FFFFFF', glow: '16,185,129' } as const;
 
-/** Marker body palette by market: gold for rent, emerald for sale. */
+/**
+ * Villas that sold or are let: muted stone, so the price history of an area
+ * never reads as a villa still on the market. Shape and glyph stay — it is
+ * still a luxury villa.
+ */
+export const VILLA_STONE = { light: '#E7E5E4', mid: '#A8A29E', deep: '#57534E', ink: '#FFFFFF', glow: '120,113,108' } as const;
+
+/** Marker body palette by market: gold for rent, emerald for sale, stone once sold or let. */
 export interface VillaMarkerPalette {
   light: string;
   mid: string;
@@ -44,8 +51,8 @@ export interface VillaMarkerPalette {
   /** "r,g,b" triplet for the drop-shadow glow. */
   glow: string;
 }
-export const getVillaMarkerPalette = (listingType?: string): VillaMarkerPalette =>
-  listingType === 'sale' ? VILLA_EMERALD : VILLA_GOLD;
+export const getVillaMarkerPalette = (listingType?: string, status?: string): VillaMarkerPalette =>
+  status === 'sold' || status === 'rented' ? VILLA_STONE : listingType === 'sale' ? VILLA_EMERALD : VILLA_GOLD;
 
 /**
  * Drop-shadow filter for a villa marker, tinted to the palette's glow colour

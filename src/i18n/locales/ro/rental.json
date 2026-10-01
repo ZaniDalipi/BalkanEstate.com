@@ -51,7 +51,12 @@
     "search": "Caută Închirieri",
     "reset": "Resetare",
     "searchCity": "Caută după oraș sau locație...",
-    "acShort": "AC"
+    "acShort": "AC",
+    "status": "Afișează",
+    "statusAvailable": "Disponibile",
+    "statusRented": "Închiriate",
+    "statusBoth": "Ambele",
+    "statusHint": "Locuințele închiriate arată chiria cu care au fost închiriate — deschideți una pentru a compara chiriile din jur."
   },
   "form": {
     "title": "Listează Proprietatea pentru Închiriere",

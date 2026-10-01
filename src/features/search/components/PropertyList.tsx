@@ -11,6 +11,7 @@ import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
 import UniversalSearchBox from '../universal/UniversalSearchBox';
 import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
+import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 
 interface PropertyListProps {
   properties: Property[];
@@ -290,6 +291,21 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                     <option value="30">{t('search:filters.last30Days', 'Last 30 days')}</option>
                 </select>
             </div>
+
+            {/* Sold filter — sold homes stay on the site as the area's price history */}
+            {filters.listingType !== 'rent' && (
+                <ListingStatusToggle
+                    value={filters.saleStatus}
+                    onChange={(value) => onFilterChange('saleStatus', value)}
+                    label={t('search:filters.saleStatus', 'Show')}
+                    optionLabels={{
+                        available: t('search:filters.saleStatusAvailable', 'For sale'),
+                        closed: t('search:filters.saleStatusSold', 'Sold'),
+                        all: t('search:filters.saleStatusAll', 'Both'),
+                    }}
+                    hint={t('search:filters.saleStatusHint', 'Sold homes show their last price and when they sold — open one to see prices around it.')}
+                />
+            )}
 
             {/* Price Change Filters */}
             <div className="flex gap-2">
@@ -768,6 +784,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
         filters.maxDaysListed,
         filters.hasDiscount,
         filters.hasPriceIncrease,
+        filters.saleStatus && filters.saleStatus !== 'available' ? filters.saleStatus : null,
     ].filter(v => v !== null && v !== undefined && v !== '' && v !== false).length;
 
     // Entrance animation: check if splash screen just completed

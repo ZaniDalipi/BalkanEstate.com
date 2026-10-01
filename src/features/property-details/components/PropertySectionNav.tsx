@@ -102,6 +102,16 @@ const SECTION_DEFS: readonly SectionDef[] = [
     ),
   },
   {
+    key: 'area-prices',
+    labelKey: 'property:sectionNav.areaPrices',
+    fallback: 'Area Prices',
+    icon: (
+      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM12 8v6m-2-4.5c0-.828.895-1.5 2-1.5s2 .672 2 1.5-.895 1.5-2 1.5-2 .672-2 1.5.895 1.5 2 1.5 2-.672 2-1.5" />
+      </svg>
+    ),
+  },
+  {
     key: 'similar',
     labelKey: 'property:sectionNav.similar',
     fallback: 'Similar Homes',

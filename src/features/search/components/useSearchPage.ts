@@ -1,12 +1,12 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { useRealtimeProperties } from '@/src/features/properties/hooks';
+import { useRealtimeProperties, useClosedProperties } from '@/src/features/properties/hooks';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
@@ -32,8 +32,18 @@ export const serializeBounds = (bounds: L.LatLngBounds): string => {
 export function useSearchPage() {
     const { t } = useTranslation(['search', 'common']);
     const { state, dispatch, fetchProperties, updateSearchPageState, addSavedSearch } = useAppContext();
-    const { properties, isAuthenticated, isLoadingProperties, currentUser, searchPageState } = state;
+    const { properties: availableProperties, isAuthenticated, isLoadingProperties: isLoadingAvailable, currentUser, searchPageState } = state;
     const { filters, activeFilters, mapBoundsJSON, drawnBoundsJSON, mobileView, searchMode, aiChatHistory, isAiChatModalOpen, isFiltersOpen, focusMapOnProperty } = searchPageState;
+
+    // Sold homes are fetched only once the sold filter asks for them, then
+    // searched alongside what is on the market.
+    const wantsSold = (activeFilters.saleStatus ?? 'available') !== 'available';
+    const { closedProperties: soldProperties, isLoadingClosed: isLoadingSold } = useClosedProperties(wantsSold, { listingType: 'sale' });
+    const properties = useMemo(
+        () => (wantsSold ? mergeById(availableProperties, soldProperties) : availableProperties),
+        [wantsSold, availableProperties, soldProperties]
+    );
+    const isLoadingProperties = isLoadingAvailable || isLoadingSold;
 
     // Local, non-persistent state
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

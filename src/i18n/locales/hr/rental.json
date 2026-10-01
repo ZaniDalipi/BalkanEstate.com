@@ -51,7 +51,12 @@
     "search": "Pretrazi najam",
     "reset": "Ponisti",
     "searchCity": "Pretrazite po gradu ili lokaciji...",
-    "acShort": "Klima"
+    "acShort": "Klima",
+    "status": "Prikaži",
+    "statusAvailable": "Slobodno",
+    "statusRented": "Iznajmljeno",
+    "statusBoth": "Oboje",
+    "statusHint": "Iznajmljene nekretnine prikazuju najamninu po kojoj su iznajmljene — otvorite jednu da usporedite najamnine oko nje."
   },
   "form": {
     "title": "Oglasite svoju nekretninu za najam",

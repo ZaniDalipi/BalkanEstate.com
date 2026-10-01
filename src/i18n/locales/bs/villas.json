@@ -138,7 +138,13 @@
     "allListings": "Sve",
     "priceRangeInvalid": "Minimalna cijena je veća od maksimalne.",
     "gardenView": "Pogled na vrt",
-    "streetView": "Pogled na ulicu"
+    "streetView": "Pogled na ulicu",
+    "status": "Prikaži",
+    "statusAvailable": "Slobodno",
+    "statusRented": "Iznajmljeno",
+    "statusSold": "Prodano",
+    "statusSoldOrRented": "Prodano i iznajmljeno",
+    "statusBoth": "Oboje"
   },
   "seo": {
     "title": "Luksuzne Vile Za Iznajmljivanje na Balkanu | BalkanEstate",

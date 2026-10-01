@@ -80,7 +80,12 @@
     "advancedFilters": "Advanced Filters",
     "moreFilters": "More Filters",
     "lessFilters": "Less Filters",
-    "sortBy": "Sort by"
+    "sortBy": "Sort by",
+    "saleStatus": "Show",
+    "saleStatusAvailable": "For sale",
+    "saleStatusSold": "Sold",
+    "saleStatusAll": "Both",
+    "saleStatusHint": "Sold homes show their last price and when they sold — open one to see prices around it."
   },
   "options": {
     "any": "Any",

@@ -138,7 +138,13 @@
     "allListings": "Όλες",
     "priceRangeInvalid": "Η ελάχιστη τιμή είναι υψηλότερη από τη μέγιστη.",
     "gardenView": "Θέα Κήπου",
-    "streetView": "Θέα Δρόμου"
+    "streetView": "Θέα Δρόμου",
+    "status": "Εμφάνιση",
+    "statusAvailable": "Διαθέσιμες",
+    "statusRented": "Ενοικιασμένες",
+    "statusSold": "Πωλημένες",
+    "statusSoldOrRented": "Πωλημένες & ενοικιασμένες",
+    "statusBoth": "Και τα δύο"
   },
   "seo": {
     "title": "Πολυτελείς Βίλες για Ενοικίαση στα Βαλκάνια | BalkanEstate",
