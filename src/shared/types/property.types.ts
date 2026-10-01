@@ -300,11 +300,14 @@ export interface VisitAvailability {
 export type SellerType = 'any' | 'agent' | 'private';
 
 /**
- * Which listings a search shows by whether they have sold: the homes still on
- * the market (plus anything sold in the last day), only sold homes — the
- * street's price history — or both.
+ * Which listings a search shows by whether they have sold or been let:
+ *   - 'available': still on the market (plus anything sold in the last day)
+ *   - 'closed':    only homes that sold or are let — the street's price history
+ *   - 'all':       both
+ * Sold and rented share one value because the listing type already separates
+ * the markets, and the villas page shows both markets at once.
  */
-export type SaleStatusFilter = 'available' | 'sold' | 'all';
+export type SaleStatusFilter = 'available' | 'closed' | 'all';
 
 export interface Filters {
   query: string;

@@ -11,6 +11,7 @@ import { AdSlot, interleaveInFeedAds } from '@/src/features/promo';
 import UniversalSearchBox from '../universal/UniversalSearchBox';
 import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
+import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 
 interface PropertyListProps {
   properties: Property[];
@@ -293,37 +294,17 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             {/* Sold filter — sold homes stay on the site as the area's price history */}
             {filters.listingType !== 'rent' && (
-                <div>
-                    <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.saleStatus', 'Show')}</label>
-                    <div role="radiogroup" aria-label={t('search:filters.saleStatus', 'Show')} className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
-                        {([
-                            ['available', t('search:filters.saleStatusAvailable', 'For sale')],
-                            ['sold', t('search:filters.saleStatusSold', 'Sold')],
-                            ['all', t('search:filters.saleStatusAll', 'Both')],
-                        ] as const).map(([value, label]) => {
-                            const selected = (filters.saleStatus ?? 'available') === value;
-                            return (
-                                <button
-                                    key={value}
-                                    type="button"
-                                    role="radio"
-                                    aria-checked={selected}
-                                    onClick={() => onFilterChange('saleStatus', value)}
-                                    className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
-                                        selected ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-600 hover:text-neutral-900'
-                                    }`}
-                                >
-                                    {label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                    {(filters.saleStatus ?? 'available') !== 'available' && (
-                        <p className="mt-1 text-[11px] text-neutral-500">
-                            {t('search:filters.saleStatusHint', 'Sold homes show their last price and when they sold — open one to see prices around it.')}
-                        </p>
-                    )}
-                </div>
+                <ListingStatusToggle
+                    value={filters.saleStatus}
+                    onChange={(value) => onFilterChange('saleStatus', value)}
+                    label={t('search:filters.saleStatus', 'Show')}
+                    optionLabels={{
+                        available: t('search:filters.saleStatusAvailable', 'For sale'),
+                        closed: t('search:filters.saleStatusSold', 'Sold'),
+                        all: t('search:filters.saleStatusAll', 'Both'),
+                    }}
+                    hint={t('search:filters.saleStatusHint', 'Sold homes show their last price and when they sold — open one to see prices around it.')}
+                />
             )}
 
             {/* Price Change Filters */}

@@ -10,6 +10,8 @@ still has the cron entry, delete it** (look for `cleanup:sold` in `crontab -l`
 or in your PM2 / scheduler config).
 
 Default search still shows only available homes, plus anything sold in the
-last 24 hours with a "Sold" badge. Photos of sold listings are cleared after
+last 24 hours with a "Sold" badge. See *Sold & Rented History* in
+`ARCHITECTURE.md` for how sold and let homes are searched and compared.
+Photos of sold listings are cleared after
 `MEDIA_RETENTION_SOLD_YEARS` (default 2) by the media retention job; the
 listing and its price stay.

@@ -798,6 +798,19 @@
     "soldPrice": "Prodajna cijena",
     "rentedPrice": "Dogovorena kirija",
     "showTable": "Prikaži kao tabelu",
-    "quarter": "Kvartal"
+    "quarter": "Kvartal",
+    "forRent": "Za iznajmljivanje",
+    "forRentNearby": "Za iznajmljivanje u blizini",
+    "noneActiveRent": "Trenutno nema drugih nekretnina za iznajmljivanje u blizini.",
+    "medianAskingNight": "Traženo po noći",
+    "medianRentedNight": "Izdato po noći",
+    "stripHintNight": "Svaka tačka je kratkoročni smještaj u blizini, po cijeni po noći. Dodirnite je da je otvorite.",
+    "trendTitleRent": "Kirija po m² kroz vrijeme",
+    "trendTitleNight": "Cijena po noći kroz vrijeme",
+    "perMonth": "/mj.",
+    "perNight": "/noć",
+    "perMonthNote": "Mjesečne kirije · nedjeljne pretvorene",
+    "perNightNote": "Samo smještaj po noći",
+    "villasIncluded": "Uključujući druge vile"
   }
 }

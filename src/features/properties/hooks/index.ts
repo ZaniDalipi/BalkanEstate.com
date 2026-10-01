@@ -9,7 +9,7 @@ export { useDeleteProperty } from './useDeleteProperty';
 export { useMyListings } from './useMyListings';
 export { useMyListingsInfinite, MY_LISTINGS_PAGE_SIZE } from './useMyListingsInfinite';
 export { useFavorites, useToggleFavorite } from './useFavorites';
-export { useSoldProperties } from './useSoldProperties';
+export { useClosedProperties } from './useClosedProperties';
 export {
   useMarkPropertyAsSold,
   usePromoteProperty,

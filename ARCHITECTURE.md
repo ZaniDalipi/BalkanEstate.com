@@ -1037,6 +1037,62 @@ MyListings
 
 ---
 
+## Sold & Rented History — Neighbourhood Prices
+
+Homes that sell or are let **stay on the site for good**: they are the price
+history of their street. Searches can show them, and every property page
+compares the home with what the homes around it ask, sold for and let for.
+
+```
+Search (buy · rentals · luxury villas)
+  └── ListingStatusToggle  src/components/shared/   filters.saleStatus: available | closed | all
+        ├── filterProperties (utils/propertyUtils.ts)   available = on the market · closed = sold or let
+        └── useClosedProperties(enabled, scope)         src/features/properties/hooks/
+              └── GET /api/properties?status=sold|rented   only once the toggle asks; mergeById folds them in
+Map pins
+  └── src/shared/map/closedListing.ts → muted "Sold €…" / "Rented €…" pill (Leaflet + Google)
+        └── villaMarker.ts VILLA_STONE → closed luxury villas keep their pin, in stone
+
+Property page → NeighborhoodPrices (src/features/property-details/components/area-prices/)
+  └── useAreaPrices(id) → propertyKeys.areaPrices(id)
+        └── GET /api/properties/:id/area-prices        getAreaPrices (propertyController)
+              ├── basisFor(listingType, rentPeriod)      services/areaPricesService.ts
+              ├── nearby: 1 → 2 → 4 → 8 km until 8 homes, then wider types
+              ├── closedEvents: the sale, or every let (rentalHistory + current)
+              └── neighbours · stats · 12-quarter trend
+  └── useAreaFormat(basis) → units + labels for AreaPriceSummary · PriceStrip
+        · NeighborhoodPriceMap (lazy, Leaflet) · NeighbourList · AreaPriceTrendChart
+```
+
+What is compared — the **basis** — follows the listing, so prices are only
+ever compared like with like:
+
+| Listing | Compared on | Compared with |
+|---|---|---|
+| For sale | € per m² | other homes for sale and sold |
+| Rent per month or week | rent per m² per month (weekly × 4.33) | monthly and weekly lets |
+| Rent per day (short stay) | price per night | nightly lets only |
+| Luxury villa | as above, by its listing type | luxury villas, then ordinary villas — never flats |
+
+Key decisions:
+- **Nothing is deleted on sale.** The `cleanup:sold` script that removed sold
+  listings after 24 hours is gone. Default search still shows homes on the
+  market plus anything sold in the last day; older sales and current lets
+  appear when the visitor asks. The rentals page defaults to "Both", as it has
+  always shown homes that are let.
+- **Rent history comes from `rentalHistory`.** A rental goes back on the
+  market when its lease ends, and its past lets (start date, monthly rent) are
+  what the "Rented" figures and trend are built from. Only those two fields are
+  ever selected — tenant names and notes never leave the server.
+- **One status value covers sold and let** (`closed`): the listing type
+  already separates the markets, and the villas page shows both at once.
+- **Sold prices are the last asking price.** The site records no separate
+  final sale price.
+- Photos of sold listings are still removed after `MEDIA_RETENTION_SOLD_YEARS`
+  (see *Lifecycle* below); the listing and its price stay.
+
+---
+
 ## Internationalisation (i18n)
 
 **Library**: `react-i18next`

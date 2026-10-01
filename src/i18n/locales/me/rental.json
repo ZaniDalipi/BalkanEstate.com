@@ -51,7 +51,12 @@
     "search": "Pretraži najam",
     "reset": "Resetuj",
     "searchCity": "Pretraži po gradu ili lokaciji...",
-    "acShort": "Klima"
+    "acShort": "Klima",
+    "status": "Prikaži",
+    "statusAvailable": "Slobodno",
+    "statusRented": "Izdato",
+    "statusBoth": "Oboje",
+    "statusHint": "Izdate nekretnine prikazuju kiriju po kojoj su izdate — otvorite jednu da uporedite kirije oko nje."
   },
   "form": {
     "title": "Oglasite nekretninu za iznajmljivanje",

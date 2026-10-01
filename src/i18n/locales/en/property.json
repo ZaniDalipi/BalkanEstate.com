@@ -803,6 +803,19 @@
     "soldPrice": "Sold price",
     "rentedPrice": "Rent agreed",
     "showTable": "Show as table",
-    "quarter": "Quarter"
+    "quarter": "Quarter",
+    "forRent": "For rent",
+    "forRentNearby": "For rent nearby",
+    "noneActiveRent": "No other homes for rent nearby right now.",
+    "medianAskingNight": "Asking per night",
+    "medianRentedNight": "Let per night",
+    "stripHintNight": "Each dot is a nightly let nearby, by price per night. Tap one to open it.",
+    "trendTitleRent": "Rent per m² over time",
+    "trendTitleNight": "Price per night over time",
+    "perMonth": "/mo",
+    "perNight": "/night",
+    "perMonthNote": "Monthly rents · weekly rents converted",
+    "perNightNote": "Nightly lets only",
+    "villasIncluded": "Including other villas"
   }
 }

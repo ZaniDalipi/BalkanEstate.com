@@ -4,6 +4,7 @@ import { Filters } from '@/types';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import { Button } from '@/components/ui/liquid-glass-button';
+import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 
 interface RentalFiltersProps {
     filters: Filters;
@@ -22,6 +23,11 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
     const selectClasses = 'glass-select block w-full text-xs px-2 py-1.5';
     const inputClasses = 'glass-input block w-full text-xs px-2 py-1.5';
     const labelClasses = 'block text-[11px] font-medium text-gray-400 mb-0.5 uppercase tracking-wide';
+    const statusLabels = {
+        available: t('rental:filters.statusAvailable', 'Available'),
+        closed: t('rental:filters.statusRented', 'Rented'),
+        all: t('rental:filters.statusBoth', 'Both'),
+    };
 
     if (compact) {
         // Compact horizontal layout for desktop sidebar
@@ -101,6 +107,15 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                         </select>
                     </div>
                 </div>
+
+                {/* Available / rented — homes that are let stay as the area's rent history */}
+                <ListingStatusToggle
+                    value={filters.saleStatus}
+                    onChange={(value) => onFilterChange('saleStatus', value)}
+                    label={t('rental:filters.status', 'Show')}
+                    optionLabels={statusLabels}
+                    showLabel={false}
+                />
 
                 {/* Row 4: Checkboxes + Actions */}
                 <div className="flex items-center justify-between">
@@ -234,6 +249,15 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                     {t('rental:filters.hasElevator')}
                 </label>
             </div>
+
+            {/* Available / rented */}
+            <ListingStatusToggle
+                value={filters.saleStatus}
+                onChange={(value) => onFilterChange('saleStatus', value)}
+                label={t('rental:filters.status', 'Show')}
+                optionLabels={statusLabels}
+                hint={t('rental:filters.statusHint', 'Rented homes show the rent they were let for — open one to compare rents around it.')}
+            />
 
             {/* Sort */}
             <div>

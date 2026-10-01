@@ -138,7 +138,13 @@
     "allListings": "Të gjitha",
     "priceRangeInvalid": "Çmimi minimal është më i lartë se maksimali.",
     "gardenView": "Pamje Kopshti",
-    "streetView": "Pamje Rruge"
+    "streetView": "Pamje Rruge",
+    "status": "Shfaq",
+    "statusAvailable": "Të lira",
+    "statusRented": "Të dhëna me qira",
+    "statusSold": "Të shitura",
+    "statusSoldOrRented": "Të shitura e me qira",
+    "statusBoth": "Të dyja"
   },
   "seo": {
     "title": "Vila Luksoze me Qira në Ballkan | BalkanEstate",

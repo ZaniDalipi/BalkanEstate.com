@@ -793,6 +793,19 @@
     "soldPrice": "Preț de vânzare",
     "rentedPrice": "Chirie convenită",
     "showTable": "Afișează ca tabel",
-    "quarter": "Trimestru"
+    "quarter": "Trimestru",
+    "forRent": "De închiriat",
+    "forRentNearby": "De închiriat în apropiere",
+    "noneActiveRent": "Momentan nu există alte locuințe de închiriat în apropiere.",
+    "medianAskingNight": "Cerut pe noapte",
+    "medianRentedNight": "Închiriat pe noapte",
+    "stripHintNight": "Fiecare punct este o cazare pe noapte din apropiere, după prețul pe noapte. Atingeți unul pentru a-l deschide.",
+    "trendTitleRent": "Chiria pe m² în timp",
+    "trendTitleNight": "Prețul pe noapte în timp",
+    "perMonth": "/lună",
+    "perNight": "/noapte",
+    "perMonthNote": "Chirii lunare · cele săptămânale convertite",
+    "perNightNote": "Doar cazări pe noapte",
+    "villasIncluded": "Inclusiv alte vile"
   }
 }

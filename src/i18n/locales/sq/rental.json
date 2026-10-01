@@ -51,7 +51,12 @@
     "search": "Kerko Qira",
     "reset": "Rivendos",
     "searchCity": "Kerko sipas qytetit ose vendndodhjes...",
-    "acShort": "AC"
+    "acShort": "AC",
+    "status": "Shfaq",
+    "statusAvailable": "Të lira",
+    "statusRented": "Të dhëna me qira",
+    "statusBoth": "Të dyja",
+    "statusHint": "Shtëpitë e dhëna me qira tregojnë qiranë me të cilën u dhanë — hapni një për të krahasuar qiratë përreth."
   },
   "form": {
     "title": "Listoni Pronen tuaj me Qira",

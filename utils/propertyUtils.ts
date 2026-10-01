@@ -2,6 +2,16 @@ import { Property, Filters } from '../types';
 import { BALKAN_COUNTRIES } from '../constants/countries';
 import { createPropertyMatcher, rankProperties } from '../src/shared/search';
 
+/**
+ * `base` plus every listing of `extra` it does not already hold. Used to fold
+ * sold or rented homes, fetched on demand, into what a search page loaded.
+ */
+export const mergeById = (base: Property[], extra: Property[]): Property[] => {
+    if (extra.length === 0) return base;
+    const seen = new Set(base.map((p) => p.id));
+    return [...base, ...extra.filter((p) => !seen.has(p.id))];
+};
+
 export const filterProperties = (properties: Property[], filters: Filters): Property[] => {
     // Text matching runs through the search engine: the query is parsed once,
     // its words are all required (typing more narrows), spellings are folded
@@ -31,10 +41,15 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
             }
         }
 
-        // Sold filter: the default keeps what the server sends (on the market,
-        // plus sold in the last day); "sold" narrows to sold homes only.
+        // Sold / rented filter. "available" keeps what is on the market (the
+        // server already adds homes sold in the last day) and drops homes that
+        // are let; "closed" keeps only homes that sold or are let.
         const saleStatus = filters.saleStatus ?? 'available';
-        const saleStatusMatch = saleStatus === 'sold' ? p.status === 'sold' : true;
+        const isClosed = p.status === 'sold' || p.status === 'rented';
+        const saleStatusMatch =
+            saleStatus === 'all' ? true
+            : saleStatus === 'closed' ? isClosed
+            : p.status !== 'rented';
 
         // Listing type filter (sale vs rent)
         const listingTypeMatch = filters.listingType && filters.listingType !== 'any'

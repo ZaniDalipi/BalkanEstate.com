@@ -65,6 +65,7 @@ import {
 } from './googleMapConstants';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { CLOSED_MARKER_COLOR, closedMarkerLabel, isClosedListing } from '@/src/shared/map/closedListing';
 
 // Inject CSS for marker entrance fly-in animation (Google Maps variant)
 if (typeof window !== 'undefined') {
@@ -988,7 +989,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       markerDiv.className = 'property-marker';
       markerDiv.dataset.propertyId = property.id;
 
-      const price = formatMarkerPrice(property);
+      const price = closedMarkerLabel(property, formatMarkerPrice(property));
       const isActivelyPromoted = property.isPromoted && property.promotionEndDate && property.promotionEndDate > Date.now();
       const isLuxuryVilla = property.propertyType === 'luxury-villa';
 
@@ -1006,11 +1007,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
         markerDiv.innerHTML = buildLuxuryVillaMarkerHTML(
           price,
           `${property.id}`.slice(-6),
-          getVillaMarkerPalette(property.listingType),
+          getVillaMarkerPalette(property.listingType, property.status),
           isActivelyPromoted ? 'star' : 'crown',
         );
       } else {
-        const color = PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
+        const color = isClosedListing(property)
+          ? CLOSED_MARKER_COLOR
+          : PROPERTY_TYPE_COLORS[property.propertyType || 'other'] || PROPERTY_TYPE_COLORS.other;
         let borderColor = 'white';
         let borderWidth = 2;
         if (isActivelyPromoted && property.promotionTier) {

@@ -16,7 +16,9 @@ export const AREA_COLORS = {
 export const colorFor = (status: NeighbourStatus): string =>
   status === 'active' ? AREA_COLORS.active : AREA_COLORS.closed;
 
-export const fmtEur = (n: number): string => `€${Math.round(n).toLocaleString()}`;
+/** "€1,388" — with one decimal for small figures such as a rent of €8.5/m². */
+export const fmtEur = (n: number): string =>
+  `€${n.toLocaleString(undefined, { maximumFractionDigits: Math.abs(n) < 100 ? 1 : 0 })}`;
 
 /** "€85k", "€1.2M" — short enough for a map pin. */
 export const fmtCompactEur = (n: number): string => {

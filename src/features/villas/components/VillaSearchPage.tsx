@@ -8,6 +8,7 @@ import HighlightedPropertiesSection from '@/src/features/property-details/compon
 import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
 import VillaListingModeToggle from './VillaListingModeToggle';
+import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
 import VillaLocationBar from './VillaLocationBar';
 import Toast from '@/components/shared/Toast';
@@ -853,6 +854,24 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         className="w-full lg:w-auto"
                                     />
                                 </div>
+
+                                {/* Status toggle — sold and let villas stay as
+                                    the price history of their area. */}
+                                <ListingStatusToggle
+                                    value={filters.saleStatus}
+                                    onChange={(value) => handleFilterChange('saleStatus', value)}
+                                    label={t('villas:filters.status', 'Show')}
+                                    showLabel={false}
+                                    className="w-full lg:w-auto"
+                                    optionLabels={{
+                                        available: t('villas:filters.statusAvailable', 'Available'),
+                                        closed:
+                                            listingMode === 'rent' ? t('villas:filters.statusRented', 'Rented')
+                                            : listingMode === 'sale' ? t('villas:filters.statusSold', 'Sold')
+                                            : t('villas:filters.statusSoldOrRented', 'Sold & rented'),
+                                        all: t('villas:filters.statusBoth', 'Both'),
+                                    }}
+                                />
                             </div>
                             {/* The list is answering a looser question than the
                                 one typed — say so instead of passing the

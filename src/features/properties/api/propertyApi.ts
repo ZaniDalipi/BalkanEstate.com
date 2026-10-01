@@ -247,7 +247,7 @@ export function transformToBackendProperty(frontendProp: Property): any {
 
 export const getProperties = async (
   filters?: Filters,
-  options?: { limit?: number; status?: 'sold' }
+  options?: { limit?: number; status?: 'sold' | 'rented' }
 ): Promise<Property[]> => {
   const params = new URLSearchParams();
 

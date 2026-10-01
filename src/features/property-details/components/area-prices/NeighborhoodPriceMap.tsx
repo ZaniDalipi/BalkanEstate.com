@@ -13,14 +13,15 @@ import { getTileLayer } from '@/config/mapStyles';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import type { AreaNeighbour } from '../../api/areaPricesApi';
-import { AREA_COLORS, colorFor, fmtCompactEur, fmtDistance, fmtEur } from './format';
+import { AREA_COLORS, colorFor, fmtDistance } from './format';
+import type { AreaFormat } from './useAreaFormat';
 
-interface Props {
+export interface NeighborhoodPriceMapProps {
   center: { lat: number; lng: number };
   radiusKm: number;
   subjectPrice: number;
   neighbours: AreaNeighbour[];
-  closedLabel: string;
+  format: AreaFormat;
   highlightedId: string | null;
   onHighlight: (id: string | null) => void;
 }
@@ -41,13 +42,13 @@ const pinIcon = (label: string, color: string, emphasised: boolean, faded: boole
     </div>`,
   });
 
-const NeighborhoodPriceMap: React.FC<Props> = ({ center, radiusKm, subjectPrice, neighbours, closedLabel, highlightedId, onHighlight }) => {
+const NeighborhoodPriceMap: React.FC<NeighborhoodPriceMapProps> = ({ center, radiusKm, subjectPrice, neighbours, format, highlightedId, onHighlight }) => {
   const { t } = useTranslation(['property']);
   const tiles = getTileLayer('positron');
 
   const subjectIcon = useMemo(
-    () => pinIcon(`${t('property:areaPrices.thisHome', 'This home')} · ${fmtCompactEur(subjectPrice)}`, AREA_COLORS.subject, true, false),
-    [subjectPrice, t]
+    () => pinIcon(`${t('property:areaPrices.thisHome', 'This home')} · ${format.compactPrice(subjectPrice)}`, AREA_COLORS.subject, true, false),
+    [subjectPrice, format, t]
   );
 
   return (
@@ -70,7 +71,7 @@ const NeighborhoodPriceMap: React.FC<Props> = ({ center, radiusKm, subjectPrice,
           <Marker
             key={n.id}
             position={[n.lat, n.lng]}
-            icon={pinIcon(fmtCompactEur(n.price), colorFor(n.status), emphasised, highlightedId !== null && !emphasised)}
+            icon={pinIcon(format.compactPrice(n.price), colorFor(n.status), emphasised, highlightedId !== null && !emphasised)}
             zIndexOffset={emphasised ? 1000 : n.status === 'active' ? 0 : 100}
             eventHandlers={{
               click: () => navigate(paths.property(n.id)),
@@ -82,11 +83,11 @@ const NeighborhoodPriceMap: React.FC<Props> = ({ center, radiusKm, subjectPrice,
               <div className="text-xs">
                 <p className="font-semibold">{n.title || n.address}</p>
                 <p>
-                  {fmtEur(n.price)}
-                  {n.pricePerSqm !== null && ` · ${fmtEur(n.pricePerSqm)}/m²`}
+                  {format.price(n.price)}
+                  {format.showsPerSqm && n.pricePerSqm !== null && ` · ${format.value(n.pricePerSqm)}`}
                 </p>
                 <p className="text-neutral-500">
-                  {n.status === 'active' ? t('property:areaPrices.forSale', 'For sale') : closedLabel} · {fmtDistance(n.distanceM)}
+                  {n.status === 'active' ? format.labels.active : format.labels.closed} · {fmtDistance(n.distanceM)}
                 </p>
               </div>
             </Tooltip>

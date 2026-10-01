@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
+import { CLOSED_MARKER_COLOR, closedMarkerLabel, isClosedListing } from '@/src/shared/map/closedListing';
 import { typeLabel, type TranslateFn } from '@/shared/constants/propertyTypes';
 import { ALL_PROPERTY_TYPES, colorForType } from '@/shared/property/typeAttributes';
 import { resolveDisplayArea } from '@/shared/property/area';
@@ -352,19 +353,12 @@ const getPromotedMarkerInnerClass = (property: Property): string => {
   }
 };
 
-/**
- * Sold homes stay on the map as price history; a muted pill marked "Sold"
- * keeps them from reading as homes still on the market.
- */
-const SOLD_MARKER_COLOR = '#57534e';
+/** Sold and let homes get a muted pill marked "Sold" / "Rented" (see closedListing). */
 const pinColorFor = (property: Property): string =>
-  property.status === 'sold'
-    ? SOLD_MARKER_COLOR
+  isClosedListing(property)
+    ? CLOSED_MARKER_COLOR
     : PROPERTY_TYPE_COLORS[property.propertyType] || PROPERTY_TYPE_COLORS.other;
-const markerPriceLabel = (property: Property): string =>
-  property.status === 'sold'
-    ? `${i18n.t('property:sold', 'Sold')} ${formatMarkerPrice(property)}`
-    : formatMarkerPrice(property);
+const markerPriceLabel = (property: Property): string => closedMarkerLabel(property, formatMarkerPrice(property));
 
 /**
  * Create simple circular marker for zoomed out view
@@ -446,7 +440,7 @@ const createSimpleMarkerIcon = (property: Property, isHovered: boolean = false, 
     const scaledW = Math.round(24 * zoomScale);
     const scaledH = Math.round(40 * zoomScale); // price label + pin
     const uid = `s${String(property.id).slice(-6)}`;
-    const pal = getVillaMarkerPalette(property.listingType);
+    const pal = getVillaMarkerPalette(property.listingType, property.status);
     const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 24);
     const svgHouseHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
@@ -577,7 +571,7 @@ const createDetailedMarkerIcon = (property: Property, isHovered: boolean = false
     const scaledW = Math.round(28 * zoomScale);
     const scaledH = Math.round(45 * zoomScale); // price label + pin
     const uid = `d${String(property.id).slice(-6)}`;
-    const pal = getVillaMarkerPalette(property.listingType);
+    const pal = getVillaMarkerPalette(property.listingType, property.status);
     const markerHtml = buildLuxuryVillaMarkerHTML(price, uid, pal, isActivelyPromoted ? 'star' : 'crown', 28);
     const svgVillaHtml = `
       <div class="promoted-marker-wrapper ${nightModeClass}" style="width:${scaledW}px;height:${scaledH}px;">
@@ -661,8 +655,8 @@ const iconSignature = (
     property.promotionTier ?? '',
     property.promotionEndDate ?? '',
     property.hasUrgentBadge ? 'u' : '',
-    // Sold pins carry a translated word
-    property.status === 'sold' ? `sold:${i18n.language}` : '',
+    // Sold and rented pins carry a translated word
+    isClosedListing(property) ? `${property.status}:${i18n.language}` : '',
   ].join('|');
 
 /**

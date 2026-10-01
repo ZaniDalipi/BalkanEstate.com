@@ -7,9 +7,12 @@ export interface AreaNeighbour {
   title?: string;
   address?: string;
   city?: string;
+  /** Asking price, or current rent in the response's rent unit. */
   price: number;
   sqft?: number;
   pricePerSqm: number | null;
+  /** What the home is compared on: €/m², or the nightly price for short stays. */
+  value: number | null;
   beds?: number;
   propertyType: string;
   status: NeighbourStatus;
@@ -18,16 +21,19 @@ export interface AreaNeighbour {
   distanceM: number;
   imageUrl?: string;
   listedAt?: string;
-  /** When it sold (or was rented). */
+  /** When it last sold or was let. */
   closedAt?: string;
+  /** The price it last sold or let for. */
+  closedPrice?: number;
+  closedValue?: number | null;
 }
 
 export interface AreaTrendPoint {
   /** e.g. "2026-Q3" */
   period: string;
-  askingPricePerSqm: number | null;
+  askingValue: number | null;
   askingCount: number;
-  closedPricePerSqm: number | null;
+  closedValue: number | null;
   closedCount: number;
 }
 
@@ -35,18 +41,22 @@ export interface AreaPricesResponse {
   center: { lat: number; lng: number };
   radiusKm: number;
   listingType: 'sale' | 'rent';
+  /** Rents only: every rent is shown per month, or per night for short stays. */
+  rentUnit?: 'month' | 'night';
+  /** 'perSqm' compares price per m²; 'price' compares the (nightly) price itself. */
+  metric: 'perSqm' | 'price';
   propertyType: string;
   /** False when the area had too few homes of this type and all types are compared. */
   sameTypeOnly: boolean;
-  subject: { id: string; price: number; sqft?: number; pricePerSqm: number | null };
+  subject: { id: string; price: number; sqft?: number; pricePerSqm: number | null; value: number | null };
   stats: {
     activeCount: number;
     closedCount: number;
-    medianAskingPricePerSqm: number | null;
-    medianClosedPricePerSqm: number | null;
+    medianAskingValue: number | null;
+    medianClosedValue: number | null;
     medianAskingPrice: number | null;
-    /** Median €/m² of every neighbour — what the subject is compared with. */
-    medianPricePerSqm: number | null;
+    /** Median value of every neighbour — what the subject is compared with. */
+    medianValue: number | null;
     subjectVsMedianPct: number | null;
   };
   trend: AreaTrendPoint[];

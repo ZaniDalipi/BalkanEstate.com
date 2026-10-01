@@ -238,20 +238,24 @@ describe('filterAndSortProperties', () => {
   });
 });
 
-describe('sold filter', () => {
+describe('sold / rented filter', () => {
   const onMarket = property({ id: 'on-market' });
   const sold = property({ id: 'sold', status: 'sold', soldAt: Date.now() - 90 * 24 * 60 * 60 * 1000 });
-  const all = [onMarket, sold];
-  const ids = (filters: Filters) => filterProperties(all, filters).map((p) => p.id);
+  const forRent = property({ id: 'for-rent', listingType: 'rent', price: 600 });
+  const let_ = property({ id: 'rented', listingType: 'rent', price: 650, status: 'rented', rentedAt: Date.now() });
+  const all = [onMarket, sold, forRent, let_];
+  const ids = (filters: Filters) => filterProperties(all, { ...filters, listingType: 'any' }).map((p) => p.id);
 
-  it('keeps whatever the page loaded by default, and with filters saved before the field existed', () => {
-    expect(ids(initialFilters)).toEqual(['on-market', 'sold']);
+  it('keeps what is on the market by default, and with filters saved before the field existed', () => {
+    // A sale the server sent stays (it only sends homes sold in the last day);
+    // a home that is let is no longer available.
+    expect(ids(initialFilters)).toEqual(['on-market', 'sold', 'for-rent']);
     const { saleStatus: _omitted, ...legacy } = initialFilters;
-    expect(ids(legacy as Filters)).toEqual(['on-market', 'sold']);
+    expect(ids(legacy as Filters)).toEqual(['on-market', 'sold', 'for-rent']);
   });
 
-  it('narrows to sold homes, or shows both', () => {
-    expect(ids({ ...initialFilters, saleStatus: 'sold' })).toEqual(['sold']);
-    expect(ids({ ...initialFilters, saleStatus: 'all' })).toEqual(['on-market', 'sold']);
+  it('narrows to homes that sold or are let, or shows everything', () => {
+    expect(ids({ ...initialFilters, saleStatus: 'closed' })).toEqual(['sold', 'rented']);
+    expect(ids({ ...initialFilters, saleStatus: 'all' })).toEqual(['on-market', 'sold', 'for-rent', 'rented']);
   });
 });

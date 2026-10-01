@@ -36,6 +36,11 @@ import {
   MIN_NEIGHBOURS,
   MAX_NEIGHBOURS,
   boundingBox,
+  distanceMeters,
+  basisFor,
+  fallbackTypesFor,
+  normalizePrice,
+  valueOf,
   toNeighbour,
   buildTrend,
   buildStats,
@@ -2490,7 +2495,7 @@ export const getAreaPrices = async (
     if (!id) return;
 
     const subject = await Property.findById(id)
-      .select('lat lng price sqft listingType propertyType')
+      .select('lat lng price sqft listingType propertyType rentPeriod')
       .lean();
 
     if (!subject) {
@@ -2498,16 +2503,17 @@ export const getAreaPrices = async (
       return;
     }
 
-    const listingType = subject.listingType || 'sale';
-    const closedStatus = listingType === 'rent' ? 'rented' : 'sold';
-    const subjectPricePerSqm = pricePerSqm(subject.price, subject.sqft);
+    const basis = basisFor(subject.listingType, subject.rentPeriod);
+    const closedStatus = basis.listingType === 'rent' ? 'rented' : 'sold';
+    const subjectPrice = normalizePrice(subject.price, subject.rentPeriod, basis);
+    const subjectValue = valueOf(subjectPrice, subject.sqft, basis);
     const hasLocation = Number.isFinite(subject.lat) && Number.isFinite(subject.lng);
 
-    const findWithin = async (radiusKm: number, sameTypeOnly: boolean): Promise<AreaListing[]> => {
+    const findWithin = async (radiusKm: number, types: string[] | null): Promise<AreaListing[]> => {
       const box = boundingBox(subject.lat, subject.lng, radiusKm);
       const filter: Record<string, unknown> = {
         _id: { $ne: subject._id },
-        listingType,
+        listingType: basis.listingType,
         status: { $in: ['active', closedStatus] },
         price: { $gt: 0 },
         lat: { $gte: box.minLat, $lte: box.maxLat },
@@ -2515,15 +2521,19 @@ export const getAreaPrices = async (
         // Villas an admin has not approved are not public anywhere else either.
         villaApprovalStatus: { $nin: ['pending', 'rejected'] },
       };
-      if (sameTypeOnly) filter.propertyType = subject.propertyType;
+      if (types) filter.propertyType = { $in: types };
+      // Like with like: nightly lets against nightly lets, monthly and weekly
+      // lets against each other (an unset period is monthly).
+      if (basis.rentUnit) filter.rentPeriod = basis.rentUnit === 'night' ? 'daily' : { $ne: 'daily' };
 
       const rows = (await Property.find(filter)
-        .select('title address city price sqft beds propertyType status lat lng imageUrl createdAt soldAt rentedAt')
+        // Only the rent and start of past lets — never tenant names or notes.
+        .select('title address city price sqft beds propertyType status lat lng imageUrl createdAt soldAt rentedAt rentPeriod rentalHistory.startDate rentalHistory.monthlyRent')
         .limit(500)
         .lean()) as unknown as AreaListing[];
 
       // The box's corners reach past the radius; keep the circle.
-      return rows.filter((r) => toNeighbour(r, subject.lat, subject.lng).distanceM <= radiusKm * 1000);
+      return rows.filter((r) => distanceMeters(subject.lat, subject.lng, r.lat, r.lng) <= radiusKm * 1000);
     };
 
     let listings: AreaListing[] = [];
@@ -2532,39 +2542,42 @@ export const getAreaPrices = async (
 
     if (hasLocation) {
       for (const r of AREA_RADII_KM) {
-        listings = await findWithin(r, true);
+        listings = await findWithin(r, [subject.propertyType]);
         radiusKm = r;
         if (listings.length >= MIN_NEIGHBOURS) break;
       }
-      // Too few of the same kind even at the widest radius: compare against
-      // every kind of home nearby rather than show an empty section.
+      // Too few of the same kind even at the widest radius: widen the types
+      // rather than show an empty section.
       if (listings.length < MIN_NEIGHBOURS) {
-        const anyType = await findWithin(radiusKm, false);
-        if (anyType.length > listings.length) {
-          listings = anyType;
+        const wider = await findWithin(radiusKm, fallbackTypesFor(subject.propertyType));
+        if (wider.length > listings.length) {
+          listings = wider;
           sameTypeOnly = false;
         }
       }
     }
 
     const neighbours = listings
-      .map((l) => toNeighbour(l, subject.lat, subject.lng))
+      .map((l) => toNeighbour(l, subject.lat, subject.lng, basis))
       .sort((a, b) => a.distanceM - b.distanceM);
 
     res.json({
       center: { lat: subject.lat, lng: subject.lng },
       radiusKm,
-      listingType,
+      listingType: basis.listingType,
+      rentUnit: basis.rentUnit,
+      metric: basis.metric,
       propertyType: subject.propertyType,
       sameTypeOnly,
       subject: {
         id: String(subject._id),
-        price: subject.price,
+        price: subjectPrice,
         sqft: subject.sqft,
-        pricePerSqm: subjectPricePerSqm,
+        pricePerSqm: pricePerSqm(subjectPrice, subject.sqft),
+        value: subjectValue,
       },
-      stats: buildStats(neighbours, subjectPricePerSqm),
-      trend: buildTrend(listings),
+      stats: buildStats(neighbours, subjectValue),
+      trend: buildTrend(listings, basis),
       neighbours: neighbours.slice(0, MAX_NEIGHBOURS),
     });
   } catch (error: unknown) {

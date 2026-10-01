@@ -793,6 +793,19 @@
     "soldPrice": "Çmimi i shitjes",
     "rentedPrice": "Qiraja e rënë dakord",
     "showTable": "Shfaq si tabelë",
-    "quarter": "Tremujori"
+    "quarter": "Tremujori",
+    "forRent": "Me qira",
+    "forRentNearby": "Me qira përreth",
+    "noneActiveRent": "Aktualisht nuk ka shtëpi të tjera me qira përreth.",
+    "medianAskingNight": "Kërkohet për natë",
+    "medianRentedNight": "Dhënë për natë",
+    "stripHintNight": "Çdo pikë është një qira ditore përreth, sipas çmimit për natë. Prekni një për ta hapur.",
+    "trendTitleRent": "Qiraja për m² me kalimin e kohës",
+    "trendTitleNight": "Çmimi për natë me kalimin e kohës",
+    "perMonth": "/muaj",
+    "perNight": "/natë",
+    "perMonthNote": "Qira mujore · qiratë javore të konvertuara",
+    "perNightNote": "Vetëm qira ditore",
+    "villasIncluded": "Përfshirë vila të tjera"
   }
 }

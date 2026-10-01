@@ -1,12 +1,12 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { useRealtimeProperties, useSoldProperties } from '@/src/features/properties/hooks';
+import { useRealtimeProperties, useClosedProperties } from '@/src/features/properties/hooks';
 import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, SearchPageState, Property, NominatimResult } from '@/types';
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
@@ -38,12 +38,11 @@ export function useSearchPage() {
     // Sold homes are fetched only once the sold filter asks for them, then
     // searched alongside what is on the market.
     const wantsSold = (activeFilters.saleStatus ?? 'available') !== 'available';
-    const { soldProperties, isLoadingSold } = useSoldProperties(wantsSold);
-    const properties = useMemo(() => {
-        if (!wantsSold || soldProperties.length === 0) return availableProperties;
-        const seen = new Set(availableProperties.map((p) => p.id));
-        return [...availableProperties, ...soldProperties.filter((p) => !seen.has(p.id))];
-    }, [wantsSold, availableProperties, soldProperties]);
+    const { closedProperties: soldProperties, isLoadingClosed: isLoadingSold } = useClosedProperties(wantsSold, { listingType: 'sale' });
+    const properties = useMemo(
+        () => (wantsSold ? mergeById(availableProperties, soldProperties) : availableProperties),
+        [wantsSold, availableProperties, soldProperties]
+    );
     const isLoadingProperties = isLoadingAvailable || isLoadingSold;
 
     // Local, non-persistent state

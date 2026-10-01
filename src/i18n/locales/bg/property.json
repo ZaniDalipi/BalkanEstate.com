@@ -793,6 +793,19 @@
     "soldPrice": "Продажна цена",
     "rentedPrice": "Договорен наем",
     "showTable": "Покажи като таблица",
-    "quarter": "Тримесечие"
+    "quarter": "Тримесечие",
+    "forRent": "Под наем",
+    "forRentNearby": "Под наем наблизо",
+    "noneActiveRent": "В момента няма други имоти под наем наблизо.",
+    "medianAskingNight": "Искано на нощ",
+    "medianRentedNight": "Отдадено на нощ",
+    "stripHintNight": "Всяка точка е краткосрочен наем наблизо, по цена на нощ. Докоснете, за да го отворите.",
+    "trendTitleRent": "Наем на m² във времето",
+    "trendTitleNight": "Цена на нощ във времето",
+    "perMonth": "/мес.",
+    "perNight": "/нощ",
+    "perMonthNote": "Месечни наеми · седмичните преизчислени",
+    "perNightNote": "Само нощувки",
+    "villasIncluded": "Включително други вили"
   }
 }

@@ -27,6 +27,12 @@ export const serializeBounds = (bounds: L.LatLngBounds): string => {
     });
 };
 
+/**
+ * The rentals page shows homes that are let alongside those still available,
+ * as it always has; the status filter narrows to one or the other.
+ */
+const RENTAL_DEFAULTS: Filters = { ...initialFilters, listingType: 'rent', saleStatus: 'all' };
+
 export function useRentalSearch() {
     const { t } = useTranslation(['search', 'rental', 'common']);
     const { state, dispatch, updateSearchPageState, addSavedSearch } = useAppContext();
@@ -47,8 +53,7 @@ export function useRentalSearch() {
     const [filters, setFilters] = useState<Filters>(() => {
         const query = new URLSearchParams(window.location.search).get('q')?.trim() ?? '';
         return {
-            ...initialFilters,
-            listingType: 'rent',
+            ...RENTAL_DEFAULTS,
             ...(query ? { query } : {}),
         };
     });
@@ -418,7 +423,7 @@ export function useRentalSearch() {
     }, [filters, applyFilters, flyToSearched]);
 
     const handleResetFilters = useCallback(() => {
-        applyFilters({ ...initialFilters, listingType: 'rent' });
+        applyFilters(RENTAL_DEFAULTS);
         setDrawnBoundsJSON(null);
         setFlyToTarget({ center: [42.5, 20.5], zoom: 6 });
     }, [applyFilters]);

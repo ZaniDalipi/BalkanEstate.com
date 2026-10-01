@@ -138,7 +138,13 @@
     "allListings": "Всички",
     "priceRangeInvalid": "Минималната цена е по-висока от максималната.",
     "gardenView": "Изглед към градина",
-    "streetView": "Изглед към улица"
+    "streetView": "Изглед към улица",
+    "status": "Покажи",
+    "statusAvailable": "Свободни",
+    "statusRented": "Отдадени",
+    "statusSold": "Продадени",
+    "statusSoldOrRented": "Продадени и отдадени",
+    "statusBoth": "И двете"
   },
   "seo": {
     "title": "Луксозни Вили под Наем на Балканите | BalkanEstate",
