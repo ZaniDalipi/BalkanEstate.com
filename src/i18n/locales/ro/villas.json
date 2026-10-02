@@ -188,7 +188,9 @@
     "enquiryHeading": "SOLICITARE VÂNZARE VILĂ DE LUX",
     "enquirySuccessTitle": "Solicitarea a fost trimisă",
     "enquirySuccessBody": "Proprietarul vilei vă va suna la {{phone}} cu detaliile și pentru a stabili o vizionare.",
-    "enquireNote": "Fără plată online. Trimiteți solicitarea, iar proprietarul vilei vă sună direct cu detaliile și pentru a stabili o vizionare."
+    "enquireNote": "Fără plată online. Trimiteți solicitarea, iar proprietarul vilei vă sună direct cu detaliile și pentru a stabili o vizionare.",
+    "perWeek": "/ săptămână",
+    "perMonth": "/ lună"
   },
   "badges": {
     "signature": "VILĂ DE LUX",

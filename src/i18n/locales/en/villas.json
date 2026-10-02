@@ -190,7 +190,9 @@
     "enquiryHeading": "LUXURY VILLA SALE ENQUIRY",
     "enquirySuccessTitle": "Enquiry sent",
     "enquirySuccessBody": "The villa owner will call you on {{phone}} with the details and to arrange a viewing.",
-    "enquireNote": "No online payment. Send your enquiry and the villa owner calls you directly with the details and to arrange a viewing."
+    "enquireNote": "No online payment. Send your enquiry and the villa owner calls you directly with the details and to arrange a viewing.",
+    "perWeek": "/ week",
+    "perMonth": "/ month"
   },
   "badges": {
     "signature": "LUXURY VILLA",

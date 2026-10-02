@@ -7,6 +7,7 @@ import { formatPrice } from '@/utils/currency';
 import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import VillaBookingModal from './VillaBookingModal';
+import { villaRentSuffix } from '../utils/villaRentPeriod';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -202,6 +203,8 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
     const isSold    = property.status === 'sold';
     const isRented  = property.status === 'rented';
     const isForRent = property.listingType !== 'sale';
+    // The period the owner priced the rent in — not every villa is let by the night.
+    const rentSuffix = villaRentSuffix(property.rentPeriod);
     const gradId    = `vbg_${String(property.id || '').slice(-8)}`;
 
     return (
@@ -525,7 +528,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
                                     </div>
                                     {isForRent && (
                                         <div className="text-[10px] font-bold text-center mt-0.5" style={{ color: 'var(--color-villa-gold-bright)' }}>
-                                            {t('villas:booking.perNight', '/ night')}
+                                            {t(rentSuffix.key, rentSuffix.fallback)}
                                         </div>
                                     )}
                                 </div>
