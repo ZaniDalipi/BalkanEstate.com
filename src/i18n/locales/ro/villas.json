@@ -144,7 +144,12 @@
     "statusRented": "Închiriate",
     "statusSold": "Vândute",
     "statusSoldOrRented": "Vândute și închiriate",
-    "statusBoth": "Ambele"
+    "statusBoth": "Ambele",
+    "price": "Preț",
+    "minPrice": "Min €",
+    "maxPrice": "Max €",
+    "priceAnyMarket": "Preț · închirieri pe noapte",
+    "perNightHint": "Vilele închiriate pe săptămână sau pe lună sunt comparate după prețul lor pe noapte."
   },
   "seo": {
     "title": "Vile de Lux de Închiriat în Balcani | BalkanEstate",

@@ -217,3 +217,27 @@ describe('useVillaSearch — sold and let villas', () => {
     expect(result.current.listProperties.map((p) => p.id).sort()).toEqual(['let', 'sold', 'v1']);
   });
 });
+
+describe('useVillaSearch — price per night', () => {
+  it('weighs a villa let by the month at its nightly rate', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        properties: [
+          villa({ id: 'nightly', price: 400, rentPeriod: 'daily' }),
+          villa({ id: 'monthly', price: 3000, rentPeriod: 'monthly' }),
+        ],
+        pagination: { total: 2 },
+      }),
+    }));
+    const { result } = await mountHook();
+
+    // €3,000 a month is €100 a night: under a €150 cap, unlike the €400 night.
+    act(() => result.current.handleFilterChange('maxPrice', 150));
+    expect(result.current.listProperties.map((p) => p.id)).toEqual(['monthly']);
+
+    act(() => result.current.handleFilterChange('minPrice', 300));
+    act(() => result.current.handleFilterChange('maxPrice', null));
+    expect(result.current.listProperties.map((p) => p.id)).toEqual(['nightly']);
+  });
+});

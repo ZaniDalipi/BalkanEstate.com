@@ -4,6 +4,7 @@ import { Filters } from '@/types';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import { Button } from '@/components/ui/liquid-glass-button';
+import type { VillaListingMode } from '../hooks/useVillaSearch';
 
 interface VillaFiltersProps {
     filters: Filters;
@@ -13,6 +14,8 @@ interface VillaFiltersProps {
     onSaveSearch?: () => void;
     isSaving?: boolean;
     compact?: boolean;
+    /** The market on screen: the price range means a nightly rate for rentals, a price for sales. */
+    listingMode?: VillaListingMode;
 }
 
 const VIEW_TYPE_CHIPS = [
@@ -36,9 +39,27 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
     onSaveSearch,
     isSaving,
     compact,
+    listingMode = 'any',
 }) => {
     const { t } = useTranslation(['villas', 'common', 'search', 'rental']);
     const currencySymbol = getCurrencySymbol(filters.country !== 'any' ? filters.country : '');
+
+    // Rentals are compared on their nightly rate whatever period they are let
+    // in (a €3,000 month is €100 a night), so the range is labelled per night
+    // for rentals and as a plain price for sales.
+    const priceLabels = listingMode === 'sale'
+        ? {
+            label: t('villas:filters.price', 'Price'),
+            min: t('villas:filters.minPrice', 'Min price'),
+            max: t('villas:filters.maxPrice', 'Max price'),
+        }
+        : {
+            label: listingMode === 'rent'
+                ? t('villas:filters.pricePerNight', 'Price / Night')
+                : t('villas:filters.priceAnyMarket', 'Price · rentals per night'),
+            min: t('villas:filters.minRentPerNight', 'Min price per night'),
+            max: t('villas:filters.maxRentPerNight', 'Max price per night'),
+        };
 
     const toggleAmenity = (tag: string) => {
         const current: string[] = (filters.amenities as string[]) || [];
@@ -216,7 +237,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                     onChange={(e) => handlePriceChange('minPrice', e.target.value)}
                     aria-invalid={priceInvalid}
                     className={`flex-shrink-0 glass-input text-[11px] h-7 px-2 py-0 w-[72px] rounded-lg ml-1.5${priceRing}`}
-                    aria-label={t('villas:filters.minRentPerNight', 'Min price per night')}
+                    aria-label={priceLabels.min}
                 />
 
                 {/* Max price */}
@@ -229,7 +250,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                     onChange={(e) => handlePriceChange('maxPrice', e.target.value)}
                     aria-invalid={priceInvalid}
                     className={`flex-shrink-0 glass-input text-[11px] h-7 px-2 py-0 w-[72px] rounded-lg ml-1.5${priceRing}`}
-                    aria-label={t('villas:filters.maxRentPerNight', 'Max price per night')}
+                    aria-label={priceLabels.max}
                 />
 
                 {/* Thin divider */}
@@ -348,9 +369,9 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 </div>
             </div>
 
-            {/* Price per night */}
+            {/* Price — per night for rentals */}
             <div>
-                <label className={fullLabelClasses}>{t('villas:filters.pricePerNight', 'Price / Night')}</label>
+                <label className={fullLabelClasses}>{priceLabels.label}</label>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{currencySymbol}</span>
@@ -363,7 +384,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                             onChange={(e) => handlePriceChange('minPrice', e.target.value)}
                             aria-invalid={priceInvalid}
                             className={`${fullInputClasses} pl-6${priceRing}`}
-                            aria-label={t('villas:filters.minRentPerNight', 'Min price per night')}
+                            aria-label={priceLabels.min}
                         />
                     </div>
                     <div className="relative">
@@ -377,10 +398,15 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                             onChange={(e) => handlePriceChange('maxPrice', e.target.value)}
                             aria-invalid={priceInvalid}
                             className={`${fullInputClasses} pl-6${priceRing}`}
-                            aria-label={t('villas:filters.maxRentPerNight', 'Max price per night')}
+                            aria-label={priceLabels.max}
                         />
                     </div>
                 </div>
+                {listingMode !== 'sale' && (
+                    <p className="mt-1.5 text-[11px] text-gray-400">
+                        {t('villas:filters.perNightHint', 'Villas let by the week or month are compared at their nightly rate.')}
+                    </p>
+                )}
                 {priceInvalid && (
                     <p className="mt-1.5 text-[11px] text-red-500" role="alert">
                         {t('villas:filters.priceRangeInvalid', 'Minimum price is higher than the maximum.')}

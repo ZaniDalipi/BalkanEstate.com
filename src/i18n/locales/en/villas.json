@@ -146,7 +146,12 @@
     "statusRented": "Rented",
     "statusSold": "Sold",
     "statusSoldOrRented": "Sold & rented",
-    "statusBoth": "Both"
+    "statusBoth": "Both",
+    "price": "Price",
+    "minPrice": "Min €",
+    "maxPrice": "Max €",
+    "priceAnyMarket": "Price · rentals per night",
+    "perNightHint": "Villas let by the week or month are compared at their nightly rate."
   },
   "seo": {
     "title": "Luxury Villas for Rent in the Balkans | BalkanEstate",

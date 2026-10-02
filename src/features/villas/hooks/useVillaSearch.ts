@@ -14,6 +14,19 @@ import { useRealtimeProperties, useClosedProperties } from '@/src/features/prope
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 import { resolveVillaSearchTarget } from './villaSearchTarget';
+import { inVillaPriceRange } from '../utils/villaRentPeriod';
+
+/**
+ * The shared filters, with price handled the villa way: a rental is weighed
+ * on its nightly rate, so a villa let by the month is neither waved through
+ * nor shut out by a "per night" price range.
+ */
+const priceless = (filters: Filters): Filters => ({ ...filters, minPrice: null, maxPrice: null });
+const inRange = (filters: Filters) => (p: Property) => inVillaPriceRange(p, filters.minPrice, filters.maxPrice);
+const filterVillas = (villas: Property[], filters: Filters): Property[] =>
+    filterProperties(villas, priceless(filters)).filter(inRange(filters));
+const filterAndSortVillas = (villas: Property[], filters: Filters): Property[] =>
+    filterAndSortProperties(villas, priceless(filters)).filter(inRange(filters));
 
 const VILLA_DEFAULTS: Partial<Filters> = {
     listingType: 'rent',
@@ -311,7 +324,7 @@ export function useVillaSearch() {
     }), [activeFilters, listingMode]);
 
     const baseFilteredProperties = useMemo(
-        () => filterAndSortProperties(villaProperties, collectionFilters),
+        () => filterAndSortVillas(villaProperties, collectionFilters),
         [villaProperties, collectionFilters]
     );
 
@@ -328,7 +341,7 @@ export function useVillaSearch() {
     const needsRelaxedText = baseFilteredProperties.length === 0 && collectionFilters.query.trim() !== '';
     const relaxedProperties = useMemo(() => {
         if (!needsRelaxedText) return null;
-        const relaxed = filterAndSortProperties(villaProperties, { ...collectionFilters, query: '' });
+        const relaxed = filterAndSortVillas(villaProperties, { ...collectionFilters, query: '' });
         return relaxed.length > 0 ? relaxed : null;
     }, [needsRelaxedText, villaProperties, collectionFilters]);
 
@@ -413,8 +426,8 @@ export function useVillaSearch() {
      * including the relaxed set, so the map and the list never disagree.
      */
     const flyToSearched = useCallback((target: { center: [number, number]; zoom: number }, forFilters: Filters) => {
-        const strict = filterProperties(villaProperties, forFilters);
-        const answering = strict.length > 0 ? strict : filterProperties(villaProperties, { ...forFilters, query: '' });
+        const strict = filterVillas(villaProperties, forFilters);
+        const answering = strict.length > 0 ? strict : filterVillas(villaProperties, { ...forFilters, query: '' });
         setFlyToTarget(frameSearchTarget(target, answering) ?? target);
     }, [villaProperties]);
 

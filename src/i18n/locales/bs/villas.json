@@ -144,7 +144,12 @@
     "statusRented": "Iznajmljeno",
     "statusSold": "Prodano",
     "statusSoldOrRented": "Prodano i iznajmljeno",
-    "statusBoth": "Oboje"
+    "statusBoth": "Oboje",
+    "price": "Cijena",
+    "minPrice": "Min €",
+    "maxPrice": "Maks €",
+    "priceAnyMarket": "Cijena · najam po noći",
+    "perNightHint": "Vile koje se iznajmljuju sedmično ili mjesečno porede se po cijeni za jednu noć."
   },
   "seo": {
     "title": "Luksuzne Vile Za Iznajmljivanje na Balkanu | BalkanEstate",

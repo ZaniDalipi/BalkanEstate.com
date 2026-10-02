@@ -1,7 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { Property } from '@/types';
-import { villaRentSuffix } from '@/src/features/villas/utils/villaRentPeriod';
+import {
+  cheapestVilla,
+  comparablePrice,
+  inVillaPriceRange,
+  nightlyRate,
+  villaRentSuffix,
+} from '@/src/features/villas/utils/villaRentPeriod';
 
 /**
  * A villa card quotes the rent in the period its owner priced it in. It used
@@ -62,6 +68,37 @@ describe('villaRentSuffix', () => {
 
   it('reads an unset period as monthly, as the server stores it', () => {
     expect(villaRentSuffix(undefined)).toEqual(villaRentSuffix('monthly'));
+  });
+});
+
+describe('comparing villas let by the night, week or month', () => {
+  const nightly = { price: 400, listingType: 'rent', rentPeriod: 'daily' as const };
+  const weekly = { price: 1400, listingType: 'rent', rentPeriod: 'weekly' as const };
+  const monthly = { price: 3000, listingType: 'rent', rentPeriod: 'monthly' as const };
+  const forSale = { price: 900_000, listingType: 'sale' };
+
+  it('turns every rent into a nightly rate', () => {
+    expect(nightlyRate(nightly)).toBe(400);
+    expect(nightlyRate(weekly)).toBe(200);
+    expect(nightlyRate(monthly)).toBe(100);
+    expect(nightlyRate({ price: 3000, listingType: 'rent' })).toBe(100);
+  });
+
+  it('compares rentals on that rate and sales on their price', () => {
+    expect(comparablePrice(monthly)).toBe(100);
+    expect(comparablePrice(forSale)).toBe(900_000);
+  });
+
+  it('keeps a monthly villa inside a nightly price range it fits', () => {
+    expect(inVillaPriceRange(monthly, null, 150)).toBe(true);
+    expect(inVillaPriceRange(nightly, null, 150)).toBe(false);
+    expect(inVillaPriceRange(weekly, 150, 250)).toBe(true);
+    expect(inVillaPriceRange(forSale, null, null)).toBe(true);
+  });
+
+  it('finds the cheapest by nightly rate, not by the raw price', () => {
+    expect(cheapestVilla([nightly, weekly, monthly])).toBe(monthly);
+    expect(cheapestVilla([{ price: 0, listingType: 'rent' }])).toBeNull();
   });
 });
 

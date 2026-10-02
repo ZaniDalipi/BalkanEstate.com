@@ -8,6 +8,7 @@ import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { XMarkIcon } from '@/constants';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { validateName, validateEmail, validatePhone, sanitizeText } from '@/shared/utils/validation';
+import { nightlyRate, villaRentSuffix } from '../utils/villaRentPeriod';
 
 interface VillaBookingModalProps {
   property: Property;
@@ -123,7 +124,10 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
 
   const nights = useMemo(() => nightsBetween(form.checkIn, form.checkOut), [form.checkIn, form.checkOut]);
   const showEstimate = !property.isNegotiable && property.price > 0 && nights > 0;
-  const estimateTotal = showEstimate ? property.price * nights : 0;
+  // Nights at the villa's nightly rate: a villa let by the month is not
+  // charged its monthly rent for every night of the stay.
+  const estimateTotal = showEstimate ? Math.round(nightlyRate(property) * nights) : 0;
+  const rentSuffix = villaRentSuffix(property.rentPeriod);
 
   const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -289,7 +293,7 @@ const VillaBookingModal: React.FC<VillaBookingModalProps> = ({
                     {!property.isNegotiable && property.price > 0 ? (
                       <p className="text-[15px] font-semibold mt-0.5 text-neutral-900">
                         {formatPrice(property.price, property.country)}
-                        {isForRent && <span className="text-[13px] font-normal text-neutral-400"> {t('villas:booking.perNight', '/ night')}</span>}
+                        {isForRent && <span className="text-[13px] font-normal text-neutral-400"> {t(rentSuffix.key, rentSuffix.fallback)}</span>}
                       </p>
                     ) : (
                       <p className="text-[14px] font-semibold mt-0.5 text-neutral-900">{t('villas:booking.byNegotiation', 'By negotiation')}</p>

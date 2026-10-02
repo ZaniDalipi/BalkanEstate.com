@@ -144,7 +144,12 @@
     "statusRented": "Të dhëna me qira",
     "statusSold": "Të shitura",
     "statusSoldOrRented": "Të shitura e me qira",
-    "statusBoth": "Të dyja"
+    "statusBoth": "Të dyja",
+    "price": "Çmimi",
+    "minPrice": "Min €",
+    "maxPrice": "Maks €",
+    "priceAnyMarket": "Çmimi · qiratë për natë",
+    "perNightHint": "Vilat me qira javore ose mujore krahasohen me çmimin e tyre për natë."
   },
   "seo": {
     "title": "Vila Luksoze me Qira në Ballkan | BalkanEstate",

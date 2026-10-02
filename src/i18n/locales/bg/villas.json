@@ -144,7 +144,12 @@
     "statusRented": "Отдадени",
     "statusSold": "Продадени",
     "statusSoldOrRented": "Продадени и отдадени",
-    "statusBoth": "И двете"
+    "statusBoth": "И двете",
+    "price": "Цена",
+    "minPrice": "Мин €",
+    "maxPrice": "Макс €",
+    "priceAnyMarket": "Цена · наеми на нощ",
+    "perNightHint": "Вилите под наем за седмица или месец се сравняват по цената им за една нощ."
   },
   "seo": {
     "title": "Луксозни Вили под Наем на Балканите | BalkanEstate",

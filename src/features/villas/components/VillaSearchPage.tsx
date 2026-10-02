@@ -13,6 +13,7 @@ import LuxuryVillaCard from './LuxuryVillaCard';
 import VillaLocationBar from './VillaLocationBar';
 import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
+import { useVillaFromPrice, type VillaFromPrice } from '../hooks/useVillaFromPrice';
 import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, Bars3Icon, Squares2x2Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
@@ -326,14 +327,13 @@ const TrustStrip: React.FC = () => {
 
 interface LuxuryHeroProps {
     count: number;
-    minPrice: number | null;
-    /** Only rentals are priced per night; sale villas must not say "/night". */
-    isNightly: boolean;
+    /** The cheapest villa, quoted in its own rent period (none for a sale). */
+    fromPrice: VillaFromPrice | null;
     activeQuery: string;
     onDestinationClick: (dest: typeof DESTINATIONS[number]) => void;
 }
 
-const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, isNightly, activeQuery, onDestinationClick }) => {
+const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, fromPrice, activeQuery, onDestinationClick }) => {
     const { t } = useTranslation(['villas']);
     const displayCount = useCountUp(count);
     return (
@@ -362,8 +362,8 @@ const LuxuryHero: React.FC<LuxuryHeroProps> = ({ count, minPrice, isNightly, act
                     <p className="text-[12px] text-neutral-500 mb-4">
                         <span className="font-semibold text-neutral-800">{displayCount}</span>
                         {' '}{count === 1 ? t('villas:hero.villaAvailable', 'villa available') : t('villas:hero.villasAvailable', 'villas available')}
-                        {minPrice != null ? (
-                            <span className="text-neutral-400"> · {t('villas:hero.from', 'from')} <span className="font-medium" style={{ color: 'var(--color-villa-gold-deep)' }}>€{minPrice.toLocaleString()}</span>{isNightly ? t('villas:perNightSuffix', '/night') : ''}</span>
+                        {fromPrice ? (
+                            <span className="text-neutral-400"> · {t('villas:hero.from', 'from')} <span className="font-medium" style={{ color: 'var(--color-villa-gold-deep)' }}>{fromPrice.price}</span>{fromPrice.suffix && ` ${fromPrice.suffix}`}</span>
                         ) : null}
                     </p>
                 )}
@@ -586,21 +586,22 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         return count;
     }, [filters, listingMode]);
 
-    /* Min price from the filtered results ("from €X/night" in the results bar) */
-    const minResultPrice = useMemo(() => {
-        if (listProperties.length === 0) return null;
-        const prices = listProperties.map(p => p.price).filter(Boolean);
-        return prices.length > 0 ? Math.min(...prices) : null;
-    }, [listProperties]);
+    /* Cheapest of the filtered results ("from €X / night" in the results bar),
+       quoted in that villa's own rent period. */
+    const resultFromPrice = useVillaFromPrice(listProperties);
+    const fromLabel = (from: VillaFromPrice) =>
+        t('villas:fromPrice', 'from {{price}}', { price: from.suffix ? `${from.price} ${from.suffix}` : from.price });
 
     /* Hero shows the size of the whole collection, taken from the API's own
        countDocuments rather than the length of the page we happened to fetch.
        The filtered count lives in the results bar. */
     const collectionCount = totalVillaCount || villaProperties.length;
-    const collectionMinPrice = useMemo(() => {
-        const prices = villaProperties.map(p => p.price).filter((n): n is number => typeof n === 'number' && n > 0);
-        return prices.length > 0 ? Math.min(...prices) : null;
-    }, [villaProperties]);
+    // The hero quotes the market on screen: rentals, sales, or both.
+    const heroVillas = useMemo(
+        () => (listingMode === 'any' ? villaProperties : villaProperties.filter((p) => (p.listingType === 'sale') === (listingMode === 'sale'))),
+        [villaProperties, listingMode]
+    );
+    const collectionFromPrice = useVillaFromPrice(heroVillas);
 
     const showViewToggle = isMobile || isTablet;
 
@@ -698,13 +699,11 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                         <span className="text-neutral-500 text-sm flex-shrink-0">
                                             {listProperties.length} {listProperties.length === 1 ? t('villas:villa', 'villa') : t('villas:villas', 'villas')}
                                         </span>
-                                        {minResultPrice != null && (
+                                        {resultFromPrice && (
                                             <>
                                                 <span className="text-neutral-300 text-sm flex-shrink-0">·</span>
                                                 <span className="text-sm flex-shrink-0 font-medium" style={{ color: 'var(--color-villa-gold-deep)' }}>
-                                                    {listingMode === 'rent'
-                                                        ? t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })
-                                                        : t('villas:fromPrice', 'from {{price}}', { price: `€${minResultPrice.toLocaleString()}` })}
+                                                    {fromLabel(resultFromPrice)}
                                                 </span>
                                             </>
                                         )}
@@ -740,6 +739,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                             <VillaFilters
                                 filters={filters}
                                 onFilterChange={handleFilterChange}
+                                listingMode={listingMode}
                                 onSearch={handleSearch}
                                 onReset={handleResetFilters}
                                 onSaveSearch={handleSaveSearchArea}
@@ -804,9 +804,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </button>
                                         </span>
                                     )}
-                                    {minResultPrice != null && listProperties.length > 0 && listingMode === 'rent' && (
+                                    {resultFromPrice && listProperties.length > 0 && listingMode === 'rent' && (
                                         <span className="hidden sm:inline text-[11px] text-gray-400 flex-shrink-0">
-                                            {t('villas:fromPerNight', 'from {{price}}/night', { price: `€${minResultPrice.toLocaleString()}` })}
+                                            {fromLabel(resultFromPrice)}
                                         </span>
                                     )}
                                 </div>
@@ -924,8 +924,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 <>
                                     <LuxuryHero
                                         count={collectionCount}
-                                        minPrice={collectionMinPrice}
-                                        isNightly={listingMode === 'rent'}
+                                        fromPrice={collectionFromPrice}
                                         activeQuery={filters.query ?? ''}
                                         onDestinationClick={handleDestinationSelect}
                                     />
@@ -954,8 +953,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {/* Cinematic hero banner — scrolls away */}
                                     <LuxuryHero
                                         count={collectionCount}
-                                        minPrice={collectionMinPrice}
-                                        isNightly={listingMode === 'rent'}
+                                        fromPrice={collectionFromPrice}
                                         activeQuery={filters.query ?? ''}
                                         onDestinationClick={handleDestinationSelect}
                                     />
@@ -1193,6 +1191,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 <VillaFilters
                                     filters={filters}
                                     onFilterChange={handleFilterChange}
+                                    listingMode={listingMode}
                                     onSearch={() => { handleSearch(); setIsFiltersOpen(false); }}
                                     onReset={handleResetFilters}
                                     onSaveSearch={handleSaveSearchArea}
