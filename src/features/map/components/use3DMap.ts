@@ -489,9 +489,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
     const floorHeightM = 3; // metres per floor (taller = clearly visible tower)
     const totalHeightM = totalFlrs * floorHeightM;
 
-    // Query the actual building at this location from the map's building layer
-    const point = mapInstance.project([longitude, latitude]);
-
     let buildingCoords: number[][][] | null = null;
     let buildingFeature: maplibregl.MapGeoJSONFeature | null = null;
 
@@ -502,8 +499,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
 
     // The Liberty base style renders buildings through its OWN extrusion layer(s)
     // (NOT named '3d-buildings'). Collect every building extrusion layer so we can
-    // both query and HIDE the property building across all of them — otherwise the
-    // base style's native building keeps rendering as a grey tower behind ours.
+    // query the property building across all of them.
     const buildingExtrusionLayerIds = (mapInstance.getStyle().layers || [])
       .filter((l) =>
         l.type === 'fill-extrusion' &&
@@ -511,136 +507,88 @@ export function use3DMap(props: Map3DBuildingsProps) {
       )
       .map((l) => l.id)
       .filter((id) => !id.startsWith('building-floor') && id !== 'building-core' && id !== 'building-floor-highlight-glow');
-    // Layers we can actually query/hide right now.
+    // Layers we can actually query right now.
     const queryBuildingLayers = buildingExtrusionLayerIds.filter((id) => !!mapInstance.getLayer(id));
 
-    // Helper function to calculate building centroid
-    const getBuildingCentroid = (feature: maplibregl.MapGeoJSONFeature): { lng: number; lat: number } | null => {
-      let coords: number[][] = [];
+    // Local metric projection around the property, so distances are in metres.
+    const mPerDegLat = 110540;
+    const mPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
+    const toLocal = (c: number[]) => [(c[0] - longitude) * mPerDegLng, (c[1] - latitude) * mPerDegLat];
+
+    // Distance in metres from the property point to a polygon: 0 when the point
+    // is inside it, otherwise the distance to its nearest edge.
+    const distanceToPolygonM = (polygon: number[][][]): number => {
+      const ring = polygon[0];
+      if (!ring || ring.length < 4) return Infinity;
+      let inside = false;
+      let minDist = Infinity;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [xi, yi] = toLocal(ring[i]);
+        const [xj, yj] = toLocal(ring[j]);
+        if ((yi > 0) !== (yj > 0) && 0 < ((xj - xi) * (0 - yi)) / (yj - yi) + xi) {
+          inside = !inside;
+        }
+        const dx = xj - xi, dy = yj - yi;
+        const lenSq = dx * dx + dy * dy;
+        const t = lenSq > 0 ? Math.max(0, Math.min(1, -(xi * dx + yi * dy) / lenSq)) : 0;
+        const px = xi + t * dx, py = yi + t * dy;
+        minDist = Math.min(minDist, Math.sqrt(px * px + py * py));
+      }
+      return inside ? 0 : minDist;
+    };
+
+    // Polygon parts of a feature (a MultiPolygon can hold several buildings).
+    const getPolygons = (feature: maplibregl.MapGeoJSONFeature): number[][][][] => {
       if (feature.geometry.type === 'Polygon') {
-        coords = (feature.geometry as GeoJSON.Polygon).coordinates[0];
-      } else if (feature.geometry.type === 'MultiPolygon') {
-        coords = (feature.geometry as GeoJSON.MultiPolygon).coordinates[0][0];
+        return [(feature.geometry as GeoJSON.Polygon).coordinates];
       }
-      if (coords.length === 0) return null;
-
-      let sumLng = 0, sumLat = 0;
-      const numPoints = coords.length - 1; // Exclude closing point
-      for (let i = 0; i < numPoints; i++) {
-        sumLng += coords[i][0];
-        sumLat += coords[i][1];
+      if (feature.geometry.type === 'MultiPolygon') {
+        return (feature.geometry as GeoJSON.MultiPolygon).coordinates;
       }
-      return { lng: sumLng / numPoints, lat: sumLat / numPoints };
+      return [];
     };
 
-    // Helper function to calculate distance between two points (in degrees, approximate)
-    const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-      const dLat = lat2 - lat1;
-      const dLng = lng2 - lng1;
-      return Math.sqrt(dLat * dLat + dLng * dLng);
-    };
-
-    // Try multiple query approaches to find the building
-    // 1. First try exact point query on the 3d-buildings layer
-    const exactFeatures = queryBuildingLayers.length
-      ? mapInstance.queryRenderedFeatures(point, { layers: queryBuildingLayers })
-      : [];
-
-    if (exactFeatures.length > 0) {
-      // If we hit multiple buildings at exact point, pick the one closest to our coordinates
-      if (exactFeatures.length === 1) {
-        buildingFeature = exactFeatures[0];
-      } else {
-        let minDist = Infinity;
-        for (const feature of exactFeatures) {
-          const centroid = getBuildingCentroid(feature);
-          if (centroid) {
-            const dist = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-            if (dist < minDist) {
-              minDist = dist;
-              buildingFeature = feature;
-            }
-          }
-        }
-      }
-    } else {
-      // 2. Try a small bounding box query (~30px, roughly one building width)
-      const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [point.x - 30, point.y - 30],
-        [point.x + 30, point.y + 30]
-      ];
-      const nearbyFeatures = queryBuildingLayers.length
-        ? mapInstance.queryRenderedFeatures(bbox, { layers: queryBuildingLayers })
-        : [];
-
-      // Find the building CLOSEST to our coordinates that is tall enough
-      // Only accept buildings very close to the property (max ~30m)
-      if (nearbyFeatures.length > 0) {
-        let minDistance = Infinity;
-        let closestFeature: maplibregl.MapGeoJSONFeature | null = null;
-
-        // Maximum distance threshold: ~30m in degrees (~0.0003)
-        const maxDistanceThreshold = 0.0003;
-
-        for (const feature of nearbyFeatures) {
-          const centroid = getBuildingCentroid(feature);
-          if (centroid) {
-            const distance = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-
-            // Only consider buildings within the distance threshold
-            if (distance < maxDistanceThreshold && distance < minDistance) {
-              minDistance = distance;
-              closestFeature = feature;
-            }
-          }
-        }
-
-        // Only accept the building if it's close enough to the property coordinates
-        // ~0.0005 degrees ≈ 55 meters - beyond this the building is likely not the right one
-        const maxAcceptableDistance = 0.0005;
-        if (closestFeature && minDistance < maxAcceptableDistance) {
-          buildingFeature = closestFeature;
-        }
-      }
-    }
-
-    // 3. Fallback: querySourceFeatures queries raw tile data, not just rendered screen features.
-    // This is more reliable in production where tiles may load after the first idle event.
-    if (!buildingFeature) {
-      const buildingLayer = mapInstance.getLayer('3d-buildings') as any;
-      const vectorSourceId: string | undefined = buildingLayer?.source;
-      if (vectorSourceId) {
+    // Gather candidate buildings from the rendered layers around the property
+    // and from the raw tile data. Rendered hits alone are unreliable in a pitched
+    // 3D view: a screen point can hit a tall building that merely sits in front
+    // of the address, which put the green floor on the wrong building.
+    const point = mapInstance.project([longitude, latitude]);
+    const candidates: maplibregl.MapGeoJSONFeature[] = [];
+    if (queryBuildingLayers.length) {
+      candidates.push(...mapInstance.queryRenderedFeatures(
+        [[point.x - 40, point.y - 40], [point.x + 40, point.y + 40]],
+        { layers: queryBuildingLayers }
+      ));
+      const sourceIds = new Set(
+        queryBuildingLayers.map((id) => (mapInstance.getLayer(id) as any)?.source).filter(Boolean)
+      );
+      for (const sourceId of sourceIds) {
         try {
-          const sourceFeatures = mapInstance.querySourceFeatures(vectorSourceId, {
-            sourceLayer: 'building',
-          }) as maplibregl.MapGeoJSONFeature[];
-
-          const maxAcceptableDistance = 0.0005; // ~55m
-          let minDist = Infinity;
-          for (const feature of sourceFeatures) {
-            const centroid = getBuildingCentroid(feature);
-            if (centroid) {
-              const dist = getDistance(latitude, longitude, centroid.lat, centroid.lng);
-              if (dist < maxAcceptableDistance && dist < minDist) {
-                minDist = dist;
-                buildingFeature = feature;
-              }
-            }
-          }
+          candidates.push(...(mapInstance.querySourceFeatures(sourceId, { sourceLayer: 'building' }) as maplibregl.MapGeoJSONFeature[]));
         } catch {
           // querySourceFeatures not supported or source unavailable
         }
       }
     }
 
-    // Extract coordinates from the building feature
-    if (buildingFeature) {
-      if (buildingFeature.geometry.type === 'Polygon') {
-        buildingCoords = (buildingFeature.geometry as GeoJSON.Polygon).coordinates;
-      } else if (buildingFeature.geometry.type === 'MultiPolygon') {
-        // For MultiPolygon, use the first polygon
-        buildingCoords = (buildingFeature.geometry as GeoJSON.MultiPolygon).coordinates[0];
+    // Only accept a building that actually contains the address, or whose wall
+    // is within a few metres of it (geocoded points often sit on the street
+    // side of the facade). Anything further away is a different building.
+    const maxMatchDistanceM = 8;
+    let bestDist = Infinity;
+    for (const feature of candidates) {
+      for (const polygon of getPolygons(feature)) {
+        const dist = distanceToPolygonM(polygon);
+        if (dist < bestDist) {
+          bestDist = dist;
+          buildingFeature = feature;
+          buildingCoords = polygon;
+        }
       }
+    }
+    if (bestDist > maxMatchDistanceM) {
+      buildingFeature = null;
+      buildingCoords = null;
     }
 
     // Build a synthetic square footprint centered on the property. Used as a
@@ -677,8 +625,6 @@ export function use3DMap(props: Map3DBuildingsProps) {
         if (c[1] < minLat) minLat = c[1];
         if (c[1] > maxLat) maxLat = c[1];
       }
-      const mPerDegLat = 110540;
-      const mPerDegLng = 111320 * Math.cos((latitude * Math.PI) / 180);
       const widthM = (maxLng - minLng) * mPerDegLng;
       const depthM = (maxLat - minLat) * mPerDegLat;
       if (widthM < 8 || depthM < 8 || widthM > 80 || depthM > 80) {
@@ -691,12 +637,15 @@ export function use3DMap(props: Map3DBuildingsProps) {
     }
     mapLogger.warn('[FLOORVIZ] footprint resolved', {
       usedSynthetic,
+      matchDistanceM: Number.isFinite(bestDist) ? Math.round(bestDist) : null,
       ringPoints: buildingCoords[0]?.length,
       matchedId: buildingFeature?.id ?? null,
     });
 
-    // Get actual building height from map data if available
+    // Get actual building height from map data if available. `mapHeightM`
+    // stays 0 when the address has no building on the map.
     let actualBuildingHeight = totalHeightM;
+    let mapHeightM = 0;
     if (buildingFeature && buildingFeature.properties) {
       const props = buildingFeature.properties;
       const renderHeight = Number(props.render_height);
@@ -706,7 +655,12 @@ export function use3DMap(props: Map3DBuildingsProps) {
       } else if (Number.isFinite(levels) && levels > 0) {
         actualBuildingHeight = levels * 3.5;
       }
+      mapHeightM = actualBuildingHeight;
     }
+    // When the map has no building here, or only one far shorter than the
+    // listing's floor count, draw our own tower covering every floor so the
+    // building reads at its real height and the green floor sits on it.
+    const needsTower = mapHeightM < totalHeightM * 0.9;
     // Use the larger of our calculated height or the map's height
     const finalBuildingHeight = Math.max(totalHeightM, actualBuildingHeight);
     // Recalculate floor height based on actual building (guard against zero floors)
@@ -831,13 +785,68 @@ export function use3DMap(props: Map3DBuildingsProps) {
     if (mapInstance.getLayer('building-core')) {
       mapInstance.removeLayer('building-core');
     }
+    if (mapInstance.getLayer('building-floors-stack')) {
+      mapInstance.removeLayer('building-floors-stack');
+    }
 
-    // Draw ONLY the property's floor as a bright green band over the EXISTING
-    // building. We no longer draw a dark core or a full stack of slabs (those
-    // covered the building and made it look hidden). The band uses a slightly
-    // larger footprint so it protrudes and stays visible on the building face;
-    // the real building underneath stays fully visible.
     const gapSize = Math.max(0.5, adjustedFloorHeight * 0.15);
+
+    // Full-height tower at the address: a dark core with one slightly larger
+    // slab per floor on top of it. The gaps between slabs reveal the core,
+    // giving each storey a visible separator line.
+    const floorSlabs: GeoJSON.Feature[] = [];
+    if (needsTower) {
+      for (let floor = 1; floor <= totalFlrs; floor++) {
+        floorSlabs.push({
+          type: 'Feature',
+          properties: {
+            base: (floor - 1) * adjustedFloorHeight + gapSize * 0.5,
+            top: floor * adjustedFloorHeight - gapSize * 0.5,
+          },
+          geometry: { type: 'Polygon', coordinates: scaledCoords },
+        });
+      }
+    }
+    const floorsSourceData: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: floorSlabs };
+    if (!mapInstance.getSource('custom-building-floors')) {
+      mapInstance.addSource('custom-building-floors', { type: 'geojson', data: floorsSourceData });
+    } else {
+      (mapInstance.getSource('custom-building-floors') as maplibregl.GeoJSONSource).setData(floorsSourceData);
+    }
+
+    if (needsTower) {
+      mapInstance.addLayer({
+        id: 'building-core',
+        type: 'fill-extrusion',
+        source: 'custom-building-core',
+        paint: {
+          'fill-extrusion-color': '#334155',
+          'fill-extrusion-height': finalBuildingHeight,
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 1,
+        },
+      });
+      mapInstance.addLayer({
+        id: 'building-floors-stack',
+        type: 'fill-extrusion',
+        source: 'custom-building-floors',
+        paint: {
+          'fill-extrusion-color': [
+            'interpolate', ['linear'], ['get', 'top'],
+            0, '#64748b',
+            finalBuildingHeight, '#94a3b8',
+          ],
+          'fill-extrusion-height': ['get', 'top'],
+          'fill-extrusion-base': ['get', 'base'],
+          'fill-extrusion-opacity': 1,
+          'fill-extrusion-vertical-gradient': true,
+        },
+      });
+    }
+
+    // Draw the property's floor as a bright green band, over either the
+    // existing map building or our tower. The band uses a slightly larger
+    // footprint so it protrudes and stays visible on the building face.
     if (floorNum > 0 && floorNum <= totalFlrs) {
       mapInstance.addLayer({
         id: `building-floor-${floorNum}`,
