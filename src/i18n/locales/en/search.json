@@ -21,7 +21,6 @@
   "searchButton": "Search",
   "showResults": "Show Results",
   "resultsFound": "{{count}} results found",
-  "showingNearby": "Nothing in this area — showing the nearest listings in {{location}}",
   "showingInArea": "Nothing matches “{{query}}” — showing what is available in this area",
   "locationNotFound": "Location not found. Showing text-based results.",
   "locationUnavailable": "Your location is not available.",
@@ -502,5 +501,13 @@
     "listings": "Listings",
     "remove": "Remove",
     "lookupFailed": "Could not look up that place. Please try another result."
+  },
+  "outOfArea": {
+    "title": "No properties in this area right now",
+    "titleQuery": "No properties in “{{query}}” right now",
+    "showingPromotedIn": "Meanwhile, here are premium and highlighted listings from elsewhere — the nearest is in {{location}}.",
+    "showingPromoted": "Meanwhile, here are premium and highlighted listings from elsewhere.",
+    "showingNearestIn": "Meanwhile, here are the nearest listings, in {{location}}.",
+    "nothingPromoted": "Try zooming out, moving the map or resetting your filters."
   }
 }

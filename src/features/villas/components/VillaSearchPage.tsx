@@ -1,6 +1,7 @@
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
@@ -474,6 +475,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         activeFilters,
         fallbackLocation,
         isTextRelaxed,
+        outOfArea,
+        isQueryUnmatched,
         isSearchingLocation,
         listingMode,
         handleListingModeChange,
@@ -873,21 +876,28 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     }}
                                 />
                             </div>
-                            {/* The list is answering a looser question than the
-                                one typed — say so instead of passing the
-                                results off as exact matches. */}
-                            {(isTextRelaxed || fallbackLocation) && (
+                            {/* Nothing in the searched area: say so, then
+                                introduce what is listed from elsewhere. */}
+                            {outOfArea ? (
+                                <div className="px-4 pb-2">
+                                    <OutOfAreaBanner
+                                        kind={outOfArea}
+                                        query={filters.query}
+                                        isQueryUnmatched={isQueryUnmatched}
+                                        location={fallbackLocation}
+                                        onResetFilters={handleResetFilters}
+                                    />
+                                </div>
+                            ) : isTextRelaxed && (
+                                /* The typed text matched nothing and the map
+                                   view is answering — say so instead of passing
+                                   the results off as exact matches. */
                                 <div className="px-4 pb-2 -mt-1">
                                     <p className="text-[11px] text-gray-400">
-                                        {isTextRelaxed
-                                            ? t('villas:showingInArea', {
-                                                query: filters.query,
-                                                defaultValue: 'No villa matches “{{query}}” — showing what is available in this area',
-                                            })
-                                            : t('villas:showingNearby', {
-                                                location: fallbackLocation,
-                                                defaultValue: 'No villas in this area — showing the nearest ones in {{location}}',
-                                            })}
+                                        {t('villas:showingInArea', {
+                                            query: filters.query,
+                                            defaultValue: 'No villa matches “{{query}}” — showing what is available in this area',
+                                        })}
                                     </p>
                                 </div>
                             )}

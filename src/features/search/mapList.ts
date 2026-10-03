@@ -1,5 +1,6 @@
 import L from 'leaflet';
 import type { Property } from '@/types';
+import { outOfAreaFallback, type OutOfAreaKind } from './outOfArea';
 
 /**
  * The list follows the map.
@@ -9,7 +10,8 @@ import type { Property } from '@/types';
  * shows the nearest listings rather than an empty page. The buy page has
  * worked this way for a long time (`useSearchPage`); this is that behaviour
  * lifted out so the rent and villa pages answer a search identically instead
- * of each growing their own half of it.
+ * of each growing their own half of it. An empty area is answered by
+ * `outOfAreaFallback`, the same rule the buy page uses.
  */
 
 export interface MapNarrowingInput {
@@ -29,42 +31,20 @@ export interface MapNarrowingInput {
 export interface MapNarrowingResult {
     listProperties: Property[];
     /**
-     * Where the listings actually are, when nothing was in view and the
-     * nearest ones are being shown instead. `null` when the list is an
+     * Where the listings actually are, when nothing was in view and listings
+     * from elsewhere are being shown instead. `null` when the list is an
      * honest answer to the view.
      */
     fallbackLocation: string | null;
+    /**
+     * Set when the searched area held nothing: which rule chose the listings
+     * from elsewhere (see `outOfAreaFallback`). `null` otherwise.
+     */
+    outOfArea: OutOfAreaKind | null;
 }
 
-/** Cheap planar distance — only ever used to order candidates, never shown. */
-const distance = (lat1: number, lng1: number, lat2: number, lng2: number) =>
-    Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
-
-/**
- * Nothing in view: the nearest listings, preferring a whole town over a
- * scattering of far-apart ones, so the answer reads as "not here, but here".
- */
-const nearest = (properties: Property[], lat: number, lng: number): MapNarrowingResult => {
-    if (properties.length === 0) return { listProperties: [], fallbackLocation: null };
-
-    const byDistance = [...properties].sort(
-        (a, b) => distance(lat, lng, a.lat, a.lng) - distance(lat, lng, b.lat, b.lng)
-    );
-    const closest = byDistance[0];
-
-    // Priority 1: the town the nearest listing is in.
-    const sameCity = byDistance.filter(p => p.city?.toLowerCase() === closest.city?.toLowerCase());
-    if (sameCity.length > 0) return { listProperties: sameCity, fallbackLocation: closest.city || null };
-
-    // Priority 2: the same country, nearest first.
-    const sameCountry = byDistance.filter(p => p.country?.toLowerCase() === closest.country?.toLowerCase());
-    if (sameCountry.length > 0) {
-        return { listProperties: sameCountry, fallbackLocation: sameCountry[0]?.city || closest.country || null };
-    }
-
-    // Priority 3: everything there is, nearest first.
-    return { listProperties: byDistance, fallbackLocation: closest.city || closest.country || null };
-};
+const inView = (listProperties: Property[]): MapNarrowingResult =>
+    ({ listProperties, fallbackLocation: null, outOfArea: null });
 
 export const narrowToMapView = ({
     properties,
@@ -76,19 +56,23 @@ export const narrowToMapView = ({
         const withinDrawn = properties.filter(p => drawnBounds.contains(L.latLng(p.lat, p.lng)));
         // An area with nothing in it falls through to the viewport rules
         // rather than showing an empty list.
-        if (withinDrawn.length > 0) return { listProperties: withinDrawn, fallbackLocation: null };
+        if (withinDrawn.length > 0) return inView(withinDrawn);
     }
 
     if (mapBounds && ready && properties.length > 0) {
         const withinView = properties.filter(p => mapBounds.contains(L.latLng(p.lat, p.lng)));
-        if (withinView.length > 0) return { listProperties: withinView, fallbackLocation: null };
+        if (withinView.length > 0) return inView(withinView);
 
+        // Nothing here: premium from anywhere, other promotions nearby, and
+        // the nearest listings when no promotion qualifies — never nothing.
         const centre = mapBounds.getCenter();
-        const fallback = nearest(properties, centre.lat, centre.lng);
-        // Never answer with nothing while there are listings to show.
-        if (fallback.listProperties.length === 0) return { listProperties: properties, fallbackLocation: null };
-        return fallback;
+        const fallback = outOfAreaFallback(properties, { lat: centre.lat, lng: centre.lng });
+        return {
+            listProperties: fallback.listProperties,
+            fallbackLocation: fallback.location,
+            outOfArea: fallback.kind,
+        };
     }
 
-    return { listProperties: properties, fallbackLocation: null };
+    return inView(properties);
 };

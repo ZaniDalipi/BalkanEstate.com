@@ -90,6 +90,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         baseFilteredProperties,
         mapProperties,
         isTextRelaxed,
+        outOfArea,
+        isQueryUnmatched,
         listProperties,
         seoTitle,
         seoDescription,
@@ -186,6 +188,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         onSelectSuggestion: handleSelectSuggestion,
         fallbackLocation: fallbackLocation,
         isTextRelaxed: isTextRelaxed,
+        outOfArea: outOfArea,
+        isQueryUnmatched: isQueryUnmatched,
         // Passed directly to avoid PropertyList subscribing to AppContext
         isLoadingProperties: isLoadingProperties,
         isAuthenticated: isAuthenticated,
