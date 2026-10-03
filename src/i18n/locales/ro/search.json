@@ -501,6 +501,7 @@
     "titleQuery": "Momentan nu există proprietăți în „{{query}}”",
     "showingPromotedIn": "Între timp, iată anunțuri premium și evidențiate din alte zone — cel mai apropiat este în {{location}}.",
     "showingPromoted": "Între timp, iată anunțuri premium și evidențiate din alte zone.",
+    "showingNearestIn": "Între timp, iată cele mai apropiate anunțuri, în {{location}}.",
     "nothingPromoted": "Încercați să micșorați sau să mutați harta ori să resetați filtrele."
   }
 }

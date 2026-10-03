@@ -6,7 +6,7 @@ import { SavedSearch, ChatMessage, AiSearchQuery, Filters, initialFilters, Searc
 import { generateSearchName, generateSearchNameFromCoords } from '@/services/geminiService';
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
-import { promotedOutsideArea } from '../outOfArea';
+import { outOfAreaFallback, type OutOfAreaKind } from '../outOfArea';
 import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
@@ -475,10 +475,10 @@ export function useSearchPage() {
      */
     const mapProperties = relaxedProperties ?? baseFilteredProperties;
 
-    const { listProperties, fallbackLocationValue, isOutOfArea = false } = useMemo((): {
+    const { listProperties, fallbackLocationValue, outOfArea = null } = useMemo((): {
         listProperties: Property[];
         fallbackLocationValue: string | null;
-        isOutOfArea?: boolean;
+        outOfArea?: OutOfAreaKind | null;
     } => {
         // The strict search, or — when it found nothing for the typed text —
         // everything the other filters allow, located by the map instead.
@@ -510,13 +510,12 @@ export function useSearchPage() {
                 return { listProperties: withinView, fallbackLocationValue: null };
             }
 
-            // Nothing in view: say so (the out-of-area banner) and offer only
-            // actively promoted listings from elsewhere — never ordinary ones
-            // that would read as results for the place searched. An empty
-            // list here is deliberate: the banner is the answer.
+            // Nothing in view: the out-of-area banner says so, and the list
+            // shows premium listings from anywhere, other promotions nearby,
+            // or — when no promotion qualifies — the nearest listings.
             const center = mapBounds.getCenter();
-            const outside = promotedOutsideArea(baseFilteredProperties, { lat: center.lat, lng: center.lng });
-            return { listProperties: outside.listProperties, fallbackLocationValue: outside.location, isOutOfArea: true };
+            const fallback = outOfAreaFallback(baseFilteredProperties, { lat: center.lat, lng: center.lng });
+            return { listProperties: fallback.listProperties, fallbackLocationValue: fallback.location, outOfArea: fallback.kind };
         }
 
         // Fallback to all filtered properties if no bounds set (initial load)
@@ -1060,7 +1059,7 @@ export function useSearchPage() {
         mapProperties,
         listProperties,
         isTextRelaxed,
-        isOutOfArea,
+        outOfArea,
         isQueryUnmatched,
         seoTitle,
         seoDescription,

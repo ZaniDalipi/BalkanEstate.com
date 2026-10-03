@@ -522,23 +522,31 @@ slug.
 ## Search — nothing in the area
 
 ```
-useSearchPage → listProperties
-  ├── in drawn area / map view → those listings
-  └── none in view → promotedOutsideArea(list, mapCentre)   src/features/search/outOfArea.ts
-        ├── validateActivePromotion(p)   isPromoted + end date in the future (validation.ts)
-        ├── premium > highlight > featured, urgent first, then nearest
-        └── { listProperties, location }  → isOutOfArea: true
-PropertyList → OutOfAreaBanner (role="status") above the promoted listings
+useSearchPage (buy) ─┐
+narrowToMapView ─────┤  (rent, villas — src/features/search/mapList.ts)
+                     ├── in drawn area / map view → those listings, outOfArea: null
+                     └── none in view → outOfAreaFallback(list, mapCentre)   src/features/search/outOfArea.ts
+                           ├── validateActivePromotion(p)   isPromoted + live end date (validation.ts)
+                           ├── premium            → always, any distance
+                           ├── highlight/featured → only within OUT_OF_AREA_RADIUS_KM (150 / 75 km,
+                           │                        haversineDistanceKm from @/shared/geo)
+                           │     ranked tier → urgent → nearest            kind: 'promoted'
+                           └── no promotion qualifies → nearest town's listings   kind: 'nearest'
+Page → OutOfAreaBanner (src/components/search, role="status") above the list
 ```
 
 - **Say it, then offer something.** A view with no listings used to fall back to
   every nearest listing, so a Durrës flat read as a result for "Budva". Now the
-  banner says the area is empty and only actively promoted listings follow.
-- **An empty list is a real answer.** With nothing promoted, the list stays empty
-  and the banner offers Reset Filters instead of the generic no-results box.
-- **Bad data never throws.** Expired or unparsable promotion dates are filtered
-  out; listings without usable coordinates rank last.
-- Buy page only; the rent and villa pages still use `narrowToMapView`.
+  banner says the area is empty and names what follows.
+- **Importance decides who travels.** Premium (the most expensive tier) is shown
+  from anywhere; cheaper tiers only when they are close enough to be relevant.
+- **Never nothing.** If no promotion qualifies, the nearest town's listings are
+  shown (with a Reset Filters link). The list is empty only when no listing
+  matches the filters at all — then each page's own no-results state shows.
+- **Bad data never throws.** Expired or unparsable promotion dates are not
+  promotions; listings without usable coordinates rank last; an invalid map
+  centre keeps premium and drops the radius tiers.
+- One rule, three pages: change it in `outOfArea.ts`, not in a page.
 
 ---
 

@@ -501,6 +501,7 @@
     "titleQuery": "Trenutno nema nekretnina u “{{query}}”",
     "showingPromotedIn": "U međuvremenu, evo premium i istaknutih oglasa s drugih lokacija — najbliži je u {{location}}.",
     "showingPromoted": "U međuvremenu, evo premium i istaknutih oglasa s drugih lokacija.",
+    "showingNearestIn": "U međuvremenu, evo najbližih oglasa, u {{location}}.",
     "nothingPromoted": "Pokušajte umanjiti ili pomjeriti mapu ili poništiti filtere."
   }
 }

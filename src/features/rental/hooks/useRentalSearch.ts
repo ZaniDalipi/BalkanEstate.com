@@ -280,11 +280,12 @@ export function useRentalSearch() {
      *
      * Same rules as the buy page, so a search behaves identically on both
      * tabs. A drawn area wins over the viewport; and when the viewport holds
-     * nothing — flying to a town with no rentals in it — the nearest rentals
-     * are shown instead of an empty screen, with `fallbackLocation` naming
-     * where they actually are.
+     * nothing — flying to a town with no rentals in it — `outOfArea` is set,
+     * the page shows the out-of-area banner, and the list holds premium
+     * rentals from anywhere, other promotions nearby, or the nearest rentals
+     * (`outOfAreaFallback`), with `fallbackLocation` naming where they are.
      */
-    const { listProperties, fallbackLocation } = useMemo(
+    const { listProperties, fallbackLocation, outOfArea } = useMemo(
         () => narrowToMapView({
             properties: mapProperties,
             drawnBounds,
@@ -300,6 +301,9 @@ export function useRentalSearch() {
      * page says so rather than letting the results look like an exact match.
      */
     const isTextRelaxed = relaxedProperties !== null && listProperties.length > 0;
+
+    /** The typed text matched no rental at all — the out-of-area banner names it. */
+    const isQueryUnmatched = relaxedProperties !== null;
 
     // --- Handlers ---
 
@@ -621,6 +625,8 @@ export function useRentalSearch() {
         listProperties,
         fallbackLocation,
         isTextRelaxed,
+        outOfArea,
+        isQueryUnmatched,
         handleSelectSuggestion,
         toggleDrawing,
         handleDrawComplete,

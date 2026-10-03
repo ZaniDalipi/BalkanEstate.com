@@ -501,6 +501,7 @@
     "titleQuery": "Aktualisht nuk ka prona në “{{query}}”",
     "showingPromotedIn": "Ndërkohë, ja disa prona premium dhe të theksuara nga zona të tjera — më e afërta është në {{location}}.",
     "showingPromoted": "Ndërkohë, ja disa prona premium dhe të theksuara nga zona të tjera.",
+    "showingNearestIn": "Ndërkohë, ja pronat më të afërta, në {{location}}.",
     "nothingPromoted": "Provoni të zvogëloni hartën, ta lëvizni atë ose të rivendosni filtrat."
   }
 }

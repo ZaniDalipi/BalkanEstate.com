@@ -333,9 +333,10 @@ export function useVillaSearch() {
     /**
      * What the list shows: the villas inside the current view, with the buy
      * page's rules — a drawn area wins over the viewport, and a view holding
-     * nothing shows the nearest villas instead of an empty screen.
+     * nothing sets `outOfArea` and lists premium villas from anywhere, other
+     * promotions nearby, or the nearest villas (`outOfAreaFallback`).
      */
-    const { listProperties, fallbackLocation } = useMemo(
+    const { listProperties, fallbackLocation, outOfArea } = useMemo(
         () => narrowToMapView({
             properties: mapProperties,
             drawnBounds,
@@ -351,6 +352,9 @@ export function useVillaSearch() {
      * page says so rather than letting the results look like an exact match.
      */
     const isTextRelaxed = relaxedProperties !== null && listProperties.length > 0;
+
+    /** The typed text matched no villa at all — the out-of-area banner names it. */
+    const isQueryUnmatched = relaxedProperties !== null;
 
     const showToast = useCallback((message: string, type: 'success' | 'error') => {
         setToast({ show: true, message, type });
@@ -666,6 +670,8 @@ export function useVillaSearch() {
         listProperties,
         fallbackLocation,
         isTextRelaxed,
+        outOfArea,
+        isQueryUnmatched,
         isSearchingLocation,
         handleSuggestionClick,
         handleDestinationSelect,
