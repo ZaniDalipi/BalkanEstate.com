@@ -340,12 +340,22 @@ const MAX_IMAGE_CREDIT_LENGTH = 200;
  * `imgSrc` is built from — a URL on any other host saves fine and then renders
  * as a blank frame with nothing to explain it.
  */
-export const ALLOWED_PHOTO_HOSTS = ['res.cloudinary.com', 'upload.wikimedia.org'] as const;
+const mediaCdnHost = ((): string[] => {
+  try {
+    const raw = import.meta.env.VITE_MEDIA_CDN_URL;
+    return raw ? [new URL(raw).hostname.toLowerCase()] : [];
+  } catch {
+    return [];
+  }
+})();
+
+/** Our R2 media domain (VITE_MEDIA_CDN_URL) when set, legacy Cloudinary, and Wikimedia. */
+export const ALLOWED_PHOTO_HOSTS: readonly string[] = [...mediaCdnHost, 'res.cloudinary.com', 'upload.wikimedia.org'];
 
 /** Host-exact, never a suffix match — `res.cloudinary.com.evil.example` is not it. */
 function isAllowedPhotoHost(url: string): boolean {
   try {
-    return (ALLOWED_PHOTO_HOSTS as readonly string[]).includes(new URL(url).hostname.toLowerCase());
+    return ALLOWED_PHOTO_HOSTS.includes(new URL(url).hostname.toLowerCase());
   } catch {
     return false;
   }

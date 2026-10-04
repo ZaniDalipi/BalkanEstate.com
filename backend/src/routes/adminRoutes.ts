@@ -601,10 +601,8 @@ router.delete('/news/:id', logAdminAction('DELETE_NEWS'), async (req: Request, r
     }
     // Cleanup Cloudinary cover
     if (article.coverImagePublicId) {
-      try {
-        const cloudinary = (await import('../config/cloudinary')).default;
-        await cloudinary.uploader.destroy(article.coverImagePublicId);
-      } catch { /* ignore cleanup errors */ }
+      const { deleteImage } = await import('../services/cloudinaryService');
+      await deleteImage(article.coverImagePublicId); // never throws
     }
     await article.deleteOne();
     res.json({ message: 'News article deleted' });
@@ -777,10 +775,8 @@ router.delete('/articles/:id', logAdminAction('DELETE_ARTICLE'), async (req: Req
 
     // Cleanup Cloudinary cover image if it exists
     if (article.coverImagePublicId) {
-      try {
-        const cloudinary = (await import('../config/cloudinary')).default;
-        await cloudinary.uploader.destroy(article.coverImagePublicId);
-      } catch { /* ignore cleanup errors */ }
+      const { deleteImage } = await import('../services/cloudinaryService');
+      await deleteImage(article.coverImagePublicId); // never throws
     }
 
     await article.deleteOne();

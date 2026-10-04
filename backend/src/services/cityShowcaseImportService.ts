@@ -1,4 +1,8 @@
 import cloudinary from '../config/cloudinary';
+import { isR2Enabled, isCloudinaryConfigured } from '../config/r2';
+import MediaAsset from '../models/MediaAsset';
+import { mediaFolder } from './media/mediaKeys';
+import { storedUrlFor } from './media/r2MediaStore';
 import CityMarketData from '../models/CityMarketData';
 import CityShowcase from '../models/CityShowcase';
 import { apiLogger } from '../utils/logger';
@@ -104,13 +108,30 @@ export function isUsablePhotoUrl(url: unknown): url is string {
  * databases will have cities the seed script never ran for — and that is not
  * an error, just a reason to fall back to the row's own field.
  */
+/** URL of the newest city photo stored in R2, or null (R2 off, or none stored). */
+async function findStoredCityPhoto(country: string, city: string): Promise<string | null> {
+  if (!isR2Enabled()) return null;
+  const folder = mediaFolder('city', { country, city });
+  const asset = await MediaAsset.findOne({ kind: 'city', key: { $regex: `^${folder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/` } })
+    .sort({ createdAt: -1 })
+    .select('key bucket')
+    .lean();
+  return asset ? storedUrlFor(asset.key, asset.bucket) : null;
+}
+
 export async function resolveCityPhoto(row: ImportableCity): Promise<string | null> {
-  const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
-  try {
-    const resource = await cloudinary.api.resource(publicId);
-    if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;
-  } catch {
-    // Not in the library — fall through to the row's own field.
+  // R2: the newest stored photo under cities/{country}/{city}/.
+  const r2Url = await findStoredCityPhoto(row.country, row.city);
+  if (r2Url && isUsablePhotoUrl(r2Url)) return r2Url;
+
+  if (isCloudinaryConfigured()) {
+    const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
+    try {
+      const resource = await cloudinary.api.resource(publicId);
+      if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;
+    } catch {
+      // Not in the library — fall through to the row's own field.
+    }
   }
 
   return isUsablePhotoUrl(row.imageUrl) ? row.imageUrl.trim() : null;

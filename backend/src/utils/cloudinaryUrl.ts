@@ -1,6 +1,8 @@
 /**
- * Helpers for Cloudinary delivery URLs on the server.
+ * Helpers for stored-image URLs on the server (Cloudinary and R2).
  */
+
+import { parseMediaUrl, mediaFileUrl, MEDIA_MASTER_FILE } from '../config/mediaVariants';
 
 export const CLOUDINARY_UPLOAD_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/i;
 
@@ -33,3 +35,15 @@ export const originalCloudinaryUrl = (url: string): string | null => {
   const [, base, rest] = match;
   return `${base}${stripCloudinaryTransforms(rest)}`;
 };
+
+/**
+ * The master of one of our R2 photos (`{photoKey}/original.jpg`), given any
+ * of its variant URLs, or null when the URL isn't on our media domain.
+ */
+export const originalR2Url = (url: string, mediaBaseUrl: string | null = process.env.R2_PUBLIC_URL || null): string | null => {
+  const parsed = parseMediaUrl(url, mediaBaseUrl);
+  return parsed && mediaBaseUrl ? mediaFileUrl(mediaBaseUrl, parsed.photoKey, MEDIA_MASTER_FILE) : null;
+};
+
+/** The unresized original of a stored photo — R2 or Cloudinary — or null. */
+export const originalStoredImageUrl = (url: string): string | null => originalR2Url(url) ?? originalCloudinaryUrl(url);

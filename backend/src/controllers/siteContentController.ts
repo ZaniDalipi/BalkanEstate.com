@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import SiteContent from '../models/SiteContent';
 import cloudinary from '../config/cloudinary';
+import { deleteImage } from '../services/cloudinaryService';
 import { getParam, getObjectIdParam } from '../utils/validateParams';
 import { toYouTubeEmbedUrl, validateYouTubeLink } from '../utils/videoLinks';
 
@@ -156,9 +157,11 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
     // Delete from Cloudinary if publicId exists
     if (content.publicId) {
       try {
-        await cloudinary.uploader.destroy(content.publicId, {
-          resource_type: content.type === 'video' ? 'video' : 'image'
-        });
+        if (content.type === 'video') {
+          await cloudinary.uploader.destroy(content.publicId, { resource_type: 'video' });
+        } else {
+          await deleteImage(content.publicId);
+        }
       } catch (_cloudErr) {
         // Cloudinary deletion failed silently - content will still be removed from database
       }

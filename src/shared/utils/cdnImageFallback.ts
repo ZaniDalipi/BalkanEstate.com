@@ -1,4 +1,4 @@
-import { retryWithOriginalImage } from '@/config/cloudinaryConfig';
+import { retryWithOriginalImage, parseMediaCdnUrl } from '@/config/cloudinaryConfig';
 
 /**
  * App-wide safety net for Cloudinary images.
@@ -30,11 +30,15 @@ export const installCdnImageFallback = (): void => {
       const src = target.currentSrc || target.src;
       const isPreset = src.includes('res.cloudinary.com') && src.includes('/t_be_');
       const isProxied = src.includes('/image-proxy?');
-      if (!isPreset && !isProxied) return;
+      // A pre-generated size on our media CDN (e.g. an image migrated before
+      // its sizes existed, or a browser without WebP) — the JPEG master works.
+      const media = parseMediaCdnUrl(src);
+      const isMediaVariant = !!media && media.file !== 'original.jpg';
+      if (!isPreset && !isProxied && !isMediaVariant) return;
       if (retryWithOriginalImage(target)) {
         // Handled: keep component onError handlers from switching to their fallback.
         event.stopImmediatePropagation();
-        if (import.meta.env.DEV) console.warn(`[cdn] ${isPreset ? 'preset' : 'image proxy'} failed, using original:`, src);
+        if (import.meta.env.DEV) console.warn(`[cdn] ${isPreset ? 'preset' : isMediaVariant ? 'media size' : 'image proxy'} failed, using original:`, src);
       }
     },
     true

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import cloudinary from '../config/cloudinary';
+import { deleteImages } from './cloudinaryService';
 import News from '../models/News';
 import CityShowcase from '../models/CityShowcase';
 import { pickNewsCover, type GalleryCity } from './news/newsCover';
@@ -372,11 +372,8 @@ export async function cleanupOldNews(monthsOld = 3): Promise<number> {
     .filter(Boolean) as string[];
 
   if (publicIds.length > 0) {
-    try {
-      await cloudinary.api.delete_resources(publicIds);
-    } catch (err) {
-      logger.error(`Failed to delete old news covers from Cloudinary: ${err}`);
-    }
+    // deleteImages handles R2 and Cloudinary ids and never throws.
+    await deleteImages(publicIds);
   }
 
   const { deletedCount } = await News.deleteMany({

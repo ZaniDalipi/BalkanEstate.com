@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
 import CityMarketData from '../models/CityMarketData';
 import { apiLogger } from '../utils/logger';
+import { isR2Enabled, uploadMedia, deleteImage } from './cloudinaryService';
 
 const IMAGE_MAX_AGE_DAYS = 365; // Wikipedia photos rarely change; each refresh re-bills every derived size
 const MAX_IMAGE_WIDTH = 1200;
@@ -140,6 +141,28 @@ export async function refreshCityImage(cityId: string, force = false): Promise<s
   // Download and resize locally before uploading to Cloudinary (avoids 10MB limit)
   const resizedBuffer = await downloadAndResizeImage(wikiUrl);
   if (!resizedBuffer) return city.imageUrl || null;
+
+  if (isR2Enabled()) {
+    // R2: cities/{country}/{city}/{photoId}. A refresh stores a new photo and
+    // removes the previous one (folders are never overwritten — CDN-cached forever).
+    let stored: { url: string; publicId: string };
+    try {
+      stored = await uploadMedia(resizedBuffer, 'city', { country: city.country, city: city.city }, { preserveQuality: true });
+    } catch (error: any) {
+      apiLogger.error(`Failed to store city image for ${city.city}:`, error.message);
+      return city.imageUrl || null;
+    }
+    const previous = city.imagePublicId;
+    await CityMarketData.findByIdAndUpdate(cityId, {
+      imageUrl: stored.url,
+      imagePublicId: stored.publicId,
+      imageUpdatedAt: new Date(),
+      imageSource: 'auto',
+    });
+    if (previous && previous !== stored.publicId) await deleteImage(previous);
+    apiLogger.info(`Updated city image for ${city.city}: ${stored.url}`);
+    return stored.url;
+  }
 
   const cloudinaryUrl = await uploadBufferToCloudinary(resizedBuffer, city.city, city.country);
   if (!cloudinaryUrl) return city.imageUrl || null;

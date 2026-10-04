@@ -3,6 +3,11 @@
 
 interface ImportMetaEnv {
   readonly VITE_API_URL: string;
+  /**
+   * Public origin of the R2 media bucket, e.g. https://media.balkanestateai.com.
+   * Must match the backend's R2_PUBLIC_URL. Unset while images are on Cloudinary.
+   */
+  readonly VITE_MEDIA_CDN_URL?: string;
   readonly VITE_GOOGLE_CLIENT_ID?: string;
   readonly VITE_GOOGLE_MAPS_KEY?: string;
   readonly VITE_GOOGLE_MAPS_MAP_ID?: string;

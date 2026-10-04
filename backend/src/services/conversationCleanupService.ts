@@ -1,6 +1,6 @@
 import Conversation from '../models/Conversation';
 import Message from '../models/Message';
-import cloudinary from '../config/cloudinary';
+import { deleteImage } from './cloudinaryService';
 import { apiLogger } from '../utils/logger';
 
 /**
@@ -56,7 +56,7 @@ export const cleanupExpiredConversations = async (): Promise<{
 
         const imageDeletePromises = messagesWithImages.map(async (message) => {
           try {
-            await cloudinary.uploader.destroy(message.imagePublicId!);
+            await deleteImage(message.imagePublicId!);
             apiLogger.info(`    ✅ Deleted: ${message.imagePublicId}`);
             return true;
           } catch (error) {

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import sharp from 'sharp';
 import { apiLogger } from '../utils/logger';
-import { originalCloudinaryUrl } from '../utils/cloudinaryUrl';
+import { originalStoredImageUrl } from '../utils/cloudinaryUrl';
+import { CLOUDINARY_IMAGE_HOST, mediaImageHost } from '../config/imageHosts';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
 import Product from '../models/Product';
@@ -277,11 +278,13 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
  * POST /api/ai/restyle-room
  * Restyle a listing's room photo into a chosen interior design style.
  * Expects JSON body { imageUrl, style }. The image is fetched server-side
- * (restricted to Cloudinary) and sent to Gemini's image model.
+ * (restricted to our own photo hosts) and sent to Gemini's image model.
  */
 const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
 const RESTYLE_MAX_EDGE = 1600;
-const ALLOWED_IMAGE_HOSTS = new Set(['res.cloudinary.com']);
+/** Our own photo hosts: the R2 media domain and (legacy) Cloudinary. */
+const allowedImageHosts = (): Set<string> =>
+  new Set([CLOUDINARY_IMAGE_HOST, ...(mediaImageHost() ? [mediaImageHost() as string] : [])]);
 
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -307,7 +310,7 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // SSRF guard: only allow https Cloudinary image URLs (listing photos).
+    // SSRF guard: only allow https URLs of our own stored photos (listing photos).
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(imageUrl);
@@ -315,8 +318,8 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       res.status(400).json({ message: 'Invalid imageUrl.' });
       return;
     }
-    if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMAGE_HOSTS.has(parsedUrl.hostname)) {
-      res.status(400).json({ message: 'imageUrl must be a Cloudinary https URL.' });
+    if (parsedUrl.protocol !== 'https:' || !allowedImageHosts().has(parsedUrl.hostname)) {
+      res.status(400).json({ message: 'imageUrl must be a listing photo URL.' });
       return;
     }
 
@@ -324,9 +327,9 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
     // with "Strict transformations" on, Cloudinary refuses ad-hoc sizes to
     // server requests, while the original is always allowed (and costs no
     // transformation credit). We resize it ourselves below.
-    const originalUrl = originalCloudinaryUrl(imageUrl);
+    const originalUrl = originalStoredImageUrl(imageUrl);
     if (!originalUrl) {
-      res.status(400).json({ message: 'imageUrl must be a Cloudinary image URL.' });
+      res.status(400).json({ message: 'imageUrl must be a listing photo URL.' });
       return;
     }
 

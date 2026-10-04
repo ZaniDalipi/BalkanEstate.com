@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 import { createHash } from 'crypto';
 import sharp from 'sharp';
+import mongoose from 'mongoose';
 import cloudinary from '../config/cloudinary';
 import { mediaLogger } from '../utils/logger';
 import { registerFileUpload, removeFileRecord, getUserFiles } from './storageAccessPolicy';
@@ -14,11 +15,30 @@ import {
   type MediaKind,
 } from './media/mediaNaming';
 import { resolveMediaOwner } from './media/mediaOwnerResolver';
+import { isR2Enabled, isCloudinaryConfigured } from '../config/r2';
+import MediaAsset, { type MediaAssetKind } from '../models/MediaAsset';
+import {
+  storeImage,
+  deleteKeys,
+  deleteWhere,
+  moveAsset,
+  storedUrlFor,
+  type StoredImage,
+} from './media/r2MediaStore';
+import { listingMediaFolder, type MediaKeyContext } from './media/mediaKeys';
+import type { MasterOptions } from './media/imageVariants';
 
 /**
- * Cloudinary Service - Efficient image upload and management
+ * Media service — every image upload and delete in the app goes through here.
  *
- * Cost optimization strategies:
+ * Storage backend:
+ *  - Cloudflare R2 when R2_* is configured (see config/r2.ts). Each photo is
+ *    stored once with all its display sizes pre-generated (Zillow-style, see
+ *    config/mediaVariants.ts) and indexed in MongoDB (models/MediaAsset.ts).
+ *  - Cloudinary otherwise, and for anything not yet migrated: deletes look a
+ *    key up in MediaAsset first and hand unknown ids to Cloudinary.
+ *
+ * Cloudinary cost optimization strategies (legacy path):
  * 1. Pre-compress images before upload using sharp (reduces storage and bandwidth)
  * 2. Use auto quality and auto format transformations (serves WebP when supported)
  * 3. Resize large images to reasonable dimensions
@@ -100,6 +120,50 @@ export const compressImageForUpload = async (
  */
 const SENSITIVE_TYPES: ReadonlySet<UploadType> = new Set(['license', 'credential']);
 
+const toUploadResult = (stored: StoredImage): CloudinaryUploadResult => ({
+  url: stored.url,
+  publicId: stored.key,
+  width: stored.width,
+  height: stored.height,
+  format: stored.format,
+  bytes: stored.bytes,
+});
+
+/** The id fields of an upload, as the R2 key builder wants them. */
+const keyContextOf = (options: Partial<UploadOptions> & MediaKeyContext): MediaKeyContext => ({
+  userId: options.userId,
+  propertyId: options.propertyId,
+  agencyId: options.agencyId,
+  businessListingId: options.businessListingId,
+  credentialId: options.credentialId,
+  conversationId: options.conversationId,
+  country: options.country,
+  city: options.city,
+  sourceSlug: options.sourceSlug,
+  sourceListingId: options.sourceListingId,
+});
+
+const storeMediaBuffer = (
+  buffer: Buffer,
+  kind: MediaAssetKind,
+  context: Partial<UploadOptions> & MediaKeyContext,
+  extra: { master?: MasterOptions; status?: 'draft' | 'active'; key?: string; source?: { url?: string } } = {}
+): Promise<StoredImage> => storeImage(buffer, { kind, context: keyContextOf(context), ...extra });
+
+/**
+ * Store an image that isn't one of the user-upload types above — chat
+ * images, city photos, news covers, site content. R2 only: callers keep their
+ * Cloudinary code path for when R2 isn't configured.
+ */
+export const uploadMedia = async (
+  buffer: Buffer,
+  kind: MediaAssetKind,
+  context: MediaKeyContext,
+  master: MasterOptions = {}
+): Promise<CloudinaryUploadResult> => toUploadResult(await storeMediaBuffer(buffer, kind, context, { master }));
+
+export { isR2Enabled };
+
 /**
  * Upload image to Cloudinary with optimization
  *
@@ -118,6 +182,27 @@ export const uploadImage = async (
     preserveQuality = false,
     // Note: quality parameter not used - using fixed values (82/90) tuned for size
   } = options;
+
+  if (isR2Enabled()) {
+    const stored = await storeMediaBuffer(fileBuffer, type, options, {
+      master: { maxWidth, maxHeight, preserveQuality },
+      // Listing-form uploads arrive before the listing exists; they are
+      // drafts until organizeListingMedia files them under the listing.
+      status: (type === 'property' || type === 'floorplan') && !propertyId ? 'draft' : 'active',
+    });
+    if (!options.skipRegistration) {
+      await registerFileUpload({
+        publicId: stored.key,
+        url: stored.url,
+        userId,
+        fileType: type,
+        resourceId: propertyId,
+        mimeType: 'image/jpeg',
+        bytes: stored.bytes,
+      });
+    }
+    return toUploadResult(stored);
+  }
 
   try {
     // Step 1: Light processing using sharp (frontend already compresses)
@@ -305,6 +390,19 @@ const buildExternalFolder = (ctx: ExternalImageContext): string => {
   return `${EXTERNAL_FEEDS_FOLDER}/${source}${listing}`;
 };
 
+const MAX_REMOTE_IMAGE_BYTES = 25 * 1024 * 1024;
+
+/** Fetch a remote image with a timeout and a size cap. */
+export const downloadImage = async (url: string, timeoutMs = 20_000): Promise<Buffer> => {
+  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs), redirect: 'follow' });
+  if (!res.ok) throw new Error(`Image download failed: HTTP ${res.status}`);
+  const declared = Number(res.headers.get('content-length') || 0);
+  if (declared > MAX_REMOTE_IMAGE_BYTES) throw new Error(`Image too large (${declared} bytes)`);
+  const buffer = Buffer.from(await res.arrayBuffer());
+  if (buffer.length > MAX_REMOTE_IMAGE_BYTES) throw new Error(`Image too large (${buffer.length} bytes)`);
+  return buffer;
+};
+
 /**
  * Upload an image directly from a remote URL.
  * Used by the universal-listings ingest pipeline to re-host external images
@@ -336,6 +434,22 @@ export const uploadFromUrl = async (
   // derived from the source URL plus `overwrite: false` makes a repeat upload
   // resolve to the asset we already have instead of storing another copy.
   const publicId = createHash('sha1').update(remoteUrl).digest('hex').slice(0, 20);
+
+  if (isR2Enabled()) {
+    const existing = await MediaAsset.findOne({ 'source.url': remoteUrl });
+    if (existing) {
+      return { url: storedUrlFor(existing.key, existing.bucket), publicId: existing.key, width: existing.width, height: existing.height, format: 'jpg', bytes: existing.bytes };
+    }
+    const buffer = await downloadImage(remoteUrl);
+    const stored = await storeMediaBuffer(
+      buffer,
+      'external',
+      { sourceSlug: context.sourceSlug, sourceListingId: context.listingId },
+      { master: { maxWidth: 1920, maxHeight: 1920 }, source: { url: remoteUrl } }
+    );
+    return toUploadResult(stored);
+  }
+
   const result = await cloudinary.uploader.upload(remoteUrl, {
     folder: buildExternalFolder(context),
     public_id: publicId,
@@ -358,95 +472,146 @@ export const uploadFromUrl = async (
 };
 
 /**
- * Delete image from Cloudinary and remove its file record.
- * Tries authenticated first, then falls back to upload type,
- * since the file may be either delivery type.
+ * Delete an image — from R2 when it's ours, otherwise from Cloudinary — and
+ * remove its file record. Never throws: a failed cleanup must not fail the
+ * operation that triggered it.
  */
 export const deleteImage = async (publicId: string): Promise<void> => {
+  if (!publicId) return;
   try {
-    // Try the standard upload type first (most files are public)
-    const result = await cloudinary.uploader.destroy(publicId);
-    if (result.result === 'not found') {
-      // May be an authenticated resource (license/credential)
-      await cloudinary.uploader.destroy(publicId, { type: 'authenticated' });
+    const ours = await deleteKeys([publicId]);
+    if (!ours.has(publicId) && isCloudinaryConfigured()) {
+      // Try the standard upload type first (most files are public)
+      const result = await cloudinary.uploader.destroy(publicId);
+      if (result.result === 'not found') {
+        // May be an authenticated resource (license/credential)
+        await cloudinary.uploader.destroy(publicId, { type: 'authenticated' });
+      }
     }
     await removeFileRecord(publicId);
-    mediaLogger.info(`🗑️  Deleted image from Cloudinary: ${publicId}`);
+    mediaLogger.info(`🗑️  Deleted image: ${publicId}`);
   } catch (error: any) {
     mediaLogger.error(`❌ Failed to delete image ${publicId}:`, error.message);
-    // Don't throw - we don't want to fail the whole operation if cleanup fails
   }
 };
 
-/**
- * Delete multiple images from Cloudinary and remove their file records
- */
+/** Delete multiple images (R2 and/or Cloudinary) and remove their file records. */
 export const deleteImages = async (publicIds: string[]): Promise<void> => {
-  if (!publicIds || publicIds.length === 0) {
-    return;
-  }
+  const ids = [...new Set((publicIds || []).filter(Boolean))];
+  if (ids.length === 0) return;
 
-  mediaLogger.info(`🗑️  Deleting ${publicIds.length} images from Cloudinary...`);
+  mediaLogger.info(`🗑️  Deleting ${ids.length} images...`);
 
+  let legacy = ids;
   try {
-    // Cloudinary allows batch deletion — try both delivery types
-    const uploadResult = await cloudinary.api.delete_resources(publicIds);
-    const notDeleted = Object.entries(uploadResult.deleted)
-      .filter(([, status]) => status === 'not_found')
-      .map(([id]) => id);
-    if (notDeleted.length > 0) {
-      await cloudinary.api.delete_resources(notDeleted, { type: 'authenticated' });
-    }
-    // Clean up file records for all deleted resources
-    await Promise.all(publicIds.map(id => removeFileRecord(id)));
-    mediaLogger.info(`✅ Deleted ${publicIds.length} images from Cloudinary`);
+    const ours = await deleteKeys(ids);
+    legacy = ids.filter((id) => !ours.has(id));
   } catch (error: any) {
-    mediaLogger.error(`❌ Batch delete error:`, error.message);
-    // Fallback to individual deletion
-    await Promise.all(publicIds.map(id => deleteImage(id)));
+    mediaLogger.error(`❌ R2 batch delete error:`, error.message);
   }
+
+  if (legacy.length > 0 && isCloudinaryConfigured()) {
+    try {
+      // Cloudinary allows batch deletion (100 per call) — try both delivery types
+      for (let i = 0; i < legacy.length; i += 100) {
+        const batch = legacy.slice(i, i + 100);
+        const uploadResult = await cloudinary.api.delete_resources(batch);
+        const notDeleted = Object.entries(uploadResult.deleted)
+          .filter(([, status]) => status === 'not_found')
+          .map(([id]) => id);
+        if (notDeleted.length > 0) {
+          await cloudinary.api.delete_resources(notDeleted, { type: 'authenticated' });
+        }
+      }
+    } catch (error: any) {
+      mediaLogger.error(`❌ Cloudinary batch delete error:`, error.message);
+      for (const id of legacy) {
+        await cloudinary.uploader.destroy(id).catch(() => undefined);
+      }
+    }
+  }
+
+  await Promise.all(ids.map((id) => removeFileRecord(id).catch(() => undefined)));
+  mediaLogger.info(`✅ Deleted ${ids.length} images`);
+};
+
+const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Every Cloudinary public id under a prefix, both delivery types. */
+const listCloudinaryPrefix = async (prefix: string): Promise<string[]> => {
+  const ids = new Set<string>();
+  for (const type of ['authenticated', 'upload'] as const) {
+    let cursor: string | undefined;
+    do {
+      const page: any = await cloudinary.api
+        .resources({ type, prefix, max_results: 500, ...(cursor ? { next_cursor: cursor } : {}) })
+        .catch(() => ({ resources: [] }));
+      for (const r of page.resources || []) ids.add(r.public_id);
+      cursor = page.next_cursor;
+    } while (cursor);
+  }
+  return [...ids];
 };
 
 /**
- * Delete all images in a folder (e.g., when deleting a property)
- * Checks both authenticated and public upload types for backwards compatibility.
+ * Delete all images under a folder/key prefix, in R2 and Cloudinary.
+ * `keep` ids survive the sweep.
  */
-export const deleteFolder = async (folderPath: string): Promise<void> => {
+export const deleteFolder = async (folderPath: string, keep: ReadonlySet<string> = new Set()): Promise<void> => {
   try {
     mediaLogger.info(`🗑️  Deleting folder: ${folderPath}`);
-    const ids = new Set<string>();
+    const r2Count = await deleteWhere({ key: { $regex: `^${escapeRegex(folderPath)}` } }, [...keep]);
 
-    // Both delivery types: documents are 'authenticated', everything else 'upload'.
-    for (const type of ['authenticated', 'upload'] as const) {
-      let cursor: string | undefined;
-      do {
-        const page: any = await cloudinary.api
-          .resources({ type, prefix: folderPath, max_results: 500, ...(cursor ? { next_cursor: cursor } : {}) })
-          .catch(() => ({ resources: [] }));
-        for (const r of page.resources || []) ids.add(r.public_id);
-        cursor = page.next_cursor;
-      } while (cursor);
+    let cloudinaryCount = 0;
+    if (isCloudinaryConfigured()) {
+      const ids = (await listCloudinaryPrefix(folderPath)).filter((id) => !keep.has(id));
+      cloudinaryCount = ids.length;
+      if (ids.length) await deleteImages(ids);
     }
-
-    const all = [...ids];
-    // delete_resources accepts at most 100 ids per call.
-    for (let i = 0; i < all.length; i += 100) {
-      await deleteImages(all.slice(i, i + 100));
-    }
-
-    mediaLogger.info(`✅ Deleted folder: ${folderPath} (${all.length} files)`);
+    mediaLogger.info(`✅ Deleted folder: ${folderPath} (${r2Count} R2 photos, ${cloudinaryCount} Cloudinary files)`);
   } catch (error: any) {
     mediaLogger.error(`❌ Failed to delete folder ${folderPath}:`, error.message);
   }
 };
 
+/** The MediaAsset filter equivalent of a Cloudinary cleanup tag (see mediaNaming). */
+export const tagToAssetFilter = (tag: string): Record<string, unknown> | null => {
+  const match = tag.match(/^(owner|listing|agency|business|kind)_(.+)$/);
+  if (!match) return null;
+  const [, prefix, value] = match;
+  const isObjectId = /^[a-f0-9]{24}$/i.test(value);
+  switch (prefix) {
+    case 'owner':
+      return isObjectId ? { ownerId: value } : null;
+    case 'listing':
+      return isObjectId ? { propertyId: value } : null;
+    case 'agency':
+      return isObjectId ? { agencyId: value } : null;
+    case 'business':
+      return isObjectId ? { businessListingId: value } : null;
+    case 'kind':
+      return { kind: value };
+    default:
+      return null;
+  }
+};
+
 /**
- * Delete every asset carrying `tag`, across images/videos and both delivery
- * types. Tags survive renames and folder-layout changes, so this is the
- * reliable way to clean up everything belonging to a listing, user, agency or
- * business. Admin API — rate-limited but not billed as credits.
+ * Delete every asset carrying `tag` — in R2 via the MediaAsset index (tags
+ * map onto its owner/listing/agency/business fields) and in Cloudinary across
+ * images/videos and both delivery types.
  */
-export const deleteByTag = async (tag: string): Promise<void> => {
+export const deleteByTag = async (tag: string, keepKeys: string[] = []): Promise<void> => {
+  const filter = tagToAssetFilter(tag);
+  if (filter) {
+    try {
+      await deleteWhere(filter, keepKeys);
+    } catch (error: any) {
+      mediaLogger.error(`❌ Failed to delete R2 photos tagged ${tag}:`, error.message);
+    }
+  }
+
+  if (!isCloudinaryConfigured()) return;
   const targets = [
     { resource_type: 'image', type: 'upload' },
     { resource_type: 'image', type: 'authenticated' },
@@ -469,9 +634,9 @@ export const deleteByTag = async (tag: string): Promise<void> => {
   mediaLogger.info(`🗑️  Deleted assets tagged ${tag}`);
 };
 
-/** Add a tag to already-uploaded assets (e.g. temp uploads once their listing exists). */
+/** Add a tag to already-uploaded Cloudinary assets (e.g. temp uploads once their listing exists). */
 const addTag = async (tag: string, publicIds: string[]): Promise<void> => {
-  if (publicIds.length === 0) return;
+  if (publicIds.length === 0 || !isCloudinaryConfigured()) return;
   try {
     for (let i = 0; i < publicIds.length; i += 1000) {
       await cloudinary.uploader.add_tag(tag, publicIds.slice(i, i + 1000));
@@ -489,16 +654,18 @@ export interface ListingImageRef {
 }
 
 /**
- * Relocate a listing's freshly-uploaded temp images into the listing's own
- * folder, so Cloudinary is organized as:
- *   balkan-estate/users/{a-z}/{user-name}_{userId}/listings/{title}_{propertyId}/photos|floorplans
+ * File a listing's freshly-uploaded photos under the listing, once it exists:
  *
- * The frontend uploads images before the property exists (to a temp folder),
- * so this runs right after the property is created and has an id + title.
- * Only Cloudinary-hosted temp images are moved; external URLs (no publicId, or
- * not under .../listings/temp) are left untouched. Each rename is best-effort —
- * on failure the original ref is kept (and still tagged) so a listing never
- * loses its image and cleanup still finds it.
+ *   R2:         users/{userId}/listings/drafts/photos/{id}
+ *            →  users/{userId}/listings/{propertyId}/photos/{id}
+ *   Cloudinary: balkan-estate/users/{a-z}/{user-name}_{userId}/listings/temp
+ *            →  …/listings/{title}_{propertyId}/photos|floorplans
+ *
+ * The frontend uploads images before the property exists (as drafts), so this
+ * runs right after the property is created. External URLs (no publicId) and
+ * photos already filed are left as they are. Each move is best-effort — on
+ * failure the original ref is kept (and still linked to the listing) so a
+ * listing never loses its image and cleanup still finds it.
  */
 export const organizeListingMedia = async (
   images: ListingImageRef[],
@@ -506,16 +673,16 @@ export const organizeListingMedia = async (
   propertyId: string,
   propertyTitle?: string
 ): Promise<ListingImageRef[]> => {
-  const owner = await resolveMediaOwner('property', { userId, propertyId, propertyTitle });
-  // Dedupe renames — the main image often shares a publicId with images[0].
+  // Dedupe moves — the main image often shares a publicId with images[0].
   const movedByPublicId = new Map<string, { url: string; publicId: string }>();
   const toTag: string[] = [];
+  let owner: Awaited<ReturnType<typeof resolveMediaOwner>> | undefined;
 
   const out: ListingImageRef[] = [];
   for (const img of images) {
     const publicId = img.publicId;
-    if (!publicId || !publicId.includes('/listings/temp')) {
-      out.push(img); // external URL or already organized — leave as-is
+    if (!publicId) {
+      out.push(img); // external URL — leave as-is
       continue;
     }
 
@@ -526,7 +693,39 @@ export const organizeListingMedia = async (
     }
 
     const isFloorplan = img.tag === 'floorplan';
-    const folder = buildMediaFolder(isFloorplan ? 'floorplan' : 'property', owner);
+    const fileType = isFloorplan ? 'floorplan' : 'property';
+
+    // R2 photo: move drafts into the listing folder, link it to the listing.
+    const asset = await MediaAsset.findOne({ key: publicId });
+    if (asset) {
+      try {
+        const folder = listingMediaFolder(userId, propertyId, isFloorplan ? 'floorplans' : 'photos');
+        const stored = await moveAsset(asset, folder, {
+          status: 'active',
+          kind: fileType,
+          propertyId: new mongoose.Types.ObjectId(propertyId),
+        });
+        if (stored.key !== publicId) {
+          await removeFileRecord(publicId);
+          await registerFileUpload({ publicId: stored.key, url: stored.url, userId, fileType, resourceId: propertyId });
+        }
+        movedByPublicId.set(publicId, { url: stored.url, publicId: stored.key });
+        out.push({ ...img, url: stored.url, publicId: stored.key });
+      } catch (error: any) {
+        mediaLogger.error(`⚠️  Failed to file R2 photo ${publicId} under listing ${propertyId}:`, error.message);
+        await MediaAsset.updateOne({ key: publicId }, { status: 'active', propertyId }).catch(() => undefined);
+        out.push(img);
+      }
+      continue;
+    }
+
+    if (!publicId.includes('/listings/temp') || !isCloudinaryConfigured()) {
+      out.push(img); // already organized — leave as-is
+      continue;
+    }
+
+    owner = owner ?? (await resolveMediaOwner('property', { userId, propertyId, propertyTitle }));
+    const folder = buildMediaFolder(fileType, owner);
     const filename = publicId.split('/').pop();
     const newPublicId = `${folder}/${filename}`;
 
@@ -540,7 +739,7 @@ export const organizeListingMedia = async (
         publicId: result.public_id,
         url: result.secure_url,
         userId,
-        fileType: isFloorplan ? 'floorplan' : 'property',
+        fileType,
         resourceId: propertyId,
       });
       movedByPublicId.set(publicId, { url: result.secure_url, publicId: result.public_id });
@@ -561,7 +760,7 @@ export const organizeListingMedia = async (
 };
 
 /**
- * Get optimized image URL with transformations.
+ * Get optimized Cloudinary image URL with transformations (legacy assets).
  * Uses signed URL for sensitive file types, standard URL for public assets.
  * This doesn't require a new request to Cloudinary - just builds the URL.
  */
@@ -590,8 +789,9 @@ export const getOptimizedUrl = (
 
 /**
  * Delete every media file of one listing: photos, floor plans and the
- * generated video. Goes by tag first, then sweeps the folder layouts used
- * before tagging existed, then any explicit public ids the caller still holds.
+ * generated video. R2 goes by the listing id in MediaAsset (plus its folder);
+ * Cloudinary goes by tag, then sweeps the folder layouts used before tagging
+ * existed. Then any explicit public ids the caller still holds.
  *
  * `keepPublicIds` survives the sweep — the archive keeps one thumbnail of a
  * deleted listing until the retention job clears it.
@@ -603,50 +803,45 @@ export const deleteListingMedia = async (
 ): Promise<void> => {
   const keep = new Set((options.keepPublicIds || []).filter(Boolean));
 
-  if (keep.size > 0) {
-    // Untag the keepers so the tag sweep leaves them alone.
-    try {
-      await cloudinary.uploader.remove_tag(listingTag(propertyId), [...keep]);
-    } catch (error: any) {
-      mediaLogger.warn(`⚠️  Could not untag kept files for ${propertyId}: ${error.message}`);
+  try {
+    await deleteWhere({ propertyId }, [...keep]);
+  } catch (error: any) {
+    mediaLogger.error(`❌ Failed to delete R2 photos of listing ${propertyId}:`, error.message);
+  }
+  await deleteFolder(listingMediaFolder(userId, propertyId, 'photos').replace(/\/photos$/, '/'), keep);
+
+  const remaining = (options.publicIds || []).filter((id) => id && !keep.has(id));
+
+  if (isCloudinaryConfigured()) {
+    if (keep.size > 0) {
+      // Untag the keepers so the tag sweep leaves them alone.
+      try {
+        await cloudinary.uploader.remove_tag(listingTag(propertyId), [...keep]);
+      } catch (error: any) {
+        mediaLogger.warn(`⚠️  Could not untag kept files for ${propertyId}: ${error.message}`);
+      }
+    }
+
+    await deleteByTag(listingTag(propertyId), [...keep]);
+
+    // Layouts from before tags: users/{userId}/listings/{propertyId}… and properties/user-…
+    for (const prefix of [
+      `${MEDIA_ROOT}/users/${userId}/listings/${propertyId}`,
+      `${MEDIA_ROOT}/properties/user-${userId}/listing-${propertyId}`,
+    ]) {
+      await deleteFolder(prefix, keep);
+    }
+
+    // Generated showcase videos, including ones uploaded before tagging.
+    for (const videoId of [
+      ...(options.videoPublicIds || []),
+      `${MEDIA_ROOT}/users/${userId}/listings/${propertyId}/videos/showcase`,
+    ]) {
+      await cloudinary.uploader.destroy(videoId, { resource_type: 'video' }).catch(() => undefined);
     }
   }
 
-  await deleteByTag(listingTag(propertyId));
-
-  // Layouts from before tags: users/{userId}/listings/{propertyId}… and properties/user-…
-  for (const prefix of [
-    `${MEDIA_ROOT}/users/${userId}/listings/${propertyId}`,
-    `${MEDIA_ROOT}/properties/user-${userId}/listing-${propertyId}`,
-  ]) {
-    await deleteFolderExcept(prefix, keep);
-  }
-
-  const remaining = (options.publicIds || []).filter((id) => id && !keep.has(id));
   if (remaining.length > 0) await deleteImages(remaining);
-
-  // Generated showcase videos, including ones uploaded before tagging.
-  for (const videoId of [
-    ...(options.videoPublicIds || []),
-    `${MEDIA_ROOT}/users/${userId}/listings/${propertyId}/videos/showcase`,
-  ]) {
-    await cloudinary.uploader.destroy(videoId, { resource_type: 'video' }).catch(() => undefined);
-  }
-};
-
-/** deleteFolder that spares specific public ids. */
-const deleteFolderExcept = async (prefix: string, keep: Set<string>): Promise<void> => {
-  if (keep.size === 0) {
-    await deleteFolder(prefix);
-    return;
-  }
-  try {
-    const page: any = await cloudinary.api.resources({ type: 'upload', prefix, max_results: 500 });
-    const ids = (page.resources || []).map((r: any) => r.public_id).filter((id: string) => !keep.has(id));
-    for (let i = 0; i < ids.length; i += 100) await deleteImages(ids.slice(i, i + 100));
-  } catch (error: any) {
-    mediaLogger.error(`❌ Failed to sweep ${prefix}:`, error.message);
-  }
 };
 
 /**
@@ -654,6 +849,12 @@ const deleteFolderExcept = async (prefix: string, keep: Set<string>): Promise<vo
  * Used when an account is closed; listing media is handled with the listings.
  */
 export const deleteUserPersonalMedia = async (userId: string): Promise<void> => {
+  try {
+    await deleteWhere({ ownerId: userId, kind: { $in: ['avatar', 'license', 'credential'] } });
+  } catch (error: any) {
+    mediaLogger.error(`❌ Failed to delete R2 personal files of ${userId}:`, error.message);
+  }
+
   const personal: string[] = [];
   for (const fileType of ['avatar', 'license', 'credential'] as const) {
     try {
@@ -663,54 +864,25 @@ export const deleteUserPersonalMedia = async (userId: string): Promise<void> => 
       mediaLogger.warn(`⚠️  Could not list ${fileType} files for ${userId}: ${error.message}`);
     }
   }
-  for (let i = 0; i < personal.length; i += 100) await deleteImages(personal.slice(i, i + 100));
+  await deleteImages(personal);
 
-  // Layout from before tagging.
-  await deleteFolder(`${MEDIA_ROOT}/users/${userId}/avatar`);
-  await deleteFolder(`${MEDIA_ROOT}/users/${userId}/documents`);
+  if (isCloudinaryConfigured()) {
+    // Layout from before tagging.
+    await deleteFolder(`${MEDIA_ROOT}/users/${userId}/avatar`);
+    await deleteFolder(`${MEDIA_ROOT}/users/${userId}/documents`);
+  }
 };
 
 /** Delete an agency's logo and cover. */
 export const deleteAgencyMedia = async (agencyId: string): Promise<void> => {
   await deleteByTag(agencyTag(agencyId));
-  await deleteFolder(`${MEDIA_ROOT}/agencies/${agencyId}/`);
+  if (isCloudinaryConfigured()) await deleteFolder(`${MEDIA_ROOT}/agencies/${agencyId}/`);
 };
 
-/**
- * Sweep listing photos that were uploaded but never attached to a listing.
- *
- * The listing form uploads photos to `.../listings/temp` before the property
- * exists; if the seller abandons the form, those files stay in Cloudinary and
- * are billed as storage forever. This deletes temp uploads older than
- * `maxAgeHours` that no Property still references (a failed move on create
- * can leave a live listing pointing at a temp file, so we check first).
- *
- * Uses the Admin API (rate-limited, but not billed as credits).
- */
-export const cleanupOrphanedTempImages = async (maxAgeHours = 48): Promise<number> => {
+/** Of `candidates`, the publicIds no Property references any more. */
+const unreferencedByListings = async (candidates: string[]): Promise<{ orphans: string[]; inUse: number }> => {
   // Lazy import keeps this service free of a model dependency at load time.
   const { default: Property } = await import('../models/Property');
-  const cutoff = Date.now() - maxAgeHours * 60 * 60 * 1000;
-  const candidates: string[] = [];
-  let cursor: string | undefined;
-
-  do {
-    const page: any = await cloudinary.api.resources({
-      type: 'upload',
-      prefix: 'balkan-estate/users/',
-      max_results: 500,
-      ...(cursor ? { next_cursor: cursor } : {}),
-    });
-    for (const r of page.resources || []) {
-      if (r.public_id.includes('/listings/temp/') && new Date(r.created_at).getTime() < cutoff) {
-        candidates.push(r.public_id);
-      }
-    }
-    cursor = page.next_cursor;
-  } while (cursor);
-
-  if (candidates.length === 0) return 0;
-
   const inUse = new Set<string>();
   for (let i = 0; i < candidates.length; i += 100) {
     const batch = candidates.slice(i, i + 100);
@@ -728,14 +900,58 @@ export const cleanupOrphanedTempImages = async (maxAgeHours = 48): Promise<numbe
         .forEach((id: string) => inUse.add(id));
     }
   }
+  return { orphans: candidates.filter((id) => !inUse.has(id)), inUse: inUse.size };
+};
 
-  const orphans = candidates.filter((id) => !inUse.has(id));
-  // delete_resources accepts at most 100 ids per call.
-  for (let i = 0; i < orphans.length; i += 100) {
-    await deleteImages(orphans.slice(i, i + 100));
+/**
+ * Sweep listing photos that were uploaded but never attached to a listing.
+ *
+ * The listing form uploads photos before the property exists (R2 drafts /
+ * Cloudinary `.../listings/temp`); if the seller abandons the form, those
+ * files would stay in storage and be billed forever. This deletes drafts
+ * older than `maxAgeHours` that no Property still references (a failed move
+ * on create can leave a live listing pointing at a draft, so we check first).
+ */
+export const cleanupOrphanedTempImages = async (maxAgeHours = 48): Promise<number> => {
+  const cutoff = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
+  let removed = 0;
+
+  // R2 drafts, straight from the MediaAsset index.
+  const drafts = await MediaAsset.find({ status: 'draft', createdAt: { $lt: cutoff } }).select('key').lean();
+  if (drafts.length > 0) {
+    const { orphans, inUse } = await unreferencedByListings(drafts.map((d) => d.key));
+    if (inUse > 0) await MediaAsset.updateMany({ key: { $in: drafts.map((d) => d.key).filter((k) => !orphans.includes(k)) } }, { status: 'active' });
+    await deleteImages(orphans);
+    removed += orphans.length;
+    mediaLogger.info(`🧹 Removed ${orphans.length} abandoned R2 draft photos (${inUse} still in use)`);
   }
-  mediaLogger.info(`🧹 Removed ${orphans.length} orphaned temp listing images (${inUse.size} still in use)`);
-  return orphans.length;
+
+  if (!isCloudinaryConfigured()) return removed;
+
+  // Cloudinary temp uploads (Admin API — rate-limited, but not billed as credits).
+  const candidates: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page: any = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: 'balkan-estate/users/',
+      max_results: 500,
+      ...(cursor ? { next_cursor: cursor } : {}),
+    });
+    for (const r of page.resources || []) {
+      if (r.public_id.includes('/listings/temp/') && new Date(r.created_at).getTime() < cutoff.getTime()) {
+        candidates.push(r.public_id);
+      }
+    }
+    cursor = page.next_cursor;
+  } while (cursor);
+
+  if (candidates.length === 0) return removed;
+
+  const { orphans, inUse } = await unreferencedByListings(candidates);
+  await deleteImages(orphans);
+  mediaLogger.info(`🧹 Removed ${orphans.length} orphaned Cloudinary temp listing images (${inUse} still in use)`);
+  return removed + orphans.length;
 };
 
 // Export types for use in other modules

@@ -7,7 +7,7 @@ import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import { SECURITY_WARNING } from '../utils/messageFilter';
 import cloudinary from '../config/cloudinary';
-import { compressImageForUpload } from '../services/cloudinaryService';
+import { compressImageForUpload, uploadMedia, isR2Enabled, deleteImage } from '../services/cloudinaryService';
 import { sendNewMessageNotification } from '../services/emailService';
 import { createNotificationWithPush } from '../services/engagementService';
 import { getSocketInstance } from '../utils/socketInstance';
@@ -502,13 +502,25 @@ export const uploadMessageImage = async (
       res.status(400).json({ message: 'The file is not a valid image' });
       return;
     }
+    const buyerId = String(conversation.buyerId);
+    const sellerId = String(conversation.sellerId);
+    const conversationId = String(conversation._id);
+
+    if (isR2Enabled()) {
+      // R2: messages/{conversationId}/{photoId} — indexed in MediaAsset by conversation
+      const stored = await uploadMedia(compressed, 'message', {
+        conversationId,
+        userId: String((req.user as IUser)._id),
+      }, { maxWidth: 1600, maxHeight: 1600, quality: 80 });
+      apiLogger.info(`📸 Message image uploaded: ${stored.publicId}`);
+      res.json({ imageUrl: stored.url, publicId: stored.publicId });
+      return;
+    }
+
     const dataURI = `data:image/jpeg;base64,${compressed.toString('base64')}`;
 
     // Create folder path that includes both users
     // Format: balkan-estate/messages/user-{userId1}-user-{userId2}/conv-{conversationId}
-    const buyerId = String(conversation.buyerId);
-    const sellerId = String(conversation.sellerId);
-    const conversationId = String(conversation._id);
 
     // Sort user IDs alphabetically for consistent folder naming
     const [user1, user2] = [buyerId, sellerId].sort();
@@ -699,8 +711,7 @@ export const deleteConversation = async (
 
       const deletePromises = messagesWithImages.map(async (message) => {
         try {
-          await cloudinary.uploader.destroy(message.imagePublicId!);
-          // Deleted image from Cloudinary
+          await deleteImage(message.imagePublicId!);
         } catch (error) {
           apiLogger.error(`❌ Failed to delete image ${message.imagePublicId}:`, error);
           // Continue even if some images fail to delete

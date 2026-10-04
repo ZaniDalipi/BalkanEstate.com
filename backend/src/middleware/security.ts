@@ -35,9 +35,6 @@ export const validateEnvironment = (): void => {
     'FIELD_ENCRYPTION_KEY',
     'PASSWORD_PEPPER',
     'FINGERPRINT_SECRET',
-    'CLOUDINARY_CLOUD_NAME',
-    'CLOUDINARY_API_KEY',
-    'CLOUDINARY_API_SECRET',
     'RESEND_API_KEY',
     'GEMINI_API_KEY',
     'FRONTEND_URL',
@@ -59,6 +56,20 @@ export const validateEnvironment = (): void => {
       missing.push(varName);
     }
   });
+
+  // Image storage: R2 (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
+  // R2_BUCKET, R2_PUBLIC_URL) or, until the switch, Cloudinary.
+  if (isProduction) {
+    const r2Vars = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_URL'];
+    const cloudinaryVars = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'];
+    const r2Missing = r2Vars.filter((v) => !process.env[v]);
+    const hasR2 = r2Missing.length === 0;
+    const hasCloudinary = cloudinaryVars.every((v) => process.env[v]);
+    if (!hasR2 && !hasCloudinary) missing.push(...r2Missing);
+    if (!hasR2 && r2Missing.length < r2Vars.length) {
+      apiLogger.warn(`[ENV WARNING] R2 is partly configured (missing ${r2Missing.join(', ')}) — uploads still go to Cloudinary`);
+    }
+  }
 
   // Validate MONGODB_URI format
   const mongoUri = process.env.MONGODB_URI;
@@ -194,7 +205,7 @@ export const helmetConfig = helmet({
         "'self'",
       ],
       objectSrc: ["'none'"],
-      mediaSrc: ["'self'", 'https://res.cloudinary.com', 'blob:'],
+      mediaSrc: ["'self'", ...ALLOWED_PHOTO_HOSTS.map(host => `https://${host}`), 'blob:'],
       workerSrc: ["'self'", 'blob:'],
       childSrc: ["'self'", 'blob:'],
       formAction: ["'self'"],

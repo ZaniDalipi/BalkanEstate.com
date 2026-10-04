@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getSignedUrl,
+  openFile,
   getBatchSignedUrls,
   getMyFiles,
   deleteFile,
@@ -109,6 +110,10 @@ router.post('/signed-urls', generalRateLimiter, getBatchSignedUrls);
  *         $ref: '#/components/responses/Unauthorized'
  */
 router.get('/signed-url/{*publicId}', generalRateLimiter, getSignedUrl);
+
+// Redirects to a short-lived link after the same ownership check. Stored as
+// the URL of R2 private documents, so a plain link opens them.
+router.get('/open/{*publicId}', generalRateLimiter, openFile);
 
 /**
  * @swagger

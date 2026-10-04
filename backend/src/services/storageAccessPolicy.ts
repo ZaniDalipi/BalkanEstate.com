@@ -1,4 +1,7 @@
 import cloudinary from '../config/cloudinary';
+import MediaAsset from '../models/MediaAsset';
+import { presignedMasterUrl, storedUrlFor } from './media/r2MediaStore';
+import { getR2Config } from '../config/r2';
 import FileRecord, { IFileRecord } from '../models/FileRecord';
 import { mediaLogger } from '../utils/logger';
 
@@ -9,7 +12,7 @@ import { mediaLogger } from '../utils/logger';
  * Users can only access files they uploaded. Admins can access any file.
  *
  * Flow:
- * 1. File is uploaded via cloudinaryService with type: 'authenticated'
+ * 1. File is uploaded via cloudinaryService (R2 private bucket, or Cloudinary type: 'authenticated')
  * 2. A FileRecord is created linking publicId -> userId (owner)
  * 3. When a client needs to display/download a file, it calls GET /api/files/signed-url
  * 4. This service checks ownership, then generates a short-lived signed URL
@@ -116,16 +119,29 @@ export const checkFileAccess = async (
 const SENSITIVE_FILE_TYPES = new Set(['license', 'credential']);
 
 /**
- * Generate a URL for a Cloudinary resource.
+ * Generate a URL for a stored file.
  *
- * For sensitive files (license, credential): generates a signed authenticated URL.
- * For public files (property, avatar, etc.): generates a standard optimized URL.
+ * R2 photos (found in MediaAsset): private documents get a presigned link
+ * that really expires after SIGNED_URL_EXPIRY_SECONDS; public photos get
+ * their CDN URL.
+ *
+ * Cloudinary (not yet migrated): sensitive files get a signed authenticated
+ * URL, public files a standard optimized URL.
  */
-export const generateSignedUrl = (
+export const generateSignedUrl = async (
   publicId: string,
   resourceType: 'image' | 'video' | 'raw' = 'image',
   fileType?: string
-): string => {
+): Promise<string> => {
+  if (getR2Config()) {
+    const asset = await MediaAsset.findOne({ key: publicId }).select('key bucket').lean();
+    if (asset) {
+      return asset.bucket === 'private'
+        ? presignedMasterUrl(asset, SIGNED_URL_EXPIRY_SECONDS)
+        : storedUrlFor(asset.key, asset.bucket);
+    }
+  }
+
   const isSensitive = fileType ? SENSITIVE_FILE_TYPES.has(fileType) : false;
 
   const url = cloudinary.url(publicId, {
@@ -162,7 +178,7 @@ export const getSignedUrlIfAuthorized = async (
     return null;
   }
 
-  const url = generateSignedUrl(publicId, resourceType, fileRecord.fileType);
+  const url = await generateSignedUrl(publicId, resourceType, fileRecord.fileType);
   return { url, fileRecord };
 };
 
@@ -240,7 +256,7 @@ export const batchGetSignedUrls = async (
     const isAdmin = userRole === 'admin';
 
     if (isOwner || isAdmin) {
-      signedUrls[record.publicId] = generateSignedUrl(record.publicId, 'image', record.fileType);
+      signedUrls[record.publicId] = await generateSignedUrl(record.publicId, 'image', record.fileType);
     }
   }
 

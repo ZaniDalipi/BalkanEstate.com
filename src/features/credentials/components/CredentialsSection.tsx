@@ -15,7 +15,7 @@ import {
   TrophyIcon,
   UsersIcon,
 } from '@/constants';
-import { Credential, addCredential, updateCredential, deleteCredential } from '../api/credentialApi';
+import { Credential, addCredential, updateCredential, deleteCredential, isPrivateDocumentUrl, openPrivateDocument } from '../api/credentialApi';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { submitLicense, getLicenseFormatHint } from '../api/licenseApi';
 
@@ -839,6 +839,11 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                       href={cred.documentUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (!isPrivateDocumentUrl(cred.documentUrl) || !cred.documentPublicId) return;
+                        e.preventDefault();
+                        void openPrivateDocument(cred.documentPublicId).catch(() => undefined);
+                      }}
                       className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
                     >
                       <DocumentTextIcon className="w-3.5 h-3.5" />

@@ -1,6 +1,7 @@
 import Property from '../../models/Property';
 import ArchivedListing from '../../models/ArchivedListing';
 import cloudinary from '../../config/cloudinary';
+import { isCloudinaryConfigured } from '../../config/r2';
 import { mediaLogger } from '../../utils/logger';
 import { deleteByTag, deleteImages } from '../cloudinaryService';
 import { listingTag } from './mediaNaming';
@@ -95,7 +96,7 @@ export const purgeSoldListingMedia = async (
       for (let i = 0; i < publicIds.length; i += 100) {
         await deleteImages(publicIds.slice(i, i + 100));
       }
-      if (listing.generatedVideoPublicId) {
+      if (listing.generatedVideoPublicId && isCloudinaryConfigured()) {
         // Upload API call — not counted against the Admin API limit.
         await cloudinary.uploader
           .destroy(listing.generatedVideoPublicId, { resource_type: 'video' })

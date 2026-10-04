@@ -25,6 +25,41 @@ import {
   snapPresetWidth,
   snapPresetRatio,
 } from '../backend/src/config/cloudinaryPresets';
+import {
+  parseMediaUrl,
+  mediaFileUrl,
+  pickVariantFile,
+  snapMediaWidth,
+  MEDIA_MASTER_FILE,
+  MEDIA_LQIP_FILE,
+  CITY_CONVENTION_FOLDER,
+} from '../backend/src/config/mediaVariants';
+
+// ============================================================================
+// R2 media (our own storage — see backend/src/config/mediaVariants.ts)
+// ============================================================================
+//
+// Every photo uploaded through the app lives in one folder on the media CDN
+// with all its display sizes pre-generated at upload:
+//
+//   {MEDIA_CDN_URL}/users/{userId}/listings/{listingId}/photos/{photoId}/w640.webp
+//
+// The database stores the master (`…/original.jpg`); the helpers below swap
+// in the right size. Nothing is resized on request, so any size is free.
+
+/**
+ * Public origin of the R2 media bucket, e.g. https://media.balkanestateai.com
+ * (VITE_MEDIA_CDN_URL; must match the backend's R2_PUBLIC_URL). Empty while
+ * images are still on Cloudinary. Read defensively: Pages Functions bundle
+ * this file without Vite's import.meta.env.
+ */
+export const MEDIA_CDN_URL: string = (import.meta.env?.VITE_MEDIA_CDN_URL || '').replace(/\/+$/, '');
+
+/** Photo key + file of a URL on our media CDN, or null. */
+export const parseMediaCdnUrl = (url: string | undefined | null) => parseMediaUrl(url, MEDIA_CDN_URL);
+
+/** True for a photo stored on our media CDN. */
+export const isMediaCdnUrl = (url: string | undefined | null): boolean => parseMediaCdnUrl(url) !== null;
 
 // Cloudinary cloud name
 export const CLOUDINARY_CLOUD_NAME = 'dh8tbq8wy';
@@ -75,6 +110,10 @@ export const getCityImageUrl = (
   // box preset (strict-transformations safe); quality/format/crop/gravity are
   // fixed by the preset (q_auto, f_auto, c_fill, g_auto).
   const publicId = `city-${normalizedCountry}-${normalizedCity}`;
+  if (MEDIA_CDN_URL) {
+    // Migrated to a fixed folder (scripts/migrateCloudinaryToR2.ts).
+    return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${publicId}`, pickVariantFile({ width, height }));
+  }
   return `${CLOUDINARY_BASE_URL}/${presetSegment(presetFor({ width, height }))}/${publicId}`;
 };
 
@@ -88,6 +127,8 @@ export const getCityImageUrl = (
  */
 export const getPropertyImagePlaceholder = (imageUrl: string | undefined): string => {
   if (!imageUrl) return '';
+  const media = parseMediaCdnUrl(imageUrl);
+  if (media) return mediaFileUrl(MEDIA_CDN_URL, media.photoKey, MEDIA_LQIP_FILE);
   const uploadMatch = imageUrl.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(v\d+\/.+)$/);
   if (!uploadMatch) return '';
   return `${uploadMatch[1]}${presetSegment(LQIP_PRESET)}/${uploadMatch[2]}`;
@@ -105,6 +146,7 @@ export const getCityImagePlaceholder = (cityName: string, country?: string): str
 
   const publicId = `city-${normalizedCountry}-${normalizedCity}`;
 
+  if (MEDIA_CDN_URL) return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${publicId}`, MEDIA_LQIP_FILE);
   return `${CLOUDINARY_BASE_URL}/${presetSegment(LQIP_PRESET)}/${publicId}`;
 };
 
@@ -229,9 +271,15 @@ export const originalProxiedUrl = (url: string | undefined | null): string | nul
   }
 };
 
-/** The unresized original behind a Cloudinary preset or proxy URL, or null. */
+/** The master (`original.jpg`) of a photo on our media CDN, or null. */
+export const originalMediaCdnUrl = (url: string | undefined | null): string | null => {
+  const media = parseMediaCdnUrl(url);
+  return media ? mediaFileUrl(MEDIA_CDN_URL, media.photoKey, MEDIA_MASTER_FILE) : null;
+};
+
+/** The unresized original behind a media CDN size, Cloudinary preset or proxy URL, or null. */
 export const originalImageUrl = (url: string | undefined | null): string | null =>
-  originalCloudinaryUrl(url) ?? originalProxiedUrl(url);
+  originalMediaCdnUrl(url) ?? originalCloudinaryUrl(url) ?? originalProxiedUrl(url);
 
 /**
  * `onError` for a resized <img>: retry once with the original image. Returns
@@ -302,6 +350,7 @@ export const shouldProxyImage = (rawUrl: string): boolean => {
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
   const host = url.hostname.toLowerCase();
   if (host === 'res.cloudinary.com' || host.endsWith('googleusercontent.com')) return false;
+  if (isMediaCdnUrl(rawUrl)) return false;
   if (DIRECT_IMAGE_HOSTS.has(host) || isOwnSiteUrl(url)) return false;
   if (rawUrl.startsWith(`${API_URL}/image-proxy`)) return false;
   // SVGs are never proxied (the proxy rejects them — they can carry script).
@@ -312,6 +361,9 @@ export const shouldProxyImage = (rawUrl: string): boolean => {
 /**
  * Size an image URL for display.
  *
+ *  - Our media CDN (R2): the pre-generated file for the request, e.g.
+ *      {MEDIA_CDN_URL}/users/{u}/listings/{p}/photos/{id}/c640.webp
+ *    width×height → 4:3 crop, width → full photo, blur → lqip, jpg → og card.
  *  - Cloudinary: rebuilt onto a registered preset, e.g.
  *      https://res.cloudinary.com/{cloud}/image/upload/t_be_w800/v{version}/{path}.jpg
  *    Any transforms already in the URL are stripped first. `quality`, `crop`,
@@ -366,6 +418,14 @@ export const optimizeCloudinaryUrl = (
   const requestedWidth = clampDimension(rawWidth, 4096);
   const requestedHeight = clampDimension(rawHeight, 4096);
 
+  // Our media CDN: pick the pre-generated size (see mediaVariants.ts).
+  const media = parseMediaCdnUrl(url);
+  if (media) {
+    const wantsBlur = typeof blur === 'number' && Number.isFinite(blur) && blur >= 1;
+    const file = pickVariantFile({ width: requestedWidth, height: requestedHeight, format, blur: wantsBlur });
+    return mediaFileUrl(MEDIA_CDN_URL, media.photoKey, file);
+  }
+
   // Handle Cloudinary upload URLs — including those with transforms baked in.
   // The transforms are stripped (so an earlier crop never stacks with ours)
   // and replaced by exactly one registered preset.
@@ -414,6 +474,16 @@ export const cloudinarySrcSet = (
 
   // Security: Only allow http/https URLs
   if (!/^https?:\/\//i.test(url)) return '';
+
+  // Our media CDN: one candidate per pre-generated width.
+  if (isMediaCdnUrl(url)) {
+    const seenMedia = new Set<number>();
+    return widths
+      .map(snapMediaWidth)
+      .filter((w) => (seenMedia.has(w) ? false : (seenMedia.add(w), true)))
+      .map((w) => `${optimizeCloudinaryUrl(url, { width: w })} ${w}w`)
+      .join(', ');
+  }
 
   // Only generate srcSet for Cloudinary upload URLs
   const uploadMatch = url.match(/^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/);

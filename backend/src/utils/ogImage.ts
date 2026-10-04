@@ -12,6 +12,7 @@
 import { OG_BASE_URL } from '../config/ogConstants';
 import { OG_PRESET } from '../config/cloudinaryPresets';
 import { CLOUDINARY_UPLOAD_RE, stripCloudinaryTransforms } from './cloudinaryUrl';
+import { parseMediaUrl, mediaFileUrl, MEDIA_OG_FILE } from '../config/mediaVariants';
 
 export const DEFAULT_OG_IMAGE = `${OG_BASE_URL}/og-image.jpg`;
 
@@ -57,6 +58,13 @@ function normalizeOgImage(raw?: string): OgImage | null {
   // Reject embedded newlines / control characters before the URL reaches a
   // meta tag.
   if (/[\u0000-\u001f\u007f]/.test(url)) return null;
+
+  // R2 photos carry a pre-made 1200×630 JPEG share card (og.jpg).
+  const mediaBase = process.env.R2_PUBLIC_URL || null;
+  const media = parseMediaUrl(url, mediaBase);
+  if (media && mediaBase) {
+    return { url: mediaFileUrl(mediaBase, media.photoKey, MEDIA_OG_FILE), sized: true };
+  }
 
   const match = url.match(CLOUDINARY_UPLOAD_RE);
   if (match) {

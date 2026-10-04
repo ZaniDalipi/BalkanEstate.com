@@ -99,6 +99,39 @@ export const getSignedUrl = async (
 };
 
 /**
+ * @desc    Open a private file: check access, then redirect to a short-lived link.
+ *          This is the URL stored for R2 private documents (licences,
+ *          credentials), so a plain "View document" link works for the owner
+ *          and admins and for nobody else.
+ * @route   GET /api/files/open/*
+ * @access  Private
+ */
+export const openFile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authorized' });
+      return;
+    }
+    const publicId = sanitizePublicId(extractPublicId(req.params));
+    if (!publicId) {
+      res.status(400).json({ message: 'Invalid or missing publicId' });
+      return;
+    }
+    const user = req.user as IUser;
+    const result = await getSignedUrlIfAuthorized(String(user._id), publicId, user.role, 'image');
+    if (!result) {
+      res.status(403).json({ message: 'You do not have permission to access this file' });
+      return;
+    }
+    res.set('Cache-Control', 'private, no-store');
+    res.redirect(302, result.url);
+  } catch (error: any) {
+    mediaLogger.error('Error opening file:', error);
+    res.status(500).json({ message: 'Error opening file' });
+  }
+};
+
+/**
  * @desc    Batch get signed URLs for multiple files
  * @route   POST /api/files/signed-urls
  * @access  Private

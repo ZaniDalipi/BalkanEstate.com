@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeCloudinaryUrl, isMediaCdnUrl } from '@/config/cloudinaryConfig';
 import { getGallerySources, warmGallery, VIEWER_SIZES } from '@/config/galleryImages';
 import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
@@ -37,9 +37,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const [isSendingToChat, setIsSendingToChat] = useState(false);
     const [showStyler, setShowStyler] = useState(false);
 
-    // The AI Room Styler only works on Cloudinary-hosted listing photos.
+    // The AI Room Styler only works on our own stored listing photos (R2, or Cloudinary until migrated).
     const currentUrl = images[currentIndex]?.url;
-    const canRestyle = !!currentUrl && currentUrl.includes('res.cloudinary.com');
+    const canRestyle = !!currentUrl && (isMediaCdnUrl(currentUrl) || currentUrl.includes('res.cloudinary.com'));
 
     const openStyler = useCallback(() => {
         if (!state.isAuthenticated) {
