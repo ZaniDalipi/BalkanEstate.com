@@ -72,6 +72,9 @@ export const mediaFolder = (kind: MediaAssetKind, ctx: MediaKeyContext): string 
       return `messages/${seg(ctx.conversationId, 'unknown')}`;
     case 'city':
       return `cities/${slugify(ctx.country) || 'unknown'}/${slugify(ctx.city) || 'unknown'}`;
+    case 'destination':
+      // Villa destinations: `city` carries the destination's name.
+      return `destinations/${slugify(ctx.country) || 'unknown'}/${slugify(ctx.city) || 'unknown'}`;
     case 'news':
       return 'news';
     case 'external':

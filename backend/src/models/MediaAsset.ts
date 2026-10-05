@@ -25,6 +25,7 @@ import mongoose, { Document, Schema } from 'mongoose';
  *   businesses/{businessId}/{logo|banner}/{photoId}/
  *   messages/{conversationId}/{photoId}/
  *   cities/{country}/{city}/{photoId}/
+ *   destinations/{country}/{destination}/{photoId}/  (villa destinations)
  *   site/{logo|email-logo|ad-banners|content}/{photoId}/
  *   news/{photoId}/
  *   external/{source}/{listingId}/{photoId}/
@@ -49,6 +50,7 @@ export const MEDIA_ASSET_KINDS = [
   'site-content',
   'message',
   'city',
+  'destination',
   'news',
   'external',
   'legacy',

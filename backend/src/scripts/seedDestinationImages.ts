@@ -2,7 +2,8 @@
  * seedDestinationImages.ts
  *
  * Fills in a photo for every villa destination that does not have one yet,
- * sourced from Unsplash and stored in Cloudinary.
+ * sourced from Unsplash and stored in R2 (destinations/{country}/{name}/, all
+ * sizes, recorded in MediaAsset) — or Cloudinary while R2_* isn't set.
  *
  * The important behaviour is what it refuses to do: a destination whose
  * `imageUrl` is already set was curated by hand in the admin, and this script
@@ -13,7 +14,7 @@
  * Requires, in backend/.env:
  *   UNSPLASH_ACCESS_KEY   an Unsplash API access key
  *   MONGODB_URI           the database to update
- *   CLOUDINARY_*          the usual upload credentials
+ *   R2_*                  the media bucket (or CLOUDINARY_* until R2 is set up)
  *
  * Usage:
  *   npx ts-node backend/src/scripts/seedDestinationImages.ts --dry-run
@@ -34,8 +35,12 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 import mongoose from 'mongoose';
 import axios from 'axios';
+import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
+import { isR2Enabled } from '../config/r2';
 import VillaDestination from '../models/VillaDestination';
+import { storeImage } from '../services/media/r2MediaStore';
+import { deleteImage } from '../services/cloudinaryService';
 
 /** Unsplash's demo tier allows 50 requests an hour; be a good citizen. */
 const REQUEST_DELAY_MS = 1200;
@@ -121,6 +126,28 @@ async function registerDownload(photo: UnsplashPhoto): Promise<void> {
   }
 }
 
+/**
+ * Store the photo in R2 at the card's own 18:25 shape, cropped toward its
+ * most interesting part — what Cloudinary's `c_fill,g_auto` did.
+ */
+async function uploadToR2(photo: UnsplashPhoto, name: string, country: string) {
+  const source = `${photo.urls.raw}&w=${STORE_WIDTH}&fm=jpg&q=90`;
+  const res = await HTTP.get<ArrayBuffer>(source, { responseType: 'arraybuffer', maxContentLength: 40 * 1024 * 1024 });
+  const framed = await sharp(Buffer.from(res.data), { limitInputPixels: 50_000_000 })
+    .rotate()
+    .resize(STORE_WIDTH, STORE_HEIGHT, { fit: 'cover', position: sharp.strategy.attention, withoutEnlargement: true })
+    .jpeg({ quality: 90 })
+    .toBuffer();
+  const stored = await storeImage(framed, {
+    kind: 'destination',
+    context: { country, city: name },
+    // Masters cap at 1920 wide like every other photo (the largest size the site shows).
+    master: { maxWidth: 1920, maxHeight: Math.round((1920 * STORE_HEIGHT) / STORE_WIDTH), preserveQuality: true },
+    source: { url: photo.links.html },
+  });
+  return { url: stored.url, publicId: stored.key };
+}
+
 async function uploadToCloudinary(photo: UnsplashPhoto, slug: string) {
   // `raw` is the untouched original; Cloudinary does the resize once, rather
   // than us fetching an already-compressed size and compressing it again.
@@ -181,7 +208,10 @@ export async function seedDestinationImages(opts: {
       }
 
       await registerDownload(photo);
-      const { url, publicId } = await uploadToCloudinary(photo, slugify(`${dest.country}-${dest.name}`));
+      const previousPublicId = dest.imagePublicId;
+      const { url, publicId } = isR2Enabled()
+        ? await uploadToR2(photo, dest.name, dest.country)
+        : await uploadToCloudinary(photo, slugify(`${dest.country}-${dest.name}`));
 
       dest.imageUrl = url;
       dest.imagePublicId = publicId;
@@ -194,6 +224,9 @@ export async function seedDestinationImages(opts: {
       dest.imageCredit = `Photo by ${photo.user.name} on Unsplash`;
       dest.imageCreditUrl = photo.user.links.html;
       await dest.save();
+      // R2 photos get a new folder each time; remove the one this replaced
+      // (Cloudinary overwrote its fixed public id in place). Never throws.
+      if (previousPublicId && previousPublicId !== publicId && isR2Enabled()) await deleteImage(previousPublicId);
 
       console.log(`  ✓ ${dest.name} (${dest.country}) ← ${photo.user.name}`);
       filled++;

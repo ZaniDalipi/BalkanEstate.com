@@ -219,3 +219,26 @@ describe('buildAgencyOgHtml', () => {
     expect(meta(html, 'og:image')).toBe(DEFAULT_IMAGE);
   });
 });
+
+describe('R2 photos in share cards', () => {
+  const MEDIA = 'https://media.example.com';
+  const key = 'users/64a1b2c3d4e5f6a7b8c9d0e1/listings/6650aa11bb22cc33dd44ee55/photos/0abc123';
+
+  it('uses the pre-made 1200×630 og.jpg once the Pages env names the media origin', async () => {
+    const og = await import('@/functions/_og-utils');
+    og.configureOgMedia({ MEDIA_CDN_URL: `${MEDIA}/` });
+
+    expect(og.resolveOgImage(`${MEDIA}/${key}/original.jpg`)).toEqual({ url: `${MEDIA}/${key}/og.jpg`, sized: true });
+    expect(og.resolveOgImage(`${MEDIA}/${key}/c640.webp`).url).toBe(`${MEDIA}/${key}/og.jpg`);
+    expect(og.getPropertyImage({ _id: 'p', images: [{ url: `${MEDIA}/${key}/original.jpg` }] } as any)).toBe(`${MEDIA}/${key}/og.jpg`);
+    expect(og.getArticleImage({ coverImageUrl: `${MEDIA}/news/0xyz/original.jpg` })).toBe(`${MEDIA}/news/0xyz/og.jpg`);
+  });
+
+  it('leaves other hosts and lookalike paths alone', async () => {
+    const og = await import('@/functions/_og-utils');
+    og.configureOgMedia({ MEDIA_CDN_URL: MEDIA });
+    expect(og.mediaOgCardUrl(`https://elsewhere.example.com/${key}/original.jpg`)).toBeNull();
+    expect(og.mediaOgCardUrl(`${MEDIA}/${key}/notes.txt`)).toBeNull();
+    expect(og.getArticleImage({ coverImageUrl: 'https://images.example.com/a.jpg' })).toBe('https://images.example.com/a.jpg');
+  });
+});

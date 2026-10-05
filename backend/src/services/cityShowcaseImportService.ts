@@ -1,7 +1,7 @@
 import cloudinary from '../config/cloudinary';
 import { isR2Enabled } from '../config/r2';
 import MediaAsset from '../models/MediaAsset';
-import { mediaFolder } from './media/mediaKeys';
+import { CITY_CONVENTION_FOLDER } from '../config/mediaVariants';
 import { storedUrlFor } from './media/r2MediaStore';
 import CityMarketData from '../models/CityMarketData';
 import CityShowcase from '../models/CityShowcase';
@@ -90,6 +90,16 @@ export function isUsablePhotoUrl(url: unknown): url is string {
 }
 
 /**
+ * The curated library photo in R2 (`cities/convention/city-{country}-{city}`,
+ * written by seedCityImages / the Cloudinary migration), or null.
+ */
+async function findCuratedCityPhoto(publicId: string): Promise<string | null> {
+  if (!isR2Enabled()) return null;
+  const asset = await MediaAsset.findOne({ key: `${CITY_CONVENTION_FOLDER}/${publicId}` }).select('key bucket').lean();
+  return asset ? storedUrlFor(asset.key, asset.bucket) : null;
+}
+
+/**
  * Finds a photo for one city, or `null` if there is none.
  *
  * The seeded Cloudinary city library (`city-{country}-{city}`) is checked
@@ -108,25 +118,15 @@ export function isUsablePhotoUrl(url: unknown): url is string {
  * databases will have cities the seed script never ran for — and that is not
  * an error, just a reason to fall back to the row's own field.
  */
-/** URL of the newest city photo stored in R2, or null (R2 off, or none stored). */
-async function findStoredCityPhoto(country: string, city: string): Promise<string | null> {
-  if (!isR2Enabled()) return null;
-  const folder = mediaFolder('city', { country, city });
-  const asset = await MediaAsset.findOne({ kind: 'city', key: { $regex: `^${folder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/` } })
-    .sort({ createdAt: -1 })
-    .select('key bucket')
-    .lean();
-  return asset ? storedUrlFor(asset.key, asset.bucket) : null;
-}
-
 export async function resolveCityPhoto(row: ImportableCity): Promise<string | null> {
-  // R2: the newest stored photo under cities/{country}/{city}/.
-  const r2Url = await findStoredCityPhoto(row.country, row.city);
+  const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
+
+  // The curated library: R2 once migrated / seeded there…
+  const r2Url = await findCuratedCityPhoto(publicId);
   if (r2Url && isUsablePhotoUrl(r2Url)) return r2Url;
 
-  // Legacy Cloudinary library (until migrated). Without credentials this just
-  // fails and falls through like a miss.
-  const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
+  // …or the legacy Cloudinary library. Without credentials this just fails
+  // and falls through like a miss.
   try {
     const resource = await cloudinary.api.resource(publicId);
     if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;

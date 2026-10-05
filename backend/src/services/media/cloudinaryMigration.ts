@@ -115,8 +115,9 @@ export const classifyReference = (modelName: string, doc: any, path: string): Mi
     case 'CityMarketData':
     case 'CityMarketSnapshot':
     case 'CityShowcase':
-    case 'VillaDestination':
       return { kind: 'city', context: { country: str(doc.country), city: str(doc.city) || str(doc.name) } };
+    case 'VillaDestination':
+      return { kind: 'destination', context: { country: str(doc.country), city: str(doc.name) || str(doc.city) } };
     case 'AdBanner':
       return { kind: 'ad-banner', context: {} };
     case 'SiteSettings':

@@ -23,6 +23,8 @@ import {
 } from '../services/media/mediaKeys';
 import { buildMaster, generatePhotoFiles } from '../services/media/imageVariants';
 import { tagToAssetFilter } from '../services/cloudinaryService';
+import { cacheControlFor } from '../services/media/r2MediaStore';
+import { classifyReference } from '../services/media/cloudinaryMigration';
 
 const USER = '64a1b2c3d4e5f6a7b8c9d0e1';
 const LISTING = '6650aa11bb22cc33dd44ee55';
@@ -103,6 +105,7 @@ describe('mediaFolder — one folder per user, per listing', () => {
     expect(mediaFolder('city', { country: 'North Macedonia', city: 'Ohër' })).toBe('cities/north-macedonia/oher');
     expect(mediaFolder('external', { sourceSlug: 'My Feed', sourceListingId: 'L-9' })).toBe('external/my-feed/L-9');
     expect(mediaFolder('ad-banner', {})).toBe('site/ad-banners');
+    expect(mediaFolder('destination', { country: 'Albania', city: 'Theth' })).toBe('destinations/albania/theth');
   });
 
   it('never lets an id escape its folder', () => {
@@ -181,5 +184,22 @@ describe('generatePhotoFiles', () => {
   it('generates one webp per width for both families', () => {
     expect(ALL_VARIANT_FILES.filter((f) => f.startsWith('w'))).toHaveLength(MEDIA_WIDTHS.length);
     expect(ALL_VARIANT_FILES.filter((f) => f.startsWith('c'))).toHaveLength(MEDIA_WIDTHS.length);
+  });
+});
+
+describe('cacheControlFor', () => {
+  it('caches photos forever, except the overwritable convention city photos and private files', () => {
+    expect(cacheControlFor(`users/${USER}/avatar/x1`, 'public')).toBe('public, max-age=31536000, immutable');
+    expect(cacheControlFor('cities/convention/city-albania-tirana', 'public')).toBe('public, max-age=86400');
+    expect(cacheControlFor(`users/${USER}/documents/license/x1`, 'private')).toBe('private, no-store');
+  });
+});
+
+describe('villa destinations in the migration', () => {
+  it('go to destinations/{country}/{name}', () => {
+    expect(classifyReference('VillaDestination', { _id: 'd1', name: 'Theth', country: 'Albania' }, 'imageUrl')).toEqual({
+      kind: 'destination',
+      context: { country: 'Albania', city: 'Theth' },
+    });
   });
 });

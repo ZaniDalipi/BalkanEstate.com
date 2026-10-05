@@ -7,7 +7,7 @@ import {
 import { getSignedUrl as presign } from '@aws-sdk/s3-request-presigner';
 import mongoose from 'mongoose';
 import { getR2Client, getR2Config } from '../../config/r2';
-import { mediaFileUrl, MEDIA_MASTER_FILE } from '../../config/mediaVariants';
+import { mediaFileUrl, MEDIA_MASTER_FILE, CITY_CONVENTION_FOLDER } from '../../config/mediaVariants';
 import MediaAsset, { IMediaAsset, MediaAssetKind } from '../../models/MediaAsset';
 import { mediaLogger } from '../../utils/logger';
 import { buildMaster, generatePhotoFiles, MasterOptions } from './imageVariants';
@@ -28,6 +28,17 @@ import {
 /** Photo folders are never reused, so every file can be cached forever. */
 const IMMUTABLE_CACHE = 'public, max-age=31536000, immutable';
 const PRIVATE_CACHE = 'private, no-store';
+/**
+ * Convention city photos live at a fixed key the frontend builds from the city
+ * name, and a re-seed overwrites them in place — so they can't be immutable.
+ */
+const REPLACEABLE_CACHE = 'public, max-age=86400';
+
+/** Cache-Control for a photo's files. */
+export const cacheControlFor = (key: string, bucket: 'public' | 'private'): string => {
+  if (bucket === 'private') return PRIVATE_CACHE;
+  return key.startsWith(`${CITY_CONVENTION_FOLDER}/`) ? REPLACEABLE_CACHE : IMMUTABLE_CACHE;
+};
 const UPLOAD_CONCURRENCY = 6;
 const PRESIGN_SECONDS = 3600;
 
@@ -139,7 +150,7 @@ export const storeImage = async (input: Buffer, options: StoreImageOptions): Pro
           Key: objectKey,
           Body: f.body,
           ContentType: f.contentType,
-          CacheControl: bucket === 'private' ? PRIVATE_CACHE : IMMUTABLE_CACHE,
+          CacheControl: cacheControlFor(key, bucket),
         })
       );
       written.push(objectKey);

@@ -2,9 +2,11 @@
  * seedCityImages.ts
  *
  * Fetches a representative image for each of the 89 featured cities from
- * Wikipedia / Wikimedia Commons and uploads to Cloudinary.
+ * Wikipedia / Wikimedia Commons and stores it where getCityImageUrl
+ * (config/cloudinaryConfig.ts) looks for it:
  *
- * Public ID format: city-{country}-{city}  (matches getCityImageUrl in cloudinaryConfig.ts)
+ *   R2 (when R2_* is set):  cities/convention/city-{country}-{city}/  (all sizes, + MediaAsset)
+ *   Cloudinary otherwise:   public id city-{country}-{city}
  *
  * Usage:
  *   npx ts-node backend/src/scripts/seedCityImages.ts            # skip existing
@@ -17,8 +19,14 @@ import path from 'path';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+import mongoose from 'mongoose';
+import sharp from 'sharp';
 import cloudinary from '../config/cloudinary';
 import axios from 'axios';
+import { isR2Enabled } from '../config/r2';
+import { CITY_CONVENTION_FOLDER } from '../config/mediaVariants';
+import MediaAsset from '../models/MediaAsset';
+import { storeImage } from '../services/media/r2MediaStore';
 
 const BATCH_SIZE = 3;
 const BATCH_DELAY_MS = 2500;
@@ -190,9 +198,17 @@ async function fetchCommonsImageUrl(city: string, country: string): Promise<stri
   return null;
 }
 
-// ── Cloudinary operations ─────────────────────────────────────────────────────
+// ── Storage operations (R2, or Cloudinary until R2 is configured) ─────────────
+
+/** The R2 key the frontend builds for a convention city photo. */
+export const conventionKey = (pid: string): string => `${CITY_CONVENTION_FOLDER}/${pid}`;
+
+/** Same frame Cloudinary's `lfill` gave: 1200×800, cropped to the interesting part, never enlarged. */
+const FRAME_WIDTH = 1200;
+const FRAME_HEIGHT = 800;
 
 async function imageExists(pid: string): Promise<boolean> {
+  if (isR2Enabled()) return Boolean(await MediaAsset.exists({ key: conventionKey(pid) }));
   try {
     await cloudinary.api.resource(pid);
     return true;
@@ -201,7 +217,31 @@ async function imageExists(pid: string): Promise<boolean> {
   }
 }
 
+async function storeInR2(imageUrl: string, pid: string): Promise<boolean> {
+  try {
+    const res = await HTTP.get<ArrayBuffer>(imageUrl, { responseType: 'arraybuffer', maxContentLength: 25 * 1024 * 1024 });
+    const framed = await sharp(Buffer.from(res.data), { limitInputPixels: 50_000_000 })
+      .rotate()
+      .resize(FRAME_WIDTH, FRAME_HEIGHT, { fit: 'cover', position: sharp.strategy.attention, withoutEnlargement: true })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+    await storeImage(framed, {
+      kind: 'city',
+      context: {},
+      key: conventionKey(pid),
+      master: { preserveQuality: true },
+      source: { url: imageUrl },
+    });
+    return true;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`  ✗ R2 upload failed: ${msg}`);
+    return false;
+  }
+}
+
 async function uploadFromUrl(imageUrl: string, pid: string): Promise<boolean> {
+  if (isR2Enabled()) return storeInR2(imageUrl, pid);
   try {
     await cloudinary.uploader.upload(imageUrl, {
       public_id: pid,
@@ -295,8 +335,17 @@ if (require.main === module) {
 
   console.log(`\nSeed city images — ${force ? 'force mode' : 'skip existing'}${only ? ` — only: ${only}` : ''}\n`);
 
-  seedCityImages(force, only).then(({ ok, skipped, failed }) => {
-    console.log(`\n✅  Done: ${ok} uploaded  ${skipped} skipped  ${failed} failed`);
+  // R2 records each photo in MediaAsset, so the CLI needs the database too.
+  const connect = isR2Enabled()
+    ? (() => {
+        if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI is not set (needed to record R2 photos)');
+        return mongoose.connect(process.env.MONGODB_URI);
+      })()
+    : Promise.resolve();
+
+  connect.then(() => seedCityImages(force, only)).then(async ({ ok, skipped, failed }) => {
+    console.log(`\n✅  Done: ${ok} uploaded  ${skipped} skipped  ${failed} failed (${isR2Enabled() ? 'R2' : 'Cloudinary'})`);
+    await mongoose.disconnect();
     process.exit(failed > 0 ? 1 : 0);
   }).catch(err => {
     console.error('Fatal error:', err);

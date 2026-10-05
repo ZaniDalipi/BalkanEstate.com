@@ -27,7 +27,8 @@ agencies/{agencyId}/logo|cover/{photoId}/
 businesses/{businessId}/logo|banner/{photoId}/
 messages/{conversationId}/{photoId}/
 cities/{country}/{city}/{photoId}/
-cities/convention/city-{country}-{city}/            city photos the frontend finds by name
+cities/convention/city-{country}-{city}/            city photos the frontend finds by name (1-day cache: re-seeding overwrites them)
+destinations/{country}/{destination}/{photoId}/     villa destination photos
 site/logo|email-logo|ad-banners|content/{photoId}/
 news/{photoId}/
 external/{source}/{listingId}/{photoId}/
@@ -91,6 +92,9 @@ db.mediaassets.find({ status: 'draft' })                              // not att
 | Licences, credentials | Go to the **private** bucket. The stored URL is `/api/files/open/{key}`. The app gets a 1-hour presigned link through `/api/files/signed-url/{key}`, only for the owner or an admin |
 | Chat images | `messages/{conversationId}/`. Deleted with the conversation |
 | City photos (Wikipedia refresh) | `cities/{country}/{city}/`. The previous photo is deleted after a refresh |
+| Curated city photos (`npm` seed script / admin "seed images") | `seedCityImages.ts` writes `cities/convention/city-{country}-{city}/`, the folder `getCityImageUrl` reads. `--force` overwrites in place |
+| Villa destination photos (`npm run seed:destination-images`) | `destinations/{country}/{name}/`. The replaced photo is deleted |
+| Share previews | Pages Functions and the backend OG middleware advertise the photo's pre-made `og.jpg` (1200×630 JPEG) |
 | External feed images | Never stored unless re-hosting is enabled. When it is, they go to `external/{source}/{listing}/` and are de-duplicated by source URL |
 | Account closed | Avatar and documents are deleted. Listing media goes with the listings |
 
@@ -110,7 +114,8 @@ db.mediaassets.find({ status: 'draft' })                              // not att
    ```
    Keep the `CLOUDINARY_*` variables until the migration is done.
 5. **Set the frontend env**: add the GitHub secret `VITE_MEDIA_CDN_URL=https://media.balkanestateai.com`, the same value as `R2_PUBLIC_URL`. The deploy workflow passes it into the build.
-6. **Deploy.** New uploads now go to R2. The CSP and photo-URL allowlists include the media host automatically.
+6. **Set the Pages Functions variable**: Cloudflare → Pages → balkanestateai → Settings → Variables, add `MEDIA_CDN_URL=https://media.balkanestateai.com` for Production and Preview. Pages Functions can't see the Vite build's variables; this is what lets link previews use each photo's `og.jpg`.
+7. **Deploy.** New uploads now go to R2. The CSP and photo-URL allowlists include the media host automatically.
 
 ## Migrating existing Cloudinary images
 
@@ -154,8 +159,15 @@ Then remove the `CLOUDINARY_*` variables.
 
 At 10,000 listings × 20 photos × ~1.3 MB that's about 260 GB, roughly **$4 a month**.
 
+## Seed scripts
+
+Both seed scripts write to R2 as soon as `R2_*` is set (and need `MONGODB_URI`, to record each photo):
+
+```bash
+npx ts-node src/scripts/seedCityImages.ts [--force] [City,Country]
+npm run seed:destination-images[:dry]
+```
+
 ## Not covered
 
-- `scripts/seedCityImages.ts` and `scripts/seedDestinationImages.ts` still upload to Cloudinary. Re-run them against R2 if they're needed again.
 - Generated listing videos were already removed (videos are YouTube links only).
-- Pages Functions share cards (`functions/_og-utils.ts`) don't see `VITE_MEDIA_CDN_URL`. For R2 photos they advertise the JPEG master instead of the 1200×630 card. The backend OG middleware does use `og.jpg`.
