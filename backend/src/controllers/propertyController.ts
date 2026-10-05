@@ -1133,7 +1133,7 @@ const fileDraftListingMedia = async (property: InstanceType<typeof Property>): P
   const add = (url: string | undefined, publicId: string | undefined, tag: string) => {
     if (isUnfiledListingMedia(publicId) && !refs.has(publicId)) refs.set(publicId, { url: url ?? '', publicId, tag });
   };
-  (property.images || []).forEach((img) => add(img.url, img.publicId, img.tag === 'floorplan' ? 'floorplan' : 'other'));
+  (property.images || []).forEach((img) => add(img.url, img.publicId, img.tag ?? 'other'));
   add(property.imageUrl, property.imagePublicId, 'other');
   (property.floorplans || []).forEach((plan: any) => add(plan.url, plan.publicId, 'floorplan'));
   add(property.floorplanUrl, property.floorplanPublicId, 'floorplan');
