@@ -28,6 +28,7 @@ import {
 } from '../sockets/propertySocket';
 import { propertyLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { isDraftListingKey } from '../services/media/mediaKeys';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
 import { respondIfValidationError } from '../middleware/propertyValidation';
 import { TYPE_ATTRIBUTES } from '../config/typeAttributes';
@@ -1047,6 +1048,9 @@ export const createProperty = async (
         }
       }
 
+      // Anything still in drafts (e.g. the floor-plan gallery).
+      await fileDraftListingMedia(property);
+
       await property.save();
     } catch (organizeError) {
       propertyLogger.error('Failed to organize listing media (non-fatal):', organizeError);
@@ -1110,6 +1114,57 @@ export const createProperty = async (
     if (respondIfValidationError(res, error)) return;
     propertyLogger.error('Create property error:', error);
     res.status(500).json({ message: 'Error creating property' });
+  }
+};
+
+/** A photo uploaded from the listing form before it was attached to a listing. */
+const isUnfiledListingMedia = (publicId?: string): publicId is string =>
+  !!publicId && (isDraftListingKey(publicId) || publicId.includes('/listings/temp'));
+
+/**
+ * File every photo of `property` still sitting in the uploader's drafts under
+ * the listing's own folder — images, the main image, the floor-plan gallery
+ * and the standalone floor plan. Photos added while editing arrive as drafts
+ * just like on create. Returns true when anything moved (caller saves).
+ * Best-effort: a failure leaves the draft refs in place, never fails the request.
+ */
+const fileDraftListingMedia = async (property: InstanceType<typeof Property>): Promise<boolean> => {
+  const refs = new Map<string, { url: string; publicId: string; tag: string }>();
+  const add = (url: string | undefined, publicId: string | undefined, tag: string) => {
+    if (isUnfiledListingMedia(publicId) && !refs.has(publicId)) refs.set(publicId, { url: url ?? '', publicId, tag });
+  };
+  (property.images || []).forEach((img) => add(img.url, img.publicId, img.tag === 'floorplan' ? 'floorplan' : 'other'));
+  add(property.imageUrl, property.imagePublicId, 'other');
+  (property.floorplans || []).forEach((plan: any) => add(plan.url, plan.publicId, 'floorplan'));
+  add(property.floorplanUrl, property.floorplanPublicId, 'floorplan');
+  if (refs.size === 0) return false;
+
+  try {
+    const inputs = [...refs.values()];
+    const filed = await organizeListingMedia(inputs, String(property.sellerId), String(property._id), property.title);
+    const moved = new Map(inputs.map((ref, i) => [ref.publicId, filed[i]]));
+    const swap = <T extends { url?: string; publicId?: string }>(item: T): T => {
+      const next = item.publicId ? moved.get(item.publicId) : undefined;
+      if (next) {
+        item.url = next.url;
+        item.publicId = next.publicId;
+      }
+      return item;
+    };
+    (property.images || []).forEach(swap);
+    (property.floorplans || []).forEach((plan: any) => swap(plan));
+    const main = swap({ url: property.imageUrl, publicId: property.imagePublicId });
+    property.imageUrl = main.url as string;
+    property.imagePublicId = main.publicId;
+    const plan = swap({ url: property.floorplanUrl, publicId: property.floorplanPublicId });
+    property.floorplanUrl = plan.url;
+    property.floorplanPublicId = plan.publicId;
+    property.markModified('images');
+    property.markModified('floorplans');
+    return true;
+  } catch (error) {
+    propertyLogger.error('Failed to file draft listing media (non-fatal):', error);
+    return false;
   }
 };
 
@@ -1217,6 +1272,9 @@ export const updateProperty = async (
       property.priceReducedAt = undefined;
       propertyLogger.info(`📈 Price increased: €${previousPrice} → €${property.price} (cleared reduction)`);
     }
+
+    // Photos added while editing were uploaded as drafts — file them under this listing.
+    await fileDraftListingMedia(property);
 
     await property.save();
 
