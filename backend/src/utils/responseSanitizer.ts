@@ -113,6 +113,13 @@ export const sanitizeProperty = (property: any, context: 'list' | 'detail' = 'li
     delete cleaned[field];
   }
 
+  // Agency-feed sync state (hashes, run ids, failed URLs) is internal; the
+  // public only learns that the listing is kept in sync with the agency's feed.
+  if (cleaned.feedSync) {
+    delete cleaned.feedSync;
+    cleaned.importedFromAgencyFeed = true;
+  }
+
   // Strip detail-only fields from list responses (reduces payload + hides internal data)
   if (context === 'list') {
     for (const field of PROPERTY_DETAIL_ONLY_FIELDS) {

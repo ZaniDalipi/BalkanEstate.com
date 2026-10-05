@@ -92,6 +92,36 @@ export interface IVisitAvailability {
   notes?: string; // e.g. "Ring bell at gate"
 }
 
+/**
+ * Provenance and sync state for a listing imported from an agency feed.
+ * See services/agencyFeeds/syncService.ts for how each field is used.
+ */
+export interface IPropertyFeedSync {
+  agencyId: mongoose.Types.ObjectId;
+  feedId: mongoose.Types.ObjectId;
+  /** The agency's own listing ID, as it appears in the feed. */
+  externalId: string;
+  /** Fingerprint of the last normalized feed record applied — unchanged records are skipped. */
+  sourceHash: string;
+  /** Per-field fingerprint of what the sync last wrote; a mismatch means a local edit. */
+  managedHashes: Record<string, string>;
+  /** Source-managed fields the agency chose to keep editing locally. */
+  lockedFields: string[];
+  /** Details the feed did not state (stored as the schema's "not provided" value). */
+  missingDetails: string[];
+  addressPrivate: boolean;
+  sourceUpdatedAt?: Date;
+  firstImportedAt: Date;
+  lastSeenAt: Date;
+  lastSyncedAt: Date;
+  lastRunId?: mongoose.Types.ObjectId;
+  deactivatedAt?: Date;
+  deactivationReason?: 'removed_from_feed' | 'marked_removed';
+  statusBeforeDeactivation?: 'active' | 'pending' | 'sold' | 'rented' | 'draft';
+  /** Feed image URLs that could not be imported on the last sync. */
+  failedImageUrls: string[];
+}
+
 export interface IProperty extends Document {
   sellerId: mongoose.Types.ObjectId;
   createdByName: string; // Name of the user who created this listing
@@ -233,6 +263,8 @@ export interface IProperty extends Document {
   sourceUrl?: string;
   sourceFetchedAt?: Date;
   sourceMetadata?: Record<string, unknown>;
+  /** Present only on listings created by an agency property feed. */
+  feedSync?: IPropertyFeedSync;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -795,6 +827,31 @@ const PropertySchema: Schema = new Schema(
     sourceMetadata: {
       type: Schema.Types.Mixed,
     },
+    feedSync: {
+      type: new Schema(
+        {
+          agencyId: { type: Schema.Types.ObjectId, ref: 'Agency', required: true },
+          feedId: { type: Schema.Types.ObjectId, ref: 'AgencyFeed', required: true },
+          externalId: { type: String, required: true },
+          sourceHash: { type: String, required: true },
+          managedHashes: { type: Schema.Types.Mixed, default: {} },
+          lockedFields: { type: [String], default: [] },
+          missingDetails: { type: [String], default: [] },
+          addressPrivate: { type: Boolean, default: false },
+          sourceUpdatedAt: { type: Date },
+          firstImportedAt: { type: Date, required: true },
+          lastSeenAt: { type: Date, required: true },
+          lastSyncedAt: { type: Date, required: true },
+          lastRunId: { type: Schema.Types.ObjectId, ref: 'AgencyFeedRun' },
+          deactivatedAt: { type: Date },
+          deactivationReason: { type: String, enum: ['removed_from_feed', 'marked_removed'] },
+          statusBeforeDeactivation: { type: String, enum: ['active', 'pending', 'sold', 'rented', 'draft'] },
+          failedImageUrls: { type: [String], default: [] },
+        },
+        { _id: false, minimize: false }
+      ),
+      default: undefined,
+    },
   },
   {
     timestamps: true,
@@ -952,6 +1009,17 @@ PropertySchema.index(
     unique: true,
     partialFilterExpression: { source: { $exists: true, $type: 'string' } },
     name: 'source_listing_unique',
+  }
+);
+
+// An agency-feed listing is identified by (agency, feed, external ID); a
+// repeated or retried import can never create a second copy.
+PropertySchema.index(
+  { 'feedSync.agencyId': 1, 'feedSync.feedId': 1, 'feedSync.externalId': 1 },
+  {
+    unique: true,
+    partialFilterExpression: { 'feedSync.feedId': { $exists: true } },
+    name: 'agency_feed_listing_unique',
   }
 );
 

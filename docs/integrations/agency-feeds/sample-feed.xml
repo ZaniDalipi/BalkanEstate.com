@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BalkanEstateAI canonical property feed, version 1.0 — SAMPLE.
+  Every agency, address, listing and URL below is fictional.
+  Documentation: docs/integrations/agency-feeds/README.md
+-->
+<balkanestate-feed version="1.0" xmlns="https://balkanestateai.com/schema/feed/1.0" total="4" generated="2026-10-01T06:00:00Z">
+  <listing>
+    <id>ADR-1001</id>
+    <status>active</status>
+    <url>https://adriatic-homes.example/listings/ADR-1001</url>
+    <title><![CDATA[Sea-view apartment near Bačvice beach]]></title>
+    <description><![CDATA[
+      <p>Bright two-bedroom apartment on the third floor of a 2019 building, five minutes' walk from the beach.</p>
+      <ul><li>Open-plan kitchen and living room</li><li>Covered balcony facing the sea</li></ul>
+    ]]></description>
+    <transaction>sale</transaction>
+    <type>apartment</type>
+    <price currency="EUR">285000</price>
+    <location visibility="exact">
+      <country>Croatia</country>
+      <city>Split</city>
+      <district>Bačvice</district>
+      <address>Ulica Primjera 12</address>
+      <latitude>43.5025</latitude>
+      <longitude>16.4480</longitude>
+    </location>
+    <area unit="m2">74</area>
+    <bedrooms>2</bedrooms>
+    <bathrooms>1</bathrooms>
+    <living-rooms>1</living-rooms>
+    <floor>3</floor>
+    <total-floors>5</total-floors>
+    <year-built>2019</year-built>
+    <energy-rating>B</energy-rating>
+    <amenities>
+      <amenity>balcony</amenity>
+      <amenity>elevator</amenity>
+      <amenity>air conditioning</amenity>
+    </amenities>
+    <images>
+      <image url="https://adriatic-homes.example/media/ADR-1001/1.jpg"/>
+      <image url="https://adriatic-homes.example/media/ADR-1001/2.jpg"/>
+      <image url="https://adriatic-homes.example/media/ADR-1001/3.jpg"/>
+    </images>
+    <floorplans>
+      <floorplan url="https://adriatic-homes.example/media/ADR-1001/plan.png" label="Third floor"/>
+    </floorplans>
+    <updated>2026-09-28T10:00:00Z</updated>
+  </listing>
+
+  <listing>
+    <id>ADR-1002</id>
+    <status>active</status>
+    <url>https://adriatic-homes.example/listings/ADR-1002</url>
+    <title>Family house with garden in a quiet village</title>
+    <description>Detached stone house on a 600 m² plot, renovated in 2021. The owner asked us not to publish the exact address.</description>
+    <transaction>sale</transaction>
+    <type>house</type>
+    <price currency="EUR">340000</price>
+    <!-- Private address: only the district and city are shown, coordinates are coarsened. -->
+    <location visibility="private">
+      <country>Montenegro</country>
+      <city>Kotor</city>
+      <district>Dobrota</district>
+      <address>Not shown publicly</address>
+      <latitude>42.4410</latitude>
+      <longitude>18.7650</longitude>
+    </location>
+    <area unit="m2">160</area>
+    <land-area unit="m2">600</land-area>
+    <bedrooms>4</bedrooms>
+    <bathrooms>2</bathrooms>
+    <images>
+      <image>https://adriatic-homes.example/media/ADR-1002/front.jpg</image>
+      <image>https://adriatic-homes.example/media/ADR-1002/garden.jpg</image>
+    </images>
+  </listing>
+
+  <listing>
+    <id>ADR-1003</id>
+    <status>active</status>
+    <title>Furnished studio for long-term rent</title>
+    <description>Compact furnished studio close to the university. Utilities paid separately.</description>
+    <transaction>rent</transaction>
+    <rent-period>monthly</rent-period>
+    <type>apartment</type>
+    <price currency="EUR">450</price>
+    <location>
+      <country>Serbia</country>
+      <city>Novi Sad</city>
+      <address>Bulevar Primera 7</address>
+    </location>
+    <area unit="m2">28</area>
+    <bedrooms>0</bedrooms>
+    <bathrooms>1</bathrooms>
+    <images>
+      <image url="https://adriatic-homes.example/media/ADR-1003/1.jpg"/>
+    </images>
+  </listing>
+
+  <!-- A listing the agency withdrew: it is deactivated on BalkanEstateAI, never deleted. -->
+  <listing>
+    <id>ADR-0990</id>
+    <status>removed</status>
+  </listing>
+</balkanestate-feed>
