@@ -40,6 +40,8 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/balkanestate
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set in .env}
+      # Run agency feed imports inside the API process for local development.
+      - AGENCY_FEED_WORKER_MODE=embedded
     volumes:
       - ./backend/src:/app/src:ro # For development hot-reload
     healthcheck:

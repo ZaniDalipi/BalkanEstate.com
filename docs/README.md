@@ -59,6 +59,7 @@ docs/
 - [Image Upload](./guides/IMAGE_UPLOAD.md) - Optimization techniques
 
 #### Integrations
+- [Agency Property Feeds](./integrations/agency-feeds/README.md) - XML feed import, mapping and worker setup
 - [Cadastre Integration](./guides/CADASTRE_INTEGRATION.md) - Property data
 - [OAuth Integration](./guides/OAUTH_INTEGRATION.md) - Social login
 - [Payment Integration](./guides/PAYMENT_INTEGRATION.md) - Stripe/PayPal

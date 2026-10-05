@@ -2,9 +2,10 @@
 # Docker Compose — Production
 #
 # Services:
-#   nginx    — reverse proxy + static file server (port 80/443)
-#   backend  — Express API (internal only, port 5001)
-#   mongodb  — database (internal only)
+#   nginx        — reverse proxy + static file server (port 80/443)
+#   backend      — Express API (internal only, port 5001)
+#   feed-worker  — agency property-feed scheduler and import jobs
+#   mongodb      — database (internal only)
 #
 # Build & deploy:
 #   docker compose -f docker-compose.prod.yml up -d --build
@@ -55,6 +56,29 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    networks:
+      - internal
+
+  # ── Agency property-feed worker ─────────────────────────────────────────────
+  # Same image as the API, different entry point: runs the daily feed scheduler
+  # and import jobs (docs/integrations/agency-feeds/README.md). All state is in
+  # MongoDB, so it can be restarted or scaled to several replicas safely.
+  feed-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: balkanestate-feed-worker-prod
+    restart: unless-stopped
+    command: ['node', 'dist/workers/agencyFeedWorkerMain.js']
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      disable: true
     networks:
       - internal
 

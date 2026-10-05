@@ -163,6 +163,8 @@ describe('custom mappings', () => {
       expect.arrayContaining([expect.stringContaining('Invalid path'), expect.stringContaining('"externalId" is required')])
     );
     expect(validateMapping({ recordElement: '<x>', fields: {} })[0]).toContain('recordElement');
+    const unsafeKeys = validateMapping({ ...mapping, valueMaps: { listingType: { $where: 'sale', 'a.b': 'rent' } } });
+    expect(unsafeKeys).toHaveLength(2);
   });
 });
 

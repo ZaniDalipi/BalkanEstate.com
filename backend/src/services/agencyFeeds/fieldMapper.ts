@@ -139,7 +139,10 @@ export const validateMapping = (mapping: unknown): string[] => {
           continue;
         }
         for (const [k, v] of Object.entries(map)) {
-          if (typeof v !== 'string' || k.length > 100 || v.length > 50) problems.push(`Invalid entry in ${name} map`);
+          // Keys are stored as MongoDB field names: no "$" prefix, no dots.
+          if (typeof v !== 'string' || !k.trim() || k.length > 100 || v.length > 50 || k.startsWith('$') || k.includes('.')) {
+            problems.push(`Invalid entry "${k.slice(0, 40)}" in ${name} map (no dots or leading $)`);
+          }
         }
       }
     }

@@ -1012,6 +1012,36 @@ keys in `importReviewKeys`; the prefill hook-in is `ListingPrefill` in
 
 ---
 
+## Agency Property Feeds — authorized XML sync
+
+Distinct from the review-first feeds above: an agency *manager* connects the
+XML feed its own website or CRM publishes, confirms it is authorized to publish
+it, and from then on the listings are synchronized directly — created, updated,
+and soft-deactivated — every 24 hours. Because the agency vouches for the data
+and the parser is strict (nothing is guessed from free text), there is no
+per-listing review; the safety comes from staging and the deactivation rules.
+
+```
+Dashboard → /api/agency-dashboard/:agencyId/feeds   (owner/admin only)
+  └── enqueueFeedJob → AgencyFeedJob (unique activeKey: one job per feed)
+Feed worker (separate process, Mongo-backed queue + scheduler)
+  └── executeRun: fetch (SSRF-guarded, paginated) → stage all records
+        → plan (create/update/unchanged/remove, plan limits, safeguards)
+        → apply (resumable, Property.feedSync provenance) → finalize
+```
+
+- Identity: `Property.feedSync.{agencyId, feedId, externalId}`, unique index.
+- Deactivation only after a complete, valid snapshot; suspicious drops wait
+  for a manager. Status `draft`, never deleted; reactivated when back.
+- Local edits to source-managed fields are kept (per-field fingerprints).
+- Photos go through `uploadImage` (or stay external via the image proxy with
+  `AGENCY_FEED_IMAGE_MODE=reference`).
+
+Full write-up, canonical format and runbook:
+[docs/integrations/agency-feeds/README.md](docs/integrations/agency-feeds/README.md).
+
+---
+
 ## My Listings — loaded in chunks
 
 An agent can have hundreds of listings, so **My Listings never fetches them all

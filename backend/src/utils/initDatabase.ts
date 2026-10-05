@@ -38,6 +38,12 @@ import PriceHistory from '../models/PriceHistory';
 import PropertyValuation from '../models/PropertyValuation';
 import ActivityLog from '../models/ActivityLog';
 import Analytics from '../models/Analytics';
+import AgencyFeed from '../models/AgencyFeed';
+import AgencyFeedRun from '../models/AgencyFeedRun';
+import AgencyFeedJob from '../models/AgencyFeedJob';
+import AgencyFeedStagedRecord from '../models/AgencyFeedStagedRecord';
+import AgencyFeedAsset from '../models/AgencyFeedAsset';
+import AgencyFeedAuditLog from '../models/AgencyFeedAuditLog';
 
 const allModels = [
   { name: 'User', model: User },
@@ -73,6 +79,14 @@ const allModels = [
   { name: 'PropertyValuation', model: PropertyValuation },
   { name: 'ActivityLog', model: ActivityLog },
   { name: 'Analytics', model: Analytics },
+  // Agency property feeds: AgencyFeedJob's unique activeKey index is what
+  // prevents two imports of one feed from running at once.
+  { name: 'AgencyFeed', model: AgencyFeed },
+  { name: 'AgencyFeedRun', model: AgencyFeedRun },
+  { name: 'AgencyFeedJob', model: AgencyFeedJob },
+  { name: 'AgencyFeedStagedRecord', model: AgencyFeedStagedRecord },
+  { name: 'AgencyFeedAsset', model: AgencyFeedAsset },
+  { name: 'AgencyFeedAuditLog', model: AgencyFeedAuditLog },
 ];
 
 /**
