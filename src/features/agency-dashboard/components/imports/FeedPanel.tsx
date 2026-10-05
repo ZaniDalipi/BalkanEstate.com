@@ -31,7 +31,7 @@ const FeedPanel: React.FC<FeedPanelProps> = (props) => {
   const { data: runs = [] } = useFeedRuns(agencyId, feed.id);
   const [pickedRunId, setPickedRunId] = useState<string | null>(null);
   const latestRunId = runs[0]?.id ?? null;
-  const shownRunId = pickedRunId ?? (feed.state === 'draft' ? feed.lastPreviewRunId ?? latestRunId : latestRunId);
+  const shownRunId = pickedRunId ?? latestRunId;
   const { data: run } = useFeedRun(agencyId, feed.id, shownRunId);
   const runActive = run ? ACTIVE_RUN_STATUSES.includes(run.status) : false;
   const isPreviewOfCurrentConfig = run?.dryRun && run.status === 'previewed' && run.id === feed.lastPreviewRunId;
@@ -58,7 +58,15 @@ const FeedPanel: React.FC<FeedPanelProps> = (props) => {
               ? t('agencyDashboard:imports.panel.uploadDraftHelp', 'Upload your XML file to check how your listings will look. Nothing is published until you activate the feed.')
               : t('agencyDashboard:imports.panel.uploadActiveHelp', 'Upload a new XML file whenever your listings change. It is imported with the same checks as a feed.')}
           </p>
-          <XmlUploadBox activated={feed.state !== 'draft'} busy={props.uploading || feed.activeJob} error={props.uploadError} onUpload={props.onUpload} />
+          <XmlUploadBox
+            activated={feed.state !== 'draft'}
+            busy={props.uploading || feed.activeJob}
+            error={props.uploadError}
+            onUpload={(file, filename, previewOnly) => {
+              setPickedRunId(null); // show the new run as soon as it appears
+              props.onUpload(file, filename, previewOnly);
+            }}
+          />
         </div>
       )}
 

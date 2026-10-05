@@ -19,11 +19,11 @@ export function useFeedMeta(agencyId: string) {
 }
 
 export function useAgencyFeeds(agencyId: string) {
-  return useQuery<AgencyFeed[]>({
+  return useQuery<{ feeds: AgencyFeed[]; workerOnline: boolean }>({
     queryKey: agencyDashboardKeys.feeds(agencyId),
     queryFn: () => api.listFeeds(agencyId),
     enabled: !!agencyId,
-    refetchInterval: (query) => (query.state.data?.some((f) => f.activeJob) ? POLL_MS : false),
+    refetchInterval: (query) => (query.state.data?.feeds.some((f) => f.activeJob) ? POLL_MS : false),
   });
 }
 

@@ -482,6 +482,12 @@
       "previewOnly": "Preview only — check the file without changing any listings",
       "preview": "Upload and preview",
       "import": "Upload and import"
-    }
+    },
+    "quickUpload": {
+      "button": "Upload XML",
+      "busy": "Uploading…",
+      "feedName": "XML upload"
+    },
+    "workerOffline": "Your import is queued, but the import service is not running, so it has not started. It will start automatically once the service is back — contact support if this lasts more than a few minutes."
   }
 }

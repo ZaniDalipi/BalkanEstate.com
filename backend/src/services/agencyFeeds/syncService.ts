@@ -19,6 +19,7 @@ import type { FeedIssue, FeedMapping } from './feedTypes';
 import {
   defaultImageStore,
   guardedImageDownload,
+  mapWithConcurrency,
   sweepUnreferencedAssets,
   type ImageDownloader,
   type ImageStore,
@@ -377,32 +378,39 @@ const applyRun = async (run: IAgencyFeedRun, feed: IAgencyFeed, agency: IAgency,
   const ctx = await loadWriterContext(run, feed, agency, deps);
   const allowance = await getCreationAllowance(feed.assignedAgentId, agency);
 
-  const cursor = AgencyFeedStagedRecord.find({
-    runId: run._id,
-    appliedAt: { $exists: false },
-    action: { $in: ['create', 'update', 'remove'] },
-  })
-    .sort({ ordinal: 1 })
-    .cursor();
-
+  // Listings are independent, so several are written at once; photo
+  // downloads inside each listing are themselves concurrent. Slot charges are
+  // atomic, so parallel creates can never overshoot the plan allowance.
+  const concurrency = Math.min(intEnv('AGENCY_FEED_APPLY_CONCURRENCY', 4), 16);
   let processed = 0;
-  for await (const record of cursor) {
-    try {
-      await applyRecord(record, ctx, allowance.model);
-    } catch (err) {
-      // A record that fails deterministically must not block the run or be retried forever.
-      feedLogger.error('record apply failed', { runId: String(run._id), externalId: record.externalId, error: (err as Error).message });
-      record.action = 'reject';
-      record.appliedAt = ctx.now;
-      record.issues = [
-        ...(record.issues ?? []),
-        { severity: 'error', code: 'apply_failed', message: 'The listing could not be saved; it will be retried on the next sync', externalId: record.externalId },
-      ];
-      record.markModified('issues');
-      await record.save();
-    }
-    processed++;
-    if (processed % 20 === 0) await deps.heartbeat?.();
+  for (;;) {
+    const batch = await AgencyFeedStagedRecord.find({
+      runId: run._id,
+      appliedAt: { $exists: false },
+      action: { $in: ['create', 'update', 'remove'] },
+    })
+      .sort({ ordinal: 1 })
+      .limit(100);
+    if (batch.length === 0) break;
+    await mapWithConcurrency(batch, concurrency, async (record) => {
+      try {
+        await applyRecord(record, ctx, allowance.model);
+      } catch (err) {
+        // A record that fails deterministically must not block the run or be retried forever.
+        feedLogger.error('record apply failed', { runId: String(run._id), externalId: record.externalId, error: (err as Error).message });
+        record.action = 'reject';
+        record.appliedAt = ctx.now;
+        record.issues = [
+          ...(record.issues ?? []),
+          { severity: 'error', code: 'apply_failed', message: 'The listing could not be saved; it will be retried on the next sync', externalId: record.externalId },
+        ];
+        record.markModified('issues');
+        await record.save();
+      }
+    });
+    processed += batch.length;
+    await deps.heartbeat?.();
+    feedLogger.info('applying', { runId: String(run._id), processed });
   }
 };
 

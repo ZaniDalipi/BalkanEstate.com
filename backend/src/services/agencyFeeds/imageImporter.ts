@@ -226,6 +226,16 @@ const shouldRetry = (asset: IAgencyFeedAsset, now: Date): boolean => {
   return since >= cooldown;
 };
 
+/** Upsert keyed by (feed, URL hash); retried once if a parallel upsert of the same URL won the insert. */
+const upsertAsset = async (filter: Record<string, unknown>, update: Record<string, unknown>): Promise<void> => {
+  try {
+    await AgencyFeedAsset.updateOne(filter, update, { upsert: true });
+  } catch (err) {
+    if ((err as { code?: number }).code !== 11000) throw err;
+    await AgencyFeedAsset.updateOne(filter, update, { upsert: true });
+  }
+};
+
 /** Uploads in progress in one batch, by content hash: identical photos are stored once even when fetched in parallel. */
 type PendingSaves = Map<string, Promise<{ url: string; publicId?: string; reused: boolean }>>;
 
@@ -275,7 +285,7 @@ const importOne = async (
     const buffer = await deps.download(sourceUrl);
     const info = await validateImageBuffer(buffer);
     const stored = await storeOnce(pending, buffer, info, sourceUrl, kind, ctx, deps);
-    await AgencyFeedAsset.updateOne(
+    await upsertAsset(
       { feedId: ctx.feedId, urlHash },
       {
         $set: {
@@ -293,8 +303,7 @@ const importOne = async (
           lastReferencedAt: now,
         },
         $unset: { failureReason: '' },
-      },
-      { upsert: true }
+      }
     );
     return { sourceUrl, ok: true, url: stored.url, publicId: stored.publicId, reused: stored.reused, downloaded: true };
   } catch (err) {
@@ -302,7 +311,7 @@ const importOne = async (
     if (!(err instanceof ImageImportError)) {
       feedLogger.warn('image store failed', { feedId: String(ctx.feedId), error: (err as Error).message });
     }
-    await AgencyFeedAsset.updateOne(
+    await upsertAsset(
       { feedId: ctx.feedId, urlHash },
       {
         $set: {
@@ -314,8 +323,7 @@ const importOne = async (
           lastReferencedAt: now,
         },
         $inc: { failures: 1 },
-      },
-      { upsert: true }
+      }
     );
     return { sourceUrl, ok: false, reused: false, downloaded: true, reason };
   }

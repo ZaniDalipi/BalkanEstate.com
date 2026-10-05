@@ -482,6 +482,12 @@
       "previewOnly": "Vetëm pamje paraprake — kontrollo skedarin pa ndryshuar njoftime",
       "preview": "Ngarko dhe shiko",
       "import": "Ngarko dhe importo"
-    }
+    },
+    "quickUpload": {
+      "button": "Ngarko XML",
+      "busy": "Po ngarkohet…",
+      "feedName": "Ngarkim XML"
+    },
+    "workerOffline": "Importimi juaj është në radhë, por shërbimi i importimit nuk po funksionon, ndaj nuk ka nisur. Do të nisë automatikisht kur shërbimi të rikthehet — kontaktoni mbështetjen nëse kjo zgjat më shumë se disa minuta."
   }
 }

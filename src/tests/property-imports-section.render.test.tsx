@@ -30,6 +30,7 @@ const api = vi.hoisted(() => ({
   getFeedRun: vi.fn(),
   activateFeed: vi.fn(),
   uploadFeedFile: vi.fn(),
+  createFeed: vi.fn(),
 }));
 vi.mock('../features/agency-dashboard/api/propertyImportsApi', () => api);
 
@@ -68,7 +69,7 @@ beforeEach(() => {
 
 describe('PropertyImportsSection', () => {
   it('shows the preview report, the listing-limit warning and gates activation', async () => {
-    api.listFeeds.mockResolvedValue([baseFeed]);
+    api.listFeeds.mockResolvedValue({ feeds: [baseFeed], workerOnline: true });
     api.activateFeed.mockResolvedValue({ feed: { ...baseFeed, state: 'active' }, runId: 'r2' });
     renderSection();
 
@@ -89,7 +90,7 @@ describe('PropertyImportsSection', () => {
 
   it('flags a held removal for review on an active feed', async () => {
     const held: FeedRun = { ...preview, id: 'r9', dryRun: false, trigger: 'scheduled', status: 'awaiting_review', samples: [], issues: [], deactivation: { candidates: 6, allowed: true, held: true, blockedReason: null, resolution: null }, limit: { ...preview.limit, wouldExceed: false } };
-    api.listFeeds.mockResolvedValue([{ ...baseFeed, state: 'active', pendingReviewRunId: 'r9', lastSuccessfulSyncAt: '2026-10-02T03:00:00Z', nextSyncAt: '2026-10-03T03:00:00Z' }]);
+    api.listFeeds.mockResolvedValue({ feeds: [{ ...baseFeed, state: 'active', pendingReviewRunId: 'r9', lastSuccessfulSyncAt: '2026-10-02T03:00:00Z', nextSyncAt: '2026-10-03T03:00:00Z' }], workerOnline: true });
     api.listFeedRuns.mockResolvedValue([held]);
     api.getFeedRun.mockResolvedValue(held);
     renderSection();
@@ -101,7 +102,7 @@ describe('PropertyImportsSection', () => {
   });
 
   it('lets an upload feed preview pasted XML, sent as an .xml file', async () => {
-    api.listFeeds.mockResolvedValue([{ ...baseFeed, sourceType: 'upload', url: null, lastPreviewRunId: null }]);
+    api.listFeeds.mockResolvedValue({ feeds: [{ ...baseFeed, sourceType: 'upload', url: null, lastPreviewRunId: null }], workerOnline: true });
     api.listFeedRuns.mockResolvedValue([]);
     api.uploadFeedFile.mockResolvedValue({ runId: 'r5', kind: 'preview' });
     renderSection();
@@ -118,5 +119,25 @@ describe('PropertyImportsSection', () => {
     const [agencyId, feedId, blob, filename, previewOnly] = api.uploadFeedFile.mock.calls[0];
     expect([agencyId, feedId, filename, previewOnly]).toEqual(['ag1', 'f1', 'pasted.xml', false]);
     expect(await (blob as Blob).text()).toContain('<listing><id>A</id></listing>');
+  });
+
+  it('Upload XML creates an upload feed when there is none and sends the chosen file in one step', async () => {
+    api.listFeeds.mockResolvedValue({ feeds: [baseFeed], workerOnline: true });
+    api.createFeed.mockResolvedValue({ ...baseFeed, id: 'f2', sourceType: 'upload', url: null, lastPreviewRunId: null });
+    api.uploadFeedFile.mockResolvedValue({ runId: 'r7', kind: 'preview' });
+    renderSection();
+
+    const input = (await screen.findByLabelText('Upload XML')) as HTMLInputElement;
+    const file = new File(['<balkanestate-feed/>'], 'listings.xml', { type: 'application/xml' });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => expect(api.uploadFeedFile).toHaveBeenCalledWith('ag1', 'f2', file, 'listings.xml', false));
+    expect(api.createFeed).toHaveBeenCalledWith('ag1', { name: 'XML upload', sourceType: 'upload' });
+  });
+
+  it('warns when an import is queued but no import worker is running', async () => {
+    api.listFeeds.mockResolvedValue({ feeds: [{ ...baseFeed, activeJob: true }], workerOnline: false });
+    renderSection();
+    expect(await screen.findByText(/the import service is not running/)).toBeTruthy();
   });
 });

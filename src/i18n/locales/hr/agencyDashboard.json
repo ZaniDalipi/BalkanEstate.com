@@ -482,6 +482,12 @@
       "previewOnly": "Samo pregled — provjeri datoteku bez mijenjanja oglasa",
       "preview": "Učitaj i pregledaj",
       "import": "Učitaj i uvezi"
-    }
+    },
+    "quickUpload": {
+      "button": "Učitaj XML",
+      "busy": "Učitavanje…",
+      "feedName": "XML učitavanje"
+    },
+    "workerOffline": "Vaš uvoz čeka u redu, ali usluga uvoza ne radi pa još nije počeo. Pokrenut će se automatski kad usluga ponovno proradi — javite se podršci ako to traje dulje od nekoliko minuta."
   }
 }

@@ -5,6 +5,7 @@ import type { IAgencyFeed } from '../models/AgencyFeed';
 import type { IUser } from '../models/User';
 import AgencyFeedRun from '../models/AgencyFeedRun';
 import AgencyFeedAuditLog from '../models/AgencyFeedAuditLog';
+import { isAnyFeedWorkerOnline } from '../models/AgencyFeedWorker';
 import { PROPERTY_TYPES } from '../config/propertyTypes';
 import { getObjectIdParam } from '../utils/validateParams';
 import { agencyLogger } from '../utils/logger';
@@ -85,7 +86,8 @@ export const getFeedMeta = (_req: Request, res: Response): void => {
 
 export const listFeeds = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.json({ feeds: await describeFeeds(agencyOf(req)._id as Types.ObjectId) });
+    const [feeds, workerOnline] = await Promise.all([describeFeeds(agencyOf(req)._id as Types.ObjectId), isAnyFeedWorkerOnline()]);
+    res.json({ feeds, workerOnline });
   } catch (err) {
     handleError(res, err, 'list');
   }

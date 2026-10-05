@@ -267,11 +267,14 @@ serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 startMonthlyResetWorker();
 serverLogger.info('✅ Monthly listing counter reset worker started');
 
-// Agency property-feed imports normally run in their own process
-// (`npm run worker:feeds`). AGENCY_FEED_WORKER_MODE=embedded runs the same
-// MongoDB-backed scheduler and job runner inside this process instead, for
-// development or single-container hosting.
-if (process.env.AGENCY_FEED_WORKER_MODE === 'embedded') {
+// Agency property-feed imports. In production they run in their own process
+// (`npm run start:worker:feeds`); everywhere else the same MongoDB-backed
+// scheduler and job runner start inside this process, so uploads and syncs
+// work in development without a second terminal. AGENCY_FEED_WORKER_MODE
+// overrides: `embedded` (always here) or `external` (never here).
+const agencyFeedWorkerMode =
+  process.env.AGENCY_FEED_WORKER_MODE || (process.env.NODE_ENV === 'production' ? 'external' : 'embedded');
+if (agencyFeedWorkerMode === 'embedded') {
   import('./workers/agencyFeedWorker')
     .then(({ startAgencyFeedWorker }) => {
       startAgencyFeedWorker();

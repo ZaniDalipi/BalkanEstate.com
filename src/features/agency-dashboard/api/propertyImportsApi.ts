@@ -8,8 +8,9 @@ const feedsPath = (agencyId: string) => `/agency-dashboard/${agencyId}/feeds`;
 export const getFeedMeta = (agencyId: string) =>
   apiRequest<FeedMeta>(`${feedsPath(agencyId)}/meta`, { requiresAuth: true });
 
-export const listFeeds = async (agencyId: string): Promise<AgencyFeed[]> =>
-  (await apiRequest<{ feeds: AgencyFeed[] }>(feedsPath(agencyId), { requiresAuth: true })).feeds;
+/** `workerOnline` is false when no import worker has checked in recently: queued imports would not start. */
+export const listFeeds = (agencyId: string) =>
+  apiRequest<{ feeds: AgencyFeed[]; workerOnline: boolean }>(feedsPath(agencyId), { requiresAuth: true });
 
 /** Only changed fields are sent: an unchanged (redacted) URL or blank secret must not overwrite the stored one. */
 export type FeedPayload = Partial<Omit<FeedFormValues, 'credentials'>> & {

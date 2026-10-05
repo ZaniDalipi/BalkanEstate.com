@@ -7,6 +7,7 @@ import FeedCard from './FeedCard';
 import FeedForm from './FeedForm';
 import FeedPanel from './FeedPanel';
 import MutationError from './MutationError';
+import QuickUploadButton from './QuickUploadButton';
 import SyncRulesInfo from './SyncRulesInfo';
 
 interface PropertyImportsSectionProps {
@@ -17,7 +18,9 @@ type Editing = { kind: 'none' } | { kind: 'new' } | { kind: 'edit'; feedId: stri
 
 const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyId }) => {
   const { t } = useTranslation(['agencyDashboard']);
-  const { data: feeds = [], isLoading, error } = useAgencyFeeds(agencyId);
+  const { data, isLoading, error } = useAgencyFeeds(agencyId);
+  const feeds = data?.feeds ?? [];
+  const workerOffline = data?.workerOnline === false && feeds.some((f) => f.activeJob);
   const { data: meta } = useFeedMeta(agencyId);
   const { agents } = useAgencyAgents(agencyId);
   const m = useFeedMutations(agencyId);
@@ -37,6 +40,20 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
   }
 
   const closeForm = () => setEditing({ kind: 'none' });
+
+  // One step: reuse the agency's upload feed, or create one, then send the file.
+  // A new or not-yet-activated feed previews it; an activated one imports it.
+  const quickUpload = async (file: File) => {
+    try {
+      const target =
+        feeds.find((f) => f.sourceType === 'upload') ??
+        (await m.create.mutateAsync({ name: t('agencyDashboard:imports.quickUpload.feedName', 'XML upload'), sourceType: 'upload' }));
+      setSelectedId(target.id);
+      await m.upload.mutateAsync({ feedId: target.id, file, filename: file.name, previewOnly: false });
+    } catch {
+      // Shown by MutationError below.
+    }
+  };
   const agentOptions = agents.map((a) => ({ id: a.userId, name: a.name }));
 
   return (
@@ -49,11 +66,14 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
           </p>
         </div>
         {editing.kind === 'none' && (
-          <button type="button" onClick={() => setEditing({ kind: 'new' })}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
-            <PlusIcon className="w-4 h-4" />
-            {t('agencyDashboard:imports.actions.add', 'Connect a feed')}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <QuickUploadButton busy={m.create.isPending || m.upload.isPending} onFile={quickUpload} />
+            <button type="button" onClick={() => setEditing({ kind: 'new' })}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+              <PlusIcon className="w-4 h-4" />
+              {t('agencyDashboard:imports.actions.add', 'Connect a feed')}
+            </button>
+          </div>
         )}
       </div>
 
@@ -86,7 +106,13 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
         </div>
       )}
 
-      <MutationError error={m.sync.error ?? m.pause.error ?? m.resume.error ?? m.review.error} />
+      {workerOffline && (
+        <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {t('agencyDashboard:imports.workerOffline', 'Your import is queued, but the import service is not running, so it has not started. It will start automatically once the service is back — contact support if this lasts more than a few minutes.')}
+        </div>
+      )}
+
+      <MutationError error={m.sync.error ?? m.pause.error ?? m.resume.error ?? m.review.error ?? (editing.kind === 'none' ? m.create.error ?? m.upload.error : null)} />
 
       <div className="space-y-3">
         {feeds.map((feed) => (

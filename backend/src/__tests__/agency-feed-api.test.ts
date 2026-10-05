@@ -24,6 +24,7 @@ import jwt from 'jsonwebtoken';
 import AgencyFeed from '../models/AgencyFeed';
 import AgencyFeedAuditLog from '../models/AgencyFeedAuditLog';
 import AgencyFeedJob from '../models/AgencyFeedJob';
+import AgencyFeedWorker from '../models/AgencyFeedWorker';
 import { decryptField } from '../utils/fieldEncryption';
 import { claimNextJob, processJob } from '../services/agencyFeeds/feedJobQueue';
 import { createAgencySetup, createWorld, feedXml, type AgencySetup } from './helpers/agencyFeedFixtures';
@@ -192,5 +193,17 @@ describe('agency feed API — preview and activation', () => {
     expect(list.body.feeds[0]).toMatchObject({ id: String(s.feed._id), lastSuccessfulSyncAt: expect.any(String), activeJob: false });
     const runs = await request(app).get(`${feedsPath(s)}/${s.feed._id}/runs`).set('Authorization', auth);
     expect(runs.body.runs[0]).toMatchObject({ trigger: 'manual', status: 'succeeded', counts: { created: 1 } });
+  });
+});
+
+describe('agency feed API — worker status', () => {
+  it('reports whether an import worker is running, so a queued import is explained', async () => {
+    const s = await createAgencySetup();
+    const auth = tokenFor(s.owner);
+    expect((await request(app).get(feedsPath(s)).set('Authorization', auth)).body.workerOnline).toBe(false);
+    await AgencyFeedWorker.create({ workerId: 'w-1', seenAt: new Date() });
+    expect((await request(app).get(feedsPath(s)).set('Authorization', auth)).body.workerOnline).toBe(true);
+    await AgencyFeedWorker.updateOne({ workerId: 'w-1' }, { $set: { seenAt: new Date(Date.now() - 5 * 60 * 1000) } });
+    expect((await request(app).get(feedsPath(s)).set('Authorization', auth)).body.workerOnline).toBe(false);
   });
 });

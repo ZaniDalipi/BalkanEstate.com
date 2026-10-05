@@ -51,7 +51,9 @@ activate again so a new configuration never publishes unreviewed listings.
 
 ### Uploading an XML file instead of a URL
 
-Agencies without a feed URL can choose **Upload XML file** as the source when connecting a feed. There is no
+The quickest way is the **Upload XML** button at the top of Property Imports: it picks a file and sends it in one
+step, creating an upload feed the first time. Agencies can also choose **Upload XML file** as the source when
+connecting a feed. There is no
 URL, credentials or daily schedule; instead:
 
 1. Upload an `.xml` file (up to 15 MB) or paste the XML. Pasted XML is sent as a file, unchanged.
@@ -331,7 +333,7 @@ the agency's URLs through the existing `/api/image-proxy`.
 |---|---|---|
 | `MONGODB_URI` | — | Required by the worker (same database as the API). |
 | `FIELD_ENCRYPTION_KEY` (or `ENCRYPTION_KEY`) | — | Encrypts feed credentials. **Must be identical for API and worker.** ≥ 32 characters. |
-| `AGENCY_FEED_WORKER_MODE` | unset | `embedded` runs the worker inside the API process. Unset in production when the separate worker runs. |
+| `AGENCY_FEED_WORKER_MODE` | `external` in production, `embedded` elsewhere | `embedded` runs the worker inside the API process; `external` expects the separate worker. |
 | `AGENCY_FEED_IMAGE_MODE` | `rehost` | `rehost` (Cloudinary) or `reference` (agency URLs via image proxy). |
 | `AGENCY_FEED_SYNC_INTERVAL_HOURS` | `24` | Time between scheduled syncs. |
 | `AGENCY_FEED_MAX_MB` | `50` | Maximum feed download size. |
@@ -340,7 +342,8 @@ the agency's URLs through the existing `/api/image-proxy`.
 | `AGENCY_FEED_FETCH_TIMEOUT_MS` | `120000` | Total download time for all pages. |
 | `AGENCY_FEED_UPLOAD_MAX_MB` | `15` | Largest uploaded XML file (cannot exceed 15 — files are stored as one MongoDB document). |
 | `AGENCY_FEED_WORKER_CONCURRENCY` | `2` | Jobs processed in parallel per worker process (1–8). |
-| `AGENCY_FEED_POLL_INTERVAL_MS` | `5000` | How often an idle worker checks the queue. |
+| `AGENCY_FEED_POLL_INTERVAL_MS` | `2000` | How often an idle worker checks the queue. |
+| `AGENCY_FEED_APPLY_CONCURRENCY` | `4` | Listings written in parallel within one import (max 16). |
 | `CLOUDINARY_*`, `SENTRY_DSN` | existing | Reused as is. |
 
 ### Deploying
@@ -353,13 +356,15 @@ the agency's URLs through the existing `/api/image-proxy`.
    - **Railway / Render:** add a *background worker* service from the `backend` directory with start command
      `npm run start:worker:feeds` (`node dist/workers/agencyFeedWorkerMain.js`) and the API's environment variables.
    - **Single container only:** set `AGENCY_FEED_WORKER_MODE=embedded` on the API instead.
-3. Check the worker log for `agency feed worker started`.
+3. Check the worker log for `agency feed worker started`. Workers check in every 20 s; if an agency's import is
+   queued while no worker has checked in for a minute, the dashboard says the import service is not running.
 4. Smoke-test with the sample feed on a staging agency: host `sample-feed.xml` at a public URL, connect it,
    preview, activate, and check the import history. Do not connect real agency inventory from a development
    environment.
 
-Local development: `docker-compose.yml` sets `AGENCY_FEED_WORKER_MODE=embedded`; outside Docker run
-`npm run worker:feeds` in `backend/` next to `npm run dev`.
+Local development: the worker starts inside `npm run dev` automatically (embedded is the default outside
+production). Import speed is dominated by photo downloads and, for listings without coordinates, by geocoding,
+which OpenStreetMap limits to one lookup per second.
 
 ---
 

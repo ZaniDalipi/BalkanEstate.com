@@ -1,6 +1,7 @@
 import { hostname } from 'os';
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
+import AgencyFeedWorker from '../models/AgencyFeedWorker';
 import { claimNextJob, processJob, scheduleDueFeeds } from '../services/agencyFeeds/feedJobQueue';
 import { feedLogger } from '../services/agencyFeeds/feedAudit';
 import { defaultSyncDeps } from '../services/agencyFeeds/syncService';
@@ -28,7 +29,7 @@ const intEnv = (name: string, fallback: number, min: number, max: number): numbe
 export const startAgencyFeedWorker = (): FeedWorkerHandle => {
   const workerId = `${hostname()}-${process.pid}-${randomBytes(3).toString('hex')}`;
   const concurrency = intEnv('AGENCY_FEED_WORKER_CONCURRENCY', 2, 1, 8);
-  const pollMs = intEnv('AGENCY_FEED_POLL_INTERVAL_MS', 5_000, 1_000, 60_000);
+  const pollMs = intEnv('AGENCY_FEED_POLL_INTERVAL_MS', 2_000, 500, 60_000);
   const deps = defaultSyncDeps();
   let stopping = false;
   const lanes: Array<Promise<void>> = [];
@@ -70,6 +71,18 @@ export const startAgencyFeedWorker = (): FeedWorkerHandle => {
   const scheduler = setInterval(schedulerTick, 60_000);
   void schedulerTick();
 
+  // Tell the dashboard a worker is alive, so a queued import is never a mystery.
+  const beat = async (): Promise<void> => {
+    if (stopping || mongoose.connection.readyState !== 1) return;
+    try {
+      await AgencyFeedWorker.updateOne({ workerId }, { $set: { seenAt: new Date() } }, { upsert: true });
+    } catch (err) {
+      feedLogger.warn('worker heartbeat failed', { workerId, error: (err as Error).message });
+    }
+  };
+  const heartbeat = setInterval(beat, 20_000);
+  void beat();
+
   for (let i = 0; i < concurrency; i++) lanes.push(lane());
   feedLogger.info('agency feed worker started', { workerId, concurrency, pollMs });
 
@@ -77,6 +90,8 @@ export const startAgencyFeedWorker = (): FeedWorkerHandle => {
     stop: async () => {
       stopping = true;
       clearInterval(scheduler);
+      clearInterval(heartbeat);
+      await AgencyFeedWorker.deleteOne({ workerId }).catch(() => undefined);
       // Lanes finish the job they hold; an interrupted job is resumed by its lease expiring.
       await Promise.race([Promise.all(lanes), sleep(25_000)]);
       feedLogger.info('agency feed worker stopped', { workerId });

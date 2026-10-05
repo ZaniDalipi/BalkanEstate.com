@@ -482,6 +482,12 @@
       "previewOnly": "Doar previzualizare — verifică fișierul fără a modifica anunțuri",
       "preview": "Încarcă și previzualizează",
       "import": "Încarcă și importă"
-    }
+    },
+    "quickUpload": {
+      "button": "Încarcă XML",
+      "busy": "Se încarcă…",
+      "feedName": "Încărcare XML"
+    },
+    "workerOffline": "Importul dvs. este în așteptare, dar serviciul de import nu funcționează, așa că nu a pornit. Va porni automat când serviciul revine — contactați asistența dacă durează mai mult de câteva minute."
   }
 }
