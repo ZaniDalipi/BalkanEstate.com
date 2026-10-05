@@ -119,6 +119,7 @@ import videoRoutes from './routes/videoRoutes';
 import aiRoutes from './routes/aiRoutes';
 import cadastreRoutes from './routes/cadastreRoutes';
 import agencyDashboardRoutes from './routes/agencyDashboardRoutes';
+import agencyFeedRoutes from './routes/agencyFeedRoutes';
 import fileRoutes from './routes/fileRoutes';
 import mapProxyRoutes from './routes/mapProxyRoutes';
 import newsRoutes from './routes/newsRoutes';
@@ -266,6 +267,19 @@ serverLogger.info('✅ Monthly coupon refresh job started (1st of each month)');
 startMonthlyResetWorker();
 serverLogger.info('✅ Monthly listing counter reset worker started');
 
+// Agency property-feed imports normally run in their own process
+// (`npm run worker:feeds`). AGENCY_FEED_WORKER_MODE=embedded runs the same
+// MongoDB-backed scheduler and job runner inside this process instead, for
+// development or single-container hosting.
+if (process.env.AGENCY_FEED_WORKER_MODE === 'embedded') {
+  import('./workers/agencyFeedWorker')
+    .then(({ startAgencyFeedWorker }) => {
+      startAgencyFeedWorker();
+      serverLogger.info('✅ Agency feed worker started (embedded)');
+    })
+    .catch((error) => serverLogger.error('Agency feed worker failed to start:', error));
+}
+
 // Initialize push notification service (VAPID setup)
 initializePushService();
 
@@ -366,6 +380,7 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api', agencyFeaturedSubscriptionRoutes); // Register BEFORE agencyRoutes to prevent conflicts
 app.use('/api/agencies', agencyRoutes);
 app.use('/api/agency-dashboard', agencyDashboardRoutes);
+app.use('/api/agency-dashboard', agencyFeedRoutes);
 app.use('/api/agency-favorites', agencyFavoriteRoutes);
 app.use('/api/agency-join-requests', agencyJoinRequestRoutes);
 app.use('/api/agents', agentRoutes);

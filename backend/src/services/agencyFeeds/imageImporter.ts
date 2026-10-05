@@ -226,11 +226,35 @@ const shouldRetry = (asset: IAgencyFeedAsset, now: Date): boolean => {
   return since >= cooldown;
 };
 
-const importOne = async (
+/** Uploads in progress in one batch, by content hash: identical photos are stored once even when fetched in parallel. */
+type PendingSaves = Map<string, Promise<{ url: string; publicId?: string; reused: boolean }>>;
+
+const storeOnce = (
+  pending: PendingSaves,
+  buffer: Buffer,
+  info: ValidatedImage,
   sourceUrl: string,
   kind: ImageKind,
   ctx: ImageContext,
   deps: ImageImporterDeps
+) => {
+  const inFlight = pending.get(info.contentHash);
+  if (inFlight) return inFlight.then((stored) => ({ ...stored, reused: true }));
+  const save = (async () => {
+    const twin = await AgencyFeedAsset.findOne({ feedId: ctx.feedId, contentHash: info.contentHash, status: 'stored' });
+    if (twin?.url) return { url: twin.url, publicId: twin.publicId, reused: true };
+    return { ...(await deps.store.save(buffer, sourceUrl, kind, ctx)), reused: false };
+  })();
+  pending.set(info.contentHash, save);
+  return save;
+};
+
+const importOne = async (
+  sourceUrl: string,
+  kind: ImageKind,
+  ctx: ImageContext,
+  deps: ImageImporterDeps,
+  pending: PendingSaves
 ): Promise<ImageImportOutcome> => {
   const now = deps.now?.() ?? new Date();
   const urlHash = hashUrl(sourceUrl);
@@ -250,10 +274,7 @@ const importOne = async (
   try {
     const buffer = await deps.download(sourceUrl);
     const info = await validateImageBuffer(buffer);
-    const twin = await AgencyFeedAsset.findOne({ feedId: ctx.feedId, contentHash: info.contentHash, status: 'stored' });
-    const stored = twin?.url
-      ? { url: twin.url, publicId: twin.publicId }
-      : await deps.store.save(buffer, sourceUrl, kind, ctx);
+    const stored = await storeOnce(pending, buffer, info, sourceUrl, kind, ctx, deps);
     await AgencyFeedAsset.updateOne(
       { feedId: ctx.feedId, urlHash },
       {
@@ -275,7 +296,7 @@ const importOne = async (
       },
       { upsert: true }
     );
-    return { sourceUrl, ok: true, url: stored.url, publicId: stored.publicId, reused: Boolean(twin), downloaded: true };
+    return { sourceUrl, ok: true, url: stored.url, publicId: stored.publicId, reused: stored.reused, downloaded: true };
   } catch (err) {
     const reason = err instanceof ImageImportError ? err.reason : 'Upload to image storage failed';
     if (!(err instanceof ImageImportError)) {
@@ -306,8 +327,10 @@ export const importImages = (
   kind: ImageKind,
   ctx: ImageContext,
   deps: ImageImporterDeps
-): Promise<ImageImportOutcome[]> =>
-  mapWithConcurrency(urls, IMAGE_LIMITS.concurrency, (url) => importOne(url, kind, ctx, deps));
+): Promise<ImageImportOutcome[]> => {
+  const pending: PendingSaves = new Map();
+  return mapWithConcurrency(urls, IMAGE_LIMITS.concurrency, (url) => importOne(url, kind, ctx, deps, pending));
+};
 
 /**
  * Delete stored feed images no listing references any more.

@@ -11,6 +11,8 @@
     "start": "NODE_ENV=production node dist/server.js",
     "start:dev": "NODE_ENV=development node dist/server.js",
     "start:staging": "NODE_ENV=staging node dist/server.js",
+    "worker:feeds": "NODE_ENV=development ts-node src/workers/agencyFeedWorkerMain.ts",
+    "start:worker:feeds": "NODE_ENV=production node dist/workers/agencyFeedWorkerMain.js",
     "setup:db": "NODE_ENV=development ts-node src/scripts/setupDatabase.ts",
     "setup:db:staging": "NODE_ENV=staging ts-node src/scripts/setupDatabase.ts",
     "setup:db:production": "NODE_ENV=production ts-node src/scripts/setupDatabase.ts",
@@ -72,7 +74,8 @@
     "test:payments:unit": "jest --testPathPattern=payment-services --detectOpenHandles --forceExit",
     "test:payments:integration": "jest --testPathPattern=payment-integration --detectOpenHandles --forceExit",
     "test:payments:api": "./test-payments.sh",
-    "test:staging": "./scripts/test-staging-payments.sh"
+    "test:staging": "./scripts/test-staging-payments.sh",
+    "test:feeds": "jest --testPathPattern=agency-feed --forceExit"
   },
   "keywords": [
     "real-estate",
@@ -120,6 +123,7 @@
     "resend": "^6.6.0",
     "robots-parser": "^3.0.1",
     "rss-parser": "^3.13.0",
+    "sax": "^1.6.0",
     "sharp": "^0.34.5",
     "socket.io": "^4.5.4",
     "stripe": "^20.4.0",
