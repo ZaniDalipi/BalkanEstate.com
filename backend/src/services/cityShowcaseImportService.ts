@@ -1,5 +1,5 @@
 import cloudinary from '../config/cloudinary';
-import { isR2Enabled, isCloudinaryConfigured } from '../config/r2';
+import { isR2Enabled } from '../config/r2';
 import MediaAsset from '../models/MediaAsset';
 import { mediaFolder } from './media/mediaKeys';
 import { storedUrlFor } from './media/r2MediaStore';
@@ -124,14 +124,14 @@ export async function resolveCityPhoto(row: ImportableCity): Promise<string | nu
   const r2Url = await findStoredCityPhoto(row.country, row.city);
   if (r2Url && isUsablePhotoUrl(r2Url)) return r2Url;
 
-  if (isCloudinaryConfigured()) {
-    const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
-    try {
-      const resource = await cloudinary.api.resource(publicId);
-      if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;
-    } catch {
-      // Not in the library — fall through to the row's own field.
-    }
+  // Legacy Cloudinary library (until migrated). Without credentials this just
+  // fails and falls through like a miss.
+  const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
+  try {
+    const resource = await cloudinary.api.resource(publicId);
+    if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;
+  } catch {
+    // Not in the library — fall through to the row's own field.
   }
 
   return isUsablePhotoUrl(row.imageUrl) ? row.imageUrl.trim() : null;
