@@ -488,6 +488,13 @@
       "busy": "Po ngarkohet…",
       "feedName": "Ngarkim XML"
     },
-    "workerOffline": "Importimi juaj është në radhë, por shërbimi i importimit nuk po funksionon, ndaj nuk ka nisur. Do të nisë automatikisht kur shërbimi të rikthehet — kontaktoni mbështetjen nëse kjo zgjat më shumë se disa minuta."
+    "workerOffline": "Importimi juaj është në radhë, por shërbimi i importimit nuk po funksionon, ndaj nuk ka nisur. Do të nisë automatikisht kur shërbimi të rikthehet — kontaktoni mbështetjen nëse kjo zgjat më shumë se disa minuta.",
+    "detect": {
+      "title": "Skedari juaj përdor një strukturë tjetër.",
+      "found": "Çdo pronë është element <{{element}}> ({{count}} të gjetura në pjesën e parë të skedarit). Përputhëm këto fusha:",
+      "missing": "Nuk u gjetën automatikisht — vendosini në përputhje:",
+      "apply": "Përdor këtë përputhje dhe shiko përsëri",
+      "review": "Kontrollo përputhjen më parë"
+    }
   }
 }

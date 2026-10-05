@@ -141,6 +141,12 @@ Details the feed does not state are left empty — BalkanEstateAI never invents 
 
 ## Mapping another XML format
 
+**Automatic suggestion.** If a preview finds no listings with the current mapping, BalkanEstateAI looks at the
+file, finds the element that repeats for each property (e.g. `<property>`), matches its fields by common names
+(English and local variants such as `cena`, `grad`, `kvadratura`), and shows the result with
+**Use this mapping and preview again** — or **Review mapping first** to adjust it in the editor. Upload feeds
+re-preview their latest file, so nothing has to be uploaded twice.
+
 Choose *Other XML format* and fill in the field mapping. The form starts from the canonical mapping.
 
 - **Listing element** — the local name of the element that wraps one listing, e.g. `property`.
@@ -428,6 +434,7 @@ npm run test:feeds        # all agency-feed suites
 | `agency-feed-sync` | initial import, repeat without duplicates, price change, local edits, removal and reactivation, failed/invalid/empty/truncated/suspicious feeds, delta mode, duplicate IDs, plan limits, partial image failure, crash recovery, overlap prevention, scheduler, lapsed subscription |
 | `agency-feed-api` | agency isolation, manager-only access, unsafe URLs, credential redaction, preview/authorization/limit gates |
 | `agency-feed-images` | content validation, reuse and dedupe, concurrency, safe cleanup |
+| `agency-feed-detect` | detecting a non-canonical layout and a mapping that imports it |
 | `agency-feed-upload` | upload feeds without a URL, preview then activate imports the same file, later uploads, incomplete files, non-XML/unsafe files, permissions, scheduler skips uploads |
 
 The database suites use `mongodb-memory-server`. Where its binary download is blocked, point it at a local `mongod`:

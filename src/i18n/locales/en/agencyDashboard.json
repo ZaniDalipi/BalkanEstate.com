@@ -488,6 +488,13 @@
       "busy": "Uploading…",
       "feedName": "XML upload"
     },
-    "workerOffline": "Your import is queued, but the import service is not running, so it has not started. It will start automatically once the service is back — contact support if this lasts more than a few minutes."
+    "workerOffline": "Your import is queued, but the import service is not running, so it has not started. It will start automatically once the service is back — contact support if this lasts more than a few minutes.",
+    "detect": {
+      "title": "Your file uses a different layout.",
+      "found": "Each property is a <{{element}}> element ({{count}} found in the first part of the file). We matched these fields:",
+      "missing": "Not found automatically — set these in the mapping:",
+      "apply": "Use this mapping and preview again",
+      "review": "Review mapping first"
+    }
   }
 }

@@ -488,6 +488,13 @@
       "busy": "Se încarcă…",
       "feedName": "Încărcare XML"
     },
-    "workerOffline": "Importul dvs. este în așteptare, dar serviciul de import nu funcționează, așa că nu a pornit. Va porni automat când serviciul revine — contactați asistența dacă durează mai mult de câteva minute."
+    "workerOffline": "Importul dvs. este în așteptare, dar serviciul de import nu funcționează, așa că nu a pornit. Va porni automat când serviciul revine — contactați asistența dacă durează mai mult de câteva minute.",
+    "detect": {
+      "title": "Fișierul dvs. folosește o altă structură.",
+      "found": "Fiecare proprietate este un element <{{element}}> ({{count}} găsite în prima parte a fișierului). Am asociat aceste câmpuri:",
+      "missing": "Negăsite automat — setați-le în corespondență:",
+      "apply": "Folosește această corespondență și previzualizează din nou",
+      "review": "Verifică mai întâi corespondența"
+    }
   }
 }

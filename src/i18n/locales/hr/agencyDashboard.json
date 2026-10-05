@@ -488,6 +488,13 @@
       "busy": "Učitavanje…",
       "feedName": "XML učitavanje"
     },
-    "workerOffline": "Vaš uvoz čeka u redu, ali usluga uvoza ne radi pa još nije počeo. Pokrenut će se automatski kad usluga ponovno proradi — javite se podršci ako to traje dulje od nekoliko minuta."
+    "workerOffline": "Vaš uvoz čeka u redu, ali usluga uvoza ne radi pa još nije počeo. Pokrenut će se automatski kad usluga ponovno proradi — javite se podršci ako to traje dulje od nekoliko minuta.",
+    "detect": {
+      "title": "Vaša datoteka koristi drugačiji raspored.",
+      "found": "Svaka nekretnina je element <{{element}}> (pronađeno {{count}} u prvom dijelu datoteke). Povezali smo ova polja:",
+      "missing": "Nije pronađeno automatski — postavite ih u mapiranju:",
+      "apply": "Koristi ovo mapiranje i ponovno pregledaj",
+      "review": "Najprije provjeri mapiranje"
+    }
   }
 }

@@ -69,6 +69,17 @@ export interface IAgencyFeedRun extends Document {
   /** Validation errors and warnings (capped). */
   issues: FeedIssue[];
   issuesTruncated: boolean;
+  /**
+   * When the file's listings were not found with the current mapping: the
+   * structure that was detected instead and a suggested mapping for it.
+   */
+  detected?: {
+    recordElement: string;
+    sampleCount: number;
+    paths: string[];
+    suggestedMapping: Record<string, unknown>;
+    unmatched: string[];
+  };
   /** Up to five normalized listings, for the preview screen. */
   samples: NormalizedListing[];
   limit: {
@@ -145,6 +156,7 @@ const AgencyFeedRunSchema = new Schema<IAgencyFeedRun>(
     issues: { type: [IssueSchema], default: [] },
     issuesTruncated: { type: Boolean, default: false },
     samples: { type: Schema.Types.Mixed, default: [] },
+    detected: { type: Schema.Types.Mixed },
     limit: {
       checked: { type: Boolean, default: false },
       remaining: { type: Number },

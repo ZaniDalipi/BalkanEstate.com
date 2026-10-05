@@ -31,6 +31,8 @@ const api = vi.hoisted(() => ({
   activateFeed: vi.fn(),
   uploadFeedFile: vi.fn(),
   createFeed: vi.fn(),
+  updateFeed: vi.fn(),
+  requestPreview: vi.fn(),
 }));
 vi.mock('../features/agency-dashboard/api/propertyImportsApi', () => api);
 
@@ -139,5 +141,33 @@ describe('PropertyImportsSection', () => {
     api.listFeeds.mockResolvedValue({ feeds: [{ ...baseFeed, activeJob: true }], workerOnline: false });
     renderSection();
     expect(await screen.findByText(/the import service is not running/)).toBeTruthy();
+  });
+
+  it('explains a file with an unknown layout and applies the suggested mapping, then previews again', async () => {
+    const empty: FeedRun = {
+      ...preview, id: 'r8', samples: [], counts: { ...counts, received: 0, valid: 0, rejected: 0 },
+      limit: { ...preview.limit, wouldExceed: false, newListings: 0, excess: [] },
+      issues: [{ severity: 'error', code: 'no_listings_found', message: 'No <listing> elements were found.' }],
+      detected: {
+        recordElement: 'property', sampleCount: 34, paths: ['id', 'title'],
+        suggestedMapping: { recordElement: 'property', fields: { externalId: 'id', title: 'title', price: 'price', city: 'location/city' } },
+        unmatched: [],
+      },
+    };
+    const uploadFeed = { ...baseFeed, sourceType: 'upload' as const, url: null, lastPreviewRunId: 'r8' };
+    api.listFeeds.mockResolvedValue({ feeds: [uploadFeed], workerOnline: true });
+    api.listFeedRuns.mockResolvedValue([empty]);
+    api.getFeedRun.mockResolvedValue(empty);
+    api.updateFeed.mockResolvedValue({ ...uploadFeed, format: 'custom' });
+    api.requestPreview.mockResolvedValue({ runId: 'r9' });
+    renderSection();
+
+    expect(await screen.findByText('Your file uses a different layout.')).toBeTruthy();
+    expect(screen.getByText(/Each property is a <property> element \(34 found/)).toBeTruthy();
+    expect(screen.queryByText('Activate and import now')).toBeNull();
+    fireEvent.click(screen.getByText('Use this mapping and preview again'));
+
+    await waitFor(() => expect(api.requestPreview).toHaveBeenCalledWith('ag1', 'f1'));
+    expect(api.updateFeed).toHaveBeenCalledWith('ag1', 'f1', { format: 'custom', mapping: empty.detected!.suggestedMapping });
   });
 });

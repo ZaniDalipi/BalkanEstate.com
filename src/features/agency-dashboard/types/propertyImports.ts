@@ -142,6 +142,16 @@ export interface FeedRun {
   issues?: FeedIssue[];
   issuesTruncated?: boolean;
   samples?: FeedSampleListing[];
+  /** Present when no listings matched the mapping: what the file contains instead. */
+  detected?: DetectedStructure | null;
+}
+
+export interface DetectedStructure {
+  recordElement: string;
+  sampleCount: number;
+  paths: string[];
+  suggestedMapping: FeedMappingConfig;
+  unmatched: string[];
 }
 
 export interface FeedMeta {

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFeedRun, useFeedRuns } from '../../hooks/usePropertyImports';
-import { ACTIVE_RUN_STATUSES, type AgencyFeed, type FeedMeta } from '../../types/propertyImports';
+import { ACTIVE_RUN_STATUSES, type AgencyFeed, type FeedMappingConfig, type FeedMeta } from '../../types/propertyImports';
+import DetectedStructureNotice from './DetectedStructureNotice';
 import ActivationBox from './ActivationBox';
 import MutationError from './MutationError';
 import RunHistory from './RunHistory';
@@ -23,6 +24,9 @@ interface FeedPanelProps {
   onUpload: (file: Blob, filename: string, previewOnly: boolean) => void;
   uploading: boolean;
   uploadError: unknown;
+  onApplyMapping: (mapping: FeedMappingConfig) => void;
+  onReviewMapping: (mapping: FeedMappingConfig) => void;
+  applyingMapping: boolean;
 }
 
 const FeedPanel: React.FC<FeedPanelProps> = (props) => {
@@ -88,9 +92,23 @@ const FeedPanel: React.FC<FeedPanelProps> = (props) => {
           {runActive ? (
             <p className="text-sm text-blue-800">{t('agencyDashboard:imports.panel.inProgress', 'This import is still running; results appear here automatically.')}</p>
           ) : (
-            <RunReport run={run} reviewSlot={reviewSlot} />
+            <RunReport
+              run={run}
+              reviewSlot={reviewSlot}
+              detectedSlot={run.detected && (
+                <DetectedStructureNotice
+                  detected={run.detected}
+                  applying={props.applyingMapping}
+                  onApply={(mapping) => {
+                    setPickedRunId(null);
+                    props.onApplyMapping(mapping);
+                  }}
+                  onReview={props.onReviewMapping}
+                />
+              )}
+            />
           )}
-          {feed.state === 'draft' && isPreviewOfCurrentConfig && (
+          {feed.state === 'draft' && isPreviewOfCurrentConfig && run.counts.valid > 0 && (
             <ActivationBox preview={run} statement={meta.authorizationStatement} activating={props.activating} error={props.activateError} onActivate={props.onActivate} />
           )}
         </div>

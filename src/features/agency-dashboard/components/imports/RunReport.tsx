@@ -12,6 +12,8 @@ interface RunReportProps {
   run: FeedRun;
   /** Review buttons for held deactivations (managers only, latest run only). */
   reviewSlot?: React.ReactNode;
+  /** Suggested mapping when the file's listings were not found. */
+  detectedSlot?: React.ReactNode;
 }
 
 const Notice: React.FC<{ tone: 'warn' | 'info'; children: React.ReactNode }> = ({ tone, children }) => (
@@ -21,7 +23,7 @@ const Notice: React.FC<{ tone: 'warn' | 'info'; children: React.ReactNode }> = (
   </div>
 );
 
-const RunReport: React.FC<RunReportProps> = ({ run, reviewSlot }) => {
+const RunReport: React.FC<RunReportProps> = ({ run, reviewSlot, detectedSlot }) => {
   const { t } = useTranslation(['agencyDashboard']);
   const { counts, limit, deactivation } = run;
 
@@ -36,6 +38,7 @@ const RunReport: React.FC<RunReportProps> = ({ run, reviewSlot }) => {
       </div>
 
       {run.error && <Notice tone="warn"><p className="font-medium">{run.error.message}</p></Notice>}
+      {detectedSlot}
 
       {!run.dryRun && counts.received > 0 && <RunCounts counts={counts} />}
       {run.dryRun && run.status === 'previewed' && (
@@ -65,7 +68,7 @@ const RunReport: React.FC<RunReportProps> = ({ run, reviewSlot }) => {
           {reviewSlot}
         </Notice>
       )}
-      {!deactivation.held && !deactivation.allowed && deactivation.blockedReason && run.status !== 'failed' && (
+      {!run.dryRun && !deactivation.held && !deactivation.allowed && deactivation.blockedReason && run.status !== 'failed' && (
         <Notice tone="info"><p>{deactivation.blockedReason}</p></Notice>
       )}
       {run.dryRun && deactivation.allowed && deactivation.candidates > 0 && (

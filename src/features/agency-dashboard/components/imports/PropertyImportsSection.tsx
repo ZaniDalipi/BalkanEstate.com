@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@/constants';
+import type { FeedMappingConfig } from '../../types/propertyImports';
 import { useAgencyAgents } from '../../hooks';
 import { useAgencyFeeds, useFeedMeta, useFeedMutations } from '../../hooks/usePropertyImports';
 import FeedCard from './FeedCard';
@@ -14,7 +15,7 @@ interface PropertyImportsSectionProps {
   agencyId: string;
 }
 
-type Editing = { kind: 'none' } | { kind: 'new' } | { kind: 'edit'; feedId: string };
+type Editing = { kind: 'none' } | { kind: 'new' } | { kind: 'edit'; feedId: string; suggestedMapping?: FeedMappingConfig };
 
 const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyId }) => {
   const { t } = useTranslation(['agencyDashboard']);
@@ -81,13 +82,21 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
         <FeedForm
           key={editing.kind === 'edit' ? editing.feedId : 'new'}
           feed={editedFeed}
+          suggestedMapping={editing.kind === 'edit' ? editing.suggestedMapping : undefined}
           meta={meta}
           agents={agentOptions}
           saving={m.create.isPending || m.update.isPending}
           error={m.create.error ?? m.update.error ?? m.remove.error}
           onCancel={closeForm}
           onSubmit={(payload) => {
-            const done = { onSuccess: (feed: { id: string }) => { setSelectedId(feed.id); closeForm(); } };
+            // A changed draft is previewed again straight away (an upload feed re-reads its last file).
+            const done = {
+              onSuccess: (feed: { id: string; state: string }) => {
+                setSelectedId(feed.id);
+                closeForm();
+                if (feed.state === 'draft') m.preview.mutate(feed.id);
+              },
+            };
             if (editedFeed) m.update.mutate({ feedId: editedFeed.id, payload }, done);
             else m.create.mutate(payload, done);
           }}
@@ -144,6 +153,14 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
           onReview={(runId, decision) => m.review.mutate({ feedId: selected.id, runId, decision })}
           reviewing={m.review.isPending}
           onUpload={(file, filename, previewOnly) => m.upload.mutate({ feedId: selected.id, file, filename, previewOnly })}
+          onApplyMapping={(mapping) =>
+            m.update.mutate(
+              { feedId: selected.id, payload: { format: 'custom', mapping } },
+              { onSuccess: () => m.preview.mutate(selected.id) }
+            )
+          }
+          onReviewMapping={(mapping) => setEditing({ kind: 'edit', feedId: selected.id, suggestedMapping: mapping })}
+          applyingMapping={m.update.isPending || m.preview.isPending}
           uploading={m.upload.isPending}
           uploadError={m.upload.error}
         />

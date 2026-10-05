@@ -213,7 +213,7 @@ export const toRunDto = (run: IAgencyFeedRun, detail = false) => ({
   },
   limit: run.limit,
   issueCount: run.issues.length,
-  ...(detail ? { issues: run.issues, issuesTruncated: run.issuesTruncated, samples: run.samples } : {}),
+  ...(detail ? { issues: run.issues, issuesTruncated: run.issuesTruncated, samples: run.samples, detected: run.detected ?? null } : {}),
 });
 
 export const describeFeeds = async (agencyId: Types.ObjectId) => {
@@ -332,8 +332,19 @@ const ensureIdle = async (feed: IAgencyFeed): Promise<void> => {
 };
 
 export const requestPreview = async (feed: IAgencyFeed, actorId: ActorId) => {
-  if (feed.sourceType === 'upload') throw new FeedStateError('upload_required', 'Upload an XML file to preview it');
-  const queued = await enqueueFeedJob({ feed, kind: 'preview', trigger: 'preview', requestedBy: actorId });
+  // An upload feed previews its most recent file again (e.g. after the mapping changed).
+  const lastUpload =
+    feed.sourceType === 'upload'
+      ? await AgencyFeedUpload.findOne({ feedId: feed._id }).sort({ createdAt: -1 }).select('filename bytes')
+      : null;
+  if (feed.sourceType === 'upload' && !lastUpload) throw new FeedStateError('upload_required', 'Upload an XML file to preview it');
+  const queued = await enqueueFeedJob({
+    feed,
+    kind: 'preview',
+    trigger: 'preview',
+    requestedBy: actorId,
+    ...(lastUpload ? { upload: { id: lastUpload._id as Types.ObjectId, filename: lastUpload.filename, bytes: lastUpload.bytes } } : {}),
+  });
   await auditFeedAction({ agencyId: feed.agencyId, feedId: feed._id as Types.ObjectId, actorId, runId: queued.runId, action: 'preview_requested' });
   return queued;
 };

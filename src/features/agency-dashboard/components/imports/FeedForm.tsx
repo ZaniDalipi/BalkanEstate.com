@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeedPayload } from '../../api/propertyImportsApi';
-import type { AgencyFeed, FeedFormValues, FeedMeta } from '../../types/propertyImports';
+import type { AgencyFeed, FeedFormValues, FeedMappingConfig, FeedMeta } from '../../types/propertyImports';
 import FeedAccessFields from './FeedAccessFields';
 import FeedSourcePicker from './FeedSourcePicker';
 import MappingEditor from './MappingEditor';
@@ -18,6 +18,8 @@ interface FeedFormProps {
   onSubmit: (payload: FeedPayload) => void;
   onCancel: () => void;
   onDelete?: () => void;
+  /** Detected mapping to start from; switches the form to a custom format. */
+  suggestedMapping?: FeedMappingConfig;
 }
 
 const initialValues = (feed: AgencyFeed | null): FeedFormValues => ({
@@ -50,10 +52,13 @@ const buildPayload = (values: FeedFormValues, initial: FeedFormValues, isNew: bo
   return payload;
 };
 
-const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, saving, error, onSubmit, onCancel, onDelete }) => {
+const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMapping, saving, error, onSubmit, onCancel, onDelete }) => {
   const { t } = useTranslation(['agencyDashboard', 'common']);
   const [initial] = useState(() => initialValues(feed));
-  const [values, setValues] = useState<FeedFormValues>(initial);
+  // Starts from the suggestion but compares against the saved feed, so the mapping is sent on save.
+  const [values, setValues] = useState<FeedFormValues>(() =>
+    suggestedMapping ? { ...initial, format: 'custom', mapping: suggestedMapping } : initial
+  );
   const set = <K extends keyof FeedFormValues>(key: K, value: FeedFormValues[K]) => setValues((v) => ({ ...v, [key]: value }));
   const setCred = (patch: Partial<FeedFormValues['credentials']>) => set('credentials', { ...values.credentials, ...patch });
 

@@ -136,7 +136,9 @@ describe('agency feed — XML file upload', () => {
     expect((await AgencyFeedRun.findById(xxe.body.runId))?.error?.code).toBe('doctype_forbidden');
 
     expect((await request(app).post(`${feedsPath(s)}/${feed.id}/sync`).set('Authorization', auth)).body.code).toBe('upload_required');
-    expect((await request(app).post(`${feedsPath(s)}/${feed.id}/preview`).set('Authorization', auth)).body.code).toBe('upload_required');
+    // Preview on an upload feed re-runs its latest file.
+    expect((await request(app).post(`${feedsPath(s)}/${feed.id}/preview`).set('Authorization', auth)).status).toBe(202);
+    await drain();
     const toUrlFeed = await upload(s, String(s.feed._id), feedXml(ids(1)));
     expect(toUrlFeed.body.code).toBe('not_upload_feed');
   });
@@ -159,5 +161,32 @@ describe('agency feed — XML file upload', () => {
     await AgencyFeed.updateMany({}, { $set: { state: 'active', nextSyncAt: new Date(Date.now() - 1000) } });
     expect(await scheduleDueFeeds()).toBe(1); // only the URL feed from the fixture
     expect(await AgencyFeedRun.countDocuments({ feedId: feed.id })).toBe(0);
+  });
+
+  it('detects a non-canonical file, suggests a mapping, and re-previews the same file with it', async () => {
+    const s = await createAgencySetup();
+    const feed = await createUploadFeed(s);
+    const auth = tokenFor(s.owner);
+    const xml = `<export><properties>${[1, 2].map((i) => `<property><id>P-${i}</id><title>Flat ${i}</title>
+      <description>Nice</description><offer>sale</offer><type>apartment</type><price currency="EUR">9000${i}</price>
+      <location><country>Albania</country><city>Tirana</city><address>Rr ${i}</address><lat>41.3</lat><lng>19.8</lng></location>
+      <size>60</size><bedrooms>2</bedrooms><bathrooms>1</bathrooms>
+      <images><image><url>https://agency.example/${i}.jpg</url></image></images></property>`).join('')}</properties></export>`;
+
+    const first = await upload(s, feed.id, xml);
+    await drain();
+    const run = await request(app).get(`${feedsPath(s)}/${feed.id}/runs/${first.body.runId}`).set('Authorization', auth);
+    expect(run.body.run.counts.received).toBe(0);
+    expect(run.body.run.issues[0].code).toBe('no_listings_found');
+    expect(run.body.run.detected).toMatchObject({ recordElement: 'property', sampleCount: 2 });
+    const mapping = run.body.run.detected.suggestedMapping;
+    expect(mapping.fields).toMatchObject({ latitude: 'location/lat', longitude: 'location/lng', images: 'images/image/url' });
+
+    const patched = await request(app).patch(`${feedsPath(s)}/${feed.id}`).set('Authorization', auth).send({ format: 'custom', mapping });
+    expect(patched.status).toBe(200);
+    const again = await request(app).post(`${feedsPath(s)}/${feed.id}/preview`).set('Authorization', auth);
+    await drain();
+    const second = await AgencyFeedRun.findById(again.body.runId);
+    expect(second).toMatchObject({ status: 'previewed', counts: { received: 2, valid: 2 } });
   });
 });

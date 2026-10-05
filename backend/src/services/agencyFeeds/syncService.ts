@@ -29,6 +29,7 @@ import { normalizeRecord } from './listingNormalizer';
 import { createListing, deactivateListing, deactivateMissing, updateListing, type Geocoder, type WriterContext } from './listingWriter';
 import { listingHash } from './managedFields';
 import { findDuplicateIds, planSync } from './syncPlanner';
+import { detectStructure } from './structureDetector';
 
 /**
  * Runs one agency-feed import from start to finish:
@@ -214,6 +215,24 @@ const fetchAndStage = async (run: IAgencyFeedRun, feed: IAgencyFeed, deps: SyncD
     .map((d) => d.listing)
     .filter((l): l is NonNullable<typeof l> => Boolean(l) && l?.feedStatus !== 'removed')
     .slice(0, MAX_SAMPLES);
+  // Nothing matched the mapping: say what the file does contain, and suggest a mapping for it.
+  if (docs.length === 0 && fetched.header) {
+    const detected = detectStructure(fetched.header);
+    if (detected && detected.recordElement !== mapping.recordElement) {
+      run.detected = detected as unknown as IAgencyFeedRun['detected'];
+      allIssues.push({
+        severity: 'error',
+        code: 'no_listings_found',
+        message: `No <${mapping.recordElement}> elements were found. This file lists properties as <${detected.recordElement}> — apply the suggested field mapping to import them.`,
+      });
+    } else {
+      allIssues.push({
+        severity: 'error',
+        code: 'no_listings_found',
+        message: `No <${mapping.recordElement}> elements were found in the file.`,
+      });
+    }
+  }
   capIssues(run, allIssues);
   run.status = 'staged';
   await run.save();
