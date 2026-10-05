@@ -310,3 +310,43 @@ export const fetchFeed = async (feedUrl: string, options: FetchFeedOptions): Pro
     incompleteReason,
   };
 };
+
+/**
+ * Read an uploaded XML document with the same bounded reader and completeness
+ * rules as a downloaded feed. An uploaded file is a single page: if it points
+ * to a next page, the listings on that page were not uploaded, so the snapshot
+ * is reported incomplete (and nothing will be deactivated).
+ */
+export const readUploadedFeed = (
+  content: Buffer,
+  mapping: FeedMapping,
+  limits: Partial<XmlReaderLimits> = {}
+): FetchedFeed => {
+  const reader = new XmlRecordReader(mapping.recordElement, { ...DEFAULT_XML_LIMITS, ...limits });
+  let page;
+  try {
+    reader.write(content);
+    page = reader.end();
+  } catch (err) {
+    if (err instanceof FeedDocumentError) throw new FeedFetchError(err.code, err.message, false);
+    throw err;
+  }
+  const rawTotal = mapping.feed?.totalCount ? selectFirst(page.header, mapping.feed.totalCount) : undefined;
+  const total = rawTotal !== undefined ? Number(rawTotal) : undefined;
+  const declaredTotal = total !== undefined && Number.isInteger(total) && total >= 0 ? total : undefined;
+  let incompleteReason: string | undefined;
+  if (mapping.feed?.nextPage && selectFirst(page.header, mapping.feed.nextPage)) {
+    incompleteReason = 'The uploaded file refers to further pages that were not uploaded';
+  } else if (declaredTotal !== undefined && declaredTotal !== page.records.length) {
+    incompleteReason = `The file declares ${declaredTotal} listings but contains ${page.records.length}`;
+  }
+  return {
+    records: page.records,
+    header: page.header,
+    pages: 1,
+    bytes: page.bytes,
+    declaredTotal,
+    complete: !incompleteReason,
+    incompleteReason,
+  };
+};

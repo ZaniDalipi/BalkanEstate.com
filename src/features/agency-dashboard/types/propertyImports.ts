@@ -4,6 +4,8 @@
 export type FeedState = 'draft' | 'active' | 'paused';
 export type FeedFormat = 'canonical' | 'custom';
 export type FeedMode = 'snapshot' | 'delta';
+/** `url`: fetched and synced daily. `upload`: imports each XML file the agency uploads. */
+export type FeedSourceType = 'url' | 'upload';
 export type CredentialType = 'none' | 'basic' | 'header';
 
 export type FeedRunStatus =
@@ -41,7 +43,9 @@ export interface FeedSafeguards {
 export interface AgencyFeed {
   id: string;
   name: string;
-  url: string;
+  sourceType: FeedSourceType;
+  /** Redacted; null for upload feeds. */
+  url: string | null;
   format: FeedFormat;
   mapping: FeedMappingConfig | null;
   mode: FeedMode;
@@ -110,6 +114,7 @@ export interface FeedRun {
   trigger: 'preview' | 'manual' | 'scheduled';
   dryRun: boolean;
   status: FeedRunStatus;
+  sourceFile?: { filename: string; bytes: number };
   startedAt: string | null;
   finishedAt: string | null;
   createdAt: string;
@@ -152,6 +157,7 @@ export interface FeedMeta {
 
 export interface FeedFormValues {
   name: string;
+  sourceType: FeedSourceType;
   url: string;
   format: FeedFormat;
   mode: FeedMode;

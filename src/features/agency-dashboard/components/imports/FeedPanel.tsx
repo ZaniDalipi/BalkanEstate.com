@@ -6,6 +6,7 @@ import ActivationBox from './ActivationBox';
 import MutationError from './MutationError';
 import RunHistory from './RunHistory';
 import RunReport from './RunReport';
+import XmlUploadBox from './XmlUploadBox';
 
 interface FeedPanelProps {
   agencyId: string;
@@ -19,6 +20,9 @@ interface FeedPanelProps {
   activateError: unknown;
   onReview: (runId: string, decision: 'approve' | 'dismiss') => void;
   reviewing: boolean;
+  onUpload: (file: Blob, filename: string, previewOnly: boolean) => void;
+  uploading: boolean;
+  uploadError: unknown;
 }
 
 const FeedPanel: React.FC<FeedPanelProps> = (props) => {
@@ -47,7 +51,18 @@ const FeedPanel: React.FC<FeedPanelProps> = (props) => {
 
   return (
     <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-6">
-      {feed.state === 'draft' && (
+      {feed.sourceType === 'upload' && (
+        <div className="space-y-2">
+          <p className="text-sm text-gray-700">
+            {feed.state === 'draft'
+              ? t('agencyDashboard:imports.panel.uploadDraftHelp', 'Upload your XML file to check how your listings will look. Nothing is published until you activate the feed.')
+              : t('agencyDashboard:imports.panel.uploadActiveHelp', 'Upload a new XML file whenever your listings change. It is imported with the same checks as a feed.')}
+          </p>
+          <XmlUploadBox activated={feed.state !== 'draft'} busy={props.uploading || feed.activeJob} error={props.uploadError} onUpload={props.onUpload} />
+        </div>
+      )}
+
+      {feed.state === 'draft' && feed.sourceType !== 'upload' && (
         <div className="space-y-3">
           <p className="text-sm text-gray-700">
             {t('agencyDashboard:imports.panel.draftHelp', 'Test the connection and check how your listings will look. Nothing is published until you activate the feed.')}

@@ -29,12 +29,13 @@ const api = vi.hoisted(() => ({
   listFeedRuns: vi.fn(),
   getFeedRun: vi.fn(),
   activateFeed: vi.fn(),
+  uploadFeedFile: vi.fn(),
 }));
 vi.mock('../features/agency-dashboard/api/propertyImportsApi', () => api);
 
 const counts = { received: 3, valid: 2, created: 0, updated: 0, unchanged: 0, rejected: 1, deactivated: 0, reactivated: 0, skippedLimit: 0, localEditsKept: 0, imagesDownloaded: 0, imagesReused: 0, imagesFailed: 0 };
 const baseFeed: AgencyFeed = {
-  id: 'f1', name: 'Website feed', url: 'https://agency.example/feed.xml', format: 'canonical', mapping: null, mode: 'snapshot',
+  id: 'f1', name: 'Website feed', sourceType: 'url', url: 'https://agency.example/feed.xml', format: 'canonical', mapping: null, mode: 'snapshot',
   state: 'draft', assignedAgentId: 'a1', credentials: { type: 'none', hasSecret: false }, safeguards: { maxRemovalRatio: 0.3, minRemovalsForReview: 5 },
   authorization: null, configVersion: 1, lastPreviewRunId: 'r1', lastRunId: null, lastRunAt: null, lastSuccessfulSyncAt: null, nextSyncAt: null,
   consecutiveFailures: 0, lastError: null, activatedAt: null, activeJob: false, pendingReviewRunId: null, createdAt: '', updatedAt: '',
@@ -97,5 +98,25 @@ describe('PropertyImportsSection', () => {
     expect(await screen.findByText('Deactivate 6 listings')).toBeTruthy();
     expect(screen.getByText('Keep them active')).toBeTruthy();
     expect(screen.getByText('Daily sync on')).toBeTruthy();
+  });
+
+  it('lets an upload feed preview pasted XML, sent as an .xml file', async () => {
+    api.listFeeds.mockResolvedValue([{ ...baseFeed, sourceType: 'upload', url: null, lastPreviewRunId: null }]);
+    api.listFeedRuns.mockResolvedValue([]);
+    api.uploadFeedFile.mockResolvedValue({ runId: 'r5', kind: 'preview' });
+    renderSection();
+
+    expect(await screen.findByText(/Upload your XML file to check how your listings will look/)).toBeTruthy();
+    expect(screen.queryByText('Sync now')).toBeNull();
+    expect(screen.getByText('When you upload a file')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Paste XML' }));
+    fireEvent.change(screen.getByLabelText('Paste XML'), { target: { value: '<balkanestate-feed><listing><id>A</id></listing></balkanestate-feed>' } });
+    fireEvent.click(screen.getByText('Upload and preview'));
+
+    await waitFor(() => expect(api.uploadFeedFile).toHaveBeenCalled());
+    const [agencyId, feedId, blob, filename, previewOnly] = api.uploadFeedFile.mock.calls[0];
+    expect([agencyId, feedId, filename, previewOnly]).toEqual(['ag1', 'f1', 'pasted.xml', false]);
+    expect(await (blob as Blob).text()).toContain('<listing><id>A</id></listing>');
   });
 });

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { FeedPayload } from '../../api/propertyImportsApi';
 import type { AgencyFeed, FeedFormValues, FeedMeta } from '../../types/propertyImports';
 import FeedAccessFields from './FeedAccessFields';
+import FeedSourcePicker from './FeedSourcePicker';
 import MappingEditor from './MappingEditor';
 import MutationError from './MutationError';
 import SafeguardFields from './SafeguardFields';
@@ -21,6 +22,7 @@ interface FeedFormProps {
 
 const initialValues = (feed: AgencyFeed | null): FeedFormValues => ({
   name: feed?.name ?? '',
+  sourceType: feed?.sourceType ?? 'url',
   url: feed?.url ?? '',
   format: feed?.format ?? 'canonical',
   mode: feed?.mode ?? 'snapshot',
@@ -33,12 +35,14 @@ const initialValues = (feed: AgencyFeed | null): FeedFormValues => ({
 /** Only what changed is sent, so a redacted URL or an empty secret box never overwrites stored values. */
 const buildPayload = (values: FeedFormValues, initial: FeedFormValues, isNew: boolean): FeedPayload => {
   const payload: FeedPayload = {};
-  (['name', 'url', 'format', 'mode', 'assignedAgentId'] as const).forEach((key) => {
+  const isUpload = values.sourceType === 'upload';
+  (['name', 'sourceType', 'url', 'format', 'mode', 'assignedAgentId'] as const).forEach((key) => {
+    if (isUpload && key === 'url') return;
     // An empty agent means "the agency owner", which the server applies by default.
     if (values[key] !== '' && (isNew || values[key] !== initial[key])) (payload as Record<string, unknown>)[key] = values[key];
   });
   const c = values.credentials;
-  if (isNew || c.secret || c.type !== initial.credentials.type || c.username !== initial.credentials.username || c.headerName !== initial.credentials.headerName) {
+  if (!isUpload && (isNew || c.secret || c.type !== initial.credentials.type || c.username !== initial.credentials.username || c.headerName !== initial.credentials.headerName)) {
     payload.credentials = { type: c.type, username: c.username, headerName: c.headerName, ...(c.secret ? { secret: c.secret } : {}) };
   }
   if (values.format === 'custom' && (isNew || JSON.stringify(values.mapping) !== JSON.stringify(initial.mapping))) payload.mapping = values.mapping;
@@ -69,15 +73,19 @@ const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, saving, error, 
         </p>
       )}
 
+      <FeedSourcePicker value={values.sourceType} onChange={(sourceType) => set('sourceType', sourceType)} />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label className="block text-sm">
           <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.name', 'Name')}</span>
           <input className={inputClass} value={values.name} maxLength={80} required onChange={(e) => set('name', e.target.value)} placeholder={t('agencyDashboard:imports.form.namePlaceholder', 'Website feed')} />
         </label>
-        <label className="block text-sm">
-          <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.url', 'Feed URL')}</span>
-          <input className={inputClass} type="url" value={values.url} required onChange={(e) => set('url', e.target.value)} placeholder="https://www.your-agency.com/feed.xml" spellCheck={false} />
-        </label>
+        {values.sourceType === 'url' && (
+          <label className="block text-sm">
+            <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.url', 'Feed URL')}</span>
+            <input className={inputClass} type="url" value={values.url ?? ''} required onChange={(e) => set('url', e.target.value)} placeholder="https://www.your-agency.com/feed.xml" spellCheck={false} />
+          </label>
+        )}
         <label className="block text-sm">
           <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.format', 'Format')}</span>
           <select className={inputClass} value={values.format} onChange={(e) => {
@@ -110,7 +118,9 @@ const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, saving, error, 
         </label>
       </div>
 
-      <FeedAccessFields value={values.credentials} hasSavedSecret={Boolean(feed?.credentials.hasSecret)} onChange={setCred} />
+      {values.sourceType === 'url' && (
+        <FeedAccessFields value={values.credentials} hasSavedSecret={Boolean(feed?.credentials.hasSecret)} onChange={setCred} />
+      )}
 
       {values.format === 'custom' && values.mapping && (
         <MappingEditor value={values.mapping} fields={meta.fields} onChange={(mapping) => set('mapping', mapping)} />

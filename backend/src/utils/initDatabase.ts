@@ -44,6 +44,7 @@ import AgencyFeedJob from '../models/AgencyFeedJob';
 import AgencyFeedStagedRecord from '../models/AgencyFeedStagedRecord';
 import AgencyFeedAsset from '../models/AgencyFeedAsset';
 import AgencyFeedAuditLog from '../models/AgencyFeedAuditLog';
+import AgencyFeedUpload from '../models/AgencyFeedUpload';
 
 const allModels = [
   { name: 'User', model: User },
@@ -87,6 +88,7 @@ const allModels = [
   { name: 'AgencyFeedStagedRecord', model: AgencyFeedStagedRecord },
   { name: 'AgencyFeedAsset', model: AgencyFeedAsset },
   { name: 'AgencyFeedAuditLog', model: AgencyFeedAuditLog },
+  { name: 'AgencyFeedUpload', model: AgencyFeedUpload },
 ];
 
 /**

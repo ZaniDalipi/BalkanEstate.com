@@ -1,5 +1,8 @@
 import { Types } from 'mongoose';
-import AgencyFeed, { type IAgencyFeed } from '../../models/AgencyFeed';
+import { createHash } from 'crypto';
+import AgencyFeed, { type AgencyFeedSourceType, type IAgencyFeed } from '../../models/AgencyFeed';
+import AgencyFeedUpload from '../../models/AgencyFeedUpload';
+import { UPLOAD_MAX_BYTES } from './syncService';
 import AgencyFeedJob from '../../models/AgencyFeedJob';
 import AgencyFeedRun, { type IAgencyFeedRun } from '../../models/AgencyFeedRun';
 import Property from '../../models/Property';
@@ -42,6 +45,7 @@ export const AUTHORIZATION_STATEMENT =
 
 export interface FeedInput {
   name?: unknown;
+  sourceType?: unknown;
   url?: unknown;
   format?: unknown;
   mapping?: unknown;
@@ -76,6 +80,7 @@ export const checkFeedUrl = async (raw: string): Promise<string | undefined> => 
 
 interface NormalizedInput {
   name?: string;
+  sourceType?: AgencyFeedSourceType;
   url?: string;
   format?: 'canonical' | 'custom';
   mapping?: FeedMapping;
@@ -85,15 +90,27 @@ interface NormalizedInput {
   safeguards?: { maxRemovalRatio: number; minRemovalsForReview: number };
 }
 
-const validateInput = async (input: FeedInput, agency: IAgency, creating: boolean): Promise<NormalizedInput> => {
+const validateInput = async (
+  input: FeedInput,
+  agency: IAgency,
+  current: Pick<IAgencyFeed, 'sourceType' | 'url'> | null
+): Promise<NormalizedInput> => {
+  const creating = current === null;
   const problems: string[] = [];
   const out: NormalizedInput = {};
+
+  if (input.sourceType !== undefined) {
+    if (input.sourceType !== 'url' && input.sourceType !== 'upload') problems.push('Source must be url or upload');
+    else out.sourceType = input.sourceType;
+  }
+  const source = out.sourceType ?? current?.sourceType ?? 'url';
 
   if (input.name !== undefined || creating) {
     if (typeof input.name !== 'string' || !input.name.trim() || input.name.trim().length > 80) problems.push('Name is required (max 80 characters)');
     else out.name = input.name.trim();
   }
-  if (input.url !== undefined || creating) {
+  // An upload feed has no URL to fetch; a URL feed must always have one.
+  if (source === 'url' && (input.url !== undefined || creating || !current?.url)) {
     if (typeof input.url !== 'string' || !input.url.trim()) problems.push('Feed URL is required');
     else {
       const url = input.url.trim();
@@ -120,7 +137,7 @@ const validateInput = async (input: FeedInput, agency: IAgency, creating: boolea
     if (!Types.ObjectId.isValid(id) || !isMember(agency, id)) problems.push('Listings must be assigned to a member of this agency');
     else out.assignedAgentId = new Types.ObjectId(id);
   }
-  if (input.credentials !== undefined && input.credentials !== null) {
+  if (source === 'url' && input.credentials !== undefined && input.credentials !== null) {
     const c = input.credentials as Record<string, unknown>;
     const creds: CredentialsInput = {
       type: c.type as CredentialsInput['type'],
@@ -148,7 +165,8 @@ const validateInput = async (input: FeedInput, agency: IAgency, creating: boolea
 export const toFeedDto = (feed: IAgencyFeed, extras: { activeJob?: boolean; pendingReviewRunId?: string } = {}) => ({
   id: String(feed._id),
   name: feed.name,
-  url: redactUrl(feed.url),
+  sourceType: feed.sourceType ?? 'url',
+  url: feed.url ? redactUrl(feed.url) : null,
   format: feed.format,
   mapping: feed.mapping ?? null,
   mode: feed.mode,
@@ -215,15 +233,19 @@ export const describeFeeds = async (agencyId: Types.ObjectId) => {
 export const createFeed = async (agency: IAgency, actorId: ActorId, input: FeedInput): Promise<IAgencyFeed> => {
   const count = await AgencyFeed.countDocuments({ agencyId: agency._id });
   if (count >= MAX_FEEDS_PER_AGENCY) throw new FeedInputError([`An agency can connect at most ${MAX_FEEDS_PER_AGENCY} feeds`]);
-  const data = await validateInput(input, agency, true);
+  const data = await validateInput(input, agency, null);
+  const sourceType = data.sourceType ?? 'url';
   const format = data.format ?? 'canonical';
   if (format === 'custom' && !data.mapping) throw new FeedInputError(['A custom feed needs a field mapping']);
-  if (await AgencyFeed.exists({ agencyId: agency._id, url: data.url })) throw new FeedInputError(['This feed URL is already connected']);
+  if (data.url && (await AgencyFeed.exists({ agencyId: agency._id, url: data.url }))) {
+    throw new FeedInputError(['This feed URL is already connected']);
+  }
 
   const feed = await AgencyFeed.create({
     agencyId: agency._id,
     name: data.name,
-    url: data.url,
+    sourceType,
+    url: sourceType === 'url' ? data.url : undefined,
     format,
     mapping: format === 'custom' ? data.mapping : undefined,
     mode: data.mode ?? 'snapshot',
@@ -239,18 +261,28 @@ export const createFeed = async (agency: IAgency, actorId: ActorId, input: FeedI
     feedId: feed._id as Types.ObjectId,
     actorId,
     action: 'feed_created',
-    details: { name: feed.name, url: redactUrl(feed.url), format, mode: feed.mode, credentials: feed.credentials.type },
+    details: { name: feed.name, sourceType, url: redactUrl(feed.url), format, mode: feed.mode, credentials: feed.credentials.type },
   });
   return feed;
 };
 
 /** Settings that change what is imported: changing one sends the feed back to draft. */
-const PARSING_KEYS = ['url', 'format', 'mapping', 'mode', 'credentials'] as const;
+const PARSING_KEYS = ['sourceType', 'url', 'format', 'mapping', 'mode', 'credentials'] as const;
 
 export const updateFeed = async (feed: IAgencyFeed, agency: IAgency, actorId: ActorId, input: FeedInput): Promise<IAgencyFeed> => {
-  const data = await validateInput(input, agency, false);
+  const data = await validateInput(input, agency, feed);
   const changed: string[] = [];
   if (data.name !== undefined && data.name !== feed.name) { feed.name = data.name; changed.push('name'); }
+  if (data.sourceType !== undefined && data.sourceType !== feed.sourceType) {
+    feed.sourceType = data.sourceType;
+    changed.push('sourceType');
+    if (data.sourceType === 'upload') {
+      // Nothing to fetch any more: drop the URL and its credentials.
+      feed.url = undefined;
+      feed.credentials = { type: 'none' };
+      feed.markModified('credentials');
+    }
+  }
   if (data.url !== undefined && data.url !== feed.url) {
     if (await AgencyFeed.exists({ agencyId: agency._id, url: data.url, _id: { $ne: feed._id } })) throw new FeedInputError(['This feed URL is already connected']);
     feed.url = data.url;
@@ -300,12 +332,14 @@ const ensureIdle = async (feed: IAgencyFeed): Promise<void> => {
 };
 
 export const requestPreview = async (feed: IAgencyFeed, actorId: ActorId) => {
+  if (feed.sourceType === 'upload') throw new FeedStateError('upload_required', 'Upload an XML file to preview it');
   const queued = await enqueueFeedJob({ feed, kind: 'preview', trigger: 'preview', requestedBy: actorId });
   await auditFeedAction({ agencyId: feed.agencyId, feedId: feed._id as Types.ObjectId, actorId, runId: queued.runId, action: 'preview_requested' });
   return queued;
 };
 
 export const requestSync = async (feed: IAgencyFeed, actorId: ActorId) => {
+  if (feed.sourceType === 'upload') throw new FeedStateError('upload_required', 'This feed imports uploaded files; upload a new XML file instead');
   if (feed.state === 'draft') throw new FeedStateError('not_active', 'Preview and activate the feed before syncing it');
   const queued = await enqueueFeedJob({ feed, kind: 'sync', trigger: 'manual', requestedBy: actorId });
   await auditFeedAction({ agencyId: feed.agencyId, feedId: feed._id as Types.ObjectId, actorId, runId: queued.runId, action: 'sync_requested' });
@@ -342,7 +376,7 @@ export const activateFeed = async (feed: IAgencyFeed, actorId: ActorId, input: A
   feed.state = 'active';
   feed.authorization = { confirmedAt: now, confirmedBy: new Types.ObjectId(String(actorId)), statement: AUTHORIZATION_STATEMENT };
   feed.activatedAt = now;
-  feed.nextSyncAt = new Date(now.getTime() + syncIntervalMs());
+  feed.nextSyncAt = feed.sourceType === 'upload' ? undefined : new Date(now.getTime() + syncIntervalMs());
   feed.updatedBy = new Types.ObjectId(String(actorId));
   await feed.save();
   await auditFeedAction({
@@ -353,11 +387,21 @@ export const activateFeed = async (feed: IAgencyFeed, actorId: ActorId, input: A
     agencyId: feed.agencyId, feedId: feed._id as Types.ObjectId, actorId, action: 'feed_activated',
     details: { acceptedListingLimit: preview.limit.wouldExceed },
   });
-  // The first import runs right away rather than in 24 hours.
-  return enqueueFeedJob({ feed, kind: 'sync', trigger: 'manual', requestedBy: actorId });
+  // The first import runs right away rather than in 24 hours. For an uploaded
+  // file it imports exactly the file that was previewed.
+  return enqueueFeedJob({
+    feed,
+    kind: 'sync',
+    trigger: 'manual',
+    requestedBy: actorId,
+    ...(preview.uploadId && preview.sourceFile
+      ? { upload: { id: preview.uploadId, filename: preview.sourceFile.filename, bytes: preview.sourceFile.bytes } }
+      : {}),
+  });
 };
 
 export const pauseFeed = async (feed: IAgencyFeed, actorId: ActorId) => {
+  if (feed.sourceType === 'upload') throw new FeedStateError('not_scheduled', 'Upload feeds have no daily sync to pause');
   if (feed.state !== 'active') throw new FeedStateError('not_active', 'Only an active feed can be paused');
   feed.state = 'paused';
   feed.nextSyncAt = undefined;
@@ -366,6 +410,7 @@ export const pauseFeed = async (feed: IAgencyFeed, actorId: ActorId) => {
 };
 
 export const resumeFeed = async (feed: IAgencyFeed, actorId: ActorId, now = new Date()) => {
+  if (feed.sourceType === 'upload') throw new FeedStateError('not_scheduled', 'Upload feeds have no daily sync to resume');
   if (feed.state !== 'paused') throw new FeedStateError('not_paused', 'Only a paused feed can be resumed');
   feed.state = 'active';
   feed.nextSyncAt = now;
@@ -427,4 +472,66 @@ export const setListingLocks = async (feed: IAgencyFeed, propertyId: string, fie
   if (result.matchedCount === 0) throw new FeedStateError('not_found', 'Listing not found in this feed');
   await auditFeedAction({ agencyId: feed.agencyId, feedId: feed._id as Types.ObjectId, actorId, action: 'listing_fields_locked', details: { propertyId, fields: unique } });
   return unique;
+};
+
+export interface UploadInput {
+  content: Buffer;
+  filename: string;
+  /** `import` applies the file on an activated feed; a draft feed always previews. */
+  intent: 'preview' | 'import';
+}
+
+/** Leading bytes of an XML document: optional BOM, whitespace, then "<". */
+const looksLikeXml = (content: Buffer): boolean => {
+  const head = content.subarray(0, 512).toString('utf8').replace(/^\uFEFF/, '').trimStart();
+  return head.startsWith('<');
+};
+
+/**
+ * Store an uploaded XML file and queue it: a preview while the feed is a
+ * draft (or when asked), otherwise an import that applies it exactly like a
+ * fetched feed — same validation, limits and deactivation safeguards.
+ */
+export const uploadFeedFile = async (feed: IAgencyFeed, actorId: ActorId, input: UploadInput) => {
+  if (feed.sourceType !== 'upload') {
+    throw new FeedStateError('not_upload_feed', 'This feed is fetched from its URL; switch it to file uploads to upload XML');
+  }
+  if (input.content.length === 0) throw new FeedInputError(['The file is empty']);
+  if (input.content.length > UPLOAD_MAX_BYTES) {
+    throw new FeedInputError([`The file is larger than ${Math.round(UPLOAD_MAX_BYTES / 1048576)} MB`]);
+  }
+  if (!looksLikeXml(input.content)) throw new FeedInputError(['The file is not XML']);
+
+  const kind = feed.state === 'draft' || input.intent === 'preview' ? 'preview' : 'sync';
+  const filename = input.filename.replace(/[^\w.\- ]/g, '_').slice(0, 200) || 'feed.xml';
+  const upload = await AgencyFeedUpload.create({
+    feedId: feed._id,
+    agencyId: feed.agencyId,
+    filename,
+    bytes: input.content.length,
+    sha256: createHash('sha256').update(input.content).digest('hex'),
+    content: input.content,
+    uploadedBy: actorId,
+  });
+  try {
+    const queued = await enqueueFeedJob({
+      feed,
+      kind,
+      trigger: kind === 'preview' ? 'preview' : 'manual',
+      requestedBy: actorId,
+      upload: { id: upload._id as Types.ObjectId, filename, bytes: upload.bytes },
+    });
+    await auditFeedAction({
+      agencyId: feed.agencyId,
+      feedId: feed._id as Types.ObjectId,
+      actorId,
+      runId: queued.runId,
+      action: kind === 'preview' ? 'preview_requested' : 'sync_requested',
+      details: { upload: filename, bytes: upload.bytes, sha256: upload.sha256 },
+    });
+    return { ...queued, kind };
+  } catch (err) {
+    await AgencyFeedUpload.deleteOne({ _id: upload._id });
+    throw err;
+  }
 };

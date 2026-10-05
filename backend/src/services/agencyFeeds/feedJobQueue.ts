@@ -37,6 +37,8 @@ export interface EnqueueInput {
   requestedBy?: Types.ObjectId | string;
   /** For `apply_deactivations`: the run whose held deactivations were approved. */
   runId?: Types.ObjectId | string;
+  /** Import this uploaded file instead of fetching the feed URL. */
+  upload?: { id: Types.ObjectId | string; filename: string; bytes: number };
   now?: Date;
 }
 
@@ -56,6 +58,7 @@ export const enqueueFeedJob = async (input: EnqueueInput): Promise<{ jobId: Type
       dryRun: input.kind === 'preview',
       configVersion: input.feed.configVersion,
       requestedBy: input.requestedBy,
+      ...(input.upload ? { uploadId: input.upload.id, sourceFile: { filename: input.upload.filename, bytes: input.upload.bytes } } : {}),
       status: 'queued',
       snapshot: { mode: 'snapshot', complete: false, pages: 0, bytes: 0 },
     });
@@ -162,7 +165,8 @@ export const processJob = async (job: IAgencyFeedJob, workerId: string, deps: Sy
  * forward first so concurrent schedulers cannot double-queue it.
  */
 export const scheduleDueFeeds = async (now: Date = new Date()): Promise<number> => {
-  const due = await AgencyFeed.find({ state: 'active', nextSyncAt: { $lte: now } })
+  // Upload feeds have nothing to fetch: they import when a file is uploaded.
+  const due = await AgencyFeed.find({ state: 'active', sourceType: { $ne: 'upload' }, nextSyncAt: { $lte: now } })
     .select('_id agencyId configVersion nextSyncAt')
     .limit(200);
   let queued = 0;

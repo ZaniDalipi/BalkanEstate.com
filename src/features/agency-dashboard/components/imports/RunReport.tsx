@@ -31,6 +31,7 @@ const RunReport: React.FC<RunReportProps> = ({ run, reviewSlot }) => {
         <ImportStatusBadge status={run.status} />
         <span>{formatDateTime(run.finishedAt ?? run.startedAt ?? run.createdAt)}</span>
         <span>· {t('agencyDashboard:imports.report.received', '{{count}} listings in feed', { count: counts.received })}</span>
+        {run.sourceFile && <span className="break-all">· {run.sourceFile.filename}</span>}
         {run.snapshot.pages > 1 && <span>· {t('agencyDashboard:imports.report.pages', '{{count}} pages', { count: run.snapshot.pages })}</span>}
       </div>
 

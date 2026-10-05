@@ -64,6 +64,11 @@ export function useFeedMutations(agencyId: string) {
         api.activateFeed(agencyId, feedId, { confirmAuthorized: true, acceptListingLimit }),
       ...options,
     }),
+    upload: useMutation({
+      mutationFn: ({ feedId, file, filename, previewOnly }: { feedId: string; file: Blob; filename: string; previewOnly: boolean }) =>
+        api.uploadFeedFile(agencyId, feedId, file, filename, previewOnly),
+      ...options,
+    }),
     pause: useMutation({ mutationFn: (feedId: string) => api.pauseFeed(agencyId, feedId), ...options }),
     resume: useMutation({ mutationFn: (feedId: string) => api.resumeFeed(agencyId, feedId), ...options }),
     review: useMutation({

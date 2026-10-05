@@ -307,7 +307,8 @@
       "notScheduled": "Nije planirano",
       "mode": "Vrsta feeda",
       "reviewNeeded": "Mnogo oglasa nestalo je iz feeda. Provjerite prije nego što budu deaktivirani.",
-      "failedTimes": "(neuspješno {{count}} puta zaredom)"
+      "failedTimes": "(neuspješno {{count}} puta zaredom)",
+      "onUpload": "Kada učitate datoteku"
     },
     "mode": {
       "snapshot": "Potpuni popis (snapshot)",
@@ -362,7 +363,9 @@
     "panel": {
       "draftHelp": "Testirajte vezu i provjerite kako će oglasi izgledati. Ništa se ne objavljuje dok ne aktivirate feed.",
       "previewRunning": "Provjera feeda…",
-      "inProgress": "Uvoz je još u tijeku; rezultati će se ovdje prikazati automatski."
+      "inProgress": "Uvoz je još u tijeku; rezultati će se ovdje prikazati automatski.",
+      "uploadDraftHelp": "Učitajte XML datoteku i provjerite kako će oglasi izgledati. Ništa se ne objavljuje dok ne aktivirate feed.",
+      "uploadActiveHelp": "Učitajte novu XML datoteku kad god se oglasi promijene. Uvozi se uz iste provjere kao feed."
     },
     "activate": {
       "title": "Aktiviraj dnevni uvoz",
@@ -462,6 +465,23 @@
       "images": "Fotografije",
       "floorplans": "Tlocrti",
       "updatedAt": "Zadnje ažuriranje"
+    },
+    "source": {
+      "title": "Odakle dolaze vaši oglasi?",
+      "url": "URL feeda",
+      "urlHelp": "Preuzimamo feed s vaše web stranice ili CRM-a i sinkroniziramo ga svaka 24 sata.",
+      "upload": "Učitaj XML datoteku",
+      "uploadHelp": "Učitajte ili zalijepite XML datoteku kad god se vaši oglasi promijene. URL nije potreban."
+    },
+    "upload": {
+      "chooseFile": "Odaberi datoteku",
+      "paste": "Zalijepi XML",
+      "pick": "Odaberite .xml datoteku",
+      "limit": "Samo XML, do {{mb}} MB",
+      "tooLarge": "Datoteka je veća od {{mb}} MB.",
+      "previewOnly": "Samo pregled — provjeri datoteku bez mijenjanja oglasa",
+      "preview": "Učitaj i pregledaj",
+      "import": "Učitaj i uvezi"
     }
   }
 }

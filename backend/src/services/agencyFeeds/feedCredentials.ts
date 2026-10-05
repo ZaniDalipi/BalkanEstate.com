@@ -68,7 +68,8 @@ export const redactCredentials = (stored: IAgencyFeedCredentials | undefined) =>
 });
 
 /** Remove any userinfo or token-like query values before a URL is logged or shown in history. */
-export const redactUrl = (raw: string): string => {
+export const redactUrl = (raw: string | undefined): string => {
+  if (!raw) return '';
   try {
     const url = new URL(raw);
     url.username = '';

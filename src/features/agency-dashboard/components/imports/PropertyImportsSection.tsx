@@ -117,6 +117,9 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
           activateError={m.activate.error}
           onReview={(runId, decision) => m.review.mutate({ feedId: selected.id, runId, decision })}
           reviewing={m.review.isPending}
+          onUpload={(file, filename, previewOnly) => m.upload.mutate({ feedId: selected.id, file, filename, previewOnly })}
+          uploading={m.upload.isPending}
+          uploadError={m.upload.error}
         />
       )}
 

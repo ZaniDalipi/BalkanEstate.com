@@ -52,6 +52,9 @@ export interface IAgencyFeedRun extends Document {
   configVersion: number;
   status: AgencyFeedRunStatus;
   requestedBy?: Types.ObjectId;
+  /** Set when the run reads an uploaded file instead of fetching the feed URL. */
+  uploadId?: Types.ObjectId;
+  sourceFile?: { filename: string; bytes: number };
   startedAt?: Date;
   finishedAt?: Date;
   snapshot: {
@@ -123,6 +126,11 @@ const AgencyFeedRunSchema = new Schema<IAgencyFeedRun>(
       default: 'queued',
     },
     requestedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    uploadId: { type: Schema.Types.ObjectId, ref: 'AgencyFeedUpload' },
+    sourceFile: {
+      filename: { type: String },
+      bytes: { type: Number },
+    },
     startedAt: { type: Date },
     finishedAt: { type: Date },
     snapshot: {

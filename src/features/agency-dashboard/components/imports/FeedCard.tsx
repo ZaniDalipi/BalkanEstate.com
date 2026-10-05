@@ -17,7 +17,8 @@ interface FeedCardProps {
 
 const FeedCard: React.FC<FeedCardProps> = ({ feed, selected, busy, onSelect, onEdit, onSyncNow, onTogglePause }) => {
   const { t } = useTranslation(['agencyDashboard']);
-  const canSync = feed.state !== 'draft' && !feed.activeJob;
+  const isUpload = feed.sourceType === 'upload';
+  const canSync = !isUpload && feed.state !== 'draft' && !feed.activeJob;
 
   return (
     <article
@@ -35,9 +36,12 @@ const FeedCard: React.FC<FeedCardProps> = ({ feed, selected, busy, onSelect, onE
               </span>
             )}
           </div>
-          <p className="mt-1 text-xs text-gray-500 break-all">{feed.url}</p>
+          <p className="mt-1 text-xs text-gray-500 break-all">
+            {isUpload ? t('agencyDashboard:imports.source.upload', 'Upload XML file') : feed.url}
+          </p>
         </button>
         <div className="flex flex-wrap gap-2 shrink-0">
+          {!isUpload && (
           <button
             type="button"
             onClick={onSyncNow}
@@ -47,7 +51,8 @@ const FeedCard: React.FC<FeedCardProps> = ({ feed, selected, busy, onSelect, onE
             <ArrowPathIcon className="w-4 h-4" />
             {t('agencyDashboard:imports.actions.syncNow', 'Sync now')}
           </button>
-          {feed.state !== 'draft' && (
+          )}
+          {!isUpload && feed.state !== 'draft' && (
             <button
               type="button"
               onClick={onTogglePause}
@@ -78,7 +83,9 @@ const FeedCard: React.FC<FeedCardProps> = ({ feed, selected, busy, onSelect, onE
         <div>
           <dt className="text-gray-500">{t('agencyDashboard:imports.card.nextSync', 'Next scheduled sync')}</dt>
           <dd className="font-medium text-gray-900">
-            {feed.state === 'active' ? formatDateTime(feed.nextSyncAt) : t('agencyDashboard:imports.card.notScheduled', 'Not scheduled')}
+            {isUpload
+              ? t('agencyDashboard:imports.card.onUpload', 'When you upload a file')
+              : feed.state === 'active' ? formatDateTime(feed.nextSyncAt) : t('agencyDashboard:imports.card.notScheduled', 'Not scheduled')}
           </dd>
         </div>
         <div>

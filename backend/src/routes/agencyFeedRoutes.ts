@@ -1,5 +1,9 @@
 import express from 'express';
+import path from 'path';
+import multer from 'multer';
 import rateLimit from 'express-rate-limit';
+import { withUploadErrors } from '../middleware/uploadErrors';
+import { UPLOAD_MAX_BYTES } from '../services/agencyFeeds/syncService';
 import { protect } from '../middleware/auth';
 import { agencyDashboardAuth } from '../middleware/agencyDashboardAuth';
 import { loadAgencyFeed, requireAgencyFeedManager } from '../middleware/agencyFeedManagerAuth';
@@ -20,6 +24,7 @@ import {
   setFeedListingLocks,
   syncAgencyFeed,
   updateAgencyFeed,
+  uploadAgencyFeedFile,
 } from '../controllers/agencyFeedController';
 
 /**
@@ -39,6 +44,19 @@ const fetchTriggerLimiter = rateLimit({
   message: { message: 'Too many import requests. Please wait a few minutes.' },
 });
 
+const XML_TYPES = new Set(['text/xml', 'application/xml', 'application/octet-stream', 'text/plain', '']);
+/** One XML file in memory, size-capped; its content is validated again by the XML reader. */
+const xmlUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: UPLOAD_MAX_BYTES, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    const okExtension = path.extname(file.originalname).toLowerCase() === '.xml';
+    const okType = XML_TYPES.has(file.mimetype) || file.mimetype.endsWith('+xml');
+    if (okExtension && okType) cb(null, true);
+    else cb(new Error('Only .xml files can be uploaded'));
+  },
+});
+
 const base = [protect, agencyDashboardAuth, requireAgencyFeedManager] as const;
 const withFeed = [...base, loadAgencyFeed] as const;
 
@@ -51,6 +69,13 @@ router.delete('/:agencyId/feeds/:feedId', ...withFeed, deleteAgencyFeed);
 
 router.post('/:agencyId/feeds/:feedId/preview', ...withFeed, fetchTriggerLimiter, previewAgencyFeed);
 router.post('/:agencyId/feeds/:feedId/sync', ...withFeed, fetchTriggerLimiter, syncAgencyFeed);
+router.post(
+  '/:agencyId/feeds/:feedId/upload',
+  ...withFeed,
+  fetchTriggerLimiter,
+  withUploadErrors(xmlUpload.single('file'), { field: 'file', maxFiles: 1, maxFileSizeBytes: UPLOAD_MAX_BYTES }),
+  uploadAgencyFeedFile
+);
 router.post('/:agencyId/feeds/:feedId/activate', ...withFeed, activateAgencyFeed);
 router.post('/:agencyId/feeds/:feedId/pause', ...withFeed, pauseAgencyFeed);
 router.post('/:agencyId/feeds/:feedId/resume', ...withFeed, resumeAgencyFeed);

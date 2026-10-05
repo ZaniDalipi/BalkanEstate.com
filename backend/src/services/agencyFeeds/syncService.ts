@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import AgencyFeed, { type IAgencyFeed } from '../../models/AgencyFeed';
 import AgencyFeedRun, { emptyRunCounts, type IAgencyFeedRun } from '../../models/AgencyFeedRun';
+import AgencyFeedUpload from '../../models/AgencyFeedUpload';
 import AgencyFeedStagedRecord, { type IAgencyFeedStagedRecord, type StagedResult } from '../../models/AgencyFeedStagedRecord';
 import Agency, { type IAgency } from '../../models/Agency';
 import Agent from '../../models/Agent';
@@ -12,7 +13,7 @@ import { captureMessage } from '../../lib/sentry';
 import { CANONICAL_MAPPING } from './canonicalFormat';
 import { auditFeedAction, feedLogger } from './feedAudit';
 import { decryptCredentials, redactUrl } from './feedCredentials';
-import { fetchFeed, FeedFetchError, type FetchFeedOptions, type FetchedFeed } from './feedFetcher';
+import { fetchFeed, FeedFetchError, readUploadedFeed, type FetchFeedOptions, type FetchedFeed } from './feedFetcher';
 import { mapRecord, selectFirst } from './fieldMapper';
 import type { FeedIssue, FeedMapping } from './feedTypes';
 import {
@@ -88,6 +89,9 @@ export const fetchLimitsFromEnv = () => ({
   maxPages: intEnv('AGENCY_FEED_MAX_PAGES', 50),
 });
 
+/** Uploaded files are stored as one MongoDB document, so they stay under its 16 MB limit. */
+export const UPLOAD_MAX_BYTES = Math.min(intEnv('AGENCY_FEED_UPLOAD_MAX_MB', 15), 15) * 1024 * 1024;
+
 export const mappingFor = (feed: Pick<IAgencyFeed, 'format' | 'mapping'>): FeedMapping =>
   feed.format === 'canonical' || !feed.mapping ? CANONICAL_MAPPING : feed.mapping;
 
@@ -127,6 +131,24 @@ const capIssues = (run: IAgencyFeedRun, issues: FeedIssue[]): void => {
 
 // ── Phase 1 ────────────────────────────────────────────────────────────────
 
+/** The run's XML: the uploaded file when there is one, otherwise the feed URL. */
+const loadDocument = async (run: IAgencyFeedRun, feed: IAgencyFeed, mapping: FeedMapping, deps: SyncDeps): Promise<FetchedFeed> => {
+  if (run.uploadId) {
+    const upload = await AgencyFeedUpload.findOne({ _id: run.uploadId, feedId: feed._id }).select('content');
+    if (!upload) throw new FeedFetchError('upload_missing', 'The uploaded file is no longer available; upload it again.', false);
+    const { maxRecords } = fetchLimitsFromEnv();
+    return readUploadedFeed(upload.content, mapping, { maxRecords, maxBytes: UPLOAD_MAX_BYTES });
+  }
+  if (feed.sourceType === 'upload' || !feed.url) {
+    throw new FeedFetchError('upload_required', 'This feed imports uploaded files; upload an XML file to import it.', false);
+  }
+  return deps.fetchDocument(feed.url, {
+    mapping,
+    credentials: decryptCredentials(feed),
+    limits: fetchLimitsFromEnv(),
+  });
+};
+
 const fetchAndStage = async (run: IAgencyFeedRun, feed: IAgencyFeed, deps: SyncDeps): Promise<void> => {
   await AgencyFeedStagedRecord.deleteMany({ runId: run._id });
   run.status = 'fetching';
@@ -134,11 +156,7 @@ const fetchAndStage = async (run: IAgencyFeedRun, feed: IAgencyFeed, deps: SyncD
   await run.save();
 
   const mapping = mappingFor(feed);
-  const fetched = await deps.fetchDocument(feed.url, {
-    mapping,
-    credentials: decryptCredentials(feed),
-    limits: fetchLimitsFromEnv(),
-  });
+  const fetched = await loadDocument(run, feed, mapping, deps);
 
   const mapped = fetched.records.map((record) => mapRecord(record, mapping));
   const normalized = mapped.map((m) => normalizeRecord(m, mapping));
@@ -524,7 +542,7 @@ export const failRun = async (
     feedId: feed._id as Types.ObjectId,
     runId: run._id as Types.ObjectId,
     action: 'sync_failed',
-    details: { code: error.code, message: error.message, url: redactUrl(feed.url) },
+    details: { code: error.code, message: error.message, ...(feed.url ? { url: redactUrl(feed.url) } : {}) },
   });
   await activityLogger.log({
     category: 'system',

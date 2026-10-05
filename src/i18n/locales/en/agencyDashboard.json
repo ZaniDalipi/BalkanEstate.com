@@ -307,7 +307,8 @@
       "notScheduled": "Not scheduled",
       "mode": "Feed type",
       "reviewNeeded": "Many listings disappeared from the feed. Review before they are deactivated.",
-      "failedTimes": "(failed {{count}} times in a row)"
+      "failedTimes": "(failed {{count}} times in a row)",
+      "onUpload": "When you upload a file"
     },
     "mode": {
       "snapshot": "Complete listing (snapshot)",
@@ -362,7 +363,9 @@
     "panel": {
       "draftHelp": "Test the connection and check how your listings will look. Nothing is published until you activate the feed.",
       "previewRunning": "Checking the feed…",
-      "inProgress": "This import is still running; results appear here automatically."
+      "inProgress": "This import is still running; results appear here automatically.",
+      "uploadDraftHelp": "Upload your XML file to check how your listings will look. Nothing is published until you activate the feed.",
+      "uploadActiveHelp": "Upload a new XML file whenever your listings change. It is imported with the same checks as a feed."
     },
     "activate": {
       "title": "Activate daily imports",
@@ -462,6 +465,23 @@
       "images": "Photos",
       "floorplans": "Floor plans",
       "updatedAt": "Last updated"
+    },
+    "source": {
+      "title": "Where do your listings come from?",
+      "url": "Feed URL",
+      "urlHelp": "We fetch your website or CRM feed and sync it every 24 hours.",
+      "upload": "Upload XML file",
+      "uploadHelp": "Upload or paste an XML file whenever your listings change. No URL needed."
+    },
+    "upload": {
+      "chooseFile": "Choose file",
+      "paste": "Paste XML",
+      "pick": "Select an .xml file",
+      "limit": "XML only, up to {{mb}} MB",
+      "tooLarge": "This file is larger than {{mb}} MB.",
+      "previewOnly": "Preview only — check the file without changing any listings",
+      "preview": "Upload and preview",
+      "import": "Upload and import"
     }
   }
 }

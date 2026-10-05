@@ -1,6 +1,6 @@
 // Property Imports API — /agency-dashboard/:agencyId/feeds (manager-only).
 
-import { apiRequest } from '@/src/shared/api';
+import { apiRequest, uploadRequest } from '@/src/shared/api';
 import type { AgencyFeed, FeedFormValues, FeedMeta, FeedRun } from '../types/propertyImports';
 
 const feedsPath = (agencyId: string) => `/agency-dashboard/${agencyId}/feeds`;
@@ -52,3 +52,15 @@ export const reviewDeactivations = (agencyId: string, feedId: string, runId: str
     body: { decision },
     requiresAuth: true,
   });
+
+/**
+ * Upload an XML file — or pasted XML, sent as a file so its markup reaches the
+ * server untouched. A draft feed previews it; an active one imports it unless
+ * `previewOnly` is set.
+ */
+export const uploadFeedFile = (agencyId: string, feedId: string, file: Blob, filename: string, previewOnly: boolean) => {
+  const form = new FormData();
+  if (previewOnly) form.append('intent', 'preview');
+  form.append('file', file, filename);
+  return uploadRequest<{ runId: string; kind: 'preview' | 'sync' }>(`${feedsPath(agencyId)}/${feedId}/upload`, form);
+};

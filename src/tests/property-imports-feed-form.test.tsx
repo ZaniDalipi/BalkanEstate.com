@@ -29,7 +29,7 @@ const meta: FeedMeta = {
 };
 
 const feed: AgencyFeed = {
-  id: 'f1', name: 'Website', url: 'https://crm.example/export.xml?token=***', format: 'canonical', mapping: null, mode: 'snapshot',
+  id: 'f1', name: 'Website', sourceType: 'url', url: 'https://crm.example/export.xml?token=***', format: 'canonical', mapping: null, mode: 'snapshot',
   state: 'active', assignedAgentId: 'a1', credentials: { type: 'basic', username: 'feed', hasSecret: true },
   safeguards: { maxRemovalRatio: 0.3, minRemovalsForReview: 5 }, authorization: null, configVersion: 1, lastPreviewRunId: null,
   lastRunId: null, lastRunAt: null, lastSuccessfulSyncAt: null, nextSyncAt: null, consecutiveFailures: 0, lastError: null,

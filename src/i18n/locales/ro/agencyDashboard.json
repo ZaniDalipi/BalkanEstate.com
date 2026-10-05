@@ -307,7 +307,8 @@
       "notScheduled": "Neprogramată",
       "mode": "Tip de flux",
       "reviewNeeded": "Multe anunțuri au dispărut din flux. Verificați înainte de a fi dezactivate.",
-      "failedTimes": "(a eșuat de {{count}} ori la rând)"
+      "failedTimes": "(a eșuat de {{count}} ori la rând)",
+      "onUpload": "Când încărcați un fișier"
     },
     "mode": {
       "snapshot": "Listă completă (snapshot)",
@@ -362,7 +363,9 @@
     "panel": {
       "draftHelp": "Testați conexiunea și verificați cum vor arăta anunțurile. Nimic nu se publică până nu activați fluxul.",
       "previewRunning": "Se verifică fluxul…",
-      "inProgress": "Importul este încă în desfășurare; rezultatele vor apărea aici automat."
+      "inProgress": "Importul este încă în desfășurare; rezultatele vor apărea aici automat.",
+      "uploadDraftHelp": "Încărcați fișierul XML pentru a vedea cum vor arăta anunțurile. Nimic nu se publică până nu activați fluxul.",
+      "uploadActiveHelp": "Încărcați un fișier XML nou ori de câte ori se schimbă anunțurile. Este importat cu aceleași verificări ca un flux."
     },
     "activate": {
       "title": "Activați importul zilnic",
@@ -462,6 +465,23 @@
       "images": "Fotografii",
       "floorplans": "Planuri",
       "updatedAt": "Ultima actualizare"
+    },
+    "source": {
+      "title": "De unde provin anunțurile dvs.?",
+      "url": "URL flux",
+      "urlHelp": "Preluăm fluxul de pe site-ul sau din CRM-ul dvs. și îl sincronizăm la fiecare 24 de ore.",
+      "upload": "Încarcă fișier XML",
+      "uploadHelp": "Încărcați sau lipiți un fișier XML ori de câte ori se schimbă anunțurile. Nu este nevoie de URL."
+    },
+    "upload": {
+      "chooseFile": "Alege fișierul",
+      "paste": "Lipește XML",
+      "pick": "Selectați un fișier .xml",
+      "limit": "Doar XML, până la {{mb}} MB",
+      "tooLarge": "Fișierul depășește {{mb}} MB.",
+      "previewOnly": "Doar previzualizare — verifică fișierul fără a modifica anunțuri",
+      "preview": "Încarcă și previzualizează",
+      "import": "Încarcă și importă"
     }
   }
 }

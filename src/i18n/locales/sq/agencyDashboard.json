@@ -307,7 +307,8 @@
       "notScheduled": "Jo i planifikuar",
       "mode": "Lloji i burimit",
       "reviewNeeded": "Shumë njoftime u zhdukën nga burimi. Shqyrtojini para se të çaktivizohen.",
-      "failedTimes": "(dështoi {{count}} herë rresht)"
+      "failedTimes": "(dështoi {{count}} herë rresht)",
+      "onUpload": "Kur ngarkoni një skedar"
     },
     "mode": {
       "snapshot": "Listë e plotë (snapshot)",
@@ -362,7 +363,9 @@
     "panel": {
       "draftHelp": "Testoni lidhjen dhe shikoni si do të duken njoftimet. Asgjë nuk publikohet derisa ta aktivizoni burimin.",
       "previewRunning": "Po kontrollohet burimi…",
-      "inProgress": "Importimi është ende në vazhdim; rezultatet do të shfaqen këtu automatikisht."
+      "inProgress": "Importimi është ende në vazhdim; rezultatet do të shfaqen këtu automatikisht.",
+      "uploadDraftHelp": "Ngarkoni skedarin XML për të parë si do të duken njoftimet. Asgjë nuk publikohet derisa ta aktivizoni burimin.",
+      "uploadActiveHelp": "Ngarkoni një skedar të ri XML sa herë ndryshojnë njoftimet. Importohet me të njëjtat kontrolle si një burim."
     },
     "activate": {
       "title": "Aktivizo importimin ditor",
@@ -462,6 +465,23 @@
       "images": "Fotot",
       "floorplans": "Planimetritë",
       "updatedAt": "Përditësimi i fundit"
+    },
+    "source": {
+      "title": "Nga vijnë njoftimet tuaja?",
+      "url": "URL e burimit",
+      "urlHelp": "Marrim burimin nga faqja ose CRM-ja juaj dhe e sinkronizojmë çdo 24 orë.",
+      "upload": "Ngarko skedar XML",
+      "uploadHelp": "Ngarkoni ose ngjitni një skedar XML sa herë ndryshojnë njoftimet. Nuk nevojitet URL."
+    },
+    "upload": {
+      "chooseFile": "Zgjidh skedarin",
+      "paste": "Ngjit XML",
+      "pick": "Zgjidhni një skedar .xml",
+      "limit": "Vetëm XML, deri në {{mb}} MB",
+      "tooLarge": "Skedari është më i madh se {{mb}} MB.",
+      "previewOnly": "Vetëm pamje paraprake — kontrollo skedarin pa ndryshuar njoftime",
+      "preview": "Ngarko dhe shiko",
+      "import": "Ngarko dhe importo"
     }
   }
 }

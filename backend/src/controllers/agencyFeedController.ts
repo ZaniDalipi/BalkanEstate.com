@@ -29,6 +29,7 @@ import {
   toFeedDto,
   toRunDto,
   updateFeed,
+  uploadFeedFile,
 } from '../services/agencyFeeds/feedManagementService';
 
 /**
@@ -43,7 +44,8 @@ const feedOf = (req: Request): IAgencyFeed => req.agencyFeed as IAgencyFeed;
 
 const handleError = (res: Response, err: unknown, context: string): void => {
   if (err instanceof FeedInputError) {
-    res.status(400).json({ message: 'Please fix the highlighted problems', errors: err.problems });
+    const message = err.problems.length === 1 ? err.problems[0] : 'Please fix the highlighted problems';
+    res.status(400).json({ message, errors: err.problems });
     return;
   }
   if (err instanceof FeedBusyError) {
@@ -230,5 +232,29 @@ export const setFeedListingLocks = async (req: Request, res: Response): Promise<
     res.json({ lockedFields });
   } catch (err) {
     handleError(res, err, 'locks');
+  }
+};
+
+/**
+ * Upload an XML file (multipart field "file") for feeds whose source is file
+ * upload. Pasted XML is sent the same way, as a file, so the global body
+ * sanitizer never rewrites its markup. Previews while the feed is a draft or
+ * when `intent=preview`; otherwise imports it.
+ */
+export const uploadAgencyFeedFile = async (req: Request, res: Response): Promise<void> => {
+  const file = (req as Request & { file?: Express.Multer.File }).file;
+  if (!file) {
+    res.status(400).json({ message: 'Choose an XML file or paste the XML' });
+    return;
+  }
+  try {
+    const result = await uploadFeedFile(feedOf(req), actorOf(req), {
+      content: file.buffer,
+      filename: file.originalname,
+      intent: req.body?.intent === 'preview' ? 'preview' : 'import',
+    });
+    res.status(202).json({ runId: String(result.runId), kind: result.kind });
+  } catch (err) {
+    handleError(res, err, 'upload');
   }
 };

@@ -49,6 +49,26 @@ activate again so a new configuration never publishes unreviewed listings.
 
 **Disconnect feed** stops synchronization. Listings already imported stay on BalkanEstateAI as they are.
 
+### Uploading an XML file instead of a URL
+
+Agencies without a feed URL can choose **Upload XML file** as the source when connecting a feed. There is no
+URL, credentials or daily schedule; instead:
+
+1. Upload an `.xml` file (up to 15 MB) or paste the XML. Pasted XML is sent as a file, unchanged.
+2. While the feed is *Not activated*, every upload is a **preview** — same report as for URL feeds.
+3. **Activate** imports exactly the file that was previewed.
+4. After that, each upload is **imported** right away; tick *Preview only* to check a file without changing
+   listings.
+
+Uploaded files go through the same XML reader, validation, plan limits, local-edit protection and deactivation
+safeguards as fetched feeds. In *snapshot* mode an uploaded file is treated as the complete list, so listings
+missing from it are deactivated (with the suspicious-drop review); a file whose root points to a `next-page` it
+does not contain counts as incomplete and deactivates nothing. Photos and floor plans in the file are still
+downloaded from their URLs. Uploaded files are kept for 30 days for support, then deleted.
+
+API: `POST /api/agency-dashboard/:agencyId/feeds/:feedId/upload` (multipart field `file`, optional field
+`intent=preview`).
+
 ---
 
 ## Canonical XML format (v1.0)
@@ -251,7 +271,7 @@ Warnings (imported, with a note): `title_truncated`, `description_truncated`, `m
 `listing_limit`, `deactivation_held`.
 
 Whole-feed failures (nothing applied): `unsafe_url`, `dns_failed`, `network_error`, `timeout`, `auth_failed`,
-`not_found`, `rate_limited`, `server_error`, `not_xml`, `too_large`, `too_many_records`, `invalid_xml`,
+`not_found`, `rate_limited`, `server_error`, `not_xml`, `too_large`, `upload_missing`, `upload_required`, `too_many_records`, `invalid_xml`,
 `doctype_forbidden`, `truncated`, `too_deep`, `record_too_large`, `text_too_long`, `subscription_inactive`,
 `agent_not_member`.
 
@@ -318,6 +338,7 @@ the agency's URLs through the existing `/api/image-proxy`.
 | `AGENCY_FEED_MAX_LISTINGS` | `10000` | Maximum listings per feed. |
 | `AGENCY_FEED_MAX_PAGES` | `50` | Maximum pages followed. |
 | `AGENCY_FEED_FETCH_TIMEOUT_MS` | `120000` | Total download time for all pages. |
+| `AGENCY_FEED_UPLOAD_MAX_MB` | `15` | Largest uploaded XML file (cannot exceed 15 — files are stored as one MongoDB document). |
 | `AGENCY_FEED_WORKER_CONCURRENCY` | `2` | Jobs processed in parallel per worker process (1–8). |
 | `AGENCY_FEED_POLL_INTERVAL_MS` | `5000` | How often an idle worker checks the queue. |
 | `CLOUDINARY_*`, `SENTRY_DSN` | existing | Reused as is. |
@@ -402,6 +423,7 @@ npm run test:feeds        # all agency-feed suites
 | `agency-feed-sync` | initial import, repeat without duplicates, price change, local edits, removal and reactivation, failed/invalid/empty/truncated/suspicious feeds, delta mode, duplicate IDs, plan limits, partial image failure, crash recovery, overlap prevention, scheduler, lapsed subscription |
 | `agency-feed-api` | agency isolation, manager-only access, unsafe URLs, credential redaction, preview/authorization/limit gates |
 | `agency-feed-images` | content validation, reuse and dedupe, concurrency, safe cleanup |
+| `agency-feed-upload` | upload feeds without a URL, preview then activate imports the same file, later uploads, incomplete files, non-XML/unsafe files, permissions, scheduler skips uploads |
 
 The database suites use `mongodb-memory-server`. Where its binary download is blocked, point it at a local `mongod`:
 `MONGOMS_SYSTEM_BINARY=/path/to/mongod npm run test:feeds`. Frontend: `npx vitest run src/tests/property-imports-*`.

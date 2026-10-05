@@ -14,6 +14,8 @@ import type { FeedMapping, FeedMode } from '../services/agencyFeeds/feedTypes';
  */
 export type AgencyFeedState = 'draft' | 'active' | 'paused';
 export type AgencyFeedFormat = 'canonical' | 'custom';
+/** `url`: fetched and synced on a schedule. `upload`: each file the agency uploads is imported. */
+export type AgencyFeedSourceType = 'url' | 'upload';
 
 export interface IAgencyFeedCredentials {
   type: 'none' | 'basic' | 'header';
@@ -32,7 +34,9 @@ export interface IAgencyFeedSafeguards {
 export interface IAgencyFeed extends Document {
   agencyId: Types.ObjectId;
   name: string;
-  url: string;
+  sourceType: AgencyFeedSourceType;
+  /** Required for `url` feeds; absent for `upload` feeds. */
+  url?: string;
   format: AgencyFeedFormat;
   mapping?: FeedMapping;
   mode: FeedMode;
@@ -68,7 +72,15 @@ const AgencyFeedSchema = new Schema<IAgencyFeed>(
   {
     agencyId: { type: Schema.Types.ObjectId, ref: 'Agency', required: true, index: true },
     name: { type: String, required: true, trim: true, maxlength: 80 },
-    url: { type: String, required: true, trim: true, maxlength: 2048 },
+    sourceType: { type: String, enum: ['url', 'upload'], required: true, default: 'url' },
+    url: {
+      type: String,
+      trim: true,
+      maxlength: 2048,
+      required: function (this: { sourceType?: string }) {
+        return this.sourceType !== 'upload';
+      },
+    },
     format: { type: String, enum: ['canonical', 'custom'], required: true, default: 'canonical' },
     mapping: { type: Schema.Types.Mixed },
     mode: { type: String, enum: ['snapshot', 'delta'], required: true, default: 'snapshot' },
@@ -112,6 +124,9 @@ const AgencyFeedSchema = new Schema<IAgencyFeed>(
 // The scheduler's query: active feeds that are due.
 AgencyFeedSchema.index({ state: 1, nextSyncAt: 1 });
 // One agency cannot register the same URL twice (duplicate imports).
-AgencyFeedSchema.index({ agencyId: 1, url: 1 }, { unique: true });
+AgencyFeedSchema.index(
+  { agencyId: 1, url: 1 },
+  { unique: true, partialFilterExpression: { url: { $type: 'string' } }, name: 'agency_feed_url_unique' }
+);
 
 export default mongoose.model<IAgencyFeed>('AgencyFeed', AgencyFeedSchema);
