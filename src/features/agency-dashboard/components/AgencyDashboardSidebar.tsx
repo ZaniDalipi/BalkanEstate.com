@@ -15,6 +15,7 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
   ArrowTopRightOnSquareIcon,
+  ArrowDownTrayIcon,
 } from '@/constants';
 import type { AgencyDashboardSection } from '@/types';
 import type { OverviewData } from '../types';
@@ -104,6 +105,11 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
           label: t('agencyDashboard:sidebar.properties', 'Properties'),
           icon: <HomeIcon className="w-5 h-5" />,
           badge: overview?.activeListings,
+        },
+        {
+          id: 'imports',
+          label: t('agencyDashboard:sidebar.imports', 'Property Imports'),
+          icon: <ArrowDownTrayIcon className="w-5 h-5" />,
         },
         {
           id: 'analytics',

@@ -5,6 +5,7 @@ import AgencyFeedRun, { type IAgencyFeedRun } from '../../models/AgencyFeedRun';
 import Property from '../../models/Property';
 import type { IAgency } from '../../models/Agency';
 import { resolvePublicUrl, SsrfError } from '../../utils/ssrfGuard';
+import { resolveId } from '../../utils/idObfuscation';
 import { auditFeedAction } from './feedAudit';
 import { buildStoredCredentials, redactCredentials, redactUrl, validateCredentialsInput, type CredentialsInput } from './feedCredentials';
 import { enqueueFeedJob, syncIntervalMs } from './feedJobQueue';
@@ -114,8 +115,8 @@ const validateInput = async (input: FeedInput, agency: IAgency, creating: boolea
     if (input.mode !== 'snapshot' && input.mode !== 'delta') problems.push('Mode must be snapshot or delta');
     else out.mode = input.mode;
   }
-  if (input.assignedAgentId !== undefined) {
-    const id = String(input.assignedAgentId);
+  if (input.assignedAgentId !== undefined && input.assignedAgentId !== '') {
+    const id = resolveId(String(input.assignedAgentId)) ?? '';
     if (!Types.ObjectId.isValid(id) || !isMember(agency, id)) problems.push('Listings must be assigned to a member of this agency');
     else out.assignedAgentId = new Types.ObjectId(id);
   }

@@ -25,7 +25,8 @@
     "closeSidebar": "Mbyll shiritin anësor",
     "navLabel": "Navigimi i panelit",
     "expandSidebar": "Zgjero shiritin anësor",
-    "collapseSidebar": "Palos shiritin anësor"
+    "collapseSidebar": "Palos shiritin anësor",
+    "imports": "Importimi i pronave"
   },
   "header": {
     "listings": "Listimet",
@@ -257,5 +258,210 @@
     "postNote": "Posto Shënimin",
     "posting": "Duke postuar...",
     "noNotes": "Ende pa shënime ekipi. Bëhu i pari që poston!"
+  },
+  "imports": {
+    "title": "Importimi i pronave",
+    "subtitle": "Lidhni burimin XML nga faqja juaj e internetit ose CRM. Njoftimet dhe fotot importohen dhe rifreskohen çdo 24 orë.",
+    "managersOnly": "Vetëm pronari ose një administrator i agjencisë mund të menaxhojë importimin e pronave.",
+    "empty": "Ende nuk ka burim të lidhur. Lidhni burimin e faqes ose të CRM-së për të importuar njoftimet automatikisht.",
+    "confirmDelete": "Ta shkëpusni këtë burim? Njoftimet e importuara mbeten në BalkanEstateAI, por nuk përditësohen më.",
+    "actions": {
+      "add": "Lidh një burim",
+      "syncNow": "Sinkronizo tani",
+      "pause": "Ndalo sinkronizimin ditor",
+      "resume": "Rifillo sinkronizimin ditor",
+      "edit": "Ndrysho",
+      "delete": "Shkëput burimin",
+      "preview": "Testo lidhjen dhe shiko paraprakisht"
+    },
+    "status": {
+      "draft": "Jo aktiv",
+      "active": "Sinkronizimi ditor aktiv",
+      "paused": "I ndalur",
+      "queued": "Në pritje",
+      "fetching": "Po shkarkohet",
+      "staged": "Po verifikohet",
+      "applying": "Po importohet",
+      "previewed": "Pamja paraprake gati",
+      "succeeded": "Me sukses",
+      "partial": "Përfundoi me probleme",
+      "awaiting_review": "Kërkon shqyrtim",
+      "failed": "Dështoi"
+    },
+    "trigger": {
+      "preview": "Pamje paraprake",
+      "manual": "Sinkronizim manual",
+      "scheduled": "Sinkronizim ditor"
+    },
+    "counts": {
+      "created": "Krijuar",
+      "updated": "Përditësuar",
+      "unchanged": "Pa ndryshime",
+      "rejected": "Refuzuar",
+      "deactivated": "Çaktivizuar"
+    },
+    "card": {
+      "running": "Importimi në vazhdim",
+      "lastSuccess": "Sinkronizimi i fundit i suksesshëm",
+      "nextSync": "Sinkronizimi i radhës i planifikuar",
+      "notScheduled": "Jo i planifikuar",
+      "mode": "Lloji i burimit",
+      "reviewNeeded": "Shumë njoftime u zhdukën nga burimi. Shqyrtojini para se të çaktivizohen.",
+      "failedTimes": "(dështoi {{count}} herë rresht)"
+    },
+    "mode": {
+      "snapshot": "Listë e plotë (snapshot)",
+      "delta": "Vetëm ndryshimet (delta)"
+    },
+    "form": {
+      "newTitle": "Lidhni një burim pronash",
+      "editTitle": "Ndrysho burimin",
+      "reactivateNote": "Ndryshimi i URL-së, formatit, përputhjes së fushave, llojit të burimit ose kredencialeve ndalon sinkronizimin ditor derisa ta shikoni paraprakisht dhe ta aktivizoni sërish burimin.",
+      "name": "Emri",
+      "namePlaceholder": "Burimi i faqes",
+      "url": "URL e burimit",
+      "format": "Formati",
+      "formatCanonical": "BalkanEstateAI XML (pa përputhje fushash)",
+      "formatCustom": "Format tjetër XML (përputhje fushash)",
+      "mode": "Përmbajtja e burimit",
+      "snapshotHelp": "Njoftimet që mungojnë në një burim të plotë dhe të vlefshëm çaktivizohen (nuk fshihen kurrë).",
+      "deltaHelp": "Çaktivizohen vetëm njoftimet e shënuara \"removed\"; ato që mungojnë mbeten të pandryshuara.",
+      "agent": "Publiko njoftimet si",
+      "ownerDefault": "Pronari i agjencisë (parazgjedhje)",
+      "agentHelp": "Njoftimet e reja llogariten në limitin e paketës së këtij agjenti.",
+      "auth": "Qasja në burim",
+      "authType": "Vërtetimi",
+      "authNone": "Asnjë (URL publike)",
+      "authBasic": "Emri i përdoruesit dhe fjalëkalimi",
+      "authHeader": "Çelës API në kokë",
+      "username": "Emri i përdoruesit",
+      "headerName": "Emri i kokës",
+      "secret": "Fjalëkalimi / çelësi",
+      "secretKept": "Ruajtur — lëreni bosh për ta mbajtur",
+      "safeguards": "Mbrojtje nga heqja",
+      "maxRemoval": "Më pyet më parë nëse zhduket më shumë se kjo përqindje (%)",
+      "minRemovals": "…dhe më shumë se ky numër njoftimesh",
+      "saving": "Po ruhet…",
+      "save": "Ruaj"
+    },
+    "mapping": {
+      "title": "Përputhja e fushave",
+      "help": "Shtigjet janë emra elementesh brenda një njoftimi, të ndarë me \"/\". Për një atribut përdorni @emri, p.sh. price/@currency ose photos/photo/@src.",
+      "recordElement": "Elementi i njoftimit",
+      "areaUnit": "Njësia e sipërfaqes",
+      "defaultCountry": "Shteti nëse nuk tregohet",
+      "defaultCurrency": "Monedha nëse nuk tregohet",
+      "totalCount": "Shtegu i numrit total (rrënja e burimit)",
+      "nextPage": "Shtegu i faqes tjetër (rrënja e burimit)",
+      "valueMap": {
+        "listingType": "Vlerat shitje/qira",
+        "propertyType": "Vlerat e llojit të pronës",
+        "status": "Vlerat e statusit"
+      }
+    },
+    "panel": {
+      "draftHelp": "Testoni lidhjen dhe shikoni si do të duken njoftimet. Asgjë nuk publikohet derisa ta aktivizoni burimin.",
+      "previewRunning": "Po kontrollohet burimi…",
+      "inProgress": "Importimi është ende në vazhdim; rezultatet do të shfaqen këtu automatikisht."
+    },
+    "activate": {
+      "title": "Aktivizo importimin ditor",
+      "statement": "Konfirmoj se kjo agjenci zotëron ose është e autorizuar të publikojë në BalkanEstateAI njoftimet, përshkrimet dhe fotot e këtij burimi.",
+      "acceptLimit": "Importo vetëm deri në limitin e paketës sime ({{remaining}} njoftime). {{excess}} të tjerat mbeten të papublikuara derisa të ketë vend.",
+      "activating": "Po aktivizohet…",
+      "button": "Aktivizo dhe importo tani"
+    },
+    "report": {
+      "received": "{{count}} njoftime në burim",
+      "pages": "{{count}} faqe",
+      "previewSummary": "{{valid}} nga {{received}} njoftime janë të vlefshme dhe gati për import; {{rejected}} kanë probleme për t'u rregulluar.",
+      "limitTitle": "Paketa juaj lejon edhe {{remaining}} njoftime, por burimi ka {{count}} të reja.",
+      "limitHelp": "Këto njoftime nuk publikohen dhe nuk tarifohet asgjë. Përmirësoni paketën ose prisni limitin e muajit të ardhshëm dhe ato do të importohen në një sinkronizim të mëvonshëm:",
+      "heldTitle": "{{count}} njoftime të importuara mungojnë në burim.",
+      "heldHelp": "Kjo është më shumë nga sa lejon mbrojtja juaj, ndaj asgjë nuk u çaktivizua. Nëse njoftimet janë hequr vërtet, miratoni; nëse burimi ishte i gabuar, refuzoni dhe rregullojeni.",
+      "wouldDeactivate": "Importimi tani do të çaktivizonte {{count}} njoftime që nuk janë më në burim.",
+      "samples": "Shembuj njoftimesh",
+      "issues": "Rezultatet e verifikimit"
+    },
+    "review": {
+      "approve": "Çaktivizo {{count}} njoftime",
+      "dismiss": "Mbaji aktive"
+    },
+    "issues": {
+      "none": "Nuk u gjetën probleme.",
+      "error": "Nuk u importua",
+      "warning": "Paralajmërim",
+      "more": "Shfaq më shumë (mbeten {{count}})",
+      "truncated": "Listohen vetëm 500 problemet e para."
+    },
+    "history": {
+      "title": "Historiku i importimeve",
+      "empty": "Ende nuk ka importime.",
+      "when": "Kur",
+      "type": "Lloji",
+      "result": "Rezultati"
+    },
+    "preview": {
+      "addressHidden": "adresa e saktë e fshehur",
+      "priceOnRequest": "Çmimi me kërkesë",
+      "rent": "Qira",
+      "sale": "Shitje"
+    },
+    "rules": {
+      "title": "Çfarë përditëson burimi — dhe çfarë mbetet juaja",
+      "managedTitle": "Përditësohet nga burimi",
+      "localEdits": "Nëse ndryshoni ndonjë prej tyre në BalkanEstateAI, ndryshimi juaj ruhet dhe raportohet në rezultatet e importimit në vend që të mbishkruhet.",
+      "localTitle": "Ndryshohet vetëm këtu, kurrë nga burimi",
+      "removal": "Njoftimet nuk fshihen kurrë. Një njoftim që mungon në një burim të plotë kalon në draft dhe kthehet automatikisht nëse rishfaqet. Njoftimet e krijuara me dorë nuk preken kurrë.",
+      "local": {
+        "0": "promovimet dhe shenjat",
+        "1": "videot dhe turet virtuale",
+        "2": "disponueshmëria për vizita",
+        "3": "veçoritë e veçanta dhe materialet",
+        "4": "mobilimi, ngrohja, gjendja dhe pamja",
+        "5": "kushtet e qirasë dhe të dhënat e qiramarrësit",
+        "6": "ID-ja juaj e brendshme e pronës"
+      }
+    },
+    "fields": {
+      "externalId": "ID e njoftimit",
+      "status": "Statusi",
+      "sourceUrl": "URL e njoftimit",
+      "title": "Titulli",
+      "description": "Përshkrimi",
+      "listingType": "Shitje ose qira",
+      "rentPeriod": "Periudha e qirasë",
+      "propertyType": "Lloji i pronës",
+      "price": "Çmimi",
+      "currency": "Monedha",
+      "priceOnRequest": "Çmimi me kërkesë",
+      "isNegotiable": "Çmimi me kërkesë",
+      "country": "Shteti",
+      "city": "Qyteti",
+      "district": "Lagjja",
+      "address": "Adresa",
+      "addressVisibility": "Dukshmëria e adresës",
+      "latitude": "Gjerësia gjeografike",
+      "longitude": "Gjatësia gjeografike",
+      "lat": "Gjerësia gjeografike",
+      "lng": "Gjatësia gjeografike",
+      "area": "Sipërfaqja",
+      "sqft": "Sipërfaqja",
+      "landArea": "Sipërfaqja e truallit",
+      "bedrooms": "Dhoma gjumi",
+      "beds": "Dhoma gjumi",
+      "bathrooms": "Banjo",
+      "baths": "Banjo",
+      "livingRooms": "Dhoma ndenjeje",
+      "floor": "Kati",
+      "floorNumber": "Kati",
+      "totalFloors": "Gjithsej kate",
+      "yearBuilt": "Viti i ndërtimit",
+      "energyRating": "Klasa energjetike",
+      "amenities": "Komoditetet",
+      "images": "Fotot",
+      "floorplans": "Planimetritë",
+      "updatedAt": "Përditësimi i fundit"
+    }
   }
 }

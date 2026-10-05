@@ -25,7 +25,8 @@
     "closeSidebar": "Închide bara laterală",
     "navLabel": "Navigarea panoului",
     "expandSidebar": "Extinde bara laterală",
-    "collapseSidebar": "Restrânge bara laterală"
+    "collapseSidebar": "Restrânge bara laterală",
+    "imports": "Import proprietăți"
   },
   "header": {
     "listings": "Anunțuri",
@@ -257,5 +258,210 @@
     "postNote": "Publică notița",
     "posting": "Se publică...",
     "noNotes": "Încă nicio notiță a echipei. Fiți primul care publică!"
+  },
+  "imports": {
+    "title": "Import proprietăți",
+    "subtitle": "Conectați fluxul XML de pe site-ul sau din CRM-ul dvs. Anunțurile și fotografiile sunt importate și actualizate la fiecare 24 de ore.",
+    "managersOnly": "Doar proprietarul agenției sau un administrator al agenției poate gestiona importurile de proprietăți.",
+    "empty": "Niciun flux conectat încă. Conectați fluxul de pe site sau din CRM pentru a importa automat anunțurile.",
+    "confirmDelete": "Deconectați acest flux? Anunțurile importate rămân pe BalkanEstateAI, dar nu mai sunt actualizate.",
+    "actions": {
+      "add": "Conectează un flux",
+      "syncNow": "Sincronizează acum",
+      "pause": "Întrerupe sincronizarea zilnică",
+      "resume": "Reia sincronizarea zilnică",
+      "edit": "Editează",
+      "delete": "Deconectează fluxul",
+      "preview": "Testează conexiunea și previzualizează"
+    },
+    "status": {
+      "draft": "Neactivat",
+      "active": "Sincronizare zilnică activă",
+      "paused": "Întrerupt",
+      "queued": "În așteptare",
+      "fetching": "Descărcare",
+      "staged": "Validare",
+      "applying": "Import",
+      "previewed": "Previzualizare gata",
+      "succeeded": "Reușit",
+      "partial": "Finalizat cu probleme",
+      "awaiting_review": "Necesită verificare",
+      "failed": "Eșuat"
+    },
+    "trigger": {
+      "preview": "Previzualizare",
+      "manual": "Sincronizare manuală",
+      "scheduled": "Sincronizare zilnică"
+    },
+    "counts": {
+      "created": "Create",
+      "updated": "Actualizate",
+      "unchanged": "Neschimbate",
+      "rejected": "Respinse",
+      "deactivated": "Dezactivate"
+    },
+    "card": {
+      "running": "Import în desfășurare",
+      "lastSuccess": "Ultima sincronizare reușită",
+      "nextSync": "Următoarea sincronizare programată",
+      "notScheduled": "Neprogramată",
+      "mode": "Tip de flux",
+      "reviewNeeded": "Multe anunțuri au dispărut din flux. Verificați înainte de a fi dezactivate.",
+      "failedTimes": "(a eșuat de {{count}} ori la rând)"
+    },
+    "mode": {
+      "snapshot": "Listă completă (snapshot)",
+      "delta": "Doar modificări (delta)"
+    },
+    "form": {
+      "newTitle": "Conectați un flux de proprietăți",
+      "editTitle": "Editare flux",
+      "reactivateNote": "Modificarea URL-ului, formatului, corespondenței câmpurilor, tipului de flux sau a datelor de acces oprește sincronizarea zilnică până când previzualizați și activați din nou fluxul.",
+      "name": "Nume",
+      "namePlaceholder": "Flux site",
+      "url": "URL flux",
+      "format": "Format",
+      "formatCanonical": "BalkanEstateAI XML (fără corespondență)",
+      "formatCustom": "Alt format XML (corespondență câmpuri)",
+      "mode": "Conținutul fluxului",
+      "snapshotHelp": "Anunțurile care lipsesc dintr-un flux complet și valid sunt dezactivate (niciodată șterse).",
+      "deltaHelp": "Sunt dezactivate doar anunțurile marcate \"removed\"; cele care lipsesc rămân neschimbate.",
+      "agent": "Publică anunțurile ca",
+      "ownerDefault": "Proprietarul agenției (implicit)",
+      "agentHelp": "Anunțurile noi se scad din limita planului acestui agent.",
+      "auth": "Acces la flux",
+      "authType": "Autentificare",
+      "authNone": "Fără (URL public)",
+      "authBasic": "Nume de utilizator și parolă",
+      "authHeader": "Cheie API în antet",
+      "username": "Nume de utilizator",
+      "headerName": "Numele antetului",
+      "secret": "Parolă / cheie",
+      "secretKept": "Salvat — lăsați gol pentru a păstra",
+      "safeguards": "Protecție la eliminare",
+      "maxRemoval": "Întreabă-mă înainte dacă dispare mai mult de această proporție (%)",
+      "minRemovals": "…și mai mult de acest număr de anunțuri",
+      "saving": "Se salvează…",
+      "save": "Salvează"
+    },
+    "mapping": {
+      "title": "Corespondența câmpurilor",
+      "help": "Căile sunt nume de elemente din cadrul unui anunț, separate prin \"/\". Pentru un atribut folosiți @nume, de ex. price/@currency sau photos/photo/@src.",
+      "recordElement": "Elementul anunțului",
+      "areaUnit": "Unitate de suprafață",
+      "defaultCountry": "Țara, dacă nu este indicată",
+      "defaultCurrency": "Moneda, dacă nu este indicată",
+      "totalCount": "Calea numărului total (rădăcina fluxului)",
+      "nextPage": "Calea paginii următoare (rădăcina fluxului)",
+      "valueMap": {
+        "listingType": "Valori vânzare/închiriere",
+        "propertyType": "Valori tip de proprietate",
+        "status": "Valori de stare"
+      }
+    },
+    "panel": {
+      "draftHelp": "Testați conexiunea și verificați cum vor arăta anunțurile. Nimic nu se publică până nu activați fluxul.",
+      "previewRunning": "Se verifică fluxul…",
+      "inProgress": "Importul este încă în desfășurare; rezultatele vor apărea aici automat."
+    },
+    "activate": {
+      "title": "Activați importul zilnic",
+      "statement": "Confirm că această agenție deține sau este autorizată să publice pe BalkanEstateAI anunțurile, descrierile și fotografiile din acest flux.",
+      "acceptLimit": "Importă doar până la limita planului meu ({{remaining}} anunțuri). Celelalte {{excess}} rămân nepublicate până când am loc.",
+      "activating": "Se activează…",
+      "button": "Activează și importă acum"
+    },
+    "report": {
+      "received": "{{count}} anunțuri în flux",
+      "pages": "{{count}} pagini",
+      "previewSummary": "{{valid}} din {{received}} anunțuri sunt valide și gata de import; {{rejected}} au probleme de corectat.",
+      "limitTitle": "Planul dvs. mai permite {{remaining}} anunțuri, dar fluxul are {{count}} noi.",
+      "limitHelp": "Aceste anunțuri nu sunt publicate și nu se taxează nimic. Faceți upgrade planului sau așteptați limita lunii viitoare, iar ele vor fi importate la o sincronizare ulterioară:",
+      "heldTitle": "{{count}} anunțuri importate lipsesc din flux.",
+      "heldHelp": "Sunt mai multe decât permite protecția dvs., așa că nimic nu a fost dezactivat. Dacă anunțurile au fost într-adevăr eliminate, aprobați; dacă fluxul a fost greșit, respingeți și corectați-l.",
+      "wouldDeactivate": "Importul acum ar dezactiva {{count}} anunțuri care nu mai sunt în flux.",
+      "samples": "Exemple de anunțuri",
+      "issues": "Rezultatele validării"
+    },
+    "review": {
+      "approve": "Dezactivează {{count}} anunțuri",
+      "dismiss": "Păstrează-le active"
+    },
+    "issues": {
+      "none": "Nu au fost găsite probleme.",
+      "error": "Neimportat",
+      "warning": "Avertisment",
+      "more": "Arată mai multe (au rămas {{count}})",
+      "truncated": "Sunt listate doar primele 500 de probleme."
+    },
+    "history": {
+      "title": "Istoricul importurilor",
+      "empty": "Niciun import încă.",
+      "when": "Când",
+      "type": "Tip",
+      "result": "Rezultat"
+    },
+    "preview": {
+      "addressHidden": "adresa exactă este ascunsă",
+      "priceOnRequest": "Preț la cerere",
+      "rent": "Închiriere",
+      "sale": "Vânzare"
+    },
+    "rules": {
+      "title": "Ce actualizează fluxul — și ce rămâne al dvs.",
+      "managedTitle": "Actualizat din flux",
+      "localEdits": "Dacă editați unul dintre acestea pe BalkanEstateAI, modificarea dvs. este păstrată și raportată în rezultatele importului în loc să fie suprascrisă.",
+      "localTitle": "Editat doar aici, niciodată de flux",
+      "removal": "Anunțurile nu sunt niciodată șterse. Un anunț care lipsește dintr-un flux complet devine ciornă și revine automat dacă reapare. Anunțurile create manual nu sunt atinse niciodată.",
+      "local": {
+        "0": "promovări și insigne",
+        "1": "videoclipuri și tururi virtuale",
+        "2": "disponibilitate pentru vizionări",
+        "3": "caracteristici speciale și materiale",
+        "4": "mobilare, încălzire, stare și priveliște",
+        "5": "condiții de închiriere și date despre chiriaș",
+        "6": "ID-ul intern al proprietății"
+      }
+    },
+    "fields": {
+      "externalId": "ID anunț",
+      "status": "Stare",
+      "sourceUrl": "URL anunț",
+      "title": "Titlu",
+      "description": "Descriere",
+      "listingType": "Vânzare sau închiriere",
+      "rentPeriod": "Perioada de închiriere",
+      "propertyType": "Tip de proprietate",
+      "price": "Preț",
+      "currency": "Monedă",
+      "priceOnRequest": "Preț la cerere",
+      "isNegotiable": "Preț la cerere",
+      "country": "Țară",
+      "city": "Oraș",
+      "district": "Cartier",
+      "address": "Adresă",
+      "addressVisibility": "Vizibilitatea adresei",
+      "latitude": "Latitudine",
+      "longitude": "Longitudine",
+      "lat": "Latitudine",
+      "lng": "Longitudine",
+      "area": "Suprafață utilă",
+      "sqft": "Suprafață utilă",
+      "landArea": "Suprafața terenului",
+      "bedrooms": "Dormitoare",
+      "beds": "Dormitoare",
+      "bathrooms": "Băi",
+      "baths": "Băi",
+      "livingRooms": "Livinguri",
+      "floor": "Etaj",
+      "floorNumber": "Etaj",
+      "totalFloors": "Total etaje",
+      "yearBuilt": "Anul construcției",
+      "energyRating": "Clasă energetică",
+      "amenities": "Facilități",
+      "images": "Fotografii",
+      "floorplans": "Planuri",
+      "updatedAt": "Ultima actualizare"
+    }
   }
 }

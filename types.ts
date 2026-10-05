@@ -844,7 +844,7 @@ export interface AppState {
 
 export type AdminSection = 'dashboard' | 'ad-banners' | 'heatmap' | 'users' | 'inquiries' | 'agent-requests' | 'discounts' | 'promotions' | 'promotion-plans' | 'properties' | 'agencies' | 'pricing' | 'activity' | 'settings' | 'site-settings' | 'how-it-works' | 'email-templates' | 'business-listings' | 'articles' | 'villa-approvals' | 'villa-destinations' | 'city-showcase' | 'city-photos';
 
-export type AgencyDashboardSection = 'overview' | 'agents' | 'properties' | 'leads' | 'analytics' | 'financial' | 'profile' | 'team';
+export type AgencyDashboardSection = 'overview' | 'agents' | 'properties' | 'imports' | 'leads' | 'analytics' | 'financial' | 'profile' | 'team';
 
 export type AppAction =
     | { type: 'AUTH_CHECK_START' }

@@ -12,6 +12,7 @@ import { AGENCY_DASHBOARD_SECTIONS } from '@/src/shared/constants/app.constants'
 import OverviewSection from './overview/OverviewSection';
 import AgentManagementSection from './agents/AgentManagementSection';
 import PropertyManagementSection from './properties/PropertyManagementSection';
+import PropertyImportsSection from './imports/PropertyImportsSection';
 import LeadsInquiriesSection from './leads/LeadsInquiriesSection';
 import AnalyticsReportsSection from './analytics/AnalyticsReportsSection';
 import FinancialBillingSection from './financial/FinancialBillingSection';
@@ -128,6 +129,8 @@ const AgencyDashboardPage: React.FC = () => {
         return <AgentManagementSection agencyId={agencyId} />;
       case 'properties':
         return <PropertyManagementSection agencyId={agencyId} />;
+      case 'imports':
+        return <PropertyImportsSection agencyId={agencyId} />;
       case 'leads':
         return <LeadsInquiriesSection agencyId={agencyId} />;
       case 'analytics':

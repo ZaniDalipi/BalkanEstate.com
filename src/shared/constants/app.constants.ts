@@ -193,6 +193,7 @@ export const AGENCY_DASHBOARD_SECTIONS = [
   'overview',
   'agents',
   'properties',
+  'imports',
   'leads',
   'analytics',
   'financial',

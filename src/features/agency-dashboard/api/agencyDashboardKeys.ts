@@ -12,4 +12,8 @@ export const agencyDashboardKeys = {
   financial: (agencyId: string) => [...agencyDashboardKeys.all, 'financial', agencyId] as const,
   teamFeed: (agencyId: string) => [...agencyDashboardKeys.all, 'team-feed', agencyId] as const,
   teamNotes: (agencyId: string) => [...agencyDashboardKeys.all, 'team-notes', agencyId] as const,
+  feeds: (agencyId: string) => [...agencyDashboardKeys.all, 'feeds', agencyId] as const,
+  feedMeta: (agencyId: string) => [...agencyDashboardKeys.feeds(agencyId), 'meta'] as const,
+  feedRuns: (agencyId: string, feedId: string) => [...agencyDashboardKeys.feeds(agencyId), feedId, 'runs'] as const,
+  feedRun: (agencyId: string, feedId: string, runId: string) => [...agencyDashboardKeys.feedRuns(agencyId, feedId), runId] as const,
 } as const;

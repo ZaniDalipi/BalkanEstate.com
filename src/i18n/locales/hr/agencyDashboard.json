@@ -25,7 +25,8 @@
     "closeSidebar": "Zatvori bočnu traku",
     "navLabel": "Navigacija nadzorne ploče",
     "expandSidebar": "Proširi bočnu traku",
-    "collapseSidebar": "Sažmi bočnu traku"
+    "collapseSidebar": "Sažmi bočnu traku",
+    "imports": "Uvoz nekretnina"
   },
   "header": {
     "listings": "Oglasi",
@@ -257,5 +258,210 @@
     "postNote": "Objavi bilješku",
     "posting": "Objavljivanje...",
     "noNotes": "Još nema timskih bilješki. Budite prvi koji će objaviti!"
+  },
+  "imports": {
+    "title": "Uvoz nekretnina",
+    "subtitle": "Povežite XML feed sa svoje web stranice ili CRM-a. Oglasi i fotografije uvoze se i osvježavaju svaka 24 sata.",
+    "managersOnly": "Uvozom nekretnina mogu upravljati samo vlasnik agencije ili administrator agencije.",
+    "empty": "Još nema povezanog feeda. Povežite feed sa svoje web stranice ili CRM-a kako biste automatski uvezli oglase.",
+    "confirmDelete": "Odspojiti ovaj feed? Uvezeni oglasi ostaju na BalkanEstateAI, ali se više ne ažuriraju.",
+    "actions": {
+      "add": "Poveži feed",
+      "syncNow": "Sinkroniziraj sada",
+      "pause": "Pauziraj dnevnu sinkronizaciju",
+      "resume": "Nastavi dnevnu sinkronizaciju",
+      "edit": "Uredi",
+      "delete": "Odspoji feed",
+      "preview": "Testiraj vezu i pregledaj"
+    },
+    "status": {
+      "draft": "Nije aktivirano",
+      "active": "Dnevna sinkronizacija uključena",
+      "paused": "Pauzirano",
+      "queued": "U redu čekanja",
+      "fetching": "Preuzimanje",
+      "staged": "Provjera",
+      "applying": "Uvoz",
+      "previewed": "Pregled spreman",
+      "succeeded": "Uspješno",
+      "partial": "Završeno s problemima",
+      "awaiting_review": "Potrebna provjera",
+      "failed": "Neuspješno"
+    },
+    "trigger": {
+      "preview": "Pregled",
+      "manual": "Ručna sinkronizacija",
+      "scheduled": "Dnevna sinkronizacija"
+    },
+    "counts": {
+      "created": "Stvoreno",
+      "updated": "Ažurirano",
+      "unchanged": "Bez promjena",
+      "rejected": "Odbijeno",
+      "deactivated": "Deaktivirano"
+    },
+    "card": {
+      "running": "Uvoz u tijeku",
+      "lastSuccess": "Zadnja uspješna sinkronizacija",
+      "nextSync": "Sljedeća planirana sinkronizacija",
+      "notScheduled": "Nije planirano",
+      "mode": "Vrsta feeda",
+      "reviewNeeded": "Mnogo oglasa nestalo je iz feeda. Provjerite prije nego što budu deaktivirani.",
+      "failedTimes": "(neuspješno {{count}} puta zaredom)"
+    },
+    "mode": {
+      "snapshot": "Potpuni popis (snapshot)",
+      "delta": "Samo promjene (delta)"
+    },
+    "form": {
+      "newTitle": "Povežite feed nekretnina",
+      "editTitle": "Uredi feed",
+      "reactivateNote": "Promjena URL-a, formata, mapiranja, vrste feeda ili pristupnih podataka zaustavlja dnevnu sinkronizaciju dok ponovno ne pregledate i aktivirate feed.",
+      "name": "Naziv",
+      "namePlaceholder": "Feed s web stranice",
+      "url": "URL feeda",
+      "format": "Format",
+      "formatCanonical": "BalkanEstateAI XML (bez mapiranja)",
+      "formatCustom": "Drugi XML format (mapiranje polja)",
+      "mode": "Sadržaj feeda",
+      "snapshotHelp": "Oglasi kojih nema u potpunom, ispravnom feedu deaktiviraju se (nikad se ne brišu).",
+      "deltaHelp": "Deaktiviraju se samo oglasi označeni kao \"removed\"; oglasi koji nedostaju ostaju nepromijenjeni.",
+      "agent": "Objavi oglase kao",
+      "ownerDefault": "Vlasnik agencije (zadano)",
+      "agentHelp": "Novi oglasi ulaze u limit paketa ovog agenta.",
+      "auth": "Pristup feedu",
+      "authType": "Autentifikacija",
+      "authNone": "Bez (javni URL)",
+      "authBasic": "Korisničko ime i lozinka",
+      "authHeader": "API ključ u zaglavlju",
+      "username": "Korisničko ime",
+      "headerName": "Naziv zaglavlja",
+      "secret": "Lozinka / ključ",
+      "secretKept": "Spremljeno — ostavite prazno za zadržavanje",
+      "safeguards": "Zaštita od uklanjanja",
+      "maxRemoval": "Pitaj me prije ako nestane više od ovog udjela (%)",
+      "minRemovals": "…i više od ovoliko oglasa",
+      "saving": "Spremanje…",
+      "save": "Spremi"
+    },
+    "mapping": {
+      "title": "Mapiranje polja",
+      "help": "Putanje su nazivi elemenata unutar jednog oglasa, odvojeni s \"/\". Za atribut koristite @naziv, npr. price/@currency ili photos/photo/@src.",
+      "recordElement": "Element oglasa",
+      "areaUnit": "Jedinica površine",
+      "defaultCountry": "Država ako nije navedena",
+      "defaultCurrency": "Valuta ako nije navedena",
+      "totalCount": "Putanja ukupnog broja (korijen feeda)",
+      "nextPage": "Putanja sljedeće stranice (korijen feeda)",
+      "valueMap": {
+        "listingType": "Vrijednosti prodaja/najam",
+        "propertyType": "Vrijednosti vrste nekretnine",
+        "status": "Vrijednosti statusa"
+      }
+    },
+    "panel": {
+      "draftHelp": "Testirajte vezu i provjerite kako će oglasi izgledati. Ništa se ne objavljuje dok ne aktivirate feed.",
+      "previewRunning": "Provjera feeda…",
+      "inProgress": "Uvoz je još u tijeku; rezultati će se ovdje prikazati automatski."
+    },
+    "activate": {
+      "title": "Aktiviraj dnevni uvoz",
+      "statement": "Potvrđujem da je ova agencija vlasnik ili je ovlaštena objaviti oglase, opise i fotografije iz ovog feeda na BalkanEstateAI.",
+      "acceptLimit": "Uvezi samo do limita mog paketa ({{remaining}} oglasa). Preostalih {{excess}} ostaje neobjavljeno dok ne bude mjesta.",
+      "activating": "Aktiviranje…",
+      "button": "Aktiviraj i uvezi sada"
+    },
+    "report": {
+      "received": "{{count}} oglasa u feedu",
+      "pages": "{{count}} stranica",
+      "previewSummary": "{{valid}} od {{received}} oglasa ispravno je i spremno za uvoz; {{rejected}} ima probleme koje treba ispraviti.",
+      "limitTitle": "Vaš paket dopušta još {{remaining}} oglasa, a feed ima {{count}} novih.",
+      "limitHelp": "Ti oglasi nisu objavljeni i ništa se ne naplaćuje. Nadogradite paket ili pričekajte limit za sljedeći mjesec i bit će uvezeni pri kasnijoj sinkronizaciji:",
+      "heldTitle": "{{count}} uvezenih oglasa nedostaje u feedu.",
+      "heldHelp": "To je više nego što vaša zaštita dopušta, pa ništa nije deaktivirano. Ako su oglasi doista uklonjeni, odobrite; ako je feed bio pogrešan, odbacite i ispravite ga.",
+      "wouldDeactivate": "Uvoz sada deaktivirao bi {{count}} oglasa kojih više nema u feedu.",
+      "samples": "Primjeri oglasa",
+      "issues": "Rezultati provjere"
+    },
+    "review": {
+      "approve": "Deaktiviraj {{count}} oglasa",
+      "dismiss": "Zadrži ih aktivnima"
+    },
+    "issues": {
+      "none": "Nisu pronađeni problemi.",
+      "error": "Nije uvezeno",
+      "warning": "Upozorenje",
+      "more": "Prikaži više (preostalo {{count}})",
+      "truncated": "Prikazano je samo prvih 500 problema."
+    },
+    "history": {
+      "title": "Povijest uvoza",
+      "empty": "Još nema uvoza.",
+      "when": "Kada",
+      "type": "Vrsta",
+      "result": "Rezultat"
+    },
+    "preview": {
+      "addressHidden": "točna adresa skrivena",
+      "priceOnRequest": "Cijena na upit",
+      "rent": "Najam",
+      "sale": "Prodaja"
+    },
+    "rules": {
+      "title": "Što feed ažurira — a što ostaje vaše",
+      "managedTitle": "Ažurira se iz feeda",
+      "localEdits": "Ako neko od ovih polja uredite na BalkanEstateAI, vaša izmjena se zadržava i prikazuje u rezultatima uvoza umjesto da bude prepisana.",
+      "localTitle": "Uređuje se samo ovdje, nikad iz feeda",
+      "removal": "Oglasi se nikad ne brišu. Oglas kojeg nema u potpunom feedu premješta se u skice i automatski se vraća ako se ponovno pojavi. Ručno stvoreni oglasi nikad se ne diraju.",
+      "local": {
+        "0": "promocije i oznake",
+        "1": "videozapisi i virtualne ture",
+        "2": "termini razgledavanja",
+        "3": "posebne značajke i materijali",
+        "4": "namještenost, grijanje, stanje i pogled",
+        "5": "uvjeti najma i podaci o najmoprimcu",
+        "6": "vaš interni ID nekretnine"
+      }
+    },
+    "fields": {
+      "externalId": "ID oglasa",
+      "status": "Status",
+      "sourceUrl": "URL oglasa",
+      "title": "Naslov",
+      "description": "Opis",
+      "listingType": "Prodaja ili najam",
+      "rentPeriod": "Razdoblje najma",
+      "propertyType": "Vrsta nekretnine",
+      "price": "Cijena",
+      "currency": "Valuta",
+      "priceOnRequest": "Cijena na upit",
+      "isNegotiable": "Cijena na upit",
+      "country": "Država",
+      "city": "Grad",
+      "district": "Četvrt",
+      "address": "Adresa",
+      "addressVisibility": "Vidljivost adrese",
+      "latitude": "Geografska širina",
+      "longitude": "Geografska dužina",
+      "lat": "Geografska širina",
+      "lng": "Geografska dužina",
+      "area": "Stambena površina",
+      "sqft": "Stambena površina",
+      "landArea": "Površina zemljišta",
+      "bedrooms": "Spavaće sobe",
+      "beds": "Spavaće sobe",
+      "bathrooms": "Kupaonice",
+      "baths": "Kupaonice",
+      "livingRooms": "Dnevni boravci",
+      "floor": "Kat",
+      "floorNumber": "Kat",
+      "totalFloors": "Ukupno katova",
+      "yearBuilt": "Godina izgradnje",
+      "energyRating": "Energetski razred",
+      "amenities": "Pogodnosti",
+      "images": "Fotografije",
+      "floorplans": "Tlocrti",
+      "updatedAt": "Zadnje ažuriranje"
+    }
   }
 }
