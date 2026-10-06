@@ -343,11 +343,12 @@
       "maxRemoval": "Pitaj me prije ako nestane više od ovog udjela (%)",
       "minRemovals": "…i više od ovoliko oglasa",
       "saving": "Čuvanje…",
-      "save": "Sačuvaj"
+      "save": "Sačuvaj",
+      "formatAuto": "Automatsko prepoznavanje (bilo koji XML feed nekretnina)"
     },
     "mapping": {
       "title": "Mapiranje polja",
-      "help": "Putanje su nazivi elemenata unutar jednog oglasa, odvojeni s \"/\". Za atribut koristite @naziv, npr. price/@currency ili photos/photo/@src.",
+      "help": "Putanje su nazivi elemenata unutar jednog oglasa, odvojeni sa \"/\". Koristite @naziv za atribut, npr. price/@currency ili photos/photo/@src; * za bilo koji element, npr. desc/*; i [@lang=en] za odabir jednog, npr. title[@lang=en].",
       "recordElement": "Element oglasa",
       "areaUnit": "Jedinica površine",
       "defaultCountry": "Država ako nije navedena",
@@ -384,7 +385,10 @@
       "heldHelp": "To je više nego što vaša zaštita dopušta, pa ništa nije deaktivirano. Ako su oglasi doista uklonjeni, odobrite; ako je feed bio pogrešan, odbacite i ispravite ga.",
       "wouldDeactivate": "Uvoz sada deaktivirao bi {{count}} oglasa kojih više nema u feedu.",
       "samples": "Primjeri oglasa",
-      "issues": "Rezultati provjere"
+      "issues": "Rezultati provjere",
+      "recognised": "Format je automatski prepoznat: {{format}}",
+      "readAs": "Pročitano kao: {{format}}",
+      "customMapping": "vaše mapiranje polja"
     },
     "review": {
       "approve": "Deaktiviraj {{count}} oglasa",
@@ -495,6 +499,16 @@
       "missing": "Nije pronađeno automatski — postavite ih u mapiranju:",
       "apply": "Koristi ovo mapiranje i ponovo pregledaj",
       "review": "Najprije provjeri mapiranje"
+    },
+    "catalog": {
+      "title": "Sva polja u ovoj datoteci ({{count}})",
+      "help": "Sve što vaša datoteka sadrži za jedan oglas, s primjerom vrijednosti. Polja označena \"ne koristi se\" se zanemaruju — mapirajte ih pod Uredi da biste ih uvezli.",
+      "search": "Pretraži polja ili vrijednosti",
+      "path": "Putanja",
+      "example": "Primjer",
+      "usedFor": "Uvozi se kao",
+      "repeated": "ponavlja se unutar oglasa",
+      "unused": "ne koristi se"
     }
   }
 }

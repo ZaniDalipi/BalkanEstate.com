@@ -57,6 +57,19 @@ const SYNONYMS: Partial<Record<FeedField, string[]>> = {
 
 const normalizeName = (name: string): string => name.toLowerCase().replace(/[-\s.]/g, '_');
 
+const ALL_SYNONYMS = new Set(Object.values(SYNONYMS).flat().map(normalizeName));
+
+/** `OfferId` inside `<Offer>` means `id`: drop the record's own name as a prefix. */
+const withoutPrefix = (name: string, recordName: string): string => {
+  const prefix = normalizeName(recordName);
+  const rest = name.startsWith(prefix) ? name.slice(prefix.length).replace(/^_/, '') : name;
+  return rest || name;
+};
+
+/** How many of a node's direct children are named like listing fields. */
+const fieldLikeChildren = (node: XmlNode): number =>
+  new Set(node.children.map((c) => normalizeName(c.name)).filter((n) => ALL_SYNONYMS.has(n) || ALL_SYNONYMS.has(withoutPrefix(n, node.name)))).size;
+
 const countDescendants = (node: XmlNode, limit = 200): number => {
   let count = Object.keys(node.attrs).length;
   for (const child of node.children) {
@@ -82,7 +95,7 @@ const findRecordCandidate = (root: XmlNode): Candidate | null => {
     for (const child of node.children) groups.set(child.name, [...(groups.get(child.name) ?? []), child]);
     for (const [name, nodes] of groups) {
       const richness = countDescendants(nodes[0]);
-      if (richness >= 3) candidates.push({ parent: node, name, count: nodes.length, score: nodes.length * richness });
+      if (richness >= 3) candidates.push({ parent: node, name, count: nodes.length, score: nodes.length * richness * (1 + fieldLikeChildren(nodes[0])) });
     }
     for (const child of node.children) visit(child, depth + 1);
   };
@@ -123,9 +136,13 @@ const collectPaths = (records: XmlNode[]): { paths: string[]; repeated: Set<stri
 
 const lastSegment = (path: string): string => normalizeName(path.split('/').pop()!.replace(/^@/, ''));
 
-const suggestPath = (field: FeedField, paths: string[], repeated: Set<string>, taken: Set<string>): string | undefined => {
+const suggestPath = (field: FeedField, paths: string[], repeated: Set<string>, taken: Set<string>, recordName: string): string | undefined => {
   const synonyms = (SYNONYMS[field] ?? []).map(normalizeName);
-  const candidates = paths.filter((p) => !taken.has(p) && synonyms.includes(lastSegment(p)));
+  const rank = (p: string): number => {
+    const exact = synonyms.indexOf(lastSegment(p));
+    return exact >= 0 ? exact : synonyms.indexOf(withoutPrefix(lastSegment(p), recordName));
+  };
+  const candidates = paths.filter((p) => !taken.has(p) && rank(p) >= 0);
   if (MULTI_VALUE_FIELDS.has(field)) {
     // Repeated media/amenity elements: prefer the repeated element, then a URL attribute on it.
     const repeatedHit = candidates.find((p) => repeated.has(p)) ?? candidates[0];
@@ -136,7 +153,7 @@ const suggestPath = (field: FeedField, paths: string[], repeated: Set<string>, t
   }
   // Prefer synonyms listed earlier, then shallower paths.
   return candidates.sort(
-    (a, b) => synonyms.indexOf(lastSegment(a)) - synonyms.indexOf(lastSegment(b)) || a.split('/').length - b.split('/').length
+    (a, b) => rank(a) - rank(b) || a.split('/').length - b.split('/').length
   )[0];
 };
 
@@ -149,7 +166,7 @@ export const detectStructure = (header: XmlNode): DetectedStructure | null => {
   const taken = new Set<string>();
   const order: FeedField[] = ['externalId', 'images', 'floorplans', 'amenities', ...FEED_FIELDS.filter((f) => !['externalId', 'images', 'floorplans', 'amenities'].includes(f))];
   for (const field of order) {
-    const path = suggestPath(field, paths, repeated, taken);
+    const path = suggestPath(field, paths, repeated, taken, candidate.name);
     if (path) {
       fields[field] = path;
       taken.add(path);
@@ -167,4 +184,59 @@ export const detectStructure = (header: XmlNode): DetectedStructure | null => {
     suggestedMapping: { recordElement: candidate.name, fields, areaUnit: 'm2' },
     unmatched: FEED_FIELDS.filter((f) => !fields[f]),
   };
+};
+
+export interface FieldCatalogEntry {
+  /** Path relative to a listing, usable directly in a mapping. */
+  path: string;
+  /** First non-empty value seen, shortened. */
+  sample: string;
+  /** How many of the sampled listings contain it. */
+  seenIn: number;
+  /** True when the element repeats inside one listing (photos, features…). */
+  repeated: boolean;
+}
+
+const SAMPLE_RECORDS = 5;
+const MAX_CATALOG = 200;
+
+/**
+ * Every element and attribute inside the first few listings, with an example
+ * value — what the dashboard shows as "all fields in this file" and offers in
+ * the mapping editor.
+ */
+export const buildFieldCatalog = (records: XmlNode[]): FieldCatalogEntry[] => {
+  const entries = new Map<string, FieldCatalogEntry>();
+  const sampled = records.slice(0, SAMPLE_RECORDS);
+  sampled.forEach((record) => {
+    const seenHere = new Set<string>();
+    const note = (path: string, value: string, repeated: boolean) => {
+      let entry = entries.get(path);
+      if (!entry) {
+        if (entries.size >= MAX_CATALOG) return;
+        entry = { path, sample: '', seenIn: 0, repeated: false };
+        entries.set(path, entry);
+      }
+      const clean = value.replace(/\s+/g, ' ').trim();
+      if (!entry.sample && clean) entry.sample = clean.length > 120 ? `${clean.slice(0, 117)}…` : clean;
+      entry.repeated = entry.repeated || repeated;
+      if (!seenHere.has(path)) {
+        seenHere.add(path);
+        entry.seenIn += 1;
+      }
+    };
+    const walk = (node: XmlNode, prefix: string, depth: number) => {
+      for (const [attr, value] of Object.entries(node.attrs)) note(prefix ? `${prefix}/@${attr}` : `@${attr}`, value, false);
+      if (depth >= 5) return;
+      const counts = new Map<string, number>();
+      for (const child of node.children) counts.set(child.name, (counts.get(child.name) ?? 0) + 1);
+      for (const child of node.children) {
+        const path = prefix ? `${prefix}/${child.name}` : child.name;
+        if (child.text.trim() || child.children.length === 0) note(path, child.text, (counts.get(child.name) ?? 0) > 1);
+        walk(child, path, depth + 1);
+      }
+    };
+    walk(record, '', 0);
+  });
+  return Array.from(entries.values());
 };

@@ -82,7 +82,7 @@ interface NormalizedInput {
   name?: string;
   sourceType?: AgencyFeedSourceType;
   url?: string;
-  format?: 'canonical' | 'custom';
+  format?: 'auto' | 'canonical' | 'custom';
   mapping?: FeedMapping;
   mode?: 'snapshot' | 'delta';
   assignedAgentId?: Types.ObjectId;
@@ -120,7 +120,7 @@ const validateInput = async (
     }
   }
   if (input.format !== undefined) {
-    if (input.format !== 'canonical' && input.format !== 'custom') problems.push('Format must be canonical or custom');
+    if (input.format !== 'auto' && input.format !== 'canonical' && input.format !== 'custom') problems.push('Format must be auto, canonical or custom');
     else out.format = input.format;
   }
   if (input.mapping !== undefined && input.mapping !== null) {
@@ -169,6 +169,7 @@ export const toFeedDto = (feed: IAgencyFeed, extras: { activeJob?: boolean; pend
   url: feed.url ? redactUrl(feed.url) : null,
   format: feed.format,
   mapping: feed.mapping ?? null,
+  recognisedFormat: feed.format === 'auto' && feed.autoMapping ? { label: feed.autoFormatLabel ?? null, mapping: feed.autoMapping } : null,
   mode: feed.mode,
   state: feed.state,
   assignedAgentId: String(feed.assignedAgentId),
@@ -213,7 +214,7 @@ export const toRunDto = (run: IAgencyFeedRun, detail = false) => ({
   },
   limit: run.limit,
   issueCount: run.issues.length,
-  ...(detail ? { issues: run.issues, issuesTruncated: run.issuesTruncated, samples: run.samples, detected: run.detected ?? null } : {}),
+  ...(detail ? { issues: run.issues, issuesTruncated: run.issuesTruncated, samples: run.samples, detected: run.detected ?? null, mappingUsed: run.mappingUsed ?? null, fieldCatalog: run.fieldCatalog ?? [] } : {}),
 });
 
 export const describeFeeds = async (agencyId: Types.ObjectId) => {
@@ -235,7 +236,7 @@ export const createFeed = async (agency: IAgency, actorId: ActorId, input: FeedI
   if (count >= MAX_FEEDS_PER_AGENCY) throw new FeedInputError([`An agency can connect at most ${MAX_FEEDS_PER_AGENCY} feeds`]);
   const data = await validateInput(input, agency, null);
   const sourceType = data.sourceType ?? 'url';
-  const format = data.format ?? 'canonical';
+  const format = data.format ?? 'auto';
   if (format === 'custom' && !data.mapping) throw new FeedInputError(['A custom feed needs a field mapping']);
   if (data.url && (await AgencyFeed.exists({ agencyId: agency._id, url: data.url }))) {
     throw new FeedInputError(['This feed URL is already connected']);
@@ -289,6 +290,8 @@ export const updateFeed = async (feed: IAgencyFeed, agency: IAgency, actorId: Ac
     changed.push('url');
   }
   if (data.format !== undefined && data.format !== feed.format) { feed.format = data.format; changed.push('format'); }
+  // A different source or format is recognised afresh on the next import.
+  if (changed.includes('url') || changed.includes('format')) { feed.autoMapping = undefined; feed.autoFormatLabel = undefined; }
   if (data.mapping !== undefined) { feed.mapping = data.mapping; feed.markModified('mapping'); changed.push('mapping'); }
   if (feed.format === 'custom' && !feed.mapping) throw new FeedInputError(['A custom feed needs a field mapping']);
   if (data.mode !== undefined && data.mode !== feed.mode) { feed.mode = data.mode; changed.push('mode'); }

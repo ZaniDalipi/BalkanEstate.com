@@ -170,4 +170,28 @@ describe('PropertyImportsSection', () => {
     await waitFor(() => expect(api.requestPreview).toHaveBeenCalledWith('ag1', 'f1'));
     expect(api.updateFeed).toHaveBeenCalledWith('ag1', 'f1', { format: 'custom', mapping: empty.detected!.suggestedMapping });
   });
+
+  it('says which format was recognised and lists every field in the file, marking the unused ones', async () => {
+    const recognised: FeedRun = {
+      ...preview,
+      mappingUsed: { source: 'profile', label: 'Kyero', mapping: { recordElement: 'property', fields: { externalId: 'id', description: 'desc/*', city: 'town' } } },
+      fieldCatalog: [
+        { path: 'id', sample: 'KY-1', seenIn: 2, repeated: false },
+        { path: 'desc/en', sample: 'Sea view villa', seenIn: 2, repeated: false },
+        { path: 'pool', sample: '1', seenIn: 1, repeated: false },
+      ],
+    };
+    api.listFeeds.mockResolvedValue({ feeds: [{ ...baseFeed, format: 'auto' }], workerOnline: true });
+    api.listFeedRuns.mockResolvedValue([recognised]);
+    api.getFeedRun.mockResolvedValue(recognised);
+    renderSection();
+
+    expect(await screen.findByText('Format recognised automatically: Kyero')).toBeTruthy();
+    fireEvent.click(screen.getByText('All fields in this file (3)'));
+    expect(screen.getByText('Sea view villa')).toBeTruthy();
+    expect(screen.getByText('description')).toBeTruthy(); // desc/* covers desc/en
+    expect(screen.getAllByText('not used')).toHaveLength(1);
+    fireEvent.change(screen.getByLabelText('Search fields or values'), { target: { value: 'pool' } });
+    expect(screen.queryByText('Sea view villa')).toBeNull();
+  });
 });

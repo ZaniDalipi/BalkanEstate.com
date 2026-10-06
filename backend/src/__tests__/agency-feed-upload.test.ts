@@ -37,11 +37,11 @@ const drain = async () => {
   }
 };
 
-const createUploadFeed = async (s: AgencySetup) => {
+const createUploadFeed = async (s: AgencySetup, extra: Record<string, unknown> = {}) => {
   const res = await request(app)
     .post(feedsPath(s))
     .set('Authorization', tokenFor(s.owner))
-    .send({ name: 'CRM export', sourceType: 'upload', assignedAgentId: String(s.agent._id) });
+    .send({ name: 'CRM export', sourceType: 'upload', assignedAgentId: String(s.agent._id), ...extra });
   expect(res.status).toBe(201);
   return res.body.feed as { id: string; sourceType: string; url: string | null; state: string };
 };
@@ -165,7 +165,8 @@ describe('agency feed — XML file upload', () => {
 
   it('detects a non-canonical file, suggests a mapping, and re-previews the same file with it', async () => {
     const s = await createAgencySetup();
-    const feed = await createUploadFeed(s);
+    // An explicit canonical feed does not auto-detect; it suggests the mapping instead.
+    const feed = await createUploadFeed(s, { format: 'canonical' });
     const auth = tokenFor(s.owner);
     const xml = `<export><properties>${[1, 2].map((i) => `<property><id>P-${i}</id><title>Flat ${i}</title>
       <description>Nice</description><offer>sale</offer><type>apartment</type><price currency="EUR">9000${i}</price>

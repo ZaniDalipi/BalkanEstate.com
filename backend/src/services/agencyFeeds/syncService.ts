@@ -29,7 +29,9 @@ import { normalizeRecord } from './listingNormalizer';
 import { createListing, deactivateListing, deactivateMissing, updateListing, type Geocoder, type WriterContext } from './listingWriter';
 import { listingHash } from './managedFields';
 import { findDuplicateIds, planSync } from './syncPlanner';
-import { detectStructure } from './structureDetector';
+import { buildFieldCatalog, detectStructure } from './structureDetector';
+import { resolveFormat } from './formatProfiles';
+import type { XmlNode } from './feedTypes';
 
 /**
  * Runs one agency-feed import from start to finish:
@@ -94,8 +96,26 @@ export const fetchLimitsFromEnv = () => ({
 /** Uploaded files are stored as one MongoDB document, so they stay under its 16 MB limit. */
 export const UPLOAD_MAX_BYTES = Math.min(intEnv('AGENCY_FEED_UPLOAD_MAX_MB', 15), 15) * 1024 * 1024;
 
-export const mappingFor = (feed: Pick<IAgencyFeed, 'format' | 'mapping'>): FeedMapping =>
-  feed.format === 'canonical' || !feed.mapping ? CANONICAL_MAPPING : feed.mapping;
+type ChosenMapping = { source: NonNullable<IAgencyFeedRun['mappingUsed']>['source']; label: string; mapping: FeedMapping };
+
+const chooseMapping = (feed: Pick<IAgencyFeed, 'format' | 'mapping' | 'autoMapping' | 'autoFormatLabel'>): ChosenMapping => {
+  if (feed.format === 'custom' && feed.mapping) return { source: 'custom', label: 'Custom mapping', mapping: feed.mapping };
+  if (feed.format === 'auto' && feed.autoMapping) {
+    return { source: 'remembered', label: feed.autoFormatLabel ?? 'Recognised format', mapping: feed.autoMapping };
+  }
+  return { source: 'canonical', label: 'BalkanEstateAI XML', mapping: CANONICAL_MAPPING };
+};
+
+export const mappingFor = (feed: Pick<IAgencyFeed, 'format' | 'mapping' | 'autoMapping'>): FeedMapping => chooseMapping(feed).mapping;
+
+/** Elements named `name` anywhere under `root` (bounded: the header is a bounded copy). */
+const findElements = (root: XmlNode, name: string, out: XmlNode[] = []): XmlNode[] => {
+  for (const child of root.children) {
+    if (child.name === name) out.push(child);
+    else findElements(child, name, out);
+  }
+  return out;
+};
 
 const isMember = (agency: IAgency, userId: Types.ObjectId): boolean => {
   const id = String(userId);
@@ -157,8 +177,29 @@ const fetchAndStage = async (run: IAgencyFeedRun, feed: IAgencyFeed, deps: SyncD
   run.startedAt = run.startedAt ?? deps.now();
   await run.save();
 
-  const mapping = mappingFor(feed);
-  const fetched = await loadDocument(run, feed, mapping, deps);
+  let chosen = chooseMapping(feed);
+  let fetched = await loadDocument(run, feed, chosen.mapping, deps);
+
+  // Auto format: the remembered (or canonical) mapping found nothing, so
+  // recognise the document — a known portal format or a detected structure —
+  // read it again with that mapping, and remember it for the next import.
+  if (feed.format === 'auto' && fetched.records.length === 0 && fetched.header) {
+    const resolved = resolveFormat(fetched.header);
+    if (resolved && JSON.stringify(resolved.mapping) !== JSON.stringify(chosen.mapping)) {
+      const retry = await loadDocument(run, feed, resolved.mapping, deps);
+      if (retry.records.length > 0) {
+        fetched = retry;
+        chosen = { source: resolved.source, label: resolved.label, mapping: resolved.mapping };
+        feed.autoMapping = resolved.mapping;
+        feed.autoFormatLabel = resolved.label;
+        await AgencyFeed.updateOne({ _id: feed._id }, { $set: { autoMapping: resolved.mapping, autoFormatLabel: resolved.label } });
+        feedLogger.info('feed format recognised', { runId: String(run._id), feedId: String(feed._id), format: resolved.label, recordElement: resolved.mapping.recordElement });
+      }
+    }
+  }
+  const mapping = chosen.mapping;
+  run.mappingUsed = { source: chosen.source, label: chosen.label, mapping: mapping as unknown as Record<string, unknown> };
+  run.fieldCatalog = buildFieldCatalog(fetched.records);
 
   const mapped = fetched.records.map((record) => mapRecord(record, mapping));
   const normalized = mapped.map((m) => normalizeRecord(m, mapping));
@@ -220,6 +261,7 @@ const fetchAndStage = async (run: IAgencyFeedRun, feed: IAgencyFeed, deps: SyncD
     const detected = detectStructure(fetched.header);
     if (detected && detected.recordElement !== mapping.recordElement) {
       run.detected = detected as unknown as IAgencyFeedRun['detected'];
+      run.fieldCatalog = buildFieldCatalog(findElements(fetched.header, detected.recordElement));
       allIssues.push({
         severity: 'error',
         code: 'no_listings_found',

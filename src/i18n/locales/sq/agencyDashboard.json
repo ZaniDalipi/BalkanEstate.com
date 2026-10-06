@@ -343,11 +343,12 @@
       "maxRemoval": "Më pyet më parë nëse zhduket më shumë se kjo përqindje (%)",
       "minRemovals": "…dhe më shumë se ky numër njoftimesh",
       "saving": "Po ruhet…",
-      "save": "Ruaj"
+      "save": "Ruaj",
+      "formatAuto": "Zbulim automatik (çdo feed XML pronash)"
     },
     "mapping": {
       "title": "Përputhja e fushave",
-      "help": "Shtigjet janë emra elementesh brenda një njoftimi, të ndarë me \"/\". Për një atribut përdorni @emri, p.sh. price/@currency ose photos/photo/@src.",
+      "help": "Shtigjet janë emra elementesh brenda një shpalljeje, të ndarë me \"/\". Përdorni @emri për atribut, p.sh. price/@currency ose photos/photo/@src; * për çdo element, p.sh. desc/*; dhe [@lang=en] për të zgjedhur një, p.sh. title[@lang=en].",
       "recordElement": "Elementi i njoftimit",
       "areaUnit": "Njësia e sipërfaqes",
       "defaultCountry": "Shteti nëse nuk tregohet",
@@ -384,7 +385,10 @@
       "heldHelp": "Kjo është më shumë nga sa lejon mbrojtja juaj, ndaj asgjë nuk u çaktivizua. Nëse njoftimet janë hequr vërtet, miratoni; nëse burimi ishte i gabuar, refuzoni dhe rregullojeni.",
       "wouldDeactivate": "Importimi tani do të çaktivizonte {{count}} njoftime që nuk janë më në burim.",
       "samples": "Shembuj njoftimesh",
-      "issues": "Rezultatet e verifikimit"
+      "issues": "Rezultatet e verifikimit",
+      "recognised": "Formati u njoh automatikisht: {{format}}",
+      "readAs": "Lexuar si: {{format}}",
+      "customMapping": "lidhja juaj e fushave"
     },
     "review": {
       "approve": "Çaktivizo {{count}} njoftime",
@@ -495,6 +499,16 @@
       "missing": "Nuk u gjetën automatikisht — vendosini në përputhje:",
       "apply": "Përdor këtë përputhje dhe shiko përsëri",
       "review": "Kontrollo përputhjen më parë"
+    },
+    "catalog": {
+      "title": "Të gjitha fushat në këtë skedar ({{count}})",
+      "help": "Gjithçka që skedari juaj përmban për një shpallje, me një vlerë shembull. Fushat e shënuara \"nuk përdoret\" injorohen — lidhini te Ndrysho për t'i importuar.",
+      "search": "Kërko fusha ose vlera",
+      "path": "Shtegu",
+      "example": "Shembull",
+      "usedFor": "Importohet si",
+      "repeated": "përsëritet brenda një shpalljeje",
+      "unused": "nuk përdoret"
     }
   }
 }

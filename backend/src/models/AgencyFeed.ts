@@ -13,7 +13,12 @@ import type { FeedMapping, FeedMode } from '../services/agencyFeeds/feedTypes';
  * utils/fieldEncryption) and never returned by the API.
  */
 export type AgencyFeedState = 'draft' | 'active' | 'paused';
-export type AgencyFeedFormat = 'canonical' | 'custom';
+/**
+ * `auto`: recognise the format on each import (canonical, a known portal
+ * format, or a detected structure) and remember the result. `canonical`:
+ * BalkanEstateAI XML only. `custom`: the agency's own mapping.
+ */
+export type AgencyFeedFormat = 'auto' | 'canonical' | 'custom';
 /** `url`: fetched and synced on a schedule. `upload`: each file the agency uploads is imported. */
 export type AgencyFeedSourceType = 'url' | 'upload';
 
@@ -39,6 +44,9 @@ export interface IAgencyFeed extends Document {
   url?: string;
   format: AgencyFeedFormat;
   mapping?: FeedMapping;
+  /** Auto format: the mapping last recognised for this feed, and what it was recognised as. */
+  autoMapping?: FeedMapping;
+  autoFormatLabel?: string;
   mode: FeedMode;
   state: AgencyFeedState;
   /** Agency member the imported listings are published under (and counted against). */
@@ -81,8 +89,10 @@ const AgencyFeedSchema = new Schema<IAgencyFeed>(
         return this.sourceType !== 'upload';
       },
     },
-    format: { type: String, enum: ['canonical', 'custom'], required: true, default: 'canonical' },
+    format: { type: String, enum: ['auto', 'canonical', 'custom'], required: true, default: 'auto' },
     mapping: { type: Schema.Types.Mixed },
+    autoMapping: { type: Schema.Types.Mixed },
+    autoFormatLabel: { type: String, maxlength: 100 },
     mode: { type: String, enum: ['snapshot', 'delta'], required: true, default: 'snapshot' },
     state: { type: String, enum: ['draft', 'active', 'paused'], required: true, default: 'draft', index: true },
     assignedAgentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },

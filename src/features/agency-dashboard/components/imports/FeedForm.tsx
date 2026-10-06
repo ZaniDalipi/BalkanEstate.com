@@ -20,13 +20,15 @@ interface FeedFormProps {
   onDelete?: () => void;
   /** Detected mapping to start from; switches the form to a custom format. */
   suggestedMapping?: FeedMappingConfig;
+  /** Paths found in the feed's last file, offered in the mapping editor. */
+  pathSuggestions?: string[];
 }
 
 const initialValues = (feed: AgencyFeed | null): FeedFormValues => ({
   name: feed?.name ?? '',
   sourceType: feed?.sourceType ?? 'url',
   url: feed?.url ?? '',
-  format: feed?.format ?? 'canonical',
+  format: feed?.format ?? 'auto',
   mode: feed?.mode ?? 'snapshot',
   assignedAgentId: feed?.assignedAgentId ?? '',
   credentials: { type: feed?.credentials.type ?? 'none', username: feed?.credentials.username, headerName: feed?.credentials.headerName },
@@ -52,7 +54,7 @@ const buildPayload = (values: FeedFormValues, initial: FeedFormValues, isNew: bo
   return payload;
 };
 
-const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMapping, saving, error, onSubmit, onCancel, onDelete }) => {
+const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMapping, pathSuggestions, saving, error, onSubmit, onCancel, onDelete }) => {
   const { t } = useTranslation(['agencyDashboard', 'common']);
   const [initial] = useState(() => initialValues(feed));
   // Starts from the suggestion but compares against the saved feed, so the mapping is sent on save.
@@ -95,8 +97,10 @@ const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMappin
           <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.format', 'Format')}</span>
           <select className={inputClass} value={values.format} onChange={(e) => {
             const format = e.target.value as FeedFormValues['format'];
-            setValues((v) => ({ ...v, format, mapping: format === 'custom' ? v.mapping ?? { ...meta.canonical.mapping } : v.mapping }));
+            // Custom starts from what auto-detection recognised, so only corrections are needed.
+            setValues((v) => ({ ...v, format, mapping: format === 'custom' ? v.mapping ?? feed?.recognisedFormat?.mapping ?? { ...meta.canonical.mapping } : v.mapping }));
           }}>
+            <option value="auto">{t('agencyDashboard:imports.form.formatAuto', 'Auto-detect (any XML property feed)')}</option>
             <option value="canonical">{t('agencyDashboard:imports.form.formatCanonical', 'BalkanEstateAI XML (no mapping needed)')}</option>
             <option value="custom">{t('agencyDashboard:imports.form.formatCustom', 'Other XML format (map fields)')}</option>
           </select>
@@ -128,7 +132,7 @@ const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMappin
       )}
 
       {values.format === 'custom' && values.mapping && (
-        <MappingEditor value={values.mapping} fields={meta.fields} onChange={(mapping) => set('mapping', mapping)} />
+        <MappingEditor value={values.mapping} fields={meta.fields} pathSuggestions={pathSuggestions} onChange={(mapping) => set('mapping', mapping)} />
       )}
 
       <SafeguardFields value={values.safeguards} onChange={(safeguards) => set('safeguards', safeguards)} />

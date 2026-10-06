@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@/constants';
 import type { FeedMappingConfig } from '../../types/propertyImports';
 import { useAgencyAgents } from '../../hooks';
-import { useAgencyFeeds, useFeedMeta, useFeedMutations } from '../../hooks/usePropertyImports';
+import { useAgencyFeeds, useFeedMeta, useFeedMutations, useFeedRun } from '../../hooks/usePropertyImports';
 import FeedCard from './FeedCard';
 import FeedForm from './FeedForm';
 import FeedPanel from './FeedPanel';
@@ -30,6 +30,9 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
 
   const selected = feeds.find((f) => f.id === (selectedId ?? feeds[0]?.id)) ?? null;
   const editedFeed = editing.kind === 'edit' ? feeds.find((f) => f.id === editing.feedId) ?? null : null;
+  // The edited feed's latest file: its paths are offered in the mapping editor.
+  const editedRunId = editedFeed ? (editedFeed.state === 'draft' ? editedFeed.lastPreviewRunId : editedFeed.lastRunId ?? editedFeed.lastPreviewRunId) : null;
+  const { data: editedRun } = useFeedRun(agencyId, editedFeed?.id ?? null, editedRunId);
   const busy = m.sync.isPending || m.pause.isPending || m.resume.isPending;
 
   if ((error as { statusCode?: number } | null)?.statusCode === 403) {
@@ -83,6 +86,7 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
           key={editing.kind === 'edit' ? editing.feedId : 'new'}
           feed={editedFeed}
           suggestedMapping={editing.kind === 'edit' ? editing.suggestedMapping : undefined}
+          pathSuggestions={editedRun?.fieldCatalog?.map((e) => e.path)}
           meta={meta}
           agents={agentOptions}
           saving={m.create.isPending || m.update.isPending}

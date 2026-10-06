@@ -4,7 +4,7 @@ Agencies can connect the XML feed their website or CRM already produces. BalkanE
 photos, refreshes them every 24 hours, applies changes, and soft-deactivates listings removed from a complete feed.
 
 - **Agencies:** [Connecting a feed](#connecting-a-feed) · [Canonical format](#canonical-xml-format-v10) ·
-  [Mapping another format](#mapping-another-xml-format) · [What the sync changes](#what-a-sync-changes) ·
+  [Any XML feed](#reading-any-xml-feed) · [Mapping another format](#mapping-another-xml-format) · [What the sync changes](#what-a-sync-changes) ·
   [Plans and limits](#plans-and-listing-limits) · [Validation messages](#validation-messages)
 - **Operators:** [Architecture](#architecture) · [Setup and deployment](#setup-and-deployment) ·
   [Operations runbook](#operations-runbook) · [Security controls](#security-controls) · [Tests](#tests)
@@ -22,6 +22,7 @@ cannot view or change feeds.
 2. Enter a name and the **feed URL**. It must be a public `http://` or `https://` address on the standard port
    (80/443). Internal, private-network and cloud-metadata addresses are refused.
 3. Choose the **format**:
+   - *Auto-detect (any XML property feed)* — the default. See [Reading any XML feed](#reading-any-xml-feed).
    - *BalkanEstateAI XML* if your feed follows the [canonical format](#canonical-xml-format-v10) — no mapping needed.
    - *Other XML format* to [map your own elements](#mapping-another-xml-format).
 4. Choose **feed contents**:
@@ -139,6 +140,31 @@ Details the feed does not state are left empty — BalkanEstateAI never invents 
 
 ---
 
+## Reading any XML feed
+
+With **Auto-detect**, each import first reads the file with the mapping remembered for the feed (or the canonical
+one). If that finds no listings, the file is recognised and read again:
+
+| Recognised as | How |
+|---|---|
+| BalkanEstateAI XML | root `<balkanestate-feed>` |
+| Kyero (v3) | `<root>` with `<kyero>` / `<property>` — multilingual `desc/*`, `url/*`, `images/image/url`, `price_freq` |
+| Trovit / Mitula / Nestoria | root `<trovit>` (or `mitula`, `nestoria`) with `<ad>` |
+| Anything else | the repeating element with the most listing-like fields, matched by name in English and local languages; `OfferId` inside `<Offer>` counts as `id` |
+
+The recognised mapping is remembered on the feed and used first next time; changing the feed's URL or format
+forgets it. The preview says *Format recognised automatically: …*. Choosing *Other XML format* afterwards starts
+the mapping editor from what was recognised, so only corrections are needed.
+
+Formats without a title (Kyero, many CRM exports) get one built from the feed's own property type and city,
+e.g. *Apartment in Skopje*, with a `title_derived` warning. Prices in BGN and BAM are converted to euros at their
+fixed rate (1.95583) with a `currency_converted` warning. Nothing else is filled in: listings missing required
+details are rejected with the reason.
+
+**All fields in this file.** Every preview and import lists each element and attribute found in the listings, with
+an example value and the field it is imported as (or *not used*). The same paths are offered as suggestions in
+the mapping editor.
+
 ## Mapping another XML format
 
 **Automatic suggestion.** If a preview finds no listings with the current mapping, BalkanEstateAI looks at the
@@ -159,6 +185,8 @@ Choose *Other XML format* and fill in the field mapping. The form starts from th
 | `cost/@cur` | the `cur` attribute of `<cost>` |
 | `@ref` | the `ref` attribute of `<property>` itself |
 | `photos/photo/@src` | every `<photo src="…">` (repeated fields: amenities, images, floor plans) |
+| `desc/*` | every child of `<desc>`, e.g. `<desc><en>…</en><mk>…</mk></desc>` (first one for single fields) |
+| `title[@lang=en]` | only the `<title lang="en">` element |
 
 - **Value maps** translate your values, one per line: `prodaja = sale`, `stan = apartment`, `prodano = sold`. Your
   entries take precedence over the built-in synonyms.
@@ -304,7 +332,8 @@ Feed worker process ──────────┘  scheduler (every minute: 
 |---|---|
 | `feedFetcher.ts` | SSRF-guarded streaming download, redirects, pagination, completeness |
 | `xmlRecordReader.ts` | bounded sax reader: no DOCTYPE, local names, CDATA, caps, truncation detection |
-| `fieldMapper.ts`, `canonicalFormat.ts` | path language, canonical and custom mappings |
+| `fieldMapper.ts`, `canonicalFormat.ts` | path language (incl. `*` and `[@attr=value]`), canonical and custom mappings |
+| `formatProfiles.ts`, `structureDetector.ts` | auto-detect: known portal formats, layout detection, field catalog |
 | `listingNormalizer.ts`, `contentSanitizer.ts` | strict validation and plain-text sanitizing |
 | `syncPlanner.ts` | pure create/update/skip/deactivate decisions and safeguards |
 | `syncService.ts` | fetch → stage → plan → apply → finalize; resumable |
@@ -435,6 +464,7 @@ npm run test:feeds        # all agency-feed suites
 | `agency-feed-api` | agency isolation, manager-only access, unsafe URLs, credential redaction, preview/authorization/limit gates |
 | `agency-feed-images` | content validation, reuse and dedupe, concurrency, safe cleanup |
 | `agency-feed-detect` | detecting a non-canonical layout and a mapping that imports it |
+| `agency-feed-formats` | Kyero and Trovit profiles, detected layouts, wildcard/predicate paths, derived titles, BGN conversion, auto format remembered per feed, field catalog |
 | `agency-feed-upload` | upload feeds without a URL, preview then activate imports the same file, later uploads, incomplete files, non-XML/unsafe files, permissions, scheduler skips uploads |
 
 The database suites use `mongodb-memory-server`. Where its binary download is blocked, point it at a local `mongod`:

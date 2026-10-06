@@ -80,6 +80,14 @@ export interface IAgencyFeedRun extends Document {
     suggestedMapping: Record<string, unknown>;
     unmatched: string[];
   };
+  /** Which mapping read the document, and how it was chosen. */
+  mappingUsed?: {
+    source: 'canonical' | 'custom' | 'remembered' | 'profile' | 'detected';
+    label: string;
+    mapping: Record<string, unknown>;
+  };
+  /** Every element/attribute found in the first listings, with an example value. */
+  fieldCatalog?: Array<{ path: string; sample: string; seenIn: number; repeated: boolean }>;
   /** Up to five normalized listings, for the preview screen. */
   samples: NormalizedListing[];
   limit: {
@@ -157,6 +165,8 @@ const AgencyFeedRunSchema = new Schema<IAgencyFeedRun>(
     issuesTruncated: { type: Boolean, default: false },
     samples: { type: Schema.Types.Mixed, default: [] },
     detected: { type: Schema.Types.Mixed },
+    mappingUsed: { type: Schema.Types.Mixed },
+    fieldCatalog: { type: Schema.Types.Mixed },
     limit: {
       checked: { type: Boolean, default: false },
       remaining: { type: Number },

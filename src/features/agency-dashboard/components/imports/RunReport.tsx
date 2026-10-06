@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExclamationTriangleIcon, InformationCircleIcon } from '@/constants';
 import type { FeedRun } from '../../types/propertyImports';
+import FieldCatalog from './FieldCatalog';
 import ImportStatusBadge from './ImportStatusBadge';
 import IssueList from './IssueList';
 import RunCounts from './RunCounts';
@@ -36,6 +37,16 @@ const RunReport: React.FC<RunReportProps> = ({ run, reviewSlot, detectedSlot }) 
         {run.sourceFile && <span className="break-all">· {run.sourceFile.filename}</span>}
         {run.snapshot.pages > 1 && <span>· {t('agencyDashboard:imports.report.pages', '{{count}} pages', { count: run.snapshot.pages })}</span>}
       </div>
+
+      {run.mappingUsed && counts.received > 0 && (
+        <p className="text-sm text-gray-600">
+          {run.mappingUsed.source === 'profile' || run.mappingUsed.source === 'detected'
+            ? t('agencyDashboard:imports.report.recognised', 'Format recognised automatically: {{format}}', { format: run.mappingUsed.label })
+            : t('agencyDashboard:imports.report.readAs', 'Read as: {{format}}', {
+                format: run.mappingUsed.source === 'custom' ? t('agencyDashboard:imports.report.customMapping', 'your field mapping') : run.mappingUsed.label,
+              })}
+        </p>
+      )}
 
       {run.error && <Notice tone="warn"><p className="font-medium">{run.error.message}</p></Notice>}
       {detectedSlot}
@@ -82,6 +93,10 @@ const RunReport: React.FC<RunReportProps> = ({ run, reviewSlot, detectedSlot }) 
           <h4 className="mb-2 text-sm font-semibold text-gray-900">{t('agencyDashboard:imports.report.samples', 'Sample listings')}</h4>
           <SampleListings samples={run.samples} />
         </section>
+      )}
+
+      {run.fieldCatalog && run.fieldCatalog.length > 0 && (
+        <FieldCatalog entries={run.fieldCatalog} mapping={run.mappingUsed?.mapping ?? run.detected?.suggestedMapping} />
       )}
 
       {run.issues && (

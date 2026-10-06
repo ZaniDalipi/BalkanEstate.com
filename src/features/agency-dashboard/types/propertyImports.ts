@@ -2,7 +2,8 @@
 // Mirrors backend/src/services/agencyFeeds/feedManagementService.ts (toFeedDto / toRunDto).
 
 export type FeedState = 'draft' | 'active' | 'paused';
-export type FeedFormat = 'canonical' | 'custom';
+/** auto: recognised from the file (BalkanEstateAI, Kyero, Trovit or a detected layout). */
+export type FeedFormat = 'auto' | 'canonical' | 'custom';
 export type FeedMode = 'snapshot' | 'delta';
 /** `url`: fetched and synced daily. `upload`: imports each XML file the agency uploads. */
 export type FeedSourceType = 'url' | 'upload';
@@ -48,6 +49,8 @@ export interface AgencyFeed {
   url: string | null;
   format: FeedFormat;
   mapping: FeedMappingConfig | null;
+  /** Auto format: what the last file was recognised as. */
+  recognisedFormat?: { label: string | null; mapping: FeedMappingConfig } | null;
   mode: FeedMode;
   state: FeedState;
   assignedAgentId: string;
@@ -144,6 +147,18 @@ export interface FeedRun {
   samples?: FeedSampleListing[];
   /** Present when no listings matched the mapping: what the file contains instead. */
   detected?: DetectedStructure | null;
+  /** The mapping that read this run's file, and how it was chosen. */
+  mappingUsed?: { source: 'canonical' | 'custom' | 'remembered' | 'profile' | 'detected'; label: string; mapping: FeedMappingConfig } | null;
+  /** Every element and attribute in the file's listings, with an example value. */
+  fieldCatalog?: FieldCatalogEntry[];
+}
+
+export interface FieldCatalogEntry {
+  path: string;
+  sample: string;
+  /** Of the listings sampled, how many contain this path. */
+  seenIn: number;
+  repeated: boolean;
 }
 
 export interface DetectedStructure {

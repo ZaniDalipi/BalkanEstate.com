@@ -343,11 +343,12 @@
       "maxRemoval": "Întreabă-mă înainte dacă dispare mai mult de această proporție (%)",
       "minRemovals": "…și mai mult de acest număr de anunțuri",
       "saving": "Se salvează…",
-      "save": "Salvează"
+      "save": "Salvează",
+      "formatAuto": "Detectare automată (orice feed XML de proprietăți)"
     },
     "mapping": {
       "title": "Corespondența câmpurilor",
-      "help": "Căile sunt nume de elemente din cadrul unui anunț, separate prin \"/\". Pentru un atribut folosiți @nume, de ex. price/@currency sau photos/photo/@src.",
+      "help": "Căile sunt nume de elemente dintr-un anunț, separate prin \"/\". Folosiți @nume pentru un atribut, de ex. price/@currency sau photos/photo/@src; * pentru orice element, de ex. desc/*; și [@lang=en] pentru a alege unul, de ex. title[@lang=en].",
       "recordElement": "Elementul anunțului",
       "areaUnit": "Unitate de suprafață",
       "defaultCountry": "Țara, dacă nu este indicată",
@@ -384,7 +385,10 @@
       "heldHelp": "Sunt mai multe decât permite protecția dvs., așa că nimic nu a fost dezactivat. Dacă anunțurile au fost într-adevăr eliminate, aprobați; dacă fluxul a fost greșit, respingeți și corectați-l.",
       "wouldDeactivate": "Importul acum ar dezactiva {{count}} anunțuri care nu mai sunt în flux.",
       "samples": "Exemple de anunțuri",
-      "issues": "Rezultatele validării"
+      "issues": "Rezultatele validării",
+      "recognised": "Format recunoscut automat: {{format}}",
+      "readAs": "Citit ca: {{format}}",
+      "customMapping": "maparea dvs. de câmpuri"
     },
     "review": {
       "approve": "Dezactivează {{count}} anunțuri",
@@ -495,6 +499,16 @@
       "missing": "Negăsite automat — setați-le în corespondență:",
       "apply": "Folosește această corespondență și previzualizează din nou",
       "review": "Verifică mai întâi corespondența"
+    },
+    "catalog": {
+      "title": "Toate câmpurile din acest fișier ({{count}})",
+      "help": "Tot ce conține fișierul pentru un anunț, cu o valoare exemplu. Câmpurile marcate „nefolosit” sunt ignorate — mapați-le la Editare pentru a le importa.",
+      "search": "Caută câmpuri sau valori",
+      "path": "Cale",
+      "example": "Exemplu",
+      "usedFor": "Importat ca",
+      "repeated": "se repetă în anunț",
+      "unused": "nefolosit"
     }
   }
 }

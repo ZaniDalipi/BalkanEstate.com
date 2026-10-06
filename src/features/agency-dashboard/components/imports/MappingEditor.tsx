@@ -7,6 +7,8 @@ interface MappingEditorProps {
   value: FeedMappingConfig;
   fields: string[];
   onChange: (next: FeedMappingConfig) => void;
+  /** Paths found in the feed's last file, offered as suggestions. */
+  pathSuggestions?: string[];
 }
 
 type MapName = 'listingType' | 'propertyType' | 'status';
@@ -25,7 +27,9 @@ const fromLines = (text: string): Record<string, string> =>
       .map(([k, v]) => [k.trim(), v.trim()])
   );
 
-const MappingEditor: React.FC<MappingEditorProps> = ({ value, fields, onChange }) => {
+const PATHS_LIST_ID = 'feed-mapping-paths';
+
+const MappingEditor: React.FC<MappingEditorProps> = ({ value, fields, onChange, pathSuggestions = [] }) => {
   const { t } = useTranslation(['agencyDashboard']);
   const setField = (field: string, path: string) => {
     const next = { ...value.fields };
@@ -40,9 +44,14 @@ const MappingEditor: React.FC<MappingEditorProps> = ({ value, fields, onChange }
       <p className="text-xs text-gray-500">
         {t(
           'agencyDashboard:imports.mapping.help',
-          'Paths are element names relative to one listing, separated by "/". Use @name for an attribute, e.g. price/@currency or photos/photo/@src.'
+          'Paths are element names relative to one listing, separated by "/". Use @name for an attribute, e.g. price/@currency or photos/photo/@src; * for any element, e.g. desc/*; and [@lang=en] to pick one, e.g. title[@lang=en].'
         )}
       </p>
+      {pathSuggestions.length > 0 && (
+        <datalist id={PATHS_LIST_ID}>
+          {pathSuggestions.map((p) => <option key={p} value={p} />)}
+        </datalist>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="block text-sm">
           <span className="font-medium text-gray-700">{t('agencyDashboard:imports.mapping.recordElement', 'Listing element')}</span>
@@ -64,7 +73,8 @@ const MappingEditor: React.FC<MappingEditorProps> = ({ value, fields, onChange }
               {t(`agencyDashboard:imports.fields.${field}`, field)}
               {REQUIRED.has(field) && <span className="text-red-500"> *</span>}
             </span>
-            <input className={inputClass} value={value.fields[field] ?? ''} onChange={(e) => setField(field, e.target.value)} spellCheck={false} />
+            <input className={inputClass} value={value.fields[field] ?? ''} onChange={(e) => setField(field, e.target.value)} spellCheck={false}
+              list={pathSuggestions.length > 0 ? PATHS_LIST_ID : undefined} />
           </label>
         ))}
       </div>

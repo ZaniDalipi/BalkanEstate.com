@@ -36,6 +36,17 @@ export const LIMITS = {
 const ROOMS_REQUIRED: ReadonlySet<PropertyType> = new Set(['apartment', 'house', 'villa', 'luxury-villa']);
 
 const SUPPORTED_CURRENCIES = new Set(['EUR']);
+/**
+ * Currencies with a legally fixed euro conversion rate, converted exactly.
+ * Floating currencies (MKD, RSD, ALL, RON, …) are not converted: a guessed
+ * exchange rate would publish a price the agency never set.
+ */
+const FIXED_EURO_RATES: Record<string, number> = { BGN: 1.95583, BAM: 1.95583 };
+
+const TYPE_LABELS: Record<PropertyType, string> = {
+  apartment: 'Apartment', house: 'House', villa: 'Villa', 'luxury-villa': 'Luxury villa',
+  commercial: 'Commercial property', parking: 'Parking space', land: 'Land', other: 'Property',
+};
 
 const SYNONYMS: Record<ValueMapName, Record<string, string>> = {
   listingType: {
@@ -44,6 +55,7 @@ const SYNONYMS: Record<ValueMapName, Record<string, string>> = {
     'продажа': 'sale', 'продаја': 'sale', 'πώληση': 'sale', verkauf: 'sale',
     rent: 'rent', rental: 'rent', lease: 'rent', let: 'rent', 'to-let': 'rent', najam: 'rent', izdavanje: 'rent',
     iznajmljivanje: 'rent', qira: 'rent', 'qiradhënie': 'rent', inchiriere: 'rent', 'închiriere': 'rent',
+    'for rent': 'rent', 'for-rent': 'rent', 'forrent': 'rent', 'long term rental': 'rent', 'month': 'rent',
     'наем': 'rent', 'под наем': 'rent', 'издавање': 'rent', 'изнајмување': 'rent', 'ενοικίαση': 'rent', miete: 'rent',
   },
   propertyType: {
@@ -58,6 +70,14 @@ const SYNONYMS: Record<ValueMapName, Record<string, string>> = {
     parking: 'parking', garage: 'parking', 'garaža': 'parking', garaza: 'parking', 'parking-space': 'parking',
     land: 'land', plot: 'land', 'zemljište': 'land', zemljiste: 'land', plac: 'land', parcel: 'land', truall: 'land',
     teren: 'land', 'парцел': 'land', 'плац': 'land', 'οικόπεδο': 'land',
+    townhouse: 'house', 'town house': 'house', bungalow: 'house', 'country house': 'house', 'semi-detached': 'house',
+    detached: 'house', cottage: 'house', chalet: 'house', finca: 'house', 'terraced house': 'house', farmhouse: 'house',
+    duplex: 'apartment', maisonette: 'apartment', loft: 'apartment', 'ground floor apartment': 'apartment', 'garsonjera': 'apartment',
+    'гарсоњера': 'apartment', 'гарсониера': 'apartment', 'мезонет': 'apartment', 'двособен': 'apartment', 'тристаен': 'apartment', 'двустаен': 'apartment',
+    'office space': 'commercial', store: 'commercial', hotel: 'commercial', restaurant: 'commercial',
+    'industrial': 'commercial', 'деловен простор': 'commercial', 'локал': 'commercial', 'офис': 'commercial',
+    'гаража': 'parking', 'гараж': 'parking', field: 'land', 'building plot': 'land', 'urban plot': 'land', 'земјиште': 'land', 'земјиште/плац': 'land',
+    'стан/апартман': 'apartment',
     other: 'other',
   },
   status: {
@@ -137,6 +157,13 @@ const parseCoordinate = (input: string | undefined, min: number, max: number): n
   return n >= min && n <= max ? n : undefined;
 };
 
+const CURRENCY_SYMBOLS: Record<string, string> = { '€': 'EUR', 'eur': 'EUR', 'euro': 'EUR', 'evro': 'EUR', 'евро': 'EUR', 'лв': 'BGN', 'лв.': 'BGN', 'km': 'BAM' };
+const normalizeCurrency = (raw: string | undefined): string | undefined => {
+  if (!raw) return undefined;
+  const key = raw.trim().toLowerCase();
+  return CURRENCY_SYMBOLS[key] ?? (key ? key.toUpperCase() : undefined);
+};
+
 const parseBool = (input: string | undefined): boolean =>
   input !== undefined && ['true', '1', 'yes', 'da', 'po'].includes(input.trim().toLowerCase());
 
@@ -183,7 +210,16 @@ export const normalizeRecord = (record: MappedRecord, mapping: FeedMapping): Nor
   }
 
   const titleRaw = single(record.title);
-  const title = singleLine(titleRaw, 10_000);
+  let title = singleLine(titleRaw, 10_000);
+  if (!title && mapping.deriveTitle) {
+    // Built from stated values only; checked again below once type and city are known.
+    const derivedType = mapValue('propertyType', single(record.propertyType), mapping) as PropertyType | undefined;
+    const derivedCity = singleLine(single(record.city), LIMITS.city);
+    if (derivedType && derivedCity) {
+      title = `${TYPE_LABELS[derivedType]} in ${derivedCity}`;
+      warn('title_derived', 'The feed has no title; one was built from the property type and city', 'title');
+    }
+  }
   if (!title) error('missing_title', 'Title is missing', 'title');
   else if (title.length > LIMITS.title) warn('title_truncated', `Title shortened to ${LIMITS.title} characters`, 'title');
 
@@ -201,7 +237,8 @@ export const normalizeRecord = (record: MappedRecord, mapping: FeedMapping): Nor
     error('invalid_listing_type', rawListingType ? `Unknown sale/rent value "${rawListingType}"` : 'Sale or rent is not stated', 'listingType');
   }
 
-  const rawRentPeriod = single(record.rentPeriod);
+  // Only a rental has a rent period (some formats share one element for sale/month/week).
+  const rawRentPeriod = listingType === 'rent' ? single(record.rentPeriod) : undefined;
   const rentPeriod = mapValue('rentPeriod', rawRentPeriod, mapping) as NormalizedListing['rentPeriod'];
   if (rawRentPeriod && !rentPeriod) warn('unknown_rent_period', `Unknown rent period "${rawRentPeriod}" ignored`, 'rentPeriod');
 
@@ -219,16 +256,20 @@ export const normalizeRecord = (record: MappedRecord, mapping: FeedMapping): Nor
   } else if (price === undefined || price <= 0 || price > LIMITS.maxPrice) {
     error('invalid_price', rawPrice ? `Price "${rawPrice}" is not a valid amount` : 'Price is missing', 'price');
   }
-  const currency = (single(record.currency) ?? mapping.defaults?.currency)?.trim().toUpperCase();
+  const currency = normalizeCurrency(single(record.currency) ?? mapping.defaults?.currency);
   if (!onRequest || (price ?? 0) > 0) {
-    if (!currency) error('missing_currency', 'Price currency is not stated', 'currency');
-    else if (!SUPPORTED_CURRENCIES.has(currency)) {
-      error('unsupported_currency', `Currency ${currency} is not supported; prices must be in EUR`, 'currency');
+    if (!currency) {
+      error('missing_currency', 'Price currency is not stated — if every price is in one currency, set "Currency if not stated" in the field mapping', 'currency');
+    } else if (FIXED_EURO_RATES[currency] && price !== undefined && price > 0) {
+      price = Math.round(price / FIXED_EURO_RATES[currency]);
+      warn('currency_converted', `Price converted from ${currency} at the fixed rate ${FIXED_EURO_RATES[currency]} per euro`, 'price');
+    } else if (!SUPPORTED_CURRENCIES.has(currency)) {
+      error('unsupported_currency', `Currency ${currency} is not supported; prices must be in EUR (BGN and BAM are converted at their fixed rate)`, 'currency');
     }
   }
 
   const country = singleLine(single(record.country) ?? mapping.defaults?.country, LIMITS.city);
-  if (!country) error('missing_country', 'Country is missing', 'country');
+  if (!country) error('missing_country', 'Country is missing — if the whole feed is in one country, set "Country if not stated" in the field mapping', 'country');
   const city = singleLine(single(record.city), LIMITS.city);
   if (!city) error('missing_city', 'City is missing', 'city');
   const district = singleLine(single(record.district), LIMITS.city);

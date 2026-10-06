@@ -343,11 +343,12 @@
       "maxRemoval": "Ask me first if more than this share disappears (%)",
       "minRemovals": "…and more than this many listings",
       "saving": "Saving…",
-      "save": "Save"
+      "save": "Save",
+      "formatAuto": "Auto-detect (any XML property feed)"
     },
     "mapping": {
       "title": "Field mapping",
-      "help": "Paths are element names relative to one listing, separated by \"/\". Use @name for an attribute, e.g. price/@currency or photos/photo/@src.",
+      "help": "Paths are element names relative to one listing, separated by \"/\". Use @name for an attribute, e.g. price/@currency or photos/photo/@src; * for any element, e.g. desc/*; and [@lang=en] to pick one, e.g. title[@lang=en].",
       "recordElement": "Listing element",
       "areaUnit": "Area unit",
       "defaultCountry": "Country if not stated",
@@ -384,7 +385,10 @@
       "heldHelp": "That is more than your safeguard allows, so nothing was deactivated. If the listings really were removed, approve; if the feed was wrong, dismiss and fix it.",
       "wouldDeactivate": "Importing now would deactivate {{count}} listings that are no longer in the feed.",
       "samples": "Sample listings",
-      "issues": "Validation results"
+      "issues": "Validation results",
+      "recognised": "Format recognised automatically: {{format}}",
+      "readAs": "Read as: {{format}}",
+      "customMapping": "your field mapping"
     },
     "review": {
       "approve": "Deactivate {{count}} listings",
@@ -495,6 +499,16 @@
       "missing": "Not found automatically — set these in the mapping:",
       "apply": "Use this mapping and preview again",
       "review": "Review mapping first"
+    },
+    "catalog": {
+      "title": "All fields in this file ({{count}})",
+      "help": "Everything your file contains for a listing, with an example value. Fields marked \"not used\" are ignored — map them under Edit to import them.",
+      "search": "Search fields or values",
+      "path": "Path",
+      "example": "Example",
+      "usedFor": "Imported as",
+      "repeated": "repeats within a listing",
+      "unused": "not used"
     }
   }
 }

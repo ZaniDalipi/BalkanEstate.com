@@ -14,12 +14,16 @@ import {
  *   `location/city`     nested children
  *   `price/@currency`   an attribute of the matched elements
  *   `@id`               an attribute of the node itself
+ *   `desc/*`            any child element (first-found language of a multilingual field)
+ *   `description[@lang=mk]`   only elements whose attribute has that value
  *
  * Names are compared case-insensitively against namespace-local names, so a
  * mapping never has to know which prefix a feed happened to use.
  */
 
-const PATH_PATTERN = /^(\.|(@[A-Za-z_][\w.-]*)|([A-Za-z_][\w.-]*(\/[A-Za-z_][\w.-]*)*(\/@[A-Za-z_][\w.-]*)?))$/;
+const NAME = '[A-Za-z_][\\w.-]*';
+const SEGMENT = `(?:\\*|${NAME}(?:\\[@${NAME}=[\\w.: -]+\\])?)`;
+const PATH_PATTERN = new RegExp(`^(\\.|@${NAME}|${SEGMENT}(?:/${SEGMENT})*(?:/@${NAME})?)$`);
 const MAX_PATH_LENGTH = 200;
 
 export const isValidPath = (path: string): boolean =>
@@ -40,9 +44,15 @@ const select = (root: XmlNode, path: string): PathMatch[] => {
 
   let current: XmlNode[] = [root];
   for (const segment of elementSegments) {
+    const predicate = /^(.+)\[@(.+?)=(.+)\]$/.exec(segment);
+    const name = predicate ? predicate[1] : segment;
     const next: XmlNode[] = [];
     for (const node of current) {
-      for (const child of node.children) if (child.name === segment) next.push(child);
+      for (const child of node.children) {
+        if (name !== '*' && child.name !== name) continue;
+        if (predicate && (child.attrs[predicate[2]] ?? '').toLowerCase() !== predicate[3].trim()) continue;
+        next.push(child);
+      }
     }
     current = next;
     if (current.length === 0) return [];
@@ -148,6 +158,7 @@ export const validateMapping = (mapping: unknown): string[] => {
     }
   }
   if (m.areaUnit !== undefined && m.areaUnit !== 'm2' && m.areaUnit !== 'sqft') problems.push('areaUnit must be m2 or sqft');
+  if (m.deriveTitle !== undefined && typeof m.deriveTitle !== 'boolean') problems.push('deriveTitle must be true or false');
   if (m.defaults !== undefined) {
     const { country, currency } = m.defaults ?? {};
     if (country !== undefined && (typeof country !== 'string' || country.length > 60)) problems.push('Invalid default country');

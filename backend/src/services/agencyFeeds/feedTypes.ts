@@ -74,6 +74,12 @@ export interface FeedMapping {
   /** Agency-declared constants, used only when a record has no value. */
   defaults?: { country?: string; currency?: string };
   areaUnit?: 'm2' | 'sqft';
+  /**
+   * For feeds that have no title element (Kyero, many CRM exports): build one
+   * from the stated type and city, e.g. "Apartment in Skopje". Only stated
+   * values are used; a record without both still fails validation.
+   */
+  deriveTitle?: boolean;
   /** Paths relative to the document root for feed-level metadata. */
   feed?: {
     totalCount?: string;
