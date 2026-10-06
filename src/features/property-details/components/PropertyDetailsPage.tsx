@@ -945,76 +945,83 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               )
             )}
 
-            {/* Share Button */}
-            <button
-              onClick={handleShare}
-              className="bg-white p-2 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
-              aria-label={t('property:actions.share')}
-              title={t('property:actions.share')}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-[18px] w-[18px] sm:h-5 sm:w-5 md:h-[22px] md:w-[22px] text-neutral-500 hover:text-primary transition-colors"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            {/* Floating action deck — Share, Favorite and Profile share one
+                 frosted-glass pill (iOS floating toolbar style) and every slot
+                 is the same 40px circle so the three read as one control. */}
+            <div className="flex items-center gap-0.5 p-1 rounded-full bg-white/75 backdrop-blur-xl backdrop-saturate-150 border border-white/70 ring-1 ring-black/[0.04] shadow-[0_8px_24px_-8px_rgba(15,23,42,0.25),0_2px_6px_-1px_rgba(15,23,42,0.08)]">
+              {/* Share Button */}
+              <button
+                type="button"
+                onClick={handleShare}
+                className="group w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full text-neutral-600 hover:text-primary hover:bg-white active:scale-90 active:bg-neutral-100 transition-all duration-150 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                aria-label={t('property:actions.share')}
+                title={t('property:actions.share')}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                  />
+                </svg>
+              </button>
 
-            {/* Favorite Button */}
-            <div
-              onClick={property.status === 'sold' ? undefined : handleFavoriteClick}
-              className={`bg-white p-2 rounded-full border border-neutral-200 ${
-                property.status === 'sold'
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'cursor-pointer hover:shadow-md'
-              }`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-[18px] w-[18px] sm:h-5 sm:w-5 md:h-[22px] md:w-[22px] transition-colors duration-300 ${
+              {/* Favorite Button */}
+              <button
+                type="button"
+                onClick={property.status === 'sold' ? undefined : handleFavoriteClick}
+                disabled={property.status === 'sold'}
+                aria-pressed={isFavorited}
+                aria-label={t('property:actions.favorite', 'Favorite')}
+                className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-150 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                   property.status === 'sold'
-                    ? 'text-neutral-300'
+                    ? 'opacity-50 cursor-not-allowed text-neutral-300'
                     : isFavorited
-                    ? 'text-red-500 fill-current'
-                    : 'text-neutral-500 hover:text-red-500'
+                    ? 'text-red-500 bg-red-50 active:scale-90'
+                    : 'text-neutral-600 hover:text-red-500 hover:bg-white active:scale-90 active:bg-neutral-100'
                 }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-5 w-5 transition-colors duration-300 ${isFavorited && property.status !== 'sold' ? 'fill-current' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </button>
 
-            {/* Profile Button - compact avatar for PWA navigation */}
-            <button
-              onClick={handleProfileClick}
-              className="rounded-full border-2 border-neutral-200 bg-white cursor-pointer hover:shadow-md hover:border-primary/30 transition-all overflow-hidden flex-shrink-0 w-9 h-9"
-              aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
-            >
-              {currentUser?.avatarUrl ? (
-                <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
-              ) : currentUser ? (
-                <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-              ) : (
-                <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
-                  <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
-                </div>
-              )}
-            </button>
+              {/* Profile Button - same 40px slot as the icons */}
+              <button
+                type="button"
+                onClick={handleProfileClick}
+                className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden ring-2 ring-white shadow-sm active:scale-90 transition-transform duration-150 touch-manipulation focus:outline-none focus-visible:ring-primary/50"
+                aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
+              >
+                {currentUser?.avatarUrl ? (
+                  <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : currentUser ? (
+                  <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+                ) : (
+                  <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-neutral-400" />
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
