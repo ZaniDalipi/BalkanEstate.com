@@ -10,6 +10,7 @@ import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { typeHasAttribute } from '@/shared/property/typeAttributes';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import { navigate, localizePath } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
 
 // Chevron Icons
@@ -446,6 +447,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       window.open(localizePath(path), '_blank', 'noopener,noreferrer');
     } else {
       // The card's copy lets the detail page render at once; it refreshes itself.
+      rememberOpenedProperty(property.id);
       navigate(path, { state: { property } });
     }
   }, [property]);

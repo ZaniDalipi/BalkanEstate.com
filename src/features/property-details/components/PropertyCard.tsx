@@ -20,6 +20,7 @@ import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '@/shared/property/attributeDisplay';
 import { navigate, localizePath } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
 
 /**
@@ -889,6 +890,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       window.open(localizePath(path), '_blank', 'noopener,noreferrer');
     } else {
       // The card's copy lets the detail page render at once; it refreshes itself.
+      rememberOpenedProperty(property.id);
       navigate(path, { state: { property } });
     }
   }, [property]);

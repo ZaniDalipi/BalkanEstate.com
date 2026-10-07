@@ -16,6 +16,7 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { getCountryData } from '@/constants/countries';
 import { generatePropertySlug } from '@/utils/slug';
 import { navigate } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
 
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -563,6 +564,7 @@ export function useRentalSearch() {
             // Same route a listing card opens, so a rental found through the
             // search box lands exactly where one found by scrolling does.
             const property = suggestion.property;
+            rememberOpenedProperty(property.id);
             navigate(paths.property(generatePropertySlug(property)), { state: { property } });
             return;
         }
