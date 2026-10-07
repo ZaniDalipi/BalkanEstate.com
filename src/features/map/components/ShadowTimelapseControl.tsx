@@ -97,6 +97,7 @@ const TimelineScrubber: React.FC<{
   isNightMode: boolean;
   timePeriod: TimePeriod;
 }> = ({ progress, sunInfo, startHour, endHour, onSeek, isNightMode, timePeriod }) => {
+  const { t } = useTranslation(['property']);
   const range = endHour - startHour;
 
   // Calculate marker positions
