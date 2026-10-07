@@ -39,6 +39,7 @@ import {
   createUserLocationMarkerElement,
   userLocationScaleForZoom,
 } from '../utils/userLocationMarker';
+import { readMapView, saveMapView, clearOpenedProperty, rememberOpenedProperty } from '../mapViewMemory';
 import {
   createClusterActivation,
   createClusterRenderer,
@@ -277,16 +278,23 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     return validateCoordinates(lat, lng).isValid ? userLocation : null;
   }, [userLocation]);
 
+  // Coming back to this history entry (e.g. back from a listing): the view the
+  // user left, read once — the map must not chase their GPS fix afterwards.
+  const [restoredView] = useState(readMapView);
+
   // Initial center from user location
   const initialCenter = useMemo(() => {
+    if (restoredView) {
+      return { lat: restoredView.lat, lng: restoredView.lng };
+    }
     if (validUserLocation) {
       return { lat: validUserLocation[0], lng: validUserLocation[1] };
     }
     return DEFAULT_CENTER;
-  }, [validUserLocation]);
+  }, [restoredView, validUserLocation]);
 
   // Initial zoom
-  const initialZoom = validUserLocation ? 13 : DEFAULT_ZOOM;
+  const initialZoom = restoredView ? restoredView.zoom : validUserLocation ? 13 : DEFAULT_ZOOM;
 
   // Fetch measurement count on mount and when authentication changes
   useEffect(() => {
@@ -684,6 +692,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     if (bounds && mapCenter && currentZoom !== undefined) {
       setZoom(currentZoom);
       setCenter({ lat: mapCenter.lat(), lng: mapCenter.lng() });
+      saveMapView(mapCenter.lat(), mapCenter.lng(), currentZoom);
 
       const ne = bounds.getNorthEast();
       const sw = bounds.getSouthWest();
@@ -1429,8 +1438,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [flyToTarget, map, onFlyComplete]);
 
   // Fit map to drawnBounds when they exist (for saved searches)
+  const skipRestoredDrawnFitRef = useRef(!!restoredView);
   useEffect(() => {
-    if (!map || !drawnBounds) return;
+    if (!map) return;
+    // Returning to a saved view: the drawn area is already framed as the user left it.
+    const skipFit = skipRestoredDrawnFitRef.current;
+    skipRestoredDrawnFitRef.current = false;
+    if (!drawnBounds || skipFit) return;
 
     // Only fit bounds if there's no flyToTarget (which handles positioning)
     // and if drawnBounds changed
@@ -1450,12 +1464,28 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [map, drawnBounds]);
 
+  // Back from a listing opened here: put it in focus again — its popup open,
+  // panned into view only if the restored view doesn't already show it.
+  const pendingFocusIdRef = useRef(restoredView?.openedPropertyId ?? null);
+  useEffect(() => {
+    const id = pendingFocusIdRef.current;
+    if (!id || !map || !markersReady) return;
+    const property = validProperties.find((p) => p.id === id);
+    if (!property) return;
+    pendingFocusIdRef.current = null;
+    clearOpenedProperty();
+    setSelectedProperty(property);
+    const position = { lat: property.lat, lng: property.lng };
+    if (!map.getBounds()?.contains(position)) map.panTo(position);
+  }, [map, markersReady, validProperties]);
+
   // Handle view details click.
   //
   // The popup already holds the full property, so it rides along with the
   // navigation the way every property card's does: the detail page renders it
   // immediately (and offline) instead of re-fetching it first.
   const handleViewDetails = useCallback((property: Property) => {
+    rememberOpenedProperty(property.id);
     navigate(paths.property(property.id), { state: { property } });
     setSelectedProperty(null);
   }, []);

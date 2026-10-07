@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { readMapView } from '@/src/features/map/mapViewMemory';
 import { useAppContext } from '@/context/AppContext';
 import { Property, Filters, initialFilters, SavedSearch } from '@/types';
 import type { Suggestion } from '@/src/features/search/universal/types';
@@ -136,7 +137,10 @@ export function useVillaSearch() {
     const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
-    const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(deepLink.focus);
+    const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(
+        // Back on this page: the map reopens where the user left it instead.
+        () => (readMapView() ? null : deepLink.focus)
+    );
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [mapBoundsJSON, setMapBoundsJSON] = useState<string | null>(null);

@@ -8,6 +8,7 @@ import PropertyImage from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import VillaBookingModal from './VillaBookingModal';
 import { navigate, localizePath } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
 
 /** View types and cancellation policies keyed to the same strings VillaFilters
@@ -100,6 +101,7 @@ const LuxuryVillaCard: React.FC<LuxuryVillaCardProps> = memo(({ property, priori
         if (shouldOpenInNewTab()) {
             window.open(localizePath(path), '_blank', 'noopener,noreferrer');
         } else {
+            rememberOpenedProperty(property.id);
             navigate(path, { state: { property: property } });
         }
     }, [dispatch, property]);
