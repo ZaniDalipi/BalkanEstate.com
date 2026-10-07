@@ -19,6 +19,8 @@ import {
   Rectangle,
   Polyline,
   Polygon,
+  OverlayView,
+  OverlayViewF,
 } from '@react-google-maps/api';
 import { HighlightedPropertiesProvider } from '@/src/context/HighlightedPropertiesContext';
 
@@ -159,6 +161,23 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
               )}
             </>
           )}
+
+          {/* Measurement vertices — a dot per placed point, so the very first
+              click is visible before any line or polygon can be drawn. Point
+              objects keep their identity across renders, so the overlays aren't
+              rebuilt on every render. */}
+          {hook.showMeasurement && hook.measurementPoints.map((point, index) => (
+            <OverlayViewF
+              key={index}
+              position={point}
+              mapPaneName={OverlayView.OVERLAY_LAYER}
+            >
+              <div
+                className="pointer-events-none w-3.5 h-3.5 rounded-full bg-white border-[3px] border-emerald-500 shadow"
+                style={{ transform: 'translate(-50%, -50%)' }}
+              />
+            </OverlayViewF>
+          ))}
         </GoogleMap>
 
         {/* Debug info overlay — desktop only */}
