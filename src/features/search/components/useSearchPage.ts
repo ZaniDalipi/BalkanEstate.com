@@ -7,7 +7,7 @@ import { generateSearchName, generateSearchNameFromCoords } from '@/services/gem
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { outOfAreaFallback, type OutOfAreaKind } from '../outOfArea';
-import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
