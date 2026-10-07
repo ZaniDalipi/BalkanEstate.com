@@ -179,7 +179,7 @@ const HomeSpecialOffersSection: React.FC<Props> = ({ onNavigate }) => {
           className="text-center mt-8"
         >
           <button
-            onClick={() => onNavigate(`/pricing?tab=listing&offer=${offer.id}`)}
+            onClick={() => onNavigate('/pricing?tab=listing')}
             className="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors"
           >
             {t('pricing:specialOffers.viewAllDeals', 'View All Promotion Plans')}

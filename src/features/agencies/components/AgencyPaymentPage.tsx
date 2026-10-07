@@ -86,26 +86,23 @@ const AgencyPaymentPage: React.FC = () => {
     const fetchEnterprisePlan = async () => {
       setLoadingPlan(true);
       try {
-        const response = await fetch(`${API_URL}/products?role=seller`);
-        if (response.ok) {
-          const data = await response.json();
-          const products = data.products || [];
+        const data = await apiRequest<{ products?: any[] }>('/products?role=seller');
+        const products = data.products || [];
 
-          const enterprise = products.find((p: any) =>
-            p.productId?.toLowerCase().includes('enterprise') ||
-            p.name?.toLowerCase().includes('enterprise')
-          );
+        const enterprise = products.find((p: any) =>
+          p.productId?.toLowerCase().includes('enterprise') ||
+          p.name?.toLowerCase().includes('enterprise')
+        );
 
-          if (enterprise) {
-            const rawFeatures: string[] = enterprise.features || DEFAULT_ENTERPRISE_PLAN.features;
-            setEnterprisePlan({
-              name: enterprise.name || 'Enterprise',
-              price: enterprise.price || 999,
-              interval: enterprise.billingPeriod === 'monthly' ? 'month' : 'year',
-              productId: enterprise.productId || 'seller_enterprise_yearly',
-              features: rawFeatures.map((f: string) => replacePlaceholders(f, enterprise)),
-            });
-          }
+        if (enterprise) {
+          const rawFeatures: string[] = enterprise.features || DEFAULT_ENTERPRISE_PLAN.features;
+          setEnterprisePlan({
+            name: enterprise.name || 'Enterprise',
+            price: enterprise.price || 999,
+            interval: enterprise.billingPeriod === 'monthly' ? 'month' : 'year',
+            productId: enterprise.productId || 'seller_enterprise_yearly',
+            features: rawFeatures.map((f: string) => replacePlaceholders(f, enterprise)),
+          });
         }
       } catch (err) {
         // Error removed
