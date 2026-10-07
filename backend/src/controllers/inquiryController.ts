@@ -9,6 +9,10 @@ import { resolveId } from '../utils/idObfuscation';
 import { uploadImage } from '../services/cloudinaryService';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
+/** Cloudinary delivery URL that forces a file download of the untouched original. */
+const cloudinaryDownloadUrl = (url: string): string =>
+  url.replace('/image/upload/', '/image/upload/fl_attachment/');
+
 const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership', 'advertising'];
 
 /**
@@ -25,8 +29,11 @@ export const uploadAdvertisingImage = async (req: Request, res: Response): Promi
     const result = await uploadImage(req.file.buffer, {
       userId: 'public-advertising',
       type: 'ad-banner',
-      maxWidth: 1600,
-      maxHeight: 1600,
+      // Keep the creative near its original size and quality — the team
+      // downloads it from the notification email to build the real banner.
+      maxWidth: 4000,
+      maxHeight: 4000,
+      preserveQuality: true,
       skipRegistration: true,
     });
     res.status(200).json({ url: result.url });
@@ -438,7 +445,11 @@ export const sendContactInquiry = async (
              <p style="margin:0 0 6px;"><strong>Requested placement:</strong> ${cleanAdPlacement || 'Not specified'}</p>
              ${cleanAttachment
                ? `<p style="margin:8px 0 6px;"><strong>Creative they attached:</strong></p>
-                  <a href="${cleanAttachment}"><img src="${cleanAttachment}" alt="Advertiser creative" style="max-width:100%;max-height:320px;border-radius:8px;border:1px solid #ddd;" /></a>`
+                  <a href="${cleanAttachment}"><img src="${cleanAttachment}" alt="Advertiser creative" style="max-width:100%;max-height:320px;border-radius:8px;border:1px solid #ddd;" /></a>
+                  <p style="margin:10px 0 0;">
+                    <a href="${cloudinaryDownloadUrl(cleanAttachment)}" style="display:inline-block;background:#4338ca;color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none;font-weight:600;">Download full size</a>
+                    &nbsp;<a href="${cleanAttachment}" style="color:#4338ca;">Open original</a>
+                  </p>`
                : '<p style="margin:0;"><em>No creative attached.</em></p>'}
            </div>`
         : '';
