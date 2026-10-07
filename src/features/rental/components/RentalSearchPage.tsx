@@ -9,6 +9,8 @@ import PropertyCardSkeleton from '@/src/features/property-details/components/Pro
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { interleaveInFeedAds } from '@/features/promo';
 import RentalFilters from './RentalFilters';
+import CollapsibleFilterPanel from '@/src/shared/components/CollapsibleFilterPanel';
+import { useScrollDirection } from '@/src/shared/hooks/useScrollDirection';
 import Toast from '@/components/shared/Toast';
 import { useRentalSearch } from '../hooks/useRentalSearch';
 import UniversalSearchBox from '@/src/features/search/universal/UniversalSearchBox';
@@ -121,6 +123,13 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     } = useRentalSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
+    // Desktop filter panel starts folded and folds itself away again once the
+    // visitor scrolls down through the results.
+    const [isDesktopFiltersCollapsed, setIsDesktopFiltersCollapsed] = useState(true);
+    const { onScroll: handleListScroll, isScrollingDown: isListScrollingDown } = useScrollDirection();
+    useEffect(() => {
+        if (isListScrollingDown) setIsDesktopFiltersCollapsed(true);
+    }, [isListScrollingDown]);
 
     // Entrance animation: animate cards when rental data first loads
     const [animateCards, setAnimateCards] = useState(true);
@@ -371,19 +380,25 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
                     {/* Desktop Filters */}
                     <div className="hidden lg:block" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                        <RentalFilters
-                            filters={filters}
-                            onFilterChange={handleFilterChange}
-                            onSearch={handleSearch}
-                            onReset={handleResetFilters}
-                            onSaveSearch={handleSaveSearchArea}
-                            isSaving={isSaving}
-                            compact
-                        />
+                        <CollapsibleFilterPanel
+                            id="rental-desktop-filter-panel"
+                            collapsed={isDesktopFiltersCollapsed}
+                            onToggle={() => setIsDesktopFiltersCollapsed(c => !c)}
+                        >
+                            <RentalFilters
+                                filters={filters}
+                                onFilterChange={handleFilterChange}
+                                onSearch={handleSearch}
+                                onReset={handleResetFilters}
+                                onSaveSearch={handleSaveSearchArea}
+                                isSaving={isSaving}
+                                compact
+                            />
+                        </CollapsibleFilterPanel>
                     </div>
 
                     {/* Property List */}
-                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container aria-live="polite">
+                    <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container onScroll={handleListScroll} aria-live="polite">
                         {/* Results count + location + sort bar */}
                         <div className="sticky top-0 bg-white z-[100] border-b border-neutral-200">
                             <div className="p-4 flex items-center justify-between">

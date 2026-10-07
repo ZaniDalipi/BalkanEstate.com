@@ -8,6 +8,8 @@ import PropertyCardSkeleton from '@/src/features/property-details/components/Pro
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
+import CollapsibleFilterPanel from '@/src/shared/components/CollapsibleFilterPanel';
+import { useScrollDirection } from '@/src/shared/hooks/useScrollDirection';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
@@ -499,6 +501,13 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     } = useVillaSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
+    // Desktop filter panel starts folded and folds itself away again once the
+    // visitor scrolls down through the results.
+    const [isDesktopFiltersCollapsed, setIsDesktopFiltersCollapsed] = useState(true);
+    const { onScroll: handleListScroll, isScrollingDown: isListScrollingDown } = useScrollDirection();
+    useEffect(() => {
+        if (isListScrollingDown) setIsDesktopFiltersCollapsed(true);
+    }, [isListScrollingDown]);
 
     /* Entrance animation: animate cards when villa data first loads */
     const [animateCards, setAnimateCards] = useState(true);
@@ -740,15 +749,22 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                         {/* Tier 3: VillaFilters compact chip row — ~52px */}
                         <div style={{ background: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                            <VillaFilters
-                                filters={filters}
-                                onFilterChange={handleFilterChange}
-                                onSearch={handleSearch}
-                                onReset={handleResetFilters}
-                                onSaveSearch={handleSaveSearchArea}
-                                isSaving={isSaving}
-                                compact
-                            />
+                            <CollapsibleFilterPanel
+                                id="villa-desktop-filter-panel"
+                                collapsed={isDesktopFiltersCollapsed}
+                                onToggle={() => setIsDesktopFiltersCollapsed(c => !c)}
+                                activeCount={activeFilterCount}
+                            >
+                                <VillaFilters
+                                    filters={filters}
+                                    onFilterChange={handleFilterChange}
+                                    onSearch={handleSearch}
+                                    onReset={handleResetFilters}
+                                    onSaveSearch={handleSaveSearchArea}
+                                    isSaving={isSaving}
+                                    compact
+                                />
+                            </CollapsibleFilterPanel>
                         </div>
                     </div>
 
@@ -757,7 +773,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         the bottom and is ~56px tall, so 112px of padding left
                         the last card — and the empty state's own button —
                         sitting underneath it. */}
-                    <div className="flex-1 overflow-y-auto pb-44 lg:pb-3 glass-scrollbar" data-scroll-container>
+                    <div className="flex-1 overflow-y-auto pb-44 lg:pb-3 glass-scrollbar" data-scroll-container onScroll={handleListScroll}>
 
                         {/* Results bar */}
                         <div className="sticky top-0 bg-white border-b border-gray-100 z-[100]">
