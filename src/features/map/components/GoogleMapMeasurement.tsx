@@ -141,7 +141,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
           </p>
 
           {/* Current measurement results */}
-          {measurementPoints.length >= 2 && (
+          {measurementPoints.length >= 1 && (
             <div className="space-y-2 mb-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
               {measurementMode === 'area' && measurementPoints.length >= 3 && (
                 <>
@@ -155,7 +155,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                   </div>
                 </>
               )}
-              {measurementMode === 'distance' && (
+              {measurementMode === 'distance' && measurementPoints.length >= 2 && (
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-600">Distance:</span>
                   <span className="font-bold text-emerald-600">{formatMeasureDistance(measurementDistance)}</span>
