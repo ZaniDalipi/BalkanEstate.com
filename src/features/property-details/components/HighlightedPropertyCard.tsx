@@ -73,6 +73,9 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
       : [property.imageUrl];
   }, [property.images, property.imageUrl]);
 
+  // Total photos on the listing (the carousel itself only cycles the first 5)
+  const totalImageCount = Math.max(property.images?.length || 0, displayImages.length);
+
   // Preload every slide up front. This card auto-advances through all images
   // (and lets the user jump via dots), and non-first layers render with
   // loading="lazy", so warming the cache here guarantees each switch is instant
@@ -238,27 +241,27 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           </>
         )}
 
-        {/* iOS-style Page Dots */}
+        {/* Image indicator — max 3 dots + count (matches PropertyCard) */}
         {displayImages.length > 1 && (
-          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-[5px] z-10">
-            {displayImages.map((_, index) => (
+          <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-20 pointer-events-none gap-1">
+            {displayImages.slice(0, 3).map((_, index) => (
               <button
                 key={index}
+                className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
                 onClick={(e) => handleDotClick(e, index)}
-                className={`rounded-full transition-all duration-300 ${
-                  index === currentImageIndex
-                    ? 'bg-white w-[7px] h-[7px]'
-                    : 'bg-white/45 w-[6px] h-[6px] active:bg-white/70'
-                }`}
-              />
+                aria-label={`Image ${index + 1} of ${totalImageCount}`}
+                aria-current={index === currentImageIndex ? 'true' : undefined}
+              >
+                <span className={`block rounded-full transition-all duration-200 ${
+                  index === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                }`} />
+              </button>
             ))}
-          </div>
-        )}
-
-        {/* iOS-style Image Counter Pill */}
-        {displayImages.length > 1 && (
-          <div className="absolute bottom-2.5 right-2.5 bg-black/40 backdrop-blur-md text-white/90 text-[10px] font-medium px-1.5 py-[2px] rounded-full z-10 tabular-nums">
-            {currentImageIndex + 1}/{displayImages.length}
+            {totalImageCount > 3 && (
+              <span className="pointer-events-none bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">
+                +{totalImageCount - 3}
+              </span>
+            )}
           </div>
         )}
 
