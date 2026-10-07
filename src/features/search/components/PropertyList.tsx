@@ -52,10 +52,6 @@ interface PropertyListProps {
   isLoadingProperties?: boolean;
   isAuthenticated?: boolean;
   onOpenAuthModal?: () => void;
-  /** Phone layout: true while the list is being scrolled down, false when scrolled back up. */
-  onMobileScrollHideChange?: (hidden: boolean) => void;
-  /** Phone layout: the floating search bar above the list has slid away. */
-  isMobileSearchBarHidden?: boolean;
 }
 
 /**
@@ -769,7 +765,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
     // Use props instead of useAppContext() to avoid re-rendering the
     // entire property list when unrelated context state changes (e.g. savedHomes).
-    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, outOfArea = null, isQueryUnmatched = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal, onMobileScrollHideChange, isMobileSearchBarHidden = false } = props;
+    const { properties, filters, onSortChange, isMobile, showFilters, showList, searchMode, onSearchModeChange, onApplyAiFilters, aiChatHistory, onAiChatHistoryChange, onPropertyHover, onResetFilters, onSearchClick, onSaveSearch, isSaving, isSearchingLocation, fallbackLocation = null, isTextRelaxed = false, outOfArea = null, isQueryUnmatched = false, isLoadingProperties = false, isAuthenticated = false, onOpenAuthModal } = props;
 
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
     const loadMoreRef = useRef(null);
@@ -787,16 +783,6 @@ const PropertyList = memo<PropertyListProps>((props) => {
         if (!isFiltersCollapsed && delta > 0 && top > 24) {
             setIsFiltersCollapsed(true);
         }
-    };
-
-    // Phone layout: the filters live behind the floating search bar, so scrolling
-    // down through the results tucks that bar away and scrolling up brings it back.
-    const handleMobileListScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const top = e.currentTarget.scrollTop;
-        const delta = top - lastListScrollTop.current;
-        lastListScrollTop.current = top;
-        if (top <= 24 || delta < -4) onMobileScrollHideChange?.(false);
-        else if (delta > 4) onMobileScrollHideChange?.(true);
     };
 
     // Count active basic filters (shown in collapse toggle badge)
@@ -1133,10 +1119,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
     
     // Mobile Layout
     return (
-        <div
-            className="flex flex-col bg-white h-full transition-[padding-top] duration-[600ms] ease-in-out"
-            style={{ paddingTop: isMobileSearchBarHidden ? 'env(safe-area-inset-top, 0px)' : 'calc(env(safe-area-inset-top, 0px) + 70px)' }}
-        >
+        <div className="flex flex-col bg-white h-full" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' }}>
             {showFilters && (
                  <div className="p-4 flex-shrink-0">
                     <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
@@ -1169,7 +1152,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     )}
 
                     {showList && (
-                        <div className="flex-grow min-h-0 overflow-y-auto relative z-0" data-scroll-container onScroll={handleMobileListScroll}>
+                        <div className="flex-grow min-h-0 overflow-y-auto relative z-0" data-scroll-container>
                             <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                                 <div className="min-w-0">
                                     <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
