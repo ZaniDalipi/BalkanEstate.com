@@ -89,8 +89,15 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
       {/* Measurement Tool Panel */}
       {showMeasurement && (
         <div
-          className="absolute top-16 left-4 z-[1002] p-4 rounded-2xl shadow-2xl border border-white/30 max-w-xs"
-          style={{ background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)' }}
+          className="absolute left-4 z-[1002] p-4 rounded-2xl shadow-2xl border border-white/30 max-w-xs overflow-y-auto"
+          style={{
+            // Sit below the floating search bar (which is offset by the safe-area inset on iOS),
+            // same as the Locate/Draw controls, so the header and close button stay visible.
+            top: 'calc(var(--floating-search-top-pad, 8px) + 60px)',
+            maxHeight: 'calc(100% - var(--floating-search-top-pad, 8px) - 140px)',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(20px)',
+          }}
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-sm text-gray-800 flex items-center gap-2">
@@ -100,6 +107,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
             <button
               onClick={() => setShowMeasurement(false)}
               className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
+              aria-label={t('common:close', 'Close')}
             >
               <XCircleIcon className="w-5 h-5" />
             </button>
