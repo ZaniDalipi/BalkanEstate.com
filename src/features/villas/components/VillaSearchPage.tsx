@@ -18,6 +18,7 @@ import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
 import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, Bars3Icon, Squares2x2Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import { Button } from '@/components/ui/liquid-glass-button';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
@@ -763,8 +764,27 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     onSaveSearch={handleSaveSearchArea}
                                     isSaving={isSaving}
                                     compact
+                                    hideActions
                                 />
                             </CollapsibleFilterPanel>
+                            {/* Actions stay outside the folding panel so search is always one click away */}
+                            <div className="flex items-center justify-end gap-2 px-4 pb-2">
+                                {hasActiveFilters && (
+                                    <button onClick={handleResetFilters} className="text-[11px] text-gray-400 hover:text-gray-600 py-1.5 transition-colors whitespace-nowrap">
+                                        {t('villas:filters.reset', 'Reset')}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={handleSaveSearchArea}
+                                    disabled={isSaving}
+                                    className="text-[11px] text-primary hover:text-primary-dark py-1.5 px-2 border border-primary/30 rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+                                >
+                                    {isSaving ? t('search:saving', 'Saving...') : t('search:saveSearch', 'Save Search')}
+                                </button>
+                                <Button variant="cool" size="sm" onClick={() => handleSearch()} className="text-xs font-semibold whitespace-nowrap rounded-xl">
+                                    {t('search:searchButton', 'Search')}
+                                </Button>
+                            </div>
                         </div>
                     </div>
 

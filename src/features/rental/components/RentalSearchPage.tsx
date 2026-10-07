@@ -393,8 +393,25 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 onSaveSearch={handleSaveSearchArea}
                                 isSaving={isSaving}
                                 compact
+                                hideActions
                             />
                         </CollapsibleFilterPanel>
+                        {/* Actions stay outside the folding panel so search is always one click away */}
+                        <div className="flex items-center justify-end gap-2 px-4 pb-2">
+                            <button onClick={handleResetFilters} className="text-[11px] text-gray-400 hover:text-gray-600 py-1.5 transition-colors whitespace-nowrap">
+                                {t('rental:filters.reset')}
+                            </button>
+                            <button
+                                onClick={handleSaveSearchArea}
+                                disabled={isSaving}
+                                className="text-[11px] text-primary hover:text-primary-dark py-1.5 px-2 border border-primary/30 rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+                            >
+                                {isSaving ? t('search:saving', 'Saving...') : t('search:saveSearch', 'Save Search')}
+                            </button>
+                            <Button variant="cool" size="sm" onClick={() => handleSearch()} className="text-xs font-semibold whitespace-nowrap rounded-xl">
+                                {t('rental:filters.search')}
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Property List */}
