@@ -16,9 +16,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GoogleMap,
-  Rectangle,
-  Polyline,
-  Polygon,
+  RectangleF,
+  PolylineF,
+  PolygonF,
   OverlayView,
   OverlayViewF,
 } from '@react-google-maps/api';
@@ -103,7 +103,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
           {/* Drawn bounds rectangle (saved area) */}
           {hook.googleDrawnBounds && !isDrawing && (
-            <Rectangle
+            <RectangleF
               bounds={hook.googleDrawnBounds}
               options={{
                 strokeColor: '#0252CD',
@@ -118,7 +118,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
           {/* Temporary drawing rectangle (while user is drawing) */}
           {hook.drawingRect && isDrawing && (
-            <Rectangle
+            <RectangleF
               bounds={hook.drawingRect}
               options={{
                 strokeColor: '#0252CD',
@@ -137,7 +137,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
           {hook.showMeasurement && hook.measurementPoints.length >= 2 && (
             <>
               {hook.measurementMode === 'area' && hook.measurementPoints.length >= 3 ? (
-                <Polygon
+                <PolygonF
                   paths={hook.measurementPoints}
                   options={{
                     strokeColor: '#10b981',
@@ -149,7 +149,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
                   }}
                 />
               ) : (
-                <Polyline
+                <PolylineF
                   path={hook.measurementPoints}
                   options={{
                     strokeColor: '#10b981',
