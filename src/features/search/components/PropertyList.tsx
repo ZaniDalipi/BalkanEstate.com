@@ -772,6 +772,19 @@ const PropertyList = memo<PropertyListProps>((props) => {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
 
+    // Once the user is done filtering and starts scrolling down through the
+    // results, fold the filter panel away so the list gets the room. The panel's
+    // max-height/opacity transition handles the animation.
+    const lastListScrollTop = useRef(0);
+    const handleListScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const top = e.currentTarget.scrollTop;
+        const delta = top - lastListScrollTop.current;
+        lastListScrollTop.current = top;
+        if (!isFiltersCollapsed && delta > 0 && top > 24) {
+            setIsFiltersCollapsed(true);
+        }
+    };
+
     // Count active basic filters (shown in collapse toggle badge)
     const activeBasicFilterCount = [
         filters.query,
@@ -986,7 +999,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     {/* data-scroll-container: results scroll in here rather than
                         in the document, so this is the element navigation has to
                         reset on a push and restore on a back. */}
-                    <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container>
+                    <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container onScroll={handleListScroll}>
                         <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
                             <div className="min-w-0">
                                 <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
