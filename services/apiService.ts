@@ -653,11 +653,15 @@ export const sendContactInquiry = async (params: ContactInquiryParams): Promise<
 export const uploadAdvertisingImage = async (file: File): Promise<{ url: string }> => {
   const form = new FormData();
   form.append('image', file);
-  const { API_URL } = await import('@/src/shared/api/config');
+  // Public visitors may not have the __csrf cookie yet; bootstrap it, then send
+  // it back in the header (double-submit) or the backend rejects with 403.
+  await ensureCsrfToken();
+  const csrfToken = getCsrfToken();
   const res = await fetch(`${API_URL}/inquiries/advertising-image`, {
     method: 'POST',
     body: form,
     credentials: 'include',
+    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
