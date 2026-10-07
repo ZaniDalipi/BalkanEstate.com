@@ -163,6 +163,11 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         hoveredPropertyId: hoveredPropertyId,
     };
 
+    // Phone list view: scrolling down the results slides the floating search bar
+    // (and its filters button) out of the way; scrolling up brings it back.
+    const [isListScrolledDown, setIsListScrolledDown] = React.useState(false);
+    const hideMobileSearchBar = isMobile && mobileView === 'list' && isListScrolledDown;
+
     const propertyListProps = {
         properties: listProperties,
         filters: filters,
@@ -194,6 +199,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         isLoadingProperties: isLoadingProperties,
         isAuthenticated: isAuthenticated,
         onOpenAuthModal: handleOpenAuthModal,
+        onMobileScrollHideChange: setIsListScrolledDown,
+        isMobileSearchBarHidden: hideMobileSearchBar,
     };
 
     return (
@@ -359,14 +366,15 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                         {/* Mobile-only: floating search bar overlay (tablet uses SearchHeader instead) */}
                         {isMobile && (
                             <div
-                                className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
+                                className={`absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none transition-[transform,opacity] duration-[600ms] ease-in-out ${hideMobileSearchBar ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+                                aria-hidden={hideMobileSearchBar || undefined}
                                 style={{
                                     paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
                                     paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
                                 }}
                             >
-                                <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">
+                                <div ref={searchWrapperRef} className={`${hideMobileSearchBar ? 'pointer-events-none' : 'pointer-events-auto'} w-full space-y-2`}>
                                     <div
                                         className="w-full bg-white/60 backdrop-blur-xl rounded-full p-1 flex items-center gap-0.5 sm:gap-1 border border-white/40"
                                         style={{
