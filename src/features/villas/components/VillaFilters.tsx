@@ -13,6 +13,8 @@ interface VillaFiltersProps {
     onSaveSearch?: () => void;
     isSaving?: boolean;
     compact?: boolean;
+    /** Leave out Reset / Save — the page renders them outside a folding panel. */
+    hideActions?: boolean;
 }
 
 const VIEW_TYPE_CHIPS = [
@@ -36,6 +38,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
     onSaveSearch,
     isSaving,
     compact,
+    hideActions,
 }) => {
     const { t } = useTranslation(['villas', 'common', 'search', 'rental']);
     const currencySymbol = getCurrencySymbol(filters.country !== 'any' ? filters.country : '');
@@ -233,10 +236,10 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 />
 
                 {/* Thin divider */}
-                <div className="flex-shrink-0 w-px h-5 bg-gray-200 mx-2.5" />
+                {!hideActions && <div className="flex-shrink-0 w-px h-5 bg-gray-200 mx-2.5" />}
 
                 {/* Reset — only if active filters */}
-                {hasActiveFilters && (
+                {!hideActions && hasActiveFilters && (
                     <button
                         onClick={onReset}
                         className="flex-shrink-0 text-[11px] text-red-400 hover:text-red-600 whitespace-nowrap transition-colors px-1.5 py-1 rounded-lg hover:bg-red-50 mr-1.5 border border-red-200 font-medium"
@@ -246,7 +249,7 @@ const VillaFilters: React.FC<VillaFiltersProps> = ({
                 )}
 
                 {/* Save search */}
-                {onSaveSearch && (
+                {!hideActions && onSaveSearch && (
                     <button
                         onClick={onSaveSearch}
                         disabled={isSaving}

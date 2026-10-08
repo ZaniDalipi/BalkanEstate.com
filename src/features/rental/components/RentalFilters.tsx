@@ -14,9 +14,11 @@ interface RentalFiltersProps {
     onSaveSearch?: () => void;
     isSaving?: boolean;
     compact?: boolean;
+    /** Leave out Reset / Save / Search — the page renders them outside a folding panel. */
+    hideActions?: boolean;
 }
 
-const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, onSearch, onReset, onSaveSearch, isSaving, compact }) => {
+const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, onSearch, onReset, onSaveSearch, isSaving, compact, hideActions }) => {
     const { t } = useTranslation(['rental', 'seller', 'common']);
     const currencySymbol = getCurrencySymbol(filters.country !== 'any' ? filters.country : '');
 
@@ -137,7 +139,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                             </label>
                         ))}
                     </div>
-                    <div className="flex items-center gap-2">
+                    {!hideActions && <div className="flex items-center gap-2">
                         <button onClick={onReset} className="text-[11px] text-gray-400 hover:text-gray-600 py-1.5 transition-colors whitespace-nowrap">
                             {t('rental:filters.reset')}
                         </button>
@@ -153,7 +155,7 @@ const RentalFilters: React.FC<RentalFiltersProps> = ({ filters, onFilterChange, 
                         <Button variant="cool" size="sm" onClick={() => onSearch()} className="text-xs font-semibold whitespace-nowrap rounded-xl">
                             {t('rental:filters.search')}
                         </Button>
-                    </div>
+                    </div>}
                 </div>
             </div>
         );
