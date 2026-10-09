@@ -821,7 +821,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {/* The live region is this short count, not
                                         the whole list — announcing every card on
                                         each filter change is unusable. */}
-                                    <p className="text-xs font-semibold text-gray-700 flex-shrink-0" role="status" aria-live="polite" aria-atomic="true">
+                                    <p className="text-xs font-semibold text-gray-700 flex-shrink-0 whitespace-nowrap" role="status" aria-live="polite" aria-atomic="true">
                                         {listProperties.length}{' '}
                                         <span className="text-gray-400 font-normal">
                                             {t('villas:exclusiveVillas', 'exclusive villas')}
@@ -878,7 +878,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             value={filters.sortBy || 'newest'}
                                             onChange={(e) => handleSortChange(e.target.value)}
                                             aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                            className="block text-xs bg-white border border-gray-200 rounded-xl text-gray-700 px-3 py-1.5 pr-7 focus:outline-none focus:border-[var(--color-primary)]/40 focus:ring-1 focus:ring-[var(--color-primary)]/20 transition-all appearance-none"
+                                            className="block max-w-[9.5rem] truncate text-xs bg-white border border-gray-200 rounded-xl text-gray-700 px-3 py-1.5 pr-7 focus:outline-none focus:border-[var(--color-primary)]/40 focus:ring-1 focus:ring-[var(--color-primary)]/20 transition-all appearance-none"
                                         >
                                             <option value="newest">{t('search:sort.newest')}</option>
                                             <option value="oldest">{t('search:sort.oldest')}</option>

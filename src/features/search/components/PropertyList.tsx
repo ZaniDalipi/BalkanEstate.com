@@ -1000,9 +1000,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         in the document, so this is the element navigation has to
                         reset on a push and restore on a back. */}
                     <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container onScroll={handleListScroll}>
-                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
+                        <div className="px-4 py-2.5 border-b border-neutral-200 flex items-center justify-between gap-2 sticky top-0 bg-white z-[100]">
                             <div className="min-w-0">
-                                <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                                <p className="text-xs text-neutral-500 font-semibold whitespace-nowrap">{t('search:resultsFound', { count: properties.length })}</p>
                                 {!outOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} />}
                             </div>
                             <div className="relative z-[101]">
@@ -1012,7 +1012,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     value={filters.sortBy}
                                     onChange={(e) => onSortChange(e.target.value)}
                                     aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                    className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
+                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs !py-1.5`}
                                 >
                                     {filters.query.trim() && (
                                         <option value="relevance">{t('search:sort.relevance')}</option>
@@ -1153,9 +1153,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
                     {showList && (
                         <div className="flex-grow min-h-0 overflow-y-auto relative z-0" data-scroll-container>
-                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
+                            <div className="px-4 py-2.5 border-b border-neutral-200 flex items-center justify-between gap-2 sticky top-0 bg-white z-[100]">
                                 <div className="min-w-0">
-                                    <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                                    <p className="text-xs text-neutral-500 font-semibold whitespace-nowrap">{t('search:resultsFound', { count: properties.length })}</p>
                                     {!outOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} />}
                                 </div>
                                 <div className="relative z-[101]">
@@ -1164,7 +1164,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         name="sortBy"
                                         value={filters.sortBy}
                                         onChange={(e) => onSortChange(e.target.value)}
-                                        className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
+                                        className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs !py-1.5`}
                                     >
                                         {filters.query.trim() && (
                                             <option value="relevance">{t('search:sort.relevance')}</option>
@@ -1235,7 +1235,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     </>
                                 ) : (
                                     <div
-                                        className="text-center py-16 px-6 rounded-2xl relative overflow-hidden"
+                                        className="text-center py-8 px-5 rounded-2xl relative overflow-hidden"
                                         style={{
                                             background: 'rgba(255, 255, 255, 0.7)',
                                             backdropFilter: 'blur(20px)',
@@ -1245,12 +1245,12 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-50/20 pointer-events-none" />
                                         <div className="relative z-10">
-                                            <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                                            <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
-                                            <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
+                                            <BuildingLibraryIcon className="w-9 h-9 text-neutral-300 mx-auto mb-2" />
+                                            <h3 className="text-base font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
+                                            <p className="text-sm text-neutral-500 mt-1 mb-4">{t('search:results.tryDifferent')}</p>
                                             <button
                                                 onClick={onResetFilters}
-                                                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark active:bg-primary-dark transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 touch-manipulation"
+                                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark active:bg-primary-dark transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 touch-manipulation"
                                             >
                                                 <XCircleIcon className="w-5 h-5" />
                                                 {t('search:filters.resetFilters', 'Reset Filters')}

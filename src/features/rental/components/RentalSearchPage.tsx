@@ -418,9 +418,9 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     <div className="flex-1 overflow-y-auto pb-28 lg:pb-3 glass-scrollbar" data-scroll-container onScroll={handleListScroll} aria-live="polite">
                         {/* Results count + location + sort bar */}
                         <div className="sticky top-0 bg-white z-[100] border-b border-neutral-200">
-                            <div className="p-4 flex items-center justify-between">
+                            <div className="px-4 py-2.5 flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <p className="text-xs text-neutral-500 font-semibold flex-shrink-0">{t('search:resultsFound', { count: listProperties.length })}</p>
+                                    <p className="text-xs text-neutral-500 font-semibold flex-shrink-0 whitespace-nowrap">{t('search:resultsFound', { count: listProperties.length })}</p>
                                     {isSearchingLocation && (
                                         <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary flex-shrink-0" aria-hidden="true" />
                                     )}
@@ -449,7 +449,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                             value={filters.sortBy || 'newest'}
                                             onChange={(e) => handleSortChange(e.target.value)}
                                             aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                            className="block w-full text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none pr-8"
+                                            className="block w-full max-w-[9.5rem] truncate text-xs bg-white border border-neutral-300 rounded-xl text-neutral-900 px-3 py-1.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none pr-8"
                                         >
                                             <option value="newest">{t('search:sort.newest')}</option>
                                             <option value="oldest">{t('search:sort.oldest')}</option>
@@ -469,32 +469,32 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     </div>
                                 </div>
                             </div>
-                            {/* Nothing in the searched area: say so, then
-                                introduce what is listed from elsewhere. */}
-                            {outOfArea ? (
-                                <div className="px-4 pb-2">
-                                    <OutOfAreaBanner
-                                        kind={outOfArea}
-                                        query={filters.query}
-                                        isQueryUnmatched={isQueryUnmatched}
-                                        location={fallbackLocation}
-                                        onResetFilters={handleResetFilters}
-                                    />
-                                </div>
-                            ) : isTextRelaxed && (
-                                /* The typed text matched nothing and the map
-                                   view is answering — say so instead of passing
-                                   the results off as exact matches. */
-                                <div className="px-4 pb-2 -mt-1">
-                                    <p className="text-xs text-neutral-500">
-                                        {t('rental:showingInArea', {
-                                            query: filters.query,
-                                            defaultValue: 'No rental matches “{{query}}” — showing what is available in this area',
-                                        })}
-                                    </p>
-                                </div>
-                            )}
                         </div>
+                            {/* Nothing in the searched area: say so, then
+                            introduce what is listed from elsewhere. */}
+                        {outOfArea ? (
+                            <div className="px-3 pt-2">
+                                <OutOfAreaBanner
+                                    kind={outOfArea}
+                                    query={filters.query}
+                                    isQueryUnmatched={isQueryUnmatched}
+                                    location={fallbackLocation}
+                                    onResetFilters={handleResetFilters}
+                                />
+                            </div>
+                        ) : isTextRelaxed && (
+                            /* The typed text matched nothing and the map
+                               view is answering — say so instead of passing
+                               the results off as exact matches. */
+                            <div className="px-4 pt-2">
+                                <p className="text-xs text-neutral-500">
+                                    {t('rental:showingInArea', {
+                                        query: filters.query,
+                                        defaultValue: 'No rental matches “{{query}}” — showing what is available in this area',
+                                    })}
+                                </p>
+                            </div>
+                        )}
                         <div className="p-3">
                         {!mountList ? null : (isLoading || isSearchFiltering) ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
