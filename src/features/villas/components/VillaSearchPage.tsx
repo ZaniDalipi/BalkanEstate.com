@@ -594,6 +594,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         // Reset also clears the market toggle, so it has to count here —
         // otherwise "For Sale" hid the Reset button that would undo it.
         if (listingMode !== 'any') count++;
+        // On touch the status toggle sits in the filter sheet, so a
+        // non-default choice has to show on the filter button's badge.
+        if (filters.saleStatus && filters.saleStatus !== 'available') count++;
         const amenities = (filters.amenities as string[] | undefined) ?? [];
         count += amenities.length;
         return count;
@@ -655,6 +658,15 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     };
 
     const hasActiveFilters = activeFilterCount > 0;
+
+    const statusOptionLabels = {
+        available: t('villas:filters.statusAvailable', 'Available'),
+        closed:
+            listingMode === 'rent' ? t('villas:filters.statusRented', 'Rented')
+            : listingMode === 'sale' ? t('villas:filters.statusSold', 'Sold')
+            : t('villas:filters.statusSoldOrRented', 'Sold & rented'),
+        all: t('villas:filters.statusBoth', 'Both'),
+    };
 
     return (
         <div className="relative flex h-full w-full flex-col lg:flex-row">
@@ -884,13 +896,14 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     </div>
                                 </div>
 
-                                {/* Market toggle — its own full-width row on
-                                    touch, inline on desktop. */}
-                                <div className="w-full lg:w-auto lg:order-none">
+                                {/* Market and status toggles — desktop only.
+                                    On phones and tablets they live in the
+                                    filter sheet: two full-width rows here
+                                    pushed the first card half off screen. */}
+                                <div className="hidden lg:block">
                                     <VillaListingModeToggle
                                         mode={listingMode}
                                         onChange={handleListingModeChange}
-                                        className="w-full lg:w-auto"
                                     />
                                 </div>
 
@@ -901,43 +914,38 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     onChange={(value) => handleFilterChange('saleStatus', value)}
                                     label={t('villas:filters.status', 'Show')}
                                     showLabel={false}
-                                    className="w-full lg:w-auto"
-                                    optionLabels={{
-                                        available: t('villas:filters.statusAvailable', 'Available'),
-                                        closed:
-                                            listingMode === 'rent' ? t('villas:filters.statusRented', 'Rented')
-                                            : listingMode === 'sale' ? t('villas:filters.statusSold', 'Sold')
-                                            : t('villas:filters.statusSoldOrRented', 'Sold & rented'),
-                                        all: t('villas:filters.statusBoth', 'Both'),
-                                    }}
+                                    className="hidden lg:block"
+                                    optionLabels={statusOptionLabels}
                                 />
                             </div>
-                            {/* Nothing in the searched area: say so, then
-                                introduce what is listed from elsewhere. */}
-                            {outOfArea ? (
-                                <div className="px-4 pb-2">
-                                    <OutOfAreaBanner
-                                        kind={outOfArea}
-                                        query={filters.query}
-                                        isQueryUnmatched={isQueryUnmatched}
-                                        location={fallbackLocation}
-                                        onResetFilters={handleResetFilters}
-                                    />
-                                </div>
-                            ) : isTextRelaxed && (
-                                /* The typed text matched nothing and the map
-                                   view is answering — say so instead of passing
-                                   the results off as exact matches. */
-                                <div className="px-4 pb-2 -mt-1">
-                                    <p className="text-[11px] text-gray-400">
-                                        {t('villas:showingInArea', {
-                                            query: filters.query,
-                                            defaultValue: 'No villa matches “{{query}}” — showing what is available in this area',
-                                        })}
-                                    </p>
-                                </div>
-                            )}
                         </div>
+
+                        {/* Nothing in the searched area: say so, then
+                            introduce what is listed from elsewhere. Kept out
+                            of the sticky bar so it scrolls away with the list. */}
+                        {outOfArea ? (
+                            <div className="px-3 pt-2 bg-gray-50">
+                                <OutOfAreaBanner
+                                    kind={outOfArea}
+                                    query={filters.query}
+                                    isQueryUnmatched={isQueryUnmatched}
+                                    location={fallbackLocation}
+                                    onResetFilters={handleResetFilters}
+                                />
+                            </div>
+                        ) : isTextRelaxed && (
+                            /* The typed text matched nothing and the map
+                               view is answering — say so instead of passing
+                               the results off as exact matches. */
+                            <div className="px-4 pt-2 bg-gray-50">
+                                <p className="text-[11px] text-gray-400">
+                                    {t('villas:showingInArea', {
+                                        query: filters.query,
+                                        defaultValue: 'No villa matches “{{query}}” — showing what is available in this area',
+                                    })}
+                                </p>
+                            </div>
+                        )}
 
                         {/* Card grid / loading / empty states */}
                         <div className="p-3 pt-0 bg-gray-50">
@@ -1236,6 +1244,22 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 </button>
                             </div>
                             <div className="overflow-y-auto glass-scrollbar flex-1">
+                                {/* Market and status — shown inline in the
+                                    results bar on desktop, folded in here on
+                                    touch so the list gets the screen. */}
+                                <div className="px-4 pt-4 space-y-3">
+                                    <VillaListingModeToggle
+                                        mode={listingMode}
+                                        onChange={handleListingModeChange}
+                                        className="w-full"
+                                    />
+                                    <ListingStatusToggle
+                                        value={filters.saleStatus}
+                                        onChange={(value) => handleFilterChange('saleStatus', value)}
+                                        label={t('villas:filters.status', 'Show')}
+                                        optionLabels={statusOptionLabels}
+                                    />
+                                </div>
                                 <VillaFilters
                                     filters={filters}
                                     onFilterChange={handleFilterChange}

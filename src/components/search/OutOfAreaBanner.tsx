@@ -63,23 +63,23 @@ const OutOfAreaBanner: React.FC<OutOfAreaBannerProps> = ({
       role="status"
       aria-live="polite"
       data-testid="out-of-area-banner"
-      className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
+      className="mb-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2"
     >
-      <MapPinIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+      <MapPinIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-neutral-800 break-words">{title}</p>
-        <p className="mt-0.5 text-xs text-neutral-600">{body}</p>
-        {kind === 'nearest' && onResetFilters && (
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline touch-manipulation"
-          >
-            <XCircleIcon className="h-4 w-4" />
-            {t('search:filters.resetFilters', 'Reset Filters')}
-          </button>
-        )}
+        <p className="text-xs font-semibold leading-snug text-neutral-800 break-words">{title}</p>
+        <p className="text-[11px] leading-snug text-neutral-600">{body}</p>
       </div>
+      {kind === 'nearest' && onResetFilters && (
+        <button
+          type="button"
+          onClick={onResetFilters}
+          className="-my-1 -mr-1 inline-flex flex-shrink-0 items-center gap-1 self-center rounded-md px-2 py-1.5 text-[11px] font-semibold text-primary hover:underline touch-manipulation"
+        >
+          <XCircleIcon className="h-3.5 w-3.5" />
+          {t('search:filters.resetFilters', 'Reset Filters')}
+        </button>
+      )}
     </div>
   );
 };
