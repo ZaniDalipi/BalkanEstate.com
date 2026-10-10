@@ -129,7 +129,16 @@
     "phoneOnlyDescription": "A phone number is needed for contact and to create property listings",
     "phoneOnlyHint": "Your phone number will be shown on your listings so buyers can reach you.",
     "saving": "Saving...",
-    "saveAndContinue": "Save & Continue"
+    "saveAndContinue": "Save & Continue",
+    "phoneRequired": "Phone number is required",
+    "invalidPhone": "Invalid phone number format",
+    "phoneNumber": "Phone Number",
+    "noLicenseCheckbox": "I don't have a license yet",
+    "noLicenseHint": "You can add your license later from your profile settings",
+    "phoneHint": "Required for agents and sellers. Clients will use this to contact you.",
+    "proRequiredForAgency": "Pro subscription required to join an agency. Upgrade to Pro first, or register as an independent agent.",
+    "viewPlans": "View Plans",
+    "becomeAgentWithoutLicense": "Become Agent"
   },
   "invitationCode": {
     "title": "Enter Invitation Code",

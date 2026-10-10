@@ -737,7 +737,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 <div>
                   <p className="text-sm text-neutral-500 mb-1">{t('payment:subscription.currentPlan')}</p>
                   <h3 className="text-lg font-bold text-neutral-800">
-                    {state.currentUser?.subscriptionProductName || state.currentUser?.subscriptionPlan || 'Pro'}
+                    {state.currentUser?.subscriptionProductName || state.currentUser?.subscriptionPlan || t('payment:ui.paymentWindow.pro', 'Pro')}
                   </h3>
                   <p className="text-sm text-green-600 font-medium mt-1">
                     {state.currentUser?.subscriptionStatus === 'active' ? t('payment:subscription.active') : state.currentUser?.subscriptionStatus}
@@ -810,15 +810,15 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <ExclamationTriangleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-2">Activation Failed</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-2">{t('payment:ui.paymentWindow.activationFailed', 'Activation Failed')}</h2>
             <p className="text-sm text-neutral-600 mb-2 px-2">{errorMessage}</p>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-5 text-left">
-              <p className="text-xs sm:text-sm text-amber-800 font-semibold mb-1">What you can do:</p>
+              <p className="text-xs sm:text-sm text-amber-800 font-semibold mb-1">{t('payment:ui.paymentWindow.whatYouCanDo', 'What you can do:')}</p>
               <ul className="text-xs sm:text-sm text-amber-700 space-y-1 list-disc list-inside">
-                <li>Check your internet connection</li>
-                <li>Make sure the coupon code is valid</li>
-                <li>Try again in a few moments</li>
-                <li>Contact support if the issue persists</li>
+                <li>{t('payment:ui.paymentWindow.checkYourInternetConnection', 'Check your internet connection')}</li>
+                <li>{t('payment:ui.paymentWindow.makeSureTheCouponCode', 'Make sure the coupon code is valid')}</li>
+                <li>{t('payment:ui.paymentWindow.tryAgainInAFew', 'Try again in a few moments')}</li>
+                <li>{t('payment:ui.paymentWindow.contactSupportIfTheIssue', 'Contact support if the issue persists')}</li>
               </ul>
             </div>
             <div className="flex gap-3 justify-center">
@@ -826,13 +826,13 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 onClick={() => setShowError(false)}
                 className="px-5 sm:px-6 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark transition-colors"
               >
-                Try Again
+                {t('payment:ui.paymentWindow.tryAgain', 'Try Again')}
               </button>
               <button
                 onClick={onClose}
                 className="px-5 sm:px-6 py-2.5 border border-neutral-300 text-neutral-700 rounded-lg font-medium text-sm hover:bg-neutral-50 transition-colors"
               >
-                Close
+                {t('payment:ui.paymentWindow.close', 'Close')}
               </button>
             </div>
           </div>
@@ -849,10 +849,10 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <CheckCircleIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2 sm:mb-3">
-              Subscription Activated!
+              {t('payment:ui.paymentWindow.subscriptionActivated', 'Subscription Activated!')}
             </h2>
             <p className="text-sm sm:text-base text-neutral-600 mb-4 sm:mb-6">
-              Your free subscription has been successfully activated.
+              {t('payment:ui.paymentWindow.yourFreeSubscriptionHasBeen', 'Your free subscription has been successfully activated.')}
             </p>
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 sm:mb-6 text-left">
               <div className="flex items-center gap-3">
@@ -861,7 +861,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 </div>
                 <div>
                   <p className="font-semibold text-green-800 text-sm sm:text-base">{planName}</p>
-                  <p className="text-xs sm:text-sm text-green-600">Now active on your account</p>
+                  <p className="text-xs sm:text-sm text-green-600">{t('payment:ui.paymentWindow.nowActiveOnYourAccount', 'Now active on your account')}</p>
                 </div>
               </div>
             </div>
@@ -869,7 +869,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               onClick={() => { onClose(); window.location.reload(); }}
               className="w-full py-3 sm:py-4 px-6 rounded-xl font-bold text-sm sm:text-lg shadow-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
             >
-              Continue to Dashboard
+              {t('payment:ui.paymentWindow.continueToDashboard', 'Continue to Dashboard')}
             </button>
           </div>
         </Modal>
@@ -1128,19 +1128,19 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   {/* Payment method badges */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
-                      <CreditCardIcon className="w-3 h-3" /> Card
+                      <CreditCardIcon className="w-3 h-3" /> {t('payment:ui.paymentWindow.card', 'Card')}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none"><path d="M12.24 10.285V14.4h5.92c-.24 1.54-1.77 4.5-5.92 4.5-3.56 0-6.47-2.95-6.47-6.58s2.91-6.58 6.47-6.58c2.03 0 3.39.86 4.17 1.61l2.84-2.73C17.46 3.09 15.1 2 12.24 2 6.73 2 2.24 6.48 2.24 12s4.49 10 10 10c5.77 0 9.6-4.06 9.6-9.77 0-.66-.07-1.16-.16-1.66h-9.44z" fill="#4285F4"/></svg>
-                      Google Pay
+                      {t('payment:ui.paymentWindow.googlePay', 'Google Pay')}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                      Apple Pay
+                      {t('payment:ui.paymentWindow.applePay', 'Apple Pay')}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
                       <svg className="w-3 h-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" /></svg>
-                      Bank
+                      {t('payment:ui.paymentWindow.bank', 'Bank')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 px-2 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
@@ -1161,7 +1161,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    sales@balkanestateai.com
+                    {t('payment:ui.paymentWindow.salesBalkanestateaiCom', 'sales@balkanestateai.com')}
                   </a>
                   <p className="text-[10px] sm:text-xs text-neutral-400 mt-2">{t('payment:comingSoon.responseTime')}</p>
                 </div>
@@ -1505,28 +1505,28 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 {/* Card */}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
                   <CreditCardIcon className="w-4 h-4 text-neutral-500" />
-                  <span className="text-xs text-neutral-600 font-medium">Card</span>
+                  <span className="text-xs text-neutral-600 font-medium">{t('payment:ui.paymentWindow.card', 'Card')}</span>
                 </div>
                 {/* Google Pay */}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
                     <path d="M12.24 10.285V14.4h5.92c-.24 1.54-1.77 4.5-5.92 4.5-3.56 0-6.47-2.95-6.47-6.58s2.91-6.58 6.47-6.58c2.03 0 3.39.86 4.17 1.61l2.84-2.73C17.46 3.09 15.1 2 12.24 2 6.73 2 2.24 6.48 2.24 12s4.49 10 10 10c5.77 0 9.6-4.06 9.6-9.77 0-.66-.07-1.16-.16-1.66h-9.44z" fill="#4285F4"/>
                   </svg>
-                  <span className="text-xs text-neutral-600 font-medium">Google Pay</span>
+                  <span className="text-xs text-neutral-600 font-medium">{t('payment:ui.paymentWindow.googlePay', 'Google Pay')}</span>
                 </div>
                 {/* Apple Pay */}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                   </svg>
-                  <span className="text-xs text-neutral-600 font-medium">Apple Pay</span>
+                  <span className="text-xs text-neutral-600 font-medium">{t('payment:ui.paymentWindow.applePay', 'Apple Pay')}</span>
                 </div>
                 {/* Bank Transfer */}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
                   <svg className="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                   </svg>
-                  <span className="text-xs text-neutral-600 font-medium">Bank</span>
+                  <span className="text-xs text-neutral-600 font-medium">{t('payment:ui.paymentWindow.bank', 'Bank')}</span>
                 </div>
               </div>
             )}

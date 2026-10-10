@@ -1,0 +1,90 @@
+{
+  "success": {
+    "title": "Poruka je poslana!",
+    "description": "Hvala što ste nam se javili. Naš tim odgovorit će vam u roku od 24 sata.",
+    "sendAnother": "Pošalji još jednu poruku"
+  },
+  "advertising": {
+    "prefill": "Pozdrav, želio bih se oglašavati na BalkanEstate. Pošaljite mi oglasna mjesta i cijene.",
+    "heading": "Gdje želite svoj oglas?",
+    "page": "Stranica",
+    "placement": "Pozicija",
+    "creative": "Priložite sliku oglasa (neobavezno)",
+    "removeImage": "Ukloni sliku",
+    "uploading": "Prenosi se…",
+    "replaceImage": "Zamijeni sliku",
+    "uploadImage": "Prenesi sliku",
+    "creativeHint": "PNG ili JPG, najviše 5 MB. To nam pomaže postaviti oglas točno gdje želite."
+  },
+  "info": {
+    "email": "E-pošta",
+    "phone": "Telefon",
+    "location": "Lokacija",
+    "locationValue": "Balkanska regija",
+    "hours": "Radno vrijeme",
+    "hoursValue": "Pon-Pet, 9:00-18:00 CET",
+    "heading": "Javite nam se"
+  },
+  "title": "Kontaktirajte nas",
+  "subtitle": "Imate pitanje ili trebate pomoć? Rado ćemo vas čuti. Pošaljite nam poruku i odgovorit ćemo što prije.",
+  "form": {
+    "heading": "Pošaljite nam poruku",
+    "name": "Ime i prezime",
+    "email": "Adresa e-pošte",
+    "phone": "Telefon (neobavezno)",
+    "subject": "Tema",
+    "message": "Vaša poruka",
+    "sending": "Šalje se...",
+    "submit": "Pošalji poruku",
+    "privacyNote": "Slanjem prihvaćate naša Pravila privatnosti. Nikada nećemo dijeliti vaše podatke."
+  },
+  "quickHelp": {
+    "heading": "Brza pomoć",
+    "howItWorks": "Saznajte kako funkcionira BalkanEstate",
+    "pricing": "Pogledajte naše cjenovne planove",
+    "findAgent": "Pronađite agenta za nekretnine",
+    "privacy": "Pročitajte naša pravila privatnosti"
+  },
+  "whatsapp": {
+    "title": "Pišite nam na WhatsApp",
+    "subtitle": "Brz odgovor tijekom radnog vremena"
+  },
+  "viber": {
+    "title": "Pišite nam na Viber",
+    "subtitle": "Popularan na Balkanu"
+  },
+  "ui": {
+    "contactForm": {
+      "adCreativePreview": "pregled oglasa"
+    }
+  },
+  "subjects": {
+    "general": "Opći upit",
+    "buying": "Kupnja nekretnine",
+    "selling": "Prodaja nekretnine",
+    "agency": "Agencije i agenti",
+    "support": "Tehnička podrška",
+    "partnership": "Partnerstvo",
+    "advertising": "Oglašavanje / oglasni prostor"
+  },
+  "adPages": {
+    "all": "Sve stranice",
+    "home": "Početna",
+    "search": "Rezultati pretraživanja",
+    "rentals": "Najam",
+    "property-details": "Detalji nekretnine",
+    "agents": "Agenti",
+    "agencies": "Agencije",
+    "business-directory": "Poslovni imenik",
+    "blog": "Blog",
+    "guides": "Vodiči"
+  },
+  "adPlacements": {
+    "in-content": "U sadržaju (leaderboard)",
+    "sidebar": "Bočna traka (skyscraper)",
+    "sticky-bottom": "Fiksna donja traka",
+    "sticky-top": "Fiksna gornja traka",
+    "header": "Zaglavlje",
+    "footer": "Podnožje"
+  }
+}

@@ -1411,7 +1411,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                 lat: user.lat ?? 0,
                 lng: user.lng ?? 0,
             });
-            setError('Failed to save changes. Please try again.');
+            setError(t('account:ui.myAccountPage.failedToSaveChangesPlease', 'Failed to save changes. Please try again.'));
         } finally {
             setIsSaving(false);
         }
@@ -1458,7 +1458,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             setIsSaved(true);
             setInvitationCode('');
             setError('');
-            await success('Joined Agency', `Successfully joined ${data.agency.name}!`);
+            await success(t('account:ui.myAccountPage.joinedAgency', 'Joined Agency'), `Successfully joined ${data.agency.name}!`);
             setTimeout(() => setIsSaved(false), 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to join agency');
@@ -1650,7 +1650,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                 <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_6px_24px_rgba(0,0,0,0.18),inset_0_-2px_6px_rgba(0,0,0,0.08)]">
                                     <img
                                         src={avatarPreview || formData.avatarUrl}
-                                        alt="Avatar"
+                                        alt={t('account:ui.myAccountPage.avatar', 'Avatar')}
                                         className="w-full h-full object-cover"
                                         referrerPolicy="no-referrer"
                                     />
@@ -1723,7 +1723,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             </fieldset>
 
             <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <legend className="sr-only">Personal Information</legend>
+                <legend className="sr-only">{t('account:ui.myAccountPage.personalInformation', 'Personal Information')}</legend>
                 <div className="relative">
                     <input type="text" id="name" value={formData.name} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
                     <label htmlFor="name" className={floatingLabelClasses}>{t('profile.fullName')}</label>
@@ -2348,7 +2348,7 @@ const MyAccountPage: React.FC = () => {
                                         <button
                                             onClick={handleAgencyClick}
                                             className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-xl border border-primary/20 hover:bg-primary/20 transition-all cursor-pointer"
-                                            title="View agency details"
+                                            title={t('account:ui.myAccountPage.viewAgencyDetails', 'View agency details')}
                                         >
                                             <BuildingOfficeIcon className="w-4 h-4 text-primary" />
                                             <span className="text-xs font-semibold text-primary">{state.currentUser.agencyName}</span>

@@ -22,7 +22,7 @@
   "newListing": "Njoftim i Ri",
   "myListings": "Njoftimet e Mia",
   "dashboard": "Paneli",
-  "admin": "Admin",
+  "admin": "Administrator",
   "adminPanel": "Paneli i Adminit",
   "login": "Hyr",
   "signup": "Regjistrohu",
@@ -102,7 +102,7 @@
     "exploreCities": "Eksploro",
     "howItWorks": "Si Funksionon",
     "analytics": "Analitika",
-    "admin": "Admin",
+    "admin": "Administrator",
     "agencyDashboard": "Paneli i Agjencisë",
     "valuation": "Vlerësimi",
     "mortgageCalculator": "Kalkulator",
@@ -113,5 +113,16 @@
     "home": "Kreu"
   },
   "blog": "Blog & Artikuj",
-  "agencyDashboard": "Paneli i Agjencisë"
+  "agencyDashboard": "Paneli i Agjencisë",
+  "mainNavigation": "Navigimi kryesor",
+  "createNewListing": "Krijo një shpallje të re",
+  "unread": "të palexuara",
+  "goToHome": "Shko në faqen kryesore",
+  "closeMenu": "Mbyll menunë e navigimit",
+  "viewSubscription": "Shiko planet e abonimit",
+  "viewAnalytics": "Shiko panelin e analitikës",
+  "inboxWithUnread": "Mesazhet ({{count}} të palexuara)",
+  "goToAccount": "Shko te llogaria ime",
+  "userAvatar": "Avatari i përdoruesit",
+  "loginOrRegister": "Hyni ose regjistroni një llogari"
 }

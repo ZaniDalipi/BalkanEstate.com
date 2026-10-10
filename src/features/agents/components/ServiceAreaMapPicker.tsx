@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { XMarkIcon, MapPinIcon } from '@/constants';
 
+import { useTranslation } from 'react-i18next';
 const BALKANS_CENTER: [number, number] = [42.0, 21.4];
 
 interface GeocodedArea {
@@ -77,6 +78,7 @@ const ClickHandler: React.FC<{ onMapClick: (lat: number, lng: number) => void; b
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const ServiceAreaMapPicker: React.FC<Props> = ({ areas, onAdd, onRemove, centerLat, centerLng }) => {
+  const { t } = useTranslation();
   const [geocoded, setGeocoded] = useState<GeocodedArea[]>([]);
   const [busy, setBusy] = useState(false);
   // Track which names we've already geocoded to avoid re-fetching
@@ -147,7 +149,7 @@ const ServiceAreaMapPicker: React.FC<Props> = ({ areas, onAdd, onRemove, centerL
           <div className="absolute inset-0 z-[1000] bg-white/60 backdrop-blur-sm flex items-center justify-center">
             <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2.5 shadow-lg border border-gray-100">
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm font-medium text-gray-700">Finding area…</span>
+              <span className="text-sm font-medium text-gray-700">{t('agents:ui.serviceAreaMapPicker.findingArea', 'Finding area…')}</span>
             </div>
           </div>
         )}
@@ -176,7 +178,7 @@ const ServiceAreaMapPicker: React.FC<Props> = ({ areas, onAdd, onRemove, centerL
                     onClick={() => handleRemove(areas.indexOf(area.name), area.name)}
                     className="w-full text-xs text-red-500 hover:text-red-700 hover:bg-red-50 py-1 rounded transition-colors"
                   >
-                    Remove area
+                    {t('agents:ui.serviceAreaMapPicker.removeArea', 'Remove area')}
                   </button>
                 </div>
               </Popup>
@@ -187,7 +189,7 @@ const ServiceAreaMapPicker: React.FC<Props> = ({ areas, onAdd, onRemove, centerL
         {/* Hint */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[500] pointer-events-none">
           <span className="bg-black/55 text-white text-[11px] font-medium px-3 py-1 rounded-full backdrop-blur-sm whitespace-nowrap">
-            Click anywhere on the map to add a service area
+            {t('agents:ui.serviceAreaMapPicker.clickAnywhereOnTheMap', 'Click anywhere on the map to add a service area')}
           </span>
         </div>
       </div>
@@ -206,7 +208,7 @@ const ServiceAreaMapPicker: React.FC<Props> = ({ areas, onAdd, onRemove, centerL
                 type="button"
                 onClick={() => handleRemove(i, area)}
                 className="w-4 h-4 rounded-full bg-blue-200 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-colors ml-0.5"
-                title="Remove"
+                title={t('agents:ui.serviceAreaMapPicker.remove', 'Remove')}
               >
                 <XMarkIcon className="w-2.5 h-2.5" />
               </button>
@@ -215,7 +217,7 @@ const ServiceAreaMapPicker: React.FC<Props> = ({ areas, onAdd, onRemove, centerL
         </div>
       ) : (
         <p className="text-sm text-gray-400 text-center py-1">
-          No service areas added. Click the map to add areas you serve.
+          {t('agents:ui.serviceAreaMapPicker.noServiceAreasAddedClick', 'No service areas added. Click the map to add areas you serve.')}
         </p>
       )}
     </div>

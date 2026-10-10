@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import React from 'react';
 import { Filters, Property, AiSearchQuery, ChatMessage } from '@/types';
 import { XMarkIcon } from '@/constants';
@@ -40,7 +41,7 @@ interface SearchMobileFiltersProps {
     isSaving: boolean;
     onApply: () => void;
     searchMode: 'manual' | 'ai';
-    t: (key: string) => string;
+    t: TFunction;
 }
 
 const SearchMobileFilters: React.FC<SearchMobileFiltersProps> = ({
@@ -65,7 +66,7 @@ const SearchMobileFilters: React.FC<SearchMobileFiltersProps> = ({
             <button
                 onClick={onClose}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-neutral-500 hover:text-neutral-800 rounded-full hover:bg-neutral-100 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                aria-label="Close filters"
+                aria-label={t('search:ui.searchMobileFilters.closeFilters', 'Close filters')}
             >
                 <XMarkIcon className="w-6 h-6" />
             </button>
@@ -102,20 +103,20 @@ const SearchMobileFilters: React.FC<SearchMobileFiltersProps> = ({
                     onClick={onReset}
                     className="min-h-[44px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                  >
-                    Reset
+                    {t('search:ui.searchMobileFilters.reset', 'Reset')}
                  </button>
                  <button
                     onClick={onSave}
                     disabled={isSaving}
                     className="min-h-[44px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors disabled:opacity-50 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                  >
-                    {isSaving ? 'Saving...' : 'Save Search'}
+                    {isSaving ? 'Saving...' : t('search:ui.searchMobileFilters.saveSearch', 'Save Search')}
                  </button>
                  <button
                     onClick={onApply}
                     className="flex-grow min-h-[44px] px-3 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark active:bg-primary-dark transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50"
                  >
-                    Show Results
+                    {t('search:ui.searchMobileFilters.showResults', 'Show Results')}
                  </button>
             </div>
         )}

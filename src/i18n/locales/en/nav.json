@@ -113,5 +113,16 @@
     "blog": "Blog & Articles",
     "guides": "Guides"
   },
-  "blog": "Blog & Articles"
+  "blog": "Blog & Articles",
+  "mainNavigation": "Main navigation",
+  "createNewListing": "Create a new listing",
+  "unread": "unread",
+  "goToHome": "Go to home page",
+  "closeMenu": "Close navigation menu",
+  "viewSubscription": "View subscription plans",
+  "viewAnalytics": "View analytics dashboard",
+  "inboxWithUnread": "Inbox ({{count}} unread)",
+  "goToAccount": "Go to my account",
+  "userAvatar": "User avatar",
+  "loginOrRegister": "Login or register an account"
 }

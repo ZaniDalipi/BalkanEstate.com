@@ -145,7 +145,7 @@ const BlogPage: React.FC = () => {
       {(selectedCategory || selectedCountry || selectedTag || searchQuery) && (
         <div className="bg-slate-50 border-b border-neutral-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-500 font-medium">Active filters:</span>
+            <span className="text-xs text-slate-500 font-medium">{t('blog:ui.blogPage.activeFilters', 'Active filters:')}</span>
             {searchQuery && (
               <FilterChip label={`"${searchQuery}"`} onRemove={() => { setSearchQuery(''); setPage(1); }} />
             )}
@@ -162,7 +162,7 @@ const BlogPage: React.FC = () => {
               onClick={() => { setSelectedCategory(undefined); setSelectedCountry(undefined); setSelectedTag(undefined); setSearchQuery(''); setPage(1); }}
               className="text-xs text-slate-400 hover:text-slate-700 underline ml-1"
             >
-              Clear all
+              {t('blog:ui.blogPage.clearAll', 'Clear all')}
             </button>
           </div>
         </div>
@@ -214,7 +214,7 @@ const BlogPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <p className="text-sm sm:text-base font-medium">{t('noArticles', 'No articles found')}</p>
-                  <p className="text-xs text-slate-300 mt-1">Try adjusting your filters</p>
+                  <p className="text-xs text-slate-300 mt-1">{t('blog:ui.blogPage.tryAdjustingYourFilters', 'Try adjusting your filters')}</p>
                 </div>
               ) : (
                 <>

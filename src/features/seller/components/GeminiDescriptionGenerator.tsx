@@ -712,13 +712,13 @@ const GeminiDescriptionGenerator: React.FC<{
                                     <label className="block text-sm font-semibold text-gray-500 mb-2">{t('seller:createListing.visitAvailability.availableDays', 'Available Days')}</label>
                                     <div className="flex flex-wrap gap-2">
                                         {[
-                                            { day: 1, label: t('common:days.mon', 'Mon') },
-                                            { day: 2, label: t('common:days.tue', 'Tue') },
-                                            { day: 3, label: t('common:days.wed', 'Wed') },
-                                            { day: 4, label: t('common:days.thu', 'Thu') },
-                                            { day: 5, label: t('common:days.fri', 'Fri') },
-                                            { day: 6, label: t('common:days.sat', 'Sat') },
-                                            { day: 0, label: t('common:days.sun', 'Sun') },
+                                            { day: 1, label: t('common:weekdays.mon', 'Mon') },
+                                            { day: 2, label: t('common:weekdays.tue', 'Tue') },
+                                            { day: 3, label: t('common:weekdays.wed', 'Wed') },
+                                            { day: 4, label: t('common:weekdays.thu', 'Thu') },
+                                            { day: 5, label: t('common:weekdays.fri', 'Fri') },
+                                            { day: 6, label: t('common:weekdays.sat', 'Sat') },
+                                            { day: 0, label: t('common:weekdays.sun', 'Sun') },
                                         ].map(({ day, label }) => (
                                             <Button
                                                 key={day}
@@ -761,10 +761,10 @@ const GeminiDescriptionGenerator: React.FC<{
                                             onChange={(e) => handleVisitAvailabilityChange({ slotDurationMinutes: Number(e.target.value) })}
                                             className="glass-select w-full px-3 py-2 text-sm"
                                         >
-                                            <option value={15}>15 min</option>
-                                            <option value={30}>30 min</option>
-                                            <option value={45}>45 min</option>
-                                            <option value={60}>60 min</option>
+                                            <option value={15}>{t('seller:ui.geminiDescriptionGenerator.n15Min', '15 min')}</option>
+                                            <option value={30}>{t('seller:ui.geminiDescriptionGenerator.n30Min', '30 min')}</option>
+                                            <option value={45}>{t('seller:ui.geminiDescriptionGenerator.n45Min', '45 min')}</option>
+                                            <option value={60}>{t('seller:ui.geminiDescriptionGenerator.n60Min', '60 min')}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -888,7 +888,7 @@ const GeminiDescriptionGenerator: React.FC<{
                             </span>
                             <span className="flex items-center gap-1 glass-badge px-2 py-1 text-gray-400">
                                 <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z" /></svg>
-                                Vimeo
+                                {t('seller:ui.geminiDescriptionGenerator.vimeo', 'Vimeo')}
                             </span>
                         </div>
                         <p className="text-xs text-red-600">

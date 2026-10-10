@@ -1,0 +1,90 @@
+{
+  "success": {
+    "title": "Mesaj trimis!",
+    "description": "Îți mulțumim că ne-ai contactat. Echipa noastră îți va răspunde în 24 de ore.",
+    "sendAnother": "Trimite alt mesaj"
+  },
+  "advertising": {
+    "prefill": "Bună ziua, aș dori să fac publicitate pe BalkanEstate. Vă rog să-mi trimiteți spațiile publicitare și prețurile.",
+    "heading": "Unde ai dori reclama ta?",
+    "page": "Pagina",
+    "placement": "Amplasare",
+    "creative": "Atașează imaginea reclamei (opțional)",
+    "removeImage": "Elimină imaginea",
+    "uploading": "Se încarcă…",
+    "replaceImage": "Înlocuiește imaginea",
+    "uploadImage": "Încarcă imaginea",
+    "creativeHint": "PNG sau JPG, max. 5MB. Ne ajută să plasăm reclama exact unde dorești."
+  },
+  "info": {
+    "email": "Email",
+    "phone": "Telefon",
+    "location": "Locație",
+    "locationValue": "Regiunea Balcanilor",
+    "hours": "Program de lucru",
+    "hoursValue": "Lun-Vin, 9:00-18:00 CET",
+    "heading": "Ia legătura cu noi"
+  },
+  "title": "Contactează-ne",
+  "subtitle": "Ai o întrebare sau ai nevoie de ajutor? Ne-ar face plăcere să te auzim. Trimite-ne un mesaj și îți vom răspunde cât mai curând.",
+  "form": {
+    "heading": "Trimite-ne un mesaj",
+    "name": "Nume complet",
+    "email": "Adresa de email",
+    "phone": "Telefon (opțional)",
+    "subject": "Subiect",
+    "message": "Mesajul tău",
+    "sending": "Se trimite...",
+    "submit": "Trimite mesajul",
+    "privacyNote": "Prin trimitere, ești de acord cu Politica noastră de confidențialitate. Nu îți vom partaja niciodată informațiile."
+  },
+  "quickHelp": {
+    "heading": "Ajutor rapid",
+    "howItWorks": "Află cum funcționează BalkanEstate",
+    "pricing": "Vezi planurile noastre de prețuri",
+    "findAgent": "Găsește un agent imobiliar",
+    "privacy": "Citește politica noastră de confidențialitate"
+  },
+  "whatsapp": {
+    "title": "Scrie-ne pe WhatsApp",
+    "subtitle": "Răspuns rapid în timpul programului"
+  },
+  "viber": {
+    "title": "Scrie-ne pe Viber",
+    "subtitle": "Popular în regiunea Balcanilor"
+  },
+  "ui": {
+    "contactForm": {
+      "adCreativePreview": "previzualizarea reclamei"
+    }
+  },
+  "subjects": {
+    "general": "Întrebare generală",
+    "buying": "Cumpărarea unei proprietăți",
+    "selling": "Vânzarea unei proprietăți",
+    "agency": "Agenții și agenți",
+    "support": "Asistență tehnică",
+    "partnership": "Parteneriat",
+    "advertising": "Publicitate / spațiu publicitar"
+  },
+  "adPages": {
+    "all": "Toate paginile",
+    "home": "Acasă",
+    "search": "Rezultatele căutării",
+    "rentals": "Închirieri",
+    "property-details": "Detaliile proprietății",
+    "agents": "Agenți",
+    "agencies": "Agenții",
+    "business-directory": "Director de afaceri",
+    "blog": "Blog",
+    "guides": "Ghiduri"
+  },
+  "adPlacements": {
+    "in-content": "În conținut (leaderboard)",
+    "sidebar": "Bară laterală (skyscraper)",
+    "sticky-bottom": "Bară fixă jos",
+    "sticky-top": "Bară fixă sus",
+    "header": "Antet",
+    "footer": "Subsol"
+  }
+}

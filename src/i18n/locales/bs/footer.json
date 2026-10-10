@@ -21,7 +21,9 @@
     "messages": "Poruke",
     "myAccount": "Moj Račun",
     "howItWorks": "Kako Funkcionira",
-    "blog": "Blog"
+    "blog": "Blog",
+    "contactUs": "Kontaktirajte nas",
+    "valuation": "Procjena nekretnine"
   },
   "countries": {
     "AL": "Albanija",
@@ -87,5 +89,12 @@
     "becomePartner": "Postanite partner",
     "affiliates": "Saradnici",
     "developers": "Za programere"
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Pronađite nas na Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Profesionalne 360° ture nekretnina",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - 360° ture nekretnina"
+    }
   }
 }

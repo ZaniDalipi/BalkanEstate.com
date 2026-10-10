@@ -21,6 +21,7 @@ import { useMapComponent, USE_GOOGLE_MAPS, TILE_LAYERS, type MapComponentProps }
 import MapPropertyMarkers from './MapPropertyMarkers';
 import MapFilterControls from './MapFilterControls';
 
+import i18n from '@/src/i18n';
 // Fix for default icon issue with bundlers
 let DefaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -89,9 +90,9 @@ class MapErrorBoundary extends Component<MapErrorBoundaryProps, MapErrorBoundary
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Map Loading Error</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{i18n.t('search:ui.mapComponent.mapLoadingError', 'Map Loading Error')}</h3>
             <p className="text-gray-500 text-sm mb-4">
-              {this.state.error?.message || 'Unable to load the map. This might be a temporary issue.'}
+              {this.state.error?.message || i18n.t('search:ui.mapComponent.unableToLoadTheMap', 'Unable to load the map. This might be a temporary issue.')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               {this.state.retryCount < 3 && (
@@ -99,14 +100,14 @@ class MapErrorBoundary extends Component<MapErrorBoundaryProps, MapErrorBoundary
                   onClick={this.handleRetry}
                   className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors"
                 >
-                  Try Again ({3 - this.state.retryCount} left)
+                  {i18n.t('search:ui.mapComponent.tryAgain', 'Try Again (')}{3 - this.state.retryCount} {i18n.t('search:ui.mapComponent.left', 'left)')}
                 </button>
               )}
               <button
                 onClick={this.handleFallback}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
-                Use Alternative Map
+                {i18n.t('search:ui.mapComponent.useAlternativeMap', 'Use Alternative Map')}
               </button>
             </div>
           </div>

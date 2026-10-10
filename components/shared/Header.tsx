@@ -124,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
             aria-label={t('nav:newListing')}
           >
             <span className="relative z-10 sm:hidden">+</span>
-            <span className="relative z-10 hidden sm:inline lg:hidden">+ New</span>
+            <span className="relative z-10 hidden sm:inline lg:hidden">{t('common:ui.header.new', '+ New')}</span>
             <span className="relative z-10 hidden lg:inline">+ {t('nav:newListing')}</span>
             <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
           </button>
@@ -147,7 +147,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
       <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex justify-between items-center py-1.5 sm:py-2">
           <div className="flex items-center">
-             <button onClick={onToggleSidebar} className="md:hidden text-neutral-600 hover:text-primary p-1.5 -ml-1.5" aria-label="Toggle sidebar navigation">
+             <button onClick={onToggleSidebar} className="md:hidden text-neutral-600 hover:text-primary p-1.5 -ml-1.5" aria-label={t('common:ui.header.toggleSidebarNavigation', 'Toggle sidebar navigation')}>
                  <Bars3Icon className="w-5 h-5"/>
              </button>
              <div className="hidden md:block">
@@ -172,7 +172,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
               aria-label={t('nav:newListing')}
             >
               <span className="relative z-10 sm:hidden">+</span>
-              <span className="relative z-10 hidden sm:inline lg:hidden">+ New</span>
+              <span className="relative z-10 hidden sm:inline lg:hidden">{t('common:ui.header.new', '+ New')}</span>
               <span className="relative z-10 hidden lg:inline">+ {t('nav:newListing')}</span>
               <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
             </button>

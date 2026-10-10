@@ -89,7 +89,10 @@
       "investment": "Investment",
       "newConstruction": "New Construction",
       "foreclosures": "Foreclosures"
-    }
+    },
+    "licensedFirst": "Licensed First",
+    "licensedOnly": "Licensed Agents Only",
+    "verified": "Verified"
   },
   "results": {
     "title": "Real Estate Agents in the Balkans",
@@ -98,7 +101,9 @@
     "showingMatchingPlural": "Showing {{count}} agents matching \"{{query}}\"",
     "noAgentsFound": "No agents found",
     "tryAdjusting": "Try adjusting your search criteria",
-    "viewMore": "View more"
+    "viewMore": "View more",
+    "showMore": "Show More Agents",
+    "showing": "Showing {{shown}} of {{total}} agents"
   },
   "agencies": {
     "title": "Top Real Estate Agencies",
@@ -435,7 +440,8 @@
     "review": "review",
     "performanceScore": "Performance",
     "specializations": "Specializations",
-    "location": "Location"
+    "location": "Location",
+    "licensed": "Licensed"
   },
   "agencyProfile": {
     "title": "Agency Profile",
@@ -612,7 +618,15 @@
         "documentHint": "Upload a PDF or image of your credential (max 10MB)",
         "save": "Save Credential",
         "saving": "Saving...",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "issuingOrganization": "Issuing Organization",
+        "certificateNumber": "Certificate / License Number",
+        "certificateNumberPlaceholder": "e.g., REA-2024-12345",
+        "supportingDocument": "Supporting Document",
+        "clickToUpload": "Click to upload certificate",
+        "fileTypes": "JPG, PNG, WebP, or PDF up to 10 MB",
+        "publicVisibility": "Public visibility",
+        "publicVisibilityDesc": "Show this on your public profile"
       },
       "messages": {
         "added": "Credential added successfully",
@@ -622,7 +636,8 @@
       },
       "empty": {
         "title": "No credentials added yet",
-        "description": "Add your professional licenses, certifications, and awards to build trust with potential clients."
+        "description": "Add your professional licenses, certifications, and awards to build trust with potential clients.",
+        "subtitle": "Showcase your professional qualifications and build trust with clients"
       },
       "license": {
         "verified": "License Verified",
@@ -642,7 +657,33 @@
         "cancel": "Cancel",
         "submit": "Submit for Review",
         "submitted": "License submitted! It will be reviewed by an admin shortly."
-      }
+      },
+      "validation": {
+        "titleRequired": "Title is required",
+        "titleMinLength": "Title must be at least 3 characters",
+        "titleMaxLength": "Title must be under 120 characters",
+        "issuerRequired": "Issuing organization is required",
+        "issuerMinLength": "Organization name must be at least 2 characters",
+        "fileTooLarge": "File must be under 10 MB",
+        "fileTypeNotAllowed": "Only images (JPG, PNG, WebP) and PDFs are allowed",
+        "issueDateFormat": "Use DD/MM/YYYY format",
+        "expiryDateFormat": "Use DD/MM/YYYY format",
+        "expiryAfterIssue": "Expiry date must be after the issue date"
+      },
+      "credentialUpdated": "Credential updated",
+      "credentialAdded": "Credential added",
+      "saveFailed": "Something went wrong. Please try again.",
+      "credentialRemoved": "Credential removed",
+      "deleteFailed": "Failed to delete. Please try again.",
+      "credentialCount": "{{count}} credentials",
+      "expired": "Expired",
+      "expires": "Expires",
+      "left": "left",
+      "edit": "Edit",
+      "delete": "Delete",
+      "editSubtitle": "Update your credential details below",
+      "addSubtitle": "Fill in the details for your new credential",
+      "failedToSave": "Failed to save"
     },
     "marketInsights": {
       "title": "Local Market Insights",
@@ -686,7 +727,14 @@
         "title": "Market data unavailable",
         "description": "Market insights for this area are not yet available."
       },
-      "lastUpdated": "Last updated: {{date}}"
+      "lastUpdated": "Last updated: {{date}}",
+      "activeListings": "Active Listings",
+      "propertiesSold": "Properties Sold",
+      "avgPrice": "Avg. Price",
+      "avgDaysToSell": "Avg. Days to Sell",
+      "priceRange": "Price Range",
+      "requestReport": "Ask for a Market Report",
+      "quickStats": "Quick Stats"
     },
     "propertiesMap": {
       "title": "Properties Map",
@@ -697,7 +745,9 @@
       "viewSoldProperty": "View Sold Property",
       "viewDetails": "View Details",
       "beds": "beds",
-      "baths": "baths"
+      "baths": "baths",
+      "rented": "Rented",
+      "viewRentedProperty": "View Rented Property"
     },
     "serviceArea": {
       "title": "Service Area Location",
@@ -735,7 +785,10 @@
       "pagination": "Listing pages",
       "previousPage": "Previous",
       "nextPage": "Next",
-      "goToPage": "Page {{page}}"
+      "goToPage": "Page {{page}}",
+      "rentedLabel": "Rented",
+      "rentedProperties": "Rented Properties",
+      "rentedBadge": "RENTED"
     },
     "reviewsTab": {
       "verifiedReviews": "verified reviews",
@@ -842,14 +895,41 @@
       "subtitle": "Update your agent profile details",
       "facebook": "Facebook",
       "instagram": "Instagram",
-      "linkedin": "LinkedIn"
+      "linkedin": "LinkedIn",
+      "bioTooLong": "Bio must be under 5000 characters",
+      "invalidUrl": "Invalid URL for {{field}}. Please include https://",
+      "savedTitle": "Profile Updated",
+      "savedMessage": "Your profile has been updated successfully",
+      "saveFailed": "Failed to save profile. Please try again.",
+      "achievements": "Awards & Achievements"
     },
     "editButton": "Edit Profile",
     "contactInfo": "Contact Information",
     "phone": "Phone",
     "email": "Email",
     "officeAddress": "Office Address",
-    "website": "Website"
+    "website": "Website",
+    "marketReport": {
+      "noData": "Market data is not available for this area yet.",
+      "title": "Market Report",
+      "avgPricePerSqm": "Avg. Price/m²",
+      "medianPrice": "Median Price",
+      "priceGrowth": "Price Growth (YoY)",
+      "avgDaysOnMarket": "Avg. Days on Market",
+      "demandScore": "Demand",
+      "rentalYield": "Rental Yield",
+      "investmentScore": "Investment",
+      "topNeighborhoods": "Top Neighborhoods",
+      "highlights": "Market Highlights",
+      "contactAgent": "Contact {{name}} for a report",
+      "personalizedReport": "Get a personalized report from {{name}}"
+    },
+    "agentSaved": "Agent saved!",
+    "agentUnsaved": "Agent removed",
+    "agentSavedMsg": "Added to your favorites",
+    "agentUnsavedMsg": "Removed from your favorites",
+    "saveError": "Failed to save agent",
+    "saveErrorMessage": "Please try again."
   },
   "languages": {
     "english": "English",
@@ -995,6 +1075,86 @@
         "desc": "Volume of reviews shows trust. Every review you collect adds 1 point regardless of score.",
         "cap": "Max 10 pts"
       }
+    }
+  },
+  "achievements": {
+    "addedTitle": "Achievement Added",
+    "addedMessage": "The achievement has been added successfully",
+    "addFailed": "Failed to add achievement",
+    "updatedTitle": "Achievement Updated",
+    "updatedMessage": "The achievement has been updated successfully",
+    "updateFailed": "Failed to update achievement",
+    "deletedTitle": "Achievement Deleted",
+    "deletedMessage": "The achievement has been deleted",
+    "deleteFailed": "Failed to delete achievement"
+  },
+  "inquiry": {
+    "findProperty": "Looking for property",
+    "template1": "Hi, I am looking for a property in your area. Can you help me find suitable options based on my requirements?",
+    "sellProperty": "Selling property",
+    "template2": "Hi, I am interested in selling my property. Could you provide a market valuation and discuss your services?",
+    "marketInfo": "Market information",
+    "template3": "Hi, I would like to learn more about the real estate market in your area. Can we schedule a consultation?",
+    "nameRequired": "Name is required",
+    "validEmailRequired": "Valid email is required",
+    "messageRequired": "Message is required",
+    "agentIdentificationError": "Unable to identify agent",
+    "sendError": "Failed to send inquiry. Please try again.",
+    "title": "Contact Agent",
+    "successTitle": "Message Sent!",
+    "successMessage": "Your message has been sent to the agent. They will contact you soon.",
+    "whatAbout": "What's this about?",
+    "yourName": "Your Name",
+    "namePlaceholder": "John Smith",
+    "yourEmail": "Your Email",
+    "yourPhone": "Phone",
+    "message": "Your Message",
+    "messagePlaceholder": "Tell the agent what you need help with...",
+    "sending": "Sending...",
+    "sendMessage": "Send Message",
+    "privacyNote": "By submitting, you agree to be contacted by the agent regarding your inquiry."
+  },
+  "ui": {
+    "agentProfileTabs": {
+      "isADedicatedRealEstate": "is a dedicated real estate professional with",
+      "yearsOfExperienceInThe": "years of experience in the industry",
+      "specializesInHelpingClientsAchieve": "specializes in helping clients achieve their real estate goals through expert market knowledge and personalized service.",
+      "call": "Call",
+      "anonymous": "Anonymous",
+      "verifiedBuyer": "Verified Buyer •",
+      "recently": "Recently",
+      "responseFrom": "Response from"
+    },
+    "agentContactActions": {
+      "n0900Am": "09:00 AM",
+      "n1000Am": "10:00 AM",
+      "n1100Am": "11:00 AM",
+      "n1200Pm": "12:00 PM",
+      "n0100Pm": "01:00 PM",
+      "n0200Pm": "02:00 PM",
+      "n0300Pm": "03:00 PM",
+      "n0400Pm": "04:00 PM",
+      "n0500Pm": "05:00 PM"
+    },
+    "serviceAreaMapPicker": {
+      "findingArea": "Finding area…",
+      "removeArea": "Remove area",
+      "clickAnywhereOnTheMap": "Click anywhere on the map to add a service area",
+      "remove": "Remove",
+      "noServiceAreasAddedClick": "No service areas added. Click the map to add areas you serve."
+    },
+    "marketReportModal": {
+      "market": "Market",
+      "updated": "Updated"
+    },
+    "agentScoringPanel": {
+      "n0Pts": "0 pts"
+    },
+    "agentEditModal": {
+      "close": "Close"
+    },
+    "agentProfileHeader": {
+      "viewProfile": "View profile"
     }
   }
 }

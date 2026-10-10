@@ -38,7 +38,8 @@
     "office": "Офис",
     "garage": "Гараж",
     "other": "Друго",
-    "luxury-villa": "Луксозна вила"
+    "luxury-villa": "Луксозна вила",
+    "parking": "Паркомясто"
   },
   "features": {
     "bedrooms": "Спални",
@@ -161,7 +162,19 @@
     "buildingArea": "Застроена площ",
     "grossArea": "Бруто площ",
     "netArea": "Нето площ",
-    "floorPlanFloorsHint": "{{count}} етажа · снимки, отбелязани на плана"
+    "floorPlanFloorsHint": "{{count}} етажа · снимки, отбелязани на плана",
+    "openPlanArea": "Отворено пространство",
+    "parkingType": "Тип паркинг",
+    "parkingTypes": {
+      "garage": "Гараж",
+      "underground": "Подземен",
+      "covered": "Покрит",
+      "outdoor": "Открит"
+    },
+    "spaces": "Места",
+    "listingType": "Обява",
+    "forRent": "Под наем",
+    "forSale": "За продажба"
   },
   "distances": {
     "title": "Разстояния",
@@ -217,7 +230,15 @@
     "whatsappMessage": "Здравейте, интересувам се от този имот: {{title}}\n{{url}}",
     "viberSeller": "Viber",
     "promote": "Промотирай",
-    "extendPromotion": "Удължи"
+    "extendPromotion": "Удължи",
+    "compareLimitTitle": "Ограничение за сравнение",
+    "call": "Обади се",
+    "email": "Имейл",
+    "removeFavorite": "Премахни от любими",
+    "addFavorite": "Добави в любими",
+    "removeFromFavorites": "Премахни от любими",
+    "addToFavorites": "Добави в любими",
+    "favorite": "Любимо"
   },
   "video": {
     "loading": "Зареждане на видео...",
@@ -306,6 +327,13 @@
       "browseAgents": "Разгледай агенти",
       "agentSaved": "Агентът е запазен",
       "agentsSaved": "Запазени агенти"
+    },
+    "agencies": {
+      "listings": "Обяви",
+      "agents": "Агенти",
+      "noSaved": "Няма запазени агенции",
+      "clickHeart": "Запазете агенциите, които харесвате, за да ги намерите бързо по-късно.",
+      "browseAgencies": "Разгледай агенциите"
     }
   },
   "comparison": {
@@ -340,7 +368,8 @@
       "other": "Друго",
       "luxury-villa": "Луксозна вила",
       "commercial": "Търговски",
-      "parking": "Паркомясто"
+      "parking": "Паркомясто",
+      "urgent": "Спешно"
     },
     "promotedListings": "Промотирани обяви",
     "agentHint": "Кликнете за препоръки!",
@@ -362,8 +391,8 @@
         "featured": "ИЗБРАНО",
         "standard": "ПРОМОТИРАНО"
       },
-      "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings",
+      "promotedCount_one": "{{count}} промотирана обява",
+      "promotedCount_other": "{{count}} промотирани обяви",
       "distanceFromYou": "на {{distance}} от вас"
     },
     "agentRecommendations": {
@@ -403,7 +432,8 @@
     "tryAgain": "Опитайте отново",
     "aiTeaserTitle": "Искате ли да научите повече за този имот?",
     "aiTeaserSubtitle": "Нека нашият изкуствен интелект генерира подробен отчет за квартала — училища, транспорт, паркове, магазини и местни удобства — само за секунди.",
-    "coordinatesUnavailable": "Данните за местоположението все още не са налични за този имот, затова не можем да генерираме анализи."
+    "coordinatesUnavailable": "Данните за местоположението все още не са налични за този имот, затова не можем да генерираме анализи.",
+    "serviceUnavailable": "AI услугата е временно недостъпна. Моля, опитайте отново по-късно."
   },
   "photos": {
     "title": "Снимки",
@@ -591,7 +621,17 @@
     "videoTour": "Видео тура",
     "enter3DTour": "Влез в 3D тура",
     "view3DMap": "3D карта на местоположението",
-    "seeOnFloorPlan": "Вижте къде е направена тази снимка на плана"
+    "seeOnFloorPlan": "Вижте къде е направена тази снимка на плана",
+    "viewImages": "Виж снимките на имота",
+    "videoEmbedNotSupported": "Този видео линк не може да бъде вграден директно",
+    "openVideo": "Отвори видеото",
+    "prevImage": "Предишна снимка",
+    "nextImage": "Следваща снимка",
+    "forRent": "Наем",
+    "forSale": "Продажба",
+    "backToPhotos": "Обратно към снимките",
+    "forRentLong": "Под наем",
+    "forSaleLong": "За продажба"
   },
   "viewings": {
     "title": "Заявки за Оглед",
@@ -704,7 +744,9 @@
       "done": "Готово",
       "save": "Запази",
       "hint": "Рисувайте върху изображението за анотация",
-      "sendToChat": "Изпрати"
+      "sendToChat": "Изпрати",
+      "sendError": "Грешка",
+      "sendFailed": "Изпращането на анотираното изображение е неуспешно."
     }
   },
   "sectionNav": {
@@ -807,5 +849,145 @@
     "perMonthNote": "Месечни наеми · седмичните преизчислени",
     "perNightNote": "Само нощувки",
     "villasIncluded": "Включително други вили"
+  },
+  "similarProperties": {
+    "agencyTitle": "Още от {{agency}}",
+    "titleRent": "Подобни имоти под наем в {{city}}",
+    "title": "Подобни имоти в {{city}}",
+    "agencySubtitle": "Други обяви от {{agency}}",
+    "subtitle": "Разгледайте още {{type}} за {{action}} в {{city}}, {{country}}"
+  },
+  "socialVideo": {
+    "title": "Видео на имота",
+    "embedFailed": "Видеото не можа да се зареди",
+    "openIn": "Отвори в {{platform}}"
+  },
+  "specs": {
+    "beds": "Спални",
+    "baths": "Бани"
+  },
+  "ai": {
+    "swipeDone": "Запазени имоти: {{count}}!",
+    "swipeNoneSaved": "Няма запазени имоти",
+    "swipeCheckFavorites": "Вижте любимите си, за да ги сравните",
+    "swipeTryAgain": "Опитайте друго търсене, за да намерите имота на мечтите си",
+    "goToFavorites": "Към любими",
+    "backToChat": "Обратно към чата",
+    "swipeTitle": "Вашите съвпадения",
+    "saved": "запазени",
+    "swipeHint": "Плъзнете надясно, за да запазите, наляво, за да пропуснете"
+  },
+  "priceDrop": "НАМАЛЕНА ЦЕНА",
+  "priceUp": "ПОВИШЕНА ЦЕНА",
+  "errors": {
+    "errorTitle": "Грешка",
+    "saveFailed": "Неуспешно запазване на имота. Моля, опитайте отново.",
+    "conversationFailed": "Неуспешно започване на разговор. Моля, опитайте отново."
+  },
+  "viewDetails": "Виж детайли",
+  "source": {
+    "viewOriginal": "Виж в {{source}}",
+    "listedOn": "Публикувано в {{source}}"
+  },
+  "inquiry": {
+    "nameRequired": "Името е задължително",
+    "validEmailRequired": "Необходим е валиден имейл",
+    "messageRequired": "Съобщението е задължително",
+    "sendError": "Неуспешно изпращане на запитването. Моля, опитайте отново.",
+    "title": "Изпрати запитване",
+    "successTitle": "Запитването е изпратено!",
+    "successMessage": "Вашето съобщение беше изпратено на собственика. Скоро ще се свърже с вас.",
+    "yourName": "Вашето име",
+    "yourEmail": "Вашият имейл",
+    "yourPhone": "Вашият телефон (по избор)",
+    "message": "Вашето съобщение",
+    "template1": "Здравейте, интересувам се от този имот. Все още ли е наличен? Бих искал да насроча оглед.",
+    "scheduleViewing": "Насрочи оглед",
+    "template2": "Здравейте, бих искал повече информация за този имот. Можете ли да ми дадете подробности за квартала и удобствата наблизо?",
+    "moreInfo": "Повече информация",
+    "template3": "Здравейте, подлежи ли цената на договаряне? Сериозен купувач съм и искам скоро да взема решение.",
+    "priceQuestion": "Цена по договаряне?",
+    "sending": "Изпращане...",
+    "sendInquiry": "Изпрати запитване",
+    "privacyNote": "С изпращането се съгласявате собственикът да се свърже с вас относно тази обява."
+  },
+  "priceHistorySection": {
+    "pricingSchedule": "График на цените",
+    "ongoing": "Текущо",
+    "perMonth": "/месец",
+    "current": "Текущо",
+    "changeHistory": "История на промените в цената",
+    "listedBadge": "Публикувано",
+    "currentPrice": "Текуща цена",
+    "listedAt": "Начална цена",
+    "totalChange": "Обща промяна",
+    "pricePerSqm": "Цена / m²",
+    "lastChanged": "Последна промяна",
+    "listed": "Публикувано",
+    "today": "Днес",
+    "daysAgo": "преди {{count}} дни",
+    "changesRecorded": "Записани промени: {{count}}",
+    "priceTrend": "Тенденция на цената",
+    "changeMagnitude": "Размер на промяната",
+    "pricePerSqmTrend": "Тенденция на цената на m²",
+    "valuesInEurPerSqm": "Стойности в €/m²",
+    "title": "История на цената",
+    "records": "Записи: {{count}}"
+  },
+  "ui": {
+    "imageViewerModal": {
+      "zoomOut": "Намали",
+      "resetZoom": "Нулирай мащаба",
+      "zoomIn": "Увеличи",
+      "toggleAnnotationMode": "Вкл./изкл. режим на анотации",
+      "undoLastStroke": "Отмени последния щрих",
+      "clearAllAnnotations": "Изчисти всички анотации",
+      "downloadAnnotatedImage": "Изтегли анотираното изображение",
+      "sendAnnotatedImageToChat": "Изпрати анотираното изображение в чата"
+    },
+    "propertyGuide": {
+      "closeGuide": "Затвори ръководството",
+      "previousTip": "Предишен съвет",
+      "nextTip": "Следващ съвет",
+      "propertyGuideMascotClickFor": "Талисман-ръководство - щракнете за съвети, десен бутон за бързи действия"
+    },
+    "propertyCard": {
+      "previousImage": "Предишна снимка",
+      "nextImage": "Следваща снимка",
+      "luxuryVilla": "ЛУКСОЗНА ВИЛА",
+      "promoted": "ПРОМОТИРАНО",
+      "perM": "на m²",
+      "wineCellar": "Винарска изба",
+      "seaView": "Изглед към морето",
+      "cityView": "Изглед към града",
+      "gardenView": "Изглед към градината",
+      "streetView": "Изглед към улицата",
+      "failedToSavePropertyPlease": "Неуспешно запазване на имота. Моля, опитайте отново.",
+      "youCanCompareAMaximum": "Можете да сравните най-много 5 имота."
+    },
+    "socialVideoEmbed": {
+      "loadingTiktokVideo": "Зареждане на TikTok видео...",
+      "instagramVideo": "Instagram видео"
+    },
+    "propertyGallery": {
+      "loadingTiktokVideo": "Зареждане на TikTok видео...",
+      "propertyVideoTour": "Видео обиколка на имота"
+    },
+    "propertyCommon": {
+      "moreFeatures": "още характеристики"
+    },
+    "propertyMapLink": {
+      "loadingMap": "Зареждане на картата..."
+    },
+    "highlightedPropertyCard": {
+      "perM": "на m²",
+      "failedToSavePropertyPlease": "Неуспешно запазване на имота. Моля, опитайте отново."
+    },
+    "neighborhoodInsights": {
+      "anUnknownErrorOccurred": "Възникна неизвестна грешка."
+    },
+    "imageEditorModal": {
+      "iHaveSomeQuestionsAbout": "Имам няколко въпроса за този имот. Моля, вижте моите бележки:"
+    }
   }
 }

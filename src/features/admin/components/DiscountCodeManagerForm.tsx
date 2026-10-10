@@ -147,13 +147,13 @@ export const CreateCodeModal: React.FC<CreateCodeModalProps> = ({
             </label>
             <div className="space-y-2">
               {[
-                { value: 'listing_promotion_15days', label: 'Listing Promotion (15 days)' },
-                { value: 'seller_pro_monthly', label: 'Seller Pro (Monthly)' },
-                { value: 'seller_pro_yearly', label: 'Seller Pro (Yearly)' },
-                { value: 'seller_enterprise_yearly', label: 'Enterprise Plan' },
-                { value: 'agent_pro_monthly', label: 'Agent Pro (Monthly)' },
-                { value: 'agent_pro_yearly', label: 'Agent Pro (Yearly)' },
-                { value: 'buyer_monthly', label: 'Buyer Pro' },
+                { value: 'listing_promotion_15days', label: t('admin:ui.discountCodeManagerForm.listingPromotion15Days', 'Listing Promotion (15 days)') },
+                { value: 'seller_pro_monthly', label: t('admin:ui.discountCodeManagerForm.sellerProMonthly', 'Seller Pro (Monthly)') },
+                { value: 'seller_pro_yearly', label: t('admin:ui.discountCodeManagerForm.sellerProYearly', 'Seller Pro (Yearly)') },
+                { value: 'seller_enterprise_yearly', label: t('admin:ui.discountCodeManagerForm.enterprisePlan', 'Enterprise Plan') },
+                { value: 'agent_pro_monthly', label: t('admin:ui.discountCodeManagerForm.agentProMonthly', 'Agent Pro (Monthly)') },
+                { value: 'agent_pro_yearly', label: t('admin:ui.discountCodeManagerForm.agentProYearly', 'Agent Pro (Yearly)') },
+                { value: 'buyer_monthly', label: t('admin:ui.discountCodeManagerForm.buyerPro', 'Buyer Pro') },
               ].map((plan) => (
                 <label key={plan.value} className="flex items-center gap-2">
                   <input

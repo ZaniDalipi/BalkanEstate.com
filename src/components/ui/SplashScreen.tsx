@@ -199,7 +199,7 @@ const BrandReveal: React.FC<BrandRevealProps> = ({ onComplete }) => {
             }}
             onAnimationComplete={() => { if (showAI) setShowTagline(true); }}
           >
-            .AI
+            {t('common:ui.splashScreen.ai', '.AI')}
           </motion.sup>
         </div>
       </div>

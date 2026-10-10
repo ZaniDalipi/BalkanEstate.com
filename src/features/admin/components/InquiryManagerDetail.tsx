@@ -194,7 +194,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
                     <a href={adInq.attachmentUrl} target="_blank" rel="noopener noreferrer">
                       <img
                         src={adInq.attachmentUrl}
-                        alt="Advertiser creative"
+                        alt={t('admin:ui.inquiryManagerDetail.advertiserCreative', 'Advertiser creative')}
                         className="max-h-64 rounded-lg border border-indigo-200 object-contain bg-white"
                       />
                     </a>
@@ -238,7 +238,7 @@ const InquiryManagerDetail: React.FC<InquiryDetailProps> = ({
             <textarea
               value={adminNotes}
               onChange={(e) => setAdminNotes(e.target.value)}
-              placeholder="Add internal notes about this inquiry..."
+              placeholder={t('admin:ui.inquiryManagerDetail.addInternalNotesAboutThis', 'Add internal notes about this inquiry...')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none"
               rows={3}
             />

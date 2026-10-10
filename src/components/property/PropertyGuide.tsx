@@ -238,7 +238,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
             <button
               onClick={handleDismiss}
               className="absolute -top-2 -left-2 w-7 h-7 bg-neutral-100 hover:bg-red-100 hover:text-red-600 rounded-full flex items-center justify-center text-neutral-500 transition-all shadow-md hover:scale-110"
-              aria-label="Close guide"
+              aria-label={t('property:ui.propertyGuide.closeGuide', 'Close guide')}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -270,7 +270,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
               <button
                 onClick={handlePrevMessage}
                 className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors"
-                aria-label="Previous tip"
+                aria-label={t('property:ui.propertyGuide.previousTip', 'Previous tip')}
               >
                 <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -300,7 +300,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
               <button
                 onClick={handleNextMessage}
                 className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors"
-                aria-label="Next tip"
+                aria-label={t('property:ui.propertyGuide.nextTip', 'Next tip')}
               >
                 <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -353,7 +353,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
           className={`relative group cursor-pointer transition-all duration-300 ${
             isHovered ? 'scale-110' : 'scale-100'
           } ${mood === 'waving' ? 'animate-wiggle' : ''} ${mood === 'excited' ? 'animate-bounce' : ''}`}
-          aria-label="Property guide mascot - Click for tips, right-click for quick actions"
+          aria-label={t('property:ui.propertyGuide.propertyGuideMascotClickFor', 'Property guide mascot - Click for tips, right-click for quick actions')}
         >
           {/* Glow effect on hover */}
           <div className={`absolute inset-0 rounded-full bg-primary/20 blur-xl transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />

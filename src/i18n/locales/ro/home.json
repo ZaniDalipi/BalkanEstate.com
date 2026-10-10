@@ -14,7 +14,7 @@
     "subtitle": "Descoperă mii de proprietăți în 11 țări. Căutare AI, agenți verificați și anunțuri în 10 limbi.",
     "searchPlaceholder": "Caută după oraș, cartier sau adresă...",
     "searchButton": "Caută",
-    "popularSearches": "Popular:",
+    "popularSearches": "Populare:",
     "ctaBuy": "Cumpără Proprietate",
     "ctaRent": "Închiriază",
     "ctaSell": "Listează Proprietatea Ta"
@@ -58,7 +58,13 @@
     "promoted": "Promovat",
     "new": "Nou",
     "priceReduced": "Preț Redus",
-    "byNegotiation": "Preț negociabil"
+    "byNegotiation": "Preț negociabil",
+    "livingRoomsLabel": "Livinguri",
+    "spacesLabel": "Locuri",
+    "officesLabel": "Birouri",
+    "openPlanLabel": "Spațiu deschis m²",
+    "prevImage": "Imaginea anterioară",
+    "nextImage": "Imaginea următoare"
   },
   "categories": {
     "title": "Caută după Categorie",
@@ -190,5 +196,68 @@
     "imageAlt": "Proprietate în {{city}}, {{country}}",
     "buy": "Cumpără",
     "rent": "Închiriază"
+  },
+  "recentlyViewed": {
+    "title": "Vizualizate recent",
+    "subtitle": "Continuă de unde ai rămas"
+  },
+  "ui": {
+    "appShowcaseSection": {
+      "searchBalkans": "Caută în Balcani...",
+      "buy": "Cumpără",
+      "rent": "Închiriază",
+      "questionsAnswered": "întrebări răspunse",
+      "properties": "proprietăți",
+      "beds": "dormitoare",
+      "steps": "pași"
+    },
+    "newsSection": {
+      "featured": "★ Recomandat",
+      "mRead": "min de citit",
+      "readArticle": "Citește articolul",
+      "noArticlesPublishedYet": "Încă nu există articole publicate",
+      "checkBackSoonForExpert": "Revino curând pentru analize de specialitate",
+      "viewAllArticles": "Vezi toate articolele"
+    },
+    "topAgentsSection": {
+      "howPointsAreCalculated": "📊 Cum se calculează punctele",
+      "maxPossible180Pts": "Maxim posibil: 180 puncte",
+      "metrics": {
+        "rating": {
+          "label": "Evaluarea clienților",
+          "formula": "20 puncte per ★",
+          "desc": "Fiecare stea primită de la clienți valorează 20 de puncte. Un rating perfect de 5 stele îți aduce singur 100 de puncte.",
+          "cap": "Max. 100 puncte"
+        },
+        "sales": {
+          "label": "Proprietăți vândute",
+          "formula": "5 puncte per vânzare",
+          "desc": "Fiecare tranzacție finalizată adaugă 5 puncte. Încheie 10 vânzări și atingi maximul la această categorie.",
+          "cap": "Max. 50 puncte"
+        },
+        "active": {
+          "label": "Anunțuri active",
+          "formula": "2 puncte per anunț",
+          "desc": "Un portofoliu activ arată că ești prezent pe piață. Fiecare anunț activ aduce 2 puncte.",
+          "cap": "Max. 20 puncte"
+        },
+        "reviews": {
+          "label": "Recenziile clienților",
+          "formula": "1 punct per recenzie",
+          "desc": "Numărul de recenzii arată încrederea. Fiecare recenzie adaugă 1 punct, indiferent de notă.",
+          "cap": "Max. 10 puncte"
+        }
+      }
+    },
+    "recentlyViewedSection": {
+      "scrollLeft": "Derulează la stânga",
+      "scrollRight": "Derulează la dreapta"
+    },
+    "heroSection": {
+      "clear": "Șterge"
+    },
+    "categoriesSection": {
+      "exclusive": "✦ Exclusiv"
+    }
   }
 }

@@ -143,7 +143,7 @@ const PropertyInquiryModal: React.FC<PropertyInquiryModalProps> = ({
           <button
             onClick={onClose}
             className="text-white/80 hover:text-white p-1 flex-shrink-0"
-            aria-label="Close"
+            aria-label={t('common:ui.propertyInquiryModal.close', 'Close')}
           >
             <XMarkIcon className="w-6 h-6" />
           </button>

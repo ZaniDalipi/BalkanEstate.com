@@ -334,7 +334,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 <button
                   onClick={() => { onSearchChange(''); setIsDismissed(false); }}
                   className="mr-1 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors"
-                  aria-label="Clear"
+                  aria-label={t('home:ui.heroSection.clear', 'Clear')}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

@@ -227,7 +227,7 @@
     "cableTV": "Καλωδιακή Τηλεόραση",
     "intercom": "Θυροτηλεόραση",
     "alarm": "Σύστημα Συναγερμού",
-    "cctv": "CCTV",
+    "cctv": "Κάμερες ασφαλείας",
     "doorman": "Θυρωρός"
   },
   "imageTags": {
@@ -341,7 +341,8 @@
     "authFailed": "Η ταυτοποίηση απέτυχε",
     "authFailedMessage": "Η ταυτοποίηση απέτυχε. Δοκιμάστε ξανά.",
     "errorLoadingGoogleMaps": "Σφάλμα φόρτωσης του Google Maps",
-    "checkApiKeyConfiguration": "Ελέγξτε τη διαμόρφωση του κλειδιού API"
+    "checkApiKeyConfiguration": "Ελέγξτε τη διαμόρφωση του κλειδιού API",
+    "generic": "Κάτι πήγε στραβά"
   },
   "actions": {
     "cancel": "Ακύρωση",
@@ -351,7 +352,8 @@
     "save": "Αποθήκευση",
     "delete": "Διαγραφή",
     "edit": "Επεξεργασία",
-    "submit": "Υποβολή"
+    "submit": "Υποβολή",
+    "ok": "OK"
   },
   "validation": {
     "required": "Αυτό το πεδίο είναι υποχρεωτικό",
@@ -647,12 +649,214 @@
     "resetsOn": "Ανανεώνεται στις {{date}}"
   },
   "ads": {
-    "previewMode": "Ad preview — ad slots are highlighted",
-    "exitPreview": "Exit",
-    "stickyBottomBar": "Sticky bottom bar",
-    "getInTouch": "Get in touch →",
-    "advertiseCta": "Advertise with us — get in touch"
+    "previewMode": "Προεπισκόπηση διαφημίσεων — οι θέσεις διαφημίσεων επισημαίνονται",
+    "exitPreview": "Έξοδος",
+    "stickyBottomBar": "Σταθερή κάτω μπάρα",
+    "getInTouch": "Επικοινωνήστε μαζί μας →",
+    "advertiseCta": "Διαφημιστείτε μαζί μας — επικοινωνήστε",
+    "close": "Κλείσιμο διαφήμισης",
+    "advertisement": "Διαφήμιση",
+    "yourAdHere": "Η διαφήμισή σας εδώ",
+    "advertiseWithUs": "Διαφημιστείτε μαζί μας",
+    "sponsored": "Χορηγούμενο",
+    "dismiss": "Απόρριψη διαφήμισης"
   },
   "note": "Σημείωση",
-  "loadMore": "Φόρτωση περισσότερων"
+  "loadMore": "Φόρτωση περισσότερων",
+  "notifications": "Ειδοποιήσεις",
+  "markAllRead": "Σήμανση όλων ως αναγνωσμένα",
+  "noNotifications": "Δεν υπάρχουν ακόμη ειδοποιήσεις",
+  "viewAll": "Προβολή όλων των ειδοποιήσεων",
+  "cookies": {
+    "title": "Χρησιμοποιούμε cookies",
+    "shortDescription": "για να βελτιώσουμε την εμπειρία σας και να αναλύσουμε την κίνηση.",
+    "learnMore": "Μάθετε περισσότερα",
+    "close": "Κλείσιμο χωρίς αποδοχή — θα χρησιμοποιηθούν μόνο τα απαραίτητα cookies",
+    "acceptAll": "Αποδοχή όλων",
+    "rejectAll": "Απόρριψη όλων",
+    "customize": "Προσαρμογή",
+    "settingsTitle": "Ρυθμίσεις cookies",
+    "essential": "Απαραίτητα",
+    "alwaysOn": "Πάντα ενεργά",
+    "functional": "Λειτουργικά",
+    "analytics": "Ανάλυσης",
+    "marketing": "Μάρκετινγκ",
+    "savePreferences": "Αποθήκευση προτιμήσεων"
+  },
+  "common": {
+    "close": "Κλείσιμο"
+  },
+  "comingSoon": {
+    "title": "Οι πληρωμές έρχονται σύντομα",
+    "message": "Αναζητούμε αυτή τη στιγμή πάροχο πληρωμών για συνεργασία. Οι άμεσες πληρωμές δεν γίνονται δεκτές προς το παρόν. Μπορείτε να ενεργοποιήσετε άμεσα τη συνδρομή σας με κωδικό κουπονιού ή να επικοινωνήσετε μαζί μας για χειροκίνητη ενεργοποίηση.",
+    "haveCoupon": "Σας δώσαμε κουπόνι;",
+    "couponDescription": "Εισαγάγετε τον κωδικό σας για άμεση ενεργοποίηση της συνδρομής",
+    "activateCoupon": "Ενεργοποίηση με κουπόνι",
+    "contactUs": "Επικοινωνήστε μαζί μας για χειροκίνητη επεξεργασία:",
+    "responseTime": "Συνήθως απαντάμε εντός 24 ωρών",
+    "badge": "Αναζητούμε συνεργάτη πληρωμών"
+  },
+  "wk": "εβδ.",
+  "day": "ημέρα",
+  "mo": "μήνα",
+  "syncing": "Συγχρονισμός...",
+  "live": "Ζωντανά",
+  "updating": "Ενημέρωση...",
+  "unknownError": "Παρουσιάστηκε άγνωστο σφάλμα",
+  "goHome": "Αρχική σελίδα",
+  "myAccount": "Ο λογαριασμός μου",
+  "login": "Σύνδεση",
+  "heroTagline": "Αναζήτηση ακινήτων με AI σε 11 χώρες των Βαλκανίων",
+  "weekdays": {
+    "mon": "Δευ",
+    "tue": "Τρί",
+    "wed": "Τετ",
+    "thu": "Πέμ",
+    "fri": "Παρ",
+    "sat": "Σάβ",
+    "sun": "Κυρ"
+  },
+  "ui": {
+    "agencyCreationModal": {
+      "eGRe123456": "π.χ., RE-123456",
+      "discardChanges": "Απόρριψη αλλαγών;",
+      "youHaveUnsavedChangesAre": "Έχετε μη αποθηκευμένες αλλαγές. Είστε σίγουροι ότι θέλετε να κλείσετε τη φόρμα;",
+      "discard": "Απόρριψη",
+      "keepEditing": "Συνέχεια επεξεργασίας",
+      "close": "Κλείσιμο"
+    },
+    "featuredSubscriptionDialog": {
+      "directPaymentsAreNotYet": "Οι άμεσες πληρωμές δεν είναι ακόμη διαθέσιμες",
+      "weAreCurrentlyLookingFor": "Αναζητούμε αυτή τη στιγμή πάροχο πληρωμών για συνεργασία. Μπορείτε να ενεργοποιήσετε δωρεάν τη συνδρομή προβεβλημένου γραφείου με κωδικό κουπονιού ή να επικοινωνήσετε μαζί μας στο",
+      "toArrangeItManually": "για χειροκίνητη ρύθμιση.",
+      "paymentNotAvailableYet": "Η πληρωμή δεν είναι ακόμη διαθέσιμη",
+      "applyA100OffCoupon": "Εφαρμόστε κουπόνι έκπτωσης 100% για να ενεργοποιήσετε δωρεάν τη συνδρομή προβολής."
+    },
+    "achievementsSection": {
+      "expired": "ΕΛΗΞΕ",
+      "ddMmYyyy": "ΗΗ/ΜΜ/ΕΕΕΕ"
+    },
+    "header": {
+      "new": "+ Νέο",
+      "toggleSidebarNavigation": "Εναλλαγή πλευρικού μενού"
+    },
+    "text-scroll-animation": {
+      "scrollToSeeMore": "Κάντε κύλιση για περισσότερα"
+    },
+    "floorInputCombined": {
+      "totalFloorsInBuilding": "Συνολικοί όροφοι κτιρίου",
+      "floorNumber": "Αριθμός ορόφου"
+    },
+    "z360TourInput": {
+      "previewTour": "Προεπισκόπηση περιήγησης",
+      "n360VirtualTourPreview": "Προεπισκόπηση εικονικής περιήγησης 360°"
+    },
+    "animations": {
+      "loading": "Φόρτωση"
+    },
+    "glass-cards": {
+      "promoted": "Προωθημένο",
+      "new": "Νέο"
+    },
+    "propertyInquiryModal": {
+      "close": "Κλείσιμο"
+    },
+    "defaultAvatar": {
+      "avatar": "Άβαταρ"
+    },
+    "promotionOfferModal": {
+      "directPaymentsAreNotYet": "Οι άμεσες πληρωμές δεν είναι ακόμη διαθέσιμες. Χρησιμοποιήστε κουπόνι για δωρεάν ενεργοποίηση.",
+      "activateWithCoupon": "Ενεργοποίηση με κουπόνι"
+    },
+    "myPromotions": {
+      "live": "Ζωντανά",
+      "updated": "Ενημερώθηκε:",
+      "refreshPromotions": "Ανανέωση προωθήσεων",
+      "autoExtendEnabledYourPromotion": "Η αυτόματη επέκταση ενεργοποιήθηκε. Η προώθησή σας θα ανανεωθεί αυτόματα όταν λήξει. Οι πληρωμές έρχονται σύντομα!",
+      "autoExtendDisabledYourPromotion": "Η αυτόματη επέκταση απενεργοποιήθηκε. Η προώθησή σας θα λήξει κανονικά.",
+      "thisPromotionHasExpiredUse": "Αυτή η προώθηση έχει λήξει. Χρησιμοποιήστε το κουμπί «Επέκταση» για να την ενεργοποιήσετε ξανά.",
+      "paymentsComingSoonAutoExtend": "Οι πληρωμές έρχονται σύντομα! Η πληρωμή αυτόματης επέκτασης θα είναι σύντομα διαθέσιμη.",
+      "paymentsComingSoonContactSales": "Οι πληρωμές έρχονται σύντομα! Επικοινωνήστε στο sales@balkanestateai.com για να επεκτείνετε την προώθησή σας."
+    },
+    "alertDialog": {
+      "close": "Κλείσιμο"
+    },
+    "phoneInput": {
+      "countryCode": "Κωδικός χώρας",
+      "phoneNumber": "Αριθμός τηλεφώνου"
+    },
+    "confirmationModal": {
+      "close": "Κλείσιμο"
+    },
+    "button": {
+      "loading": "Φόρτωση"
+    },
+    "notificationModal": {
+      "close": "Κλείσιμο"
+    },
+    "modal": {
+      "closeModal": "Κλείσιμο παραθύρου"
+    },
+    "consentBanner": {
+      "cookieConsent": "Συναίνεση cookies"
+    },
+    "z360TourEmbed": {
+      "z360Tour": "Περιήγηση Z360"
+    },
+    "mapAgentAvatar": {
+      "closePanel": "Κλείσιμο πίνακα"
+    },
+    "breadcrumbs": {
+      "breadcrumb": "Πλοήγηση"
+    },
+    "promotedPropertyCard": {
+      "property": "Ακίνητο",
+      "untitledProperty": "Ακίνητο χωρίς τίτλο",
+      "viewPromotionHistory": "Προβολή ιστορικού προωθήσεων"
+    },
+    "promotionModal": {
+      "closeModal": "Κλείσιμο παραθύρου"
+    },
+    "beforeAfterSlider": {
+      "comparisonSlider": "Ρυθμιστικό σύγκρισης"
+    },
+    "agentInquiryModal": {
+      "youExampleCom": "esy@paradeigma.com"
+    },
+    "heroSearchSection": {
+      "clearSearch": "Εκκαθάριση αναζήτησης"
+    },
+    "avatarCustomizer": {
+      "discardChanges": "Απόρριψη αλλαγών;",
+      "youHaveUnsavedAvatarChanges": "Έχετε μη αποθηκευμένες αλλαγές στο άβαταρ. Είστε σίγουροι ότι θέλετε να κλείσετε;",
+      "discard": "Απόρριψη",
+      "keepEditing": "Συνέχεια επεξεργασίας"
+    },
+    "liquid-glass": {
+      "howCanIHelpYou": "Πώς μπορώ να σας βοηθήσω σήμερα;"
+    },
+    "apple-liquid-glass-switcher": {
+      "chooseTheme": "Επιλογή θέματος"
+    },
+    "agencyManagementSection": {
+      "pleaseSelectAnAgency": "Επιλέξτε ένα γραφείο",
+      "pleaseEnterTheInvitationCode": "Εισαγάγετε τον κωδικό πρόσκλησης",
+      "pleaseEnterACouponCode": "Εισαγάγετε κωδικό κουπονιού",
+      "invalidCodeFormatExpectedAbc": "Μη έγκυρη μορφή κωδικού. Αναμενόμενη: ABC-XXXXXXXX",
+      "onlyRegisteredAgentsCanRedeem": "Μόνο εγγεγραμμένοι μεσίτες μπορούν να εξαργυρώσουν κουπόνια γραφείου. Εγγραφείτε πρώτα ως μεσίτης.",
+      "userDataUnavailablePleaseRefresh": "Τα δεδομένα χρήστη δεν είναι διαθέσιμα. Ανανεώστε τη σελίδα.",
+      "youAreNotLoggedIn": "Δεν έχετε συνδεθεί. Συνδεθείτε και δοκιμάστε ξανά.",
+      "unexpectedResponseFromServerPlease": "Μη αναμενόμενη απάντηση από τον διακομιστή. Δοκιμάστε ξανά.",
+      "invalidCouponCodePleaseCheck": "Μη έγκυρος κωδικός κουπονιού. Ελέγξτε τον κωδικό και δοκιμάστε ξανά.",
+      "thisCouponHasAlreadyBeen": "Αυτό το κουπόνι έχει ήδη χρησιμοποιηθεί από άλλον μεσίτη.",
+      "thisCouponHasExpiredAnd": "Αυτό το κουπόνι έχει λήξει και δεν μπορεί πλέον να εξαργυρωθεί.",
+      "couponNotFoundPleaseVerify": "Το κουπόνι δεν βρέθηκε. Βεβαιωθείτε ότι ο κωδικός είναι σωστός.",
+      "theAgencySubscriptionIsNo": "Η συνδρομή του γραφείου δεν είναι πλέον ενεργή. Αυτό το κουπόνι δεν μπορεί να εξαργυρωθεί.",
+      "unknownAgency": "Άγνωστο γραφείο"
+    },
+    "profileStatistics": {
+      "noAuthenticationTokenFound": "Δεν βρέθηκε διακριτικό ταυτοποίησης",
+      "syncFailed": "Ο συγχρονισμός απέτυχε"
+    }
+  }
 }

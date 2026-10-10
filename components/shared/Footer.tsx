@@ -146,7 +146,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400 group-hover:text-orange-300 transition-colors" viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 36.8C10.728 36.8 3.2 29.272 3.2 20S10.728 3.2 20 3.2 36.8 10.728 36.8 20 29.272 36.8 20 36.8zm3.2-22.4h-8v11.2h4.8v-3.2h3.2c2.648 0 4.8-2.152 4.8-4.8s-2.152-4.8-4.8-4.8zm0 6.4H20v-3.2h3.2c.884 0 1.6.716 1.6 1.6s-.716 1.6-1.6 1.6z"/>
                             </svg>
-                            <span className="text-xs sm:text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Find us on Product Hunt</span>
+                            <span className="text-xs sm:text-sm font-medium text-slate-300 group-hover:text-white transition-colors">{t('footer:ui.footer.findUsOnProductHunt', 'Find us on Product Hunt')}</span>
                         </a>
 
                         {/* Social Media Links */}
@@ -291,11 +291,11 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                             target="_blank"
                             rel="noopener noreferrer"
                             className="group block overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
-                            title="Z360 Virtual Tours - Professional 360° Property Tours"
+                            title={t('footer:ui.footer.z360VirtualToursProfessional360', 'Z360 Virtual Tours - Professional 360° Property Tours')}
                         >
                             <img
                                 src="/images/partners/z360-logo.png"
-                                alt="Z360 Virtual Tours - 360° Property Tours"
+                                alt={t('footer:ui.footer.z360VirtualTours360Property', 'Z360 Virtual Tours - 360° Property Tours')}
                                 className="w-40 sm:w-52 md:w-64 h-auto rounded-xl"
                             />
                         </a>

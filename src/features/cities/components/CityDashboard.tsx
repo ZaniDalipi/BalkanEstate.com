@@ -442,7 +442,7 @@ const CityDashboard: React.FC = () => {
         {galleryImages.length > 0 && (
           <div className="absolute top-5 right-5 z-10">
             <span className="text-[10px] text-white/50 bg-black/30 backdrop-blur-sm px-2 py-1 rounded-md">
-              © Wikimedia Commons
+              {t('exploreCities:ui.cityDashboard.wikimediaCommons', '© Wikimedia Commons')}
             </span>
           </div>
         )}
@@ -479,9 +479,9 @@ const CityDashboard: React.FC = () => {
               <LightBulbIcon className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="text-xs font-bold text-violet-800 uppercase tracking-wide mb-0.5">BalkanEstate AI</p>
+              <p className="text-xs font-bold text-violet-800 uppercase tracking-wide mb-0.5">{t('exploreCities:ui.cityDashboard.balkanestateAi', 'BalkanEstate AI')}</p>
               <p className="text-[11px] text-violet-600 leading-relaxed">
-                Market scores, demand index, rental estimates, neighborhood insights, and suburb stats are AI-generated using our regional data model.
+                {t('exploreCities:ui.cityDashboard.marketScoresDemandIndexRental', 'Market scores, demand index, rental estimates, neighborhood insights, and suburb stats are AI-generated using our regional data model.')}
               </p>
             </div>
           </div>
@@ -490,9 +490,9 @@ const CityDashboard: React.FC = () => {
               <ShieldCheckIcon className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-0.5">Official Sources</p>
+              <p className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-0.5">{t('exploreCities:ui.cityDashboard.officialSources', 'Official Sources')}</p>
               <p className="text-[11px] text-blue-600 leading-relaxed">
-                Price history from <span className="font-semibold">BIS</span> · Macroeconomic data from <span className="font-semibold">World Bank</span> · Photos from <span className="font-semibold">Wikimedia Commons</span>.
+                {t('exploreCities:ui.cityDashboard.priceHistoryFrom', 'Price history from')} <span className="font-semibold">BIS</span> {t('exploreCities:ui.cityDashboard.macroeconomicDataFrom', '· Macroeconomic data from')} <span className="font-semibold">{t('exploreCities:ui.cityDashboard.worldBank', 'World Bank')}</span> {t('exploreCities:ui.cityDashboard.photosFrom', '· Photos from')} <span className="font-semibold">{t('exploreCities:ui.cityDashboard.wikimediaCommons2', 'Wikimedia Commons')}</span>.
               </p>
             </div>
           </div>
@@ -503,7 +503,7 @@ const CityDashboard: React.FC = () => {
           <div className="h-px flex-1 bg-violet-100" />
           <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
             <LightBulbIcon className="w-3 h-3" />
-            BalkanEstate AI Analysis
+            {t('exploreCities:ui.cityDashboard.balkanestateAiAnalysis', 'BalkanEstate AI Analysis')}
           </span>
           <div className="h-px flex-1 bg-violet-100" />
         </div>
@@ -573,7 +573,7 @@ const CityDashboard: React.FC = () => {
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${showOfficialPrice ? 'bg-blue-100' : 'bg-primary/10'}`}>
                   <HomeIcon className={`w-4 h-4 ${showOfficialPrice ? 'text-blue-600' : 'text-primary'}`} />
                 </div>
-                <span className="text-xs font-medium text-neutral-500">Avg. Price /m²</span>
+                <span className="text-xs font-medium text-neutral-500">{t('exploreCities:ui.cityDashboard.avgPriceM', 'Avg. Price /m²')}</span>
               </div>
               <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
                 <button
@@ -584,13 +584,13 @@ const CityDashboard: React.FC = () => {
                   <button
                     onClick={() => { setShowListingPrice(true); setShowOfficialPrice(false); }}
                     className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                  >Listings</button>
+                  >{t('exploreCities:ui.cityDashboard.listings', 'Listings')}</button>
                 )}
                 {hasBIS && (
                   <button
                     onClick={() => { setShowOfficialPrice(true); setShowListingPrice(false); }}
                     className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showOfficialPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                  >Official</button>
+                  >{t('exploreCities:ui.cityDashboard.official', 'Official')}</button>
                 )}
               </div>
             </div>
@@ -609,10 +609,10 @@ const CityDashboard: React.FC = () => {
               {showOfficialPrice
                 ? <span className="text-blue-500 font-semibold flex items-center gap-1">
                     <ShieldCheckIcon className="w-3 h-3" />
-                    BIS Residential Property Price Index
+                    {t('exploreCities:ui.cityDashboard.bisResidentialPropertyPriceIndex', 'BIS Residential Property Price Index')}
                   </span>
                 : showListingPrice
-                ? <span className="text-neutral-400">{city.listingsCount} active listings</span>
+                ? <span className="text-neutral-400">{city.listingsCount} {t('exploreCities:ui.cityDashboard.activeListings', 'active listings')}</span>
                 : city.officialSourceUrl
                   ? <a
                       href={city.officialSourceUrl}
@@ -622,9 +622,9 @@ const CityDashboard: React.FC = () => {
                       title={city.officialSourceName}
                     >
                       <ShieldCheckIcon className="w-3 h-3" />
-                      Official data ↗
+                      {t('exploreCities:ui.cityDashboard.officialData', 'Official data ↗')}
                     </a>
-                  : <span className="text-violet-400">BalkanEstate AI estimate</span>
+                  : <span className="text-violet-400">{t('exploreCities:ui.cityDashboard.balkanestateAiEstimate', 'BalkanEstate AI estimate')}</span>
               }
             </p>
           </div>
@@ -679,7 +679,7 @@ const CityDashboard: React.FC = () => {
 
         <p className="text-[10px] text-blue-500 mb-3 flex items-center gap-1">
           <ShieldCheckIcon className="w-3 h-3" />
-          Prices anchored to official government data — tap <span className="font-bold">Official</span> on the price card to see the BIS index.
+          {t('exploreCities:ui.cityDashboard.pricesAnchoredToOfficialGovernment', 'Prices anchored to official government data — tap')} <span className="font-bold">{t('exploreCities:ui.cityDashboard.official', 'Official')}</span> {t('exploreCities:ui.cityDashboard.onThePriceCardTo', 'on the price card to see the BIS index.')}
         </p>
 
         {/* Official price reference strip — visible only when BIS data is available */}
@@ -687,17 +687,17 @@ const CityDashboard: React.FC = () => {
           <div className="mb-6 flex flex-wrap items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
             <div className="flex items-center gap-1.5 flex-shrink-0">
               <ShieldCheckIcon className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-bold text-blue-800 uppercase tracking-wide">Official Reference</span>
+              <span className="text-xs font-bold text-blue-800 uppercase tracking-wide">{t('exploreCities:ui.cityDashboard.officialReference', 'Official Reference')}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="font-black text-blue-900">€{bisLatestPrice!.toLocaleString()}/m²</span>
               {bisYoY !== null && (
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${bisYoY >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                  {bisYoY >= 0 ? '+' : ''}{bisYoY}% YoY
+                  {bisYoY >= 0 ? '+' : ''}{bisYoY}{t('exploreCities:ui.cityDashboard.yoy', '% YoY')}
                 </span>
               )}
             </div>
-            <span className="text-[10px] text-blue-600 flex-shrink-0">BIS Residential Property Price Index · {city.country}</span>
+            <span className="text-[10px] text-blue-600 flex-shrink-0">{t('exploreCities:ui.cityDashboard.bisResidentialPropertyPriceIndex2', 'BIS Residential Property Price Index ·')} {city.country}</span>
             {bisSourceUrl && (
               <a
                 href={bisSourceUrl}
@@ -705,7 +705,7 @@ const CityDashboard: React.FC = () => {
                 rel="noopener noreferrer"
                 className="ml-auto text-[10px] text-blue-600 hover:underline font-semibold flex-shrink-0"
               >
-                View source ↗
+                {t('exploreCities:ui.cityDashboard.viewSource', 'View source ↗')}
               </a>
             )}
           </div>
@@ -880,7 +880,7 @@ const CityDashboard: React.FC = () => {
           <div className="h-px flex-1 bg-blue-100" />
           <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest px-3 py-1 bg-blue-50 border border-blue-200 rounded-full flex items-center gap-1.5">
             <ShieldCheckIcon className="w-3 h-3" />
-            Official Market Data
+            {t('exploreCities:ui.cityDashboard.officialMarketData', 'Official Market Data')}
           </span>
           <div className="h-px flex-1 bg-blue-100" />
         </div>
@@ -903,7 +903,7 @@ const CityDashboard: React.FC = () => {
           ) : (
             <div className="text-center py-10 text-neutral-400 text-sm">
               <ChartBarIcon className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
-              Price history is being prepared for {city.city}.
+              {t('exploreCities:ui.cityDashboard.priceHistoryIsBeingPrepared', 'Price history is being prepared for')} {city.city}.
             </div>
           )}
         </div>
@@ -920,7 +920,7 @@ const CityDashboard: React.FC = () => {
           <div className="h-px flex-1 bg-violet-100" />
           <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
             <LightBulbIcon className="w-3 h-3" />
-            BalkanEstate AI Analysis
+            {t('exploreCities:ui.cityDashboard.balkanestateAiAnalysis', 'BalkanEstate AI Analysis')}
           </span>
           <div className="h-px flex-1 bg-violet-100" />
         </div>
@@ -932,7 +932,7 @@ const CityDashboard: React.FC = () => {
             <div className="flex flex-col gap-1">
               <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
                 <MapPinIcon className="w-5 h-5 text-primary" />
-                Explore Neighborhoods
+                {t('exploreCities:ui.cityDashboard.exploreNeighborhoods', 'Explore Neighborhoods')}
               </h3>
               {suburbData && (
                 <div className="flex flex-col gap-1 items-start">
@@ -944,10 +944,10 @@ const CityDashboard: React.FC = () => {
                         : 'bg-amber-50 text-amber-600 border border-amber-200'
                   }`}>
                     {suburbData.dataSource === 'research'
-                      ? '◈ Market Research Data'
+                      ? t('exploreCities:ui.cityDashboard.marketResearchData', '◈ Market Research Data')
                       : suburbData.dataSource === 'gemini'
-                        ? '✦ BalkanEstate AI Analysis'
-                        : 'Estimated data · updating…'}
+                        ? t('exploreCities:ui.cityDashboard.balkanestateAiAnalysis2', '✦ BalkanEstate AI Analysis')
+                        : t('exploreCities:ui.cityDashboard.estimatedDataUpdating', 'Estimated data · updating…')}
                   </span>
                   {suburbData.officialSourceName && suburbData.officialSourceUrl && (
                     <a
@@ -955,9 +955,9 @@ const CityDashboard: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[11px] text-blue-500 hover:text-blue-700 hover:underline transition-colors"
-                      title="View official data source"
+                      title={t('exploreCities:ui.cityDashboard.viewOfficialDataSource', 'View official data source')}
                     >
-                      Data anchored to {suburbData.officialSourceName} ↗
+                      {t('exploreCities:ui.cityDashboard.dataAnchoredTo', 'Data anchored to')} {suburbData.officialSourceName} ↗
                     </a>
                   )}
                   {/* When these numbers were pulled, so a reader can tell this
@@ -986,7 +986,7 @@ const CityDashboard: React.FC = () => {
                       : 'text-neutral-500 hover:text-neutral-700'
                   }`}
                 >
-                  {view === 'map' ? 'Interactive Map' : 'List View'}
+                  {view === 'map' ? t('exploreCities:ui.cityDashboard.interactiveMap', 'Interactive Map') : t('exploreCities:ui.cityDashboard.listView', 'List View')}
                 </button>
               ))}
             </div>
@@ -1009,7 +1009,7 @@ const CityDashboard: React.FC = () => {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <GlobeAltIcon className="w-12 h-12 text-neutral-300 mb-3" />
               <p className="text-neutral-500 text-sm">
-                Neighborhood data is being prepared. Check back soon.
+                {t('exploreCities:ui.cityDashboard.neighborhoodDataIsBeingPrepared', 'Neighborhood data is being prepared. Check back soon.')}
               </p>
             </div>
           )}
@@ -1042,7 +1042,7 @@ const CityDashboard: React.FC = () => {
                   {!selectedSuburb && (
                     <p className="lg:hidden text-xs text-neutral-400 text-center -mt-1 mb-1 flex items-center justify-center gap-1">
                       <MapPinIcon className="w-3 h-3" />
-                      Tap a neighbourhood on the map for details
+                      {t('exploreCities:ui.cityDashboard.tapANeighbourhoodOnThe', 'Tap a neighbourhood on the map for details')}
                     </p>
                   )}
 
@@ -1058,8 +1058,8 @@ const CityDashboard: React.FC = () => {
                     ) : (
                       <div className="hidden lg:flex h-full flex-col items-center justify-center py-10 text-center border-2 border-dashed border-neutral-200 rounded-xl">
                         <MapPinIcon className="w-10 h-10 text-neutral-300 mb-2" />
-                        <p className="text-sm font-medium text-neutral-500">Click a neighborhood</p>
-                        <p className="text-xs text-neutral-400 mt-1">to see detailed stats</p>
+                        <p className="text-sm font-medium text-neutral-500">{t('exploreCities:ui.cityDashboard.clickANeighborhood', 'Click a neighborhood')}</p>
+                        <p className="text-xs text-neutral-400 mt-1">{t('exploreCities:ui.cityDashboard.toSeeDetailedStats', 'to see detailed stats')}</p>
                       </div>
                     )}
                   </div>
@@ -1093,10 +1093,10 @@ const CityDashboard: React.FC = () => {
                           €{suburb.stats.avgPricePerSqm.toLocaleString()}/m²
                         </div>
                         <div className={`text-[11px] font-semibold mb-2 ${vsAvg > 0 ? 'text-red-500' : vsAvg < 0 ? 'text-green-600' : 'text-neutral-500'}`}>
-                          {vsAvg > 0 ? `+${vsAvg}%` : `${vsAvg}%`} vs city avg
+                          {vsAvg > 0 ? `+${vsAvg}%` : `${vsAvg}%`} {t('exploreCities:ui.cityDashboard.vsCityAvg', 'vs city avg')}
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-neutral-500">
-                          <span>+{suburb.stats.priceGrowthYoY}% YoY</span>
+                          <span>+{suburb.stats.priceGrowthYoY}{t('exploreCities:ui.cityDashboard.yoy', '% YoY')}</span>
                           <span>{suburb.stats.demandScore}/100 demand</span>
                         </div>
                       </button>
@@ -1111,7 +1111,7 @@ const CityDashboard: React.FC = () => {
           {!suburbLoading && !suburbError && (!suburbData || suburbData.suburbs.length === 0) && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <MapPinIcon className="w-12 h-12 text-neutral-300 mb-3" />
-              <p className="text-neutral-500 text-sm">No neighborhood data available for {city.city} yet.</p>
+              <p className="text-neutral-500 text-sm">{t('exploreCities:ui.cityDashboard.noNeighborhoodDataAvailableFor', 'No neighborhood data available for')} {city.city} {t('exploreCities:ui.cityDashboard.yet', 'yet.')}</p>
             </div>
           )}
         </div>
@@ -1307,7 +1307,7 @@ const CityDashboard: React.FC = () => {
                           : otherCity.marketTrend === 'declining' ? 'bg-red-500/90 text-white'
                           : 'bg-neutral-500/90 text-white'
                         }`}>
-                          {otherCity.marketTrend === 'rising' ? '+' : ''}{otherCity.priceGrowthYoY}% YoY
+                          {otherCity.marketTrend === 'rising' ? '+' : ''}{otherCity.priceGrowthYoY}{t('exploreCities:ui.cityDashboard.yoy', '% YoY')}
                         </span>
                       </div>
                       <div className="p-3">
@@ -1343,7 +1343,7 @@ const CityDashboard: React.FC = () => {
                 <LightBulbIcon className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-xs font-bold text-violet-700 uppercase tracking-wide">BalkanEstate AI</p>
+                <p className="text-xs font-bold text-violet-700 uppercase tracking-wide">{t('exploreCities:ui.cityDashboard.balkanestateAi', 'BalkanEstate AI')}</p>
                 <p className="text-[11px] text-neutral-500 mt-0.5">
                   {t('aiInsights.lastUpdated', { date: safeFormatDate(city.lastUpdated) })} &bull; {t('aiInsights.dataSource')}
                 </p>
@@ -1355,20 +1355,20 @@ const CityDashboard: React.FC = () => {
                 <ShieldCheckIcon className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">Official Sources</p>
+                <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">{t('exploreCities:ui.cityDashboard.officialSources', 'Official Sources')}</p>
                 <p className="text-[11px] text-neutral-500 mt-0.5 space-x-1">
                   {bisSourceUrl
-                    ? <a href={bisSourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">BIS Residential Property Price Index ↗</a>
-                    : <span>BIS Residential Property Price Index</span>
+                    ? <a href={bisSourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{t('exploreCities:ui.cityDashboard.bisResidentialPropertyPriceIndex3', 'BIS Residential Property Price Index ↗')}</a>
+                    : <span>{t('exploreCities:ui.cityDashboard.bisResidentialPropertyPriceIndex', 'BIS Residential Property Price Index')}</span>
                   }
                   <span>&bull;</span>
-                  <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">World Bank ↗</a>
+                  <a href="https://data.worldbank.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{t('exploreCities:ui.cityDashboard.worldBank2', 'World Bank ↗')}</a>
                   <span>&bull;</span>
-                  <span>Wikimedia Commons</span>
+                  <span>{t('exploreCities:ui.cityDashboard.wikimediaCommons2', 'Wikimedia Commons')}</span>
                 </p>
                 {priceHistory?.lastUpdated && (
                   <p className="text-[10px] text-neutral-400 mt-0.5">
-                    Price index refreshed {safeFormatDate(priceHistory.lastUpdated)}
+                    {t('exploreCities:ui.cityDashboard.priceIndexRefreshed', 'Price index refreshed')} {safeFormatDate(priceHistory.lastUpdated)}
                   </p>
                 )}
               </div>

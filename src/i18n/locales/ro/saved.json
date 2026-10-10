@@ -45,7 +45,21 @@
     "confirmDelete": "Sunteți sigur că doriți să ștergeți \"{{name}}\"?",
     "deleteFailed": "Nu s-a putut șterge căutarea salvată. Vă rugăm încercați din nou.",
     "enterName": "Vă rugăm introduceți un nume",
-    "renameFailed": "Nu s-a putut redenumi căutarea salvată. Vă rugăm încercați din nou."
+    "renameFailed": "Nu s-a putut redenumi căutarea salvată. Vă rugăm încercați din nou.",
+    "alertsEnabled": "Alertele sunt activate",
+    "alertsEnabledDesc": "Vei primi notificări: {{frequency}}",
+    "errorTitle": "Eroare",
+    "alertUpdateFailed": "Actualizarea setărilor de alertă a eșuat",
+    "deleteTitle": "Șterge căutarea salvată",
+    "deleteButton": "Șterge",
+    "cancelButton": "Anulează",
+    "warningTitle": "Avertisment",
+    "rent": "ÎNCHIRIERE",
+    "buy": "CUMPĂRARE",
+    "alertSettings": "Setări alerte",
+    "upgradeForAlerts": "Treci la un plan superior pentru alerte",
+    "emailAlerts": "Alerte pe email",
+    "frequency": "Frecvență"
   },
   "stats": {
     "savedSearches": "Căutări salvate",
@@ -65,7 +79,9 @@
     "enabledMessage": "Veți primi notificări prin e-mail pentru toate căutările salvate",
     "disabledTitle": "Alerte dezactivate",
     "disabledMessage": "Notificările prin e-mail au fost dezactivate",
-    "toggleFailed": "Actualizarea setărilor de alertă a eșuat"
+    "toggleFailed": "Actualizarea setărilor de alertă a eșuat",
+    "noSearchesTitle": "Nicio căutare salvată",
+    "noSearchesMessage": "Salvează mai întâi o căutare, apoi activează alertele pe email pentru a fi anunțat despre potriviri noi"
   },
   "clearAll": {
     "button": "Șterge tot",
@@ -84,16 +100,26 @@
     "stats": {
       "properties": "Proprietăți",
       "agents": "Agenți",
-      "countries": "Țări"
+      "countries": "Țări",
+      "agencies": "Agenții"
     },
     "tabs": {
       "properties": "Proprietăți",
-      "agents": "Agenți"
+      "agents": "Agenți",
+      "agencies": "Agenții"
     },
     "badges": {
       "quickAccess": "Acces rapid",
       "organized": "Organizate după locație",
       "compare": "Comparație ușoară"
+    }
+  },
+  "searches": {
+    "clearFailed": "Ștergerea căutărilor salvate a eșuat"
+  },
+  "ui": {
+    "savedHomesPage": {
+      "featured": "Recomandat"
     }
   }
 }

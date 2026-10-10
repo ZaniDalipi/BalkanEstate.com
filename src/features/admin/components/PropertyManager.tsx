@@ -76,14 +76,14 @@ const PropertyManager: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{t('admin:properties.title', 'Property Manager')}</h2>
-            <p className="text-sm text-gray-500 mt-1">Manage all property listings on the platform</p>
+            <p className="text-sm text-gray-500 mt-1">{t('admin:ui.propertyManager.manageAllPropertyListingsOn', 'Manage all property listings on the platform')}</p>
           </div>
           <button
             onClick={fetchProperties}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <ArrowPathIcon className="w-4 h-4" />
-            Refresh
+            {t('admin:ui.propertyManager.refresh', 'Refresh')}
           </button>
         </div>
 
@@ -96,7 +96,7 @@ const PropertyManager: React.FC = () => {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-900">{totalProperties}</div>
-                <div className="text-xs text-gray-500">Total Properties</div>
+                <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.totalProperties', 'Total Properties')}</div>
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@ const PropertyManager: React.FC = () => {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
-                <div className="text-xs text-gray-500">Active</div>
+                <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.active', 'Active')}</div>
               </div>
             </div>
           </div>
@@ -118,7 +118,7 @@ const PropertyManager: React.FC = () => {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-900">{stats.pending}</div>
-                <div className="text-xs text-gray-500">Pending</div>
+                <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.pending', 'Pending')}</div>
               </div>
             </div>
           </div>
@@ -129,7 +129,7 @@ const PropertyManager: React.FC = () => {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-900">{stats.promoted}</div>
-                <div className="text-xs text-gray-500">Promoted</div>
+                <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.promoted', 'Promoted')}</div>
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@ const PropertyManager: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="flex items-center gap-2 mb-4">
           <FunnelIcon className="w-5 h-5 text-gray-400" />
-          <span className="font-medium text-gray-700">Filters</span>
+          <span className="font-medium text-gray-700">{t('admin:ui.propertyManager.filters', 'Filters')}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="lg:col-span-2 relative">
@@ -149,7 +149,7 @@ const PropertyManager: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search properties..."
+              placeholder={t('admin:ui.propertyManager.searchProperties', 'Search properties...')}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -158,17 +158,17 @@ const PropertyManager: React.FC = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="sold">Sold</option>
+            <option value="all">{t('admin:ui.propertyManager.allStatuses', 'All Statuses')}</option>
+            <option value="active">{t('admin:ui.propertyManager.active', 'Active')}</option>
+            <option value="pending">{t('admin:ui.propertyManager.pending', 'Pending')}</option>
+            <option value="sold">{t('admin:ui.propertyManager.sold', 'Sold')}</option>
           </select>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="all">All Types</option>
+            <option value="all">{t('admin:ui.propertyManager.allTypes', 'All Types')}</option>
             {PROPERTY_TYPE_OPTIONS.map(option => (
               <option key={option.value} value={option.value}>{option.fallback}</option>
             ))}
@@ -178,9 +178,9 @@ const PropertyManager: React.FC = () => {
             onChange={(e) => setFilterPromoted(e.target.value)}
             className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="all">All Properties</option>
-            <option value="true">Promoted Only</option>
-            <option value="false">Not Promoted</option>
+            <option value="all">{t('admin:ui.propertyManager.allProperties', 'All Properties')}</option>
+            <option value="true">{t('admin:ui.propertyManager.promotedOnly', 'Promoted Only')}</option>
+            <option value="false">{t('admin:ui.propertyManager.notPromoted', 'Not Promoted')}</option>
           </select>
         </div>
       </div>
@@ -209,14 +209,14 @@ const PropertyManager: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Property</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Location</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Specs</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Owner</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                <th className="px-4 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.property', 'Property')}</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.location', 'Location')}</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.price', 'Price')}</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.specs', 'Specs')}</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.owner', 'Owner')}</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.status', 'Status')}</th>
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.date', 'Date')}</th>
+                <th className="px-4 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('admin:ui.propertyManager.actions', 'Actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -248,7 +248,7 @@ const PropertyManager: React.FC = () => {
                           {property.isPromoted && (
                             <span className="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded flex items-center gap-1">
                               <SparklesIcon className="w-3 h-3" />
-                              Promoted
+                              {t('admin:ui.propertyManager.promoted', 'Promoted')}
                             </span>
                           )}
                         </div>
@@ -270,13 +270,13 @@ const PropertyManager: React.FC = () => {
                       {(property.bedrooms || property.beds) && (
                         <div className="flex items-center gap-1">
                           <BedIcon className="w-3.5 h-3.5" />
-                          {property.bedrooms || property.beds} beds
+                          {property.bedrooms || property.beds} {t('admin:ui.propertyManager.beds', 'beds')}
                         </div>
                       )}
                       {(property.bathrooms || property.baths) && (
                         <div className="flex items-center gap-1">
                           <BathIcon className="w-3.5 h-3.5" />
-                          {property.bathrooms || property.baths} baths
+                          {property.bathrooms || property.baths} {t('admin:ui.propertyManager.baths', 'baths')}
                         </div>
                       )}
                       {(property.area || property.sqft) && (
@@ -288,7 +288,7 @@ const PropertyManager: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="text-sm text-gray-900">{property.sellerId?.name || 'Unknown'}</div>
+                    <div className="text-sm text-gray-900">{property.sellerId?.name || t('admin:ui.propertyManager.unknown', 'Unknown')}</div>
                     <div className="text-xs text-gray-500 truncate max-w-[120px]" title={property.sellerId?.email}>
                       {property.sellerId?.email || ''}
                     </div>
@@ -302,20 +302,20 @@ const PropertyManager: React.FC = () => {
                     </span>
                     {property.views !== undefined && (
                       <div className="text-xs text-gray-500 mt-1">
-                        {property.views} views
+                        {property.views} {t('admin:ui.propertyManager.views', 'views')}
                       </div>
                     )}
                   </td>
                   <td className="px-4 py-4">
                     <div className="text-sm text-gray-900">{formatDate(property.createdAt)}</div>
-                    <div className="text-xs text-gray-500">Updated: {formatDate(property.updatedAt)}</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.updated', 'Updated:')} {formatDate(property.updatedAt)}</div>
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-center gap-1">
                       <button
                         onClick={() => handleViewProperty(property)}
                         className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="View details"
+                        title={t('admin:ui.propertyManager.viewDetails', 'View details')}
                       >
                         <EyeIcon className="w-4 h-4" />
                       </button>
@@ -326,21 +326,21 @@ const PropertyManager: React.FC = () => {
                             ? 'text-purple-600 bg-purple-50 hover:bg-purple-100'
                             : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
                         }`}
-                        title={property.isPromoted ? 'Remove promotion' : 'Promote property'}
+                        title={property.isPromoted ? t('admin:ui.propertyManager.removePromotion', 'Remove promotion') : t('admin:ui.propertyManager.promoteProperty', 'Promote property')}
                       >
                         <SparklesIcon className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleEditProperty(property)}
                         className="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                        title="Edit property"
+                        title={t('admin:ui.propertyManager.editProperty', 'Edit property')}
                       >
                         <PencilIcon className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteProperty(property._id, property.title)}
                         className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete property"
+                        title={t('admin:ui.propertyManager.deleteProperty', 'Delete property')}
                       >
                         <TrashIcon className="w-4 h-4" />
                       </button>
@@ -354,8 +354,8 @@ const PropertyManager: React.FC = () => {
           {properties.length === 0 && !isLoading && (
             <div className="text-center py-16">
               <HomeIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 font-medium">No properties found</p>
-              <p className="text-gray-400 text-sm mt-1">Try adjusting your filters</p>
+              <p className="text-gray-500 font-medium">{t('admin:ui.propertyManager.noPropertiesFound', 'No properties found')}</p>
+              <p className="text-gray-400 text-sm mt-1">{t('admin:ui.propertyManager.tryAdjustingYourFilters', 'Try adjusting your filters')}</p>
             </div>
           )}
         </div>
@@ -364,8 +364,8 @@ const PropertyManager: React.FC = () => {
         {totalPages > 1 && (
           <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
-              <span className="text-gray-400 ml-2">({totalProperties} total properties)</span>
+              {t('admin:ui.propertyManager.page', 'Page')} <span className="font-medium">{currentPage}</span> {t('admin:ui.propertyManager.of', 'of')} <span className="font-medium">{totalPages}</span>
+              <span className="text-gray-400 ml-2">({totalProperties} {t('admin:ui.propertyManager.totalProperties2', 'total properties)')}</span>
             </div>
             <div className="flex gap-2">
               <button
@@ -374,14 +374,14 @@ const PropertyManager: React.FC = () => {
                 className="flex items-center gap-1 px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
               >
                 <ChevronLeftIcon className="w-4 h-4" />
-                Previous
+                {t('admin:ui.propertyManager.previous', 'Previous')}
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
                 className="flex items-center gap-1 px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
               >
-                Next
+                {t('admin:ui.propertyManager.next', 'Next')}
                 <ChevronRightIcon className="w-4 h-4" />
               </button>
             </div>

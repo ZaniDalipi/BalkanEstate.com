@@ -35,7 +35,17 @@
     "failedToUploadImage": "Slanje slike nije uspelo. Pokušajte ponovo.",
     "failedToSendMessage": "Slanje poruke nije uspelo. Pokušajte ponovo.",
     "failedToDeleteConversation": "Brisanje razgovora nije uspelo. Pokušajte ponovo.",
-    "allConversations": "Сви разговори"
+    "allConversations": "Сви разговори",
+    "errorTitle": "Грешка",
+    "deleteTitle": "Обриши разговор",
+    "deleteButton": "Обриши",
+    "cancelButton": "Откажи",
+    "directConversation": "Директан разговор",
+    "directAgentConversation": "Разговор са агентом",
+    "seller": "Продавац",
+    "buyer": "Купац",
+    "you": "Ви",
+    "image": "📷 Слика"
   },
   "quickReplies": {
     "scheduleTour": "Zakaži Obilazak",
@@ -133,7 +143,13 @@
     "enable": "Укључи",
     "enabling": "Укључивање...",
     "later": "Касније",
-    "dismiss": "Одбаци"
+    "dismiss": "Одбаци",
+    "error": "Укључивање обавештења није успело. Покушајте поново.",
+    "error_title": "Грешка обавештења",
+    "error_hint_devices": "Покушајте поново или уклоните старији уређај из подешавања.",
+    "error_hint_browser": "Проверите подешавања прегледача и покушајте поново.",
+    "error_hint_generic": "Покушајте поново.",
+    "close": "Затвори"
   },
   "toast": {
     "success": "Uspeh!",
@@ -225,5 +241,14 @@
     "deleteFailed": "Neuspelo brisanje poruke",
     "connectionLost": "Veza izgubljena. Ponovno povezivanje...",
     "reconnected": "Povezano!"
+  },
+  "ui": {
+    "messageInput": {
+      "preview": "Преглед"
+    },
+    "conversationView": {
+      "annotatedProperty": "Означена некретнина",
+      "seller": "Продавац"
+    }
   }
 }

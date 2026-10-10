@@ -360,7 +360,7 @@ const VillaDestinationsManager: React.FC = () => {
                                     {row.country} · {t('admin:villaDestinations.searches', 'searches')} “{row.query}”
                                 </p>
                                 <p className="truncate text-xs text-gray-400">
-                                    {row.lat.toFixed(4)}, {row.lng.toFixed(4)} · zoom {row.zoom}
+                                    {row.lat.toFixed(4)}, {row.lng.toFixed(4)} {t('admin:ui.villaDestinationsManager.zoom', '· zoom')} {row.zoom}
                                     {!row.imageUrl && row.imageCity ? ` · ${t('admin:villaDestinations.usingCityPhoto', 'using {{city}} photo', { city: row.imageCity })}` : ''}
                                 </p>
                             </div>

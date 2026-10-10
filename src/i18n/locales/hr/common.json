@@ -203,7 +203,7 @@
     "g": "G"
   },
   "amenities": {
-    "parking": "Parking",
+    "parking": "Parkiralište",
     "garage": "Garaža",
     "pool": "Bazen",
     "gym": "Teretana",
@@ -227,7 +227,7 @@
     "cableTV": "Kabelska TV",
     "intercom": "Interfon",
     "alarm": "Alarm sustav",
-    "cctv": "CCTV",
+    "cctv": "Video nadzor",
     "doorman": "Vratar"
   },
   "imageTags": {
@@ -341,7 +341,8 @@
     "authFailed": "Autentifikacija nije uspjela",
     "authFailedMessage": "Autentifikacija nije uspjela. Pokušajte ponovno.",
     "errorLoadingGoogleMaps": "Pogreška pri učitavanju Google Maps",
-    "checkApiKeyConfiguration": "Provjerite konfiguraciju API ključa"
+    "checkApiKeyConfiguration": "Provjerite konfiguraciju API ključa",
+    "generic": "Nešto je pošlo po zlu"
   },
   "tryAgain": "Pokušaj ponovo",
   "actions": {
@@ -352,7 +353,8 @@
     "save": "Spremi",
     "delete": "Izbriši",
     "edit": "Uredi",
-    "submit": "Pošalji"
+    "submit": "Pošalji",
+    "ok": "U redu"
   },
   "validation": {
     "required": "Ovo polje je obavezno",
@@ -647,12 +649,214 @@
     "resetsOn": "Obnavlja se {{date}}"
   },
   "ads": {
-    "previewMode": "Ad preview — ad slots are highlighted",
-    "exitPreview": "Exit",
-    "stickyBottomBar": "Sticky bottom bar",
-    "getInTouch": "Get in touch →",
-    "advertiseCta": "Advertise with us — get in touch"
+    "previewMode": "Pregled oglasa — oglasna mjesta su istaknuta",
+    "exitPreview": "Izađi",
+    "stickyBottomBar": "Fiksna donja traka",
+    "getInTouch": "Kontaktirajte nas →",
+    "advertiseCta": "Oglašavajte se kod nas — javite nam se",
+    "close": "Zatvori oglas",
+    "advertisement": "Oglas",
+    "yourAdHere": "Vaš oglas ovdje",
+    "advertiseWithUs": "Oglašavajte se kod nas",
+    "sponsored": "Sponzorirano",
+    "dismiss": "Odbaci oglas"
   },
   "note": "Napomena",
-  "loadMore": "Učitaj više"
+  "loadMore": "Učitaj više",
+  "notifications": "Obavijesti",
+  "markAllRead": "Označi sve kao pročitano",
+  "noNotifications": "Još nema obavijesti",
+  "viewAll": "Pogledaj sve obavijesti",
+  "cookies": {
+    "title": "Koristimo kolačiće",
+    "shortDescription": "kako bismo poboljšali vaše iskustvo i analizirali promet.",
+    "learnMore": "Saznaj više",
+    "close": "Zatvori bez prihvaćanja — koristit će se samo nužni kolačići",
+    "acceptAll": "Prihvati sve",
+    "rejectAll": "Odbij sve",
+    "customize": "Prilagodi",
+    "settingsTitle": "Postavke kolačića",
+    "essential": "Nužni",
+    "alwaysOn": "Uvijek uključeni",
+    "functional": "Funkcionalni",
+    "analytics": "Analitički",
+    "marketing": "Marketing",
+    "savePreferences": "Spremi postavke"
+  },
+  "common": {
+    "close": "Zatvori"
+  },
+  "comingSoon": {
+    "title": "Plaćanja uskoro",
+    "message": "Trenutačno tražimo pružatelja usluga plaćanja za suradnju. Izravna plaćanja trenutačno nisu moguća. Pretplatu možete odmah aktivirati kodom kupona ili nam se javite da je aktiviramo ručno.",
+    "haveCoupon": "Jesmo li vam dali kupon?",
+    "couponDescription": "Unesite kod kako biste odmah aktivirali pretplatu",
+    "activateCoupon": "Aktiviraj kuponom",
+    "contactUs": "Javite nam se za ručnu obradu:",
+    "responseTime": "Obično odgovaramo u roku od 24 sata",
+    "badge": "Tražimo partnera za plaćanja"
+  },
+  "wk": "tj.",
+  "day": "dan",
+  "mo": "mj.",
+  "syncing": "Sinkronizacija...",
+  "live": "Uživo",
+  "updating": "Ažurira se...",
+  "unknownError": "Došlo je do nepoznate pogreške",
+  "goHome": "Idi na početnu",
+  "myAccount": "Moj račun",
+  "login": "Prijava",
+  "heroTagline": "Pretraživanje nekretnina uz AI u 11 balkanskih zemalja",
+  "weekdays": {
+    "mon": "Pon",
+    "tue": "Uto",
+    "wed": "Sri",
+    "thu": "Čet",
+    "fri": "Pet",
+    "sat": "Sub",
+    "sun": "Ned"
+  },
+  "ui": {
+    "agencyCreationModal": {
+      "eGRe123456": "npr., RE-123456",
+      "discardChanges": "Odbaciti promjene?",
+      "youHaveUnsavedChangesAre": "Imate nespremljene promjene. Jeste li sigurni da želite zatvoriti obrazac?",
+      "discard": "Odbaci",
+      "keepEditing": "Nastavi uređivanje",
+      "close": "Zatvori"
+    },
+    "featuredSubscriptionDialog": {
+      "directPaymentsAreNotYet": "Izravna plaćanja još nisu dostupna",
+      "weAreCurrentlyLookingFor": "Trenutačno tražimo pružatelja usluga plaćanja za suradnju. Pretplatu za istaknutu agenciju možete besplatno aktivirati kodom kupona ili nam se javite na",
+      "toArrangeItManually": "kako bismo to ručno riješili.",
+      "paymentNotAvailableYet": "Plaćanje još nije dostupno",
+      "applyA100OffCoupon": "Primijenite kupon sa 100 % popusta kako biste besplatno aktivirali istaknutu pretplatu."
+    },
+    "achievementsSection": {
+      "expired": "ISTEKLO",
+      "ddMmYyyy": "DD/MM/GGGG"
+    },
+    "header": {
+      "new": "+ Novo",
+      "toggleSidebarNavigation": "Prikaži/sakrij bočni izbornik"
+    },
+    "text-scroll-animation": {
+      "scrollToSeeMore": "Pomaknite se za više"
+    },
+    "floorInputCombined": {
+      "totalFloorsInBuilding": "Ukupno katova u zgradi",
+      "floorNumber": "Broj kata"
+    },
+    "z360TourInput": {
+      "previewTour": "Pregled ture",
+      "n360VirtualTourPreview": "Pregled virtualne ture 360°"
+    },
+    "animations": {
+      "loading": "Učitavanje"
+    },
+    "glass-cards": {
+      "promoted": "Promovirano",
+      "new": "Novo"
+    },
+    "propertyInquiryModal": {
+      "close": "Zatvori"
+    },
+    "defaultAvatar": {
+      "avatar": "Avatar"
+    },
+    "promotionOfferModal": {
+      "directPaymentsAreNotYet": "Izravna plaćanja još nisu dostupna. Upotrijebite kupon za besplatnu aktivaciju.",
+      "activateWithCoupon": "Aktiviraj kuponom"
+    },
+    "myPromotions": {
+      "live": "Uživo",
+      "updated": "Ažurirano:",
+      "refreshPromotions": "Osvježi promocije",
+      "autoExtendEnabledYourPromotion": "Automatsko produljenje je uključeno. Vaša promocija automatski će se obnoviti kad istekne. Plaćanja uskoro!",
+      "autoExtendDisabledYourPromotion": "Automatsko produljenje je isključeno. Vaša promocija normalno će isteći.",
+      "thisPromotionHasExpiredUse": "Ova je promocija istekla. Upotrijebite gumb „Produlji“ da je ponovno aktivirate.",
+      "paymentsComingSoonAutoExtend": "Plaćanja uskoro! Plaćanje automatskog produljenja uskoro će biti dostupno.",
+      "paymentsComingSoonContactSales": "Plaćanja uskoro! Javite se na sales@balkanestateai.com kako biste produljili promociju."
+    },
+    "alertDialog": {
+      "close": "Zatvori"
+    },
+    "phoneInput": {
+      "countryCode": "Pozivni broj države",
+      "phoneNumber": "Broj telefona"
+    },
+    "confirmationModal": {
+      "close": "Zatvori"
+    },
+    "button": {
+      "loading": "Učitavanje"
+    },
+    "notificationModal": {
+      "close": "Zatvori"
+    },
+    "modal": {
+      "closeModal": "Zatvori prozor"
+    },
+    "consentBanner": {
+      "cookieConsent": "Privola za kolačiće"
+    },
+    "z360TourEmbed": {
+      "z360Tour": "Z360 tura"
+    },
+    "mapAgentAvatar": {
+      "closePanel": "Zatvori ploču"
+    },
+    "breadcrumbs": {
+      "breadcrumb": "Navigacija"
+    },
+    "promotedPropertyCard": {
+      "property": "Nekretnina",
+      "untitledProperty": "Nekretnina bez naslova",
+      "viewPromotionHistory": "Pogledaj povijest promocija"
+    },
+    "promotionModal": {
+      "closeModal": "Zatvori prozor"
+    },
+    "beforeAfterSlider": {
+      "comparisonSlider": "Klizač za usporedbu"
+    },
+    "agentInquiryModal": {
+      "youExampleCom": "vi@primjer.com"
+    },
+    "heroSearchSection": {
+      "clearSearch": "Očisti pretraživanje"
+    },
+    "avatarCustomizer": {
+      "discardChanges": "Odbaciti promjene?",
+      "youHaveUnsavedAvatarChanges": "Imate nespremljene promjene avatara. Jeste li sigurni da želite zatvoriti?",
+      "discard": "Odbaci",
+      "keepEditing": "Nastavi uređivanje"
+    },
+    "liquid-glass": {
+      "howCanIHelpYou": "Kako vam mogu pomoći danas?"
+    },
+    "apple-liquid-glass-switcher": {
+      "chooseTheme": "Odaberi temu"
+    },
+    "agencyManagementSection": {
+      "pleaseSelectAnAgency": "Odaberite agenciju",
+      "pleaseEnterTheInvitationCode": "Unesite kod pozivnice",
+      "pleaseEnterACouponCode": "Unesite kod kupona",
+      "invalidCodeFormatExpectedAbc": "Neispravan format koda. Očekivano: ABC-XXXXXXXX",
+      "onlyRegisteredAgentsCanRedeem": "Samo registrirani agenti mogu iskoristiti kupone agencije. Najprije se registrirajte kao agent.",
+      "userDataUnavailablePleaseRefresh": "Podaci o korisniku nisu dostupni. Osvježite stranicu.",
+      "youAreNotLoggedIn": "Niste prijavljeni. Prijavite se i pokušajte ponovno.",
+      "unexpectedResponseFromServerPlease": "Neočekivan odgovor poslužitelja. Pokušajte ponovno.",
+      "invalidCouponCodePleaseCheck": "Neispravan kod kupona. Provjerite kod i pokušajte ponovno.",
+      "thisCouponHasAlreadyBeen": "Ovaj je kupon već iskoristio drugi agent.",
+      "thisCouponHasExpiredAnd": "Ovaj je kupon istekao i više se ne može iskoristiti.",
+      "couponNotFoundPleaseVerify": "Kupon nije pronađen. Provjerite je li kod točan.",
+      "theAgencySubscriptionIsNo": "Pretplata agencije više nije aktivna. Ovaj se kupon ne može iskoristiti.",
+      "unknownAgency": "Nepoznata agencija"
+    },
+    "profileStatistics": {
+      "noAuthenticationTokenFound": "Nije pronađen token za autentifikaciju",
+      "syncFailed": "Sinkronizacija nije uspjela"
+    }
+  }
 }

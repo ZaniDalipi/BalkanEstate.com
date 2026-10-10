@@ -113,5 +113,16 @@
     "home": "Начало"
   },
   "blog": "Блог и Статии",
-  "agencyDashboard": "Табло на агенцията"
+  "agencyDashboard": "Табло на агенцията",
+  "mainNavigation": "Основна навигация",
+  "createNewListing": "Създай нова обява",
+  "unread": "непрочетени",
+  "goToHome": "Към началната страница",
+  "closeMenu": "Затвори менюто",
+  "viewSubscription": "Виж абонаментните планове",
+  "viewAnalytics": "Виж таблото с анализи",
+  "inboxWithUnread": "Входящи ({{count}} непрочетени)",
+  "goToAccount": "Към моя профил",
+  "userAvatar": "Аватар на потребителя",
+  "loginOrRegister": "Влезте или регистрирайте профил"
 }

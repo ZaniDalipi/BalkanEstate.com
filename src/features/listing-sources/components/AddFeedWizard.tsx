@@ -76,6 +76,7 @@ const SamplePreview: React.FC<{ sample?: Record<string, unknown>; fieldMap: Reco
   sample,
   fieldMap,
 }) => {
+  const { t } = useTranslation();
   if (!sample) return null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const get = (path: string): string => {
@@ -110,7 +111,7 @@ const SamplePreview: React.FC<{ sample?: Record<string, unknown>; fieldMap: Reco
         {price && <p className="text-sm text-primary font-bold">{price}</p>}
         {city && <p className="text-xs text-gray-500">{city}</p>}
         {!title && !price && !city && (
-          <p className="text-xs text-gray-400 italic">Sample item found — fields will be mapped on import</p>
+          <p className="text-xs text-gray-400 italic">{t('listingFeeds:ui.addFeedWizard.sampleItemFoundFieldsWill', 'Sample item found — fields will be mapped on import')}</p>
         )}
       </div>
     </div>
@@ -126,6 +127,7 @@ const AuthHeadersEditor: React.FC<{
   onChange: (rows: HeaderRow[]) => void;
   addLabel: string;
 }> = ({ rows, onChange, addLabel }) => {
+  const { t } = useTranslation();
   const set = (idx: number, field: 'key' | 'value', val: string) => {
     const next = rows.map((r, i) => (i === idx ? { ...r, [field]: val } : r));
     onChange(next);
@@ -141,14 +143,14 @@ const AuthHeadersEditor: React.FC<{
             type="text"
             value={row.key}
             onChange={(e) => set(idx, 'key', e.target.value)}
-            placeholder="Header name"
+            placeholder={t('listingFeeds:ui.addFeedWizard.headerName', 'Header name')}
             className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/30"
           />
           <input
             type="text"
             value={row.value}
             onChange={(e) => set(idx, 'value', e.target.value)}
-            placeholder="Value"
+            placeholder={t('listingFeeds:ui.addFeedWizard.value', 'Value')}
             className="flex-[2] px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/30"
           />
           <button
@@ -230,7 +232,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
       if (method === 'sampleJson') {
         const sanitized = sanitizeJsonInput(sampleJson);
         if (!sanitized) {
-          setError('Please paste a JSON sample to analyze.');
+          setError(t('listingFeeds:ui.addFeedWizard.pleasePasteAJsonSample', 'Please paste a JSON sample to analyze.'));
           return;
         }
         let parsed: unknown;
@@ -486,7 +488,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                         type="text"
                         value={apiKeyHeader}
                         onChange={(e) => setApiKeyHeader(e.target.value)}
-                        placeholder="X-API-Key"
+                        placeholder={t('listingFeeds:ui.addFeedWizard.xApiKey', 'X-API-Key')}
                         className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/30"
                       />
                     </label>
@@ -592,7 +594,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <span className="text-sm font-semibold text-gray-700">
-                  🔧 Field mapping ({Object.keys(editingFieldMap).length} fields)
+                  {t('listingFeeds:ui.addFeedWizard.fieldMapping', '🔧 Field mapping (')}{Object.keys(editingFieldMap).length} {t('listingFeeds:ui.addFeedWizard.fields', 'fields)')}
                 </span>
                 <span className="text-lg text-gray-400 leading-none">{showFieldMapEditor ? '▼' : '▶'}</span>
               </button>
@@ -608,7 +610,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                           value={sourcePath}
                           onChange={(e) => setEditingFieldMap({ ...editingFieldMap, [prop]: e.target.value })}
                           className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm font-mono focus:ring-1 focus:ring-primary/50"
-                          placeholder="e.g., title, images[0], $.item.name"
+                          placeholder={t('listingFeeds:ui.addFeedWizard.eGTitleImages0', 'e.g., title, images[0], $.item.name')}
                         />
                       </label>
                       <button
@@ -619,14 +621,14 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                           setEditingFieldMap(next);
                         }}
                         className="px-2 py-1.5 text-red-600 hover:bg-red-50 rounded text-lg leading-none font-semibold"
-                        title="Remove this field"
+                        title={t('listingFeeds:ui.addFeedWizard.removeThisField', 'Remove this field')}
                       >
                         ×
                       </button>
                     </div>
                   ))}
                   <p className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-300">
-                    💡 Use JSONPath notation for nested data: <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">$.images[0].url</code> or bare keys for top-level:  <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">image_url</code>
+                    {t('listingFeeds:ui.addFeedWizard.useJsonpathNotationForNested', '💡 Use JSONPath notation for nested data:')} <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">$.images[0].url</code> {t('listingFeeds:ui.addFeedWizard.orBareKeysForTop', 'or bare keys for top-level:')}  <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">image_url</code>
                   </p>
                 </div>
               )}

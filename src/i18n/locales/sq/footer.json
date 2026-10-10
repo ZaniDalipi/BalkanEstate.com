@@ -21,7 +21,9 @@
     "messages": "Mesazhet",
     "myAccount": "Llogaria Ime",
     "howItWorks": "Si Funksionon",
-    "blog": "Blog"
+    "blog": "Blog",
+    "contactUs": "Na kontaktoni",
+    "valuation": "Vlerësimi i pronës"
   },
   "countries": {
     "AL": "Shqipëri",
@@ -87,5 +89,12 @@
     "becomePartner": "Bëhu Partner",
     "affiliates": "Bashkëpunëtorë",
     "developers": "Për Zhvilluesit"
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Na gjeni në Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Ture profesionale 360° të pronave",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - Ture 360° të pronave"
+    }
   }
 }

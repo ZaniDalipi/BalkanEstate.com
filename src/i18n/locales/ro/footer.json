@@ -21,7 +21,9 @@
     "messages": "Mesaje",
     "myAccount": "Contul Meu",
     "howItWorks": "Cum Funcționează",
-    "blog": "Blog"
+    "blog": "Blog",
+    "contactUs": "Contactează-ne",
+    "valuation": "Evaluarea proprietății"
   },
   "countries": {
     "AL": "Albania",
@@ -87,5 +89,12 @@
     "becomePartner": "Deveniți partener",
     "affiliates": "Afiliați",
     "developers": "Pentru dezvoltatori"
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Găsește-ne pe Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Tururi profesionale 360° ale proprietăților",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - Tururi 360° ale proprietăților"
+    }
   }
 }

@@ -388,7 +388,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                     color: '#fff',
                                     backdropFilter: 'none'
                                 }}>
-                                    Promoted
+                                    {t('common:ui.glass-cards.promoted', 'Promoted')}
                                 </span>
                             )}
                             {property.createdAt && Date.now() - property.createdAt < 7 * 24 * 60 * 60 * 1000 && (
@@ -403,7 +403,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                     color: '#fff',
                                     backdropFilter: 'none'
                                 }}>
-                                    New
+                                    {t('common:ui.glass-cards.new', 'New')}
                                 </span>
                             )}
                         </div>

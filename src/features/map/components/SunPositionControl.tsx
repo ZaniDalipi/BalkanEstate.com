@@ -562,11 +562,11 @@ const SunPositionControl: React.FC<SunPositionControlProps> = ({
               `}
             />
             <div className={`flex justify-between text-[9px] ${isNightMode ? 'text-slate-500' : 'text-neutral-400'}`}>
-              <span>12AM</span>
-              <span>6AM</span>
-              <span>12PM</span>
-              <span>6PM</span>
-              <span>11PM</span>
+              <span>{t('search:ui.sunPositionControl.n12am', '12AM')}</span>
+              <span>{t('search:ui.sunPositionControl.n6am', '6AM')}</span>
+              <span>{t('search:ui.sunPositionControl.n12pm', '12PM')}</span>
+              <span>{t('search:ui.sunPositionControl.n6pm', '6PM')}</span>
+              <span>{t('search:ui.sunPositionControl.n11pm', '11PM')}</span>
             </div>
           </div>
 

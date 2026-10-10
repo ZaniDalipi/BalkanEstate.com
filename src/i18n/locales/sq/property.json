@@ -38,7 +38,8 @@
     "office": "Zyrë",
     "garage": "Garazh",
     "other": "Tjetër",
-    "luxury-villa": "Vilë Luksoze"
+    "luxury-villa": "Vilë Luksoze",
+    "parking": "Vend parkimi"
   },
   "features": {
     "bedrooms": "Dhoma Gjumi",
@@ -55,7 +56,7 @@
     "sqft": "Metra Katrorë",
     "floor": "Kati",
     "floors": "Kate",
-    "parking": "Parking",
+    "parking": "Parkim",
     "parkingSpots": "Vende Parkimi",
     "yearBuilt": "Viti i Ndërtimit",
     "expectedCompletion": "Përfundimi i pritur",
@@ -161,7 +162,19 @@
     "buildingArea": "Sipërfaqja e ndërtimit",
     "grossArea": "Sipërfaqja bruto",
     "netArea": "Sipërfaqja neto",
-    "floorPlanFloorsHint": "{{count}} kate · fotot të shënuara në plan"
+    "floorPlanFloorsHint": "{{count}} kate · fotot të shënuara në plan",
+    "openPlanArea": "Hapësirë e hapur",
+    "parkingType": "Lloji i parkimit",
+    "parkingTypes": {
+      "garage": "Garazh",
+      "underground": "Nëntokësor",
+      "covered": "I mbuluar",
+      "outdoor": "I hapur"
+    },
+    "spaces": "Vende",
+    "listingType": "Shpallja",
+    "forRent": "Me qira",
+    "forSale": "Në shitje"
   },
   "distances": {
     "title": "Distancat",
@@ -217,7 +230,15 @@
     "whatsappMessage": "Përshëndetje, jam i/e interesuar për këtë pronë: {{title}}\n{{url}}",
     "viberSeller": "Viber",
     "promote": "Promovo",
-    "extendPromotion": "Zgjat"
+    "extendPromotion": "Zgjat",
+    "compareLimitTitle": "Kufiri i krahasimit",
+    "call": "Telefono",
+    "email": "Email",
+    "removeFavorite": "Hiq nga të preferuarat",
+    "addFavorite": "Shto te të preferuarat",
+    "removeFromFavorites": "Hiq nga të preferuarat",
+    "addToFavorites": "Shto te të preferuarat",
+    "favorite": "E preferuar"
   },
   "video": {
     "loading": "Duke ngarkuar videon...",
@@ -306,6 +327,13 @@
       "browseAgents": "Shfleto agjentët",
       "agentSaved": "Agjenti u ruajt",
       "agentsSaved": "Agjentët e ruajtur"
+    },
+    "agencies": {
+      "listings": "Shpallje",
+      "agents": "Agjentë",
+      "noSaved": "Nuk ka agjenci të ruajtura",
+      "clickHeart": "Ruani agjencitë që ju pëlqejnë për t'i gjetur shpejt më vonë.",
+      "browseAgencies": "Shfleto agjencitë"
     }
   },
   "comparison": {
@@ -317,7 +345,7 @@
     "livingRooms": "Dhoma Ndenjeje",
     "area": "Sipërfaqja (m²)",
     "yearBuilt": "Viti i Ndërtimit",
-    "parking": "Parking",
+    "parking": "Parkim",
     "specialFeatures": "Veçori të Veçanta",
     "materials": "Materialet",
     "best": "Më i miri",
@@ -329,7 +357,7 @@
     "baths": "Banjo",
     "area": "m²",
     "living": "Ndenjeje",
-    "parking": "Parking",
+    "parking": "Parkim",
     "clickForDetails": "Kliko për detaje →",
     "legend": "Legjenda",
     "propertyTypes": {
@@ -340,7 +368,8 @@
       "other": "Tjetër",
       "luxury-villa": "Vilë luksoze",
       "commercial": "Komerciale",
-      "parking": "Vend parkimi"
+      "parking": "Vend parkimi",
+      "urgent": "Urgjent"
     },
     "promotedListings": "Listime të Promovuara",
     "agentHint": "Kliko për rekomandime!",
@@ -362,8 +391,8 @@
         "featured": "TË VEÇUAR",
         "standard": "PROMOVUAR"
       },
-      "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings",
+      "promotedCount_one": "{{count}} shpallje e promovuar",
+      "promotedCount_other": "{{count}} shpallje të promovuara",
       "distanceFromYou": "{{distance}} larg"
     },
     "agentRecommendations": {
@@ -403,7 +432,8 @@
     "tryAgain": "Provo përsëri",
     "aiTeaserTitle": "Doni të dini më shumë për këtë pronë?",
     "aiTeaserSubtitle": "Lëreni IA-në tonë të gjenerojë një raport të detajuar të lagjes — shkolla, transport, parqe, dyqane dhe shërbime lokale — për pak sekonda.",
-    "coordinatesUnavailable": "Të dhënat e vendndodhjes nuk janë ende të disponueshme për këtë pronë, prandaj nuk mund të gjenerojmë njohuri."
+    "coordinatesUnavailable": "Të dhënat e vendndodhjes nuk janë ende të disponueshme për këtë pronë, prandaj nuk mund të gjenerojmë njohuri.",
+    "serviceUnavailable": "Shërbimi AI nuk është i disponueshëm përkohësisht. Ju lutemi provoni më vonë."
   },
   "photos": {
     "title": "Foto",
@@ -591,7 +621,17 @@
     "videoTour": "Tur me video",
     "enter3DTour": "Hyni në turin 3D",
     "view3DMap": "Harta 3D e vendndodhjes",
-    "seeOnFloorPlan": "Shihni ku është bërë kjo foto në planimetri"
+    "seeOnFloorPlan": "Shihni ku është bërë kjo foto në planimetri",
+    "viewImages": "Shiko fotot e pronës",
+    "videoEmbedNotSupported": "Kjo lidhje video nuk mund të shfaqet direkt",
+    "openVideo": "Hap videon",
+    "prevImage": "Fotoja e mëparshme",
+    "nextImage": "Fotoja tjetër",
+    "forRent": "Qira",
+    "forSale": "Shitje",
+    "backToPhotos": "Kthehu te fotot",
+    "forRentLong": "Me qira",
+    "forSaleLong": "Në shitje"
   },
   "viewings": {
     "title": "Kërkesat për Vizitë",
@@ -704,7 +744,9 @@
       "done": "Gatë",
       "save": "Ruaj",
       "hint": "Vizato mbi imazh për të shtuar shënime",
-      "sendToChat": "Dërgo"
+      "sendToChat": "Dërgo",
+      "sendError": "Gabim",
+      "sendFailed": "Dërgimi i imazhit me shënime dështoi."
     }
   },
   "sectionNav": {
@@ -751,7 +793,7 @@
     "unlimitedNote": "Ristilime të pakufizuara në planin tuaj",
     "remainingNote": "{{remaining}} të mbetura këtë muaj",
     "disclaimer": "Skenë e krijuar me AI vetëm për qëllime demonstrimi. Këto imazhe nuk janë foto reale të pronës dhe mund të përmbajnë artikuj që nuk janë pjesë e shpalljes.",
-    "interior": "Interior",
+    "interior": "Interier",
     "exterior": "Eksterier"
   },
   "featured": {
@@ -807,5 +849,145 @@
     "perMonthNote": "Qira mujore · qiratë javore të konvertuara",
     "perNightNote": "Vetëm qira ditore",
     "villasIncluded": "Përfshirë vila të tjera"
+  },
+  "similarProperties": {
+    "agencyTitle": "Më shumë nga {{agency}}",
+    "titleRent": "Qira të ngjashme në {{city}}",
+    "title": "Prona të ngjashme në {{city}}",
+    "agencySubtitle": "Shpallje të tjera nga {{agency}}",
+    "subtitle": "Shfleto më shumë {{type}} për {{action}} në {{city}}, {{country}}"
+  },
+  "socialVideo": {
+    "title": "Video e pronës",
+    "embedFailed": "Videoja nuk mund të ngarkohej",
+    "openIn": "Hap në {{platform}}"
+  },
+  "specs": {
+    "beds": "Dhoma gjumi",
+    "baths": "Banjo"
+  },
+  "ai": {
+    "swipeDone": "{{count}} prona u ruajtën!",
+    "swipeNoneSaved": "Nuk u ruajt asnjë pronë",
+    "swipeCheckFavorites": "Shikoni të preferuarat tuaja për t'i krahasuar",
+    "swipeTryAgain": "Provoni një kërkim tjetër për të gjetur pronën e ëndrrave",
+    "goToFavorites": "Shko te të preferuarat",
+    "backToChat": "Kthehu te biseda",
+    "swipeTitle": "Përputhjet tuaja",
+    "saved": "u ruajt",
+    "swipeHint": "Rrëshqit djathtas për ta ruajtur, majtas për ta kaluar"
+  },
+  "priceDrop": "ULJE ÇMIMI",
+  "priceUp": "RRITJE ÇMIMI",
+  "errors": {
+    "errorTitle": "Gabim",
+    "saveFailed": "Ruajtja e pronës dështoi. Ju lutemi provoni përsëri.",
+    "conversationFailed": "Nisja e bisedës dështoi. Ju lutemi provoni përsëri."
+  },
+  "viewDetails": "Shiko detajet",
+  "source": {
+    "viewOriginal": "Shiko në {{source}}",
+    "listedOn": "Publikuar në {{source}}"
+  },
+  "inquiry": {
+    "nameRequired": "Emri është i detyrueshëm",
+    "validEmailRequired": "Kërkohet një email i vlefshëm",
+    "messageRequired": "Mesazhi është i detyrueshëm",
+    "sendError": "Dërgimi i kërkesës dështoi. Ju lutemi provoni përsëri.",
+    "title": "Dërgo kërkesë",
+    "successTitle": "Kërkesa u dërgua!",
+    "successMessage": "Mesazhi juaj iu dërgua pronarit. Ai do t'ju kontaktojë së shpejti.",
+    "yourName": "Emri juaj",
+    "yourEmail": "Email-i juaj",
+    "yourPhone": "Telefoni juaj (opsional)",
+    "message": "Mesazhi juaj",
+    "template1": "Përshëndetje, jam i interesuar për këtë pronë. A është ende e disponueshme? Do të doja të caktoja një vizitë.",
+    "scheduleViewing": "Cakto vizitë",
+    "template2": "Përshëndetje, do të doja më shumë informacion për këtë pronë. A mund të më jepni detaje për lagjen dhe shërbimet përreth?",
+    "moreInfo": "Më shumë informacion",
+    "template3": "Përshëndetje, a është çmimi i negociueshëm? Jam blerës serioz dhe dua të vendos së shpejti.",
+    "priceQuestion": "Çmimi i negociueshëm?",
+    "sending": "Duke dërguar...",
+    "sendInquiry": "Dërgo kërkesën",
+    "privacyNote": "Duke dërguar, pranoni të kontaktoheni nga pronari në lidhje me këtë shpallje."
+  },
+  "priceHistorySection": {
+    "pricingSchedule": "Orari i çmimeve",
+    "ongoing": "Në vazhdim",
+    "perMonth": "/muaj",
+    "current": "Aktual",
+    "changeHistory": "Historiku i ndryshimeve të çmimit",
+    "listedBadge": "Publikuar",
+    "currentPrice": "Çmimi aktual",
+    "listedAt": "Çmimi fillestar",
+    "totalChange": "Ndryshimi total",
+    "pricePerSqm": "Çmimi / m²",
+    "lastChanged": "Ndryshuar së fundi",
+    "listed": "Publikuar",
+    "today": "Sot",
+    "daysAgo": "{{count}} ditë më parë",
+    "changesRecorded": "Ndryshime të regjistruara: {{count}}",
+    "priceTrend": "Tendenca e çmimit",
+    "changeMagnitude": "Madhësia e ndryshimit",
+    "pricePerSqmTrend": "Tendenca e çmimit për m²",
+    "valuesInEurPerSqm": "Vlerat në €/m²",
+    "title": "Historiku i çmimit",
+    "records": "Regjistrime: {{count}}"
+  },
+  "ui": {
+    "imageViewerModal": {
+      "zoomOut": "Zvogëlo",
+      "resetZoom": "Rivendos zmadhimin",
+      "zoomIn": "Zmadho",
+      "toggleAnnotationMode": "Aktivizo/çaktivizo shënimet",
+      "undoLastStroke": "Zhbëj vijën e fundit",
+      "clearAllAnnotations": "Pastro të gjitha shënimet",
+      "downloadAnnotatedImage": "Shkarko imazhin me shënime",
+      "sendAnnotatedImageToChat": "Dërgo imazhin me shënime në bisedë"
+    },
+    "propertyGuide": {
+      "closeGuide": "Mbyll udhëzuesin",
+      "previousTip": "Këshilla e mëparshme",
+      "nextTip": "Këshilla tjetër",
+      "propertyGuideMascotClickFor": "Maskota udhëzuese - kliko për këshilla, kliko djathtas për veprime të shpejta"
+    },
+    "propertyCard": {
+      "previousImage": "Fotoja e mëparshme",
+      "nextImage": "Fotoja tjetër",
+      "luxuryVilla": "VILË LUKSOZE",
+      "promoted": "E PROMOVUAR",
+      "perM": "për m²",
+      "wineCellar": "Kantinë vere",
+      "seaView": "Pamje nga deti",
+      "cityView": "Pamje nga qyteti",
+      "gardenView": "Pamje nga kopshti",
+      "streetView": "Pamje nga rruga",
+      "failedToSavePropertyPlease": "Ruajtja e pronës dështoi. Ju lutemi provoni përsëri.",
+      "youCanCompareAMaximum": "Mund të krahasoni maksimumi 5 prona."
+    },
+    "socialVideoEmbed": {
+      "loadingTiktokVideo": "Po ngarkohet videoja TikTok...",
+      "instagramVideo": "Video Instagram"
+    },
+    "propertyGallery": {
+      "loadingTiktokVideo": "Po ngarkohet videoja TikTok...",
+      "propertyVideoTour": "Turi video i pronës"
+    },
+    "propertyCommon": {
+      "moreFeatures": "veçori të tjera"
+    },
+    "propertyMapLink": {
+      "loadingMap": "Po ngarkohet harta..."
+    },
+    "highlightedPropertyCard": {
+      "perM": "për m²",
+      "failedToSavePropertyPlease": "Ruajtja e pronës dështoi. Ju lutemi provoni përsëri."
+    },
+    "neighborhoodInsights": {
+      "anUnknownErrorOccurred": "Ndodhi një gabim i panjohur."
+    },
+    "imageEditorModal": {
+      "iHaveSomeQuestionsAbout": "Kam disa pyetje për këtë pronë. Ju lutemi shikoni shënimet e mia:"
+    }
   }
 }

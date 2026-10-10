@@ -35,7 +35,17 @@
     "failedToUploadImage": "Dështoi ngarkimi i imazhit. Ju lutem provoni përsëri.",
     "failedToSendMessage": "Dështoi dërgimi i mesazhit. Ju lutem provoni përsëri.",
     "failedToDeleteConversation": "Dështoi fshirja e bisedës. Ju lutem provoni përsëri.",
-    "allConversations": "Të gjitha bisedat"
+    "allConversations": "Të gjitha bisedat",
+    "errorTitle": "Gabim",
+    "deleteTitle": "Fshi bisedën",
+    "deleteButton": "Fshi",
+    "cancelButton": "Anulo",
+    "directConversation": "Bisedë direkte",
+    "directAgentConversation": "Bisedë me agjentin",
+    "seller": "Shitësi",
+    "buyer": "Blerësi",
+    "you": "Ju",
+    "image": "📷 Foto"
   },
   "quickReplies": {
     "scheduleTour": "Cakto një Vizitë",
@@ -66,7 +76,13 @@
     "enable": "Aktivizo",
     "enabling": "Duke aktivizuar...",
     "later": "Më vonë",
-    "dismiss": "Mbyll"
+    "dismiss": "Mbyll",
+    "error": "Aktivizimi i njoftimeve dështoi. Ju lutemi provoni përsëri.",
+    "error_title": "Gabim në njoftime",
+    "error_hint_devices": "Ju lutemi provoni përsëri ose hiqni një pajisje më të vjetër nga cilësimet.",
+    "error_hint_browser": "Ju lutemi kontrolloni cilësimet e shfletuesit dhe provoni përsëri.",
+    "error_hint_generic": "Ju lutemi provoni përsëri.",
+    "close": "Mbyll"
   },
   "toast": {
     "success": "Sukses!",
@@ -171,5 +187,14 @@
     "deleteFailed": "Dështoi fshirja e mesazhit",
     "connectionLost": "Lidhja u humb. Duke u rilidhur...",
     "reconnected": "U lidh!"
+  },
+  "ui": {
+    "messageInput": {
+      "preview": "Pamje paraprake"
+    },
+    "conversationView": {
+      "annotatedProperty": "Pronë me shënime",
+      "seller": "Shitësi"
+    }
   }
 }

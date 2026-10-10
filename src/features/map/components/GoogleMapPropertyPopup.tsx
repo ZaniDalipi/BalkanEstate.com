@@ -99,7 +99,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
           onClose();
         }}
         className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-all duration-200 hover:rotate-90 hover:scale-110 active:scale-95 z-50"
-        aria-label="Close popup"
+        aria-label={t('search:ui.googleMapPropertyPopup.closePopup', 'Close popup')}
       >
         <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

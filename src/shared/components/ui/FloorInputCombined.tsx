@@ -89,7 +89,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                         className={inputClasses}
                         min={1}
                         placeholder="14"
-                        aria-label="Total floors in building"
+                        aria-label={t('common:ui.floorInputCombined.totalFloorsInBuilding', 'Total floors in building')}
                     />
                 </div>
                 <span className="text-xl font-light text-gray-300 mt-3">/</span>
@@ -106,7 +106,7 @@ const FloorInputCombined: React.FC<FloorInputCombinedProps> = ({
                         min={0}
                         max={totalFloors || 999}
                         placeholder="8"
-                        aria-label="Floor number"
+                        aria-label={t('common:ui.floorInputCombined.floorNumber', 'Floor number')}
                     />
                 </div>
                 <div className="ml-1 text-gray-400 mt-3">

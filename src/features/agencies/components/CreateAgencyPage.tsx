@@ -823,7 +823,7 @@ const CreateAgencyPage: React.FC = () => {
                       name="facebookUrl"
                       value={formData.facebookUrl}
                       onChange={handleInputChange}
-                      placeholder="facebook.com/yourpage"
+                      placeholder={t('agencies:ui.createAgencyPage.facebookComYourpage', 'facebook.com/yourpage')}
                       className={inputClasses}
                     />
                   </div>
@@ -835,7 +835,7 @@ const CreateAgencyPage: React.FC = () => {
                       name="instagramUrl"
                       value={formData.instagramUrl}
                       onChange={handleInputChange}
-                      placeholder="instagram.com/yourpage"
+                      placeholder={t('agencies:ui.createAgencyPage.instagramComYourpage', 'instagram.com/yourpage')}
                       className={inputClasses}
                     />
                   </div>
@@ -847,7 +847,7 @@ const CreateAgencyPage: React.FC = () => {
                       name="linkedinUrl"
                       value={formData.linkedinUrl}
                       onChange={handleInputChange}
-                      placeholder="linkedin.com/company/..."
+                      placeholder={t('agencies:ui.createAgencyPage.linkedinComCompany', 'linkedin.com/company/...')}
                       className={inputClasses}
                     />
                   </div>
@@ -989,7 +989,7 @@ const CreateAgencyPage: React.FC = () => {
                         id={day}
                         value={hours}
                         onChange={(e) => handleBusinessHoursChange(day, e.target.value)}
-                        placeholder="9:00 AM - 5:00 PM"
+                        placeholder={t('agencies:ui.createAgencyPage.n900Am500', '9:00 AM - 5:00 PM')}
                         className={inputClasses}
                       />
                     </div>

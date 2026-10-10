@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +23,7 @@ interface ConversationViewProps {
     onBack?: () => void;
 }
 
-const MessageImage: React.FC<{imageUrl: string; t: (key: string) => string}> = ({imageUrl, t}) => {
+const MessageImage: React.FC<{imageUrl: string; t: TFunction}> = ({imageUrl, t}) => {
     const [error, setError] = useState(false);
     useEffect(() => { setError(false); }, [imageUrl]);
 
@@ -33,7 +34,7 @@ const MessageImage: React.FC<{imageUrl: string; t: (key: string) => string}> = (
     return (
         <img
             src={optimizeCloudinaryUrl(imageUrl, { width: 640 }) || imageUrl}
-            alt="Annotated property"
+            alt={t('messages:ui.conversationView.annotatedProperty', 'Annotated property')}
             loading="lazy"
             decoding="async"
             className="max-w-full max-h-48 sm:max-h-64 h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
@@ -424,7 +425,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 bg-neutral-100 ring-2 ring-primary ring-opacity-50">
                                     <UserAvatar
                                         src={conversation.seller?.avatarUrl || property?.seller?.avatarUrl}
-                                        alt={conversation.seller?.name || property?.seller?.name || 'Seller'}
+                                        alt={conversation.seller?.name || property?.seller?.name || t('messages:ui.conversationView.seller', 'Seller')}
                                         gender={conversation.seller?.gender || property?.seller?.gender}
                                         seed={conversation.seller?.id || conversation.sellerId || property?.sellerId}
                                         avatarOptions={conversation.seller?.avatarOptions || property?.seller?.avatarOptions}

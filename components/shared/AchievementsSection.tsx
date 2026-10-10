@@ -466,7 +466,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                         className="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.2em]"
                         style={{ color: colors.accent }}
                       >
-                        {expired ? 'EXPIRED' : `YEAR ${year}`}
+                        {expired ? t('common:ui.achievementsSection.expired', 'EXPIRED') : `YEAR ${year}`}
                       </p>
                     </div>
 
@@ -693,7 +693,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       if (errors.dateReceived) setErrors(prev => ({ ...prev, dateReceived: undefined }));
                       if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
                     })}
-                    placeholder="DD/MM/YYYY"
+                    placeholder={t('common:ui.achievementsSection.ddMmYyyy', 'DD/MM/YYYY')}
                     maxLength={10}
                     inputMode="numeric"
                     aria-invalid={!!errors.dateReceived}
@@ -715,7 +715,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
                       setFormData(prev => ({ ...prev, expiryDate: v }));
                       if (errors.expiryDate) setErrors(prev => ({ ...prev, expiryDate: undefined }));
                     })}
-                    placeholder="DD/MM/YYYY"
+                    placeholder={t('common:ui.achievementsSection.ddMmYyyy', 'DD/MM/YYYY')}
                     maxLength={10}
                     inputMode="numeric"
                     aria-invalid={!!errors.expiryDate}

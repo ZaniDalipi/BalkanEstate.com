@@ -152,7 +152,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
               >
                 <CrosshairsIcon className="w-4 h-4 xl:w-5 xl:h-5 text-neutral-700" />
               </button>
-              <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label="Map style">
+              <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full" role="radiogroup" aria-label={t('search:ui.mapFilterControls.mapStyle', 'Map style')}>
                 <button
                   onClick={() => { setMapType('positron'); if (drawnBounds) onDrawComplete(null); }}
                   className={`px-1.5 py-0.5 xl:px-2 xl:py-1 rounded-full text-[10px] xl:text-[11px] font-semibold transition-all ${
@@ -160,7 +160,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Clean map style - minimal, properties stand out"
+                  aria-label={t('search:ui.mapFilterControls.cleanMapStyleMinimalProperties', 'Clean map style - minimal, properties stand out')}
                   aria-pressed={mapType === 'positron'}
                 >
                   {t('search:map.clean', 'Clean')}
@@ -172,7 +172,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Color map style - shows neighborhoods, parks, amenities"
+                  aria-label={t('search:ui.mapFilterControls.colorMapStyleShowsNeighborhoods', 'Color map style - shows neighborhoods, parks, amenities')}
                   aria-pressed={mapType === 'voyager'}
                 >
                   {t('search:map.color', 'Color')}
@@ -184,7 +184,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Street map style"
+                  aria-label={t('search:ui.mapFilterControls.streetMapStyle', 'Street map style')}
                   aria-pressed={mapType === 'street'}
                 >
                   {t('search:map.street')}
@@ -196,7 +196,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                       ? 'bg-white shadow text-primary'
                       : 'text-neutral-600 hover:bg-white/50'
                   }`}
-                  aria-label="Satellite aerial imagery"
+                  aria-label={t('search:ui.mapFilterControls.satelliteAerialImagery', 'Satellite aerial imagery')}
                   aria-pressed={mapType === 'satellite'}
                 >
                   {t('search:map.satellite')}
@@ -359,7 +359,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                   >
                     <SearchPlusIcon className="w-4 h-4" />
                     <span className="hidden sm:inline">{isSaving ? t('search:map.saving') : t('search:map.saveArea')}</span>
-                    <span className="sm:hidden">Save</span>
+                    <span className="sm:hidden">{t('search:ui.mapFilterControls.save', 'Save')}</span>
                   </button>
                 )}
                 <button
@@ -368,7 +368,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 >
                   <XCircleIcon className="w-4 h-4" />
                   <span className="hidden sm:inline">{t('search:map.clearArea')}</span>
-                  <span className="sm:hidden">Clear</span>
+                  <span className="sm:hidden">{t('search:ui.mapFilterControls.clear', 'Clear')}</span>
                 </button>
               </div>
             )}

@@ -46,7 +46,7 @@ const InteractionHeatmap: React.FC = () => {
         }
       );
 
-      if (!response.ok) throw new Error('Failed to fetch heatmap data');
+      if (!response.ok) throw new Error(t('admin:ui.interactionHeatmap.failedToFetchHeatmapData', 'Failed to fetch heatmap data'));
 
       const heatmapData = await response.json();
       setData(heatmapData);
@@ -184,7 +184,7 @@ const InteractionHeatmap: React.FC = () => {
             <div className="text-sm text-gray-600 mt-2">
               {t('admin:analytics.conversionRate', 'Conversion Rate')}
             </div>
-            <div className="text-xs text-gray-500 mt-1">Clicks to Completion</div>
+            <div className="text-xs text-gray-500 mt-1">{t('admin:ui.interactionHeatmap.clicksToCompletion', 'Clicks to Completion')}</div>
           </div>
         </div>
       </div>
@@ -205,12 +205,12 @@ const InteractionHeatmap: React.FC = () => {
                       {page.path}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {page.uniqueVisitors} unique visitors
+                      {page.uniqueVisitors} {t('admin:ui.interactionHeatmap.uniqueVisitors', 'unique visitors')}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-blue-600">{page.views}</div>
-                    <div className="text-xs text-gray-500">views</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.interactionHeatmap.views', 'views')}</div>
                   </div>
                 </div>
               ))}
@@ -237,12 +237,12 @@ const InteractionHeatmap: React.FC = () => {
                       {btn.button}
                     </div>
                     <div className="text-xs text-gray-500 truncate">
-                      on {btn.page}
+                      {t('admin:ui.interactionHeatmap.on', 'on')} {btn.page}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-green-600">{btn.clicks}</div>
-                    <div className="text-xs text-gray-500">clicks</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.interactionHeatmap.clicks', 'clicks')}</div>
                   </div>
                 </div>
               ))}
@@ -315,7 +315,7 @@ const InteractionHeatmap: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-purple-600">{flow.count}</div>
-                    <div className="text-xs text-gray-500">sessions</div>
+                    <div className="text-xs text-gray-500">{t('admin:ui.interactionHeatmap.sessions', 'sessions')}</div>
                   </div>
                 </div>
               ))}

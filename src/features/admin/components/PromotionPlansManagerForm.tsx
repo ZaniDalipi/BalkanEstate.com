@@ -91,7 +91,7 @@ export const PlanCard: React.FC<{
                 offerStatus === 'scheduled' ? 'bg-blue-500/30 text-blue-100' :
                 'bg-green-500/30 text-green-100'
               }`}>
-                {offerStatus === 'expired' ? 'Expired' : offerStatus === 'scheduled' ? 'Scheduled' : 'Live'}
+                {offerStatus === 'expired' ? t('admin:ui.promotionPlansManagerForm.expired', 'Expired') : offerStatus === 'scheduled' ? t('admin:ui.promotionPlansManagerForm.scheduled', 'Scheduled') : t('admin:ui.promotionPlansManagerForm.live', 'Live')}
               </span>
             )}
           </div>
@@ -119,19 +119,19 @@ export const PlanCard: React.FC<{
             <div className="text-xs text-gray-500 mt-1">{t('admin:promotionPlans.featuredEverywhere', 'Featured everywhere on platform')}</div>
           <div className="grid grid-cols-4 gap-1.5 mt-3">
             <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-              <div className="text-[10px] text-amber-600 font-medium">7 days</div>
+              <div className="text-[10px] text-amber-600 font-medium">{t('admin:ui.promotionPlansManagerForm.n7Days', '7 days')}</div>
               <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration7 || 0}</div>
             </div>
             <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-              <div className="text-[10px] text-amber-600 font-medium">14 days</div>
+              <div className="text-[10px] text-amber-600 font-medium">{t('admin:ui.promotionPlansManagerForm.n14Days', '14 days')}</div>
               <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration14 || 0}</div>
             </div>
             <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-              <div className="text-[10px] text-amber-600 font-medium">28 days</div>
+              <div className="text-[10px] text-amber-600 font-medium">{t('admin:ui.promotionPlansManagerForm.n28Days', '28 days')}</div>
               <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration28 || 0}</div>
             </div>
             <div className="text-center p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-              <div className="text-[10px] text-amber-600 font-medium">90 days</div>
+              <div className="text-[10px] text-amber-600 font-medium">{t('admin:ui.promotionPlansManagerForm.n90Days', '90 days')}</div>
               <div className="font-bold text-amber-600 text-sm">&euro;{plan.pricing.duration90 || 0}</div>
             </div>
           </div>
@@ -279,7 +279,7 @@ export const EditPlanModal: React.FC<{
                     value={plan.name}
                     onChange={(e) => onChange({ ...plan, name: e.target.value })}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    placeholder="e.g., Featured"
+                    placeholder={t('admin:ui.promotionPlansManagerForm.eGFeatured', 'e.g., Featured')}
                   />
                 </div>
                 <div>
@@ -301,7 +301,7 @@ export const EditPlanModal: React.FC<{
                   value={plan.description || ''}
                   onChange={(e) => onChange({ ...plan, description: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  placeholder="Short description"
+                  placeholder={t('admin:ui.promotionPlansManagerForm.shortDescription', 'Short description')}
                 />
               </div>
 
@@ -315,14 +315,14 @@ export const EditPlanModal: React.FC<{
                   >
                     {plan.category === 'listing' ? (
                       <>
-                        <option value="featured">Featured</option>
-                        <option value="highlight">Highlight</option>
-                        <option value="premium">Premium</option>
+                        <option value="featured">{t('admin:ui.promotionPlansManagerForm.featured', 'Featured')}</option>
+                        <option value="highlight">{t('admin:ui.promotionPlansManagerForm.highlight', 'Highlight')}</option>
+                        <option value="premium">{t('admin:ui.promotionPlansManagerForm.premium', 'Premium')}</option>
                       </>
                     ) : (
                       <>
-                        <option value="featured">Featured</option>
-                        <option value="addon">Add-on</option>
+                        <option value="featured">{t('admin:ui.promotionPlansManagerForm.featured', 'Featured')}</option>
+                        <option value="addon">{t('admin:ui.promotionPlansManagerForm.addOn', 'Add-on')}</option>
                       </>
                     )}
                   </select>
@@ -346,7 +346,7 @@ export const EditPlanModal: React.FC<{
                   {plan.category === 'agency' && (
                     <span className="px-2 py-0.5 bg-amber-200 text-amber-700 text-xs font-bold rounded-full ml-auto">
                       {t('admin:promotionPlans.weekly', 'Weekly')}
-                      Duration-Based
+                      {t('admin:ui.promotionPlansManagerForm.durationBased', 'Duration-Based')}
                     </span>
                   )}
                 </h4>
@@ -354,7 +354,7 @@ export const EditPlanModal: React.FC<{
                 {plan.category === 'agency' ? (
                   <div className="grid grid-cols-4 gap-3">
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1">7 Days</label>
+                      <label className="block text-sm text-gray-700 mb-1">{t('admin:ui.promotionPlansManagerForm.n7Days2', '7 Days')}</label>
                       <input
                         type="number"
                         min="0"
@@ -369,7 +369,7 @@ export const EditPlanModal: React.FC<{
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1">14 Days</label>
+                      <label className="block text-sm text-gray-700 mb-1">{t('admin:ui.promotionPlansManagerForm.n14Days2', '14 Days')}</label>
                       <input
                         type="number"
                         min="0"
@@ -384,7 +384,7 @@ export const EditPlanModal: React.FC<{
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1">28 Days</label>
+                      <label className="block text-sm text-gray-700 mb-1">{t('admin:ui.promotionPlansManagerForm.n28Days2', '28 Days')}</label>
                       <input
                         type="number"
                         min="0"
@@ -399,7 +399,7 @@ export const EditPlanModal: React.FC<{
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-700 mb-1">90 Days</label>
+                      <label className="block text-sm text-gray-700 mb-1">{t('admin:ui.promotionPlansManagerForm.n90Days2', '90 Days')}</label>
                       <input
                         type="number"
                         min="0"
@@ -516,7 +516,7 @@ export const EditPlanModal: React.FC<{
                       type="text"
                       value={plan.badge || ''}
                       onChange={(e) => onChange({ ...plan, badge: e.target.value })}
-                      placeholder="e.g., Popular"
+                      placeholder={t('admin:ui.promotionPlansManagerForm.eGPopular', 'e.g., Popular')}
                       className="w-full px-3 py-2 border rounded-lg"
                     />
                   </div>
@@ -595,7 +595,7 @@ export const EditPlanModal: React.FC<{
                           type="text"
                           value={plan.offerLabel || ''}
                           onChange={(e) => onChange({ ...plan, offerLabel: e.target.value })}
-                          placeholder="e.g., Spring Sale, Limited Time"
+                          placeholder={t('admin:ui.promotionPlansManagerForm.eGSpringSaleLimited', 'e.g., Spring Sale, Limited Time')}
                           className="w-full px-3 py-2 border rounded-lg text-sm"
                         />
                       </div>
@@ -607,7 +607,7 @@ export const EditPlanModal: React.FC<{
                           step="0.1"
                           value={plan.originalPriceMultiplier || ''}
                           onChange={(e) => onChange({ ...plan, originalPriceMultiplier: parseFloat(e.target.value) || undefined })}
-                          placeholder="e.g., 1.5 = was 50% more"
+                          placeholder={t('admin:ui.promotionPlansManagerForm.eG15Was', 'e.g., 1.5 = was 50% more')}
                           className="w-full px-3 py-2 border rounded-lg text-sm"
                         />
                       </div>

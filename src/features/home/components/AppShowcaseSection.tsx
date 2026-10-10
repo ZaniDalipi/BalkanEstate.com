@@ -150,6 +150,7 @@ interface MapPin {
 
 /* ─── Phone Map Content ─── */
 const PhoneMapContent: React.FC<{ pins: MapPin[] }> = ({ pins: MAP_PINS }) => {
+  const { t } = useTranslation();
   const [activePin, setActivePin] = useState<number | null>(null);
   const [filter, setFilter] = useState<'buy' | 'rent'>('buy');
 
@@ -175,7 +176,7 @@ const PhoneMapContent: React.FC<{ pins: MapPin[] }> = ({ pins: MAP_PINS }) => {
             <circle cx="11" cy="11" r="5" stroke="currentColor" strokeWidth={2} />
             <path d="M14.5 14.5L19 19" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
           </svg>
-          <span className="text-[8px] text-slate-400">Search Balkans...</span>
+          <span className="text-[8px] text-slate-400">{t('home:ui.appShowcaseSection.searchBalkans', 'Search Balkans...')}</span>
         </div>
       </div>
 
@@ -189,14 +190,14 @@ const PhoneMapContent: React.FC<{ pins: MapPin[] }> = ({ pins: MAP_PINS }) => {
               filter === f ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 border border-neutral-200'
             }`}
           >
-            {f === 'buy' ? 'Buy' : 'Rent'}
+            {f === 'buy' ? t('home:ui.appShowcaseSection.buy', 'Buy') : t('home:ui.appShowcaseSection.rent', 'Rent')}
           </button>
         ))}
         <div className="ml-auto flex items-center gap-0.5 text-[7px] text-slate-600 font-medium">
           <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
             <path d="M3 7l6-3 6 3 6-3v14l-6 3-6-3-6 3V7z" />
           </svg>
-          {MAP_PINS.length} properties
+          {MAP_PINS.length} {t('home:ui.appShowcaseSection.properties', 'properties')}
         </div>
       </div>
 
@@ -252,7 +253,7 @@ const PhoneMapContent: React.FC<{ pins: MapPin[] }> = ({ pins: MAP_PINS }) => {
                 >
                   <p className="text-[7px] font-bold text-slate-800">{pin.city}, {pin.country}</p>
                   <p className="text-[7px] font-semibold" style={{ color: pin.color }}>{pin.price}</p>
-                  <p className="text-[6px] text-slate-400">{pin.beds} beds</p>
+                  <p className="text-[6px] text-slate-400">{pin.beds} {t('home:ui.appShowcaseSection.beds', 'beds')}</p>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-transparent border-t-white" />
                 </motion.div>
               )}
@@ -348,7 +349,9 @@ const VideoCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({
 );
 
 /* ─── Guide card component ─── */
-const GuideCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ item, onClick }) => (
+const GuideCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ item, onClick }) => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     whileHover={{ y: -3 }}
     whileTap={{ scale: 0.98 }}
@@ -369,15 +372,18 @@ const GuideCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({
         <h4 className="text-xs md:text-sm font-semibold text-slate-800 line-clamp-1">{item.title}</h4>
         {item.description && <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 line-clamp-2">{item.description}</p>}
         {item.steps && item.steps.length > 0 && (
-          <span className="text-[9px] md:text-[10px] text-slate-600 font-medium mt-1 inline-block">{item.steps.length} steps</span>
+          <span className="text-[9px] md:text-[10px] text-slate-600 font-medium mt-1 inline-block">{item.steps.length} {t('home:ui.appShowcaseSection.steps', 'steps')}</span>
         )}
       </div>
     </div>
   </motion.div>
 );
+};
 
 /* ─── FAQ card component ─── */
-const FAQCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ item, onClick }) => (
+const FAQCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ item, onClick }) => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     whileHover={{ y: -3 }}
     whileTap={{ scale: 0.98 }}
@@ -398,12 +404,13 @@ const FAQCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ i
       <div className="min-w-0">
         <h4 className="text-xs md:text-sm font-semibold text-slate-800 line-clamp-1">{item.title}</h4>
         {item.faqs && item.faqs.length > 0 && (
-          <p className="text-[10px] md:text-xs text-slate-500 mt-0.5">{item.faqs.length} questions answered</p>
+          <p className="text-[10px] md:text-xs text-slate-500 mt-0.5">{item.faqs.length} {t('home:ui.appShowcaseSection.questionsAnswered', 'questions answered')}</p>
         )}
       </div>
     </div>
   </motion.div>
 );
+};
 
 /* ─── Content card router ─── */
 const ContentCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ item, onClick }) => {

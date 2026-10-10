@@ -243,10 +243,10 @@ const SystemSettings: React.FC = () => {
             onChange={(e) => handleInputChange('timezone', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="Europe/Belgrade">Europe/Belgrade (CET)</option>
-            <option value="Europe/London">Europe/London (GMT)</option>
-            <option value="Europe/Paris">Europe/Paris (CET)</option>
-            <option value="America/New_York">America/New York (EST)</option>
+            <option value="Europe/Belgrade">{t('admin:ui.systemSettings.europeBelgradeCet', 'Europe/Belgrade (CET)')}</option>
+            <option value="Europe/London">{t('admin:ui.systemSettings.europeLondonGmt', 'Europe/London (GMT)')}</option>
+            <option value="Europe/Paris">{t('admin:ui.systemSettings.europeParisCet', 'Europe/Paris (CET)')}</option>
+            <option value="America/New_York">{t('admin:ui.systemSettings.americaNewYorkEst', 'America/New York (EST)')}</option>
           </select>
         </div>
         <div>
@@ -256,9 +256,9 @@ const SystemSettings: React.FC = () => {
             onChange={(e) => handleInputChange('dateFormat', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            <option value="DD/MM/YYYY">{t('admin:ui.systemSettings.ddMmYyyy', 'DD/MM/YYYY')}</option>
+            <option value="MM/DD/YYYY">{t('admin:ui.systemSettings.mmDdYyyy', 'MM/DD/YYYY')}</option>
+            <option value="YYYY-MM-DD">{t('admin:ui.systemSettings.yyyyMmDd', 'YYYY-MM-DD')}</option>
           </select>
         </div>
         <div>
@@ -268,11 +268,11 @@ const SystemSettings: React.FC = () => {
             onChange={(e) => handleInputChange('currency', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="EUR">EUR (Euro)</option>
-            <option value="USD">USD (US Dollar)</option>
-            <option value="GBP">GBP (British Pound)</option>
-            <option value="RSD">RSD (Serbian Dinar)</option>
-            <option value="MKD">MKD (Macedonian Denar)</option>
+            <option value="EUR">{t('admin:ui.systemSettings.eurEuro', 'EUR (Euro)')}</option>
+            <option value="USD">{t('admin:ui.systemSettings.usdUsDollar', 'USD (US Dollar)')}</option>
+            <option value="GBP">{t('admin:ui.systemSettings.gbpBritishPound', 'GBP (British Pound)')}</option>
+            <option value="RSD">{t('admin:ui.systemSettings.rsdSerbianDinar', 'RSD (Serbian Dinar)')}</option>
+            <option value="MKD">{t('admin:ui.systemSettings.mkdMacedonianDenar', 'MKD (Macedonian Denar)')}</option>
           </select>
         </div>
       </div>
@@ -340,7 +340,7 @@ const SystemSettings: React.FC = () => {
       </div>
       <div className="p-4 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> {t('admin:settings.emailCredentialsNote')}
+          <strong>{t('admin:ui.systemSettings.note', 'Note:')}</strong> {t('admin:settings.emailCredentialsNote')}
         </p>
       </div>
     </div>

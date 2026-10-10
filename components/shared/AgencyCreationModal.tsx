@@ -724,7 +724,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 type="email"
                 value={formData.email}
                 onChange={e => set('email', e.target.value)}
-                placeholder="contact@agency.com"
+                placeholder={t('common:ui.agencyCreationModal.contactAgencyCom', 'contact@agency.com')}
                 className={inputCls('email')}
                 disabled={isCreating}
               />
@@ -769,7 +769,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   type="text"
                   value={formData.licenseNumber}
                   onChange={e => set('licenseNumber', e.target.value)}
-                  placeholder="e.g., RE-123456"
+                  placeholder={t('common:ui.agencyCreationModal.eGRe123456', 'e.g., RE-123456')}
                   className={inputCls('licenseNumber')}
                   disabled={isCreating}
                 />
@@ -853,7 +853,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                       type="text"
                       value={formData.businessHours[day]}
                       onChange={e => setHours(day, e.target.value)}
-                      placeholder="9:00 AM - 5:00 PM"
+                      placeholder={t('common:ui.agencyCreationModal.n900Am500', '9:00 AM - 5:00 PM')}
                       className={inputCls(day)}
                       disabled={isCreating}
                     />
@@ -878,10 +878,10 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         isOpen={showCloseConfirmation}
         onClose={() => setShowCloseConfirmation(false)}
         onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
-        title="Discard Changes?"
-        message="You have unsaved changes. Are you sure you want to close this form?"
-        confirmLabel="Discard"
-        cancelLabel="Keep Editing"
+        title={t('common:ui.agencyCreationModal.discardChanges', 'Discard Changes?')}
+        message={t('common:ui.agencyCreationModal.youHaveUnsavedChangesAre', 'You have unsaved changes. Are you sure you want to close this form?')}
+        confirmLabel={t('common:ui.agencyCreationModal.discard', 'Discard')}
+        cancelLabel={t('common:ui.agencyCreationModal.keepEditing', 'Keep Editing')}
         type="danger"
         cancelPrimary
       />
@@ -922,7 +922,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
               onClick={requestClose}
               disabled={isCreating}
               className="p-2 hover:bg-gray-100 rounded-xl transition-colors ml-3 flex-shrink-0 disabled:opacity-40"
-              aria-label="Close"
+              aria-label={t('common:ui.agencyCreationModal.close', 'Close')}
             >
               <X className="w-5 h-5 text-gray-400" />
             </button>

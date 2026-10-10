@@ -591,19 +591,19 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
       {viewingUser.isSubscribed && (
         <div className="grid grid-cols-2 gap-4 border-t border-green-200 pt-3">
           <div>
-            <label className="text-xs text-gray-500">Started</label>
+            <label className="text-xs text-gray-500">{t('admin:ui.userManagerDetail.started', 'Started')}</label>
             <p className="font-medium text-sm">{formatDisplayDate(viewingUser.subscriptionStartedAt)}</p>
           </div>
           <div>
-            <label className="text-xs text-gray-500">Expires</label>
+            <label className="text-xs text-gray-500">{t('admin:ui.userManagerDetail.expires', 'Expires')}</label>
             <p className="font-medium text-sm">{formatDisplayDate(viewingUser.subscriptionExpiresAt)}</p>
           </div>
           <div>
-            <label className="text-xs text-gray-500">Source</label>
+            <label className="text-xs text-gray-500">{t('admin:ui.userManagerDetail.source', 'Source')}</label>
             <p className="font-medium text-sm capitalize">{viewingUser.subscriptionSource || '—'}</p>
           </div>
           <div>
-            <label className="text-xs text-gray-500">Product Name</label>
+            <label className="text-xs text-gray-500">{t('admin:ui.userManagerDetail.productName', 'Product Name')}</label>
             <p className="font-medium text-sm">{viewingUser.subscriptionProductName || '—'}</p>
           </div>
         </div>
@@ -614,7 +614,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
         <label className="text-xs font-semibold text-gray-600 block mb-1">
           {t('userDetail.listingLimitOverride')}
           <span className="font-normal text-gray-400 ml-1">
-            (sub.listingsLimit: {displayLimit} · activeListingsLimit: {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} active)
+            {t('admin:ui.userManagerDetail.subListingslimit', '(sub.listingsLimit:')} {displayLimit} {t('admin:ui.userManagerDetail.activelistingslimit', '· activeListingsLimit:')} {viewingUser.activeListingsLimit ?? '—'} · {viewingUser.subscription?.activeListingsCount ?? 0} {t('admin:ui.userManagerDetail.active', 'active)')}
           </span>
         </label>
         <div className="flex items-center gap-2 mb-2">
@@ -635,11 +635,11 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
             onClick={handleSave}
             disabled={saving || !hasLimitChanged}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
-            title={!hasLimitChanged ? 'No changes to save' : 'Save changes'}
+            title={!hasLimitChanged ? t('admin:ui.userManagerDetail.noChangesToSave', 'No changes to save') : t('admin:ui.userManagerDetail.saveChanges', 'Save changes')}
           >
             {saving ? t('userDetail.saving') : saved ? t('userDetail.saved') : t('userDetail.apply')}
           </button>
-          <span className="text-xs text-gray-400">listings/month</span>
+          <span className="text-xs text-gray-400">{t('admin:ui.userManagerDetail.listingsMonth', 'listings/month')}</span>
         </div>
         <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-100 p-1 rounded mb-2">
           <input
@@ -649,10 +649,10 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
             className="w-4 h-4 rounded border-gray-300 cursor-pointer"
             disabled={saving}
           />
-          <span className="text-xs text-gray-600">Notify user of limit increase</span>
+          <span className="text-xs text-gray-600">{t('admin:ui.userManagerDetail.notifyUserOfLimitIncrease', 'Notify user of limit increase')}</span>
         </label>
         {err && <p className="text-xs text-red-600 font-medium mt-1">{err}</p>}
-        {saved && <p className="text-xs text-green-600 font-medium mt-1">✓ Limit updated successfully</p>}
+        {saved && <p className="text-xs text-green-600 font-medium mt-1">{t('admin:ui.userManagerDetail.limitUpdatedSuccessfully', '✓ Limit updated successfully')}</p>}
       </div>
 
       {/* Monthly listing counter */}
@@ -660,7 +660,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
         <label className="text-xs font-semibold text-gray-600 block mb-1">
           {t('userDetail.monthlyListingCounter', 'Monthly Listing Counter')}
           <span className="font-normal text-gray-400 ml-1">
-            (current: {currentMonthlyCounter})
+            {t('admin:ui.userManagerDetail.current', '(current:')} {currentMonthlyCounter})
           </span>
         </label>
         <div className="flex items-center gap-2 mb-2">
@@ -681,7 +681,7 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
             onClick={handleSaveMonthlyCounter}
             disabled={savingMonthly || (!hasCounterChanged && !resetMonthCheckbox)}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
-            title={!hasCounterChanged && !resetMonthCheckbox ? 'No changes to save' : 'Save changes'}
+            title={!hasCounterChanged && !resetMonthCheckbox ? t('admin:ui.userManagerDetail.noChangesToSave', 'No changes to save') : t('admin:ui.userManagerDetail.saveChanges', 'Save changes')}
           >
             {savingMonthly ? t('userDetail.saving') : savedMonthly ? t('userDetail.saved') : t('userDetail.apply')}
           </button>
@@ -698,11 +698,11 @@ function SubscriptionPanel({ viewingUser, onUpdate }: { viewingUser: User; onUpd
             className="w-4 h-4 rounded border-gray-300 cursor-pointer"
             disabled={savingMonthly}
           />
-          <span className="text-xs text-gray-600">Reset monthResetDate to today</span>
-          {resetMonthCheckbox && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Will update</span>}
+          <span className="text-xs text-gray-600">{t('admin:ui.userManagerDetail.resetMonthresetdateToToday', 'Reset monthResetDate to today')}</span>
+          {resetMonthCheckbox && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">{t('admin:ui.userManagerDetail.willUpdate', 'Will update')}</span>}
         </label>
         {errMonthly && <p className="text-xs text-red-600 font-medium mt-1">{errMonthly}</p>}
-        {savedMonthly && <p className="text-xs text-green-600 font-medium mt-1">✓ Counter updated successfully</p>}
+        {savedMonthly && <p className="text-xs text-green-600 font-medium mt-1">{t('admin:ui.userManagerDetail.counterUpdatedSuccessfully', '✓ Counter updated successfully')}</p>}
       </div>
     </div>
   );
@@ -802,34 +802,34 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold text-gray-700">{t('userDetail.subscriptionSection')}</h4>
         <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${isSubscribed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-          {isSubscribed ? 'Active' : 'Inactive'}
+          {isSubscribed ? t('admin:ui.userManagerDetail.active2', 'Active') : t('admin:ui.userManagerDetail.inactive', 'Inactive')}
         </span>
       </div>
 
       {/* Plan selector */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Plan</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin:ui.userManagerDetail.plan', 'Plan')}</label>
         <select
           value={plan}
           onChange={(e) => setPlan(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
         >
-          <option value="">— Select Plan —</option>
-          <option value="seller_pro_monthly">Seller Pro Monthly</option>
-          <option value="seller_pro_yearly">Seller Pro Yearly</option>
-          <option value="seller_enterprise_yearly">Seller Enterprise Yearly</option>
-          <option value="buyer_monthly">Buyer Monthly</option>
-          <option value="buyer_yearly">Buyer Yearly</option>
-          <option value="pro_monthly">Pro Monthly</option>
-          <option value="pro_yearly">Pro Yearly</option>
-          <option value="agency_yearly">Agency Yearly</option>
+          <option value="">{t('admin:ui.userManagerDetail.selectPlan', '— Select Plan —')}</option>
+          <option value="seller_pro_monthly">{t('admin:ui.userManagerDetail.sellerProMonthly', 'Seller Pro Monthly')}</option>
+          <option value="seller_pro_yearly">{t('admin:ui.userManagerDetail.sellerProYearly', 'Seller Pro Yearly')}</option>
+          <option value="seller_enterprise_yearly">{t('admin:ui.userManagerDetail.sellerEnterpriseYearly', 'Seller Enterprise Yearly')}</option>
+          <option value="buyer_monthly">{t('admin:ui.userManagerDetail.buyerMonthly', 'Buyer Monthly')}</option>
+          <option value="buyer_yearly">{t('admin:ui.userManagerDetail.buyerYearly', 'Buyer Yearly')}</option>
+          <option value="pro_monthly">{t('admin:ui.userManagerDetail.proMonthly', 'Pro Monthly')}</option>
+          <option value="pro_yearly">{t('admin:ui.userManagerDetail.proYearly', 'Pro Yearly')}</option>
+          <option value="agency_yearly">{t('admin:ui.userManagerDetail.agencyYearly', 'Agency Yearly')}</option>
         </select>
       </div>
 
       {/* Date pickers */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin:ui.userManagerDetail.startDate', 'Start Date')}</label>
           <input
             type="date"
             value={startDate}
@@ -838,7 +838,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Expiration Date</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">{t('admin:ui.userManagerDetail.expirationDate', 'Expiration Date')}</label>
           <input
             type="date"
             value={expiresDate}
@@ -851,7 +851,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
       {/* Current info */}
       {editingUser.subscriptionSource && (
         <p className="text-xs text-gray-400">
-          Source: <span className="capitalize">{editingUser.subscriptionSource}</span>
+          {t('admin:ui.userManagerDetail.source2', 'Source:')} <span className="capitalize">{editingUser.subscriptionSource}</span>
           {editingUser.subscriptionProductName && <> &middot; {editingUser.subscriptionProductName}</>}
         </p>
       )}
@@ -866,7 +866,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
               disabled={saving}
               className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40 font-medium"
             >
-              {saving ? 'Saving...' : 'Update Dates'}
+              {saving ? 'Saving...' : t('admin:ui.userManagerDetail.updateDates', 'Update Dates')}
             </button>
             <button
               type="button"
@@ -874,7 +874,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
               disabled={saving}
               className="flex-1 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-40 font-medium"
             >
-              {saving ? 'Saving...' : 'Deactivate'}
+              {saving ? 'Saving...' : t('admin:ui.userManagerDetail.deactivate', 'Deactivate')}
             </button>
           </>
         ) : (
@@ -884,7 +884,7 @@ function SubscriptionEditPanel({ editingUser }: { editingUser: User }) {
             disabled={saving || !plan || !expiresDate}
             className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-40 font-medium"
           >
-            {saving ? 'Activating...' : 'Activate Subscription'}
+            {saving ? 'Activating...' : t('admin:ui.userManagerDetail.activateSubscription', 'Activate Subscription')}
           </button>
         )}
       </div>

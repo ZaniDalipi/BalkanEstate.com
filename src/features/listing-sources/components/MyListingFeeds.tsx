@@ -130,7 +130,7 @@ const MyListingFeeds: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900">{t('listingFeeds:title')}</h2>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold uppercase tracking-wider">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              Alpha
+              {t('listingFeeds:ui.myListingFeeds.alpha', 'Alpha')}
             </span>
           </div>
           <p className="text-sm text-gray-600">{t('listingFeeds:description')}</p>

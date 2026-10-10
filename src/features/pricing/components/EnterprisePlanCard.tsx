@@ -57,7 +57,7 @@ const EnterprisePlanCard: React.FC<EnterprisePlanCardProps> = ({
             <h3 className="text-2xl font-bold">{enterpriseProduct.name}</h3>
           </div>
           <p className="mt-2 text-sm text-gray-400">
-            {enterpriseProduct.description || 'Complete solution for real estate agencies'}
+            {enterpriseProduct.description || t('pricing:ui.enterprisePlanCard.completeSolutionForRealEstate', 'Complete solution for real estate agencies')}
           </p>
           <div className="mt-6">
             <span className="text-5xl font-extrabold">€{enterpriseProduct.price}</span>

@@ -80,7 +80,7 @@ const BuyerPlansSection: React.FC<BuyerPlansSectionProps> = ({
         </div>
       ) : (
         <div className="text-center py-12 bg-gray-50 rounded-2xl">
-          <p className="text-gray-600">No buyer plans available at the moment.</p>
+          <p className="text-gray-600">{t('pricing:ui.buyerPlansSection.noBuyerPlansAvailableAt', 'No buyer plans available at the moment.')}</p>
         </div>
       )}
     </Animated>

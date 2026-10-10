@@ -68,7 +68,16 @@
     "saleStatusAvailable": "Προς πώληση",
     "saleStatusSold": "Πωλημένα",
     "saleStatusAll": "Και τα δύο",
-    "saleStatusHint": "Τα πωλημένα ακίνητα δείχνουν την τελευταία τιμή και πότε πωλήθηκαν — ανοίξτε ένα για να δείτε τις τιμές γύρω του."
+    "saleStatusHint": "Τα πωλημένα ακίνητα δείχνουν την τελευταία τιμή και πότε πωλήθηκαν — ανοίξτε ένα για να δείτε τις τιμές γύρω του.",
+    "filters": "Φίλτρα",
+    "pricePerSqm": "Τιμή ανά m²",
+    "daysOnMarket": "Καταχωρήθηκε εντός",
+    "last24h": "Τελευταίες 24 ώρες",
+    "last3Days": "Τελευταίες 3 ημέρες",
+    "last7Days": "Τελευταίες 7 ημέρες",
+    "last30Days": "Τελευταίες 30 ημέρες",
+    "priceReduced": "Μειωμένη τιμή",
+    "priceIncreased": "Αυξημένη τιμή"
   },
   "options": {
     "any": "Οποιοδήποτε",
@@ -172,7 +181,8 @@
     "tryDifferent": "Δοκιμάστε να προσαρμόσετε τα φίλτρα ή τα κριτήρια αναζήτησης",
     "inArea": "στην περιοχή {{area}}",
     "forSale": "προς πώληση",
-    "forRent": "προς ενοικίαση"
+    "forRent": "προς ενοικίαση",
+    "resetHint": "Επαναφέρετε τα φίλτρα για να δείτε όλα τα ακίνητα της περιοχής"
   },
   "map": {
     "showMap": "Χάρτης",
@@ -282,7 +292,26 @@
       "title": "Σχεδιάστε τη δική σας περιοχή",
       "subtitle": "Σχεδιάστε ένα σχήμα στον χάρτη για αναζήτηση μόνο εντός αυτού",
       "dismiss": "Απόρριψη υπόδειξης"
-    }
+    },
+    "loadingTimeout": "Ο χάρτης αργεί πολύ",
+    "loadingTimeoutDesc": "Ο χάρτης αργεί περισσότερο από το αναμενόμενο. Αυτό μπορεί να οφείλεται σε αργή σύνδεση.",
+    "useAlternative": "Χρήση εναλλακτικού χάρτη",
+    "saveMeasurement": "Αποθήκευση μέτρησης",
+    "measurementName": "Όνομα",
+    "measurementNamePlaceholder": "π.χ., Οικόπεδο κήπου, οικοδομήσιμο οικόπεδο...",
+    "measurementLocation": "Τοποθεσία / Διεύθυνση",
+    "measurementLocationPlaceholder": "π.χ., Κοντά στη λίμνη Αχρίδα, Αλβανία...",
+    "measurementNotes": "Σημειώσεις",
+    "measurementNotesPlaceholder": "Τυχόν επιπλέον λεπτομέρειες...",
+    "measurementUsage": "Αποθηκευμένες μετρήσεις",
+    "saveFailed": "Αδυναμία αποθήκευσης",
+    "limitReached": "Συμπληρώθηκε το όριο",
+    "saveToProfile": "Αποθήκευση στο προφίλ",
+    "cluster": {
+      "zoomIn": "{{count}} ακίνητα εδώ — ενεργοποιήστε για μεγέθυνση και προβολή όλων"
+    },
+    "resetView": "Επαναφορά προβολής",
+    "loading": "Φόρτωση χάρτη..."
   },
   "newsletter": {
     "title": "Μείνετε Ενημερωμένοι για Νέα Ακίνητα",
@@ -508,5 +537,116 @@
     "showingPromoted": "Στο μεταξύ, δείτε premium και προβεβλημένες αγγελίες από άλλες περιοχές.",
     "showingNearestIn": "Στο μεταξύ, δείτε τις πλησιέστερες αγγελίες, στο {{location}}.",
     "nothingPromoted": "Δοκιμάστε σμίκρυνση, μετακίνηση του χάρτη ή επαναφορά των φίλτρων."
+  },
+  "showingInArea": "Τίποτα δεν ταιριάζει με «{{query}}» — εμφανίζουμε ό,τι είναι διαθέσιμο σε αυτή την περιοχή",
+  "ui": {
+    "measurementTool": {
+      "startPointClickToClose": "🎯 Σημείο έναρξης (κλικ για κλείσιμο)",
+      "fromPrev": "από την προηγούμενη",
+      "measure": "Μέτρηση",
+      "viewingSavedMeasurement": "Προβολή αποθηκευμένης μέτρησης",
+      "clickMapToAddPoints": "Κάντε κλικ στον χάρτη για προσθήκη σημείων",
+      "pts": "Σημεία:",
+      "cursor": "+κέρσορας:",
+      "area": "Εμβαδόν:",
+      "startNewMeasurement": "✏️ Νέα μέτρηση",
+      "undo": "↩ Αναίρεση",
+      "clear": "Εκκαθάριση",
+      "closePolygon": "🔷 Κλείσιμο πολυγώνου",
+      "save": "💾 Αποθήκευση",
+      "saveMeasurement": "💾 Αποθήκευση μέτρησης",
+      "type": "Τύπος:",
+      "area2": "🔷 Εμβαδόν",
+      "distance": "📏 Απόσταση",
+      "points": "Σημεία:",
+      "perimeter": "Περίμετρος:",
+      "distance2": "Απόσταση:",
+      "logInToSaveMeasurements": "Συνδεθείτε για να αποθηκεύσετε τις μετρήσεις στο προφίλ σας. Διαφορετικά, θα αποθηκευτούν τοπικά.",
+      "name": "Όνομα",
+      "eGMyPropertyPlot": "π.χ., Το οικόπεδό μου",
+      "location": "Τοποθεσία",
+      "eG123MainStreet": "π.χ., Κεντρική οδός 123, Πόλη",
+      "notesOptional": "Σημειώσεις (προαιρετικά)",
+      "addAnyNotesAboutThis": "Προσθέστε σημειώσεις για αυτή τη μέτρηση...",
+      "cancel": "Ακύρωση",
+      "saveTo": "Αποθήκευση σε",
+      "profile": "Προφίλ",
+      "device": "Συσκευή"
+    },
+    "googleMapMeasurement": {
+      "area": "📐 Εμβαδόν",
+      "distance": "📍 Απόσταση",
+      "clickOnTheMapTo": "Κάντε κλικ στον χάρτη για να σχεδιάσετε πολύγωνο. Προσθέστε τουλάχιστον 3 σημεία.",
+      "clickOnTheMapTo2": "Κάντε κλικ στον χάρτη για να προσθέσετε σημεία και να μετρήσετε απόσταση.",
+      "area2": "Εμβαδόν:",
+      "perimeter": "Περίμετρος:",
+      "distance2": "Απόσταση:",
+      "undo": "↩️ Αναίρεση",
+      "save": "💾 Αποθήκευση",
+      "keep": "💾 Διατήρηση",
+      "new": "🗑️ Νέο",
+      "youVeReachedTheFree": "⚠️ Φτάσατε το δωρεάν όριο. Αναβαθμιστείτε σε Pro για περισσότερα!",
+      "n1SlotRemainingUpgradeTo": "⚠️ Απομένει 1 θέση. Αναβαθμιστείτε σε Pro για περισσότερες μετρήσεις."
+    },
+    "mapFilterControls": {
+      "mapStyle": "Στυλ χάρτη",
+      "cleanMapStyleMinimalProperties": "Καθαρό στυλ - μινιμαλιστικό, τα ακίνητα ξεχωρίζουν",
+      "colorMapStyleShowsNeighborhoods": "Έγχρωμο στυλ - εμφανίζει γειτονιές, πάρκα, παροχές",
+      "streetMapStyle": "Στυλ οδικού χάρτη",
+      "satelliteAerialImagery": "Δορυφορικές εικόνες",
+      "save": "Αποθήκευση",
+      "clear": "Εκκαθάριση"
+    },
+    "searchPage": {
+      "loadingProperties": "Φόρτωση ακινήτων",
+      "openMenu": "Άνοιγμα μενού",
+      "openFilters": "Άνοιγμα φίλτρων",
+      "myAccount": "Ο λογαριασμός μου",
+      "tapMap": "Πατήστε «Χάρτης»",
+      "viewToggle": "Εναλλαγή προβολής"
+    },
+    "aiSearch": {
+      "agent": "👔 Μεσίτης",
+      "private": "👤 Ιδιώτης",
+      "stopRecording": "Διακοπή εγγραφής",
+      "startVoiceAssistant": "Έναρξη φωνητικού βοηθού"
+    },
+    "mapComponent": {
+      "mapLoadingError": "Σφάλμα φόρτωσης χάρτη",
+      "unableToLoadTheMap": "Δεν ήταν δυνατή η φόρτωση του χάρτη. Μπορεί να είναι προσωρινό πρόβλημα.",
+      "tryAgain": "Δοκιμάστε ξανά (",
+      "left": "απομένουν)",
+      "useAlternativeMap": "Χρήση εναλλακτικού χάρτη"
+    },
+    "searchMobileFilters": {
+      "closeFilters": "Κλείσιμο φίλτρων",
+      "reset": "Επαναφορά",
+      "saveSearch": "Αποθήκευση αναζήτησης",
+      "showResults": "Εμφάνιση αποτελεσμάτων"
+    },
+    "mapPropertyPopup": {
+      "closePopup": "Κλείσιμο αναδυόμενου",
+      "propertyImage": "Εικόνα ακινήτου",
+      "previousImage": "Προηγούμενη εικόνα",
+      "nextImage": "Επόμενη εικόνα"
+    },
+    "propertyList": {
+      "signInToAccessAi": "Συνδεθείτε για πρόσβαση στην αναζήτηση AI"
+    },
+    "virtualizedPropertyGrid": {
+      "loadingMore": "Φόρτωση περισσότερων..."
+    },
+    "mobileFiltersModal": {
+      "closeFilters": "Κλείσιμο φίλτρων"
+    },
+    "propertyLocationMap": {
+      "locationDataUnavailable": "Τα δεδομένα τοποθεσίας δεν είναι διαθέσιμα."
+    },
+    "googleMapPropertyPopup": {
+      "closePopup": "Κλείσιμο αναδυόμενου"
+    },
+    "climateRiskLayer": {
+      "veryHigh": "Πολύ υψηλός"
+    }
   }
 }

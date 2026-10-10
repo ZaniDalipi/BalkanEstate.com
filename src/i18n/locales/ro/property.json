@@ -38,7 +38,8 @@
     "office": "Birou",
     "garage": "Garaj",
     "other": "Altele",
-    "luxury-villa": "Vilă de Lux"
+    "luxury-villa": "Vilă de Lux",
+    "parking": "Loc de parcare"
   },
   "features": {
     "bedrooms": "Dormitoare",
@@ -161,7 +162,19 @@
     "buildingArea": "Suprafață construită",
     "grossArea": "Suprafață brută",
     "netArea": "Suprafață utilă",
-    "floorPlanFloorsHint": "{{count}} etaje · fotografii marcate pe plan"
+    "floorPlanFloorsHint": "{{count}} etaje · fotografii marcate pe plan",
+    "openPlanArea": "Spațiu deschis",
+    "parkingType": "Tip parcare",
+    "parkingTypes": {
+      "garage": "Garaj",
+      "underground": "Subteran",
+      "covered": "Acoperit",
+      "outdoor": "Exterior"
+    },
+    "spaces": "Locuri",
+    "listingType": "Anunț",
+    "forRent": "De închiriat",
+    "forSale": "De vânzare"
   },
   "distances": {
     "title": "Distanțe",
@@ -217,7 +230,15 @@
     "whatsappMessage": "Bună, sunt interesat/ă de această proprietate: {{title}}\n{{url}}",
     "viberSeller": "Viber",
     "promote": "Promovează",
-    "extendPromotion": "Prelungește"
+    "extendPromotion": "Prelungește",
+    "compareLimitTitle": "Limită de comparare",
+    "call": "Sună",
+    "email": "Email",
+    "removeFavorite": "Elimină din favorite",
+    "addFavorite": "Adaugă la favorite",
+    "removeFromFavorites": "Elimină din favorite",
+    "addToFavorites": "Adaugă la favorite",
+    "favorite": "Favorit"
   },
   "video": {
     "loading": "Se încarcă videoul...",
@@ -306,6 +327,13 @@
       "browseAgents": "Răsfoiește agenți",
       "agentSaved": "Agent salvat",
       "agentsSaved": "Agenți salvați"
+    },
+    "agencies": {
+      "listings": "Anunțuri",
+      "agents": "Agenți",
+      "noSaved": "Nicio agenție salvată",
+      "clickHeart": "Salvează agențiile care îți plac pentru a le găsi rapid mai târziu.",
+      "browseAgencies": "Explorează agențiile"
     }
   },
   "comparison": {
@@ -340,7 +368,8 @@
       "other": "Altele",
       "luxury-villa": "Vilă de lux",
       "commercial": "Comercial",
-      "parking": "Loc de parcare"
+      "parking": "Loc de parcare",
+      "urgent": "Urgent"
     },
     "promotedListings": "Anunțuri Promovate",
     "agentHint": "Click pentru recomandări!",
@@ -362,8 +391,8 @@
         "featured": "RECOMANDAT",
         "standard": "PROMOVAT"
       },
-      "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings",
+      "promotedCount_one": "{{count}} anunț promovat",
+      "promotedCount_other": "{{count}} anunțuri promovate",
       "distanceFromYou": "{{distance}} distanță"
     },
     "agentRecommendations": {
@@ -403,7 +432,8 @@
     "tryAgain": "Încearcă din nou",
     "aiTeaserTitle": "Vrei să afli mai multe despre această proprietate?",
     "aiTeaserSubtitle": "Lasă IA-ul nostru să genereze un raport detaliat despre cartier — școli, transport, parcuri, magazine și facilități locale — în doar câteva secunde.",
-    "coordinatesUnavailable": "Datele de localizare nu sunt încă disponibile pentru această proprietate, așa că nu putem genera informații."
+    "coordinatesUnavailable": "Datele de localizare nu sunt încă disponibile pentru această proprietate, așa că nu putem genera informații.",
+    "serviceUnavailable": "Serviciul AI este temporar indisponibil. Te rugăm să încerci mai târziu."
   },
   "photos": {
     "title": "Fotografii",
@@ -591,7 +621,17 @@
     "videoTour": "Tur video",
     "enter3DTour": "Intră în turul 3D",
     "view3DMap": "Hartă 3D a locației",
-    "seeOnFloorPlan": "Vedeți unde a fost făcută această fotografie pe plan"
+    "seeOnFloorPlan": "Vedeți unde a fost făcută această fotografie pe plan",
+    "viewImages": "Vezi imaginile proprietății",
+    "videoEmbedNotSupported": "Acest link video nu poate fi încorporat direct",
+    "openVideo": "Deschide videoclipul",
+    "prevImage": "Imaginea anterioară",
+    "nextImage": "Imaginea următoare",
+    "forRent": "Închiriere",
+    "forSale": "Vânzare",
+    "backToPhotos": "Înapoi la fotografii",
+    "forRentLong": "De închiriat",
+    "forSaleLong": "De vânzare"
   },
   "viewings": {
     "title": "Cereri de Vizionare",
@@ -704,7 +744,9 @@
       "done": "Gata",
       "save": "Salvare",
       "hint": "Desenați pe imagine pentru adnotare",
-      "sendToChat": "Trimite"
+      "sendToChat": "Trimite",
+      "sendError": "Eroare",
+      "sendFailed": "Trimiterea imaginii adnotate a eșuat."
     }
   },
   "sectionNav": {
@@ -807,5 +849,145 @@
     "perMonthNote": "Chirii lunare · cele săptămânale convertite",
     "perNightNote": "Doar cazări pe noapte",
     "villasIncluded": "Inclusiv alte vile"
+  },
+  "similarProperties": {
+    "agencyTitle": "Mai multe de la {{agency}}",
+    "titleRent": "Închirieri similare în {{city}}",
+    "title": "Proprietăți similare în {{city}}",
+    "agencySubtitle": "Alte anunțuri de la {{agency}}",
+    "subtitle": "Explorează mai multe {{type}} de {{action}} în {{city}}, {{country}}"
+  },
+  "socialVideo": {
+    "title": "Videoclipul proprietății",
+    "embedFailed": "Videoclipul nu a putut fi încărcat",
+    "openIn": "Deschide în {{platform}}"
+  },
+  "specs": {
+    "beds": "Dormitoare",
+    "baths": "Băi"
+  },
+  "ai": {
+    "swipeDone": "{{count}} proprietăți salvate!",
+    "swipeNoneSaved": "Nicio proprietate salvată",
+    "swipeCheckFavorites": "Verifică favoritele pentru a le compara",
+    "swipeTryAgain": "Încearcă o altă căutare pentru a găsi proprietatea visurilor tale",
+    "goToFavorites": "Mergi la favorite",
+    "backToChat": "Înapoi la chat",
+    "swipeTitle": "Potrivirile tale",
+    "saved": "salvate",
+    "swipeHint": "Glisează la dreapta pentru a salva, la stânga pentru a sări"
+  },
+  "priceDrop": "PREȚ REDUS",
+  "priceUp": "PREȚ CRESCUT",
+  "errors": {
+    "errorTitle": "Eroare",
+    "saveFailed": "Salvarea proprietății a eșuat. Te rugăm să încerci din nou.",
+    "conversationFailed": "Începerea conversației a eșuat. Te rugăm să încerci din nou."
+  },
+  "viewDetails": "Vezi detalii",
+  "source": {
+    "viewOriginal": "Vezi pe {{source}}",
+    "listedOn": "Publicat pe {{source}}"
+  },
+  "inquiry": {
+    "nameRequired": "Numele este obligatoriu",
+    "validEmailRequired": "Este necesar un email valid",
+    "messageRequired": "Mesajul este obligatoriu",
+    "sendError": "Trimiterea solicitării a eșuat. Te rugăm să încerci din nou.",
+    "title": "Trimite o solicitare",
+    "successTitle": "Solicitare trimisă!",
+    "successMessage": "Mesajul tău a fost trimis proprietarului. Te va contacta în curând.",
+    "yourName": "Numele tău",
+    "yourEmail": "Emailul tău",
+    "yourPhone": "Telefonul tău (opțional)",
+    "message": "Mesajul tău",
+    "template1": "Bună ziua, sunt interesat de această proprietate. Mai este disponibilă? Aș dori să programez o vizionare.",
+    "scheduleViewing": "Programează vizionare",
+    "template2": "Bună ziua, aș dori mai multe informații despre această proprietate. Îmi puteți oferi detalii despre cartier și facilitățile din apropiere?",
+    "moreInfo": "Mai multe informații",
+    "template3": "Bună ziua, prețul este negociabil? Sunt un cumpărător serios și doresc să iau o decizie în curând.",
+    "priceQuestion": "Preț negociabil?",
+    "sending": "Se trimite...",
+    "sendInquiry": "Trimite solicitarea",
+    "privacyNote": "Prin trimitere, ești de acord să fii contactat de proprietar în legătură cu acest anunț."
+  },
+  "priceHistorySection": {
+    "pricingSchedule": "Program de prețuri",
+    "ongoing": "În desfășurare",
+    "perMonth": "/lună",
+    "current": "Curent",
+    "changeHistory": "Istoricul modificărilor de preț",
+    "listedBadge": "Publicat",
+    "currentPrice": "Preț curent",
+    "listedAt": "Preț inițial",
+    "totalChange": "Modificare totală",
+    "pricePerSqm": "Preț / m²",
+    "lastChanged": "Ultima modificare",
+    "listed": "Publicat",
+    "today": "Astăzi",
+    "daysAgo": "acum {{count}} zile",
+    "changesRecorded": "Modificări înregistrate: {{count}}",
+    "priceTrend": "Evoluția prețului",
+    "changeMagnitude": "Amploarea modificării",
+    "pricePerSqmTrend": "Evoluția prețului pe m²",
+    "valuesInEurPerSqm": "Valori în €/m²",
+    "title": "Istoricul prețului",
+    "records": "Înregistrări: {{count}}"
+  },
+  "ui": {
+    "imageViewerModal": {
+      "zoomOut": "Micșorează",
+      "resetZoom": "Resetează zoomul",
+      "zoomIn": "Mărește",
+      "toggleAnnotationMode": "Comută modul de adnotare",
+      "undoLastStroke": "Anulează ultima linie",
+      "clearAllAnnotations": "Șterge toate adnotările",
+      "downloadAnnotatedImage": "Descarcă imaginea adnotată",
+      "sendAnnotatedImageToChat": "Trimite imaginea adnotată în chat"
+    },
+    "propertyGuide": {
+      "closeGuide": "Închide ghidul",
+      "previousTip": "Sfatul anterior",
+      "nextTip": "Sfatul următor",
+      "propertyGuideMascotClickFor": "Mascota ghid - clic pentru sfaturi, clic dreapta pentru acțiuni rapide"
+    },
+    "propertyCard": {
+      "previousImage": "Imaginea anterioară",
+      "nextImage": "Imaginea următoare",
+      "luxuryVilla": "VILĂ DE LUX",
+      "promoted": "PROMOVAT",
+      "perM": "pe m²",
+      "wineCellar": "Cramă",
+      "seaView": "Vedere la mare",
+      "cityView": "Vedere spre oraș",
+      "gardenView": "Vedere spre grădină",
+      "streetView": "Vedere spre stradă",
+      "failedToSavePropertyPlease": "Salvarea proprietății a eșuat. Te rugăm să încerci din nou.",
+      "youCanCompareAMaximum": "Poți compara maximum 5 proprietăți."
+    },
+    "socialVideoEmbed": {
+      "loadingTiktokVideo": "Se încarcă videoclipul TikTok...",
+      "instagramVideo": "Videoclip Instagram"
+    },
+    "propertyGallery": {
+      "loadingTiktokVideo": "Se încarcă videoclipul TikTok...",
+      "propertyVideoTour": "Tur video al proprietății"
+    },
+    "propertyCommon": {
+      "moreFeatures": "alte caracteristici"
+    },
+    "propertyMapLink": {
+      "loadingMap": "Se încarcă harta..."
+    },
+    "highlightedPropertyCard": {
+      "perM": "pe m²",
+      "failedToSavePropertyPlease": "Salvarea proprietății a eșuat. Te rugăm să încerci din nou."
+    },
+    "neighborhoodInsights": {
+      "anUnknownErrorOccurred": "A apărut o eroare necunoscută."
+    },
+    "imageEditorModal": {
+      "iHaveSomeQuestionsAbout": "Am câteva întrebări despre această proprietate. Vă rog să vedeți adnotările mele:"
+    }
   }
 }

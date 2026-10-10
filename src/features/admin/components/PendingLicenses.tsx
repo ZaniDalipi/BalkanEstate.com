@@ -27,7 +27,7 @@ const PendingLicenses: React.FC = () => {
       const data = await getPendingLicenses();
       setAgents(data.agents);
     } catch {
-      setError('Failed to load pending licenses');
+      setError(t('admin:ui.pendingLicenses.failedToLoadPendingLicenses', 'Failed to load pending licenses'));
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ const PendingLicenses: React.FC = () => {
         return id !== userId;
       }));
     } catch {
-      setError('Failed to approve license');
+      setError(t('admin:ui.pendingLicenses.failedToApproveLicense', 'Failed to approve license'));
     } finally {
       setProcessingId(null);
     }
@@ -60,7 +60,7 @@ const PendingLicenses: React.FC = () => {
         return id !== userId;
       }));
     } catch {
-      setError('Failed to reject license');
+      setError(t('admin:ui.pendingLicenses.failedToRejectLicense', 'Failed to reject license'));
     } finally {
       setProcessingId(null);
     }
@@ -93,7 +93,7 @@ const PendingLicenses: React.FC = () => {
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">Dismiss</button>
+          <button onClick={() => setError(null)} className="ml-2 underline">{t('admin:ui.pendingLicenses.dismiss', 'Dismiss')}</button>
         </div>
       )}
 
@@ -132,7 +132,7 @@ const PendingLicenses: React.FC = () => {
                       />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{user?.name || 'Unknown'}</p>
+                      <p className="font-semibold text-gray-900 truncate">{user?.name || t('admin:ui.pendingLicenses.unknown', 'Unknown')}</p>
                       <p className="text-xs text-gray-500 truncate">{user?.email || ''}</p>
                       {user?.country && (
                         <p className="text-xs text-gray-400">{user.city ? `${user.city}, ` : ''}{user.country}</p>

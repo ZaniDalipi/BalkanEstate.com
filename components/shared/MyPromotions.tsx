@@ -149,12 +149,12 @@ const MyPromotions: React.FC = () => {
       if (autoExtend) {
         setToastMessage({
           type: 'info',
-          message: 'Auto-extend enabled. Your promotion will automatically renew when it expires. Payments coming soon!',
+          message: t('common:ui.myPromotions.autoExtendEnabledYourPromotion', 'Auto-extend enabled. Your promotion will automatically renew when it expires. Payments coming soon!'),
         });
       } else {
         setToastMessage({
           type: 'success',
-          message: 'Auto-extend disabled. Your promotion will expire naturally.',
+          message: t('common:ui.myPromotions.autoExtendDisabledYourPromotion', 'Auto-extend disabled. Your promotion will expire naturally.'),
         });
       }
     } catch (error: any) {
@@ -163,7 +163,7 @@ const MyPromotions: React.FC = () => {
       if (errorMessage.toLowerCase().includes('expired')) {
         setToastMessage({
           type: 'info',
-          message: 'This promotion has expired. Use the "Extend" button to reactivate it.',
+          message: t('common:ui.myPromotions.thisPromotionHasExpiredUse', 'This promotion has expired. Use the "Extend" button to reactivate it.'),
         });
       } else {
         setToastMessage({
@@ -183,14 +183,14 @@ const MyPromotions: React.FC = () => {
       } else {
         setToastMessage({
           type: 'info',
-          message: 'Payments coming soon! Auto-extend payment will be available shortly.',
+          message: t('common:ui.myPromotions.paymentsComingSoonAutoExtend', 'Payments coming soon! Auto-extend payment will be available shortly.'),
         });
         setActionLoading(null);
       }
     } catch (error: any) {
       setToastMessage({
         type: 'info',
-        message: 'Payments coming soon! Contact sales@balkanestateai.com to extend your promotion.',
+        message: t('common:ui.myPromotions.paymentsComingSoonContactSales', 'Payments coming soon! Contact sales@balkanestateai.com to extend your promotion.'),
       });
       setActionLoading(null);
     }
@@ -277,15 +277,15 @@ const MyPromotions: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-neutral-500">
             <div className={`w-2 h-2 rounded-full ${isFetching ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`} />
-            <span>{isFetching ? 'Syncing...' : 'Live'}</span>
+            <span>{isFetching ? 'Syncing...' : t('common:ui.myPromotions.live', 'Live')}</span>
             <span className="text-neutral-400">|</span>
-            <span>Updated: {formatLastUpdated(dataUpdatedAt)}</span>
+            <span>{t('common:ui.myPromotions.updated', 'Updated:')} {formatLastUpdated(dataUpdatedAt)}</span>
           </div>
           <button
             onClick={() => refetch()}
             disabled={isFetching}
             className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors disabled:opacity-50"
-            title="Refresh promotions"
+            title={t('common:ui.myPromotions.refreshPromotions', 'Refresh promotions')}
           >
             <ArrowPathIcon className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
           </button>

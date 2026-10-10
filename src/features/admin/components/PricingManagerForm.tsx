@@ -214,7 +214,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                   value={editingProduct.savedSearchesLimit}
                   onChange={(e) => handleNumberChange('savedSearchesLimit', e.target.value, -1)}
                   min="-1"
-                  placeholder="-1 for unlimited"
+                  placeholder={t('admin:ui.pricingManagerForm.n1ForUnlimited', '-1 for unlimited')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500 mt-1">{t('admin:pricing.form.unlimitedHelp', '-1 = unlimited')}</p>
@@ -397,7 +397,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                           ? 'text-gray-300 cursor-not-allowed'
                           : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'
                       }`}
-                      title="Move up"
+                      title={t('admin:ui.pricingManagerForm.moveUp', 'Move up')}
                     >
                       <ChevronUpIcon className="w-3 h-3" />
                     </button>
@@ -410,7 +410,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
                           ? 'text-gray-300 cursor-not-allowed'
                           : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'
                       }`}
-                      title="Move down"
+                      title={t('admin:ui.pricingManagerForm.moveDown', 'Move down')}
                     >
                       <ChevronDownIcon className="w-3 h-3" />
                     </button>

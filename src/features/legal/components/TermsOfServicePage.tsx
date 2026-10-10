@@ -350,8 +350,8 @@ const TermsOfServicePage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
-              <p className="text-gray-700">Email: {CONTACT_CONFIG.email.legal}</p>
-              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
+              <p className="text-gray-700">{t('legal:ui.termsOfServicePage.email', 'Email:')} {CONTACT_CONFIG.email.legal}</p>
+              <p className="text-gray-700">{t('legal:ui.termsOfServicePage.phone', 'Phone:')} {CONTACT_CONFIG.phone.primary}</p>
             </div>
           </section>
             </div>

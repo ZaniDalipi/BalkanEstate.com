@@ -491,7 +491,7 @@ const SiteSettingsManager: React.FC = () => {
                   <div className="w-8 h-8 rounded border border-gray-200 bg-white flex items-center justify-center overflow-hidden">
                     <img
                       src={form.faviconUrl}
-                      alt="Favicon"
+                      alt={t('admin:ui.siteSettingsManager.favicon', 'Favicon')}
                       className="w-6 h-6 object-contain"
                       onError={e => (e.currentTarget.style.display = 'none')}
                     />
@@ -600,7 +600,7 @@ const SiteSettingsManager: React.FC = () => {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
-                        Light
+                        {t('admin:ui.siteSettingsManager.light', 'Light')}
                       </button>
                       <button
                         type="button"
@@ -614,7 +614,7 @@ const SiteSettingsManager: React.FC = () => {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
-                        Dark
+                        {t('admin:ui.siteSettingsManager.dark', 'Dark')}
                       </button>
                     </div>
                   </div>
@@ -622,7 +622,7 @@ const SiteSettingsManager: React.FC = () => {
 
                   {/* Primary Colors Group */}
                   <div className="mb-5">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Primary</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">{t('admin:ui.siteSettingsManager.primary', 'Primary')}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {renderColorField(t('admin:siteSettings.email.colorPrimary'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'primary')}
                       {renderColorField(t('admin:siteSettings.email.colorPrimaryDark'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'primaryDark')}
@@ -632,7 +632,7 @@ const SiteSettingsManager: React.FC = () => {
 
                   {/* Text Colors Group */}
                   <div className="mb-5">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Text</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">{t('admin:ui.siteSettingsManager.text', 'Text')}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {renderColorField(t('admin:siteSettings.email.colorText'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'text')}
                       {renderColorField(t('admin:siteSettings.email.colorTextMuted'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'textMuted')}
@@ -641,7 +641,7 @@ const SiteSettingsManager: React.FC = () => {
 
                   {/* Background Colors Group */}
                   <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Background</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">{t('admin:ui.siteSettingsManager.background', 'Background')}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {renderColorField(t('admin:siteSettings.email.colorBackground'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'background')}
                       {renderColorField(t('admin:siteSettings.email.colorBackgroundAlt'), colorThemeTab === 'light' ? 'emailBrandColors' : 'emailBrandColorsDark', 'backgroundAlt')}
@@ -656,7 +656,7 @@ const SiteSettingsManager: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 14h18" />
                     </svg>
-                    Footer
+                    {t('admin:ui.siteSettingsManager.footer', 'Footer')}
                   </h3>
 
                   {renderField(t('admin:siteSettings.email.emailFooterText'), 'emailFooterText', 'All rights reserved.')}
@@ -714,7 +714,7 @@ const SiteSettingsManager: React.FC = () => {
               <div className="xl:col-span-2">
                 <div className="sticky top-6">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-gray-800">Live Preview</h3>
+                    <h3 className="text-sm font-semibold text-gray-800">{t('admin:ui.siteSettingsManager.livePreview', 'Live Preview')}</h3>
                     <div className="flex items-center bg-gray-200 rounded-lg p-0.5">
                       <button
                         type="button"
@@ -728,7 +728,7 @@ const SiteSettingsManager: React.FC = () => {
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
-                        Light
+                        {t('admin:ui.siteSettingsManager.light', 'Light')}
                       </button>
                       <button
                         type="button"
@@ -742,7 +742,7 @@ const SiteSettingsManager: React.FC = () => {
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
-                        Dark
+                        {t('admin:ui.siteSettingsManager.dark', 'Dark')}
                       </button>
                     </div>
                   </div>
@@ -768,13 +768,13 @@ const SiteSettingsManager: React.FC = () => {
                             {form.emailLogoUrl ? (
                               <img
                                 src={form.emailLogoUrl}
-                                alt="Logo"
+                                alt={t('admin:ui.siteSettingsManager.logo', 'Logo')}
                                 className="h-8 mx-auto object-contain"
                                 onError={e => (e.currentTarget.style.display = 'none')}
                               />
                             ) : (
                               <span className="text-white font-bold text-lg">
-                                {form.companyName || 'BalkanEstateAI'}
+                                {form.companyName || t('admin:ui.siteSettingsManager.balkanestateai', 'BalkanEstateAI')}
                               </span>
                             )}
                           </div>
@@ -785,20 +785,20 @@ const SiteSettingsManager: React.FC = () => {
                               className="text-base font-semibold mb-2"
                               style={{ color: previewColors?.text || defaults.text }}
                             >
-                              Welcome to {form.companyName || 'BalkanEstateAI'}!
+                              {t('admin:ui.siteSettingsManager.welcomeTo', 'Welcome to')} {form.companyName || t('admin:ui.siteSettingsManager.balkanestateai', 'BalkanEstateAI')}!
                             </h4>
                             <p
                               className="text-sm leading-relaxed mb-4"
                               style={{ color: previewColors?.textMuted || defaults.textMuted }}
                             >
-                              This is a preview of how your emails will look with the current brand settings.
+                              {t('admin:ui.siteSettingsManager.thisIsAPreviewOf', 'This is a preview of how your emails will look with the current brand settings.')}
                             </p>
                             <div className="text-center">
                               <span
                                 className="inline-block px-5 py-2 rounded-lg text-white text-sm font-medium"
                                 style={{ backgroundColor: previewColors?.accent || defaults.accent }}
                               >
-                                Action Button
+                                {t('admin:ui.siteSettingsManager.actionButton', 'Action Button')}
                               </span>
                             </div>
                           </div>
@@ -819,7 +819,7 @@ const SiteSettingsManager: React.FC = () => {
                                     className="text-xs font-medium underline"
                                     style={{ color: previewColors?.primary || defaults.primary }}
                                   >
-                                    {link.label || 'Link'}
+                                    {link.label || t('admin:ui.siteSettingsManager.link', 'Link')}
                                   </span>
                                 ))}
                               </div>
@@ -828,14 +828,14 @@ const SiteSettingsManager: React.FC = () => {
                               className="text-xs"
                               style={{ color: previewColors?.textMuted || defaults.textMuted }}
                             >
-                              {form.emailFooterText || 'All rights reserved.'}
+                              {form.emailFooterText || t('admin:ui.siteSettingsManager.allRightsReserved', 'All rights reserved.')}
                             </p>
                           </div>
                         </div>
                       </div>
                     );
                   })()}
-                  <p className="text-xs text-gray-400 mt-2 text-center">Updates in real-time as you change settings</p>
+                  <p className="text-xs text-gray-400 mt-2 text-center">{t('admin:ui.siteSettingsManager.updatesInRealTimeAs', 'Updates in real-time as you change settings')}</p>
                 </div>
               </div>
             </div>
@@ -869,13 +869,13 @@ const SiteSettingsManager: React.FC = () => {
                 <h3 className="text-sm font-semibold text-gray-800 mb-3">{t('admin:siteSettings.seo.previewTitle')}</h3>
                 <div className="border border-gray-200 rounded-lg p-4 bg-white max-w-xl">
                   <p className="text-blue-700 text-lg font-medium leading-tight truncate">
-                    {form.siteTitle || 'Page Title'}
+                    {form.siteTitle || t('admin:ui.siteSettingsManager.pageTitle', 'Page Title')}
                   </p>
                   <p className="text-green-700 text-sm mt-1 truncate">
                     {form.frontendUrl || 'https://balkanestateai.com'}
                   </p>
                   <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                    {form.siteDescription || 'Page description will appear here...'}
+                    {form.siteDescription || t('admin:ui.siteSettingsManager.pageDescriptionWillAppearHere', 'Page description will appear here...')}
                   </p>
                 </div>
               </div>

@@ -217,19 +217,19 @@ const PrivacyPolicyPage: React.FC = () => {
                 <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.provider', 'Our payment processor handles all payment transactions, VAT/tax compliance, invoicing, and refunds on our behalf. Your payment information is processed securely and we do not store your full credit card details.')}</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-1">Google Analytics</h4>
+                <h4 className="font-semibold text-gray-800 mb-1">{t('legal:ui.privacyPolicyPage.googleAnalytics', 'Google Analytics')}</h4>
                 <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.analytics', 'Website analytics to understand user behavior and improve our services. We use IP anonymization.')}</p>
-                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">{t('legal:ui.privacyPolicyPage.privacyPolicy', 'Privacy Policy →')}</a>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-1">Cloudflare</h4>
+                <h4 className="font-semibold text-gray-800 mb-1">{t('legal:ui.privacyPolicyPage.cloudflare', 'Cloudflare')}</h4>
                 <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.cloudflare', 'Security and performance services including DDoS protection and content delivery.')}</p>
-                <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+                <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">{t('legal:ui.privacyPolicyPage.privacyPolicy', 'Privacy Policy →')}</a>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-1">AWS (Amazon Web Services)</h4>
+                <h4 className="font-semibold text-gray-800 mb-1">{t('legal:ui.privacyPolicyPage.awsAmazonWebServices', 'AWS (Amazon Web Services)')}</h4>
                 <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.aws', 'Cloud hosting and storage services. Data is stored in EU data centers.')}</p>
-                <a href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+                <a href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">{t('legal:ui.privacyPolicyPage.privacyPolicy', 'Privacy Policy →')}</a>
               </div>
             </div>
           </section>
@@ -274,7 +274,7 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{t('legal:privacy.dpo.role', 'Data Protection Officer')}</strong></p>
-              <p className="text-gray-700">Email: dpo@balkanestateai.com</p>
+              <p className="text-gray-700">{t('legal:ui.privacyPolicyPage.emailDpoBalkanestateaiCom', 'Email: dpo@balkanestateai.com')}</p>
             </div>
           </section>
 
@@ -288,8 +288,8 @@ const PrivacyPolicyPage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
-              <p className="text-gray-700">Email: {CONTACT_CONFIG.email.privacy}</p>
-              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
+              <p className="text-gray-700">{t('legal:ui.privacyPolicyPage.email', 'Email:')} {CONTACT_CONFIG.email.privacy}</p>
+              <p className="text-gray-700">{t('legal:ui.privacyPolicyPage.phone', 'Phone:')} {CONTACT_CONFIG.phone.primary}</p>
               <p className="text-gray-700">{t('legal:privacy.contact.address', 'Address: Skopje, North Macedonia')}</p>
             </div>
           </section>

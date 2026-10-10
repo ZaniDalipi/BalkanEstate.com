@@ -78,13 +78,13 @@ const UserManager: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm">
               <span className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`}></span>
-              <span className="text-gray-600">{isRefetching ? 'Syncing...' : 'Live'}</span>
+              <span className="text-gray-600">{isRefetching ? 'Syncing...' : t('admin:ui.userManager.live', 'Live')}</span>
             </div>
             <button
               onClick={() => refetch()}
               disabled={isRefetching}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-              title="Refresh users"
+              title={t('admin:ui.userManager.refreshUsers', 'Refresh users')}
             >
               <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
             </button>
@@ -109,7 +109,7 @@ const UserManager: React.FC = () => {
             onChange={(e) => setFilterRole(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Roles</option>
+            <option value="all">{t('admin:ui.userManager.allRoles', 'All Roles')}</option>
             <option value="buyer">{t('admin:users.roles.buyer')}</option>
             <option value="private_seller">{t('admin:users.roles.seller')}</option>
             <option value="agent">{t('admin:users.roles.agent')}</option>
@@ -121,9 +121,9 @@ const UserManager: React.FC = () => {
             onChange={(e) => setFilterVerification(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Verification</option>
-            <option value="verified">Email Verified</option>
-            <option value="unverified">Email Not Verified</option>
+            <option value="all">{t('admin:ui.userManager.allVerification', 'All Verification')}</option>
+            <option value="verified">{t('admin:ui.userManager.emailVerified', 'Email Verified')}</option>
+            <option value="unverified">{t('admin:ui.userManager.emailNotVerified', 'Email Not Verified')}</option>
           </select>
 
           <select
@@ -131,9 +131,9 @@ const UserManager: React.FC = () => {
             onChange={(e) => setFilterSubscription(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="all">All Subscription</option>
-            <option value="subscribed">Subscribed</option>
-            <option value="free">Free</option>
+            <option value="all">{t('admin:ui.userManager.allSubscription', 'All Subscription')}</option>
+            <option value="subscribed">{t('admin:ui.userManager.subscribed', 'Subscribed')}</option>
+            <option value="free">{t('admin:ui.userManager.free', 'Free')}</option>
           </select>
         </div>
       </div>
@@ -155,13 +155,13 @@ const UserManager: React.FC = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verification</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subscription</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.userManager.user', 'User')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.userManager.contact', 'Contact')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.userManager.role', 'Role')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.userManager.verification', 'Verification')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.userManager.subscription', 'Subscription')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.userManager.joined', 'Joined')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.userManager.actions', 'Actions')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -221,7 +221,7 @@ const UserManager: React.FC = () => {
                       ) : (
                         <XCircleIcon className="w-3 h-3" />
                       )}
-                      Email {user.isEmailVerified ? 'Verified' : 'Not Verified'}
+                      Email {user.isEmailVerified ? t('admin:ui.userManager.verified', 'Verified') : t('admin:ui.userManager.notVerified', 'Not Verified')}
                     </button>
 
                     {user.role === 'agent' && (
@@ -235,7 +235,7 @@ const UserManager: React.FC = () => {
                         title={`Click to ${user.licenseVerified ? 'unverify' : 'verify'} license`}
                       >
                         <ShieldCheckIcon className="w-3 h-3" />
-                        License {user.licenseVerified ? 'Verified' : 'Pending'}
+                        {t('admin:ui.userManager.license', 'License')} {user.licenseVerified ? t('admin:ui.userManager.verified', 'Verified') : t('admin:ui.userManager.pending', 'Pending')}
                       </button>
                     )}
                   </div>
@@ -244,14 +244,14 @@ const UserManager: React.FC = () => {
                   {user.isSubscribed ? (
                     <div>
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                        {user.subscriptionPlan || user.subscriptionType || 'Active'}
+                        {user.subscriptionPlan || user.subscriptionType || t('admin:ui.userManager.active', 'Active')}
                       </span>
                       {user.subscriptionStatus && (
                         <div className="text-xs text-gray-500 mt-1 capitalize">{user.subscriptionStatus}</div>
                       )}
                       {user.subscriptionExpiresAt && (
                         <div className="text-xs text-gray-400 mt-1">
-                          Expires: {formatDate(user.subscriptionExpiresAt)}
+                          {t('admin:ui.userManager.expires', 'Expires:')} {formatDate(user.subscriptionExpiresAt)}
                         </div>
                       )}
                       {user.subscriptionSource && (
@@ -261,7 +261,7 @@ const UserManager: React.FC = () => {
                       )}
                     </div>
                   ) : (
-                    <span className="text-gray-500 text-sm">Free</span>
+                    <span className="text-gray-500 text-sm">{t('admin:ui.userManager.free', 'Free')}</span>
                   )}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -272,21 +272,21 @@ const UserManager: React.FC = () => {
                     <button
                       onClick={() => handleViewUser(user)}
                       className="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
-                      title="View details"
+                      title={t('admin:ui.userManager.viewDetails', 'View details')}
                     >
                       <EyeIcon className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleEditUser(user)}
                       className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded"
-                      title="Edit user"
+                      title={t('admin:ui.userManager.editUser', 'Edit user')}
                     >
                       <PencilIcon className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDeleteUser(user._id, user.name)}
                       className="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded"
-                      title="Delete user"
+                      title={t('admin:ui.userManager.deleteUser', 'Delete user')}
                     >
                       <TrashIcon className="w-5 h-5" />
                     </button>
@@ -299,7 +299,7 @@ const UserManager: React.FC = () => {
 
         {users.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            No users found matching your filters.
+            {t('admin:ui.userManager.noUsersFoundMatchingYour', 'No users found matching your filters.')}
           </div>
         )}
       </div>
@@ -308,7 +308,7 @@ const UserManager: React.FC = () => {
       {totalPages > 1 && (
         <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
+            {t('admin:ui.userManager.page', 'Page')} {currentPage} of {totalPages}
           </div>
           <div className="flex gap-2">
             <button
@@ -316,14 +316,14 @@ const UserManager: React.FC = () => {
               disabled={currentPage === 1}
               className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Previous
+              {t('admin:ui.userManager.previous', 'Previous')}
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
               className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Next
+              {t('admin:ui.userManager.next', 'Next')}
             </button>
           </div>
         </div>

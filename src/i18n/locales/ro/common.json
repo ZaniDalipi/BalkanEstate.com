@@ -227,7 +227,7 @@
     "cableTV": "Cablu TV",
     "intercom": "Interfon",
     "alarm": "Sistem de Alarmă",
-    "cctv": "CCTV",
+    "cctv": "Supraveghere video",
     "doorman": "Portar"
   },
   "imageTags": {
@@ -341,7 +341,8 @@
     "authFailed": "Autentificare eșuată",
     "authFailedMessage": "Autentificarea a eșuat. Vă rugăm să încercați din nou.",
     "errorLoadingGoogleMaps": "Eroare la încărcarea Google Maps",
-    "checkApiKeyConfiguration": "Vă rugăm să verificați configurația cheii API"
+    "checkApiKeyConfiguration": "Vă rugăm să verificați configurația cheii API",
+    "generic": "Ceva nu a funcționat"
   },
   "actions": {
     "cancel": "Anulează",
@@ -351,7 +352,8 @@
     "save": "Salvează",
     "delete": "Șterge",
     "edit": "Editează",
-    "submit": "Trimite"
+    "submit": "Trimite",
+    "ok": "OK"
   },
   "validation": {
     "required": "Acest câmp este obligatoriu",
@@ -462,7 +464,7 @@
     "showAll": "Afișează tot",
     "typeArea": "Suprafață",
     "typeDistance": "Distanță",
-    "typeDistShort": "Dist",
+    "typeDistShort": "Dist.",
     "viewOnMap": "Vizualizare pe hartă",
     "deleteConfirmation": "Șterge \"{{name}}\"?",
     "deleting": "Se șterge...",
@@ -647,12 +649,214 @@
     "resetsOn": "Se resetează pe {{date}}"
   },
   "ads": {
-    "previewMode": "Ad preview — ad slots are highlighted",
-    "exitPreview": "Exit",
-    "stickyBottomBar": "Sticky bottom bar",
-    "getInTouch": "Get in touch →",
-    "advertiseCta": "Advertise with us — get in touch"
+    "previewMode": "Previzualizare reclame — spațiile publicitare sunt evidențiate",
+    "exitPreview": "Ieșire",
+    "stickyBottomBar": "Bară fixă jos",
+    "getInTouch": "Contactează-ne →",
+    "advertiseCta": "Fă publicitate la noi — contactează-ne",
+    "close": "Închide reclama",
+    "advertisement": "Reclamă",
+    "yourAdHere": "Reclama ta aici",
+    "advertiseWithUs": "Fă publicitate la noi",
+    "sponsored": "Sponsorizat",
+    "dismiss": "Închide reclama"
   },
   "note": "Notă",
-  "loadMore": "Încarcă mai multe"
+  "loadMore": "Încarcă mai multe",
+  "notifications": "Notificări",
+  "markAllRead": "Marchează toate ca citite",
+  "noNotifications": "Încă nu ai notificări",
+  "viewAll": "Vezi toate notificările",
+  "cookies": {
+    "title": "Folosim cookie-uri",
+    "shortDescription": "pentru a-ți îmbunătăți experiența și a analiza traficul.",
+    "learnMore": "Află mai multe",
+    "close": "Închide fără a accepta — vor fi folosite doar cookie-urile esențiale",
+    "acceptAll": "Acceptă toate",
+    "rejectAll": "Respinge toate",
+    "customize": "Personalizează",
+    "settingsTitle": "Setări cookie-uri",
+    "essential": "Esențiale",
+    "alwaysOn": "Mereu active",
+    "functional": "Funcționale",
+    "analytics": "Analitice",
+    "marketing": "Marketing",
+    "savePreferences": "Salvează preferințele"
+  },
+  "common": {
+    "close": "Închide"
+  },
+  "comingSoon": {
+    "title": "Plățile vin în curând",
+    "message": "În prezent căutăm un furnizor de plăți partener. Plățile directe nu sunt acceptate momentan. Îți poți activa abonamentul instant folosind un cod de cupon sau ne poți contacta pentru activare manuală.",
+    "haveCoupon": "V-am oferit un cupon?",
+    "couponDescription": "Introdu codul pentru a-ți activa instant abonamentul",
+    "activateCoupon": "Activează cu cupon",
+    "contactUs": "Contactează-ne pentru procesare manuală:",
+    "responseTime": "De obicei răspundem în 24 de ore",
+    "badge": "Căutăm un partener de plăți"
+  },
+  "wk": "săpt.",
+  "day": "zi",
+  "mo": "lună",
+  "syncing": "Se sincronizează...",
+  "live": "Live",
+  "updating": "Se actualizează...",
+  "unknownError": "A apărut o eroare necunoscută",
+  "goHome": "Mergi la pagina principală",
+  "myAccount": "Contul meu",
+  "login": "Autentificare",
+  "heroTagline": "Căutare de proprietăți cu AI în 11 țări din Balcani",
+  "weekdays": {
+    "mon": "Lun",
+    "tue": "Mar",
+    "wed": "Mie",
+    "thu": "Joi",
+    "fri": "Vin",
+    "sat": "Sâm",
+    "sun": "Dum"
+  },
+  "ui": {
+    "agencyCreationModal": {
+      "eGRe123456": "ex., RE-123456",
+      "discardChanges": "Renunți la modificări?",
+      "youHaveUnsavedChangesAre": "Ai modificări nesalvate. Sigur vrei să închizi formularul?",
+      "discard": "Renunță",
+      "keepEditing": "Continuă editarea",
+      "close": "Închide"
+    },
+    "featuredSubscriptionDialog": {
+      "directPaymentsAreNotYet": "Plățile directe nu sunt încă disponibile",
+      "weAreCurrentlyLookingFor": "În prezent căutăm un furnizor de plăți partener. Îți poți activa gratuit abonamentul de agenție recomandată cu un cod de cupon sau ne poți contacta la",
+      "toArrangeItManually": "pentru a o aranja manual.",
+      "paymentNotAvailableYet": "Plata nu este încă disponibilă",
+      "applyA100OffCoupon": "Aplică un cupon cu reducere de 100% pentru a-ți activa gratuit abonamentul recomandat."
+    },
+    "achievementsSection": {
+      "expired": "EXPIRAT",
+      "ddMmYyyy": "ZZ/LL/AAAA"
+    },
+    "header": {
+      "new": "+ Nou",
+      "toggleSidebarNavigation": "Comută meniul lateral"
+    },
+    "text-scroll-animation": {
+      "scrollToSeeMore": "Derulează pentru a vedea mai mult"
+    },
+    "floorInputCombined": {
+      "totalFloorsInBuilding": "Total etaje în clădire",
+      "floorNumber": "Numărul etajului"
+    },
+    "z360TourInput": {
+      "previewTour": "Previzualizează turul",
+      "n360VirtualTourPreview": "Previzualizare tur virtual 360°"
+    },
+    "animations": {
+      "loading": "Se încarcă"
+    },
+    "glass-cards": {
+      "promoted": "Promovat",
+      "new": "Nou"
+    },
+    "propertyInquiryModal": {
+      "close": "Închide"
+    },
+    "defaultAvatar": {
+      "avatar": "Avatar"
+    },
+    "promotionOfferModal": {
+      "directPaymentsAreNotYet": "Plățile directe nu sunt încă disponibile. Folosește un cupon pentru activare gratuită.",
+      "activateWithCoupon": "Activează cu cupon"
+    },
+    "myPromotions": {
+      "live": "Live",
+      "updated": "Actualizat:",
+      "refreshPromotions": "Reîmprospătează promovările",
+      "autoExtendEnabledYourPromotion": "Prelungirea automată este activată. Promovarea ta se va reînnoi automat la expirare. Plățile vin în curând!",
+      "autoExtendDisabledYourPromotion": "Prelungirea automată este dezactivată. Promovarea ta va expira normal.",
+      "thisPromotionHasExpiredUse": "Această promovare a expirat. Folosește butonul „Prelungește” pentru a o reactiva.",
+      "paymentsComingSoonAutoExtend": "Plățile vin în curând! Plata pentru prelungirea automată va fi disponibilă în curând.",
+      "paymentsComingSoonContactSales": "Plățile vin în curând! Contactează sales@balkanestateai.com pentru a-ți prelungi promovarea."
+    },
+    "alertDialog": {
+      "close": "Închide"
+    },
+    "phoneInput": {
+      "countryCode": "Prefixul țării",
+      "phoneNumber": "Număr de telefon"
+    },
+    "confirmationModal": {
+      "close": "Închide"
+    },
+    "button": {
+      "loading": "Se încarcă"
+    },
+    "notificationModal": {
+      "close": "Închide"
+    },
+    "modal": {
+      "closeModal": "Închide fereastra"
+    },
+    "consentBanner": {
+      "cookieConsent": "Consimțământ cookie-uri"
+    },
+    "z360TourEmbed": {
+      "z360Tour": "Tur Z360"
+    },
+    "mapAgentAvatar": {
+      "closePanel": "Închide panoul"
+    },
+    "breadcrumbs": {
+      "breadcrumb": "Navigare"
+    },
+    "promotedPropertyCard": {
+      "property": "Proprietate",
+      "untitledProperty": "Proprietate fără titlu",
+      "viewPromotionHistory": "Vezi istoricul promovărilor"
+    },
+    "promotionModal": {
+      "closeModal": "Închide fereastra"
+    },
+    "beforeAfterSlider": {
+      "comparisonSlider": "Glisor de comparare"
+    },
+    "agentInquiryModal": {
+      "youExampleCom": "tu@exemplu.com"
+    },
+    "heroSearchSection": {
+      "clearSearch": "Șterge căutarea"
+    },
+    "avatarCustomizer": {
+      "discardChanges": "Renunți la modificări?",
+      "youHaveUnsavedAvatarChanges": "Ai modificări nesalvate ale avatarului. Sigur vrei să închizi?",
+      "discard": "Renunță",
+      "keepEditing": "Continuă editarea"
+    },
+    "liquid-glass": {
+      "howCanIHelpYou": "Cu ce te pot ajuta astăzi?"
+    },
+    "apple-liquid-glass-switcher": {
+      "chooseTheme": "Alege tema"
+    },
+    "agencyManagementSection": {
+      "pleaseSelectAnAgency": "Te rugăm să selectezi o agenție",
+      "pleaseEnterTheInvitationCode": "Te rugăm să introduci codul de invitație",
+      "pleaseEnterACouponCode": "Te rugăm să introduci un cod de cupon",
+      "invalidCodeFormatExpectedAbc": "Format de cod invalid. Format așteptat: ABC-XXXXXXXX",
+      "onlyRegisteredAgentsCanRedeem": "Doar agenții înregistrați pot folosi cupoanele agenției. Te rugăm să te înregistrezi mai întâi ca agent.",
+      "userDataUnavailablePleaseRefresh": "Datele utilizatorului nu sunt disponibile. Te rugăm să reîmprospătezi pagina.",
+      "youAreNotLoggedIn": "Nu ești autentificat. Te rugăm să te autentifici și să încerci din nou.",
+      "unexpectedResponseFromServerPlease": "Răspuns neașteptat de la server. Te rugăm să încerci din nou.",
+      "invalidCouponCodePleaseCheck": "Cod de cupon invalid. Te rugăm să verifici codul și să încerci din nou.",
+      "thisCouponHasAlreadyBeen": "Acest cupon a fost deja folosit de alt agent.",
+      "thisCouponHasExpiredAnd": "Acest cupon a expirat și nu mai poate fi folosit.",
+      "couponNotFoundPleaseVerify": "Cuponul nu a fost găsit. Te rugăm să verifici dacă codul este corect.",
+      "theAgencySubscriptionIsNo": "Abonamentul agenției nu mai este activ. Acest cupon nu poate fi folosit.",
+      "unknownAgency": "Agenție necunoscută"
+    },
+    "profileStatistics": {
+      "noAuthenticationTokenFound": "Nu a fost găsit niciun token de autentificare",
+      "syncFailed": "Sincronizarea a eșuat"
+    }
+  }
 }

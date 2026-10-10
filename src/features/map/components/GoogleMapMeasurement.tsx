@@ -121,7 +121,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 measurementMode === 'area' ? 'bg-white shadow text-emerald-600' : 'text-gray-600 hover:bg-white/50'
               }`}
             >
-              📐 Area
+              {t('search:ui.googleMapMeasurement.area', '📐 Area')}
             </button>
             <button
               onClick={() => { setMeasurementMode('distance'); setMeasurementPoints([]); }}
@@ -129,15 +129,15 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 measurementMode === 'distance' ? 'bg-white shadow text-emerald-600' : 'text-gray-600 hover:bg-white/50'
               }`}
             >
-              📍 Distance
+              {t('search:ui.googleMapMeasurement.distance', '📍 Distance')}
             </button>
           </div>
 
           {/* Instructions */}
           <p className="text-xs text-gray-500 mb-3">
             {measurementMode === 'area'
-              ? 'Click on the map to draw a polygon. Add at least 3 points.'
-              : 'Click on the map to add points and measure distance.'}
+              ? t('search:ui.googleMapMeasurement.clickOnTheMapTo', 'Click on the map to draw a polygon. Add at least 3 points.')
+              : t('search:ui.googleMapMeasurement.clickOnTheMapTo2', 'Click on the map to add points and measure distance.')}
           </p>
 
           {/* Current measurement results */}
@@ -146,18 +146,18 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
               {measurementMode === 'area' && measurementPoints.length >= 3 && (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-600">Area:</span>
+                    <span className="text-xs text-gray-600">{t('search:ui.googleMapMeasurement.area2', 'Area:')}</span>
                     <span className="font-bold text-emerald-600">{formatMeasureArea(measurementArea)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-600">Perimeter:</span>
+                    <span className="text-xs text-gray-600">{t('search:ui.googleMapMeasurement.perimeter', 'Perimeter:')}</span>
                     <span className="font-semibold text-gray-700">{formatMeasureDistance(measurementPerimeter)}</span>
                   </div>
                 </>
               )}
               {measurementMode === 'distance' && measurementPoints.length >= 2 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600">Distance:</span>
+                  <span className="text-xs text-gray-600">{t('search:ui.googleMapMeasurement.distance2', 'Distance:')}</span>
                   <span className="font-bold text-emerald-600">{formatMeasureDistance(measurementDistance)}</span>
                 </div>
               )}
@@ -174,7 +174,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
               disabled={measurementPoints.length === 0}
               className="flex-1 py-2 text-xs font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              ↩️ Undo
+              {t('search:ui.googleMapMeasurement.undo', '↩️ Undo')}
             </button>
             {isAuthenticated ? (
               <button
@@ -182,7 +182,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
                 className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                💾 Save
+                {t('search:ui.googleMapMeasurement.save', '💾 Save')}
               </button>
             ) : (
               <button
@@ -190,7 +190,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
                 className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                💾 Keep
+                {t('search:ui.googleMapMeasurement.keep', '💾 Keep')}
               </button>
             )}
             <button
@@ -198,7 +198,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
               disabled={measurementPoints.length === 0}
               className="flex-1 py-2 text-xs font-semibold rounded-lg bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              🗑️ New
+              {t('search:ui.googleMapMeasurement.new', '🗑️ New')}
             </button>
           </div>
 
@@ -283,13 +283,13 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
               {/* Measurement details */}
               <div className="p-3 bg-indigo-50 rounded-xl">
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="text-indigo-600 font-semibold">{pendingMeasurement.mode === 'area' ? '📐 Area' : '📍 Distance'}</span>
+                  <span className="text-indigo-600 font-semibold">{pendingMeasurement.mode === 'area' ? t('search:ui.googleMapMeasurement.area', '📐 Area') : t('search:ui.googleMapMeasurement.distance', '📍 Distance')}</span>
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-700">{pendingMeasurement.points.length} points</span>
                   {pendingMeasurement.mode === 'area' && (
                     <>
                       <span className="text-gray-500">•</span>
-                      <span className="text-gray-700">Perimeter: {formatMeasureDistance(pendingMeasurement.perimeter)}</span>
+                      <span className="text-gray-700">{t('search:ui.googleMapMeasurement.perimeter', 'Perimeter:')} {formatMeasureDistance(pendingMeasurement.perimeter)}</span>
                     </>
                   )}
                 </div>
@@ -309,8 +309,8 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                   {!measurementIsPro && measurementCount >= measurementMaxAllowed - 1 && (
                     <p className="text-xs text-amber-600 mt-1">
                       {isAtMeasurementLimit
-                        ? '⚠️ You\'ve reached the free limit. Upgrade to Pro for more!'
-                        : '⚠️ 1 slot remaining. Upgrade to Pro for more measurements.'
+                        ? t('search:ui.googleMapMeasurement.youVeReachedTheFree', '⚠️ You\'ve reached the free limit. Upgrade to Pro for more!')
+                        : t('search:ui.googleMapMeasurement.n1SlotRemainingUpgradeTo', '⚠️ 1 slot remaining. Upgrade to Pro for more measurements.')
                       }
                     </p>
                   )}

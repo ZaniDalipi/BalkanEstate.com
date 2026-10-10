@@ -66,14 +66,14 @@ const RefundPolicyPage: React.FC = () => {
             </h2>
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                <h4 className="text-green-800 font-semibold mb-1">Monthly Subscriptions</h4>
-                <p className="text-green-700 text-2xl font-bold">7 Days</p>
-                <p className="text-green-600 text-sm">Full refund within 7 days of purchase</p>
+                <h4 className="text-green-800 font-semibold mb-1">{t('legal:ui.refundPolicyPage.monthlySubscriptions', 'Monthly Subscriptions')}</h4>
+                <p className="text-green-700 text-2xl font-bold">{t('legal:ui.refundPolicyPage.n7Days', '7 Days')}</p>
+                <p className="text-green-600 text-sm">{t('legal:ui.refundPolicyPage.fullRefundWithin7Days', 'Full refund within 7 days of purchase')}</p>
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h4 className="text-blue-800 font-semibold mb-1">Yearly Subscriptions</h4>
-                <p className="text-blue-700 text-2xl font-bold">30 Days</p>
-                <p className="text-blue-600 text-sm">Full refund within 30 days of purchase</p>
+                <h4 className="text-blue-800 font-semibold mb-1">{t('legal:ui.refundPolicyPage.yearlySubscriptions', 'Yearly Subscriptions')}</h4>
+                <p className="text-blue-700 text-2xl font-bold">{t('legal:ui.refundPolicyPage.n30Days', '30 Days')}</p>
+                <p className="text-blue-600 text-sm">{t('legal:ui.refundPolicyPage.fullRefundWithin30Days', 'Full refund within 30 days of purchase')}</p>
               </div>
             </div>
             <p className="text-gray-700 leading-relaxed mb-4">
@@ -170,13 +170,13 @@ const RefundPolicyPage: React.FC = () => {
               </p>
               <div className="space-y-2">
                 <p className="text-blue-900">
-                  <strong>Email:</strong>{' '}
+                  <strong>{t('legal:ui.refundPolicyPage.email', 'Email:')}</strong>{' '}
                   <a href={`mailto:${CONTACT_CONFIG.email.refunds}`} className="underline hover:no-underline">
                     {CONTACT_CONFIG.email.refunds}
                   </a>
                 </p>
                 <p className="text-blue-900">
-                  <strong>Phone:</strong> {CONTACT_CONFIG.phone.primary}
+                  <strong>{t('legal:ui.refundPolicyPage.phone', 'Phone:')}</strong> {CONTACT_CONFIG.phone.primary}
                 </p>
                 <p className="text-blue-900 text-sm mt-2">
                   {t('legal:refund.contact.response', 'We typically respond within 24-48 hours during business days.')}
@@ -196,15 +196,15 @@ const RefundPolicyPage: React.FC = () => {
             <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">{t('legal:refund.processing.review', 'Review time')}</span>
-                <span className="font-medium text-gray-900">2-3 business days</span>
+                <span className="font-medium text-gray-900">{t('legal:ui.refundPolicyPage.n23BusinessDays', '2-3 business days')}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">{t('legal:refund.processing.process', 'Processing time')}</span>
-                <span className="font-medium text-gray-900">5-10 business days</span>
+                <span className="font-medium text-gray-900">{t('legal:ui.refundPolicyPage.n510BusinessDays', '5-10 business days')}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">{t('legal:refund.processing.bank', 'Bank processing')}</span>
-                <span className="font-medium text-gray-900">Varies by bank (up to 10 days)</span>
+                <span className="font-medium text-gray-900">{t('legal:ui.refundPolicyPage.variesByBankUpTo', 'Varies by bank (up to 10 days)')}</span>
               </div>
             </div>
             <p className="text-gray-600 text-sm mt-4">
@@ -272,9 +272,9 @@ const RefundPolicyPage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
-              <p className="text-gray-700">Refunds: <a href={`mailto:${CONTACT_CONFIG.email.refunds}`} className="text-primary hover:underline">{CONTACT_CONFIG.email.refunds}</a></p>
-              <p className="text-gray-700">Support: <a href={`mailto:${CONTACT_CONFIG.email.support}`} className="text-primary hover:underline">{CONTACT_CONFIG.email.support}</a></p>
-              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
+              <p className="text-gray-700">{t('legal:ui.refundPolicyPage.refunds', 'Refunds:')} <a href={`mailto:${CONTACT_CONFIG.email.refunds}`} className="text-primary hover:underline">{CONTACT_CONFIG.email.refunds}</a></p>
+              <p className="text-gray-700">{t('legal:ui.refundPolicyPage.support', 'Support:')} <a href={`mailto:${CONTACT_CONFIG.email.support}`} className="text-primary hover:underline">{CONTACT_CONFIG.email.support}</a></p>
+              <p className="text-gray-700">{t('legal:ui.refundPolicyPage.phone', 'Phone:')} {CONTACT_CONFIG.phone.primary}</p>
             </div>
           </section>
             </div>

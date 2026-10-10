@@ -663,7 +663,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         // Redeem agent coupon for Pro subscription
         const token = tokenService.getAccessToken()?.trim();
         if (!token) {
-          throw new Error('You are not logged in. Please log in and try again.');
+          throw new Error(t('agencies:ui.agencyDetailPage.youAreNotLoggedIn', 'You are not logged in. Please log in and try again.'));
         }
         await _ensureCsrf();
         const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
@@ -681,20 +681,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         try {
           data = await response.json();
         } catch {
-          throw new Error('Unexpected response from server. Please try again.');
+          throw new Error(t('agencies:ui.agencyDetailPage.unexpectedResponseFromServerPlease', 'Unexpected response from server. Please try again.'));
         }
 
         if (!response.ok) {
           switch (data?.code) {
             case 'INVALID_COUPON':
             case 'INVALID_COUPON_FORMAT':
-              throw new Error('Invalid coupon code. Please check and try again.');
+              throw new Error(t('agencies:ui.agencyDetailPage.invalidCouponCodePleaseCheck', 'Invalid coupon code. Please check and try again.'));
             case 'COUPON_ALREADY_USED':
-              throw new Error('This coupon has already been used.');
+              throw new Error(t('agencies:ui.agencyDetailPage.thisCouponHasAlreadyBeen', 'This coupon has already been used.'));
             case 'COUPON_EXPIRED':
-              throw new Error('This coupon has expired.');
+              throw new Error(t('agencies:ui.agencyDetailPage.thisCouponHasExpired', 'This coupon has expired.'));
             case 'AGENCY_SUBSCRIPTION_INACTIVE':
-              throw new Error('The agency subscription is no longer active.');
+              throw new Error(t('agencies:ui.agencyDetailPage.theAgencySubscriptionIsNo', 'The agency subscription is no longer active.'));
             default:
               throw new Error(data?.message || 'Failed to redeem coupon.');
           }
@@ -744,7 +744,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         }
 
         setIsInvitationCodeModalOpen(false);
-        await success('Coupon Redeemed!', `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
+        await success(t('agencies:ui.agencyDetailPage.couponRedeemed', 'Coupon Redeemed!'), `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
 
         // Silently refetch agency data so the new agent appears in the list immediately
         await fetchAgencyData(true);
@@ -759,7 +759,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         // If code is valid, send join request with the code
         await createJoinRequest(agency._id, `Joining with invitation code: ${trimmedCode}`);
         setIsInvitationCodeModalOpen(false);
-        await success(t('messages.requestSent', 'Request Sent'), 'Join request sent successfully! The agency admin will review your request.');
+        await success(t('messages.requestSent', 'Request Sent'), t('agencies:ui.agencyDetailPage.joinRequestSentSuccessfullyThe', 'Join request sent successfully! The agency admin will review your request.'));
       }
     } catch (error) {
       throw error; // Let the modal handle the error display
@@ -949,19 +949,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
 
     if (editForm.name.trim().length < 2) {
-      await error(t('messages.errorTitle', 'Error'), 'Agency name must be at least 2 characters');
+      await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.agencyNameMustBeAt', 'Agency name must be at least 2 characters'));
       return;
     }
 
     if (editForm.description && editForm.description.length > 5000) {
-      await error(t('messages.errorTitle', 'Error'), 'Description must be under 5,000 characters');
+      await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.descriptionMustBeUnder5', 'Description must be under 5,000 characters'));
       return;
     }
 
     if (editForm.email && editForm.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(editForm.email.trim())) {
-        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid email address');
+        await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.pleaseEnterAValidEmail', 'Please enter a valid email address'));
         return;
       }
     }
@@ -969,7 +969,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     if (editForm.phone && editForm.phone.trim()) {
       const phoneClean = editForm.phone.replace(/[\s\-().]/g, '');
       if (phoneClean.length < 6 || !/^\+?\d+$/.test(phoneClean)) {
-        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid phone number');
+        await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.pleaseEnterAValidPhone', 'Please enter a valid phone number'));
         return;
       }
     }
@@ -1234,7 +1234,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       setAgencyData(prev => ({ ...prev, coverImage: agencyData.coverImage }));
       const msg = err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed');
       setUploadError(msg);
-      await error('Upload Failed', msg);
+      await error(t('agencies:ui.agencyDetailPage.uploadFailed', 'Upload Failed'), msg);
     } finally {
       URL.revokeObjectURL(previewUrl);
       setIsUploadingCover(false);
@@ -1342,7 +1342,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || t('messages.updateFailed', 'Failed to update gradient'));
+        throw new Error(errorData?.message || t('messages.gradientUpdateFailed', 'Failed to update gradient'));
       }
 
       const data = await response.json();
@@ -1351,7 +1351,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     } catch (err) {
       // Revert on failure
       setAgencyData(prev => ({ ...prev, ...previousData } as any));
-      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update gradient'));
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.gradientUpdateFailed', 'Failed to update gradient'));
     }
   };
 
@@ -1382,13 +1382,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         },
         body: JSON.stringify(body),
       });
-      if (!response.ok) throw new Error('Failed to save position');
+      if (!response.ok) throw new Error(t('agencies:ui.agencyDetailPage.failedToSavePosition', 'Failed to save position'));
     } catch (err) {
       // Revert position on failure
       setAgencyData(prev => ({ ...prev, [posKey]: previousPos }));
       if (type === 'cover') setCoverPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
       else setLogoPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
-      await error('Error', 'Failed to save image position');
+      await error('Error', t('agencies:ui.agencyDetailPage.failedToSaveImagePosition', 'Failed to save image position'));
     }
   };
 
@@ -1440,7 +1440,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     else setIsRepositioningLogo(false);
     // Save in background — no await so UI doesn't block
     saveImagePosition(type, pos).then(() => {
-      success('Position Saved', `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
+      success(t('agencies:ui.agencyDetailPage.positionSaved', 'Position Saved'), `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
     });
   };
 
@@ -1579,7 +1579,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {isRepositioningCover && (
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-40 pointer-events-none">
                 <div className="bg-black/70 text-white px-6 py-3 rounded-xl text-sm font-medium backdrop-blur-sm pointer-events-none select-none">
-                  Drag to reposition cover image
+                  {t('agencies:ui.agencyDetailPage.dragToRepositionCoverImage', 'Drag to reposition cover image')}
                 </div>
               </div>
             )}
@@ -1589,13 +1589,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   onClick={() => handleFinishRepositioning('cover')}
                   className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl shadow-lg hover:bg-primary/90 transition-colors"
                 >
-                  Save Position
+                  {t('agencies:ui.agencyDetailPage.savePosition', 'Save Position')}
                 </button>
                 <button
                   onClick={() => handleCancelRepositioning('cover')}
                   className="px-4 py-2 bg-white/90 text-slate-700 text-sm font-medium rounded-xl shadow-lg hover:bg-white transition-colors"
                 >
-                  Cancel
+                  {t('agencies:ui.agencyDetailPage.cancel', 'Cancel')}
                 </button>
               </div>
             )}
@@ -1738,7 +1738,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                           </svg>
-                          Reposition Cover
+                          {t('agencies:ui.agencyDetailPage.repositionCover', 'Reposition Cover')}
                         </button>
                       )}
 
@@ -1751,7 +1751,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                           </svg>
-                          Reposition Logo
+                          {t('agencies:ui.agencyDetailPage.repositionLogo', 'Reposition Logo')}
                         </button>
                       )}
 
@@ -1894,13 +1894,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         onClick={() => handleFinishRepositioning('logo')}
                         className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg shadow-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
                       >
-                        Save
+                        {t('agencies:ui.agencyDetailPage.save', 'Save')}
                       </button>
                       <button
                         onClick={() => handleCancelRepositioning('logo')}
                         className="px-3 py-1.5 bg-white/90 text-slate-700 text-xs font-medium rounded-lg shadow-lg hover:bg-white transition-colors whitespace-nowrap"
                       >
-                        Cancel
+                        {t('agencies:ui.agencyDetailPage.cancel', 'Cancel')}
                       </button>
                     </div>
                   )}
@@ -2190,7 +2190,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   <CalendarIcon className="w-5 h-5 text-violet-600" />
                 </div>
                 <div className="text-2xl font-bold text-slate-900">{agencyData.yearsInBusiness ? `${agencyData.yearsInBusiness}+` : '—'}</div>
-                <div className="text-xs text-slate-500 font-medium">Years</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencies:ui.agencyDetailPage.years', 'Years')}</div>
               </div>
               <div
                 className="text-center p-4 rounded-xl border border-slate-200/60"
@@ -2310,7 +2310,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                             </svg>
                           </div>
-                          <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">X / Twitter</span>
+                          <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">{t('agencies:ui.agencyDetailPage.xTwitter', 'X / Twitter')}</span>
                         </a>
                       )}
                     </div>
@@ -2701,7 +2701,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               },
                               body: JSON.stringify({ generateInvitationCode: true }),
                             });
-                            if (!response.ok) throw new Error('Failed to generate code');
+                            if (!response.ok) throw new Error(t('agencies:ui.agencyDetailPage.failedToGenerateCode', 'Failed to generate code'));
                             const data = await response.json();
                             if (data.agency?.invitationCode) {
                               setAgencyData(prev => ({ ...prev, invitationCode: data.agency.invitationCode }));
@@ -2990,7 +2990,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                                   ? 'text-slate-500 bg-slate-100 hover:bg-slate-200'
                                   : 'text-sky-600 bg-sky-50 hover:bg-sky-100'
                               }`}
-                              title={isAgentAdmin ? 'Remove admin rights' : 'Make admin'}
+                              title={isAgentAdmin ? t('agencies:ui.agencyDetailPage.removeAdminRights', 'Remove admin rights') : t('agencies:ui.agencyDetailPage.makeAdmin', 'Make admin')}
                             >
                               <ShieldCheckIcon className="w-3 h-3" />
                               {isAgentAdmin ? t('agencyDetails:teamMembers.removeAdmin') : t('agencyDetails:teamMembers.makeAdmin')}
@@ -3003,7 +3003,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               }}
                               disabled={removingAgentId === agentId}
                               className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                              title="Remove agent from agency"
+                              title={t('agencies:ui.agencyDetailPage.removeAgentFromAgency', 'Remove agent from agency')}
                             >
                               {removingAgentId === agentId ? (
                                 <>
@@ -3030,7 +3030,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               }}
                               disabled={isLeavingAgency}
                               className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                              title="Leave this agency"
+                              title={t('agencies:ui.agencyDetailPage.leaveThisAgency', 'Leave this agency')}
                             >
                               {isLeavingAgency ? (
                                 <>
@@ -3452,7 +3452,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       editForm.description.length > 4800 ? 'border-amber-300' : 'border-slate-200'
                     }`}
                     rows={4}
-                    placeholder="Tell clients about your agency..."
+                    placeholder={t('agencies:ui.agencyDetailPage.tellClientsAboutYourAgency', 'Tell clients about your agency...')}
                   />
                   <div className="flex justify-between mt-1">
                     <p className="text-xs text-slate-400">{t('agencyDetails:editModal.descriptionHint', 'Use line breaks to separate paragraphs')}</p>
@@ -3660,7 +3660,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       specialties: e.target.value.split(',').map(s => s.trim())
                     })}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
-                    placeholder="Residential, Commercial, Luxury Properties"
+                    placeholder={t('agencies:ui.agencyDetailPage.residentialCommercialLuxuryProperties', 'Residential, Commercial, Luxury Properties')}
                   />
                 </div>
                 <div>
@@ -3675,7 +3675,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       certifications: e.target.value.split(',').map(s => s.trim())
                     })}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
-                    placeholder="Licensed Real Estate Agency, ISO Certified"
+                    placeholder={t('agencies:ui.agencyDetailPage.licensedRealEstateAgencyIso', 'Licensed Real Estate Agency, ISO Certified')}
                   />
                 </div>
                 <div>
@@ -3690,7 +3690,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       languages: e.target.value.split(',').map(s => s.trim())
                     })}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
-                    placeholder="English, Serbian, Croatian, Albanian"
+                    placeholder={t('agencies:ui.agencyDetailPage.englishSerbianCroatianAlbanian', 'English, Serbian, Croatian, Albanian')}
                   />
                   <p className="text-xs text-slate-400 mt-1.5">{t('agencyDetails:editModal.languagesHint')}</p>
                 </div>
@@ -3716,7 +3716,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           businessHours: { ...editForm.businessHours, [day]: e.target.value }
                         })}
                         className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-xs"
-                        placeholder="9AM - 6PM"
+                        placeholder={t('agencies:ui.agencyDetailPage.n9am6pm', '9AM - 6PM')}
                       />
                     </div>
                   ))}

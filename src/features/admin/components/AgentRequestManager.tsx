@@ -95,7 +95,7 @@ const AgentRequestManager: React.FC = () => {
       setRequests(data.agentRequests || []);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
-      setError('Failed to load agent requests');
+      setError(t('admin:ui.agentRequestManager.failedToLoadAgentRequests', 'Failed to load agent requests'));
     } finally {
       setIsLoading(false);
     }
@@ -367,7 +367,7 @@ const AgentRequestManager: React.FC = () => {
                       <button
                         onClick={() => openDetailModal(request)}
                         className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-blue-600"
-                        title="View Details"
+                        title={t('admin:ui.agentRequestManager.viewDetails', 'View Details')}
                       >
                         <EyeIcon className="w-5 h-5" />
                       </button>

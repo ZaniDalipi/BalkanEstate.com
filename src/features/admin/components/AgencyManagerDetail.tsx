@@ -552,7 +552,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     specialties: e.target.value.split(',').map(s => s.trim())
                   })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Residential, Commercial, Luxury Properties"
+                  placeholder={t('admin:ui.agencyManagerDetail.residentialCommercialLuxuryProperties', 'Residential, Commercial, Luxury Properties')}
                 />
               </div>
 
@@ -569,7 +569,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     certifications: e.target.value.split(',').map(s => s.trim())
                   })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Licensed Real Estate Agency, ISO Certified"
+                  placeholder={t('admin:ui.agencyManagerDetail.licensedRealEstateAgencyIso', 'Licensed Real Estate Agency, ISO Certified')}
                 />
               </div>
 
@@ -590,7 +590,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                           businessHours: { ...editForm.businessHours, [day]: e.target.value }
                         })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        placeholder="9:00 AM - 6:00 PM"
+                        placeholder={t('admin:ui.agencyManagerDetail.n900Am600', '9:00 AM - 6:00 PM')}
                       />
                     </div>
                   ))}

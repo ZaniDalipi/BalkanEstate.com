@@ -344,7 +344,8 @@
     "authFailed": "Authentication Failed",
     "authFailedMessage": "Authentication failed. Please try again.",
     "errorLoadingGoogleMaps": "Error loading Google Maps",
-    "checkApiKeyConfiguration": "Please check your API key configuration"
+    "checkApiKeyConfiguration": "Please check your API key configuration",
+    "generic": "Something went wrong"
   },
   "tryAgain": "Try Again",
   "actions": {
@@ -355,7 +356,8 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "submit": "Submit"
+    "submit": "Submit",
+    "ok": "OK"
   },
   "validation": {
     "required": "This field is required",
@@ -651,8 +653,223 @@
     "exitPreview": "Exit",
     "stickyBottomBar": "Sticky bottom bar",
     "getInTouch": "Get in touch →",
-    "advertiseCta": "Advertise with us — get in touch"
+    "advertiseCta": "Advertise with us — get in touch",
+    "close": "Close advertisement",
+    "advertisement": "Advertisement",
+    "yourAdHere": "Your Ad Here",
+    "advertiseWithUs": "Advertise with us",
+    "sponsored": "Sponsored",
+    "dismiss": "Dismiss advertisement"
   },
   "note": "Note",
-  "loadMore": "Load more"
+  "loadMore": "Load more",
+  "notifications": "Notifications",
+  "markAllRead": "Mark all read",
+  "noNotifications": "No notifications yet",
+  "viewAll": "View all notifications",
+  "cookies": {
+    "title": "We use cookies",
+    "shortDescription": "to improve your experience and analyze traffic.",
+    "learnMore": "Learn more",
+    "close": "Close without accepting — only essential cookies will be used",
+    "acceptAll": "Accept All",
+    "rejectAll": "Reject All",
+    "customize": "Customize",
+    "settingsTitle": "Cookie Settings",
+    "essential": "Essential",
+    "alwaysOn": "Always on",
+    "functional": "Functional",
+    "analytics": "Analytics",
+    "marketing": "Marketing",
+    "savePreferences": "Save Preferences"
+  },
+  "common": {
+    "close": "Close"
+  },
+  "comingSoon": {
+    "title": "Payments Coming Soon",
+    "message": "We are currently looking for a payment provider to partner with us. Direct payments are not accepted at this time. You can activate your subscription instantly using a coupon code, or contact us to arrange it manually.",
+    "haveCoupon": "Did we provide a coupon for you?",
+    "couponDescription": "Enter your code to activate your subscription instantly",
+    "activateCoupon": "Activate with Coupon",
+    "contactUs": "Contact us for manual processing:",
+    "responseTime": "We typically respond within 24 hours",
+    "badge": "Seeking payment provider partner"
+  },
+  "wk": "wk",
+  "day": "day",
+  "mo": "mo",
+  "syncing": "Syncing...",
+  "live": "Live",
+  "updating": "Updating...",
+  "unknownError": "An unknown error occurred",
+  "goHome": "Go Home",
+  "myAccount": "My Account",
+  "login": "Login",
+  "heroTagline": "AI-powered property search across 11 Balkan countries",
+  "weekdays": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "ui": {
+    "agencyCreationModal": {
+      "contactAgencyCom": "contact@agency.com",
+      "eGRe123456": "e.g., RE-123456",
+      "n900Am500": "9:00 AM - 5:00 PM",
+      "discardChanges": "Discard Changes?",
+      "youHaveUnsavedChangesAre": "You have unsaved changes. Are you sure you want to close this form?",
+      "discard": "Discard",
+      "keepEditing": "Keep Editing",
+      "close": "Close"
+    },
+    "featuredSubscriptionDialog": {
+      "directPaymentsAreNotYet": "Direct payments are not yet available",
+      "weAreCurrentlyLookingFor": "We are currently looking for a payment provider to partner with us. You can activate your featured agency subscription for free using a coupon code, or contact us at",
+      "salesBalkanestateaiCom": "sales@balkanestateai.com",
+      "toArrangeItManually": "to arrange it manually.",
+      "paymentNotAvailableYet": "Payment Not Available Yet",
+      "applyA100OffCoupon": "Apply a 100% off coupon code to activate your featured subscription at no cost."
+    },
+    "splashScreen": {
+      "ai": ".AI"
+    },
+    "achievementsSection": {
+      "expired": "EXPIRED",
+      "ddMmYyyy": "DD/MM/YYYY"
+    },
+    "header": {
+      "new": "+ New",
+      "toggleSidebarNavigation": "Toggle sidebar navigation"
+    },
+    "text-scroll-animation": {
+      "scrollToSeeMore": "Scroll to see more",
+      "integrateWithYourFavTech": "integrate with your fav tech stack"
+    },
+    "floorInputCombined": {
+      "totalFloorsInBuilding": "Total floors in building",
+      "floorNumber": "Floor number"
+    },
+    "z360TourInput": {
+      "previewTour": "Preview tour",
+      "n360VirtualTourPreview": "360° Virtual Tour Preview"
+    },
+    "apple-hello-effect": {
+      "xinChO": "xin chào"
+    },
+    "animations": {
+      "loading": "Loading"
+    },
+    "glass-cards": {
+      "promoted": "Promoted",
+      "new": "New"
+    },
+    "propertyInquiryModal": {
+      "close": "Close"
+    },
+    "defaultAvatar": {
+      "avatar": "Avatar"
+    },
+    "promotionOfferModal": {
+      "directPaymentsAreNotYet": "Direct payments are not yet available. Use a coupon to activate for free.",
+      "activateWithCoupon": "Activate with Coupon"
+    },
+    "myPromotions": {
+      "live": "Live",
+      "updated": "Updated:",
+      "refreshPromotions": "Refresh promotions",
+      "autoExtendEnabledYourPromotion": "Auto-extend enabled. Your promotion will automatically renew when it expires. Payments coming soon!",
+      "autoExtendDisabledYourPromotion": "Auto-extend disabled. Your promotion will expire naturally.",
+      "thisPromotionHasExpiredUse": "This promotion has expired. Use the \"Extend\" button to reactivate it.",
+      "paymentsComingSoonAutoExtend": "Payments coming soon! Auto-extend payment will be available shortly.",
+      "paymentsComingSoonContactSales": "Payments coming soon! Contact sales@balkanestateai.com to extend your promotion."
+    },
+    "alertDialog": {
+      "close": "Close"
+    },
+    "phoneInput": {
+      "countryCode": "Country code",
+      "phoneNumber": "Phone number"
+    },
+    "confirmationModal": {
+      "close": "Close"
+    },
+    "button": {
+      "loading": "Loading"
+    },
+    "notificationModal": {
+      "close": "Close"
+    },
+    "modal": {
+      "closeModal": "Close modal"
+    },
+    "logoLoader": {
+      "balkanestate": "BALKANESTATE"
+    },
+    "consentBanner": {
+      "cookieConsent": "Cookie consent"
+    },
+    "z360TourEmbed": {
+      "z360Tour": "Z360 Tour"
+    },
+    "mapAgentAvatar": {
+      "closePanel": "Close panel"
+    },
+    "breadcrumbs": {
+      "breadcrumb": "Breadcrumb"
+    },
+    "promotedPropertyCard": {
+      "property": "Property",
+      "untitledProperty": "Untitled Property",
+      "viewPromotionHistory": "View Promotion History"
+    },
+    "promotionModal": {
+      "closeModal": "Close modal"
+    },
+    "beforeAfterSlider": {
+      "comparisonSlider": "Comparison slider"
+    },
+    "agentInquiryModal": {
+      "youExampleCom": "you@example.com"
+    },
+    "heroSearchSection": {
+      "clearSearch": "Clear search"
+    },
+    "avatarCustomizer": {
+      "discardChanges": "Discard Changes?",
+      "youHaveUnsavedAvatarChanges": "You have unsaved avatar changes. Are you sure you want to close?",
+      "discard": "Discard",
+      "keepEditing": "Keep Editing"
+    },
+    "liquid-glass": {
+      "howCanIHelpYou": "How can i help you today?"
+    },
+    "apple-liquid-glass-switcher": {
+      "chooseTheme": "Choose theme"
+    },
+    "agencyManagementSection": {
+      "pleaseSelectAnAgency": "Please select an agency",
+      "pleaseEnterTheInvitationCode": "Please enter the invitation code",
+      "pleaseEnterACouponCode": "Please enter a coupon code",
+      "invalidCodeFormatExpectedAbc": "Invalid code format. Expected: ABC-XXXXXXXX",
+      "onlyRegisteredAgentsCanRedeem": "Only registered agents can redeem agency coupons. Please register as an agent first.",
+      "userDataUnavailablePleaseRefresh": "User data unavailable. Please refresh the page.",
+      "youAreNotLoggedIn": "You are not logged in. Please log in and try again.",
+      "unexpectedResponseFromServerPlease": "Unexpected response from server. Please try again.",
+      "invalidCouponCodePleaseCheck": "Invalid coupon code. Please check the code and try again.",
+      "thisCouponHasAlreadyBeen": "This coupon has already been used by another agent.",
+      "thisCouponHasExpiredAnd": "This coupon has expired and can no longer be redeemed.",
+      "couponNotFoundPleaseVerify": "Coupon not found. Please verify the code is correct.",
+      "theAgencySubscriptionIsNo": "The agency subscription is no longer active. This coupon cannot be redeemed.",
+      "unknownAgency": "Unknown Agency"
+    },
+    "profileStatistics": {
+      "noAuthenticationTokenFound": "No authentication token found",
+      "syncFailed": "Sync failed"
+    }
+  }
 }

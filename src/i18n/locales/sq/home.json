@@ -58,7 +58,13 @@
     "promoted": "E Promovuar",
     "new": "E Re",
     "priceReduced": "Çmim i Ulur",
-    "byNegotiation": "Me Negocim"
+    "byNegotiation": "Me Negocim",
+    "livingRoomsLabel": "Dhoma ndenjeje",
+    "spacesLabel": "Vende",
+    "officesLabel": "Zyra",
+    "openPlanLabel": "Hapësirë e hapur m²",
+    "prevImage": "Fotoja e mëparshme",
+    "nextImage": "Fotoja tjetër"
   },
   "categories": {
     "title": "Shfleto sipas Kategorisë",
@@ -190,5 +196,68 @@
     "imageAlt": "Pronë në {{city}}, {{country}}",
     "buy": "Blej",
     "rent": "Merr me qira"
+  },
+  "recentlyViewed": {
+    "title": "Shikuar së fundmi",
+    "subtitle": "Vazhdoni aty ku e latë"
+  },
+  "ui": {
+    "appShowcaseSection": {
+      "searchBalkans": "Kërko në Ballkan...",
+      "buy": "Bli",
+      "rent": "Qira",
+      "questionsAnswered": "pyetje të përgjigjura",
+      "properties": "prona",
+      "beds": "dhoma",
+      "steps": "hapa"
+    },
+    "newsSection": {
+      "featured": "★ E veçuar",
+      "mRead": "min lexim",
+      "readArticle": "Lexo artikullin",
+      "noArticlesPublishedYet": "Ende nuk ka artikuj të publikuar",
+      "checkBackSoonForExpert": "Kthehuni së shpejti për analiza nga ekspertët",
+      "viewAllArticles": "Shiko të gjithë artikujt"
+    },
+    "topAgentsSection": {
+      "howPointsAreCalculated": "📊 Si llogariten pikët",
+      "maxPossible180Pts": "Maksimumi i mundshëm: 180 pikë",
+      "metrics": {
+        "rating": {
+          "label": "Vlerësimi i klientëve",
+          "formula": "20 pikë për ★",
+          "desc": "Çdo yll që ju japin klientët vlen 20 pikë. Një vlerësim i përsosur me 5 yje ju jep vetëm 100 pikë.",
+          "cap": "Maks. 100 pikë"
+        },
+        "sales": {
+          "label": "Prona të shitura",
+          "formula": "5 pikë për shitje",
+          "desc": "Çdo transaksion i përfunduar shton 5 pikë. Mbyllni 10 shitje dhe e arrini maksimumin në këtë kategori.",
+          "cap": "Maks. 50 pikë"
+        },
+        "active": {
+          "label": "Shpallje aktive",
+          "formula": "2 pikë për shpallje",
+          "desc": "Një portofol aktiv tregon se jeni në treg. Çdo shpallje aktive fiton 2 pikë.",
+          "cap": "Maks. 20 pikë"
+        },
+        "reviews": {
+          "label": "Vlerësimet e klientëve",
+          "formula": "1 pikë për vlerësim",
+          "desc": "Numri i vlerësimeve tregon besueshmëri. Çdo vlerësim që mblidhni shton 1 pikë pavarësisht notës.",
+          "cap": "Maks. 10 pikë"
+        }
+      }
+    },
+    "recentlyViewedSection": {
+      "scrollLeft": "Lëviz majtas",
+      "scrollRight": "Lëviz djathtas"
+    },
+    "heroSection": {
+      "clear": "Pastro"
+    },
+    "categoriesSection": {
+      "exclusive": "✦ Ekskluzive"
+    }
   }
 }

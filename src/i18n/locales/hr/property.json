@@ -38,7 +38,8 @@
     "office": "Ured",
     "garage": "Garaža",
     "other": "Ostalo",
-    "luxury-villa": "Luksuzna vila"
+    "luxury-villa": "Luksuzna vila",
+    "parking": "Parkirno mjesto"
   },
   "features": {
     "bedrooms": "Spavaće Sobe",
@@ -55,7 +56,7 @@
     "sqft": "Kvadratni Metri",
     "floor": "Kat",
     "floors": "Katovi",
-    "parking": "Parking",
+    "parking": "Parkiralište",
     "parkingSpots": "Parkirna Mjesta",
     "yearBuilt": "Godina Gradnje",
     "expectedCompletion": "Očekivani završetak",
@@ -161,7 +162,19 @@
     "buildingArea": "Površina objekta",
     "grossArea": "Bruto površina",
     "netArea": "Neto površina",
-    "floorPlanFloorsHint": "{{count}} kata · fotografije označene na tlocrtu"
+    "floorPlanFloorsHint": "{{count}} kata · fotografije označene na tlocrtu",
+    "openPlanArea": "Otvoreni prostor",
+    "parkingType": "Vrsta parkirališta",
+    "parkingTypes": {
+      "garage": "Garaža",
+      "underground": "Podzemni",
+      "covered": "Natkriveni",
+      "outdoor": "Otvoreni"
+    },
+    "spaces": "Mjesta",
+    "listingType": "Oglas",
+    "forRent": "Za najam",
+    "forSale": "Na prodaju"
   },
   "distances": {
     "title": "Udaljenosti",
@@ -217,7 +230,15 @@
     "whatsappMessage": "Bok, zanima me ova nekretnina: {{title}}\n{{url}}",
     "viberSeller": "Viber",
     "promote": "Promoviraj",
-    "extendPromotion": "Produži"
+    "extendPromotion": "Produži",
+    "compareLimitTitle": "Ograničenje usporedbe",
+    "call": "Nazovi",
+    "email": "E-pošta",
+    "removeFavorite": "Ukloni iz favorita",
+    "addFavorite": "Dodaj u favorite",
+    "removeFromFavorites": "Ukloni iz favorita",
+    "addToFavorites": "Dodaj u favorite",
+    "favorite": "Favorit"
   },
   "video": {
     "loading": "Učitavanje videa...",
@@ -306,6 +327,13 @@
       "browseAgents": "Pregledaj agente",
       "agentSaved": "Agent spremljen",
       "agentsSaved": "Spremljeni agenti"
+    },
+    "agencies": {
+      "listings": "Oglasi",
+      "agents": "Agenti",
+      "noSaved": "Nema spremljenih agencija",
+      "clickHeart": "Spremite agencije koje vam se sviđaju kako biste ih kasnije brzo pronašli.",
+      "browseAgencies": "Pregledaj agencije"
     }
   },
   "comparison": {
@@ -317,7 +345,7 @@
     "livingRooms": "Dnevne Sobe",
     "area": "Površina (m²)",
     "yearBuilt": "Godina Gradnje",
-    "parking": "Parking",
+    "parking": "Parkiralište",
     "specialFeatures": "Posebne Značajke",
     "materials": "Materijali",
     "best": "Najbolje",
@@ -329,7 +357,7 @@
     "baths": "Kupaonice",
     "area": "m²",
     "living": "Dnevne Sobe",
-    "parking": "Parking",
+    "parking": "Parkiralište",
     "clickForDetails": "Kliknite za detalje →",
     "legend": "Legenda",
     "propertyTypes": {
@@ -340,7 +368,8 @@
       "other": "Ostalo",
       "luxury-villa": "Luksuzna vila",
       "commercial": "Komercijalno",
-      "parking": "Parkirno mjesto"
+      "parking": "Parkirno mjesto",
+      "urgent": "Hitno"
     },
     "promotedListings": "Promovirani Oglasi",
     "agentHint": "Kliknite za preporuke!",
@@ -382,8 +411,8 @@
         "featured": "IZDVOJENO",
         "standard": "PROMOVIRANO"
       },
-      "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings",
+      "promotedCount_one": "{{count}} promoviran oglas",
+      "promotedCount_other": "{{count}} promoviranih oglasa",
       "distanceFromYou": "{{distance}} daleko"
     },
     "heatMapLegend": "Gustoća Nekretnina",
@@ -403,7 +432,8 @@
     "tryAgain": "Pokušaj ponovno",
     "aiTeaserTitle": "Želite li saznati više o ovoj nekretnini?",
     "aiTeaserSubtitle": "Neka naša umjetna inteligencija izradi detaljan izvještaj o susjedstvu — škole, prijevoz, parkovi, trgovine i lokalni sadržaji — u samo nekoliko sekundi.",
-    "coordinatesUnavailable": "Podaci o lokaciji za ovu nekretninu još nisu dostupni pa ne možemo generirati uvide."
+    "coordinatesUnavailable": "Podaci o lokaciji za ovu nekretninu još nisu dostupni pa ne možemo generirati uvide.",
+    "serviceUnavailable": "AI usluga privremeno nije dostupna. Pokušajte ponovno kasnije."
   },
   "photos": {
     "title": "Fotografije",
@@ -591,7 +621,17 @@
     "videoTour": "Video obilazak",
     "enter3DTour": "Uđi u 3D obilazak",
     "view3DMap": "3D karta lokacije",
-    "seeOnFloorPlan": "Pogledajte gdje je ova fotografija snimljena na tlocrtu"
+    "seeOnFloorPlan": "Pogledajte gdje je ova fotografija snimljena na tlocrtu",
+    "viewImages": "Pogledaj slike nekretnine",
+    "videoEmbedNotSupported": "Ovu video poveznicu nije moguće izravno ugraditi",
+    "openVideo": "Otvori video",
+    "prevImage": "Prethodna slika",
+    "nextImage": "Sljedeća slika",
+    "forRent": "Najam",
+    "forSale": "Prodaja",
+    "backToPhotos": "Natrag na slike",
+    "forRentLong": "Za najam",
+    "forSaleLong": "Na prodaju"
   },
   "viewings": {
     "title": "Zahtjevi za Razgledavanje",
@@ -704,7 +744,9 @@
       "done": "Gotovo",
       "save": "Spremi",
       "hint": "Crtajte po slici za bilješke",
-      "sendToChat": "Pošalji"
+      "sendToChat": "Pošalji",
+      "sendError": "Pogreška",
+      "sendFailed": "Slanje označene slike nije uspjelo."
     }
   },
   "sectionNav": {
@@ -807,5 +849,145 @@
     "perMonthNote": "Mjesečne najamnine · tjedne preračunate",
     "perNightNote": "Samo smještaj po noći",
     "villasIncluded": "Uključujući druge vile"
+  },
+  "similarProperties": {
+    "agencyTitle": "Više od {{agency}}",
+    "titleRent": "Slične nekretnine za najam u {{city}}",
+    "title": "Slične nekretnine u {{city}}",
+    "agencySubtitle": "Ostali oglasi od {{agency}}",
+    "subtitle": "Pregledajte još {{type}} za {{action}} u {{city}}, {{country}}"
+  },
+  "socialVideo": {
+    "title": "Video nekretnine",
+    "embedFailed": "Videozapis nije moguće učitati",
+    "openIn": "Otvori u {{platform}}"
+  },
+  "specs": {
+    "beds": "Spavaće sobe",
+    "baths": "Kupaonice"
+  },
+  "ai": {
+    "swipeDone": "Spremljeno nekretnina: {{count}}!",
+    "swipeNoneSaved": "Nijedna nekretnina nije spremljena",
+    "swipeCheckFavorites": "Pogledajte favorite kako biste ih usporedili",
+    "swipeTryAgain": "Pokušajte drugu pretragu kako biste pronašli nekretninu iz snova",
+    "goToFavorites": "Idi na favorite",
+    "backToChat": "Natrag na razgovor",
+    "swipeTitle": "Vaša podudaranja",
+    "saved": "spremljeno",
+    "swipeHint": "Povucite udesno za spremanje, ulijevo za preskakanje"
+  },
+  "priceDrop": "SNIŽENJE CIJENE",
+  "priceUp": "POVEĆANJE CIJENE",
+  "errors": {
+    "errorTitle": "Pogreška",
+    "saveFailed": "Spremanje nekretnine nije uspjelo. Pokušajte ponovno.",
+    "conversationFailed": "Pokretanje razgovora nije uspjelo. Pokušajte ponovno."
+  },
+  "viewDetails": "Pogledaj detalje",
+  "source": {
+    "viewOriginal": "Pogledaj na {{source}}",
+    "listedOn": "Objavljeno na {{source}}"
+  },
+  "inquiry": {
+    "nameRequired": "Ime je obavezno",
+    "validEmailRequired": "Potrebna je ispravna e-pošta",
+    "messageRequired": "Poruka je obavezna",
+    "sendError": "Slanje upita nije uspjelo. Pokušajte ponovno.",
+    "title": "Pošalji upit",
+    "successTitle": "Upit je poslan!",
+    "successMessage": "Vaša poruka poslana je vlasniku nekretnine. Uskoro će vas kontaktirati.",
+    "yourName": "Vaše ime",
+    "yourEmail": "Vaša e-pošta",
+    "yourPhone": "Vaš telefon (neobavezno)",
+    "message": "Vaša poruka",
+    "template1": "Pozdrav, zainteresiran sam za ovu nekretninu. Je li još uvijek dostupna? Želio bih dogovoriti razgledavanje.",
+    "scheduleViewing": "Dogovori razgledavanje",
+    "template2": "Pozdrav, želio bih više informacija o ovoj nekretnini. Možete li mi dati detalje o četvrti i obližnjim sadržajima?",
+    "moreInfo": "Više informacija",
+    "template3": "Pozdrav, je li cijena podložna pregovorima? Ozbiljan sam kupac i želim uskoro donijeti odluku.",
+    "priceQuestion": "Cijena po dogovoru?",
+    "sending": "Šalje se...",
+    "sendInquiry": "Pošalji upit",
+    "privacyNote": "Slanjem pristajete da vas vlasnik kontaktira u vezi s ovim oglasom."
+  },
+  "priceHistorySection": {
+    "pricingSchedule": "Raspored cijena",
+    "ongoing": "U tijeku",
+    "perMonth": "/mj.",
+    "current": "Trenutno",
+    "changeHistory": "Povijest promjena cijene",
+    "listedBadge": "Objavljeno",
+    "currentPrice": "Trenutna cijena",
+    "listedAt": "Početna cijena",
+    "totalChange": "Ukupna promjena",
+    "pricePerSqm": "Cijena / m²",
+    "lastChanged": "Posljednja promjena",
+    "listed": "Objavljeno",
+    "today": "Danas",
+    "daysAgo": "prije {{count}} dana",
+    "changesRecorded": "Zabilježene promjene: {{count}}",
+    "priceTrend": "Trend cijene",
+    "changeMagnitude": "Veličina promjene",
+    "pricePerSqmTrend": "Trend cijene po m²",
+    "valuesInEurPerSqm": "Vrijednosti u €/m²",
+    "title": "Povijest cijene",
+    "records": "Zapisi: {{count}}"
+  },
+  "ui": {
+    "imageViewerModal": {
+      "zoomOut": "Smanji",
+      "resetZoom": "Poništi zumiranje",
+      "zoomIn": "Povećaj",
+      "toggleAnnotationMode": "Uključi/isključi označavanje",
+      "undoLastStroke": "Poništi posljednji potez",
+      "clearAllAnnotations": "Izbriši sve oznake",
+      "downloadAnnotatedImage": "Preuzmi označenu sliku",
+      "sendAnnotatedImageToChat": "Pošalji označenu sliku u razgovor"
+    },
+    "propertyGuide": {
+      "closeGuide": "Zatvori vodič",
+      "previousTip": "Prethodni savjet",
+      "nextTip": "Sljedeći savjet",
+      "propertyGuideMascotClickFor": "Maskota vodič - kliknite za savjete, desni klik za brze radnje"
+    },
+    "propertyCard": {
+      "previousImage": "Prethodna slika",
+      "nextImage": "Sljedeća slika",
+      "luxuryVilla": "LUKSUZNA VILA",
+      "promoted": "PROMOVIRANO",
+      "perM": "po m²",
+      "wineCellar": "Vinski podrum",
+      "seaView": "Pogled na more",
+      "cityView": "Pogled na grad",
+      "gardenView": "Pogled na vrt",
+      "streetView": "Pogled na ulicu",
+      "failedToSavePropertyPlease": "Spremanje nekretnine nije uspjelo. Pokušajte ponovno.",
+      "youCanCompareAMaximum": "Možete usporediti najviše 5 nekretnina."
+    },
+    "socialVideoEmbed": {
+      "loadingTiktokVideo": "Učitava se TikTok video...",
+      "instagramVideo": "Instagram video"
+    },
+    "propertyGallery": {
+      "loadingTiktokVideo": "Učitava se TikTok video...",
+      "propertyVideoTour": "Video obilazak nekretnine"
+    },
+    "propertyCommon": {
+      "moreFeatures": "više značajki"
+    },
+    "propertyMapLink": {
+      "loadingMap": "Učitava se karta..."
+    },
+    "highlightedPropertyCard": {
+      "perM": "po m²",
+      "failedToSavePropertyPlease": "Spremanje nekretnine nije uspjelo. Pokušajte ponovno."
+    },
+    "neighborhoodInsights": {
+      "anUnknownErrorOccurred": "Došlo je do nepoznate pogreške."
+    },
+    "imageEditorModal": {
+      "iHaveSomeQuestionsAbout": "Imam nekoliko pitanja o ovoj nekretnini. Molim pogledajte moje oznake:"
+    }
   }
 }

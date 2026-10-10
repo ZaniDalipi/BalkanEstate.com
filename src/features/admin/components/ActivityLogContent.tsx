@@ -344,7 +344,7 @@ export const HeatmapPanel: React.FC<HeatmapPanelProps> = ({ heatmapData }) => {
             {heatmapData.userFlows.slice(0, 5).map((flow, index) => (
               <div key={flow.flow} className="p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-start mb-1">
-                  <span className="text-xs font-medium text-gray-500">Flow #{index + 1}</span>
+                  <span className="text-xs font-medium text-gray-500">{t('admin:ui.activityLogContent.flow', 'Flow #')}{index + 1}</span>
                   <span className="text-sm font-bold text-gray-900">{flow.count} {t('admin:activityLog.sessions')}</span>
                 </div>
                 <p className="text-xs text-gray-600 font-mono">{flow.flow}</p>

@@ -140,12 +140,12 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
     // Validation
     if (!selectedAgencyId) {
-      setError('Please select an agency');
+      setError(t('common:ui.agencyManagementSection.pleaseSelectAnAgency', 'Please select an agency'));
       return;
     }
 
     if (!invitationCode.trim()) {
-      setError('Please enter the invitation code');
+      setError(t('common:ui.agencyManagementSection.pleaseEnterTheInvitationCode', 'Please enter the invitation code'));
       return;
     }
 
@@ -223,25 +223,25 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
     const trimmedCode = agentCouponCode.trim().toUpperCase();
     if (!trimmedCode) {
-      setError('Please enter a coupon code');
+      setError(t('common:ui.agencyManagementSection.pleaseEnterACouponCode', 'Please enter a coupon code'));
       return;
     }
 
     // Validate format before hitting the server
     const COUPON_FORMAT = /^[A-Z0-9]{2,6}-[A-Z0-9]{8}$/;
     if (!COUPON_FORMAT.test(trimmedCode)) {
-      setError('Invalid code format. Expected: ABC-XXXXXXXX');
+      setError(t('common:ui.agencyManagementSection.invalidCodeFormatExpectedAbc', 'Invalid code format. Expected: ABC-XXXXXXXX'));
       return;
     }
 
     // Validate user is an agent
     if (!isUserAgent()) {
-      setError('Only registered agents can redeem agency coupons. Please register as an agent first.');
+      setError(t('common:ui.agencyManagementSection.onlyRegisteredAgentsCanRedeem', 'Only registered agents can redeem agency coupons. Please register as an agent first.'));
       return;
     }
 
     if (!currentUser) {
-      setError('User data unavailable. Please refresh the page.');
+      setError(t('common:ui.agencyManagementSection.userDataUnavailablePleaseRefresh', 'User data unavailable. Please refresh the page.'));
       return;
     }
 
@@ -250,7 +250,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
 
       const token = tokenService.getAccessToken()?.trim();
       if (!token) {
-        setError('You are not logged in. Please log in and try again.');
+        setError(t('common:ui.agencyManagementSection.youAreNotLoggedIn', 'You are not logged in. Please log in and try again.'));
         return;
       }
 
@@ -270,7 +270,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
       try {
         data = await response.json();
       } catch {
-        setError('Unexpected response from server. Please try again.');
+        setError(t('common:ui.agencyManagementSection.unexpectedResponseFromServerPlease', 'Unexpected response from server. Please try again.'));
         return;
       }
 
@@ -278,19 +278,19 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
         // Handle specific error codes
         switch (data.code) {
           case 'INVALID_COUPON':
-            setError('Invalid coupon code. Please check the code and try again.');
+            setError(t('common:ui.agencyManagementSection.invalidCouponCodePleaseCheck', 'Invalid coupon code. Please check the code and try again.'));
             break;
           case 'COUPON_ALREADY_USED':
-            setError('This coupon has already been used by another agent.');
+            setError(t('common:ui.agencyManagementSection.thisCouponHasAlreadyBeen', 'This coupon has already been used by another agent.'));
             break;
           case 'COUPON_EXPIRED':
-            setError('This coupon has expired and can no longer be redeemed.');
+            setError(t('common:ui.agencyManagementSection.thisCouponHasExpiredAnd', 'This coupon has expired and can no longer be redeemed.'));
             break;
           case 'COUPON_NOT_FOUND':
-            setError('Coupon not found. Please verify the code is correct.');
+            setError(t('common:ui.agencyManagementSection.couponNotFoundPleaseVerify', 'Coupon not found. Please verify the code is correct.'));
             break;
           case 'AGENCY_SUBSCRIPTION_INACTIVE':
-            setError('The agency subscription is no longer active. This coupon cannot be redeemed.');
+            setError(t('common:ui.agencyManagementSection.theAgencySubscriptionIsNo', 'The agency subscription is no longer active. This coupon cannot be redeemed.'));
             break;
           default:
             setError(data.message || 'Failed to redeem coupon. Please try again.');
@@ -444,7 +444,7 @@ const AgencyManagementSection: React.FC<AgencyManagementSectionProps> = ({ curre
             {pendingRequests.map((request) => (
               <div key={request._id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-yellow-200">
                 <div>
-                  <p className="font-medium text-gray-900">{request.agencyId?.name || 'Unknown Agency'}</p>
+                  <p className="font-medium text-gray-900">{request.agencyId?.name || t('common:ui.agencyManagementSection.unknownAgency', 'Unknown Agency')}</p>
                   <p className="text-xs text-gray-600">{t('agencies:management.sent', 'Sent:')} {new Date(request.createdAt).toLocaleDateString()}</p>
                 </div>
                 <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">

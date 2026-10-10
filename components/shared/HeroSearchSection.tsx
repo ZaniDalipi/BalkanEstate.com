@@ -2,6 +2,7 @@ import React from 'react';
 import { MagnifyingGlassIcon, BuildingOfficeIcon, UsersIcon, HomeIcon } from '@/constants';
 import { FloatingSphere, GlossyPill, AbstractBlob, WaveRibbon, Decorative3DStyles } from './Decorative3D';
 
+import { useTranslation } from 'react-i18next';
 interface StatItem {
   icon: 'users' | 'building' | 'home';
   count: number | string;
@@ -74,6 +75,7 @@ const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
   stats,
   mousePosition,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="relative bg-gradient-to-b from-neutral-100 via-neutral-50 to-white w-full overflow-hidden mesh-3d">
       {/* 3D Mesh Background with Parallax */}
@@ -253,7 +255,7 @@ const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
                   <button
                     onClick={() => onSearchChange('')}
                     className="p-1 sm:p-2 hover:bg-neutral-100 rounded-lg transition-all duration-200"
-                    title="Clear search"
+                    title={t('common:ui.heroSearchSection.clearSearch', 'Clear search')}
                   >
                     <span className="text-neutral-400 hover:text-neutral-600 text-sm">✕</span>
                   </button>

@@ -362,7 +362,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
       setLoading(true);
       const token = getAuthToken();
       if (!token) {
-        throw new Error('No authentication token found');
+        throw new Error(t('common:ui.profileStatistics.noAuthenticationTokenFound', 'No authentication token found'));
       }
 
       let statsData: UserStats | null = null;
@@ -447,7 +447,7 @@ const ProfileStatistics: React.FC<ProfileStatisticsProps> = ({ user }) => {
           ...syncData.stats
         }));
       } else {
-        throw new Error('Sync failed');
+        throw new Error(t('common:ui.profileStatistics.syncFailed', 'Sync failed'));
       }
     } catch (error) {
       await fetchStats();

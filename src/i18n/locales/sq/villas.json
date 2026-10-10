@@ -222,5 +222,6 @@
     "cardLabel": "Vila luksoze në {{place}}, {{country}}",
     "seeAll": "Shiko të gjitha",
     "photoWikimedia": "© Wikimedia Commons"
-  }
+  },
+  "showingInArea": "Asnjë vilë nuk përputhet me “{{query}}” — po shfaqim çfarë është e disponueshme në këtë zonë"
 }

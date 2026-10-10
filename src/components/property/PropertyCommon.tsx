@@ -5,6 +5,7 @@ import React from 'react';
 import { Property } from '../../../types';
 import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
 
+import { useTranslation } from 'react-i18next';
 interface DetailItemProps {
   icon: React.ReactNode;
   label: string;
@@ -163,6 +164,7 @@ export const PropertyFeatureList: React.FC<PropertyFeatureListProps> = ({
   features,
   maxDisplay,
 }) => {
+  const { t } = useTranslation();
   const displayFeatures = maxDisplay ? features.slice(0, maxDisplay) : features;
   const remaining = maxDisplay && features.length > maxDisplay ? features.length - maxDisplay : 0;
 
@@ -175,7 +177,7 @@ export const PropertyFeatureList: React.FC<PropertyFeatureListProps> = ({
         </li>
       ))}
       {remaining > 0 && (
-        <li className="text-sm text-neutral-500 italic">+ {remaining} more features</li>
+        <li className="text-sm text-neutral-500 italic">+ {remaining} {t('property:ui.propertyCommon.moreFeatures', 'more features')}</li>
       )}
     </ul>
   );

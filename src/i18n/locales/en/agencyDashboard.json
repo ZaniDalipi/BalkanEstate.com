@@ -150,7 +150,18 @@
     "emptyDesc": "Try adjusting your filters or add new listings.",
     "emptyTitle": "No properties found",
     "promote": "Promote",
-    "showing": "Showing {{from}}-{{to}} of {{total}}"
+    "showing": "Showing {{from}}-{{to}} of {{total}}",
+    "statusAll": "All Statuses",
+    "statusActive": "Active",
+    "statusSold": "Sold",
+    "statusRented": "Rented",
+    "statusPending": "Pending",
+    "statusDraft": "Draft",
+    "typeAll": "All Types",
+    "dateAll": "All Time",
+    "date7": "Last 7 days",
+    "date30": "Last 30 days",
+    "date90": "Last 90 days"
   },
   "leads": {
     "title": "Leads & Inquiries",
@@ -181,7 +192,13 @@
     "emptyTitle": "No inquiries found",
     "noAgents": "No agents available",
     "showing": "Showing {{from}}-{{to}} of {{total}}",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "statusAll": "All Statuses",
+    "statusInProgress": "In Progress",
+    "dateAll": "All Time",
+    "date7": "Last 7 days",
+    "date30": "Last 30 days",
+    "date90": "Last 90 days"
   },
   "analytics": {
     "title": "Analytics & Reports",
@@ -257,5 +274,10 @@
     "postNote": "Post Note",
     "posting": "Posting...",
     "noNotes": "No team notes yet. Be the first to post!"
+  },
+  "ui": {
+    "overviewCharts": {
+      "noDataAvailable": "No data available"
+    }
   }
 }

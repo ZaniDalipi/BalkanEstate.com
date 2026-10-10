@@ -35,7 +35,17 @@
     "imageFailedToLoad": "Неуспешно вчитување на сликата.",
     "failedToUploadImage": "Неуспешно прикачување на слика. Ве молиме обидете се повторно.",
     "failedToSendMessage": "Неуспешно испраќање на порака. Ве молиме обидете се повторно.",
-    "failedToDeleteConversation": "Неуспешно бришење на разговор. Ве молиме обидете се повторно."
+    "failedToDeleteConversation": "Неуспешно бришење на разговор. Ве молиме обидете се повторно.",
+    "errorTitle": "Грешка",
+    "deleteTitle": "Избриши разговор",
+    "deleteButton": "Избриши",
+    "cancelButton": "Откажи",
+    "directConversation": "Директен разговор",
+    "directAgentConversation": "Разговор со агент",
+    "seller": "Продавач",
+    "buyer": "Купувач",
+    "you": "Вие",
+    "image": "📷 Слика"
   },
   "quickReplies": {
     "scheduleTour": "Закажи тура",
@@ -66,7 +76,13 @@
     "enable": "Вклучи",
     "enabling": "Вклучување...",
     "later": "Подоцна",
-    "dismiss": "Одбиј"
+    "dismiss": "Одбиј",
+    "error": "Вклучувањето на известувањата не успеа. Обидете се повторно.",
+    "error_title": "Грешка со известувањата",
+    "error_hint_devices": "Обидете се повторно или отстранете постар уред од поставките.",
+    "error_hint_browser": "Проверете ги поставките на прелистувачот и обидете се повторно.",
+    "error_hint_generic": "Обидете се повторно.",
+    "close": "Затвори"
   },
   "toast": {
     "success": "Успешно!",
@@ -171,5 +187,14 @@
     "deleteFailed": "Неуспешно бришење на порака",
     "connectionLost": "Конекцијата е изгубена. Повторно поврзување...",
     "reconnected": "Поврзано!"
+  },
+  "ui": {
+    "messageInput": {
+      "preview": "Преглед"
+    },
+    "conversationView": {
+      "annotatedProperty": "Означен имот",
+      "seller": "Продавач"
+    }
   }
 }

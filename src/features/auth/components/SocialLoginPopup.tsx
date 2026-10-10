@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { GoogleIcon, AppleIcon, SpinnerIcon, XMarkIcon } from '@/constants';
 import { isEmbeddedWebView, getOAuthUrl } from '../api/authApi';
 
+import { useTranslation } from 'react-i18next';
 type Provider = 'google' | 'apple';
 
 interface SocialLoginPopupProps {
@@ -16,6 +17,7 @@ const providerDetails: Record<Provider, { name: string; icon: React.ReactNode }>
 };
 
 const SocialLoginPopup: React.FC<SocialLoginPopupProps> = ({ provider, onSuccess, onClose }) => {
+  const { t } = useTranslation();
     const details = providerDetails[provider];
     const isInApp = isEmbeddedWebView();
     const [copied, setCopied] = useState(false);
@@ -73,7 +75,7 @@ const SocialLoginPopup: React.FC<SocialLoginPopupProps> = ({ provider, onSuccess
                     <div className="p-4 border-b flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <div className="w-6 h-6">{details.icon}</div>
-                            <h2 className="font-semibold text-neutral-700">Sign in with {details.name}</h2>
+                            <h2 className="font-semibold text-neutral-700">{t('auth:ui.socialLoginPopup.signInWith', 'Sign in with')} {details.name}</h2>
                         </div>
                         <button onClick={onClose} className="text-neutral-400 hover:text-neutral-700">
                             <XMarkIcon className="w-5 h-5"/>
@@ -87,14 +89,14 @@ const SocialLoginPopup: React.FC<SocialLoginPopupProps> = ({ provider, onSuccess
                             </svg>
                         </div>
                         <p className="text-neutral-700 font-medium text-sm">
-                            {details.name} sign-in doesn't work in this browser. Please open this page in your default browser.
+                            {details.name} {t('auth:ui.socialLoginPopup.signInDoesnTWork', 'sign-in doesn\'t work in this browser. Please open this page in your default browser.')}
                         </p>
 
                         <button
                             onClick={handleOpenInBrowser}
                             className="w-full py-2.5 px-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors text-sm"
                         >
-                            Open in Browser
+                            {t('auth:ui.socialLoginPopup.openInBrowser', 'Open in Browser')}
                         </button>
 
                         <button
@@ -106,20 +108,20 @@ const SocialLoginPopup: React.FC<SocialLoginPopupProps> = ({ provider, onSuccess
                                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
-                                    Link Copied!
+                                    {t('auth:ui.socialLoginPopup.linkCopied', 'Link Copied!')}
                                 </>
                             ) : (
                                 <>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                     </svg>
-                                    Copy Link
+                                    {t('auth:ui.socialLoginPopup.copyLink', 'Copy Link')}
                                 </>
                             )}
                         </button>
 
                         <p className="text-neutral-400 text-xs">
-                            Paste the link in Safari, Chrome, or your preferred browser
+                            {t('auth:ui.socialLoginPopup.pasteTheLinkInSafari', 'Paste the link in Safari, Chrome, or your preferred browser')}
                         </p>
                     </div>
                 </div>
@@ -133,7 +135,7 @@ const SocialLoginPopup: React.FC<SocialLoginPopupProps> = ({ provider, onSuccess
                 <div className="p-4 border-b flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <div className="w-6 h-6">{details.icon}</div>
-                        <h2 className="font-semibold text-neutral-700">Sign in with {details.name}</h2>
+                        <h2 className="font-semibold text-neutral-700">{t('auth:ui.socialLoginPopup.signInWith', 'Sign in with')} {details.name}</h2>
                     </div>
                     <button onClick={onClose} className="text-neutral-400 hover:text-neutral-700">
                         <XMarkIcon className="w-5 h-5"/>
@@ -142,7 +144,7 @@ const SocialLoginPopup: React.FC<SocialLoginPopupProps> = ({ provider, onSuccess
 
                 <div className="p-8 flex flex-col items-center justify-center h-48">
                     <SpinnerIcon className="w-12 h-12 text-primary" />
-                    <p className="mt-4 text-neutral-600 font-medium">Redirecting to {details.name}...</p>
+                    <p className="mt-4 text-neutral-600 font-medium">{t('auth:ui.socialLoginPopup.redirectingTo', 'Redirecting to')} {details.name}...</p>
                 </div>
             </div>
         </div>

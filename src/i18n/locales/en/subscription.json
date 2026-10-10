@@ -290,7 +290,10 @@
       "toggleAutoRenewalError": "Failed to update auto-renewal. Please try again.",
       "enabled": "enabled",
       "disabled": "disabled"
-    }
+    },
+    "listingLimitYearly": "Annual Listings",
+    "listingUsageYearly": "{{used}} of {{limit}} this year",
+    "perYearLabel": "Per year"
   },
   "featuredAgency": {
     "title": "Featured Agency",
@@ -395,7 +398,9 @@
   "messages": {
     "subscriptionActivated": "Subscription activated successfully!",
     "subscriptionCanceled": "Subscription canceled successfully",
-    "paymentFailed": "Payment failed. Please try again."
+    "paymentFailed": "Payment failed. Please try again.",
+    "noPlans": "No plans available",
+    "noPlansCurrent": "You are already on the best plan available."
   },
   "coupons": {
     "haveCoupon": "Have a coupon?",
@@ -421,5 +426,81 @@
     "benefit3": "Unlimited AI Chat",
     "benefit4": "20 Insights/Month",
     "viewPlans": "View Plans & Pricing"
+  },
+  "errors": {
+    "loadingPlans": "Failed to load plans",
+    "tryAgain": "Please try again later."
+  },
+  "sections": {
+    "upgradePlan": "Upgrade Your Plan",
+    "upgradePlanSubtitle": "Choose a plan that fits your needs"
+  },
+  "tips": {
+    "swipeToCompare": "Scroll to see all plans",
+    "tabletCompare": "All your plan options are displayed above"
+  },
+  "billing": {
+    "month": "month",
+    "year": "year"
+  },
+  "metrics": {
+    "listings": "Listings",
+    "promoCoupons": "Coupons"
+  },
+  "common": {
+    "more": "more"
+  },
+  "buttons": {
+    "startAgency": "Start Agency",
+    "upgradeNow": "Upgrade"
+  },
+  "ui": {
+    "subscriptionExpiryModals": {
+      "subscriptionExpiringSoon": "Subscription Expiring Soon",
+      "lessThan": "Less than",
+      "your": "Your",
+      "subscriptionExpiresOn": "subscription expires on",
+      "afterThatYourAccountWill": ". After that, your account will be downgraded to the free plan.",
+      "youLlLoseAccessTo": "You'll lose access to:",
+      "increasedPropertyListingLimits": "Increased property listing limits",
+      "monthlyPromotionCoupons": "Monthly promotion coupons",
+      "aiMessagesMarketInsights": "AI messages & market insights",
+      "priorityNotifications": "Priority notifications",
+      "remindMeLater": "Remind me later",
+      "loading": "Loading…",
+      "renewNow": "Renew Now →",
+      "yourSubscriptionHasExpired": "Your Subscription Has Expired",
+      "yourAccountHasBeenDowngraded": "Your account has been downgraded to the free plan",
+      "subscriptionExpiredOn": "subscription expired on",
+      "reactivateNowToInstantlyRestore": ". Reactivate now to instantly restore all your premium features.",
+      "youNoLongerHaveAccess": "You no longer have access to:",
+      "noThanks": "No, thanks",
+      "maybeLater": "Maybe later",
+      "reactivatePlan": "Reactivate Plan →"
+    },
+    "subscriptionManagement": {
+      "limitReached": "limit reached",
+      "annual": "Annual",
+      "monthly": "Monthly",
+      "limitReached2": "limit reached.",
+      "waitForNextMonthOr": "Wait for next month or ",
+      "upgradeYourPlan": "Upgrade your plan.",
+      "almostThere": "⚡ Almost there! (",
+      "used": "% used)",
+      "of": "% of",
+      "limitUsed": "limit used",
+      "youHavePlentyOfSpace": "✓ You have plenty of space",
+      "thisYear": "this year",
+      "thisMonth": "this month",
+      "requestMoreListings": "📧 Request More Listings",
+      "note": "Note:",
+      "requestMoreListings2": "Request More Listings",
+      "youReApproachingYourMonthly": "You're approaching your monthly listing limit. Let us know if you'd like to increase it, and our team will review your request.",
+      "requestSentSuccessfully": "✓ Request sent successfully!",
+      "ourTeamWillReviewYour": "Our team will review your request and contact you soon.",
+      "tellUsWhyYouNeed": "Tell us why you need more listings... (optional)",
+      "sendRequest": "Send Request",
+      "cancel": "Cancel"
+    }
   }
 }

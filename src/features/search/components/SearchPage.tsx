@@ -203,7 +203,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 <div
                     className="fixed top-0 left-0 right-0 z-[9999] h-0.5 overflow-hidden"
                     role="progressbar"
-                    aria-label="Loading properties"
+                    aria-label={t('search:ui.searchPage.loadingProperties', 'Loading properties')}
                 >
                     <div
                         className="h-full bg-blue-600"
@@ -376,7 +376,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         <button
                                             onClick={onToggleSidebar}
                                             className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                            aria-label="Open menu"
+                                            aria-label={t('search:ui.searchPage.openMenu', 'Open menu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800"/>
                                         </button>
@@ -392,7 +392,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         <button
                                             onClick={() => updateSearchPageState({ isFiltersOpen: true })}
                                             className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
-                                            aria-label="Open filters"
+                                            aria-label={t('search:ui.searchPage.openFilters', 'Open filters')}
                                         >
                                             <AdjustmentsHorizontalIcon className="w-6 h-6 text-neutral-800"/>
                                         </button>
@@ -400,7 +400,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                             <button
                                                 onClick={() => navigate(paths.account())}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 mr-0.5"
-                                                aria-label="My account"
+                                                aria-label={t('search:ui.searchPage.myAccount', 'My account')}
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {currentUser.avatarUrl ? (
@@ -422,12 +422,12 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                             {showMapHint && (
                                 <div className="absolute bottom-full right-1/2 translate-x-[70%] mb-2 pointer-events-auto animate-bounce">
                                     <div className="relative bg-primary text-white px-3 py-1.5 rounded-lg shadow-lg text-xs font-medium whitespace-nowrap">
-                                        <span>Tap "Map"</span>
+                                        <span>{t('search:ui.searchPage.tapMap', 'Tap "Map"')}</span>
                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-6 border-transparent border-t-primary"></div>
                                     </div>
                                 </div>
                             )}
-                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label="View toggle">
+                            <div className="pointer-events-auto mx-auto w-fit" role="tablist" aria-label={t('search:ui.searchPage.viewToggle', 'View toggle')}>
                                 <LiquidGlassSwitch
                                     options={[
                                         { value: 'list', label: 'List', icon: <Squares2x2Icon className="w-full h-full" /> },

@@ -344,7 +344,7 @@ const SavedPropertiesPage: React.FC = () => {
             )}
             {agency.isFeatured && (
               <span className="inline-block mt-1 px-2 py-0.5 bg-amber-50 text-amber-600 text-xs rounded-full font-medium">
-                Featured
+                {t('saved:ui.savedHomesPage.featured', 'Featured')}
               </span>
             )}
           </div>

@@ -29,5 +29,28 @@
     "prev": "Previous",
     "next": "Next",
     "page": "Page {{page}} of {{total}}"
+  },
+  "ui": {
+    "articlePage": {
+      "copied": "Copied!",
+      "xTwitter": "X / Twitter",
+      "reddit": "Reddit",
+      "more": "More",
+      "copyLink": "Copy link",
+      "articleContent": "Article content",
+      "featured": "Featured",
+      "minRead": "min read",
+      "shareThisArticle": "Share this article",
+      "views": "views"
+    },
+    "blogPage": {
+      "activeFilters": "Active filters:",
+      "clearAll": "Clear all",
+      "tryAdjustingYourFilters": "Try adjusting your filters"
+    },
+    "articleCard": {
+      "featured": "Featured",
+      "readArticle": "Read article"
+    }
   }
 }

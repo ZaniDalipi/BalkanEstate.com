@@ -341,7 +341,8 @@
     "authFailed": "Удостоверяването е неуспешно",
     "authFailedMessage": "Удостоверяването е неуспешно. Моля, опитайте отново.",
     "errorLoadingGoogleMaps": "Грешка при зареждане на Google Maps",
-    "checkApiKeyConfiguration": "Моля, проверете конфигурацията на API ключа"
+    "checkApiKeyConfiguration": "Моля, проверете конфигурацията на API ключа",
+    "generic": "Нещо се обърка"
   },
   "validation": {
     "required": "Това поле е задължително",
@@ -392,7 +393,8 @@
     "save": "Запази",
     "delete": "Изтрий",
     "edit": "Редактирай",
-    "submit": "Изпрати"
+    "submit": "Изпрати",
+    "ok": "OK"
   },
   "tryAgain": "Опитай Отново",
   "achievements": {
@@ -647,12 +649,214 @@
     "resetsOn": "Обновява се на {{date}}"
   },
   "ads": {
-    "previewMode": "Ad preview — ad slots are highlighted",
-    "exitPreview": "Exit",
-    "stickyBottomBar": "Sticky bottom bar",
-    "getInTouch": "Get in touch →",
-    "advertiseCta": "Advertise with us — get in touch"
+    "previewMode": "Преглед на реклами — рекламните места са маркирани",
+    "exitPreview": "Изход",
+    "stickyBottomBar": "Фиксирана долна лента",
+    "getInTouch": "Свържете се с нас →",
+    "advertiseCta": "Рекламирайте при нас — свържете се с нас",
+    "close": "Затвори рекламата",
+    "advertisement": "Реклама",
+    "yourAdHere": "Вашата реклама тук",
+    "advertiseWithUs": "Рекламирайте при нас",
+    "sponsored": "Спонсорирано",
+    "dismiss": "Скрий рекламата"
   },
   "note": "Забележка",
-  "loadMore": "Зареди още"
+  "loadMore": "Зареди още",
+  "notifications": "Известия",
+  "markAllRead": "Маркирай всички като прочетени",
+  "noNotifications": "Все още няма известия",
+  "viewAll": "Виж всички известия",
+  "cookies": {
+    "title": "Използваме бисквитки",
+    "shortDescription": "за да подобрим вашето изживяване и да анализираме трафика.",
+    "learnMore": "Научете повече",
+    "close": "Затвори без приемане — ще се използват само необходимите бисквитки",
+    "acceptAll": "Приеми всички",
+    "rejectAll": "Откажи всички",
+    "customize": "Персонализирай",
+    "settingsTitle": "Настройки на бисквитките",
+    "essential": "Необходими",
+    "alwaysOn": "Винаги включени",
+    "functional": "Функционални",
+    "analytics": "Аналитични",
+    "marketing": "Маркетингови",
+    "savePreferences": "Запази предпочитанията"
+  },
+  "common": {
+    "close": "Затвори"
+  },
+  "comingSoon": {
+    "title": "Плащанията скоро",
+    "message": "В момента търсим доставчик на платежни услуги, с когото да си партнираме. Директни плащания засега не се приемат. Можете да активирате абонамента си веднага с код на купон или да се свържете с нас за ръчна обработка.",
+    "haveCoupon": "Дадохме ли ви купон?",
+    "couponDescription": "Въведете кода си, за да активирате абонамента веднага",
+    "activateCoupon": "Активирай с купон",
+    "contactUs": "Свържете се с нас за ръчна обработка:",
+    "responseTime": "Обикновено отговаряме в рамките на 24 часа",
+    "badge": "Търсим партньор за плащания"
+  },
+  "wk": "седм.",
+  "day": "ден",
+  "mo": "мес.",
+  "syncing": "Синхронизиране...",
+  "live": "На живо",
+  "updating": "Обновяване...",
+  "unknownError": "Възникна неизвестна грешка",
+  "goHome": "Към началото",
+  "myAccount": "Моят профил",
+  "login": "Вход",
+  "heroTagline": "Търсене на имоти с AI в 11 балкански държави",
+  "weekdays": {
+    "mon": "Пон",
+    "tue": "Вт",
+    "wed": "Ср",
+    "thu": "Чет",
+    "fri": "Пет",
+    "sat": "Съб",
+    "sun": "Нед"
+  },
+  "ui": {
+    "agencyCreationModal": {
+      "eGRe123456": "напр., RE-123456",
+      "discardChanges": "Отхвърляне на промените?",
+      "youHaveUnsavedChangesAre": "Имате незапазени промени. Сигурни ли сте, че искате да затворите формуляра?",
+      "discard": "Отхвърли",
+      "keepEditing": "Продължи редакцията",
+      "close": "Затвори"
+    },
+    "featuredSubscriptionDialog": {
+      "directPaymentsAreNotYet": "Директните плащания все още не са налични",
+      "weAreCurrentlyLookingFor": "В момента търсим доставчик на платежни услуги за партньорство. Можете да активирате безплатно абонамента за открояваща се агенция с код на купон или да се свържете с нас на",
+      "toArrangeItManually": "за ръчно уреждане.",
+      "paymentNotAvailableYet": "Плащането все още не е налично",
+      "applyA100OffCoupon": "Приложете купон със 100% отстъпка, за да активирате безплатно абонамента."
+    },
+    "achievementsSection": {
+      "expired": "ИЗТЕКЛО",
+      "ddMmYyyy": "ДД/ММ/ГГГГ"
+    },
+    "header": {
+      "new": "+ Нова",
+      "toggleSidebarNavigation": "Покажи/скрий страничното меню"
+    },
+    "text-scroll-animation": {
+      "scrollToSeeMore": "Превъртете, за да видите още"
+    },
+    "floorInputCombined": {
+      "totalFloorsInBuilding": "Общо етажи в сградата",
+      "floorNumber": "Номер на етажа"
+    },
+    "z360TourInput": {
+      "previewTour": "Преглед на обиколката",
+      "n360VirtualTourPreview": "Преглед на виртуална обиколка 360°"
+    },
+    "animations": {
+      "loading": "Зареждане"
+    },
+    "glass-cards": {
+      "promoted": "Промотирано",
+      "new": "Ново"
+    },
+    "propertyInquiryModal": {
+      "close": "Затвори"
+    },
+    "defaultAvatar": {
+      "avatar": "Аватар"
+    },
+    "promotionOfferModal": {
+      "directPaymentsAreNotYet": "Директните плащания все още не са налични. Използвайте купон за безплатно активиране.",
+      "activateWithCoupon": "Активирай с купон"
+    },
+    "myPromotions": {
+      "live": "На живо",
+      "updated": "Обновено:",
+      "refreshPromotions": "Обнови промоциите",
+      "autoExtendEnabledYourPromotion": "Автоматичното удължаване е включено. Промоцията ви ще се поднови автоматично при изтичане. Плащанията скоро!",
+      "autoExtendDisabledYourPromotion": "Автоматичното удължаване е изключено. Промоцията ви ще изтече нормално.",
+      "thisPromotionHasExpiredUse": "Тази промоция е изтекла. Използвайте бутона „Удължи“, за да я активирате отново.",
+      "paymentsComingSoonAutoExtend": "Плащанията скоро! Плащането за автоматично удължаване ще бъде налично скоро.",
+      "paymentsComingSoonContactSales": "Плащанията скоро! Свържете се със sales@balkanestateai.com, за да удължите промоцията си."
+    },
+    "alertDialog": {
+      "close": "Затвори"
+    },
+    "phoneInput": {
+      "countryCode": "Код на държавата",
+      "phoneNumber": "Телефонен номер"
+    },
+    "confirmationModal": {
+      "close": "Затвори"
+    },
+    "button": {
+      "loading": "Зареждане"
+    },
+    "notificationModal": {
+      "close": "Затвори"
+    },
+    "modal": {
+      "closeModal": "Затвори прозореца"
+    },
+    "consentBanner": {
+      "cookieConsent": "Съгласие за бисквитки"
+    },
+    "z360TourEmbed": {
+      "z360Tour": "Z360 обиколка"
+    },
+    "mapAgentAvatar": {
+      "closePanel": "Затвори панела"
+    },
+    "breadcrumbs": {
+      "breadcrumb": "Навигация"
+    },
+    "promotedPropertyCard": {
+      "property": "Имот",
+      "untitledProperty": "Имот без заглавие",
+      "viewPromotionHistory": "Виж историята на промоциите"
+    },
+    "promotionModal": {
+      "closeModal": "Затвори прозореца"
+    },
+    "beforeAfterSlider": {
+      "comparisonSlider": "Плъзгач за сравнение"
+    },
+    "agentInquiryModal": {
+      "youExampleCom": "vie@primer.com"
+    },
+    "heroSearchSection": {
+      "clearSearch": "Изчисти търсенето"
+    },
+    "avatarCustomizer": {
+      "discardChanges": "Отхвърляне на промените?",
+      "youHaveUnsavedAvatarChanges": "Имате незапазени промени по аватара. Сигурни ли сте, че искате да затворите?",
+      "discard": "Отхвърли",
+      "keepEditing": "Продължи редакцията"
+    },
+    "liquid-glass": {
+      "howCanIHelpYou": "Как мога да ви помогна днес?"
+    },
+    "apple-liquid-glass-switcher": {
+      "chooseTheme": "Избери тема"
+    },
+    "agencyManagementSection": {
+      "pleaseSelectAnAgency": "Моля, изберете агенция",
+      "pleaseEnterTheInvitationCode": "Моля, въведете кода за покана",
+      "pleaseEnterACouponCode": "Моля, въведете код на купон",
+      "invalidCodeFormatExpectedAbc": "Невалиден формат на кода. Очаква се: ABC-XXXXXXXX",
+      "onlyRegisteredAgentsCanRedeem": "Само регистрирани агенти могат да използват купони на агенция. Моля, първо се регистрирайте като агент.",
+      "userDataUnavailablePleaseRefresh": "Данните за потребителя не са налични. Моля, обновете страницата.",
+      "youAreNotLoggedIn": "Не сте влезли. Моля, влезте и опитайте отново.",
+      "unexpectedResponseFromServerPlease": "Неочакван отговор от сървъра. Моля, опитайте отново.",
+      "invalidCouponCodePleaseCheck": "Невалиден код на купон. Моля, проверете кода и опитайте отново.",
+      "thisCouponHasAlreadyBeen": "Този купон вече е използван от друг агент.",
+      "thisCouponHasExpiredAnd": "Този купон е изтекъл и вече не може да бъде използван.",
+      "couponNotFoundPleaseVerify": "Купонът не е намерен. Моля, проверете дали кодът е правилен.",
+      "theAgencySubscriptionIsNo": "Абонаментът на агенцията вече не е активен. Този купон не може да бъде използван.",
+      "unknownAgency": "Неизвестна агенция"
+    },
+    "profileStatistics": {
+      "noAuthenticationTokenFound": "Не е намерен токен за удостоверяване",
+      "syncFailed": "Синхронизацията е неуспешна"
+    }
+  }
 }

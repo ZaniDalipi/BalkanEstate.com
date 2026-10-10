@@ -570,7 +570,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 rounded-2xl bg-neutral-100 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-dashed border-neutral-300">
                   {logoPreview ? (
-                    <img src={logoPreview} alt="Preview" className="w-full h-full object-cover rounded-xl" />
+                    <img src={logoPreview} alt={t('businessDirectory:ui.editBusinessListingForm.preview', 'Preview')} className="w-full h-full object-cover rounded-xl" />
                   ) : (
                     <div className="text-center">
                       <svg className="w-8 h-8 mx-auto text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -615,7 +615,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
               <div className="space-y-3">
                 <div className="w-full h-32 rounded-xl bg-neutral-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-neutral-300">
                   {bannerPreview ? (
-                    <img src={bannerPreview} alt="Banner preview" className="w-full h-full object-cover" />
+                    <img src={bannerPreview} alt={t('businessDirectory:ui.editBusinessListingForm.bannerPreview', 'Banner preview')} className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-center">
                       <svg className="w-10 h-10 mx-auto text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

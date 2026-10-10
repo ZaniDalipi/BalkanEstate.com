@@ -5,6 +5,7 @@ import ReactLenis from "lenis/react";
 import React, { useRef } from "react";
 import { cn } from "@/lib/utils";
 
+import { useTranslation } from 'react-i18next';
 type CharacterProps = {
   char: string;
   index: number;
@@ -83,6 +84,7 @@ const CharacterV3 = ({
 };
 
 const Skiper31 = () => {
+  const { t } = useTranslation();
   const targetRef = useRef<HTMLDivElement | null>(null);
   const targetRef2 = useRef<HTMLDivElement | null>(null);
   const targetRef3 = useRef<HTMLDivElement | null>(null);
@@ -114,7 +116,7 @@ const Skiper31 = () => {
         {/* Шапка-подсказка */}
         <div className="top-22 absolute left-1/2 z-10 grid -translate-x-1/2 content-start justify-items-center gap-6 text-center text-black">
           <span className="relative max-w-[12ch] text-xs uppercase leading-tight opacity-40 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-gradient-to-b after:from-[#f5f4f3] after:to-black after:content-['']">
-            Scroll to see more
+            {t('common:ui.text-scroll-animation.scrollToSeeMore', 'Scroll to see more')}
           </span>
         </div>
 
@@ -146,7 +148,7 @@ const Skiper31 = () => {
         >
           <p className="font-geist flex items-center justify-center gap-3 text-2xl font-medium tracking-tight text-black">
             <Bracket className="h-12 text-black" />
-            <span className="font-geist font-medium">integrate with your fav tech stack</span>
+            <span className="font-geist font-medium">{t('common:ui.text-scroll-animation.integrateWithYourFavTech', 'integrate with your fav tech stack')}</span>
             <Bracket className="h-12 scale-x-[-1] text-black" />
           </p>
 
@@ -170,7 +172,7 @@ const Skiper31 = () => {
         >
           <p className="font-geist flex items-center justify-center gap-3 text-2xl font-medium tracking-tight text-black">
             <Bracket className="h-12 text-black" />
-            <span className="font-geist font-medium">integrate with your fav tech stack</span>
+            <span className="font-geist font-medium">{t('common:ui.text-scroll-animation.integrateWithYourFavTech', 'integrate with your fav tech stack')}</span>
             <Bracket className="h-12 scale-x-[-1] text-black" />
           </p>
 

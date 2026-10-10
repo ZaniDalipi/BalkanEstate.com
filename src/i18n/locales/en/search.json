@@ -84,7 +84,16 @@
     "saleStatusAvailable": "For sale",
     "saleStatusSold": "Sold",
     "saleStatusAll": "Both",
-    "saleStatusHint": "Sold homes show their last price and when they sold — open one to see prices around it."
+    "saleStatusHint": "Sold homes show their last price and when they sold — open one to see prices around it.",
+    "filters": "Filters",
+    "pricePerSqm": "Price per m²",
+    "daysOnMarket": "Listed within",
+    "last24h": "Last 24 hours",
+    "last3Days": "Last 3 days",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "priceReduced": "Price Reduced",
+    "priceIncreased": "Price Increased"
   },
   "options": {
     "any": "Any",
@@ -188,7 +197,8 @@
     "tryDifferent": "Try adjusting your filters or search criteria",
     "inArea": "in {{area}}",
     "forSale": "for sale",
-    "forRent": "for rent"
+    "forRent": "for rent",
+    "resetHint": "Reset filters to see all properties in this area"
   },
   "map": {
     "showMap": "Map",
@@ -298,7 +308,26 @@
       "title": "Draw your own area",
       "subtitle": "Trace a shape on the map to search only inside it",
       "dismiss": "Dismiss hint"
-    }
+    },
+    "loadingTimeout": "Map Taking Too Long",
+    "loadingTimeoutDesc": "The map is taking longer than expected. This might be due to a slow connection.",
+    "useAlternative": "Use Alternative Map",
+    "saveMeasurement": "Save Measurement",
+    "measurementName": "Name",
+    "measurementNamePlaceholder": "e.g., Garden plot, Building lot...",
+    "measurementLocation": "Location / Address",
+    "measurementLocationPlaceholder": "e.g., Near Lake Ohrid, Albania...",
+    "measurementNotes": "Notes",
+    "measurementNotesPlaceholder": "Any additional details...",
+    "measurementUsage": "Saved measurements",
+    "saveFailed": "Could not save",
+    "limitReached": "Limit Reached",
+    "saveToProfile": "Save to Profile",
+    "cluster": {
+      "zoomIn": "{{count}} properties here — activate to zoom in and see them all"
+    },
+    "resetView": "Reset view",
+    "loading": "Loading map..."
   },
   "newsletter": {
     "title": "Stay Updated with New Properties",
@@ -509,5 +538,125 @@
     "showingPromoted": "Meanwhile, here are premium and highlighted listings from elsewhere.",
     "showingNearestIn": "Meanwhile, here are the nearest listings, in {{location}}.",
     "nothingPromoted": "Try zooming out, moving the map or resetting your filters."
+  },
+  "ui": {
+    "measurementTool": {
+      "startPointClickToClose": "🎯 Start Point (click to close)",
+      "fromPrev": "from prev",
+      "measure": "Measure",
+      "viewingSavedMeasurement": "Viewing saved measurement",
+      "clickMapToAddPoints": "Click map to add points",
+      "pts": "Pts:",
+      "cursor": "+cursor:",
+      "area": "Area:",
+      "startNewMeasurement": "✏️ Start New Measurement",
+      "undo": "↩ Undo",
+      "clear": "Clear",
+      "closePolygon": "🔷 Close Polygon",
+      "save": "💾 Save",
+      "saveMeasurement": "💾 Save Measurement",
+      "type": "Type:",
+      "area2": "🔷 Area",
+      "distance": "📏 Distance",
+      "points": "Points:",
+      "perimeter": "Perimeter:",
+      "distance2": "Distance:",
+      "logInToSaveMeasurements": "Log in to save measurements to your profile. Otherwise, they will be saved locally.",
+      "name": "Name",
+      "eGMyPropertyPlot": "e.g., My Property Plot",
+      "location": "Location",
+      "eG123MainStreet": "e.g., 123 Main Street, City",
+      "notesOptional": "Notes (optional)",
+      "addAnyNotesAboutThis": "Add any notes about this measurement...",
+      "cancel": "Cancel",
+      "saveTo": "Save to",
+      "profile": "Profile",
+      "device": "Device"
+    },
+    "googleMapMeasurement": {
+      "area": "📐 Area",
+      "distance": "📍 Distance",
+      "clickOnTheMapTo": "Click on the map to draw a polygon. Add at least 3 points.",
+      "clickOnTheMapTo2": "Click on the map to add points and measure distance.",
+      "area2": "Area:",
+      "perimeter": "Perimeter:",
+      "distance2": "Distance:",
+      "undo": "↩️ Undo",
+      "save": "💾 Save",
+      "keep": "💾 Keep",
+      "new": "🗑️ New",
+      "youVeReachedTheFree": "⚠️ You've reached the free limit. Upgrade to Pro for more!",
+      "n1SlotRemainingUpgradeTo": "⚠️ 1 slot remaining. Upgrade to Pro for more measurements."
+    },
+    "mapFilterControls": {
+      "mapStyle": "Map style",
+      "cleanMapStyleMinimalProperties": "Clean map style - minimal, properties stand out",
+      "colorMapStyleShowsNeighborhoods": "Color map style - shows neighborhoods, parks, amenities",
+      "streetMapStyle": "Street map style",
+      "satelliteAerialImagery": "Satellite aerial imagery",
+      "save": "Save",
+      "clear": "Clear"
+    },
+    "searchPage": {
+      "loadingProperties": "Loading properties",
+      "openMenu": "Open menu",
+      "openFilters": "Open filters",
+      "myAccount": "My account",
+      "tapMap": "Tap \"Map\"",
+      "viewToggle": "View toggle"
+    },
+    "sunPositionControl": {
+      "n12am": "12AM",
+      "n6am": "6AM",
+      "n12pm": "12PM",
+      "n6pm": "6PM",
+      "n11pm": "11PM"
+    },
+    "aiSearch": {
+      "agent": "👔 Agent",
+      "private": "👤 Private",
+      "stopRecording": "Stop recording",
+      "startVoiceAssistant": "Start voice assistant"
+    },
+    "mapComponent": {
+      "mapLoadingError": "Map Loading Error",
+      "unableToLoadTheMap": "Unable to load the map. This might be a temporary issue.",
+      "tryAgain": "Try Again (",
+      "left": "left)",
+      "useAlternativeMap": "Use Alternative Map"
+    },
+    "searchMobileFilters": {
+      "closeFilters": "Close filters",
+      "reset": "Reset",
+      "saveSearch": "Save Search",
+      "showResults": "Show Results"
+    },
+    "mapPropertyPopup": {
+      "closePopup": "Close popup",
+      "propertyImage": "Property image",
+      "previousImage": "Previous image",
+      "nextImage": "Next image"
+    },
+    "propertyList": {
+      "signInToAccessAi": "Sign in to access AI search"
+    },
+    "virtualizedPropertyGrid": {
+      "loadingMore": "Loading more..."
+    },
+    "mobileFiltersModal": {
+      "closeFilters": "Close filters"
+    },
+    "shadowTimelapseControl": {
+      "n1200Pm": "12:00 PM"
+    },
+    "propertyLocationMap": {
+      "locationDataUnavailable": "Location data unavailable."
+    },
+    "googleMapPropertyPopup": {
+      "closePopup": "Close popup"
+    },
+    "climateRiskLayer": {
+      "veryHigh": "Very High"
+    }
   }
 }

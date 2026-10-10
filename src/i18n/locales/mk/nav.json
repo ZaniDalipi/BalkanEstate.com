@@ -113,5 +113,16 @@
     "home": "Почетна"
   },
   "blog": "Блог и Написи",
-  "agencyDashboard": "Контролна табла на агенцијата"
+  "agencyDashboard": "Контролна табла на агенцијата",
+  "mainNavigation": "Главна навигација",
+  "createNewListing": "Креирај нов оглас",
+  "unread": "непрочитани",
+  "goToHome": "Оди на почетната страница",
+  "closeMenu": "Затвори го менито",
+  "viewSubscription": "Види ги плановите за претплата",
+  "viewAnalytics": "Види аналитичка табла",
+  "inboxWithUnread": "Пораки ({{count}} непрочитани)",
+  "goToAccount": "Оди на мојата сметка",
+  "userAvatar": "Аватар на корисникот",
+  "loginOrRegister": "Најавете се или регистрирајте сметка"
 }

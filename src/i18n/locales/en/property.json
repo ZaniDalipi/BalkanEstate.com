@@ -178,7 +178,10 @@
       "outdoor": "Outdoor"
     },
     "spaces": "Spaces",
-    "floorPlanFloorsHint": "{{count}} floors · photos marked on the plan"
+    "floorPlanFloorsHint": "{{count}} floors · photos marked on the plan",
+    "listingType": "Listing",
+    "forRent": "For Rent",
+    "forSale": "For Sale"
   },
   "distances": {
     "title": "Distances",
@@ -234,7 +237,15 @@
     "whatsappMessage": "Hi, I'm interested in this property: {{title}}\n{{url}}",
     "viberSeller": "Viber",
     "promote": "Promote",
-    "extendPromotion": "Extend"
+    "extendPromotion": "Extend",
+    "compareLimitTitle": "Comparison Limit",
+    "call": "Call",
+    "email": "Email",
+    "removeFavorite": "Remove from favorites",
+    "addFavorite": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "addToFavorites": "Add to favorites",
+    "favorite": "Favorite"
   },
   "video": {
     "loading": "Loading video...",
@@ -287,7 +298,17 @@
     "videoTour": "Video Tour",
     "enter3DTour": "Enter 3D Tour",
     "view3DMap": "3D Location Map",
-    "seeOnFloorPlan": "See where this photo was taken on the floor plan"
+    "seeOnFloorPlan": "See where this photo was taken on the floor plan",
+    "viewImages": "View property images",
+    "videoEmbedNotSupported": "This video link cannot be embedded directly",
+    "openVideo": "Open Video",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
+    "forRent": "Rent",
+    "forSale": "Sale",
+    "backToPhotos": "Back to Photos",
+    "forRentLong": "For Rent",
+    "forSaleLong": "For Sale"
   },
   "featuredAgencies": "Featured Agencies",
   "status": {
@@ -336,6 +357,13 @@
       "browseAgents": "Browse Agents",
       "agentSaved": "Agent Saved",
       "agentsSaved": "Agents Saved"
+    },
+    "agencies": {
+      "listings": "Listings",
+      "agents": "Agents",
+      "noSaved": "No Saved Agencies",
+      "clickHeart": "Save agencies you like to find them quickly later.",
+      "browseAgencies": "Browse Agencies"
     }
   },
   "comparison": {
@@ -370,7 +398,8 @@
       "other": "Other",
       "luxury-villa": "Luxury Villa",
       "commercial": "Commercial",
-      "parking": "Parking Space"
+      "parking": "Parking Space",
+      "urgent": "Urgent"
     },
     "promotedListings": "Promoted Listings",
     "agentHint": "Click for recommendations!",
@@ -433,7 +462,8 @@
     "tryAgain": "Try again",
     "aiTeaserTitle": "Want to know more about this property?",
     "aiTeaserSubtitle": "Let our AI generate a detailed neighborhood report — nearby schools, transport, parks, shops and local amenities — in just seconds.",
-    "coordinatesUnavailable": "Location data isn't available for this property yet, so we can't generate insights."
+    "coordinatesUnavailable": "Location data isn't available for this property yet, so we can't generate insights.",
+    "serviceUnavailable": "AI service is temporarily unavailable. Please try again later."
   },
   "photos": {
     "title": "Photos",
@@ -721,7 +751,9 @@
       "done": "Done",
       "save": "Save",
       "hint": "Draw on the image to annotate",
-      "sendToChat": "Send"
+      "sendToChat": "Send",
+      "sendError": "Error",
+      "sendFailed": "Failed to send annotated image."
     }
   },
   "roomStyler": {
@@ -817,5 +849,145 @@
     "perMonthNote": "Monthly rents · weekly rents converted",
     "perNightNote": "Nightly lets only",
     "villasIncluded": "Including other villas"
+  },
+  "similarProperties": {
+    "agencyTitle": "More from {{agency}}",
+    "titleRent": "Similar Rentals in {{city}}",
+    "title": "Similar Properties in {{city}}",
+    "agencySubtitle": "Other listings from {{agency}}",
+    "subtitle": "Browse more {{type}} for {{action}} in {{city}}, {{country}}"
+  },
+  "socialVideo": {
+    "title": "Property Video",
+    "embedFailed": "Video embed could not be loaded",
+    "openIn": "Open in {{platform}}"
+  },
+  "specs": {
+    "beds": "Beds",
+    "baths": "Baths"
+  },
+  "ai": {
+    "swipeDone": "{{count}} properties saved!",
+    "swipeNoneSaved": "No properties saved",
+    "swipeCheckFavorites": "Check your favorites to compare them",
+    "swipeTryAgain": "Try a different search to find your dream property",
+    "goToFavorites": "Go to Favorites",
+    "backToChat": "Back to Chat",
+    "swipeTitle": "Your Matches",
+    "saved": "saved",
+    "swipeHint": "Swipe right to save, left to skip"
+  },
+  "priceDrop": "PRICE DROP",
+  "priceUp": "PRICE UP",
+  "errors": {
+    "errorTitle": "Error",
+    "saveFailed": "Failed to save property. Please try again.",
+    "conversationFailed": "Failed to start conversation. Please try again."
+  },
+  "viewDetails": "View Details",
+  "source": {
+    "viewOriginal": "View on {{source}}",
+    "listedOn": "Listed on {{source}}"
+  },
+  "inquiry": {
+    "nameRequired": "Name is required",
+    "validEmailRequired": "Valid email is required",
+    "messageRequired": "Message is required",
+    "sendError": "Failed to send inquiry. Please try again.",
+    "title": "Send Inquiry",
+    "successTitle": "Inquiry Sent!",
+    "successMessage": "Your message has been sent to the property owner. They will contact you soon.",
+    "yourName": "Your Name",
+    "yourEmail": "Your Email",
+    "yourPhone": "Your Phone (optional)",
+    "message": "Your Message",
+    "template1": "Hi, I am interested in this property. Is it still available? I would like to schedule a viewing.",
+    "scheduleViewing": "Schedule viewing",
+    "template2": "Hi, I would like more information about this property. Can you provide details about the neighborhood and nearby amenities?",
+    "moreInfo": "More information",
+    "template3": "Hi, is the price negotiable? I am a serious buyer looking to make a decision soon.",
+    "priceQuestion": "Price negotiable?",
+    "sending": "Sending...",
+    "sendInquiry": "Send Inquiry",
+    "privacyNote": "By submitting, you agree to be contacted by the property owner regarding this listing."
+  },
+  "priceHistorySection": {
+    "pricingSchedule": "Pricing Schedule",
+    "ongoing": "Ongoing",
+    "perMonth": "/mo",
+    "current": "Current",
+    "changeHistory": "Price Change History",
+    "listedBadge": "Listed",
+    "currentPrice": "Current Price",
+    "listedAt": "Listed At",
+    "totalChange": "Total Change",
+    "pricePerSqm": "Price / m²",
+    "lastChanged": "Last Changed",
+    "listed": "Listed",
+    "today": "Today",
+    "daysAgo": "{{count}}d ago",
+    "changesRecorded": "Changes recorded: {{count}}",
+    "priceTrend": "Price Trend",
+    "changeMagnitude": "Change Magnitude",
+    "pricePerSqmTrend": "Price per m² Trend",
+    "valuesInEurPerSqm": "Values in €/m²",
+    "title": "Price History",
+    "records": "Records: {{count}}"
+  },
+  "ui": {
+    "imageViewerModal": {
+      "zoomOut": "Zoom out",
+      "resetZoom": "Reset zoom",
+      "zoomIn": "Zoom in",
+      "toggleAnnotationMode": "Toggle annotation mode",
+      "undoLastStroke": "Undo last stroke",
+      "clearAllAnnotations": "Clear all annotations",
+      "downloadAnnotatedImage": "Download annotated image",
+      "sendAnnotatedImageToChat": "Send annotated image to chat"
+    },
+    "propertyGuide": {
+      "closeGuide": "Close guide",
+      "previousTip": "Previous tip",
+      "nextTip": "Next tip",
+      "propertyGuideMascotClickFor": "Property guide mascot - Click for tips, right-click for quick actions"
+    },
+    "propertyCard": {
+      "previousImage": "Previous image",
+      "nextImage": "Next image",
+      "luxuryVilla": "LUXURY VILLA",
+      "promoted": "PROMOTED",
+      "perM": "per m²",
+      "wineCellar": "Wine Cellar",
+      "seaView": "Sea View",
+      "cityView": "City View",
+      "gardenView": "Garden View",
+      "streetView": "Street View",
+      "failedToSavePropertyPlease": "Failed to save property. Please try again.",
+      "youCanCompareAMaximum": "You can compare a maximum of 5 properties."
+    },
+    "socialVideoEmbed": {
+      "loadingTiktokVideo": "Loading TikTok video...",
+      "instagramVideo": "Instagram Video"
+    },
+    "propertyGallery": {
+      "loadingTiktokVideo": "Loading TikTok video...",
+      "propertyVideoTour": "Property Video Tour"
+    },
+    "propertyCommon": {
+      "moreFeatures": "more features"
+    },
+    "propertyMapLink": {
+      "loadingMap": "Loading map..."
+    },
+    "highlightedPropertyCard": {
+      "perM": "per m²",
+      "failedToSavePropertyPlease": "Failed to save property. Please try again."
+    },
+    "neighborhoodInsights": {
+      "anUnknownErrorOccurred": "An unknown error occurred."
+    },
+    "imageEditorModal": {
+      "iHaveSomeQuestionsAbout": "I have some questions about this property. Please see my annotations:"
+    }
   }
 }

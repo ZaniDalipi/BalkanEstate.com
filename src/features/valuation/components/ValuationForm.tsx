@@ -591,7 +591,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
             {/* View Type (Multi-select) */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-neutral-700">
-                {t('valuation:form.viewType')} <span className="text-xs text-neutral-400 font-normal ml-1">(multi-select)</span>
+                {t('valuation:form.viewType')} <span className="text-xs text-neutral-400 font-normal ml-1">{t('valuation:ui.valuationForm.multiSelect', '(multi-select)')}</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {views.map((v) => (

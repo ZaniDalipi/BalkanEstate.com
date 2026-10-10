@@ -1,6 +1,7 @@
 import React from 'react';
 import type { AdPage, AdPlacement } from '@/src/features/promo/types';
 
+import { useTranslation } from 'react-i18next';
 interface Props {
   page: AdPage;
   placement: AdPlacement;
@@ -115,6 +116,7 @@ const highlightStyle = (placement: AdPlacement, side?: 'left' | 'right'): React.
  * highlighted, so the admin can see exactly where the banner will appear.
  */
 const AdLocationPreview: React.FC<Props> = ({ page, placement }) => {
+  const { t } = useTranslation();
   const route = PAGE_ROUTE[page];
   const info = PLACEMENT_INFO[placement];
   // Home shows two side rails; every other page shows a single (right) rail.
@@ -178,7 +180,7 @@ const AdLocationPreview: React.FC<Props> = ({ page, placement }) => {
             {/* Highlighted ad position */}
             {showLeftRail && <div style={highlightStyle('sidebar', 'left')}>AD</div>}
             <div style={highlightStyle(placement, placement === 'sidebar' ? 'right' : undefined)}>
-              {placement === 'sidebar' ? 'AD' : 'YOUR AD'}
+              {placement === 'sidebar' ? 'AD' : t('admin:ui.adLocationPreview.yourAd', 'YOUR AD')}
             </div>
           </div>
         </div>
@@ -191,11 +193,11 @@ const AdLocationPreview: React.FC<Props> = ({ page, placement }) => {
           </div>
           <p className="text-gray-700">{info.description}</p>
           <p className="text-gray-500">
-            <span className="font-medium text-gray-600">Shows on:</span>{' '}
-            {page === 'all' ? 'every page across the site' : <code className="px-1 py-0.5 rounded bg-gray-100 text-gray-700">{route.path}</code>}
+            <span className="font-medium text-gray-600">{t('admin:ui.adLocationPreview.showsOn', 'Shows on:')}</span>{' '}
+            {page === 'all' ? t('admin:ui.adLocationPreview.everyPageAcrossTheSite', 'every page across the site') : <code className="px-1 py-0.5 rounded bg-gray-100 text-gray-700">{route.path}</code>}
           </p>
           <p className="text-gray-500">
-            <span className="font-medium text-gray-600">Recommended image:</span> {info.shape}
+            <span className="font-medium text-gray-600">{t('admin:ui.adLocationPreview.recommendedImage', 'Recommended image:')}</span> {info.shape}
           </p>
         </div>
       </div>

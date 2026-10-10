@@ -145,7 +145,7 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, 
               </span>
               {(cat as any).isLuxury && (
                 <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-amber-600/70 tracking-widest uppercase whitespace-nowrap">
-                  ✦ Exclusive
+                  {t('home:ui.categoriesSection.exclusive', '✦ Exclusive')}
                 </span>
               )}
             </motion.button>

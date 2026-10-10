@@ -3,6 +3,7 @@ import ArticleManagerForm from './ArticleManagerForm';
 import { tokenService } from '@/src/shared/api/tokenService';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 
+import { useTranslation } from 'react-i18next';
 interface Article {
   _id: string;
   title: string;
@@ -17,6 +18,7 @@ interface Article {
 type StatusFilter = 'all' | 'draft' | 'published';
 
 const ArticleManager: React.FC = () => {
+  const { t } = useTranslation();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,8 +108,8 @@ const ArticleManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Articles</h2>
-          {total > 0 && <p className="text-sm text-slate-500 mt-0.5">{total} article{total !== 1 ? 's' : ''} total</p>}
+          <h2 className="text-2xl font-bold text-slate-900">{t('admin:ui.articleManager.articles', 'Articles')}</h2>
+          {total > 0 && <p className="text-sm text-slate-500 mt-0.5">{total} {t('admin:ui.articleManager.article', 'article')}{total !== 1 ? 's' : ''} {t('admin:ui.articleManager.total', 'total')}</p>}
         </div>
         <button
           onClick={() => { setEditingId(null); setShowForm(true); }}
@@ -116,7 +118,7 @@ const ArticleManager: React.FC = () => {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Article
+          {t('admin:ui.articleManager.newArticle', 'New Article')}
         </button>
       </div>
 
@@ -135,7 +137,7 @@ const ArticleManager: React.FC = () => {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+            {status === 'all' ? t('admin:ui.articleManager.all', 'All') : status.charAt(0).toUpperCase() + status.slice(1)}
           </button>
         ))}
       </div>
@@ -147,7 +149,7 @@ const ArticleManager: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>{error}</span>
-          <button onClick={fetchArticles} className="ml-auto underline hover:no-underline">Retry</button>
+          <button onClick={fetchArticles} className="ml-auto underline hover:no-underline">{t('admin:ui.articleManager.retry', 'Retry')}</button>
         </div>
       )}
 
@@ -163,9 +165,9 @@ const ArticleManager: React.FC = () => {
           <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p className="text-slate-500 font-medium">No articles found</p>
+          <p className="text-slate-500 font-medium">{t('admin:ui.articleManager.noArticlesFound', 'No articles found')}</p>
           <p className="text-slate-400 text-sm mt-1">
-            {statusFilter !== 'all' ? `No ${statusFilter} articles yet` : 'Create your first article to get started'}
+            {statusFilter !== 'all' ? `No ${statusFilter} articles yet` : t('admin:ui.articleManager.createYourFirstArticleTo', 'Create your first article to get started')}
           </p>
         </div>
       ) : (
@@ -174,13 +176,13 @@ const ArticleManager: React.FC = () => {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-neutral-200">
                 <tr>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-600">Title</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden sm:table-cell">Category</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden md:table-cell">Country</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-600">Status</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden lg:table-cell">Published</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden lg:table-cell">Views</th>
-                  <th className="text-right py-3 px-4 font-semibold text-slate-600">Actions</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-600">{t('admin:ui.articleManager.title', 'Title')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden sm:table-cell">{t('admin:ui.articleManager.category', 'Category')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden md:table-cell">{t('admin:ui.articleManager.country', 'Country')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-600">{t('admin:ui.articleManager.status', 'Status')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden lg:table-cell">{t('admin:ui.articleManager.published', 'Published')}</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-600 hidden lg:table-cell">{t('admin:ui.articleManager.views', 'Views')}</th>
+                  <th className="text-right py-3 px-4 font-semibold text-slate-600">{t('admin:ui.articleManager.actions', 'Actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
@@ -217,14 +219,14 @@ const ArticleManager: React.FC = () => {
                               : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                           }`}
                         >
-                          {togglingId === article._id ? '…' : article.status === 'published' ? 'Unpublish' : 'Publish'}
+                          {togglingId === article._id ? '…' : article.status === 'published' ? t('admin:ui.articleManager.unpublish', 'Unpublish') : t('admin:ui.articleManager.publish', 'Publish')}
                         </button>
                         {/* Edit */}
                         <button
                           onClick={() => handleEdit(article._id)}
                           className="text-xs px-2.5 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md font-medium transition-colors"
                         >
-                          Edit
+                          {t('admin:ui.articleManager.edit', 'Edit')}
                         </button>
                         {/* Delete */}
                         <button
@@ -232,7 +234,7 @@ const ArticleManager: React.FC = () => {
                           disabled={deletingId === article._id}
                           className="text-xs px-2.5 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-md font-medium transition-colors disabled:opacity-50"
                         >
-                          {deletingId === article._id ? '…' : 'Delete'}
+                          {deletingId === article._id ? '…' : t('admin:ui.articleManager.delete', 'Delete')}
                         </button>
                       </div>
                     </td>
@@ -250,15 +252,15 @@ const ArticleManager: React.FC = () => {
                 disabled={page === 1}
                 className="px-3 py-1.5 border border-neutral-200 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-neutral-50 transition-colors"
               >
-                ← Prev
+                {t('admin:ui.articleManager.prev', '← Prev')}
               </button>
-              <span className="text-sm text-slate-600 px-2">Page {page} of {totalPages}</span>
+              <span className="text-sm text-slate-600 px-2">{t('admin:ui.articleManager.page', 'Page')} {page} {t('admin:ui.articleManager.of', 'of')} {totalPages}</span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="px-3 py-1.5 border border-neutral-200 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-neutral-50 transition-colors"
               >
-                Next →
+                {t('admin:ui.articleManager.next', 'Next →')}
               </button>
             </div>
           )}

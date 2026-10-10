@@ -119,7 +119,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unknown error occurred.');
+        setError(t('property:ui.neighborhoodInsights.anUnknownErrorOccurred', 'An unknown error occurred.'));
       }
     } finally {
       setLoading(false);

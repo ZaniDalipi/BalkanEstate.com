@@ -163,5 +163,16 @@
     "perMonth": "/month",
     "perYear": "/year",
     "invalidValue": "Invalid value"
+  },
+  "ui": {
+    "rentVsBuyCalculator": {
+      "after8YearsItS": "After 8 years, it's cheaper to",
+      "buy": "Buy",
+      "estimatedSavings0": "Estimated savings: $0",
+      "totalCostToRent": "Total Cost to Rent",
+      "netCostToOwn": "Net Cost to Own",
+      "yearlyCostComparison": "Yearly Cost Comparison",
+      "year1": "Year 1"
+    }
   }
 }

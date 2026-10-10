@@ -36,7 +36,9 @@ interface ToggleRowProps {
   onChange?: (checked: boolean) => void;
 }
 
-const ToggleRow: React.FC<ToggleRowProps> = ({ icon, label, description, checked, disabled, loading, badge, onChange }) => (
+const ToggleRow: React.FC<ToggleRowProps> = ({ icon, label, description, checked, disabled, loading, badge, onChange }) => {
+  const { t } = useTranslation();
+  return (
   <div className="flex items-center justify-between gap-4 py-3.5 px-4 rounded-2xl hover:bg-white/20 transition-colors group">
     <div className="flex items-center gap-3 min-w-0">
       <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl transition-colors ${checked ? 'bg-primary/10 text-primary' : 'bg-neutral-100/60 text-neutral-400'}`}>
@@ -46,10 +48,10 @@ const ToggleRow: React.FC<ToggleRowProps> = ({ icon, label, description, checked
         <div className="flex items-center gap-2 flex-wrap">
           <p className="text-sm font-semibold text-neutral-800">{label}</p>
           {badge === 'always-on' && (
-            <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">Always on</span>
+            <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">{t('account:ui.notificationSettingsSection.alwaysOn', 'Always on')}</span>
           )}
           {badge === 'blocked' && (
-            <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">Blocked</span>
+            <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">{t('account:ui.notificationSettingsSection.blocked', 'Blocked')}</span>
           )}
         </div>
         <p className="text-xs text-neutral-500 mt-0.5 leading-relaxed">{description}</p>
@@ -79,6 +81,7 @@ const ToggleRow: React.FC<ToggleRowProps> = ({ icon, label, description, checked
     )}
   </div>
 );
+};
 
 // ─── Push notification card ────────────────────────────────────────────────────
 
@@ -116,9 +119,9 @@ const PushSection: React.FC = () => {
             <div className="flex items-start gap-2 rounded-xl bg-amber-50/60 border border-amber-200/50 px-3 py-2.5 text-xs text-amber-800">
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Development mode:</strong> Web Push requires HTTPS or{' '}
-                <code className="font-mono bg-amber-100/60 px-1 rounded">localhost</code>. Access the app via{' '}
-                <code className="font-mono bg-amber-100/60 px-1 rounded">http://localhost:PORT</code> instead of an IP address to enable full push subscription testing.
+                <strong>{t('account:ui.notificationSettingsSection.developmentMode', 'Development mode:')}</strong> {t('account:ui.notificationSettingsSection.webPushRequiresHttpsOr', 'Web Push requires HTTPS or')}{' '}
+                <code className="font-mono bg-amber-100/60 px-1 rounded">localhost</code>{t('account:ui.notificationSettingsSection.accessTheAppVia', '. Access the app via')}{' '}
+                <code className="font-mono bg-amber-100/60 px-1 rounded">http://localhost:PORT</code> {t('account:ui.notificationSettingsSection.insteadOfAnIpAddress', 'instead of an IP address to enable full push subscription testing.')}
               </span>
             </div>
             <button
@@ -127,7 +130,7 @@ const PushSection: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 px-3 py-2 text-xs font-medium text-primary transition-colors"
             >
               <Bell className="w-3.5 h-3.5" />
-              {testSent ? 'Notification sent!' : 'Send test browser notification'}
+              {testSent ? t('account:ui.notificationSettingsSection.notificationSent', 'Notification sent!') : t('account:ui.notificationSettingsSection.sendTestBrowserNotification', 'Send test browser notification')}
             </button>
           </div>
         );
@@ -428,6 +431,7 @@ const UNSUBSCRIBE_LABELS: Record<string, string> = {
 };
 
 const UnsubscribeBanner: React.FC = () => {
+  const { t } = useTranslation();
   const [type, setType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -450,9 +454,9 @@ const UnsubscribeBanner: React.FC = () => {
     <div className="flex items-start gap-3 rounded-2xl bg-green-50/80 border border-green-200/60 px-4 py-3.5 text-sm text-green-800">
       <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-green-600" />
       <div>
-        <p className="font-semibold">You've been unsubscribed</p>
+        <p className="font-semibold">{t('account:ui.notificationSettingsSection.youVeBeenUnsubscribed', 'You\'ve been unsubscribed')}</p>
         <p className="text-xs text-green-700 mt-0.5">
-          You'll no longer receive <strong>{label}</strong>. Use the toggles below to adjust anytime.
+          {t('account:ui.notificationSettingsSection.youLlNoLongerReceive', 'You\'ll no longer receive')} <strong>{label}</strong>{t('account:ui.notificationSettingsSection.useTheTogglesBelowTo', '. Use the toggles below to adjust anytime.')}
         </p>
       </div>
     </div>

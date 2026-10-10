@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default icon issue with bundlers
@@ -21,8 +22,9 @@ interface PropertyLocationMapProps {
 }
 
 const PropertyLocationMap: React.FC<PropertyLocationMapProps> = ({ lat, lng, address }) => {
+  const { t } = useTranslation();
     if (isNaN(lat) || isNaN(lng)) {
-        return <div className="h-full bg-neutral-200 flex items-center justify-center text-neutral-500">Location data unavailable.</div>;
+        return <div className="h-full bg-neutral-200 flex items-center justify-center text-neutral-500">{t('search:ui.propertyLocationMap.locationDataUnavailable', 'Location data unavailable.')}</div>;
     }
 
     return (

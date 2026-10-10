@@ -13,6 +13,7 @@ import {
   ChartBarIcon,
 } from '@/constants';
 
+import { useTranslation } from 'react-i18next';
 export interface EconomicIndicatorsPanelProps {
   data: EconomicIndicators;
 }
@@ -53,6 +54,7 @@ function fmtNumber(v: number | null): string {
 }
 
 const EconomicIndicatorsPanel: React.FC<EconomicIndicatorsPanelProps> = ({ data }) => {
+  const { t } = useTranslation();
   const gdpTrend: 'up' | 'down' | 'neutral' = data.gdpGrowthYoY == null
     ? 'neutral'
     : data.gdpGrowthYoY >= 0
@@ -66,7 +68,7 @@ const EconomicIndicatorsPanel: React.FC<EconomicIndicatorsPanelProps> = ({ data 
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
           <GlobeAltIcon className="w-5 h-5 text-primary" />
-          Economic Context — {data.country}
+          {t('exploreCities:ui.economicIndicatorsPanel.economicContext', 'Economic Context —')} {data.country}
         </h3>
         <a
           href={data.sourceUrl}
@@ -74,53 +76,53 @@ const EconomicIndicatorsPanel: React.FC<EconomicIndicatorsPanelProps> = ({ data 
           rel="noopener noreferrer"
           className="text-[10px] text-blue-500 hover:underline"
         >
-          World Bank Open Data ↗
+          {t('exploreCities:ui.economicIndicatorsPanel.worldBankOpenData', 'World Bank Open Data ↗')}
         </a>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
         <IndicatorCard
-          label="GDP Growth (YoY)"
+          label={t('exploreCities:ui.economicIndicatorsPanel.gdpGrowthYoy', 'GDP Growth (YoY)')}
           value={fmtPercent(data.gdpGrowthYoY)}
           trend={gdpTrend}
           color={gdpTrend === 'up' ? 'text-green-600' : gdpTrend === 'down' ? 'text-red-500' : 'text-neutral-500'}
           icon={<ChartBarIcon className="w-3.5 h-3.5 text-emerald-500" />}
-          description="Annual real growth"
+          description={t('exploreCities:ui.economicIndicatorsPanel.annualRealGrowth', 'Annual real growth')}
         />
         <IndicatorCard
-          label="Inflation (CPI)"
+          label={t('exploreCities:ui.economicIndicatorsPanel.inflationCpi', 'Inflation (CPI)')}
           value={fmtPercent(data.inflationCPI)}
           color={inflationOk ? 'text-green-600' : 'text-amber-600'}
           icon={<ArrowTrendingUpIcon className="w-3.5 h-3.5 text-amber-500" />}
-          description="Consumer Price Index"
+          description={t('exploreCities:ui.economicIndicatorsPanel.consumerPriceIndex', 'Consumer Price Index')}
         />
         <IndicatorCard
-          label="Mortgage Rate"
+          label={t('exploreCities:ui.economicIndicatorsPanel.mortgageRate', 'Mortgage Rate')}
           value={data.lendingRate == null ? '—' : `${data.lendingRate.toFixed(1)}%`}
           color="text-blue-600"
           icon={<CurrencyEuroIcon className="w-3.5 h-3.5 text-blue-500" />}
-          description="Avg lending rate"
+          description={t('exploreCities:ui.economicIndicatorsPanel.avgLendingRate', 'Avg lending rate')}
         />
         <IndicatorCard
-          label="GNI per Capita"
+          label={t('exploreCities:ui.economicIndicatorsPanel.gniPerCapita', 'GNI per Capita')}
           value={data.gniPerCapitaUSD == null ? '—' : `$${(data.gniPerCapitaUSD / 1000).toFixed(1)}K`}
           color="text-neutral-900"
           icon={<CurrencyEuroIcon className="w-3.5 h-3.5 text-green-500" />}
-          description="USD, Atlas method"
+          description={t('exploreCities:ui.economicIndicatorsPanel.usdAtlasMethod', 'USD, Atlas method')}
         />
         <IndicatorCard
-          label="Population"
+          label={t('exploreCities:ui.economicIndicatorsPanel.population', 'Population')}
           value={fmtNumber(data.populationTotal)}
           color="text-neutral-900"
           icon={<GlobeAltIcon className="w-3.5 h-3.5 text-violet-500" />}
-          description="Country total"
+          description={t('exploreCities:ui.economicIndicatorsPanel.countryTotal', 'Country total')}
         />
         <IndicatorCard
-          label="Unemployment"
+          label={t('exploreCities:ui.economicIndicatorsPanel.unemployment', 'Unemployment')}
           value={data.unemploymentRate == null ? '—' : `${data.unemploymentRate.toFixed(1)}%`}
           color={data.unemploymentRate != null && data.unemploymentRate > 10 ? 'text-amber-600' : 'text-green-600'}
           icon={<ChartBarIcon className="w-3.5 h-3.5 text-red-500" />}
-          description="Labor force %"
+          description={t('exploreCities:ui.economicIndicatorsPanel.laborForce', 'Labor force %')}
         />
       </div>
     </div>

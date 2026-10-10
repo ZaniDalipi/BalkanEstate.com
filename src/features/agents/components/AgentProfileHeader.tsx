@@ -374,7 +374,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                 <button
                                     onClick={handleNameClick}
                                     className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200 text-left hover:underline"
-                                    title="View profile"
+                                    title={t('agents:ui.agentProfileHeader.viewProfile', 'View profile')}
                                 >
                                     <h1 className="inline">{agent.name}</h1>
                                 </button>

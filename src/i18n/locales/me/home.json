@@ -58,7 +58,13 @@
     "promoted": "Promovisano",
     "new": "Novo",
     "priceReduced": "Snižena Cijena",
-    "byNegotiation": "Po dogovoru"
+    "byNegotiation": "Po dogovoru",
+    "livingRoomsLabel": "Dnevne sobe",
+    "spacesLabel": "Mjesta",
+    "officesLabel": "Kancelarije",
+    "openPlanLabel": "Otvoreni prostor m²",
+    "prevImage": "Prethodna slika",
+    "nextImage": "Sljedeća slika"
   },
   "categories": {
     "title": "Pretražujte po Kategoriji",
@@ -190,5 +196,68 @@
     "imageAlt": "Nekretnina u {{city}}, {{country}}",
     "buy": "Kupi",
     "rent": "Iznajmi"
+  },
+  "recentlyViewed": {
+    "title": "Nedavno pregledano",
+    "subtitle": "Nastavite đe ste stali"
+  },
+  "ui": {
+    "appShowcaseSection": {
+      "searchBalkans": "Pretraži Balkan...",
+      "buy": "Kupi",
+      "rent": "Iznajmi",
+      "questionsAnswered": "odgovorenih pitanja",
+      "properties": "nekretnina",
+      "beds": "spavaće sobe",
+      "steps": "koraka"
+    },
+    "newsSection": {
+      "featured": "★ Izdvojeno",
+      "mRead": "min čitanja",
+      "readArticle": "Pročitaj članak",
+      "noArticlesPublishedYet": "Još nema objavljenih članaka",
+      "checkBackSoonForExpert": "Uskoro provjerite stručne analize",
+      "viewAllArticles": "Pogledaj sve članke"
+    },
+    "topAgentsSection": {
+      "howPointsAreCalculated": "📊 Kako se računaju bodovi",
+      "maxPossible180Pts": "Maksimalno: 180 bodova",
+      "metrics": {
+        "rating": {
+          "label": "Ocjena klijenata",
+          "formula": "20 bodova po ★",
+          "desc": "Svaka zvjezdica koju vam daju klijenti vrijedi 20 bodova. Savršena ocjena od 5 zvjezdica sama donosi 100 bodova.",
+          "cap": "Maks. 100 bodova"
+        },
+        "sales": {
+          "label": "Prodate nekretnine",
+          "formula": "5 bodova po prodaji",
+          "desc": "Svaka završena transakcija dodaje 5 bodova. Zaključite 10 prodaja i dostižete maksimum u ovoj kategoriji.",
+          "cap": "Maks. 50 bodova"
+        },
+        "active": {
+          "label": "Aktivni oglasi",
+          "formula": "2 boda po oglasu",
+          "desc": "Aktivan portfolio pokazuje da ste na tržištu. Svaki aktivan oglas donosi 2 boda.",
+          "cap": "Maks. 20 bodova"
+        },
+        "reviews": {
+          "label": "Recenzije klijenata",
+          "formula": "1 bod po recenziji",
+          "desc": "Broj recenzija pokazuje povjerenje. Svaka recenzija dodaje 1 bod bez obzira na ocjenu.",
+          "cap": "Maks. 10 bodova"
+        }
+      }
+    },
+    "recentlyViewedSection": {
+      "scrollLeft": "Pomjeri lijevo",
+      "scrollRight": "Pomjeri desno"
+    },
+    "heroSection": {
+      "clear": "Obriši"
+    },
+    "categoriesSection": {
+      "exclusive": "✦ Ekskluzivno"
+    }
   }
 }

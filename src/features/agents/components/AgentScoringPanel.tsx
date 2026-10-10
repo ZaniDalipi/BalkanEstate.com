@@ -24,7 +24,9 @@ interface MetricCardProps {
 
 const MetricCard: React.FC<MetricCardProps> = ({
   icon, label, formula, desc, cap, maxPts, color, bg, border,
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <div
     role="listitem"
     style={{ background: bg, border: `1px solid ${border}` }}
@@ -45,7 +47,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
 
     <div className="w-full">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] text-gray-400 font-medium">0 pts</span>
+        <span className="text-[10px] text-gray-400 font-medium">{t('agents:ui.agentScoringPanel.n0Pts', '0 pts')}</span>
         <span className="text-[10px] font-bold" style={{ color }}>{maxPts} pts</span>
       </div>
       <div className="h-1 rounded-full bg-gray-100 overflow-hidden">
@@ -67,6 +69,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     </span>
   </div>
 );
+};
 
 const AgentScoringPanel: React.FC<AgentScoringPanelProps> = ({
   defaultCollapsed = false,

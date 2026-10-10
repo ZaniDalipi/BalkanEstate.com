@@ -107,7 +107,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
               type="button"
               onClick={handlePreview}
               className="p-1.5 text-neutral-500 hover:text-purple-600 transition-colors"
-              title="Preview tour"
+              title={t('common:ui.z360TourInput.previewTour', 'Preview tour')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -184,7 +184,7 @@ export const Z360TourInput: React.FC<Z360TourInputProps> = ({
                 className="absolute top-0 left-0 w-full h-full border-0"
                 allowFullScreen
                 allow="xr-spatial-tracking; gyroscope; accelerometer; vr"
-                title="360° Virtual Tour Preview"
+                title={t('common:ui.z360TourInput.n360VirtualTourPreview', '360° Virtual Tour Preview')}
               />
             </div>
 

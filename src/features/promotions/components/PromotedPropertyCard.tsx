@@ -179,7 +179,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="flex items-start justify-between mb-3">
           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${tierConfig.bg} ${tierConfig.color} text-sm font-semibold`}>
             <StarIconSolid className="w-3.5 h-3.5" />
-            <span>{tierConfig.label}</span>
+            <span>{t(`seller:promotionCard.tiers.${TIER_CONFIG[tier] ? tier : 'standard'}`, tierConfig.label)}</span>
           </div>
           <div className="flex items-center gap-2">
             {property.hasUrgentBadge ? (
@@ -208,7 +208,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
         <div className="flex gap-4">
           <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-neutral-100">
             {property.imageUrl ? (
-              <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || 'Property'} className="w-full h-full object-cover" loading="lazy" decoding="async" width={96} height={96} />
+              <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 192, quality: 'auto', crop: 'fill' })} alt={property.title || t('common:ui.promotedPropertyCard.property', 'Property')} className="w-full h-full object-cover" loading="lazy" decoding="async" width={96} height={96} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <BuildingOfficeIcon className="w-10 h-10 text-neutral-300" />
@@ -216,7 +216,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-neutral-800 truncate mb-1">{property.title || 'Untitled Property'}</h4>
+            <h4 className="font-semibold text-neutral-800 truncate mb-1">{property.title || t('common:ui.promotedPropertyCard.untitledProperty', 'Untitled Property')}</h4>
             <div className="flex items-center gap-1 text-sm text-neutral-500 mb-2">
               <MapPinIcon className="w-3.5 h-3.5" />
               <span className="truncate">{property.city}, {property.country}</span>
@@ -291,7 +291,7 @@ const PromotedPropertyCard: React.FC<PromotedPropertyCardProps> = ({
           <button
             onClick={() => onViewHistory(property)}
             className="px-3 py-2 bg-neutral-100 text-neutral-600 hover:bg-neutral-200 rounded-lg transition-colors text-sm font-medium flex items-center gap-1.5"
-            title="View Promotion History"
+            title={t('common:ui.promotedPropertyCard.viewPromotionHistory', 'View Promotion History')}
           >
             <ChartBarIcon className="w-4 h-4" />
           </button>

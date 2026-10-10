@@ -227,7 +227,7 @@
     "cableTV": "Кабелска ТВ",
     "intercom": "Интерфон",
     "alarm": "Аларм систем",
-    "cctv": "CCTV",
+    "cctv": "Видео надзор",
     "doorman": "Портир"
   },
   "imageTags": {
@@ -341,7 +341,8 @@
     "authFailed": "Автентикацијата не успеа",
     "authFailedMessage": "Автентикацијата не успеа. Обидете се повторно.",
     "errorLoadingGoogleMaps": "Грешка при вчитување на Google Maps",
-    "checkApiKeyConfiguration": "Проверете ја конфигурацијата на API-клучот"
+    "checkApiKeyConfiguration": "Проверете ја конфигурацијата на API-клучот",
+    "generic": "Нешто тргна наопаку"
   },
   "tryAgain": "Обиди се повторно",
   "actions": {
@@ -352,7 +353,8 @@
     "save": "Зачувај",
     "delete": "Избриши",
     "edit": "Измени",
-    "submit": "Испрати"
+    "submit": "Испрати",
+    "ok": "ОК"
   },
   "validation": {
     "required": "Ова поле е задолжително",
@@ -647,12 +649,214 @@
     "resetsOn": "Се обновува на {{date}}"
   },
   "ads": {
-    "previewMode": "Ad preview — ad slots are highlighted",
-    "exitPreview": "Exit",
-    "stickyBottomBar": "Sticky bottom bar",
-    "getInTouch": "Get in touch →",
-    "advertiseCta": "Advertise with us — get in touch"
+    "previewMode": "Преглед на реклами — рекламните места се истакнати",
+    "exitPreview": "Излез",
+    "stickyBottomBar": "Фиксна долна лента",
+    "getInTouch": "Контактирајте нè →",
+    "advertiseCta": "Рекламирајте кај нас — контактирајте нè",
+    "close": "Затвори реклама",
+    "advertisement": "Реклама",
+    "yourAdHere": "Вашата реклама тука",
+    "advertiseWithUs": "Рекламирајте кај нас",
+    "sponsored": "Спонзорирано",
+    "dismiss": "Отфрли реклама"
   },
   "note": "Забелешка",
-  "loadMore": "Вчитај повеќе"
+  "loadMore": "Вчитај повеќе",
+  "notifications": "Известувања",
+  "markAllRead": "Означи ги сите како прочитани",
+  "noNotifications": "Сè уште нема известувања",
+  "viewAll": "Види ги сите известувања",
+  "cookies": {
+    "title": "Користиме колачиња",
+    "shortDescription": "за да го подобриме вашето искуство и да го анализираме сообраќајот.",
+    "learnMore": "Дознај повеќе",
+    "close": "Затвори без прифаќање — ќе се користат само неопходни колачиња",
+    "acceptAll": "Прифати ги сите",
+    "rejectAll": "Одбиј ги сите",
+    "customize": "Прилагоди",
+    "settingsTitle": "Поставки за колачиња",
+    "essential": "Неопходни",
+    "alwaysOn": "Секогаш вклучени",
+    "functional": "Функционални",
+    "analytics": "Аналитички",
+    "marketing": "Маркетинг",
+    "savePreferences": "Зачувај поставки"
+  },
+  "common": {
+    "close": "Затвори"
+  },
+  "comingSoon": {
+    "title": "Плаќањата наскоро",
+    "message": "Моментално бараме давател на платежни услуги за соработка. Директни плаќања засега не се прифаќаат. Можете веднаш да ја активирате претплатата со код за купон или контактирајте нè за рачна обработка.",
+    "haveCoupon": "Дали ви дадовме купон?",
+    "couponDescription": "Внесете го кодот за веднаш да ја активирате претплатата",
+    "activateCoupon": "Активирај со купон",
+    "contactUs": "Контактирајте нè за рачна обработка:",
+    "responseTime": "Обично одговараме во рок од 24 часа",
+    "badge": "Бараме партнер за плаќања"
+  },
+  "wk": "нед.",
+  "day": "ден",
+  "mo": "мес.",
+  "syncing": "Синхронизирање...",
+  "live": "Во живо",
+  "updating": "Се ажурира...",
+  "unknownError": "Настана непозната грешка",
+  "goHome": "Оди на почетна",
+  "myAccount": "Мојата сметка",
+  "login": "Најава",
+  "heroTagline": "Пребарување имоти со AI низ 11 балкански земји",
+  "weekdays": {
+    "mon": "Пон",
+    "tue": "Вто",
+    "wed": "Сре",
+    "thu": "Чет",
+    "fri": "Пет",
+    "sat": "Саб",
+    "sun": "Нед"
+  },
+  "ui": {
+    "agencyCreationModal": {
+      "eGRe123456": "пр., RE-123456",
+      "discardChanges": "Отфрли ги промените?",
+      "youHaveUnsavedChangesAre": "Имате незачувани промени. Дали сте сигурни дека сакате да го затворите формуларот?",
+      "discard": "Отфрли",
+      "keepEditing": "Продолжи со уредување",
+      "close": "Затвори"
+    },
+    "featuredSubscriptionDialog": {
+      "directPaymentsAreNotYet": "Директните плаќања сè уште не се достапни",
+      "weAreCurrentlyLookingFor": "Моментално бараме давател на платежни услуги за соработка. Можете бесплатно да ја активирате претплатата за истакната агенција со код за купон или контактирајте нè на",
+      "toArrangeItManually": "за рачно да го средиме.",
+      "paymentNotAvailableYet": "Плаќањето сè уште не е достапно",
+      "applyA100OffCoupon": "Примени купон со 100% попуст за бесплатно да ја активирате истакнатата претплата."
+    },
+    "achievementsSection": {
+      "expired": "ИСТЕЧЕНО",
+      "ddMmYyyy": "ДД/ММ/ГГГГ"
+    },
+    "header": {
+      "new": "+ Нов",
+      "toggleSidebarNavigation": "Прикажи/скриј странично мени"
+    },
+    "text-scroll-animation": {
+      "scrollToSeeMore": "Скролувај за да видиш повеќе"
+    },
+    "floorInputCombined": {
+      "totalFloorsInBuilding": "Вкупно катови во зградата",
+      "floorNumber": "Број на кат"
+    },
+    "z360TourInput": {
+      "previewTour": "Преглед на турата",
+      "n360VirtualTourPreview": "Преглед на виртуелна тура 360°"
+    },
+    "animations": {
+      "loading": "Се вчитува"
+    },
+    "glass-cards": {
+      "promoted": "Промовирано",
+      "new": "Ново"
+    },
+    "propertyInquiryModal": {
+      "close": "Затвори"
+    },
+    "defaultAvatar": {
+      "avatar": "Аватар"
+    },
+    "promotionOfferModal": {
+      "directPaymentsAreNotYet": "Директните плаќања сè уште не се достапни. Користете купон за бесплатно активирање.",
+      "activateWithCoupon": "Активирај со купон"
+    },
+    "myPromotions": {
+      "live": "Во живо",
+      "updated": "Ажурирано:",
+      "refreshPromotions": "Освежи промоции",
+      "autoExtendEnabledYourPromotion": "Автоматското продолжување е вклучено. Вашата промоција автоматски ќе се обнови кога ќе истече. Плаќањата наскоро!",
+      "autoExtendDisabledYourPromotion": "Автоматското продолжување е исклучено. Вашата промоција ќе истече природно.",
+      "thisPromotionHasExpiredUse": "Оваа промоција е истечена. Користете го копчето „Продолжи“ за да ја реактивирате.",
+      "paymentsComingSoonAutoExtend": "Плаќањата наскоро! Плаќањето за автоматско продолжување ќе биде достапно наскоро.",
+      "paymentsComingSoonContactSales": "Плаќањата наскоро! Контактирајте sales@balkanestateai.com за да ја продолжите промоцијата."
+    },
+    "alertDialog": {
+      "close": "Затвори"
+    },
+    "phoneInput": {
+      "countryCode": "Код на земјата",
+      "phoneNumber": "Телефонски број"
+    },
+    "confirmationModal": {
+      "close": "Затвори"
+    },
+    "button": {
+      "loading": "Се вчитува"
+    },
+    "notificationModal": {
+      "close": "Затвори"
+    },
+    "modal": {
+      "closeModal": "Затвори прозорец"
+    },
+    "consentBanner": {
+      "cookieConsent": "Согласност за колачиња"
+    },
+    "z360TourEmbed": {
+      "z360Tour": "Z360 тура"
+    },
+    "mapAgentAvatar": {
+      "closePanel": "Затвори панел"
+    },
+    "breadcrumbs": {
+      "breadcrumb": "Навигација"
+    },
+    "promotedPropertyCard": {
+      "property": "Имот",
+      "untitledProperty": "Имот без наслов",
+      "viewPromotionHistory": "Види историја на промоции"
+    },
+    "promotionModal": {
+      "closeModal": "Затвори прозорец"
+    },
+    "beforeAfterSlider": {
+      "comparisonSlider": "Лизгач за споредба"
+    },
+    "agentInquiryModal": {
+      "youExampleCom": "vie@primer.com"
+    },
+    "heroSearchSection": {
+      "clearSearch": "Исчисти пребарување"
+    },
+    "avatarCustomizer": {
+      "discardChanges": "Отфрли ги промените?",
+      "youHaveUnsavedAvatarChanges": "Имате незачувани промени на аватарот. Дали сте сигурни дека сакате да затворите?",
+      "discard": "Отфрли",
+      "keepEditing": "Продолжи со уредување"
+    },
+    "liquid-glass": {
+      "howCanIHelpYou": "Како можам да ви помогнам денес?"
+    },
+    "apple-liquid-glass-switcher": {
+      "chooseTheme": "Избери тема"
+    },
+    "agencyManagementSection": {
+      "pleaseSelectAnAgency": "Ве молиме изберете агенција",
+      "pleaseEnterTheInvitationCode": "Ве молиме внесете го кодот за покана",
+      "pleaseEnterACouponCode": "Ве молиме внесете код за купон",
+      "invalidCodeFormatExpectedAbc": "Невалиден формат на кодот. Очекувано: ABC-XXXXXXXX",
+      "onlyRegisteredAgentsCanRedeem": "Само регистрирани агенти можат да користат купони на агенцијата. Прво регистрирајте се како агент.",
+      "userDataUnavailablePleaseRefresh": "Податоците за корисникот не се достапни. Освежете ја страницата.",
+      "youAreNotLoggedIn": "Не сте најавени. Најавете се и обидете се повторно.",
+      "unexpectedResponseFromServerPlease": "Неочекуван одговор од серверот. Обидете се повторно.",
+      "invalidCouponCodePleaseCheck": "Невалиден код за купон. Проверете го кодот и обидете се повторно.",
+      "thisCouponHasAlreadyBeen": "Овој купон веќе е искористен од друг агент.",
+      "thisCouponHasExpiredAnd": "Овој купон е истечен и повеќе не може да се искористи.",
+      "couponNotFoundPleaseVerify": "Купонот не е пронајден. Проверете дали кодот е точен.",
+      "theAgencySubscriptionIsNo": "Претплатата на агенцијата повеќе не е активна. Овој купон не може да се искористи.",
+      "unknownAgency": "Непозната агенција"
+    },
+    "profileStatistics": {
+      "noAuthenticationTokenFound": "Не е пронајден токен за автентикација",
+      "syncFailed": "Синхронизацијата не успеа"
+    }
+  }
 }

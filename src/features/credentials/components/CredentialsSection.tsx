@@ -1027,7 +1027,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                     type="text"
                     value={formData.issueDate}
                     onChange={(e) => applyDateChange(e, (v) => handleFieldChange('issueDate', v))}
-                    placeholder="DD/MM/YYYY"
+                    placeholder={t('account:ui.credentialsSection.ddMmYyyy', 'DD/MM/YYYY')}
                     maxLength={10}
                     inputMode="numeric"
                     className={`w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${
@@ -1049,7 +1049,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                     type="text"
                     value={formData.expiryDate}
                     onChange={(e) => applyDateChange(e, (v) => handleFieldChange('expiryDate', v))}
-                    placeholder="DD/MM/YYYY"
+                    placeholder={t('account:ui.credentialsSection.ddMmYyyy', 'DD/MM/YYYY')}
                     maxLength={10}
                     inputMode="numeric"
                     className={`w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 ${
@@ -1090,7 +1090,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                         <div className="text-left min-w-0">
                           <p className="text-sm font-semibold text-blue-700 truncate max-w-[200px]">{selectedFile.name}</p>
                           <p className="text-[11px] text-blue-500">
-                            {(selectedFile.size / 1024).toFixed(0)} KB · {selectedFile.type.split('/').pop()?.toUpperCase()}
+                            {(selectedFile.size / 1024).toFixed(0)} {t('account:ui.credentialsSection.kb', 'KB ·')} {selectedFile.type.split('/').pop()?.toUpperCase()}
                           </p>
                         </div>
                         <button
@@ -1151,7 +1151,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                 disabled={isSubmitting}
                 className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm disabled:opacity-40"
               >
-                Cancel
+                {t('account:ui.credentialsSection.cancel', 'Cancel')}
               </button>
               <button
                 type="button"
@@ -1167,12 +1167,12 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                 ) : editingId ? (
                   <>
                     <CheckCircleIcon className="w-4 h-4" />
-                    <span>Save Changes</span>
+                    <span>{t('account:ui.credentialsSection.saveChanges', 'Save Changes')}</span>
                   </>
                 ) : (
                   <>
                     <PlusIcon className="w-4 h-4" />
-                    <span>Add Credential</span>
+                    <span>{t('account:ui.credentialsSection.addCredential', 'Add Credential')}</span>
                   </>
                 )}
               </button>

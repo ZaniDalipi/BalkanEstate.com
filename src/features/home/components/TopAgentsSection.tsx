@@ -50,17 +50,19 @@ const HOME_METRIC_LABELS: Record<string, { label: string; formula: string; desc:
   reviews: { label: 'Client Reviews',    formula: '1 pt per review',  desc: 'Volume of reviews shows trust. Every review you collect adds 1 point regardless of score.',              cap: 'Max 10 pts'  },
 };
 
-const ScoringPanel: React.FC = () => (
+const ScoringPanel: React.FC = () => {
+  const { t } = useTranslation();
+  return (
   <div style={{ maxWidth: '820px', margin: '2rem auto 0', padding: '0 1rem' }}>
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.4rem',
     }}>
       <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-        📊 How points are calculated
+        {t('home:ui.topAgentsSection.howPointsAreCalculated', '📊 How points are calculated')}
       </span>
       <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#94a3b8', background: 'rgba(148,163,184,0.1)', borderRadius: '999px', padding: '2px 10px', border: '1px solid rgba(148,163,184,0.2)' }}>
-        Max possible: 180 pts
+        {t('home:ui.topAgentsSection.maxPossible180Pts', 'Max possible: 180 pts')}
       </span>
     </div>
 
@@ -70,16 +72,17 @@ const ScoringPanel: React.FC = () => (
         return (
           <div key={m.key} style={{ background: m.bg, border: `1px solid ${m.border}`, borderRadius: '16px', padding: '1rem 1rem 0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.3rem' }}>
             <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>{m.icon}</span>
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a' }}>{text.label}</span>
-            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: m.color, background: `${m.color}14`, borderRadius: '8px', padding: '2px 8px' }}>{text.formula}</span>
-            <p style={{ fontSize: '0.63rem', color: '#64748b', lineHeight: 1.5, margin: '0.1rem 0 0.3rem' }}>{text.desc}</p>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, color: m.color, background: `${m.color}12`, border: `1px solid ${m.color}25`, borderRadius: '999px', padding: '1px 9px' }}>{text.cap}</span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a' }}>{t(`home:ui.topAgentsSection.metrics.${m.key}.label`, text.label)}</span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: m.color, background: `${m.color}14`, borderRadius: '8px', padding: '2px 8px' }}>{t(`home:ui.topAgentsSection.metrics.${m.key}.formula`, text.formula)}</span>
+            <p style={{ fontSize: '0.63rem', color: '#64748b', lineHeight: 1.5, margin: '0.1rem 0 0.3rem' }}>{t(`home:ui.topAgentsSection.metrics.${m.key}.desc`, text.desc)}</p>
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, color: m.color, background: `${m.color}12`, border: `1px solid ${m.color}25`, borderRadius: '999px', padding: '1px 9px' }}>{t(`home:ui.topAgentsSection.metrics.${m.key}.cap`, text.cap)}</span>
           </div>
         );
       })}
     </div>
   </div>
 );
+};
 
 /* ─── Single agent podium card ─── */
 const AgentPodiumCard: React.FC<{

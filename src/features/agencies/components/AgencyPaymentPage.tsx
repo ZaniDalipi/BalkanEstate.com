@@ -305,9 +305,9 @@ const AgencyPaymentPage: React.FC = () => {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircleIcon className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-xl font-bold text-neutral-800 mb-2">Agency Created!</h2>
+              <h2 className="text-xl font-bold text-neutral-800 mb-2">{t('agencies:ui.agencyPaymentPage.agencyCreated', 'Agency Created!')}</h2>
               <p className="text-neutral-600 mb-6">{successMessage}</p>
-              <p className="text-sm text-neutral-500">Redirecting to agencies page...</p>
+              <p className="text-sm text-neutral-500">{t('agencies:ui.agencyPaymentPage.redirectingToAgenciesPage', 'Redirecting to agencies page...')}</p>
             </div>
           ) : (
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-neutral-100">
@@ -329,7 +329,7 @@ const AgencyPaymentPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   {pendingAgencyData.phone && (
                     <div className="flex flex-col">
-                      <span className="text-neutral-500 text-xs uppercase tracking-wide">Phone</span>
+                      <span className="text-neutral-500 text-xs uppercase tracking-wide">{t('agencies:ui.agencyPaymentPage.phone', 'Phone')}</span>
                       <span className="text-neutral-700 font-medium">{pendingAgencyData.phone}</span>
                     </div>
                   )}
@@ -341,7 +341,7 @@ const AgencyPaymentPage: React.FC = () => {
                   )}
                   {pendingAgencyData.licenseNumber && (
                     <div className="flex flex-col">
-                      <span className="text-neutral-500 text-xs uppercase tracking-wide">License</span>
+                      <span className="text-neutral-500 text-xs uppercase tracking-wide">{t('agencies:ui.agencyPaymentPage.license', 'License')}</span>
                       <span className="text-neutral-700 font-medium">{pendingAgencyData.licenseNumber}</span>
                     </div>
                   )}
@@ -350,11 +350,11 @@ const AgencyPaymentPage: React.FC = () => {
 
               {/* Enterprise benefits reminder */}
               <div className="rounded-xl p-4 mb-6 border border-slate-700" style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}>
-                <p className="text-amber-400 font-semibold text-sm mb-2">✓ Enterprise Plan Active</p>
+                <p className="text-amber-400 font-semibold text-sm mb-2">{t('agencies:ui.agencyPaymentPage.enterprisePlanActive', '✓ Enterprise Plan Active')}</p>
                 <ul className="text-slate-300 text-sm space-y-1">
-                  <li>• 5 agent registration codes will be emailed to you</li>
-                  <li>• Monthly listing promotion coupons included</li>
-                  <li>• 7-day featured agency trial starts immediately</li>
+                  <li>{t('agencies:ui.agencyPaymentPage.n5AgentRegistrationCodesWill', '• 5 agent registration codes will be emailed to you')}</li>
+                  <li>{t('agencies:ui.agencyPaymentPage.monthlyListingPromotionCouponsIncluded', '• Monthly listing promotion coupons included')}</li>
+                  <li>{t('agencies:ui.agencyPaymentPage.n7DayFeaturedAgencyTrial', '• 7-day featured agency trial starts immediately')}</li>
                 </ul>
               </div>
 
@@ -495,7 +495,7 @@ const AgencyPaymentPage: React.FC = () => {
             {/* Plan Details */}
             <div className="border-t border-neutral-100 pt-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-neutral-600">{enterprisePlan.name} Plan</span>
+                <span className="text-neutral-600">{enterprisePlan.name} {t('agencies:ui.agencyPaymentPage.plan', 'Plan')}</span>
                 <span className="font-semibold">€{enterprisePlan.price}/{enterprisePlan.interval}</span>
               </div>
 
@@ -503,7 +503,7 @@ const AgencyPaymentPage: React.FC = () => {
                 <div className="flex justify-between items-center mb-2 text-green-600">
                   <span className="flex items-center gap-2">
                     <SparklesIcon className="w-4 h-4" />
-                    Coupon ({appliedCoupon.code})
+                    {t('agencies:ui.agencyPaymentPage.coupon', 'Coupon (')}{appliedCoupon.code})
                   </span>
                   <span>-{appliedCoupon.discount}%</span>
                 </div>

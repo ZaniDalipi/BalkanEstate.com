@@ -128,7 +128,12 @@
       "renewStatus": "🔄 Renew Your Featured Status",
       "continueVisibility": "Continue enjoying enhanced visibility and top placement in search results.",
       "renewNow": "Renew Now",
-      "proTip": "💡 Pro Tip: Featured agencies get up to 5x more visibility and appear at the top of search results!"
+      "proTip": "💡 Pro Tip: Featured agencies get up to 5x more visibility and appear at the top of search results!",
+      "featuredInDirectory": "Featured in agency directory",
+      "priorityInSearch": "Priority in search results",
+      "homepageCarousel": "Homepage agency carousel",
+      "featuredBadge": "Featured badge on profile",
+      "boostedVisibility": "Boosted visibility everywhere"
     }
   },
   "create": {
@@ -257,7 +262,8 @@
     "payNow": "Pay",
     "processing": "Processing...",
     "stripeSecure": "Payments are securely processed by Stripe",
-    "error": "Failed to initiate payment. Please try again."
+    "error": "Failed to initiate payment. Please try again.",
+    "activateFree": "Activate Free"
   },
   "coupon": {
     "title": "Redeem Agency Coupon",
@@ -334,7 +340,14 @@
     "validating": "Validating...",
     "processing": "Processing...",
     "activateForFree": "Activate for FREE",
-    "subscribePrice": "Subscribe - €{{price}}"
+    "subscribePrice": "Subscribe - €{{price}}",
+    "duration1week": "1 Week",
+    "duration2weeks": "2 Weeks",
+    "duration4weeks": "4 Weeks",
+    "badgePopular": "POPULAR",
+    "duration90days": "90 Days",
+    "badgeBestValue": "BEST VALUE",
+    "haveCouponCode": "Have a coupon code?"
   },
   "management": {
     "currentAgency": "Current Agency",
@@ -448,6 +461,88 @@
         "desc": "Featured agencies receive a 20-point bonus and appear at the top of all searches.",
         "cap": "Max 20 pts"
       }
+    }
+  },
+  "confirm": {
+    "title": "Create Your Agency",
+    "subtitle": "Your Enterprise subscription is active. Review the details and confirm.",
+    "reviewDetails": "Review Agency Details",
+    "createAgency": "Create My Agency"
+  },
+  "ui": {
+    "agencyDetailPage": {
+      "dragToRepositionCoverImage": "Drag to reposition cover image",
+      "savePosition": "Save Position",
+      "cancel": "Cancel",
+      "repositionCover": "Reposition Cover",
+      "repositionLogo": "Reposition Logo",
+      "save": "Save",
+      "years": "Years",
+      "xTwitter": "X / Twitter",
+      "removeAdminRights": "Remove admin rights",
+      "makeAdmin": "Make admin",
+      "removeAgentFromAgency": "Remove agent from agency",
+      "leaveThisAgency": "Leave this agency",
+      "tellClientsAboutYourAgency": "Tell clients about your agency...",
+      "residentialCommercialLuxuryProperties": "Residential, Commercial, Luxury Properties",
+      "licensedRealEstateAgencyIso": "Licensed Real Estate Agency, ISO Certified",
+      "englishSerbianCroatianAlbanian": "English, Serbian, Croatian, Albanian",
+      "n9am6pm": "9AM - 6PM",
+      "youAreNotLoggedIn": "You are not logged in. Please log in and try again.",
+      "unexpectedResponseFromServerPlease": "Unexpected response from server. Please try again.",
+      "invalidCouponCodePleaseCheck": "Invalid coupon code. Please check and try again.",
+      "thisCouponHasAlreadyBeen": "This coupon has already been used.",
+      "thisCouponHasExpired": "This coupon has expired.",
+      "theAgencySubscriptionIsNo": "The agency subscription is no longer active.",
+      "couponRedeemed": "Coupon Redeemed!",
+      "joinRequestSentSuccessfullyThe": "Join request sent successfully! The agency admin will review your request.",
+      "agencyNameMustBeAt": "Agency name must be at least 2 characters",
+      "descriptionMustBeUnder5": "Description must be under 5,000 characters",
+      "pleaseEnterAValidEmail": "Please enter a valid email address",
+      "pleaseEnterAValidPhone": "Please enter a valid phone number",
+      "uploadFailed": "Upload Failed",
+      "failedToSavePosition": "Failed to save position",
+      "failedToSaveImagePosition": "Failed to save image position",
+      "positionSaved": "Position Saved",
+      "failedToGenerateCode": "Failed to generate code"
+    },
+    "agencyPaymentPage": {
+      "agencyCreated": "Agency Created!",
+      "redirectingToAgenciesPage": "Redirecting to agencies page...",
+      "phone": "Phone",
+      "license": "License",
+      "enterprisePlanActive": "✓ Enterprise Plan Active",
+      "n5AgentRegistrationCodesWill": "• 5 agent registration codes will be emailed to you",
+      "monthlyListingPromotionCouponsIncluded": "• Monthly listing promotion coupons included",
+      "n7DayFeaturedAgencyTrial": "• 7-day featured agency trial starts immediately",
+      "plan": "Plan",
+      "coupon": "Coupon ("
+    },
+    "createAgencyPage": {
+      "facebookComYourpage": "facebook.com/yourpage",
+      "instagramComYourpage": "instagram.com/yourpage",
+      "linkedinComCompany": "linkedin.com/company/...",
+      "n900Am500": "9:00 AM - 5:00 PM"
+    },
+    "agencyScoringPanel": {
+      "n0Pts": "0 pts"
+    },
+    "agencyJoinRequestsModal": {
+      "closeJoinRequestsModal": "Close join requests modal"
+    },
+    "invitationCodeModal": {
+      "keepTypingAgyXxxxxxXxxxxx": "Keep typing... (AGY-XXXXXX-XXXXXX)",
+      "invalidFormatExpectedAgyXxxxxx": "Invalid format. Expected: AGY-XXXXXX-XXXXXX",
+      "keepTypingXxxXxxxxxxx": "Keep typing... (XXX-XXXXXXXX)",
+      "invalidFormatExpectedXxxXxxxxxxx": "Invalid format. Expected: XXX-XXXXXXXX",
+      "proSubscriptionRequiredToUse": "Pro subscription required to use invitation codes",
+      "agyXxxxxxXxxxxx": "AGY-XXXXXX-XXXXXX",
+      "xxxXxxxxxxx": "XXX-XXXXXXXX",
+      "formatAgyXxxxxxXxxxxx": "Format: AGY-XXXXXX-XXXXXX",
+      "formatAbcXxxxxxxx": "Format: ABC-XXXXXXXX"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Your agency has been created successfully. You now have a dedicated agency page."
     }
   }
 }

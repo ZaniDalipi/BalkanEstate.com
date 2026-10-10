@@ -781,7 +781,7 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
         if (query.beds) p.push(<FilterPill key="bd" delay={d += 50}>🛏️ {query.beds}+ {t('ai.beds')}</FilterPill>);
         if (query.baths) p.push(<FilterPill key="ba" delay={d += 50}>🛁 {query.baths}+ {t('ai.baths')}</FilterPill>);
         if (query.livingRooms) p.push(<FilterPill key="lr" delay={d += 50}>🛋️ {query.livingRooms}+ {t('ai.living')}</FilterPill>);
-        if (query.sellerType) p.push(<FilterPill key="se" delay={d += 50}>{query.sellerType === 'agent' ? '👔 Agent' : '👤 Private'}</FilterPill>);
+        if (query.sellerType) p.push(<FilterPill key="se" delay={d += 50}>{query.sellerType === 'agent' ? t('search:ui.aiSearch.agent', '👔 Agent') : t('search:ui.aiSearch.private', '👤 Private')}</FilterPill>);
         return p;
     };
 
@@ -947,12 +947,12 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
                     />
                     {voiceSupported && (
                         isListening ? (
-                            <button type="button" onClick={stopListening} className="relative bg-red-500 text-white rounded-2xl p-3 hover:bg-red-600 transition-all active:scale-90 flex-shrink-0 shadow-md shadow-red-500/25" aria-label="Stop recording">
+                            <button type="button" onClick={stopListening} className="relative bg-red-500 text-white rounded-2xl p-3 hover:bg-red-600 transition-all active:scale-90 flex-shrink-0 shadow-md shadow-red-500/25" aria-label={t('search:ui.aiSearch.stopRecording', 'Stop recording')}>
                                 <span className="absolute inset-0 rounded-2xl bg-red-400 anim-ring-pulse opacity-30" />
                                 <StopCircleIcon className="w-5 h-5 relative z-10" />
                             </button>
                         ) : (
-                            <button type="button" onClick={startListening} disabled={isSearching} className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-2xl p-3 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 disabled:from-neutral-200 disabled:to-neutral-200 disabled:text-neutral-400 disabled:shadow-none transition-all duration-200 active:scale-90 flex-shrink-0 shadow-md shadow-primary/20" aria-label="Start voice assistant">
+                            <button type="button" onClick={startListening} disabled={isSearching} className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-2xl p-3 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 disabled:from-neutral-200 disabled:to-neutral-200 disabled:text-neutral-400 disabled:shadow-none transition-all duration-200 active:scale-90 flex-shrink-0 shadow-md shadow-primary/20" aria-label={t('search:ui.aiSearch.startVoiceAssistant', 'Start voice assistant')}>
                                 <MicrophoneIcon className="w-5 h-5" />
                             </button>
                         )

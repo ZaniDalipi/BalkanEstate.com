@@ -285,14 +285,14 @@ const InquiryManager: React.FC = () => {
                       <button
                         onClick={() => handleViewInquiry(inquiry)}
                         className="text-blue-600 hover:text-blue-900"
-                        title="View details"
+                        title={t('admin:ui.inquiryManager.viewDetails', 'View details')}
                       >
                         <EyeIcon className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDeleteInquiry(inquiry._id)}
                         className="text-red-600 hover:text-red-900"
-                        title="Delete"
+                        title={t('admin:ui.inquiryManager.delete', 'Delete')}
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>

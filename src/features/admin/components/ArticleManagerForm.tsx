@@ -4,6 +4,7 @@ import { csrfHeaders } from '@/src/shared/api/httpClient';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 
+import { useTranslation } from 'react-i18next';
 interface ArticleManagerFormProps {
   articleId: string | null;
   onClose: () => void;
@@ -39,6 +40,7 @@ const detectHtmlPage = (content: string) =>
   content.includes('<style') || content.trimStart().startsWith('<!DOCTYPE') || content.trimStart().startsWith('<html');
 
 const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onClose }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [category, setCategory] = useState('guide');
@@ -91,7 +93,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
         credentials: 'include',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to load article');
+      if (!res.ok) throw new Error(t('admin:ui.articleManagerForm.failedToLoadArticle', 'Failed to load article'));
       const data = await res.json();
       const a = data.article;
       setTitle(a.title || '');
@@ -114,7 +116,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
         pendingContentRef.current = rawContent;
       }
     } catch {
-      setError('Failed to load article for editing.');
+      setError(t('admin:ui.articleManagerForm.failedToLoadArticleFor', 'Failed to load article for editing.'));
     } finally {
       setFetchingArticle(false);
     }
@@ -191,12 +193,12 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
         headers: { Authorization: `Bearer ${token}`, ...csrfHeaders() },
         body: formData,
       });
-      if (!res.ok) throw new Error('Upload failed');
+      if (!res.ok) throw new Error(t('admin:ui.articleManagerForm.uploadFailed', 'Upload failed'));
       const data = await res.json();
       setCoverImageUrl(data.url);
       setCoverImagePublicId(data.publicId || '');
     } catch {
-      setError('Cover image upload failed.');
+      setError(t('admin:ui.articleManagerForm.coverImageUploadFailed', 'Cover image upload failed.'));
     } finally {
       setCoverUploading(false);
     }
@@ -220,7 +222,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
         headers: { Authorization: `Bearer ${token}`, ...csrfHeaders() },
         body: formData,
       });
-      if (!res.ok) throw new Error('Upload failed');
+      if (!res.ok) throw new Error(t('admin:ui.articleManagerForm.uploadFailed', 'Upload failed'));
       const data = await res.json();
 
       // Restore focus + selection before inserting so execCommand works
@@ -233,7 +235,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       document.execCommand('insertHTML', false, `<img src="${data.url}" alt="" style="max-width:100%;border-radius:8px;margin:12px 0;" />`);
       handleEditorInput();
     } catch {
-      setError('Inline image upload failed.');
+      setError(t('admin:ui.articleManagerForm.inlineImageUploadFailed', 'Inline image upload failed.'));
     } finally {
       setInlineUploading(false);
       // Reset the file input so the same file can be re-selected
@@ -300,7 +302,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
     if (Object.keys(errs).length > 0) {
       setFieldErrors(errs);
-      setError('Please fix the highlighted fields before saving.');
+      setError(t('admin:ui.articleManagerForm.pleaseFixTheHighlightedFields', 'Please fix the highlighted fields before saving.'));
       return;
     }
 
@@ -363,7 +365,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-10 flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
-          <p className="text-slate-600 font-medium">Loading article…</p>
+          <p className="text-slate-600 font-medium">{t('admin:ui.articleManagerForm.loadingArticle', 'Loading article…')}</p>
         </div>
       </div>
     );
@@ -377,14 +379,14 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
           <button
             onClick={onClose}
             className="text-slate-500 hover:text-slate-900 transition-colors p-1"
-            aria-label="Close"
+            aria-label={t('admin:ui.articleManagerForm.close', 'Close')}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
           <span className="text-sm font-semibold text-slate-900">
-            {articleId ? 'Edit Article' : 'New Article'}
+            {articleId ? t('admin:ui.articleManagerForm.editArticle', 'Edit Article') : t('admin:ui.articleManagerForm.newArticle', 'New Article')}
           </span>
           <div className="hidden sm:flex items-center bg-neutral-100 rounded-lg p-0.5">
             {(['write', 'preview'] as const).map(s => (
@@ -419,11 +421,11 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                   <>
                     <img
                       src={coverImageUrl}
-                      alt="Cover"
+                      alt={t('admin:ui.articleManagerForm.cover', 'Cover')}
                       className={`absolute inset-0 w-full h-full object-center ${coverImageFit === 'contain' ? 'object-contain bg-slate-100' : coverImageFit === 'fill' ? 'object-fill' : 'object-cover'}`}
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">Change cover photo</span>
+                      <span className="text-white text-sm font-medium">{t('admin:ui.articleManagerForm.changeCoverPhoto', 'Change cover photo')}</span>
                     </div>
                     <button
                       onClick={e => { e.stopPropagation(); setCoverImageUrl(''); setCoverImagePublicId(''); }}
@@ -441,8 +443,8 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span className="text-sm font-medium">Add a cover photo</span>
-                        <span className="text-xs">Click to upload · JPG, PNG, WebP · max 10MB</span>
+                        <span className="text-sm font-medium">{t('admin:ui.articleManagerForm.addACoverPhoto', 'Add a cover photo')}</span>
+                        <span className="text-xs">{t('admin:ui.articleManagerForm.clickToUploadJpgPng', 'Click to upload · JPG, PNG, WebP · max 10MB')}</span>
                       </>
                     )}
                   </div>
@@ -460,7 +462,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               <textarea
                 value={title}
                 onChange={e => { setTitle(e.target.value); if (fieldErrors.title) setFieldErrors(p => ({ ...p, title: undefined })); }}
-                placeholder="Article title…"
+                placeholder={t('admin:ui.articleManagerForm.articleTitle', 'Article title…')}
                 rows={2}
                 maxLength={120}
                 className={`w-full text-3xl sm:text-4xl font-bold text-slate-900 placeholder:text-neutral-300 border-none outline-none resize-none leading-tight ${fieldErrors.title ? 'border-b-2 border-red-400 pb-1' : 'mb-1'}`}
@@ -476,7 +478,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               <textarea
                 value={excerpt}
                 onChange={e => { setExcerpt(e.target.value); if (fieldErrors.excerpt) setFieldErrors(p => ({ ...p, excerpt: undefined })); }}
-                placeholder="Write a short excerpt (shown in listing cards)…"
+                placeholder={t('admin:ui.articleManagerForm.writeAShortExcerptShown', 'Write a short excerpt (shown in listing cards)…')}
                 rows={2}
                 maxLength={500}
                 className={`w-full text-base text-slate-500 placeholder:text-neutral-300 border-none outline-none resize-none leading-relaxed ${fieldErrors.excerpt ? 'border-b-2 border-red-400 pb-1' : 'mb-1'}`}
@@ -496,49 +498,49 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                   <div className="flex items-center gap-2 flex-1">
                     <span className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-lg border border-violet-200">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                      HTML Source Mode
+                      {t('admin:ui.articleManagerForm.htmlSourceMode', 'HTML Source Mode')}
                     </span>
-                    <span className="text-xs text-slate-400">Paste a full HTML page — styles &amp; layout are preserved</span>
+                    <span className="text-xs text-slate-400">{t('admin:ui.articleManagerForm.pasteAFullHtmlPage', 'Paste a full HTML page — styles & layout are preserved')}</span>
                     <div className="flex-1" />
-                    <ToolbarBtn title="Switch to Visual Editor" onClick={toggleHtmlMode}>
-                      <span className="text-[9px] font-bold tracking-wide">WYSIWYG</span>
+                    <ToolbarBtn title={t('admin:ui.articleManagerForm.switchToVisualEditor', 'Switch to Visual Editor')} onClick={toggleHtmlMode}>
+                      <span className="text-[9px] font-bold tracking-wide">{t('admin:ui.articleManagerForm.wysiwyg', 'WYSIWYG')}</span>
                     </ToolbarBtn>
                   </div>
                 ) : (
                   <>
-                <ToolbarBtn title="Bold (Ctrl+B)" onClick={() => execCmd('bold')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.boldCtrlB', 'Bold (Ctrl+B)')} onClick={() => execCmd('bold')}>
                   <strong>B</strong>
                 </ToolbarBtn>
-                <ToolbarBtn title="Italic (Ctrl+I)" onClick={() => execCmd('italic')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.italicCtrlI', 'Italic (Ctrl+I)')} onClick={() => execCmd('italic')}>
                   <em>I</em>
                 </ToolbarBtn>
-                <ToolbarBtn title="Underline (Ctrl+U)" onClick={() => execCmd('underline')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.underlineCtrlU', 'Underline (Ctrl+U)')} onClick={() => execCmd('underline')}>
                   <span className="underline">U</span>
                 </ToolbarBtn>
-                <ToolbarBtn title="Strikethrough" onClick={() => execCmd('strikeThrough')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.strikethrough', 'Strikethrough')} onClick={() => execCmd('strikeThrough')}>
                   <span className="line-through">S</span>
                 </ToolbarBtn>
 
                 <div className="w-px h-5 bg-neutral-200 mx-1" />
 
-                <ToolbarBtn title="Heading 1" onClick={() => execBlock('h1')}>H1</ToolbarBtn>
-                <ToolbarBtn title="Heading 2" onClick={() => execBlock('h2')}>H2</ToolbarBtn>
-                <ToolbarBtn title="Heading 3" onClick={() => execBlock('h3')}>H3</ToolbarBtn>
-                <ToolbarBtn title="Paragraph" onClick={() => execBlock('p')}>P</ToolbarBtn>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.heading1', 'Heading 1')} onClick={() => execBlock('h1')}>H1</ToolbarBtn>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.heading2', 'Heading 2')} onClick={() => execBlock('h2')}>H2</ToolbarBtn>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.heading3', 'Heading 3')} onClick={() => execBlock('h3')}>H3</ToolbarBtn>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.paragraph', 'Paragraph')} onClick={() => execBlock('p')}>P</ToolbarBtn>
 
                 <div className="w-px h-5 bg-neutral-200 mx-1" />
 
-                <ToolbarBtn title="Bullet list" onClick={() => execCmd('insertUnorderedList')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.bulletList', 'Bullet list')} onClick={() => execCmd('insertUnorderedList')}>
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M3 5a1 1 0 100-2 1 1 0 000 2zm3-1a1 1 0 011-1h10a1 1 0 110 2H7a1 1 0 01-1-1zm-3 6a1 1 0 100-2 1 1 0 000 2zm3-1a1 1 0 011-1h10a1 1 0 110 2H7a1 1 0 01-1-1zm-3 6a1 1 0 100-2 1 1 0 000 2zm3-1a1 1 0 011-1h10a1 1 0 110 2H7a1 1 0 01-1-1z" clipRule="evenodd" />
                   </svg>
                 </ToolbarBtn>
-                <ToolbarBtn title="Numbered list" onClick={() => execCmd('insertOrderedList')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.numberedList', 'Numbered list')} onClick={() => execCmd('insertOrderedList')}>
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M4 4h2v2H4V4zm0 4h2v2H4V8zm0 4h2v2H4v-2zm4-8h8v2H8V4zm0 4h8v2H8V8zm0 4h8v2H8v-2z" />
                   </svg>
                 </ToolbarBtn>
-                <ToolbarBtn title="Blockquote" onClick={() => execBlock('blockquote')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.blockquote', 'Blockquote')} onClick={() => execBlock('blockquote')}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
@@ -547,7 +549,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 <div className="w-px h-5 bg-neutral-200 mx-1" />
 
                 <ToolbarBtn
-                  title="Insert link"
+                  title={t('admin:ui.articleManagerForm.insertLink', 'Insert link')}
                   onClick={() => {
                     const url = prompt('Enter URL:');
                     if (url) execCmd('createLink', url);
@@ -559,7 +561,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 </ToolbarBtn>
 
                 <ToolbarBtn
-                  title="Insert image from file"
+                  title={t('admin:ui.articleManagerForm.insertImageFromFile', 'Insert image from file')}
                   onClick={() => { saveSelection(); inlineImageInputRef.current?.click(); }}
                   disabled={inlineUploading}
                 >
@@ -572,7 +574,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                   )}
                 </ToolbarBtn>
 
-                <ToolbarBtn title="Horizontal rule" onClick={() => execCmd('insertHorizontalRule')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.horizontalRule', 'Horizontal rule')} onClick={() => execCmd('insertHorizontalRule')}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12h16" />
                   </svg>
@@ -580,7 +582,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
                 <div className="w-px h-5 bg-neutral-200 mx-1" />
 
-                <ToolbarBtn title="Clear formatting" onClick={() => execCmd('removeFormat')}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.clearFormatting', 'Clear formatting')} onClick={() => execCmd('removeFormat')}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -588,7 +590,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
                 <div className="w-px h-5 bg-neutral-200 mx-1" />
 
-                <ToolbarBtn title="Switch to HTML source mode" onClick={toggleHtmlMode}>
+                <ToolbarBtn title={t('admin:ui.articleManagerForm.switchToHtmlSourceMode', 'Switch to HTML source mode')} onClick={toggleHtmlMode}>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                   </svg>
@@ -615,7 +617,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                       if (fieldErrors.content) setFieldErrors(p => ({ ...p, content: undefined }));
                     }}
                     spellCheck={false}
-                    placeholder="Paste your full HTML page here — including <style> blocks, custom layouts, everything…"
+                    placeholder={t('admin:ui.articleManagerForm.pasteYourFullHtmlPage', 'Paste your full HTML page here — including <style> blocks, custom layouts, everything…')}
                     className={`w-full min-h-[560px] font-mono text-[13px] leading-6 text-slate-700 bg-slate-950 border rounded-xl p-4 resize-y focus:outline-none focus:ring-2 placeholder:text-slate-600 ${fieldErrors.content ? 'border-red-400 focus:ring-red-400/40' : 'border-slate-700 focus:ring-violet-500/40'}`}
                     style={{ colorScheme: 'dark' }}
                   />
@@ -665,7 +667,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
             /* ── Preview ─────────────────────────────────────────────────── */
             <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8">
               {coverImageUrl && (
-                <img src={coverImageUrl} alt="Cover" className="w-full h-64 object-cover rounded-2xl mb-8" />
+                <img src={coverImageUrl} alt={t('admin:ui.articleManagerForm.cover', 'Cover')} className="w-full h-64 object-cover rounded-2xl mb-8" />
               )}
               <div className="flex flex-wrap items-center gap-2 mb-4 text-sm text-slate-500">
                 {selectedCountryObj && (
@@ -679,10 +681,10 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 )}
               </div>
               <h1 className="text-4xl font-bold text-slate-900 mb-4 leading-tight">
-                {title || <span className="text-neutral-300">Article title…</span>}
+                {title || <span className="text-neutral-300">{t('admin:ui.articleManagerForm.articleTitle', 'Article title…')}</span>}
               </h1>
               <p className="text-lg text-slate-500 mb-6 leading-relaxed">
-                {excerpt || <span className="text-neutral-300">Excerpt…</span>}
+                {excerpt || <span className="text-neutral-300">{t('admin:ui.articleManagerForm.excerpt', 'Excerpt…')}</span>}
               </p>
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-8">
@@ -699,10 +701,10 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                     sandbox="allow-same-origin"
                     className="w-full border border-neutral-200 rounded-2xl"
                     style={{ height: '75vh', minHeight: '400px' }}
-                    title="HTML Page Preview"
+                    title={t('admin:ui.articleManagerForm.htmlPagePreview', 'HTML Page Preview')}
                   />
                 ) : (
-                  <p className="text-neutral-300 text-sm">Paste HTML in the editor to see the preview…</p>
+                  <p className="text-neutral-300 text-sm">{t('admin:ui.articleManagerForm.pasteHtmlInTheEditor', 'Paste HTML in the editor to see the preview…')}</p>
                 )
               ) : (
                 <div
@@ -726,7 +728,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
-                Saved
+                {t('admin:ui.articleManagerForm.saved', 'Saved')}
               </span>
             )}
           </div>
@@ -736,7 +738,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               disabled={loading}
               className="px-4 py-2 text-sm font-medium border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50 transition-colors"
             >
-              Save Draft
+              {t('admin:ui.articleManagerForm.saveDraft', 'Save Draft')}
             </button>
             <button
               onClick={() => handleSubmit('published')}
@@ -746,9 +748,9 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               {loading ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Saving…
+                  {t('admin:ui.articleManagerForm.saving', 'Saving…')}
                 </>
-              ) : status === 'published' ? 'Update' : 'Publish'}
+              ) : status === 'published' ? t('admin:ui.articleManagerForm.update', 'Update') : t('admin:ui.articleManagerForm.publish', 'Publish')}
             </button>
           </div>
         </div>
@@ -760,16 +762,16 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
             {/* Status & Featured */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Publishing</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t('admin:ui.articleManagerForm.publishing', 'Publishing')}</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-700">Status</span>
+                  <span className="text-sm text-slate-700">{t('admin:ui.articleManagerForm.status', 'Status')}</span>
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {status === 'published' ? 'Published' : 'Draft'}
+                    {status === 'published' ? t('admin:ui.articleManagerForm.published', 'Published') : t('admin:ui.articleManagerForm.draft', 'Draft')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-700">Featured article</span>
+                  <span className="text-sm text-slate-700">{t('admin:ui.articleManagerForm.featuredArticle', 'Featured article')}</span>
                   <button
                     onClick={() => setIsFeatured(!isFeatured)}
                     className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isFeatured ? 'bg-slate-900' : 'bg-neutral-300'}`}
@@ -782,7 +784,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
             {/* Category */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Category</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t('admin:ui.articleManagerForm.category', 'Category')}</h3>
               <div className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map(cat => (
                   <button
@@ -802,25 +804,25 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
 
             {/* Country */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Country</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t('admin:ui.articleManagerForm.country', 'Country')}</h3>
               <select
                 value={country}
                 onChange={e => handleCountryChange(e.target.value)}
                 className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
               >
-                <option value="">— No specific country —</option>
+                <option value="">{t('admin:ui.articleManagerForm.noSpecificCountry', '— No specific country —')}</option>
                 {BALKAN_COUNTRIES.map(c => (
                   <option key={c.code} value={c.name}>{c.flag} {c.name}</option>
                 ))}
               </select>
               {countryCode && (
-                <p className="text-[11px] text-slate-400 mt-1">Code: <strong>{countryCode}</strong></p>
+                <p className="text-[11px] text-slate-400 mt-1">{t('admin:ui.articleManagerForm.code', 'Code:')} <strong>{countryCode}</strong></p>
               )}
             </div>
 
             {/* Tags */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Tags</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t('admin:ui.articleManagerForm.tags', 'Tags')}</h3>
               <div className="flex flex-wrap gap-1.5 mb-2 min-h-[24px]">
                 {tags.map(tag => (
                   <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-slate-900 text-white text-xs rounded-full">
@@ -835,15 +837,15 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 onChange={e => setTagInput(e.target.value)}
                 onKeyDown={handleTagKeyDown}
                 onBlur={() => tagInput.trim() && addTag(tagInput)}
-                placeholder="Type tag, press Enter"
+                placeholder={t('admin:ui.articleManagerForm.typeTagPressEnter', 'Type tag, press Enter')}
                 className="w-full text-sm border border-neutral-200 rounded-lg px-3 py-2 bg-white text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
               />
-              <p className="text-[11px] text-slate-400 mt-1">Enter or comma to add · {20 - tags.length} remaining</p>
+              <p className="text-[11px] text-slate-400 mt-1">{t('admin:ui.articleManagerForm.enterOrCommaToAdd', 'Enter or comma to add ·')} {20 - tags.length} remaining</p>
             </div>
 
             {/* Cover image URL fallback */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Cover Image URL</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t('admin:ui.articleManagerForm.coverImageUrl', 'Cover Image URL')}</h3>
               <input
                 type="url"
                 value={coverImageUrl}
@@ -853,18 +855,18 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               />
               {fieldErrors.coverImageUrl
                 ? <p className="text-[11px] text-red-500 mt-1">{fieldErrors.coverImageUrl}</p>
-                : <p className="text-[11px] text-slate-400 mt-1">Or paste URL instead of uploading above</p>
+                : <p className="text-[11px] text-slate-400 mt-1">{t('admin:ui.articleManagerForm.orPasteUrlInsteadOf', 'Or paste URL instead of uploading above')}</p>
               }
             </div>
 
             {/* Cover Image Fit */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Cover Image Fit</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t('admin:ui.articleManagerForm.coverImageFit', 'Cover Image Fit')}</h3>
               <div className="flex rounded-lg overflow-hidden border border-neutral-200">
                 {([
-                  { value: 'cover', label: 'Cover (crop to fill)' },
-                  { value: 'contain', label: 'Contain (show full image)' },
-                  { value: 'fill', label: 'Fill (stretch)' },
+                  { value: 'cover', label: t('admin:ui.articleManagerForm.coverCropToFill', 'Cover (crop to fill)') },
+                  { value: 'contain', label: t('admin:ui.articleManagerForm.containShowFullImage', 'Contain (show full image)') },
+                  { value: 'fill', label: t('admin:ui.articleManagerForm.fillStretch', 'Fill (stretch)') },
                 ] as const).map((opt, i) => (
                   <button
                     key={opt.value}
@@ -880,15 +882,15 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">How the cover image fills the 1200×628 frame</p>
+              <p className="text-[11px] text-slate-400 mt-1">{t('admin:ui.articleManagerForm.howTheCoverImageFills', 'How the cover image fills the 1200×628 frame')}</p>
             </div>
 
             {/* SEO Preview */}
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">SEO Preview</h3>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">{t('admin:ui.articleManagerForm.seoPreview', 'SEO Preview')}</h3>
               <div className="bg-white border border-neutral-200 rounded-xl p-3 space-y-1">
-                <p className="text-xs text-blue-700 font-medium truncate">{title || 'Article Title'}</p>
-                <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{excerpt || 'Article excerpt will appear here in search results…'}</p>
+                <p className="text-xs text-blue-700 font-medium truncate">{title || t('admin:ui.articleManagerForm.articleTitle2', 'Article Title')}</p>
+                <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{excerpt || t('admin:ui.articleManagerForm.articleExcerptWillAppearHere', 'Article excerpt will appear here in search results…')}</p>
               </div>
             </div>
 

@@ -136,7 +136,7 @@ const ListingCard: React.FC<{
                         <ListingTypeBadge listingType={property.listingType} />
                         <RoleBadge role={property.createdAsRole} />
                         {!hasValidCoordinates && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700" title="This property won't appear on the map. Edit to set location.">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700" title={t('account:ui.myListings.thisPropertyWonTAppear', 'This property won\'t appear on the map. Edit to set location.')}>
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
                                 </svg>
@@ -156,10 +156,10 @@ const ListingCard: React.FC<{
                     <p className="text-sm text-neutral-600">{property.address}, {property.city}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
-                     <button onClick={handleEditClick} aria-label="Edit listing" className="p-2 text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
+                     <button onClick={handleEditClick} aria-label={t('account:ui.myListings.editListing', 'Edit listing')} className="p-2 text-neutral-500 bg-neutral-100 rounded-full hover:bg-neutral-200 hover:text-neutral-800 transition-colors">
                         <PencilIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label="Delete listing" className="p-2 text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(property.id); }} aria-label={t('account:ui.myListings.deleteListing', 'Delete listing')} className="p-2 text-red-500 bg-red-50 rounded-full hover:bg-red-100 hover:text-red-700 transition-colors">
                         <TrashIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>
@@ -168,11 +168,11 @@ const ListingCard: React.FC<{
             <div className="flex-grow"></div>
 
             <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-neutral-500 mt-3 pt-3 border-t">
-                <div className="flex items-center gap-1.5" title="Views"><EyeIcon className="w-4 h-4" /> {property.views || 0}</div>
-                <div className="flex items-center gap-1.5" title="Saves"><HeartIcon className="w-4 h-4" /> {property.saves || 0}</div>
-                <div className="flex items-center gap-1.5" title="Inquiries"><InquiriesIcon className="w-4 h-4" /> {property.inquiries || 0}</div>
+                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.views', 'Views')}><EyeIcon className="w-4 h-4" /> {property.views || 0}</div>
+                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.saves', 'Saves')}><HeartIcon className="w-4 h-4" /> {property.saves || 0}</div>
+                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.inquiries', 'Inquiries')}><InquiriesIcon className="w-4 h-4" /> {property.inquiries || 0}</div>
                 {property.lastRenewed && isActionable && (
-                    <div className="flex items-center gap-1.5 text-green-600" title="Last Renewed">
+                    <div className="flex items-center gap-1.5 text-green-600" title={t('account:ui.myListings.lastRenewed', 'Last Renewed')}>
                         <CalendarIcon className="w-4 h-4"/>
                         <span className="text-xs font-medium">
                             {new Date(property.lastRenewed).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -180,7 +180,7 @@ const ListingCard: React.FC<{
                     </div>
                 )}
                 {property.status === 'rented' && property.rentedUntil && (
-                    <div className="flex items-center gap-1.5 text-orange-600" title="Rented until">
+                    <div className="flex items-center gap-1.5 text-orange-600" title={t('account:ui.myListings.rentedUntil', 'Rented until')}>
                         <CalendarIcon className="w-4 h-4"/>
                         <span className="text-xs font-medium">
                             {t('seller:myListings.rentedUntil', 'Rented until {{date}}', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) })}
@@ -212,7 +212,7 @@ const ListingCard: React.FC<{
                 <button
                     onClick={(e) => { e.stopPropagation(); onVideo(property.id); }}
                     disabled={!property.images || property.images.length === 0}
-                    title={property.images && property.images.length > 0 ? 'Create video reel' : 'Add images first'}
+                    title={property.images && property.images.length > 0 ? t('account:ui.myListings.createVideoReel', 'Create video reel') : t('account:ui.myListings.addImagesFirst', 'Add images first')}
                     className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <VideoIcon className="w-4 h-4" />
@@ -221,7 +221,7 @@ const ListingCard: React.FC<{
                 <button
                     onClick={(e) => { e.stopPropagation(); onRenew(property.id); }}
                     disabled={!isActionable || !canRenew}
-                    title={!canRenew && renewalStatus ? `Can renew in ${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : 'Renew listing to appear at top'}
+                    title={!canRenew && renewalStatus ? `Can renew in ${renewalStatus.hoursRemaining}h ${renewalStatus.minutesRemaining}m` : t('account:ui.myListings.renewListingToAppearAt', 'Renew listing to appear at top')}
                     className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-700 bg-neutral-100 border border-neutral-200 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <ArrowPathIcon className="w-4 h-4" />
@@ -934,12 +934,12 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             <Modal
                 isOpen={showDeleteConfirm}
                 onClose={() => setShowDeleteConfirm(false)}
-                title="Delete Listing"
+                title={t('account:ui.myListings.deleteListing2', 'Delete Listing')}
             >
-                <p className="text-neutral-600 mb-6 text-center">Are you sure you want to delete this listing? This action cannot be undone and the property will be permanently removed.</p>
+                <p className="text-neutral-600 mb-6 text-center">{t('account:ui.myListings.areYouSureYouWant', 'Are you sure you want to delete this listing? This action cannot be undone and the property will be permanently removed.')}</p>
                 <div className="flex justify-center gap-4">
-                    <button onClick={() => setShowDeleteConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">Cancel</button>
-                    <button onClick={confirmDelete} className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700">Delete</button>
+                    <button onClick={() => setShowDeleteConfirm(false)} className="px-6 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100">{t('account:ui.myListings.cancel', 'Cancel')}</button>
+                    <button onClick={confirmDelete} className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700">{t('account:ui.myListings.delete', 'Delete')}</button>
                 </div>
             </Modal>
 
@@ -1044,7 +1044,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                             listingTypeFilter === 'all' ? 'bg-white text-neutral-800 shadow' : 'text-neutral-600 hover:bg-white/50'
                         }`}
                     >
-                        All ({listingTypeCounts.all})
+                        {t('account:ui.myListings.all', 'All (')}{listingTypeCounts.all})
                     </button>
                     <button
                         onClick={() => setListingTypeFilter('sale')}
@@ -1068,7 +1068,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
             {/* Role Filter - Only show if user has listings in both roles */}
             {showRoleFilter && (
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-100">
-                    <p className="text-sm text-neutral-600 mb-3 font-medium">Filter by posting role:</p>
+                    <p className="text-sm text-neutral-600 mb-3 font-medium">{t('account:ui.myListings.filterByPostingRole', 'Filter by posting role:')}</p>
                     <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => setRoleFilter('all')}
@@ -1174,17 +1174,17 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                 <div className="text-center p-12 border-2 border-dashed rounded-lg bg-neutral-50">
                     {counts.all > 0 ? (
                          <>
-                            <h4 className="text-xl font-semibold text-neutral-700">No Listings Found</h4>
+                            <h4 className="text-xl font-semibold text-neutral-700">{t('account:ui.myListings.noListingsFound', 'No Listings Found')}</h4>
                             <p className="text-neutral-500 mt-2">
-                                No properties match the current filters.
-                                {roleFilter !== 'all' && ` Try selecting "All Listings".`}
-                                {statusFilter !== 'all' && ` Try selecting "All" status.`}
+                                {t('account:ui.myListings.noPropertiesMatchTheCurrent', 'No properties match the current filters.')}
+                                {roleFilter !== 'all' && t('account:ui.myListings.trySelectingAllListings', ' Try selecting "All Listings".')}
+                                {statusFilter !== 'all' && t('account:ui.myListings.trySelectingAllStatus', ' Try selecting "All" status.')}
                             </p>
                         </>
                     ) : (
                         <>
-                            <h4 className="text-xl font-semibold text-neutral-700">No Listings Yet</h4>
-                            <p className="text-neutral-500 mt-2">Click "Add New Listing" to get started.</p>
+                            <h4 className="text-xl font-semibold text-neutral-700">{t('account:ui.myListings.noListingsYet', 'No Listings Yet')}</h4>
+                            <p className="text-neutral-500 mt-2">{t('account:ui.myListings.clickAddNewListingTo', 'Click "Add New Listing" to get started.')}</p>
                         </>
                     )}
                 </div>

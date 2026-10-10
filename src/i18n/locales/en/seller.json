@@ -37,6 +37,10 @@
       "buyer": "Buyer",
       "free": "Free",
       "proRequired": "Pro Required"
+    },
+    "becomeAgent": {
+      "title": "Want to post as an agent?",
+      "description": "You can register as a real estate agent from your Profile Settings to unlock agent features and higher listing limits."
     }
   },
   "createListing": {
@@ -60,7 +64,9 @@
       "uploading": "Uploading to cloud...",
       "uploadingHint": "Securely uploading your photos...",
       "creating": "Creating listing...",
-      "creatingHint": "Almost there! Saving your listing..."
+      "creatingHint": "Almost there! Saving your listing...",
+      "analyzing": "Analyzing your images...",
+      "analyzingHint": "Our AI is identifying rooms, features, and details from your photos. This may take a moment."
     },
     "nextStep": "Next Step",
     "previousStep": "Previous Step",
@@ -176,7 +182,8 @@
       "parkingFeatures": "Parking Features",
       "fencedSecured": "Fenced / Secured",
       "hasVegetation": "Has Vegetation / Trees",
-      "hasWaterSource": "Has Water Source"
+      "hasWaterSource": "Has Water Source",
+      "landFeatures": "Land Features"
     },
     "advancedDetails": {
       "title": "Advanced Property Details",
@@ -335,7 +342,12 @@
       "title": "Visit Availability",
       "enable": "Enable scheduling",
       "description": "Allow visitors to schedule viewings online. Define your available days and hours.",
-      "availableDays": "Available Days"
+      "availableDays": "Available Days",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "slotDuration": "Slot Duration",
+      "notes": "Notes for visitors",
+      "notesPlaceholder": "e.g., Ring bell at gate, parking available..."
     },
     "imageTags": {
       "exterior": "Exterior",
@@ -396,6 +408,32 @@
       "limitTitle": "Floor plan limit reached",
       "limit": "A listing can have up to {{max}} floor plans.",
       "switch": "Floors"
+    },
+    "dailyRental": {
+      "title": "Daily Rental Details",
+      "checkIn": "Check-in Time",
+      "checkOut": "Check-out Time",
+      "cleaningFee": "Cleaning Fee (€)",
+      "cancellationPolicy": "Cancellation Policy",
+      "selectPolicy": "Select…",
+      "flexible": "Flexible",
+      "moderate": "Moderate",
+      "strict": "Strict",
+      "nonRefundable": "Non-refundable",
+      "included": "Included in Price",
+      "breakfast": "🍳 Breakfast",
+      "towels": "🛁 Towels & Linen",
+      "parking": "🚗 Parking"
+    },
+    "preview": {
+      "banner": "Preview Mode",
+      "bannerHint": "Review your listing before publishing",
+      "editListing": "Edit Listing",
+      "satisfied": "Satisfied with your listing?",
+      "goBackEdit": "Go Back & Edit"
+    },
+    "ai": {
+      "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
     }
   },
   "myListings": {
@@ -759,13 +797,17 @@
     "buyerCannotCreateListing": "Buyers cannot create property listings. Please switch to Private Seller or Agent role to create listings.",
     "monthlyLimitReached": "Monthly Listing Limit Reached",
     "monthlyLimitMessage": "You've used all your listings this month. Resets at the start of next month.",
-    "monthlyLimitMessageWithCount": "You've used {{used}} of {{limit}} listings this month. Resets at the start of next month."
+    "monthlyLimitMessageWithCount": "You've used {{used}} of {{limit}} listings this month. Resets at the start of next month.",
+    "phoneRequired": "Phone number required",
+    "phoneRequiredMessage": "Please add a mobile phone number in your Profile Settings before creating a listing."
   },
   "actions": {
     "subscribeToPro": "Subscribe to Pro",
     "viewMyListings": "View My Listings",
     "switchRole": "Switch Role",
-    "requestMoreListings": "Request More Listings"
+    "requestMoreListings": "Request More Listings",
+    "playForDiscount": "Play for Discount",
+    "saveDraft": "Save as Draft"
   },
   "promotionHistory": {
     "title": "Promotion History",
@@ -809,7 +851,13 @@
     "expiringIn_other": "Expiring in {{count}} days!",
     "extendNow": "Extend Now",
     "autoExtendReady": "Auto-extend ready! Complete payment to extend.",
-    "completePayment": "Complete Payment"
+    "completePayment": "Complete Payment",
+    "tiers": {
+      "premium": "Premium Premiere",
+      "highlight": "Highlight",
+      "featured": "Featured",
+      "standard": "Standard"
+    }
   },
   "parkingTypes": {
     "garage": "Garage",
@@ -825,6 +873,160 @@
     "unfinishedRental": "Unfinished rental listing",
     "keptUntil": "Saved as a draft on this device until {{date}}.",
     "continue": "Continue",
-    "discard": "Discard"
+    "discard": "Discard",
+    "savedTitle": "Draft Saved",
+    "savedMessage": "Your listing has been saved. You can continue editing it later from your account."
+  },
+  "ui": {
+    "videoGenerator": {
+      "videoGenerator": "Video Generator",
+      "createAStunningVideoReel": "Create a stunning video reel from your property photos",
+      "noImagesAvailable": "No Images Available",
+      "uploadPropertyImagesFirstTo": "Upload property images first to generate a video showcase.",
+      "creatingYourVideo": "Creating Your Video...",
+      "thisCanTakeAMinute": "This can take a minute. Please don't close this window.",
+      "yourVideoIsReady": "Your Video Is Ready!",
+      "sVideoDownloadItPost": "s video — download it, post it, then add the link to your listing.",
+      "downloadVideo": "Download Video",
+      "createAnother": "Create Another",
+      "failedToGenerateVideoPlease": "Failed to generate video. Please try again.",
+      "tryAgain": "Try Again",
+      "videoFormat": "Video Format",
+      "videoQuality": "Video Quality",
+      "backgroundStyle": "Background Style",
+      "durationPerImage": "Duration per Image:",
+      "n2sQuick": "2s (Quick)",
+      "n10sSlow": "10s (Slow)",
+      "backgroundMusic": "Background Music",
+      "includeBalkanestateaiWatermark": "Include BalkanEstateAI watermark",
+      "addsBrandingToYourVideo": "Adds branding to your video for social sharing",
+      "videoPreview": "Video Preview",
+      "images": "Images",
+      "duration": "Duration",
+      "size": "Size",
+      "generateVideo": "Generate Video",
+      "videoGenerationMayTake1": "Video generation may take 1-3 minutes depending on the number of images.",
+      "postItThenAddThe": "Post it, then add the link to your listing",
+      "uploadTheDownloadedFileTo": "Upload the downloaded file to one of these, copy the post link, and paste it into your listing's video field.",
+      "shareToInstagram": "Share to Instagram",
+      "shareToTiktok": "Share to TikTok",
+      "shareToYoutube": "Share to YouTube",
+      "shareToFacebook": "Share to Facebook",
+      "format": {
+        "vertical": {
+          "label": "Reels (9:16)",
+          "description": "Instagram Reels & TikTok"
+        },
+        "horizontal": {
+          "label": "Landscape (16:9)",
+          "description": "YouTube & Websites"
+        },
+        "square": {
+          "label": "Square (1:1)",
+          "description": "Instagram Feed"
+        }
+      },
+      "music": {
+        "elegant": {
+          "label": "Elegant Piano",
+          "description": "Perfect for luxury properties"
+        },
+        "upbeat": {
+          "label": "Upbeat Corporate",
+          "description": "Great for modern homes"
+        },
+        "calm": {
+          "label": "Calm Ambient",
+          "description": "Ideal for countryside properties"
+        },
+        "modern": {
+          "label": "Modern Electronic",
+          "description": "Suits urban apartments"
+        }
+      },
+      "quality": {
+        "mobile": {
+          "label": "Mobile (720p)",
+          "description": "Smaller file, faster loading"
+        },
+        "standard": {
+          "label": "Standard (1080p)",
+          "description": "Full quality, larger file"
+        }
+      },
+      "background": {
+        "elegant": {
+          "label": "Elegant Dark",
+          "description": "Premium dark with gold accents"
+        },
+        "gradient": {
+          "label": "Gradient",
+          "description": "Purple-blue gradient (Canva style)"
+        },
+        "dark": {
+          "label": "Pure Dark",
+          "description": "Clean dark background"
+        },
+        "blur": {
+          "label": "Blur Effect",
+          "description": "Blurred background effect"
+        }
+      }
+    },
+    "geminiDescriptionGenerator": {
+      "n15Min": "15 min",
+      "n30Min": "30 min",
+      "n45Min": "45 min",
+      "n60Min": "60 min",
+      "vimeo": "Vimeo"
+    },
+    "marketInsightsAnimation": {
+      "analyzingYourProperty": "Analyzing Your Property...",
+      "whileOurAiWorksLearn": "While our AI works, learn about the",
+      "realEstateMarket": "real estate market",
+      "avgPriceM": "Avg. Price/m²",
+      "daysToSell": "Days to Sell",
+      "yoyGrowth": "YoY Growth",
+      "liveMarketDataPoweredBy": "📊 Live market data powered by AI • Updated",
+      "marketTrends": "Market Trends",
+      "timeOnMarket": "Time on Market",
+      "proTip": "Pro Tip",
+      "successRate": "Success Rate",
+      "bestPractice": "Best Practice",
+      "yearOverYear": "Year Over Year",
+      "pricingStrategy": "Pricing Strategy"
+    },
+    "roleSelector": {
+      "promotionCoupons": "Promotion Coupons",
+      "featured": "⭐ Featured:",
+      "daysEach": "days each",
+      "highlighted": "🔥 Highlighted:",
+      "usedThisMonth": "Used this month:"
+    },
+    "whackAnIconAnimation": {
+      "gameOver": "Game Over!",
+      "yourScore": "Your Score:",
+      "calculatingYourReward": "Calculating your reward...",
+      "time": "Time:",
+      "score": "Score:",
+      "whackAnIcon": "Whack-an-Icon!",
+      "analyzingProperty": "Analyzing Property...",
+      "ourAiIsHardAt": "Our AI is hard at work. Feel free to play a game while you wait!"
+    },
+    "onboarding": {
+      "ai": ".AI",
+      "trustedByLeadingAgenciesAcross": "Trusted by leading agencies across the Balkans",
+      "n11Countries50CitiesAi": "11 countries • 50+ cities • AI-powered search • Thousands of properties"
+    },
+    "aiAnalyzingAnimation": {
+      "claimYourDiscount": "Claim Your Discount!",
+      "analyzingProperty": "Analyzing Property...",
+      "clickTheButtonToReveal": "Click the button to reveal your special one-time discount for listing your property.",
+      "ourAiIsHardAt": "Our AI is hard at work. Feel free to play around with the icons while you wait!",
+      "revealMyDiscount": "Reveal My Discount!"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Your agency has been created successfully. You now have a dedicated agency page."
+    }
   }
 }

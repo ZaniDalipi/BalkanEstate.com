@@ -33,6 +33,8 @@ import businessDirectory from './businessDirectory.json';
 import listingFeeds from './listingFeeds.json';
 import blog from './blog.json';
 import villas from './villas.json';
+import legal from './legal.json';
+import contact from './contact.json';
 
 export default {
   common, nav, property, auth, search, messages, footer, newsletter,
@@ -40,5 +42,5 @@ export default {
   payment, saved, exploreCities, analytics, subscription, agencies,
   agencyDetails, agentProfile, newListing, valuation, howItWorks, rental, agencyDashboard, home,
   businessDirectory, listingFeeds, blog,
-  villas,
+  villas, legal, contact,
 };

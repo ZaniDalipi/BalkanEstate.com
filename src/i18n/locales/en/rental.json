@@ -220,7 +220,28 @@
     "discardTitle": "Discard Changes?",
     "discardMessage": "You have unsaved changes to your viewing request. Are you sure you want to close?",
     "discardConfirm": "Discard",
-    "discardCancel": "Keep Editing"
+    "discardCancel": "Keep Editing",
+    "errors": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "selectDateAndTime": "Please select a date and time.",
+      "invalidDetails": "Please provide valid contact details.",
+      "slotAlreadyBooked": "This time slot was just booked. Please select another.",
+      "submitFailed": "Failed to schedule viewing. Please try again."
+    },
+    "loadingAvailability": "Loading availability...",
+    "notConfigured": "Online Scheduling Not Available",
+    "notConfiguredDesc": "The property owner hasn't set up online visit scheduling. Please contact them directly to arrange a viewing.",
+    "understood": "Got it",
+    "emailSent": "A confirmation email has been sent to",
+    "addToCalendar": "Add to Calendar",
+    "availableHours": "Available hours",
+    "minSlots": "min slots",
+    "slotBooked": "Already booked",
+    "at": "at",
+    "confirmNote": "A confirmation email will be sent to your email address.",
+    "submitting": "Scheduling..."
   },
   "status": {
     "markAsRented": "Mark as Rented",

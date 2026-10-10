@@ -6,6 +6,7 @@ import {
   EnvelopeIcon,
 } from '@/constants';
 
+import { useTranslation } from 'react-i18next';
 interface TrafficChartProps {
   direct: number;
   search: number;
@@ -35,6 +36,7 @@ const TrafficChart: React.FC<TrafficChartProps> = ({
   email,
   other = 0,
 }) => {
+  const { t } = useTranslation();
   const total = direct + search + social + email + other || 1;
   const [animated, setAnimated] = useState(false);
   const [hoveredSource, setHoveredSource] = useState<string | null>(null);
@@ -47,7 +49,7 @@ const TrafficChart: React.FC<TrafficChartProps> = ({
       color: 'bg-blue-500',
       hoverColor: 'bg-blue-600',
       icon: GlobeAltIcon,
-      description: 'Direct URL visits',
+      description: t('analytics:ui.trafficChart.directUrlVisits', 'Direct URL visits'),
     },
     {
       key: 'search',
@@ -56,7 +58,7 @@ const TrafficChart: React.FC<TrafficChartProps> = ({
       color: 'bg-green-500',
       hoverColor: 'bg-green-600',
       icon: MagnifyingGlassIcon,
-      description: 'Google, Bing, etc.',
+      description: t('analytics:ui.trafficChart.googleBingEtc', 'Google, Bing, etc.'),
     },
     {
       key: 'social',
@@ -65,7 +67,7 @@ const TrafficChart: React.FC<TrafficChartProps> = ({
       color: 'bg-pink-500',
       hoverColor: 'bg-pink-600',
       icon: ChatBubbleLeftRightIcon,
-      description: 'Facebook, Instagram, etc.',
+      description: t('analytics:ui.trafficChart.facebookInstagramEtc', 'Facebook, Instagram, etc.'),
     },
     {
       key: 'email',
@@ -74,7 +76,7 @@ const TrafficChart: React.FC<TrafficChartProps> = ({
       color: 'bg-amber-500',
       hoverColor: 'bg-amber-600',
       icon: EnvelopeIcon,
-      description: 'Newsletter, campaigns',
+      description: t('analytics:ui.trafficChart.newsletterCampaigns', 'Newsletter, campaigns'),
     },
   ];
 
@@ -167,8 +169,8 @@ const TrafficChart: React.FC<TrafficChartProps> = ({
 
       {/* Summary footer */}
       <div className="pt-2 mt-1 border-t border-neutral-100 flex items-center justify-between text-[10px] text-neutral-400">
-        <span>Total: {total.toLocaleString()} views</span>
-        <span>Top: {topSource.label} ({Math.round((topSource.value / total) * 100)}%)</span>
+        <span>{t('analytics:ui.trafficChart.total', 'Total:')} {total.toLocaleString()} views</span>
+        <span>{t('analytics:ui.trafficChart.top', 'Top:')} {topSource.label} ({Math.round((topSource.value / total) * 100)}%)</span>
       </div>
     </div>
   );

@@ -334,7 +334,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                       value={formData.buyerEmail}
                       onChange={handleChange}
                       className={inputClasses}
-                      placeholder="you@example.com"
+                      placeholder={t('common:ui.agentInquiryModal.youExampleCom', 'you@example.com')}
                       autoComplete="email"
                       inputMode="email"
                       required

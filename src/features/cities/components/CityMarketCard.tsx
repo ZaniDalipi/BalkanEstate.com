@@ -211,20 +211,20 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
         <div className="flex items-stretch gap-3 mb-4">
           <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-[11px] font-medium text-neutral-500">Avg. Price /m²</p>
+              <p className="text-[11px] font-medium text-neutral-500">{t('exploreCities:ui.cityMarketCard.avgPriceM', 'Avg. Price /m²')}</p>
               {city.listingAvgPricePerSqm && (
                 <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
                   <button
                     onClick={e => { e.stopPropagation(); setShowListingPrice(false); }}
                     className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
                   >
-                    Market
+                    {t('exploreCities:ui.cityMarketCard.market', 'Market')}
                   </button>
                   <button
                     onClick={e => { e.stopPropagation(); setShowListingPrice(true); }}
                     className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
                   >
-                    Listings
+                    {t('exploreCities:ui.cityMarketCard.listings', 'Listings')}
                   </button>
                 </div>
               )}
@@ -236,7 +236,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
               <span className="text-xs font-medium text-neutral-400">/m²</span>
             </div>
             <p className="text-[10px] text-neutral-400 mt-1">
-              {showListingPrice ? `${city.listingsCount} active listings` : 'Market research'}
+              {showListingPrice ? `${city.listingsCount} active listings` : t('exploreCities:ui.cityMarketCard.marketResearch', 'Market research')}
             </p>
           </div>
           <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">

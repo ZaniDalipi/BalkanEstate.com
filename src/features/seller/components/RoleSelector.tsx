@@ -443,33 +443,33 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                 {subscription.isPro && (subscription.featuredCoupons || subscription.highlightedCoupons) ? (
                                     <div className="mt-2 p-2 glass-fieldset border-purple-200 rounded text-xs space-y-1.5">
                                         <p className="text-purple-600 font-semibold flex items-center gap-1">
-                                            <span>🎟️</span> Promotion Coupons
+                                            <span>🎟️</span> {t('seller:ui.roleSelector.promotionCoupons', 'Promotion Coupons')}
                                         </p>
                                         <div className="grid grid-cols-2 gap-2">
                                             {subscription.featuredCoupons !== undefined && (
                                                 <div className="bg-gray-50 p-1.5 rounded">
                                                     <p className="text-purple-600 font-medium">
-                                                        ⭐ Featured: {subscription.featuredCoupons}
+                                                        {t('seller:ui.roleSelector.featured', '⭐ Featured:')} {subscription.featuredCoupons}
                                                     </p>
                                                     <p className="text-purple-500 text-[11px]">
-                                                        {subscription.featuredDuration} days each
+                                                        {subscription.featuredDuration} {t('seller:ui.roleSelector.daysEach', 'days each')}
                                                     </p>
                                                 </div>
                                             )}
                                             {subscription.highlightedCoupons !== undefined && (
                                                 <div className="bg-gray-50 p-1.5 rounded">
                                                     <p className="text-amber-500 font-medium">
-                                                        🔥 Highlighted: {subscription.highlightedCoupons}
+                                                        {t('seller:ui.roleSelector.highlighted', '🔥 Highlighted:')} {subscription.highlightedCoupons}
                                                     </p>
                                                     <p className="text-amber-500 text-[11px]">
-                                                        {subscription.highlightedDuration} days each
+                                                        {subscription.highlightedDuration} {t('seller:ui.roleSelector.daysEach', 'days each')}
                                                     </p>
                                                 </div>
                                             )}
                                         </div>
                                         {subscription.usedCoupons ? (
                                             <p className="text-purple-500 text-[11px]">
-                                                Used this month: {subscription.usedCoupons}
+                                                {t('seller:ui.roleSelector.usedThisMonth', 'Used this month:')} {subscription.usedCoupons}
                                             </p>
                                         ) : null}
                                     </div>

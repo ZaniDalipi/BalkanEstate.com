@@ -65,7 +65,9 @@ interface PropertyMapLinkProps {
 const MapPlaceholder: React.FC<{ heightClassName: string; busy?: boolean }> = ({
   heightClassName,
   busy = false,
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <div
     className={`bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center ${heightClassName} ${busy ? 'animate-pulse' : ''}`}
   >
@@ -78,11 +80,12 @@ const MapPlaceholder: React.FC<{ heightClassName: string; busy?: boolean }> = ({
             style={{ animationDuration: '1s' }}
           />
         </div>
-        <p className="text-neutral-500 text-sm font-medium">Loading map...</p>
+        <p className="text-neutral-500 text-sm font-medium">{t('property:ui.propertyMapLink.loadingMap', 'Loading map...')}</p>
       </div>
     )}
   </div>
 );
+};
 
 /**
  * Mount the 3D map only once it is close to the viewport.

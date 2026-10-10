@@ -6,6 +6,7 @@ import { useAppContext } from '../../../../context/AppContext';
 import * as api from '../../../../services/apiService';
 import { replaceQueryString } from '@/src/app/router/navigation';
 
+import { useTranslation } from 'react-i18next';
 interface MeasurementPoint {
   lat: number;
   lng: number;
@@ -158,6 +159,7 @@ const firstPointActiveIcon = L.divIcon({
 });
 
 const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onClose, viewMeasurement }) => {
+  const { t } = useTranslation();
   const map = useMap();
   const { state } = useAppContext();
   const isLoggedIn = !!state.currentUser;
@@ -475,14 +477,14 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           >
             <Popup>
               <div className="text-xs">
-                <strong>{isFirstPoint && points.length >= 3 && !isPolygonClosed ? '🎯 Start Point (click to close)' : `Point ${index + 1}`}</strong>
+                <strong>{isFirstPoint && points.length >= 3 && !isPolygonClosed ? t('search:ui.measurementTool.startPointClickToClose', '🎯 Start Point (click to close)') : `Point ${index + 1}`}</strong>
                 <br />
                 {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
                 {index > 0 && (
                   <>
                     <br />
                     <span className="text-gray-500">
-                      {formatDistance(calculateDistance(points[index - 1], point))} from prev
+                      {formatDistance(calculateDistance(points[index - 1], point))} {t('search:ui.measurementTool.fromPrev', 'from prev')}
                     </span>
                   </>
                 )}
@@ -500,7 +502,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       >
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-1">
-            {isViewMode ? '👁️' : '📏'} {isViewMode && viewMeasurementData ? viewMeasurementData.name : 'Measure'}
+            {isViewMode ? '👁️' : '📏'} {isViewMode && viewMeasurementData ? viewMeasurementData.name : t('search:ui.measurementTool.measure', 'Measure')}
           </h3>
           <button
             onClick={onClose}
@@ -513,7 +515,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
         {/* View mode info */}
         {isViewMode && viewMeasurementData && (
           <div className="mb-2 p-1.5 bg-blue-50 rounded text-[10px] text-blue-700">
-            <span className="font-medium">Viewing saved measurement</span>
+            <span className="font-medium">{t('search:ui.measurementTool.viewingSavedMeasurement', 'Viewing saved measurement')}</span>
             {viewMeasurementData.address && (
               <div className="text-blue-600 mt-0.5">📍 {viewMeasurementData.address}</div>
             )}
@@ -523,7 +525,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
         {/* Instructions - compact */}
         {points.length === 0 && !isViewMode && (
           <p className="text-xs text-gray-500 mb-2">
-            Click map to add points
+            {t('search:ui.measurementTool.clickMapToAddPoints', 'Click map to add points')}
           </p>
         )}
 
@@ -531,7 +533,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
         {points.length > 0 && (
           <div className="space-y-1 mb-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-gray-500">Pts: {points.length}</span>
+              <span className="text-gray-500">{t('search:ui.measurementTool.pts', 'Pts:')} {points.length}</span>
               <span className="font-medium text-blue-600">
                 {formatDistance(isPolygonClosed ? perimeter : totalDistance)}
               </span>
@@ -539,14 +541,14 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
 
             {!isPolygonClosed && previewDistance > 0 && (
               <div className="flex justify-between text-gray-400">
-                <span>+cursor:</span>
+                <span>{t('search:ui.measurementTool.cursor', '+cursor:')}</span>
                 <span>{formatDistance(previewDistance)}</span>
               </div>
             )}
 
             {isPolygonClosed && (
               <div className="flex justify-between">
-                <span className="text-gray-500">Area:</span>
+                <span className="text-gray-500">{t('search:ui.measurementTool.area', 'Area:')}</span>
                 <span className="font-semibold text-green-600">{formatArea(area)}</span>
               </div>
             )}
@@ -563,7 +565,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             }}
             className="w-full px-2 py-1.5 mb-2 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
           >
-            ✏️ Start New Measurement
+            {t('search:ui.measurementTool.startNewMeasurement', '✏️ Start New Measurement')}
           </button>
         )}
 
@@ -575,14 +577,14 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
               disabled={points.length === 0}
               className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
             >
-              ↩ Undo
+              {t('search:ui.measurementTool.undo', '↩ Undo')}
             </button>
             <button
               onClick={handleClear}
               disabled={points.length === 0}
               className="flex-1 px-2 py-1 text-[10px] font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-40"
             >
-              Clear
+              {t('search:ui.measurementTool.clear', 'Clear')}
             </button>
           </div>
         )}
@@ -593,7 +595,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             onClick={handleClosePolygon}
             className="w-full px-2 py-1.5 mb-2 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700"
           >
-            🔷 Close Polygon
+            {t('search:ui.measurementTool.closePolygon', '🔷 Close Polygon')}
           </button>
         )}
 
@@ -603,7 +605,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             onClick={() => setShowSaveDialog(true)}
             className="w-full px-2 py-1.5 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
           >
-            💾 Save
+            {t('search:ui.measurementTool.save', '💾 Save')}
           </button>
         )}
       </div>
@@ -628,7 +630,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                💾 Save Measurement
+                {t('search:ui.measurementTool.saveMeasurement', '💾 Save Measurement')}
               </h3>
               <button
                 onClick={() => {
@@ -644,20 +646,20 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             {/* Measurement summary */}
             <div className="bg-gray-50 rounded-lg p-3 mb-4">
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-500">Type:</span>
-                <span className="font-medium">{isPolygonClosed ? '🔷 Area' : '📏 Distance'}</span>
+                <span className="text-gray-500">{t('search:ui.measurementTool.type', 'Type:')}</span>
+                <span className="font-medium">{isPolygonClosed ? t('search:ui.measurementTool.area2', '🔷 Area') : t('search:ui.measurementTool.distance', '📏 Distance')}</span>
               </div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-500">Points:</span>
+                <span className="text-gray-500">{t('search:ui.measurementTool.points', 'Points:')}</span>
                 <span className="font-medium">{points.length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{isPolygonClosed ? 'Perimeter:' : 'Distance:'}</span>
+                <span className="text-gray-500">{isPolygonClosed ? t('search:ui.measurementTool.perimeter', 'Perimeter:') : t('search:ui.measurementTool.distance2', 'Distance:')}</span>
                 <span className="font-medium text-blue-600">{formatDistance(isPolygonClosed ? perimeter : totalDistance)}</span>
               </div>
               {isPolygonClosed && (
                 <div className="flex justify-between text-sm mt-1">
-                  <span className="text-gray-500">Area:</span>
+                  <span className="text-gray-500">{t('search:ui.measurementTool.area', 'Area:')}</span>
                   <span className="font-semibold text-green-600">{formatArea(area)}</span>
                 </div>
               )}
@@ -667,39 +669,39 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             {!isLoggedIn && (
               <div className="text-sm text-amber-700 bg-amber-50 p-3 rounded-lg mb-4 flex items-start gap-2">
                 <span className="text-lg">⚠️</span>
-                <span>Log in to save measurements to your profile. Otherwise, they will be saved locally.</span>
+                <span>{t('search:ui.measurementTool.logInToSaveMeasurements', 'Log in to save measurements to your profile. Otherwise, they will be saved locally.')}</span>
               </div>
             )}
 
             {/* Form */}
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('search:ui.measurementTool.name', 'Name')}</label>
                 <input
                   type="text"
                   value={measurementName}
                   onChange={(e) => setMeasurementName(e.target.value)}
-                  placeholder="e.g., My Property Plot"
+                  placeholder={t('search:ui.measurementTool.eGMyPropertyPlot', 'e.g., My Property Plot')}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('search:ui.measurementTool.location', 'Location')}</label>
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="e.g., 123 Main Street, City"
+                  placeholder={t('search:ui.measurementTool.eG123MainStreet', 'e.g., 123 Main Street, City')}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes (optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('search:ui.measurementTool.notesOptional', 'Notes (optional)')}</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any notes about this measurement..."
+                  placeholder={t('search:ui.measurementTool.addAnyNotesAboutThis', 'Add any notes about this measurement...')}
                   rows={2}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                 />
@@ -724,7 +726,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
                 disabled={isSaving}
                 className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 transition-colors"
               >
-                Cancel
+                {t('search:ui.measurementTool.cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleSave}
@@ -739,7 +741,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
                 ) : (
                   <>
                     <span>💾</span>
-                    <span>Save to {isLoggedIn ? 'Profile' : 'Device'}</span>
+                    <span>{t('search:ui.measurementTool.saveTo', 'Save to')} {isLoggedIn ? t('search:ui.measurementTool.profile', 'Profile') : t('search:ui.measurementTool.device', 'Device')}</span>
                   </>
                 )}
               </button>

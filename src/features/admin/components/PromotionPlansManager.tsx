@@ -86,7 +86,7 @@ const PromotionPlansManager: React.FC = () => {
               <span
                 className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}
               />
-              {isRefetching ? 'Syncing...' : 'Live'}
+              {isRefetching ? 'Syncing...' : t('admin:ui.promotionPlansManager.live', 'Live')}
             </div>
 
             {plans.length === 0 && (
@@ -113,7 +113,7 @@ const PromotionPlansManager: React.FC = () => {
       {/* Messages */}
       {(error || mutationError) && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center justify-between">
-          <span>{(error as Error)?.message || (mutationError as Error)?.message || 'An error occurred'}</span>
+          <span>{(error as Error)?.message || (mutationError as Error)?.message || t('admin:ui.promotionPlansManager.anErrorOccurred', 'An error occurred')}</span>
           <button className="p-1 hover:bg-red-100 rounded">&times;</button>
         </div>
       )}

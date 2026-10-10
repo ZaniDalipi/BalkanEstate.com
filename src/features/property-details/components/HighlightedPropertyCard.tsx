@@ -321,7 +321,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
                 ) : (
                   property.sqft > 0 && property.propertyType !== 'land' && (
                     <p className="text-[11px] text-neutral-400 font-medium">
-                      {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
+                      {formatPrice(Math.round(property.price / property.sqft), property.country)} {t('property:ui.highlightedPropertyCard.perM', 'per m²')}
                     </p>
                   )
                 )}
@@ -429,6 +429,7 @@ HighlightedCardInner.displayName = 'HighlightedCardInner';
  * extracts primitive values, and passes them to the memoized inner component.
  */
 const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ property, showToast }) => {
+  const { t } = useTranslation();
   const { state, dispatch, toggleSavedHome } = useAppContext();
 
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
@@ -460,7 +461,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       try {
         await toggleSavedHomeRef.current(property);
       } catch (error) {
-        showToast?.('Failed to save property. Please try again.', 'error');
+        showToast?.(t('property:ui.highlightedPropertyCard.failedToSavePropertyPlease', 'Failed to save property. Please try again.'), 'error');
       }
     }
   }, [dispatch, property, showToast]);

@@ -80,13 +80,13 @@ const AnalyticsDashboard: React.FC = () => {
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch stats');
+      if (!response.ok) throw new Error(t('admin:ui.analyticsDashboard.failedToFetchStats', 'Failed to fetch stats'));
 
       const data = await response.json();
       setStats(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load statistics');
+      setError(t('admin:ui.analyticsDashboard.failedToLoadStatistics', 'Failed to load statistics'));
       // Error removed
     } finally {
       setIsLoading(false);
@@ -102,7 +102,7 @@ const AnalyticsDashboard: React.FC = () => {
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch');
+      if (!response.ok) throw new Error(t('admin:ui.analyticsDashboard.failedToFetch', 'Failed to fetch'));
 
       const data = await response.json();
       setPendingLicenseAgents(data.users || []);

@@ -11,6 +11,7 @@ import {
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
+import { useTranslation } from 'react-i18next';
 interface Props {
   expiryInfo: ExpiryCheckResult;
   /** Phase 1 / 2 / 3 to show, or null (nothing to show). Owned by App-level hook. */
@@ -39,6 +40,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
   onDismissExpiredFinal,
   onPaymentSuccess,
 }) => {
+  const { t } = useTranslation();
   const { state } = useAppContext();
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const [productInfo, setProductInfo] = useState<ProductInfo | null>(null);
@@ -177,24 +179,23 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 text-center">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/20 text-3xl mb-3">⏰</div>
-              <h2 className="text-xl font-bold text-white">Subscription Expiring Soon</h2>
+              <h2 className="text-xl font-bold text-white">{t('subscription:ui.subscriptionExpiryModals.subscriptionExpiringSoon', 'Subscription Expiring Soon')}</h2>
               <p className="text-amber-100 text-sm mt-1">
-                Less than {hoursLeft} hour{hoursLeft !== 1 ? 's' : ''} remaining
+                {t('subscription:ui.subscriptionExpiryModals.lessThan', 'Less than')} {hoursLeft} hour{hoursLeft !== 1 ? 's' : ''} remaining
               </p>
             </div>
             <div className="px-6 py-5">
               <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-4">
-                Your <span className="font-semibold">{expiryInfo.productId.replace(/_/g, ' ')}</span>{' '}
-                subscription expires on <span className="font-semibold">{expiryStr}</span>. After
-                that, your account will be downgraded to the free plan.
+                {t('subscription:ui.subscriptionExpiryModals.your', 'Your')} <span className="font-semibold">{expiryInfo.productId.replace(/_/g, ' ')}</span>{' '}
+                {t('subscription:ui.subscriptionExpiryModals.subscriptionExpiresOn', 'subscription expires on')} <span className="font-semibold">{expiryStr}</span>{t('subscription:ui.subscriptionExpiryModals.afterThatYourAccountWill', '. After that, your account will be downgraded to the free plan.')}
               </p>
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 mb-5 text-sm text-amber-800 dark:text-amber-300">
-                <p className="font-semibold mb-2">You'll lose access to:</p>
+                <p className="font-semibold mb-2">{t('subscription:ui.subscriptionExpiryModals.youLlLoseAccessTo', 'You\'ll lose access to:')}</p>
                 <ul className="space-y-1 list-disc list-inside">
-                  <li>Increased property listing limits</li>
-                  <li>Monthly promotion coupons</li>
-                  <li>AI messages &amp; market insights</li>
-                  <li>Priority notifications</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.increasedPropertyListingLimits', 'Increased property listing limits')}</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.monthlyPromotionCoupons', 'Monthly promotion coupons')}</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.aiMessagesMarketInsights', 'AI messages & market insights')}</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.priorityNotifications', 'Priority notifications')}</li>
                 </ul>
               </div>
               <div className="flex gap-3">
@@ -202,14 +203,14 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
                   onClick={handleDismissWarning}
                   className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
-                  Remind me later
+                  {t('subscription:ui.subscriptionExpiryModals.remindMeLater', 'Remind me later')}
                 </button>
                 <button
                   onClick={handleReactivate}
                   disabled={loadingProduct}
                   className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-md disabled:opacity-70"
                 >
-                  {loadingProduct ? 'Loading…' : 'Renew Now →'}
+                  {loadingProduct ? t('subscription:ui.subscriptionExpiryModals.loading', 'Loading…') : t('subscription:ui.subscriptionExpiryModals.renewNow', 'Renew Now →')}
                 </button>
               </div>
             </div>
@@ -224,23 +225,22 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="bg-gradient-to-r from-red-500 to-rose-600 px-6 py-5 text-center">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/20 text-3xl mb-3">⚡</div>
-              <h2 className="text-xl font-bold text-white">Your Subscription Has Expired</h2>
-              <p className="text-red-100 text-sm mt-1">Your account has been downgraded to the free plan</p>
+              <h2 className="text-xl font-bold text-white">{t('subscription:ui.subscriptionExpiryModals.yourSubscriptionHasExpired', 'Your Subscription Has Expired')}</h2>
+              <p className="text-red-100 text-sm mt-1">{t('subscription:ui.subscriptionExpiryModals.yourAccountHasBeenDowngraded', 'Your account has been downgraded to the free plan')}</p>
             </div>
             <div className="px-6 py-5">
               <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-4">
-                Your{' '}
+                {t('subscription:ui.subscriptionExpiryModals.your', 'Your')}{' '}
                 <span className="font-semibold">{expiryInfo.productId.replace(/_/g, ' ')}</span>{' '}
-                subscription expired on <span className="font-semibold">{expiryStr}</span>. Reactivate
-                now to instantly restore all your premium features.
+                {t('subscription:ui.subscriptionExpiryModals.subscriptionExpiredOn', 'subscription expired on')} <span className="font-semibold">{expiryStr}</span>{t('subscription:ui.subscriptionExpiryModals.reactivateNowToInstantlyRestore', '. Reactivate now to instantly restore all your premium features.')}
               </p>
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4 mb-5 text-sm text-red-700 dark:text-red-300">
-                <p className="font-semibold mb-2">You no longer have access to:</p>
+                <p className="font-semibold mb-2">{t('subscription:ui.subscriptionExpiryModals.youNoLongerHaveAccess', 'You no longer have access to:')}</p>
                 <ul className="space-y-1 list-disc list-inside">
-                  <li>Increased property listing limits</li>
-                  <li>Monthly promotion coupons</li>
-                  <li>AI messages &amp; market insights</li>
-                  <li>Priority notifications</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.increasedPropertyListingLimits', 'Increased property listing limits')}</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.monthlyPromotionCoupons', 'Monthly promotion coupons')}</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.aiMessagesMarketInsights', 'AI messages & market insights')}</li>
+                  <li>{t('subscription:ui.subscriptionExpiryModals.priorityNotifications', 'Priority notifications')}</li>
                 </ul>
               </div>
               <div className="flex gap-3">
@@ -248,14 +248,14 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
                   onClick={isFinalPhase ? onDismissExpiredFinal : onDismissExpired}
                   className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
-                  {isFinalPhase ? 'No, thanks' : 'Maybe later'}
+                  {isFinalPhase ? t('subscription:ui.subscriptionExpiryModals.noThanks', 'No, thanks') : t('subscription:ui.subscriptionExpiryModals.maybeLater', 'Maybe later')}
                 </button>
                 <button
                   onClick={handleReactivate}
                   disabled={loadingProduct}
                   className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-semibold hover:from-red-600 hover:to-rose-700 transition-all shadow-md disabled:opacity-70"
                 >
-                  {loadingProduct ? 'Loading…' : 'Reactivate Plan →'}
+                  {loadingProduct ? t('subscription:ui.subscriptionExpiryModals.loading', 'Loading…') : t('subscription:ui.subscriptionExpiryModals.reactivatePlan', 'Reactivate Plan →')}
                 </button>
               </div>
             </div>

@@ -41,7 +41,7 @@ const ListingSourcesAlphaTerms: React.FC<Props> = ({ onAccepted }) => {
         <div className="flex items-center gap-3 mb-6">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold uppercase tracking-wider">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            Alpha
+            {t('listingFeeds:ui.listingSourcesAlphaTerms.alpha', 'Alpha')}
           </span>
           <h2 className="text-2xl font-bold text-gray-900">
             {t('listingFeeds:termsTitle', 'Listing Sources — Terms of Use')}
@@ -70,95 +70,76 @@ const ListingSourcesAlphaTerms: React.FC<Props> = ({ onAccepted }) => {
           {/* Terms body */}
           <div className="px-6 py-5 space-y-5 text-sm text-gray-700 max-h-[50vh] overflow-y-auto">
 
-            <Section title="1. Alpha / Beta Status">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n1AlphaBetaStatus', '1. Alpha / Beta Status')}>
               <p>
-                The Listing Sources feature is currently in <strong>alpha testing</strong> and is provided
-                on an <em>"as-is, as-available"</em> basis. Features may change, be removed, or behave
-                unexpectedly without prior notice. BalkanEstate makes no guarantee of uptime, data
-                completeness, or continued availability of this feature.
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.theListingSourcesFeatureIs', 'The Listing Sources feature is currently in')} <strong>{t('listingFeeds:ui.listingSourcesAlphaTerms.alphaTesting', 'alpha testing')}</strong> {t('listingFeeds:ui.listingSourcesAlphaTerms.andIsProvidedOnAn', 'and is provided on an')} <em>{t('listingFeeds:ui.listingSourcesAlphaTerms.asIsAsAvailable', '"as-is, as-available"')}</em> {t('listingFeeds:ui.listingSourcesAlphaTerms.basisFeaturesMayChangeBe', 'basis. Features may change, be removed, or behave unexpectedly without prior notice. BalkanEstate makes no guarantee of uptime, data completeness, or continued availability of this feature.')}
               </p>
             </Section>
 
-            <Section title="2. No Warranty on Scraped Data">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n2NoWarrantyOnScraped', '2. No Warranty on Scraped Data')}>
               <p>
-                BalkanEstate does <strong>not verify, validate, or guarantee the accuracy</strong> of any
-                data imported through Listing Sources. Prices, dimensions, descriptions, images, and
-                all other property details are retrieved automatically from third-party websites and
-                may be:
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.balkanestateDoes', 'BalkanEstate does')} <strong>{t('listingFeeds:ui.listingSourcesAlphaTerms.notVerifyValidateOrGuarantee', 'not verify, validate, or guarantee the accuracy')}</strong> {t('listingFeeds:ui.listingSourcesAlphaTerms.ofAnyDataImportedThrough', 'of any data imported through Listing Sources. Prices, dimensions, descriptions, images, and all other property details are retrieved automatically from third-party websites and may be:')}
               </p>
               <ul className="mt-2 ml-4 list-disc space-y-1 text-gray-600">
-                <li>Inaccurate, outdated, or incomplete</li>
-                <li>Misattributed to the wrong property or location</li>
-                <li>Formatted incorrectly due to parsing limitations</li>
-                <li>Missing key fields such as price, area, or address</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.inaccurateOutdatedOrIncomplete', 'Inaccurate, outdated, or incomplete')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.misattributedToTheWrongProperty', 'Misattributed to the wrong property or location')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.formattedIncorrectlyDueToParsing', 'Formatted incorrectly due to parsing limitations')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.missingKeyFieldsSuchAs', 'Missing key fields such as price, area, or address')}</li>
               </ul>
             </Section>
 
-            <Section title="3. Your Responsibility to Review and Correct">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n3YourResponsibilityToReview', '3. Your Responsibility to Review and Correct')}>
               <p>
-                <strong>You are solely responsible</strong> for reviewing every imported property before
-                it is published or presented to any third party. You must:
+                <strong>{t('listingFeeds:ui.listingSourcesAlphaTerms.youAreSolelyResponsible', 'You are solely responsible')}</strong> {t('listingFeeds:ui.listingSourcesAlphaTerms.forReviewingEveryImportedProperty', 'for reviewing every imported property before it is published or presented to any third party. You must:')}
               </p>
               <ul className="mt-2 ml-4 list-disc space-y-1 text-gray-600">
-                <li>Verify all prices, dimensions, and property details against the original source</li>
-                <li>Correct any inaccuracies, missing data, or mis-parsed values</li>
-                <li>Remove or unpublish any property that does not meet your quality standards</li>
-                <li>Ensure your published listings comply with applicable advertising laws</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.verifyAllPricesDimensionsAnd', 'Verify all prices, dimensions, and property details against the original source')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.correctAnyInaccuraciesMissingData', 'Correct any inaccuracies, missing data, or mis-parsed values')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.removeOrUnpublishAnyProperty', 'Remove or unpublish any property that does not meet your quality standards')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.ensureYourPublishedListingsComply', 'Ensure your published listings comply with applicable advertising laws')}</li>
               </ul>
             </Section>
 
-            <Section title="4. Legal Responsibility for Scraping">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n4LegalResponsibilityForScraping', '4. Legal Responsibility for Scraping')}>
               <p>
-                Before adding a website as a Listing Source, <strong>you must ensure you have the legal
-                right to scrape and republish that site's content.</strong> This includes but is not limited to:
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.beforeAddingAWebsiteAs', 'Before adding a website as a Listing Source,')} <strong>{t('listingFeeds:ui.listingSourcesAlphaTerms.youMustEnsureYouHave', 'you must ensure you have the legal right to scrape and republish that site\'s content.')}</strong> {t('listingFeeds:ui.listingSourcesAlphaTerms.thisIncludesButIsNot', 'This includes but is not limited to:')}
               </p>
               <ul className="mt-2 ml-4 list-disc space-y-1 text-gray-600">
-                <li>Reviewing and complying with the source website's Terms of Service</li>
-                <li>Complying with any <code className="bg-gray-100 px-1 rounded text-xs">robots.txt</code> directives that prohibit automated access</li>
-                <li>Obtaining permission where required before reproducing or redistributing listings</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.reviewingAndComplyingWithThe', 'Reviewing and complying with the source website\'s Terms of Service')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.complyingWithAny', 'Complying with any')} <code className="bg-gray-100 px-1 rounded text-xs">robots.txt</code> {t('listingFeeds:ui.listingSourcesAlphaTerms.directivesThatProhibitAutomatedAccess', 'directives that prohibit automated access')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.obtainingPermissionWhereRequiredBefore', 'Obtaining permission where required before reproducing or redistributing listings')}</li>
               </ul>
               <p className="mt-2">
-                BalkanEstate accepts no liability for any claims arising from your use of scraped content.
-                Any legal consequences of scraping a website are <strong>your sole responsibility.</strong>
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.balkanestateAcceptsNoLiabilityFor', 'BalkanEstate accepts no liability for any claims arising from your use of scraped content. Any legal consequences of scraping a website are')} <strong>{t('listingFeeds:ui.listingSourcesAlphaTerms.yourSoleResponsibility', 'your sole responsibility.')}</strong>
               </p>
             </Section>
 
-            <Section title="5. Copyright and Intellectual Property">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n5CopyrightAndIntellectualProperty', '5. Copyright and Intellectual Property')}>
               <p>
-                Property listings, images, descriptions, and other content on third-party websites
-                may be protected by copyright. You acknowledge that:
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.propertyListingsImagesDescriptionsAnd', 'Property listings, images, descriptions, and other content on third-party websites may be protected by copyright. You acknowledge that:')}
               </p>
               <ul className="mt-2 ml-4 list-disc space-y-1 text-gray-600">
-                <li>BalkanEstate does not hold or grant you any licence over third-party content</li>
-                <li>You are responsible for ensuring your use of imported content is lawful</li>
-                <li>You will promptly remove any content that you do not have the right to publish</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.balkanestateDoesNotHoldOr', 'BalkanEstate does not hold or grant you any licence over third-party content')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.youAreResponsibleForEnsuring', 'You are responsible for ensuring your use of imported content is lawful')}</li>
+                <li>{t('listingFeeds:ui.listingSourcesAlphaTerms.youWillPromptlyRemoveAny', 'You will promptly remove any content that you do not have the right to publish')}</li>
               </ul>
             </Section>
 
-            <Section title="6. GDPR and Privacy">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n6GdprAndPrivacy', '6. GDPR and Privacy')}>
               <p>
-                If the imported data includes personal information (e.g. contact details, agent names),
-                you are a <strong>data controller</strong> under GDPR and equivalent regulations. You must
-                have a lawful basis for processing that data and must comply with all applicable
-                data-protection obligations.
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.ifTheImportedDataIncludes', 'If the imported data includes personal information (e.g. contact details, agent names), you are a')} <strong>{t('listingFeeds:ui.listingSourcesAlphaTerms.dataController', 'data controller')}</strong> {t('listingFeeds:ui.listingSourcesAlphaTerms.underGdprAndEquivalentRegulations', 'under GDPR and equivalent regulations. You must have a lawful basis for processing that data and must comply with all applicable data-protection obligations.')}
               </p>
             </Section>
 
-            <Section title="7. Rate Limiting and Fair Use">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n7RateLimitingAndFair', '7. Rate Limiting and Fair Use')}>
               <p>
-                The tool includes configurable rate-limiting. You must not use Listing Sources to
-                conduct denial-of-service attacks or send excessive requests to any website.
-                BalkanEstate reserves the right to suspend access to this feature if misuse is detected.
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.theToolIncludesConfigurableRate', 'The tool includes configurable rate-limiting. You must not use Listing Sources to conduct denial-of-service attacks or send excessive requests to any website. BalkanEstate reserves the right to suspend access to this feature if misuse is detected.')}
               </p>
             </Section>
 
-            <Section title="8. No Liability">
+            <Section title={t('listingFeeds:ui.listingSourcesAlphaTerms.n8NoLiability', '8. No Liability')}>
               <p>
-                To the maximum extent permitted by applicable law, BalkanEstate, its officers,
-                employees, and affiliates shall not be liable for any direct, indirect, incidental,
-                special, or consequential damages arising from your use of the Listing Sources feature,
-                including but not limited to: data loss, inaccurate listings, legal claims, or
-                commercial losses.
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.toTheMaximumExtentPermitted', 'To the maximum extent permitted by applicable law, BalkanEstate, its officers, employees, and affiliates shall not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of the Listing Sources feature, including but not limited to: data loss, inaccurate listings, legal claims, or commercial losses.')}
               </p>
             </Section>
 
@@ -180,9 +161,7 @@ const ListingSourcesAlphaTerms: React.FC<Props> = ({ onAccepted }) => {
                 className="mt-0.5 w-4 h-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary/30 flex-shrink-0"
               />
               <span className="text-sm text-gray-700 leading-snug group-hover:text-gray-900">
-                I have read and understood these terms. I accept full responsibility for reviewing
-                all imported data, ensuring I have the legal right to scrape and republish the
-                content, and complying with all applicable laws and third-party terms of service.
+                {t('listingFeeds:ui.listingSourcesAlphaTerms.iHaveReadAndUnderstood', 'I have read and understood these terms. I accept full responsibility for reviewing all imported data, ensuring I have the legal right to scrape and republish the content, and complying with all applicable laws and third-party terms of service.')}
               </span>
             </label>
 

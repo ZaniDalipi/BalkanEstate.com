@@ -13,7 +13,8 @@
     "measurements": "Measurements",
     "profileSettings": "Profile Settings",
     "security": "Security",
-    "importReview": "Imported Drafts"
+    "importReview": "Imported Drafts",
+    "notifications": "Notifications"
   },
   "promotions": {
     "title": "My Promotions",
@@ -48,7 +49,44 @@
     "privateSeller": "Private Seller",
     "agent": "Agent",
     "yourRole": "Your Role",
-    "agentCannotSwitchToBuyer": "Agents cannot switch to Buyer role"
+    "agentCannotSwitchToBuyer": "Agents cannot switch to Buyer role",
+    "agencyMemberWarning": {
+      "title": "You are part of an agency",
+      "description": "To switch your profile to Private Seller, you must leave {{agencyName}} first. Note: You can still post individual listings as a private seller without switching your profile role."
+    },
+    "hints": {
+      "cancel": "Cancel",
+      "switchTo": "Switch to",
+      "buyer": {
+        "title": "Buyer",
+        "description": "Browse and save properties. No listing or agent features.",
+        "f1": "Search & filter all properties",
+        "f2": "Save favourite listings",
+        "f3": "Request viewings & contact agents"
+      },
+      "privateSeller": {
+        "title": "Private Seller",
+        "description": "List your own properties without agency affiliation.",
+        "f1": "Post up to your plan's listing limit",
+        "f2": "Manage & promote your listings",
+        "f3": "Receive direct buyer inquiries"
+      },
+      "agent": {
+        "title": "Real Estate Agent",
+        "description": "Full professional tools. Requires a valid license number.",
+        "f1": "Agent profile & verified badge",
+        "f2": "Higher listing limits & promotions",
+        "f3": "Join or manage an agency"
+      },
+      "admin": {
+        "title": "Admin",
+        "description": "Platform administration."
+      },
+      "superAdmin": {
+        "title": "Super Admin",
+        "description": "Full platform administration."
+      }
+    }
   },
   "profile": {
     "profilePicture": "Profile Picture",
@@ -65,7 +103,13 @@
     "emailChangeWarning": "Changing your email will require re-verification and you will be logged out.",
     "emailChangeTitle": "Change Email Address?",
     "emailChangeConfirm": "Changing your email to \"{{email}}\" will require you to verify the new address. You will be logged out and need to verify before logging back in.",
-    "emailChangeButton": "Change Email & Logout"
+    "emailChangeButton": "Change Email & Logout",
+    "success": "Success",
+    "avatarSaved": "Avatar saved successfully",
+    "avatarUploaded": "Photo uploaded successfully",
+    "customizeAvatar": "Customize Avatar",
+    "avatarDescription": "Create a custom character or upload your own photo",
+    "gender": "Gender"
   },
   "agent": {
     "agentInformation": "Agent Information",
@@ -89,7 +133,20 @@
     "agentIdCannotChange": "Agent ID is automatically generated and cannot be changed",
     "licenseCannotChange": "License number can only be set during agent verification",
     "areas": "areas",
-    "area": "area"
+    "area": "area",
+    "licensePending": "License Pending Review",
+    "licensePendingDesc": "Your license is being reviewed by an admin. It will not appear on your public profile until approved.",
+    "licenseSubmitted": "License Submitted",
+    "licenseSubmittedDesc": "Your license is pending admin verification. You will be notified once reviewed.",
+    "noLicenseYet": "No License on File",
+    "addLicenseHint": "Submit your license to get verified and stand out to clients.",
+    "addLicense": "Add License",
+    "submitLicenseTitle": "Submit Your License",
+    "licenseCountry": "Country",
+    "selectCountry": "Select country...",
+    "enterLicenseNumber": "Enter your license number",
+    "formatHint": "Expected format",
+    "submitForReview": "Submit for Review"
   },
   "security": {
     "title": "Security & Login Activity",
@@ -118,7 +175,36 @@
     "reason": "Reason",
     "loadingLoginHistory": "Loading login history...",
     "unknown": "Unknown",
-    "unknownBrowser": "Unknown Browser"
+    "unknownBrowser": "Unknown Browser",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordNeedsUppercase": "Password must contain an uppercase letter",
+    "passwordNeedsLowercase": "Password must contain a lowercase letter",
+    "passwordNeedsNumber": "Password must contain a number",
+    "passwordNeedsSpecial": "Password must contain a special character",
+    "passwordSetSuccess": "Password set successfully! You can now also log in with your email and password.",
+    "setPassword": "Set a Password",
+    "setPasswordDescription": "You signed in with a social account. Set a password to also be able to log in with your email and password.",
+    "settingPassword": "Setting password...",
+    "deleteAgencyTitle": "Delete Agency",
+    "deleteAgencyConfirm": "This will permanently delete your agency. All agents will be transferred to a Pro monthly plan for the remaining duration of the agency subscription. This cannot be undone.",
+    "deleteAgencyButton": "Yes, Delete Agency",
+    "cancelButton": "Cancel",
+    "deleteAgencyFailed": "Failed to delete agency",
+    "agencyDeleted": "Agency Deleted",
+    "deleteAgency": "Delete Agency",
+    "deleteAgencyDescription": "Permanently delete your agency. Active agents will be transferred to Pro monthly plan until the current subscription expires.",
+    "deleting": "Deleting...",
+    "passwordRequiredToDelete": "Please enter your password to confirm deletion",
+    "deleteAccountTitle": "Delete Account",
+    "deleteAccountConfirm": "This action is PERMANENT and cannot be undone. All your data, listings, and subscriptions will be deleted. Are you sure?",
+    "deleteAccountButton": "Yes, Delete My Account",
+    "deleteAccountFailed": "Failed to delete account",
+    "deleteAccount": "Delete Account",
+    "deleteAccountDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+    "enterPasswordToConfirm": "Enter your password to confirm",
+    "password": "Password",
+    "logoutAllDevicesTitle": "Logout All Devices",
+    "logoutButton": "Logout All"
   },
   "logout": "Logout",
   "joinAgency": {
@@ -216,7 +302,7 @@
     "lifetimeRevenue": "Lifetime revenue",
     "agencyPerformance": "Agency Performance",
     "partOfAgency": "You are part of {{agency}}",
-    "verifiedLicense": "\u2713 Verified License",
+    "verifiedLicense": "✓ Verified License",
     "licenseNumber": "License #{{number}}",
     "salesHistory": "Sales History",
     "viewHistory": "View History",
@@ -240,10 +326,10 @@
     },
     "filterPrices": {
       "all": "All Prices",
-      "under100k": "Under \u20ac100K",
-      "100kTo500k": "\u20ac100K - \u20ac500K",
-      "500kTo1m": "\u20ac500K - \u20ac1M",
-      "over1m": "Over \u20ac1M"
+      "under100k": "Under €100K",
+      "100kTo500k": "€100K - €500K",
+      "500kTo1m": "€500K - €1M",
+      "over1m": "Over €1M"
     },
     "clearFilters": "Clear Filters",
     "downloadCSV": "Download CSV",
@@ -291,7 +377,34 @@
     "preferencesSaved": "Notification preferences saved",
     "email_cityMarketUpdates": "City Market Updates",
     "email_cityMarketUpdates_desc": "Monthly Explore Cities digest when city prices move",
-    "saveError": "We could not save that change. Your previous setting is still active \u2014 please try again."
+    "saveError": "We could not save that change. Your previous setting is still active — please try again.",
+    "pushUnsupported": "Push notifications require HTTPS and a modern browser. They are not available in this environment.",
+    "pushBlockedHelp": "Notifications are blocked. Open your browser site settings and allow notifications for this site, then reload.",
+    "pushActive": "Push notifications are active on this device. You will receive instant alerts even when the app is closed.",
+    "pushTitle": "Push Notifications",
+    "pushSubtitle": "Receive instant alerts on this device — even when the app is in the background.",
+    "emailTitle": "Email Notifications",
+    "enableAll": "Enable all",
+    "unsubscribeAll": "Turn off all",
+    "emailSubtitle": "Control which emails we send to your inbox.",
+    "allOffNotice": "You've turned off all optional emails. You'll still receive transaction and security emails.",
+    "emailLoadError": "Could not load preferences.",
+    "email_transactional": "Transaction & Security Emails",
+    "email_transactional_desc": "Payment receipts, email verification, and security alerts",
+    "allDisabled": "All emails turned off",
+    "allEnabled": "All emails turned on",
+    "saved": "Preferences saved",
+    "subtitle": "Choose how and when we reach out to you.",
+    "email_messages": "New Messages",
+    "email_messages_desc": "Email alert when someone sends you a message",
+    "email_propertyAlerts": "Property Alerts",
+    "email_propertyAlerts_desc": "New listings matching your saved searches",
+    "email_priceDrops": "Price Drops",
+    "email_priceDrops_desc": "When a saved or watched property drops in price",
+    "email_weeklyStats": "Weekly Stats",
+    "email_weeklyStats_desc": "Performance summary for your listings every week",
+    "email_marketing": "Marketing & Promotions",
+    "email_marketing_desc": "Special offers, platform news and promotions"
   },
   "preferences": {
     "title": "Preferences",
@@ -473,6 +586,75 @@
       "quirky": "Quirky",
       "frown": "Frown",
       "intense": "Intense"
+    }
+  },
+  "common": {
+    "cancel": "Cancel"
+  },
+  "suggestions": {
+    "title": "Your Suggestions",
+    "agencyListings": "More from {{agency}}",
+    "sellerListings": "More from {{name}}",
+    "agencySubtitle": "Other active listings from {{agency}}",
+    "sellerSubtitle": "Other active listings from this seller"
+  },
+  "loginToManagePrefs": "Log in to manage your email and notification preferences.",
+  "signIn": "Sign in",
+  "listings": {
+    "noListings": "You don't have any listings yet."
+  },
+  "ui": {
+    "myListings": {
+      "thisPropertyWonTAppear": "This property won't appear on the map. Edit to set location.",
+      "editListing": "Edit listing",
+      "deleteListing": "Delete listing",
+      "views": "Views",
+      "saves": "Saves",
+      "inquiries": "Inquiries",
+      "lastRenewed": "Last Renewed",
+      "rentedUntil": "Rented until",
+      "createVideoReel": "Create video reel",
+      "addImagesFirst": "Add images first",
+      "renewListingToAppearAt": "Renew listing to appear at top",
+      "deleteListing2": "Delete Listing",
+      "areYouSureYouWant": "Are you sure you want to delete this listing? This action cannot be undone and the property will be permanently removed.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "all": "All (",
+      "filterByPostingRole": "Filter by posting role:",
+      "noListingsFound": "No Listings Found",
+      "noPropertiesMatchTheCurrent": "No properties match the current filters.",
+      "trySelectingAllListings": " Try selecting \"All Listings\".",
+      "trySelectingAllStatus": " Try selecting \"All\" status.",
+      "noListingsYet": "No Listings Yet",
+      "clickAddNewListingTo": "Click \"Add New Listing\" to get started."
+    },
+    "notificationSettingsSection": {
+      "alwaysOn": "Always on",
+      "blocked": "Blocked",
+      "developmentMode": "Development mode:",
+      "webPushRequiresHttpsOr": "Web Push requires HTTPS or",
+      "accessTheAppVia": ". Access the app via",
+      "insteadOfAnIpAddress": "instead of an IP address to enable full push subscription testing.",
+      "notificationSent": "Notification sent!",
+      "sendTestBrowserNotification": "Send test browser notification",
+      "youVeBeenUnsubscribed": "You've been unsubscribed",
+      "youLlNoLongerReceive": "You'll no longer receive",
+      "useTheTogglesBelowTo": ". Use the toggles below to adjust anytime."
+    },
+    "credentialsSection": {
+      "ddMmYyyy": "DD/MM/YYYY",
+      "kb": "KB ·",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "addCredential": "Add Credential"
+    },
+    "myAccountPage": {
+      "avatar": "Avatar",
+      "personalInformation": "Personal Information",
+      "viewAgencyDetails": "View agency details",
+      "failedToSaveChangesPlease": "Failed to save changes. Please try again.",
+      "joinedAgency": "Joined Agency"
     }
   }
 }

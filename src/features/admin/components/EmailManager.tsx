@@ -120,7 +120,7 @@ const EmailManager: React.FC = () => {
             className="px-3 py-2 bg-green-100 hover:bg-green-200 rounded-lg text-green-700 flex items-center gap-2 transition-colors"
           >
             <ArrowPathIcon className={`w-4 h-4 ${syncMissingMutation.isPending ? 'animate-spin' : ''}`} />
-            {syncMissingMutation.isPending ? 'Syncing...' : 'Sync Missing'}
+            {syncMissingMutation.isPending ? 'Syncing...' : t('admin:ui.emailManager.syncMissing', 'Sync Missing')}
           </button>
           <button
             onClick={handleResetAll}
@@ -234,9 +234,9 @@ const EmailManager: React.FC = () => {
                       </div>
                       <p className="text-sm text-gray-500 mt-1">{email.description}</p>
                       <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                        <span>Key: <code className="bg-gray-100 px-1 rounded">{email.key}</code></span>
-                        <span>From: {fromCategoryLabels[email.fromCategory]}</span>
-                        <span>Subject: {email.subject.substring(0, 50)}...</span>
+                        <span>{t('admin:ui.emailManager.key', 'Key:')} <code className="bg-gray-100 px-1 rounded">{email.key}</code></span>
+                        <span>{t('admin:ui.emailManager.from', 'From:')} {fromCategoryLabels[email.fromCategory]}</span>
+                        <span>{t('admin:ui.emailManager.subject', 'Subject:')} {email.subject.substring(0, 50)}...</span>
                       </div>
                     </div>
 
@@ -245,21 +245,21 @@ const EmailManager: React.FC = () => {
                         onClick={() => handlePreview(email)}
                         disabled={previewMutation.isPending}
                         className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Preview"
+                        title={t('admin:ui.emailManager.preview', 'Preview')}
                       >
                         <EyeIcon className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleOpenTestModal(email)}
                         className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        title="Send Test"
+                        title={t('admin:ui.emailManager.sendTest', 'Send Test')}
                       >
                         <PaperAirplaneIcon className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleOpenEdit(email)}
                         className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                        title="Edit"
+                        title={t('admin:ui.emailManager.edit', 'Edit')}
                       >
                         <PencilIcon className="w-5 h-5" />
                       </button>
@@ -271,7 +271,7 @@ const EmailManager: React.FC = () => {
                             ? 'text-gray-500 hover:text-red-600 hover:bg-red-50'
                             : 'text-gray-500 hover:text-green-600 hover:bg-green-50'
                         }`}
-                        title={email.isActive ? 'Disable' : 'Enable'}
+                        title={email.isActive ? t('admin:ui.emailManager.disable', 'Disable') : t('admin:ui.emailManager.enable', 'Enable')}
                       >
                         {email.isActive ? (
                           <XCircleIcon className="w-5 h-5" />
@@ -283,7 +283,7 @@ const EmailManager: React.FC = () => {
                         onClick={() => handleReset(email)}
                         disabled={resetMutation.isPending}
                         className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                        title="Reset to Default"
+                        title={t('admin:ui.emailManager.resetToDefault', 'Reset to Default')}
                       >
                         <ArrowPathIcon className="w-5 h-5" />
                       </button>

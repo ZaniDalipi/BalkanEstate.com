@@ -532,15 +532,15 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[48px]"
                                     >
                                         <option value="">{t('profilePage.consultationModal.selectTime')}</option>
-                                        <option value="09:00">09:00 AM</option>
-                                        <option value="10:00">10:00 AM</option>
-                                        <option value="11:00">11:00 AM</option>
-                                        <option value="12:00">12:00 PM</option>
-                                        <option value="13:00">01:00 PM</option>
-                                        <option value="14:00">02:00 PM</option>
-                                        <option value="15:00">03:00 PM</option>
-                                        <option value="16:00">04:00 PM</option>
-                                        <option value="17:00">05:00 PM</option>
+                                        <option value="09:00">{t('agents:ui.agentContactActions.n0900Am', '09:00 AM')}</option>
+                                        <option value="10:00">{t('agents:ui.agentContactActions.n1000Am', '10:00 AM')}</option>
+                                        <option value="11:00">{t('agents:ui.agentContactActions.n1100Am', '11:00 AM')}</option>
+                                        <option value="12:00">{t('agents:ui.agentContactActions.n1200Pm', '12:00 PM')}</option>
+                                        <option value="13:00">{t('agents:ui.agentContactActions.n0100Pm', '01:00 PM')}</option>
+                                        <option value="14:00">{t('agents:ui.agentContactActions.n0200Pm', '02:00 PM')}</option>
+                                        <option value="15:00">{t('agents:ui.agentContactActions.n0300Pm', '03:00 PM')}</option>
+                                        <option value="16:00">{t('agents:ui.agentContactActions.n0400Pm', '04:00 PM')}</option>
+                                        <option value="17:00">{t('agents:ui.agentContactActions.n0500Pm', '05:00 PM')}</option>
                                     </select>
                                 </div>
                             </div>

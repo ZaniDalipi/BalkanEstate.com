@@ -68,7 +68,16 @@
     "saleStatusAvailable": "За продажба",
     "saleStatusSold": "Продадени",
     "saleStatusAll": "И двете",
-    "saleStatusHint": "Продадените имоти показват последната цена и кога са продадени — отворете един, за да видите цените около него."
+    "saleStatusHint": "Продадените имоти показват последната цена и кога са продадени — отворете един, за да видите цените около него.",
+    "filters": "Филтри",
+    "pricePerSqm": "Цена на m²",
+    "daysOnMarket": "Публикувано през",
+    "last24h": "Последните 24 часа",
+    "last3Days": "Последните 3 дни",
+    "last7Days": "Последните 7 дни",
+    "last30Days": "Последните 30 дни",
+    "priceReduced": "Намалена цена",
+    "priceIncreased": "Повишена цена"
   },
   "options": {
     "any": "Всички",
@@ -172,7 +181,8 @@
     "tryDifferent": "Опитайте да промените филтрите или критериите за търсене",
     "inArea": "в {{area}}",
     "forSale": "за продажба",
-    "forRent": "под наем"
+    "forRent": "под наем",
+    "resetHint": "Нулирайте филтрите, за да видите всички имоти в района"
   },
   "map": {
     "showMap": "Покажи карта",
@@ -282,7 +292,26 @@
       "title": "Начертайте своя район",
       "subtitle": "Начертайте форма върху картата, за да търсите само в нея",
       "dismiss": "Затвори съвета"
-    }
+    },
+    "loadingTimeout": "Картата се зарежда твърде дълго",
+    "loadingTimeoutDesc": "Картата се зарежда по-бавно от очакваното. Възможно е връзката да е бавна.",
+    "useAlternative": "Използвай алтернативна карта",
+    "saveMeasurement": "Запази измерването",
+    "measurementName": "Име",
+    "measurementNamePlaceholder": "напр., Градински парцел, строителен парцел...",
+    "measurementLocation": "Местоположение / Адрес",
+    "measurementLocationPlaceholder": "напр., Близо до Охридското езеро, Албания...",
+    "measurementNotes": "Бележки",
+    "measurementNotesPlaceholder": "Допълнителни подробности...",
+    "measurementUsage": "Запазени измервания",
+    "saveFailed": "Неуспешно запазване",
+    "limitReached": "Достигнат лимит",
+    "saveToProfile": "Запази в профила",
+    "cluster": {
+      "zoomIn": "{{count}} имота тук — активирайте, за да увеличите и да ги видите всички"
+    },
+    "resetView": "Нулирай изгледа",
+    "loading": "Зареждане на картата..."
   },
   "newsletter": {
     "title": "Бъдете в течение с нови имоти",
@@ -508,5 +537,116 @@
     "showingPromoted": "Междувременно ето премиум и откроени обяви от други места.",
     "showingNearestIn": "Междувременно ето най-близките обяви, в {{location}}.",
     "nothingPromoted": "Опитайте да намалите мащаба, да преместите картата или да нулирате филтрите."
+  },
+  "showingInArea": "Нищо не отговаря на „{{query}}“ — показваме наличното в този район",
+  "ui": {
+    "measurementTool": {
+      "startPointClickToClose": "🎯 Начална точка (щракнете, за да затворите)",
+      "fromPrev": "от предишната",
+      "measure": "Измери",
+      "viewingSavedMeasurement": "Преглед на запазено измерване",
+      "clickMapToAddPoints": "Щракнете върху картата, за да добавите точки",
+      "pts": "Точки:",
+      "cursor": "+курсор:",
+      "area": "Площ:",
+      "startNewMeasurement": "✏️ Започни ново измерване",
+      "undo": "↩ Отмени",
+      "clear": "Изчисти",
+      "closePolygon": "🔷 Затвори полигона",
+      "save": "💾 Запази",
+      "saveMeasurement": "💾 Запази измерването",
+      "type": "Тип:",
+      "area2": "🔷 Площ",
+      "distance": "📏 Разстояние",
+      "points": "Точки:",
+      "perimeter": "Периметър:",
+      "distance2": "Разстояние:",
+      "logInToSaveMeasurements": "Влезте, за да запазите измерванията в профила си. В противен случай те ще бъдат запазени локално.",
+      "name": "Име",
+      "eGMyPropertyPlot": "напр., Моят парцел",
+      "location": "Местоположение",
+      "eG123MainStreet": "напр., ул. Главна 123, Град",
+      "notesOptional": "Бележки (по избор)",
+      "addAnyNotesAboutThis": "Добавете бележки за това измерване...",
+      "cancel": "Отказ",
+      "saveTo": "Запази в",
+      "profile": "Профил",
+      "device": "Устройство"
+    },
+    "googleMapMeasurement": {
+      "area": "📐 Площ",
+      "distance": "📍 Разстояние",
+      "clickOnTheMapTo": "Щракнете върху картата, за да начертаете полигон. Добавете поне 3 точки.",
+      "clickOnTheMapTo2": "Щракнете върху картата, за да добавите точки и да измерите разстояние.",
+      "area2": "Площ:",
+      "perimeter": "Периметър:",
+      "distance2": "Разстояние:",
+      "undo": "↩️ Отмени",
+      "save": "💾 Запази",
+      "keep": "💾 Запази",
+      "new": "🗑️ Ново",
+      "youVeReachedTheFree": "⚠️ Достигнахте безплатния лимит. Преминете към Pro за повече!",
+      "n1SlotRemainingUpgradeTo": "⚠️ Остава 1 място. Преминете към Pro за повече измервания."
+    },
+    "mapFilterControls": {
+      "mapStyle": "Стил на картата",
+      "cleanMapStyleMinimalProperties": "Изчистен стил - минималистичен, имотите изпъкват",
+      "colorMapStyleShowsNeighborhoods": "Цветен стил - показва квартали, паркове, удобства",
+      "streetMapStyle": "Улична карта",
+      "satelliteAerialImagery": "Сателитни изображения",
+      "save": "Запази",
+      "clear": "Изчисти"
+    },
+    "searchPage": {
+      "loadingProperties": "Зареждане на имоти",
+      "openMenu": "Отвори менюто",
+      "openFilters": "Отвори филтрите",
+      "myAccount": "Моят профил",
+      "tapMap": "Докоснете „Карта“",
+      "viewToggle": "Смяна на изгледа"
+    },
+    "aiSearch": {
+      "agent": "👔 Агент",
+      "private": "👤 Частно лице",
+      "stopRecording": "Спри записа",
+      "startVoiceAssistant": "Стартирай гласовия асистент"
+    },
+    "mapComponent": {
+      "mapLoadingError": "Грешка при зареждане на картата",
+      "unableToLoadTheMap": "Картата не може да се зареди. Възможно е да е временен проблем.",
+      "tryAgain": "Опитай отново (",
+      "left": "оставащи)",
+      "useAlternativeMap": "Използвай алтернативна карта"
+    },
+    "searchMobileFilters": {
+      "closeFilters": "Затвори филтрите",
+      "reset": "Нулирай",
+      "saveSearch": "Запази търсенето",
+      "showResults": "Покажи резултатите"
+    },
+    "mapPropertyPopup": {
+      "closePopup": "Затвори изскачащия прозорец",
+      "propertyImage": "Снимка на имота",
+      "previousImage": "Предишна снимка",
+      "nextImage": "Следваща снимка"
+    },
+    "propertyList": {
+      "signInToAccessAi": "Влезте, за да използвате AI търсене"
+    },
+    "virtualizedPropertyGrid": {
+      "loadingMore": "Зареждане на още..."
+    },
+    "mobileFiltersModal": {
+      "closeFilters": "Затвори филтрите"
+    },
+    "propertyLocationMap": {
+      "locationDataUnavailable": "Данните за местоположението не са налични."
+    },
+    "googleMapPropertyPopup": {
+      "closePopup": "Затвори изскачащия прозорец"
+    },
+    "climateRiskLayer": {
+      "veryHigh": "Много висок"
+    }
   }
 }

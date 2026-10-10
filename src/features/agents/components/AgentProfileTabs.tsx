@@ -313,10 +313,8 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             <div className="prose prose-sm sm:prose-base lg:prose-lg text-gray-700 leading-relaxed">
                                 {agent.bio || (
                                     <p className="text-sm sm:text-base lg:text-lg">
-                                        {firstName} is a dedicated real estate professional with {stats.yearsExperience} years of experience
-                                        in the industry{isAgencyAgent && ` as part of the ${agent.agencyName} team`}.
-                                        {firstName} specializes in helping clients achieve their real estate goals through
-                                        expert market knowledge and personalized service.
+                                        {firstName} {t('agents:ui.agentProfileTabs.isADedicatedRealEstate', 'is a dedicated real estate professional with')} {stats.yearsExperience} {t('agents:ui.agentProfileTabs.yearsOfExperienceInThe', 'years of experience in the industry')}{isAgencyAgent && ` as part of the ${agent.agencyName} team`}.
+                                        {firstName} {t('agents:ui.agentProfileTabs.specializesInHelpingClientsAchieve', 'specializes in helping clients achieve their real estate goals through expert market knowledge and personalized service.')}
                                     </p>
                                 )}
                             </div>
@@ -699,7 +697,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                             className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-semibold mb-2 transition-colors text-sm"
                                                         >
                                                             <PhoneIcon className="w-4 h-4" />
-                                                            Call
+                                                            {t('agents:ui.agentProfileTabs.call', 'Call')}
                                                         </a>
                                                     )}
                                                     {agent.email && (
@@ -737,7 +735,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                         href={`tel:${agent.phone}`}
                                                         className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-semibold transition-colors text-sm pointer-events-auto"
                                                     >
-                                                        Call
+                                                        {t('agents:ui.agentProfileTabs.call', 'Call')}
                                                     </a>
                                                 )}
                                                 <a
@@ -1039,46 +1037,46 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {/* Reviews List */}
                         {agent.testimonials && agent.testimonials.length > 0 ? (
                             <div className="space-y-6">
-                                {agent.testimonials.slice(0, 5).map((t, index) => (
+                                {agent.testimonials.slice(0, 5).map((testimonial, index) => (
                                     <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-blue-300 transition-colors">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                                                    {t.userId?.avatarUrl ? (
+                                                    {testimonial.userId?.avatarUrl ? (
                                                         <img
-                                                            src={optimizeCloudinaryUrl(t.userId.avatarUrl, { width: 128 }) || t.userId.avatarUrl}
-                                                            alt={t.userId.name || t.clientName}
+                                                            src={optimizeCloudinaryUrl(testimonial.userId.avatarUrl, { width: 128 }) || testimonial.userId.avatarUrl}
+                                                            alt={testimonial.userId.name || testimonial.clientName}
                                                             loading="lazy"
                                                             decoding="async"
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <DefaultAvatar gender={t.userId?.gender} seed={t.userId?.id || t.userId?.name || t.clientName || 'user'} avatarOptions={t.userId?.avatarOptions} show3d />
+                                                        <DefaultAvatar gender={testimonial.userId?.gender} seed={testimonial.userId?.id || testimonial.userId?.name || testimonial.clientName || 'user'} avatarOptions={testimonial.userId?.avatarOptions} show3d />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-gray-900">{t.userId?.name || t.clientName || 'Anonymous'}</p>
-                                                    <p className="text-sm text-gray-600">Verified Buyer • {t.rating}.0</p>
+                                                    <p className="font-bold text-gray-900">{testimonial.userId?.name || testimonial.clientName || t('agents:ui.agentProfileTabs.anonymous', 'Anonymous')}</p>
+                                                    <p className="text-sm text-gray-600">{t('agents:ui.agentProfileTabs.verifiedBuyer', 'Verified Buyer •')} {testimonial.rating}.0</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-gray-500 text-sm">
-                                                    {t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-US', {
+                                                    {testimonial.createdAt ? new Date(testimonial.createdAt).toLocaleDateString('en-US', {
                                                         year: 'numeric',
                                                         month: 'short',
                                                         day: 'numeric',
-                                                    }) : 'Recently'}
+                                                    }) : t('agents:ui.agentProfileTabs.recently', 'Recently')}
                                                 </div>
-                                                <StarRating rating={t.rating || 0} />
+                                                <StarRating rating={testimonial.rating || 0} />
                                             </div>
                                         </div>
-                                        <p className="text-gray-700 text-lg italic mb-4">"{t.quote}"</p>
+                                        <p className="text-gray-700 text-lg italic mb-4">"{testimonial.quote}"</p>
                                         {(t as any).response && (
                                             <div className="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500">
                                                 <div className="flex items-start gap-3">
                                                     <ChatBubbleBottomCenterTextIcon className="w-5 h-5 text-blue-500 mt-0.5" />
                                                     <div>
-                                                        <p className="font-semibold text-gray-900 mb-1">Response from {firstName}</p>
+                                                        <p className="font-semibold text-gray-900 mb-1">{t('agents:ui.agentProfileTabs.responseFrom', 'Response from')} {firstName}</p>
                                                         <p className="text-gray-700">{(t as any).response}</p>
                                                     </div>
                                                 </div>

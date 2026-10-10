@@ -1,0 +1,90 @@
+{
+  "success": {
+    "title": "Mesazhi u dërgua!",
+    "description": "Faleminderit që na kontaktuat. Ekipi ynë do t'ju përgjigjet brenda 24 orëve.",
+    "sendAnother": "Dërgo një mesazh tjetër"
+  },
+  "advertising": {
+    "prefill": "Përshëndetje, do të doja të reklamoja në BalkanEstate. Ju lutemi më dërgoni hapësirat reklamuese dhe çmimet.",
+    "heading": "Ku dëshironi të shfaqet reklama juaj?",
+    "page": "Faqja",
+    "placement": "Vendosja",
+    "creative": "Bashkëngjitni imazhin e reklamës (opsionale)",
+    "removeImage": "Hiq imazhin",
+    "uploading": "Duke ngarkuar…",
+    "replaceImage": "Zëvendëso imazhin",
+    "uploadImage": "Ngarko imazhin",
+    "creativeHint": "PNG ose JPG, maks. 5MB. Kjo na ndihmon ta vendosim reklamën pikërisht aty ku dëshironi."
+  },
+  "info": {
+    "email": "Email",
+    "phone": "Telefoni",
+    "location": "Vendndodhja",
+    "locationValue": "Rajoni i Ballkanit",
+    "hours": "Orari i punës",
+    "hoursValue": "Hën-Pre, 9:00-18:00 CET",
+    "heading": "Na kontaktoni"
+  },
+  "title": "Na kontaktoni",
+  "subtitle": "Keni një pyetje ose keni nevojë për ndihmë? Do të donim t'ju dëgjonim. Na dërgoni një mesazh dhe do t'ju përgjigjemi sa më shpejt.",
+  "form": {
+    "heading": "Na dërgoni një mesazh",
+    "name": "Emri i plotë",
+    "email": "Adresa e email-it",
+    "phone": "Telefoni (opsional)",
+    "subject": "Tema",
+    "message": "Mesazhi juaj",
+    "sending": "Duke dërguar...",
+    "submit": "Dërgo mesazhin",
+    "privacyNote": "Duke dërguar, pranoni Politikën tonë të Privatësisë. Nuk do t'i ndajmë kurrë të dhënat tuaja."
+  },
+  "quickHelp": {
+    "heading": "Ndihmë e shpejtë",
+    "howItWorks": "Mësoni si funksionon BalkanEstate",
+    "pricing": "Shikoni planet tona të çmimeve",
+    "findAgent": "Gjeni një agjent të pasurive të paluajtshme",
+    "privacy": "Lexoni politikën tonë të privatësisë"
+  },
+  "whatsapp": {
+    "title": "Bisedoni në WhatsApp",
+    "subtitle": "Përgjigje e shpejtë gjatë orarit të punës"
+  },
+  "viber": {
+    "title": "Bisedoni në Viber",
+    "subtitle": "I popullarizuar në rajonin e Ballkanit"
+  },
+  "ui": {
+    "contactForm": {
+      "adCreativePreview": "pamje paraprake e reklamës"
+    }
+  },
+  "subjects": {
+    "general": "Pyetje e përgjithshme",
+    "buying": "Blerje prone",
+    "selling": "Shitje prone",
+    "agency": "Agjenci dhe agjentë",
+    "support": "Mbështetje teknike",
+    "partnership": "Partneritet",
+    "advertising": "Reklamim / vendosje reklame"
+  },
+  "adPages": {
+    "all": "Të gjitha faqet",
+    "home": "Kryefaqja",
+    "search": "Rezultatet e kërkimit",
+    "rentals": "Qira",
+    "property-details": "Detajet e pronës",
+    "agents": "Agjentët",
+    "agencies": "Agjencitë",
+    "business-directory": "Drejtoria e bizneseve",
+    "blog": "Blog",
+    "guides": "Udhëzuesit"
+  },
+  "adPlacements": {
+    "in-content": "Brenda përmbajtjes (leaderboard)",
+    "sidebar": "Shiriti anësor (skyscraper)",
+    "sticky-bottom": "Shiriti i poshtëm fiks",
+    "sticky-top": "Shiriti i sipërm fiks",
+    "header": "Koka e faqes",
+    "footer": "Fundi i faqes"
+  }
+}

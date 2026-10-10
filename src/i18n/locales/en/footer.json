@@ -21,7 +21,9 @@
     "messages": "Messages",
     "myAccount": "My Account",
     "howItWorks": "How It Works",
-    "blog": "Blog"
+    "blog": "Blog",
+    "contactUs": "Contact Us",
+    "valuation": "Property Valuation"
   },
   "countries": {
     "AL": "Albania",
@@ -87,5 +89,12 @@
     "becomePartner": "Become a Partner",
     "affiliates": "Affiliates",
     "developers": "For Developers"
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Find us on Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Professional 360° Property Tours",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - 360° Property Tours"
+    }
   }
 }

@@ -122,7 +122,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           onClick={onClose}
           disabled={isLoading}
           className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 transition-colors z-10 disabled:opacity-50"
-          aria-label="Close"
+          aria-label={t('common:ui.confirmationModal.close', 'Close')}
         >
           <XMarkIcon className="w-5 h-5" />
         </button>

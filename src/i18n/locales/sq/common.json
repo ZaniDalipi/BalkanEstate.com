@@ -18,7 +18,7 @@
   "confirm": "Konfirmo",
   "yes": "Po",
   "no": "Jo",
-  "ok": "OK",
+  "ok": "Në rregull",
   "apply": "Apliko",
   "reset": "Rivendos",
   "clear": "Pastro",
@@ -203,7 +203,7 @@
     "g": "G"
   },
   "amenities": {
-    "parking": "Parking",
+    "parking": "Parkim",
     "garage": "Garazh",
     "pool": "Pishinë",
     "gym": "Palestër",
@@ -227,7 +227,7 @@
     "cableTV": "TV Kabllor",
     "intercom": "Interkom",
     "alarm": "Sistem Alarmi",
-    "cctv": "CCTV",
+    "cctv": "Kamera sigurie",
     "doorman": "Portier"
   },
   "imageTags": {
@@ -341,7 +341,8 @@
     "authFailed": "Vërtetimi dështoi",
     "authFailedMessage": "Vërtetimi dështoi. Ju lutemi provoni përsëri.",
     "errorLoadingGoogleMaps": "Gabim në ngarkimin e Google Maps",
-    "checkApiKeyConfiguration": "Ju lutemi kontrolloni konfigurimin e çelësit API"
+    "checkApiKeyConfiguration": "Ju lutemi kontrolloni konfigurimin e çelësit API",
+    "generic": "Diçka shkoi keq"
   },
   "tryAgain": "Provo Përsëri",
   "actions": {
@@ -352,7 +353,8 @@
     "save": "Ruaj",
     "delete": "Fshi",
     "edit": "Redakto",
-    "submit": "Dërgo"
+    "submit": "Dërgo",
+    "ok": "Në rregull"
   },
   "validation": {
     "required": "Kjo fushë është e detyrueshme",
@@ -462,7 +464,7 @@
     "showAll": "Shfaq të gjitha",
     "typeArea": "Sipërfaqe",
     "typeDistance": "Distancë",
-    "typeDistShort": "Dist",
+    "typeDistShort": "Dist.",
     "viewOnMap": "Shiko në hartë",
     "deleteConfirmation": "Fshi \"{{name}}\"?",
     "deleting": "Duke fshirë...",
@@ -647,12 +649,214 @@
     "resetsOn": "Rifreskohet më {{date}}"
   },
   "ads": {
-    "previewMode": "Ad preview — ad slots are highlighted",
-    "exitPreview": "Exit",
-    "stickyBottomBar": "Sticky bottom bar",
-    "getInTouch": "Get in touch →",
-    "advertiseCta": "Advertise with us — get in touch"
+    "previewMode": "Pamje paraprake e reklamave — hapësirat reklamuese janë të theksuara",
+    "exitPreview": "Dil",
+    "stickyBottomBar": "Shiriti i poshtëm fiks",
+    "getInTouch": "Na kontaktoni →",
+    "advertiseCta": "Reklamoni me ne — na kontaktoni",
+    "close": "Mbyll reklamën",
+    "advertisement": "Reklamë",
+    "yourAdHere": "Reklama juaj këtu",
+    "advertiseWithUs": "Reklamoni me ne",
+    "sponsored": "E sponsorizuar",
+    "dismiss": "Largo reklamën"
   },
   "note": "Shënim",
-  "loadMore": "Ngarko më shumë"
+  "loadMore": "Ngarko më shumë",
+  "notifications": "Njoftime",
+  "markAllRead": "Shëno të gjitha si të lexuara",
+  "noNotifications": "Ende nuk ka njoftime",
+  "viewAll": "Shiko të gjitha njoftimet",
+  "cookies": {
+    "title": "Ne përdorim cookies",
+    "shortDescription": "për të përmirësuar përvojën tuaj dhe për të analizuar trafikun.",
+    "learnMore": "Mëso më shumë",
+    "close": "Mbyll pa pranuar — do të përdoren vetëm cookies thelbësore",
+    "acceptAll": "Prano të gjitha",
+    "rejectAll": "Refuzo të gjitha",
+    "customize": "Personalizo",
+    "settingsTitle": "Cilësimet e cookies",
+    "essential": "Thelbësore",
+    "alwaysOn": "Gjithmonë aktive",
+    "functional": "Funksionale",
+    "analytics": "Analitike",
+    "marketing": "Marketing",
+    "savePreferences": "Ruaj preferencat"
+  },
+  "common": {
+    "close": "Mbyll"
+  },
+  "comingSoon": {
+    "title": "Pagesat së shpejti",
+    "message": "Aktualisht po kërkojmë një ofrues pagesash për bashkëpunim. Pagesat direkte nuk pranohen për momentin. Mund ta aktivizoni abonimin menjëherë me një kod kuponi ose na kontaktoni për ta rregulluar manualisht.",
+    "haveCoupon": "A ju kemi dhënë një kupon?",
+    "couponDescription": "Vendosni kodin për të aktivizuar abonimin menjëherë",
+    "activateCoupon": "Aktivizo me kupon",
+    "contactUs": "Na kontaktoni për përpunim manual:",
+    "responseTime": "Zakonisht përgjigjemi brenda 24 orëve",
+    "badge": "Kërkojmë partner për pagesat"
+  },
+  "wk": "jav.",
+  "day": "ditë",
+  "mo": "muaj",
+  "syncing": "Duke sinkronizuar...",
+  "live": "Live",
+  "updating": "Duke përditësuar...",
+  "unknownError": "Ndodhi një gabim i panjohur",
+  "goHome": "Shko në faqen kryesore",
+  "myAccount": "Llogaria ime",
+  "login": "Hyr",
+  "heroTagline": "Kërkim pronash me AI në 11 vende të Ballkanit",
+  "weekdays": {
+    "mon": "Hën",
+    "tue": "Mar",
+    "wed": "Mër",
+    "thu": "Enj",
+    "fri": "Pre",
+    "sat": "Sht",
+    "sun": "Die"
+  },
+  "ui": {
+    "agencyCreationModal": {
+      "eGRe123456": "p.sh., RE-123456",
+      "discardChanges": "Të hidhen ndryshimet?",
+      "youHaveUnsavedChangesAre": "Keni ndryshime të paruajtura. Jeni i sigurt që doni ta mbyllni formularin?",
+      "discard": "Hidh",
+      "keepEditing": "Vazhdo redaktimin",
+      "close": "Mbyll"
+    },
+    "featuredSubscriptionDialog": {
+      "directPaymentsAreNotYet": "Pagesat direkte nuk janë ende të disponueshme",
+      "weAreCurrentlyLookingFor": "Aktualisht po kërkojmë një ofrues pagesash për bashkëpunim. Mund ta aktivizoni falas abonimin e agjencisë së veçuar me një kod kuponi, ose na kontaktoni në",
+      "toArrangeItManually": "për ta rregulluar manualisht.",
+      "paymentNotAvailableYet": "Pagesa nuk është ende e disponueshme",
+      "applyA100OffCoupon": "Aplikoni një kupon me 100% zbritje për të aktivizuar abonimin e veçuar pa kosto."
+    },
+    "achievementsSection": {
+      "expired": "SKADUAR",
+      "ddMmYyyy": "DD/MM/VVVV"
+    },
+    "header": {
+      "new": "+ E re",
+      "toggleSidebarNavigation": "Shfaq/fshih menunë anësore"
+    },
+    "text-scroll-animation": {
+      "scrollToSeeMore": "Rrëshqit për të parë më shumë"
+    },
+    "floorInputCombined": {
+      "totalFloorsInBuilding": "Gjithsej kate në ndërtesë",
+      "floorNumber": "Numri i katit"
+    },
+    "z360TourInput": {
+      "previewTour": "Shiko turin",
+      "n360VirtualTourPreview": "Pamje paraprake e turit virtual 360°"
+    },
+    "animations": {
+      "loading": "Duke u ngarkuar"
+    },
+    "glass-cards": {
+      "promoted": "E promovuar",
+      "new": "E re"
+    },
+    "propertyInquiryModal": {
+      "close": "Mbyll"
+    },
+    "defaultAvatar": {
+      "avatar": "Avatar"
+    },
+    "promotionOfferModal": {
+      "directPaymentsAreNotYet": "Pagesat direkte nuk janë ende të disponueshme. Përdorni një kupon për ta aktivizuar falas.",
+      "activateWithCoupon": "Aktivizo me kupon"
+    },
+    "myPromotions": {
+      "live": "Live",
+      "updated": "Përditësuar:",
+      "refreshPromotions": "Rifresko promovimet",
+      "autoExtendEnabledYourPromotion": "Zgjatja automatike u aktivizua. Promovimi juaj do të rinovohet automatikisht kur të skadojë. Pagesat së shpejti!",
+      "autoExtendDisabledYourPromotion": "Zgjatja automatike u çaktivizua. Promovimi juaj do të skadojë normalisht.",
+      "thisPromotionHasExpiredUse": "Ky promovim ka skaduar. Përdorni butonin \"Zgjat\" për ta riaktivizuar.",
+      "paymentsComingSoonAutoExtend": "Pagesat së shpejti! Pagesa për zgjatjen automatike do të jetë e disponueshme shumë shpejt.",
+      "paymentsComingSoonContactSales": "Pagesat së shpejti! Kontaktoni sales@balkanestateai.com për të zgjatur promovimin tuaj."
+    },
+    "alertDialog": {
+      "close": "Mbyll"
+    },
+    "phoneInput": {
+      "countryCode": "Kodi i shtetit",
+      "phoneNumber": "Numri i telefonit"
+    },
+    "confirmationModal": {
+      "close": "Mbyll"
+    },
+    "button": {
+      "loading": "Duke u ngarkuar"
+    },
+    "notificationModal": {
+      "close": "Mbyll"
+    },
+    "modal": {
+      "closeModal": "Mbyll dritaren"
+    },
+    "consentBanner": {
+      "cookieConsent": "Pëlqimi për cookies"
+    },
+    "z360TourEmbed": {
+      "z360Tour": "Turi Z360"
+    },
+    "mapAgentAvatar": {
+      "closePanel": "Mbyll panelin"
+    },
+    "breadcrumbs": {
+      "breadcrumb": "Navigimi"
+    },
+    "promotedPropertyCard": {
+      "property": "Pronë",
+      "untitledProperty": "Pronë pa titull",
+      "viewPromotionHistory": "Shiko historikun e promovimit"
+    },
+    "promotionModal": {
+      "closeModal": "Mbyll dritaren"
+    },
+    "beforeAfterSlider": {
+      "comparisonSlider": "Rrëshqitësi i krahasimit"
+    },
+    "agentInquiryModal": {
+      "youExampleCom": "ju@shembull.com"
+    },
+    "heroSearchSection": {
+      "clearSearch": "Pastro kërkimin"
+    },
+    "avatarCustomizer": {
+      "discardChanges": "Të hidhen ndryshimet?",
+      "youHaveUnsavedAvatarChanges": "Keni ndryshime të paruajtura në avatar. Jeni i sigurt që doni ta mbyllni?",
+      "discard": "Hidh",
+      "keepEditing": "Vazhdo redaktimin"
+    },
+    "liquid-glass": {
+      "howCanIHelpYou": "Si mund t'ju ndihmoj sot?"
+    },
+    "apple-liquid-glass-switcher": {
+      "chooseTheme": "Zgjidh temën"
+    },
+    "agencyManagementSection": {
+      "pleaseSelectAnAgency": "Ju lutemi zgjidhni një agjenci",
+      "pleaseEnterTheInvitationCode": "Ju lutemi vendosni kodin e ftesës",
+      "pleaseEnterACouponCode": "Ju lutemi vendosni një kod kuponi",
+      "invalidCodeFormatExpectedAbc": "Format i pavlefshëm i kodit. Pritet: ABC-XXXXXXXX",
+      "onlyRegisteredAgentsCanRedeem": "Vetëm agjentët e regjistruar mund të përdorin kuponët e agjencisë. Ju lutemi regjistrohuni fillimisht si agjent.",
+      "userDataUnavailablePleaseRefresh": "Të dhënat e përdoruesit nuk janë të disponueshme. Ju lutemi rifreskoni faqen.",
+      "youAreNotLoggedIn": "Nuk jeni i identifikuar. Ju lutemi identifikohuni dhe provoni përsëri.",
+      "unexpectedResponseFromServerPlease": "Përgjigje e papritur nga serveri. Ju lutemi provoni përsëri.",
+      "invalidCouponCodePleaseCheck": "Kod kuponi i pavlefshëm. Ju lutemi kontrolloni kodin dhe provoni përsëri.",
+      "thisCouponHasAlreadyBeen": "Ky kupon është përdorur tashmë nga një agjent tjetër.",
+      "thisCouponHasExpiredAnd": "Ky kupon ka skaduar dhe nuk mund të përdoret më.",
+      "couponNotFoundPleaseVerify": "Kuponi nuk u gjet. Ju lutemi verifikoni që kodi është i saktë.",
+      "theAgencySubscriptionIsNo": "Abonimi i agjencisë nuk është më aktiv. Ky kupon nuk mund të përdoret.",
+      "unknownAgency": "Agjenci e panjohur"
+    },
+    "profileStatistics": {
+      "noAuthenticationTokenFound": "Nuk u gjet token autentikimi",
+      "syncFailed": "Sinkronizimi dështoi"
+    }
+  }
 }

@@ -282,7 +282,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
     if (property.hasPool)                             chips.push({ emoji: '🏊', label: 'Pool' });
     if (property.hasGarden)                           chips.push({ emoji: '🌿', label: 'Garden' });
     if (amenities.some(a => a.toLowerCase().includes('sauna')))        chips.push({ emoji: '🧖', label: 'Sauna' });
-    if (amenities.some(a => a.toLowerCase().includes('wine cellar')))  chips.push({ emoji: '🍷', label: 'Wine Cellar' });
+    if (amenities.some(a => a.toLowerCase().includes('wine cellar')))  chips.push({ emoji: '🍷', label: t('property:ui.propertyCard.wineCellar', 'Wine Cellar') });
     if (amenities.some(a => a.toLowerCase().includes('panoramic')))    chips.push({ emoji: '🏔️', label: 'Panoramic' });
     if (property.breakfastIncluded)           chips.push({ emoji: '🍳', label: 'Breakfast' });
     if (property.towelsIncluded)              chips.push({ emoji: '🛁', label: 'Towels' });
@@ -291,12 +291,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   })() : [];
 
   const viewTypeDisplay: Record<string, { emoji: string; label: string }> = {
-    sea: { emoji: '🌊', label: 'Sea View' },
+    sea: { emoji: '🌊', label: t('property:ui.propertyCard.seaView', 'Sea View') },
     mountain: { emoji: '⛰️', label: 'Mountain' },
     park: { emoji: '🌲', label: 'Forest/Lake' },
-    city: { emoji: '🏙️', label: 'City View' },
-    garden: { emoji: '🌷', label: 'Garden View' },
-    street: { emoji: '🏘️', label: 'Street View' },
+    city: { emoji: '🏙️', label: t('property:ui.propertyCard.cityView', 'City View') },
+    garden: { emoji: '🌷', label: t('property:ui.propertyCard.gardenView', 'Garden View') },
+    street: { emoji: '🏘️', label: t('property:ui.propertyCard.streetView', 'Street View') },
   };
 
   return (
@@ -360,7 +360,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 <button
                   className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handlePrevImage}
-                  aria-label="Previous image"
+                  aria-label={t('property:ui.propertyCard.previousImage', 'Previous image')}
                 >
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -369,7 +369,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 <button
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center transition-opacity duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white opacity-60 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
                   onClick={handleNextImage}
-                  aria-label="Next image"
+                  aria-label={t('property:ui.propertyCard.nextImage', 'Next image')}
                 >
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -419,7 +419,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {isLuxuryVilla ? (
               <div className="bg-gradient-to-r from-[#FFA500] to-[#E8940A] text-white text-[10px] font-bold px-2 py-[3px] rounded-full flex items-center gap-1 shadow-sm">
                 <span className="text-[8px] leading-none">✦</span>
-                LUXURY VILLA
+                {t('property:ui.propertyCard.luxuryVilla', 'LUXURY VILLA')}
               </div>
             ) : isRental ? (
               <div className="bg-blue-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
@@ -497,7 +497,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
                 {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
                 {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
-                {promotionTier === 'standard' && 'PROMOTED'}
+                {promotionTier === 'standard' && t('property:ui.propertyCard.promoted', 'PROMOTED')}
               </div>
             )}
 
@@ -614,7 +614,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 ) : (
                   safeProperty.sqft > 0 && property.propertyType !== 'land' && (
                     <p className="text-[10px] text-neutral-400 font-medium">
-                      {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)} per m²
+                      {formatPrice(Math.round(property.price / safeProperty.sqft), property.country)} {t('property:ui.propertyCard.perM', 'per m²')}
                     </p>
                   )
                 )}
@@ -841,6 +841,7 @@ PropertyCardInner.displayName = 'PropertyCardInner';
  * PropertyCardInner only re-renders if its specific props actually changed.
  */
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCompareButton, priority, wide }) => {
+  const { t } = useTranslation();
   const { state, dispatch, toggleSavedHome, updateSearchPageState } = useAppContext();
 
   // Defensive check for required fields
@@ -903,7 +904,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       try {
         await toggleSavedHomeRef.current(property);
       } catch (error) {
-        showToast?.('Failed to save property. Please try again.', 'error');
+        showToast?.(t('property:ui.propertyCard.failedToSavePropertyPlease', 'Failed to save property. Please try again.'), 'error');
       }
     }
   }, [dispatch, property, showToast]);
@@ -916,7 +917,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
       if (stateRef.current.comparisonList.length < 5) {
         dispatch({ type: 'ADD_TO_COMPARISON', payload: property.id });
       } else {
-        showToast?.("You can compare a maximum of 5 properties.", 'error');
+        showToast?.(t('property:ui.propertyCard.youCanCompareAMaximum', 'You can compare a maximum of 5 properties.'), 'error');
       }
     }
   }, [dispatch, property.id, showToast]);

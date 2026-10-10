@@ -165,8 +165,8 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
         <div className="flex items-center gap-3">
           <VideoIcon className="w-6 h-6 text-white" />
           <div>
-            <h3 className="text-lg font-semibold text-white">Video Generator</h3>
-            <p className="text-white/80 text-sm">Create a stunning video reel from your property photos</p>
+            <h3 className="text-lg font-semibold text-white">{t('seller:ui.videoGenerator.videoGenerator', 'Video Generator')}</h3>
+            <p className="text-white/80 text-sm">{t('seller:ui.videoGenerator.createAStunningVideoReel', 'Create a stunning video reel from your property photos')}</p>
           </div>
         </div>
       </div>
@@ -177,18 +177,18 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
           // No images warning
           <div className="text-center py-8">
             <VideoIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-neutral-700 mb-2">No Images Available</h4>
+            <h4 className="text-lg font-medium text-neutral-700 mb-2">{t('seller:ui.videoGenerator.noImagesAvailable', 'No Images Available')}</h4>
             <p className="text-neutral-500">
-              Upload property images first to generate a video showcase.
+              {t('seller:ui.videoGenerator.uploadPropertyImagesFirstTo', 'Upload property images first to generate a video showcase.')}
             </p>
           </div>
         ) : isGenerating ? (
           // Generating state
           <div className="text-center py-8" role="status" aria-live="polite">
             <SpinnerIcon className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h4 className="text-lg font-medium text-neutral-700 mb-2">Creating Your Video...</h4>
+            <h4 className="text-lg font-medium text-neutral-700 mb-2">{t('seller:ui.videoGenerator.creatingYourVideo', 'Creating Your Video...')}</h4>
             <p className="text-neutral-500 text-sm">
-              This can take a minute. Please don't close this window.
+              {t('seller:ui.videoGenerator.thisCanTakeAMinute', 'This can take a minute. Please don\'t close this window.')}
             </p>
           </div>
         ) : status === 'completed' && generatedVideo ? (
@@ -197,9 +197,9 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckIcon className="w-8 h-8 text-green-600" />
             </div>
-            <h4 className="text-lg font-medium text-neutral-700 mb-2">Your Video Is Ready!</h4>
+            <h4 className="text-lg font-medium text-neutral-700 mb-2">{t('seller:ui.videoGenerator.yourVideoIsReady', 'Your Video Is Ready!')}</h4>
             <p className="text-neutral-500 text-sm mb-6">
-              {Math.round(generatedVideo.duration)}s video — download it, post it, then add the link to your listing.
+              {Math.round(generatedVideo.duration)}{t('seller:ui.videoGenerator.sVideoDownloadItPost', 's video — download it, post it, then add the link to your listing.')}
             </p>
 
             {/* Local preview (plays from the file in your browser) */}
@@ -220,13 +220,13 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
               >
                 <DownloadIcon className="w-5 h-5" />
-                Download Video
+                {t('seller:ui.videoGenerator.downloadVideo', 'Download Video')}
               </button>
               <button
                 onClick={reset}
                 className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors"
               >
-                Create Another
+                {t('seller:ui.videoGenerator.createAnother', 'Create Another')}
               </button>
             </div>
 
@@ -257,13 +257,13 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
         {error && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 text-sm">
-              {error.message || 'Failed to generate video. Please try again.'}
+              {error.message || t('seller:ui.videoGenerator.failedToGenerateVideoPlease', 'Failed to generate video. Please try again.')}
             </p>
             <button
               onClick={reset}
               className="mt-2 text-red-700 underline text-sm"
             >
-              Try Again
+              {t('seller:ui.videoGenerator.tryAgain', 'Try Again')}
             </button>
           </div>
         )}
@@ -308,11 +308,12 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
   isLoadingPreview,
   onGenerate,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       {/* Format selection */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-3">Video Format</label>
+        <label className="block text-sm font-medium text-neutral-700 mb-3">{t('seller:ui.videoGenerator.videoFormat', 'Video Format')}</label>
         <div className="grid grid-cols-3 gap-3">
           {FORMAT_OPTIONS.map((option) => (
             <button
@@ -325,8 +326,8 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
               }`}
             >
               <span className="text-2xl block mb-1">{option.icon}</span>
-              <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
-              <span className="text-xs text-neutral-500">{option.description}</span>
+              <span className="text-sm font-medium block text-neutral-800">{t(`seller:ui.videoGenerator.format.${option.value}.label`, option.label)}</span>
+              <span className="text-xs text-neutral-500">{t(`seller:ui.videoGenerator.format.${option.value}.description`, option.description)}</span>
             </button>
           ))}
         </div>
@@ -334,7 +335,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
 
       {/* Quality selection */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-3">Video Quality</label>
+        <label className="block text-sm font-medium text-neutral-700 mb-3">{t('seller:ui.videoGenerator.videoQuality', 'Video Quality')}</label>
         <div className="grid grid-cols-2 gap-3">
           {QUALITY_OPTIONS.map((option) => (
             <button
@@ -346,8 +347,8 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
                   : 'border-neutral-200 hover:border-neutral-300'
               }`}
             >
-              <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
-              <span className="text-xs text-neutral-500">{option.description}</span>
+              <span className="text-sm font-medium block text-neutral-800">{t(`seller:ui.videoGenerator.quality.${option.value}.label`, option.label)}</span>
+              <span className="text-xs text-neutral-500">{t(`seller:ui.videoGenerator.quality.${option.value}.description`, option.description)}</span>
             </button>
           ))}
         </div>
@@ -355,7 +356,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
 
       {/* Background Style */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-3">Background Style</label>
+        <label className="block text-sm font-medium text-neutral-700 mb-3">{t('seller:ui.videoGenerator.backgroundStyle', 'Background Style')}</label>
         <div className="grid grid-cols-2 gap-3">
           {BACKGROUND_OPTIONS.map((option) => (
             <button
@@ -368,8 +369,8 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
               }`}
             >
               <span className="text-lg block mb-1">{option.icon}</span>
-              <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
-              <span className="text-xs text-neutral-500">{option.description}</span>
+              <span className="text-sm font-medium block text-neutral-800">{t(`seller:ui.videoGenerator.background.${option.value}.label`, option.label)}</span>
+              <span className="text-xs text-neutral-500">{t(`seller:ui.videoGenerator.background.${option.value}.description`, option.description)}</span>
             </button>
           ))}
         </div>
@@ -378,7 +379,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
       {/* Duration per image */}
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-3">
-          Duration per Image: {duration}s
+          {t('seller:ui.videoGenerator.durationPerImage', 'Duration per Image:')} {duration}s
         </label>
         <input
           type="range"
@@ -389,8 +390,8 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
           className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
         />
         <div className="flex justify-between text-xs text-neutral-500 mt-1">
-          <span>2s (Quick)</span>
-          <span>10s (Slow)</span>
+          <span>{t('seller:ui.videoGenerator.n2sQuick', '2s (Quick)')}</span>
+          <span>{t('seller:ui.videoGenerator.n10sSlow', '10s (Slow)')}</span>
         </div>
       </div>
 
@@ -398,7 +399,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
       <div>
         <label className="block text-sm font-medium text-neutral-700 mb-3">
           <MusicNoteIcon className="w-4 h-4 inline-block mr-1" />
-          Background Music
+          {t('seller:ui.videoGenerator.backgroundMusic', 'Background Music')}
         </label>
         <div className="grid grid-cols-2 gap-3">
           {MUSIC_OPTIONS.map((option) => (
@@ -411,8 +412,8 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
                   : 'border-neutral-200 hover:border-neutral-300'
               }`}
             >
-              <span className="text-sm font-medium block text-neutral-800">{option.label}</span>
-              <span className="text-xs text-neutral-500">{option.description}</span>
+              <span className="text-sm font-medium block text-neutral-800">{t(`seller:ui.videoGenerator.music.${option.value}.label`, option.label)}</span>
+              <span className="text-xs text-neutral-500">{t(`seller:ui.videoGenerator.music.${option.value}.description`, option.description)}</span>
             </button>
           ))}
         </div>
@@ -421,8 +422,8 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
       {/* Watermark toggle */}
       <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
         <div>
-          <span className="text-sm font-medium text-neutral-700">Include BalkanEstateAI watermark</span>
-          <p className="text-xs text-neutral-500">Adds branding to your video for social sharing</p>
+          <span className="text-sm font-medium text-neutral-700">{t('seller:ui.videoGenerator.includeBalkanestateaiWatermark', 'Include BalkanEstateAI watermark')}</span>
+          <p className="text-xs text-neutral-500">{t('seller:ui.videoGenerator.addsBrandingToYourVideo', 'Adds branding to your video for social sharing')}</p>
         </div>
         <label className="relative inline-flex items-center cursor-pointer">
           <input
@@ -438,19 +439,19 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
       {/* Preview info */}
       {preview && !isLoadingPreview && (
         <div className="bg-neutral-50 rounded-lg p-4">
-          <h5 className="text-sm font-medium text-neutral-700 mb-2">Video Preview</h5>
+          <h5 className="text-sm font-medium text-neutral-700 mb-2">{t('seller:ui.videoGenerator.videoPreview', 'Video Preview')}</h5>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <span className="text-2xl font-bold text-primary">{preview.imageCount}</span>
-              <p className="text-xs text-neutral-500">Images</p>
+              <p className="text-xs text-neutral-500">{t('seller:ui.videoGenerator.images', 'Images')}</p>
             </div>
             <div>
               <span className="text-2xl font-bold text-primary">{preview.estimatedDuration}s</span>
-              <p className="text-xs text-neutral-500">Duration</p>
+              <p className="text-xs text-neutral-500">{t('seller:ui.videoGenerator.duration', 'Duration')}</p>
             </div>
             <div>
               <span className="text-2xl font-bold text-primary">~{preview.estimatedSizeMB}MB</span>
-              <p className="text-xs text-neutral-500">Size</p>
+              <p className="text-xs text-neutral-500">{t('seller:ui.videoGenerator.size', 'Size')}</p>
             </div>
           </div>
         </div>
@@ -462,11 +463,11 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
         className="w-full py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
       >
         <VideoIcon className="w-5 h-5" />
-        Generate Video
+        {t('seller:ui.videoGenerator.generateVideo', 'Generate Video')}
       </button>
 
       <p className="text-xs text-neutral-500 text-center">
-        Video generation may take 1-3 minutes depending on the number of images.
+        {t('seller:ui.videoGenerator.videoGenerationMayTake1', 'Video generation may take 1-3 minutes depending on the number of images.')}
       </p>
     </div>
   );
@@ -481,6 +482,7 @@ const UPLOAD_PAGES: Record<'instagram' | 'tiktok' | 'youtube' | 'facebook', stri
 };
 
 const PostToPlatforms: React.FC = () => {
+  const { t } = useTranslation();
   const handleShare = useCallback((platform: keyof typeof UPLOAD_PAGES) => {
     window.open(UPLOAD_PAGES[platform], '_blank', 'noopener,noreferrer');
   }, []);
@@ -489,10 +491,10 @@ const PostToPlatforms: React.FC = () => {
     <div className="border-t border-neutral-200 pt-6">
       <div className="flex items-center justify-center gap-2 mb-2">
         <ShareIcon className="w-5 h-5 text-neutral-500" />
-        <h5 className="text-sm font-medium text-neutral-700">Post it, then add the link to your listing</h5>
+        <h5 className="text-sm font-medium text-neutral-700">{t('seller:ui.videoGenerator.postItThenAddThe', 'Post it, then add the link to your listing')}</h5>
       </div>
       <p className="text-xs text-neutral-500 mb-4 text-center">
-        Upload the downloaded file to one of these, copy the post link, and paste it into your listing&apos;s video field.
+        {t('seller:ui.videoGenerator.uploadTheDownloadedFileTo', 'Upload the downloaded file to one of these, copy the post link, and paste it into your listing\'s video field.')}
       </p>
 
       <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto mb-4">
@@ -500,7 +502,7 @@ const PostToPlatforms: React.FC = () => {
         <button
           onClick={() => handleShare('instagram')}
           className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 hover:opacity-90 transition-opacity group"
-          title="Share to Instagram"
+          title={t('seller:ui.videoGenerator.shareToInstagram', 'Share to Instagram')}
         >
           <InstagramIcon className="w-6 h-6 text-white" />
           <span className="text-[10px] font-medium text-white">Instagram</span>
@@ -510,7 +512,7 @@ const PostToPlatforms: React.FC = () => {
         <button
           onClick={() => handleShare('tiktok')}
           className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-black hover:bg-neutral-900 transition-colors group"
-          title="Share to TikTok"
+          title={t('seller:ui.videoGenerator.shareToTiktok', 'Share to TikTok')}
         >
           <TikTokIcon className="w-6 h-6 text-white" />
           <span className="text-[10px] font-medium text-white">TikTok</span>
@@ -520,7 +522,7 @@ const PostToPlatforms: React.FC = () => {
         <button
           onClick={() => handleShare('youtube')}
           className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-red-600 hover:bg-red-700 transition-colors group"
-          title="Share to YouTube"
+          title={t('seller:ui.videoGenerator.shareToYoutube', 'Share to YouTube')}
         >
           <YouTubeIcon className="w-6 h-6 text-white" />
           <span className="text-[10px] font-medium text-white">YouTube</span>
@@ -530,7 +532,7 @@ const PostToPlatforms: React.FC = () => {
         <button
           onClick={() => handleShare('facebook')}
           className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors group"
-          title="Share to Facebook"
+          title={t('seller:ui.videoGenerator.shareToFacebook', 'Share to Facebook')}
         >
           <FacebookIcon className="w-6 h-6 text-white" />
           <span className="text-[10px] font-medium text-white">Facebook</span>

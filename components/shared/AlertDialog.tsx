@@ -1,6 +1,7 @@
 import React from 'react';
 import { XMarkIcon } from '../../constants';
 
+import { useTranslation } from 'react-i18next';
 export type AlertType = 'error' | 'warning' | 'success' | 'info';
 
 export interface AlertAction {
@@ -31,6 +32,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   showCloseButton = true,
   icon,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   // Icon colors and backgrounds based on type
@@ -123,7 +125,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 transition-colors z-10"
-            aria-label="Close"
+            aria-label={t('common:ui.alertDialog.close', 'Close')}
           >
             <XMarkIcon className="w-5 h-5" />
           </button>

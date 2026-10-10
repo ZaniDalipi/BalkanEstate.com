@@ -194,7 +194,7 @@ const AdBannerManager: React.FC = () => {
                       <CursorArrowRaysIcon className="w-4 h-4" />
                       {(item.clicks || 0).toLocaleString()}
                     </span>
-                    <span className="text-xs text-gray-400">{ctr}% CTR</span>
+                    <span className="text-xs text-gray-400">{ctr}{t('admin:ui.adBannerManager.ctr', '% CTR')}</span>
                   </div>
 
                   {/* Actions */}

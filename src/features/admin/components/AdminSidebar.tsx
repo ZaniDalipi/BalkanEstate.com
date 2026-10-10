@@ -233,7 +233,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">BE</span>
             </div>
-            <span className="font-bold text-white">Admin Panel</span>
+            <span className="font-bold text-white">{t('admin:ui.adminSidebar.adminPanel', 'Admin Panel')}</span>
           </div>
         )}
         {collapsed && (
@@ -323,7 +323,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           ) : (
             <>
               <ChevronLeftIcon className="w-5 h-5" />
-              <span className="text-sm">Collapse</span>
+              <span className="text-sm">{t('admin:ui.adminSidebar.collapse', 'Collapse')}</span>
             </>
           )}
         </button>

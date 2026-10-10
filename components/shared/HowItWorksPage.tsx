@@ -1025,10 +1025,10 @@ const HowItWorksPage: React.FC = () => {
                     <div className="bg-white rounded-xl p-4 text-neutral-800">
                       <div className="flex items-center gap-2 mb-3">
                         <SparklesIcon className="w-5 h-5 text-amber-500" />
-                        <span className="font-medium text-sm">AI Search</span>
+                        <span className="font-medium text-sm">{t('howItWorks:ui.howItWorksPage.aiSearch', 'AI Search')}</span>
                       </div>
                       <div className="bg-neutral-100 rounded-lg p-3 mb-3">
-                        <p className="text-xs text-neutral-500">Find me a...</p>
+                        <p className="text-xs text-neutral-500">{t('howItWorks:ui.howItWorksPage.findMeA', 'Find me a...')}</p>
                       </div>
                       <div className="space-y-2">
                         <div className="h-2 bg-neutral-200 rounded-full w-3/4"></div>
@@ -1091,7 +1091,7 @@ const HowItWorksPage: React.FC = () => {
                 <p className="text-yellow-100 mb-6 max-w-2xl">{t('howItWorks:premiumFeatures.interactiveMap3D.desc')}</p>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="font-semibold mb-4">Features</h4>
+                    <h4 className="font-semibold mb-4">{t('howItWorks:ui.howItWorksPage.features', 'Features')}</h4>
                     <div className="grid grid-cols-2 gap-3">
                       {['sunPosition', 'shadows', 'timeSlider', 'orientation'].map((key) => (
                         <div key={key} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
@@ -1642,7 +1642,7 @@ const HowItWorksPage: React.FC = () => {
                 <span className="text-blue-600 font-medium text-sm">{t('howItWorks:buyers.freePlan.title')}</span>
                 <div className="flex items-baseline gap-2 mt-2 mb-6">
                   <span className="text-4xl font-bold text-neutral-800">€{prices.buyerFree.price ?? 0}</span>
-                  <span className="text-neutral-500">forever</span>
+                  <span className="text-neutral-500">{t('howItWorks:ui.howItWorksPage.forever', 'forever')}</span>
                 </div>
                 <p className="text-neutral-600 mb-6">
                   {t('howItWorks:buyers.freePlan.tagline')}

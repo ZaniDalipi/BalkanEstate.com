@@ -101,7 +101,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
           onClose();
         }}
         className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors z-50"
-        aria-label="Close popup"
+        aria-label={t('search:ui.mapPropertyPopup.closePopup', 'Close popup')}
       >
         <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -123,7 +123,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
               src={optimizeCloudinaryUrl(imageUrl, { width: 200, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })}
               srcSet={`${optimizeCloudinaryUrl(imageUrl, { width: 160, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 160w, ${optimizeCloudinaryUrl(imageUrl, { width: 200, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 200w, ${optimizeCloudinaryUrl(imageUrl, { width: 280, quality: 'auto', format: 'auto', crop: 'fill', gravity: 'auto' })} 280w`}
               sizes="(max-width: 640px) calc(70vw - 20px), 200px"
-              alt={property.title || property.address || 'Property image'}
+              alt={property.title || property.address || t('search:ui.mapPropertyPopup.propertyImage', 'Property image')}
               loading="lazy"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover object-center"
@@ -145,7 +145,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
             <button
               onClick={handlePrevImage}
               className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/50 active:bg-black/70 rounded-full flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              aria-label="Previous image"
+              aria-label={t('search:ui.mapPropertyPopup.previousImage', 'Previous image')}
             >
               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -154,7 +154,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
             <button
               onClick={handleNextImage}
               className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-black/50 active:bg-black/70 rounded-full flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              aria-label="Next image"
+              aria-label={t('search:ui.mapPropertyPopup.nextImage', 'Next image')}
             >
               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

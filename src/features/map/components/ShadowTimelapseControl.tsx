@@ -437,7 +437,7 @@ const ShadowTimelapseControl: React.FC<ShadowTimelapseControlProps> = ({
         >
           <span className="text-lg">☀️</span>
           <span className="text-[10px] font-medium">{t('shadowTimelapse.noon', 'Noon')}</span>
-          <span className="text-[9px] opacity-70">12:00 PM</span>
+          <span className="text-[9px] opacity-70">{t('search:ui.shadowTimelapseControl.n1200Pm', '12:00 PM')}</span>
         </button>
         <button
           onClick={goToSunset}

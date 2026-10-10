@@ -716,26 +716,26 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
             // Empty placeholder that maintains exact same height including yearly breakdown
             <div className="border-t border-neutral-200 pt-3 h-64 invisible">
               <div className="text-center">
-                <p className="text-xs font-semibold text-neutral-600">After 8 years, it's cheaper to</p>
-                <p className="text-3xl font-extrabold my-0.5 text-transparent">Buy</p>
+                <p className="text-xs font-semibold text-neutral-600">{t('calculators:ui.rentVsBuyCalculator.after8YearsItS', 'After 8 years, it\'s cheaper to')}</p>
+                <p className="text-3xl font-extrabold my-0.5 text-transparent">{t('calculators:ui.rentVsBuyCalculator.buy', 'Buy')}</p>
                 <p className="text-sm font-semibold text-neutral-700 opacity-0">
-                  Estimated savings: $0
+                  {t('calculators:ui.rentVsBuyCalculator.estimatedSavings0', 'Estimated savings: $0')}
                 </p>
                 <div className="mt-3 grid grid-cols-2 gap-2 opacity-0">
                   <div className="p-2 rounded-lg border">
-                    <p className="text-[11px]">Total Cost to Rent</p>
+                    <p className="text-[11px]">{t('calculators:ui.rentVsBuyCalculator.totalCostToRent', 'Total Cost to Rent')}</p>
                     <p className="text-base font-bold">$0</p>
                   </div>
                   <div className="p-2 rounded-lg border">
-                    <p className="text-[11px]">Net Cost to Own</p>
+                    <p className="text-[11px]">{t('calculators:ui.rentVsBuyCalculator.netCostToOwn', 'Net Cost to Own')}</p>
                     <p className="text-base font-bold">$0</p>
                   </div>
                 </div>
                 <div className="mt-4 text-left opacity-0">
-                  <p className="text-xs font-semibold text-neutral-700 mb-2">Yearly Cost Comparison</p>
+                  <p className="text-xs font-semibold text-neutral-700 mb-2">{t('calculators:ui.rentVsBuyCalculator.yearlyCostComparison', 'Yearly Cost Comparison')}</p>
                   <div className="space-y-1 max-h-32 overflow-y-auto border border-neutral-200 rounded-lg p-2 bg-neutral-50">
                     <div className="flex justify-between items-center text-xs">
-                      <span>Year 1</span>
+                      <span>{t('calculators:ui.rentVsBuyCalculator.year1', 'Year 1')}</span>
                       <div className="flex gap-4">
                         <span className="w-20 text-right">$0</span>
                         <span className="w-20 text-right">$0</span>

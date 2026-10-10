@@ -128,6 +128,7 @@ const NewsCard: React.FC<{ item: NewsItem; index: number; t: (key: string, fallb
 };
 
 const ArticleMiniCard: React.FC<{ article: ArticleListItem; index: number; onNavigate: (slug: string) => void }> = ({ article, index, onNavigate }) => {
+  const { t } = useTranslation();
   const cat = ARTICLE_CATEGORY_COLORS[article.category] ?? { pill: 'bg-neutral-100 text-neutral-700', gradient: 'from-slate-400 to-slate-600' };
   const flag = article.country ? COUNTRY_FLAGS[article.country] : '';
   const formattedDate = article.publishedAt
@@ -174,7 +175,7 @@ const ArticleMiniCard: React.FC<{ article: ArticleListItem; index: number; onNav
         </span>
         {article.isFeatured && (
           <span className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400 text-amber-900 text-[9px] font-bold">
-            ★ Featured
+            {t('home:ui.newsSection.featured', '★ Featured')}
           </span>
         )}
       </div>
@@ -201,14 +202,14 @@ const ArticleMiniCard: React.FC<{ article: ArticleListItem; index: number; onNav
             <span className="text-[9px] sm:text-[10px] text-slate-400 truncate max-w-[80px]">{article.author?.name || 'BalkanEstate'}</span>
           </div>
           <div className="flex items-center gap-1 text-[9px] sm:text-[10px] text-slate-400">
-            {article.readTime && <span>{article.readTime}m read</span>}
+            {article.readTime && <span>{article.readTime}{t('home:ui.newsSection.mRead', 'm read')}</span>}
             {article.readTime && formattedDate && <span>·</span>}
             {formattedDate && <span>{formattedDate}</span>}
           </div>
         </div>
 
         <span className="inline-flex items-center gap-1 mt-2 text-[10px] sm:text-[11px] text-blue-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-          Read article <span>&rarr;</span>
+          {t('home:ui.newsSection.readArticle', 'Read article')} <span>&rarr;</span>
         </span>
       </div>
     </motion.div>
@@ -342,8 +343,8 @@ const NewsSection: React.FC = () => {
                   <svg className="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <p className="text-sm font-medium">No articles published yet</p>
-                  <p className="text-xs text-slate-300 mt-1">Check back soon for expert insights</p>
+                  <p className="text-sm font-medium">{t('home:ui.newsSection.noArticlesPublishedYet', 'No articles published yet')}</p>
+                  <p className="text-xs text-slate-300 mt-1">{t('home:ui.newsSection.checkBackSoonForExpert', 'Check back soon for expert insights')}</p>
                 </div>
               ) : (
                 <>
@@ -362,7 +363,7 @@ const NewsSection: React.FC = () => {
                       onClick={handleViewAllArticles}
                       className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-700 transition-colors"
                     >
-                      View all articles
+                      {t('home:ui.newsSection.viewAllArticles', 'View all articles')}
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>

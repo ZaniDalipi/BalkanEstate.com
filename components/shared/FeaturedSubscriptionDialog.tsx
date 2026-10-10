@@ -286,10 +286,10 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-amber-900 mb-1">
-                    Direct payments are not yet available
+                    {t('common:ui.featuredSubscriptionDialog.directPaymentsAreNotYet', 'Direct payments are not yet available')}
                   </p>
                   <p className="text-xs text-amber-800 leading-relaxed">
-                    We are currently looking for a payment provider to partner with us. You can activate your featured agency subscription for free using a coupon code, or contact us at <a href="mailto:sales@balkanestateai.com" className="underline font-medium">sales@balkanestateai.com</a> to arrange it manually.
+                    {t('common:ui.featuredSubscriptionDialog.weAreCurrentlyLookingFor', 'We are currently looking for a payment provider to partner with us. You can activate your featured agency subscription for free using a coupon code, or contact us at')} <a href="mailto:sales@balkanestateai.com" className="underline font-medium">{t('common:ui.featuredSubscriptionDialog.salesBalkanestateaiCom', 'sales@balkanestateai.com')}</a> {t('common:ui.featuredSubscriptionDialog.toArrangeItManually', 'to arrange it manually.')}
                   </p>
                 </div>
               </div>
@@ -366,7 +366,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               >
                 {loading ? t('agencies:featuredDialog.processing', 'Processing...') : couponApplied && finalPrice === 0
                   ? t('agencies:featuredDialog.activateForFree', 'Activate for FREE')
-                  : 'Payment Not Available Yet'}
+                  : t('common:ui.featuredSubscriptionDialog.paymentNotAvailableYet', 'Payment Not Available Yet')}
               </button>
             </div>
 
@@ -375,7 +375,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
               {couponApplied && finalPrice === 0 ? (
                 <span className="font-semibold text-green-600"> {t('agencies:featuredDialog.noPaymentRequired', 'No payment required - 100% discount applied!')}</span>
               ) : (
-                <span className="text-amber-700"> Apply a 100% off coupon code to activate your featured subscription at no cost.</span>
+                <span className="text-amber-700"> {t('common:ui.featuredSubscriptionDialog.applyA100OffCoupon', 'Apply a 100% off coupon code to activate your featured subscription at no cost.')}</span>
               )}
             </p>
           </>

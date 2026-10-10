@@ -113,5 +113,16 @@
     "home": "Acasă"
   },
   "blog": "Blog & Articole",
-  "agencyDashboard": "Panoul agenției"
+  "agencyDashboard": "Panoul agenției",
+  "mainNavigation": "Navigare principală",
+  "createNewListing": "Creează un anunț nou",
+  "unread": "necitite",
+  "goToHome": "Mergi la pagina principală",
+  "closeMenu": "Închide meniul de navigare",
+  "viewSubscription": "Vezi planurile de abonament",
+  "viewAnalytics": "Vezi panoul de analiză",
+  "inboxWithUnread": "Mesaje ({{count}} necitite)",
+  "goToAccount": "Mergi la contul meu",
+  "userAvatar": "Avatarul utilizatorului",
+  "loginOrRegister": "Autentifică-te sau înregistrează un cont"
 }

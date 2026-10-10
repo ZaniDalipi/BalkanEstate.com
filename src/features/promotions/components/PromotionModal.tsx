@@ -2,6 +2,7 @@ import React from 'react';
 import Modal from '@/src/shared/components/ui/Modal';
 import PromotionSelector from './PromotionSelector';
 
+import { useTranslation } from 'react-i18next';
 interface PromotionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,6 +35,7 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
   hasUrgentBadge = false,
   elevated = false,
 }) => {
+  const { t } = useTranslation();
   const handleSuccess = () => {
     if (onSuccess) {
       onSuccess();
@@ -55,7 +57,7 @@ const PromotionModal: React.FC<PromotionModalProps> = ({
         <button
           onClick={onClose}
           className="fixed top-4 right-4 z-[5001] min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/80 backdrop-blur-md hover:bg-white text-neutral-500 hover:text-neutral-800 transition-all shadow-lg shadow-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-          aria-label="Close modal"
+          aria-label={t('common:ui.promotionModal.closeModal', 'Close modal')}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

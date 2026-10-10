@@ -35,7 +35,17 @@
     "failedToUploadImage": "Η μεταφόρτωση εικόνας απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
     "failedToSendMessage": "Η αποστολή μηνύματος απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
     "failedToDeleteConversation": "Η διαγραφή συνομιλίας απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
-    "allConversations": "Όλες οι συνομιλίες"
+    "allConversations": "Όλες οι συνομιλίες",
+    "errorTitle": "Σφάλμα",
+    "deleteTitle": "Διαγραφή συνομιλίας",
+    "deleteButton": "Διαγραφή",
+    "cancelButton": "Ακύρωση",
+    "directConversation": "Άμεση συνομιλία",
+    "directAgentConversation": "Συνομιλία με μεσίτη",
+    "seller": "Πωλητής",
+    "buyer": "Αγοραστής",
+    "you": "Εσείς",
+    "image": "📷 Εικόνα"
   },
   "quickReplies": {
     "scheduleTour": "Προγραμματισμός Επίσκεψης",
@@ -66,7 +76,13 @@
     "enable": "Ενεργοποίηση",
     "enabling": "Ενεργοποίηση...",
     "later": "Αργότερα",
-    "dismiss": "Κλείσιμο"
+    "dismiss": "Κλείσιμο",
+    "error": "Η ενεργοποίηση ειδοποιήσεων απέτυχε. Δοκιμάστε ξανά.",
+    "error_title": "Σφάλμα ειδοποιήσεων",
+    "error_hint_devices": "Δοκιμάστε ξανά ή αφαιρέστε μια παλαιότερη συσκευή από τις ρυθμίσεις.",
+    "error_hint_browser": "Ελέγξτε τις ρυθμίσεις του προγράμματος περιήγησης και δοκιμάστε ξανά.",
+    "error_hint_generic": "Δοκιμάστε ξανά.",
+    "close": "Κλείσιμο"
   },
   "toast": {
     "success": "Επιτυχία!",
@@ -171,5 +187,14 @@
     "deleteFailed": "Αποτυχία διαγραφής μηνύματος",
     "connectionLost": "Η σύνδεση χάθηκε. Επανασύνδεση...",
     "reconnected": "Συνδέθηκε!"
+  },
+  "ui": {
+    "messageInput": {
+      "preview": "Προεπισκόπηση"
+    },
+    "conversationView": {
+      "annotatedProperty": "Σχολιασμένο ακίνητο",
+      "seller": "Πωλητής"
+    }
   }
 }

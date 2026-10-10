@@ -815,7 +815,7 @@ const AgentsPage: React.FC = () => {
                     {t('agents:results.showing', {
                       shown: visibleAgentsCount,
                       total: filteredAgents.length,
-                      defaultValue: `Showing ${visibleAgentsCount} of ${filteredAgents.length} agents`
+                      defaultValue: 'Showing {{shown}} of {{total}} agents'
                     })}
                   </p>
                   <button

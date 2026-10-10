@@ -35,7 +35,17 @@
     "imageFailedToLoad": "Image failed to load.",
     "failedToUploadImage": "Failed to upload image. Please try again.",
     "failedToSendMessage": "Failed to send message. Please try again.",
-    "failedToDeleteConversation": "Failed to delete conversation. Please try again."
+    "failedToDeleteConversation": "Failed to delete conversation. Please try again.",
+    "errorTitle": "Error",
+    "deleteTitle": "Delete Conversation",
+    "deleteButton": "Delete",
+    "cancelButton": "Cancel",
+    "directConversation": "Direct Conversation",
+    "directAgentConversation": "Agent Conversation",
+    "seller": "Seller",
+    "buyer": "Buyer",
+    "you": "You",
+    "image": "📷 Image"
   },
   "quickReplies": {
     "scheduleTour": "Schedule a Tour",
@@ -66,7 +76,13 @@
     "enable": "Enable",
     "enabling": "Enabling...",
     "later": "Later",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "error": "Failed to enable notifications. Please try again.",
+    "error_title": "Notification Error",
+    "error_hint_devices": "Please try again or remove an older device from settings.",
+    "error_hint_browser": "Please check your browser settings and try again.",
+    "error_hint_generic": "Please try again.",
+    "close": "Close"
   },
   "toast": {
     "success": "Success!",
@@ -171,5 +187,14 @@
     "deleteFailed": "Failed to delete message",
     "connectionLost": "Connection lost. Reconnecting...",
     "reconnected": "Connected!"
+  },
+  "ui": {
+    "messageInput": {
+      "preview": "Preview"
+    },
+    "conversationView": {
+      "annotatedProperty": "Annotated property",
+      "seller": "Seller"
+    }
   }
 }

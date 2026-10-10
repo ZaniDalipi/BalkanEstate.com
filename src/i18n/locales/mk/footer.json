@@ -21,7 +21,9 @@
     "messages": "Пораки",
     "myAccount": "Мојот Профил",
     "howItWorks": "Како функционира",
-    "blog": "Блог"
+    "blog": "Блог",
+    "contactUs": "Контактирајте нè",
+    "valuation": "Процена на имот"
   },
   "countries": {
     "AL": "Албанија",
@@ -87,5 +89,12 @@
     "becomePartner": "Станете партнер",
     "affiliates": "Соработници",
     "developers": "За програмери"
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Најдете нè на Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Професионални 360° тури на имоти",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - 360° тури на имоти"
+    }
   }
 }

@@ -113,5 +113,16 @@
     "home": "Početna"
   },
   "blog": "Blog i Članci",
-  "agencyDashboard": "Nadzorna ploča agencije"
+  "agencyDashboard": "Nadzorna ploča agencije",
+  "mainNavigation": "Glavna navigacija",
+  "createNewListing": "Izradi novi oglas",
+  "unread": "nepročitano",
+  "goToHome": "Idi na početnu stranicu",
+  "closeMenu": "Zatvori izbornik",
+  "viewSubscription": "Pogledaj planove pretplate",
+  "viewAnalytics": "Pogledaj analitičku nadzornu ploču",
+  "inboxWithUnread": "Poruke ({{count}} nepročitanih)",
+  "goToAccount": "Idi na moj račun",
+  "userAvatar": "Avatar korisnika",
+  "loginOrRegister": "Prijavite se ili registrirajte račun"
 }

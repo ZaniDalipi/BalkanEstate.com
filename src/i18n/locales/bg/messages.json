@@ -35,7 +35,17 @@
     "imageFailedToLoad": "Изображението не се зареди.",
     "failedToUploadImage": "Неуспешно качване на изображение. Моля, опитайте отново.",
     "failedToSendMessage": "Неуспешно изпращане на съобщение. Моля, опитайте отново.",
-    "failedToDeleteConversation": "Неуспешно изтриване на разговора. Моля, опитайте отново."
+    "failedToDeleteConversation": "Неуспешно изтриване на разговора. Моля, опитайте отново.",
+    "errorTitle": "Грешка",
+    "deleteTitle": "Изтрий разговора",
+    "deleteButton": "Изтрий",
+    "cancelButton": "Отказ",
+    "directConversation": "Директен разговор",
+    "directAgentConversation": "Разговор с агент",
+    "seller": "Продавач",
+    "buyer": "Купувач",
+    "you": "Вие",
+    "image": "📷 Снимка"
   },
   "quickReplies": {
     "scheduleTour": "Запази оглед",
@@ -66,7 +76,13 @@
     "enable": "Включи",
     "enabling": "Включване...",
     "later": "По-късно",
-    "dismiss": "Затвори"
+    "dismiss": "Затвори",
+    "error": "Неуспешно включване на известията. Моля, опитайте отново.",
+    "error_title": "Грешка с известията",
+    "error_hint_devices": "Опитайте отново или премахнете по-старо устройство от настройките.",
+    "error_hint_browser": "Проверете настройките на браузъра и опитайте отново.",
+    "error_hint_generic": "Моля, опитайте отново.",
+    "close": "Затвори"
   },
   "toast": {
     "success": "Успешно!",
@@ -171,5 +187,14 @@
     "deleteFailed": "Неуспешно изтриване на съобщението",
     "connectionLost": "Връзката е загубена. Възстановяване...",
     "reconnected": "Връзката е възстановена!"
+  },
+  "ui": {
+    "messageInput": {
+      "preview": "Преглед"
+    },
+    "conversationView": {
+      "annotatedProperty": "Анотиран имот",
+      "seller": "Продавач"
+    }
   }
 }

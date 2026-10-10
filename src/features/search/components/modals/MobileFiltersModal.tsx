@@ -46,7 +46,7 @@ const MobileFiltersModal: React.FC<MobileFiltersModalProps> = ({
                             <button
                                 onClick={onClose}
                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-neutral-500 hover:text-neutral-800 rounded-full hover:bg-neutral-100 transition-colors"
-                                aria-label="Close filters"
+                                aria-label={t('search:ui.mobileFiltersModal.closeFilters', 'Close filters')}
                             >
                                 <XMarkIcon className="w-6 h-6" />
                             </button>

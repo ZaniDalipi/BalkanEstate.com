@@ -11,7 +11,10 @@
 
 import React, { useState, useMemo, useId } from 'react';
 import type { Property, PriceHistoryEntry, PriceInterval } from '@/src/shared/types';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { usePriceHistory } from '../hooks/usePriceHistory';
+import { toIntlLocale } from '@/src/shared/utils/intlLocale';
 
 // ── SVG chart constants ────────────────────────────────────────────────────────
 const W = 700;
@@ -21,16 +24,16 @@ const PW = W - PAD.left - PAD.right;
 const PH = H - PAD.top - PAD.bottom;
 
 // ── Small helpers ──────────────────────────────────────────────────────────────
-function fmtEur(n: number) {
-  return `€${n.toLocaleString()}`;
+function fmtEur(n: number, locale?: string) {
+  return `€${n.toLocaleString(locale)}`;
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+function fmtDate(iso: string, locale?: string) {
+  return new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function fmtDateShort(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+function fmtDateShort(iso: string, locale?: string) {
+  return new Date(iso).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
 }
 
 function pct(n: number) {
@@ -67,6 +70,8 @@ interface PriceTrendChartProps {
 }
 
 const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ entries }) => {
+  const { i18n } = useTranslation();
+  const locale = toIntlLocale(i18n.language);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   const uid = useId();
 
@@ -90,7 +95,7 @@ const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ entries }) => {
 
     const yT = [0, 0.25, 0.5, 0.75, 1].map((t) => ({
       y: PAD.top + PH - t * PH,
-      label: `€${Math.round(minP + (maxP - minP) * t).toLocaleString()}`,
+      label: `€${Math.round(minP + (maxP - minP) * t).toLocaleString(locale)}`,
     }));
 
     const step = Math.max(1, Math.floor(pts.length / 5));
@@ -109,7 +114,7 @@ const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ entries }) => {
       areaPath: area,
       isOverall: last >= first,
     };
-  }, [entries]);
+  }, [entries, locale]);
 
   const hovered = hoverIdx != null ? points[hoverIdx] : null;
   const lineColor = isOverall ? '#22c55e' : '#ef4444';
@@ -152,7 +157,7 @@ const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ entries }) => {
         {/* X labels */}
         {xTicks.map((p, i) => (
           <text key={i} x={p.x} y={H - PAD.bottom + 16} fontSize="10" fill="#94a3b8" textAnchor="middle">
-            {fmtDateShort(p.entry.changedAt)}
+            {fmtDateShort(p.entry.changedAt, locale)}
           </text>
         ))}
 
@@ -193,12 +198,12 @@ const PriceTrendChart: React.FC<PriceTrendChartProps> = ({ entries }) => {
           className="absolute pointer-events-none bg-neutral-900 text-white text-xs rounded-xl shadow-xl px-3 py-2 z-10 whitespace-nowrap"
           style={{ left: `${(hovered.x / W) * 100}%`, top: 8, transform: 'translateX(-50%)' }}
         >
-          <p className="font-bold">{fmtDate(hovered.entry.changedAt)}</p>
-          <p className="text-base font-black mt-0.5">{fmtEur(hovered.entry.price)}</p>
+          <p className="font-bold">{fmtDate(hovered.entry.changedAt, locale)}</p>
+          <p className="text-base font-black mt-0.5">{fmtEur(hovered.entry.price, locale)}</p>
           {hovered.entry.previousPrice != null && (
             <p className={`text-[11px] mt-0.5 ${hovered.entry.changeType === 'increase' ? 'text-green-400' : hovered.entry.changeType === 'decrease' ? 'text-red-400' : 'text-neutral-400'}`}>
               {hovered.entry.changeType === 'increase' ? '▲' : hovered.entry.changeType === 'decrease' ? '▼' : '●'}{' '}
-              {fmtEur(Math.abs(hovered.entry.price - hovered.entry.previousPrice))}
+              {fmtEur(Math.abs(hovered.entry.price - hovered.entry.previousPrice), locale)}
               {hovered.entry.percentageChange != null && ` (${pct(hovered.entry.percentageChange)})`}
             </p>
           )}
@@ -215,6 +220,8 @@ interface ChangeBarChartProps {
 }
 
 const ChangeBarChart: React.FC<ChangeBarChartProps> = ({ entries }) => {
+  const { i18n } = useTranslation();
+  const locale = toIntlLocale(i18n.language);
   const changes = entries.filter((e) => e.changeType !== 'initial' && e.previousPrice != null);
   if (changes.length === 0) return null;
 
@@ -250,7 +257,7 @@ const ChangeBarChart: React.FC<ChangeBarChartProps> = ({ entries }) => {
             <g key={e.id ?? i}>
               {/* Date label */}
               <text x={LABEL_W - 6} y={y + BAR_H / 2 + 4} fontSize="10" fill="#94a3b8" textAnchor="end">
-                {fmtDateShort(e.changedAt)}
+                {fmtDateShort(e.changedAt, locale)}
               </text>
 
               {/* Bar */}
@@ -265,7 +272,7 @@ const ChangeBarChart: React.FC<ChangeBarChartProps> = ({ entries }) => {
                 fontWeight="700"
                 textAnchor="start"
               >
-                {isPos ? '+' : ''}{fmtEur(delta)}
+                {isPos ? '+' : ''}{fmtEur(delta, locale)}
               </text>
             </g>
           );
@@ -283,6 +290,8 @@ interface PriceIntervalsProps {
 }
 
 const PriceIntervalsSection: React.FC<PriceIntervalsProps> = ({ intervals, currentPrice }) => {
+  const { t, i18n } = useTranslation(['property']);
+  const locale = toIntlLocale(i18n.language);
   if (intervals.length === 0) return null;
 
   const now = Date.now();
@@ -294,7 +303,7 @@ const PriceIntervalsSection: React.FC<PriceIntervalsProps> = ({ intervals, curre
         <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        Pricing Schedule
+        {t('property:priceHistorySection.pricingSchedule', 'Pricing Schedule')}
       </h4>
 
       <div className="space-y-2">
@@ -312,19 +321,19 @@ const PriceIntervalsSection: React.FC<PriceIntervalsProps> = ({ intervals, curre
               <div className="min-w-0">
                 {iv.label && <p className="text-xs font-semibold text-neutral-700 truncate">{iv.label}</p>}
                 <p className="text-[11px] text-neutral-500">
-                  {new Date(iv.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {new Date(iv.startDate).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}
                   {' – '}
                   {iv.endDate
-                    ? new Date(iv.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-                    : 'Ongoing'}
+                    ? new Date(iv.endDate).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+                    : t('property:priceHistorySection.ongoing', 'Ongoing')}
                 </p>
               </div>
               <div className="text-right flex-shrink-0 ml-4">
                 <p className={`text-base font-black ${isActive ? 'text-primary' : 'text-neutral-700'}`}>
-                  {fmtEur(iv.price)}<span className="text-xs font-normal text-neutral-500">/mo</span>
+                  {fmtEur(iv.price, locale)}<span className="text-xs font-normal text-neutral-500">{t('property:priceHistorySection.perMonth', '/mo')}</span>
                 </p>
                 {isActive && (
-                  <span className="text-[10px] font-bold text-primary bg-primary/10 rounded-full px-2 py-0.5">Current</span>
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 rounded-full px-2 py-0.5">{t('property:priceHistorySection.current', 'Current')}</span>
                 )}
               </div>
             </div>
@@ -342,9 +351,12 @@ interface ChangeTimelineProps {
   sqft?: number;
 }
 
-const ChangeTimeline: React.FC<ChangeTimelineProps> = ({ entries, sqft }) => (
+const ChangeTimeline: React.FC<ChangeTimelineProps> = ({ entries, sqft }) => {
+  const { t, i18n } = useTranslation(['property']);
+  const locale = toIntlLocale(i18n.language);
+  return (
   <div className="mt-6">
-    <h4 className="text-sm font-bold text-neutral-800 mb-3">Price Change History</h4>
+    <h4 className="text-sm font-bold text-neutral-800 mb-3">{t('property:priceHistorySection.changeHistory', 'Price Change History')}</h4>
     <div className="relative">
       {/* Vertical line */}
       <div className="absolute left-[18px] top-0 bottom-0 w-px bg-neutral-100" />
@@ -367,23 +379,23 @@ const ChangeTimeline: React.FC<ChangeTimelineProps> = ({ entries, sqft }) => (
 
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-bold text-neutral-900">{fmtEur(e.price)}</p>
+                  <p className="text-sm font-bold text-neutral-900">{fmtEur(e.price, locale)}</p>
                   {sqft && sqft > 0 && (
-                    <span className="text-xs text-neutral-400">({fmtEur(Math.round(e.price / sqft))}/m²)</span>
+                    <span className="text-xs text-neutral-400">({fmtEur(Math.round(e.price / sqft), locale)}/m²)</span>
                   )}
                   {delta != null && (
                     <span className={`text-[10px] font-bold border rounded-full px-2 py-0.5 ${badgeColor}`}>
-                      {delta > 0 ? '▲' : '▼'} {fmtEur(Math.abs(delta))}
+                      {delta > 0 ? '▲' : '▼'} {fmtEur(Math.abs(delta), locale)}
                       {e.percentageChange != null && ` (${pct(e.percentageChange)})`}
                     </span>
                   )}
                   {e.changeType === 'initial' && (
                     <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full px-2 py-0.5">
-                      Listed
+                      {t('property:priceHistorySection.listedBadge', 'Listed')}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-neutral-400 mt-0.5">{fmtDate(e.changedAt)}</p>
+                <p className="text-xs text-neutral-400 mt-0.5">{fmtDate(e.changedAt, locale)}</p>
               </div>
             </div>
           );
@@ -391,7 +403,8 @@ const ChangeTimeline: React.FC<ChangeTimelineProps> = ({ entries, sqft }) => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
@@ -400,6 +413,8 @@ interface PropertyPriceHistoryProps {
 }
 
 const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property }) => {
+  const { t, i18n } = useTranslation(['property']);
+  const locale = toIntlLocale(i18n.language);
   const { data, isLoading } = usePriceHistory(property.id);
 
   // ── Derive all values from the property prop first so the section always
@@ -495,18 +510,18 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
 
   return (
     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 sm:p-6">
-      <SectionHeader count={dbHistoryCount} />
+      <SectionHeader count={dbHistoryCount} t={t} />
 
       {/* Stats Row — 2-col grid on mobile, auto-fill on larger screens */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
-        <StatCard label="Current Price" value={fmtEur(currentPrice)} color="text-primary" />
+        <StatCard label={t('property:priceHistorySection.currentPrice', 'Current Price')} value={fmtEur(currentPrice, locale)} color="text-primary" />
 
         {totalDelta != null && totalPct != null && startingPrice !== currentPrice && (
           <>
-            <StatCard label="Listed At" value={fmtEur(startingPrice)} />
+            <StatCard label={t('property:priceHistorySection.listedAt', 'Listed At')} value={fmtEur(startingPrice, locale)} />
             <StatCard
-              label="Total Change"
-              value={`${isDown ? '▼' : '▲'} ${fmtEur(Math.abs(totalDelta))}`}
+              label={t('property:priceHistorySection.totalChange', 'Total Change')}
+              value={`${isDown ? '▼' : '▲'} ${fmtEur(Math.abs(totalDelta), locale)}`}
               sub={`${isDown ? '' : '+'}${totalPct.toFixed(1)}%`}
               color={isDown ? 'text-red-600' : 'text-green-600'}
             />
@@ -514,16 +529,16 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
         )}
 
         {effectiveSqft && effectiveSqft > 0 && (
-          <StatCard label="Price / m²" value={fmtEur(Math.round(currentPrice / effectiveSqft))} />
+          <StatCard label={t('property:priceHistorySection.pricePerSqm', 'Price / m²')} value={fmtEur(Math.round(currentPrice / effectiveSqft), locale)} />
         )}
 
         <StatCard
-          label={dbHistoryCount > 0 ? 'Last Changed' : 'Listed'}
-          value={daysSinceLast === 0 ? 'Today' : `${daysSinceLast}d ago`}
+          label={dbHistoryCount > 0 ? t('property:priceHistorySection.lastChanged', 'Last Changed') : t('property:priceHistorySection.listed', 'Listed')}
+          value={daysSinceLast === 0 ? t('property:priceHistorySection.today', 'Today') : t('property:priceHistorySection.daysAgo', { count: daysSinceLast, defaultValue: '{{count}}d ago' })}
           sub={
             dbHistoryCount > 0
-              ? `${dbHistoryCount} change${dbHistoryCount !== 1 ? 's' : ''} recorded`
-              : fmtDate(listedAt)
+              ? t('property:priceHistorySection.changesRecorded', { count: dbHistoryCount, defaultValue: 'Changes recorded: {{count}}' })
+              : fmtDate(listedAt, locale)
           }
         />
       </div>
@@ -538,7 +553,7 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
           {/* Trend chart — needs ≥ 2 points */}
           {workingHistory.length >= 2 && (
             <div className="mb-8">
-              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price Trend</h4>
+              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">{t('property:priceHistorySection.priceTrend', 'Price Trend')}</h4>
               <PriceTrendChart entries={workingHistory} />
             </div>
           )}
@@ -546,7 +561,7 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
           {/* Bar chart — needs ≥ 2 non-initial change events */}
           {nonInitialCount >= 2 && (
             <div className="mb-8">
-              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Change Magnitude</h4>
+              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">{t('property:priceHistorySection.changeMagnitude', 'Change Magnitude')}</h4>
               <ChangeBarChart entries={workingHistory} />
             </div>
           )}
@@ -554,9 +569,9 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
           {/* Price/m² trend — needs ≥ 2 points and sqft */}
           {pricePerSqftEntries && (
             <div className="mb-8">
-              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Price per m² Trend</h4>
+              <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">{t('property:priceHistorySection.pricePerSqmTrend', 'Price per m² Trend')}</h4>
               <PriceTrendChart entries={pricePerSqftEntries} />
-              <p className="text-[10px] text-neutral-400 text-right mt-1">Values in €/m²</p>
+              <p className="text-[10px] text-neutral-400 text-right mt-1">{t('property:priceHistorySection.valuesInEurPerSqm', 'Values in €/m²')}</p>
             </div>
           )}
         </>
@@ -575,15 +590,15 @@ const PropertyPriceHistory: React.FC<PropertyPriceHistoryProps> = ({ property })
 
 // ── Tiny shared header ─────────────────────────────────────────────────────────
 
-const SectionHeader: React.FC<{ count?: number }> = ({ count }) => (
+const SectionHeader: React.FC<{ count?: number; t: TFunction }> = ({ count, t }) => (
   <div className="flex items-center gap-2 mb-5">
     <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
     </svg>
-    <h3 className="text-lg font-bold text-neutral-900">Price History</h3>
+    <h3 className="text-lg font-bold text-neutral-900">{t('property:priceHistorySection.title', 'Price History')}</h3>
     {count != null && count > 0 && (
       <span className="text-xs font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
-        {count} {count === 1 ? 'record' : 'records'}
+        {t('property:priceHistorySection.records', { count, defaultValue: 'Records: {{count}}' })}
       </span>
     )}
   </div>

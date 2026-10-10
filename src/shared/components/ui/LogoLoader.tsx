@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useTranslation } from 'react-i18next';
 interface LogoLoaderProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
@@ -25,6 +26,7 @@ function phaseDelay(offsetS: number): string {
 }
 
 export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = true }) => {
+  const { t } = useTranslation();
   const sizeMap = {
     sm: 80,
     md: 120,
@@ -144,7 +146,7 @@ export const LogoLoader: React.FC<LogoLoaderProps> = ({ size = 'md', showText = 
           className="be-text-anim font-bold tracking-widest text-blue-400"
           style={{ fontSize: px * 0.12, letterSpacing: '0.15em', animationDelay: glowDelay }}
         >
-          BALKANESTATE
+          {t('common:ui.logoLoader.balkanestate', 'BALKANESTATE')}
         </span>
       )}
     </div>

@@ -45,7 +45,21 @@
     "confirmDelete": "Da li ste sigurni da želite obrisati \"{{name}}\"?",
     "deleteFailed": "Brisanje sačuvane pretrage nije uspjelo. Pokušajte ponovo.",
     "enterName": "Molimo unesite ime",
-    "renameFailed": "Preimenovanje sačuvane pretrage nije uspjelo. Pokušajte ponovo."
+    "renameFailed": "Preimenovanje sačuvane pretrage nije uspjelo. Pokušajte ponovo.",
+    "alertsEnabled": "Obavještenja su uključena",
+    "alertsEnabledDesc": "Dobijaćete obavještenja: {{frequency}}",
+    "errorTitle": "Greška",
+    "alertUpdateFailed": "Ažuriranje podešavanja obavještenja nije uspjelo",
+    "deleteTitle": "Obriši sačuvanu pretragu",
+    "deleteButton": "Obriši",
+    "cancelButton": "Otkaži",
+    "warningTitle": "Upozorenje",
+    "rent": "IZDAVANJE",
+    "buy": "KUPOVINA",
+    "alertSettings": "Podešavanja obavještenja",
+    "upgradeForAlerts": "Nadogradite da uključite obavještenja",
+    "emailAlerts": "Obavještenja e-mailom",
+    "frequency": "Učestalost"
   },
   "stats": {
     "savedSearches": "Sačuvane pretrage",
@@ -65,7 +79,9 @@
     "enabledMessage": "Primaćete e-mail obavještenja za sve sačuvane pretrage",
     "disabledTitle": "Obavještenja isključena",
     "disabledMessage": "E-mail obavještenja su isključena",
-    "toggleFailed": "Ažuriranje postavki obavještenja nije uspjelo"
+    "toggleFailed": "Ažuriranje postavki obavještenja nije uspjelo",
+    "noSearchesTitle": "Nema sačuvanih pretraga",
+    "noSearchesMessage": "Prvo sačuvajte pretragu nekretnina, zatim uključite obavještenja e-mailom da biste saznali za nova podudaranja"
   },
   "clearAll": {
     "button": "Obriši sve",
@@ -84,16 +100,26 @@
     "stats": {
       "properties": "Nekretnine",
       "agents": "Agenti",
-      "countries": "Države"
+      "countries": "Države",
+      "agencies": "Agencije"
     },
     "tabs": {
       "properties": "Nekretnine",
-      "agents": "Agenti"
+      "agents": "Agenti",
+      "agencies": "Agencije"
     },
     "badges": {
       "quickAccess": "Brzi pristup",
       "organized": "Organizovano po lokaciji",
       "compare": "Jednostavno poređenje"
+    }
+  },
+  "searches": {
+    "clearFailed": "Brisanje sačuvanih pretraga nije uspjelo"
+  },
+  "ui": {
+    "savedHomesPage": {
+      "featured": "Izdvojeno"
     }
   }
 }

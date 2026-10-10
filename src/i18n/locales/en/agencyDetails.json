@@ -13,7 +13,11 @@
     "uploading": "Uploading...",
     "chooseGradient": "Choose Gradient",
     "customImageHint": "Or upload a custom image using the button above",
-    "changeLogo": "Change Logo"
+    "changeLogo": "Change Logo",
+    "dropCoverImage": "Drop to upload cover image",
+    "maxSize": "Max 5MB, images only",
+    "customize": "Customize",
+    "addLogo": "Add Logo"
   },
   "gradientPresets": {
     "oceanBlue": "Ocean Blue",
@@ -54,14 +58,19 @@
   "invitationCode": {
     "title": "Agency Invitation Code",
     "description": "Share this code with agents you want to join your agency",
-    "copy": "Copy"
+    "copy": "Copy",
+    "generatedTitle": "Code Generated",
+    "generatedMessage": "Invitation code has been generated successfully",
+    "generateFailed": "Failed to generate invitation code",
+    "generate": "Generate Code"
   },
   "actions": {
     "editAgency": "Edit Agency",
     "manageJoinRequests": "Manage Join Requests",
     "requestToJoin": "Request to Join Agency",
     "proRequiredForInviteCode": "Pro subscription required for invitation codes. Use a coupon code to join.",
-    "viewPlans": "View Plans"
+    "viewPlans": "View Plans",
+    "goToDashboard": "Go to Dashboard"
   },
   "featuredSubscription": {
     "title": "Featured Subscription",
@@ -73,7 +82,7 @@
     "title": "Team Members",
     "showTopPerformers": "Show Top Performers",
     "showAllMembers": "Show All Members",
-    "rankedByPerformance": "{{count}} agents \u2022 Ranked by performance",
+    "rankedByPerformance": "{{count}} agents • Ranked by performance",
     "topAgent": "Top Agent",
     "secondPlace": "2nd Place",
     "thirdPlace": "3rd Place",
@@ -161,7 +170,15 @@
     "leaveAgencyDetails": "This will:\n- Remove you from this agency\n- Cancel your agency-provided Pro plan immediately\n- Change your status to Independent Agent\n- Keep your properties and reviews intact",
     "toggleAdmin": "Are you sure you want to {{action}} {{name}}?",
     "removeAdminRights": "remove admin rights from",
-    "makeAdminRights": "make admin"
+    "makeAdminRights": "make admin",
+    "removeAdminTitle": "Remove Admin",
+    "makeAdminTitle": "Make Admin",
+    "removeButton": "Remove",
+    "makeAdminButton": "Make Admin",
+    "cancelButton": "Cancel",
+    "removeAgentTitle": "Remove Agent",
+    "leaveAgencyTitle": "Leave Agency",
+    "leaveButton": "Leave"
   },
   "messages": {
     "logoUpdated": "Logo updated successfully!",
@@ -177,7 +194,27 @@
     "onlyOwnerCanManage": "Only the agency owner can manage admins",
     "onlyAdminCanRemove": "Only agency admins can remove agents",
     "selectImageFile": "Please select an image file",
-    "imageSizeLimit": "Image size must be less than 5MB"
+    "imageSizeLimit": "Image size must be less than 5MB",
+    "requestSent": "Request Sent",
+    "accessDenied": "Access Denied",
+    "adminRemovedTitle": "Admin Removed",
+    "adminAddedTitle": "Admin Added",
+    "errorTitle": "Error",
+    "agentRemovedTitle": "Agent Removed",
+    "leftAgencyTitle": "Left Agency",
+    "nameRequired": "Agency name is required",
+    "invalidUrl": "Invalid URL for {{field}}. Please include https://",
+    "agencyUpdatedTitle": "Agency Updated",
+    "updateFailed": "Failed to update agency",
+    "uploadFailed": "Failed to upload logo",
+    "logoUpdatedTitle": "Logo Updated",
+    "coverUpdatedTitle": "Cover Updated",
+    "gradientUpdatedTitle": "Gradient Updated",
+    "usedBy": "Used by",
+    "unknown": "Unknown",
+    "copiedTitle": "Copied!",
+    "invitationCodeCopied": "Invitation code copied to clipboard!",
+    "gradientUpdateFailed": "Failed to update gradient"
   },
   "weekdays": {
     "monday": "Monday",
@@ -207,5 +244,45 @@
     "yearsInBusiness": "{{count}} Years",
     "contactAgency": "Contact Agency",
     "verifiedAgency": "Verified Agency"
+  },
+  "fields": {
+    "website": "Website"
+  },
+  "achievements": {
+    "addedTitle": "Achievement Added",
+    "addedMessage": "The achievement has been added successfully",
+    "addFailed": "Failed to add achievement",
+    "updatedTitle": "Achievement Updated",
+    "updatedMessage": "The achievement has been updated successfully",
+    "updateFailed": "Failed to update achievement",
+    "deletedTitle": "Achievement Deleted",
+    "deletedMessage": "The achievement has been deleted",
+    "deleteFailed": "Failed to delete achievement"
+  },
+  "adminStats": {
+    "title": "Agency Stats",
+    "adminOnly": "Admin only",
+    "profileViews": "Profile Views",
+    "subscriptionPlan": "Subscription Plan",
+    "featuredStatus": "Featured Status",
+    "featured": "Featured",
+    "notFeatured": "Not featured",
+    "featuredUntil": "Featured Until",
+    "memberSince": "Member Since"
+  },
+  "coupons": {
+    "promotionTitle": "Promotion Coupons",
+    "promotionSubtitle": "Monthly listing promotion allocation",
+    "monthly": "Monthly",
+    "available": "Available",
+    "used": "Used",
+    "usedThisMonth": "Used this month",
+    "yourCodes": "Your Coupon Codes",
+    "expired": "Expired",
+    "codeCopied": "Code copied!",
+    "copyCode": "Copy code",
+    "agentCodesTitle": "Agent Registration Codes",
+    "total": "total",
+    "seatsFilled": "{{used}} of {{total}} seats filled"
   }
 }

@@ -245,7 +245,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
 
           await sendMessage(conversationId, {
             id: `msg-${Date.now()}`,
-            text: 'I have some questions about this property. Please see my annotations:',
+            text: t('property:ui.imageEditorModal.iHaveSomeQuestionsAbout', 'I have some questions about this property. Please see my annotations:'),
             imageUrl: uploadedImageUrl,
             senderId: state.currentUser?.id || '',
             timestamp: Date.now(),

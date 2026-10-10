@@ -38,7 +38,8 @@
     "office": "Γραφείο",
     "garage": "Γκαράζ",
     "other": "Άλλο",
-    "luxury-villa": "Πολυτελής Βίλα"
+    "luxury-villa": "Πολυτελής Βίλα",
+    "parking": "Θέση στάθμευσης"
   },
   "features": {
     "bedrooms": "Υπνοδωμάτια",
@@ -161,7 +162,19 @@
     "buildingArea": "Εμβαδόν κτίσματος",
     "grossArea": "Μικτό εμβαδόν",
     "netArea": "Καθαρό εμβαδόν",
-    "floorPlanFloorsHint": "{{count}} όροφοι · φωτογραφίες σημειωμένες στην κάτοψη"
+    "floorPlanFloorsHint": "{{count}} όροφοι · φωτογραφίες σημειωμένες στην κάτοψη",
+    "openPlanArea": "Ενιαίος χώρος",
+    "parkingType": "Τύπος στάθμευσης",
+    "parkingTypes": {
+      "garage": "Γκαράζ",
+      "underground": "Υπόγειο",
+      "covered": "Στεγασμένο",
+      "outdoor": "Υπαίθριο"
+    },
+    "spaces": "Θέσεις",
+    "listingType": "Αγγελία",
+    "forRent": "Προς ενοικίαση",
+    "forSale": "Προς πώληση"
   },
   "distances": {
     "title": "Αποστάσεις",
@@ -217,7 +230,15 @@
     "whatsappMessage": "Γεια σας, ενδιαφέρομαι για αυτό το ακίνητο: {{title}}\n{{url}}",
     "viberSeller": "Viber",
     "promote": "Προώθηση",
-    "extendPromotion": "Παράταση"
+    "extendPromotion": "Παράταση",
+    "compareLimitTitle": "Όριο σύγκρισης",
+    "call": "Κλήση",
+    "email": "Email",
+    "removeFavorite": "Αφαίρεση από τα αγαπημένα",
+    "addFavorite": "Προσθήκη στα αγαπημένα",
+    "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
+    "addToFavorites": "Προσθήκη στα αγαπημένα",
+    "favorite": "Αγαπημένο"
   },
   "video": {
     "loading": "Φόρτωση βίντεο...",
@@ -306,6 +327,13 @@
       "browseAgents": "Περιήγηση σε πράκτορες",
       "agentSaved": "Ο πράκτορας αποθηκεύτηκε",
       "agentsSaved": "Αποθηκευμένοι πράκτορες"
+    },
+    "agencies": {
+      "listings": "Αγγελίες",
+      "agents": "Μεσίτες",
+      "noSaved": "Δεν υπάρχουν αποθηκευμένα γραφεία",
+      "clickHeart": "Αποθηκεύστε τα γραφεία που σας αρέσουν για να τα βρίσκετε γρήγορα αργότερα.",
+      "browseAgencies": "Περιήγηση στα γραφεία"
     }
   },
   "comparison": {
@@ -340,7 +368,8 @@
       "other": "Άλλο",
       "luxury-villa": "Πολυτελής Βίλα",
       "commercial": "Επαγγελματικό",
-      "parking": "Θέση Στάθμευσης"
+      "parking": "Θέση Στάθμευσης",
+      "urgent": "Επείγον"
     },
     "promotedListings": "Προωθημένες Αγγελίες",
     "agentHint": "Κλικ για προτάσεις!",
@@ -362,8 +391,8 @@
         "featured": "ΠΡΟΤΕΙΝΟΜΕΝΟ",
         "standard": "ΠΡΟΩΘΗΜΕΝΟ"
       },
-      "promotedCount_one": "{{count}} promoted listing",
-      "promotedCount_other": "{{count}} promoted listings",
+      "promotedCount_one": "{{count}} προωθημένη αγγελία",
+      "promotedCount_other": "{{count}} προωθημένες αγγελίες",
       "distanceFromYou": "{{distance}} μακριά"
     },
     "agentRecommendations": {
@@ -403,7 +432,8 @@
     "tryAgain": "Δοκιμάστε ξανά",
     "aiTeaserTitle": "Θέλετε να μάθετε περισσότερα για αυτό το ακίνητο;",
     "aiTeaserSubtitle": "Αφήστε την τεχνητή μας νοημοσύνη να δημιουργήσει μια λεπτομερή αναφορά για τη γειτονιά — σχολεία, συγκοινωνίες, πάρκα, καταστήματα και τοπικές παροχές — σε λίγα δευτερόλεπτα.",
-    "coordinatesUnavailable": "Τα δεδομένα τοποθεσίας δεν είναι ακόμη διαθέσιμα για αυτό το ακίνητο, οπότε δεν μπορούμε να δημιουργήσουμε πληροφορίες."
+    "coordinatesUnavailable": "Τα δεδομένα τοποθεσίας δεν είναι ακόμη διαθέσιμα για αυτό το ακίνητο, οπότε δεν μπορούμε να δημιουργήσουμε πληροφορίες.",
+    "serviceUnavailable": "Η υπηρεσία AI δεν είναι προσωρινά διαθέσιμη. Δοκιμάστε ξανά αργότερα."
   },
   "photos": {
     "title": "Φωτογραφίες",
@@ -591,7 +621,17 @@
     "videoTour": "Περιήγηση με βίντεο",
     "enter3DTour": "Είσοδος σε περιήγηση 3D",
     "view3DMap": "3D χάρτης τοποθεσίας",
-    "seeOnFloorPlan": "Δείτε πού τραβήχτηκε αυτή η φωτογραφία στην κάτοψη"
+    "seeOnFloorPlan": "Δείτε πού τραβήχτηκε αυτή η φωτογραφία στην κάτοψη",
+    "viewImages": "Προβολή φωτογραφιών ακινήτου",
+    "videoEmbedNotSupported": "Αυτός ο σύνδεσμος βίντεο δεν μπορεί να ενσωματωθεί απευθείας",
+    "openVideo": "Άνοιγμα βίντεο",
+    "prevImage": "Προηγούμενη εικόνα",
+    "nextImage": "Επόμενη εικόνα",
+    "forRent": "Ενοικίαση",
+    "forSale": "Πώληση",
+    "backToPhotos": "Πίσω στις φωτογραφίες",
+    "forRentLong": "Προς ενοικίαση",
+    "forSaleLong": "Προς πώληση"
   },
   "viewings": {
     "title": "Αιτήματα Επίσκεψης",
@@ -630,7 +670,9 @@
       "done": "Τέλος",
       "save": "Αποθήκευση",
       "hint": "Σχεδιάστε στην εικόνα για να προσθέσετε σχόλια",
-      "sendToChat": "Αποστολή"
+      "sendToChat": "Αποστολή",
+      "sendError": "Σφάλμα",
+      "sendFailed": "Η αποστολή της σχολιασμένης εικόνας απέτυχε."
     },
     "ariaLabel": "Πρόγραμμα προβολής εικόνων: {{current}} από {{total}}",
     "close": "Κλείσιμο προγράμματος προβολής εικόνων",
@@ -807,5 +849,145 @@
     "perMonthNote": "Μηνιαία ενοίκια · τα εβδομαδιαία μετατράπηκαν",
     "perNightNote": "Μόνο βραχυχρόνιες μισθώσεις",
     "villasIncluded": "Μαζί με άλλες βίλες"
+  },
+  "similarProperties": {
+    "agencyTitle": "Περισσότερα από {{agency}}",
+    "titleRent": "Παρόμοιες ενοικιάσεις σε {{city}}",
+    "title": "Παρόμοια ακίνητα σε {{city}}",
+    "agencySubtitle": "Άλλες αγγελίες από {{agency}}",
+    "subtitle": "Δείτε περισσότερα {{type}} για {{action}} σε {{city}}, {{country}}"
+  },
+  "socialVideo": {
+    "title": "Βίντεο ακινήτου",
+    "embedFailed": "Δεν ήταν δυνατή η φόρτωση του βίντεο",
+    "openIn": "Άνοιγμα στο {{platform}}"
+  },
+  "specs": {
+    "beds": "Υπνοδωμάτια",
+    "baths": "Μπάνια"
+  },
+  "ai": {
+    "swipeDone": "Αποθηκεύτηκαν {{count}} ακίνητα!",
+    "swipeNoneSaved": "Δεν αποθηκεύτηκε κανένα ακίνητο",
+    "swipeCheckFavorites": "Δείτε τα αγαπημένα σας για να τα συγκρίνετε",
+    "swipeTryAgain": "Δοκιμάστε διαφορετική αναζήτηση για να βρείτε το ακίνητο των ονείρων σας",
+    "goToFavorites": "Μετάβαση στα αγαπημένα",
+    "backToChat": "Πίσω στη συνομιλία",
+    "swipeTitle": "Οι αντιστοιχίες σας",
+    "saved": "αποθηκεύτηκαν",
+    "swipeHint": "Σύρετε δεξιά για αποθήκευση, αριστερά για παράλειψη"
+  },
+  "priceDrop": "ΜΕΙΩΣΗ ΤΙΜΗΣ",
+  "priceUp": "ΑΥΞΗΣΗ ΤΙΜΗΣ",
+  "errors": {
+    "errorTitle": "Σφάλμα",
+    "saveFailed": "Η αποθήκευση του ακινήτου απέτυχε. Δοκιμάστε ξανά.",
+    "conversationFailed": "Η έναρξη συνομιλίας απέτυχε. Δοκιμάστε ξανά."
+  },
+  "viewDetails": "Προβολή λεπτομερειών",
+  "source": {
+    "viewOriginal": "Προβολή στο {{source}}",
+    "listedOn": "Δημοσιεύτηκε στο {{source}}"
+  },
+  "inquiry": {
+    "nameRequired": "Το όνομα είναι υποχρεωτικό",
+    "validEmailRequired": "Απαιτείται έγκυρο email",
+    "messageRequired": "Το μήνυμα είναι υποχρεωτικό",
+    "sendError": "Η αποστολή του αιτήματος απέτυχε. Δοκιμάστε ξανά.",
+    "title": "Αποστολή αιτήματος",
+    "successTitle": "Το αίτημα στάλθηκε!",
+    "successMessage": "Το μήνυμά σας στάλθηκε στον ιδιοκτήτη. Θα επικοινωνήσει μαζί σας σύντομα.",
+    "yourName": "Το όνομά σας",
+    "yourEmail": "Το email σας",
+    "yourPhone": "Το τηλέφωνό σας (προαιρετικό)",
+    "message": "Το μήνυμά σας",
+    "template1": "Γεια σας, ενδιαφέρομαι για αυτό το ακίνητο. Είναι ακόμη διαθέσιμο; Θα ήθελα να κανονίσω μια επίσκεψη.",
+    "scheduleViewing": "Προγραμματισμός επίσκεψης",
+    "template2": "Γεια σας, θα ήθελα περισσότερες πληροφορίες για αυτό το ακίνητο. Μπορείτε να μου δώσετε λεπτομέρειες για τη γειτονιά και τις παροχές της περιοχής;",
+    "moreInfo": "Περισσότερες πληροφορίες",
+    "template3": "Γεια σας, η τιμή είναι διαπραγματεύσιμη; Είμαι σοβαρός αγοραστής και θέλω να αποφασίσω σύντομα.",
+    "priceQuestion": "Διαπραγματεύσιμη τιμή;",
+    "sending": "Αποστολή...",
+    "sendInquiry": "Αποστολή αιτήματος",
+    "privacyNote": "Υποβάλλοντας, συμφωνείτε να επικοινωνήσει μαζί σας ο ιδιοκτήτης σχετικά με αυτή την αγγελία."
+  },
+  "priceHistorySection": {
+    "pricingSchedule": "Πρόγραμμα τιμών",
+    "ongoing": "Σε εξέλιξη",
+    "perMonth": "/μήνα",
+    "current": "Τρέχον",
+    "changeHistory": "Ιστορικό αλλαγών τιμής",
+    "listedBadge": "Καταχωρήθηκε",
+    "currentPrice": "Τρέχουσα τιμή",
+    "listedAt": "Αρχική τιμή",
+    "totalChange": "Συνολική μεταβολή",
+    "pricePerSqm": "Τιμή / m²",
+    "lastChanged": "Τελευταία αλλαγή",
+    "listed": "Καταχωρήθηκε",
+    "today": "Σήμερα",
+    "daysAgo": "πριν από {{count}} ημ.",
+    "changesRecorded": "Καταγεγραμμένες αλλαγές: {{count}}",
+    "priceTrend": "Τάση τιμής",
+    "changeMagnitude": "Μέγεθος μεταβολής",
+    "pricePerSqmTrend": "Τάση τιμής ανά m²",
+    "valuesInEurPerSqm": "Τιμές σε €/m²",
+    "title": "Ιστορικό τιμής",
+    "records": "Εγγραφές: {{count}}"
+  },
+  "ui": {
+    "imageViewerModal": {
+      "zoomOut": "Σμίκρυνση",
+      "resetZoom": "Επαναφορά ζουμ",
+      "zoomIn": "Μεγέθυνση",
+      "toggleAnnotationMode": "Εναλλαγή λειτουργίας σχολιασμού",
+      "undoLastStroke": "Αναίρεση τελευταίας γραμμής",
+      "clearAllAnnotations": "Διαγραφή όλων των σχολίων",
+      "downloadAnnotatedImage": "Λήψη σχολιασμένης εικόνας",
+      "sendAnnotatedImageToChat": "Αποστολή σχολιασμένης εικόνας στη συνομιλία"
+    },
+    "propertyGuide": {
+      "closeGuide": "Κλείσιμο οδηγού",
+      "previousTip": "Προηγούμενη συμβουλή",
+      "nextTip": "Επόμενη συμβουλή",
+      "propertyGuideMascotClickFor": "Μασκότ οδηγός - κάντε κλικ για συμβουλές, δεξί κλικ για γρήγορες ενέργειες"
+    },
+    "propertyCard": {
+      "previousImage": "Προηγούμενη εικόνα",
+      "nextImage": "Επόμενη εικόνα",
+      "luxuryVilla": "ΠΟΛΥΤΕΛΗΣ ΒΙΛΑ",
+      "promoted": "ΠΡΟΩΘΗΜΕΝΗ",
+      "perM": "ανά m²",
+      "wineCellar": "Κελάρι κρασιών",
+      "seaView": "Θέα στη θάλασσα",
+      "cityView": "Θέα στην πόλη",
+      "gardenView": "Θέα στον κήπο",
+      "streetView": "Θέα στον δρόμο",
+      "failedToSavePropertyPlease": "Η αποθήκευση του ακινήτου απέτυχε. Δοκιμάστε ξανά.",
+      "youCanCompareAMaximum": "Μπορείτε να συγκρίνετε έως 5 ακίνητα."
+    },
+    "socialVideoEmbed": {
+      "loadingTiktokVideo": "Φόρτωση βίντεο TikTok...",
+      "instagramVideo": "Βίντεο Instagram"
+    },
+    "propertyGallery": {
+      "loadingTiktokVideo": "Φόρτωση βίντεο TikTok...",
+      "propertyVideoTour": "Βίντεο ξενάγηση ακινήτου"
+    },
+    "propertyCommon": {
+      "moreFeatures": "ακόμη χαρακτηριστικά"
+    },
+    "propertyMapLink": {
+      "loadingMap": "Φόρτωση χάρτη..."
+    },
+    "highlightedPropertyCard": {
+      "perM": "ανά m²",
+      "failedToSavePropertyPlease": "Η αποθήκευση του ακινήτου απέτυχε. Δοκιμάστε ξανά."
+    },
+    "neighborhoodInsights": {
+      "anUnknownErrorOccurred": "Παρουσιάστηκε άγνωστο σφάλμα."
+    },
+    "imageEditorModal": {
+      "iHaveSomeQuestionsAbout": "Έχω κάποιες ερωτήσεις για αυτό το ακίνητο. Δείτε τις σημειώσεις μου:"
+    }
   }
 }

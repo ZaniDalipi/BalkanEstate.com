@@ -262,22 +262,22 @@ const CookiePolicyPage: React.FC = () => {
             <ul className="space-y-2 ml-4">
               <li>
                 <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Google Chrome
+                  {t('legal:ui.cookiePolicyPage.googleChrome', 'Google Chrome')}
                 </a>
               </li>
               <li>
                 <a href="https://support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Mozilla Firefox
+                  {t('legal:ui.cookiePolicyPage.mozillaFirefox', 'Mozilla Firefox')}
                 </a>
               </li>
               <li>
                 <a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Safari
+                  {t('legal:ui.cookiePolicyPage.safari', 'Safari')}
                 </a>
               </li>
               <li>
                 <a href="https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Microsoft Edge
+                  {t('legal:ui.cookiePolicyPage.microsoftEdge', 'Microsoft Edge')}
                 </a>
               </li>
             </ul>
@@ -313,8 +313,8 @@ const CookiePolicyPage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
-              <p className="text-gray-700">Email: {CONTACT_CONFIG.email.privacy}</p>
-              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
+              <p className="text-gray-700">{t('legal:ui.cookiePolicyPage.email', 'Email:')} {CONTACT_CONFIG.email.privacy}</p>
+              <p className="text-gray-700">{t('legal:ui.cookiePolicyPage.phone', 'Phone:')} {CONTACT_CONFIG.phone.primary}</p>
             </div>
           </section>
             </div>

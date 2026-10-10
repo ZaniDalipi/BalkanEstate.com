@@ -68,7 +68,16 @@
     "saleStatusAvailable": "De vânzare",
     "saleStatusSold": "Vândute",
     "saleStatusAll": "Ambele",
-    "saleStatusHint": "Locuințele vândute își arată ultimul preț și când s-au vândut — deschideți una pentru a vedea prețurile din jur."
+    "saleStatusHint": "Locuințele vândute își arată ultimul preț și când s-au vândut — deschideți una pentru a vedea prețurile din jur.",
+    "filters": "Filtre",
+    "pricePerSqm": "Preț pe m²",
+    "daysOnMarket": "Publicat în",
+    "last24h": "Ultimele 24 de ore",
+    "last3Days": "Ultimele 3 zile",
+    "last7Days": "Ultimele 7 zile",
+    "last30Days": "Ultimele 30 de zile",
+    "priceReduced": "Preț redus",
+    "priceIncreased": "Preț crescut"
   },
   "options": {
     "any": "Oricare",
@@ -172,7 +181,8 @@
     "tryDifferent": "Încercați să ajustați filtrele sau criteriile de căutare",
     "inArea": "în zona {{area}}",
     "forSale": "de vânzare",
-    "forRent": "de închiriat"
+    "forRent": "de închiriat",
+    "resetHint": "Resetează filtrele pentru a vedea toate proprietățile din această zonă"
   },
   "map": {
     "showMap": "Hartă",
@@ -282,7 +292,26 @@
       "title": "Desenați-vă propria zonă",
       "subtitle": "Desenați o formă pe hartă pentru a căuta doar în interiorul ei",
       "dismiss": "Închide sugestia"
-    }
+    },
+    "loadingTimeout": "Harta se încarcă prea greu",
+    "loadingTimeoutDesc": "Harta se încarcă mai greu decât de obicei. Cauza poate fi o conexiune lentă.",
+    "useAlternative": "Folosește harta alternativă",
+    "saveMeasurement": "Salvează măsurătoarea",
+    "measurementName": "Nume",
+    "measurementNamePlaceholder": "ex., Teren de grădină, teren de construcție...",
+    "measurementLocation": "Locație / Adresă",
+    "measurementLocationPlaceholder": "ex., Lângă Lacul Ohrid, Albania...",
+    "measurementNotes": "Note",
+    "measurementNotesPlaceholder": "Orice detalii suplimentare...",
+    "measurementUsage": "Măsurători salvate",
+    "saveFailed": "Nu s-a putut salva",
+    "limitReached": "Limită atinsă",
+    "saveToProfile": "Salvează în profil",
+    "cluster": {
+      "zoomIn": "{{count}} proprietăți aici — activează pentru a mări și a le vedea pe toate"
+    },
+    "resetView": "Resetează vizualizarea",
+    "loading": "Se încarcă harta..."
   },
   "newsletter": {
     "title": "Fiți la Curent cu Proprietăți Noi",
@@ -450,7 +479,7 @@
     "create": "Creează Alertă",
     "manage": "Gestionează Alertele",
     "frequency": {
-      "instant": "Instant",
+      "instant": "Instantaneu",
       "daily": "Zilnic",
       "weekly": "Săptămânal"
     },
@@ -508,5 +537,116 @@
     "showingPromoted": "Între timp, iată anunțuri premium și evidențiate din alte zone.",
     "showingNearestIn": "Între timp, iată cele mai apropiate anunțuri, în {{location}}.",
     "nothingPromoted": "Încercați să micșorați sau să mutați harta ori să resetați filtrele."
+  },
+  "showingInArea": "Nimic nu corespunde cu „{{query}}” — afișăm ce este disponibil în această zonă",
+  "ui": {
+    "measurementTool": {
+      "startPointClickToClose": "🎯 Punct de start (clic pentru a închide)",
+      "fromPrev": "de la anterioara",
+      "measure": "Măsoară",
+      "viewingSavedMeasurement": "Vizualizezi o măsurătoare salvată",
+      "clickMapToAddPoints": "Dă clic pe hartă pentru a adăuga puncte",
+      "pts": "Puncte:",
+      "cursor": "+cursor:",
+      "area": "Suprafață:",
+      "startNewMeasurement": "✏️ Începe o măsurătoare nouă",
+      "undo": "↩ Anulează",
+      "clear": "Șterge",
+      "closePolygon": "🔷 Închide poligonul",
+      "save": "💾 Salvează",
+      "saveMeasurement": "💾 Salvează măsurătoarea",
+      "type": "Tip:",
+      "area2": "🔷 Suprafață",
+      "distance": "📏 Distanță",
+      "points": "Puncte:",
+      "perimeter": "Perimetru:",
+      "distance2": "Distanță:",
+      "logInToSaveMeasurements": "Autentifică-te pentru a salva măsurătorile în profil. Altfel, vor fi salvate local.",
+      "name": "Nume",
+      "eGMyPropertyPlot": "ex., Terenul meu",
+      "location": "Locație",
+      "eG123MainStreet": "ex., Strada Principală 123, Oraș",
+      "notesOptional": "Note (opțional)",
+      "addAnyNotesAboutThis": "Adaugă note despre această măsurătoare...",
+      "cancel": "Anulează",
+      "saveTo": "Salvează în",
+      "profile": "Profil",
+      "device": "Dispozitiv"
+    },
+    "googleMapMeasurement": {
+      "area": "📐 Suprafață",
+      "distance": "📍 Distanță",
+      "clickOnTheMapTo": "Dă clic pe hartă pentru a desena un poligon. Adaugă cel puțin 3 puncte.",
+      "clickOnTheMapTo2": "Dă clic pe hartă pentru a adăuga puncte și a măsura distanța.",
+      "area2": "Suprafață:",
+      "perimeter": "Perimetru:",
+      "distance2": "Distanță:",
+      "undo": "↩️ Anulează",
+      "save": "💾 Salvează",
+      "keep": "💾 Păstrează",
+      "new": "🗑️ Nou",
+      "youVeReachedTheFree": "⚠️ Ai atins limita gratuită. Treci la Pro pentru mai mult!",
+      "n1SlotRemainingUpgradeTo": "⚠️ A rămas 1 loc. Treci la Pro pentru mai multe măsurători."
+    },
+    "mapFilterControls": {
+      "mapStyle": "Stilul hărții",
+      "cleanMapStyleMinimalProperties": "Stil curat - minimalist, proprietățile ies în evidență",
+      "colorMapStyleShowsNeighborhoods": "Stil color - arată cartiere, parcuri, facilități",
+      "streetMapStyle": "Stil hartă stradală",
+      "satelliteAerialImagery": "Imagini din satelit",
+      "save": "Salvează",
+      "clear": "Șterge"
+    },
+    "searchPage": {
+      "loadingProperties": "Se încarcă proprietățile",
+      "openMenu": "Deschide meniul",
+      "openFilters": "Deschide filtrele",
+      "myAccount": "Contul meu",
+      "tapMap": "Atinge „Hartă”",
+      "viewToggle": "Comută vizualizarea"
+    },
+    "aiSearch": {
+      "agent": "👔 Agent",
+      "private": "👤 Persoană fizică",
+      "stopRecording": "Oprește înregistrarea",
+      "startVoiceAssistant": "Pornește asistentul vocal"
+    },
+    "mapComponent": {
+      "mapLoadingError": "Eroare la încărcarea hărții",
+      "unableToLoadTheMap": "Harta nu a putut fi încărcată. Poate fi o problemă temporară.",
+      "tryAgain": "Încearcă din nou (",
+      "left": "rămase)",
+      "useAlternativeMap": "Folosește harta alternativă"
+    },
+    "searchMobileFilters": {
+      "closeFilters": "Închide filtrele",
+      "reset": "Resetează",
+      "saveSearch": "Salvează căutarea",
+      "showResults": "Arată rezultatele"
+    },
+    "mapPropertyPopup": {
+      "closePopup": "Închide fereastra",
+      "propertyImage": "Imaginea proprietății",
+      "previousImage": "Imaginea anterioară",
+      "nextImage": "Imaginea următoare"
+    },
+    "propertyList": {
+      "signInToAccessAi": "Autentifică-te pentru căutarea cu AI"
+    },
+    "virtualizedPropertyGrid": {
+      "loadingMore": "Se încarcă mai multe..."
+    },
+    "mobileFiltersModal": {
+      "closeFilters": "Închide filtrele"
+    },
+    "propertyLocationMap": {
+      "locationDataUnavailable": "Datele de locație nu sunt disponibile."
+    },
+    "googleMapPropertyPopup": {
+      "closePopup": "Închide fereastra"
+    },
+    "climateRiskLayer": {
+      "veryHigh": "Foarte ridicat"
+    }
   }
 }

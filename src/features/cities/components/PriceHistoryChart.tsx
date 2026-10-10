@@ -7,6 +7,7 @@ import React, { useMemo, useState } from 'react';
 import type { QuarterlyPricePoint } from '@/src/shared/types/cityInsights.types';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon } from '@/constants';
 
+import { useTranslation } from 'react-i18next';
 export interface PriceHistoryChartProps {
   history: QuarterlyPricePoint[];
   dataSource: 'bis' | 'estimated';
@@ -26,6 +27,7 @@ const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
   fredUrl,
   city,
 }) => {
+  const { t } = useTranslation();
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   const { min, max, points, growthYoY, growth5y, latest } = useMemo(() => {
@@ -66,7 +68,7 @@ const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
   if (history.length === 0 || !latest) {
     return (
       <div className="h-72 flex items-center justify-center bg-neutral-50 rounded-xl">
-        <p className="text-neutral-400 text-sm">No price history available</p>
+        <p className="text-neutral-400 text-sm">{t('exploreCities:ui.priceHistoryChart.noPriceHistoryAvailable', 'No price history available')}</p>
       </div>
     );
   }
@@ -96,28 +98,28 @@ const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
         <div>
           <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
             <ChartBarIcon className="w-5 h-5 text-primary" />
-            8-Year Price History
+            {t('exploreCities:ui.priceHistoryChart.n8YearPriceHistory', '8-Year Price History')}
           </h3>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Quarterly €/m² for {city} — {dataSource === 'bis' ? 'BIS Residential Property Price Index' : 'estimated from regional data'}
+            {t('exploreCities:ui.priceHistoryChart.quarterlyMFor', 'Quarterly €/m² for')} {city} — {dataSource === 'bis' ? t('exploreCities:ui.priceHistoryChart.bisResidentialPropertyPriceIndex', 'BIS Residential Property Price Index') : t('exploreCities:ui.priceHistoryChart.estimatedFromRegionalData', 'estimated from regional data')}
           </p>
         </div>
         <div className="flex gap-2">
           <div className="px-3 py-1.5 rounded-lg bg-neutral-50 border border-neutral-200">
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">YoY</p>
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">{t('exploreCities:ui.priceHistoryChart.yoy', 'YoY')}</p>
             <p className={`text-sm font-black flex items-center gap-1 ${isGrowing ? 'text-green-600' : 'text-red-500'}`}>
               {isGrowing ? <ArrowTrendingUpIcon className="w-3.5 h-3.5" /> : <ArrowTrendingDownIcon className="w-3.5 h-3.5" />}
               {isGrowing ? '+' : ''}{growthYoY}%
             </p>
           </div>
           <div className="px-3 py-1.5 rounded-lg bg-neutral-50 border border-neutral-200">
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">5-Year</p>
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">{t('exploreCities:ui.priceHistoryChart.n5Year', '5-Year')}</p>
             <p className={`text-sm font-black ${growth5y >= 0 ? 'text-green-600' : 'text-red-500'}`}>
               {growth5y >= 0 ? '+' : ''}{growth5y}%
             </p>
           </div>
           <div className="px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/20">
-            <p className="text-[10px] uppercase tracking-wider text-primary/70 font-semibold">Current</p>
+            <p className="text-[10px] uppercase tracking-wider text-primary/70 font-semibold">{t('exploreCities:ui.priceHistoryChart.current', 'Current')}</p>
             <p className="text-sm font-black text-primary">€{latest.pricePerSqm.toLocaleString()}/m²</p>
           </div>
         </div>
@@ -218,9 +220,9 @@ const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
 
       {/* Footer with source */}
       <div className="mt-3 flex items-center justify-between text-[10px] text-neutral-400">
-        <span>{history.length} quarterly observations</span>
+        <span>{history.length} {t('exploreCities:ui.priceHistoryChart.quarterlyObservations', 'quarterly observations')}</span>
         <span>
-          Source:{' '}
+          {t('exploreCities:ui.priceHistoryChart.source', 'Source:')}{' '}
           {fredUrl ? (
             <a
               href={fredUrl}
@@ -228,10 +230,10 @@ const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
               rel="noopener noreferrer"
               className="text-blue-500 hover:underline"
             >
-              FRED · BIS Residential Property Price Index ↗
+              {t('exploreCities:ui.priceHistoryChart.fredBisResidentialPropertyPrice', 'FRED · BIS Residential Property Price Index ↗')}
             </a>
           ) : (
-            'estimated from regional comparable cities'
+            t('exploreCities:ui.priceHistoryChart.estimatedFromRegionalComparableCities', 'estimated from regional comparable cities')
           )}
         </span>
       </div>

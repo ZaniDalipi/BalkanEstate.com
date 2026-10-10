@@ -222,5 +222,6 @@
     "cardLabel": "Πολυτελείς βίλες σε {{place}}, {{country}}",
     "seeAll": "Δείτε όλα",
     "photoWikimedia": "© Wikimedia Commons"
-  }
+  },
+  "showingInArea": "Καμία βίλα δεν ταιριάζει με «{{query}}» — εμφανίζουμε ό,τι είναι διαθέσιμο σε αυτή την περιοχή"
 }

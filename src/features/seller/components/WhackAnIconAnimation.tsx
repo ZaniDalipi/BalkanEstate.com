@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BedIcon, BathIcon, LivingRoomIcon, SqftIcon, ParkingIcon, CubeIcon } from '@/constants';
 
+import { useTranslation } from 'react-i18next';
 const icons = [
     { id: 1, icon: <BedIcon className="w-8 h-8 text-primary" /> },
     { id: 2, icon: <BathIcon className="w-8 h-8 text-primary" /> },
@@ -23,6 +24,7 @@ interface WhackAnIconAnimationProps {
 }
 
 const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loading', onGameEnd, description }) => {
+  const { t } = useTranslation();
     const [activeMole, setActiveMole] = useState<number | null>(null);
     const [score, setScore] = useState(0);
     const [hitIndex, setHitIndex] = useState<number | null>(null);
@@ -152,9 +154,9 @@ const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loa
             const percentage = totalMoles > 0 ? Math.round((score / totalMoles) * 100) : 0;
             return (
                 <div className="text-center animate-fade-in">
-                    <h3 className="text-2xl font-bold text-primary">Game Over!</h3>
-                    <p className="text-lg mt-2">Your Score: <span className="font-bold">{score} / {totalMoles} ({percentage}%)</span></p>
-                    <p className="mt-4 text-neutral-600">Calculating your reward...</p>
+                    <h3 className="text-2xl font-bold text-primary">{t('seller:ui.whackAnIconAnimation.gameOver', 'Game Over!')}</h3>
+                    <p className="text-lg mt-2">{t('seller:ui.whackAnIconAnimation.yourScore', 'Your Score:')} <span className="font-bold">{score} / {totalMoles} ({percentage}%)</span></p>
+                    <p className="mt-4 text-neutral-600">{t('seller:ui.whackAnIconAnimation.calculatingYourReward', 'Calculating your reward...')}</p>
                 </div>
             );
         }
@@ -187,11 +189,11 @@ const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loa
                 </div>
                 {mode === 'game' && (
                      <div className="absolute -top-4 left-0 bg-primary text-white font-bold px-4 py-2 rounded-lg shadow-lg">
-                        Time: {timeLeft}s
+                        {t('seller:ui.whackAnIconAnimation.time', 'Time:')} {timeLeft}s
                     </div>
                 )}
                 <div className="absolute -top-4 -right-4 bg-secondary text-white font-bold px-4 py-2 rounded-lg shadow-lg">
-                    Score: {score}
+                    {t('seller:ui.whackAnIconAnimation.score', 'Score:')} {score}
                 </div>
             </div>
         )
@@ -200,10 +202,10 @@ const WhackAnIconAnimation: React.FC<WhackAnIconAnimationProps> = ({ mode = 'loa
     return (
         <div className="flex flex-col items-center justify-center py-8 w-full">
             <h3 className="text-lg sm:text-xl font-bold text-neutral-800">
-                {mode === 'game' ? 'Whack-an-Icon!' : 'Analyzing Property...'}
+                {mode === 'game' ? t('seller:ui.whackAnIconAnimation.whackAnIcon', 'Whack-an-Icon!') : t('seller:ui.whackAnIconAnimation.analyzingProperty', 'Analyzing Property...')}
             </h3>
             <p className="text-neutral-600 mt-2 mb-6 max-w-sm mx-auto text-center">
-                {mode === 'game' && description ? description : mode === 'game' && onGameEnd ? `You have ${GAME_DURATION} seconds to click as many icons as you can. Your score determines your discount!` : 'Our AI is hard at work. Feel free to play a game while you wait!'}
+                {mode === 'game' && description ? description : mode === 'game' && onGameEnd ? `You have ${GAME_DURATION} seconds to click as many icons as you can. Your score determines your discount!` : t('seller:ui.whackAnIconAnimation.ourAiIsHardAt', 'Our AI is hard at work. Feel free to play a game while you wait!')}
             </p>
             {renderGameContent()}
         </div>

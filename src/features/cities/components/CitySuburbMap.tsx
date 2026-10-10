@@ -30,6 +30,7 @@ import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import { getTileLayer } from '@/config/mapStyles';
 import { tessellateDistricts } from '../utils/districtTessellation';
 
+import { useTranslation } from 'react-i18next';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface CitySuburbMapProps {
@@ -220,6 +221,7 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
   officialAvgPrice,
   officialSource = 'BIS',
 }) => {
+  const { t } = useTranslation();
   const layerRef = useRef<GeoJSONLayer | null>(null);
   const [priceMode, setPriceMode] = useState<'ai' | 'official'>('ai');
 
@@ -418,7 +420,7 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
   if (!suburbs.length) {
     return (
       <div className="h-64 sm:h-80 lg:h-[500px] flex items-center justify-center bg-neutral-100 rounded-xl">
-        <p className="text-neutral-400 text-sm">No suburb data available</p>
+        <p className="text-neutral-400 text-sm">{t('exploreCities:ui.citySuburbMap.noSuburbDataAvailable', 'No suburb data available')}</p>
       </div>
     );
   }
@@ -440,7 +442,7 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
                 : 'text-neutral-500 hover:text-neutral-700'
             }`}
           >
-            Estimate
+            {t('exploreCities:ui.citySuburbMap.estimate', 'Estimate')}
           </button>
           <button
             onClick={() => setPriceMode('official')}
@@ -464,7 +466,7 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
               : 'bg-violet-100 text-violet-700'
           }`}
         >
-          {usingRealBoundaries ? '📍 OSM boundaries' : '◇ Approx. districts'}
+          {usingRealBoundaries ? t('exploreCities:ui.citySuburbMap.osmBoundaries', '📍 OSM boundaries') : t('exploreCities:ui.citySuburbMap.approxDistricts', '◇ Approx. districts')}
         </span>
       </div>
 
@@ -542,13 +544,13 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
             </div>
             <div className="flex items-center gap-1.5 mt-1.5">
               <div className="w-4 h-3 rounded-sm" style={{ background: CHORO.noData }} />
-              <span className="text-[9px] text-neutral-400">No data</span>
+              <span className="text-[9px] text-neutral-400">{t('exploreCities:ui.citySuburbMap.noData', 'No data')}</span>
             </div>
           </>
         ) : (
           <>
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-              {usingRealBoundaries ? 'Districts' : 'Approx. districts'}
+              {usingRealBoundaries ? t('exploreCities:ui.citySuburbMap.districts', 'Districts') : t('exploreCities:ui.citySuburbMap.approxDistricts2', 'Approx. districts')}
             </div>
             <div className="flex flex-wrap gap-1" style={{ maxWidth: 120 }}>
               {PALETTE.map((c, i) => (

@@ -356,10 +356,10 @@ const AvatarCustomizer: React.FC<AvatarCustomizerProps> = ({
         isOpen={showCloseConfirmation}
         onClose={() => setShowCloseConfirmation(false)}
         onConfirm={() => { setShowCloseConfirmation(false); onClose(); }}
-        title="Discard Changes?"
-        message="You have unsaved avatar changes. Are you sure you want to close?"
-        confirmLabel="Discard"
-        cancelLabel="Keep Editing"
+        title={t('common:ui.avatarCustomizer.discardChanges', 'Discard Changes?')}
+        message={t('common:ui.avatarCustomizer.youHaveUnsavedAvatarChanges', 'You have unsaved avatar changes. Are you sure you want to close?')}
+        confirmLabel={t('common:ui.avatarCustomizer.discard', 'Discard')}
+        cancelLabel={t('common:ui.avatarCustomizer.keepEditing', 'Keep Editing')}
         type="danger"
         cancelPrimary
       />

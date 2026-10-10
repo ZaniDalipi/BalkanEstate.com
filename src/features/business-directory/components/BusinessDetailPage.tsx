@@ -987,7 +987,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
                     {listing.yearEstablished && (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg text-xs font-medium text-blue-600">
                         <ClockIcon className="w-3.5 h-3.5" />
-                        {t('detail.established', { year: listing.yearEstablished, defaultValue: `Est. ${listing.yearEstablished}` })}
+                        {t('detail.established', { year: listing.yearEstablished, defaultValue: 'Est. {{year}}' })}
                       </span>
                     )}
                     {listing.priceRange && (

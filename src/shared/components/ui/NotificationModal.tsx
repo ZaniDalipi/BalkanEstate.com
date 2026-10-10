@@ -132,7 +132,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10"
-          aria-label="Close"
+          aria-label={t('common:ui.notificationModal.close', 'Close')}
         >
           <XMarkIcon className="w-5 h-5" />
         </button>

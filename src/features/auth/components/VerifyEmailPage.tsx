@@ -157,7 +157,7 @@ const VerifyEmailPage: React.FC<VerifyEmailPageProps> = ({ onVerificationComplet
               {t('auth:verifyEmail.checkEmail', 'Check Your Email')}
             </h3>
             <p className="text-gray-600 mb-4">
-              {t('auth:verifyEmail.emailSent', `We've sent a new verification email to ${resendEmail}. Please check your inbox and spam folder.`)}
+              {t('auth:verifyEmail.emailSent', { email: resendEmail, defaultValue: "We've sent a new verification email to {{email}}. Please check your inbox and spam folder." })}
             </p>
             <button
               onClick={() => { setResendSuccess(false); setResendEmail(''); }}

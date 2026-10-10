@@ -21,7 +21,9 @@
     "messages": "Μηνύματα",
     "myAccount": "Ο Λογαριασμός μου",
     "howItWorks": "Πώς Λειτουργεί",
-    "blog": "Ιστολόγιο"
+    "blog": "Ιστολόγιο",
+    "contactUs": "Επικοινωνία",
+    "valuation": "Εκτίμηση ακινήτου"
   },
   "countries": {
     "AL": "Αλβανία",
@@ -87,5 +89,12 @@
     "becomePartner": "Γίνετε συνεργάτης",
     "affiliates": "Συνεργάτες",
     "developers": "Για προγραμματιστές"
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Βρείτε μας στο Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Επαγγελματικές περιηγήσεις ακινήτων 360°",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - Περιηγήσεις ακινήτων 360°"
+    }
   }
 }

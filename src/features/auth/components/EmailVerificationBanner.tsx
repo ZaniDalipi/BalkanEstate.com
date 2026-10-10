@@ -39,7 +39,7 @@ const EmailVerificationBanner: React.FC<EmailVerificationBannerProps> = ({ email
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <p className="text-sm text-green-700">
-                {t('auth:verificationBanner.emailSent', `Verification email sent to ${email}. Please check your inbox.`)}
+                {t('auth:verificationBanner.emailSent', { email, defaultValue: 'Verification email sent to {{email}}. Please check your inbox.' })}
               </p>
             </div>
           </div>
@@ -81,7 +81,7 @@ const EmailVerificationBanner: React.FC<EmailVerificationBannerProps> = ({ email
               <button
                 onClick={onDismiss}
                 className="text-amber-600 hover:text-amber-800"
-                aria-label="Dismiss"
+                aria-label={t('auth:ui.emailVerificationBanner.dismiss', 'Dismiss')}
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

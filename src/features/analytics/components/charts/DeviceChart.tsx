@@ -5,6 +5,7 @@ import {
   GlobeAltIcon,
 } from '@/constants';
 
+import { useTranslation } from 'react-i18next';
 interface DeviceChartProps {
   desktop: number;
   mobile: number;
@@ -25,6 +26,7 @@ interface DeviceSegment {
  * Shows breakdown of views by device type with hover effects
  */
 const DeviceChart: React.FC<DeviceChartProps> = ({ desktop, mobile, tablet }) => {
+  const { t } = useTranslation();
   const total = desktop + mobile + tablet || 1;
   const [animated, setAnimated] = useState(false);
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
@@ -92,7 +94,7 @@ const DeviceChart: React.FC<DeviceChartProps> = ({ desktop, mobile, tablet }) =>
                   <div className="bg-neutral-800 text-white text-xs px-2 py-1.5 rounded shadow-lg whitespace-nowrap">
                     <div className="font-medium">{seg.label}</div>
                     <div className="text-neutral-300">{seg.value.toLocaleString()} views</div>
-                    <div className="text-neutral-400 text-[10px]">{Math.round(percentage)}% of total</div>
+                    <div className="text-neutral-400 text-[10px]">{Math.round(percentage)}{t('analytics:ui.deviceChart.ofTotal', '% of total')}</div>
                   </div>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
                     <div className="border-4 border-transparent border-t-neutral-800" />

@@ -189,7 +189,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 className="w-full px-3 py-2.5 rounded-xl border border-indigo-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
               >
                 {AD_PAGE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{t(`contact:adPages.${o.value}`, o.label)}</option>
                 ))}
               </select>
             </div>
@@ -205,7 +205,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 className="w-full px-3 py-2.5 rounded-xl border border-indigo-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
               >
                 {AD_PLACEMENT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value}>{t(`contact:adPlacements.${o.value}`, o.label)}</option>
                 ))}
               </select>
             </div>
@@ -221,7 +221,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 <div className="relative">
                   <img
                     src={formData.adImageUrl}
-                    alt="ad creative preview"
+                    alt={t('contact:ui.contactForm.adCreativePreview', 'ad creative preview')}
                     className="h-20 rounded-lg border border-indigo-200 object-contain bg-white"
                   />
                   {onAdImageClear && (

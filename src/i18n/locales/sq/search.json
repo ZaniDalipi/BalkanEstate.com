@@ -68,7 +68,16 @@
     "saleStatusAvailable": "Në shitje",
     "saleStatusSold": "Të shitura",
     "saleStatusAll": "Të dyja",
-    "saleStatusHint": "Shtëpitë e shitura tregojnë çmimin e fundit dhe kur u shitën — hapni një për të parë çmimet përreth saj."
+    "saleStatusHint": "Shtëpitë e shitura tregojnë çmimin e fundit dhe kur u shitën — hapni një për të parë çmimet përreth saj.",
+    "filters": "Filtrat",
+    "pricePerSqm": "Çmimi për m²",
+    "daysOnMarket": "Publikuar brenda",
+    "last24h": "24 orët e fundit",
+    "last3Days": "3 ditët e fundit",
+    "last7Days": "7 ditët e fundit",
+    "last30Days": "30 ditët e fundit",
+    "priceReduced": "Çmim i ulur",
+    "priceIncreased": "Çmim i rritur"
   },
   "options": {
     "any": "Çdo",
@@ -172,7 +181,8 @@
     "tryDifferent": "Provoni të ndryshoni filtrat ose kriteret e kërkimit",
     "inArea": "në {{area}}",
     "forSale": "për shitje",
-    "forRent": "me qira"
+    "forRent": "me qira",
+    "resetHint": "Rivendosni filtrat për të parë të gjitha pronat në këtë zonë"
   },
   "map": {
     "showMap": "Hartë",
@@ -282,7 +292,26 @@
       "title": "Vizatoni zonën tuaj",
       "subtitle": "Vizatoni një formë në hartë për të kërkuar vetëm brenda saj",
       "dismiss": "Mbyll këshillën"
-    }
+    },
+    "loadingTimeout": "Harta po vonon shumë",
+    "loadingTimeoutDesc": "Harta po zgjat më shumë se zakonisht. Kjo mund të ndodhë për shkak të një lidhjeje të ngadaltë.",
+    "useAlternative": "Përdor hartën alternative",
+    "saveMeasurement": "Ruaj matjen",
+    "measurementName": "Emri",
+    "measurementNamePlaceholder": "p.sh., Parcelë kopshti, truall ndërtimi...",
+    "measurementLocation": "Vendndodhja / Adresa",
+    "measurementLocationPlaceholder": "p.sh., Pranë liqenit të Ohrit, Shqipëri...",
+    "measurementNotes": "Shënime",
+    "measurementNotesPlaceholder": "Çdo detaj shtesë...",
+    "measurementUsage": "Matjet e ruajtura",
+    "saveFailed": "Nuk u ruajt",
+    "limitReached": "Kufiri u arrit",
+    "saveToProfile": "Ruaj në profil",
+    "cluster": {
+      "zoomIn": "{{count}} prona këtu — aktivizoni për t'u zmadhuar dhe për t'i parë të gjitha"
+    },
+    "resetView": "Rivendos pamjen",
+    "loading": "Po ngarkohet harta..."
   },
   "newsletter": {
     "title": "Qëndro i Përditësuar me Prona të Reja",
@@ -508,5 +537,116 @@
     "showingPromoted": "Ndërkohë, ja disa prona premium dhe të theksuara nga zona të tjera.",
     "showingNearestIn": "Ndërkohë, ja pronat më të afërta, në {{location}}.",
     "nothingPromoted": "Provoni të zvogëloni hartën, ta lëvizni atë ose të rivendosni filtrat."
+  },
+  "showingInArea": "Asgjë nuk përputhet me “{{query}}” — po shfaqim çfarë është e disponueshme në këtë zonë",
+  "ui": {
+    "measurementTool": {
+      "startPointClickToClose": "🎯 Pika e fillimit (kliko për të mbyllur)",
+      "fromPrev": "nga e mëparshmja",
+      "measure": "Mat",
+      "viewingSavedMeasurement": "Po shikoni një matje të ruajtur",
+      "clickMapToAddPoints": "Kliko hartën për të shtuar pika",
+      "pts": "Pika:",
+      "cursor": "+kursori:",
+      "area": "Sipërfaqja:",
+      "startNewMeasurement": "✏️ Fillo matje të re",
+      "undo": "↩ Zhbëj",
+      "clear": "Pastro",
+      "closePolygon": "🔷 Mbyll poligonin",
+      "save": "💾 Ruaj",
+      "saveMeasurement": "💾 Ruaj matjen",
+      "type": "Lloji:",
+      "area2": "🔷 Sipërfaqe",
+      "distance": "📏 Distancë",
+      "points": "Pikat:",
+      "perimeter": "Perimetri:",
+      "distance2": "Distanca:",
+      "logInToSaveMeasurements": "Hyni për t'i ruajtur matjet në profilin tuaj. Përndryshe, ato do të ruhen lokalisht.",
+      "name": "Emri",
+      "eGMyPropertyPlot": "p.sh., Parcela ime",
+      "location": "Vendndodhja",
+      "eG123MainStreet": "p.sh., Rruga Kryesore 123, Qyteti",
+      "notesOptional": "Shënime (opsionale)",
+      "addAnyNotesAboutThis": "Shtoni shënime për këtë matje...",
+      "cancel": "Anulo",
+      "saveTo": "Ruaj në",
+      "profile": "Profil",
+      "device": "Pajisje"
+    },
+    "googleMapMeasurement": {
+      "area": "📐 Sipërfaqe",
+      "distance": "📍 Distancë",
+      "clickOnTheMapTo": "Klikoni në hartë për të vizatuar një poligon. Shtoni të paktën 3 pika.",
+      "clickOnTheMapTo2": "Klikoni në hartë për të shtuar pika dhe për të matur distancën.",
+      "area2": "Sipërfaqja:",
+      "perimeter": "Perimetri:",
+      "distance2": "Distanca:",
+      "undo": "↩️ Zhbëj",
+      "save": "💾 Ruaj",
+      "keep": "💾 Mbaj",
+      "new": "🗑️ E re",
+      "youVeReachedTheFree": "⚠️ Keni arritur kufirin falas. Kaloni në Pro për më shumë!",
+      "n1SlotRemainingUpgradeTo": "⚠️ Ka mbetur 1 vend. Kaloni në Pro për më shumë matje."
+    },
+    "mapFilterControls": {
+      "mapStyle": "Stili i hartës",
+      "cleanMapStyleMinimalProperties": "Stil i pastër - minimal, pronat dallohen",
+      "colorMapStyleShowsNeighborhoods": "Stil me ngjyra - shfaq lagjet, parqet, shërbimet",
+      "streetMapStyle": "Stili i rrugëve",
+      "satelliteAerialImagery": "Pamje satelitore",
+      "save": "Ruaj",
+      "clear": "Pastro"
+    },
+    "searchPage": {
+      "loadingProperties": "Po ngarkohen pronat",
+      "openMenu": "Hap menunë",
+      "openFilters": "Hap filtrat",
+      "myAccount": "Llogaria ime",
+      "tapMap": "Prek \"Harta\"",
+      "viewToggle": "Ndrysho pamjen"
+    },
+    "aiSearch": {
+      "agent": "👔 Agjent",
+      "private": "👤 Privat",
+      "stopRecording": "Ndalo regjistrimin",
+      "startVoiceAssistant": "Nis asistentin zanor"
+    },
+    "mapComponent": {
+      "mapLoadingError": "Gabim në ngarkimin e hartës",
+      "unableToLoadTheMap": "Harta nuk mund të ngarkohet. Mund të jetë një problem i përkohshëm.",
+      "tryAgain": "Provo përsëri (",
+      "left": "të mbetura)",
+      "useAlternativeMap": "Përdor hartën alternative"
+    },
+    "searchMobileFilters": {
+      "closeFilters": "Mbyll filtrat",
+      "reset": "Rivendos",
+      "saveSearch": "Ruaj kërkimin",
+      "showResults": "Shfaq rezultatet"
+    },
+    "mapPropertyPopup": {
+      "closePopup": "Mbyll dritaren",
+      "propertyImage": "Foto e pronës",
+      "previousImage": "Fotoja e mëparshme",
+      "nextImage": "Fotoja tjetër"
+    },
+    "propertyList": {
+      "signInToAccessAi": "Hyni për të përdorur kërkimin me AI"
+    },
+    "virtualizedPropertyGrid": {
+      "loadingMore": "Po ngarkohen më shumë..."
+    },
+    "mobileFiltersModal": {
+      "closeFilters": "Mbyll filtrat"
+    },
+    "propertyLocationMap": {
+      "locationDataUnavailable": "Të dhënat e vendndodhjes nuk janë të disponueshme."
+    },
+    "googleMapPropertyPopup": {
+      "closePopup": "Mbyll dritaren"
+    },
+    "climateRiskLayer": {
+      "veryHigh": "Shumë i lartë"
+    }
   }
 }

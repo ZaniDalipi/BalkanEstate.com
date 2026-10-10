@@ -35,7 +35,17 @@
     "failedToUploadImage": "Încărcarea imaginii a eșuat. Vă rugăm încercați din nou.",
     "failedToSendMessage": "Trimiterea mesajului a eșuat. Vă rugăm încercați din nou.",
     "failedToDeleteConversation": "Ștergerea conversației a eșuat. Vă rugăm încercați din nou.",
-    "allConversations": "Toate conversațiile"
+    "allConversations": "Toate conversațiile",
+    "errorTitle": "Eroare",
+    "deleteTitle": "Șterge conversația",
+    "deleteButton": "Șterge",
+    "cancelButton": "Anulează",
+    "directConversation": "Conversație directă",
+    "directAgentConversation": "Conversație cu agentul",
+    "seller": "Vânzător",
+    "buyer": "Cumpărător",
+    "you": "Tu",
+    "image": "📷 Imagine"
   },
   "quickReplies": {
     "scheduleTour": "Programează o Vizită",
@@ -66,7 +76,13 @@
     "enable": "Activează",
     "enabling": "Se activează...",
     "later": "Mai târziu",
-    "dismiss": "Închide"
+    "dismiss": "Închide",
+    "error": "Activarea notificărilor a eșuat. Te rugăm să încerci din nou.",
+    "error_title": "Eroare de notificare",
+    "error_hint_devices": "Încearcă din nou sau elimină un dispozitiv mai vechi din setări.",
+    "error_hint_browser": "Verifică setările browserului și încearcă din nou.",
+    "error_hint_generic": "Te rugăm să încerci din nou.",
+    "close": "Închide"
   },
   "toast": {
     "success": "Succes!",
@@ -171,5 +187,14 @@
     "deleteFailed": "Ștergerea mesajului a eșuat",
     "connectionLost": "Conexiune pierdută. Reconectare...",
     "reconnected": "Conectat!"
+  },
+  "ui": {
+    "messageInput": {
+      "preview": "Previzualizare"
+    },
+    "conversationView": {
+      "annotatedProperty": "Proprietate adnotată",
+      "seller": "Vânzător"
+    }
   }
 }

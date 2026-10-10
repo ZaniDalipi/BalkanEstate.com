@@ -72,7 +72,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
               onClick={() => scroll('left')}
               disabled={!canScrollLeft}
               className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center transition-all hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-              aria-label="Scroll left"
+              aria-label={t('home:ui.recentlyViewedSection.scrollLeft', 'Scroll left')}
             >
               <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -82,7 +82,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
               onClick={() => scroll('right')}
               disabled={!canScrollRight}
               className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center transition-all hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-              aria-label="Scroll right"
+              aria-label={t('home:ui.recentlyViewedSection.scrollRight', 'Scroll right')}
             >
               <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />

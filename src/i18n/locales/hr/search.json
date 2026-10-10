@@ -68,7 +68,16 @@
     "saleStatusAvailable": "Na prodaju",
     "saleStatusSold": "Prodano",
     "saleStatusAll": "Oboje",
-    "saleStatusHint": "Prodane nekretnine prikazuju posljednju cijenu i kada su prodane — otvorite jednu da vidite cijene oko nje."
+    "saleStatusHint": "Prodane nekretnine prikazuju posljednju cijenu i kada su prodane — otvorite jednu da vidite cijene oko nje.",
+    "filters": "Filtri",
+    "pricePerSqm": "Cijena po m²",
+    "daysOnMarket": "Objavljeno u",
+    "last24h": "Posljednja 24 sata",
+    "last3Days": "Posljednja 3 dana",
+    "last7Days": "Posljednjih 7 dana",
+    "last30Days": "Posljednjih 30 dana",
+    "priceReduced": "Snižena cijena",
+    "priceIncreased": "Povećana cijena"
   },
   "options": {
     "any": "Bilo Koji",
@@ -172,7 +181,8 @@
     "tryDifferent": "Pokušajte prilagoditi filtere ili kriterije pretrage",
     "inArea": "u {{area}}",
     "forSale": "na prodaju",
-    "forRent": "za najam"
+    "forRent": "za najam",
+    "resetHint": "Poništite filtre da biste vidjeli sve nekretnine na ovom području"
   },
   "map": {
     "showMap": "Karta",
@@ -282,7 +292,26 @@
       "title": "Nacrtajte svoje područje",
       "subtitle": "Nacrtajte oblik na karti za pretragu samo unutar njega",
       "dismiss": "Zatvori savjet"
-    }
+    },
+    "loadingTimeout": "Karta se predugo učitava",
+    "loadingTimeoutDesc": "Karta se učitava dulje nego što je očekivano. Mogući uzrok je spora veza.",
+    "useAlternative": "Koristi alternativnu kartu",
+    "saveMeasurement": "Spremi mjerenje",
+    "measurementName": "Naziv",
+    "measurementNamePlaceholder": "npr., Vrtna parcela, građevinsko zemljište...",
+    "measurementLocation": "Lokacija / Adresa",
+    "measurementLocationPlaceholder": "npr., Blizu Ohridskog jezera, Albanija...",
+    "measurementNotes": "Bilješke",
+    "measurementNotesPlaceholder": "Dodatni detalji...",
+    "measurementUsage": "Spremljena mjerenja",
+    "saveFailed": "Spremanje nije uspjelo",
+    "limitReached": "Dosegnuto ograničenje",
+    "saveToProfile": "Spremi u profil",
+    "cluster": {
+      "zoomIn": "Ovdje ima nekretnina: {{count}} — aktivirajte za povećanje i prikaz svih"
+    },
+    "resetView": "Vrati prikaz",
+    "loading": "Učitava se karta..."
   },
   "newsletter": {
     "title": "Ostanite Ažurirani s Novim Nekretninama",
@@ -508,5 +537,116 @@
     "showingPromoted": "U međuvremenu, evo premium i istaknutih oglasa s drugih lokacija.",
     "showingNearestIn": "U međuvremenu, evo najbližih oglasa, u {{location}}.",
     "nothingPromoted": "Pokušajte umanjiti ili pomaknuti kartu ili poništiti filtre."
+  },
+  "showingInArea": "Ništa ne odgovara upitu „{{query}}” — prikazujemo što je dostupno na ovom području",
+  "ui": {
+    "measurementTool": {
+      "startPointClickToClose": "🎯 Početna točka (kliknite za zatvaranje)",
+      "fromPrev": "od prethodne",
+      "measure": "Mjeri",
+      "viewingSavedMeasurement": "Pregled spremljenog mjerenja",
+      "clickMapToAddPoints": "Kliknite na kartu za dodavanje točaka",
+      "pts": "Točke:",
+      "cursor": "+pokazivač:",
+      "area": "Površina:",
+      "startNewMeasurement": "✏️ Započni novo mjerenje",
+      "undo": "↩ Poništi",
+      "clear": "Očisti",
+      "closePolygon": "🔷 Zatvori poligon",
+      "save": "💾 Spremi",
+      "saveMeasurement": "💾 Spremi mjerenje",
+      "type": "Vrsta:",
+      "area2": "🔷 Površina",
+      "distance": "📏 Udaljenost",
+      "points": "Točke:",
+      "perimeter": "Opseg:",
+      "distance2": "Udaljenost:",
+      "logInToSaveMeasurements": "Prijavite se kako biste spremili mjerenja u profil. U suprotnom, spremit će se lokalno.",
+      "name": "Naziv",
+      "eGMyPropertyPlot": "npr., Moja parcela",
+      "location": "Lokacija",
+      "eG123MainStreet": "npr., Glavna ulica 123, Grad",
+      "notesOptional": "Bilješke (neobavezno)",
+      "addAnyNotesAboutThis": "Dodajte bilješke o ovom mjerenju...",
+      "cancel": "Odustani",
+      "saveTo": "Spremi u",
+      "profile": "Profil",
+      "device": "Uređaj"
+    },
+    "googleMapMeasurement": {
+      "area": "📐 Površina",
+      "distance": "📍 Udaljenost",
+      "clickOnTheMapTo": "Kliknite na kartu da biste nacrtali poligon. Dodajte najmanje 3 točke.",
+      "clickOnTheMapTo2": "Kliknite na kartu da biste dodali točke i izmjerili udaljenost.",
+      "area2": "Površina:",
+      "perimeter": "Opseg:",
+      "distance2": "Udaljenost:",
+      "undo": "↩️ Poništi",
+      "save": "💾 Spremi",
+      "keep": "💾 Zadrži",
+      "new": "🗑️ Novo",
+      "youVeReachedTheFree": "⚠️ Dosegnuli ste besplatno ograničenje. Prijeđite na Pro za više!",
+      "n1SlotRemainingUpgradeTo": "⚠️ Preostalo je 1 mjesto. Prijeđite na Pro za više mjerenja."
+    },
+    "mapFilterControls": {
+      "mapStyle": "Stil karte",
+      "cleanMapStyleMinimalProperties": "Čisti stil - minimalistički, nekretnine se ističu",
+      "colorMapStyleShowsNeighborhoods": "Stil u boji - prikazuje četvrti, parkove, sadržaje",
+      "streetMapStyle": "Stil ulica",
+      "satelliteAerialImagery": "Satelitske snimke",
+      "save": "Spremi",
+      "clear": "Očisti"
+    },
+    "searchPage": {
+      "loadingProperties": "Učitavaju se nekretnine",
+      "openMenu": "Otvori izbornik",
+      "openFilters": "Otvori filtre",
+      "myAccount": "Moj račun",
+      "tapMap": "Dodirnite „Karta“",
+      "viewToggle": "Promijeni prikaz"
+    },
+    "aiSearch": {
+      "agent": "👔 Agent",
+      "private": "👤 Privatno",
+      "stopRecording": "Zaustavi snimanje",
+      "startVoiceAssistant": "Pokreni glasovnog pomoćnika"
+    },
+    "mapComponent": {
+      "mapLoadingError": "Pogreška pri učitavanju karte",
+      "unableToLoadTheMap": "Kartu nije moguće učitati. Možda je riječ o privremenom problemu.",
+      "tryAgain": "Pokušaj ponovno (",
+      "left": "preostalo)",
+      "useAlternativeMap": "Koristi alternativnu kartu"
+    },
+    "searchMobileFilters": {
+      "closeFilters": "Zatvori filtre",
+      "reset": "Poništi",
+      "saveSearch": "Spremi pretraživanje",
+      "showResults": "Prikaži rezultate"
+    },
+    "mapPropertyPopup": {
+      "closePopup": "Zatvori skočni prozor",
+      "propertyImage": "Slika nekretnine",
+      "previousImage": "Prethodna slika",
+      "nextImage": "Sljedeća slika"
+    },
+    "propertyList": {
+      "signInToAccessAi": "Prijavite se za pristup AI pretraživanju"
+    },
+    "virtualizedPropertyGrid": {
+      "loadingMore": "Učitava se još..."
+    },
+    "mobileFiltersModal": {
+      "closeFilters": "Zatvori filtre"
+    },
+    "propertyLocationMap": {
+      "locationDataUnavailable": "Podaci o lokaciji nisu dostupni."
+    },
+    "googleMapPropertyPopup": {
+      "closePopup": "Zatvori skočni prozor"
+    },
+    "climateRiskLayer": {
+      "veryHigh": "Vrlo visok"
+    }
   }
 }
