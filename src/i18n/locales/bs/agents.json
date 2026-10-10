@@ -17,32 +17,32 @@
       "location": "Lokacija",
       "name": "Ime Agenta",
       "specialization": "Specijalizacija",
-      "all": "All"
+      "all": "Sve"
     },
     "placeholders": {
       "location": "Pretražite po gradu, četvrti ili državi...",
       "name": "Pretražite po imenu agenta...",
       "specialization": "Pretražite po specijalizaciji (npr., Luksuzno, Komercijalno)...",
-      "all": "Search by name, city, or specialty..."
+      "all": "Pretražujte po imenu, gradu ili specijalnosti..."
     },
     "clearSearch": "Očistite pretragu",
     "searchButton": "Pretraži",
     "popularSearches": "Popularne pretrage:",
     "viewAll": "Pogledaj Sve",
     "quickSearch": {
-      "topRated": "Top Rated",
-      "verified": "Verified",
-      "expert": "Expert",
-      "serbia": "Serbia",
-      "croatia": "Croatia",
-      "albania": "Albania",
-      "montenegro": "Montenegro",
-      "bosnia": "Bosnia",
-      "luxury": "Luxury",
-      "commercial": "Commercial",
-      "residential": "Residential",
-      "investment": "Investment",
-      "belgrade": "Belgrade",
+      "topRated": "Najbolje ocijenjeni",
+      "verified": "Verifikovani",
+      "expert": "Stručnjaci",
+      "serbia": "Srbija",
+      "croatia": "Hrvatska",
+      "albania": "Albanija",
+      "montenegro": "Crna Gora",
+      "bosnia": "Bosna",
+      "luxury": "Luksuzne",
+      "commercial": "Poslovne",
+      "residential": "Stambene",
+      "investment": "Investicije",
+      "belgrade": "Beograd",
       "zagreb": "Zagreb"
     }
   },
@@ -79,7 +79,11 @@
       "investment": "Investicije",
       "newConstruction": "Nova Izgradnja",
       "foreclosures": "Ovrhe"
-    }
+    },
+    "myAgentProfile": "Moj profil agenta",
+    "licensedFirst": "Prvo licencirani",
+    "licensedOnly": "Samo licencirani agenti",
+    "verified": "Verifikovani"
   },
   "results": {
     "title": "Agenti za Nekretnine na Balkanu",
@@ -88,7 +92,9 @@
     "showingMatchingPlural": "Prikazuje se {{count}} agenata koji odgovaraju \"{{query}}\"",
     "noAgentsFound": "Nije pronađen nijedan agent",
     "tryAdjusting": "Pokušajte prilagoditi kriterije pretrage",
-    "viewMore": "Pogledajte više"
+    "viewMore": "Pogledajte više",
+    "showMore": "Prikaži još agenata",
+    "showing": "Prikazano {{shown}} od {{total}} agenata"
   },
   "agencies": {
     "title": "Najbolje Agencije za Nekretnine",
@@ -150,139 +156,139 @@
     "years": "Godine",
     "certs": "Certifikati",
     "call": "Pozovi",
-    "email": "Email",
-    "website": "Website",
+    "email": "E-mail",
+    "website": "Web stranica",
     "viewProfile": "Pogledaj Profil",
     "view": "Pogledaj",
     "more": "+{{count}} više",
-    "universalSearchPlaceholder": "Search agencies...",
-    "search": "Search",
-    "verifiedAgencies": "Verified Agencies",
-    "premiumSupport": "Premium Support",
-    "rank1st": "1st",
-    "rank2nd": "2nd",
-    "rank3rd": "3rd",
-    "loginRequired": "Login Required",
-    "loginToCreateAgency": "Please login to create an agency.",
-    "alreadyHaveAgency": "You Already Have an Agency",
-    "viewYourAgency": "You are already part of an agency. View your agency from the filters above.",
-    "agentRequired": "Agent Status Required",
-    "becomeAgentFirst": "You must be a registered agent to create an agency. Please update your profile to become an agent first.",
-    "topAgencies": "Top Agencies",
+    "universalSearchPlaceholder": "Pretraži agencije...",
+    "search": "Pretraži",
+    "verifiedAgencies": "Verifikovane agencije",
+    "premiumSupport": "Premium podrška",
+    "rank1st": "1.",
+    "rank2nd": "2.",
+    "rank3rd": "3.",
+    "loginRequired": "Potrebna je prijava",
+    "loginToCreateAgency": "Prijavite se da biste napravili agenciju.",
+    "alreadyHaveAgency": "Već imate agenciju",
+    "viewYourAgency": "Već ste dio agencije. Pogledajte svoju agenciju preko filtera iznad.",
+    "agentRequired": "Potreban je status agenta",
+    "becomeAgentFirst": "Morate biti registrovani agent da biste napravili agenciju. Prvo ažurirajte profil da postanete agent.",
+    "topAgencies": "Najbolje agencije",
     "contact": {
-      "getInTouch": "Get in Touch",
-      "phone": "Phone",
-      "email": "Email",
-      "address": "Address"
+      "getInTouch": "Stupite u kontakt",
+      "phone": "Telefon",
+      "email": "E-mail",
+      "address": "Adresa"
     },
     "map": {
-      "noLocationData": "No agencies with location data found",
-      "street": "Street",
-      "satellite": "Satellite",
-      "legend": "Legend",
-      "regularAgency": "Regular Agency",
-      "featuredAgency": "Featured Agency"
+      "noLocationData": "Nisu pronađene agencije s podacima o lokaciji",
+      "street": "Ulice",
+      "satellite": "Satelit",
+      "legend": "Legenda",
+      "regularAgency": "Obična agencija",
+      "featuredAgency": "Istaknuta agencija"
     },
     "creation": {
-      "editTitle": "Edit Agency Details",
-      "createTitle": "Create Your Agency",
-      "enterpriseSubtitle": "You have an active Enterprise subscription! Set up your agency profile now.",
-      "editSubtitle": "Update your agency information before proceeding to payment",
-      "createSubtitle": "Set up your agency profile to showcase your team and properties",
-      "enterpriseActive": "Enterprise Subscription Active - No Payment Required",
-      "agentStatusRequired": "Agent Status Required",
-      "proSubscriptionRequired": "Pro Subscription Required",
-      "becomeAgentFirst": "Become an Agent First",
-      "upgradeToPro": "Upgrade to Pro",
-      "successTitle": "Agency Created!",
-      "successMessage": "Your agency \"{{name}}\" has been created successfully.",
-      "successMessageEnterprise": "Your agency \"{{name}}\" has been created successfully with your Enterprise subscription.",
-      "paymentSuccessButFailed": "Payment successful but failed to create agency. Please contact support.",
-      "paymentFailed": "Payment failed: {{error}}",
-      "createFailed": "Failed to create agency. Please try again.",
-      "creatingAgency": "Creating Agency...",
-      "createAgencyButton": "Create Agency",
-      "continueToPayment": "Continue to Payment",
+      "editTitle": "Uredi detalje agencije",
+      "createTitle": "Napravite svoju agenciju",
+      "enterpriseSubtitle": "Imate aktivnu Enterprise pretplatu! Podesite profil agencije sada.",
+      "editSubtitle": "Ažurirajte podatke o agenciji prije plaćanja",
+      "createSubtitle": "Podesite profil agencije da predstavite svoj tim i nekretnine",
+      "enterpriseActive": "Enterprise pretplata je aktivna - plaćanje nije potrebno",
+      "agentStatusRequired": "Potreban je status agenta",
+      "proSubscriptionRequired": "Potrebna je Pro pretplata",
+      "becomeAgentFirst": "Prvo postanite agent",
+      "upgradeToPro": "Pređi na Pro",
+      "successTitle": "Agencija je napravljena!",
+      "successMessage": "Vaša agencija „{{name}}“ je uspješno napravljena.",
+      "successMessageEnterprise": "Vaša agencija „{{name}}“ je uspješno napravljena uz Enterprise pretplatu.",
+      "paymentSuccessButFailed": "Plaćanje je uspjelo, ali pravljenje agencije nije. Kontaktirajte podršku.",
+      "paymentFailed": "Plaćanje nije uspjelo: {{error}}",
+      "createFailed": "Pravljenje agencije nije uspjelo. Pokušajte ponovo.",
+      "creatingAgency": "Pravi se agencija...",
+      "createAgencyButton": "Napravi agenciju",
+      "continueToPayment": "Nastavi na plaćanje",
       "validation": {
-        "nameRequired": "Agency name is required",
-        "cityCountryRequired": "City and country are required",
-        "emailRequired": "Email is required",
-        "invalidEmail": "Please enter a valid email address",
-        "invalidWebsite": "Website URL must start with http:// or https://"
+        "nameRequired": "Naziv agencije je obavezan",
+        "cityCountryRequired": "Grad i država su obavezni",
+        "emailRequired": "E-mail je obavezan",
+        "invalidEmail": "Unesite ispravnu e-mail adresu",
+        "invalidWebsite": "URL web stranice mora počinjati s http:// ili https://"
       },
       "sections": {
-        "basicInfo": "Basic Information",
-        "location": "Location",
-        "contactInfo": "Contact Information",
-        "professionalDetails": "Professional Details",
-        "socialMedia": "Social Media (Optional)",
-        "businessHours": "Business Hours (Optional)"
+        "basicInfo": "Osnovne informacije",
+        "location": "Lokacija",
+        "contactInfo": "Kontakt podaci",
+        "professionalDetails": "Profesionalni detalji",
+        "socialMedia": "Društvene mreže (opcionalno)",
+        "businessHours": "Radno vrijeme (opcionalno)"
       },
       "fields": {
-        "agencyName": "Agency Name",
-        "description": "Description",
-        "country": "Country",
-        "city": "City",
-        "streetAddress": "Street Address",
-        "email": "Email",
-        "phone": "Phone Number",
-        "websiteUrl": "Website URL",
-        "licenseNumber": "Agent License Number",
-        "yearsInBusiness": "Years in Business",
-        "languagesSpoken": "Languages Spoken"
+        "agencyName": "Naziv agencije",
+        "description": "Opis",
+        "country": "Država",
+        "city": "Grad",
+        "streetAddress": "Adresa",
+        "email": "E-mail",
+        "phone": "Broj telefona",
+        "websiteUrl": "URL web stranice",
+        "licenseNumber": "Broj licence agenta",
+        "yearsInBusiness": "Godina poslovanja",
+        "languagesSpoken": "Jezici koji se govore"
       },
       "placeholders": {
-        "agencyName": "e.g., Premier Real Estate Agency",
-        "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-        "selectCountry": "Select a country",
-        "selectCity": "Select a city",
-        "selectCountryFirst": "Select country first",
-        "streetAddress": "e.g., 123 Main Street, Building A",
-        "email": "contact@agency.com",
+        "agencyName": "npr. Premier agencija za nekretnine",
+        "description": "Recite potencijalnim klijentima o svojoj agenciji, stručnosti i šta vas čini jedinstvenim...",
+        "selectCountry": "Odaberite državu",
+        "selectCity": "Odaberite grad",
+        "selectCountryFirst": "Prvo odaberite državu",
+        "streetAddress": "npr. Glavna ulica 123, zgrada A",
+        "email": "kontakt@agencija.com",
         "phone": "+381 11 123 4567",
         "website": "https://yourwebsite.com",
-        "licenseNumber": "e.g., RE-123456",
+        "licenseNumber": "npr. RE-123456",
         "yearsInBusiness": "e.g., 5"
       },
       "hints": {
-        "agencyName": "Choose a professional name that represents your brand",
-        "description": "A compelling description helps clients understand your value",
-        "streetAddress": "Optional: Full street address for office location",
-        "email": "Primary contact email for inquiries",
-        "phone": "Include country code",
-        "website": "Optional: Your agency's website",
-        "licenseNumber": "Required for agency registration",
-        "yearsInBusiness": "How long you've been in real estate",
-        "languages": "Select languages your team can communicate in",
-        "socialMedia": "Connect your social profiles to increase visibility",
-        "businessHours": "Let clients know when you're available"
+        "agencyName": "Odaberite profesionalan naziv koji predstavlja vaš brend",
+        "description": "Uvjerljiv opis pomaže klijentima da razumiju vašu vrijednost",
+        "streetAddress": "Opcionalno: puna adresa kancelarije",
+        "email": "Glavni e-mail za upite",
+        "phone": "Uključite pozivni broj države",
+        "website": "Opcionalno: web stranica agencije",
+        "licenseNumber": "Obavezno za registraciju agencije",
+        "yearsInBusiness": "Koliko dugo radite u nekretninama",
+        "languages": "Odaberite jezike na kojima vaš tim može komunicirati",
+        "socialMedia": "Povežite društvene profile za veću vidljivost",
+        "businessHours": "Obavijestite klijente kada ste dostupni"
       },
       "days": {
-        "monday": "Monday",
-        "tuesday": "Tuesday",
-        "wednesday": "Wednesday",
-        "thursday": "Thursday",
-        "friday": "Friday",
-        "saturday": "Saturday",
-        "sunday": "Sunday"
+        "monday": "Ponedjeljak",
+        "tuesday": "Utorak",
+        "wednesday": "Srijeda",
+        "thursday": "Četvrtak",
+        "friday": "Petak",
+        "saturday": "Subota",
+        "sunday": "Nedjelja"
       },
       "features": {
-        "title": "What You'll Get",
-        "dedicatedPage": "Dedicated agency page on platform",
-        "displayAgents": "Display all agents & properties",
-        "featuredAds": "Featured in homepage ads",
-        "contactInfo": "Full contact info displayed",
-        "invitationCode": "Unique invitation code for agents",
-        "prioritySupport": "Priority customer support"
+        "title": "Šta ćete dobiti",
+        "dedicatedPage": "Posebna stranica agencije na platformi",
+        "displayAgents": "Prikažite sve agente i nekretnine",
+        "featuredAds": "Isticanje u reklamama na početnoj stranici",
+        "contactInfo": "Prikazani puni kontakt podaci",
+        "invitationCode": "Jedinstveni kod pozivnice za agente",
+        "prioritySupport": "Prioritetna korisnička podrška"
       }
     },
     "popularSearch": {
-      "belgrade": "Belgrade",
+      "belgrade": "Beograd",
       "zagreb": "Zagreb",
-      "luxury": "Luxury",
+      "luxury": "Luksuzne",
       "tirana": "Tirana",
-      "commercial": "Commercial",
-      "residential": "Residential"
+      "commercial": "Poslovne",
+      "residential": "Stambene"
     }
   },
   "contact": {
@@ -379,25 +385,25 @@
     "mostHelpful": "Najkorisnije",
     "noReviews": "Još nema recenzija",
     "beFirst": "Budite prvi koji će recenzirati ovog agenta",
-    "submitted": "Review Submitted!",
-    "thankYouMessage": "Thank you for sharing your experience with {{name}}.",
-    "starCount_one": "{{count}} star",
-    "starCount_other": "{{count}} stars",
-    "minCharacters": "Minimum {{min}} characters ({{current}}/{{min}})",
-    "publicNotice": "Your review will be publicly visible and associated with your account.",
+    "submitted": "Recenzija je poslana!",
+    "thankYouMessage": "Hvala što ste podijelili svoje iskustvo sa {{name}}.",
+    "starCount_one": "{{count}} zvjezdica",
+    "starCount_other": "{{count}} zvjezdica",
+    "minCharacters": "Najmanje {{min}} znakova ({{current}}/{{min}})",
+    "publicNotice": "Vaša recenzija bit će javno vidljiva i povezana s vašim računom.",
     "validation": {
-      "required": "Please write a review",
-      "minLength": "Review must be at least 10 characters long",
-      "submitFailed": "Failed to submit review. Please try again."
+      "required": "Napišite recenziju",
+      "minLength": "Recenzija mora imati najmanje 10 znakova",
+      "submitFailed": "Slanje recenzije nije uspjelo. Pokušajte ponovo."
     },
     "beforeLeaving": {
-      "title": "Before Leaving a Review",
-      "description": "To ensure authentic testimonials, please inquire about one of {{name}}'s properties first. Browse their current offerings below and start a conversation!"
+      "title": "Prije nego što ostavite recenziju",
+      "description": "Da bismo osigurali autentične recenzije, prvo se raspitajte o nekoj od nekretnina agenta {{name}}. Pregledajte ponudu ispod i započnite razgovor!"
     },
-    "inquireProperty": "Inquire About This Property",
-    "noActiveListings": "This agent currently has no active listings.",
-    "contactDirectly": "Please contact them directly to start a conversation.",
-    "contactAgent": "Contact {{name}}"
+    "inquireProperty": "Raspitajte se o ovoj nekretnini",
+    "noActiveListings": "Ovaj agent trenutno nema aktivnih oglasa.",
+    "contactDirectly": "Kontaktirajte ga direktno da započnete razgovor.",
+    "contactAgent": "Kontaktiraj {{name}}"
   },
   "card": {
     "properties": "Nekretnine",
@@ -425,7 +431,8 @@
     "review": "recenzija",
     "performanceScore": "Učinak",
     "specializations": "Specijalizacije",
-    "location": "Lokacija"
+    "location": "Lokacija",
+    "licensed": "Licenciran"
   },
   "agencyProfile": {
     "title": "Profil Agencije",
@@ -602,7 +609,15 @@
         "documentHint": "Prenesite PDF ili sliku kvalifikacije (max 10MB)",
         "save": "Sačuvaj Kvalifikaciju",
         "saving": "Čuvanje...",
-        "cancel": "Otkaži"
+        "cancel": "Otkaži",
+        "issuingOrganization": "Izdavalac",
+        "certificateNumber": "Broj certifikata / licence",
+        "certificateNumberPlaceholder": "npr. REA-2024-12345",
+        "supportingDocument": "Prateći dokument",
+        "clickToUpload": "Kliknite da učitate certifikat",
+        "fileTypes": "JPG, PNG, WebP ili PDF do 10 MB",
+        "publicVisibility": "Javna vidljivost",
+        "publicVisibilityDesc": "Prikaži ovo na javnom profilu"
       },
       "messages": {
         "added": "Kvalifikacija uspješno dodana",
@@ -612,8 +627,54 @@
       },
       "empty": {
         "title": "Nema dodanih kvalifikacija",
-        "description": "Dodajte svoje profesionalne licence, certifikate i nagrade kako biste izgradili povjerenje kod potencijalnih klijenata."
-      }
+        "description": "Dodajte svoje profesionalne licence, certifikate i nagrade kako biste izgradili povjerenje kod potencijalnih klijenata.",
+        "subtitle": "Predstavite svoje profesionalne kvalifikacije i izgradite povjerenje klijenata"
+      },
+      "license": {
+        "verified": "Licenca je verifikovana",
+        "pending": "Licenca čeka pregled",
+        "pendingDesc": "Vašu licencu pregleda administrator. Značku verifikacije dobit ćete nakon odobrenja.",
+        "rejected": "Licenca je odbijena",
+        "rejectedDesc": "Vaša licenca nije odobrena. Možete je ponovo podnijeti s tačnim podacima.",
+        "resubmit": "Ponovo podnesi licencu",
+        "getVerified": "Verifikujte se",
+        "getVerifiedDesc": "Podnesite broj licence za nekretnine da biste dobili značku verifikacije na profilu.",
+        "submitLicense": "Podnesi licencu",
+        "country": "Država",
+        "selectCountry": "Odaberite državu...",
+        "licenseNumber": "Broj licence",
+        "enterLicense": "Unesite broj licence",
+        "formatHint": "Očekivani format",
+        "cancel": "Otkaži",
+        "submit": "Pošalji na pregled",
+        "submitted": "Licenca je podnesena! Uskoro će je pregledati administrator."
+      },
+      "validation": {
+        "titleRequired": "Naslov je obavezan",
+        "titleMinLength": "Naslov mora imati najmanje 3 znaka",
+        "titleMaxLength": "Naslov mora biti kraći od 120 znakova",
+        "issuerRequired": "Izdavalac je obavezan",
+        "issuerMinLength": "Naziv organizacije mora imati najmanje 2 znaka",
+        "fileTooLarge": "Datoteka mora biti manja od 10 MB",
+        "fileTypeNotAllowed": "Dozvoljene su samo slike (JPG, PNG, WebP) i PDF",
+        "issueDateFormat": "Koristite format DD/MM/GGGG",
+        "expiryDateFormat": "Koristite format DD/MM/GGGG",
+        "expiryAfterIssue": "Datum isteka mora biti nakon datuma izdavanja"
+      },
+      "credentialUpdated": "Kvalifikacija je ažurirana",
+      "credentialAdded": "Kvalifikacija je dodana",
+      "saveFailed": "Nešto je pošlo po zlu. Pokušajte ponovo.",
+      "credentialRemoved": "Kvalifikacija je uklonjena",
+      "deleteFailed": "Brisanje nije uspjelo. Pokušajte ponovo.",
+      "credentialCount": "Kvalifikacija: {{count}}",
+      "expired": "Isteklo",
+      "expires": "Ističe",
+      "left": "preostalo",
+      "edit": "Uredi",
+      "delete": "Obriši",
+      "editSubtitle": "Ažurirajte detalje kvalifikacije ispod",
+      "addSubtitle": "Popunite detalje nove kvalifikacije",
+      "failedToSave": "Spremanje nije uspjelo"
     },
     "marketInsights": {
       "title": "Lokalni Uvidi u Tržište",
@@ -657,7 +718,14 @@
         "title": "Tržišni podaci nisu dostupni",
         "description": "Uvidi u tržište za ovo područje još nisu dostupni."
       },
-      "lastUpdated": "Posljednje ažuriranje: {{date}}"
+      "lastUpdated": "Posljednje ažuriranje: {{date}}",
+      "activeListings": "Aktivni oglasi",
+      "propertiesSold": "Prodane nekretnine",
+      "avgPrice": "Prosječna cijena",
+      "avgDaysToSell": "Prosječno dana do prodaje",
+      "priceRange": "Raspon cijena",
+      "requestReport": "Zatražite izvještaj o tržištu",
+      "quickStats": "Brza statistika"
     },
     "propertiesMap": {
       "title": "Mapa Nekretnina",
@@ -668,12 +736,14 @@
       "viewSoldProperty": "Pogledajte Prodanu Nekretninu",
       "viewDetails": "Pogledajte Detalje",
       "beds": "spavaće sobe",
-      "baths": "kupatila"
+      "baths": "kupatila",
+      "rented": "Iznajmljeno",
+      "viewRentedProperty": "Pogledaj iznajmljenu nekretninu"
     },
     "serviceArea": {
       "title": "Lokacija Područja Usluga",
       "call": "Pozovi",
-      "email": "Email"
+      "email": "E-mail"
     },
     "expertise": {
       "title": "Oblasti Stručnosti",
@@ -706,7 +776,10 @@
       "pagination": "Stranice oglasa",
       "previousPage": "Prethodna",
       "nextPage": "Sljedeća",
-      "goToPage": "Stranica {{page}}"
+      "goToPage": "Stranica {{page}}",
+      "rentedLabel": "Iznajmljeno",
+      "rentedProperties": "Iznajmljene nekretnine",
+      "rentedBadge": "IZNAJMLJENO"
     },
     "reviewsTab": {
       "verifiedReviews": "verificiranih recenzija",
@@ -806,42 +879,70 @@
       "officeAddress": "Adresa Kancelarije",
       "officeAddressPlaceholder": "Unesite adresu kancelarije...",
       "socialLinks": "Društvene Mreže",
-      "website": "Website",
+      "website": "Web stranica",
       "cancel": "Otkaži",
       "saving": "Čuvanje...",
-      "saveChanges": "Sačuvaj Promjene"
+      "saveChanges": "Sačuvaj Promjene",
+      "subtitle": "Ažurirajte detalje profila agenta",
+      "bioTooLong": "Biografija mora biti kraća od 5000 znakova",
+      "invalidUrl": "Neispravan URL za {{field}}. Uključite https://",
+      "savedTitle": "Profil je ažuriran",
+      "savedMessage": "Vaš profil je uspješno ažuriran",
+      "saveFailed": "Spremanje profila nije uspjelo. Pokušajte ponovo.",
+      "achievements": "Nagrade i dostignuća"
     },
     "editButton": "Uredi Profil",
     "contactInfo": "Kontakt informacije",
     "phone": "Telefon",
     "email": "E-mail",
     "officeAddress": "Adresa kancelarije",
-    "website": "Web stranica"
+    "website": "Web stranica",
+    "marketReport": {
+      "noData": "Tržišni podaci za ovo područje još nisu dostupni.",
+      "title": "Izvještaj o tržištu",
+      "avgPricePerSqm": "Prosječna cijena/m²",
+      "medianPrice": "Medijalna cijena",
+      "priceGrowth": "Rast cijena (godišnji)",
+      "avgDaysOnMarket": "Prosječno dana na tržištu",
+      "demandScore": "Potražnja",
+      "rentalYield": "Prinos od zakupa",
+      "investmentScore": "Investicija",
+      "topNeighborhoods": "Najbolja naselja",
+      "highlights": "Ključne tačke tržišta",
+      "contactAgent": "Kontaktirajte {{name}} za izvještaj",
+      "personalizedReport": "Dobijte personalizovani izvještaj od {{name}}"
+    },
+    "agentSaved": "Agent je sačuvan!",
+    "agentUnsaved": "Agent je uklonjen",
+    "agentSavedMsg": "Dodano u omiljene",
+    "agentUnsavedMsg": "Uklonjeno iz omiljenih",
+    "saveError": "Spremanje agenta nije uspjelo",
+    "saveErrorMessage": "Pokušajte ponovo."
   },
   "badges": {
-    "verifiedAgents": "Verified Agents",
-    "topRated": "Top Rated",
-    "premiumSupport": "Premium Support"
+    "verifiedAgents": "Verifikovani agenti",
+    "topRated": "Najbolje ocijenjeni",
+    "premiumSupport": "Premium podrška"
   },
   "languages": {
-    "english": "English",
-    "serbian": "Serbian",
-    "croatian": "Croatian",
-    "slovenian": "Slovenian",
-    "bosnian": "Bosnian",
-    "macedonian": "Macedonian",
-    "albanian": "Albanian",
-    "montenegrin": "Montenegrin",
-    "bulgarian": "Bulgarian",
-    "romanian": "Romanian",
-    "greek": "Greek",
-    "turkish": "Turkish",
-    "hungarian": "Hungarian",
-    "german": "German",
-    "italian": "Italian",
-    "french": "French",
-    "russian": "Russian",
-    "spanish": "Spanish"
+    "english": "Engleski",
+    "serbian": "Srpski",
+    "croatian": "Hrvatski",
+    "slovenian": "Slovenski",
+    "bosnian": "Bosanski",
+    "macedonian": "Makedonski",
+    "albanian": "Albanski",
+    "montenegrin": "Crnogorski",
+    "bulgarian": "Bugarski",
+    "romanian": "Rumunski",
+    "greek": "Grčki",
+    "turkish": "Turski",
+    "hungarian": "Mađarski",
+    "german": "Njemački",
+    "italian": "Italijanski",
+    "french": "Francuski",
+    "russian": "Ruski",
+    "spanish": "Španski"
   },
   "scoring": {
     "panelTitle": "Kako funkcioniše sistem bodova",
@@ -874,6 +975,183 @@
         "desc": "Broj recenzija pokazuje povjerenje. Svaka recenzija dodaje 1 bod bez obzira na ocjenu.",
         "cap": "Maks 10 bodova"
       }
+    }
+  },
+  "seo": {
+    "agentTitle": "{{name}} - Agent za nekretnine u {{location}}",
+    "agentDescription": "{{name}} je verifikovani agent za nekretnine u {{location}} na BalkanEstateAI. Prodanih nekretnina: {{sales}}, aktivnih oglasa: {{listings}}. Kontaktirajte danas."
+  },
+  "agencyCreation": {
+    "steps": {
+      "agencyInfo": "Podaci o agenciji",
+      "location": "Lokacija",
+      "contact": "Kontakt",
+      "professional": "Profesionalno",
+      "online": "Online"
+    },
+    "header": {
+      "edit": "Uredi detalje agencije",
+      "create": "Napravite svoju agenciju",
+      "stepIndicator": "Korak {{step}} od {{total}} — {{label}}"
+    },
+    "fields": {
+      "agencyName": "Naziv agencije",
+      "description": "Opis",
+      "country": "Država",
+      "city": "Grad",
+      "pinLocation": "Označite tačnu lokaciju",
+      "streetAddress": "Adresa",
+      "email": "E-mail adresa",
+      "phone": "Broj telefona",
+      "website": "URL web stranice",
+      "licenseNumber": "Broj licence agenta",
+      "yearsInBusiness": "Godina poslovanja",
+      "languages": "Jezici koji se govore",
+      "socialMedia": "Društvene mreže",
+      "businessHours": "Radno vrijeme",
+      "optional": "(opcionalno)",
+      "logo": "Logo agencije",
+      "logoPreview": "Pregled logoa",
+      "registrationNumber": "Registarski broj / ID broj"
+    },
+    "placeholders": {
+      "agencyName": "npr. Premier agencija za nekretnine",
+      "description": "Recite potencijalnim klijentima o svojoj agenciji, stručnosti i šta vas čini jedinstvenim...",
+      "selectCountry": "Odaberite državu",
+      "selectCity": "Odaberite grad",
+      "selectCountryFirst": "Prvo odaberite državu",
+      "streetAddress": "npr. Glavna ulica 123, zgrada A",
+      "registrationNumber": "npr. JIB 4200000000000"
+    },
+    "hints": {
+      "agencyName": "Odaberite profesionalan naziv koji predstavlja vaš brend",
+      "description": "Uvjerljiv opis pomaže klijentima da razumiju vašu vrijednost",
+      "pinLocation": "Prevucite marker ili kliknite na mapu da postavite tačan položaj kancelarije. Adresa ispod će se automatski ažurirati.",
+      "streetAddress": "Automatski se popunjava s mape iznad ili unesite ručno. Uključite broj zgrade, ulicu i sprat/kancelariju.",
+      "email": "Glavni e-mail za upite",
+      "phone": "Uključite pozivni broj (npr. +387 za BiH)",
+      "website": "Opcionalno: web stranica agencije",
+      "licenseNumber": "Vaša službena licenca za nekretnine",
+      "yearsInBusiness": "Koliko dugo radite u nekretninama",
+      "languages": "Odaberite sve jezike na kojima vaš tim može komunicirati",
+      "logo": "JPEG, PNG, WebP ili SVG. Maks. 5MB.",
+      "registrationNumber": "Vaš službeni registarski ili porezni broj"
+    },
+    "validation": {
+      "nameRequired": "Naziv agencije je obavezan",
+      "countryRequired": "Država je obavezna",
+      "cityRequired": "Grad je obavezan",
+      "emailRequired": "E-mail adresa je obavezna",
+      "emailInvalid": "Unesite ispravnu e-mail adresu",
+      "phoneRequired": "Broj telefona je obavezan",
+      "phoneInvalid": "Unesite ispravan broj telefona (npr. +387 33 123 456)",
+      "websiteInvalid": "Web stranica mora počinjati s http:// ili https://",
+      "logoInvalidType": "Učitajte sliku u formatu JPEG, PNG, WebP ili SVG",
+      "logoTooLarge": "Logo mora biti manji od 5MB"
+    },
+    "alerts": {
+      "createdTitle": "Agencija je napravljena!",
+      "createdMessage": "Vaša agencija „{{name}}“ je napravljena.",
+      "paymentSucceededButFailed": "Plaćanje je uspjelo, ali pravljenje agencije nije. Kontaktirajte podršku.",
+      "createFailed": "Pravljenje agencije nije uspjelo. Pokušajte ponovo.",
+      "paymentFailed": "Plaćanje nije uspjelo: {{error}}"
+    },
+    "eligibility": {
+      "agentRequired": "Potreban je status agenta",
+      "proRequired": "Potrebna je Pro pretplata",
+      "becomeAgent": "Prvo postanite agent",
+      "upgradeToPro": "Pređi na Pro"
+    },
+    "enterprise": {
+      "active": "Enterprise je aktivan — plaćanje nije potrebno"
+    },
+    "buttons": {
+      "creating": "Pravi se agencija…",
+      "create": "Napravi agenciju",
+      "continueToPayment": "Nastavi na plaćanje →",
+      "removeLogo": "Ukloni logo",
+      "uploadLogo": "Učitaj logo",
+      "changeLogo": "Promijeni logo"
+    }
+  },
+  "achievements": {
+    "addedTitle": "Dostignuće je dodano",
+    "addedMessage": "Dostignuće je uspješno dodano",
+    "addFailed": "Dodavanje dostignuća nije uspjelo",
+    "updatedTitle": "Dostignuće je ažurirano",
+    "updatedMessage": "Dostignuće je uspješno ažurirano",
+    "updateFailed": "Ažuriranje dostignuća nije uspjelo",
+    "deletedTitle": "Dostignuće je obrisano",
+    "deletedMessage": "Dostignuće je obrisano",
+    "deleteFailed": "Brisanje dostignuća nije uspjelo"
+  },
+  "inquiry": {
+    "findProperty": "Tražim nekretninu",
+    "template1": "Zdravo, tražim nekretninu u vašem području. Možete li mi pomoći da pronađem odgovarajuće opcije prema mojim zahtjevima?",
+    "sellProperty": "Prodajem nekretninu",
+    "template2": "Zdravo, zainteresovan sam za prodaju svoje nekretnine. Možete li dati tržišnu procjenu i razgovarati o svojim uslugama?",
+    "marketInfo": "Informacije o tržištu",
+    "template3": "Zdravo, želio bih saznati više o tržištu nekretnina u vašem području. Možemo li zakazati konsultacije?",
+    "nameRequired": "Ime je obavezno",
+    "validEmailRequired": "Potreban je ispravan e-mail",
+    "messageRequired": "Poruka je obavezna",
+    "agentIdentificationError": "Agent se ne može identifikovati",
+    "sendError": "Slanje upita nije uspjelo. Pokušajte ponovo.",
+    "title": "Kontaktiraj agenta",
+    "successTitle": "Poruka je poslana!",
+    "successMessage": "Vaša poruka je poslana agentu. Uskoro će vas kontaktirati.",
+    "whatAbout": "O čemu se radi?",
+    "yourName": "Vaše ime",
+    "namePlaceholder": "Amar Hodžić",
+    "yourEmail": "Vaš e-mail",
+    "yourPhone": "Telefon",
+    "message": "Vaša poruka",
+    "messagePlaceholder": "Recite agentu oko čega vam treba pomoć...",
+    "sending": "Šalje se...",
+    "sendMessage": "Pošalji poruku",
+    "privacyNote": "Slanjem pristajete da vas agent kontaktira u vezi s vašim upitom."
+  },
+  "ui": {
+    "agentProfileTabs": {
+      "isADedicatedRealEstate": "je posvećeni profesionalac za nekretnine sa",
+      "yearsOfExperienceInThe": "godina iskustva u industriji",
+      "specializesInHelpingClientsAchieve": "specijalizovan je za pomoć klijentima u ostvarivanju njihovih ciljeva kroz stručno poznavanje tržišta i personalizovanu uslugu.",
+      "call": "Pozovi",
+      "anonymous": "Anonimno",
+      "verifiedBuyer": "Verifikovani kupac •",
+      "recently": "Nedavno",
+      "responseFrom": "Odgovor od"
+    },
+    "agentContactActions": {
+      "n0900Am": "09:00",
+      "n1000Am": "10:00",
+      "n1100Am": "11:00",
+      "n1200Pm": "12:00",
+      "n0100Pm": "13:00",
+      "n0200Pm": "14:00",
+      "n0300Pm": "15:00",
+      "n0400Pm": "16:00",
+      "n0500Pm": "17:00"
+    },
+    "serviceAreaMapPicker": {
+      "findingArea": "Traži se područje…",
+      "removeArea": "Ukloni područje",
+      "clickAnywhereOnTheMap": "Kliknite bilo gdje na mapi da dodate područje rada",
+      "remove": "Ukloni",
+      "noServiceAreasAddedClick": "Nema dodanih područja. Kliknite na mapu da dodate područja koja pokrivate."
+    },
+    "marketReportModal": {
+      "market": "Tržište",
+      "updated": "Ažurirano"
+    },
+    "agentScoringPanel": {
+      "n0Pts": "0 bodova"
+    },
+    "agentEditModal": {
+      "close": "Zatvori"
+    },
+    "agentProfileHeader": {
+      "viewProfile": "Pogledaj profil"
     }
   }
 }

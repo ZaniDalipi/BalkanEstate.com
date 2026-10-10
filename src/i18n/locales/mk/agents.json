@@ -17,33 +17,33 @@
       "location": "Локација",
       "name": "Име на агент",
       "specialization": "Специјализација",
-      "all": "All"
+      "all": "Сите"
     },
     "placeholders": {
       "location": "Пребарајте по град, населба или држава...",
       "name": "Пребарајте по име на агент...",
       "specialization": "Пребарајте по специјализација (на пр., Луксуз, Комерцијално)...",
-      "all": "Search by name, city, or specialty..."
+      "all": "Пребарувајте по име, град или специјалност..."
     },
     "clearSearch": "Исчисти пребарување",
     "searchButton": "Пребарај",
     "popularSearches": "Популарни пребарувања:",
     "viewAll": "Прегледај ги сите",
     "quickSearch": {
-      "topRated": "Top Rated",
-      "verified": "Verified",
-      "expert": "Expert",
-      "serbia": "Serbia",
-      "croatia": "Croatia",
-      "albania": "Albania",
-      "montenegro": "Montenegro",
-      "bosnia": "Bosnia",
-      "luxury": "Luxury",
-      "commercial": "Commercial",
-      "residential": "Residential",
-      "investment": "Investment",
-      "belgrade": "Belgrade",
-      "zagreb": "Zagreb"
+      "topRated": "Најдобро оценети",
+      "verified": "Верификувани",
+      "expert": "Експерти",
+      "serbia": "Србија",
+      "croatia": "Хрватска",
+      "albania": "Албанија",
+      "montenegro": "Црна Гора",
+      "bosnia": "Босна",
+      "luxury": "Луксузни",
+      "commercial": "Деловни",
+      "residential": "Станбени",
+      "investment": "Инвестиции",
+      "belgrade": "Белград",
+      "zagreb": "Загреб"
     }
   },
   "stats": {
@@ -79,7 +79,11 @@
       "investment": "Инвестиција",
       "newConstruction": "Нова градба",
       "foreclosures": "Извршувања"
-    }
+    },
+    "myAgentProfile": "Мојот агентски профил",
+    "licensedFirst": "Прво лиценцирани",
+    "licensedOnly": "Само лиценцирани агенти",
+    "verified": "Верификувани"
   },
   "results": {
     "title": "Агенти за недвижен имот на Балканот",
@@ -88,7 +92,9 @@
     "showingMatchingPlural": "Прикажување на {{count}} агенти што одговараат на \"{{query}}\"",
     "noAgentsFound": "Не се пронајдени агенти",
     "tryAdjusting": "Обидете се да ги прилагодите критериумите за пребарување",
-    "viewMore": "Прегледај повеќе"
+    "viewMore": "Прегледај повеќе",
+    "showMore": "Прикажи повеќе агенти",
+    "showing": "Прикажани {{shown}} од {{total}} агенти"
   },
   "agencies": {
     "title": "Врвни агенции за недвижен имот",
@@ -155,134 +161,134 @@
     "viewProfile": "Прегледај профил",
     "view": "Прегледај",
     "more": "+{{count}} повеќе",
-    "universalSearchPlaceholder": "Search agencies...",
-    "search": "Search",
-    "verifiedAgencies": "Verified Agencies",
-    "premiumSupport": "Premium Support",
-    "rank1st": "1st",
-    "rank2nd": "2nd",
-    "rank3rd": "3rd",
-    "loginRequired": "Login Required",
-    "loginToCreateAgency": "Please login to create an agency.",
-    "alreadyHaveAgency": "You Already Have an Agency",
-    "viewYourAgency": "You are already part of an agency. View your agency from the filters above.",
-    "agentRequired": "Agent Status Required",
-    "becomeAgentFirst": "You must be a registered agent to create an agency. Please update your profile to become an agent first.",
-    "topAgencies": "Top Agencies",
+    "universalSearchPlaceholder": "Пребарај агенции...",
+    "search": "Пребарај",
+    "verifiedAgencies": "Верификувани агенции",
+    "premiumSupport": "Премиум поддршка",
+    "rank1st": "1.",
+    "rank2nd": "2.",
+    "rank3rd": "3.",
+    "loginRequired": "Потребна е најава",
+    "loginToCreateAgency": "Најавете се за да креирате агенција.",
+    "alreadyHaveAgency": "Веќе имате агенција",
+    "viewYourAgency": "Веќе сте дел од агенција. Погледнете ја преку филтрите погоре.",
+    "agentRequired": "Потребен е статус на агент",
+    "becomeAgentFirst": "Мора да бидете регистриран агент за да креирате агенција. Прво ажурирајте го профилот за да станете агент.",
+    "topAgencies": "Врвни агенции",
     "contact": {
-      "getInTouch": "Get in Touch",
-      "phone": "Phone",
-      "email": "Email",
-      "address": "Address"
+      "getInTouch": "Стапете во контакт",
+      "phone": "Телефон",
+      "email": "Е-пошта",
+      "address": "Адреса"
     },
     "map": {
-      "noLocationData": "No agencies with location data found",
-      "street": "Street",
-      "satellite": "Satellite",
-      "legend": "Legend",
-      "regularAgency": "Regular Agency",
-      "featuredAgency": "Featured Agency"
+      "noLocationData": "Не се пронајдени агенции со податоци за локација",
+      "street": "Улици",
+      "satellite": "Сателит",
+      "legend": "Легенда",
+      "regularAgency": "Обична агенција",
+      "featuredAgency": "Истакната агенција"
     },
     "creation": {
-      "editTitle": "Edit Agency Details",
-      "createTitle": "Create Your Agency",
-      "enterpriseSubtitle": "You have an active Enterprise subscription! Set up your agency profile now.",
-      "editSubtitle": "Update your agency information before proceeding to payment",
-      "createSubtitle": "Set up your agency profile to showcase your team and properties",
-      "enterpriseActive": "Enterprise Subscription Active - No Payment Required",
-      "agentStatusRequired": "Agent Status Required",
-      "proSubscriptionRequired": "Pro Subscription Required",
-      "becomeAgentFirst": "Become an Agent First",
-      "upgradeToPro": "Upgrade to Pro",
-      "successTitle": "Agency Created!",
-      "successMessage": "Your agency \"{{name}}\" has been created successfully.",
-      "successMessageEnterprise": "Your agency \"{{name}}\" has been created successfully with your Enterprise subscription.",
-      "paymentSuccessButFailed": "Payment successful but failed to create agency. Please contact support.",
-      "paymentFailed": "Payment failed: {{error}}",
-      "createFailed": "Failed to create agency. Please try again.",
-      "creatingAgency": "Creating Agency...",
-      "createAgencyButton": "Create Agency",
-      "continueToPayment": "Continue to Payment",
+      "editTitle": "Уреди детали за агенцијата",
+      "createTitle": "Креирајте ја вашата агенција",
+      "enterpriseSubtitle": "Имате активна Enterprise претплата! Поставете го профилот на агенцијата сега.",
+      "editSubtitle": "Ажурирајте ги податоците за агенцијата пред да продолжите кон плаќање",
+      "createSubtitle": "Поставете го профилот на агенцијата за да ги претставите тимот и имотите",
+      "enterpriseActive": "Enterprise претплатата е активна - не е потребно плаќање",
+      "agentStatusRequired": "Потребен е статус на агент",
+      "proSubscriptionRequired": "Потребна е Pro претплата",
+      "becomeAgentFirst": "Прво станете агент",
+      "upgradeToPro": "Надгради на Pro",
+      "successTitle": "Агенцијата е креирана!",
+      "successMessage": "Вашата агенција „{{name}}“ е успешно креирана.",
+      "successMessageEnterprise": "Вашата агенција „{{name}}“ е успешно креирана со Enterprise претплатата.",
+      "paymentSuccessButFailed": "Плаќањето успеа, но креирањето на агенцијата не успеа. Контактирајте ја поддршката.",
+      "paymentFailed": "Плаќањето не успеа: {{error}}",
+      "createFailed": "Креирањето на агенцијата не успеа. Обидете се повторно.",
+      "creatingAgency": "Се креира агенција...",
+      "createAgencyButton": "Креирај агенција",
+      "continueToPayment": "Продолжи кон плаќање",
       "validation": {
-        "nameRequired": "Agency name is required",
-        "cityCountryRequired": "City and country are required",
-        "emailRequired": "Email is required",
-        "invalidEmail": "Please enter a valid email address",
-        "invalidWebsite": "Website URL must start with http:// or https://"
+        "nameRequired": "Името на агенцијата е задолжително",
+        "cityCountryRequired": "Градот и земјата се задолжителни",
+        "emailRequired": "Е-поштата е задолжителна",
+        "invalidEmail": "Внесете валидна е-пошта",
+        "invalidWebsite": "URL-то на веб-страницата мора да почнува со http:// или https://"
       },
       "sections": {
-        "basicInfo": "Basic Information",
-        "location": "Location",
-        "contactInfo": "Contact Information",
-        "professionalDetails": "Professional Details",
-        "socialMedia": "Social Media (Optional)",
-        "businessHours": "Business Hours (Optional)"
+        "basicInfo": "Основни информации",
+        "location": "Локација",
+        "contactInfo": "Податоци за контакт",
+        "professionalDetails": "Професионални детали",
+        "socialMedia": "Социјални мрежи (опционално)",
+        "businessHours": "Работно време (опционално)"
       },
       "fields": {
-        "agencyName": "Agency Name",
-        "description": "Description",
-        "country": "Country",
-        "city": "City",
-        "streetAddress": "Street Address",
-        "email": "Email",
-        "phone": "Phone Number",
-        "websiteUrl": "Website URL",
-        "licenseNumber": "Agent License Number",
-        "yearsInBusiness": "Years in Business",
-        "languagesSpoken": "Languages Spoken"
+        "agencyName": "Име на агенцијата",
+        "description": "Опис",
+        "country": "Земја",
+        "city": "Град",
+        "streetAddress": "Адреса",
+        "email": "Е-пошта",
+        "phone": "Телефонски број",
+        "websiteUrl": "URL на веб-страница",
+        "licenseNumber": "Број на лиценца на агент",
+        "yearsInBusiness": "Години во бизнисот",
+        "languagesSpoken": "Јазици што се зборуваат"
       },
       "placeholders": {
-        "agencyName": "e.g., Premier Real Estate Agency",
-        "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-        "selectCountry": "Select a country",
-        "selectCity": "Select a city",
-        "selectCountryFirst": "Select country first",
-        "streetAddress": "e.g., 123 Main Street, Building A",
-        "email": "contact@agency.com",
+        "agencyName": "пр. Премиер агенција за недвижности",
+        "description": "Кажете им на потенцијалните клиенти за вашата агенција, експертизата и што ве прави уникатни...",
+        "selectCountry": "Изберете земја",
+        "selectCity": "Изберете град",
+        "selectCountryFirst": "Прво изберете земја",
+        "streetAddress": "пр. Главна улица 123, зграда А",
+        "email": "kontakt@agencija.com",
         "phone": "+381 11 123 4567",
         "website": "https://yourwebsite.com",
-        "licenseNumber": "e.g., RE-123456",
+        "licenseNumber": "пр. RE-123456",
         "yearsInBusiness": "e.g., 5"
       },
       "hints": {
-        "agencyName": "Choose a professional name that represents your brand",
-        "description": "A compelling description helps clients understand your value",
-        "streetAddress": "Optional: Full street address for office location",
-        "email": "Primary contact email for inquiries",
-        "phone": "Include country code",
-        "website": "Optional: Your agency's website",
-        "licenseNumber": "Required for agency registration",
-        "yearsInBusiness": "How long you've been in real estate",
-        "languages": "Select languages your team can communicate in",
-        "socialMedia": "Connect your social profiles to increase visibility",
-        "businessHours": "Let clients know when you're available"
+        "agencyName": "Изберете професионално име што го претставува вашиот бренд",
+        "description": "Убедлив опис им помага на клиентите да ја разберат вашата вредност",
+        "streetAddress": "Опционално: целосна адреса на канцеларијата",
+        "email": "Главна е-пошта за прашања",
+        "phone": "Вклучете го повикувачкиот број на земјата",
+        "website": "Опционално: веб-страница на агенцијата",
+        "licenseNumber": "Задолжително за регистрација на агенцијата",
+        "yearsInBusiness": "Колку долго работите во недвижности",
+        "languages": "Изберете ги јазиците на кои може да комуницира вашиот тим",
+        "socialMedia": "Поврзете ги социјалните профили за поголема видливост",
+        "businessHours": "Кажете им на клиентите кога сте достапни"
       },
       "days": {
-        "monday": "Monday",
-        "tuesday": "Tuesday",
-        "wednesday": "Wednesday",
-        "thursday": "Thursday",
-        "friday": "Friday",
-        "saturday": "Saturday",
-        "sunday": "Sunday"
+        "monday": "Понеделник",
+        "tuesday": "Вторник",
+        "wednesday": "Среда",
+        "thursday": "Четврток",
+        "friday": "Петок",
+        "saturday": "Сабота",
+        "sunday": "Недела"
       },
       "features": {
-        "title": "What You'll Get",
-        "dedicatedPage": "Dedicated agency page on platform",
-        "displayAgents": "Display all agents & properties",
-        "featuredAds": "Featured in homepage ads",
-        "contactInfo": "Full contact info displayed",
-        "invitationCode": "Unique invitation code for agents",
-        "prioritySupport": "Priority customer support"
+        "title": "Што ќе добиете",
+        "dedicatedPage": "Посебна страница за агенцијата на платформата",
+        "displayAgents": "Прикажете ги сите агенти и имоти",
+        "featuredAds": "Истакнување во рекламите на почетната страница",
+        "contactInfo": "Прикажани целосни податоци за контакт",
+        "invitationCode": "Уникатен код за покана за агенти",
+        "prioritySupport": "Приоритетна корисничка поддршка"
       }
     },
     "popularSearch": {
-      "belgrade": "Belgrade",
-      "zagreb": "Zagreb",
-      "luxury": "Luxury",
-      "tirana": "Tirana",
-      "commercial": "Commercial",
-      "residential": "Residential"
+      "belgrade": "Белград",
+      "zagreb": "Загреб",
+      "luxury": "Луксузни",
+      "tirana": "Тирана",
+      "commercial": "Деловни",
+      "residential": "Станбени"
     }
   },
   "contact": {
@@ -379,25 +385,25 @@
     "mostHelpful": "Најкорисни",
     "noReviews": "Сè уште нема рецензии",
     "beFirst": "Бидете први кои ќе рецензираат овој агент",
-    "submitted": "Review Submitted!",
-    "thankYouMessage": "Thank you for sharing your experience with {{name}}.",
-    "starCount_one": "{{count}} star",
-    "starCount_other": "{{count}} stars",
-    "minCharacters": "Minimum {{min}} characters ({{current}}/{{min}})",
-    "publicNotice": "Your review will be publicly visible and associated with your account.",
+    "submitted": "Рецензијата е испратена!",
+    "thankYouMessage": "Ви благодариме што го споделивте вашето искуство со {{name}}.",
+    "starCount_one": "{{count}} ѕвезда",
+    "starCount_other": "{{count}} ѕвезди",
+    "minCharacters": "Најмалку {{min}} знаци ({{current}}/{{min}})",
+    "publicNotice": "Вашата рецензија ќе биде јавно видлива и поврзана со вашата сметка.",
     "validation": {
-      "required": "Please write a review",
-      "minLength": "Review must be at least 10 characters long",
-      "submitFailed": "Failed to submit review. Please try again."
+      "required": "Напишете рецензија",
+      "minLength": "Рецензијата мора да има најмалку 10 знаци",
+      "submitFailed": "Испраќањето на рецензијата не успеа. Обидете се повторно."
     },
     "beforeLeaving": {
-      "title": "Before Leaving a Review",
-      "description": "To ensure authentic testimonials, please inquire about one of {{name}}'s properties first. Browse their current offerings below and start a conversation!"
+      "title": "Пред да оставите рецензија",
+      "description": "За да обезбедиме автентични рецензии, прво распрашајте се за некој од имотите на {{name}}. Прегледајте ги понудите подолу и започнете разговор!"
     },
-    "inquireProperty": "Inquire About This Property",
-    "noActiveListings": "This agent currently has no active listings.",
-    "contactDirectly": "Please contact them directly to start a conversation.",
-    "contactAgent": "Contact {{name}}"
+    "inquireProperty": "Распрашај се за овој имот",
+    "noActiveListings": "Овој агент моментално нема активни огласи.",
+    "contactDirectly": "Контактирајте го директно за да започнете разговор.",
+    "contactAgent": "Контактирај го {{name}}"
   },
   "card": {
     "properties": "Имоти",
@@ -425,7 +431,8 @@
     "review": "рецензија",
     "performanceScore": "Перформанси",
     "specializations": "Специјализации",
-    "location": "Локација"
+    "location": "Локација",
+    "licensed": "Лиценциран"
   },
   "agencyProfile": {
     "title": "Профил на агенција",
@@ -602,7 +609,15 @@
         "documentHint": "Прикачете PDF или слика на Вашиот акредитив (макс 10MB)",
         "save": "Зачувај акредитив",
         "saving": "Зачувување...",
-        "cancel": "Откажи"
+        "cancel": "Откажи",
+        "issuingOrganization": "Издавачка организација",
+        "certificateNumber": "Број на сертификат / лиценца",
+        "certificateNumberPlaceholder": "пр. REA-2024-12345",
+        "supportingDocument": "Придружен документ",
+        "clickToUpload": "Кликнете за прикачување сертификат",
+        "fileTypes": "JPG, PNG, WebP или PDF до 10 MB",
+        "publicVisibility": "Јавна видливост",
+        "publicVisibilityDesc": "Прикажи го ова на јавниот профил"
       },
       "messages": {
         "added": "Акредитивот е успешно додаден",
@@ -612,8 +627,54 @@
       },
       "empty": {
         "title": "Сè уште нема додадени акредитиви",
-        "description": "Додадете ги Вашите професионални лиценци, сертификати и награди за да изградите доверба со потенцијалните клиенти."
-      }
+        "description": "Додадете ги Вашите професионални лиценци, сертификати и награди за да изградите доверба со потенцијалните клиенти.",
+        "subtitle": "Претставете ги вашите професионални квалификации и изградете доверба кај клиентите"
+      },
+      "license": {
+        "verified": "Лиценцата е верификувана",
+        "pending": "Лиценцата е на преглед",
+        "pendingDesc": "Вашата лиценца ја прегледува администратор. Ќе ја добиете значката за верификација по одобрувањето.",
+        "rejected": "Лиценцата е одбиена",
+        "rejectedDesc": "Вашата лиценца не е одобрена. Можете повторно да ја поднесете со точни податоци.",
+        "resubmit": "Повторно поднеси лиценца",
+        "getVerified": "Верификувајте се",
+        "getVerifiedDesc": "Поднесете го бројот на лиценцата за да добиете значка за верификација на профилот.",
+        "submitLicense": "Поднеси лиценца",
+        "country": "Земја",
+        "selectCountry": "Изберете земја...",
+        "licenseNumber": "Број на лиценца",
+        "enterLicense": "Внесете го бројот на лиценцата",
+        "formatHint": "Очекуван формат",
+        "cancel": "Откажи",
+        "submit": "Поднеси на преглед",
+        "submitted": "Лиценцата е поднесена! Наскоро ќе ја прегледа администратор."
+      },
+      "validation": {
+        "titleRequired": "Насловот е задолжителен",
+        "titleMinLength": "Насловот мора да има најмалку 3 знаци",
+        "titleMaxLength": "Насловот мора да биде пократок од 120 знаци",
+        "issuerRequired": "Издавачката организација е задолжителна",
+        "issuerMinLength": "Името на организацијата мора да има најмалку 2 знаци",
+        "fileTooLarge": "Датотеката мора да биде помала од 10 MB",
+        "fileTypeNotAllowed": "Дозволени се само слики (JPG, PNG, WebP) и PDF",
+        "issueDateFormat": "Користете формат ДД/ММ/ГГГГ",
+        "expiryDateFormat": "Користете формат ДД/ММ/ГГГГ",
+        "expiryAfterIssue": "Датумот на истекување мора да биде по датумот на издавање"
+      },
+      "credentialUpdated": "Квалификацијата е ажурирана",
+      "credentialAdded": "Квалификацијата е додадена",
+      "saveFailed": "Нешто тргна наопаку. Обидете се повторно.",
+      "credentialRemoved": "Квалификацијата е отстранета",
+      "deleteFailed": "Бришењето не успеа. Обидете се повторно.",
+      "credentialCount": "Квалификации: {{count}}",
+      "expired": "Истечено",
+      "expires": "Истекува",
+      "left": "преостанато",
+      "edit": "Уреди",
+      "delete": "Избриши",
+      "editSubtitle": "Ажурирајте ги деталите за квалификацијата подолу",
+      "addSubtitle": "Пополнете ги деталите за новата квалификација",
+      "failedToSave": "Зачувувањето не успеа"
     },
     "marketInsights": {
       "title": "Локални пазарни анализи",
@@ -657,7 +718,14 @@
         "title": "Пазарните податоци не се достапни",
         "description": "Пазарните анализи за оваа област сè уште не се достапни."
       },
-      "lastUpdated": "Последна ажурирање: {{date}}"
+      "lastUpdated": "Последна ажурирање: {{date}}",
+      "activeListings": "Активни огласи",
+      "propertiesSold": "Продадени имоти",
+      "avgPrice": "Просечна цена",
+      "avgDaysToSell": "Просечни денови до продажба",
+      "priceRange": "Ценовен опсег",
+      "requestReport": "Побарајте пазарен извештај",
+      "quickStats": "Брза статистика"
     },
     "propertiesMap": {
       "title": "Мапа на имоти",
@@ -668,7 +736,9 @@
       "viewSoldProperty": "Прегледај продаден имот",
       "viewDetails": "Прегледај детали",
       "beds": "спални",
-      "baths": "бањи"
+      "baths": "бањи",
+      "rented": "Изнајмено",
+      "viewRentedProperty": "Види изнајмен имот"
     },
     "serviceArea": {
       "title": "Локација на областа на услуги",
@@ -706,7 +776,10 @@
       "pagination": "Страници со огласи",
       "previousPage": "Претходна",
       "nextPage": "Следна",
-      "goToPage": "Страница {{page}}"
+      "goToPage": "Страница {{page}}",
+      "rentedLabel": "Изнајмено",
+      "rentedProperties": "Изнајмени имоти",
+      "rentedBadge": "ИЗНАЈМЕНО"
     },
     "reviewsTab": {
       "verifiedReviews": "верифицирани рецензии",
@@ -809,39 +882,67 @@
       "website": "Веб-страница",
       "cancel": "Откажи",
       "saving": "Зачувување...",
-      "saveChanges": "Зачувај промени"
+      "saveChanges": "Зачувај промени",
+      "subtitle": "Ажурирајте ги деталите на агентскиот профил",
+      "bioTooLong": "Биографијата мора да биде пократка од 5000 знаци",
+      "invalidUrl": "Невалиден URL за {{field}}. Вклучете https://",
+      "savedTitle": "Профилот е ажуриран",
+      "savedMessage": "Вашиот профил е успешно ажуриран",
+      "saveFailed": "Зачувувањето на профилот не успеа. Обидете се повторно.",
+      "achievements": "Награди и достигнувања"
     },
     "editButton": "Уреди профил",
     "contactInfo": "Контакт информации",
     "phone": "Телефон",
     "email": "Е-пошта",
     "officeAddress": "Адреса на канцеларија",
-    "website": "Веб-страница"
+    "website": "Веб-страница",
+    "marketReport": {
+      "noData": "Пазарните податоци за ова подрачје сè уште не се достапни.",
+      "title": "Пазарен извештај",
+      "avgPricePerSqm": "Просечна цена/m²",
+      "medianPrice": "Медијана цена",
+      "priceGrowth": "Раст на цените (годишен)",
+      "avgDaysOnMarket": "Просечни денови на пазарот",
+      "demandScore": "Побарувачка",
+      "rentalYield": "Принос од закуп",
+      "investmentScore": "Инвестиција",
+      "topNeighborhoods": "Врвни населби",
+      "highlights": "Пазарни истакнувања",
+      "contactAgent": "Контактирајте го {{name}} за извештај",
+      "personalizedReport": "Добијте персонализиран извештај од {{name}}"
+    },
+    "agentSaved": "Агентот е зачуван!",
+    "agentUnsaved": "Агентот е отстранет",
+    "agentSavedMsg": "Додадено во омилени",
+    "agentUnsavedMsg": "Отстрането од омилени",
+    "saveError": "Зачувувањето на агентот не успеа",
+    "saveErrorMessage": "Обидете се повторно."
   },
   "badges": {
-    "verifiedAgents": "Verified Agents",
-    "topRated": "Top Rated",
-    "premiumSupport": "Premium Support"
+    "verifiedAgents": "Верификувани агенти",
+    "topRated": "Најдобро оценети",
+    "premiumSupport": "Премиум поддршка"
   },
   "languages": {
-    "english": "English",
-    "serbian": "Serbian",
-    "croatian": "Croatian",
-    "slovenian": "Slovenian",
-    "bosnian": "Bosnian",
-    "macedonian": "Macedonian",
-    "albanian": "Albanian",
-    "montenegrin": "Montenegrin",
-    "bulgarian": "Bulgarian",
-    "romanian": "Romanian",
-    "greek": "Greek",
-    "turkish": "Turkish",
-    "hungarian": "Hungarian",
-    "german": "German",
-    "italian": "Italian",
-    "french": "French",
-    "russian": "Russian",
-    "spanish": "Spanish"
+    "english": "Англиски",
+    "serbian": "Српски",
+    "croatian": "Хрватски",
+    "slovenian": "Словенечки",
+    "bosnian": "Босански",
+    "macedonian": "Македонски",
+    "albanian": "Албански",
+    "montenegrin": "Црногорски",
+    "bulgarian": "Бугарски",
+    "romanian": "Романски",
+    "greek": "Грчки",
+    "turkish": "Турски",
+    "hungarian": "Унгарски",
+    "german": "Германски",
+    "italian": "Италијански",
+    "french": "Француски",
+    "russian": "Руски",
+    "spanish": "Шпански"
   },
   "scoring": {
     "panelTitle": "Како функционира системот на поени",
@@ -874,6 +975,183 @@
         "desc": "Бројот на рецензии покажува доверба. Секоја собрана рецензија додава 1 поен без разлика на оценката.",
         "cap": "Макс 10 поени"
       }
+    }
+  },
+  "seo": {
+    "agentTitle": "{{name}} - Агент за недвижности во {{location}}",
+    "agentDescription": "{{name}} е верификуван агент за недвижности во {{location}} на BalkanEstateAI. Продадени имоти: {{sales}}, активни огласи: {{listings}}. Контактирајте денес."
+  },
+  "agencyCreation": {
+    "steps": {
+      "agencyInfo": "Податоци за агенцијата",
+      "location": "Локација",
+      "contact": "Контакт",
+      "professional": "Професионално",
+      "online": "Онлајн"
+    },
+    "header": {
+      "edit": "Уреди детали за агенцијата",
+      "create": "Креирајте ја вашата агенција",
+      "stepIndicator": "Чекор {{step}} од {{total}} — {{label}}"
+    },
+    "fields": {
+      "agencyName": "Име на агенцијата",
+      "description": "Опис",
+      "country": "Земја",
+      "city": "Град",
+      "pinLocation": "Означете ја точната локација",
+      "streetAddress": "Адреса",
+      "email": "Е-пошта",
+      "phone": "Телефонски број",
+      "website": "URL на веб-страница",
+      "licenseNumber": "Број на лиценца на агент",
+      "yearsInBusiness": "Години во бизнисот",
+      "languages": "Јазици што се зборуваат",
+      "socialMedia": "Социјални мрежи",
+      "businessHours": "Работно време",
+      "optional": "(опционално)",
+      "logo": "Лого на агенцијата",
+      "logoPreview": "Преглед на логото",
+      "registrationNumber": "Регистарски број / ЕДБ"
+    },
+    "placeholders": {
+      "agencyName": "пр. Премиер агенција за недвижности",
+      "description": "Кажете им на потенцијалните клиенти за вашата агенција, експертизата и што ве прави уникатни...",
+      "selectCountry": "Изберете земја",
+      "selectCity": "Изберете град",
+      "selectCountryFirst": "Прво изберете земја",
+      "streetAddress": "пр. Главна улица 123, зграда А",
+      "registrationNumber": "пр. ЕДБ 4030000000000"
+    },
+    "hints": {
+      "agencyName": "Изберете професионално име што го претставува вашиот бренд",
+      "description": "Убедлив опис им помага на клиентите да ја разберат вашата вредност",
+      "pinLocation": "Повлечете го маркерот или кликнете на картата за да ја поставите точната позиција на канцеларијата. Адресата подолу ќе се ажурира автоматски.",
+      "streetAddress": "Автоматски се пополнува од картата погоре или внесете рачно. Вклучете број на зграда, улица и кат/канцеларија.",
+      "email": "Главна е-пошта за прашања",
+      "phone": "Вклучете повикувачки број (пр. +389 за Македонија)",
+      "website": "Опционално: веб-страница на агенцијата",
+      "licenseNumber": "Вашата официјална лиценца за недвижности",
+      "yearsInBusiness": "Колку долго работите во недвижности",
+      "languages": "Изберете ги сите јазици на кои може да комуницира тимот",
+      "logo": "JPEG, PNG, WebP или SVG. Макс. 5MB.",
+      "registrationNumber": "Вашиот официјален регистарски или даночен број"
+    },
+    "validation": {
+      "nameRequired": "Името на агенцијата е задолжително",
+      "countryRequired": "Земјата е задолжителна",
+      "cityRequired": "Градот е задолжителен",
+      "emailRequired": "Е-поштата е задолжителна",
+      "emailInvalid": "Внесете валидна е-пошта",
+      "phoneRequired": "Телефонскиот број е задолжителен",
+      "phoneInvalid": "Внесете валиден телефонски број (пр. +389 2 123 4567)",
+      "websiteInvalid": "Веб-страницата мора да почнува со http:// или https://",
+      "logoInvalidType": "Прикачете слика во формат JPEG, PNG, WebP или SVG",
+      "logoTooLarge": "Логото мора да биде помало од 5MB"
+    },
+    "alerts": {
+      "createdTitle": "Агенцијата е креирана!",
+      "createdMessage": "Вашата агенција „{{name}}“ е креирана.",
+      "paymentSucceededButFailed": "Плаќањето успеа, но креирањето на агенцијата не успеа. Контактирајте ја поддршката.",
+      "createFailed": "Креирањето на агенцијата не успеа. Обидете се повторно.",
+      "paymentFailed": "Плаќањето не успеа: {{error}}"
+    },
+    "eligibility": {
+      "agentRequired": "Потребен е статус на агент",
+      "proRequired": "Потребна е Pro претплата",
+      "becomeAgent": "Прво станете агент",
+      "upgradeToPro": "Надгради на Pro"
+    },
+    "enterprise": {
+      "active": "Enterprise е активен — не е потребно плаќање"
+    },
+    "buttons": {
+      "creating": "Се креира агенција…",
+      "create": "Креирај агенција",
+      "continueToPayment": "Продолжи кон плаќање →",
+      "removeLogo": "Отстрани лого",
+      "uploadLogo": "Прикачи лого",
+      "changeLogo": "Промени лого"
+    }
+  },
+  "achievements": {
+    "addedTitle": "Достигнувањето е додадено",
+    "addedMessage": "Достигнувањето е успешно додадено",
+    "addFailed": "Додавањето на достигнувањето не успеа",
+    "updatedTitle": "Достигнувањето е ажурирано",
+    "updatedMessage": "Достигнувањето е успешно ажурирано",
+    "updateFailed": "Ажурирањето на достигнувањето не успеа",
+    "deletedTitle": "Достигнувањето е избришано",
+    "deletedMessage": "Достигнувањето е избришано",
+    "deleteFailed": "Бришењето на достигнувањето не успеа"
+  },
+  "inquiry": {
+    "findProperty": "Барам имот",
+    "template1": "Здраво, барам имот во вашата област. Можете ли да ми помогнете да најдам соодветни опции според моите барања?",
+    "sellProperty": "Продавам имот",
+    "template2": "Здраво, заинтересиран сум да го продадам мојот имот. Можете ли да дадете пазарна процена и да разговараме за вашите услуги?",
+    "marketInfo": "Информации за пазарот",
+    "template3": "Здраво, би сакал да дознаам повеќе за пазарот на недвижности во вашата област. Можеме ли да закажеме консултација?",
+    "nameRequired": "Името е задолжително",
+    "validEmailRequired": "Потребна е валидна е-пошта",
+    "messageRequired": "Пораката е задолжителна",
+    "agentIdentificationError": "Агентот не може да се идентификува",
+    "sendError": "Испраќањето на барањето не успеа. Обидете се повторно.",
+    "title": "Контактирај агент",
+    "successTitle": "Пораката е испратена!",
+    "successMessage": "Вашата порака е испратена до агентот. Наскоро ќе ве контактира.",
+    "whatAbout": "За што станува збор?",
+    "yourName": "Вашето име",
+    "namePlaceholder": "Петар Петровски",
+    "yourEmail": "Вашата е-пошта",
+    "yourPhone": "Телефон",
+    "message": "Вашата порака",
+    "messagePlaceholder": "Кажете му на агентот со што ви треба помош...",
+    "sending": "Се испраќа...",
+    "sendMessage": "Испрати порака",
+    "privacyNote": "Со испраќањето се согласувате агентот да ве контактира во врска со вашето барање."
+  },
+  "ui": {
+    "agentProfileTabs": {
+      "isADedicatedRealEstate": "е посветен професионалец за недвижности со",
+      "yearsOfExperienceInThe": "години искуство во индустријата",
+      "specializesInHelpingClientsAchieve": "е специјализиран за помош на клиентите да ги остварат своите цели преку стручно познавање на пазарот и персонализирана услуга.",
+      "call": "Јави се",
+      "anonymous": "Анонимно",
+      "verifiedBuyer": "Верификуван купувач •",
+      "recently": "Неодамна",
+      "responseFrom": "Одговор од"
+    },
+    "agentContactActions": {
+      "n0900Am": "09:00",
+      "n1000Am": "10:00",
+      "n1100Am": "11:00",
+      "n1200Pm": "12:00",
+      "n0100Pm": "13:00",
+      "n0200Pm": "14:00",
+      "n0300Pm": "15:00",
+      "n0400Pm": "16:00",
+      "n0500Pm": "17:00"
+    },
+    "serviceAreaMapPicker": {
+      "findingArea": "Се бара подрачје…",
+      "removeArea": "Отстрани подрачје",
+      "clickAnywhereOnTheMap": "Кликнете каде било на картата за да додадете подрачје на работа",
+      "remove": "Отстрани",
+      "noServiceAreasAddedClick": "Нема додадени подрачја. Кликнете на картата за да ги додадете подрачјата што ги покривате."
+    },
+    "marketReportModal": {
+      "market": "Пазар",
+      "updated": "Ажурирано"
+    },
+    "agentScoringPanel": {
+      "n0Pts": "0 поени"
+    },
+    "agentEditModal": {
+      "close": "Затвори"
+    },
+    "agentProfileHeader": {
+      "viewProfile": "Види профил"
     }
   }
 }
