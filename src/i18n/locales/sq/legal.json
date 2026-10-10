@@ -96,7 +96,9 @@
       "stripe": "Përpunimi i pagesave. Procesori ynë i pagesave përpunon informacionin tuaj të pagesës në mënyrë të sigurt. Ne nuk ruajmë detajet e plota të kartës suaj të kreditit.",
       "analytics": "Analitika e faqes për të kuptuar sjelljen e përdoruesve dhe përmirësuar shërbimet tona. Përdorim anonimizimin e IP.",
       "cloudflare": "Shërbime sigurie dhe performancë duke përfshirë mbrojtjen DDoS dhe shpërndarjen e përmbajtjes.",
-      "aws": "Shërbime pritjeje dhe ruajtjeje në cloud. Të dhënat ruhen në qendrat e të dhënave të BE."
+      "aws": "Shërbime pritjeje dhe ruajtjeje në cloud. Të dhënat ruhen në qendrat e të dhënave të BE.",
+      "paymentTitle": "Përpunuesi i pagesave",
+      "provider": "Përpunuesi ynë i pagesave trajton të gjitha transaksionet, përputhshmërinë me TVSH/taksat, faturimin dhe rimbursimet në emrin tonë. Informacioni juaj i pagesës përpunohet në mënyrë të sigurt dhe ne nuk ruajmë të dhënat e plota të kartës suaj."
     },
     "transfers": {
       "title": "Transfertat Ndërkombëtare të të Dhënave",
@@ -164,6 +166,12 @@
         "title": "Përpunimi i Pagesave",
         "text": "Kur bëni një blerje, po kryeni transaksion me ofruesin tonë të shërbimeve të pagesave Paysera, i cili menaxhon përpunimin e pagesave, faturimin, përputhshmërinë me TVSH/taksat dhe rimbursimet.",
         "buyerTerms": "Duke bërë një blerje, pranoni gjithashtu Kushtet e Përdorimit të Paysera."
+      },
+      "provider": {
+        "title": "Përpunimi i pagesave",
+        "morStatement": "Procesi ynë i porosive kryhet nga ofruesi ynë i shërbimeve të pagesës. Ai shërben si Tregtar i Regjistruar (Merchant of Record) për të gjitha porositë dhe trajton pyetjet e klientëve lidhur me pagesat dhe kthimet.",
+        "text": "Kur bëni një blerje, transaksioni kryhet me ofruesin tonë të shërbimeve të pagesës, i cili trajton përpunimin e pagesës, faturimin, përputhshmërinë me TVSH/taksat dhe rimbursimet.",
+        "buyerTerms": "Duke bërë një blerje, ju pranoni edhe kushtet e shërbimit të ofruesit të pagesave."
       }
     },
     "prohibited": {
@@ -347,6 +355,126 @@
     "contact": {
       "title": "Na Kontaktoni",
       "text": "Nëse keni pyetje rreth përdorimit tonë të cookies, ju lutemi na kontaktoni:"
+    }
+  },
+  "refund": {
+    "title": "Politika e rimbursimit",
+    "lastUpdated": "Përditësuar së fundi",
+    "intro": {
+      "title": "Angazhimi ynë",
+      "text": "Në BalkanEstate AI, duam që të jeni plotësisht të kënaqur me abonimin tuaj. Nëse nuk jeni të kënaqur me shërbimet tona, ofrojmë rimbursim sipas llojit të abonimit. Kjo politikë përshkruan kushtet për kërkimin e rimbursimit."
+    },
+    "guarantee": {
+      "title": "Periudhat e rimbursimit",
+      "text": "Nëse për çfarëdo arsye nuk jeni të kënaqur me abonimin, mund të kërkoni rimbursim të plotë brenda periudhës përkatëse. Kjo garanci vlen për:",
+      "newSub": "Blerje të reja abonimi",
+      "upgrade": "Përmirësime plani (rimbursim i diferencës së paguar)",
+      "firstTime": "Abonentë për herë të parë"
+    },
+    "eligibility": {
+      "title": "Kushtet për rimbursim",
+      "text": "Keni të drejtë për rimbursim nëse:",
+      "withinPeriod": "Kërkesa juaj bëhet brenda 7 ditëve (mujor) ose 30 ditëve (vjetor) nga blerja fillestare",
+      "firstPurchase": "Është abonimi juaj i parë me BalkanEstate AI",
+      "notAbused": "Nuk e keni përdorur më parë politikën e rimbursimit",
+      "goodFaith": "E keni përdorur shërbimin me mirëbesim"
+    },
+    "nonRefundable": {
+      "title": "Raste pa rimbursim",
+      "text": "Rimbursimet nuk ofrohen në rastet e mëposhtme:",
+      "afterPeriod": "Kërkesa të bëra pas periudhës së rimbursimit (7 ditë për mujor, 30 ditë për vjetor)",
+      "renewal": "Rinovimet automatike të abonimit (duhet ta anuloni para datës së rinovimit)",
+      "abuse": "Llogari të mbyllura për shkelje të Kushteve të Shërbimit",
+      "repeat": "Kërkesa të përsëritura rimbursimi (një rimbursim për përdorues)",
+      "partial": "Përdorim i pjesshëm pasi ka skaduar afati i rimbursimit"
+    },
+    "howTo": {
+      "title": "Si të kërkoni rimbursim",
+      "text": "Për të kërkuar rimbursim, ndiqni këto hapa:",
+      "step1": {
+        "title": "Dërgoni një email",
+        "text": "Na shkruani në refunds@balkanestateai.com me temën \"Refund Request\""
+      },
+      "step2": {
+        "title": "Përfshini të dhënat tuaja",
+        "text": "Përfshini email-in e llogarisë, planin e abonimit, datën e blerjes dhe arsyen e rimbursimit (opsionale)"
+      },
+      "step3": {
+        "title": "Prisni konfirmimin",
+        "text": "Do ta shqyrtojmë kërkesën dhe do t'ju përgjigjemi brenda 2-3 ditëve të punës"
+      },
+      "step4": {
+        "title": "Merrni rimbursimin",
+        "text": "Pas miratimit, rimbursimet përpunohen brenda 5-10 ditëve të punës në metodën origjinale të pagesës"
+      }
+    },
+    "contact": {
+      "title": "Kërkoni rimbursim tani",
+      "text": "Gati të kërkoni rimbursim? Kontaktoni ekipin tonë të mbështetjes:",
+      "response": "Zakonisht përgjigjemi brenda 24-48 orëve në ditët e punës."
+    },
+    "processing": {
+      "title": "Përpunimi i rimbursimit",
+      "text": "Rimbursimet përpunohen nga ofruesi ynë i pagesave. Ja çfarë të prisni:",
+      "review": "Koha e shqyrtimit",
+      "process": "Koha e përpunimit",
+      "bank": "Përpunimi nga banka",
+      "note": "Shënim: Koha e rimbursimit mund të ndryshojë sipas metodës së pagesës dhe institucionit financiar."
+    },
+    "provider": {
+      "title": "Përpunimi i pagesave",
+      "text": "Të gjitha pagesat dhe rimbursimet përpunohen nga ofruesi ynë i pagesave, i cili trajton përpunimin e pagesave, përputhshmërinë tatimore dhe disbursimin e rimbursimeve në emrin tonë. Kur merrni një rimbursim, ai do të shfaqet në pasqyrën tuaj nga ofruesi ynë i pagesave. Për çdo pyetje lidhur me pagesat, ju rekomandojmë të na kontaktoni fillimisht ne për zgjidhjen më të shpejtë."
+    },
+    "cancellation": {
+      "title": "Anulimi kundrejt rimbursimit",
+      "text": "Ju lutemi vini re ndryshimin midis anulimit dhe rimbursimit:",
+      "cancel": "Anulim",
+      "cancelDesc": "Ndalon faturimin e ardhshëm. Ruani qasjen deri në fund të periudhës aktuale të faturimit. Nuk lëshohet rimbursim.",
+      "refund": "Rimbursim",
+      "refundDesc": "Kthen pagesën tuaj. Abonimi ndërpritet menjëherë dhe qasja hiqet pas përpunimit të rimbursimit."
+    },
+    "prorated": {
+      "title": "Rimbursime proporcionale për planet vjetore",
+      "text": "Për planet vjetore, nëse kërkoni rimbursim pas periudhës 30-ditore të garancisë por brenda 90 ditëve të para, mund të ofrojmë rimbursim proporcional sipas gjykimit tonë, minus një tarifë përpunimi. Kontaktoni ekipin tonë për situatën tuaj specifike."
+    },
+    "disputes": {
+      "title": "Mosmarrëveshjet dhe chargeback-et",
+      "text": "Ju inkurajojmë të na kontaktoni drejtpërdrejt para se të hapni një mosmarrëveshje me bankën ose kompaninë e kartës. Chargeback-et janë të kushtueshme dhe kërkojnë kohë për të dyja palët. Jemi të angazhuar t'i zgjidhim problemet drejt dhe shpejt. Nëse hapni një chargeback pa na kontaktuar më parë, llogaria juaj mund të pezullohet deri në përfundim të hetimit."
+    },
+    "contactUs": {
+      "title": "Na kontaktoni",
+      "text": "Nëse keni pyetje rreth politikës sonë të rimbursimit ose keni nevojë për ndihmë, na kontaktoni:"
+    }
+  },
+  "ui": {
+    "cookiePolicyPage": {
+      "email": "Email:",
+      "phone": "Telefon:"
+    },
+    "refundPolicyPage": {
+      "monthlySubscriptions": "Abonime mujore",
+      "n7Days": "7 ditë",
+      "fullRefundWithin7Days": "Rimbursim i plotë brenda 7 ditëve nga blerja",
+      "yearlySubscriptions": "Abonime vjetore",
+      "n30Days": "30 ditë",
+      "fullRefundWithin30Days": "Rimbursim i plotë brenda 30 ditëve nga blerja",
+      "email": "Email:",
+      "phone": "Telefon:",
+      "n23BusinessDays": "2-3 ditë pune",
+      "n510BusinessDays": "5-10 ditë pune",
+      "variesByBankUpTo": "Ndryshon sipas bankës (deri në 10 ditë)",
+      "refunds": "Rimbursime:",
+      "support": "Mbështetje:"
+    },
+    "privacyPolicyPage": {
+      "privacyPolicy": "Politika e privatësisë →",
+      "emailDpoBalkanestateaiCom": "Email: dpo@balkanestateai.com",
+      "email": "Email:",
+      "phone": "Telefon:"
+    },
+    "termsOfServicePage": {
+      "email": "Email:",
+      "phone": "Telefon:"
     }
   }
 }

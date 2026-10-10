@@ -158,7 +158,7 @@
         "desc": "Kliknite da pozovete na mobilnim uređajima"
       },
       "email": {
-        "title": "Email",
+        "title": "E-mail",
         "desc": "Direktan email prodavcu ili agentu"
       },
       "whatsapp": {
@@ -861,6 +861,27 @@
     "q5": {
       "question": "Kako funkcioniraju promocijski krediti?",
       "answer": "Promocijski krediti vam omogućavaju da podignete svoje oglase da se pojavljuju visoko u rezultatima pretrage. Pro korisnici dobijaju 3 kredita/mjesečno, agencije dobijaju 15 za dijeljenje među svojim timom."
+    }
+  },
+  "guide": {
+    "stepByStep": "Vodič korak po korak",
+    "progress": "Napredak",
+    "tips": "Savjeti",
+    "completed": "Vodič je završen!",
+    "completedMessage": "Odlično! Završili ste sve korake."
+  },
+  "video": {
+    "tutorial": "Video uputstvo"
+  },
+  "feature": {
+    "highlight": "Istaknuta funkcija"
+  },
+  "ui": {
+    "howItWorksPage": {
+      "aiSearch": "AI pretraga",
+      "findMeA": "Pronađi mi...",
+      "features": "Funkcije",
+      "forever": "zauvijek"
     }
   }
 }

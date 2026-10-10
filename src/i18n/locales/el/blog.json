@@ -29,5 +29,26 @@
     "prev": "Προηγούμενη",
     "next": "Επόμενη",
     "page": "Σελίδα {{page}} από {{total}}"
+  },
+  "ui": {
+    "articlePage": {
+      "copied": "Αντιγράφηκε!",
+      "more": "Περισσότερα",
+      "copyLink": "Αντιγραφή συνδέσμου",
+      "articleContent": "Περιεχόμενο άρθρου",
+      "featured": "Προτεινόμενο",
+      "minRead": "λεπτά ανάγνωσης",
+      "shareThisArticle": "Κοινοποιήστε αυτό το άρθρο",
+      "views": "προβολές"
+    },
+    "blogPage": {
+      "activeFilters": "Ενεργά φίλτρα:",
+      "clearAll": "Καθαρισμός όλων",
+      "tryAdjustingYourFilters": "Δοκιμάστε να αλλάξετε τα φίλτρα"
+    },
+    "articleCard": {
+      "featured": "Προτεινόμενο",
+      "readArticle": "Διαβάστε το άρθρο"
+    }
   }
 }

@@ -21,7 +21,9 @@
     "agencyFeature": "Agjenci"
   },
   "error": {
-    "loadFailed": "Dështoi ngarkimi i planeve të çmimeve"
+    "loadFailed": "Dështoi ngarkimi i planeve të çmimeve",
+    "paymentFailed": "Pagesa dështoi",
+    "paymentFailedMessage": "Diçka shkoi keq me pagesën tuaj. Provoni përsëri ose kontaktoni mbështetjen."
   },
   "limitedOffer": "Oferta e Kufizuar Përfundon Në:",
   "offerTitle": "Urime! Keni Hapur Zbritje Ekskluzive!",
@@ -145,7 +147,8 @@
     "message": "Abonimi juaj {{plan}} është aktivizuar. Tani keni qasje në të gjitha veçoritë premium.",
     "agencyMessage": "Abonimi juaj Ndërmarrje është aktivizuar dhe agjencia juaj është krijuar me sukses! Tani jeni admini i agjencisë suaj.",
     "subscriptionActivated": "Abonimi u aktivizua me sukses!",
-    "startListing": "Fillo të Listosh Prona"
+    "startListing": "Fillo të Listosh Prona",
+    "subscriptionActivatedWithReceipt": "Abonimi juaj u aktivizua. Fatura u dërgua në email-in tuaj."
   },
   "listing": {
     "title": "Planet e Promovimit të Listimeve",
@@ -276,7 +279,8 @@
     "enterpriseSubtitle": "Gjithçka që i duhet agjencisë suaj — anëtarë të ekipit, faqe branding dhe më shumë.",
     "comingSoon": "Së Shpejti",
     "featureComingSoon": "Veçoritë e agjencisë do të jenë të disponueshme së shpejti!",
-    "selectDuration": "Zgjidh kohëzgjatjen:"
+    "selectDuration": "Zgjidh kohëzgjatjen:",
+    "noPlans": "Nuk ka plane për agjencitë për momentin."
   },
   "contact": {
     "haveQuestions": "Keni pyetje?",
@@ -296,12 +300,46 @@
     "title": "A keni një kupon nga shitësi?",
     "description": "Zgjidhni çdo plan më lart dhe përdorni kodin e kuponit tuaj për të aktivizuar abonimin tuaj menjëherë.",
     "selectPlan": "Zgjidh një plan për të përdorur kuponin tuaj",
-    "haveDiscountCode": "Have a discount code?"
+    "haveDiscountCode": "Keni një kod zbritjeje?"
   },
   "specialOffers": {
     "title": "Ofertat Spesiale",
     "subtitle": "Marrëveshje me kohë të limituar për promovimin e listimeve",
     "selectOffer": "Zgjidh Ofertën",
-    "daysLeft": "{{days}} ditë të mbetura"
+    "daysLeft": "{{days}} ditë të mbetura",
+    "limitedTime": "Kohë e kufizuar",
+    "homeSubtitle": "Rritni shpalljet tuaja me oferta ekskluzive",
+    "lastDay": "Dita e fundit!",
+    "getThisDeal": "Merr këtë ofertë",
+    "viewAllDeals": "Shiko të gjitha planet e promovimit",
+    "selectListing": "Zgjidhni një shpallje për ta promovuar me {{name}}",
+    "selected": "E zgjedhur — Zgjidhni shpalljen"
+  },
+  "gameDiscount": {
+    "title": "Fituat {{percent}}% zbritje!",
+    "description": "Kodi juaj {{code}} aplikohet automatikisht në pagesë për planet Pro dhe Enterprise.",
+    "validUntil": "I vlefshëm deri më {{date}}."
+  },
+  "role": {
+    "buyerPlanOnly": "Plan për blerës",
+    "buyerPlanOnlyMessage": "Ky plan është për blerësit. Kaloni në një llogari Blerësi te cilësimet e profilit për t'u abonuar.",
+    "sellerPlanOnly": "Plan për shitës",
+    "sellerPlanOnlyMessage": "Ky plan është për shitësit dhe agjentët. Kaloni në një llogari Shitësi privat ose Agjenti te cilësimet e profilit për t'u abonuar."
+  },
+  "upgrade": {
+    "alreadyEnterprise": "Keni planin më të lartë",
+    "alreadyEnterpriseMessage": "Keni tashmë planin Enterprise — niveli më i lartë. Menaxhoni abonimin nga cilësimet e llogarisë.",
+    "yearlyActive": "Plani vjetor aktiv",
+    "yearlyActiveMessage": "Keni tashmë një plan vjetor. Mund të kaloni vetëm në planin Enterprise.",
+    "monthlyActive": "Plani mujor aktiv",
+    "monthlyActiveMessage": "Keni tashmë një plan mujor. Mund të kaloni në planin Vjetor ose Enterprise."
+  },
+  "ui": {
+    "buyerPlansSection": {
+      "noBuyerPlansAvailableAt": "Nuk ka plane për blerës për momentin."
+    },
+    "enterprisePlanCard": {
+      "completeSolutionForRealEstate": "Zgjidhje e plotë për agjencitë e patundshmërive"
+    }
   }
 }

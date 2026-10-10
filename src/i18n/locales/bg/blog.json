@@ -29,5 +29,26 @@
     "prev": "Предишна",
     "next": "Следваща",
     "page": "Страница {{page}} от {{total}}"
+  },
+  "ui": {
+    "articlePage": {
+      "copied": "Копирано!",
+      "more": "Още",
+      "copyLink": "Копирай връзката",
+      "articleContent": "Съдържание на статията",
+      "featured": "Препоръчано",
+      "minRead": "мин. четене",
+      "shareThisArticle": "Споделете статията",
+      "views": "прегледа"
+    },
+    "blogPage": {
+      "activeFilters": "Активни филтри:",
+      "clearAll": "Изчисти всички",
+      "tryAdjustingYourFilters": "Опитайте да промените филтрите"
+    },
+    "articleCard": {
+      "featured": "Препоръчано",
+      "readArticle": "Прочети статията"
+    }
   }
 }

@@ -862,5 +862,26 @@
       "question": "Si funksionojnë kreditë e promovimit?",
       "answer": "Kreditë e promovimit ju lejojnë të rrisni listimet tuaja për t'u shfaqur më lart në rezultatet e kërkimit. Përdoruesit Pro marrin 3 kredite/muaj, agjencitë marrin 15 për t'i ndarë mes ekipit të tyre."
     }
+  },
+  "guide": {
+    "stepByStep": "Udhëzues hap pas hapi",
+    "progress": "Përparimi",
+    "tips": "Këshilla",
+    "completed": "Udhëzuesi u përfundua!",
+    "completedMessage": "Punë e shkëlqyer! I keni përfunduar të gjithë hapat."
+  },
+  "video": {
+    "tutorial": "Video udhëzues"
+  },
+  "feature": {
+    "highlight": "Veçori kryesore"
+  },
+  "ui": {
+    "howItWorksPage": {
+      "aiSearch": "Kërkim me AI",
+      "findMeA": "Më gjej një...",
+      "features": "Veçoritë",
+      "forever": "përgjithmonë"
+    }
   }
 }

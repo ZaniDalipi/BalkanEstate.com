@@ -119,6 +119,28 @@
     "networkError": "Eroare de rețea. Vă rugăm verificați conexiunea.",
     "serverError": "Eroare de server. Vă rugăm încercați mai târziu.",
     "retry": "Reîncercați",
-    "retrying": "Se reîncearcă..."
+    "retrying": "Se reîncearcă...",
+    "title": "Eroare la încărcarea datelor"
+  },
+  "ui": {
+    "hourlyHeatmap": {
+      "peakHour": "Ora de vârf",
+      "peak": "Vârf:",
+      "total": "Total:",
+      "less": "Mai puțin",
+      "noViews": "Nicio vizualizare",
+      "more": "Mai mult"
+    },
+    "trafficChart": {
+      "total": "Total:",
+      "top": "Top:",
+      "directUrlVisits": "Vizite directe prin URL",
+      "googleBingEtc": "Google, Bing etc.",
+      "facebookInstagramEtc": "Facebook, Instagram etc.",
+      "newsletterCampaigns": "Newsletter, campanii"
+    },
+    "deviceChart": {
+      "ofTotal": "% din total"
+    }
   }
 }

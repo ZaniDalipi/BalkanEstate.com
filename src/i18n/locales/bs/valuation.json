@@ -182,5 +182,14 @@
     "count": "{{count}} sačuvano na ovom uređaju",
     "clearAll": "Obriši sve",
     "remove": "Ukloni"
+  },
+  "seo": {
+    "title": "Besplatna AI procjena nekretnine - trenutna procjena na Balkanu",
+    "description": "Dobijte besplatnu AI procjenu za bilo koju nekretninu na Balkanu. Trenutne procjene cijena za stanove, kuće i vile u Crnoj Gori, Albaniji, Srbiji i još 8 zemalja."
+  },
+  "ui": {
+    "valuationForm": {
+      "multiSelect": "(višestruki izbor)"
+    }
   }
 }

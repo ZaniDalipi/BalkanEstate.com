@@ -97,7 +97,8 @@
     "noLocations": "Nema lokacija za prikaz",
     "noLocationsHint": "Tvrtke s adresama pojavit će se ovdje na karti",
     "viewDetails": "Pogledaj detalje",
-    "directions": "Upute"
+    "directions": "Upute",
+    "listingCount": "{{count}} na karti"
   },
   "verified": "Provjereno",
   "detail": {
@@ -141,7 +142,8 @@
       "subtitle": "Javite se danas kako biste razgovarali o svom projektu i dobili besplatnu konzultaciju.",
       "callNow": "Nazovite {{phone}}",
       "sendEmail": "Pošalji e-mail"
-    }
+    },
+    "established": "Osnovano {{year}}."
   },
   "days": {
     "monday": "Ponedjeljak",
@@ -278,6 +280,33 @@
     "delete": "Obriši",
     "emptyTitle": "Još nema poslova",
     "emptyMessage": "Kreirajte svoj prvi poslovni oglas kako biste prikazali svoje usluge u imeniku.",
-    "createFirst": "Kreiraj poslovni oglas"
+    "createFirst": "Kreiraj poslovni oglas",
+    "editSuccessTitle": "Ažurirano",
+    "editSuccessMessage": "Oglas tvrtke je ažuriran.",
+    "errorTitle": "Učitavanje tvrtki nije uspjelo",
+    "errorMessage": "Nešto je pošlo po zlu. Pokušajte kasnije.",
+    "backToList": "Natrag na Moje tvrtke"
+  },
+  "delete": {
+    "confirmTitle": "Izbriši oglas",
+    "successTitle": "Izbrisano",
+    "successMessage": "Oglas tvrtke je izbrisan.",
+    "errorTitle": "Pogreška",
+    "errorMessage": "Brisanje oglasa nije uspjelo. Pokušajte ponovno.",
+    "confirmMessage": "Jeste li sigurni da želite izbrisati „{{name}}”? Ova se radnja ne može poništiti."
+  },
+  "status": {
+    "active": "Aktivno",
+    "inactive": "Neaktivno"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Pregled",
+      "bannerPreview": "Pregled bannera"
+    },
+    "createBusinessListingForm": {
+      "preview": "Pregled",
+      "bannerPreview": "Pregled bannera"
+    }
   }
 }

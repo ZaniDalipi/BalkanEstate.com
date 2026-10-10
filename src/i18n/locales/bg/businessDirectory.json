@@ -97,7 +97,8 @@
     "noLocations": "Няма локации за показване",
     "noLocationsHint": "Фирми с адреси ще се появят тук на картата",
     "viewDetails": "Виж детайли",
-    "directions": "Упътвания"
+    "directions": "Упътвания",
+    "listingCount": "{{count}} на картата"
   },
   "verified": "Проверено",
   "detail": {
@@ -141,7 +142,8 @@
       "subtitle": "Свържете се днес, за да обсъдите вашия проект и да получите безплатна консултация.",
       "callNow": "Обадете се на {{phone}}",
       "sendEmail": "Изпрати имейл"
-    }
+    },
+    "established": "Основано {{year}} г."
   },
   "days": {
     "monday": "Понеделник",
@@ -278,6 +280,33 @@
     "delete": "Изтрий",
     "emptyTitle": "Все още няма бизнеси",
     "emptyMessage": "Създайте първата си бизнес обява, за да покажете услугите си в указателя.",
-    "createFirst": "Създай бизнес обява"
+    "createFirst": "Създай бизнес обява",
+    "editSuccessTitle": "Обновено",
+    "editSuccessMessage": "Обявата на бизнеса е обновена.",
+    "errorTitle": "Неуспешно зареждане на бизнесите",
+    "errorMessage": "Нещо се обърка. Опитайте по-късно.",
+    "backToList": "Обратно към Моите бизнеси"
+  },
+  "delete": {
+    "confirmTitle": "Изтрий обявата",
+    "successTitle": "Изтрито",
+    "successMessage": "Обявата на бизнеса е изтрита.",
+    "errorTitle": "Грешка",
+    "errorMessage": "Неуспешно изтриване на обявата. Опитайте отново.",
+    "confirmMessage": "Сигурни ли сте, че искате да изтриете „{{name}}“? Действието е необратимо."
+  },
+  "status": {
+    "active": "Активно",
+    "inactive": "Неактивно"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Преглед",
+      "bannerPreview": "Преглед на банера"
+    },
+    "createBusinessListingForm": {
+      "preview": "Преглед",
+      "bannerPreview": "Преглед на банера"
+    }
   }
 }

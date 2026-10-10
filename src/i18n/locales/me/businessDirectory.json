@@ -97,7 +97,8 @@
     "noLocations": "Nema lokacija za prikaz",
     "noLocationsHint": "Biznisi sa adresama pojaviće se ovdje na mapi",
     "viewDetails": "Pogledaj detalje",
-    "directions": "Upute"
+    "directions": "Upute",
+    "listingCount": "{{count}} na mapi"
   },
   "verified": "Verifikovano",
   "detail": {
@@ -112,7 +113,7 @@
     "today": "Danas",
     "contactInfo": "Kontakt informacije",
     "phone": "Telefon",
-    "email": "Email",
+    "email": "E-mail",
     "website": "Web stranica",
     "location": "Lokacija",
     "socialMedia": "Društvene mreže",
@@ -141,7 +142,8 @@
       "subtitle": "Kontaktirajte nas danas da razgovarate o vašem projektu i dobijte besplatnu konsultaciju.",
       "callNow": "Pozovite {{phone}}",
       "sendEmail": "Pošaljite email"
-    }
+    },
+    "established": "Osnovano {{year}}."
   },
   "days": {
     "monday": "Ponedeljak",
@@ -278,6 +280,33 @@
     "delete": "Obriši",
     "emptyTitle": "Još nema biznisa",
     "emptyMessage": "Kreirajte svoj prvi poslovni oglas da prikažete usluge u imeniku.",
-    "createFirst": "Kreiraj poslovni oglas"
+    "createFirst": "Kreiraj poslovni oglas",
+    "editSuccessTitle": "Ažurirano",
+    "editSuccessMessage": "Oglas firme je ažuriran.",
+    "errorTitle": "Učitavanje firmi nije uspjelo",
+    "errorMessage": "Nešto je pošlo naopako. Pokušajte kasnije.",
+    "backToList": "Nazad na Moje firme"
+  },
+  "delete": {
+    "confirmTitle": "Obriši oglas",
+    "successTitle": "Obrisano",
+    "successMessage": "Oglas firme je obrisan.",
+    "errorTitle": "Greška",
+    "errorMessage": "Brisanje oglasa nije uspjelo. Pokušajte ponovo.",
+    "confirmMessage": "Da li ste sigurni da želite da obrišete „{{name}}“? Ovo se ne može poništiti."
+  },
+  "status": {
+    "active": "Aktivno",
+    "inactive": "Neaktivno"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Pregled",
+      "bannerPreview": "Pregled banera"
+    },
+    "createBusinessListingForm": {
+      "preview": "Pregled",
+      "bannerPreview": "Pregled banera"
+    }
   }
 }

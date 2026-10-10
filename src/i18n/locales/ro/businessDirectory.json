@@ -97,7 +97,8 @@
     "noLocations": "Nu există locații de afișat",
     "noLocationsHint": "Afacerile cu adrese vor apărea aici pe hartă",
     "viewDetails": "Vezi detalii",
-    "directions": "Direcții"
+    "directions": "Direcții",
+    "listingCount": "{{count}} pe hartă"
   },
   "verified": "Verificat",
   "detail": {
@@ -141,7 +142,8 @@
       "subtitle": "Contactați-ne astăzi pentru a discuta proiectul dumneavoastră și a primi o consultație gratuită.",
       "callNow": "Sună la {{phone}}",
       "sendEmail": "Trimite email"
-    }
+    },
+    "established": "Înființat în {{year}}"
   },
   "days": {
     "monday": "Luni",
@@ -278,6 +280,33 @@
     "delete": "Șterge",
     "emptyTitle": "Nu există afaceri încă",
     "emptyMessage": "Creează primul tău anunț de afacere pentru a-ți prezenta serviciile în director.",
-    "createFirst": "Creează anunț de afacere"
+    "createFirst": "Creează anunț de afacere",
+    "editSuccessTitle": "Actualizat",
+    "editSuccessMessage": "Anunțul afacerii a fost actualizat.",
+    "errorTitle": "Încărcarea afacerilor a eșuat",
+    "errorMessage": "Ceva nu a mers bine. Încearcă mai târziu.",
+    "backToList": "Înapoi la Afacerile mele"
+  },
+  "delete": {
+    "confirmTitle": "Șterge anunțul",
+    "successTitle": "Șters",
+    "successMessage": "Anunțul afacerii a fost șters.",
+    "errorTitle": "Eroare",
+    "errorMessage": "Ștergerea anunțului a eșuat. Încearcă din nou.",
+    "confirmMessage": "Sigur vrei să ștergi „{{name}}”? Această acțiune nu poate fi anulată."
+  },
+  "status": {
+    "active": "Activ",
+    "inactive": "Inactiv"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Previzualizare",
+      "bannerPreview": "Previzualizare banner"
+    },
+    "createBusinessListingForm": {
+      "preview": "Previzualizare",
+      "bannerPreview": "Previzualizare banner"
+    }
   }
 }

@@ -53,7 +53,7 @@
     "noViewsMessage": "{{count}} обяви не са получили никакви прегледи. Може да им е нужно внимание.",
     "priceCorrelation": "Корелация между Цена и Прегледи",
     "priceCorrelationMessage": "Имотите с цена между {{min}} и {{max}} получават най-много прегледи във вашите обяви.",
-    "moreProperties": "+{{count}} more"
+    "moreProperties": "+{{count}} още"
   },
   "properties": {
     "title": "Представяне на Имоти",
@@ -119,6 +119,28 @@
     "networkError": "Мрежова грешка. Моля, проверете връзката си.",
     "serverError": "Грешка в сървъра. Моля, опитайте отново по-късно.",
     "retry": "Опитай отново",
-    "retrying": "Опитване отново..."
+    "retrying": "Опитване отново...",
+    "title": "Грешка при зареждане на данните"
+  },
+  "ui": {
+    "hourlyHeatmap": {
+      "peakHour": "Пиков час",
+      "peak": "Пик:",
+      "total": "Общо:",
+      "less": "По-малко",
+      "noViews": "Няма прегледи",
+      "more": "Повече"
+    },
+    "trafficChart": {
+      "total": "Общо:",
+      "top": "Водещ:",
+      "directUrlVisits": "Директни посещения чрез URL",
+      "googleBingEtc": "Google, Bing и др.",
+      "facebookInstagramEtc": "Facebook, Instagram и др.",
+      "newsletterCampaigns": "Бюлетин, кампании"
+    },
+    "deviceChart": {
+      "ofTotal": "% от общо"
+    }
   }
 }

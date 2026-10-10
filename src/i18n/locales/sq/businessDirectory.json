@@ -97,7 +97,8 @@
     "noLocations": "Nuk ka vendndodhje për shfaqje",
     "noLocationsHint": "Bizneset me adresa do të shfaqen këtu në hartë",
     "viewDetails": "Shiko Detajet",
-    "directions": "Drejtimet"
+    "directions": "Drejtimet",
+    "listingCount": "{{count}} në hartë"
   },
   "verified": "I verifikuar",
   "detail": {
@@ -141,7 +142,8 @@
       "subtitle": "Na kontaktoni sot për të diskutuar projektin tuaj dhe përfitoni një konsultim falas.",
       "callNow": "Thirr {{phone}}",
       "sendEmail": "Dërgo Email"
-    }
+    },
+    "established": "Themeluar më {{year}}"
   },
   "days": {
     "monday": "E hënë",
@@ -278,6 +280,33 @@
     "delete": "Fshi",
     "emptyTitle": "Asnjë biznes ende",
     "emptyMessage": "Krijoni listimin tuaj të parë të biznesit për të shfaqur shërbimet tuaja në drejtori.",
-    "createFirst": "Krijo listim biznesi"
+    "createFirst": "Krijo listim biznesi",
+    "editSuccessTitle": "U përditësua",
+    "editSuccessMessage": "Shpallja e biznesit u përditësua.",
+    "errorTitle": "Ngarkimi i bizneseve dështoi",
+    "errorMessage": "Diçka shkoi keq. Provoni përsëri më vonë.",
+    "backToList": "Kthehu te Bizneset e mia"
+  },
+  "delete": {
+    "confirmTitle": "Fshi shpalljen",
+    "successTitle": "U fshi",
+    "successMessage": "Shpallja e biznesit u fshi.",
+    "errorTitle": "Gabim",
+    "errorMessage": "Fshirja e shpalljes dështoi. Provoni përsëri.",
+    "confirmMessage": "Jeni të sigurt që doni të fshini \"{{name}}\"? Ky veprim nuk mund të zhbëhet."
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Joaktiv"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Pamje paraprake",
+      "bannerPreview": "Pamje paraprake e banerit"
+    },
+    "createBusinessListingForm": {
+      "preview": "Pamje paraprake",
+      "bannerPreview": "Pamje paraprake e banerit"
+    }
   }
 }

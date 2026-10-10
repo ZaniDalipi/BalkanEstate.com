@@ -119,6 +119,28 @@
     "networkError": "Грешка у мрежи. Молимо проверите везу.",
     "serverError": "Грешка на серверу. Молимо покушајте касније.",
     "retry": "Покушај поново",
-    "retrying": "Покушавање поново..."
+    "retrying": "Покушавање поново...",
+    "title": "Грешка при учитавању података"
+  },
+  "ui": {
+    "hourlyHeatmap": {
+      "peakHour": "Вршни сат",
+      "peak": "Врх:",
+      "total": "Укупно:",
+      "less": "Мање",
+      "noViews": "Нема прегледа",
+      "more": "Више"
+    },
+    "trafficChart": {
+      "total": "Укупно:",
+      "top": "Највише:",
+      "directUrlVisits": "Директне посете преко URL-а",
+      "googleBingEtc": "Google, Bing, итд.",
+      "facebookInstagramEtc": "Facebook, Instagram, итд.",
+      "newsletterCampaigns": "Билтен, кампање"
+    },
+    "deviceChart": {
+      "ofTotal": "% од укупно"
+    }
   }
 }

@@ -182,5 +182,14 @@
     "count": "{{count}} të ruajtura në këtë pajisje",
     "clearAll": "Pastro të gjitha",
     "remove": "Hiq"
+  },
+  "seo": {
+    "title": "Vlerësim falas i pronës me AI - Vlerësim i menjëhershëm për prona në Ballkan",
+    "description": "Merrni falas një vlerësim me AI për çdo pronë në Ballkan. Vlerësime të menjëhershme çmimesh për apartamente, shtëpi dhe vila në Mal të Zi, Shqipëri, Serbi dhe 8 vende të tjera."
+  },
+  "ui": {
+    "valuationForm": {
+      "multiSelect": "(zgjedhje e shumëfishtë)"
+    }
   }
 }

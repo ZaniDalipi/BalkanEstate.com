@@ -105,7 +105,7 @@
     "direct": "Direktno",
     "search": "Pretraga",
     "social": "Društvene Mreže",
-    "email": "Email",
+    "email": "E-mail",
     "other": "Ostalo"
   },
   "report": {
@@ -119,6 +119,28 @@
     "networkError": "Greška na mreži. Molimo provjerite Vašu vezu.",
     "serverError": "Greška na serveru. Molimo pokušajte kasnije.",
     "retry": "Pokušajte Ponovo",
-    "retrying": "Pokušavanje ponovo..."
+    "retrying": "Pokušavanje ponovo...",
+    "title": "Greška pri učitavanju podataka"
+  },
+  "ui": {
+    "hourlyHeatmap": {
+      "peakHour": "Vršni sat",
+      "peak": "Vrh:",
+      "total": "Ukupno:",
+      "less": "Manje",
+      "noViews": "Nema pregleda",
+      "more": "Više"
+    },
+    "trafficChart": {
+      "total": "Ukupno:",
+      "top": "Najviše:",
+      "directUrlVisits": "Direktne posjete preko URL-a",
+      "googleBingEtc": "Google, Bing, itd.",
+      "facebookInstagramEtc": "Facebook, Instagram, itd.",
+      "newsletterCampaigns": "Bilten, kampanje"
+    },
+    "deviceChart": {
+      "ofTotal": "% od ukupno"
+    }
   }
 }

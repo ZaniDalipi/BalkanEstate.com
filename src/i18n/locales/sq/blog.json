@@ -29,5 +29,26 @@
     "prev": "Mëparshme",
     "next": "Tjetër",
     "page": "Faqja {{page}} nga {{total}}"
+  },
+  "ui": {
+    "articlePage": {
+      "copied": "U kopjua!",
+      "more": "Më shumë",
+      "copyLink": "Kopjo lidhjen",
+      "articleContent": "Përmbajtja e artikullit",
+      "featured": "E veçuar",
+      "minRead": "min lexim",
+      "shareThisArticle": "Shpërndaje këtë artikull",
+      "views": "shikime"
+    },
+    "blogPage": {
+      "activeFilters": "Filtrat aktivë:",
+      "clearAll": "Pastro të gjitha",
+      "tryAdjustingYourFilters": "Provoni të ndryshoni filtrat"
+    },
+    "articleCard": {
+      "featured": "E veçuar",
+      "readArticle": "Lexo artikullin"
+    }
   }
 }

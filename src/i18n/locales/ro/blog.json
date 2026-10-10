@@ -29,5 +29,26 @@
     "prev": "Anterioară",
     "next": "Următoare",
     "page": "Pagina {{page}} din {{total}}"
+  },
+  "ui": {
+    "articlePage": {
+      "copied": "Copiat!",
+      "more": "Mai mult",
+      "copyLink": "Copiază linkul",
+      "articleContent": "Conținutul articolului",
+      "featured": "Recomandat",
+      "minRead": "min de citit",
+      "shareThisArticle": "Distribuie acest articol",
+      "views": "vizualizări"
+    },
+    "blogPage": {
+      "activeFilters": "Filtre active:",
+      "clearAll": "Șterge tot",
+      "tryAdjustingYourFilters": "Încearcă să ajustezi filtrele"
+    },
+    "articleCard": {
+      "featured": "Recomandat",
+      "readArticle": "Citește articolul"
+    }
   }
 }

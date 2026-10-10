@@ -119,6 +119,28 @@
     "networkError": "Σφάλμα δικτύου. Παρακαλώ ελέγξτε τη σύνδεσή σας.",
     "serverError": "Σφάλμα διακομιστή. Παρακαλώ δοκιμάστε ξανά αργότερα.",
     "retry": "Επανάληψη",
-    "retrying": "Επανάληψη..."
+    "retrying": "Επανάληψη...",
+    "title": "Σφάλμα φόρτωσης δεδομένων"
+  },
+  "ui": {
+    "hourlyHeatmap": {
+      "peakHour": "Ώρα αιχμής",
+      "peak": "Αιχμή:",
+      "total": "Σύνολο:",
+      "less": "Λιγότερα",
+      "noViews": "Καμία προβολή",
+      "more": "Περισσότερα"
+    },
+    "trafficChart": {
+      "total": "Σύνολο:",
+      "top": "Κορυφαίο:",
+      "directUrlVisits": "Άμεσες επισκέψεις μέσω URL",
+      "googleBingEtc": "Google, Bing κ.λπ.",
+      "facebookInstagramEtc": "Facebook, Instagram κ.λπ.",
+      "newsletterCampaigns": "Newsletter, καμπάνιες"
+    },
+    "deviceChart": {
+      "ofTotal": "% του συνόλου"
+    }
   }
 }

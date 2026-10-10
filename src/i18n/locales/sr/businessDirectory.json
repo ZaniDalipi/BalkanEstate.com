@@ -97,7 +97,8 @@
     "noLocations": "Нема локација за приказ",
     "noLocationsHint": "Бизниси са адресама ће се појавити овде на мапи",
     "viewDetails": "Погледај детаље",
-    "directions": "Упутства"
+    "directions": "Упутства",
+    "listingCount": "{{count}} на мапи"
   },
   "verified": "Верификован",
   "detail": {
@@ -141,7 +142,8 @@
       "subtitle": "Контактирајте нас данас да разговарате о вашем пројекту и добијете бесплатну консултацију.",
       "callNow": "Позови {{phone}}",
       "sendEmail": "Пошаљи имејл"
-    }
+    },
+    "established": "Основано {{year}}."
   },
   "days": {
     "monday": "Понедељак",
@@ -278,6 +280,33 @@
     "delete": "Обриши",
     "emptyTitle": "Још нема бизниса",
     "emptyMessage": "Креирајте свој први пословни оглас да прикажете услуге у именику.",
-    "createFirst": "Креирај пословни оглас"
+    "createFirst": "Креирај пословни оглас",
+    "editSuccessTitle": "Ажурирано",
+    "editSuccessMessage": "Оглас фирме је ажуриран.",
+    "errorTitle": "Учитавање фирми није успело",
+    "errorMessage": "Нешто је пошло наопако. Покушајте касније.",
+    "backToList": "Назад на Моје фирме"
+  },
+  "delete": {
+    "confirmTitle": "Обриши оглас",
+    "successTitle": "Обрисано",
+    "successMessage": "Оглас фирме је обрисан.",
+    "errorTitle": "Грешка",
+    "errorMessage": "Брисање огласа није успело. Покушајте поново.",
+    "confirmMessage": "Да ли сте сигурни да желите да обришете „{{name}}“? Ова се не може опозвати."
+  },
+  "status": {
+    "active": "Активно",
+    "inactive": "Неактивно"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Преглед",
+      "bannerPreview": "Преглед банера"
+    },
+    "createBusinessListingForm": {
+      "preview": "Преглед",
+      "bannerPreview": "Преглед банера"
+    }
   }
 }

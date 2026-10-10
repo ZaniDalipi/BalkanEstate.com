@@ -29,5 +29,26 @@
     "prev": "Претходна",
     "next": "Следна",
     "page": "Страница {{page}} од {{total}}"
+  },
+  "ui": {
+    "articlePage": {
+      "copied": "Копирано!",
+      "more": "Повеќе",
+      "copyLink": "Копирај линк",
+      "articleContent": "Содржина на статијата",
+      "featured": "Издвоено",
+      "minRead": "мин. читање",
+      "shareThisArticle": "Споделете ја статијата",
+      "views": "прегледи"
+    },
+    "blogPage": {
+      "activeFilters": "Активни филтри:",
+      "clearAll": "Исчисти сè",
+      "tryAdjustingYourFilters": "Обидете се да ги промените филтрите"
+    },
+    "articleCard": {
+      "featured": "Издвоено",
+      "readArticle": "Прочитај ја статијата"
+    }
   }
 }

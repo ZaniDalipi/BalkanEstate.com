@@ -21,7 +21,9 @@
     "agencyFeature": "Agenție"
   },
   "error": {
-    "loadFailed": "Încărcarea planurilor de prețuri a eșuat"
+    "loadFailed": "Încărcarea planurilor de prețuri a eșuat",
+    "paymentFailed": "Plata a eșuat",
+    "paymentFailedMessage": "Ceva nu a mers bine cu plata. Încearcă din nou sau contactează asistența."
   },
   "limitedOffer": "Oferta limitată se încheie în:",
   "offerTitle": "Felicitări! Ați deblocat reduceri exclusive!",
@@ -145,7 +147,8 @@
     "message": "Abonamentul dumneavoastră {{plan}} este activat. Acum aveți acces la toate funcțiile premium.",
     "agencyMessage": "Abonamentul Enterprise este activat și agenția dumneavoastră a fost creată cu succes! Sunteți acum administratorul agenției.",
     "subscriptionActivated": "Abonament activat cu succes!",
-    "startListing": "Începeți să listați proprietăți"
+    "startListing": "Începeți să listați proprietăți",
+    "subscriptionActivatedWithReceipt": "Abonamentul tău a fost activat. Chitanța a fost trimisă pe email."
   },
   "listing": {
     "title": "Planuri de promovare a anunțurilor",
@@ -244,7 +247,7 @@
       "homepageCarousel": "Carusel de agenții pe pagina principală",
       "featuredBadge": "Insignă recomandată pe profil",
       "boostedVisibility": "Vizibilitate crescută peste tot (3x)",
-      "mapMarker": "Agency marker on property map"
+      "mapMarker": "Marcaj al agenției pe harta proprietăților"
     },
     "mapMarker": {
       "title": "Marker pe hartă",
@@ -268,10 +271,11 @@
     "enterpriseSubtitle": "Tot ce are nevoie agenția ta — membri ai echipei, pagină de brand și multe altele.",
     "comingSoon": "În curând",
     "featureComingSoon": "Recomandarea agenției va fi disponibilă în curând!",
-    "oneWeek": "1 WEEK",
-    "perWeek": "per week",
-    "showsEverywhere": "Shows everywhere!",
-    "selectDuration": "Selectați durata:"
+    "oneWeek": "1 SĂPTĂMÂNĂ",
+    "perWeek": "pe săptămână",
+    "showsEverywhere": "Apare peste tot!",
+    "selectDuration": "Selectați durata:",
+    "noPlans": "Momentan nu există planuri pentru agenții."
   },
   "contact": {
     "haveQuestions": "Aveți întrebări?",
@@ -288,20 +292,54 @@
     "providerNote": "Plățile sunt gestionate de Paysera. TVA/taxele sunt incluse acolo unde este cazul."
   },
   "duration": {
-    "7days": "7 days",
-    "30days": "30 days",
-    "90days": "90 days"
+    "7days": "7 zile",
+    "30days": "30 de zile",
+    "90days": "90 de zile"
   },
   "coupon": {
     "title": "Aveți un cupon de la vânzător?",
     "description": "Selectați orice plan de mai sus și utilizați codul cuponului pentru a activa abonamentul dvs. instantaneu.",
     "selectPlan": "Selectați un plan pentru a utiliza cuponul dvs.",
-    "haveDiscountCode": "Have a discount code?"
+    "haveDiscountCode": "Ai un cod de reducere?"
   },
   "specialOffers": {
     "title": "Oferte Speciale",
     "subtitle": "Oferte cu timp limitat pentru promovarea anunțurilor",
     "selectOffer": "Alege Oferta",
-    "daysLeft": "{{days}} zile rămase"
+    "daysLeft": "{{days}} zile rămase",
+    "limitedTime": "Timp limitat",
+    "homeSubtitle": "Promovează-ți anunțurile cu oferte exclusive",
+    "lastDay": "Ultima zi!",
+    "getThisDeal": "Profită de ofertă",
+    "viewAllDeals": "Vezi toate planurile de promovare",
+    "selectListing": "Alege un anunț de promovat cu {{name}}",
+    "selected": "Selectat — alege anunțul"
+  },
+  "gameDiscount": {
+    "title": "Ai câștigat {{percent}}% reducere!",
+    "description": "Codul tău {{code}} se aplică automat la plată pentru planurile Pro și Enterprise.",
+    "validUntil": "Valabil până la {{date}}."
+  },
+  "role": {
+    "buyerPlanOnly": "Plan pentru cumpărători",
+    "buyerPlanOnlyMessage": "Acest plan este pentru cumpărători. Comută la un cont de Cumpărător din setările profilului pentru a te abona.",
+    "sellerPlanOnly": "Plan pentru vânzători",
+    "sellerPlanOnlyMessage": "Acest plan este pentru vânzători și agenți. Comută la un cont de Vânzător privat sau Agent din setările profilului pentru a te abona."
+  },
+  "upgrade": {
+    "alreadyEnterprise": "Ai planul de top",
+    "alreadyEnterpriseMessage": "Ai deja planul Enterprise — cel mai înalt nivel. Gestionează abonamentul din setările contului.",
+    "yearlyActive": "Plan anual activ",
+    "yearlyActiveMessage": "Ai deja un plan anual. Poți trece doar la planul Enterprise.",
+    "monthlyActive": "Plan lunar activ",
+    "monthlyActiveMessage": "Ai deja un plan lunar. Poți trece la planul Anual sau Enterprise."
+  },
+  "ui": {
+    "buyerPlansSection": {
+      "noBuyerPlansAvailableAt": "Momentan nu există planuri pentru cumpărători."
+    },
+    "enterprisePlanCard": {
+      "completeSolutionForRealEstate": "Soluție completă pentru agențiile imobiliare"
+    }
   }
 }
