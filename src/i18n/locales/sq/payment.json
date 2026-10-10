@@ -21,10 +21,10 @@
     "browseProperties": "Shfleto Pronat",
     "noSessionFound": "Nuk u gjet sesion pagese",
     "loginToVerify": "Ju lutemi identifikohuni për të verifikuar pagesën tuaj",
-    "plan": "Plan",
-    "validUntil": "Valid Until",
-    "nowActive": "Now active on your account",
-    "continue": "Continue to Dashboard"
+    "plan": "Plani",
+    "validUntil": "E vlefshme deri më",
+    "nowActive": "Tani aktiv në llogarinë tuaj",
+    "continue": "Vazhdo te paneli"
   },
   "cancel": {
     "title": "Pagesa u Anulua",
@@ -52,10 +52,10 @@
     "redirectBlocked": "Ridrejtimi i pagesës u bllokua për arsye sigurie. Ju lutemi provoni përsëri.",
     "sessionCreationFailed": "Dështoi krijimi i sesionit të pagesës",
     "invalidDiscountCode": "Kodi i zbritjes i pavlefshëm",
-    "freeSubscriptionFailed": "Failed to apply free subscription",
-    "verificationTimeout": "Payment verification timed out. If you completed the payment, your subscription will be activated shortly. Please check your email for confirmation.",
-    "invalidCodeFormat": "Invalid code format. Use only letters, numbers, hyphens and underscores.",
-    "invalidPlanPrice": "Invalid plan price"
+    "freeSubscriptionFailed": "Aplikimi i abonimit falas dështoi",
+    "verificationTimeout": "Verifikimi i pagesës zgjati shumë. Nëse e përfunduat pagesën, abonimi do të aktivizohet së shpejti. Kontrolloni email-in për konfirmim.",
+    "invalidCodeFormat": "Format i pavlefshëm i kodit. Përdorni vetëm shkronja, numra, viza dhe nënvizime.",
+    "invalidPlanPrice": "Çmim i pavlefshëm i planit"
   },
   "checkout": {
     "secureCheckout": "Pagesë e Sigurt",
@@ -84,17 +84,17 @@
     "sslSecured": "SSL i Sigurt",
     "pciCompliant": "PCI Konform",
     "securePayment": "Pagesë e Sigurt",
-    "freeSubscriptionReady": "Free Subscription Ready",
-    "freeSubscriptionReadyDescription": "Your discount code provides 100% off! Click below to activate your subscription immediately - no payment required.",
-    "enterCouponCode": "Enter coupon code",
-    "enterDiscountCode": "Please enter a discount code",
-    "discountAppliedSave": "Discount applied: Save €{{amount}}!",
-    "validationFailed": "Failed to validate discount code",
-    "subscribeTo": "Subscribe to {{plan}}",
-    "coupon100Off": "Your coupon provides 100% off!",
-    "priceDescription": "€{{price}}/{{interval}} - Premium features await you",
-    "haveCoupon": "Did we provide a coupon for you?",
-    "enterCodeToActivate": "Enter your code to activate your subscription"
+    "freeSubscriptionReady": "Abonimi falas është gati",
+    "freeSubscriptionReadyDescription": "Kodi juaj i zbritjes jep 100% zbritje! Klikoni më poshtë për ta aktivizuar abonimin menjëherë - pa pagesë.",
+    "enterCouponCode": "Vendosni kodin e kuponit",
+    "enterDiscountCode": "Ju lutemi vendosni një kod zbritjeje",
+    "discountAppliedSave": "Zbritja u aplikua: kurseni €{{amount}}!",
+    "validationFailed": "Verifikimi i kodit të zbritjes dështoi",
+    "subscribeTo": "Abonohu në {{plan}}",
+    "coupon100Off": "Kuponi juaj jep 100% zbritje!",
+    "priceDescription": "€{{price}}/{{interval}} - Veçoritë premium ju presin",
+    "haveCoupon": "A ju kemi dhënë një kupon?",
+    "enterCodeToActivate": "Vendosni kodin për të aktivizuar abonimin"
   },
   "termsAcceptance": {
     "text": "Pranoj",
@@ -104,48 +104,90 @@
     "and": "dhe"
   },
   "subscription": {
-    "alreadySubscribed": "Already Subscribed",
-    "subscriptionActive": "Subscription Active",
-    "alreadyActive": "You already have this subscription active.",
-    "cancelYearlyFirst": "You have a yearly subscription active. Cancel it first before switching to monthly.",
-    "currentPlan": "Current Plan",
-    "active": "✓ Active",
-    "renewsOn": "Renews on",
-    "wantToSwitch": "Want to switch plans?",
-    "manageYourSubscription": "Manage your subscription",
-    "switchToMonthlyInfo": "To switch from yearly to monthly billing, please cancel your current subscription first. After it expires, you can subscribe to the monthly plan.",
-    "manageInfo": "You can manage your subscription from your Account Settings. Cancel anytime before the renewal date.",
-    "manageSubscription": "Manage Subscription"
+    "alreadySubscribed": "Tashmë i abonuar",
+    "subscriptionActive": "Abonimi aktiv",
+    "alreadyActive": "Ky abonim është tashmë aktiv.",
+    "cancelYearlyFirst": "Keni një abonim vjetor aktiv. Anulojeni fillimisht para se të kaloni në mujor.",
+    "currentPlan": "Plani aktual",
+    "active": "✓ Aktiv",
+    "renewsOn": "Rinovohet më",
+    "wantToSwitch": "Dëshironi të ndryshoni planin?",
+    "manageYourSubscription": "Menaxhoni abonimin tuaj",
+    "switchToMonthlyInfo": "Për të kaluar nga faturimi vjetor në mujor, anuloni fillimisht abonimin aktual. Pasi të skadojë, mund të abonoheni në planin mujor.",
+    "manageInfo": "Mund ta menaxhoni abonimin nga Cilësimet e llogarisë. Anulojeni në çdo kohë para datës së rinovimit.",
+    "manageSubscription": "Menaxho abonimin"
   },
   "polling": {
-    "waitingForPayment": "Waiting for payment confirmation...",
-    "windowClosed": "Payment window closed. Verifying payment...",
-    "processing": "Payment is being processed...",
-    "verifying": "Verifying your payment with our payment provider...",
-    "verifyingAfterClose": "Verifying payment status...",
-    "devMode": "Development mode: Payment window opened. Complete payment manually, then refresh to see subscription status."
+    "waitingForPayment": "Në pritje të konfirmimit të pagesës...",
+    "windowClosed": "Dritarja e pagesës u mbyll. Po verifikohet pagesa...",
+    "processing": "Pagesa po përpunohet...",
+    "verifying": "Po verifikohet pagesa me ofruesin tonë të pagesave...",
+    "verifyingAfterClose": "Po verifikohet statusi i pagesës...",
+    "devMode": "Modaliteti i zhvillimit: dritarja e pagesës u hap. Përfundoni pagesën manualisht, pastaj rifreskoni për të parë statusin e abonimit."
   },
   "inProgress": {
-    "title": "Payment in Progress",
-    "description": "Please complete your payment in the new window",
-    "waitingTitle": "Waiting for Payment",
-    "waitingMessage": "Complete your payment in the popup window. This page will update automatically once your payment is confirmed.",
-    "subscriptionInfo": "Subscription Information",
-    "autoRenewal": "Your subscription will automatically renew at the end of each billing period",
-    "renewalReminder": "You will receive a reminder email 7 days before renewal",
-    "cancelAnytime": "You can cancel anytime from your account settings",
-    "cancel": "Cancel and Close",
-    "helpText": "If the payment window didn't open, please check your popup blocker"
+    "title": "Pagesa në proces",
+    "description": "Ju lutemi përfundoni pagesën në dritaren e re",
+    "waitingTitle": "Në pritje të pagesës",
+    "waitingMessage": "Përfundoni pagesën në dritaren që u hap. Kjo faqe do të përditësohet automatikisht pasi pagesa të konfirmohet.",
+    "subscriptionInfo": "Informacion për abonimin",
+    "autoRenewal": "Abonimi juaj do të rinovohet automatikisht në fund të çdo periudhe faturimi",
+    "renewalReminder": "Do të merrni një email kujtese 7 ditë para rinovimit",
+    "cancelAnytime": "Mund ta anuloni në çdo kohë nga cilësimet e llogarisë",
+    "cancel": "Anulo dhe mbyll",
+    "helpText": "Nëse dritarja e pagesës nuk u hap, kontrolloni bllokuesin e dritareve"
   },
   "comingSoon": {
     "selfServicePayment": "Self-service payment",
     "launchingSoon": "Online payment gateway launching soon",
     "integrationInProgress": "Payment integration in progress",
     "contactSalesDescription": "Need help or want to subscribe manually? Contact our sales team:",
-    "responseTime": "We typically respond within 24 hours"
+    "responseTime": "Zakonisht përgjigjemi brenda 24 orëve"
   },
   "taxNotice": {
-    "title": "Taxes May Apply",
-    "description": "The final price at checkout may include applicable VAT/taxes based on your location. Paysera handles all tax compliance automatically."
+    "title": "Mund të aplikohen taksa",
+    "description": "Çmimi përfundimtar në pagesë mund të përfshijë TVSH/taksa sipas vendndodhjes suaj. Paysera menaxhon automatikisht të gjitha detyrimet tatimore."
+  },
+  "ui": {
+    "paymentSuccess": {
+      "creatingYourAgency": "Po krijohet agjencia juaj...",
+      "settingUpYourAgencyProfile": "Po konfigurojmë profilin e agjencisë dhe po gjenerojmë kodet e ftesës për ekipin...",
+      "provider": "Ofruesi:",
+      "onlinePayment": "Pagesë online",
+      "paymentProvider": "Ofruesi i pagesave",
+      "orderId": "ID e porosisë",
+      "agencyCreatedSuccessfully": "Agjencia u krijua me sukses!",
+      "yourAgency": "Agjencia juaj",
+      "hasBeenSetUp": "u konfigurua",
+      "isReadyToGo": "është gati!",
+      "inviteTeamMembersWithYour": "Ftoni anëtarët e ekipit me kodet tuaja unike",
+      "customizeYourAgencyProfilePage": "Personalizoni faqen e profilit të agjencisë",
+      "startListingPropertiesUnderYour": "Filloni të publikoni prona nën agjencinë tuaj",
+      "viewYourAgency": "Shiko agjencinë tuaj",
+      "teamInvitationCodes": "Kodet e ftesës për ekipin",
+      "shareTheseCodesWithYour": "Ndani këto kode me anëtarët e ekipit. Çdo kod jep statusin Agjent Pro kur regjistrohen.",
+      "copied": "U kopjua!",
+      "copyCode": "Kopjo kodin",
+      "theseCodesHaveAlsoBeen": "Këto kode ju janë dërguar edhe me email",
+      "agencyCreated": "Agjencia u krijua!",
+      "agencySetupPending": "Konfigurimi i agjencisë në pritje",
+      "paymentSuccessfulPleaseCompleteYour": "Pagesa u krye! Ju lutemi përfundoni konfigurimin e agjencisë nga faqja e llogarisë."
+    },
+    "paymentWindow": {
+      "activationFailed": "Aktivizimi dështoi",
+      "whatYouCanDo": "Çfarë mund të bëni:",
+      "checkYourInternetConnection": "Kontrolloni lidhjen me internetin",
+      "makeSureTheCouponCode": "Sigurohuni që kodi i kuponit është i vlefshëm",
+      "tryAgainInAFew": "Provoni përsëri pas pak",
+      "contactSupportIfTheIssue": "Kontaktoni mbështetjen nëse problemi vazhdon",
+      "tryAgain": "Provo përsëri",
+      "close": "Mbyll",
+      "subscriptionActivated": "Abonimi u aktivizua!",
+      "yourFreeSubscriptionHasBeen": "Abonimi juaj falas u aktivizua me sukses.",
+      "nowActiveOnYourAccount": "Tani aktiv në llogarinë tuaj",
+      "continueToDashboard": "Vazhdo te paneli",
+      "card": "Kartë",
+      "bank": "Bankë"
+    }
   }
 }
