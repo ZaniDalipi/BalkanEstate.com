@@ -150,7 +150,18 @@
     "emptyDesc": "Încercați să ajustați filtrele sau adăugați anunțuri noi.",
     "emptyTitle": "Nu s-au găsit proprietăți",
     "promote": "Promovează",
-    "showing": "Se afișează {{from}}-{{to}} din {{total}}"
+    "showing": "Se afișează {{from}}-{{to}} din {{total}}",
+    "statusAll": "Toate statusurile",
+    "statusActive": "Active",
+    "statusSold": "Vândute",
+    "statusRented": "Închiriate",
+    "statusPending": "În așteptare",
+    "statusDraft": "Ciornă",
+    "typeAll": "Toate tipurile",
+    "dateAll": "Tot timpul",
+    "date7": "Ultimele 7 zile",
+    "date30": "Ultimele 30 de zile",
+    "date90": "Ultimele 90 de zile"
   },
   "leads": {
     "title": "Clienți potențiali și solicitări",
@@ -181,7 +192,13 @@
     "emptyTitle": "Nu s-au găsit solicitări",
     "noAgents": "Niciun agent disponibil",
     "showing": "Se afișează {{from}}-{{to}} din {{total}}",
-    "unassigned": "Neatribuit"
+    "unassigned": "Neatribuit",
+    "statusAll": "Toate statusurile",
+    "statusInProgress": "În desfășurare",
+    "dateAll": "Tot timpul",
+    "date7": "Ultimele 7 zile",
+    "date30": "Ultimele 30 de zile",
+    "date90": "Ultimele 90 de zile"
   },
   "analytics": {
     "title": "Analize și rapoarte",
@@ -257,5 +274,10 @@
     "postNote": "Publică notița",
     "posting": "Se publică...",
     "noNotes": "Încă nicio notiță a echipei. Fiți primul care publică!"
+  },
+  "ui": {
+    "overviewCharts": {
+      "noDataAvailable": "Nu există date disponibile"
+    }
   }
 }

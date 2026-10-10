@@ -128,136 +128,142 @@
       "renewStatus": "🔄 Obnovi Istaknuti Status",
       "continueVisibility": "Nastavite uživati u poboljšanoj vidljivosti.",
       "renewNow": "Obnovi Sada",
-      "proTip": "💡 Pro Savjet: Istaknute agencije dobijaju do 5x više vidljivosti!"
+      "proTip": "💡 Pro Savjet: Istaknute agencije dobijaju do 5x više vidljivosti!",
+      "featuredInDirectory": "Istaknuta u imeniku agencija",
+      "priorityInSearch": "Prioritet u rezultatima pretrage",
+      "homepageCarousel": "Karusel agencija na početnoj stranici",
+      "featuredBadge": "Značka istaknutosti na profilu",
+      "boostedVisibility": "Povećana vidljivost svuda"
     }
   },
   "create": {
-    "title": "Create Your Agency",
-    "subtitle": "Set up your agency profile to showcase your team and properties",
-    "backToAccount": "Back to Account",
-    "enterpriseActive": "Enterprise Subscription Active",
+    "title": "Napravite svoju agenciju",
+    "subtitle": "Podesite profil agencije da predstavite svoj tim i nekretnine",
+    "backToAccount": "Nazad na nalog",
+    "enterpriseActive": "Enterprise pretplata je aktivna",
     "steps": {
-      "basic": "Basic Info",
-      "location": "Location",
-      "contact": "Contact",
-      "details": "Details"
+      "basic": "Osnovni podaci",
+      "location": "Lokacija",
+      "contact": "Kontakt",
+      "details": "Detalji"
     },
     "sections": {
-      "basicInfo": "Basic Information",
-      "location": "Location",
-      "contact": "Contact Information",
-      "professional": "Professional Details",
-      "businessHours": "Business Hours"
+      "basicInfo": "Osnovne informacije",
+      "location": "Lokacija",
+      "contact": "Kontakt podaci",
+      "professional": "Profesionalni detalji",
+      "businessHours": "Radno vrijeme"
     },
     "fields": {
-      "agencyName": "Agency Name",
-      "description": "Description",
-      "country": "Country",
-      "city": "City",
-      "address": "Street Address",
-      "email": "Email",
-      "phone": "Phone Number",
-      "website": "Website URL",
-      "license": "Agent License Number",
-      "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken",
-      "logo": "Agency Logo",
-      "logoPreview": "Logo preview",
-      "registrationNumber": "Business Registration / Tax ID",
-      "agencyType": "Agency Type",
-      "specializations": "Specializations",
-      "serviceAreas": "Service Areas / Regions",
-      "zipCode": "Zip / Postal Code"
+      "agencyName": "Naziv agencije",
+      "description": "Opis",
+      "country": "Država",
+      "city": "Grad",
+      "address": "Adresa",
+      "email": "E-mail",
+      "phone": "Broj telefona",
+      "website": "URL veb-sajta",
+      "license": "Broj licence agenta",
+      "yearsInBusiness": "Godina poslovanja",
+      "languages": "Jezici koji se govore",
+      "logo": "Logo agencije",
+      "logoPreview": "Pregled logoa",
+      "registrationNumber": "Registarski broj / PIB",
+      "agencyType": "Tip agencije",
+      "specializations": "Specijalizacije",
+      "serviceAreas": "Područja rada / regioni",
+      "zipCode": "Poštanski broj"
     },
     "placeholders": {
-      "agencyName": "e.g., Premier Real Estate Agency",
-      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-      "selectCountry": "Select a country",
-      "selectCity": "Select a city",
-      "selectCountryFirst": "Select country first",
-      "address": "e.g., 123 Main Street, Building A",
-      "email": "contact@agency.com",
+      "agencyName": "npr. Premier agencija za nekretnine",
+      "description": "Recite potencijalnim klijentima o svojoj agenciji, stručnosti i šta vas čini jedinstvenim...",
+      "selectCountry": "Izaberite državu",
+      "selectCity": "Izaberite grad",
+      "selectCountryFirst": "Prvo izaberite državu",
+      "address": "npr. Glavna ulica 123, zgrada A",
+      "email": "kontakt@agencija.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456",
-      "registrationNumber": "e.g., PIB 123456789, OIB 12345678901",
+      "license": "npr. RE-123456",
+      "registrationNumber": "npr. PIB 02000000",
       "zipCode": "e.g., 11000",
-      "serviceAreas": "e.g., Belgrade, Novi Sad, Nis (comma-separated)"
+      "serviceAreas": "npr. Podgorica, Budva, Kotor (odvojeno zarezom)"
     },
     "hints": {
-      "agencyName": "Choose a professional name that represents your brand",
-      "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location",
-      "logo": "JPEG, PNG, WebP or SVG. Max 5MB.",
-      "registrationNumber": "Your official business registration or tax identification number",
-      "specializations": "Select all areas your agency specializes in",
-      "serviceAreas": "List the cities or regions where your agency operates",
-      "agencyType": "Select the type that best describes your agency"
+      "agencyName": "Izaberite profesionalan naziv koji predstavlja vaš brend",
+      "description": "Ubjedljiv opis pomaže klijentima da razumiju vašu vrijednost",
+      "address": "Opciono: puna adresa kancelarije",
+      "logo": "JPEG, PNG, WebP ili SVG. Maks. 5MB.",
+      "registrationNumber": "Vaš zvanični registarski ili poreski broj",
+      "specializations": "Izaberite sve oblasti u kojima je agencija specijalizovana",
+      "serviceAreas": "Navedite gradove ili regione u kojima agencija radi",
+      "agencyType": "Izaberite tip koji najbolje opisuje vašu agenciju"
     },
     "days": {
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+      "monday": "Ponedjeljak",
+      "tuesday": "Utorak",
+      "wednesday": "Srijeda",
+      "thursday": "Četvrtak",
+      "friday": "Petak",
+      "saturday": "Subota",
+      "sunday": "Nedjelja"
     },
     "benefits": {
-      "title": "What You'll Get",
-      "dedicatedPage": "Dedicated agency page on platform",
-      "displayAgents": "Display all agents & properties",
-      "featured": "Featured in homepage ads",
-      "contactInfo": "Full contact info displayed",
-      "invitationCode": "Unique invitation code for agents",
-      "support": "Priority customer support"
+      "title": "Šta ćete dobiti",
+      "dedicatedPage": "Posebna stranica agencije na platformi",
+      "displayAgents": "Prikažite sve agente i nekretnine",
+      "featured": "Isticanje u reklamama na početnoj stranici",
+      "contactInfo": "Prikazani puni kontakt podaci",
+      "invitationCode": "Jedinstveni kod pozivnice za agente",
+      "support": "Prioritetna korisnička podrška"
     },
     "warnings": {
-      "agentRequired": "Agent Status Required",
-      "proRequired": "Pro Subscription Required"
+      "agentRequired": "Potreban je status agenta",
+      "proRequired": "Potrebna je Pro pretplata"
     },
     "errors": {
-      "nameRequired": "Agency name is required",
-      "locationRequired": "City and country are required",
-      "emailRequired": "Email is required",
-      "logoInvalidType": "Please upload a JPEG, PNG, WebP, or SVG image",
-      "logoTooLarge": "Logo must be under 5MB"
+      "nameRequired": "Naziv agencije je obavezan",
+      "locationRequired": "Grad i država su obavezni",
+      "emailRequired": "E-mail je obavezan",
+      "logoInvalidType": "Učitajte sliku u formatu JPEG, PNG, WebP ili SVG",
+      "logoTooLarge": "Logo mora biti manji od 5MB"
     },
-    "becomeAgent": "Become an Agent First",
-    "upgradeToPro": "Upgrade to Pro",
-    "createAgency": "Create Agency",
-    "continueToPayment": "Continue to Payment",
+    "becomeAgent": "Prvo postanite agent",
+    "upgradeToPro": "Pređi na Pro",
+    "createAgency": "Napravi agenciju",
+    "continueToPayment": "Nastavi na plaćanje",
     "buttons": {
-      "uploadLogo": "Upload Logo",
-      "changeLogo": "Change Logo",
-      "removeLogo": "Remove logo"
+      "uploadLogo": "Učitaj logo",
+      "changeLogo": "Promijeni logo",
+      "removeLogo": "Ukloni logo"
     }
   },
   "payment": {
-    "title": "Complete Your Purchase",
-    "subtitle": "Subscribe to Enterprise plan to create your agency",
-    "backToDetails": "Back to Agency Details",
+    "title": "Završite kupovinu",
+    "subtitle": "Pretplatite se na Enterprise plan da biste napravili agenciju",
+    "backToDetails": "Nazad na detalje agencije",
     "steps": {
-      "details": "Agency Details",
-      "payment": "Payment",
-      "confirmation": "Confirmation"
+      "details": "Detalji agencije",
+      "payment": "Plaćanje",
+      "confirmation": "Potvrda"
     },
-    "orderSummary": "Order Summary",
-    "total": "Total",
-    "couponCode": "Have a coupon code?",
-    "enterCoupon": "Enter coupon code",
-    "apply": "Apply",
-    "invalidCoupon": "Invalid coupon code",
-    "couponError": "Failed to validate coupon",
-    "whatsIncluded": "What's Included",
-    "securePayment": "Secure Payment",
-    "teamSupport": "Team Support",
-    "unlimitedProperties": "750 Listings",
-    "fullAnalytics": "Full Analytics",
-    "payNow": "Pay",
-    "processing": "Processing...",
-    "stripeSecure": "Payments are securely processed by Stripe",
-    "error": "Failed to initiate payment. Please try again."
+    "orderSummary": "Pregled porudžbine",
+    "total": "Ukupno",
+    "couponCode": "Imate kod kupona?",
+    "enterCoupon": "Unesite kod kupona",
+    "apply": "Primijeni",
+    "invalidCoupon": "Neispravan kod kupona",
+    "couponError": "Provjera kupona nije uspjela",
+    "whatsIncluded": "Šta je uključeno",
+    "securePayment": "Bezbjedno plaćanje",
+    "teamSupport": "Podrška za tim",
+    "unlimitedProperties": "750 oglasa",
+    "fullAnalytics": "Potpuna analitika",
+    "payNow": "Plati",
+    "processing": "Obrađuje se...",
+    "stripeSecure": "Plaćanja bezbjedno obrađuje Stripe",
+    "error": "Pokretanje plaćanja nije uspjelo. Pokušajte ponovo.",
+    "activateFree": "Aktiviraj besplatno"
   },
   "featuredDialog": {
     "title": "Pretplata za Istaknutu Agenciju",
@@ -278,7 +284,14 @@
     "validating": "Provjera...",
     "processing": "Obrada...",
     "activateForFree": "Aktiviraj BESPLATNO",
-    "subscribePrice": "Pretplati se - €{{price}}"
+    "subscribePrice": "Pretplati se - €{{price}}",
+    "duration1week": "1 nedjelja",
+    "duration2weeks": "2 nedjelje",
+    "duration4weeks": "4 nedjelje",
+    "badgePopular": "POPULARNO",
+    "duration90days": "90 dana",
+    "badgeBestValue": "NAJBOLJA VRIJEDNOST",
+    "haveCouponCode": "Imate kod kupona?"
   },
   "management": {
     "currentAgency": "Trenutna Agencija",
@@ -449,5 +462,81 @@
     "independentShort": "Nez",
     "agency": "Agencija",
     "independentAgent": "Nezavisni Agent"
+  },
+  "confirm": {
+    "title": "Napravite svoju agenciju",
+    "subtitle": "Vaša Enterprise pretplata je aktivna. Pregledajte detalje i potvrdite.",
+    "reviewDetails": "Pregledajte detalje agencije",
+    "createAgency": "Napravi moju agenciju"
+  },
+  "ui": {
+    "agencyDetailPage": {
+      "dragToRepositionCoverImage": "Prevucite da ponovo postavite naslovnu sliku",
+      "savePosition": "Sačuvaj položaj",
+      "cancel": "Otkaži",
+      "repositionCover": "Pomjeri naslovnu",
+      "repositionLogo": "Pomjeri logo",
+      "save": "Sačuvaj",
+      "years": "Godina",
+      "removeAdminRights": "Ukloni administratorska prava",
+      "makeAdmin": "Postavi za administratora",
+      "removeAgentFromAgency": "Ukloni agenta iz agencije",
+      "leaveThisAgency": "Napusti ovu agenciju",
+      "tellClientsAboutYourAgency": "Recite klijentima o svojoj agenciji...",
+      "residentialCommercialLuxuryProperties": "Stambene, poslovne, luksuzne nekretnine",
+      "licensedRealEstateAgencyIso": "Licencirana agencija za nekretnine, ISO sertifikovana",
+      "englishSerbianCroatianAlbanian": "Engleski, srpski, hrvatski, albanski",
+      "n9am6pm": "9:00 - 18:00",
+      "youAreNotLoggedIn": "Nijeste prijavljeni. Prijavite se i pokušajte ponovo.",
+      "unexpectedResponseFromServerPlease": "Neočekivan odgovor servera. Pokušajte ponovo.",
+      "invalidCouponCodePleaseCheck": "Neispravan kod kupona. Provjerite i pokušajte ponovo.",
+      "thisCouponHasAlreadyBeen": "Ovaj kupon je već iskorišćen.",
+      "thisCouponHasExpired": "Ovaj kupon je istekao.",
+      "theAgencySubscriptionIsNo": "Pretplata agencije više nije aktivna.",
+      "couponRedeemed": "Kupon je iskorišćen!",
+      "joinRequestSentSuccessfullyThe": "Zahtjev za pridruživanje je uspješno poslat! Administrator agencije će ga razmotriti.",
+      "agencyNameMustBeAt": "Naziv agencije mora imati najmanje 2 znaka",
+      "descriptionMustBeUnder5": "Opis mora biti kraći od 5.000 znakova",
+      "pleaseEnterAValidEmail": "Unesite ispravnu e-mail adresu",
+      "pleaseEnterAValidPhone": "Unesite ispravan broj telefona",
+      "uploadFailed": "Učitavanje nije uspjelo",
+      "failedToSavePosition": "Čuvanje položaja nije uspjelo",
+      "failedToSaveImagePosition": "Čuvanje položaja slike nije uspjelo",
+      "positionSaved": "Položaj je sačuvan",
+      "failedToGenerateCode": "Generisanje koda nije uspjelo"
+    },
+    "agencyPaymentPage": {
+      "agencyCreated": "Agencija je napravljena!",
+      "redirectingToAgenciesPage": "Preusmjeravanje na stranicu agencija...",
+      "phone": "Telefon",
+      "license": "Licenca",
+      "enterprisePlanActive": "✓ Enterprise plan je aktivan",
+      "n5AgentRegistrationCodesWill": "• 5 kodova za registraciju agenata biće vam poslato e-mailom",
+      "monthlyListingPromotionCouponsIncluded": "• Uključeni mjesečni kuponi za promociju oglasa",
+      "n7DayFeaturedAgencyTrial": "• Sedmodnevni probni period istaknute agencije počinje odmah",
+      "plan": "Plan",
+      "coupon": "Kupon ("
+    },
+    "createAgencyPage": {
+      "n900Am500": "9:00 - 17:00"
+    },
+    "agencyScoringPanel": {
+      "n0Pts": "0 bodova"
+    },
+    "agencyJoinRequestsModal": {
+      "closeJoinRequestsModal": "Zatvori prozor zahtjeva za pridruživanje"
+    },
+    "invitationCodeModal": {
+      "keepTypingAgyXxxxxxXxxxxx": "Nastavite da kucate... (AGY-XXXXXX-XXXXXX)",
+      "invalidFormatExpectedAgyXxxxxx": "Neispravan format. Očekivano: AGY-XXXXXX-XXXXXX",
+      "keepTypingXxxXxxxxxxx": "Nastavite da kucate... (XXX-XXXXXXXX)",
+      "invalidFormatExpectedXxxXxxxxxxx": "Neispravan format. Očekivano: XXX-XXXXXXXX",
+      "proSubscriptionRequiredToUse": "Potrebna je Pro pretplata za korišćenje kodova pozivnice",
+      "formatAgyXxxxxxXxxxxx": "Format: AGY-XXXXXX-XXXXXX",
+      "formatAbcXxxxxxxx": "Format: ABC-XXXXXXXX"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Vaša agencija je uspješno kreirana. Sada imate posebnu stranicu agencije."
+    }
   }
 }

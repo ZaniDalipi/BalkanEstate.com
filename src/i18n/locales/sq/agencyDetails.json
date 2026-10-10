@@ -13,7 +13,11 @@
     "uploading": "Duke ngarkuar...",
     "chooseGradient": "Zgjidhni Gradientin",
     "customImageHint": "Ose ngarkoni një imazh të personalizuar duke përdorur butonin më sipër",
-    "changeLogo": "Ndrysho Logon"
+    "changeLogo": "Ndrysho Logon",
+    "dropCoverImage": "Lëshojeni për të ngarkuar kopertinën",
+    "maxSize": "Maks. 5MB, vetëm imazhe",
+    "customize": "Personalizo",
+    "addLogo": "Shto logo"
   },
   "gradientPresets": {
     "oceanBlue": "Blu Oqeani",
@@ -46,19 +50,27 @@
     "specializations": "Specializimet",
     "serviceAreas": "Zonat e Shërbimit",
     "languagesSpoken": "Gjuhët e Folura",
-    "yearsOfExcellence": "{{years}}+ Vite Shkëlqimi"
+    "yearsOfExcellence": "{{years}}+ Vite Shkëlqimi",
+    "getInTouch": "Na kontaktoni",
+    "address": "Adresa",
+    "followUs": "Na ndiqni"
   },
   "invitationCode": {
     "title": "Kodi i Ftesës së Agjencisë",
     "description": "Ndani këtë kod me agjentët që dëshironi të bashkohen me agjencin tuaj",
-    "copy": "Kopjo"
+    "copy": "Kopjo",
+    "generatedTitle": "Kodi u gjenerua",
+    "generatedMessage": "Kodi i ftesës u gjenerua me sukses",
+    "generateFailed": "Gjenerimi i kodit të ftesës dështoi",
+    "generate": "Gjenero kodin"
   },
   "actions": {
     "editAgency": "Redakto Agjencin",
     "manageJoinRequests": "Menaxho Kërkesat për Bashkim",
     "requestToJoin": "Kërko të Bashkohesh me Agjencin",
     "proRequiredForInviteCode": "Kërkohet abonim Pro për kodet e ftesës. Përdorni një kod kuponi për t'u bashkuar.",
-    "viewPlans": "Shiko Planet"
+    "viewPlans": "Shiko Planet",
+    "goToDashboard": "Shko te paneli"
   },
   "featuredSubscription": {
     "title": "Abonimi i Veçantë",
@@ -86,7 +98,9 @@
     "removing": "Duke hequr...",
     "leaveAgency": "Largohu nga Agjencia",
     "leaving": "Duke u larguar...",
-    "noAgentsFound": "Nuk u gjetën agjentë për këtë agjenci"
+    "noAgentsFound": "Nuk u gjetën agjentë për këtë agjenci",
+    "noAgentsHelpText": "Anëtarët e ekipit do të shfaqen këtu pasi të bashkohen",
+    "loading": "Po ngarkohen anëtarët e ekipit..."
   },
   "properties": {
     "activeListings": "LISTIME AKTIVE",
@@ -97,7 +111,21 @@
     "noActiveListings": "Nuk ka listime aktive për momentin",
     "noSoldProperties": "Ende pa prona të shitura",
     "checkBackSoon": "Kontrolloni së shpejti për prona të reja",
-    "soldWillAppear": "Pronat e shitura do të shfaqen këtu"
+    "soldWillAppear": "Pronat e shitura do të shfaqen këtu",
+    "map": "Harta e pronave",
+    "activeCount": "{{count}} aktive",
+    "soldCount": "{{count}} të shitura",
+    "beds": "dhoma gjumi",
+    "baths": "banjo",
+    "viewDetails": "Shiko detajet",
+    "forSaleCount": "Në shitje ({{count}})",
+    "soldCountLabel": "Të shitura ({{count}})",
+    "serviceAreaLocation": "Vendndodhja e zonës së shërbimit",
+    "portfolio": "Portofoli i pronave",
+    "totalProperties": "{{count}} prona gjithsej",
+    "rented": "Me qira",
+    "allCount": "Të gjitha ({{count}})",
+    "forRentCount": "Me qira ({{count}})"
   },
   "editModal": {
     "title": "Redakto Agjencin",
@@ -130,7 +158,10 @@
     "languagesHint": "Gjuhët sinkronizohen automatikisht kur agjentët bashkohen/largohen",
     "businessHours": "Orari i Punës",
     "businessHoursPlaceholder": "9:00 - 18:00",
-    "saveChanges": "Ruaj Ndryshimet"
+    "saveChanges": "Ruaj Ndryshimet",
+    "subtitle": "Përditësoni informacionin e agjencisë",
+    "descriptionHint": "Përdorni rreshta të rinj për të ndarë paragrafët",
+    "achievements": "Çmime dhe arritje"
   },
   "confirmations": {
     "removeAgent": "Jeni i sigurt që dëshironi të hiqni {{name}} nga {{agency}}?",
@@ -139,7 +170,15 @@
     "leaveAgencyDetails": "Kjo do të:\n- Ju heq nga kjo agjenci\n- Pastron përkatësin tuaj të agjencisë\n- Mban pronat dhe vlerësimet tuaja të paprekura\n- Ndryshon statusin tuaj në Agjent i Pavarur",
     "toggleAdmin": "Jeni i sigurt që dëshironi të {{action}} {{name}}?",
     "removeAdminRights": "hiqni të drejtat e administratorit nga",
-    "makeAdminRights": "bëni administrator"
+    "makeAdminRights": "bëni administrator",
+    "removeAdminTitle": "Hiq administratorin",
+    "makeAdminTitle": "Bëje administrator",
+    "removeButton": "Hiq",
+    "makeAdminButton": "Bëje administrator",
+    "cancelButton": "Anulo",
+    "removeAgentTitle": "Hiq agjentin",
+    "leaveAgencyTitle": "Largohu nga agjencia",
+    "leaveButton": "Largohu"
   },
   "messages": {
     "logoUpdated": "Logo u përditësua me sukses!",
@@ -155,7 +194,27 @@
     "onlyOwnerCanManage": "Vetëm pronari i agjencisë mund të menaxhojë administratorët",
     "onlyAdminCanRemove": "Vetëm administratorët e agjencisë mund të heqin agjentët",
     "selectImageFile": "Ju lutem zgjidhni një skedar imazhi",
-    "imageSizeLimit": "Madhësia e imazhit duhet të jetë më pak se 5MB"
+    "imageSizeLimit": "Madhësia e imazhit duhet të jetë më pak se 5MB",
+    "requestSent": "Kërkesa u dërgua",
+    "accessDenied": "Qasja u refuzua",
+    "adminRemovedTitle": "Administratori u hoq",
+    "adminAddedTitle": "Administratori u shtua",
+    "errorTitle": "Gabim",
+    "agentRemovedTitle": "Agjenti u hoq",
+    "leftAgencyTitle": "U larguat nga agjencia",
+    "nameRequired": "Emri i agjencisë është i detyrueshëm",
+    "invalidUrl": "URL e pavlefshme për {{field}}. Ju lutemi përfshini https://",
+    "agencyUpdatedTitle": "Agjencia u përditësua",
+    "updateFailed": "Përditësimi i agjencisë dështoi",
+    "uploadFailed": "Ngarkimi i logos dështoi",
+    "logoUpdatedTitle": "Logoja u përditësua",
+    "coverUpdatedTitle": "Kopertina u përditësua",
+    "gradientUpdatedTitle": "Gradienti u përditësua",
+    "usedBy": "Përdorur nga",
+    "unknown": "I panjohur",
+    "copiedTitle": "U kopjua!",
+    "invitationCodeCopied": "Kodi i ftesës u kopjua!",
+    "gradientUpdateFailed": "Përditësimi i gradientit dështoi"
   },
   "weekdays": {
     "monday": "E Hënë",
@@ -175,5 +234,55 @@
     "call": "Telefono",
     "email": "Email",
     "website": "Faqja e Internetit"
+  },
+  "propertyCard": {
+    "listedBy": "Publikuar nga",
+    "viewAgency": "Shiko agjencinë",
+    "registrationNumber": "Nr. regj.",
+    "properties": "{{count}} prona",
+    "agents": "{{count}} agjentë",
+    "yearsInBusiness": "{{count}} vite",
+    "contactAgency": "Kontakto agjencinë",
+    "verifiedAgency": "Agjenci e verifikuar"
+  },
+  "fields": {
+    "website": "Faqja e internetit"
+  },
+  "achievements": {
+    "addedTitle": "Arritja u shtua",
+    "addedMessage": "Arritja u shtua me sukses",
+    "addFailed": "Shtimi i arritjes dështoi",
+    "updatedTitle": "Arritja u përditësua",
+    "updatedMessage": "Arritja u përditësua me sukses",
+    "updateFailed": "Përditësimi i arritjes dështoi",
+    "deletedTitle": "Arritja u fshi",
+    "deletedMessage": "Arritja u fshi",
+    "deleteFailed": "Fshirja e arritjes dështoi"
+  },
+  "adminStats": {
+    "title": "Statistikat e agjencisë",
+    "adminOnly": "Vetëm për administratorët",
+    "profileViews": "Shikime të profilit",
+    "subscriptionPlan": "Plani i abonimit",
+    "featuredStatus": "Statusi i veçimit",
+    "featured": "E veçuar",
+    "notFeatured": "Jo e veçuar",
+    "featuredUntil": "E veçuar deri më",
+    "memberSince": "Anëtar që nga"
+  },
+  "coupons": {
+    "promotionTitle": "Kupona promovimi",
+    "promotionSubtitle": "Shpërndarja mujore për promovimin e shpalljeve",
+    "monthly": "Mujore",
+    "available": "Të disponueshme",
+    "used": "Të përdorura",
+    "usedThisMonth": "Përdorur këtë muaj",
+    "yourCodes": "Kodet tuaja të kuponëve",
+    "expired": "Të skaduara",
+    "codeCopied": "Kodi u kopjua!",
+    "copyCode": "Kopjo kodin",
+    "agentCodesTitle": "Kodet e regjistrimit të agjentëve",
+    "total": "gjithsej",
+    "seatsFilled": "{{used}} nga {{total}} vende të zëna"
   }
 }

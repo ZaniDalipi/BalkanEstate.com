@@ -13,17 +13,21 @@
     "uploading": "Učitavanje...",
     "chooseGradient": "Izaberite Gradijent",
     "customImageHint": "Ili učitajte prilagođenu sliku koristeći dugme iznad",
-    "changeLogo": "Promijenite Logo"
+    "changeLogo": "Promijenite Logo",
+    "dropCoverImage": "Ispustite da učitate naslovnu sliku",
+    "maxSize": "Maks. 5MB, samo slike",
+    "customize": "Prilagodi",
+    "addLogo": "Dodaj logo"
   },
   "gradientPresets": {
-    "oceanBlue": "Ocean Blue",
-    "sunset": "Sunset",
-    "forest": "Forest",
-    "royalPurple": "Royal Purple",
-    "fire": "Fire",
-    "nightSky": "Night Sky",
-    "mintFresh": "Mint Fresh",
-    "roseGold": "Rose Gold"
+    "oceanBlue": "Okeansko plava",
+    "sunset": "Zalazak sunca",
+    "forest": "Šuma",
+    "royalPurple": "Kraljevska ljubičasta",
+    "fire": "Vatra",
+    "nightSky": "Noćno nebo",
+    "mintFresh": "Svježa menta",
+    "roseGold": "Ružičasto zlato"
   },
   "stats": {
     "totalListings": "Ukupno Oglasa",
@@ -47,21 +51,26 @@
     "serviceAreas": "Područja Djelovanja",
     "languagesSpoken": "Jezici Kojima Govorimo",
     "yearsOfExcellence": "{{years}}+ Godina izvrsnosti",
-    "getInTouch": "Get in Touch",
-    "address": "Address",
-    "followUs": "Follow Us"
+    "getInTouch": "Stupite u kontakt",
+    "address": "Adresa",
+    "followUs": "Pratite nas"
   },
   "invitationCode": {
     "title": "Pozivni Kod Agencije",
     "description": "Podijelite ovaj kod sa agentima koje želite da se pridruže Vašoj agenciji",
-    "copy": "Kopiraj"
+    "copy": "Kopiraj",
+    "generatedTitle": "Kod je generisan",
+    "generatedMessage": "Kod pozivnice je uspješno generisan",
+    "generateFailed": "Generisanje koda pozivnice nije uspjelo",
+    "generate": "Generiši kod"
   },
   "actions": {
     "editAgency": "Uredite Agenciju",
     "manageJoinRequests": "Upravljajte Zahtjevima za Pridruživanje",
     "requestToJoin": "Zatražite Pridruživanje Agenciji",
     "proRequiredForInviteCode": "Pro pretplata je potrebna za kodove pozivnice. Koristite kod kupona da se pridružite.",
-    "viewPlans": "Pogledaj Planove"
+    "viewPlans": "Pogledaj Planove",
+    "goToDashboard": "Idi na kontrolnu tablu"
   },
   "featuredSubscription": {
     "title": "Istaknuta Pretplata",
@@ -74,7 +83,7 @@
     "showTopPerformers": "Prikaži Najbolje Izvođače",
     "showAllMembers": "Prikaži Sve Članove",
     "rankedByPerformance": "Ranked by Performance",
-    "topAgent": "Top Agent",
+    "topAgent": "Najbolji agent",
     "secondPlace": "2. Mjesto",
     "thirdPlace": "3. Mjesto",
     "owner": "Vlasnik",
@@ -90,8 +99,8 @@
     "leaveAgency": "Napustite Agenciju",
     "leaving": "Napuštanje...",
     "noAgentsFound": "Nisu pronađeni agenti za ovu agenciju",
-    "noAgentsHelpText": "Team members will appear here once they join",
-    "loading": "Loading team members..."
+    "noAgentsHelpText": "Članovi tima će se pojaviti ovdje kada se pridruže",
+    "loading": "Učitavaju se članovi tima..."
   },
   "properties": {
     "activeListings": "AKTIVNI OGLASI",
@@ -103,27 +112,27 @@
     "noSoldProperties": "Još nema prodatih nekretnina",
     "checkBackSoon": "Vratite se uskoro za nove nekretnine",
     "soldWillAppear": "Prodate nekretnine će se pojaviti ovdje",
-    "map": "Properties Map",
-    "activeCount": "{{count}} active",
-    "soldCount": "{{count}} sold",
-    "beds": "beds",
-    "baths": "baths",
-    "viewDetails": "View Details",
-    "forSaleCount": "For Sale ({{count}})",
-    "soldCountLabel": "Sold ({{count}})",
-    "serviceAreaLocation": "Service Area Location",
-    "portfolio": "Property Portfolio",
-    "totalProperties": "{{count}} total properties",
-    "rented": "Rented",
-    "allCount": "All ({{count}})",
-    "forRentCount": "For Rent ({{count}})"
+    "map": "Mapa nekretnina",
+    "activeCount": "Aktivnih: {{count}}",
+    "soldCount": "Prodatih: {{count}}",
+    "beds": "spavaće sobe",
+    "baths": "kupatila",
+    "viewDetails": "Pogledaj detalje",
+    "forSaleCount": "Na prodaju ({{count}})",
+    "soldCountLabel": "Prodato ({{count}})",
+    "serviceAreaLocation": "Lokacija područja rada",
+    "portfolio": "Portfolio nekretnina",
+    "totalProperties": "Ukupno nekretnina: {{count}}",
+    "rented": "Izdato",
+    "allCount": "Sve ({{count}})",
+    "forRentCount": "Za izdavanje ({{count}})"
   },
   "editModal": {
     "title": "Uredite Agenciju",
     "basicInfo": "Osnovne Informacije",
     "agencyName": "Ime Agencije",
     "description": "Opis",
-    "email": "Email",
+    "email": "E-mail",
     "phone": "Telefon",
     "website": "Web Stranica",
     "yearsInBusiness": "Godina u Poslovanju",
@@ -150,9 +159,9 @@
     "businessHours": "Radno Vrijeme",
     "businessHoursPlaceholder": "9:00 - 18:00",
     "saveChanges": "Sačuvajte Promjene",
-    "subtitle": "Update your agency information",
-    "descriptionHint": "Use line breaks to separate paragraphs",
-    "achievements": "Awards & Achievements"
+    "subtitle": "Ažurirajte podatke o agenciji",
+    "descriptionHint": "Koristite nove redove za odvajanje pasusa",
+    "achievements": "Nagrade i dostignuća"
   },
   "confirmations": {
     "removeAgent": "Da li ste sigurni da želite ukloniti {{name}} iz {{agency}}?",
@@ -161,7 +170,15 @@
     "leaveAgencyDetails": "This will:\n- Remove you from this agency\n- Clear your agency affiliation\n- Keep your properties and reviews intact\n- Change your status to Independent Agent",
     "toggleAdmin": "Da li ste sigurni da želite {{action}} {{name}}?",
     "removeAdminRights": "ukloniti admin prava od",
-    "makeAdminRights": "postaviti za admina"
+    "makeAdminRights": "postaviti za admina",
+    "removeAdminTitle": "Ukloni administratora",
+    "makeAdminTitle": "Postavi za administratora",
+    "removeButton": "Ukloni",
+    "makeAdminButton": "Postavi za administratora",
+    "cancelButton": "Otkaži",
+    "removeAgentTitle": "Ukloni agenta",
+    "leaveAgencyTitle": "Napusti agenciju",
+    "leaveButton": "Napusti"
   },
   "messages": {
     "logoUpdated": "Logo uspješno ažuriran!",
@@ -177,7 +194,27 @@
     "onlyOwnerCanManage": "Samo vlasnik agencije može upravljati adminima",
     "onlyAdminCanRemove": "Samo admini agencije mogu ukloniti agente",
     "selectImageFile": "Molimo izaberite fajl slike",
-    "imageSizeLimit": "Veličina slike mora biti manja od 5MB"
+    "imageSizeLimit": "Veličina slike mora biti manja od 5MB",
+    "requestSent": "Zahtjev je poslat",
+    "accessDenied": "Pristup odbijen",
+    "adminRemovedTitle": "Administrator je uklonjen",
+    "adminAddedTitle": "Administrator je dodat",
+    "errorTitle": "Greška",
+    "agentRemovedTitle": "Agent je uklonjen",
+    "leftAgencyTitle": "Napustili ste agenciju",
+    "nameRequired": "Naziv agencije je obavezan",
+    "invalidUrl": "Neispravan URL za {{field}}. Uključite https://",
+    "agencyUpdatedTitle": "Agencija je ažurirana",
+    "updateFailed": "Ažuriranje agencije nije uspjelo",
+    "uploadFailed": "Učitavanje logoa nije uspjelo",
+    "logoUpdatedTitle": "Logo je ažuriran",
+    "coverUpdatedTitle": "Naslovna slika je ažurirana",
+    "gradientUpdatedTitle": "Gradijent je ažuriran",
+    "usedBy": "Iskoristio",
+    "unknown": "Nepoznato",
+    "copiedTitle": "Kopirano!",
+    "invitationCodeCopied": "Kod pozivnice je kopiran!",
+    "gradientUpdateFailed": "Ažuriranje gradijenta nije uspjelo"
   },
   "weekdays": {
     "monday": "Ponedjeljak",
@@ -195,17 +232,57 @@
   },
   "labels": {
     "call": "Pozovi",
-    "email": "Email",
+    "email": "E-mail",
     "website": "Web Stranica"
   },
   "propertyCard": {
-    "listedBy": "Listed by",
-    "viewAgency": "View Agency",
-    "registrationNumber": "Reg. No.",
-    "properties": "{{count}} Properties",
-    "agents": "{{count}} Agents",
-    "yearsInBusiness": "{{count}} Years",
-    "contactAgency": "Contact Agency",
-    "verifiedAgency": "Verified Agency"
+    "listedBy": "Objavio",
+    "viewAgency": "Pogledaj agenciju",
+    "registrationNumber": "Reg. br.",
+    "properties": "Nekretnina: {{count}}",
+    "agents": "Agenata: {{count}}",
+    "yearsInBusiness": "Godina: {{count}}",
+    "contactAgency": "Kontaktiraj agenciju",
+    "verifiedAgency": "Verifikovana agencija"
+  },
+  "fields": {
+    "website": "Veb-sajt"
+  },
+  "achievements": {
+    "addedTitle": "Dostignuće je dodato",
+    "addedMessage": "Dostignuće je uspješno dodato",
+    "addFailed": "Dodavanje dostignuća nije uspjelo",
+    "updatedTitle": "Dostignuće je ažurirano",
+    "updatedMessage": "Dostignuće je uspješno ažurirano",
+    "updateFailed": "Ažuriranje dostignuća nije uspjelo",
+    "deletedTitle": "Dostignuće je obrisano",
+    "deletedMessage": "Dostignuće je obrisano",
+    "deleteFailed": "Brisanje dostignuća nije uspjelo"
+  },
+  "adminStats": {
+    "title": "Statistika agencije",
+    "adminOnly": "Samo za administratore",
+    "profileViews": "Pregledi profila",
+    "subscriptionPlan": "Plan pretplate",
+    "featuredStatus": "Status istaknutosti",
+    "featured": "Istaknuta",
+    "notFeatured": "Nije istaknuta",
+    "featuredUntil": "Istaknuta do",
+    "memberSince": "Član od"
+  },
+  "coupons": {
+    "promotionTitle": "Promotivni kuponi",
+    "promotionSubtitle": "Mjesečna raspodjela za promociju oglasa",
+    "monthly": "Mjesečno",
+    "available": "Dostupno",
+    "used": "Iskorišćeno",
+    "usedThisMonth": "Iskorišćeno ovog mjeseca",
+    "yourCodes": "Vaši kodovi kupona",
+    "expired": "Isteklo",
+    "codeCopied": "Kod je kopiran!",
+    "copyCode": "Kopiraj kod",
+    "agentCodesTitle": "Kodovi za registraciju agenata",
+    "total": "ukupno",
+    "seatsFilled": "Popunjeno {{used}} od {{total}} mjesta"
   }
 }

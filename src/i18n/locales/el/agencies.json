@@ -3,30 +3,33 @@
     "title": "Βρείτε Κορυφαία Μεσιτικά Γραφεία",
     "subtitle": "Συνδεθείτε με αξιόπιστους επαγγελματίες ακινήτων στην περιοχή σας",
     "searchPlaceholder": "Αναζήτηση γραφείων κατά όνομα ή τοποθεσία...",
-    "badge": "Premier Real Estate Networks",
-    "titleHighlight": "Agencies in Balkans"
+    "badge": "Κορυφαία δίκτυα ακινήτων",
+    "titleHighlight": "Γραφεία στα Βαλκάνια"
   },
   "search": {
-    "placeholder": "Αναζήτηση γραφείων...",
+    "placeholder": {
+      "city": "Αναζήτηση ανά πόλη ή τοποθεσία...",
+      "name": "Αναζήτηση ανά όνομα γραφείου..."
+    },
     "button": "Αναζήτηση",
     "clear": "Καθαρισμός",
-    "title": "Find Your Ideal Agency",
-    "subtitle": "Search {{count}}+ professional agencies across the Balkans",
+    "title": "Βρείτε το ιδανικό γραφείο",
+    "subtitle": "Αναζητήστε {{count}}+ επαγγελματικά γραφεία στα Βαλκάνια",
     "tabs": {
-      "city": "City",
-      "agencyName": "Agency Name"
+      "city": "Πόλη",
+      "agencyName": "Όνομα γραφείου"
     },
-    "clearSearch": "Clear search",
-    "popularSearches": "Popular searches:"
+    "clearSearch": "Εκκαθάριση αναζήτησης",
+    "popularSearches": "Δημοφιλείς αναζητήσεις:"
   },
   "stats": {
     "totalAgencies": "Συνολικά Γραφεία",
     "totalAgents": "Επαγγελματίες Πράκτορες",
     "propertiesListed": "Καταχωρημένα Ακίνητα",
     "citiesCovered": "Πόλεις που Καλύπτονται",
-    "professionalAgencies": "Professional Agencies",
-    "expertAgents": "Expert Agents",
-    "listedProperties": "Listed Properties"
+    "professionalAgencies": "Επαγγελματικά γραφεία",
+    "expertAgents": "Έμπειροι μεσίτες",
+    "listedProperties": "Καταχωρημένα ακίνητα"
   },
   "filters": {
     "title": "Φίλτρα",
@@ -37,9 +40,9 @@
     "rating": "Αξιολόγηση",
     "anyRating": "Οποιαδήποτε Αξιολόγηση",
     "reset": "Επαναφορά Φίλτρων",
-    "allAgencies": "All Agencies",
-    "featured": "Featured",
-    "myAgency": "My Agency"
+    "allAgencies": "Όλα τα γραφεία",
+    "featured": "Προβεβλημένα",
+    "myAgency": "Το γραφείο μου"
   },
   "sort": {
     "label": "Ταξινόμηση κατά",
@@ -48,23 +51,23 @@
     "ratingDesc": "Υψηλότερη Αξιολόγηση",
     "propertiesDesc": "Περισσότερα Ακίνητα",
     "newest": "Νεότερα Πρώτα",
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperienced": "Most Experienced",
-    "alphabetical": "Alphabetical"
+    "mostProperties": "Περισσότερα ακίνητα",
+    "mostAgents": "Περισσότεροι μεσίτες",
+    "mostExperienced": "Πιο έμπειρα",
+    "alphabetical": "Αλφαβητικά"
   },
   "results": {
     "showing": "Εμφάνιση {{count}} γραφείων",
     "of": "από",
     "noResults": "Δεν βρέθηκαν γραφεία",
     "tryAdjusting": "Δοκιμάστε να προσαρμόσετε τα φίλτρα σας",
-    "title": "Top Real Estate Agencies",
-    "featuredTitle": "Featured Agencies",
-    "yourAgencyTitle": "Your Agency",
-    "showingMatching": "Showing {{count}} agencies matching \"{{query}}\"",
-    "browseAgencies": "Browse professional agencies with experienced teams",
-    "agenciesFound": "agencies found",
-    "moreAgencies": "More Agencies"
+    "title": "Κορυφαία μεσιτικά γραφεία",
+    "featuredTitle": "Προβεβλημένα γραφεία",
+    "yourAgencyTitle": "Το γραφείο σας",
+    "showingMatching": "Εμφανίζονται {{count}} γραφεία που ταιριάζουν με «{{query}}»",
+    "browseAgencies": "Περιηγηθείτε σε επαγγελματικά γραφεία με έμπειρες ομάδες",
+    "agenciesFound": "γραφεία βρέθηκαν",
+    "moreAgencies": "Περισσότερα γραφεία"
   },
   "card": {
     "properties": "ακίνητα",
@@ -73,41 +76,41 @@
     "contact": "Επικοινωνία",
     "featured": "Προβεβλημένο",
     "verified": "Επαληθευμένο",
-    "certified": "Certified",
-    "years": "Years",
-    "certs": "Certs",
-    "view": "View",
-    "more": "+{{count}} more"
+    "certified": "Πιστοποιημένο",
+    "years": "Χρόνια",
+    "certs": "Πιστοπ.",
+    "view": "Προβολή",
+    "more": "+{{count}} ακόμη"
   },
   "empty": {
     "title": "Δεν Βρέθηκαν Γραφεία",
     "description": "Δεν βρέθηκαν γραφεία που να ταιριάζουν με τα κριτήριά σας",
     "resetFilters": "Επαναφορά Φίλτρων",
-    "noAgenciesTitle": "No Agencies Found",
-    "noAgenciesYet": "No Agencies Yet",
-    "noMyAgency": "No Agency Found",
-    "adjustSearch": "Try adjusting your search criteria or browse all agencies.",
-    "noMyAgencyMessage": "You haven't created an agency yet. Start your journey today!",
-    "beFirst": "Be the first to create an agency and showcase your properties!"
+    "noAgenciesTitle": "Δεν βρέθηκαν γραφεία",
+    "noAgenciesYet": "Δεν υπάρχουν ακόμη γραφεία",
+    "noMyAgency": "Δεν βρέθηκε γραφείο",
+    "adjustSearch": "Δοκιμάστε να προσαρμόσετε τα κριτήρια αναζήτησης ή δείτε όλα τα γραφεία.",
+    "noMyAgencyMessage": "Δεν έχετε δημιουργήσει ακόμη γραφείο. Ξεκινήστε σήμερα!",
+    "beFirst": "Γίνετε οι πρώτοι που θα δημιουργήσουν γραφείο και θα προβάλουν τα ακίνητά τους!"
   },
   "cta": {
     "title": "Είστε Επαγγελματίας Ακινήτων;",
     "description": "Γίνετε μέλος του δικτύου μας αξιόπιστων γραφείων και επεκτείνετε την επιχείρησή σας",
     "button": "Καταχωρίστε το Γραφείο σας",
-    "createAgency": "Create Agency",
-    "readyToGrow": "Ready to Grow Your Agency?",
-    "ctaDescription": "Join our network of premier real estate agencies and get featured to thousands of potential clients. Showcase your properties, connect with buyers, and expand your reach.",
-    "createToday": "Create Your Agency Today"
+    "createAgency": "Δημιουργία γραφείου",
+    "readyToGrow": "Έτοιμοι να αναπτύξετε το γραφείο σας;",
+    "ctaDescription": "Γίνετε μέλος του δικτύου μας με κορυφαία μεσιτικά γραφεία και προβληθείτε σε χιλιάδες πιθανούς πελάτες. Παρουσιάστε τα ακίνητά σας, συνδεθείτε με αγοραστές και επεκτείνετε την εμβέλειά σας.",
+    "createToday": "Δημιουργήστε το γραφείο σας σήμερα"
   },
   "loading": {
     "text": "Φόρτωση γραφείων...",
-    "title": "Finding Agencies...",
-    "message": "Searching through our network of professional real estate agencies"
+    "title": "Αναζήτηση γραφείων...",
+    "message": "Αναζητούμε στο δίκτυο επαγγελματικών μεσιτικών γραφείων μας"
   },
   "error": {
     "title": "Σφάλμα Φόρτωσης Γραφείων",
     "retry": "Δοκιμάστε Ξανά",
-    "unableToLoad": "Unable to Load Agencies"
+    "unableToLoad": "Δεν ήταν δυνατή η φόρτωση των γραφείων"
   },
   "featured": {
     "title": "Προβεβλημένα Γραφεία",
@@ -129,118 +132,173 @@
     "empty": {
       "title": "Δεν υπάρχουν διαθέσιμα προβεβλημένα γραφεία αυτή τη στιγμή",
       "message": "Ελέγξτε ξανά σύντομα για τους προβεβλημένους συνεργάτες μας!"
+    },
+    "subscription": {
+      "currentlyFeatured": "Το γραφείο είναι τώρα προβεβλημένο ✨",
+      "receivingVisibility": "Το γραφείο σας είναι προβεβλημένο και έχει αυξημένη ορατότητα.",
+      "timeRemaining": "Υπολειπόμενος χρόνος",
+      "expires": "Λήγει:",
+      "featureYourAgency": "Προβάλετε το γραφείο σας",
+      "getVisibility": "Αποκτήστε περισσότερη ορατότητα με προβολή. Το γραφείο σας θα εμφανίζεται στην κορυφή των αποτελεσμάτων και στο καρουζέλ προβεβλημένων γραφείων.",
+      "getFeaturedFrom": "Προβολή από €{{price}}/εβδομάδα",
+      "getFeaturedNow": "Προβολή τώρα",
+      "featuredAgency": "Προβεβλημένο γραφείο",
+      "boostVisibility": "Ενισχύστε την ορατότητά σας",
+      "freeTrialProgress": "🎉 Πρόοδος δωρεάν δοκιμής",
+      "subscriptionPeriod": "📅 Περίοδος συνδρομής",
+      "daysLeft": "Απομένουν ημέρες: {{count}}",
+      "freeTrialActive": "🎉 Η δωρεάν δοκιμή είναι ενεργή",
+      "trialEndsOn": "Η δωρεάν δοκιμή σας λήγει στις {{date}}",
+      "interval": "Διάστημα",
+      "price": "Τιμή",
+      "startDate": "Ημερομηνία έναρξης",
+      "renewsOn": "Ανανεώνεται στις",
+      "endedOn": "Έληξε στις",
+      "couponApplied": "✓ Εφαρμόστηκε το κουπόνι {{code}}",
+      "cancelAtPeriodEnd": "⚠️ Η συνδρομή θα ακυρωθεί στο τέλος της τρέχουσας περιόδου",
+      "renewStatus": "🔄 Ανανεώστε την προβολή σας",
+      "continueVisibility": "Συνεχίστε να απολαμβάνετε αυξημένη ορατότητα και κορυφαία θέση στα αποτελέσματα.",
+      "renewNow": "Ανανέωση τώρα",
+      "proTip": "💡 Συμβουλή: τα προβεβλημένα γραφεία έχουν έως 5x περισσότερη ορατότητα και εμφανίζονται στην κορυφή των αποτελεσμάτων!",
+      "featuredInDirectory": "Προβολή στον κατάλογο γραφείων",
+      "priorityInSearch": "Προτεραιότητα στα αποτελέσματα αναζήτησης",
+      "homepageCarousel": "Καρουζέλ γραφείων στην αρχική σελίδα",
+      "featuredBadge": "Σήμα προβολής στο προφίλ",
+      "boostedVisibility": "Ενισχυμένη ορατότητα παντού"
     }
   },
   "statsCards": {
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperience": "Most Experience"
+    "mostProperties": "Περισσότερα ακίνητα",
+    "mostAgents": "Περισσότεροι μεσίτες",
+    "mostExperience": "Μεγαλύτερη εμπειρία"
   },
   "create": {
-    "title": "Create Your Agency",
-    "subtitle": "Set up your agency profile to showcase your team and properties",
-    "backToAccount": "Back to Account",
-    "enterpriseActive": "Enterprise Subscription Active",
+    "title": "Δημιουργήστε το γραφείο σας",
+    "subtitle": "Ρυθμίστε το προφίλ του γραφείου σας για να παρουσιάσετε την ομάδα και τα ακίνητά σας",
+    "backToAccount": "Πίσω στον λογαριασμό",
+    "enterpriseActive": "Η συνδρομή Enterprise είναι ενεργή",
     "steps": {
-      "basic": "Basic Info",
-      "location": "Location",
-      "contact": "Contact",
-      "details": "Details"
+      "basic": "Βασικά στοιχεία",
+      "location": "Τοποθεσία",
+      "contact": "Επικοινωνία",
+      "details": "Λεπτομέρειες"
     },
     "sections": {
-      "basicInfo": "Basic Information",
-      "location": "Location",
-      "contact": "Contact Information",
-      "professional": "Professional Details",
-      "businessHours": "Business Hours"
+      "basicInfo": "Βασικές πληροφορίες",
+      "location": "Τοποθεσία",
+      "contact": "Στοιχεία επικοινωνίας",
+      "professional": "Επαγγελματικά στοιχεία",
+      "businessHours": "Ώρες λειτουργίας"
     },
     "fields": {
-      "agencyName": "Agency Name",
-      "description": "Description",
-      "country": "Country",
-      "city": "City",
-      "address": "Street Address",
+      "agencyName": "Όνομα γραφείου",
+      "description": "Περιγραφή",
+      "country": "Χώρα",
+      "city": "Πόλη",
+      "address": "Διεύθυνση",
       "email": "Email",
-      "phone": "Phone Number",
-      "website": "Website URL",
-      "license": "Agent License Number",
-      "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken"
+      "phone": "Αριθμός τηλεφώνου",
+      "website": "URL ιστότοπου",
+      "license": "Αριθμός άδειας μεσίτη",
+      "yearsInBusiness": "Χρόνια λειτουργίας",
+      "languages": "Ομιλούμενες γλώσσες",
+      "logo": "Λογότυπο γραφείου",
+      "logoPreview": "Προεπισκόπηση λογότυπου",
+      "registrationNumber": "Αριθμός μητρώου / ΑΦΜ",
+      "agencyType": "Τύπος γραφείου",
+      "specializations": "Εξειδικεύσεις",
+      "serviceAreas": "Περιοχές εξυπηρέτησης",
+      "zipCode": "Ταχυδρομικός κώδικας"
     },
     "placeholders": {
-      "agencyName": "e.g., Premier Real Estate Agency",
-      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-      "selectCountry": "Select a country",
-      "selectCity": "Select a city",
-      "selectCountryFirst": "Select country first",
-      "address": "e.g., 123 Main Street, Building A",
-      "email": "contact@agency.com",
+      "agencyName": "π.χ., Premier Μεσιτικό Γραφείο",
+      "description": "Πείτε στους πιθανούς πελάτες για το γραφείο σας, την εξειδίκευσή σας και τι σας κάνει μοναδικούς...",
+      "selectCountry": "Επιλέξτε χώρα",
+      "selectCity": "Επιλέξτε πόλη",
+      "selectCountryFirst": "Επιλέξτε πρώτα χώρα",
+      "address": "π.χ., Κεντρική οδός 123, Κτίριο Α",
+      "email": "contact@grafeio.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456"
+      "license": "π.χ., RE-123456",
+      "registrationNumber": "π.χ., ΑΦΜ 123456789",
+      "serviceAreas": "π.χ., Αθήνα, Θεσσαλονίκη, Πάτρα (χωρισμένα με κόμμα)"
     },
     "hints": {
-      "agencyName": "Choose a professional name that represents your brand",
-      "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location"
+      "agencyName": "Επιλέξτε ένα επαγγελματικό όνομα που εκπροσωπεί την επωνυμία σας",
+      "description": "Μια πειστική περιγραφή βοηθά τους πελάτες να κατανοήσουν την αξία σας",
+      "address": "Προαιρετικό: πλήρης διεύθυνση γραφείου",
+      "logo": "JPEG, PNG, WebP ή SVG. Μέγ. 5MB.",
+      "registrationNumber": "Ο επίσημος αριθμός μητρώου ή φορολογικός αριθμός σας",
+      "specializations": "Επιλέξτε όλους τους τομείς εξειδίκευσης του γραφείου σας",
+      "serviceAreas": "Αναφέρετε τις πόλεις ή περιοχές όπου δραστηριοποιείται το γραφείο",
+      "agencyType": "Επιλέξτε τον τύπο που περιγράφει καλύτερα το γραφείο σας"
     },
     "days": {
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+      "monday": "Δευτέρα",
+      "tuesday": "Τρίτη",
+      "wednesday": "Τετάρτη",
+      "thursday": "Πέμπτη",
+      "friday": "Παρασκευή",
+      "saturday": "Σάββατο",
+      "sunday": "Κυριακή"
     },
     "benefits": {
-      "title": "What You'll Get",
-      "dedicatedPage": "Dedicated agency page on platform",
-      "displayAgents": "Display all agents & properties",
-      "featured": "Featured in homepage ads",
-      "contactInfo": "Full contact info displayed",
-      "invitationCode": "Unique invitation code for agents",
-      "support": "Priority customer support"
+      "title": "Τι θα αποκτήσετε",
+      "dedicatedPage": "Αποκλειστική σελίδα γραφείου στην πλατφόρμα",
+      "displayAgents": "Προβολή όλων των μεσιτών και ακινήτων",
+      "featured": "Προβολή στις διαφημίσεις της αρχικής σελίδας",
+      "contactInfo": "Εμφάνιση πλήρων στοιχείων επικοινωνίας",
+      "invitationCode": "Μοναδικός κωδικός πρόσκλησης για μεσίτες",
+      "support": "Υποστήριξη πελατών κατά προτεραιότητα"
     },
     "warnings": {
-      "agentRequired": "Agent Status Required",
-      "proRequired": "Pro Subscription Required"
+      "agentRequired": "Απαιτείται ιδιότητα μεσίτη",
+      "proRequired": "Απαιτείται συνδρομή Pro"
     },
     "errors": {
-      "nameRequired": "Agency name is required",
-      "locationRequired": "City and country are required",
-      "emailRequired": "Email is required"
+      "nameRequired": "Το όνομα του γραφείου είναι υποχρεωτικό",
+      "locationRequired": "Η πόλη και η χώρα είναι υποχρεωτικές",
+      "emailRequired": "Το email είναι υποχρεωτικό",
+      "logoInvalidType": "Ανεβάστε εικόνα JPEG, PNG, WebP ή SVG",
+      "logoTooLarge": "Το λογότυπο πρέπει να είναι κάτω από 5MB"
     },
-    "becomeAgent": "Become an Agent First",
-    "upgradeToPro": "Upgrade to Pro",
-    "createAgency": "Create Agency",
-    "continueToPayment": "Continue to Payment"
+    "becomeAgent": "Γίνετε πρώτα μεσίτης",
+    "upgradeToPro": "Αναβάθμιση σε Pro",
+    "createAgency": "Δημιουργία γραφείου",
+    "continueToPayment": "Συνέχεια στην πληρωμή",
+    "buttons": {
+      "uploadLogo": "Ανέβασμα λογότυπου",
+      "changeLogo": "Αλλαγή λογότυπου",
+      "removeLogo": "Αφαίρεση λογότυπου"
+    }
   },
   "payment": {
-    "title": "Complete Your Purchase",
-    "subtitle": "Subscribe to Enterprise plan to create your agency",
-    "backToDetails": "Back to Agency Details",
+    "title": "Ολοκληρώστε την αγορά σας",
+    "subtitle": "Εγγραφείτε στο πρόγραμμα Enterprise για να δημιουργήσετε το γραφείο σας",
+    "backToDetails": "Πίσω στα στοιχεία γραφείου",
     "steps": {
-      "details": "Agency Details",
-      "payment": "Payment",
-      "confirmation": "Confirmation"
+      "details": "Στοιχεία γραφείου",
+      "payment": "Πληρωμή",
+      "confirmation": "Επιβεβαίωση"
     },
-    "orderSummary": "Order Summary",
-    "total": "Total",
-    "couponCode": "Have a coupon code?",
-    "enterCoupon": "Enter coupon code",
-    "apply": "Apply",
-    "invalidCoupon": "Invalid coupon code",
-    "couponError": "Failed to validate coupon",
-    "whatsIncluded": "What's Included",
-    "securePayment": "Secure Payment",
-    "teamSupport": "Team Support",
-    "unlimitedProperties": "750 Listings",
-    "fullAnalytics": "Full Analytics",
-    "payNow": "Pay",
-    "processing": "Processing...",
-    "stripeSecure": "Payments are securely processed by Stripe",
-    "error": "Failed to initiate payment. Please try again."
+    "orderSummary": "Σύνοψη παραγγελίας",
+    "total": "Σύνολο",
+    "couponCode": "Έχετε κωδικό κουπονιού;",
+    "enterCoupon": "Εισαγάγετε κωδικό κουπονιού",
+    "apply": "Εφαρμογή",
+    "invalidCoupon": "Μη έγκυρος κωδικός κουπονιού",
+    "couponError": "Η επαλήθευση του κουπονιού απέτυχε",
+    "whatsIncluded": "Τι περιλαμβάνεται",
+    "securePayment": "Ασφαλής πληρωμή",
+    "teamSupport": "Υποστήριξη ομάδας",
+    "unlimitedProperties": "750 αγγελίες",
+    "fullAnalytics": "Πλήρη αναλυτικά στοιχεία",
+    "payNow": "Πληρωμή",
+    "processing": "Επεξεργασία...",
+    "stripeSecure": "Οι πληρωμές επεξεργάζονται με ασφάλεια από τη Stripe",
+    "error": "Η έναρξη της πληρωμής απέτυχε. Δοκιμάστε ξανά.",
+    "activateFree": "Δωρεάν ενεργοποίηση"
   },
   "featuredDialog": {
     "title": "Συνδρομή Προβεβλημένου Γραφείου",
@@ -261,7 +319,14 @@
     "validating": "Επαλήθευση...",
     "processing": "Επεξεργασία...",
     "activateForFree": "Ενεργοποίηση ΔΩΡΕΑΝ",
-    "subscribePrice": "Εγγραφή - €{{price}}"
+    "subscribePrice": "Εγγραφή - €{{price}}",
+    "duration1week": "1 εβδομάδα",
+    "duration2weeks": "2 εβδομάδες",
+    "duration4weeks": "4 εβδομάδες",
+    "badgePopular": "ΔΗΜΟΦΙΛΕΣ",
+    "duration90days": "90 ημέρες",
+    "badgeBestValue": "ΚΑΛΥΤΕΡΗ ΑΞΙΑ",
+    "haveCouponCode": "Έχετε κωδικό κουπονιού;"
   },
   "management": {
     "currentAgency": "Τρέχον Γραφείο",
@@ -375,6 +440,138 @@
         "desc": "Τα προβεβλημένα πρακτορεία λαμβάνουν μπόνους 20 πόντων και εμφανίζονται στην κορυφή.",
         "cap": "Μέγ 20 πόντοι"
       }
+    }
+  },
+  "coupon": {
+    "title": "Εξαργύρωση κουπονιού γραφείου",
+    "description": "Εισαγάγετε τον κωδικό κουπονιού που λάβατε για να ενταχθείτε σε γραφείο και να αποκτήσετε συνδρομή Pro.",
+    "codeLabel": "Κωδικός κουπονιού",
+    "codePlaceholder": "Εισαγάγετε τον κωδικό κουπονιού (π.χ. AGENCY-XXXXXXXX)",
+    "codeFormat": "Ο κωδικός πρέπει να έχει τη μορφή: AGENCY-XXXXXXXX",
+    "redeeming": "Εξαργύρωση...",
+    "redeemButton": "Εξαργύρωση κουπονιού",
+    "note": "Σημείωση:",
+    "alreadyInAgency": "Είστε ήδη μέλος του {{name}}. Η εξαργύρωση νέου κουπονιού θα σας μεταφέρει στο νέο γραφείο.",
+    "anAgency": "ενός γραφείου",
+    "confirmMove": "Είστε ήδη μέλος γραφείου. Η εξαργύρωση αυτού του κουπονιού θα σας μεταφέρει στο νέο γραφείο. Συνέχεια;",
+    "agentRequired": {
+      "title": "Απαιτείται εγγραφή μεσίτη",
+      "description": "Για να εξαργυρώσετε κουπόνι γραφείου και να ενταχθείτε, πρέπει πρώτα να εγγραφείτε ως μεσίτης. Απαιτούνται αριθμός άδειας και επαγγελματικά στοιχεία.",
+      "goToProfile": "Μετάβαση στις ρυθμίσεις προφίλ"
+    },
+    "errors": {
+      "enterCode": "Εισαγάγετε κωδικό κουπονιού",
+      "loginRequired": "Πρέπει να συνδεθείτε για να εξαργυρώσετε κουπόνι",
+      "agentRequired": "Μόνο εγγεγραμμένοι μεσίτες μπορούν να εξαργυρώσουν κουπόνια γραφείου. Εγγραφείτε πρώτα ως μεσίτης στις ρυθμίσεις προφίλ.",
+      "invalidCoupon": "Μη έγκυρος κωδικός κουπονιού. Ελέγξτε τον κωδικό και δοκιμάστε ξανά.",
+      "alreadyUsed": "Αυτό το κουπόνι έχει ήδη χρησιμοποιηθεί από άλλον μεσίτη.",
+      "expired": "Αυτό το κουπόνι έχει λήξει και δεν μπορεί πλέον να εξαργυρωθεί.",
+      "notFound": "Το κουπόνι δεν βρέθηκε. Βεβαιωθείτε ότι ο κωδικός είναι σωστός.",
+      "subscriptionInactive": "Η συνδρομή του γραφείου δεν είναι πλέον ενεργή. Αυτό το κουπόνι δεν μπορεί να εξαργυρωθεί.",
+      "missingCode": "Εισαγάγετε κωδικό κουπονιού.",
+      "redeemFailed": "Η εξαργύρωση του κουπονιού απέτυχε. Δοκιμάστε ξανά.",
+      "redemptionFailed": "Η εξαργύρωση απέτυχε"
+    },
+    "success": {
+      "title": "Το κουπόνι εξαργυρώθηκε!",
+      "message": "Εντάχθηκατε επιτυχώς στο {{name}} με συνδρομή Pro!",
+      "welcome": "Καλώς ήρθατε στο {{name}}!",
+      "joined": "Εντάχθηκατε επιτυχώς στο γραφείο με συνδρομή Pro.",
+      "benefits": "Τα οφέλη σας:",
+      "listingsLimit": "Έως {{limit}} ενεργές αγγελίες",
+      "branding": "Επωνυμία γραφείου στις αγγελίες σας",
+      "promotionAccess": "Πρόσβαση σε κουπόνια προώθησης του γραφείου",
+      "validUntil": "Η συνδρομή ισχύει έως {{date}}",
+      "viewAgency": "Προβολή γραφείου"
+    },
+    "whatHappens": {
+      "title": "Τι συμβαίνει όταν εξαργυρώνετε;",
+      "addedToTeam": "Θα προστεθείτε στο γραφείο ως μέλος της ομάδας",
+      "proSubscription": "Θα λάβετε συνδρομή Pro (ισχύει για 1 έτος)",
+      "agencyBranding": "Οι αγγελίες σας θα εμφανίζουν την επωνυμία του γραφείου",
+      "promotionCoupons": "Πρόσβαση σε κουπόνια προώθησης του γραφείου για τις αγγελίες σας"
+    }
+  },
+  "badge": {
+    "independent": "Ανεξάρτητος",
+    "independentShort": "Ανεξ.",
+    "agency": "Γραφείο",
+    "independentAgent": "Ανεξάρτητος μεσίτης"
+  },
+  "confirm": {
+    "title": "Δημιουργήστε το γραφείο σας",
+    "subtitle": "Η συνδρομή Enterprise είναι ενεργή. Ελέγξτε τα στοιχεία και επιβεβαιώστε.",
+    "reviewDetails": "Έλεγχος στοιχείων γραφείου",
+    "createAgency": "Δημιουργία του γραφείου μου"
+  },
+  "ui": {
+    "agencyDetailPage": {
+      "dragToRepositionCoverImage": "Σύρετε για να μετακινήσετε την εικόνα εξωφύλλου",
+      "savePosition": "Αποθήκευση θέσης",
+      "cancel": "Ακύρωση",
+      "repositionCover": "Μετακίνηση εξωφύλλου",
+      "repositionLogo": "Μετακίνηση λογότυπου",
+      "save": "Αποθήκευση",
+      "years": "Χρόνια",
+      "removeAdminRights": "Αφαίρεση δικαιωμάτων διαχειριστή",
+      "makeAdmin": "Ορισμός ως διαχειριστή",
+      "removeAgentFromAgency": "Αφαίρεση μεσίτη από το γραφείο",
+      "leaveThisAgency": "Αποχώρηση από το γραφείο",
+      "tellClientsAboutYourAgency": "Πείτε στους πελάτες για το γραφείο σας...",
+      "residentialCommercialLuxuryProperties": "Κατοικίες, επαγγελματικά, πολυτελή ακίνητα",
+      "licensedRealEstateAgencyIso": "Αδειοδοτημένο μεσιτικό γραφείο, πιστοποιημένο κατά ISO",
+      "englishSerbianCroatianAlbanian": "Αγγλικά, σερβικά, κροατικά, αλβανικά",
+      "n9am6pm": "9:00 - 18:00",
+      "youAreNotLoggedIn": "Δεν έχετε συνδεθεί. Συνδεθείτε και δοκιμάστε ξανά.",
+      "unexpectedResponseFromServerPlease": "Μη αναμενόμενη απάντηση από τον διακομιστή. Δοκιμάστε ξανά.",
+      "invalidCouponCodePleaseCheck": "Μη έγκυρος κωδικός κουπονιού. Ελέγξτε και δοκιμάστε ξανά.",
+      "thisCouponHasAlreadyBeen": "Αυτό το κουπόνι έχει ήδη χρησιμοποιηθεί.",
+      "thisCouponHasExpired": "Αυτό το κουπόνι έχει λήξει.",
+      "theAgencySubscriptionIsNo": "Η συνδρομή του γραφείου δεν είναι πλέον ενεργή.",
+      "couponRedeemed": "Το κουπόνι εξαργυρώθηκε!",
+      "joinRequestSentSuccessfullyThe": "Το αίτημα συμμετοχής στάλθηκε επιτυχώς! Ο διαχειριστής του γραφείου θα το εξετάσει.",
+      "agencyNameMustBeAt": "Το όνομα του γραφείου πρέπει να έχει τουλάχιστον 2 χαρακτήρες",
+      "descriptionMustBeUnder5": "Η περιγραφή πρέπει να είναι κάτω από 5.000 χαρακτήρες",
+      "pleaseEnterAValidEmail": "Εισαγάγετε έγκυρη διεύθυνση email",
+      "pleaseEnterAValidPhone": "Εισαγάγετε έγκυρο αριθμό τηλεφώνου",
+      "uploadFailed": "Η μεταφόρτωση απέτυχε",
+      "failedToSavePosition": "Η αποθήκευση της θέσης απέτυχε",
+      "failedToSaveImagePosition": "Η αποθήκευση της θέσης εικόνας απέτυχε",
+      "positionSaved": "Η θέση αποθηκεύτηκε",
+      "failedToGenerateCode": "Η δημιουργία κωδικού απέτυχε"
+    },
+    "agencyPaymentPage": {
+      "agencyCreated": "Το γραφείο δημιουργήθηκε!",
+      "redirectingToAgenciesPage": "Ανακατεύθυνση στη σελίδα γραφείων...",
+      "phone": "Τηλέφωνο",
+      "license": "Άδεια",
+      "enterprisePlanActive": "✓ Το πρόγραμμα Enterprise είναι ενεργό",
+      "n5AgentRegistrationCodesWill": "• 5 κωδικοί εγγραφής μεσιτών θα σας σταλούν με email",
+      "monthlyListingPromotionCouponsIncluded": "• Περιλαμβάνονται μηνιαία κουπόνια προώθησης αγγελιών",
+      "n7DayFeaturedAgencyTrial": "• Η 7ήμερη δοκιμή προβεβλημένου γραφείου ξεκινά αμέσως",
+      "plan": "Πρόγραμμα",
+      "coupon": "Κουπόνι ("
+    },
+    "createAgencyPage": {
+      "n900Am500": "9:00 - 17:00"
+    },
+    "agencyScoringPanel": {
+      "n0Pts": "0 πόντοι"
+    },
+    "agencyJoinRequestsModal": {
+      "closeJoinRequestsModal": "Κλείσιμο παραθύρου αιτημάτων συμμετοχής"
+    },
+    "invitationCodeModal": {
+      "keepTypingAgyXxxxxxXxxxxx": "Συνεχίστε να πληκτρολογείτε... (AGY-XXXXXX-XXXXXX)",
+      "invalidFormatExpectedAgyXxxxxx": "Μη έγκυρη μορφή. Αναμενόμενη: AGY-XXXXXX-XXXXXX",
+      "keepTypingXxxXxxxxxxx": "Συνεχίστε να πληκτρολογείτε... (XXX-XXXXXXXX)",
+      "invalidFormatExpectedXxxXxxxxxxx": "Μη έγκυρη μορφή. Αναμενόμενη: XXX-XXXXXXXX",
+      "proSubscriptionRequiredToUse": "Απαιτείται συνδρομή Pro για χρήση κωδικών πρόσκλησης",
+      "formatAgyXxxxxxXxxxxx": "Μορφή: AGY-XXXXXX-XXXXXX",
+      "formatAbcXxxxxxxx": "Μορφή: ABC-XXXXXXXX"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Το γραφείο σας δημιουργήθηκε επιτυχώς. Τώρα έχετε αποκλειστική σελίδα γραφείου."
     }
   }
 }

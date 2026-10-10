@@ -13,7 +13,11 @@
     "uploading": "Се прикачува...",
     "chooseGradient": "Избери градиент",
     "customImageHint": "Или прикачете сопствена слика преку копчето погоре",
-    "changeLogo": "Промени лого"
+    "changeLogo": "Промени лого",
+    "dropCoverImage": "Пуштете за да ја прикачите насловната слика",
+    "maxSize": "Макс. 5MB, само слики",
+    "customize": "Прилагоди",
+    "addLogo": "Додај лого"
   },
   "gradientPresets": {
     "oceanBlue": "Океанско сино",
@@ -46,19 +50,27 @@
     "specializations": "Специјализации",
     "serviceAreas": "Области на работа",
     "languagesSpoken": "Јазици",
-    "yearsOfExcellence": "{{years}}+ Години на извонредност"
+    "yearsOfExcellence": "{{years}}+ Години на извонредност",
+    "getInTouch": "Стапете во контакт",
+    "address": "Адреса",
+    "followUs": "Следете нè"
   },
   "invitationCode": {
     "title": "Код за покана",
     "description": "Испратете го овој код до агенти што сакате да се приклучат на вашата агенција",
-    "copy": "Копирај код"
+    "copy": "Копирај код",
+    "generatedTitle": "Кодот е генериран",
+    "generatedMessage": "Кодот за покана е успешно генериран",
+    "generateFailed": "Генерирањето на кодот за покана не успеа",
+    "generate": "Генерирај код"
   },
   "actions": {
     "editAgency": "Уреди агенција",
     "manageJoinRequests": "Барања за приклучување",
     "requestToJoin": "Побарај приклучување",
     "proRequiredForInviteCode": "Потребен е Pro претплата за кодови за покана. Користете код за купон за да се приклучите.",
-    "viewPlans": "Погледни Планови"
+    "viewPlans": "Погледни Планови",
+    "goToDashboard": "Оди на контролната табла"
   },
   "featuredSubscription": {
     "title": "Истакната претплата",
@@ -86,7 +98,9 @@
     "removing": "Се отстранува...",
     "leaveAgency": "Напушти агенција",
     "leaving": "Се напушта...",
-    "noAgentsFound": "Нема агенти во оваа агенција"
+    "noAgentsFound": "Нема агенти во оваа агенција",
+    "noAgentsHelpText": "Членовите на тимот ќе се појават тука откако ќе се приклучат",
+    "loading": "Се вчитуваат членовите на тимот..."
   },
   "properties": {
     "activeListings": "АКТИВНИ ОГЛАСИ",
@@ -97,7 +111,21 @@
     "noActiveListings": "Моментално нема активни огласи",
     "noSoldProperties": "Сè уште нема продадени недвижности",
     "checkBackSoon": "Проверете повторно наскоро",
-    "soldWillAppear": "Продадените недвижности ќе се прикажат тука"
+    "soldWillAppear": "Продадените недвижности ќе се прикажат тука",
+    "map": "Карта на имоти",
+    "activeCount": "{{count}} активни",
+    "soldCount": "{{count}} продадени",
+    "beds": "спални",
+    "baths": "бањи",
+    "viewDetails": "Види детали",
+    "forSaleCount": "На продажба ({{count}})",
+    "soldCountLabel": "Продадени ({{count}})",
+    "serviceAreaLocation": "Локација на подрачјето на работа",
+    "portfolio": "Портфолио на имоти",
+    "totalProperties": "Вкупно имоти: {{count}}",
+    "rented": "Изнајмено",
+    "allCount": "Сите ({{count}})",
+    "forRentCount": "Под наем ({{count}})"
   },
   "editModal": {
     "title": "Уреди податоци за агенцијата",
@@ -130,7 +158,10 @@
     "languagesHint": "Јазиците автоматски се ажурираат според агентите",
     "businessHours": "Работно време",
     "businessHoursPlaceholder": "09:00 – 18:00",
-    "saveChanges": "Зачувај промени"
+    "saveChanges": "Зачувај промени",
+    "subtitle": "Ажурирајте ги податоците за агенцијата",
+    "descriptionHint": "Користете нов ред за одвојување пасуси",
+    "achievements": "Награди и достигнувања"
   },
   "confirmations": {
     "removeAgent": "Дали сигурно сакате да го отстраните {{name}} од {{agency}}?",
@@ -139,7 +170,15 @@
     "leaveAgencyDetails": "Со ова:\n- ќе бидете отстранети од агенцијата\n- ќе продолжите како независен агент",
     "toggleAdmin": "Дали сакате да {{action}} {{name}}?",
     "removeAdminRights": "ги отстраните администраторските права од",
-    "makeAdminRights": "го назначите за администратор"
+    "makeAdminRights": "го назначите за администратор",
+    "removeAdminTitle": "Отстрани администратор",
+    "makeAdminTitle": "Направи администратор",
+    "removeButton": "Отстрани",
+    "makeAdminButton": "Направи администратор",
+    "cancelButton": "Откажи",
+    "removeAgentTitle": "Отстрани агент",
+    "leaveAgencyTitle": "Напушти агенција",
+    "leaveButton": "Напушти"
   },
   "messages": {
     "logoUpdated": "Логото е успешно ажурирано.",
@@ -155,7 +194,27 @@
     "onlyOwnerCanManage": "Само сопственикот може да управува со администратори.",
     "onlyAdminCanRemove": "Само администратор може да отстрани агент.",
     "selectImageFile": "Изберете слика",
-    "imageSizeLimit": "Сликата мора да биде помала од 5MB"
+    "imageSizeLimit": "Сликата мора да биде помала од 5MB",
+    "requestSent": "Барањето е испратено",
+    "accessDenied": "Пристапот е одбиен",
+    "adminRemovedTitle": "Администраторот е отстранет",
+    "adminAddedTitle": "Администраторот е додаден",
+    "errorTitle": "Грешка",
+    "agentRemovedTitle": "Агентот е отстранет",
+    "leftAgencyTitle": "Ја напуштивте агенцијата",
+    "nameRequired": "Името на агенцијата е задолжително",
+    "invalidUrl": "Невалиден URL за {{field}}. Вклучете https://",
+    "agencyUpdatedTitle": "Агенцијата е ажурирана",
+    "updateFailed": "Ажурирањето на агенцијата не успеа",
+    "uploadFailed": "Прикачувањето на логото не успеа",
+    "logoUpdatedTitle": "Логото е ажурирано",
+    "coverUpdatedTitle": "Насловната слика е ажурирана",
+    "gradientUpdatedTitle": "Градиентот е ажуриран",
+    "usedBy": "Искористено од",
+    "unknown": "Непознато",
+    "copiedTitle": "Копирано!",
+    "invitationCodeCopied": "Кодот за покана е копиран!",
+    "gradientUpdateFailed": "Ажурирањето на градиентот не успеа"
   },
   "weekdays": {
     "monday": "Понеделник",
@@ -175,5 +234,55 @@
     "call": "Повикај",
     "email": "Е-пошта",
     "website": "Веб-страница"
+  },
+  "propertyCard": {
+    "listedBy": "Објавено од",
+    "viewAgency": "Види агенција",
+    "registrationNumber": "Рег. бр.",
+    "properties": "Имоти: {{count}}",
+    "agents": "Агенти: {{count}}",
+    "yearsInBusiness": "Години: {{count}}",
+    "contactAgency": "Контактирај агенција",
+    "verifiedAgency": "Верификувана агенција"
+  },
+  "fields": {
+    "website": "Веб-страница"
+  },
+  "achievements": {
+    "addedTitle": "Достигнувањето е додадено",
+    "addedMessage": "Достигнувањето е успешно додадено",
+    "addFailed": "Додавањето на достигнувањето не успеа",
+    "updatedTitle": "Достигнувањето е ажурирано",
+    "updatedMessage": "Достигнувањето е успешно ажурирано",
+    "updateFailed": "Ажурирањето на достигнувањето не успеа",
+    "deletedTitle": "Достигнувањето е избришано",
+    "deletedMessage": "Достигнувањето е избришано",
+    "deleteFailed": "Бришењето на достигнувањето не успеа"
+  },
+  "adminStats": {
+    "title": "Статистика на агенцијата",
+    "adminOnly": "Само за администратори",
+    "profileViews": "Прегледи на профилот",
+    "subscriptionPlan": "План на претплата",
+    "featuredStatus": "Статус на истакнатост",
+    "featured": "Истакната",
+    "notFeatured": "Не е истакната",
+    "featuredUntil": "Истакната до",
+    "memberSince": "Член од"
+  },
+  "coupons": {
+    "promotionTitle": "Промотивни купони",
+    "promotionSubtitle": "Месечна распределба за промоција на огласи",
+    "monthly": "Месечно",
+    "available": "Достапни",
+    "used": "Искористени",
+    "usedThisMonth": "Искористени овој месец",
+    "yourCodes": "Ваши кодови за купони",
+    "expired": "Истечени",
+    "codeCopied": "Кодот е копиран!",
+    "copyCode": "Копирај код",
+    "agentCodesTitle": "Кодови за регистрација на агенти",
+    "total": "вкупно",
+    "seatsFilled": "Пополнети {{used}} од {{total}} места"
   }
 }

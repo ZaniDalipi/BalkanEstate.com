@@ -4,14 +4,14 @@
     "overview": "Επισκόπηση",
     "listings": "Καταχωρίσεις",
     "reviews": "Κριτικές",
-    "back": "Back to Agents"
+    "back": "Πίσω στους μεσίτες"
   },
   "tabs": {
     "about": "Σχετικά",
     "listings": "Καταχωρίσεις",
     "reviews": "Κριτικές",
     "contact": "Επικοινωνία",
-    "overview": "Overview"
+    "overview": "Επισκόπηση"
   },
   "badges": {
     "verified": "Επαληθευμένος Πράκτορας",
@@ -19,7 +19,7 @@
     "topRated": "Κορυφαία Αξιολόγηση",
     "superAgent": "Super Πράκτορας",
     "newAgent": "Νέος Πράκτορας",
-    "premierAgent": "Premier Agent",
+    "premierAgent": "Κορυφαίος μεσίτης",
     "superhost": "Superhost"
   },
   "contact": {
@@ -34,10 +34,10 @@
     "schedule": "Προγραμματισμός Κλήσης",
     "message": "Αποστολή Μηνύματος",
     "responseTime": "Συνήθως απαντά εντός",
-    "callNow": "Call Now",
-    "sendEmail": "Send Email",
-    "sendMessage": "Send Message",
-    "scheduleCall": "Schedule a Call"
+    "callNow": "Καλέστε τώρα",
+    "sendEmail": "Αποστολή email",
+    "sendMessage": "Αποστολή μηνύματος",
+    "scheduleCall": "Προγραμματισμός κλήσης"
   },
   "stats": {
     "propertiesSold": "Ακίνητα που Πουλήθηκαν",
@@ -46,10 +46,10 @@
     "avgRating": "Μέση Αξιολόγηση",
     "responseRate": "Ποσοστό Απάντησης",
     "yearsExperience": "Χρόνια Εμπειρίας",
-    "totalSales": "Total Sales",
-    "avgResponseTime": "Avg. Response Time",
-    "satisfactionRate": "Satisfaction Rate",
-    "languages": "Languages Spoken"
+    "totalSales": "Συνολικές πωλήσεις",
+    "avgResponseTime": "Μέσος χρόνος απάντησης",
+    "satisfactionRate": "Ποσοστό ικανοποίησης",
+    "languages": "Ομιλούμενες γλώσσες"
   },
   "overview": {
     "about": "Σχετικά με Εμένα",
@@ -58,8 +58,8 @@
     "languages": "Γλώσσες που Μιλώ",
     "certifications": "Πιστοποιήσεις",
     "education": "Εκπαίδευση",
-    "aboutMe": "About Me",
-    "serviceAreas": "Service Areas"
+    "aboutMe": "Σχετικά με εμένα",
+    "serviceAreas": "Περιοχές δραστηριότητας"
   },
   "listings": {
     "title": "Οι Καταχωρίσεις μου",
@@ -68,8 +68,8 @@
     "pending": "Σε Εκκρεμότητα",
     "viewAll": "Προβολή Όλων",
     "noListings": "Δεν υπάρχουν καταχωρίσεις ακόμα",
-    "activeListings": "Active Listings",
-    "soldListings": "Sold Listings"
+    "activeListings": "Ενεργές αγγελίες",
+    "soldListings": "Πωληθείσες αγγελίες"
   },
   "reviews": {
     "title": "Κριτικές Πελατών",
@@ -78,10 +78,10 @@
     "verifiedPurchase": "Επαληθευμένος Πελάτης",
     "helpful": "Χρήσιμο",
     "report": "Αναφορά",
-    "averageRating": "Average Rating",
-    "totalReviews": "Total Reviews",
-    "beFirst": "Be the first to leave a review for this agent",
-    "reportReview": "Report Review"
+    "averageRating": "Μέση βαθμολογία",
+    "totalReviews": "Σύνολο κριτικών",
+    "beFirst": "Γίνετε ο πρώτος που θα αφήσει κριτική για αυτόν τον μεσίτη",
+    "reportReview": "Αναφορά κριτικής"
   },
   "consultation": {
     "title": "Κλείστε Δωρεάν Συμβουλευτική",
@@ -89,54 +89,54 @@
     "button": "Προγραμματισμός Τώρα",
     "duration": "30 λεπτά",
     "free": "Δωρεάν",
-    "selectDate": "Select Date",
-    "selectTime": "Select Time",
-    "yourName": "Your Name",
-    "yourEmail": "Your Email",
-    "yourPhone": "Your Phone",
-    "message": "Message (optional)",
-    "messagePlaceholder": "Tell us about your property requirements...",
-    "bookNow": "Book Consultation",
-    "confirmBooking": "Confirm Booking"
+    "selectDate": "Επιλέξτε ημερομηνία",
+    "selectTime": "Επιλέξτε ώρα",
+    "yourName": "Το όνομά σας",
+    "yourEmail": "Το email σας",
+    "yourPhone": "Το τηλέφωνό σας",
+    "message": "Μήνυμα (προαιρετικό)",
+    "messagePlaceholder": "Πείτε μας για τις απαιτήσεις σας σε ακίνητο...",
+    "bookNow": "Κράτηση συμβουλευτικής",
+    "confirmBooking": "Επιβεβαίωση κράτησης"
   },
   "appraisal": {
     "title": "Αποτίμηση Ακινήτου",
     "description": "Μάθετε την αξία του ακινήτου σας σήμερα",
     "button": "Αίτημα Αποτίμησης",
-    "propertyAddress": "Property Address",
-    "propertyType": "Property Type",
-    "requestAppraisal": "Request Appraisal"
+    "propertyAddress": "Διεύθυνση ακινήτου",
+    "propertyType": "Τύπος ακινήτου",
+    "requestAppraisal": "Αίτημα εκτίμησης"
   },
   "agency": {
     "title": "Γραφείο",
     "worksWith": "Συνεργάζεται με",
     "viewAgency": "Προβολή Γραφείου",
     "independent": "Ανεξάρτητος Πράκτορας",
-    "partOf": "Part of",
-    "independentAgent": "Independent Agent"
+    "partOf": "Μέλος του",
+    "independentAgent": "Ανεξάρτητος μεσίτης"
   },
   "similarAgents": {
     "title": "Παρόμοιοι Πράκτορες",
     "viewAll": "Προβολή Όλων",
-    "inArea": "in {{area}}"
+    "inArea": "σε {{area}}"
   },
   "actions": {
     "share": "Κοινοποίηση Προφίλ",
     "save": "Αποθήκευση Πράκτορα",
     "report": "Αναφορά Πράκτορα",
-    "shareProfile": "Share Profile",
-    "saveAgent": "Save Agent",
-    "reportAgent": "Report Agent"
+    "shareProfile": "Κοινοποίηση προφίλ",
+    "saveAgent": "Αποθήκευση μεσίτη",
+    "reportAgent": "Αναφορά μεσίτη"
   },
   "messages": {
     "saved": "Ο πράκτορας αποθηκεύτηκε στα αγαπημένα",
     "removed": "Ο πράκτορας αφαιρέθηκε από τα αγαπημένα",
     "messageSent": "Το μήνυμα στάλθηκε επιτυχώς",
     "error": "Παρουσιάστηκε σφάλμα. Παρακαλώ δοκιμάστε ξανά.",
-    "consultationBooked": "Consultation booked successfully!",
-    "appraisalRequested": "Appraisal request sent successfully!",
-    "profileShared": "Profile link copied to clipboard!",
-    "agentSaved": "Agent saved to your favorites!",
-    "reviewSubmitted": "Review submitted successfully!"
+    "consultationBooked": "Η συμβουλευτική κλείστηκε επιτυχώς!",
+    "appraisalRequested": "Το αίτημα εκτίμησης στάλθηκε επιτυχώς!",
+    "profileShared": "Ο σύνδεσμος του προφίλ αντιγράφηκε στο πρόχειρο!",
+    "agentSaved": "Ο μεσίτης αποθηκεύτηκε στα αγαπημένα σας!",
+    "reviewSubmitted": "Η κριτική υποβλήθηκε επιτυχώς!"
   }
 }

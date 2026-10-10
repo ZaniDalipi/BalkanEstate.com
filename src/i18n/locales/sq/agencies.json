@@ -128,114 +128,141 @@
       "renewStatus": "🔄 Rinovo Statusin e Veçuar",
       "continueVisibility": "Vazhdo të gëzosh dukshmëri të zgjeruar dhe vendosje në krye të rezultateve.",
       "renewNow": "Rinovo Tani",
-      "proTip": "💡 Këshillë Pro: Agjencitë e veçuara marrin deri në 5x më shumë dukshmëri!"
+      "proTip": "💡 Këshillë Pro: Agjencitë e veçuara marrin deri në 5x më shumë dukshmëri!",
+      "featuredInDirectory": "E veçuar në drejtorinë e agjencive",
+      "priorityInSearch": "Përparësi në rezultatet e kërkimit",
+      "homepageCarousel": "Karuseli i agjencive në kryefaqe",
+      "featuredBadge": "Distinktiv i veçuar në profil",
+      "boostedVisibility": "Dukshmëri e rritur kudo"
     }
   },
   "create": {
-    "title": "Create Your Agency",
-    "subtitle": "Set up your agency profile to showcase your team and properties",
-    "backToAccount": "Back to Account",
-    "enterpriseActive": "Enterprise Subscription Active",
+    "title": "Krijoni agjencinë tuaj",
+    "subtitle": "Konfiguroni profilin e agjencisë për të prezantuar ekipin dhe pronat tuaja",
+    "backToAccount": "Kthehu te llogaria",
+    "enterpriseActive": "Abonimi Enterprise është aktiv",
     "steps": {
-      "basic": "Basic Info",
-      "location": "Location",
-      "contact": "Contact",
-      "details": "Details"
+      "basic": "Të dhëna bazë",
+      "location": "Vendndodhja",
+      "contact": "Kontakti",
+      "details": "Detajet"
     },
     "sections": {
-      "basicInfo": "Basic Information",
-      "location": "Location",
-      "contact": "Contact Information",
-      "professional": "Professional Details",
-      "businessHours": "Business Hours"
+      "basicInfo": "Të dhëna bazë",
+      "location": "Vendndodhja",
+      "contact": "Të dhënat e kontaktit",
+      "professional": "Detaje profesionale",
+      "businessHours": "Orari i punës"
     },
     "fields": {
-      "agencyName": "Agency Name",
-      "description": "Description",
-      "country": "Country",
-      "city": "City",
-      "address": "Street Address",
+      "agencyName": "Emri i agjencisë",
+      "description": "Përshkrimi",
+      "country": "Shteti",
+      "city": "Qyteti",
+      "address": "Adresa",
       "email": "Email",
-      "phone": "Phone Number",
-      "website": "Website URL",
-      "license": "Agent License Number",
-      "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken"
+      "phone": "Numri i telefonit",
+      "website": "URL e faqes së internetit",
+      "license": "Numri i licencës së agjentit",
+      "yearsInBusiness": "Vite në biznes",
+      "languages": "Gjuhët që flitet",
+      "logo": "Logoja e agjencisë",
+      "logoPreview": "Pamje paraprake e logos",
+      "registrationNumber": "Numri i regjistrimit të biznesit / NIPT",
+      "agencyType": "Lloji i agjencisë",
+      "specializations": "Specializimet",
+      "serviceAreas": "Zonat e shërbimit / rajonet",
+      "zipCode": "Kodi postar"
     },
     "placeholders": {
-      "agencyName": "e.g., Premier Real Estate Agency",
-      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-      "selectCountry": "Select a country",
-      "selectCity": "Select a city",
-      "selectCountryFirst": "Select country first",
-      "address": "e.g., 123 Main Street, Building A",
-      "email": "contact@agency.com",
+      "agencyName": "p.sh., Agjencia Premier e Pasurive të Paluajtshme",
+      "description": "Tregojuni klientëve të mundshëm për agjencinë tuaj, ekspertizën dhe atë që ju bën unikë...",
+      "selectCountry": "Zgjidhni një shtet",
+      "selectCity": "Zgjidhni një qytet",
+      "selectCountryFirst": "Zgjidhni fillimisht shtetin",
+      "address": "p.sh., Rruga Kryesore 123, Ndërtesa A",
+      "email": "kontakt@agjencia.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456"
+      "license": "p.sh., RE-123456",
+      "registrationNumber": "p.sh., NIPT L12345678A",
+      "serviceAreas": "p.sh., Tiranë, Durrës, Vlorë (të ndara me presje)"
     },
     "hints": {
-      "agencyName": "Choose a professional name that represents your brand",
-      "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location"
+      "agencyName": "Zgjidhni një emër profesional që përfaqëson markën tuaj",
+      "description": "Një përshkrim bindës i ndihmon klientët të kuptojnë vlerën tuaj",
+      "address": "Opsionale: adresa e plotë e zyrës",
+      "logo": "JPEG, PNG, WebP ose SVG. Maks. 5MB.",
+      "registrationNumber": "Numri juaj zyrtar i regjistrimit të biznesit ose identifikimit tatimor",
+      "specializations": "Zgjidhni të gjitha fushat ku specializohet agjencia juaj",
+      "serviceAreas": "Listoni qytetet ose rajonet ku vepron agjencia juaj",
+      "agencyType": "Zgjidhni llojin që e përshkruan më mirë agjencinë tuaj"
     },
     "days": {
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+      "monday": "E hënë",
+      "tuesday": "E martë",
+      "wednesday": "E mërkurë",
+      "thursday": "E enjte",
+      "friday": "E premte",
+      "saturday": "E shtunë",
+      "sunday": "E diel"
     },
     "benefits": {
-      "title": "What You'll Get",
-      "dedicatedPage": "Dedicated agency page on platform",
-      "displayAgents": "Display all agents & properties",
-      "featured": "Featured in homepage ads",
-      "contactInfo": "Full contact info displayed",
-      "invitationCode": "Unique invitation code for agents",
-      "support": "Priority customer support"
+      "title": "Çfarë do të merrni",
+      "dedicatedPage": "Faqe e dedikuar e agjencisë në platformë",
+      "displayAgents": "Shfaqni të gjithë agjentët dhe pronat",
+      "featured": "E veçuar në reklamat e kryefaqes",
+      "contactInfo": "Të dhëna të plota kontakti të shfaqura",
+      "invitationCode": "Kod unik ftese për agjentët",
+      "support": "Mbështetje prioritare për klientët"
     },
     "warnings": {
-      "agentRequired": "Agent Status Required",
-      "proRequired": "Pro Subscription Required"
+      "agentRequired": "Kërkohet statusi i agjentit",
+      "proRequired": "Kërkohet abonimi Pro"
     },
     "errors": {
-      "nameRequired": "Agency name is required",
-      "locationRequired": "City and country are required",
-      "emailRequired": "Email is required"
+      "nameRequired": "Emri i agjencisë është i detyrueshëm",
+      "locationRequired": "Qyteti dhe shteti janë të detyrueshëm",
+      "emailRequired": "Email-i është i detyrueshëm",
+      "logoInvalidType": "Ju lutemi ngarkoni një imazh JPEG, PNG, WebP ose SVG",
+      "logoTooLarge": "Logoja duhet të jetë nën 5MB"
     },
-    "becomeAgent": "Become an Agent First",
-    "upgradeToPro": "Upgrade to Pro",
-    "createAgency": "Create Agency",
-    "continueToPayment": "Continue to Payment"
+    "becomeAgent": "Bëhuni fillimisht agjent",
+    "upgradeToPro": "Kaloni në Pro",
+    "createAgency": "Krijo agjencinë",
+    "continueToPayment": "Vazhdo te pagesa",
+    "buttons": {
+      "uploadLogo": "Ngarko logon",
+      "changeLogo": "Ndrysho logon",
+      "removeLogo": "Hiq logon"
+    }
   },
   "payment": {
-    "title": "Complete Your Purchase",
-    "subtitle": "Subscribe to Enterprise plan to create your agency",
-    "backToDetails": "Back to Agency Details",
+    "title": "Përfundoni blerjen tuaj",
+    "subtitle": "Abonohuni në planin Enterprise për të krijuar agjencinë tuaj",
+    "backToDetails": "Kthehu te detajet e agjencisë",
     "steps": {
-      "details": "Agency Details",
-      "payment": "Payment",
-      "confirmation": "Confirmation"
+      "details": "Detajet e agjencisë",
+      "payment": "Pagesa",
+      "confirmation": "Konfirmimi"
     },
-    "orderSummary": "Order Summary",
-    "total": "Total",
-    "couponCode": "Have a coupon code?",
-    "enterCoupon": "Enter coupon code",
-    "apply": "Apply",
-    "invalidCoupon": "Invalid coupon code",
-    "couponError": "Failed to validate coupon",
-    "whatsIncluded": "What's Included",
-    "securePayment": "Secure Payment",
-    "teamSupport": "Team Support",
-    "unlimitedProperties": "750 Listings",
-    "fullAnalytics": "Full Analytics",
-    "payNow": "Pay",
-    "processing": "Processing...",
-    "stripeSecure": "Payments are securely processed by Stripe",
-    "error": "Failed to initiate payment. Please try again."
+    "orderSummary": "Përmbledhja e porosisë",
+    "total": "Totali",
+    "couponCode": "Keni një kod kuponi?",
+    "enterCoupon": "Vendosni kodin e kuponit",
+    "apply": "Apliko",
+    "invalidCoupon": "Kod kuponi i pavlefshëm",
+    "couponError": "Verifikimi i kuponit dështoi",
+    "whatsIncluded": "Çfarë përfshihet",
+    "securePayment": "Pagesë e sigurt",
+    "teamSupport": "Mbështetje për ekipin",
+    "unlimitedProperties": "750 shpallje",
+    "fullAnalytics": "Analitikë e plotë",
+    "payNow": "Paguaj",
+    "processing": "Duke u përpunuar...",
+    "stripeSecure": "Pagesat përpunohen në mënyrë të sigurt nga Stripe",
+    "error": "Nisja e pagesës dështoi. Ju lutemi provoni përsëri.",
+    "activateFree": "Aktivizo falas"
   },
   "coupon": {
     "title": "Aktivizo Kuponin e Agjencisë",
@@ -312,7 +339,14 @@
     "validating": "Duke validuar...",
     "processing": "Duke procesuar...",
     "activateForFree": "Aktivizo FALAS",
-    "subscribePrice": "Abonohu - €{{price}}"
+    "subscribePrice": "Abonohu - €{{price}}",
+    "duration1week": "1 javë",
+    "duration2weeks": "2 javë",
+    "duration4weeks": "4 javë",
+    "badgePopular": "POPULLOR",
+    "duration90days": "90 ditë",
+    "badgeBestValue": "VLERA MË E MIRË",
+    "haveCouponCode": "Keni një kod kuponi?"
   },
   "management": {
     "currentAgency": "Agjencia Aktuale",
@@ -426,6 +460,82 @@
         "desc": "Agjencitë e veçuara marrin 20 pikë bonus dhe shfaqen në krye të të gjitha kërkimeve.",
         "cap": "Maks 20 pikë"
       }
+    }
+  },
+  "confirm": {
+    "title": "Krijoni agjencinë tuaj",
+    "subtitle": "Abonimi juaj Enterprise është aktiv. Rishikoni detajet dhe konfirmoni.",
+    "reviewDetails": "Rishikoni detajet e agjencisë",
+    "createAgency": "Krijo agjencinë time"
+  },
+  "ui": {
+    "agencyDetailPage": {
+      "dragToRepositionCoverImage": "Tërhiqni për të rivendosur imazhin e kopertinës",
+      "savePosition": "Ruaj pozicionin",
+      "cancel": "Anulo",
+      "repositionCover": "Rivendos kopertinën",
+      "repositionLogo": "Rivendos logon",
+      "save": "Ruaj",
+      "years": "Vite",
+      "removeAdminRights": "Hiq të drejtat e administratorit",
+      "makeAdmin": "Bëje administrator",
+      "removeAgentFromAgency": "Hiq agjentin nga agjencia",
+      "leaveThisAgency": "Largohu nga kjo agjenci",
+      "tellClientsAboutYourAgency": "Tregojuni klientëve për agjencinë tuaj...",
+      "residentialCommercialLuxuryProperties": "Prona banimi, komerciale, luksoze",
+      "licensedRealEstateAgencyIso": "Agjenci e licencuar e pasurive të paluajtshme, e certifikuar ISO",
+      "englishSerbianCroatianAlbanian": "Anglisht, serbisht, kroatisht, shqip",
+      "n9am6pm": "9:00 - 18:00",
+      "youAreNotLoggedIn": "Nuk jeni i identifikuar. Ju lutemi identifikohuni dhe provoni përsëri.",
+      "unexpectedResponseFromServerPlease": "Përgjigje e papritur nga serveri. Ju lutemi provoni përsëri.",
+      "invalidCouponCodePleaseCheck": "Kod kuponi i pavlefshëm. Ju lutemi kontrolloni dhe provoni përsëri.",
+      "thisCouponHasAlreadyBeen": "Ky kupon është përdorur tashmë.",
+      "thisCouponHasExpired": "Ky kupon ka skaduar.",
+      "theAgencySubscriptionIsNo": "Abonimi i agjencisë nuk është më aktiv.",
+      "couponRedeemed": "Kuponi u përdor!",
+      "joinRequestSentSuccessfullyThe": "Kërkesa për anëtarësim u dërgua me sukses! Administratori i agjencisë do ta shqyrtojë.",
+      "agencyNameMustBeAt": "Emri i agjencisë duhet të ketë të paktën 2 karaktere",
+      "descriptionMustBeUnder5": "Përshkrimi duhet të jetë nën 5,000 karaktere",
+      "pleaseEnterAValidEmail": "Ju lutemi vendosni një adresë email të vlefshme",
+      "pleaseEnterAValidPhone": "Ju lutemi vendosni një numër telefoni të vlefshëm",
+      "uploadFailed": "Ngarkimi dështoi",
+      "failedToSavePosition": "Ruajtja e pozicionit dështoi",
+      "failedToSaveImagePosition": "Ruajtja e pozicionit të imazhit dështoi",
+      "positionSaved": "Pozicioni u ruajt",
+      "failedToGenerateCode": "Gjenerimi i kodit dështoi"
+    },
+    "agencyPaymentPage": {
+      "agencyCreated": "Agjencia u krijua!",
+      "redirectingToAgenciesPage": "Po ridrejtohet te faqja e agjencive...",
+      "phone": "Telefoni",
+      "license": "Licenca",
+      "enterprisePlanActive": "✓ Plani Enterprise aktiv",
+      "n5AgentRegistrationCodesWill": "• 5 kode regjistrimi për agjentë do t'ju dërgohen me email",
+      "monthlyListingPromotionCouponsIncluded": "• Përfshihen kupona mujorë për promovimin e shpalljeve",
+      "n7DayFeaturedAgencyTrial": "• Prova 7-ditore si agjenci e veçuar fillon menjëherë",
+      "plan": "Plani",
+      "coupon": "Kuponi ("
+    },
+    "createAgencyPage": {
+      "n900Am500": "9:00 - 17:00"
+    },
+    "agencyScoringPanel": {
+      "n0Pts": "0 pikë"
+    },
+    "agencyJoinRequestsModal": {
+      "closeJoinRequestsModal": "Mbyll dritaren e kërkesave për anëtarësim"
+    },
+    "invitationCodeModal": {
+      "keepTypingAgyXxxxxxXxxxxx": "Vazhdoni të shkruani... (AGY-XXXXXX-XXXXXX)",
+      "invalidFormatExpectedAgyXxxxxx": "Format i pavlefshëm. Pritet: AGY-XXXXXX-XXXXXX",
+      "keepTypingXxxXxxxxxxx": "Vazhdoni të shkruani... (XXX-XXXXXXXX)",
+      "invalidFormatExpectedXxxXxxxxxxx": "Format i pavlefshëm. Pritet: XXX-XXXXXXXX",
+      "proSubscriptionRequiredToUse": "Kërkohet abonimi Pro për të përdorur kodet e ftesës",
+      "formatAgyXxxxxxXxxxxx": "Formati: AGY-XXXXXX-XXXXXX",
+      "formatAbcXxxxxxxx": "Formati: ABC-XXXXXXXX"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Agjencia juaj u krijua me sukses. Tani keni një faqe të dedikuar agjencie."
     }
   }
 }

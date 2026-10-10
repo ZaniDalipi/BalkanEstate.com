@@ -150,7 +150,18 @@
     "emptyDesc": "Pokušajte prilagoditi filtere ili dodajte nove oglase.",
     "emptyTitle": "Nije pronađena nijedna nekretnina",
     "promote": "Promoviši",
-    "showing": "Prikaz {{from}}-{{to}} od {{total}}"
+    "showing": "Prikaz {{from}}-{{to}} od {{total}}",
+    "statusAll": "Svi statusi",
+    "statusActive": "Aktivni",
+    "statusSold": "Prodate",
+    "statusRented": "Izdate",
+    "statusPending": "Na čekanju",
+    "statusDraft": "Nacrt",
+    "typeAll": "Sve vrste",
+    "dateAll": "Sve vrijeme",
+    "date7": "Posljednjih 7 dana",
+    "date30": "Posljednjih 30 dana",
+    "date90": "Posljednjih 90 dana"
   },
   "leads": {
     "title": "Potencijalni klijenti i upiti",
@@ -181,7 +192,13 @@
     "emptyTitle": "Nije pronađen nijedan upit",
     "noAgents": "Nema dostupnih agenata",
     "showing": "Prikaz {{from}}-{{to}} od {{total}}",
-    "unassigned": "Nedodijeljeno"
+    "unassigned": "Nedodijeljeno",
+    "statusAll": "Svi statusi",
+    "statusInProgress": "U toku",
+    "dateAll": "Sve vrijeme",
+    "date7": "Posljednjih 7 dana",
+    "date30": "Posljednjih 30 dana",
+    "date90": "Posljednjih 90 dana"
   },
   "analytics": {
     "title": "Analitika i izvještaji",
@@ -257,5 +274,10 @@
     "postNote": "Objavi bilješku",
     "posting": "Objavljivanje...",
     "noNotes": "Još nema timskih bilješki. Budite prvi koji će objaviti!"
+  },
+  "ui": {
+    "overviewCharts": {
+      "noDataAvailable": "Nema dostupnih podataka"
+    }
   }
 }

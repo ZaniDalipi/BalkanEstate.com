@@ -3,30 +3,33 @@
     "title": "Găsiți Agenții Imobiliare de Top",
     "subtitle": "Conectați-vă cu profesioniști imobiliari de încredere din zona dumneavoastră",
     "searchPlaceholder": "Căutați agenții după nume sau locație...",
-    "badge": "Premier Real Estate Networks",
-    "titleHighlight": "Agencies in Balkans"
+    "badge": "Rețele imobiliare de top",
+    "titleHighlight": "Agenții din Balcani"
   },
   "search": {
-    "placeholder": "Căutați agenții...",
+    "placeholder": {
+      "city": "Caută după oraș sau locație...",
+      "name": "Caută după numele agenției..."
+    },
     "button": "Caută",
     "clear": "Șterge",
-    "title": "Find Your Ideal Agency",
-    "subtitle": "Search {{count}}+ professional agencies across the Balkans",
+    "title": "Găsește agenția ideală",
+    "subtitle": "Caută printre peste {{count}} agenții profesioniste din Balcani",
     "tabs": {
-      "city": "City",
-      "agencyName": "Agency Name"
+      "city": "Oraș",
+      "agencyName": "Numele agenției"
     },
-    "clearSearch": "Clear search",
-    "popularSearches": "Popular searches:"
+    "clearSearch": "Șterge căutarea",
+    "popularSearches": "Căutări populare:"
   },
   "stats": {
     "totalAgencies": "Total Agenții",
     "totalAgents": "Agenți Profesioniști",
     "propertiesListed": "Proprietăți Listate",
     "citiesCovered": "Orașe Acoperite",
-    "professionalAgencies": "Professional Agencies",
-    "expertAgents": "Expert Agents",
-    "listedProperties": "Listed Properties"
+    "professionalAgencies": "Agenții profesioniste",
+    "expertAgents": "Agenți experți",
+    "listedProperties": "Proprietăți listate"
   },
   "filters": {
     "title": "Filtre",
@@ -37,9 +40,9 @@
     "rating": "Rating",
     "anyRating": "Orice Rating",
     "reset": "Resetează Filtrele",
-    "allAgencies": "All Agencies",
-    "featured": "Featured",
-    "myAgency": "My Agency"
+    "allAgencies": "Toate agențiile",
+    "featured": "Recomandate",
+    "myAgency": "Agenția mea"
   },
   "sort": {
     "label": "Sortează după",
@@ -48,23 +51,23 @@
     "ratingDesc": "Cel Mai Mare Rating",
     "propertiesDesc": "Cele Mai Multe Proprietăți",
     "newest": "Cele Mai Noi Întâi",
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperienced": "Most Experienced",
-    "alphabetical": "Alphabetical"
+    "mostProperties": "Cele mai multe proprietăți",
+    "mostAgents": "Cei mai mulți agenți",
+    "mostExperienced": "Cele mai experimentate",
+    "alphabetical": "Alfabetic"
   },
   "results": {
     "showing": "Se afișează {{count}} agenții",
     "of": "din",
     "noResults": "Nu s-au găsit agenții",
     "tryAdjusting": "Încercați să ajustați filtrele",
-    "title": "Top Real Estate Agencies",
-    "featuredTitle": "Featured Agencies",
-    "yourAgencyTitle": "Your Agency",
-    "showingMatching": "Showing {{count}} agencies matching \"{{query}}\"",
-    "browseAgencies": "Browse professional agencies with experienced teams",
-    "agenciesFound": "agencies found",
-    "moreAgencies": "More Agencies"
+    "title": "Top agenții imobiliare",
+    "featuredTitle": "Agenții recomandate",
+    "yourAgencyTitle": "Agenția ta",
+    "showingMatching": "Se afișează {{count}} agenții care corespund cu „{{query}}”",
+    "browseAgencies": "Explorează agenții profesioniste cu echipe experimentate",
+    "agenciesFound": "agenții găsite",
+    "moreAgencies": "Mai multe agenții"
   },
   "card": {
     "properties": "proprietăți",
@@ -73,41 +76,41 @@
     "contact": "Contact",
     "featured": "Promovat",
     "verified": "Verificat",
-    "certified": "Certified",
-    "years": "Years",
-    "certs": "Certs",
-    "view": "View",
-    "more": "+{{count}} more"
+    "certified": "Certificată",
+    "years": "Ani",
+    "certs": "Cert.",
+    "view": "Vezi",
+    "more": "+{{count}} în plus"
   },
   "empty": {
     "title": "Nu S-au Găsit Agenții",
     "description": "Nu s-au găsit agenții care să corespundă criteriilor dumneavoastră",
     "resetFilters": "Resetează Filtrele",
-    "noAgenciesTitle": "No Agencies Found",
-    "noAgenciesYet": "No Agencies Yet",
-    "noMyAgency": "No Agency Found",
-    "adjustSearch": "Try adjusting your search criteria or browse all agencies.",
-    "noMyAgencyMessage": "You haven't created an agency yet. Start your journey today!",
-    "beFirst": "Be the first to create an agency and showcase your properties!"
+    "noAgenciesTitle": "Nu s-au găsit agenții",
+    "noAgenciesYet": "Încă nu există agenții",
+    "noMyAgency": "Nicio agenție găsită",
+    "adjustSearch": "Încearcă să ajustezi criteriile de căutare sau explorează toate agențiile.",
+    "noMyAgencyMessage": "Încă nu ai creat o agenție. Începe chiar azi!",
+    "beFirst": "Fii primul care creează o agenție și își prezintă proprietățile!"
   },
   "cta": {
     "title": "Sunteți Profesionist Imobiliar?",
     "description": "Alăturați-vă rețelei noastre de agenții de încredere și extindeți-vă afacerea",
     "button": "Înregistrați-vă Agenția",
-    "createAgency": "Create Agency",
-    "readyToGrow": "Ready to Grow Your Agency?",
-    "ctaDescription": "Join our network of premier real estate agencies and get featured to thousands of potential clients. Showcase your properties, connect with buyers, and expand your reach.",
-    "createToday": "Create Your Agency Today"
+    "createAgency": "Creează agenție",
+    "readyToGrow": "Ești gata să-ți dezvolți agenția?",
+    "ctaDescription": "Alătură-te rețelei noastre de agenții imobiliare de top și fii promovat către mii de clienți potențiali. Prezintă-ți proprietățile, conectează-te cu cumpărători și extinde-ți acoperirea.",
+    "createToday": "Creează-ți agenția astăzi"
   },
   "loading": {
     "text": "Se încarcă agențiile...",
-    "title": "Finding Agencies...",
-    "message": "Searching through our network of professional real estate agencies"
+    "title": "Se caută agenții...",
+    "message": "Căutăm în rețeaua noastră de agenții imobiliare profesioniste"
   },
   "error": {
     "title": "Eroare la Încărcarea Agențiilor",
     "retry": "Încearcă Din Nou",
-    "unableToLoad": "Unable to Load Agencies"
+    "unableToLoad": "Agențiile nu au putut fi încărcate"
   },
   "featured": {
     "title": "Agenții Promovate",
@@ -156,119 +159,146 @@
       "renewStatus": "🔄 Reînnoiește Statutul Evidențiat",
       "continueVisibility": "Continuați să vă bucurați de vizibilitate îmbunătățită.",
       "renewNow": "Reînnoiește Acum",
-      "proTip": "💡 Sfat Pro: Agențiile evidențiate primesc de până la 5x mai multă vizibilitate!"
+      "proTip": "💡 Sfat Pro: Agențiile evidențiate primesc de până la 5x mai multă vizibilitate!",
+      "featuredInDirectory": "Recomandată în directorul de agenții",
+      "priorityInSearch": "Prioritate în rezultatele căutării",
+      "homepageCarousel": "Caruselul de agenții pe pagina principală",
+      "featuredBadge": "Insignă de recomandat pe profil",
+      "boostedVisibility": "Vizibilitate sporită peste tot"
     }
   },
   "statsCards": {
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperience": "Most Experience"
+    "mostProperties": "Cele mai multe proprietăți",
+    "mostAgents": "Cei mai mulți agenți",
+    "mostExperience": "Cea mai mare experiență"
   },
   "create": {
-    "title": "Create Your Agency",
-    "subtitle": "Set up your agency profile to showcase your team and properties",
-    "backToAccount": "Back to Account",
-    "enterpriseActive": "Enterprise Subscription Active",
+    "title": "Creează-ți agenția",
+    "subtitle": "Configurează profilul agenției pentru a-ți prezenta echipa și proprietățile",
+    "backToAccount": "Înapoi la cont",
+    "enterpriseActive": "Abonamentul Enterprise este activ",
     "steps": {
-      "basic": "Basic Info",
-      "location": "Location",
+      "basic": "Informații de bază",
+      "location": "Locație",
       "contact": "Contact",
-      "details": "Details"
+      "details": "Detalii"
     },
     "sections": {
-      "basicInfo": "Basic Information",
-      "location": "Location",
-      "contact": "Contact Information",
-      "professional": "Professional Details",
-      "businessHours": "Business Hours"
+      "basicInfo": "Informații de bază",
+      "location": "Locație",
+      "contact": "Informații de contact",
+      "professional": "Detalii profesionale",
+      "businessHours": "Program de lucru"
     },
     "fields": {
-      "agencyName": "Agency Name",
-      "description": "Description",
-      "country": "Country",
-      "city": "City",
-      "address": "Street Address",
+      "agencyName": "Numele agenției",
+      "description": "Descriere",
+      "country": "Țara",
+      "city": "Orașul",
+      "address": "Adresa",
       "email": "Email",
-      "phone": "Phone Number",
-      "website": "Website URL",
-      "license": "Agent License Number",
-      "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken"
+      "phone": "Număr de telefon",
+      "website": "URL site web",
+      "license": "Numărul licenței de agent",
+      "yearsInBusiness": "Ani de activitate",
+      "languages": "Limbi vorbite",
+      "logo": "Logoul agenției",
+      "logoPreview": "Previzualizare logo",
+      "registrationNumber": "Număr de înregistrare / CUI",
+      "agencyType": "Tipul agenției",
+      "specializations": "Specializări",
+      "serviceAreas": "Zone deservite / regiuni",
+      "zipCode": "Cod poștal"
     },
     "placeholders": {
-      "agencyName": "e.g., Premier Real Estate Agency",
-      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-      "selectCountry": "Select a country",
-      "selectCity": "Select a city",
-      "selectCountryFirst": "Select country first",
-      "address": "e.g., 123 Main Street, Building A",
-      "email": "contact@agency.com",
+      "agencyName": "ex., Agenția Imobiliară Premier",
+      "description": "Spune-le clienților potențiali despre agenția ta, expertiza ta și ce te face unic...",
+      "selectCountry": "Selectează o țară",
+      "selectCity": "Selectează un oraș",
+      "selectCountryFirst": "Selectează mai întâi țara",
+      "address": "ex., Strada Principală 123, Clădirea A",
+      "email": "contact@agentie.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456"
+      "license": "ex., RE-123456",
+      "registrationNumber": "ex., CUI RO12345678",
+      "serviceAreas": "ex., București, Cluj-Napoca, Iași (separate prin virgulă)"
     },
     "hints": {
-      "agencyName": "Choose a professional name that represents your brand",
-      "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location"
+      "agencyName": "Alege un nume profesionist care îți reprezintă brandul",
+      "description": "O descriere convingătoare îi ajută pe clienți să-ți înțeleagă valoarea",
+      "address": "Opțional: adresa completă a biroului",
+      "logo": "JPEG, PNG, WebP sau SVG. Max. 5MB.",
+      "registrationNumber": "Numărul oficial de înregistrare sau de identificare fiscală",
+      "specializations": "Selectează toate domeniile în care este specializată agenția",
+      "serviceAreas": "Enumeră orașele sau regiunile în care activează agenția",
+      "agencyType": "Selectează tipul care descrie cel mai bine agenția"
     },
     "days": {
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+      "monday": "Luni",
+      "tuesday": "Marți",
+      "wednesday": "Miercuri",
+      "thursday": "Joi",
+      "friday": "Vineri",
+      "saturday": "Sâmbătă",
+      "sunday": "Duminică"
     },
     "benefits": {
-      "title": "What You'll Get",
-      "dedicatedPage": "Dedicated agency page on platform",
-      "displayAgents": "Display all agents & properties",
-      "featured": "Featured in homepage ads",
-      "contactInfo": "Full contact info displayed",
-      "invitationCode": "Unique invitation code for agents",
-      "support": "Priority customer support"
+      "title": "Ce vei primi",
+      "dedicatedPage": "Pagină dedicată agenției pe platformă",
+      "displayAgents": "Afișează toți agenții și proprietățile",
+      "featured": "Promovare în reclamele de pe pagina principală",
+      "contactInfo": "Informații de contact complete afișate",
+      "invitationCode": "Cod unic de invitație pentru agenți",
+      "support": "Asistență prioritară pentru clienți"
     },
     "warnings": {
-      "agentRequired": "Agent Status Required",
-      "proRequired": "Pro Subscription Required"
+      "agentRequired": "Este necesar statutul de agent",
+      "proRequired": "Este necesar abonamentul Pro"
     },
     "errors": {
-      "nameRequired": "Agency name is required",
-      "locationRequired": "City and country are required",
-      "emailRequired": "Email is required"
+      "nameRequired": "Numele agenției este obligatoriu",
+      "locationRequired": "Orașul și țara sunt obligatorii",
+      "emailRequired": "Emailul este obligatoriu",
+      "logoInvalidType": "Te rugăm să încarci o imagine JPEG, PNG, WebP sau SVG",
+      "logoTooLarge": "Logoul trebuie să aibă sub 5MB"
     },
-    "becomeAgent": "Become an Agent First",
-    "upgradeToPro": "Upgrade to Pro",
-    "createAgency": "Create Agency",
-    "continueToPayment": "Continue to Payment"
+    "becomeAgent": "Devino mai întâi agent",
+    "upgradeToPro": "Treci la Pro",
+    "createAgency": "Creează agenția",
+    "continueToPayment": "Continuă la plată",
+    "buttons": {
+      "uploadLogo": "Încarcă logo",
+      "changeLogo": "Schimbă logo",
+      "removeLogo": "Elimină logo"
+    }
   },
   "payment": {
-    "title": "Complete Your Purchase",
-    "subtitle": "Subscribe to Enterprise plan to create your agency",
-    "backToDetails": "Back to Agency Details",
+    "title": "Finalizează achiziția",
+    "subtitle": "Abonează-te la planul Enterprise pentru a-ți crea agenția",
+    "backToDetails": "Înapoi la detaliile agenției",
     "steps": {
-      "details": "Agency Details",
-      "payment": "Payment",
-      "confirmation": "Confirmation"
+      "details": "Detaliile agenției",
+      "payment": "Plată",
+      "confirmation": "Confirmare"
     },
-    "orderSummary": "Order Summary",
+    "orderSummary": "Rezumatul comenzii",
     "total": "Total",
-    "couponCode": "Have a coupon code?",
-    "enterCoupon": "Enter coupon code",
-    "apply": "Apply",
-    "invalidCoupon": "Invalid coupon code",
-    "couponError": "Failed to validate coupon",
-    "whatsIncluded": "What's Included",
-    "securePayment": "Secure Payment",
-    "teamSupport": "Team Support",
-    "unlimitedProperties": "750 Listings",
-    "fullAnalytics": "Full Analytics",
-    "payNow": "Pay",
-    "processing": "Processing...",
-    "stripeSecure": "Payments are securely processed by Stripe",
-    "error": "Failed to initiate payment. Please try again."
+    "couponCode": "Ai un cod de cupon?",
+    "enterCoupon": "Introdu codul cuponului",
+    "apply": "Aplică",
+    "invalidCoupon": "Cod de cupon invalid",
+    "couponError": "Validarea cuponului a eșuat",
+    "whatsIncluded": "Ce este inclus",
+    "securePayment": "Plată securizată",
+    "teamSupport": "Suport pentru echipă",
+    "unlimitedProperties": "750 de anunțuri",
+    "fullAnalytics": "Analiză completă",
+    "payNow": "Plătește",
+    "processing": "Se procesează...",
+    "stripeSecure": "Plățile sunt procesate în siguranță de Stripe",
+    "error": "Inițierea plății a eșuat. Te rugăm să încerci din nou.",
+    "activateFree": "Activează gratuit"
   },
   "coupon": {
     "title": "Utilizează Cuponul Agenției",
@@ -345,7 +375,14 @@
     "validating": "Validare...",
     "processing": "Procesare...",
     "activateForFree": "Activează GRATUIT",
-    "subscribePrice": "Abonează-te - €{{price}}"
+    "subscribePrice": "Abonează-te - €{{price}}",
+    "duration1week": "1 săptămână",
+    "duration2weeks": "2 săptămâni",
+    "duration4weeks": "4 săptămâni",
+    "badgePopular": "POPULAR",
+    "duration90days": "90 de zile",
+    "badgeBestValue": "CEL MAI AVANTAJOS",
+    "haveCouponCode": "Ai un cod de cupon?"
   },
   "management": {
     "currentAgency": "Agenția Curentă",
@@ -459,6 +496,82 @@
         "desc": "Agențiile Featured primesc 20 puncte bonus și apar în fruntea tuturor căutărilor.",
         "cap": "Max 20 puncte"
       }
+    }
+  },
+  "confirm": {
+    "title": "Creează-ți agenția",
+    "subtitle": "Abonamentul tău Enterprise este activ. Verifică detaliile și confirmă.",
+    "reviewDetails": "Verifică detaliile agenției",
+    "createAgency": "Creează-mi agenția"
+  },
+  "ui": {
+    "agencyDetailPage": {
+      "dragToRepositionCoverImage": "Trage pentru a repoziționa imaginea de copertă",
+      "savePosition": "Salvează poziția",
+      "cancel": "Anulează",
+      "repositionCover": "Repoziționează coperta",
+      "repositionLogo": "Repoziționează logoul",
+      "save": "Salvează",
+      "years": "Ani",
+      "removeAdminRights": "Elimină drepturile de administrator",
+      "makeAdmin": "Fă administrator",
+      "removeAgentFromAgency": "Elimină agentul din agenție",
+      "leaveThisAgency": "Părăsește această agenție",
+      "tellClientsAboutYourAgency": "Spune-le clienților despre agenția ta...",
+      "residentialCommercialLuxuryProperties": "Proprietăți rezidențiale, comerciale, de lux",
+      "licensedRealEstateAgencyIso": "Agenție imobiliară licențiată, certificată ISO",
+      "englishSerbianCroatianAlbanian": "Engleză, sârbă, croată, albaneză",
+      "n9am6pm": "9:00 - 18:00",
+      "youAreNotLoggedIn": "Nu ești autentificat. Te rugăm să te autentifici și să încerci din nou.",
+      "unexpectedResponseFromServerPlease": "Răspuns neașteptat de la server. Te rugăm să încerci din nou.",
+      "invalidCouponCodePleaseCheck": "Cod de cupon invalid. Verifică și încearcă din nou.",
+      "thisCouponHasAlreadyBeen": "Acest cupon a fost deja folosit.",
+      "thisCouponHasExpired": "Acest cupon a expirat.",
+      "theAgencySubscriptionIsNo": "Abonamentul agenției nu mai este activ.",
+      "couponRedeemed": "Cupon folosit!",
+      "joinRequestSentSuccessfullyThe": "Cererea de aderare a fost trimisă cu succes! Administratorul agenției o va analiza.",
+      "agencyNameMustBeAt": "Numele agenției trebuie să aibă cel puțin 2 caractere",
+      "descriptionMustBeUnder5": "Descrierea trebuie să aibă sub 5.000 de caractere",
+      "pleaseEnterAValidEmail": "Te rugăm să introduci o adresă de email validă",
+      "pleaseEnterAValidPhone": "Te rugăm să introduci un număr de telefon valid",
+      "uploadFailed": "Încărcarea a eșuat",
+      "failedToSavePosition": "Salvarea poziției a eșuat",
+      "failedToSaveImagePosition": "Salvarea poziției imaginii a eșuat",
+      "positionSaved": "Poziția a fost salvată",
+      "failedToGenerateCode": "Generarea codului a eșuat"
+    },
+    "agencyPaymentPage": {
+      "agencyCreated": "Agenția a fost creată!",
+      "redirectingToAgenciesPage": "Redirecționare către pagina agențiilor...",
+      "phone": "Telefon",
+      "license": "Licență",
+      "enterprisePlanActive": "✓ Planul Enterprise este activ",
+      "n5AgentRegistrationCodesWill": "• 5 coduri de înregistrare pentru agenți îți vor fi trimise pe email",
+      "monthlyListingPromotionCouponsIncluded": "• Cupoane lunare de promovare a anunțurilor incluse",
+      "n7DayFeaturedAgencyTrial": "• Perioada de probă de 7 zile ca agenție recomandată începe imediat",
+      "plan": "Plan",
+      "coupon": "Cupon ("
+    },
+    "createAgencyPage": {
+      "n900Am500": "9:00 - 17:00"
+    },
+    "agencyScoringPanel": {
+      "n0Pts": "0 puncte"
+    },
+    "agencyJoinRequestsModal": {
+      "closeJoinRequestsModal": "Închide fereastra cererilor de aderare"
+    },
+    "invitationCodeModal": {
+      "keepTypingAgyXxxxxxXxxxxx": "Continuă să tastezi... (AGY-XXXXXX-XXXXXX)",
+      "invalidFormatExpectedAgyXxxxxx": "Format invalid. Format așteptat: AGY-XXXXXX-XXXXXX",
+      "keepTypingXxxXxxxxxxx": "Continuă să tastezi... (XXX-XXXXXXXX)",
+      "invalidFormatExpectedXxxXxxxxxxx": "Format invalid. Format așteptat: XXX-XXXXXXXX",
+      "proSubscriptionRequiredToUse": "Este necesar abonamentul Pro pentru a folosi coduri de invitație",
+      "formatAgyXxxxxxXxxxxx": "Format: AGY-XXXXXX-XXXXXX",
+      "formatAbcXxxxxxxx": "Format: ABC-XXXXXXXX"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Agenția ta a fost creată cu succes. Acum ai o pagină dedicată agenției."
     }
   }
 }

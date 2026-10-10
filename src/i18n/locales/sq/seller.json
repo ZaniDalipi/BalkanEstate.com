@@ -33,6 +33,10 @@
       "buyer": "Blerës",
       "free": "Falas",
       "proRequired": "Kërkohet Pro"
+    },
+    "becomeAgent": {
+      "title": "Dëshironi të publikoni si agjent?",
+      "description": "Mund të regjistroheni si agjent i pasurive të paluajtshme nga Cilësimet e profilit për të zhbllokuar veçoritë e agjentit dhe kufij më të lartë shpalljesh."
     }
   },
   "createListing": {
@@ -53,7 +57,12 @@
     "progress": {
       "compressing": "Duke kompresuar imazhet...",
       "uploading": "Duke ngarkuar në cloud...",
-      "creating": "Duke krijuar listimin..."
+      "creating": "Duke krijuar listimin...",
+      "compressingHint": "Po optimizojmë fotot tuaja për cilësinë më të mirë...",
+      "uploadingHint": "Po ngarkojmë fotot tuaja në mënyrë të sigurt...",
+      "creatingHint": "Pothuajse gati! Po ruajmë shpalljen tuaj...",
+      "analyzing": "Po analizojmë fotot tuaja...",
+      "analyzingHint": "AI jonë po identifikon dhomat, veçoritë dhe detajet nga fotot tuaja. Kjo mund të zgjasë pak."
     },
     "nextStep": "Hapi Tjetër",
     "previousStep": "Hapi i Mëparshëm",
@@ -146,7 +155,12 @@
       "netArea": "Sipërfaqja neto (m²)",
       "parkingType": "Lloji i parkimit",
       "parkingSpaces": "Vende",
-      "officeRooms": "Zyra"
+      "officeRooms": "Zyra",
+      "kitchens": "Kuzhina",
+      "diningRooms": "Dhoma ngrënieje",
+      "toilets": "Tualete (WC)",
+      "storageRooms": "Depo",
+      "offices": "Zyrë / studio"
     },
     "propertyFeatures": {
       "title": "Veçoritë e Pronës",
@@ -164,7 +178,8 @@
       "parkingFeatures": "Karakteristikat e parkimit",
       "fencedSecured": "I rrethuar / i siguruar",
       "hasVegetation": "Me bimësi / pemë",
-      "hasWaterSource": "Me burim uji"
+      "hasWaterSource": "Me burim uji",
+      "landFeatures": "Karakteristikat e tokës"
     },
     "advancedDetails": {
       "title": "Detaje të Avancuara të Pronës",
@@ -263,7 +278,7 @@
       "label": "URL e Turit 360°",
       "placeholder": "https://my.matterport.com/show/?m=... ose https://kuula.co/share/...",
       "hint": "Ngjisni URL-në e embed ose share nga ofruesi juaj i turit 360. Turi do të shfaqet si një iframe interaktive në listimin tuaj.",
-      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
+      "z360Hint": "Krijoni turin tuaj në z360-virtual-tour.vercel.app dhe ngjitni lidhjen këtu"
     },
     "video": {
       "title": "Video e Pronës (Opsionale)",
@@ -323,7 +338,12 @@
       "title": "Disponibiliteti i Vizitave",
       "enable": "Aktivizo planifikimin",
       "description": "Lejoji vizitorët të planifikojnë vizita online. Përcaktoni ditët dhe orët tuaja të disponueshme.",
-      "availableDays": "Ditët e Disponueshme"
+      "availableDays": "Ditët e Disponueshme",
+      "startTime": "Ora e fillimit",
+      "endTime": "Ora e mbarimit",
+      "slotDuration": "Kohëzgjatja e terminit",
+      "notes": "Shënime për vizitorët",
+      "notesPlaceholder": "p.sh., Bini ziles te porta, ka parkim..."
     },
     "imageTags": {
       "exterior": "Jashtë",
@@ -335,10 +355,10 @@
       "selectTag": "Zgjidh Etiketën"
     },
     "luxuryVillaBanner": {
-      "title": "Luxury Villas Collection",
-      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+      "title": "Koleksioni i vilave luksoze",
+      "hint": "Kjo shpallje do të shfaqet në skedën ekskluzive Vilat luksoze — e dukshme për blerësit premium që kërkojnë strehime të nivelit të lartë në Ballkan."
     },
-    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "luxuryVillaBadge": "Shfaqet te Vilat luksoze",
     "quickAmenities": {
       "label": "Komoditete të njohura",
       "sauna": "Sauna",
@@ -384,6 +404,32 @@
       "limitTitle": "U arrit kufiri i planimetrive",
       "limit": "Një shpallje mund të ketë deri në {{max}} planimetri.",
       "switch": "Katet"
+    },
+    "dailyRental": {
+      "title": "Detajet e qirasë ditore",
+      "checkIn": "Ora e hyrjes",
+      "checkOut": "Ora e largimit",
+      "cleaningFee": "Tarifa e pastrimit (€)",
+      "cancellationPolicy": "Politika e anulimit",
+      "selectPolicy": "Zgjidhni…",
+      "flexible": "Fleksibël",
+      "moderate": "Mesatare",
+      "strict": "E rreptë",
+      "nonRefundable": "Pa rimbursim",
+      "included": "Përfshirë në çmim",
+      "breakfast": "🍳 Mëngjes",
+      "towels": "🛁 Peshqirë dhe çarçafë",
+      "parking": "🚗 Parkim"
+    },
+    "preview": {
+      "banner": "Modaliteti i pamjes paraprake",
+      "bannerHint": "Rishikoni shpalljen para publikimit",
+      "editListing": "Redakto shpalljen",
+      "satisfied": "Jeni i kënaqur me shpalljen?",
+      "goBackEdit": "Kthehu dhe redakto"
+    },
+    "ai": {
+      "locationHint": "Shtimi i vendndodhjes ndihmon AI të krijojë përshkrime më të sakta dhe specifike për zonën"
     }
   },
   "propertyTypes": {
@@ -487,13 +533,17 @@
     "buyerCannotCreateListing": "Blerësit nuk mund të krijojnë listime pronash. Ju lutem kaloni në rolin Shitës Privat ose Agjent.",
     "monthlyLimitReached": "Limiti Mujor i Listimeve u Arrit",
     "monthlyLimitMessage": "Keni përdorur të gjitha listimet tuaja këtë muaj. Rivendoset në fillim të muajit të ardhshëm.",
-    "monthlyLimitMessageWithCount": "Keni përdorur {{used}} nga {{limit}} listime këtë muaj. Rivendoset në fillim të muajit të ardhshëm."
+    "monthlyLimitMessageWithCount": "Keni përdorur {{used}} nga {{limit}} listime këtë muaj. Rivendoset në fillim të muajit të ardhshëm.",
+    "phoneRequired": "Kërkohet numri i telefonit",
+    "phoneRequiredMessage": "Ju lutemi shtoni një numër celulari te Cilësimet e profilit para se të krijoni një shpallje."
   },
   "actions": {
     "subscribeToPro": "Abonohu në Pro",
     "viewMyListings": "Shiko Listimet e Mia",
     "switchRole": "Ndërro Rolin",
-    "requestMoreListings": "Kërkoni Më Shumë Listime"
+    "requestMoreListings": "Kërkoni Më Shumë Listime",
+    "playForDiscount": "Luaj për zbritje",
+    "saveDraft": "Ruaj si draft"
   },
   "myListings": {
     "title": "Listimet e Mia",
@@ -693,7 +743,7 @@
       "exterior": "Përfshini foto të jashtme",
       "clearPhotos": "Përdorni foto të qarta me cilësi të lartë"
     },
-    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
+    "locationHint": "Shtimi i vendndodhjes ndihmon AI të krijojë përshkrime më të sakta dhe specifike për zonën"
   },
   "promotion": {
     "title": "Promovo Listimin Tënd",
@@ -756,8 +806,8 @@
     "m": "m"
   },
   "listings": {
-    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
-    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
+    "confirmSold": "Jeni i sigurt që doni ta shënoni këtë pronë si të shitur? Ky veprim nuk mund të zhbëhet.",
+    "confirmDelete": "Jeni i sigurt që doni ta fshini këtë shpallje? Ky veprim nuk mund të zhbëhet."
   },
   "promotionHistory": {
     "title": "Historia e Promovimit",
@@ -801,7 +851,13 @@
     "expiringIn_other": "Skadon për {{count}} ditë!",
     "extendNow": "Zgjat Tani",
     "autoExtendReady": "Zgjatja automatike gati! Kryejeni pagesën për të zgjatur.",
-    "completePayment": "Kryej Pagesën"
+    "completePayment": "Kryej Pagesën",
+    "tiers": {
+      "premium": "Premium Premiere",
+      "highlight": "Theksim",
+      "featured": "E veçuar",
+      "standard": "Standard"
+    }
   },
   "parkingTypes": {
     "garage": "Garazh",
@@ -817,6 +873,158 @@
     "unfinishedRental": "Njoftim qiraje i papërfunduar",
     "keptUntil": "Ruajtur si draft në këtë pajisje deri më {{date}}.",
     "continue": "Vazhdo",
-    "discard": "Hidhe"
+    "discard": "Hidhe",
+    "savedTitle": "Drafti u ruajt",
+    "savedMessage": "Shpallja juaj u ruajt. Mund ta vazhdoni redaktimin më vonë nga llogaria juaj."
+  },
+  "ui": {
+    "videoGenerator": {
+      "videoGenerator": "Gjeneruesi i videove",
+      "createAStunningVideoReel": "Krijoni një video reel mbresëlënëse nga fotot e pronës",
+      "noImagesAvailable": "Nuk ka foto të disponueshme",
+      "uploadPropertyImagesFirstTo": "Ngarkoni fillimisht fotot e pronës për të krijuar një video prezantuese.",
+      "creatingYourVideo": "Po krijohet videoja juaj...",
+      "thisCanTakeAMinute": "Kjo mund të zgjasë një minutë. Ju lutemi mos e mbyllni këtë dritare.",
+      "yourVideoIsReady": "Videoja juaj është gati!",
+      "sVideoDownloadItPost": "video — shkarkojeni, publikojeni dhe pastaj shtoni lidhjen në shpalljen tuaj.",
+      "downloadVideo": "Shkarko videon",
+      "createAnother": "Krijo një tjetër",
+      "failedToGenerateVideoPlease": "Gjenerimi i videos dështoi. Ju lutemi provoni përsëri.",
+      "tryAgain": "Provo përsëri",
+      "videoFormat": "Formati i videos",
+      "videoQuality": "Cilësia e videos",
+      "backgroundStyle": "Stili i sfondit",
+      "durationPerImage": "Kohëzgjatja për foto:",
+      "n2sQuick": "2s (e shpejtë)",
+      "n10sSlow": "10s (e ngadaltë)",
+      "backgroundMusic": "Muzikë sfondi",
+      "includeBalkanestateaiWatermark": "Përfshi vulën BalkanEstateAI",
+      "addsBrandingToYourVideo": "Shton markën në videon tuaj për ndarje në rrjete sociale",
+      "videoPreview": "Pamje paraprake e videos",
+      "images": "Foto",
+      "duration": "Kohëzgjatja",
+      "size": "Madhësia",
+      "generateVideo": "Gjenero videon",
+      "videoGenerationMayTake1": "Gjenerimi i videos mund të zgjasë 1-3 minuta në varësi të numrit të fotove.",
+      "postItThenAddThe": "Publikojeni, pastaj shtoni lidhjen në shpalljen tuaj",
+      "uploadTheDownloadedFileTo": "Ngarkoni skedarin e shkarkuar në një nga këto, kopjoni lidhjen e postimit dhe ngjiteni në fushën e videos së shpalljes.",
+      "shareToInstagram": "Ndaj në Instagram",
+      "shareToTiktok": "Ndaj në TikTok",
+      "shareToYoutube": "Ndaj në YouTube",
+      "shareToFacebook": "Ndaj në Facebook",
+      "format": {
+        "vertical": {
+          "label": "Reels (9:16)",
+          "description": "Instagram Reels dhe TikTok"
+        },
+        "horizontal": {
+          "label": "Horizontal (16:9)",
+          "description": "YouTube dhe faqe interneti"
+        },
+        "square": {
+          "label": "Katror (1:1)",
+          "description": "Feed-i i Instagram"
+        }
+      },
+      "music": {
+        "elegant": {
+          "label": "Piano elegante",
+          "description": "E përsosur për prona luksoze"
+        },
+        "upbeat": {
+          "label": "Korporative energjike",
+          "description": "E shkëlqyer për shtëpi moderne"
+        },
+        "calm": {
+          "label": "Ambient i qetë",
+          "description": "Ideale për prona në fshat"
+        },
+        "modern": {
+          "label": "Elektronike moderne",
+          "description": "I përshtatet apartamenteve urbane"
+        }
+      },
+      "quality": {
+        "mobile": {
+          "label": "Celular (720p)",
+          "description": "Skedar më i vogël, ngarkim më i shpejtë"
+        },
+        "standard": {
+          "label": "Standard (1080p)",
+          "description": "Cilësi e plotë, skedar më i madh"
+        }
+      },
+      "background": {
+        "elegant": {
+          "label": "E errët elegante",
+          "description": "E errët premium me thekse të arta"
+        },
+        "gradient": {
+          "label": "Gradient",
+          "description": "Gradient vjollcë-blu (stil Canva)"
+        },
+        "dark": {
+          "label": "Plotësisht e errët",
+          "description": "Sfond i errët i pastër"
+        },
+        "blur": {
+          "label": "Efekt turbullimi",
+          "description": "Efekt sfondi i turbullt"
+        }
+      }
+    },
+    "geminiDescriptionGenerator": {
+      "n15Min": "15 min",
+      "n30Min": "30 min",
+      "n45Min": "45 min",
+      "n60Min": "60 min"
+    },
+    "marketInsightsAnimation": {
+      "analyzingYourProperty": "Po analizojmë pronën tuaj...",
+      "whileOurAiWorksLearn": "Ndërsa AI jonë punon, mësoni rreth tregut",
+      "realEstateMarket": "të pasurive të paluajtshme",
+      "avgPriceM": "Çmimi mesatar/m²",
+      "daysToSell": "Ditë deri në shitje",
+      "yoyGrowth": "Rritja vjetore",
+      "liveMarketDataPoweredBy": "📊 Të dhëna tregu në kohë reale me AI • Përditësuar",
+      "marketTrends": "Tendencat e tregut",
+      "timeOnMarket": "Koha në treg",
+      "proTip": "Këshillë profesionale",
+      "successRate": "Shkalla e suksesit",
+      "bestPractice": "Praktika më e mirë",
+      "yearOverYear": "Vit pas viti",
+      "pricingStrategy": "Strategjia e çmimit"
+    },
+    "roleSelector": {
+      "promotionCoupons": "Kupona promovimi",
+      "featured": "⭐ E veçuar:",
+      "daysEach": "ditë secili",
+      "highlighted": "🔥 E theksuar:",
+      "usedThisMonth": "Përdorur këtë muaj:"
+    },
+    "whackAnIconAnimation": {
+      "gameOver": "Loja mbaroi!",
+      "yourScore": "Rezultati juaj:",
+      "calculatingYourReward": "Po llogaritet shpërblimi juaj...",
+      "time": "Koha:",
+      "score": "Rezultati:",
+      "whackAnIcon": "Godit ikonën!",
+      "analyzingProperty": "Po analizohet prona...",
+      "ourAiIsHardAt": "AI jonë po punon fort. Mund të luani një lojë ndërsa prisni!"
+    },
+    "onboarding": {
+      "trustedByLeadingAgenciesAcross": "Besuar nga agjencitë kryesore në të gjithë Ballkanin",
+      "n11Countries50CitiesAi": "11 vende • 50+ qytete • kërkim me AI • mijëra prona"
+    },
+    "aiAnalyzingAnimation": {
+      "claimYourDiscount": "Merrni zbritjen tuaj!",
+      "analyzingProperty": "Po analizohet prona...",
+      "clickTheButtonToReveal": "Klikoni butonin për të zbuluar zbritjen tuaj speciale të njëhershme për publikimin e pronës.",
+      "ourAiIsHardAt": "AI jonë po punon fort. Mund të luani me ikonat ndërsa prisni!",
+      "revealMyDiscount": "Zbulo zbritjen time!"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Agjencia juaj u krijua me sukses. Tani keni një faqe të dedikuar agjencie."
+    }
   }
 }

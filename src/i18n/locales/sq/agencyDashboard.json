@@ -150,7 +150,18 @@
     "emptyDesc": "Provoni të rregulloni filtrat ose shtoni listime të reja.",
     "emptyTitle": "Nuk u gjet asnjë pronë",
     "promote": "Promovo",
-    "showing": "Duke shfaqur {{from}}-{{to}} nga {{total}}"
+    "showing": "Duke shfaqur {{from}}-{{to}} nga {{total}}",
+    "statusAll": "Të gjitha statuset",
+    "statusActive": "Aktive",
+    "statusSold": "Të shitura",
+    "statusRented": "Me qira",
+    "statusPending": "Në pritje",
+    "statusDraft": "Draft",
+    "typeAll": "Të gjitha llojet",
+    "dateAll": "Gjithë kohës",
+    "date7": "7 ditët e fundit",
+    "date30": "30 ditët e fundit",
+    "date90": "90 ditët e fundit"
   },
   "leads": {
     "title": "Klientët & Kërkesat",
@@ -181,7 +192,13 @@
     "emptyTitle": "Nuk u gjet asnjë kërkesë",
     "noAgents": "Nuk ka agjentë në dispozicion",
     "showing": "Duke shfaqur {{from}}-{{to}} nga {{total}}",
-    "unassigned": "Pa caktuar"
+    "unassigned": "Pa caktuar",
+    "statusAll": "Të gjitha statuset",
+    "statusInProgress": "Në proces",
+    "dateAll": "Gjithë kohës",
+    "date7": "7 ditët e fundit",
+    "date30": "30 ditët e fundit",
+    "date90": "90 ditët e fundit"
   },
   "analytics": {
     "title": "Analitika & Raportet",
@@ -257,5 +274,10 @@
     "postNote": "Posto Shënimin",
     "posting": "Duke postuar...",
     "noNotes": "Ende pa shënime ekipi. Bëhu i pari që poston!"
+  },
+  "ui": {
+    "overviewCharts": {
+      "noDataAvailable": "Nuk ka të dhëna"
+    }
   }
 }

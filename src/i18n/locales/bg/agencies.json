@@ -3,30 +3,33 @@
     "title": "Намерете Топ Агенции за Недвижими Имоти",
     "subtitle": "Свържете се с доверени професионалисти по недвижими имоти във вашия район",
     "searchPlaceholder": "Търсене на агенции по име или локация...",
-    "badge": "Premier Real Estate Networks",
-    "titleHighlight": "Agencies in Balkans"
+    "badge": "Водещи мрежи за недвижими имоти",
+    "titleHighlight": "Агенции на Балканите"
   },
   "search": {
-    "placeholder": "Търсене на агенции...",
+    "placeholder": {
+      "city": "Търсене по град или местоположение...",
+      "name": "Търсене по име на агенция..."
+    },
     "button": "Търси",
     "clear": "Изчисти",
-    "title": "Find Your Ideal Agency",
-    "subtitle": "Search {{count}}+ professional agencies across the Balkans",
+    "title": "Намерете идеалната агенция",
+    "subtitle": "Търсете сред {{count}}+ професионални агенции на Балканите",
     "tabs": {
-      "city": "City",
-      "agencyName": "Agency Name"
+      "city": "Град",
+      "agencyName": "Име на агенцията"
     },
-    "clearSearch": "Clear search",
-    "popularSearches": "Popular searches:"
+    "clearSearch": "Изчисти търсенето",
+    "popularSearches": "Популярни търсения:"
   },
   "stats": {
     "totalAgencies": "Общо Агенции",
     "totalAgents": "Професионални Агенти",
     "propertiesListed": "Обявени Имоти",
     "citiesCovered": "Покрити Градове",
-    "professionalAgencies": "Professional Agencies",
-    "expertAgents": "Expert Agents",
-    "listedProperties": "Listed Properties"
+    "professionalAgencies": "Професионални агенции",
+    "expertAgents": "Експертни агенти",
+    "listedProperties": "Обявени имоти"
   },
   "filters": {
     "title": "Филтри",
@@ -37,9 +40,9 @@
     "rating": "Рейтинг",
     "anyRating": "Всякакъв Рейтинг",
     "reset": "Нулирай Филтрите",
-    "allAgencies": "All Agencies",
-    "featured": "Featured",
-    "myAgency": "My Agency"
+    "allAgencies": "Всички агенции",
+    "featured": "Препоръчани",
+    "myAgency": "Моята агенция"
   },
   "sort": {
     "label": "Сортирай по",
@@ -48,23 +51,23 @@
     "ratingDesc": "Най-висок Рейтинг",
     "propertiesDesc": "Най-много Имоти",
     "newest": "Най-нови Първо",
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperienced": "Most Experienced",
-    "alphabetical": "Alphabetical"
+    "mostProperties": "Най-много имоти",
+    "mostAgents": "Най-много агенти",
+    "mostExperienced": "Най-опитни",
+    "alphabetical": "По азбучен ред"
   },
   "results": {
     "showing": "Показване на {{count}} агенции",
     "of": "от",
     "noResults": "Не са намерени агенции",
     "tryAdjusting": "Опитайте да промените филтрите",
-    "title": "Top Real Estate Agencies",
-    "featuredTitle": "Featured Agencies",
-    "yourAgencyTitle": "Your Agency",
-    "showingMatching": "Showing {{count}} agencies matching \"{{query}}\"",
-    "browseAgencies": "Browse professional agencies with experienced teams",
-    "agenciesFound": "agencies found",
-    "moreAgencies": "More Agencies"
+    "title": "Топ агенции за недвижими имоти",
+    "featuredTitle": "Препоръчани агенции",
+    "yourAgencyTitle": "Вашата агенция",
+    "showingMatching": "Показани {{count}} агенции, отговарящи на „{{query}}“",
+    "browseAgencies": "Разгледайте професионални агенции с опитни екипи",
+    "agenciesFound": "намерени агенции",
+    "moreAgencies": "Още агенции"
   },
   "card": {
     "properties": "имота",
@@ -73,67 +76,67 @@
     "contact": "Контакт",
     "featured": "Представена",
     "verified": "Верифицирана",
-    "certified": "Certified",
-    "years": "Years",
-    "certs": "Certs",
-    "view": "View",
-    "more": "+{{count}} more"
+    "certified": "Сертифицирана",
+    "years": "Години",
+    "certs": "Серт.",
+    "view": "Виж",
+    "more": "+{{count}} още"
   },
   "empty": {
     "title": "Не са Намерени Агенции",
     "description": "Не са намерени агенции, отговарящи на вашите критерии",
     "resetFilters": "Нулирай Филтрите",
-    "noAgenciesTitle": "No Agencies Found",
-    "noAgenciesYet": "No Agencies Yet",
-    "noMyAgency": "No Agency Found",
-    "adjustSearch": "Try adjusting your search criteria or browse all agencies.",
-    "noMyAgencyMessage": "You haven't created an agency yet. Start your journey today!",
-    "beFirst": "Be the first to create an agency and showcase your properties!"
+    "noAgenciesTitle": "Не са намерени агенции",
+    "noAgenciesYet": "Все още няма агенции",
+    "noMyAgency": "Не е намерена агенция",
+    "adjustSearch": "Опитайте да промените критериите за търсене или разгледайте всички агенции.",
+    "noMyAgencyMessage": "Все още не сте създали агенция. Започнете още днес!",
+    "beFirst": "Бъдете първите, които ще създадат агенция и ще покажат имотите си!"
   },
   "cta": {
     "title": "Вие Професионалист по Недвижими Имоти ли сте?",
     "description": "Присъединете се към нашата мрежа от доверени агенции и разширете бизнеса си",
     "button": "Регистрирайте Вашата Агенция",
-    "createAgency": "Create Agency",
-    "readyToGrow": "Ready to Grow Your Agency?",
-    "ctaDescription": "Join our network of premier real estate agencies and get featured to thousands of potential clients. Showcase your properties, connect with buyers, and expand your reach.",
-    "createToday": "Create Your Agency Today"
+    "createAgency": "Създай агенция",
+    "readyToGrow": "Готови ли сте да развиете агенцията си?",
+    "ctaDescription": "Присъединете се към нашата мрежа от водещи агенции и бъдете представени пред хиляди потенциални клиенти. Покажете имотите си, свържете се с купувачи и разширете обхвата си.",
+    "createToday": "Създайте агенцията си днес"
   },
   "loading": {
     "text": "Зареждане на агенции...",
-    "title": "Finding Agencies...",
-    "message": "Searching through our network of professional real estate agencies"
+    "title": "Търсене на агенции...",
+    "message": "Търсим в мрежата ни от професионални агенции за недвижими имоти"
   },
   "error": {
     "title": "Грешка при Зареждане на Агенции",
     "retry": "Опитай Отново",
-    "unableToLoad": "Unable to Load Agencies"
+    "unableToLoad": "Агенциите не могат да се заредят"
   },
   "statsCards": {
-    "mostProperties": "Most Properties",
-    "mostAgents": "Most Agents",
-    "mostExperience": "Most Experience"
+    "mostProperties": "Най-много имоти",
+    "mostAgents": "Най-много агенти",
+    "mostExperience": "Най-голям опит"
   },
   "featured": {
-    "title": "Featured Agencies",
-    "subtitle": "Discover properties through our trusted network of professional real estate partners",
-    "badge": "Featured",
-    "viewAgency": "View Agency",
-    "exploreAll": "Explore All Agencies",
-    "selectedByAlgorithm": "Each agency is carefully selected for quality and trust",
-    "selectedByAlgorithmMobile": "Carefully selected agencies",
-    "properties": "Properties",
-    "agents": "Agents",
+    "title": "Препоръчани агенции",
+    "subtitle": "Открийте имоти чрез нашата мрежа от доверени професионални партньори",
+    "badge": "Препоръчана",
+    "viewAgency": "Виж агенцията",
+    "exploreAll": "Разгледай всички агенции",
+    "selectedByAlgorithm": "Всяка агенция е внимателно подбрана за качество и доверие",
+    "selectedByAlgorithmMobile": "Внимателно подбрани агенции",
+    "properties": "Имоти",
+    "agents": "Агенти",
     "agencyTypes": {
-      "luxury": "Luxury Properties",
-      "commercial": "Commercial Properties",
-      "boutique": "Boutique Agency",
-      "team": "Team Agency",
-      "default": "Real Estate"
+      "luxury": "Луксозни имоти",
+      "commercial": "Търговски имоти",
+      "boutique": "Бутикова агенция",
+      "team": "Екипна агенция",
+      "default": "Недвижими имоти"
     },
     "empty": {
-      "title": "No featured agencies available at the moment",
-      "message": "Check back soon for our featured partners!"
+      "title": "В момента няма препоръчани агенции",
+      "message": "Очаквайте скоро нашите препоръчани партньори!"
     },
     "subscription": {
       "currentlyFeatured": "Агенцията е Отличена ✨",
@@ -161,114 +164,141 @@
       "renewStatus": "🔄 Поднови Отличения Статус",
       "continueVisibility": "Продължете да се наслаждавате на подобрена видимост.",
       "renewNow": "Поднови Сега",
-      "proTip": "💡 Про Съвет: Отличените агенции получават до 5x повече видимост!"
+      "proTip": "💡 Про Съвет: Отличените агенции получават до 5x повече видимост!",
+      "featuredInDirectory": "Препоръчана в указателя на агенциите",
+      "priorityInSearch": "Приоритет в резултатите от търсенето",
+      "homepageCarousel": "Карусел с агенции на началната страница",
+      "featuredBadge": "Значка „Препоръчана“ в профила",
+      "boostedVisibility": "Повишена видимост навсякъде"
     }
   },
   "create": {
-    "title": "Create Your Agency",
-    "subtitle": "Set up your agency profile to showcase your team and properties",
-    "backToAccount": "Back to Account",
-    "enterpriseActive": "Enterprise Subscription Active",
+    "title": "Създайте своята агенция",
+    "subtitle": "Настройте профила на агенцията си, за да представите екипа и имотите си",
+    "backToAccount": "Обратно към профила",
+    "enterpriseActive": "Абонаментът Enterprise е активен",
     "steps": {
-      "basic": "Basic Info",
-      "location": "Location",
-      "contact": "Contact",
-      "details": "Details"
+      "basic": "Основна информация",
+      "location": "Местоположение",
+      "contact": "Контакт",
+      "details": "Детайли"
     },
     "sections": {
-      "basicInfo": "Basic Information",
-      "location": "Location",
-      "contact": "Contact Information",
-      "professional": "Professional Details",
-      "businessHours": "Business Hours"
+      "basicInfo": "Основна информация",
+      "location": "Местоположение",
+      "contact": "Информация за контакт",
+      "professional": "Професионални данни",
+      "businessHours": "Работно време"
     },
     "fields": {
-      "agencyName": "Agency Name",
-      "description": "Description",
-      "country": "Country",
-      "city": "City",
-      "address": "Street Address",
-      "email": "Email",
-      "phone": "Phone Number",
-      "website": "Website URL",
-      "license": "Agent License Number",
-      "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken"
+      "agencyName": "Име на агенцията",
+      "description": "Описание",
+      "country": "Държава",
+      "city": "Град",
+      "address": "Адрес",
+      "email": "Имейл",
+      "phone": "Телефонен номер",
+      "website": "URL на уебсайт",
+      "license": "Номер на лиценза на агента",
+      "yearsInBusiness": "Години в бизнеса",
+      "languages": "Говорими езици",
+      "logo": "Лого на агенцията",
+      "logoPreview": "Преглед на логото",
+      "registrationNumber": "Регистрационен номер / ЕИК",
+      "agencyType": "Вид агенция",
+      "specializations": "Специализации",
+      "serviceAreas": "Райони на обслужване / региони",
+      "zipCode": "Пощенски код"
     },
     "placeholders": {
-      "agencyName": "e.g., Premier Real Estate Agency",
-      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-      "selectCountry": "Select a country",
-      "selectCity": "Select a city",
-      "selectCountryFirst": "Select country first",
-      "address": "e.g., 123 Main Street, Building A",
-      "email": "contact@agency.com",
+      "agencyName": "напр. Премиер агенция за недвижими имоти",
+      "description": "Разкажете на потенциалните клиенти за агенцията си, опита си и какво ви прави уникални...",
+      "selectCountry": "Изберете държава",
+      "selectCity": "Изберете град",
+      "selectCountryFirst": "Първо изберете държава",
+      "address": "напр. ул. Главна 123, сграда А",
+      "email": "kontakt@agencia.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456"
+      "license": "напр. RE-123456",
+      "registrationNumber": "напр. ЕИК 123456789",
+      "serviceAreas": "напр. София, Пловдив, Варна (разделени със запетая)"
     },
     "hints": {
-      "agencyName": "Choose a professional name that represents your brand",
-      "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location"
+      "agencyName": "Изберете професионално име, което представя марката ви",
+      "description": "Убедителното описание помага на клиентите да разберат стойността ви",
+      "address": "По избор: пълен адрес на офиса",
+      "logo": "JPEG, PNG, WebP или SVG. Макс. 5MB.",
+      "registrationNumber": "Официалният ви регистрационен или данъчен номер",
+      "specializations": "Изберете всички области, в които е специализирана агенцията ви",
+      "serviceAreas": "Посочете градовете или регионите, в които работи агенцията ви",
+      "agencyType": "Изберете вида, който най-добре описва агенцията ви"
     },
     "days": {
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+      "monday": "Понеделник",
+      "tuesday": "Вторник",
+      "wednesday": "Сряда",
+      "thursday": "Четвъртък",
+      "friday": "Петък",
+      "saturday": "Събота",
+      "sunday": "Неделя"
     },
     "benefits": {
-      "title": "What You'll Get",
-      "dedicatedPage": "Dedicated agency page on platform",
-      "displayAgents": "Display all agents & properties",
-      "featured": "Featured in homepage ads",
-      "contactInfo": "Full contact info displayed",
-      "invitationCode": "Unique invitation code for agents",
-      "support": "Priority customer support"
+      "title": "Какво ще получите",
+      "dedicatedPage": "Собствена страница на агенцията в платформата",
+      "displayAgents": "Показване на всички агенти и имоти",
+      "featured": "Представяне в рекламите на началната страница",
+      "contactInfo": "Показана пълна информация за контакт",
+      "invitationCode": "Уникален код за покана за агенти",
+      "support": "Приоритетна поддръжка"
     },
     "warnings": {
-      "agentRequired": "Agent Status Required",
-      "proRequired": "Pro Subscription Required"
+      "agentRequired": "Необходим е статус на агент",
+      "proRequired": "Необходим е Pro абонамент"
     },
     "errors": {
-      "nameRequired": "Agency name is required",
-      "locationRequired": "City and country are required",
-      "emailRequired": "Email is required"
+      "nameRequired": "Името на агенцията е задължително",
+      "locationRequired": "Градът и държавата са задължителни",
+      "emailRequired": "Имейлът е задължителен",
+      "logoInvalidType": "Моля, качете изображение във формат JPEG, PNG, WebP или SVG",
+      "logoTooLarge": "Логото трябва да е под 5MB"
     },
-    "becomeAgent": "Become an Agent First",
-    "upgradeToPro": "Upgrade to Pro",
-    "createAgency": "Create Agency",
-    "continueToPayment": "Continue to Payment"
+    "becomeAgent": "Първо станете агент",
+    "upgradeToPro": "Премини към Pro",
+    "createAgency": "Създай агенция",
+    "continueToPayment": "Продължи към плащане",
+    "buttons": {
+      "uploadLogo": "Качи лого",
+      "changeLogo": "Смени логото",
+      "removeLogo": "Премахни логото"
+    }
   },
   "payment": {
-    "title": "Complete Your Purchase",
-    "subtitle": "Subscribe to Enterprise plan to create your agency",
-    "backToDetails": "Back to Agency Details",
+    "title": "Завършете покупката си",
+    "subtitle": "Абонирайте се за план Enterprise, за да създадете агенцията си",
+    "backToDetails": "Обратно към данните на агенцията",
     "steps": {
-      "details": "Agency Details",
-      "payment": "Payment",
-      "confirmation": "Confirmation"
+      "details": "Данни на агенцията",
+      "payment": "Плащане",
+      "confirmation": "Потвърждение"
     },
-    "orderSummary": "Order Summary",
-    "total": "Total",
-    "couponCode": "Have a coupon code?",
-    "enterCoupon": "Enter coupon code",
-    "apply": "Apply",
-    "invalidCoupon": "Invalid coupon code",
-    "couponError": "Failed to validate coupon",
-    "whatsIncluded": "What's Included",
-    "securePayment": "Secure Payment",
-    "teamSupport": "Team Support",
-    "unlimitedProperties": "750 Listings",
-    "fullAnalytics": "Full Analytics",
-    "payNow": "Pay",
-    "processing": "Processing...",
-    "stripeSecure": "Payments are securely processed by Stripe",
-    "error": "Failed to initiate payment. Please try again."
+    "orderSummary": "Обобщение на поръчката",
+    "total": "Общо",
+    "couponCode": "Имате код на купон?",
+    "enterCoupon": "Въведете код на купон",
+    "apply": "Приложи",
+    "invalidCoupon": "Невалиден код на купон",
+    "couponError": "Неуспешна проверка на купона",
+    "whatsIncluded": "Какво е включено",
+    "securePayment": "Сигурно плащане",
+    "teamSupport": "Поддръжка за екипа",
+    "unlimitedProperties": "750 обяви",
+    "fullAnalytics": "Пълни анализи",
+    "payNow": "Плати",
+    "processing": "Обработване...",
+    "stripeSecure": "Плащанията се обработват сигурно от Stripe",
+    "error": "Неуспешно започване на плащането. Моля, опитайте отново.",
+    "activateFree": "Активирай безплатно"
   },
   "coupon": {
     "title": "Използвай Купон на Агенция",
@@ -345,7 +375,14 @@
     "validating": "Проверка...",
     "processing": "Обработка...",
     "activateForFree": "Активирай БЕЗПЛАТНО",
-    "subscribePrice": "Абонирай се - €{{price}}"
+    "subscribePrice": "Абонирай се - €{{price}}",
+    "duration1week": "1 седмица",
+    "duration2weeks": "2 седмици",
+    "duration4weeks": "4 седмици",
+    "badgePopular": "ПОПУЛЯРНО",
+    "duration90days": "90 дни",
+    "badgeBestValue": "НАЙ-ИЗГОДНО",
+    "haveCouponCode": "Имате код на купон?"
   },
   "management": {
     "currentAgency": "Текуща Агенция",
@@ -459,6 +496,82 @@
         "desc": "Изтъкнатите агенции получават 20 точки бонус и се появяват в началото на всички търсения.",
         "cap": "Макс 20 точки"
       }
+    }
+  },
+  "confirm": {
+    "title": "Създайте своята агенция",
+    "subtitle": "Абонаментът ви Enterprise е активен. Прегледайте данните и потвърдете.",
+    "reviewDetails": "Прегледайте данните на агенцията",
+    "createAgency": "Създай моята агенция"
+  },
+  "ui": {
+    "agencyDetailPage": {
+      "dragToRepositionCoverImage": "Плъзнете, за да преместите корицата",
+      "savePosition": "Запази позицията",
+      "cancel": "Отказ",
+      "repositionCover": "Премести корицата",
+      "repositionLogo": "Премести логото",
+      "save": "Запази",
+      "years": "Години",
+      "removeAdminRights": "Премахни администраторските права",
+      "makeAdmin": "Направи администратор",
+      "removeAgentFromAgency": "Премахни агента от агенцията",
+      "leaveThisAgency": "Напусни тази агенция",
+      "tellClientsAboutYourAgency": "Разкажете на клиентите за агенцията си...",
+      "residentialCommercialLuxuryProperties": "Жилищни, търговски, луксозни имоти",
+      "licensedRealEstateAgencyIso": "Лицензирана агенция за недвижими имоти, сертифицирана по ISO",
+      "englishSerbianCroatianAlbanian": "Английски, сръбски, хърватски, албански",
+      "n9am6pm": "9:00 - 18:00",
+      "youAreNotLoggedIn": "Не сте влезли. Моля, влезте и опитайте отново.",
+      "unexpectedResponseFromServerPlease": "Неочакван отговор от сървъра. Моля, опитайте отново.",
+      "invalidCouponCodePleaseCheck": "Невалиден код на купон. Моля, проверете и опитайте отново.",
+      "thisCouponHasAlreadyBeen": "Този купон вече е използван.",
+      "thisCouponHasExpired": "Този купон е изтекъл.",
+      "theAgencySubscriptionIsNo": "Абонаментът на агенцията вече не е активен.",
+      "couponRedeemed": "Купонът е използван!",
+      "joinRequestSentSuccessfullyThe": "Заявката за присъединяване е изпратена успешно! Администраторът на агенцията ще я разгледа.",
+      "agencyNameMustBeAt": "Името на агенцията трябва да е поне 2 знака",
+      "descriptionMustBeUnder5": "Описанието трябва да е под 5000 знака",
+      "pleaseEnterAValidEmail": "Моля, въведете валиден имейл адрес",
+      "pleaseEnterAValidPhone": "Моля, въведете валиден телефонен номер",
+      "uploadFailed": "Неуспешно качване",
+      "failedToSavePosition": "Неуспешно запазване на позицията",
+      "failedToSaveImagePosition": "Неуспешно запазване на позицията на изображението",
+      "positionSaved": "Позицията е запазена",
+      "failedToGenerateCode": "Неуспешно генериране на код"
+    },
+    "agencyPaymentPage": {
+      "agencyCreated": "Агенцията е създадена!",
+      "redirectingToAgenciesPage": "Пренасочване към страницата с агенции...",
+      "phone": "Телефон",
+      "license": "Лиценз",
+      "enterprisePlanActive": "✓ План Enterprise е активен",
+      "n5AgentRegistrationCodesWill": "• 5 кода за регистрация на агенти ще ви бъдат изпратени по имейл",
+      "monthlyListingPromotionCouponsIncluded": "• Включени месечни купони за промотиране на обяви",
+      "n7DayFeaturedAgencyTrial": "• 7-дневният пробен период като препоръчана агенция започва веднага",
+      "plan": "План",
+      "coupon": "Купон ("
+    },
+    "createAgencyPage": {
+      "n900Am500": "9:00 - 17:00"
+    },
+    "agencyScoringPanel": {
+      "n0Pts": "0 точки"
+    },
+    "agencyJoinRequestsModal": {
+      "closeJoinRequestsModal": "Затвори прозореца със заявки за присъединяване"
+    },
+    "invitationCodeModal": {
+      "keepTypingAgyXxxxxxXxxxxx": "Продължете да пишете... (AGY-XXXXXX-XXXXXX)",
+      "invalidFormatExpectedAgyXxxxxx": "Невалиден формат. Очаква се: AGY-XXXXXX-XXXXXX",
+      "keepTypingXxxXxxxxxxx": "Продължете да пишете... (XXX-XXXXXXXX)",
+      "invalidFormatExpectedXxxXxxxxxxx": "Невалиден формат. Очаква се: XXX-XXXXXXXX",
+      "proSubscriptionRequiredToUse": "Необходим е Pro абонамент, за да използвате кодове за покана",
+      "formatAgyXxxxxxXxxxxx": "Формат: AGY-XXXXXX-XXXXXX",
+      "formatAbcXxxxxxxx": "Формат: ABC-XXXXXXXX"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Агенцията ви е създадена успешно. Вече имате собствена страница на агенцията."
     }
   }
 }

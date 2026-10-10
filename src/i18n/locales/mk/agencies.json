@@ -101,113 +101,168 @@
     "empty": {
       "title": "Моментално нема достапни истакнати агенции",
       "message": "Проверете наскоро за нашите истакнати партнери!"
+    },
+    "subscription": {
+      "currentlyFeatured": "Агенцијата е моментално истакната ✨",
+      "receivingVisibility": "Вашата агенција е моментално истакната и добива зголемена видливост.",
+      "timeRemaining": "Преостанато време",
+      "expires": "Истекува:",
+      "featureYourAgency": "Истакнете ја вашата агенција",
+      "getVisibility": "Добијте поголема видливост со истакнат оглас. Вашата агенција ќе се појавува на врвот на резултатите и во каруселот со истакнати агенции.",
+      "getFeaturedFrom": "Бидете истакнати од €{{price}}/недела",
+      "getFeaturedNow": "Истакни се сега",
+      "featuredAgency": "Истакната агенција",
+      "boostVisibility": "Зголемете ја видливоста",
+      "freeTrialProgress": "🎉 Напредок на бесплатниот пробен период",
+      "subscriptionPeriod": "📅 Период на претплата",
+      "daysLeft": "Преостануваат денови: {{count}}",
+      "freeTrialActive": "🎉 Бесплатниот пробен период е активен",
+      "trialEndsOn": "Вашиот бесплатен пробен период завршува на {{date}}",
+      "interval": "Интервал",
+      "price": "Цена",
+      "startDate": "Датум на почеток",
+      "renewsOn": "Се обновува на",
+      "endedOn": "Завршено на",
+      "couponApplied": "✓ Применет купон {{code}}",
+      "cancelAtPeriodEnd": "⚠️ Претплатата ќе биде откажана на крајот на тековниот период",
+      "renewStatus": "🔄 Обновете го статусот на истакнатост",
+      "continueVisibility": "Продолжете да уживате во зголемена видливост и врвни позиции во резултатите.",
+      "renewNow": "Обнови сега",
+      "proTip": "💡 Совет: истакнатите агенции добиваат до 5 пати поголема видливост и се појавуваат на врвот на резултатите!",
+      "featuredInDirectory": "Истакната во именикот на агенции",
+      "priorityInSearch": "Приоритет во резултатите од пребарување",
+      "homepageCarousel": "Карусел на агенции на почетната страница",
+      "featuredBadge": "Значка за истакнатост на профилот",
+      "boostedVisibility": "Зголемена видливост насекаде"
     }
   },
   "create": {
-    "title": "Create Your Agency",
-    "subtitle": "Set up your agency profile to showcase your team and properties",
-    "backToAccount": "Back to Account",
-    "enterpriseActive": "Enterprise Subscription Active",
+    "title": "Креирајте ја вашата агенција",
+    "subtitle": "Поставете го профилот на агенцијата за да ги претставите тимот и имотите",
+    "backToAccount": "Назад кон сметката",
+    "enterpriseActive": "Enterprise претплатата е активна",
     "steps": {
-      "basic": "Basic Info",
-      "location": "Location",
-      "contact": "Contact",
-      "details": "Details"
+      "basic": "Основни податоци",
+      "location": "Локација",
+      "contact": "Контакт",
+      "details": "Детали"
     },
     "sections": {
-      "basicInfo": "Basic Information",
-      "location": "Location",
-      "contact": "Contact Information",
-      "professional": "Professional Details",
-      "businessHours": "Business Hours"
+      "basicInfo": "Основни информации",
+      "location": "Локација",
+      "contact": "Податоци за контакт",
+      "professional": "Професионални детали",
+      "businessHours": "Работно време"
     },
     "fields": {
-      "agencyName": "Agency Name",
-      "description": "Description",
-      "country": "Country",
-      "city": "City",
-      "address": "Street Address",
-      "email": "Email",
-      "phone": "Phone Number",
-      "website": "Website URL",
-      "license": "Agent License Number",
-      "yearsInBusiness": "Years in Business",
-      "languages": "Languages Spoken"
+      "agencyName": "Име на агенцијата",
+      "description": "Опис",
+      "country": "Земја",
+      "city": "Град",
+      "address": "Адреса",
+      "email": "Е-пошта",
+      "phone": "Телефонски број",
+      "website": "URL на веб-страница",
+      "license": "Број на лиценца на агент",
+      "yearsInBusiness": "Години во бизнисот",
+      "languages": "Јазици што се зборуваат",
+      "logo": "Лого на агенцијата",
+      "logoPreview": "Преглед на логото",
+      "registrationNumber": "Регистарски број / ЕДБ",
+      "agencyType": "Тип на агенција",
+      "specializations": "Специјализации",
+      "serviceAreas": "Подрачја на работа / региони",
+      "zipCode": "Поштенски код"
     },
     "placeholders": {
-      "agencyName": "e.g., Premier Real Estate Agency",
-      "description": "Tell potential clients about your agency, your expertise, and what makes you unique...",
-      "selectCountry": "Select a country",
-      "selectCity": "Select a city",
-      "selectCountryFirst": "Select country first",
-      "address": "e.g., 123 Main Street, Building A",
-      "email": "contact@agency.com",
+      "agencyName": "пр. Премиер агенција за недвижности",
+      "description": "Кажете им на потенцијалните клиенти за вашата агенција, експертизата и што ве прави уникатни...",
+      "selectCountry": "Изберете земја",
+      "selectCity": "Изберете град",
+      "selectCountryFirst": "Прво изберете земја",
+      "address": "пр. Главна улица 123, зграда А",
+      "email": "kontakt@agencija.com",
       "phone": "+381 11 123 4567",
       "website": "https://yourwebsite.com",
-      "license": "e.g., RE-123456"
+      "license": "пр. RE-123456",
+      "registrationNumber": "пр. ЕДБ 4030000000000",
+      "serviceAreas": "пр. Скопје, Битола, Охрид (одделени со запирка)"
     },
     "hints": {
-      "agencyName": "Choose a professional name that represents your brand",
-      "description": "A compelling description helps clients understand your value",
-      "address": "Optional: Full street address for office location"
+      "agencyName": "Изберете професионално име што го претставува вашиот бренд",
+      "description": "Убедлив опис им помага на клиентите да ја разберат вашата вредност",
+      "address": "Опционално: целосна адреса на канцеларијата",
+      "logo": "JPEG, PNG, WebP или SVG. Макс. 5MB.",
+      "registrationNumber": "Вашиот официјален регистарски или даночен број",
+      "specializations": "Изберете ги сите области во кои е специјализирана агенцијата",
+      "serviceAreas": "Наведете ги градовите или регионите каде работи агенцијата",
+      "agencyType": "Изберете го типот што најдобро ја опишува агенцијата"
     },
     "days": {
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+      "monday": "Понеделник",
+      "tuesday": "Вторник",
+      "wednesday": "Среда",
+      "thursday": "Четврток",
+      "friday": "Петок",
+      "saturday": "Сабота",
+      "sunday": "Недела"
     },
     "benefits": {
-      "title": "What You'll Get",
-      "dedicatedPage": "Dedicated agency page on platform",
-      "displayAgents": "Display all agents & properties",
-      "featured": "Featured in homepage ads",
-      "contactInfo": "Full contact info displayed",
-      "invitationCode": "Unique invitation code for agents",
-      "support": "Priority customer support"
+      "title": "Што ќе добиете",
+      "dedicatedPage": "Посебна страница за агенцијата на платформата",
+      "displayAgents": "Прикажете ги сите агенти и имоти",
+      "featured": "Истакнување во рекламите на почетната страница",
+      "contactInfo": "Прикажани целосни податоци за контакт",
+      "invitationCode": "Уникатен код за покана за агенти",
+      "support": "Приоритетна корисничка поддршка"
     },
     "warnings": {
-      "agentRequired": "Agent Status Required",
-      "proRequired": "Pro Subscription Required"
+      "agentRequired": "Потребен е статус на агент",
+      "proRequired": "Потребна е Pro претплата"
     },
     "errors": {
-      "nameRequired": "Agency name is required",
-      "locationRequired": "City and country are required",
-      "emailRequired": "Email is required"
+      "nameRequired": "Името на агенцијата е задолжително",
+      "locationRequired": "Градот и земјата се задолжителни",
+      "emailRequired": "Е-поштата е задолжителна",
+      "logoInvalidType": "Прикачете слика во формат JPEG, PNG, WebP или SVG",
+      "logoTooLarge": "Логото мора да биде помало од 5MB"
     },
-    "becomeAgent": "Become an Agent First",
-    "upgradeToPro": "Upgrade to Pro",
-    "createAgency": "Create Agency",
-    "continueToPayment": "Continue to Payment"
+    "becomeAgent": "Прво станете агент",
+    "upgradeToPro": "Надгради на Pro",
+    "createAgency": "Креирај агенција",
+    "continueToPayment": "Продолжи кон плаќање",
+    "buttons": {
+      "uploadLogo": "Прикачи лого",
+      "changeLogo": "Промени лого",
+      "removeLogo": "Отстрани лого"
+    }
   },
   "payment": {
-    "title": "Complete Your Purchase",
-    "subtitle": "Subscribe to Enterprise plan to create your agency",
-    "backToDetails": "Back to Agency Details",
+    "title": "Завршете ја купувачката",
+    "subtitle": "Претплатете се на Enterprise план за да креирате агенција",
+    "backToDetails": "Назад кон деталите за агенцијата",
     "steps": {
-      "details": "Agency Details",
-      "payment": "Payment",
-      "confirmation": "Confirmation"
+      "details": "Детали за агенцијата",
+      "payment": "Плаќање",
+      "confirmation": "Потврда"
     },
-    "orderSummary": "Order Summary",
-    "total": "Total",
-    "couponCode": "Have a coupon code?",
-    "enterCoupon": "Enter coupon code",
-    "apply": "Apply",
-    "invalidCoupon": "Invalid coupon code",
-    "couponError": "Failed to validate coupon",
-    "whatsIncluded": "What's Included",
-    "securePayment": "Secure Payment",
-    "teamSupport": "Team Support",
-    "unlimitedProperties": "750 Listings",
-    "fullAnalytics": "Full Analytics",
-    "payNow": "Pay",
-    "processing": "Processing...",
-    "stripeSecure": "Payments are securely processed by Stripe",
-    "error": "Failed to initiate payment. Please try again."
+    "orderSummary": "Преглед на нарачката",
+    "total": "Вкупно",
+    "couponCode": "Имате код за купон?",
+    "enterCoupon": "Внесете код за купон",
+    "apply": "Примени",
+    "invalidCoupon": "Невалиден код за купон",
+    "couponError": "Проверката на купонот не успеа",
+    "whatsIncluded": "Што е вклучено",
+    "securePayment": "Безбедно плаќање",
+    "teamSupport": "Поддршка за тимот",
+    "unlimitedProperties": "750 огласи",
+    "fullAnalytics": "Целосна аналитика",
+    "payNow": "Плати",
+    "processing": "Се обработува...",
+    "stripeSecure": "Плаќањата безбедно ги обработува Stripe",
+    "error": "Започнувањето на плаќањето не успеа. Обидете се повторно.",
+    "activateFree": "Активирај бесплатно"
   },
   "featuredDialog": {
     "title": "Претплата за Истакната Агенција",
@@ -228,7 +283,14 @@
     "validating": "Проверување...",
     "processing": "Обработка...",
     "activateForFree": "Активирај БЕСПЛАТНО",
-    "subscribePrice": "Претплати се - €{{price}}"
+    "subscribePrice": "Претплати се - €{{price}}",
+    "duration1week": "1 недела",
+    "duration2weeks": "2 недели",
+    "duration4weeks": "4 недели",
+    "badgePopular": "ПОПУЛАРНО",
+    "duration90days": "90 дена",
+    "badgeBestValue": "НАЈДОБРА ВРЕДНОСТ",
+    "haveCouponCode": "Имате код за купон?"
   },
   "management": {
     "currentAgency": "Тековна Агенција",
@@ -342,6 +404,138 @@
         "desc": "Истакнатите агенции добиваат 20 поени бонус и се прикажуваат на врвот.",
         "cap": "Макс 20 поени"
       }
+    }
+  },
+  "coupon": {
+    "title": "Искористете купон од агенција",
+    "description": "Внесете го кодот за купон што го добивте за да се приклучите на агенција и да добиете Pro претплата.",
+    "codeLabel": "Код за купон",
+    "codePlaceholder": "Внесете го кодот за купон (пр. AGENCY-XXXXXXXX)",
+    "codeFormat": "Кодот треба да биде во формат: AGENCY-XXXXXXXX",
+    "redeeming": "Се искористува...",
+    "redeemButton": "Искористи купон",
+    "note": "Забелешка:",
+    "alreadyInAgency": "Веќе сте член на {{name}}. Со искористување на нов купон ќе преминете во новата агенција.",
+    "anAgency": "агенција",
+    "confirmMove": "Веќе сте член на агенција. Со искористување на овој купон ќе преминете во новата агенција. Продолжи?",
+    "agentRequired": {
+      "title": "Потребна е регистрација како агент",
+      "description": "За да искористите купон од агенција и да се приклучите, прво мора да се регистрирате како агент. Потребни се број на лиценца и професионални податоци.",
+      "goToProfile": "Оди во поставки на профилот"
+    },
+    "errors": {
+      "enterCode": "Внесете код за купон",
+      "loginRequired": "Мора да сте најавени за да искористите купон",
+      "agentRequired": "Само регистрирани агенти можат да искористат купони од агенција. Прво регистрирајте се како агент во поставките на профилот.",
+      "invalidCoupon": "Невалиден код за купон. Проверете го кодот и обидете се повторно.",
+      "alreadyUsed": "Овој купон веќе е искористен од друг агент.",
+      "expired": "Овој купон е истечен и повеќе не може да се искористи.",
+      "notFound": "Купонот не е пронајден. Проверете дали кодот е точен.",
+      "subscriptionInactive": "Претплатата на агенцијата повеќе не е активна. Овој купон не може да се искористи.",
+      "missingCode": "Внесете код за купон.",
+      "redeemFailed": "Искористувањето на купонот не успеа. Обидете се повторно.",
+      "redemptionFailed": "Искористувањето не успеа"
+    },
+    "success": {
+      "title": "Купонот е искористен!",
+      "message": "Успешно се приклучивте на {{name}} со Pro претплата!",
+      "welcome": "Добредојдовте во {{name}}!",
+      "joined": "Успешно се приклучивте на агенцијата со Pro претплата.",
+      "benefits": "Вашите придобивки:",
+      "listingsLimit": "До {{limit}} активни огласи",
+      "branding": "Бренд на агенцијата на вашите огласи",
+      "promotionAccess": "Пристап до промотивни купони на агенцијата",
+      "validUntil": "Претплатата важи до {{date}}",
+      "viewAgency": "Види агенција"
+    },
+    "whatHappens": {
+      "title": "Што се случува кога ќе искористите купон?",
+      "addedToTeam": "Ќе бидете додадени во агенцијата како член на тимот",
+      "proSubscription": "Ќе добиете Pro претплата (важи 1 година)",
+      "agencyBranding": "Вашите огласи ќе го прикажуваат брендот на агенцијата",
+      "promotionCoupons": "Пристап до промотивни купони на агенцијата за вашите огласи"
+    }
+  },
+  "badge": {
+    "independent": "Независен",
+    "independentShort": "Нез.",
+    "agency": "Агенција",
+    "independentAgent": "Независен агент"
+  },
+  "confirm": {
+    "title": "Креирајте ја вашата агенција",
+    "subtitle": "Вашата Enterprise претплата е активна. Прегледајте ги деталите и потврдете.",
+    "reviewDetails": "Прегледајте ги деталите за агенцијата",
+    "createAgency": "Креирај ја мојата агенција"
+  },
+  "ui": {
+    "agencyDetailPage": {
+      "dragToRepositionCoverImage": "Повлечете за да ја преместите насловната слика",
+      "savePosition": "Зачувај позиција",
+      "cancel": "Откажи",
+      "repositionCover": "Премести насловна",
+      "repositionLogo": "Премести лого",
+      "save": "Зачувај",
+      "years": "Години",
+      "removeAdminRights": "Отстрани администраторски права",
+      "makeAdmin": "Направи администратор",
+      "removeAgentFromAgency": "Отстрани го агентот од агенцијата",
+      "leaveThisAgency": "Напушти ја оваа агенција",
+      "tellClientsAboutYourAgency": "Кажете им на клиентите за вашата агенција...",
+      "residentialCommercialLuxuryProperties": "Станбени, деловни, луксузни имоти",
+      "licensedRealEstateAgencyIso": "Лиценцирана агенција за недвижности, ISO сертифицирана",
+      "englishSerbianCroatianAlbanian": "Англиски, српски, хрватски, албански",
+      "n9am6pm": "9:00 - 18:00",
+      "youAreNotLoggedIn": "Не сте најавени. Најавете се и обидете се повторно.",
+      "unexpectedResponseFromServerPlease": "Неочекуван одговор од серверот. Обидете се повторно.",
+      "invalidCouponCodePleaseCheck": "Невалиден код за купон. Проверете и обидете се повторно.",
+      "thisCouponHasAlreadyBeen": "Овој купон веќе е искористен.",
+      "thisCouponHasExpired": "Овој купон е истечен.",
+      "theAgencySubscriptionIsNo": "Претплатата на агенцијата повеќе не е активна.",
+      "couponRedeemed": "Купонот е искористен!",
+      "joinRequestSentSuccessfullyThe": "Барањето за приклучување е успешно испратено! Администраторот на агенцијата ќе го разгледа.",
+      "agencyNameMustBeAt": "Името на агенцијата мора да има најмалку 2 знаци",
+      "descriptionMustBeUnder5": "Описот мора да биде пократок од 5.000 знаци",
+      "pleaseEnterAValidEmail": "Внесете валидна е-пошта",
+      "pleaseEnterAValidPhone": "Внесете валиден телефонски број",
+      "uploadFailed": "Прикачувањето не успеа",
+      "failedToSavePosition": "Зачувувањето на позицијата не успеа",
+      "failedToSaveImagePosition": "Зачувувањето на позицијата на сликата не успеа",
+      "positionSaved": "Позицијата е зачувана",
+      "failedToGenerateCode": "Генерирањето на кодот не успеа"
+    },
+    "agencyPaymentPage": {
+      "agencyCreated": "Агенцијата е креирана!",
+      "redirectingToAgenciesPage": "Пренасочување кон страницата со агенции...",
+      "phone": "Телефон",
+      "license": "Лиценца",
+      "enterprisePlanActive": "✓ Enterprise планот е активен",
+      "n5AgentRegistrationCodesWill": "• 5 кодови за регистрација на агенти ќе ви бидат испратени по е-пошта",
+      "monthlyListingPromotionCouponsIncluded": "• Вклучени месечни купони за промоција на огласи",
+      "n7DayFeaturedAgencyTrial": "• 7-дневен пробен период како истакната агенција започнува веднаш",
+      "plan": "План",
+      "coupon": "Купон ("
+    },
+    "createAgencyPage": {
+      "n900Am500": "9:00 - 17:00"
+    },
+    "agencyScoringPanel": {
+      "n0Pts": "0 поени"
+    },
+    "agencyJoinRequestsModal": {
+      "closeJoinRequestsModal": "Затвори прозорец за барања за приклучување"
+    },
+    "invitationCodeModal": {
+      "keepTypingAgyXxxxxxXxxxxx": "Продолжете да пишувате... (AGY-XXXXXX-XXXXXX)",
+      "invalidFormatExpectedAgyXxxxxx": "Невалиден формат. Очекувано: AGY-XXXXXX-XXXXXX",
+      "keepTypingXxxXxxxxxxx": "Продолжете да пишувате... (XXX-XXXXXXXX)",
+      "invalidFormatExpectedXxxXxxxxxxx": "Невалиден формат. Очекувано: XXX-XXXXXXXX",
+      "proSubscriptionRequiredToUse": "Потребна е Pro претплата за користење кодови за покана",
+      "formatAgyXxxxxxXxxxxx": "Формат: AGY-XXXXXX-XXXXXX",
+      "formatAbcXxxxxxxx": "Формат: ABC-XXXXXXXX"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Вашата агенција е успешно креирана. Сега имате посебна страница за агенцијата."
     }
   }
 }

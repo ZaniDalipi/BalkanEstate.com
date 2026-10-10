@@ -33,6 +33,10 @@
       "buyer": "Купац",
       "free": "Бесплатно",
       "proRequired": "Потребан Pro"
+    },
+    "becomeAgent": {
+      "title": "Желите да објављујете као агент?",
+      "description": "Можете се регистровати као агент за некретнине у Подешавањима профила и откључати агентске функције и већа ограничења огласа."
     }
   },
   "createListing": {
@@ -53,7 +57,12 @@
     "progress": {
       "compressing": "Компресовање слика...",
       "uploading": "Отпремање у облак...",
-      "creating": "Креирање огласа..."
+      "creating": "Креирање огласа...",
+      "compressingHint": "Оптимизујемо ваше слике за најбољи квалитет...",
+      "uploadingHint": "Безбедно отпремамо ваше фотографије...",
+      "creatingHint": "Скоро готово! Чувамо ваш оглас...",
+      "analyzing": "Анализирамо ваше слике...",
+      "analyzingHint": "Наша AI препознаје просторије, карактеристике и детаље са ваших фотографија. Ово може потрајати."
     },
     "nextStep": "Следећи Корак",
     "previousStep": "Претходни Корак",
@@ -146,7 +155,12 @@
       "netArea": "Нето површина (m²)",
       "parkingType": "Тип паркинга",
       "parkingSpaces": "Места",
-      "officeRooms": "Канцеларије"
+      "officeRooms": "Канцеларије",
+      "kitchens": "Кухиње",
+      "diningRooms": "Трпезарије",
+      "toilets": "Тоалети (WC)",
+      "storageRooms": "Оставе",
+      "offices": "Канцеларија / радна соба"
     },
     "propertyFeatures": {
       "title": "Карактеристике Некретнине",
@@ -164,7 +178,8 @@
       "parkingFeatures": "Карактеристике паркинга",
       "fencedSecured": "Ограђено / обезбеђено",
       "hasVegetation": "Има вегетацију / дрвеће",
-      "hasWaterSource": "Има извор воде"
+      "hasWaterSource": "Има извор воде",
+      "landFeatures": "Карактеристике земљишта"
     },
     "advancedDetails": {
       "title": "Напредни Детаљи Некретнине",
@@ -323,7 +338,12 @@
       "title": "Доступност Посета",
       "enable": "Омогући заказивање",
       "description": "Дозволите посетиоцима да заказују прегледе онлајн. Дефинишите своје расположиве дане и време.",
-      "availableDays": "Расположиви Дани"
+      "availableDays": "Расположиви Дани",
+      "startTime": "Време почетка",
+      "endTime": "Време завршетка",
+      "slotDuration": "Трајање термина",
+      "notes": "Напомене за посетиоце",
+      "notesPlaceholder": "нпр., Позвоните на капији, паркинг доступан..."
     },
     "imageTags": {
       "exterior": "Екстеријер",
@@ -335,13 +355,13 @@
       "selectTag": "Изабери Ознаку"
     },
     "luxuryVillaBanner": {
-      "title": "Luxury Villas Collection",
-      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+      "title": "Колекција луксузних вила",
+      "hint": "Овај оглас ће се појавити у ексклузивној картици Луксузне виле — видљив премијум купцима који траже врхунске балканске оазе."
     },
-    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "luxuryVillaBadge": "Појављује се у Луксузним вилама",
     "quickAmenities": {
       "label": "Popularni sadržaji",
-      "sauna": "Sauna",
+      "sauna": "Сауна",
       "wineCellar": "Vinski podrum",
       "panoramic": "Panoramski",
       "jacuzzi": "Đakuzi",
@@ -384,6 +404,32 @@
       "limitTitle": "Достигнут је лимит основа",
       "limit": "Оглас може имати највише {{max}} основа.",
       "switch": "Спратови"
+    },
+    "dailyRental": {
+      "title": "Детаљи дневног издавања",
+      "checkIn": "Време пријаве",
+      "checkOut": "Време одјаве",
+      "cleaningFee": "Накнада за чишћење (€)",
+      "cancellationPolicy": "Правила отказивања",
+      "selectPolicy": "Изаберите…",
+      "flexible": "Флексибилна",
+      "moderate": "Умерена",
+      "strict": "Строга",
+      "nonRefundable": "Без повраћаја",
+      "included": "Укључено у цену",
+      "breakfast": "🍳 Доручак",
+      "towels": "🛁 Пешкири и постељина",
+      "parking": "🚗 Паркинг"
+    },
+    "preview": {
+      "banner": "Режим прегледа",
+      "bannerHint": "Прегледајте оглас пре објављивања",
+      "editListing": "Измени оглас",
+      "satisfied": "Задовољни сте огласом?",
+      "goBackEdit": "Врати се и измени"
+    },
+    "ai": {
+      "locationHint": "Додавање локације помаже AI да направи прецизније описе специфичне за локацију"
     }
   },
   "myListings": {
@@ -584,7 +630,7 @@
       "exterior": "Укључите екстеријерне снимке",
       "clearPhotos": "Користите јасне, високо квалитетне фотографије"
     },
-    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
+    "locationHint": "Додавање локације помаже AI да направи прецизније описе специфичне за локацију"
   },
   "promotion": {
     "title": "Промовишите Ваш Оглас",
@@ -747,17 +793,21 @@
     "buyerCannotCreateListing": "Купци не могу креирати огласе за некретнине. Молимо пређите на улогу Приватног Продавца или Агента.",
     "monthlyLimitReached": "Месечни Лимит Огласа је Достигнут",
     "monthlyLimitMessage": "Искористили сте све огласе овог месеца. Обнавља се почетком следећег месеца.",
-    "monthlyLimitMessageWithCount": "Искористили сте {{used}} од {{limit}} огласа овог месеца. Обнавља се почетком следећег месеца."
+    "monthlyLimitMessageWithCount": "Искористили сте {{used}} од {{limit}} огласа овог месеца. Обнавља се почетком следећег месеца.",
+    "phoneRequired": "Потребан је број телефона",
+    "phoneRequiredMessage": "Додајте број мобилног телефона у Подешавањима профила пре креирања огласа."
   },
   "actions": {
     "subscribeToPro": "Претплати се на Pro",
     "viewMyListings": "Погледај Моје Огласе",
     "switchRole": "Промени Улогу",
-    "requestMoreListings": "Затражи Више Огласа"
+    "requestMoreListings": "Затражи Више Огласа",
+    "playForDiscount": "Играј за попуст",
+    "saveDraft": "Сачувај као нацрт"
   },
   "listings": {
-    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
-    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
+    "confirmSold": "Да ли сте сигурни да желите да означите ову некретнину као продату? Ово се не може поништити.",
+    "confirmDelete": "Да ли сте сигурни да желите да обришете овај оглас? Ово се не може поништити."
   },
   "promotionHistory": {
     "title": "Историја Промоција",
@@ -801,7 +851,13 @@
     "expiringIn_other": "Истиче за {{count}} дана!",
     "extendNow": "Продужи Сада",
     "autoExtendReady": "Аутоматско продужење спремно! Довршите плаћање да продужите.",
-    "completePayment": "Доврши Плаћање"
+    "completePayment": "Доврши Плаћање",
+    "tiers": {
+      "premium": "Премијум премијера",
+      "highlight": "Истицање",
+      "featured": "Издвојено",
+      "standard": "Стандардно"
+    }
   },
   "parkingTypes": {
     "garage": "Гаража",
@@ -817,6 +873,158 @@
     "unfinishedRental": "Недовршени оглас за издавање",
     "keptUntil": "Сачувано као нацрт на овом уређају до {{date}}.",
     "continue": "Настави",
-    "discard": "Одбаци"
+    "discard": "Одбаци",
+    "savedTitle": "Нацрт је сачуван",
+    "savedMessage": "Ваш оглас је сачуван. Уређивање можете наставити касније са свог налога."
+  },
+  "ui": {
+    "videoGenerator": {
+      "videoGenerator": "Генератор видеа",
+      "createAStunningVideoReel": "Направите упечатљив видео рил од фотографија некретнине",
+      "noImagesAvailable": "Нема доступних слика",
+      "uploadPropertyImagesFirstTo": "Прво отпремите слике некретнине да бисте направили видео приказ.",
+      "creatingYourVideo": "Прави се ваш видео...",
+      "thisCanTakeAMinute": "Ово може потрајати минут. Не затварајте овај прозор.",
+      "yourVideoIsReady": "Ваш видео је спреман!",
+      "sVideoDownloadItPost": "видео — преузмите га, објавите, па додајте линк у оглас.",
+      "downloadVideo": "Преузми видео",
+      "createAnother": "Направи још један",
+      "failedToGenerateVideoPlease": "Генерисање видеа није успело. Покушајте поново.",
+      "tryAgain": "Покушај поново",
+      "videoFormat": "Формат видеа",
+      "videoQuality": "Квалитет видеа",
+      "backgroundStyle": "Стил позадине",
+      "durationPerImage": "Трајање по слици:",
+      "n2sQuick": "2s (брзо)",
+      "n10sSlow": "10s (споро)",
+      "backgroundMusic": "Музика у позадини",
+      "includeBalkanestateaiWatermark": "Укључи водени жиг BalkanEstateAI",
+      "addsBrandingToYourVideo": "Додаје брендирање видеу за дељење на друштвеним мрежама",
+      "videoPreview": "Преглед видеа",
+      "images": "Слике",
+      "duration": "Трајање",
+      "size": "Величина",
+      "generateVideo": "Генериши видео",
+      "videoGenerationMayTake1": "Генерисање видеа може трајати 1-3 минута у зависности од броја слика.",
+      "postItThenAddThe": "Објавите га, па додајте линк у оглас",
+      "uploadTheDownloadedFileTo": "Отпремите преузету датотеку на једну од ових платформи, копирајте линк објаве и налепите га у поље за видео у огласу.",
+      "shareToInstagram": "Подели на Instagram-у",
+      "shareToTiktok": "Подели на TikTok-у",
+      "shareToYoutube": "Подели на YouTube-у",
+      "shareToFacebook": "Подели на Facebook-у",
+      "format": {
+        "vertical": {
+          "label": "Reels (9:16)",
+          "description": "Instagram Reels и TikTok"
+        },
+        "horizontal": {
+          "label": "Хоризонтално (16:9)",
+          "description": "YouTube и веб-сајтови"
+        },
+        "square": {
+          "label": "Квадрат (1:1)",
+          "description": "Instagram фид"
+        }
+      },
+      "music": {
+        "elegant": {
+          "label": "Елегантни клавир",
+          "description": "Савршено за луксузне некретнине"
+        },
+        "upbeat": {
+          "label": "Енергична корпоративна",
+          "description": "Одлично за модерне домове"
+        },
+        "calm": {
+          "label": "Мирни амбијент",
+          "description": "Идеално за сеоске некретнине"
+        },
+        "modern": {
+          "label": "Модерна електронска",
+          "description": "Погодно за градске станове"
+        }
+      },
+      "quality": {
+        "mobile": {
+          "label": "Мобилно (720p)",
+          "description": "Мања датотека, брже учитавање"
+        },
+        "standard": {
+          "label": "Стандардно (1080p)",
+          "description": "Пун квалитет, већа датотека"
+        }
+      },
+      "background": {
+        "elegant": {
+          "label": "Елегантна тамна",
+          "description": "Премијум тамна са златним акцентима"
+        },
+        "gradient": {
+          "label": "Градијент",
+          "description": "Љубичасто-плави градијент (Canva стил)"
+        },
+        "dark": {
+          "label": "Потпуно тамна",
+          "description": "Чиста тамна позадина"
+        },
+        "blur": {
+          "label": "Ефекат замућења",
+          "description": "Ефекат замућене позадине"
+        }
+      }
+    },
+    "geminiDescriptionGenerator": {
+      "n15Min": "15 мин",
+      "n30Min": "30 мин",
+      "n45Min": "45 мин",
+      "n60Min": "60 мин"
+    },
+    "marketInsightsAnimation": {
+      "analyzingYourProperty": "Анализирамо вашу некретнину...",
+      "whileOurAiWorksLearn": "Док наша AI ради, сазнајте више о тржишту",
+      "realEstateMarket": "некретнина",
+      "avgPriceM": "Просечна цена/m²",
+      "daysToSell": "Дана до продаје",
+      "yoyGrowth": "Годишњи раст",
+      "liveMarketDataPoweredBy": "📊 Тржишни подаци уживо уз AI • Ажурирано",
+      "marketTrends": "Тржишни трендови",
+      "timeOnMarket": "Време на тржишту",
+      "proTip": "Професионални савет",
+      "successRate": "Стопа успеха",
+      "bestPractice": "Најбоља пракса",
+      "yearOverYear": "Година у односу на годину",
+      "pricingStrategy": "Стратегија цена"
+    },
+    "roleSelector": {
+      "promotionCoupons": "Промотивни купони",
+      "featured": "⭐ Издвојено:",
+      "daysEach": "дана сваки",
+      "highlighted": "🔥 Истакнуто:",
+      "usedThisMonth": "Искоришћено овог месеца:"
+    },
+    "whackAnIconAnimation": {
+      "gameOver": "Крај игре!",
+      "yourScore": "Ваш резултат:",
+      "calculatingYourReward": "Рачуна се ваша награда...",
+      "time": "Време:",
+      "score": "Резултат:",
+      "whackAnIcon": "Удари иконицу!",
+      "analyzingProperty": "Анализира се некретнина...",
+      "ourAiIsHardAt": "Наша AI вредно ради. Слободно играјте игру док чекате!"
+    },
+    "onboarding": {
+      "trustedByLeadingAgenciesAcross": "Поверење водећих агенција широм Балкана",
+      "n11Countries50CitiesAi": "11 земаља • 50+ градова • AI претрага • хиљаде некретнина"
+    },
+    "aiAnalyzingAnimation": {
+      "claimYourDiscount": "Преузмите свој попуст!",
+      "analyzingProperty": "Анализира се некретнина...",
+      "clickTheButtonToReveal": "Кликните на дугме да откријете специјални једнократни попуст за објаву некретнине.",
+      "ourAiIsHardAt": "Наша AI вредно ради. Слободно се играјте иконицама док чекате!",
+      "revealMyDiscount": "Откриј мој попуст!"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Ваша агенција је успешно креирана. Сада имате посебну страницу агенције."
+    }
   }
 }

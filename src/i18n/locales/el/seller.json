@@ -33,6 +33,10 @@
       "buyer": "Αγοραστής",
       "free": "Δωρεάν",
       "proRequired": "Απαιτείται Pro"
+    },
+    "becomeAgent": {
+      "title": "Θέλετε να δημοσιεύετε ως μεσίτης;",
+      "description": "Μπορείτε να εγγραφείτε ως μεσίτης από τις Ρυθμίσεις προφίλ για να ξεκλειδώσετε λειτουργίες μεσίτη και υψηλότερα όρια αγγελιών."
     }
   },
   "createListing": {
@@ -53,7 +57,12 @@
     "progress": {
       "compressing": "Συμπίεση εικόνων...",
       "uploading": "Ανέβασμα στο cloud...",
-      "creating": "Δημιουργία αγγελίας..."
+      "creating": "Δημιουργία αγγελίας...",
+      "compressingHint": "Βελτιστοποιούμε τις εικόνες σας για την καλύτερη ποιότητα...",
+      "uploadingHint": "Ανεβάζουμε με ασφάλεια τις φωτογραφίες σας...",
+      "creatingHint": "Σχεδόν έτοιμο! Αποθηκεύουμε την αγγελία σας...",
+      "analyzing": "Αναλύουμε τις εικόνες σας...",
+      "analyzingHint": "Η AI μας αναγνωρίζει δωμάτια, χαρακτηριστικά και λεπτομέρειες από τις φωτογραφίες σας. Μπορεί να πάρει λίγο χρόνο."
     },
     "nextStep": "Επόμενο Βήμα",
     "previousStep": "Προηγούμενο Βήμα",
@@ -146,7 +155,12 @@
       "netArea": "Καθαρό εμβαδόν (m²)",
       "parkingType": "Τύπος στάθμευσης",
       "parkingSpaces": "Θέσεις",
-      "officeRooms": "Γραφεία"
+      "officeRooms": "Γραφεία",
+      "kitchens": "Κουζίνες",
+      "diningRooms": "Τραπεζαρίες",
+      "toilets": "Τουαλέτες (WC)",
+      "storageRooms": "Αποθήκες",
+      "offices": "Γραφείο / μελετητήριο"
     },
     "propertyFeatures": {
       "title": "Χαρακτηριστικά Ακινήτου",
@@ -164,7 +178,8 @@
       "parkingFeatures": "Χαρακτηριστικά Θέσης Στάθμευσης",
       "fencedSecured": "Περιφραγμένο / Ασφαλισμένο",
       "hasVegetation": "Με Βλάστηση / Δέντρα",
-      "hasWaterSource": "Με Πηγή Νερού"
+      "hasWaterSource": "Με Πηγή Νερού",
+      "landFeatures": "Χαρακτηριστικά οικοπέδου"
     },
     "advancedDetails": {
       "title": "Προχωρημένες Λεπτομέρειες Ακινήτου",
@@ -263,7 +278,7 @@
       "label": "URL Περιήγησης 360°",
       "placeholder": "https://my.matterport.com/show/?m=... ή https://kuula.co/share/...",
       "hint": "Επικολλήστε το URL ενσωμάτωσης ή κοινοποίησης από τον πάροχο 360 περιήγησης. Η περιήγηση θα εμφανίζεται ως διαδραστικό iframe στην αγγελία σας.",
-      "z360Hint": "Create your tour at z360-virtual-tour.vercel.app and paste the link here"
+      "z360Hint": "Δημιουργήστε την περιήγησή σας στο z360-virtual-tour.vercel.app και επικολλήστε τον σύνδεσμο εδώ"
     },
     "promotion": {
       "title": "Προωθήστε την Αγγελία σας",
@@ -323,7 +338,12 @@
       "title": "Διαθεσιμότητα Επισκέψεων",
       "enable": "Ενεργοποίηση Προγραμματισμού",
       "description": "Επιτρέψτε στους επισκέπτες να προγραμματίσουν επισκέψεις διαδικτυακά. Καθορίστε τις διαθέσιμες ημέρες και ώρες σας.",
-      "availableDays": "Διαθέσιμες Ημέρες"
+      "availableDays": "Διαθέσιμες Ημέρες",
+      "startTime": "Ώρα έναρξης",
+      "endTime": "Ώρα λήξης",
+      "slotDuration": "Διάρκεια χρονοθυρίδας",
+      "notes": "Σημειώσεις για τους επισκέπτες",
+      "notesPlaceholder": "π.χ., Χτυπήστε το κουδούνι στην πύλη, υπάρχει στάθμευση..."
     },
     "imageTags": {
       "exterior": "Εξωτερικά",
@@ -335,10 +355,10 @@
       "selectTag": "Επιλέξτε Ετικέτα"
     },
     "luxuryVillaBanner": {
-      "title": "Luxury Villas Collection",
-      "hint": "This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats."
+      "title": "Συλλογή πολυτελών βιλών",
+      "hint": "Αυτή η αγγελία θα εμφανίζεται στην αποκλειστική καρτέλα Πολυτελείς βίλες — ορατή σε premium αγοραστές που αναζητούν κορυφαία καταλύματα στα Βαλκάνια."
     },
-    "luxuryVillaBadge": "Appears in Luxury Villas",
+    "luxuryVillaBadge": "Εμφανίζεται στις Πολυτελείς βίλες",
     "quickAmenities": {
       "label": "Δημοφιλείς παροχές",
       "sauna": "Σάουνα",
@@ -384,6 +404,32 @@
       "limitTitle": "Έφτασες το όριο κατόψεων",
       "limit": "Μια αγγελία μπορεί να έχει έως {{max}} κατόψεις.",
       "switch": "Όροφοι"
+    },
+    "dailyRental": {
+      "title": "Λεπτομέρειες ημερήσιας ενοικίασης",
+      "checkIn": "Ώρα άφιξης",
+      "checkOut": "Ώρα αναχώρησης",
+      "cleaningFee": "Χρέωση καθαρισμού (€)",
+      "cancellationPolicy": "Πολιτική ακύρωσης",
+      "selectPolicy": "Επιλέξτε…",
+      "flexible": "Ευέλικτη",
+      "moderate": "Μέτρια",
+      "strict": "Αυστηρή",
+      "nonRefundable": "Χωρίς επιστροφή χρημάτων",
+      "included": "Περιλαμβάνεται στην τιμή",
+      "breakfast": "🍳 Πρωινό",
+      "towels": "🛁 Πετσέτες και λευκά είδη",
+      "parking": "🚗 Στάθμευση"
+    },
+    "preview": {
+      "banner": "Λειτουργία προεπισκόπησης",
+      "bannerHint": "Ελέγξτε την αγγελία σας πριν τη δημοσίευση",
+      "editListing": "Επεξεργασία αγγελίας",
+      "satisfied": "Είστε ικανοποιημένοι με την αγγελία σας;",
+      "goBackEdit": "Επιστροφή και επεξεργασία"
+    },
+    "ai": {
+      "locationHint": "Η προσθήκη τοποθεσίας βοηθά την AI να δημιουργεί πιο ακριβείς περιγραφές για την περιοχή"
     }
   },
   "myListings": {
@@ -584,7 +630,7 @@
       "exterior": "Συμπεριλάβετε εξωτερικές λήψεις",
       "clearPhotos": "Χρησιμοποιήστε καθαρές, υψηλής ποιότητας φωτογραφίες"
     },
-    "locationHint": "Adding location helps AI generate more accurate, location-specific descriptions"
+    "locationHint": "Η προσθήκη τοποθεσίας βοηθά την AI να δημιουργεί πιο ακριβείς περιγραφές για την περιοχή"
   },
   "promotion": {
     "title": "Προωθήστε την Αγγελία σας",
@@ -625,15 +671,15 @@
     "invalidCode": "Μη έγκυρος κωδικός έκπτωσης",
     "total": "Σύνολο",
     "proceedToPayment": "Συνέχεια στην Πληρωμή",
-    "day": "day",
-    "selectTier": "Please select a promotion tier",
-    "extendedSuccess": "Promotion extended successfully! New end date: {{date}}",
-    "activatedSuccess": "Promotion activated successfully!",
-    "activatedFree": "Promotion activated (free with coupon)!",
-    "loadFailed": "Failed to load promotion options",
-    "freeWithCoupon": "(Free with coupon)",
-    "skipForNow": "Skip for Now",
-    "postWithoutPromotion": "Post Without Promotion"
+    "day": "ημέρα",
+    "selectTier": "Επιλέξτε επίπεδο προώθησης",
+    "extendedSuccess": "Η προώθηση επεκτάθηκε επιτυχώς! Νέα ημερομηνία λήξης: {{date}}",
+    "activatedSuccess": "Η προώθηση ενεργοποιήθηκε επιτυχώς!",
+    "activatedFree": "Η προώθηση ενεργοποιήθηκε (δωρεάν με κουπόνι)!",
+    "loadFailed": "Η φόρτωση των επιλογών προώθησης απέτυχε",
+    "freeWithCoupon": "(Δωρεάν με κουπόνι)",
+    "skipForNow": "Παράλειψη προς το παρόν",
+    "postWithoutPromotion": "Δημοσίευση χωρίς προώθηση"
   },
   "distances": {
     "title": "Πληροφορίες Απόστασης",
@@ -747,17 +793,21 @@
     "buyerCannotCreateListing": "Οι αγοραστές δεν μπορούν να δημιουργήσουν καταχωρήσεις ακινήτων. Παρακαλώ αλλάξτε σε ρόλο Ιδιώτη Πωλητή ή Πράκτορα.",
     "monthlyLimitReached": "Το Μηνιαίο Όριο Καταχωρήσεων Έχει Επιτευχθεί",
     "monthlyLimitMessage": "Χρησιμοποιήσατε όλες τις καταχωρήσεις σας αυτό το μήνα. Επαναφορά στην αρχή του επόμενου μήνα.",
-    "monthlyLimitMessageWithCount": "Χρησιμοποιήσατε {{used}} από {{limit}} καταχωρήσεις αυτό το μήνα. Επαναφορά στην αρχή του επόμενου μήνα."
+    "monthlyLimitMessageWithCount": "Χρησιμοποιήσατε {{used}} από {{limit}} καταχωρήσεις αυτό το μήνα. Επαναφορά στην αρχή του επόμενου μήνα.",
+    "phoneRequired": "Απαιτείται αριθμός τηλεφώνου",
+    "phoneRequiredMessage": "Προσθέστε αριθμό κινητού στις Ρυθμίσεις προφίλ πριν δημιουργήσετε αγγελία."
   },
   "actions": {
     "subscribeToPro": "Εγγραφή στο Pro",
     "viewMyListings": "Δείτε τις Καταχωρήσεις μου",
     "switchRole": "Αλλαγή Ρόλου",
-    "requestMoreListings": "Ζητήστε Περισσότερες Καταχωρήσεις"
+    "requestMoreListings": "Ζητήστε Περισσότερες Καταχωρήσεις",
+    "playForDiscount": "Παίξτε για έκπτωση",
+    "saveDraft": "Αποθήκευση ως πρόχειρο"
   },
   "listings": {
-    "confirmSold": "Are you sure you want to mark this property as sold? This action cannot be undone.",
-    "confirmDelete": "Are you sure you want to delete this listing? This action cannot be undone."
+    "confirmSold": "Είστε σίγουροι ότι θέλετε να επισημάνετε αυτό το ακίνητο ως πωληθέν; Δεν μπορεί να αναιρεθεί.",
+    "confirmDelete": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την αγγελία; Δεν μπορεί να αναιρεθεί."
   },
   "promotionHistory": {
     "title": "Ιστορικό Προωθήσεων",
@@ -801,7 +851,13 @@
     "expiringIn_other": "Λήγει σε {{count}} ημέρες!",
     "extendNow": "Επέκταση Τώρα",
     "autoExtendReady": "Η αυτόματη επέκταση είναι έτοιμη! Ολοκληρώστε την πληρωμή για επέκταση.",
-    "completePayment": "Ολοκλήρωση Πληρωμής"
+    "completePayment": "Ολοκλήρωση Πληρωμής",
+    "tiers": {
+      "premium": "Premium Premiere",
+      "highlight": "Επισήμανση",
+      "featured": "Προβεβλημένο",
+      "standard": "Τυπικό"
+    }
   },
   "parkingTypes": {
     "garage": "Γκαράζ",
@@ -817,6 +873,158 @@
     "unfinishedRental": "Ημιτελής αγγελία ενοικίασης",
     "keptUntil": "Αποθηκεύτηκε ως πρόχειρο σε αυτή τη συσκευή έως {{date}}.",
     "continue": "Συνέχεια",
-    "discard": "Απόρριψη"
+    "discard": "Απόρριψη",
+    "savedTitle": "Το πρόχειρο αποθηκεύτηκε",
+    "savedMessage": "Η αγγελία σας αποθηκεύτηκε. Μπορείτε να συνεχίσετε την επεξεργασία αργότερα από τον λογαριασμό σας."
+  },
+  "ui": {
+    "videoGenerator": {
+      "videoGenerator": "Δημιουργός βίντεο",
+      "createAStunningVideoReel": "Δημιουργήστε ένα εντυπωσιακό βίντεο reel από τις φωτογραφίες του ακινήτου",
+      "noImagesAvailable": "Δεν υπάρχουν διαθέσιμες εικόνες",
+      "uploadPropertyImagesFirstTo": "Ανεβάστε πρώτα εικόνες του ακινήτου για να δημιουργήσετε βίντεο παρουσίασης.",
+      "creatingYourVideo": "Δημιουργία του βίντεό σας...",
+      "thisCanTakeAMinute": "Μπορεί να πάρει ένα λεπτό. Μην κλείσετε αυτό το παράθυρο.",
+      "yourVideoIsReady": "Το βίντεό σας είναι έτοιμο!",
+      "sVideoDownloadItPost": "βίντεο — κατεβάστε το, δημοσιεύστε το και προσθέστε τον σύνδεσμο στην αγγελία σας.",
+      "downloadVideo": "Λήψη βίντεο",
+      "createAnother": "Δημιουργία νέου",
+      "failedToGenerateVideoPlease": "Η δημιουργία βίντεο απέτυχε. Δοκιμάστε ξανά.",
+      "tryAgain": "Δοκιμάστε ξανά",
+      "videoFormat": "Μορφή βίντεο",
+      "videoQuality": "Ποιότητα βίντεο",
+      "backgroundStyle": "Στυλ φόντου",
+      "durationPerImage": "Διάρκεια ανά εικόνα:",
+      "n2sQuick": "2δ (γρήγορα)",
+      "n10sSlow": "10δ (αργά)",
+      "backgroundMusic": "Μουσική υπόκρουση",
+      "includeBalkanestateaiWatermark": "Συμπερίληψη υδατογραφήματος BalkanEstateAI",
+      "addsBrandingToYourVideo": "Προσθέτει την επωνυμία στο βίντεο για κοινοποίηση στα social",
+      "videoPreview": "Προεπισκόπηση βίντεο",
+      "images": "Εικόνες",
+      "duration": "Διάρκεια",
+      "size": "Μέγεθος",
+      "generateVideo": "Δημιουργία βίντεο",
+      "videoGenerationMayTake1": "Η δημιουργία βίντεο μπορεί να διαρκέσει 1-3 λεπτά ανάλογα με τον αριθμό των εικόνων.",
+      "postItThenAddThe": "Δημοσιεύστε το και προσθέστε τον σύνδεσμο στην αγγελία σας",
+      "uploadTheDownloadedFileTo": "Ανεβάστε το αρχείο σε μία από αυτές τις πλατφόρμες, αντιγράψτε τον σύνδεσμο της ανάρτησης και επικολλήστε τον στο πεδίο βίντεο της αγγελίας.",
+      "shareToInstagram": "Κοινοποίηση στο Instagram",
+      "shareToTiktok": "Κοινοποίηση στο TikTok",
+      "shareToYoutube": "Κοινοποίηση στο YouTube",
+      "shareToFacebook": "Κοινοποίηση στο Facebook",
+      "format": {
+        "vertical": {
+          "label": "Reels (9:16)",
+          "description": "Instagram Reels και TikTok"
+        },
+        "horizontal": {
+          "label": "Οριζόντιο (16:9)",
+          "description": "YouTube και ιστότοποι"
+        },
+        "square": {
+          "label": "Τετράγωνο (1:1)",
+          "description": "Ροή Instagram"
+        }
+      },
+      "music": {
+        "elegant": {
+          "label": "Κομψό πιάνο",
+          "description": "Ιδανικό για πολυτελή ακίνητα"
+        },
+        "upbeat": {
+          "label": "Ζωντανό εταιρικό",
+          "description": "Ιδανικό για σύγχρονα σπίτια"
+        },
+        "calm": {
+          "label": "Ήρεμη ατμόσφαιρα",
+          "description": "Ιδανικό για εξοχικά ακίνητα"
+        },
+        "modern": {
+          "label": "Σύγχρονη ηλεκτρονική",
+          "description": "Ταιριάζει σε αστικά διαμερίσματα"
+        }
+      },
+      "quality": {
+        "mobile": {
+          "label": "Κινητό (720p)",
+          "description": "Μικρότερο αρχείο, ταχύτερη φόρτωση"
+        },
+        "standard": {
+          "label": "Τυπικό (1080p)",
+          "description": "Πλήρης ποιότητα, μεγαλύτερο αρχείο"
+        }
+      },
+      "background": {
+        "elegant": {
+          "label": "Κομψό σκούρο",
+          "description": "Premium σκούρο με χρυσές πινελιές"
+        },
+        "gradient": {
+          "label": "Διαβάθμιση",
+          "description": "Μωβ-μπλε διαβάθμιση (στυλ Canva)"
+        },
+        "dark": {
+          "label": "Καθαρό σκούρο",
+          "description": "Καθαρό σκούρο φόντο"
+        },
+        "blur": {
+          "label": "Εφέ θολώματος",
+          "description": "Εφέ θολού φόντου"
+        }
+      }
+    },
+    "geminiDescriptionGenerator": {
+      "n15Min": "15 λεπτά",
+      "n30Min": "30 λεπτά",
+      "n45Min": "45 λεπτά",
+      "n60Min": "60 λεπτά"
+    },
+    "marketInsightsAnimation": {
+      "analyzingYourProperty": "Αναλύουμε το ακίνητό σας...",
+      "whileOurAiWorksLearn": "Όσο η AI μας δουλεύει, μάθετε για την αγορά",
+      "realEstateMarket": "ακινήτων",
+      "avgPriceM": "Μέση τιμή/m²",
+      "daysToSell": "Ημέρες έως την πώληση",
+      "yoyGrowth": "Ετήσια ανάπτυξη",
+      "liveMarketDataPoweredBy": "📊 Ζωντανά δεδομένα αγοράς με AI • Ενημερώθηκε",
+      "marketTrends": "Τάσεις αγοράς",
+      "timeOnMarket": "Χρόνος στην αγορά",
+      "proTip": "Επαγγελματική συμβουλή",
+      "successRate": "Ποσοστό επιτυχίας",
+      "bestPractice": "Βέλτιστη πρακτική",
+      "yearOverYear": "Σε ετήσια βάση",
+      "pricingStrategy": "Στρατηγική τιμολόγησης"
+    },
+    "roleSelector": {
+      "promotionCoupons": "Κουπόνια προώθησης",
+      "featured": "⭐ Προβεβλημένο:",
+      "daysEach": "ημέρες ο καθένας",
+      "highlighted": "🔥 Επισημασμένο:",
+      "usedThisMonth": "Χρησιμοποιήθηκαν αυτόν τον μήνα:"
+    },
+    "whackAnIconAnimation": {
+      "gameOver": "Τέλος παιχνιδιού!",
+      "yourScore": "Η βαθμολογία σας:",
+      "calculatingYourReward": "Υπολογισμός της ανταμοιβής σας...",
+      "time": "Χρόνος:",
+      "score": "Βαθμολογία:",
+      "whackAnIcon": "Χτύπα το εικονίδιο!",
+      "analyzingProperty": "Ανάλυση ακινήτου...",
+      "ourAiIsHardAt": "Η AI μας δουλεύει σκληρά. Παίξτε ένα παιχνίδι όσο περιμένετε!"
+    },
+    "onboarding": {
+      "trustedByLeadingAgenciesAcross": "Μας εμπιστεύονται κορυφαία γραφεία σε όλα τα Βαλκάνια",
+      "n11Countries50CitiesAi": "11 χώρες • 50+ πόλεις • αναζήτηση AI • χιλιάδες ακίνητα"
+    },
+    "aiAnalyzingAnimation": {
+      "claimYourDiscount": "Διεκδικήστε την έκπτωσή σας!",
+      "analyzingProperty": "Ανάλυση ακινήτου...",
+      "clickTheButtonToReveal": "Πατήστε το κουμπί για να αποκαλύψετε την ειδική εφάπαξ έκπτωση για την καταχώριση του ακινήτου σας.",
+      "ourAiIsHardAt": "Η AI μας δουλεύει σκληρά. Παίξτε με τα εικονίδια όσο περιμένετε!",
+      "revealMyDiscount": "Αποκάλυψη της έκπτωσής μου!"
+    },
+    "enterpriseCreationForm": {
+      "yourAgencyHasBeenCreated": "Το γραφείο σας δημιουργήθηκε επιτυχώς. Τώρα έχετε αποκλειστική σελίδα γραφείου."
+    }
   }
 }
