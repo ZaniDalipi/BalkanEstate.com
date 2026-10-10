@@ -200,7 +200,9 @@
       "yet": ".",
       "bisResidentialPropertyPriceIndex3": "Δείκτης τιμών κατοικιών BIS ↗",
       "worldBank2": "Παγκόσμια Τράπεζα ↗",
-      "priceIndexRefreshed": "Ο δείκτης τιμών ανανεώθηκε"
+      "priceIndexRefreshed": "Ο δείκτης τιμών ανανεώθηκε",
+      "balkanestateAiAnalysis": "Ανάλυση AI του BalkanEstate",
+      "balkanestateAiEstimate": "Εκτίμηση AI του BalkanEstate"
     },
     "suburbDetailPanel": {
       "close": "Κλείσιμο",

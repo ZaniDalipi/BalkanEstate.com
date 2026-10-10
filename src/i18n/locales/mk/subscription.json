@@ -294,7 +294,8 @@
     },
     "listingLimitYearly": "Годишни огласи",
     "listingUsageYearly": "{{used}} од {{limit}} оваа година",
-    "perYearLabel": "Годишно"
+    "perYearLabel": "Годишно",
+    "cancelled": "Претплатата е откажана"
   },
   "featuredAgency": {
     "title": "Истакната Агенција",

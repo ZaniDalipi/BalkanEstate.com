@@ -288,13 +288,14 @@
       "active": "AKTIVNA",
       "expired": "ISTEKLA",
       "trial": "PROBNI PERIOD",
-      "gracePeriod": "GRACE PERIOD",
+      "gracePeriod": "PERIOD ODGODE",
       "cancelled": "OTKAZANA",
       "free": "BESPLATNO"
     },
     "listingLimitYearly": "Godišnji oglasi",
     "listingUsageYearly": "{{used}} od {{limit}} ove godine",
-    "perYearLabel": "Godišnje"
+    "perYearLabel": "Godišnje",
+    "cancelled": "Pretplata je otkazana"
   },
   "featuredAgency": {
     "title": "Istaknuta Agencija",

@@ -200,7 +200,9 @@
       "yet": ".",
       "bisResidentialPropertyPriceIndex3": "BIS индекс цена стамбених некретнина ↗",
       "worldBank2": "Светска банка ↗",
-      "priceIndexRefreshed": "Индекс цена освежен"
+      "priceIndexRefreshed": "Индекс цена освежен",
+      "balkanestateAiAnalysis": "BalkanEstate AI анализа",
+      "balkanestateAiEstimate": "BalkanEstate AI процена"
     },
     "suburbDetailPanel": {
       "close": "Затвори",

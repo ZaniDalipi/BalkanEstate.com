@@ -294,7 +294,8 @@
     },
     "listingLimitYearly": "Godišnji oglasi",
     "listingUsageYearly": "{{used}} od {{limit}} ove godine",
-    "perYearLabel": "Godišnje"
+    "perYearLabel": "Godišnje",
+    "cancelled": "Pretplata je otkazana"
   },
   "featuredAgency": {
     "title": "Istaknuta Agencija",

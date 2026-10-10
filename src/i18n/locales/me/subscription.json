@@ -258,7 +258,7 @@
     "cancelPendingDesc": "Vaša pretplata biće otkazana na kraju obračunskog perioda {{date}}. Do tada imate pristup svim funkcijama.",
     "restoring": "Vraća se...",
     "keepSubscription": "Zadrži pretplatu",
-    "cancelled": "Subscription Cancelled",
+    "cancelled": "Pretplata je otkazana",
     "cancelledDesc": "Vaša pretplata je otkazana, ali i dalje imate pristup do {{date}}. Nakon tog datuma prelazite na besplatni plan.",
     "resubscribe": "Ponovo se pretplati",
     "settings": "Podešavanja pretplate",
@@ -289,7 +289,7 @@
       "active": "AKTIVNA",
       "expired": "ISTEKLA",
       "trial": "PROBNI PERIOD",
-      "gracePeriod": "GRACE PERIOD",
+      "gracePeriod": "PERIOD ODLAGANJA",
       "cancelled": "OTKAZANA",
       "free": "BESPLATNO"
     },

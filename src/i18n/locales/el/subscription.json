@@ -294,7 +294,8 @@
     },
     "listingLimitYearly": "Ετήσιες αγγελίες",
     "listingUsageYearly": "{{used}} από {{limit}} φέτος",
-    "perYearLabel": "Ανά έτος"
+    "perYearLabel": "Ανά έτος",
+    "cancelled": "Η συνδρομή ακυρώθηκε"
   },
   "featuredAgency": {
     "title": "Προβεβλημένο Γραφείο",

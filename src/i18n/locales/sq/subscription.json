@@ -294,7 +294,8 @@
     },
     "listingLimitYearly": "Shpallje vjetore",
     "listingUsageYearly": "{{used}} nga {{limit}} këtë vit",
-    "perYearLabel": "Në vit"
+    "perYearLabel": "Në vit",
+    "cancelled": "Abonimi u anulua"
   },
   "featuredAgency": {
     "title": "Agjenci e Veçantë",
