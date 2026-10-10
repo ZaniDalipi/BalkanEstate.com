@@ -12,7 +12,11 @@
   "hero": {
     "title": "Изследвайте Градове на Балканите",
     "subtitle": "Подобрени с AI пазарни анализи за {{count}} основни града в 10 държави",
-    "discoverSubtitle": "Открийте най-добрите пазари на недвижими имоти на Балканите"
+    "discoverSubtitle": "Открийте най-добрите пазари на недвижими имоти на Балканите",
+    "badge": "Пазарен анализ",
+    "titleHighlight": "Пазари на Балканите",
+    "filterTitle": "Филтрирай по държава",
+    "filterSubtitle": "Разгледайте пазарите в конкретни региони"
   },
   "empty": {
     "title": "Няма данни за града",
@@ -71,10 +75,10 @@
     "message": "Извличане на пазарни данни за градовете на Балканите"
   },
   "seo": {
-    "title": "Explore Balkan Cities - Property Markets, Prices & City Guides",
-    "description": "Explore {{cityCount}}+ cities across {{countryCount}} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.",
-    "schemaName": "Balkan Cities Property Guide",
-    "schemaDescription": "Property market data for {{count}} cities across the Balkans"
+    "title": "Разгледайте балканските градове - пазари на имоти, цени и пътеводители",
+    "description": "Разгледайте {{cityCount}}+ града в {{countryCount}} балкански държави. Сравнете цени на имоти, доходност от наеми и пазарни тенденции в Тирана, Будва, Белград, Скопие и други.",
+    "schemaName": "Пътеводител за имоти в балканските градове",
+    "schemaDescription": "Пазарни данни за имоти в {{count}} града на Балканите"
   },
   "dashboard": {
     "notFound": "Градът не е намерен",
@@ -151,5 +155,120 @@
     "monthsAgo": "преди {{count}} месеца",
     "label": "Данните са изтеглени {{age}}",
     "labelWithSource": "Данните са изтеглени {{age}} · {{source}}"
+  },
+  "badges": {
+    "realTimeData": "Данни в реално време",
+    "aiInsights": "Пазарни анализи",
+    "marketTrends": "Пазарни тенденции"
+  },
+  "ui": {
+    "cityDashboard": {
+      "marketScoresDemandIndexRental": "Пазарните оценки, индексът на търсене, оценките на наемите, данните за кварталите и статистиките са генерирани от AI чрез регионалния ни модел на данни.",
+      "officialSources": "Официални източници",
+      "priceHistoryFrom": "История на цените от",
+      "macroeconomicDataFrom": "· Макроикономически данни от",
+      "worldBank": "Световната банка",
+      "photosFrom": "· Снимки от",
+      "avgPriceM": "Средна цена /m²",
+      "listings": "Обяви",
+      "official": "Официално",
+      "bisResidentialPropertyPriceIndex": "Индекс на BIS за цените на жилищни имоти",
+      "activeListings": "активни обяви",
+      "officialData": "Официални данни ↗",
+      "pricesAnchoredToOfficialGovernment": "Цените са обвързани с официални държавни данни — докоснете",
+      "onThePriceCardTo": "на картата с цената, за да видите индекса на BIS.",
+      "officialReference": "Официална справка",
+      "yoy": "% годишно",
+      "bisResidentialPropertyPriceIndex2": "Индекс на BIS за цените на жилищни имоти ·",
+      "viewSource": "Виж източника ↗",
+      "officialMarketData": "Официални пазарни данни",
+      "priceHistoryIsBeingPrepared": "Историята на цените се подготвя за",
+      "exploreNeighborhoods": "Разгледайте кварталите",
+      "marketResearchData": "◈ Данни от пазарно проучване",
+      "balkanestateAiAnalysis2": "✦ AI анализ на BalkanEstate",
+      "estimatedDataUpdating": "Приблизителни данни · обновяване…",
+      "viewOfficialDataSource": "Виж официалния източник на данни",
+      "dataAnchoredTo": "Данни, базирани на",
+      "interactiveMap": "Интерактивна карта",
+      "listView": "Изглед на списък",
+      "neighborhoodDataIsBeingPrepared": "Данните за кварталите се подготвят. Проверете скоро.",
+      "tapANeighbourhoodOnThe": "Докоснете квартал на картата за подробности",
+      "clickANeighborhood": "Щракнете върху квартал",
+      "toSeeDetailedStats": "за да видите подробна статистика",
+      "vsCityAvg": "спрямо средното за града",
+      "noNeighborhoodDataAvailableFor": "Все още няма данни за кварталите в",
+      "yet": ".",
+      "bisResidentialPropertyPriceIndex3": "Индекс на BIS за цените на жилищни имоти ↗",
+      "worldBank2": "Световната банка ↗",
+      "priceIndexRefreshed": "Индексът на цените е обновен"
+    },
+    "suburbDetailPanel": {
+      "close": "Затвори",
+      "averageAskingPricePerM": "Средна искана цена на m²",
+      "typicalPropertyPrice": "Типична цена на имот",
+      "cityAverage": "Средно за града",
+      "yoyGrowth": "Годишен ръст",
+      "rentalYield": "Доходност от наем",
+      "daysOnMarket": "Дни на пазара",
+      "activeListings": "Активни обяви",
+      "estimatedPrices": "Приблизителни цени",
+      "basedOnAvg": "Въз основа на средно €",
+      "grade": "Оценка",
+      "buyerDemand": "Търсене от купувачи",
+      "high": "🔥 Високо",
+      "medium": "📊 Средно",
+      "low": "📉 Ниско",
+      "propertyMix": "Структура на имотите",
+      "highlights": "Акценти",
+      "viewListingsIn": "Виж обявите в",
+      "strongYieldHighDemand": "Висока доходност + силно търсене",
+      "solidInvestmentProfile": "Солиден инвестиционен профил",
+      "moderateInvestmentCase": "Умерен инвестиционен потенциал",
+      "belowAverageMetrics": "Показатели под средното"
+    },
+    "priceHistoryChart": {
+      "noPriceHistoryAvailable": "Няма налична история на цените",
+      "n8YearPriceHistory": "История на цените за 8 години",
+      "quarterlyMFor": "Тримесечни €/m² за",
+      "bisResidentialPropertyPriceIndex": "Индекс на BIS за цените на жилищни имоти",
+      "estimatedFromRegionalData": "оценено по регионални данни",
+      "yoy": "Годишно",
+      "n5Year": "5 години",
+      "current": "Текуща",
+      "quarterlyObservations": "тримесечни наблюдения",
+      "source": "Източник:",
+      "estimatedFromRegionalComparableCities": "оценено по сравними градове в региона"
+    },
+    "economicIndicatorsPanel": {
+      "economicContext": "Икономически контекст —",
+      "worldBankOpenData": "Отворени данни на Световната банка ↗",
+      "gdpGrowthYoy": "Ръст на БВП (годишен)",
+      "annualRealGrowth": "Годишен реален ръст",
+      "inflationCpi": "Инфлация (ИПЦ)",
+      "consumerPriceIndex": "Индекс на потребителските цени",
+      "mortgageRate": "Лихва по ипотека",
+      "avgLendingRate": "Средна лихва по кредити",
+      "gniPerCapita": "БНД на глава от населението",
+      "usdAtlasMethod": "USD, метод Atlas",
+      "population": "Население",
+      "countryTotal": "Общо за страната",
+      "unemployment": "Безработица",
+      "laborForce": "% от работната сила"
+    },
+    "cityMarketCard": {
+      "avgPriceM": "Средна цена /m²",
+      "market": "Пазар",
+      "listings": "Обяви",
+      "marketResearch": "Пазарно проучване"
+    },
+    "citySuburbMap": {
+      "noSuburbDataAvailable": "Няма данни за кварталите",
+      "estimate": "Оценка",
+      "osmBoundaries": "📍 Граници от OSM",
+      "approxDistricts": "◇ Приблизителни райони",
+      "noData": "Няма данни",
+      "districts": "Райони",
+      "approxDistricts2": "Приблизителни райони"
+    }
   }
 }

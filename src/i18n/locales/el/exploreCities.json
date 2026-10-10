@@ -12,7 +12,11 @@
   "hero": {
     "title": "Εξερευνήστε Βαλκανικές Πόλεις",
     "subtitle": "Αναλύσεις αγοράς με τεχνητή νοημοσύνη για {{count}} μεγάλες πόλεις σε 10 χώρες",
-    "discoverSubtitle": "Ανακαλύψτε τις καλύτερες αγορές ακινήτων στα Βαλκάνια"
+    "discoverSubtitle": "Ανακαλύψτε τις καλύτερες αγορές ακινήτων στα Βαλκάνια",
+    "badge": "Ανάλυση αγοράς",
+    "titleHighlight": "Αγορές σε όλα τα Βαλκάνια",
+    "filterTitle": "Φιλτράρισμα ανά χώρα",
+    "filterSubtitle": "Εξερευνήστε αγορές σε συγκεκριμένες περιοχές"
   },
   "empty": {
     "title": "Δεν Υπάρχουν Διαθέσιμα Δεδομένα Πόλεων",
@@ -71,10 +75,10 @@
     "message": "Ανάκτηση δεδομένων αγοράς για βαλκανικές πόλεις"
   },
   "seo": {
-    "title": "Explore Balkan Cities - Property Markets, Prices & City Guides",
-    "description": "Explore {{cityCount}}+ cities across {{countryCount}} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.",
-    "schemaName": "Balkan Cities Property Guide",
-    "schemaDescription": "Property market data for {{count}} cities across the Balkans"
+    "title": "Εξερευνήστε τις πόλεις των Βαλκανίων - Αγορές ακινήτων, τιμές και οδηγοί πόλεων",
+    "description": "Εξερευνήστε {{cityCount}}+ πόλεις σε {{countryCount}} χώρες των Βαλκανίων. Συγκρίνετε τιμές ακινήτων, αποδόσεις ενοικίων και τάσεις αγοράς σε Τίρανα, Μπούντβα, Βελιγράδι, Σκόπια και άλλες.",
+    "schemaName": "Οδηγός ακινήτων για τις πόλεις των Βαλκανίων",
+    "schemaDescription": "Δεδομένα αγοράς ακινήτων για {{count}} πόλεις στα Βαλκάνια"
   },
   "dashboard": {
     "notFound": "Η πόλη δεν βρέθηκε",
@@ -151,5 +155,120 @@
     "monthsAgo": "{{count}} μήνες πριν",
     "label": "Δεδομένα από {{age}}",
     "labelWithSource": "Δεδομένα από {{age}} · {{source}}"
+  },
+  "badges": {
+    "realTimeData": "Δεδομένα σε πραγματικό χρόνο",
+    "aiInsights": "Πληροφορίες αγοράς",
+    "marketTrends": "Τάσεις αγοράς"
+  },
+  "ui": {
+    "cityDashboard": {
+      "marketScoresDemandIndexRental": "Οι βαθμολογίες αγοράς, ο δείκτης ζήτησης, οι εκτιμήσεις ενοικίων, οι πληροφορίες γειτονιών και τα στατιστικά περιοχών δημιουργούνται από AI με βάση το περιφερειακό μας μοντέλο δεδομένων.",
+      "officialSources": "Επίσημες πηγές",
+      "priceHistoryFrom": "Ιστορικό τιμών από",
+      "macroeconomicDataFrom": "· Μακροοικονομικά δεδομένα από",
+      "worldBank": "Παγκόσμια Τράπεζα",
+      "photosFrom": "· Φωτογραφίες από",
+      "avgPriceM": "Μέση τιμή /m²",
+      "listings": "Αγγελίες",
+      "official": "Επίσημο",
+      "bisResidentialPropertyPriceIndex": "Δείκτης τιμών κατοικιών BIS",
+      "activeListings": "ενεργές αγγελίες",
+      "officialData": "Επίσημα δεδομένα ↗",
+      "pricesAnchoredToOfficialGovernment": "Οι τιμές βασίζονται σε επίσημα κρατικά δεδομένα — πατήστε",
+      "onThePriceCardTo": "στην κάρτα τιμής για να δείτε τον δείκτη BIS.",
+      "officialReference": "Επίσημη αναφορά",
+      "yoy": "% ετησίως",
+      "bisResidentialPropertyPriceIndex2": "Δείκτης τιμών κατοικιών BIS ·",
+      "viewSource": "Προβολή πηγής ↗",
+      "officialMarketData": "Επίσημα δεδομένα αγοράς",
+      "priceHistoryIsBeingPrepared": "Το ιστορικό τιμών ετοιμάζεται για",
+      "exploreNeighborhoods": "Εξερευνήστε τις γειτονιές",
+      "marketResearchData": "◈ Δεδομένα έρευνας αγοράς",
+      "balkanestateAiAnalysis2": "✦ Ανάλυση AI του BalkanEstate",
+      "estimatedDataUpdating": "Εκτιμώμενα δεδομένα · ενημέρωση…",
+      "viewOfficialDataSource": "Προβολή επίσημης πηγής δεδομένων",
+      "dataAnchoredTo": "Δεδομένα με βάση",
+      "interactiveMap": "Διαδραστικός χάρτης",
+      "listView": "Προβολή λίστας",
+      "neighborhoodDataIsBeingPrepared": "Τα δεδομένα γειτονιών ετοιμάζονται. Επιστρέψτε σύντομα.",
+      "tapANeighbourhoodOnThe": "Πατήστε μια γειτονιά στον χάρτη για λεπτομέρειες",
+      "clickANeighborhood": "Κάντε κλικ σε μια γειτονιά",
+      "toSeeDetailedStats": "για να δείτε αναλυτικά στατιστικά",
+      "vsCityAvg": "σε σχέση με τον μέσο όρο της πόλης",
+      "noNeighborhoodDataAvailableFor": "Δεν υπάρχουν ακόμη δεδομένα γειτονιών για",
+      "yet": ".",
+      "bisResidentialPropertyPriceIndex3": "Δείκτης τιμών κατοικιών BIS ↗",
+      "worldBank2": "Παγκόσμια Τράπεζα ↗",
+      "priceIndexRefreshed": "Ο δείκτης τιμών ανανεώθηκε"
+    },
+    "suburbDetailPanel": {
+      "close": "Κλείσιμο",
+      "averageAskingPricePerM": "Μέση ζητούμενη τιμή ανά m²",
+      "typicalPropertyPrice": "Τυπική τιμή ακινήτου",
+      "cityAverage": "Μέσος όρος πόλης",
+      "yoyGrowth": "Ετήσια ανάπτυξη",
+      "rentalYield": "Απόδοση ενοικίου",
+      "daysOnMarket": "Ημέρες στην αγορά",
+      "activeListings": "Ενεργές αγγελίες",
+      "estimatedPrices": "Εκτιμώμενες τιμές",
+      "basedOnAvg": "Με βάση τον μέσο όρο €",
+      "grade": "Βαθμός",
+      "buyerDemand": "Ζήτηση αγοραστών",
+      "high": "🔥 Υψηλή",
+      "medium": "📊 Μέτρια",
+      "low": "📉 Χαμηλή",
+      "propertyMix": "Μείγμα ακινήτων",
+      "highlights": "Βασικά σημεία",
+      "viewListingsIn": "Προβολή αγγελιών σε",
+      "strongYieldHighDemand": "Ισχυρή απόδοση + υψηλή ζήτηση",
+      "solidInvestmentProfile": "Σταθερό επενδυτικό προφίλ",
+      "moderateInvestmentCase": "Μέτρια επενδυτική ευκαιρία",
+      "belowAverageMetrics": "Δείκτες κάτω του μέσου όρου"
+    },
+    "priceHistoryChart": {
+      "noPriceHistoryAvailable": "Δεν υπάρχει διαθέσιμο ιστορικό τιμών",
+      "n8YearPriceHistory": "Ιστορικό τιμών 8 ετών",
+      "quarterlyMFor": "Τριμηνιαία €/m² για",
+      "bisResidentialPropertyPriceIndex": "Δείκτης τιμών κατοικιών BIS",
+      "estimatedFromRegionalData": "εκτίμηση από περιφερειακά δεδομένα",
+      "yoy": "Ετήσια",
+      "n5Year": "5 ετών",
+      "current": "Τρέχουσα",
+      "quarterlyObservations": "τριμηνιαίες παρατηρήσεις",
+      "source": "Πηγή:",
+      "estimatedFromRegionalComparableCities": "εκτίμηση από συγκρίσιμες πόλεις της περιοχής"
+    },
+    "economicIndicatorsPanel": {
+      "economicContext": "Οικονομικό πλαίσιο —",
+      "worldBankOpenData": "Ανοιχτά δεδομένα Παγκόσμιας Τράπεζας ↗",
+      "gdpGrowthYoy": "Ανάπτυξη ΑΕΠ (ετήσια)",
+      "annualRealGrowth": "Ετήσια πραγματική ανάπτυξη",
+      "inflationCpi": "Πληθωρισμός (ΔΤΚ)",
+      "consumerPriceIndex": "Δείκτης τιμών καταναλωτή",
+      "mortgageRate": "Επιτόκιο στεγαστικού",
+      "avgLendingRate": "Μέσο επιτόκιο δανεισμού",
+      "gniPerCapita": "ΑΕΕ κατά κεφαλή",
+      "usdAtlasMethod": "USD, μέθοδος Atlas",
+      "population": "Πληθυσμός",
+      "countryTotal": "Σύνολο χώρας",
+      "unemployment": "Ανεργία",
+      "laborForce": "% εργατικού δυναμικού"
+    },
+    "cityMarketCard": {
+      "avgPriceM": "Μέση τιμή /m²",
+      "market": "Αγορά",
+      "listings": "Αγγελίες",
+      "marketResearch": "Έρευνα αγοράς"
+    },
+    "citySuburbMap": {
+      "noSuburbDataAvailable": "Δεν υπάρχουν δεδομένα περιοχών",
+      "estimate": "Εκτίμηση",
+      "osmBoundaries": "📍 Όρια OSM",
+      "approxDistricts": "◇ Κατά προσέγγιση περιοχές",
+      "noData": "Χωρίς δεδομένα",
+      "districts": "Περιοχές",
+      "approxDistricts2": "Κατά προσέγγιση περιοχές"
+    }
   }
 }

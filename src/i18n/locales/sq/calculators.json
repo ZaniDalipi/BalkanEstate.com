@@ -33,8 +33,8 @@
       "loanTerm": "Afati i Kredisë",
       "years": "vite",
       "yrs": "vite",
-      "country": "Country",
-      "quickSelect": "Quick select:",
+      "country": "Shteti",
+      "quickSelect": "Zgjedhje e shpejtë:",
       "currency": "Monedha"
     },
     "results": {
@@ -54,20 +54,20 @@
     },
     "disclaimer": "Ky është një vlerësim vetëm për qëllime informative. Konsultohuni me një profesionist financiar për normat dhe pagesat aktuale.",
     "features": {
-      "accurate": "Accurate Estimates",
-      "accurateDesc": "Get precise monthly payment calculations",
-      "flexible": "Flexible Terms",
-      "flexibleDesc": "Compare different loan terms and rates",
+      "accurate": "Vlerësime të sakta",
+      "accurateDesc": "Merrni llogaritje të sakta të këstit mujor",
+      "flexible": "Kushte fleksibile",
+      "flexibleDesc": "Krahasoni afate dhe norma të ndryshme kredie",
       "local": "Çmime në Euro",
       "localDesc": "Vlerësime të qarta në euro në të gjithë Ballkanin"
     },
-    "howItWorks": "How It Works",
-    "step1Title": "Enter Property Price",
-    "step1Desc": "Input the price of the property you want to buy",
-    "step2Title": "Adjust Parameters",
-    "step2Desc": "Set your down payment, loan term, and interest rate",
-    "step3Title": "See Your Payment",
-    "step3Desc": "Get your estimated monthly mortgage payment instantly",
+    "howItWorks": "Si funksionon",
+    "step1Title": "Futni çmimin e pronës",
+    "step1Desc": "Futni çmimin e pronës që dëshironi të blini",
+    "step2Title": "Rregulloni parametrat",
+    "step2Desc": "Vendosni këstin fillestar, afatin dhe normën e interesit",
+    "step3Title": "Shihni këstin tuaj",
+    "step3Desc": "Merrni menjëherë këstin mujor të vlerësuar të kredisë",
     "rateContext": "Norma tipike për {{country}}: {{min}}%–{{max}}% (mesatarja e tregut {{year}}). Përshtateni me ofertën e bankës suaj.",
     "errors": {
       "rateRequired": "Vendosni një normë interesi",
@@ -163,5 +163,16 @@
     "perMonth": "/muaj",
     "perYear": "/vit",
     "invalidValue": "Vlerë e pavlefshme"
+  },
+  "ui": {
+    "rentVsBuyCalculator": {
+      "after8YearsItS": "Pas 8 vitesh, është më lirë të",
+      "buy": "blini",
+      "estimatedSavings0": "Kursime të vlerësuara: $0",
+      "totalCostToRent": "Kostoja totale e qirasë",
+      "netCostToOwn": "Kostoja neto e pronësisë",
+      "yearlyCostComparison": "Krahasimi vjetor i kostove",
+      "year1": "Viti 1"
+    }
   }
 }

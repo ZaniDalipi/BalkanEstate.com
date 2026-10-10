@@ -12,7 +12,11 @@
   "hero": {
     "title": "Eksploroni Qytetet Ballkanike",
     "subtitle": "Njohuri të pasura nga AI për {{count}} qytete kryesore në 10 vende",
-    "discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në të gjithë Ballkanin"
+    "discoverSubtitle": "Zbuloni tregjet më të mira të pasurive të paluajtshme në të gjithë Ballkanin",
+    "badge": "Inteligjenca e tregut",
+    "titleHighlight": "Tregjet në të gjithë Ballkanin",
+    "filterTitle": "Filtro sipas shtetit",
+    "filterSubtitle": "Eksploroni tregjet në rajone specifike"
   },
   "empty": {
     "title": "Nuk ka të dhëna për Qytetin",
@@ -71,10 +75,10 @@
     "message": "Po merren të dhënat e tregut për qytetet ballkanike"
   },
   "seo": {
-    "title": "Explore Balkan Cities - Property Markets, Prices & City Guides",
-    "description": "Explore {{cityCount}}+ cities across {{countryCount}} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.",
-    "schemaName": "Balkan Cities Property Guide",
-    "schemaDescription": "Property market data for {{count}} cities across the Balkans"
+    "title": "Eksploroni qytetet e Ballkanit - Tregjet e pronave, çmimet dhe udhëzues qytetesh",
+    "description": "Eksploroni {{cityCount}}+ qytete në {{countryCount}} vende të Ballkanit. Krahasoni çmimet e pronave, rendimentet e qirasë dhe tendencat e tregut në Tiranë, Budva, Beograd, Shkup dhe më shumë.",
+    "schemaName": "Udhëzues pronash për qytetet e Ballkanit",
+    "schemaDescription": "Të dhëna tregu pronash për {{count}} qytete në Ballkan"
   },
   "dashboard": {
     "notFound": "Qyteti nuk u gjet",
@@ -151,5 +155,120 @@
     "monthsAgo": "{{count}} muaj më parë",
     "label": "Të dhënat e marra {{age}}",
     "labelWithSource": "Të dhënat e marra {{age}} · {{source}}"
+  },
+  "badges": {
+    "realTimeData": "Të dhëna në kohë reale",
+    "aiInsights": "Analiza tregu",
+    "marketTrends": "Tendencat e tregut"
+  },
+  "ui": {
+    "cityDashboard": {
+      "marketScoresDemandIndexRental": "Pikët e tregut, indeksi i kërkesës, vlerësimet e qirasë, analizat e lagjeve dhe statistikat e periferive gjenerohen nga AI duke përdorur modelin tonë rajonal të të dhënave.",
+      "officialSources": "Burime zyrtare",
+      "priceHistoryFrom": "Historiku i çmimeve nga",
+      "macroeconomicDataFrom": "· Të dhëna makroekonomike nga",
+      "worldBank": "Banka Botërore",
+      "photosFrom": "· Foto nga",
+      "avgPriceM": "Çmimi mesatar /m²",
+      "listings": "Shpallje",
+      "official": "Zyrtare",
+      "bisResidentialPropertyPriceIndex": "Indeksi BIS i çmimeve të pronave të banimit",
+      "activeListings": "shpallje aktive",
+      "officialData": "Të dhëna zyrtare ↗",
+      "pricesAnchoredToOfficialGovernment": "Çmimet mbështeten në të dhëna zyrtare qeveritare — prekni",
+      "onThePriceCardTo": "në kartën e çmimit për të parë indeksin BIS.",
+      "officialReference": "Referencë zyrtare",
+      "yoy": "% vjetore",
+      "bisResidentialPropertyPriceIndex2": "Indeksi BIS i çmimeve të pronave të banimit ·",
+      "viewSource": "Shiko burimin ↗",
+      "officialMarketData": "Të dhëna zyrtare tregu",
+      "priceHistoryIsBeingPrepared": "Historiku i çmimeve po përgatitet për",
+      "exploreNeighborhoods": "Eksploroni lagjet",
+      "marketResearchData": "◈ Të dhëna nga kërkimi i tregut",
+      "balkanestateAiAnalysis2": "✦ Analiza AI e BalkanEstate",
+      "estimatedDataUpdating": "Të dhëna të vlerësuara · po përditësohen…",
+      "viewOfficialDataSource": "Shiko burimin zyrtar të të dhënave",
+      "dataAnchoredTo": "Të dhënat të mbështetura në",
+      "interactiveMap": "Hartë interaktive",
+      "listView": "Pamje liste",
+      "neighborhoodDataIsBeingPrepared": "Të dhënat e lagjeve po përgatiten. Kthehuni së shpejti.",
+      "tapANeighbourhoodOnThe": "Prekni një lagje në hartë për detaje",
+      "clickANeighborhood": "Klikoni një lagje",
+      "toSeeDetailedStats": "për të parë statistika të detajuara",
+      "vsCityAvg": "krahasuar me mesataren e qytetit",
+      "noNeighborhoodDataAvailableFor": "Ende nuk ka të dhëna për lagjet e",
+      "yet": ".",
+      "bisResidentialPropertyPriceIndex3": "Indeksi BIS i çmimeve të pronave të banimit ↗",
+      "worldBank2": "Banka Botërore ↗",
+      "priceIndexRefreshed": "Indeksi i çmimeve u rifreskua"
+    },
+    "suburbDetailPanel": {
+      "close": "Mbyll",
+      "averageAskingPricePerM": "Çmimi mesatar i kërkuar për m²",
+      "typicalPropertyPrice": "Çmimi tipik i pronës",
+      "cityAverage": "Mesatarja e qytetit",
+      "yoyGrowth": "Rritja vjetore",
+      "rentalYield": "Rendimenti i qirasë",
+      "daysOnMarket": "Ditë në treg",
+      "activeListings": "Shpallje aktive",
+      "estimatedPrices": "Çmime të vlerësuara",
+      "basedOnAvg": "Bazuar në mesataren €",
+      "grade": "Nota",
+      "buyerDemand": "Kërkesa e blerësve",
+      "high": "🔥 E lartë",
+      "medium": "📊 Mesatare",
+      "low": "📉 E ulët",
+      "propertyMix": "Përbërja e pronave",
+      "highlights": "Pikat kryesore",
+      "viewListingsIn": "Shiko shpalljet në",
+      "strongYieldHighDemand": "Rendiment i fortë + kërkesë e lartë",
+      "solidInvestmentProfile": "Profil i fortë investimi",
+      "moderateInvestmentCase": "Rast investimi mesatar",
+      "belowAverageMetrics": "Tregues nën mesataren"
+    },
+    "priceHistoryChart": {
+      "noPriceHistoryAvailable": "Nuk ka historik çmimesh",
+      "n8YearPriceHistory": "Historiku 8-vjeçar i çmimeve",
+      "quarterlyMFor": "€/m² tremujore për",
+      "bisResidentialPropertyPriceIndex": "Indeksi BIS i çmimeve të pronave të banimit",
+      "estimatedFromRegionalData": "vlerësuar nga të dhëna rajonale",
+      "yoy": "Vjetore",
+      "n5Year": "5-vjeçare",
+      "current": "Aktuale",
+      "quarterlyObservations": "vëzhgime tremujore",
+      "source": "Burimi:",
+      "estimatedFromRegionalComparableCities": "vlerësuar nga qytete të krahasueshme rajonale"
+    },
+    "economicIndicatorsPanel": {
+      "economicContext": "Konteksti ekonomik —",
+      "worldBankOpenData": "Të dhëna të hapura të Bankës Botërore ↗",
+      "gdpGrowthYoy": "Rritja e PBB (vjetore)",
+      "annualRealGrowth": "Rritje reale vjetore",
+      "inflationCpi": "Inflacioni (IÇK)",
+      "consumerPriceIndex": "Indeksi i çmimeve të konsumit",
+      "mortgageRate": "Norma e kredisë hipotekore",
+      "avgLendingRate": "Norma mesatare e kreditimit",
+      "gniPerCapita": "TKB për frymë",
+      "usdAtlasMethod": "USD, metoda Atlas",
+      "population": "Popullsia",
+      "countryTotal": "Gjithsej në vend",
+      "unemployment": "Papunësia",
+      "laborForce": "% e fuqisë punëtore"
+    },
+    "cityMarketCard": {
+      "avgPriceM": "Çmimi mesatar /m²",
+      "market": "Tregu",
+      "listings": "Shpallje",
+      "marketResearch": "Kërkim tregu"
+    },
+    "citySuburbMap": {
+      "noSuburbDataAvailable": "Nuk ka të dhëna për zonat",
+      "estimate": "Vlerësim",
+      "osmBoundaries": "📍 Kufijtë OSM",
+      "approxDistricts": "◇ Rrethe të përafërta",
+      "noData": "Nuk ka të dhëna",
+      "districts": "Rrethet",
+      "approxDistricts2": "Rrethe të përafërta"
+    }
   }
 }

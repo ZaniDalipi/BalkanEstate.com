@@ -12,7 +12,11 @@
   "hero": {
     "title": "Explorați Orașele Balcanice",
     "subtitle": "Informații de piață generate de inteligența artificială pentru {{count}} orașe mari din 10 țări",
-    "discoverSubtitle": "Descoperiți cele mai bune piețe imobiliare din Balcani"
+    "discoverSubtitle": "Descoperiți cele mai bune piețe imobiliare din Balcani",
+    "badge": "Analiză de piață",
+    "titleHighlight": "Piețe din Balcani",
+    "filterTitle": "Filtrează după țară",
+    "filterSubtitle": "Explorează piețele din anumite regiuni"
   },
   "empty": {
     "title": "Nu Sunt Disponibile Date despre Orașe",
@@ -71,10 +75,10 @@
     "message": "Se preiau datele de piață pentru orașele balcanice"
   },
   "seo": {
-    "title": "Explore Balkan Cities - Property Markets, Prices & City Guides",
-    "description": "Explore {{cityCount}}+ cities across {{countryCount}} Balkan countries. Compare property prices, rental yields, and market trends in Tirana, Budva, Belgrade, Skopje, and more.",
-    "schemaName": "Balkan Cities Property Guide",
-    "schemaDescription": "Property market data for {{count}} cities across the Balkans"
+    "title": "Explorează orașele din Balcani - piețe imobiliare, prețuri și ghiduri",
+    "description": "Explorează peste {{cityCount}} orașe din {{countryCount}} țări balcanice. Compară prețurile proprietăților, randamentele din chirii și tendințele pieței în Tirana, Budva, Belgrad, Skopje și altele.",
+    "schemaName": "Ghid imobiliar al orașelor din Balcani",
+    "schemaDescription": "Date despre piața imobiliară pentru {{count}} orașe din Balcani"
   },
   "dashboard": {
     "notFound": "Orașul nu a fost găsit",
@@ -151,5 +155,120 @@
     "monthsAgo": "acum {{count}} luni",
     "label": "Date preluate {{age}}",
     "labelWithSource": "Date preluate {{age}} · {{source}}"
+  },
+  "badges": {
+    "realTimeData": "Date în timp real",
+    "aiInsights": "Analize de piață",
+    "marketTrends": "Tendințe de piață"
+  },
+  "ui": {
+    "cityDashboard": {
+      "marketScoresDemandIndexRental": "Scorurile de piață, indicele cererii, estimările chiriilor, analizele cartierelor și statisticile zonelor sunt generate de AI pe baza modelului nostru de date regional.",
+      "officialSources": "Surse oficiale",
+      "priceHistoryFrom": "Istoricul prețurilor de la",
+      "macroeconomicDataFrom": "· Date macroeconomice de la",
+      "worldBank": "Banca Mondială",
+      "photosFrom": "· Fotografii de pe",
+      "avgPriceM": "Preț mediu /m²",
+      "listings": "Anunțuri",
+      "official": "Oficial",
+      "bisResidentialPropertyPriceIndex": "Indicele BIS al prețurilor locuințelor",
+      "activeListings": "anunțuri active",
+      "officialData": "Date oficiale ↗",
+      "pricesAnchoredToOfficialGovernment": "Prețurile sunt ancorate în date oficiale guvernamentale — atinge",
+      "onThePriceCardTo": "pe cardul de preț pentru a vedea indicele BIS.",
+      "officialReference": "Referință oficială",
+      "yoy": "% anual",
+      "bisResidentialPropertyPriceIndex2": "Indicele BIS al prețurilor locuințelor ·",
+      "viewSource": "Vezi sursa ↗",
+      "officialMarketData": "Date oficiale de piață",
+      "priceHistoryIsBeingPrepared": "Istoricul prețurilor se pregătește pentru",
+      "exploreNeighborhoods": "Explorează cartierele",
+      "marketResearchData": "◈ Date din studii de piață",
+      "balkanestateAiAnalysis2": "✦ Analiză AI BalkanEstate",
+      "estimatedDataUpdating": "Date estimate · se actualizează…",
+      "viewOfficialDataSource": "Vezi sursa oficială de date",
+      "dataAnchoredTo": "Date ancorate în",
+      "interactiveMap": "Hartă interactivă",
+      "listView": "Vizualizare listă",
+      "neighborhoodDataIsBeingPrepared": "Datele despre cartiere se pregătesc. Revino curând.",
+      "tapANeighbourhoodOnThe": "Atinge un cartier pe hartă pentru detalii",
+      "clickANeighborhood": "Dă clic pe un cartier",
+      "toSeeDetailedStats": "pentru a vedea statistici detaliate",
+      "vsCityAvg": "față de media orașului",
+      "noNeighborhoodDataAvailableFor": "Încă nu există date despre cartiere pentru",
+      "yet": ".",
+      "bisResidentialPropertyPriceIndex3": "Indicele BIS al prețurilor locuințelor ↗",
+      "worldBank2": "Banca Mondială ↗",
+      "priceIndexRefreshed": "Indicele prețurilor actualizat"
+    },
+    "suburbDetailPanel": {
+      "close": "Închide",
+      "averageAskingPricePerM": "Prețul mediu cerut pe m²",
+      "typicalPropertyPrice": "Prețul tipic al proprietății",
+      "cityAverage": "Media orașului",
+      "yoyGrowth": "Creștere anuală",
+      "rentalYield": "Randament din chirie",
+      "daysOnMarket": "Zile pe piață",
+      "activeListings": "Anunțuri active",
+      "estimatedPrices": "Prețuri estimate",
+      "basedOnAvg": "Pe baza mediei €",
+      "grade": "Notă",
+      "buyerDemand": "Cererea cumpărătorilor",
+      "high": "🔥 Ridicată",
+      "medium": "📊 Medie",
+      "low": "📉 Scăzută",
+      "propertyMix": "Structura proprietăților",
+      "highlights": "Repere",
+      "viewListingsIn": "Vezi anunțurile din",
+      "strongYieldHighDemand": "Randament puternic + cerere mare",
+      "solidInvestmentProfile": "Profil investițional solid",
+      "moderateInvestmentCase": "Potențial investițional moderat",
+      "belowAverageMetrics": "Indicatori sub medie"
+    },
+    "priceHistoryChart": {
+      "noPriceHistoryAvailable": "Nu există istoric de prețuri",
+      "n8YearPriceHistory": "Istoricul prețurilor pe 8 ani",
+      "quarterlyMFor": "€/m² trimestrial pentru",
+      "bisResidentialPropertyPriceIndex": "Indicele BIS al prețurilor locuințelor",
+      "estimatedFromRegionalData": "estimat din date regionale",
+      "yoy": "Anual",
+      "n5Year": "5 ani",
+      "current": "Actual",
+      "quarterlyObservations": "observații trimestriale",
+      "source": "Sursă:",
+      "estimatedFromRegionalComparableCities": "estimat din orașe comparabile din regiune"
+    },
+    "economicIndicatorsPanel": {
+      "economicContext": "Context economic —",
+      "worldBankOpenData": "Date deschise Banca Mondială ↗",
+      "gdpGrowthYoy": "Creșterea PIB (anuală)",
+      "annualRealGrowth": "Creștere reală anuală",
+      "inflationCpi": "Inflația (IPC)",
+      "consumerPriceIndex": "Indicele prețurilor de consum",
+      "mortgageRate": "Dobânda la ipotecă",
+      "avgLendingRate": "Rata medie a dobânzii",
+      "gniPerCapita": "VNB pe cap de locuitor",
+      "usdAtlasMethod": "USD, metoda Atlas",
+      "population": "Populație",
+      "countryTotal": "Total țară",
+      "unemployment": "Șomaj",
+      "laborForce": "% din forța de muncă"
+    },
+    "cityMarketCard": {
+      "avgPriceM": "Preț mediu /m²",
+      "market": "Piață",
+      "listings": "Anunțuri",
+      "marketResearch": "Studiu de piață"
+    },
+    "citySuburbMap": {
+      "noSuburbDataAvailable": "Nu există date despre zone",
+      "estimate": "Estimare",
+      "osmBoundaries": "📍 Limite OSM",
+      "approxDistricts": "◇ Districte aproximative",
+      "noData": "Fără date",
+      "districts": "Districte",
+      "approxDistricts2": "Districte aproximative"
+    }
   }
 }
