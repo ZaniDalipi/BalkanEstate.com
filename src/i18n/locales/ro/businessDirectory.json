@@ -273,6 +273,7 @@
   "myBusinesses": {
     "title": "Afacerile mele",
     "subtitle_one": "{{count}} anunț de afacere",
+    "subtitle_few": "{{count}} anunțuri de afaceri",
     "subtitle_other": "{{count}} anunțuri de afaceri",
     "createNew": "Afacere nouă",
     "view": "Vizualizare",

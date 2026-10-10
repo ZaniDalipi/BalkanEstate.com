@@ -369,7 +369,7 @@
     "writeReview": "Shkruaj Vlerësim",
     "yourRating": "Vlerësimi Juaj",
     "yourReview": "Vlerësimi Juaj",
-    "reviewPlaceholder": "Ndani përvojën tuaj me këtë agjent...",
+    "reviewPlaceholder": "Ndani përvojën tuaj me {{name}}...",
     "submitReview": "Dërgo Vlerësimin",
     "submitting": "Duke dërguar...",
     "thankYou": "Faleminderit për vlerësimin!",

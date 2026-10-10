@@ -848,6 +848,7 @@
     "viewListing": "Погледај Оглас",
     "extend": "Продужи",
     "expiringIn_one": "Истиче за {{count}} дан!",
+    "expiringIn_few": "Истиче за {{count}} дана!",
     "expiringIn_other": "Истиче за {{count}} дана!",
     "extendNow": "Продужи Сада",
     "autoExtendReady": "Аутоматско продужење спремно! Довршите плаћање да продужите.",

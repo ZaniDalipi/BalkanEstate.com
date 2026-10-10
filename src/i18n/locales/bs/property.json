@@ -412,6 +412,7 @@
         "standard": "PROMOVISANO"
       },
       "promotedCount_one": "{{count}} promovisan oglas",
+      "promotedCount_few": "{{count}} promovisana oglasa",
       "promotedCount_other": "{{count}} promovisanih oglasa",
       "distanceFromYou": "{{distance}} daleko"
     },

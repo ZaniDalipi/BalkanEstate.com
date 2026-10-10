@@ -82,7 +82,7 @@
     "title": "Тим",
     "showTopPerformers": "Прикажи најдобри агенти",
     "showAllMembers": "Прикажи го целиот тим",
-    "rankedByPerformance": "Подредени според резултати",
+    "rankedByPerformance": "{{count}} агенти • Подредени според резултати",
     "topAgent": "Најдобар агент",
     "secondPlace": "2 место",
     "thirdPlace": "3 место",

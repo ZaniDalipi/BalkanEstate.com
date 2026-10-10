@@ -82,7 +82,7 @@
     "title": "Anëtarët e Ekipit",
     "showTopPerformers": "Shfaq Performuesit Kryesorë",
     "showAllMembers": "Shfaq Të Gjithë Anëtarët",
-    "rankedByPerformance": "Renditur sipas Performancës",
+    "rankedByPerformance": "{{count}} agjentë • Renditur sipas performancës",
     "topAgent": "Agjenti Kryesor",
     "secondPlace": "Vendi i 2-të",
     "thirdPlace": "Vendi i 3-të",

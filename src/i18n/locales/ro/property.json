@@ -392,6 +392,7 @@
         "standard": "PROMOVAT"
       },
       "promotedCount_one": "{{count}} anunț promovat",
+      "promotedCount_few": "{{count}} anunțuri promovate",
       "promotedCount_other": "{{count}} anunțuri promovate",
       "distanceFromYou": "{{distance}} distanță"
     },

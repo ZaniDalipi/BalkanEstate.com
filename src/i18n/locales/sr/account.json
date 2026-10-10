@@ -441,6 +441,7 @@
     "totalSalesCount": "Укупно продаја",
     "sold": "ПРОДАТО",
     "daysOnMarket_one": "{{count}} дан на тржишту",
+    "daysOnMarket_few": "{{count}} дана на тржишту",
     "daysOnMarket_other": "{{count}} дана на тржишту",
     "daysOnMarket": "{{count}} дана на тржишту",
     "noSalesMatchFilters": "Нема продаја које одговарају филтерима",

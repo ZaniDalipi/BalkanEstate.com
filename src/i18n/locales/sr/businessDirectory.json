@@ -273,6 +273,7 @@
   "myBusinesses": {
     "title": "Моји бизниси",
     "subtitle_one": "{{count}} пословни оглас",
+    "subtitle_few": "{{count}} пословна огласа",
     "subtitle_other": "{{count}} пословних огласа",
     "createNew": "Нови бизнис",
     "view": "Прегледај",

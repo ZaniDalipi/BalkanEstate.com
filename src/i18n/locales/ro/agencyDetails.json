@@ -57,7 +57,7 @@
     "averagePrice": "Preț mediu"
   },
   "about": {
-    "title": "Despre Noi",
+    "title": "Despre {{agencyName}}",
     "description": "Descriere",
     "specializations": "Specializări",
     "areasServed": "Zone Deservite",
@@ -115,7 +115,7 @@
     "agent": "Agent",
     "showTopPerformers": "Arată cei mai performanți",
     "showAllMembers": "Arată toți membrii",
-    "rankedByPerformance": "Ranked by Performance",
+    "rankedByPerformance": "{{count}} agenți • Clasați după performanță",
     "topAgent": "Agent de top",
     "secondPlace": "Locul 2",
     "thirdPlace": "Locul 3",

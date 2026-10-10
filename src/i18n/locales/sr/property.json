@@ -412,6 +412,7 @@
         "standard": "ПРОМОВИСАНО"
       },
       "promotedCount_one": "{{count}} промовисан оглас",
+      "promotedCount_few": "{{count}} промовисана огласа",
       "promotedCount_other": "{{count}} промовисаних огласа",
       "distanceFromYou": "на {{distance}} од вас"
     },

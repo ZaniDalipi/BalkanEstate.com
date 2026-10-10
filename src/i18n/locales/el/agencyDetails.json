@@ -57,7 +57,7 @@
     "averagePrice": "Μέση τιμή"
   },
   "about": {
-    "title": "Σχετικά με Εμάς",
+    "title": "Σχετικά με το {{agencyName}}",
     "description": "Περιγραφή",
     "specializations": "Εξειδικεύσεις",
     "areasServed": "Περιοχές Εξυπηρέτησης",
@@ -115,7 +115,7 @@
     "agent": "Πράκτορας",
     "showTopPerformers": "Εμφάνιση κορυφαίων",
     "showAllMembers": "Εμφάνιση όλων των μελών",
-    "rankedByPerformance": "Ranked by Performance",
+    "rankedByPerformance": "{{count}} μεσίτες • Κατάταξη βάσει απόδοσης",
     "topAgent": "Κορυφαίος μεσίτης",
     "secondPlace": "2η θέση",
     "thirdPlace": "3η θέση",

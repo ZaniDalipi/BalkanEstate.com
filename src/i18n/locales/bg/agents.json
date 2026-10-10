@@ -127,7 +127,7 @@
     "writeReview": "Напиши отзив",
     "yourRating": "Твоята оценка",
     "yourReview": "Твоят отзив",
-    "reviewPlaceholder": "Споделете вашия опит с този агент...",
+    "reviewPlaceholder": "Споделете опита си с {{name}}...",
     "submitReview": "Изпрати отзив",
     "submitting": "Изпращане...",
     "thankYou": "Благодарим за отзива!",

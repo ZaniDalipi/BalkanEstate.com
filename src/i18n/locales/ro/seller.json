@@ -848,6 +848,7 @@
     "viewListing": "Vezi Anunțul",
     "extend": "Extinde",
     "expiringIn_one": "Expiră în {{count}} zi!",
+    "expiringIn_few": "Expiră în {{count}} zile!",
     "expiringIn_other": "Expiră în {{count}} zile!",
     "extendNow": "Extinde Acum",
     "autoExtendReady": "Extinderea automată este pregătită! Finalizați plata pentru extindere.",

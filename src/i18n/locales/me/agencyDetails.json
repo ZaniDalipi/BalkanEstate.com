@@ -82,7 +82,7 @@
     "title": "Članovi Tima",
     "showTopPerformers": "Prikaži Najbolje Izvođače",
     "showAllMembers": "Prikaži Sve Članove",
-    "rankedByPerformance": "Ranked by Performance",
+    "rankedByPerformance": "{{count}} agenata • Rangirano po učinku",
     "topAgent": "Najbolji agent",
     "secondPlace": "2. Mjesto",
     "thirdPlace": "3. Mjesto",

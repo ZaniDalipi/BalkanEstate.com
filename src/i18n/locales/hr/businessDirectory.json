@@ -273,6 +273,7 @@
   "myBusinesses": {
     "title": "Moji poslovi",
     "subtitle_one": "{{count}} poslovni oglas",
+    "subtitle_few": "{{count}} poslovna oglasa",
     "subtitle_other": "{{count}} poslovnih oglasa",
     "createNew": "Novi posao",
     "view": "Pogledaj",

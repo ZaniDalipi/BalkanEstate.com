@@ -441,6 +441,7 @@
     "totalSalesCount": "Vânzări totale",
     "sold": "VÂNDUT",
     "daysOnMarket_one": "{{count}} zi pe piață",
+    "daysOnMarket_few": "{{count}} zile pe piață",
     "daysOnMarket_other": "{{count}} zile pe piață",
     "daysOnMarket": "{{count}} zile pe piață",
     "noSalesMatchFilters": "Nu există vânzări care să corespundă filtrelor",

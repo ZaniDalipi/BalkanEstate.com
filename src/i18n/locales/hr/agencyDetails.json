@@ -57,7 +57,7 @@
     "averagePrice": "Prosječna cijena"
   },
   "about": {
-    "title": "O Nama",
+    "title": "O agenciji {{agencyName}}",
     "description": "Opis",
     "specializations": "Specijalizacije",
     "areasServed": "Područja Djelovanja",
@@ -115,7 +115,7 @@
     "agent": "Agent",
     "showTopPerformers": "Prikaži najuspješnije",
     "showAllMembers": "Prikaži sve članove",
-    "rankedByPerformance": "Ranked by Performance",
+    "rankedByPerformance": "{{count}} agenata • Poredano po učinku",
     "topAgent": "Najbolji agent",
     "secondPlace": "2. mjesto",
     "thirdPlace": "3. mjesto",

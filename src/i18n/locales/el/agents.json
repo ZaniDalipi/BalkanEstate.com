@@ -369,7 +369,7 @@
     "writeReview": "Γράψτε κριτική",
     "yourRating": "Η βαθμολογία σας",
     "yourReview": "Η κριτική σας",
-    "reviewPlaceholder": "Share your experience working with this agent...",
+    "reviewPlaceholder": "Μοιραστείτε την εμπειρία σας με {{name}}...",
     "submitReview": "Υποβολή κριτικής",
     "submitting": "Υποβολή...",
     "thankYou": "Ευχαριστούμε για την κριτική σας!",

@@ -57,7 +57,7 @@
     "averagePrice": "Средна цена"
   },
   "about": {
-    "title": "За Нас",
+    "title": "За {{agencyName}}",
     "description": "Описание",
     "specializations": "Специализации",
     "areasServed": "Обслужвани Райони",
@@ -115,7 +115,7 @@
     "agent": "Агент",
     "showTopPerformers": "Покажи най-добрите",
     "showAllMembers": "Покажи всички членове",
-    "rankedByPerformance": "Ranked by Performance",
+    "rankedByPerformance": "{{count}} агенти • Подредени по резултати",
     "topAgent": "Топ агент",
     "secondPlace": "2-ро място",
     "thirdPlace": "3-то място",
