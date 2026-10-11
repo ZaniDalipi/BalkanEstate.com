@@ -21,7 +21,12 @@
     "messages": "Съобщения",
     "myAccount": "Моят Профил",
     "howItWorks": "Как Работи",
-    "blog": "Блог"
+    "blog": "Блог",
+    "about": "За нас",
+    "contactUs": "Контакт",
+    "advertise": "Рекламирайте при нас",
+    "buyingGuides": "Ръководства за купувачи",
+    "mortgageCalculator": "Ипотечен калкулатор"
   },
   "countries": {
     "AL": "Албания",

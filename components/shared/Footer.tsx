@@ -6,7 +6,6 @@ import {
     BuildingOfficeIcon,
     PhoneIcon,
     EnvelopeIcon,
-    HeartIcon,
     UserGroupIcon,
     BuildingLibraryIcon,
     FacebookIcon,
@@ -15,17 +14,23 @@ import {
     InstagramIcon,
     TikTokIcon,
     ChatBubbleLeftRightIcon,
-    BellIcon,
     UserCircleIcon,
     SparklesIcon,
     GlobeAltIcon,
     ChartBarIcon
 } from '../../constants';
 import FooterCityscape from './FooterCityscape';
-import { navigate } from '@/src/app/router/navigation';
-import { paths, pathForView } from '@/src/app/router/paths';
+import { AppLink } from '@/src/app/router/AppLink';
+import { paths, pathForView, withQuery } from '@/src/app/router/paths';
+import { COUNTRY_GUIDES } from '@/src/features/guides/data/countryGuides';
 import type { AppView } from '@/types';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
+
+/** English fallbacks for footer link keys added after the locale files. */
+const FOOTER_LINK_FALLBACKS: Record<string, string> = {
+    'links.buyingGuides': 'Buying Guides',
+    'links.mortgageCalculator': 'Mortgage Calculator',
+};
 
 interface FooterProps {
     className?: string;
@@ -50,23 +55,18 @@ const balkanCountries = [
 const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) => {
     const { t } = useTranslation(['footer', 'common']);
     const currentYear = new Date().getFullYear();
-    const handleNavigation = (view: AppView) => {
-        navigate(pathForView(view) ?? paths.home());
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const handleCountrySearch = (countryName: string) => {
-        navigate(paths.exploreCities({ country: countryName }));
-        // Notify already-mounted components about the country filter change
-        window.dispatchEvent(new CustomEvent('country-filter-change', { detail: countryName }));
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    // Every footer entry is a real <a href> (AppLink): crawlers follow hrefs,
+    // not click handlers, and the footer is how they reach the legal, guide
+    // and directory pages from anywhere on the site.
+    const viewPath = (view: AppView) => pathForView(view) ?? paths.home();
+    const guideSlugFor = (countryName: string) =>
+        COUNTRY_GUIDES.find((g) => g.country === countryName)?.slug;
 
     const buyerLinks = [
         { icon: SearchIcon, labelKey: 'links.searchProperties', view: 'search' },
         { icon: SparklesIcon, labelKey: 'links.exploreCities', view: 'explore-cities' },
-        { icon: HeartIcon, labelKey: 'links.savedProperties', view: 'saved-properties' },
-        { icon: BellIcon, labelKey: 'links.savedSearches', view: 'saved-searches' },
+        { icon: BuildingLibraryIcon, labelKey: 'links.buyingGuides', view: 'guides' },
+        { icon: ChartBarIcon, labelKey: 'links.mortgageCalculator', view: 'mortgage-calculator' },
         { icon: UserGroupIcon, labelKey: 'links.findAgents', view: 'agents' },
         { icon: ChartBarIcon, labelKey: 'links.valuation', view: 'valuation' },
         { icon: BuildingLibraryIcon, labelKey: 'links.browseAgencies', view: 'agencies' },
@@ -180,13 +180,13 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         <ul className="space-y-2 sm:space-y-2.5">
                             {buyerLinks.map(({ icon: Icon, labelKey, view }) => (
                                 <li key={labelKey}>
-                                    <button
-                                        onClick={() => handleNavigation(view as any)}
+                                    <AppLink
+                                        to={viewPath(view as AppView)}
                                         className="group flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
                                     >
                                         <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/70 group-hover:text-primary transition-colors flex-shrink-0" />
-                                        <span className="text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
-                                    </button>
+                                        <span className="text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, FOOTER_LINK_FALLBACKS[labelKey] ?? labelKey.split('.')[1])}</span>
+                                    </AppLink>
                                 </li>
                             ))}
                         </ul>
@@ -201,13 +201,14 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         <ul className="space-y-2 sm:space-y-2.5">
                             {sellerLinks.map(({ icon: Icon, labelKey, view }) => (
                                 <li key={labelKey}>
-                                    <button
-                                        onClick={() => handleNavigation(view as any)}
+                                    <AppLink
+                                        to={viewPath(view as AppView)}
+                                        rel="nofollow"
                                         className="group flex items-center gap-2 sm:gap-2.5 text-slate-400 hover:text-white transition-all duration-200 text-left w-full"
                                     >
                                         <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500/70 group-hover:text-green-500 transition-colors flex-shrink-0" />
                                         <span className="text-xs sm:text-sm group-hover:translate-x-1 transition-transform duration-200">{t(`footer:${labelKey}`, labelKey.split('.')[1])}</span>
-                                    </button>
+                                    </AppLink>
                                 </li>
                             ))}
                         </ul>
@@ -261,16 +262,15 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         </h3>
                         <div className="grid grid-cols-2 gap-1.5">
                             {balkanCountries.map((country) => (
-                                <button
+                                <AppLink
                                     key={country.code}
-                                    onClick={() => handleCountrySearch(country.name)}
+                                    to={paths.guide(guideSlugFor(country.name) ?? country.name.toLowerCase())}
                                     className="inline-flex items-center gap-1.5 bg-slate-700/30 hover:bg-slate-700/60 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition-all duration-200 cursor-pointer text-left group"
-                                    title={`Explore cities in ${country.label}`}
-                                    aria-label={`Explore cities in ${country.label}`}
+                                    title={t('footer:countryGuideTitle', 'Buying property in {{country}}', { country: country.name })}
                                 >
-                                    <span className="text-sm leading-none flex-shrink-0">{country.flag}</span>
+                                    <span className="text-sm leading-none flex-shrink-0" aria-hidden="true">{country.flag}</span>
                                     <span className="group-hover:translate-x-0.5 transition-transform duration-200">{country.label}</span>
-                                </button>
+                                </AppLink>
                             ))}
                         </div>
                     </div>
@@ -311,42 +311,55 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                         © {currentYear} <span className="font-semibold text-slate-400">BalkanEstate<sup className="text-xs">AI</sup></span>. {t('footer:legal.allRightsReserved', 'All rights reserved.')}
                     </p>
                     <div className="flex flex-wrap gap-x-3 gap-y-2 sm:gap-x-4 md:gap-x-6 justify-center text-xs sm:text-sm">
-                        <button
-                            onClick={() => handleNavigation('how-it-works')}
+                        <AppLink
+                            to={paths.about()}
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
+                        >
+                            {t('footer:links.about', 'About Us')}
+                        </AppLink>
+                        <AppLink
+                            to={viewPath('how-it-works')}
                             className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:links.howItWorks', 'How It Works')}
-                        </button>
-                        <button
-                            onClick={() => handleNavigation('privacy')}
+                        </AppLink>
+                        <AppLink
+                            to={viewPath('privacy')}
                             className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.privacyPolicy', 'Privacy Policy')}
-                        </button>
-                        <button
-                            onClick={() => handleNavigation('terms')}
+                        </AppLink>
+                        <AppLink
+                            to={viewPath('terms')}
                             className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.termsOfService', 'Terms of Service')}
-                        </button>
-                        <button
-                            onClick={() => handleNavigation('cookies')}
+                        </AppLink>
+                        <AppLink
+                            to={viewPath('cookies')}
                             className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.cookiePolicy', 'Cookie Policy')}
-                        </button>
-                        <button
-                            onClick={() => handleNavigation('refund')}
+                        </AppLink>
+                        <AppLink
+                            to={viewPath('refund')}
                             className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:legal.refundPolicy', 'Refund Policy')}
-                        </button>
-                        <button
-                            onClick={() => handleNavigation('contact')}
+                        </AppLink>
+                        <AppLink
+                            to={viewPath('contact')}
                             className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
                         >
                             {t('footer:links.contactUs', 'Contact Us')}
-                        </button>
+                        </AppLink>
+                        <AppLink
+                            to={withQuery(paths.contact(), { topic: 'advertise' })}
+                            rel="nofollow"
+                            className="text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
+                        >
+                            {t('footer:links.advertise', 'Advertise with us')}
+                        </AppLink>
                     </div>
                 </div>
             </div>

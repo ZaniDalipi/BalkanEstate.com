@@ -807,5 +807,9 @@
     "perMonthNote": "Chirii lunare · cele săptămânale convertite",
     "perNightNote": "Doar cazări pe noapte",
     "villasIncluded": "Inclusiv alte vile"
+  },
+  "report": {
+    "prompt": "Ceva nu este în regulă cu acest anunț?",
+    "link": "Raportați-ne"
   }
 }

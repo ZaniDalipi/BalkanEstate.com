@@ -29,5 +29,8 @@
     "prev": "Anterioară",
     "next": "Următoare",
     "page": "Pagina {{page}} din {{total}}"
+  },
+  "article": {
+    "updated": "Actualizat"
   }
 }

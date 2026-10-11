@@ -673,7 +673,10 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
             <SEO
                 title={t('villas:seo.title', 'Luxury Villas for Rent in the Balkans | BalkanEstate')}
                 description={t('villas:seo.description', 'Discover exclusive luxury villas for rent in the Balkans. Mountain retreats, lakeside estates, and coastal villas in Croatia, Montenegro, Albania, and more.')}
-                canonical={`${window.location.origin}/villas${window.location.search}`}
+                canonical={`${window.location.origin}/villas`}
+                // Filtered views are internal search results: endless
+                // combinations, often empty. Only the unfiltered page is indexed.
+                noindex={window.location.search.length > 1}
                 type="website"
             />
 

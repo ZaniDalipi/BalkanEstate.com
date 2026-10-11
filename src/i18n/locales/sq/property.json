@@ -807,5 +807,9 @@
     "perMonthNote": "Qira mujore · qiratë javore të konvertuara",
     "perNightNote": "Vetëm qira ditore",
     "villasIncluded": "Përfshirë vila të tjera"
+  },
+  "report": {
+    "prompt": "Diçka nuk shkon me këtë njoftim?",
+    "link": "Na e raportoni"
   }
 }

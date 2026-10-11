@@ -635,7 +635,11 @@
     "title": "Ghiduri de cumpărare a proprietăților",
     "topCities": "Cele mai bune orașe pentru proprietăți",
     "transferTax": "Impozit pe transfer",
-    "whyBuy": "De ce să cumpărați în {{country}}?"
+    "whyBuy": "De ce să cumpărați în {{country}}?",
+    "readGuide": "Citiți ghidul →",
+    "lastUpdated": "Ultima actualizare",
+    "otherGuides": "Ghiduri pentru alte țări",
+    "officialSources": "Surse oficiale"
   },
   "removeFromFavorites": "Elimină de la favorite",
   "saved": "Salvat",
@@ -654,5 +658,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Notă",
-  "loadMore": "Încarcă mai multe"
+  "loadMore": "Încarcă mai multe",
+  "loadError": {
+    "title": "Pagina nu a putut fi încărcată",
+    "retry": "Încercați din nou"
+  }
 }

@@ -1,679 +1,450 @@
 /**
- * Prerender Script for BalkanEstateAI
+ * Prerender script for BalkanEstateAI.
  *
- * Generates static HTML files for critical SEO routes at build time.
- * This ensures search engine crawlers see fully-rendered HTML with
- * meta tags, structured data, and content — even without JavaScript.
+ * Run after `vite build`: node scripts/prerender.mjs dist
  *
- * Run after `vite build`: node scripts/prerender.mjs
+ * The app is a client-rendered SPA. For each public page listed below this
+ * writes a static HTML file — the built index.html with the page's own head
+ * (title, description, canonical, hreflang, Open Graph, JSON-LD) and a
+ * crawlable version of its content inside #root — so search engines, Google's
+ * ad crawler and AI search engines see real pages without running JavaScript.
+ * React replaces #root on mount (createRoot), so visitors see the app.
  *
- * For each route, it injects the correct <title>, <meta description>,
- * canonical URL, Open Graph tags, and JSON-LD structured data directly
- * into the HTML template. The React app then hydrates on top.
+ * URL scheme: every page lives under a language prefix. For each page and
+ * language it writes dist/{lang}/{path}/index.html. The English file is also
+ * written to dist/{path}/index.html so an old unprefixed link still gets the
+ * right HTML before the SPA redirects it; its canonical points at /en/{path}.
  *
- * Generates language variants for all 10 supported languages,
- * with correct og:locale, html lang, and hreflang tags per language.
+ * dist/index.html is left as a neutral shell (no canonical): Cloudflare Pages
+ * serves it for every URL that has no file of its own, so it must not claim to
+ * be the home page.
+ *
+ * Detail pages (listings, articles, profiles) are rendered per request by the
+ * Pages Functions in /functions, and listed in the listings sitemap the API
+ * generates. This script writes dist/sitemap.xml for the static pages.
+ *
+ * What is deliberately NOT prerendered: search/filter URLs with query strings
+ * (Cloudflare Pages ignores the query when picking a file, so they were never
+ * served, and templated "property in {city}" pages are thin content), and the
+ * user's private pages.
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
-import { LANDING_PAGES } from './seo-landing-pages.mjs';
+import {
+  SITE_URL,
+  SITE_NAME,
+  LANGUAGES,
+  DEFAULT_LANG,
+  ROBOTS_INDEX,
+  buildHead,
+  renderPage,
+  hasShellMarkers,
+  escapeHtml,
+  pageUrl,
+  HREFLANG,
+} from './lib/page-shell.mjs';
+import { COUNTRY_GUIDES, GUIDES_LAST_UPDATED } from '../src/features/guides/data/countryGuides.js';
 
 const DIST_DIR = process.argv[2] || 'dist';
-const BASE_URL = 'https://balkanestateai.com';
-const SITE_NAME = 'BalkanEstateAI';
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
 
-// ─── Multi-language configuration ────────────────────────────────────────────
-const LANGUAGES = ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'];
-const OG_LOCALE_MAP = {
-  en: 'en_US', sq: 'sq_AL', sr: 'sr_RS', bg: 'bg_BG',
-  hr: 'hr_HR', bs: 'bs_BA', mk: 'mk_MK', me: 'sr_ME',
-  ro: 'ro_RO', el: 'el_GR',
-};
-
-// Read the built index.html as template
 const templatePath = join(DIST_DIR, 'index.html');
-if (!existsSync(templatePath)) {
+let template;
+try {
+  template = readFileSync(templatePath, 'utf-8');
+} catch {
   console.error(`❌ ${templatePath} not found. Run 'vite build' first.`);
   process.exit(1);
 }
-const template = readFileSync(templatePath, 'utf-8');
-
-// Validate the template exposes the structural hooks this script relies on, so a
-// silent no-op replacement (e.g. empty #root) fails loudly at build time instead.
-for (const marker of ['<div id="root">', '</head>', '<title>']) {
-  if (!template.includes(marker)) {
-    console.error(`❌ Template ${templatePath} is missing required marker: ${marker}`);
-    process.exit(1);
-  }
-}
-
-// ─── Routes to prerender ─────────────────────────────────────────────────────
-// Each route gets a static HTML file with SEO-optimized meta tags.
-// Prioritized by keyword opportunity score.
-
-const routes = [
-  // Homepage
-  {
-    path: '/',
-    title: `${SITE_NAME} - Property for Sale in the Balkans | Houses, Apartments & Villas`,
-    description: 'Find property for sale across 10 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages.',
-  },
-  // Main search
-  {
-    path: '/search',
-    title: `Property for Sale in the Balkans - Houses, Apartments & Villas | ${SITE_NAME}`,
-    description: 'Search property for sale across 10 Balkan countries. AI-powered search for apartments, houses, villas, and land in Montenegro, Albania, Serbia, North Macedonia, Croatia, and more.',
-  },
-
-  // ── Tier 1: Kosovo, N. Macedonia, Albania ────────────────────────
-  {
-    path: '/search?country=Kosovo',
-    title: `Property for Sale in Kosovo - Houses, Apartments & Land | ${SITE_NAME}`,
-    description: 'Find property for sale in Kosovo. Browse apartments, houses, villas, and land listings in Pristina, Prizren, and across Kosovo. AI-powered search.',
-  },
-  {
-    path: '/search?country=North+Macedonia',
-    title: `Real Estate North Macedonia - Property for Sale in Skopje & Ohrid | ${SITE_NAME}`,
-    description: 'Find real estate in North Macedonia. Browse apartments, houses, and land for sale in Skopje, Ohrid, and across the country. AI-powered property search.',
-  },
-  {
-    path: '/search?country=Albania',
-    title: `Buy Property in Albania - Apartments, Villas & Land for Sale | ${SITE_NAME}`,
-    description: 'Buy property in Albania. Find apartments for sale in Tirana, villas on the Albanian Riviera, and land across the country. Low prices, high ROI.',
-  },
-  {
-    path: '/search?country=Albania&city=Tirana',
-    title: `Apartments for Sale in Tirana - Buy Property in Albania's Capital | ${SITE_NAME}`,
-    description: 'Find apartments for sale in Tirana, Albania. New builds, city center flats, and investment properties. Tirana apartment prices from €800/sqm.',
-  },
-  {
-    path: '/search?country=North+Macedonia&city=Skopje',
-    title: `Buy Property in Skopje - Apartments & Houses for Sale | ${SITE_NAME}`,
-    description: 'Buy property in Skopje, North Macedonia. Find apartments, houses, and new builds for sale in the capital. Affordable prices, AI-powered search.',
-  },
-  {
-    path: '/search?country=North+Macedonia&city=Ohrid',
-    title: `Ohrid Real Estate - Property for Sale by UNESCO Lake | ${SITE_NAME}`,
-    description: 'Explore Ohrid real estate. Find lakeside apartments, houses, and villas for sale by UNESCO Lake Ohrid.',
-  },
-  {
-    path: '/search?country=Albania&city=Saranda',
-    title: `Sarande Property for Sale - Albanian Riviera Real Estate | ${SITE_NAME}`,
-    description: 'Discover Sarande property for sale on the Albanian Riviera. Seaside apartments, luxury villas, and investment properties with sea views.',
-  },
-
-  // ── Tier 2: Montenegro, Bosnia ───────────────────────────────────
-  {
-    path: '/search?country=Montenegro',
-    title: `Property for Sale in Montenegro - Real Estate, Villas & Apartments | ${SITE_NAME}`,
-    description: 'Find property for sale in Montenegro. Browse luxury villas in Budva, apartments in Kotor, land on the coast, and new builds in Tivat.',
-  },
-  {
-    path: '/search?country=Montenegro&city=Budva',
-    title: `Apartments for Sale in Budva - Montenegro Coastal Property | ${SITE_NAME}`,
-    description: 'Find apartments for sale in Budva, Montenegro. Coastal properties, sea view apartments, and luxury residences on the Budva Riviera.',
-  },
-  {
-    path: '/search?country=Montenegro&city=Kotor',
-    title: `Apartments for Sale in Kotor - UNESCO Bay Property | ${SITE_NAME}`,
-    description: 'Discover apartments for sale in Kotor, Montenegro. Property in the UNESCO Bay of Kotor. Old town apartments, new builds, and sea view homes.',
-  },
-  {
-    path: '/search?country=Montenegro&city=Tivat',
-    title: `Property for Sale in Tivat - Porto Montenegro Real Estate | ${SITE_NAME}`,
-    description: 'Browse property for sale in Tivat, Montenegro. Luxury apartments near Porto Montenegro, new builds, and coastal residences.',
-  },
-  {
-    path: '/search?country=Montenegro&city=Podgorica',
-    title: `Buy Apartment in Podgorica - Montenegro Capital Property | ${SITE_NAME}`,
-    description: 'Buy apartment in Podgorica, Montenegro. Affordable capital city property, new builds, and investment opportunities.',
-  },
-  {
-    path: '/search?country=Bosnia',
-    title: `Property for Sale in Bosnia and Herzegovina - Real Estate BiH | ${SITE_NAME}`,
-    description: 'Find property for sale in Bosnia and Herzegovina. Browse apartments in Sarajevo, houses in Mostar, and affordable real estate across BiH.',
-  },
-  {
-    path: '/search?country=Bosnia&city=Sarajevo',
-    title: `Apartments for Sale in Sarajevo - Bosnia Real Estate | ${SITE_NAME}`,
-    description: 'Find apartments for sale in Sarajevo, Bosnia. Capital city property, new builds, and investment opportunities.',
-  },
-
-  // ── Tier 3: Serbia, Croatia, Bulgaria, Romania, Greece ───────────
-  {
-    path: '/search?country=Serbia',
-    title: `Real Estate Serbia - Property for Sale in Belgrade & Beyond | ${SITE_NAME}`,
-    description: 'Find real estate in Serbia. Browse apartments for sale in Belgrade, houses across Serbia, and investment properties.',
-  },
-  {
-    path: '/search?country=Serbia&city=Belgrade',
-    title: `Apartments for Sale in Belgrade - Serbia Real Estate | ${SITE_NAME}`,
-    description: 'Find apartments for sale in Belgrade, Serbia. New Belgrade flats, city center apartments, and investment properties.',
-  },
-  {
-    path: '/search?country=Croatia',
-    title: `Property for Sale in Croatia - Coastal Homes, Apartments & Villas | ${SITE_NAME}`,
-    description: 'Find property for sale in Croatia. Browse seaside apartments in Split, houses on the Dalmatian coast, villas in Dubrovnik.',
-  },
-  {
-    path: '/search?country=Bulgaria',
-    title: `Real Estate Bulgaria - Property & Apartments for Sale | ${SITE_NAME}`,
-    description: 'Find real estate in Bulgaria. Affordable apartments in Sofia, Black Sea coast properties, and ski resort homes.',
-  },
-  {
-    path: '/search?country=Romania',
-    title: `Property for Sale in Romania - Bucharest & Cluj Real Estate | ${SITE_NAME}`,
-    description: 'Find property for sale in Romania. Browse apartments in Bucharest, houses in Cluj-Napoca, and real estate across the country.',
-  },
-  {
-    path: '/search?country=Greece',
-    title: `Property for Sale in Greece - Islands, Athens & Coastal Homes | ${SITE_NAME}`,
-    description: 'Find property for sale in Greece. Browse Athens apartments, island homes, and coastal villas. Golden visa eligible.',
-  },
-
-  // ── Other pages ──────────────────────────────────────────────────
-  {
-    path: '/agents',
-    title: `Real Estate Agents in the Balkans - Find Verified Agents | ${SITE_NAME}`,
-    description: 'Find verified real estate agents across 10 Balkan countries. Connect with local property experts in Montenegro, Albania, Serbia, North Macedonia, and more.',
-  },
-  {
-    path: '/agencies',
-    title: `Real Estate Agencies in the Balkans | ${SITE_NAME}`,
-    description: 'Browse real estate agencies across the Balkans. Find trusted agencies in Montenegro, Albania, Serbia, Croatia, and more.',
-  },
-  {
-    path: '/rentals',
-    title: `Rental Properties in the Balkans - Apartments & Houses for Rent | ${SITE_NAME}`,
-    description: 'Find rental properties across the Balkans. Apartments and houses for rent in Montenegro, Serbia, Albania, Croatia, and more.',
-  },
-  {
-    path: '/valuation',
-    title: `AI Property Valuation - Free Estimate for Balkan Properties | ${SITE_NAME}`,
-    description: 'Get a free AI-powered property valuation for any Balkan property. Instant price estimates based on comparable sales, location data, and market trends.',
-  },
-  {
-    path: '/explore-cities',
-    title: `City Guides - Explore Balkan Cities for Property | ${SITE_NAME}`,
-    description: 'Explore city guides for property buyers. Neighborhood insights, price data, and lifestyle information for cities across the Balkans.',
-  },
-  {
-    path: '/mortgage-calculator',
-    title: `Mortgage Calculator - Calculate Property Payments | ${SITE_NAME}`,
-    description: 'Calculate your mortgage payments for Balkan properties. Free mortgage calculator with interest rates for Montenegro, Serbia, Albania, and more.',
-  },
-  {
-    path: '/guides',
-    title: `Property Buying Guides - How to Buy Real Estate in the Balkans | ${SITE_NAME}`,
-    description: 'Complete guides to buying property in 10 Balkan countries. Legal process, foreign ownership rules, taxes, and investment insights for Montenegro, Albania, Serbia, Greece, and more.',
-  },
-
-  // ── Rental pages ──────────────────────────────────────────────────
-  {
-    path: '/rentals?country=Montenegro',
-    title: `Apartments for Rent in Montenegro - Monthly & Long-Term Rentals | ${SITE_NAME}`,
-    description: 'Find apartments and houses for rent in Montenegro. Monthly rentals in Budva, Kotor, Tivat, Podgorica. Verified listings, instant contact.',
-  },
-  {
-    path: '/rentals?country=Albania',
-    title: `Apartments for Rent in Albania - Tirana & Coastal Rentals | ${SITE_NAME}`,
-    description: 'Find apartments for rent in Albania. Tirana city rentals, Saranda beach apartments, and more. Affordable monthly rental prices.',
-  },
-  {
-    path: '/rentals?country=Serbia',
-    title: `Apartments for Rent in Belgrade & Serbia | ${SITE_NAME}`,
-    description: 'Find apartments for rent in Serbia. Belgrade city center flats, New Belgrade apartments, and rentals across Serbia.',
-  },
-  {
-    path: '/rentals?country=North+Macedonia',
-    title: `Apartments for Rent in North Macedonia - Skopje Rentals | ${SITE_NAME}`,
-    description: 'Find apartments for rent in North Macedonia. Skopje city rentals, Ohrid lakeside apartments, and affordable monthly rentals.',
-  },
-  {
-    path: '/rentals?country=Kosovo',
-    title: `Apartments for Rent in Kosovo - Pristina Rentals | ${SITE_NAME}`,
-    description: 'Find apartments for rent in Kosovo. Pristina city center, Prizren old town, and monthly rental listings across Kosovo.',
-  },
-
-  // ── Property type pages ───────────────────────────────────────────
-  {
-    path: '/search?propertyType=apartment',
-    title: `Apartments for Sale in the Balkans - Buy Flat | ${SITE_NAME}`,
-    description: 'Find apartments for sale across 10 Balkan countries. City flats, new builds, and investment apartments in Montenegro, Albania, Serbia, and more.',
-  },
-  {
-    path: '/search?propertyType=house',
-    title: `Houses for Sale in the Balkans - Buy Home | ${SITE_NAME}`,
-    description: 'Find houses for sale across the Balkans. Family homes, countryside houses, and traditional stone houses in Montenegro, Croatia, and more.',
-  },
-  {
-    path: '/search?propertyType=villa',
-    title: `Luxury Villas for Sale in the Balkans | ${SITE_NAME}`,
-    description: 'Find luxury villas for sale in the Balkans. Sea view villas, pool villas, and exclusive properties in Montenegro, Croatia, Greece, and Albania.',
-  },
-  {
-    path: '/search?propertyType=land',
-    title: `Land for Sale in the Balkans - Building Plots & Agricultural Land | ${SITE_NAME}`,
-    description: 'Find land for sale in the Balkans. Building plots, agricultural land, and development sites in Montenegro, Albania, Serbia, and more.',
-  },
-];
-
-// ─── Generate prerendered HTML ───────────────────────────────────────────────
-
-// ─── GEO content injection ───────────────────────────────────────────────────
-// AI answer engines (ChatGPT/OAI-SearchBot, ClaudeBot, PerplexityBot, GPTBot,
-// Google-Extended) largely DO NOT execute JavaScript. Because the app mounts
-// with createRoot() (not hydrateRoot), React replaces #root on load — so we can
-// safely seed #root with crawler-visible content + JSON-LD. Users see the React
-// app the instant JS runs; crawlers get real, citable, per-page content.
-
-const COUNTRIES = [
-  { name: 'Montenegro', q: 'Montenegro', cities: ['Budva', 'Kotor', 'Tivat', 'Podgorica', 'Herceg Novi'] },
-  { name: 'Albania', q: 'Albania', cities: ['Tirana', 'Saranda', 'Durres', 'Vlora'] },
-  { name: 'Kosovo', q: 'Kosovo', cities: ['Pristina', 'Prizren'] },
-  { name: 'North Macedonia', q: 'North Macedonia', cities: ['Skopje', 'Ohrid', 'Bitola'] },
-  { name: 'Serbia', q: 'Serbia', cities: ['Belgrade', 'Novi Sad', 'Nis'] },
-  { name: 'Croatia', q: 'Croatia', cities: ['Split', 'Dubrovnik', 'Zagreb'] },
-  { name: 'Bosnia and Herzegovina', q: 'Bosnia', cities: ['Sarajevo', 'Mostar'] },
-  { name: 'Bulgaria', q: 'Bulgaria', cities: ['Sofia', 'Burgas', 'Varna'] },
-  { name: 'Romania', q: 'Romania', cities: ['Bucharest', 'Cluj-Napoca', 'Brasov'] },
-  { name: 'Greece', q: 'Greece', cities: ['Athens', 'Thessaloniki', 'Crete'] },
-];
-
-const PROPERTY_TYPES = [
-  { name: 'Apartments', q: 'apartment' },
-  { name: 'Houses', q: 'house' },
-  { name: 'Villas', q: 'villa' },
-  { name: 'Land', q: 'land' },
-  { name: 'Commercial', q: 'commercial' },
-];
-
-// Short UI labels translated per language (section headings only — high-confidence
-// strings). FAQ answers are kept in English in this first iteration, matching the
-// existing convention that prerendered meta copy is English across all locales.
-const LABELS = {
-  en: { country: 'Browse property by country', type: 'Property types', faq: 'Frequently asked questions', view: 'View listings', pages: 'Explore' },
-  sq: { country: 'Shfletoni prona sipas shtetit', type: 'Llojet e pronave', faq: 'Pyetjet e shpeshta', view: 'Shiko listimet', pages: 'Eksploro' },
-  sr: { country: 'Pretražite nekretnine po zemlji', type: 'Tipovi nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istražite' },
-  bg: { country: 'Имоти по държава', type: 'Видове имоти', faq: 'Често задавани въпроси', view: 'Виж обявите', pages: 'Разгледай' },
-  hr: { country: 'Pretraži nekretnine po državi', type: 'Vrste nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istraži' },
-  bs: { country: 'Pretraži nekretnine po državi', type: 'Vrste nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istraži' },
-  mk: { country: 'Имоти по земја', type: 'Типови на имоти', faq: 'Често поставувани прашања', view: 'Погледни огласи', pages: 'Истражи' },
-  me: { country: 'Pretraži nekretnine po državi', type: 'Tipovi nekretnina', faq: 'Često postavljana pitanja', view: 'Pogledaj oglase', pages: 'Istraži' },
-  ro: { country: 'Caută proprietăți după țară', type: 'Tipuri de proprietăți', faq: 'Întrebări frecvente', view: 'Vezi anunțurile', pages: 'Explorează' },
-  el: { country: 'Αναζήτηση ακινήτων ανά χώρα', type: 'Τύποι ακινήτων', faq: 'Συχνές ερωτήσεις', view: 'Δείτε τις αγγελίες', pages: 'Εξερευνήστε' },
-};
-
-// FAQ sets (English). Keyed by page category. {country} is interpolated.
-const FAQ_GENERAL = [
-  { q: 'Which countries does BalkanEstateAI cover?', a: 'BalkanEstateAI lists property for sale and rent across all 10 Balkan countries: Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania, and Serbia — on a single platform.' },
-  { q: 'Can foreigners buy property in the Balkans?', a: 'In most Balkan countries foreign nationals can buy property, though rules differ by country (some restrict agricultural land or require a local company for certain purchases). See our country-specific buying guides for the exact process.' },
-  { q: 'What languages is BalkanEstateAI available in?', a: 'The platform is available in 10 languages: English, Albanian, Serbian, Bulgarian, Croatian, Bosnian, Macedonian, Montenegrin, Romanian, and Greek.' },
-  { q: 'Is BalkanEstateAI free for buyers and renters?', a: 'Yes. Searching listings, using AI-powered natural-language search, and contacting agents is free for buyers and renters.' },
-  { q: 'What makes BalkanEstateAI different from other portals?', a: 'It is the only single platform covering all 10 Balkan countries with AI-powered search and AI property valuations, whereas most competitors cover a few countries or run a separate site per country.' },
-];
-
-const faqCountry = (country) => [
-  { q: `Can foreigners buy property in ${country}?`, a: `Foreign buyers can generally purchase property in ${country}, subject to that country's specific rules on residential vs. agricultural land. Read the ${country} buying guide on BalkanEstateAI for the legal process, taxes, and ownership requirements.` },
-  { q: `How do I find property for sale in ${country}?`, a: `Browse all verified listings for ${country} on BalkanEstateAI. Filter by city, price, property type, and bedrooms, or use AI-powered natural-language search to describe exactly what you want.` },
-  { q: `What types of property are available in ${country}?`, a: `Apartments, houses, villas, land, and commercial property are listed across ${country}. You can also estimate any property's value for free with the AI valuation tool.` },
-  { q: `How much does property cost in ${country}?`, a: `Prices vary by city, location, and property type. Use BalkanEstateAI's free AI property valuation and live listings to see current ${country} market prices rather than relying on outdated figures.` },
-];
-
-const faqType = (type) => [
-  { q: `Where can I buy ${type} in the Balkans?`, a: `BalkanEstateAI lists ${type} for sale across all 10 Balkan countries. Filter by country and city to find ${type} that match your budget and location.` },
-  { q: `Can I get a price estimate for a ${type}?`, a: `Yes — use the free AI property valuation tool to estimate the value of any ${type} in the Balkans based on comparable listings and location data.` },
-];
-
-const faqRentals = [
-  { q: 'How do I find apartments for rent in the Balkans?', a: 'Browse rental listings on BalkanEstateAI by country and city. Filter by price, bedrooms, and property type, and contact landlords or agents directly for free.' },
-  { q: 'Are long-term and monthly rentals available?', a: 'Yes. The platform lists both long-term and monthly rental apartments and houses across the Balkans.' },
-];
-
-function faqForRoute(route) {
-  const p = route.path;
-  const country = COUNTRIES.find(c => p.includes(`country=${c.q.replace(/ /g, '+')}`) || p.includes(`country=${c.q}`));
-  if (p.startsWith('/rentals')) return faqRentals;
-  if (country) return faqCountry(country.name);
-  const type = PROPERTY_TYPES.find(t => p.includes(`propertyType=${t.q}`));
-  if (type) return faqType(type.name.toLowerCase());
-  return FAQ_GENERAL;
-}
-
-// Build crawler-visible HTML for #root.
-function buildBodyContent(route, lang, canonicalUrl, loc) {
-  const L = LABELS[lang] || LABELS.en;
-  const prefix = lang === 'en' ? '' : `/${lang}`;
-  const link = (path, text) => `<a href="${BASE_URL}${prefix}${path}">${escapeHtml(text)}</a>`;
-
-  const countryLinks = COUNTRIES.map(c =>
-    `<li>${link(`/search?country=${c.q.replace(/ /g, '+')}`, `${c.name}`)}${c.cities.length ? ` — ${c.cities.slice(0, 4).map(escapeHtml).join(', ')}` : ''}</li>`
-  ).join('');
-  const typeLinks = PROPERTY_TYPES.map(t =>
-    `<li>${link(`/search?propertyType=${t.q}`, t.name)}</li>`
-  ).join('');
-  const pageLinks = [
-    ['/search', 'Property search'], ['/rentals', 'Rentals'], ['/agents', 'Real estate agents'],
-    ['/agencies', 'Agencies'], ['/explore-cities', 'City guides'], ['/valuation', 'AI property valuation'],
-    ['/guides', 'Buying guides'], ['/mortgage-calculator', 'Mortgage calculator'],
-  ].map(([p, t]) => `<li>${link(p, t)}</li>`).join('');
-
-  const faqs = (loc && loc.faqs) ? loc.faqs : faqForRoute(route);
-  const faqHtml = faqs.map(f =>
-    `<div itemscope itemtype="https://schema.org/Question"><h3 itemprop="name">${escapeHtml(f.q)}</h3>` +
-    `<div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"><p itemprop="text">${escapeHtml(f.a)}</p></div></div>`
-  ).join('');
-
-  const h1 = loc?.h1 || route.title.split(' | ')[0];
-  const intro = loc?.description || route.description;
-
-  // Visible while JS loads; React replaces it on mount (createRoot).
-  return `
-      <main id="prerendered-content">
-        <h1>${escapeHtml(h1)}</h1>
-        <p>${escapeHtml(intro)}</p>
-        <nav aria-label="${escapeHtml(L.country)}"><h2>${escapeHtml(L.country)}</h2><ul>${countryLinks}</ul></nav>
-        <nav aria-label="${escapeHtml(L.type)}"><h2>${escapeHtml(L.type)}</h2><ul>${typeLinks}</ul></nav>
-        <nav aria-label="${escapeHtml(L.pages)}"><h2>${escapeHtml(L.pages)}</h2><ul>${pageLinks}</ul></nav>
-        <section itemscope itemtype="https://schema.org/FAQPage"><h2>${escapeHtml(L.faq)}</h2>${faqHtml}</section>
-      </main>`;
-}
-
-// Build per-page JSON-LD: BreadcrumbList + CollectionPage + FAQPage.
-function buildPageJsonLd(route, lang, canonicalUrl, loc) {
-  const prefix = lang === 'en' ? '' : `/${lang}`;
-  const crumbs = [{ name: 'Home', url: `${BASE_URL}${prefix}/` }];
-  const country = COUNTRIES.find(c => route.path.includes(`country=${c.q.replace(/ /g, '+')}`) || route.path.includes(`country=${c.q}`));
-  if (country) crumbs.push({ name: country.name, url: canonicalUrl });
-  const type = PROPERTY_TYPES.find(t => route.path.includes(`propertyType=${t.q}`));
-  if (type && !country) crumbs.push({ name: type.name, url: canonicalUrl });
-  if (!country && !type && route.path !== '/') {
-    crumbs.push({ name: route.title.split(' | ')[0], url: canonicalUrl });
-  }
-
-  const breadcrumb = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: crumbs.map((c, i) => ({
-      '@type': 'ListItem', position: i + 1, name: c.name, item: c.url,
-    })),
-  };
-
-  const collectionPage = {
-    '@context': 'https://schema.org',
-    '@type': route.path.includes('/search') || route.path.includes('/rentals') ? 'CollectionPage' : 'WebPage',
-    '@id': `${canonicalUrl}#webpage`,
-    url: canonicalUrl,
-    name: loc?.title || route.title,
-    description: loc?.description || route.description,
-    inLanguage: lang,
-    isPartOf: { '@id': `${BASE_URL}/#website` },
-    about: { '@id': `${BASE_URL}/#organization` },
-  };
-
-  const faqs = (loc && loc.faqs) ? loc.faqs : faqForRoute(route);
-  const faqPage = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    inLanguage: lang,
-    mainEntity: faqs.map(f => ({
-      '@type': 'Question', name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  };
-
-  return [breadcrumb, collectionPage, faqPage]
-    .map(s => `  <script type="application/ld+json">${JSON.stringify(s)}</script>`)
-    .join('\n');
-}
-
-/**
- * Build hreflang link tags for a given page path across all languages.
- */
-function buildHreflangTags(pagePath) {
-  const tags = LANGUAGES.map(lang => {
-    const href = pagePath === '/'
-      ? (lang === 'en' ? BASE_URL : `${BASE_URL}/${lang}`)
-      : `${BASE_URL}/${lang}${pagePath}`;
-    return `    <link rel="alternate" hreflang="${lang}" href="${href}" />`;
-  });
-  const xDefault = pagePath === '/' ? BASE_URL : `${BASE_URL}${pagePath}`;
-  tags.push(`    <link rel="alternate" hreflang="x-default" href="${xDefault}" />`);
-  return tags.join('\n');
-}
-
-/**
- * Generate a prerendered HTML file for a given route and language.
- */
-function prerenderPage(route, lang) {
-  const isDefaultLang = lang === 'en';
-  const langPrefix = isDefaultLang ? '' : `/${lang}`;
-  const canonicalUrl = `${BASE_URL}${langPrefix}${route.path}`;
-  const ogLocale = OG_LOCALE_MAP[lang] || 'en_US';
-
-  // Native-language override for this path+language, if one exists.
-  const loc = LOCALIZED[route.path]?.[lang];
-  const pageTitle = loc?.title ? `${loc.title} | ${SITE_NAME}` : route.title;
-  const pageDescription = loc?.description || route.description;
-
-  let html = template;
-
-  // Set html lang attribute
-  html = html.replace(/<html lang="[^"]*"/, `<html lang="${lang}"`);
-
-  // Replace title
-  html = html.replace(
-    /<title>[^<]*<\/title>/,
-    `<title>${escapeHtml(pageTitle)}</title>`
-  );
-
-  // Replace meta description
-  html = html.replace(
-    /<meta name="description" content="[^"]*"/,
-    `<meta name="description" content="${escapeHtml(pageDescription)}"`
-  );
-
-  // Replace meta title
-  html = html.replace(
-    /<meta name="title" content="[^"]*"/,
-    `<meta name="title" content="${escapeHtml(pageTitle)}"`
-  );
-
-  // Replace meta language
-  html = html.replace(
-    /<meta name="language" content="[^"]*"/,
-    `<meta name="language" content="${lang}"`
-  );
-
-  // Replace canonical
-  html = html.replace(
-    /<link rel="canonical" href="[^"]*"/,
-    `<link rel="canonical" href="${escapeHtml(canonicalUrl)}"`
-  );
-
-  // Replace OG tags
-  html = html.replace(
-    /<meta property="og:title" content="[^"]*"/,
-    `<meta property="og:title" content="${escapeHtml(pageTitle)}"`
-  );
-  html = html.replace(
-    /<meta property="og:description" content="[^"]*"/,
-    `<meta property="og:description" content="${escapeHtml(pageDescription)}"`
-  );
-  html = html.replace(
-    /<meta property="og:url" content="[^"]*"/,
-    `<meta property="og:url" content="${escapeHtml(canonicalUrl)}"`
-  );
-  html = html.replace(
-    /<meta property="og:locale" content="[^"]*"/,
-    `<meta property="og:locale" content="${ogLocale}"`
-  );
-
-  // Replace Twitter tags
-  html = html.replace(
-    /<meta name="twitter:title" content="[^"]*"/,
-    `<meta name="twitter:title" content="${escapeHtml(pageTitle)}"`
-  );
-  html = html.replace(
-    /<meta name="twitter:description" content="[^"]*"/,
-    `<meta name="twitter:description" content="${escapeHtml(pageDescription)}"`
-  );
-
-  // Replace hreflang tags with page-specific ones
-  html = html.replace(
-    /\s*<!-- Hreflang for Multi-Region SEO -->[\s\S]*?<link rel="alternate" hreflang="x-default"[^>]*>/,
-    `\n    <!-- Hreflang for Multi-Region SEO -->\n${buildHreflangTags(route.path)}`
-  );
-
-  // Inject per-page JSON-LD (BreadcrumbList + CollectionPage/WebPage + FAQPage),
-  // a freshness signal, and prerender status indicator before </head>.
-  const buildDate = new Date().toISOString();
-  const pageJsonLd = buildPageJsonLd(route, lang, canonicalUrl, loc);
-  html = html.replace(
-    '</head>',
-    `${pageJsonLd}\n  <meta property="article:modified_time" content="${buildDate}" />\n  <meta name="prerender-status" content="200" />\n  </head>`
-  );
-
-  // Seed #root with crawler-visible content, injected right after the opening
-  // <div id="root"> tag (before the app-shell loader). React (createRoot) clears
-  // all of #root's children on mount, so real users still see the loader overlay
-  // while JS loads, and JS-less AI crawlers get real, page-specific content.
-  const bodyContent = buildBodyContent(route, lang, canonicalUrl, loc);
-  html = html.replace('<div id="root">', () => `<div id="root">${bodyContent}`);
-
-  // Remove the generic <noscript> SEO fallback: the per-page #root content above
-  // now provides superior, page-specific content for crawlers and no-JS users,
-  // and the static block would otherwise duplicate the H1 and content.
-  html = html.replace(
-    /\s*<!-- Noscript fallback for SEO crawlers and users without JavaScript -->[\s\S]*?<\/noscript>/,
-    ''
-  );
-
-  // Determine output path
-  let outputPath;
-  const langDir = isDefaultLang ? '' : lang;
-
-  if (route.path === '/') {
-    // For the homepage, write to both dist/index.html AND dist/en/index.html
-    // so that /en serves a prerendered file instead of relying on SPA fallback
-    // (which can serve stale cached HTML after deployments)
-    outputPath = isDefaultLang
-      ? join(DIST_DIR, 'index.html')
-      : join(DIST_DIR, lang, 'index.html');
-
-    // Also write dist/{lang}/index.html for the default language
-    if (isDefaultLang) {
-      const langCopyPath = join(DIST_DIR, lang, 'index.html');
-      const langCopyDir = dirname(langCopyPath);
-      if (!existsSync(langCopyDir)) {
-        mkdirSync(langCopyDir, { recursive: true });
-      }
-      writeFileSync(langCopyPath, html, 'utf-8');
-      generated++;
-    }
-  } else if (route.path.includes('?')) {
-    const [base, query] = route.path.split('?');
-    const params = new URLSearchParams(query);
-    const parts = langDir ? [langDir] : [];
-    parts.push(base.replace(/^\//, ''));
-    for (const [key, value] of params) {
-      parts.push(key, value.replace(/\+/g, ' '));
-    }
-    outputPath = join(DIST_DIR, ...parts, 'index.html');
-  } else {
-    const parts = langDir ? [langDir] : [];
-    parts.push(route.path.replace(/^\//, ''));
-    outputPath = join(DIST_DIR, ...parts, 'index.html');
-  }
-
-  // Create directory and write file
-  const dir = dirname(outputPath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  writeFileSync(outputPath, html, 'utf-8');
-  return outputPath;
-}
-
-// ─── Validate native-language landing-page data ──────────────────────────────
-// This is the system boundary for externally-edited content (seo-landing-pages.mjs).
-// Validate the shape up front so malformed entries fail the build with a clear
-// message instead of emitting broken pages or invalid JSON-LD.
-function validateLandingPages(pages) {
-  if (!Array.isArray(pages)) {
-    throw new Error('LANDING_PAGES must be an array');
-  }
-  const seen = new Set();
-  pages.forEach((page, i) => {
-    const at = `LANDING_PAGES[${i}]${page?.path ? ` (${page.path})` : ''}`;
-    if (!page || typeof page.path !== 'string' || !page.path.startsWith('/')) {
-      throw new Error(`${at}: 'path' must be a string starting with '/'`);
-    }
-    if (seen.has(page.path)) throw new Error(`${at}: duplicate path`);
-    seen.add(page.path);
-    if (!page.en?.title || !page.en?.description) {
-      throw new Error(`${at}: missing en.title or en.description`);
-    }
-    if (!page.loc || typeof page.loc !== 'object' || Object.keys(page.loc).length === 0) {
-      throw new Error(`${at}: 'loc' must contain at least one language`);
-    }
-    for (const [lang, c] of Object.entries(page.loc)) {
-      if (!LANGUAGES.includes(lang)) {
-        throw new Error(`${at}: loc language '${lang}' is not a supported locale`);
-      }
-      if (!c?.title || !c?.description || !c?.h1) {
-        throw new Error(`${at}.loc.${lang}: requires title, description, and h1`);
-      }
-      if (!Array.isArray(c.faqs) || c.faqs.some(f => !f?.q || !f?.a)) {
-        throw new Error(`${at}.loc.${lang}: 'faqs' must be an array of { q, a }`);
-      }
-    }
-  });
-}
-
-try {
-  validateLandingPages(LANDING_PAGES);
-} catch (err) {
-  console.error(`❌ Invalid landing-page data: ${err.message}`);
+if (!hasShellMarkers(template) || !template.includes('<div id="root">')) {
+  console.error(`❌ ${templatePath} is missing the page-head/page-body markers (see index.html).`);
   process.exit(1);
 }
 
-// ─── Merge native-language landing pages ─────────────────────────────────────
-// Build a path -> { lang -> {title, description, h1, faqs} } lookup, and register
-// an English route for any landing path not already covered (so it generates in
-// all languages with hreflang). Existing routes keep their richer English copy.
-const LOCALIZED = {};
-const existingPaths = new Set(routes.map(r => r.path));
-for (const page of LANDING_PAGES) {
-  LOCALIZED[page.path] = page.loc;
-  if (!existingPaths.has(page.path)) {
-    routes.push({ path: page.path, title: `${page.en.title} | ${SITE_NAME}`, description: page.en.description });
-    existingPaths.add(page.path);
-  }
+// ─── Shared content ──────────────────────────────────────────────────────────
+
+const link = (lang, path, text) => `<a href="${escapeHtml(pageUrl(lang, path))}">${escapeHtml(text)}</a>`;
+const list = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+
+const NAV_LABEL = {
+  en: 'Explore', sq: 'Eksploro', sr: 'Istražite', bg: 'Разгледай', hr: 'Istraži',
+  bs: 'Istraži', mk: 'Истражи', me: 'Istraži', ro: 'Explorează', el: 'Εξερευνήστε',
+};
+
+function siteNav(lang) {
+  return `<nav aria-label="${escapeHtml(NAV_LABEL[lang] || NAV_LABEL.en)}">${list([
+    link(lang, '/search', 'Property for sale'),
+    link(lang, '/rentals', 'Property for rent'),
+    link(lang, '/explore-cities', 'City pages'),
+    link(lang, '/guides', 'Buying guides'),
+    link(lang, '/mortgage-calculator', 'Mortgage calculator'),
+    link(lang, '/valuation', 'Property price estimate'),
+    link(lang, '/agents', 'Real estate agents'),
+    link(lang, '/agencies', 'Real estate agencies'),
+    link(lang, '/blog', 'Blog'),
+    link(lang, '/about', 'About BalkanEstateAI'),
+    link(lang, '/contact', 'Contact'),
+    link(lang, '/privacy', 'Privacy Policy'),
+    link(lang, '/terms', 'Terms of Service'),
+    link(lang, '/cookies', 'Cookie Policy'),
+  ])}</nav>`;
 }
 
-let generated = 0;
+function guideLinks(lang) {
+  return list(COUNTRY_GUIDES.map((g) => link(lang, `/guides/${g.slug}`, `Buying property in ${g.country}`)));
+}
 
-// Generate English (default) pages first, then all other languages
-for (const route of routes) {
+const FEATURES = [
+  'Map-based search for homes for sale and rent, with filters for price, size, rooms and property type',
+  'Listing pages with photos, floor plans, 360° virtual tours and 3D building views',
+  'Sunlight and shadow simulation and the orientation of each property',
+  'Nearby schools, shops and transport, with distance measurement',
+  'Mortgage and rent-versus-buy calculators',
+  'Country buying guides covering foreign ownership, taxes and the legal steps',
+  'Agent and agency profiles, and viewing requests sent from a listing',
+];
+
+const COUNTRY_LIST = 'Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania and Serbia';
+
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+};
+
+function webPage(lang, path, name, description, type = 'WebPage', extra = {}) {
+  return {
+    ...organization,
+    '@type': type,
+    '@id': `${pageUrl(lang, path)}#webpage`,
+    url: pageUrl(lang, path),
+    name,
+    description,
+    inLanguage: lang,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    ...extra,
+  };
+}
+
+// ─── Pages ───────────────────────────────────────────────────────────────────
+// Each page: path, title (without site name), description, body(lang) and
+// optionally englishOnly (content written in English only: every language URL
+// exists, but the canonical is the English one and there are no hreflang
+// alternates, so ten identical copies do not compete with each other).
+
+/** @type {Array<{ path: string, title: string, description: string, body: (lang: string) => string, type?: string, englishOnly?: boolean, priority?: string, changefreq?: string, jsonLd?: (lang: string) => object[] }>} */
+const PAGES = [
+  {
+    path: '/',
+    title: 'Property for Sale and Rent in the Balkans',
+    description: `Search property for sale and rent in ${COUNTRY_LIST}, with maps, floor plans, virtual tours, calculators and country buying guides.`,
+    priority: '1.0',
+    changefreq: 'daily',
+    body: (lang) => `
+      <h1>Property for sale and rent in the Balkans</h1>
+      <p>${SITE_NAME} is a property marketplace for ${COUNTRY_LIST}. Owners, agents and agencies publish homes for sale and rent; buyers and renters search, compare and contact them directly.</p>
+      <h2>What you can do</h2>${list(FEATURES.map(escapeHtml))}
+      <h2>Country buying guides</h2>${guideLinks(lang)}`,
+  },
+  {
+    path: '/search',
+    title: 'Property for Sale in the Balkans — Map Search',
+    description: `Search apartments, houses, villas and land for sale in ${COUNTRY_LIST} on an interactive map.`,
+    type: 'CollectionPage',
+    priority: '0.9',
+    changefreq: 'daily',
+    body: (lang) => `
+      <h1>Property for sale in the Balkans</h1>
+      <p>Search listings for sale on an interactive map. Filter by country, city, price, size, number of rooms and property type, or describe what you want in plain language. Each listing links to the seller or agent.</p>
+      <p>New to buying in the region? Start with a country guide:</p>${guideLinks(lang)}`,
+  },
+  {
+    path: '/rentals',
+    title: 'Property for Rent in the Balkans',
+    description: 'Search apartments and houses for rent across the Balkans on an interactive map, and contact owners and agents directly.',
+    type: 'CollectionPage',
+    priority: '0.8',
+    changefreq: 'daily',
+    body: () => `
+      <h1>Property for rent in the Balkans</h1>
+      <p>Search apartments and houses for rent on an interactive map. Filter by city, monthly rent, size and rooms, and send a viewing request from the listing.</p>`,
+  },
+  {
+    path: '/explore-cities',
+    title: 'City Pages — Prices and Neighbourhoods Across the Balkans',
+    description: 'City pages with price history, districts and economic indicators for cities across the Balkans.',
+    priority: '0.7',
+    changefreq: 'weekly',
+    body: () => `
+      <h1>Explore cities</h1>
+      <p>Each city page brings together price history, districts and economic indicators, with the listings currently available in that city.</p>`,
+  },
+  {
+    path: '/guides',
+    title: 'Property Buying Guides for the Balkans',
+    description: 'How buying property works in 10 Balkan countries: foreign ownership rules, taxes, the legal steps and the official registries to check.',
+    englishOnly: true,
+    priority: '0.8',
+    changefreq: 'monthly',
+    body: (lang) => `
+      <h1>Property buying guides</h1>
+      <p>How buying property works in each country we cover: who can buy, the taxes, the legal steps and which official registry to check. Last updated <time datetime="${GUIDES_LAST_UPDATED}">${GUIDES_LAST_UPDATED}</time>.</p>
+      ${guideLinks(lang)}
+      <p>General information, not legal or tax advice. Confirm the current rules with a licensed local lawyer or notary.</p>`,
+  },
+  ...COUNTRY_GUIDES.map((g) => ({
+    path: `/guides/${g.slug}`,
+    title: `How to Buy Property in ${g.country} — Buyer's Guide`,
+    description: `How to buy property in ${g.country}: foreign ownership, taxes, residency, the legal steps and the official registry to check.`,
+    englishOnly: true,
+    type: 'Article',
+    priority: '0.7',
+    changefreq: 'monthly',
+    body: (lang) => `
+      <article>
+        <h1>How to buy property in ${escapeHtml(g.country)}</h1>
+        <p>By ${SITE_NAME} · Last updated <time datetime="${GUIDES_LAST_UPDATED}">${GUIDES_LAST_UPDATED}</time></p>
+        <dl>
+          <dt>Foreign ownership</dt><dd>${escapeHtml(g.foreignBuy)}</dd>
+          <dt>Annual tax</dt><dd>${escapeHtml(g.tax)}</dd>
+          <dt>Transfer tax</dt><dd>${escapeHtml(g.transferTax)}</dd>
+          <dt>Residency</dt><dd>${escapeHtml(g.residency)}</dd>
+        </dl>
+        <h2>Key points for buyers</h2>${list(g.highlights.map(escapeHtml))}
+        <h2>Buying process, step by step</h2><ol>${g.legalProcess.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
+        <h2>Check before you buy</h2>${list(g.cautions.map(escapeHtml))}
+        <h2>Cities</h2>${list(g.topCities.map((c) => link(lang, `/explore-cities/${encodeURIComponent(c)}/${encodeURIComponent(g.searchCountry)}`, c)))}
+        <p>${link(lang, `/search?country=${encodeURIComponent(g.searchCountry)}`, `Property for sale in ${g.country}`)}</p>
+        <h2>Official sources</h2>${list(g.sources.map((s) => (s.url ? `<a href="${escapeHtml(s.url)}" rel="noopener">${escapeHtml(s.name)}</a>` : escapeHtml(s.name))))}
+        <p>General information, not legal or tax advice. Rules and rates change and can depend on your nationality and the municipality; confirm them with a licensed local lawyer or notary and the official registry.</p>
+      </article>
+      <h2>Other country guides</h2>${guideLinks(lang)}`,
+    jsonLd: (lang) => [{
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: `How to buy property in ${g.country}`,
+      dateModified: GUIDES_LAST_UPDATED,
+      inLanguage: 'en',
+      url: pageUrl(DEFAULT_LANG, `/guides/${g.slug}`),
+      author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+      publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+      citation: g.sources.filter((s) => s.url).map((s) => s.url),
+      about: { '@type': 'Country', name: g.country },
+      mainEntityOfPage: pageUrl(lang, `/guides/${g.slug}`),
+    }],
+  })),
+  {
+    path: '/mortgage-calculator',
+    title: 'Mortgage Calculator',
+    description: 'Estimate monthly mortgage repayments for a property purchase, and compare renting with buying.',
+    priority: '0.6',
+    changefreq: 'monthly',
+    body: () => `
+      <h1>Mortgage calculator</h1>
+      <p>Enter the price, deposit, interest rate and term to estimate the monthly repayment and the total interest. The rent-versus-buy calculator compares the cost of renting with buying over time.</p>
+      <p>Results are estimates; your bank's offer depends on your income, residency and the property.</p>`,
+  },
+  {
+    path: '/valuation',
+    title: 'Property Price Estimate',
+    description: 'Get an automated indication of a property\'s value from comparable listings and its location. Not a professional valuation.',
+    priority: '0.6',
+    changefreq: 'monthly',
+    body: () => `
+      <h1>Property price estimate</h1>
+      <p>Enter a property's location, type and size to get an automated indication of its value based on comparable listings. It is an estimate, not a professional valuation.</p>`,
+  },
+  {
+    path: '/agents',
+    title: 'Real Estate Agents in the Balkans',
+    description: 'Find real estate agents working in Albania, Montenegro, Serbia, North Macedonia, Croatia and the rest of the region, with their listings and contact details.',
+    type: 'CollectionPage',
+    priority: '0.7',
+    changefreq: 'weekly',
+    body: () => `<h1>Real estate agents</h1><p>Browse agent profiles with their current listings, the areas they cover and how to contact them.</p>`,
+  },
+  {
+    path: '/agencies',
+    title: 'Real Estate Agencies in the Balkans',
+    description: 'Browse real estate agencies across the Balkans, with their agents, listings and contact details.',
+    type: 'CollectionPage',
+    priority: '0.7',
+    changefreq: 'weekly',
+    body: () => `<h1>Real estate agencies</h1><p>Browse agency profiles with their agents, their current listings and how to contact them.</p>`,
+  },
+  {
+    path: '/blog',
+    title: 'Blog — Property in the Balkans',
+    description: 'Articles about buying, renting and owning property in the Balkans.',
+    type: 'CollectionPage',
+    priority: '0.6',
+    changefreq: 'weekly',
+    body: () => `<h1>Blog</h1><p>Articles about buying, renting and owning property in the Balkans.</p>`,
+  },
+  {
+    path: '/how-it-works',
+    title: 'How BalkanEstateAI Works',
+    description: 'How searching, listing and contacting sellers works on BalkanEstateAI, for buyers, sellers, agents and agencies.',
+    priority: '0.5',
+    changefreq: 'monthly',
+    body: () => `<h1>How it works</h1><p>How searching, listing and contacting sellers works, for buyers, renters, private sellers, agents and agencies.</p>${list(FEATURES.map(escapeHtml))}`,
+  },
+  {
+    path: '/about',
+    title: 'About Us',
+    description: 'Who operates BalkanEstateAI, what the property marketplace offers, where its listings come from, how to report a listing and how to contact us.',
+    englishOnly: true,
+    type: 'AboutPage',
+    priority: '0.5',
+    changefreq: 'monthly',
+    body: (lang) => `
+      <h1>About BalkanEstateAI</h1>
+      <p>${SITE_NAME} is an online property marketplace for ${COUNTRY_LIST}. It is operated by BalkanEstate AI DOOEL.</p>
+      <h2>Where listings come from</h2>
+      <p>Listings are created by property owners, agents and agencies with an account. Some listings are imported from agency feeds or other websites and show their original source.</p>
+      <h2>What we check</h2>
+      <p>We do not inspect properties or verify each listing's details; the person who publishes a listing is responsible for it. Every listing page has a link to report it.</p>
+      <h2>Contact</h2>
+      <p>${link(lang, '/contact', 'Contact form')} · <a href="mailto:info@balkanestateai.com">info@balkanestateai.com</a> · <a href="mailto:support@balkanestateai.com">support@balkanestateai.com</a></p>`,
+  },
+  {
+    path: '/contact',
+    title: 'Contact BalkanEstateAI',
+    description: 'Contact BalkanEstateAI support, report a listing, or ask about advertising and agency plans.',
+    type: 'ContactPage',
+    priority: '0.4',
+    changefreq: 'yearly',
+    body: () => `
+      <h1>Contact us</h1>
+      <p>Use the contact form for support, to report a listing, or about advertising and agency plans.</p>
+      <p>Email: <a href="mailto:contact@balkanestateai.com">contact@balkanestateai.com</a> · Support: <a href="mailto:support@balkanestateai.com">support@balkanestateai.com</a></p>`,
+  },
+  {
+    path: '/privacy',
+    title: 'Privacy Policy',
+    description: 'How BalkanEstateAI collects, uses and protects personal data, including cookies, analytics and advertising.',
+    priority: '0.3',
+    changefreq: 'yearly',
+    body: () => `
+      <h1>Privacy Policy</h1>
+      <p>How we collect, use, share and protect personal data, the legal bases we rely on, how long we keep data, and your rights. It also explains our use of cookies, analytics and advertising, including Google AdSense, and how to opt out of personalised ads.</p>
+      <p>Privacy requests: <a href="mailto:privacy@balkanestateai.com">privacy@balkanestateai.com</a></p>`,
+  },
+  {
+    path: '/terms',
+    title: 'Terms of Service',
+    description: 'The terms that apply to using BalkanEstateAI, publishing listings and paid plans.',
+    priority: '0.3',
+    changefreq: 'yearly',
+    body: () => `<h1>Terms of Service</h1><p>The terms that apply to using the site, publishing listings, and paid plans for agents and agencies.</p>`,
+  },
+  {
+    path: '/cookies',
+    title: 'Cookie Policy',
+    description: 'Which cookies BalkanEstateAI uses, what they are for, and how to change your choices.',
+    priority: '0.3',
+    changefreq: 'yearly',
+    body: () => `<h1>Cookie Policy</h1><p>Which cookies the site uses — necessary, preference, analytics and marketing (advertising) cookies — and how to change your choice at any time.</p>`,
+  },
+];
+
+// ─── Write files ─────────────────────────────────────────────────────────────
+
+function outputPathFor(lang, path) {
+  const segments = path === '/' ? [] : path.replace(/^\//, '').split('/');
+  return join(DIST_DIR, ...(lang ? [lang] : []), ...segments, 'index.html');
+}
+
+function write(file, html) {
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, html, 'utf-8');
+}
+
+function renderFor(page, lang) {
+  const canonicalLang = page.englishOnly ? DEFAULT_LANG : lang;
+  const title = `${page.title} | ${SITE_NAME}`;
+  const head = buildHead({
+    lang,
+    path: page.path,
+    title,
+    description: page.description,
+    robots: ROBOTS_INDEX,
+    canonicalLang,
+    alternates: !page.englishOnly,
+    ogType: page.type === 'Article' ? 'article' : 'website',
+    jsonLd: [
+      webPage(canonicalLang, page.path, page.title, page.description, page.type === 'Article' ? 'WebPage' : (page.type || 'WebPage'), {
+        dateModified: BUILD_DATE,
+      }),
+      ...(page.jsonLd ? page.jsonLd(lang) : []),
+    ],
+  });
+  const body = `<main id="prerendered-content">${page.body(lang)}${siteNav(lang)}</main>`;
+  // English-only pages are English documents whatever the URL prefix.
+  return renderPage(template, { lang: canonicalLang, head, body });
+}
+
+let written = 0;
+for (const page of PAGES) {
   for (const lang of LANGUAGES) {
-    try {
-      prerenderPage(route, lang);
-    } catch (err) {
-      console.error(`❌ Failed to prerender ${route.path} [${lang}]: ${err.message}`);
-      process.exit(1);
+    const html = renderFor(page, lang);
+    write(outputPathFor(lang, page.path), html);
+    written++;
+    // Unprefixed copy for old links. Never the root: dist/index.html is the
+    // neutral SPA shell (see header comment).
+    if (lang === DEFAULT_LANG && page.path !== '/') {
+      write(outputPathFor('', page.path), html);
+      written++;
     }
-    generated++;
   }
 }
 
-console.log(`✅ Prerendered ${generated} pages (${routes.length} routes × ${LANGUAGES.length} languages) to ${DIST_DIR}/`);
+// Neutral shell: generic head (no canonical — this file answers for every URL
+// without a file of its own), plus a short description and the site
+// navigation for anything that reads it without JavaScript.
+const shellBody = `<main id="prerendered-content">
+      <h1>${SITE_NAME}</h1>
+      <p>Property marketplace for ${COUNTRY_LIST}.</p>
+      ${siteNav(DEFAULT_LANG)}
+    </main>`;
+write(templatePath, renderPage(template, {
+  lang: DEFAULT_LANG,
+  head: template.slice(
+    template.indexOf('<!--page-head:start-->') + '<!--page-head:start-->'.length,
+    template.indexOf('<!--page-head:end-->'),
+  ).trim(),
+  body: shellBody,
+}));
 
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+// ─── Sitemap (static pages) ──────────────────────────────────────────────────
+// Only canonical, indexable URLs: every language for translated pages, the
+// English URL only for English-only pages. Listings, articles and profiles are
+// in /sitemap-listings.xml (generated by the API, proxied by a Pages Function).
+
+const urls = [];
+for (const page of PAGES) {
+  const langs = page.englishOnly ? [DEFAULT_LANG] : LANGUAGES;
+  for (const lang of langs) {
+    const alternates = page.englishOnly
+      ? ''
+      : LANGUAGES.map((l) => `\n    <xhtml:link rel="alternate" hreflang="${HREFLANG[l]}" href="${escapeHtml(pageUrl(l, page.path))}"/>`).join('') +
+        `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeHtml(pageUrl(DEFAULT_LANG, page.path))}"/>`;
+    urls.push(`  <url>
+    <loc>${escapeHtml(pageUrl(lang, page.path))}</loc>${alternates}
+    <lastmod>${page.path.startsWith('/guides') ? GUIDES_LAST_UPDATED : BUILD_DATE}</lastmod>
+    <changefreq>${page.changefreq || 'monthly'}</changefreq>
+    <priority>${page.priority || '0.5'}</priority>
+  </url>`);
+  }
 }
+writeFileSync(
+  join(DIST_DIR, 'sitemap.xml'),
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${urls.join('\n')}
+</urlset>
+`,
+  'utf-8',
+);
+
+console.log(`✅ Prerendered ${written} files for ${PAGES.length} pages × ${LANGUAGES.length} languages; sitemap.xml has ${urls.length} URLs`);

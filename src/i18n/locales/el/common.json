@@ -635,7 +635,11 @@
     "title": "Οδηγοί αγοράς ακινήτων",
     "topCities": "Κορυφαίες πόλεις για ακίνητα",
     "transferTax": "Φόρος μεταβίβασης",
-    "whyBuy": "Γιατί να αγοράσετε στην {{country}};"
+    "whyBuy": "Γιατί να αγοράσετε στην {{country}};",
+    "readGuide": "Διαβάστε τον οδηγό →",
+    "lastUpdated": "Τελευταία ενημέρωση",
+    "otherGuides": "Οδηγοί για άλλες χώρες",
+    "officialSources": "Επίσημες πηγές"
   },
   "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
   "saved": "Αποθηκευμένο",
@@ -654,5 +658,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Σημείωση",
-  "loadMore": "Φόρτωση περισσότερων"
+  "loadMore": "Φόρτωση περισσότερων",
+  "loadError": {
+    "title": "Η σελίδα δεν μπόρεσε να φορτωθεί",
+    "retry": "Δοκιμάστε ξανά"
+  }
 }

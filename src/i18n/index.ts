@@ -205,20 +205,33 @@ i18n
   })
   .then(() => {
     // Set initial html lang attribute for SEO and accessibility
-    document.documentElement.lang = i18n.language || 'en';
+    document.documentElement.lang = htmlLang(i18n.language || 'en');
 
-    // If detected language is not English, load its bundle and switch
+    // If detected language is not English, load its bundle and switch —
+    // unless the URL names a language. The URL decides (LanguageGate applies
+    // it); switching to the remembered language after its bundle arrives
+    // used to override it, so /en/… showed the last language visited.
     const detectedLang = (i18n.language || 'en').split('-')[0];
     if (detectedLang !== 'en' && languageLoaders[detectedLang]) {
       loadLanguageResources(detectedLang).then(() => {
+        const urlLang = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : '';
+        const urlNamesLanguage = urlLang === 'en' || urlLang in languageLoaders;
+        if (urlNamesLanguage && urlLang !== detectedLang) return;
         i18n.changeLanguage(detectedLang);
       });
     }
   });
 
+/**
+ * The BCP 47 tag for <html lang>. The app's code for Montenegrin is "me",
+ * which is a country code, not a language: browsers, screen readers and
+ * search engines need "sr-ME" (Serbian as used in Montenegro).
+ */
+export const htmlLang = (lng: string): string => (lng.split('-')[0] === 'me' ? 'sr-ME' : lng);
+
 // Listen for language changes to update html lang attribute
 i18n.on('languageChanged', (lng) => {
-  document.documentElement.lang = lng;
+  document.documentElement.lang = htmlLang(lng);
   // Update meta og:locale for social sharing
   const ogLocale = document.querySelector('meta[property="og:locale"]');
   if (ogLocale) {
@@ -239,7 +252,7 @@ export const changeLanguage = async (lng: LanguageCode): Promise<void> => {
   await loadLanguageResources(lng);
   await i18n.changeLanguage(lng);
   localStorage.setItem('balkanestate_language', lng);
-  document.documentElement.lang = lng;
+  document.documentElement.lang = htmlLang(lng);
 };
 
 // Get current language

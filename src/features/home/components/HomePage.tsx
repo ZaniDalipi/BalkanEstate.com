@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
-import { SEO, OrganizationSchema, FAQSchema, realEstateFAQs } from '@/src/components/seo';
+import { SEO } from '@/src/components/seo';
 import { Property } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProperties } from '@/src/features/properties/api/propertyApi';
@@ -227,11 +227,8 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       <SEO
         title={t('home:seo.title')}
         description={t('home:seo.description')}
-        canonical="https://balkanestateai.com"
         type="website"
       />
-      <OrganizationSchema />
-      <FAQSchema faqs={realEstateFAQs} />
 
       {/* The gallery goes inside the hero, directly under its buttons, so it
           is on screen when the page opens. No `content-below-fold` wrapper for

@@ -635,7 +635,11 @@
     "title": "Водичи за куповину некретнина",
     "topCities": "Најбољи градови за некретнине",
     "transferTax": "Порез на пренос",
-    "whyBuy": "Зашто купити у {{country}}?"
+    "whyBuy": "Зашто купити у {{country}}?",
+    "readGuide": "Прочитајте водич →",
+    "lastUpdated": "Последње ажурирано",
+    "otherGuides": "Водичи за друге земље",
+    "officialSources": "Званични извори"
   },
   "removeFromFavorites": "Уклони из омиљених",
   "saved": "Сачувано",
@@ -654,5 +658,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Напомена",
-  "loadMore": "Учитај више"
+  "loadMore": "Учитај више",
+  "loadError": {
+    "title": "Страница није могла да се учита",
+    "retry": "Покушајте поново"
+  }
 }

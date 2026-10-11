@@ -296,6 +296,9 @@ const STANDALONE_TYPES: ReadonlySet<ListingData['propertyType']> = new Set(['hou
  * Checks every mandatory field of a listing and returns a message per invalid
  * field. An empty result means the listing can be published.
  */
+/** Shortest description a listing can be published with. */
+export const MIN_DESCRIPTION_LENGTH = 50;
+
 export const validateListing = (
     params: {
         listingData: ListingData;
@@ -327,6 +330,13 @@ export const validateListing = (
 
     if (!listingData.description.trim()) {
         errors.description = t('newListing:validation.descriptionRequired', 'Please add a description of the property');
+    } else if (listingData.description.trim().length < MIN_DESCRIPTION_LENGTH) {
+        // A one-line description leaves the listing page with nothing to read
+        // but a price: ask for a few sentences about the property itself.
+        errors.description = t(
+            'newListing:validation.descriptionTooShort',
+            `Please describe the property in at least ${MIN_DESCRIPTION_LENGTH} characters — the rooms, condition, view and what is nearby.`,
+        );
     }
 
     // At least one photo is mandatory - a listing without images cannot be published

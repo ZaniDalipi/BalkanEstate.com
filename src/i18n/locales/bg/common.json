@@ -635,7 +635,11 @@
     "title": "Ръководства за покупка на имот",
     "topCities": "Топ градове за имоти",
     "transferTax": "Данък при прехвърляне",
-    "whyBuy": "Защо да купите в {{country}}?"
+    "whyBuy": "Защо да купите в {{country}}?",
+    "readGuide": "Прочетете ръководството →",
+    "lastUpdated": "Последна актуализация",
+    "otherGuides": "Ръководства за други държави",
+    "officialSources": "Официални източници"
   },
   "removeFromFavorites": "Премахни от любими",
   "saved": "Запазено",
@@ -654,5 +658,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Забележка",
-  "loadMore": "Зареди още"
+  "loadMore": "Зареди още",
+  "loadError": {
+    "title": "Страницата не можа да се зареди",
+    "retry": "Опитайте отново"
+  }
 }

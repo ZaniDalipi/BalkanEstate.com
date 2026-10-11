@@ -310,9 +310,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         aria-label={t('nav:goToHome', 'Go to home page')}
                     >
                         <LogoIcon className="w-7 h-7 text-primary flex-shrink-0" aria-hidden="true" />
-                        <h1 className="text-lg font-bold text-neutral-800 md:hidden group-hover:md:inline whitespace-nowrap">
+                        {/* A span, not an h1: the sidebar is on every page, and the
+                            page's own heading should be its only h1. */}
+                        <span className="text-lg font-bold text-neutral-800 md:hidden group-hover:md:inline whitespace-nowrap">
                             Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
-                        </h1>
+                        </span>
                     </button>
                     <button
                         onClick={onClose}

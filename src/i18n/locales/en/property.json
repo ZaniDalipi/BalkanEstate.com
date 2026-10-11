@@ -817,5 +817,9 @@
     "perMonthNote": "Monthly rents · weekly rents converted",
     "perNightNote": "Nightly lets only",
     "villasIncluded": "Including other villas"
+  },
+  "report": {
+    "prompt": "Something wrong with this listing?",
+    "link": "Report it to us"
   }
 }

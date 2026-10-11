@@ -807,5 +807,9 @@
     "perMonthNote": "Mjesečne kirije · sedmične pretvorene",
     "perNightNote": "Samo smještaj po noći",
     "villasIncluded": "Uključujući druge vile"
+  },
+  "report": {
+    "prompt": "Nešto nije u redu s ovim oglasom?",
+    "link": "Prijavite nam"
   }
 }

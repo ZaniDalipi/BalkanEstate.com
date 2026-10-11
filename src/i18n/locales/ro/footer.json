@@ -21,7 +21,12 @@
     "messages": "Mesaje",
     "myAccount": "Contul Meu",
     "howItWorks": "Cum Funcționează",
-    "blog": "Blog"
+    "blog": "Blog",
+    "about": "Despre noi",
+    "contactUs": "Contact",
+    "advertise": "Faceți reclamă la noi",
+    "buyingGuides": "Ghiduri de cumpărare",
+    "mortgageCalculator": "Calculator credit ipotecar"
   },
   "countries": {
     "AL": "Albania",

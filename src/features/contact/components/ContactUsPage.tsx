@@ -15,6 +15,7 @@ import type { ContactFormData } from '../types';
 import type { AppView } from '@/types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
+import { SEO } from '@/src/components/seo';
 
 // Inline SVG icons to avoid importing full icon set
 const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -53,13 +54,19 @@ const ContactUsPage: React.FC = () => {
 
   // Preselect the "advertising" subject (and a starter message) when arriving
   // from a "Your Ad Here" placeholder (?topic=advertise).
-  const isAdvertising = (() => {
+  // Also preselect a report when arriving from a listing's "Report this
+  // listing" link (?topic=report&listing=<url>). Reports go to support, which
+  // reviews them; the subject needs no separate backend category.
+  const { topic, listing } = (() => {
     try {
-      return new URLSearchParams(window.location.search).get('topic') === 'advertise';
+      const params = new URLSearchParams(window.location.search);
+      return { topic: params.get('topic'), listing: params.get('listing') };
     } catch {
-      return false;
+      return { topic: null, listing: null };
     }
   })();
+  const isAdvertising = topic === 'advertise';
+  const isReport = topic === 'report';
   const advertisingOverrides = isAdvertising
     ? {
         subject: 'advertising',
@@ -70,7 +77,14 @@ const ContactUsPage: React.FC = () => {
           "Hi, I'd like to advertise on BalkanEstate. Please send me your ad placements and pricing."
         ),
       }
-    : undefined;
+    : isReport
+      ? {
+          subject: 'support',
+          message: `${t('contact:report.prefill', 'I want to report a listing that looks inaccurate, misleading or fraudulent.')}\n${
+            listing ? `${t('contact:report.listing', 'Listing')}: ${listing}\n` : ''
+          }${t('contact:report.reason', 'What is wrong with it')}: `,
+        }
+      : undefined;
 
   const {
     formData,
@@ -161,6 +175,10 @@ const ContactUsPage: React.FC = () => {
 
   return (
     <div className="liquid-glass-bg min-h-screen flex flex-col">
+      <SEO
+        title={t('contact:seo.title', 'Contact Us')}
+        description={t('contact:seo.description', 'Contact BalkanEstateAI support, report a listing, or ask about advertising and agency plans.')}
+      />
       <div className="flex-1">
         <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
           {/* Back Button */}

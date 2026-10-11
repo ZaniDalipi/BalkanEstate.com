@@ -33,6 +33,8 @@ const BALKAN_SPEECH_LANGS: Record<string, string> = {
 };
 
 function getSpeechLang(): string {
+    // <html lang> is "sr-ME" for Montenegrin (see htmlLang in src/i18n).
+    if (document.documentElement.lang?.toLowerCase() === 'sr-me') return BALKAN_SPEECH_LANGS.me;
     const i18nLang = document.documentElement.lang?.split('-')[0] || 'en';
     return BALKAN_SPEECH_LANGS[i18nLang] || BALKAN_SPEECH_LANGS.en;
 }

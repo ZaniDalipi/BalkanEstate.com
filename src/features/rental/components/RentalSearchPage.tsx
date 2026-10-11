@@ -247,7 +247,10 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
             <SEO
                 title={t('rental:seo.title', 'Properties for Rent | BalkanEstate')}
                 description={t('rental:seo.description', 'Browse rental properties across the Balkans. Find apartments, houses, and villas for rent.')}
-                canonical={`${window.location.origin}/rentals${window.location.search}`}
+                canonical={`${window.location.origin}/rentals`}
+                // Filtered views are internal search results: endless
+                // combinations, often empty. Only the unfiltered page is indexed.
+                noindex={window.location.search.length > 1}
                 type="website"
             />
 

@@ -29,5 +29,8 @@
     "prev": "Mëparshme",
     "next": "Tjetër",
     "page": "Faqja {{page}} nga {{total}}"
+  },
+  "article": {
+    "updated": "Përditësuar"
   }
 }

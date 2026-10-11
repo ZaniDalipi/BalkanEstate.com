@@ -49,7 +49,8 @@ import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
 import { AdSlot } from '@/src/features/promo';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import { buildGalleryImages, groupGalleryImagesByTag } from '@/shared/property/galleryImages';
-import { paths } from '@/src/app/router/paths';
+import { paths, withQuery } from '@/src/app/router/paths';
+import { AppLink } from '@/src/app/router/AppLink';
 import { navigate, goBack } from '@/src/app/router/navigation';
 
 /**
@@ -620,8 +621,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         defaultValue: `${bedsPrefix}${propertyTypeLabel} for ${listingAction} in ${property.city}, ${property.country} - ${priceStr}`,
       });
 
-  // Generate SEO description
-  const seoDescription = t('property:seo.description', {
+  // Generate SEO description. The full sentence needs a size and a location;
+  // imported listings often lack one, and "0m²" or "undefined" in a search
+  // snippet is worse than a shorter description.
+  const seoLocation = [property.city, property.country].filter(Boolean).join(', ');
+  const seoHasFullFacts = (property.sqft ?? 0) > 0 && !!property.city && !!property.country;
+  const seoFallbackDescription = [
+    `${roomsSentence}${property.propertyType || 'property'} for ${listingAction}${seoLocation ? ` in ${seoLocation}` : ''}`,
+    (property.sqft ?? 0) > 0 ? `${property.sqft} m²` : '',
+    (property.price ?? 0) > 0 && !property.isNegotiable ? priceStr : '',
+  ].filter(Boolean).join(' · ') + '.';
+  const seoDescription = (seoHasFullFacts ? t('property:seo.description', {
     beds: seoBeds,
     baths: seoBaths,
     type: property.propertyType || 'property',
@@ -631,7 +641,16 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     sqft: property.sqft,
     price: property.price?.toLocaleString(),
     defaultValue: `${roomsSentence}${property.propertyType || 'property'} for ${listingAction} in ${property.city}, ${property.country}. ${property.sqft}m² for ${priceStr}.`,
-  }) + (property.description ? ` ${property.description.slice(0, 120)}` : '');
+  }) : seoFallbackDescription) + (property.description ? ` ${property.description.slice(0, 120)}` : '');
+
+  // Listings imported from another website carry that site's text and photos.
+  // They stay useful to visitors (with attribution to the source), but they are
+  // not this site's original content: keep them out of search indexes and
+  // never put ads next to them. Listings that are no longer on the market are
+  // likewise kept out of the index.
+  const isImportedListing = !!property.source;
+  const isOffMarket = !!property.status && property.status !== 'active';
+  const showAds = !isImportedListing;
 
   // Get all images for SEO
   const seoImages = allImages.map(img => img.url).filter(Boolean);
@@ -651,6 +670,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         canonical={`${window.location.origin}/property/${propertySlug}`}
         image={seoImages[0] || property.imageUrl}
         type="product"
+        noindex={isImportedListing || isOffMarket}
         property={{
           price: property.price,
           originalPrice: property.originalPrice,
@@ -1118,7 +1138,23 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       </main>
 
       {/* Ad — horizontal leaderboard between the property details and the location map */}
-      <AdSlot page="property-details" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" />
+      {/* Listings are published by their owners and agents, not checked by us
+          one by one — give every visitor a direct way to flag a bad one. */}
+      <p className="w-full px-4 lg:px-6 mt-6 text-sm text-neutral-500">
+        {t('property:report.prompt', 'Something wrong with this listing?')}{' '}
+        <AppLink
+          to={withQuery(paths.contact(), {
+            topic: 'report',
+            listing: `https://balkanestateai.com${paths.property(propertySlug)}`,
+          })}
+          className="font-medium text-primary-700 underline hover:text-primary-800"
+          rel="nofollow"
+        >
+          {t('property:report.link', 'Report it to us')}
+        </AppLink>
+      </p>
+
+      {showAds && <AdSlot page="property-details" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" />}
 
       {/* 3D Map — full-bleed full-width band, rendered outside the main container so it
           spans the full screen width, right after the description to keep readers engaged.
@@ -1182,7 +1218,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           {/* Ad — vertical skyscraper in the otherwise-empty right column (desktop only) */}
           <div className="hidden lg:block lg:col-span-1 min-w-0">
             <div className="sticky top-24">
-              <AdSlot page="property-details" placement="sidebar" format="halfpage" />
+              {showAds && <AdSlot page="property-details" placement="sidebar" format="halfpage" />}
             </div>
           </div>
 
@@ -1192,7 +1228,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               the shape — a 300x600 rail image squeezed into a wide box does
               neither advertiser nor reader any favours. */}
           <div className="lg:hidden">
-            <AdSlot page="property-details" placement="in-content" index={2} format="leaderboard" />
+            {showAds && <AdSlot page="property-details" placement="in-content" index={2} format="leaderboard" />}
           </div>
         </div>
       </main>

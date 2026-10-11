@@ -635,7 +635,11 @@
     "title": "Udhëzues për blerjen e pronës",
     "topCities": "Qytetet kryesore për pronë",
     "transferTax": "Taksa e transferimit",
-    "whyBuy": "Pse të blini në {{country}}?"
+    "whyBuy": "Pse të blini në {{country}}?",
+    "readGuide": "Lexo udhëzuesin →",
+    "lastUpdated": "Përditësuar së fundi",
+    "otherGuides": "Udhëzues për vende të tjera",
+    "officialSources": "Burime zyrtare"
   },
   "removeFromFavorites": "Hiq nga të preferuarat",
   "saved": "Të ruajtura",
@@ -654,5 +658,9 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Shënim",
-  "loadMore": "Ngarko më shumë"
+  "loadMore": "Ngarko më shumë",
+  "loadError": {
+    "title": "Kjo faqe nuk mund të ngarkohej",
+    "retry": "Provo përsëri"
+  }
 }

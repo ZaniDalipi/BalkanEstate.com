@@ -57,6 +57,14 @@ describe('validateListing', () => {
         );
     });
 
+    it('rejects a description too short to say anything about the property', () => {
+        const errors = validateListing({
+            ...completeListing,
+            listingData: { ...completeListing.listingData, description: 'Nice flat.' },
+        }, t);
+        expect(errors.description).toBeDefined();
+    });
+
     it('requires a location on the map once a city is picked', () => {
         const errors = validateListing({
             ...completeListing,

@@ -637,7 +637,16 @@
     "topCities": "Top Cities for Property",
     "ctaTitle": "Ready to Find Your Property?",
     "ctaDescription": "Search across all 11 Balkan countries with AI-powered matching. 10 languages, verified agents, instant valuations.",
-    "ctaButton": "Start Searching"
+    "ctaButton": "Start Searching",
+    "readGuide": "Read the guide →",
+    "lastUpdated": "Last updated",
+    "otherGuides": "Guides for other countries",
+    "officialSources": "Official sources",
+    "byline": "By BalkanEstateAI",
+    "keyPoints": "Key points for buyers",
+    "checkBeforeBuying": "Check before you buy",
+    "disclaimerTitle": "General information, not legal or tax advice",
+    "seoGuideSuffix": "Buyer's Guide"
   },
   "any": "Any",
   "usageMeter": {
@@ -654,5 +663,11 @@
     "advertiseCta": "Advertise with us — get in touch"
   },
   "note": "Note",
-  "loadMore": "Load more"
+  "loadMore": "Load more",
+  "loadError": {
+    "title": "This page could not be loaded",
+    "retry": "Try again",
+    "description": "Check your connection and try again. If it keeps happening, our servers may be busy.",
+    "retrying": "Retrying…"
+  }
 }

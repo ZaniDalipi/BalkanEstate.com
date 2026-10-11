@@ -224,7 +224,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <SEO
                 title={seoTitle}
                 description={seoDescription}
-                canonical={`${window.location.origin}/search${window.location.search}`}
+                canonical={`${window.location.origin}/search`}
+                // Filtered views are internal search results: endless
+                // combinations, often empty. Only the unfiltered page is indexed.
+                noindex={window.location.search.length > 1}
                 type="website"
             />
 

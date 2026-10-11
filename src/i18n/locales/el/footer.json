@@ -21,7 +21,12 @@
     "messages": "Μηνύματα",
     "myAccount": "Ο Λογαριασμός μου",
     "howItWorks": "Πώς Λειτουργεί",
-    "blog": "Ιστολόγιο"
+    "blog": "Ιστολόγιο",
+    "about": "Σχετικά με εμάς",
+    "contactUs": "Επικοινωνία",
+    "advertise": "Διαφημιστείτε μαζί μας",
+    "buyingGuides": "Οδηγοί αγοράς",
+    "mortgageCalculator": "Υπολογιστής δανείου"
   },
   "countries": {
     "AL": "Αλβανία",

@@ -1,307 +1,59 @@
-# Robots.txt for BalkanEstateAI
-# https://balkanestateai.com
+# robots.txt for https://balkanestateai.com
+#
+# A crawler obeys only the most specific group that names it, so every group
+# below repeats the same private-area rules. (An earlier version gave Googlebot
+# its own group with just "Allow: /", which silently exempted Google from all
+# of the Disallow lines.)
+#
+# Private pages also send "noindex"; these rules just stop crawlers wasting
+# requests on them. Pages are served under a language prefix (/en/…, /sq/…),
+# so each rule covers both the prefixed and the unprefixed path.
+#
+# Google's ad crawlers (Mediapartners-Google, AdsBot-Google) are not blocked:
+# AdSense must be able to read any page that can show ads.
 
-# Default rules for all crawlers
 User-agent: *
-Allow: /
-Allow: /search
-Allow: /property/
-Allow: /agencies/
-Allow: /agencies
-Allow: /agents
-Allow: /agents/
-Allow: /rentals
-Allow: /explore-cities
-Allow: /city-dashboard/
-Allow: /valuation
-Allow: /mortgage-calculator
-Allow: /how-it-works
-Allow: /contact
-Allow: /pricing
-Allow: /guides
-Allow: /privacy
-Allow: /terms
-Allow: /cookies
-
-# Allow language-prefixed versions of all public pages
-Allow: /en/
-Allow: /sq/
-Allow: /sr/
-Allow: /bg/
-Allow: /hr/
-Allow: /bs/
-Allow: /mk/
-Allow: /me/
-Allow: /ro/
-Allow: /el/
-
-# Disallow private/authenticated areas
 Disallow: /account
+Disallow: /*/account
 Disallow: /inbox
+Disallow: /*/inbox
 Disallow: /admin
+Disallow: /*/admin
 Disallow: /saved-properties
+Disallow: /*/saved-properties
 Disallow: /saved-searches
+Disallow: /*/saved-searches
 Disallow: /create-listing
-Disallow: /edit-listing
+Disallow: /*/create-listing
 Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-
-# Disallow query parameters that create duplicate content
-Disallow: /*?sort=
-Disallow: /*?page=
-Disallow: /*&sort=
-Disallow: /*&page=
-
-# Crawl-delay for polite crawling
-Crawl-delay: 1
-
-# Google specific - no crawl delay needed
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-# Google Images
-User-agent: Googlebot-Image
-Allow: /icons/
-Allow: /images/
-Allow: /og-image.png
-
-# Bing specific
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-# Yandex (relevant for Balkan countries with Russian-speaking tourists)
-User-agent: Yandex
-Allow: /
-Crawl-delay: 2
-
-# DuckDuckBot
-User-agent: DuckDuckBot
-Allow: /
-Crawl-delay: 1
-
-# AI Search Crawlers - Allow public content for AI search visibility
-# Private/authenticated areas remain blocked for all AI crawlers
-
-User-agent: GPTBot
-Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
+Disallow: /*/create-rental
 Disallow: /edit-listing
-Disallow: /create-rental
+Disallow: /*/edit-listing
 Disallow: /create-agency
+Disallow: /*/create-agency
 Disallow: /agency-dashboard
+Disallow: /*/agency-dashboard
 Disallow: /analytics
+Disallow: /*/analytics
 Disallow: /payment/
+Disallow: /*/payment/
 Disallow: /reset-password
+Disallow: /*/reset-password
 Disallow: /verify-email
+Disallow: /*/verify-email
 Disallow: /login
+Disallow: /*/login
 Disallow: /register
-Crawl-delay: 2
+Disallow: /*/register
+Disallow: /auth/
+Disallow: /*/auth/
+Disallow: /api/
 
-User-agent: ChatGPT-User
+User-agent: Mediapartners-Google
 Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /edit-listing
-Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
 
-User-agent: CCBot
+User-agent: AdsBot-Google
 Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /edit-listing
-Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
 
-User-agent: anthropic-ai
-Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /edit-listing
-Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-User-agent: Google-Extended
-Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /edit-listing
-Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-User-agent: PerplexityBot
-Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /edit-listing
-Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# OpenAI ChatGPT Search crawler (powers in-chat search results & citations)
-User-agent: OAI-SearchBot
-Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /edit-listing
-Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# Anthropic Claude crawler
-User-agent: ClaudeBot
-Allow: /
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /edit-listing
-Disallow: /create-rental
-Disallow: /create-agency
-Disallow: /agency-dashboard
-Disallow: /analytics
-Disallow: /payment/
-Disallow: /reset-password
-Disallow: /verify-email
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# Anthropic Claude in-product fetch (when a user asks Claude about a page)
-User-agent: Claude-Web
-Allow: /
-Disallow: /account
-Disallow: /admin
-Disallow: /payment/
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# Apple Intelligence / Siri AI training & answers
-User-agent: Applebot-Extended
-Allow: /
-Disallow: /account
-Disallow: /admin
-Disallow: /payment/
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# Meta AI (Llama / Meta AI assistant)
-User-agent: meta-externalagent
-Allow: /
-Disallow: /account
-Disallow: /admin
-Disallow: /payment/
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# Amazon (Alexa / Rufus AI)
-User-agent: Amazonbot
-Allow: /
-Disallow: /account
-Disallow: /admin
-Disallow: /payment/
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# Cohere AI
-User-agent: cohere-ai
-Allow: /
-Disallow: /account
-Disallow: /admin
-Disallow: /payment/
-Disallow: /login
-Disallow: /register
-Crawl-delay: 2
-
-# Sitemap location
 Sitemap: https://balkanestateai.com/sitemap.xml
+Sitemap: https://balkanestateai.com/sitemap-listings.xml

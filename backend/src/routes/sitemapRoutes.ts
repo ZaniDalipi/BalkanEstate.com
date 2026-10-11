@@ -1,89 +1,94 @@
 import express, { Request, Response } from 'express';
 import Property from '../models/Property';
 import Agency from '../models/Agency';
+import Article from '../models/Article';
+import { encodeId } from '../utils/idObfuscation';
 import { apiLogger } from '../utils/logger';
 
 const router = express.Router();
 
 const BASE_URL = process.env.FRONTEND_URL || 'https://balkanestateai.com';
 
+/** Pages are served under a language prefix; English is the default. */
+const LANG = 'en';
+
+const xmlEscape = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+
+const day = (date?: Date | string | null): string =>
+  (date ? new Date(date) : new Date()).toISOString().split('T')[0];
+
+const urlEntry = (path: string, lastmod: string, changefreq: string, priority: string): string =>
+  `  <url>
+    <loc>${xmlEscape(`${BASE_URL}/${LANG}${path}`)}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>
+`;
+
 /**
- * Generate XML Sitemap for SEO
- * Includes:
- * - Static pages (home, search, agents, agencies)
- * - Dynamic property listings (active only)
- * - Agency pages
+ * Sitemap of the database-backed pages: listings, agency profiles and blog
+ * articles. The static pages (home, guides, legal, tools) are in the
+ * frontend's own /sitemap.xml, generated at build time; this one is served on
+ * the site's host as /sitemap-listings.xml by a Cloudflare Pages Function.
+ *
+ * Only canonical, indexable URLs belong here, which rules out:
+ *  - listings that are not active (sold, rented, draft, pending),
+ *  - listings imported from other websites (their text and photos belong to
+ *    the source, and their pages are marked noindex),
+ *  - listings with no description — a page with nothing but a price says
+ *    nothing a search result should point to.
+ * Listing URLs use the encoded id, exactly as the site links to them.
  */
 router.get('/sitemap.xml', async (_req: Request, res: Response) => {
   try {
-    // Fetch active properties
-    const properties = await Property.find({ status: 'active' })
-      .select('_id updatedAt city country price')
-      .sort({ updatedAt: -1 })
-      .lean();
+    const [properties, agencies, articles] = await Promise.all([
+      Property.find({
+        status: 'active',
+        $or: [{ source: { $exists: false } }, { source: null }, { source: '' }],
+        description: { $exists: true, $ne: '' },
+      })
+        .select('_id updatedAt')
+        .sort({ updatedAt: -1 })
+        .limit(45000)
+        .lean(),
+      Agency.find({ slug: { $exists: true, $ne: '' } })
+        .select('slug updatedAt')
+        .sort({ updatedAt: -1 })
+        .limit(2000)
+        .lean(),
+      Article.find({ status: 'published' })
+        .select('slug updatedAt publishedAt')
+        .sort({ publishedAt: -1 })
+        .limit(2000)
+        .lean(),
+    ]);
 
-    // Fetch agencies
-    const agencies = await Agency.find({ isActive: true })
-      .select('slug updatedAt')
-      .sort({ updatedAt: -1 })
-      .lean();
-
-    const currentDate = new Date().toISOString().split('T')[0];
-
-    // Static pages
-    const staticPages = [
-      { url: '/', priority: '1.0', changefreq: 'daily' },
-      { url: '/search', priority: '0.9', changefreq: 'daily' },
-      { url: '/agents', priority: '0.8', changefreq: 'weekly' },
-      { url: '/agencies', priority: '0.8', changefreq: 'weekly' },
-      { url: '/explore-cities', priority: '0.7', changefreq: 'weekly' },
-    ];
-
-    // Build XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
-    // Add static pages
-    for (const page of staticPages) {
-      xml += `  <url>
-    <loc>${BASE_URL}${page.url}</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>
-`;
-    }
-
-    // Add property pages
     for (const property of properties) {
-      const lastmod = property.updatedAt
-        ? new Date(property.updatedAt).toISOString().split('T')[0]
-        : currentDate;
-
-      xml += `  <url>
-    <loc>${BASE_URL}/property/${property._id}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-`;
+      xml += urlEntry(`/property/${encodeId(String(property._id))}`, day(property.updatedAt), 'weekly', '0.8');
     }
 
-    // Add agency pages
     for (const agency of agencies) {
-      const lastmod = agency.updatedAt
-        ? new Date(agency.updatedAt).toISOString().split('T')[0]
-        : currentDate;
+      const slug = String(agency.slug)
+        .split('/')
+        .filter(Boolean)
+        .map(encodeURIComponent)
+        .join('/');
+      xml += urlEntry(`/agencies/${slug}`, day(agency.updatedAt), 'weekly', '0.6');
+    }
 
-      xml += `  <url>
-    <loc>${BASE_URL}/agencies/${agency.slug}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-`;
+    for (const article of articles) {
+      xml += urlEntry(`/blog/${encodeURIComponent(article.slug)}`, day(article.updatedAt || article.publishedAt), 'monthly', '0.6');
     }
 
     xml += `</urlset>`;
@@ -101,40 +106,11 @@ router.get('/sitemap.xml', async (_req: Request, res: Response) => {
  * Robots.txt endpoint (alternative to static file)
  */
 router.get('/robots.txt', (_req: Request, res: Response) => {
-  const robotsTxt = `# Robots.txt for Balkan Estate
-# ${BASE_URL}
-
-User-agent: *
-Allow: /
-Allow: /property/
-Allow: /agencies/
-Allow: /agents
-Allow: /search
-
-# Disallow private areas
-Disallow: /account
-Disallow: /inbox
-Disallow: /admin
-Disallow: /saved-properties
-Disallow: /saved-searches
-Disallow: /create-listing
-Disallow: /payment/
-
-# Crawl-delay for polite crawling
-Crawl-delay: 1
-
-# Sitemap location
-Sitemap: ${BASE_URL}/sitemap.xml
-
-# Google specific
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-# Bing specific
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
+  // This is the API host's robots.txt. The website's own robots.txt is a static
+  // file served by the frontend; nothing on this host is a page to index.
+  const robotsTxt = `User-agent: *
+Disallow: /api/
+Allow: /sitemap.xml
 `;
 
   res.set('Content-Type', 'text/plain');

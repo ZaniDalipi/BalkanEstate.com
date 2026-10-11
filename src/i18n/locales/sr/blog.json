@@ -29,5 +29,8 @@
     "prev": "Prethodna",
     "next": "Sledeća",
     "page": "Strana {{page}} od {{total}}"
+  },
+  "article": {
+    "updated": "Ажурирано"
   }
 }

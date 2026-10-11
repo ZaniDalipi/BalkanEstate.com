@@ -39,9 +39,16 @@ interface AdSlotProps {
   /** Extra wrapper style. */
   style?: React.CSSProperties;
   /** When there's no booked banner, render nothing instead of the
-   *  "Your Ad Here" placeholder (network fill still applies). Use for overlays
-   *  where an empty placeholder would be intrusive (e.g. over photos). */
+   *  "Your Ad Here" placeholder even in admin preview (network fill still
+   *  applies). Outside preview the placeholder is never shown. */
   hidePlaceholder?: boolean;
+  /** Allow AdSense to fill the slot when nothing is booked (default: true).
+   *  Turn off for slots that sit over content — AdSense units must not
+   *  overlay or obscure the publisher's content, e.g. listing photos. */
+  allowNetworkFill?: boolean;
+  /** Show a close button on a booked banner (used for the overlay in the
+   *  photo gallery). Nothing is rendered — button included — when unbooked. */
+  dismiss?: { label: string; onDismiss: () => void };
 }
 
 /**
@@ -60,6 +67,8 @@ const AdSlot: React.FC<AdSlotProps> = ({
   className,
   style,
   hidePlaceholder = false,
+  allowNetworkFill = true,
+  dismiss,
 }) => {
   const { t } = useTranslation(['common']);
   const { data } = useAdBanners(page);
@@ -157,7 +166,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
   // No direct booking — fill with a network ad (AdSense) to earn revenue on
   // unsold inventory, when consented to and not in preview mode. Once AdSense
   // reports it has nothing either, fall through to the placeholder below.
-  if (!banner && !preview.active && canNetworkFill && !networkUnfilled) {
+  if (!banner && !preview.active && allowNetworkFill && canNetworkFill && !networkUnfilled) {
     return (
       <div ref={wrapperRef} className={className} style={style} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
         <div style={{ ...baseBoxStyle, background: '#f8fafc', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -167,12 +176,14 @@ const AdSlot: React.FC<AdSlotProps> = ({
     );
   }
 
-  // Overlay slots opt out of the placeholder entirely (network fill above
-  // still applies when configured).
-  if (!banner && hidePlaceholder) return null;
+  // Nothing booked and nothing from the network: collapse. Public pages never
+  // show an empty "Your Ad Here" box — a page of placeholder ad space reads as
+  // a page with little content of its own, which is exactly what AdSense's
+  // "low value content" review flags. Advertisers find the offer through the
+  // "Advertise with us" link in the footer instead.
+  if (!banner && (hidePlaceholder || !preview.active)) return null;
 
-  // No banner configured — show a "Your Ad Here" placeholder so the ad space
-  // is always visible and sellable, sized to the real ad slot.
+  // Admin preview: show where the unbooked slot sits, sized to the real unit.
   if (!banner) {
     return (
       <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
@@ -319,6 +330,18 @@ const AdSlot: React.FC<AdSlotProps> = ({
           />
         </a>
       </div>
+      {dismiss && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); dismiss.onDismiss(); }}
+          aria-label={dismiss.label}
+          className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };

@@ -8,6 +8,7 @@ import {
   DENY_ALL,
 } from '@/src/shared/utils/cookieConsent';
 import LegalFooter from './LegalFooter';
+import { SEO } from '@/src/components/seo';
 import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 import type { AppView } from '@/types';
@@ -38,10 +39,14 @@ const CookiePolicyPage: React.FC = () => {
     openCookieSettings();
   };
 
-  const lastUpdated = 'January 9, 2026';
+  const lastUpdated = 'October 11, 2026';
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <SEO
+        title={t('legal:cookies.seoTitle', 'Cookie Policy')}
+        description={t('legal:cookies.seoDescription', 'Which cookies BalkanEstateAI uses — necessary, analytics and advertising — what they are for, and how to change your choice.')}
+      />
       <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
           {/* Header */}
@@ -221,6 +226,15 @@ const CookiePolicyPage: React.FC = () => {
                 {t('legal:cookies.types.marketing.desc', 'These cookies track your activity across websites to show you relevant advertisements. They are set by our advertising partners.')}
               </p>
               <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-gray-600">__gads, __gpi, IDE</span>
+                  <span className="text-gray-500">{t('legal:cookies.types.marketing.adsense', 'Google AdSense — serving and measuring ads')}</span>
+                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{t('legal:cookies.duration.upTo13months', 'up to 13 months')}</span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {t('legal:cookies.types.marketing.adsenseNote', 'Set by Google and its partners only after you accept marketing cookies. Opt out of personalised ads at')}{' '}
+                  <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">myadcenter.google.com</a>.
+                </p>
                 <div className="flex justify-between items-center">
                   <span className="font-mono text-gray-600">_fbp</span>
                   <span className="text-gray-500">{t('legal:cookies.types.marketing.fb', 'Facebook Pixel')}</span>
