@@ -92,8 +92,8 @@ export interface Stats {
   failed: Array<{ publicId: string; error: string }>;
   docsUpdated: number;
   byKind: Record<string, number>;
-  /** Imported external-listing images left on Cloudinary (--skip-external). */
-  skippedExternal: number;
+  /** Images deliberately left on Cloudinary (--skip-external / --skip-listings). */
+  leftOnCloudinary: number;
   /** Access records created for private documents that had none. */
   accessRecordsCreated: number;
 }
@@ -105,6 +105,12 @@ export interface MigrationOptions {
   skipConventionCities?: boolean;
   /** Leave imported external-listing images (…/external-listings/…) on Cloudinary for now. */
   skipExternal?: boolean;
+  /**
+   * Leave every listing photo and floor plan (own and external) on Cloudinary;
+   * move everything else (avatars, logos, cities, villas…). The site keeps
+   * showing those through the image proxy.
+   */
+  skipListings?: boolean;
   log?: (line: string) => void;
 }
 
@@ -115,7 +121,7 @@ interface RunState {
   migrated: Map<string, Migrated>;
   /** Public ids that failed this run — not retried per reference. */
   failedIds: Set<string>;
-  /** External-listing public ids left alone this run. */
+  /** Public ids deliberately left on Cloudinary this run. */
   skippedIds: Set<string>;
   /** Cloudinary cloud names seen in the documents (to find convention photos). */
   cloudsSeen: string[];
@@ -171,11 +177,15 @@ const migrateOne = async (run: RunState, ref: CloudinaryRef, target: MigrationTa
   const done = migrated.get(ref.publicId);
   if (done) return done;
   if (failedIds.has(ref.publicId)) return null;
-  if (options.skipExternal && isExternalListingImage(ref.publicId)) {
-    if (!run.skippedIds.has(ref.publicId)) {
-      run.skippedIds.add(ref.publicId);
-      stats.skippedExternal++;
-    }
+  if (run.skippedIds.has(ref.publicId)) return null;
+  const isListingPhoto =
+    isExternalListingImage(ref.publicId) ||
+    /\/listings\//.test(ref.publicId) ||
+    target?.kind === 'property' ||
+    target?.kind === 'floorplan';
+  if ((options.skipExternal && isExternalListingImage(ref.publicId)) || (options.skipListings && isListingPhoto)) {
+    run.skippedIds.add(ref.publicId);
+    stats.leftOnCloudinary++;
     return null;
   }
 
@@ -330,7 +340,7 @@ export async function runMigration(options: MigrationOptions): Promise<Stats> {
     failedIds: new Set(),
     skippedIds: new Set(),
     cloudsSeen: [],
-    stats: { migrated: 0, alreadyMigrated: 0, failed: [], docsUpdated: 0, byKind: {}, skippedExternal: 0, accessRecordsCreated: 0 },
+    stats: { migrated: 0, alreadyMigrated: 0, failed: [], docsUpdated: 0, byKind: {}, leftOnCloudinary: 0, accessRecordsCreated: 0 },
   };
 
   // Resume: everything a previous run already moved.
@@ -413,6 +423,7 @@ async function main(): Promise<void> {
   const options: MigrationOptions = {
     apply: args.includes('--apply'),
     skipExternal: args.includes('--skip-external'),
+    skipListings: args.includes('--skip-listings'),
     onlyCollections: args.find((a) => a.startsWith('--collections='))?.split('=')[1]?.split(',').filter(Boolean),
   };
   const uri = process.env.MONGODB_URI;
@@ -434,7 +445,7 @@ async function main(): Promise<void> {
   console.log(
     `\nDone. ${verb} ${stats.migrated} images (${Object.entries(stats.byKind).map(([k, n]) => `${k}: ${n}`).join(', ') || 'none'}), ` +
       `${stats.alreadyMigrated} already done, ` +
-      (stats.skippedExternal ? `${stats.skippedExternal} external-listing images left on Cloudinary, ` : '') +
+      (stats.leftOnCloudinary ? `${stats.leftOnCloudinary} images left on Cloudinary as asked, ` : '') +
       `${options.apply ? 'updated' : 'would update'} ${stats.docsUpdated} documents. ` +
       `Failed: ${stats.failed.length}. Report: ${reportPath}`
   );

@@ -12,6 +12,8 @@
  *
  *   npm run media:check              (everything, including an HTTP check of each photo)
  *   npm run media:check -- --no-http (database only, fast)
+ *   npm run media:check -- --allow-cloudinary
+ *     (listing photos deliberately kept on Cloudinary: reported, not a failure)
  *
  * Exits 1 when anything is wrong, and writes media-check-report-*.json.
  */
@@ -54,6 +56,7 @@ const mapLimit = async <T>(items: T[], limit: number, fn: (item: T) => Promise<v
 
 async function main(): Promise<void> {
   const checkHttp = !process.argv.includes('--no-http');
+  const allowCloudinary = process.argv.includes('--allow-cloudinary');
   const mediaBase = process.env.R2_PUBLIC_URL?.trim().replace(/\/+$/, '');
   if (!mediaBase) throw new Error('R2_PUBLIC_URL is not set (backend/.env)');
   if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI is not set');
@@ -130,13 +133,13 @@ async function main(): Promise<void> {
     const reportPath = path.resolve(process.cwd(), `media-check-report-${Date.now()}.json`);
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
-    const line = (label: string, items: Finding[]) => {
-      console.log(`${items.length === 0 ? '✅' : '❌'} ${label}: ${items.length}`);
+    const line = (label: string, items: Finding[], infoOnly = false) => {
+      console.log(`${items.length === 0 ? '✅' : infoOnly ? 'ℹ️ ' : '❌'} ${label}: ${items.length}`);
       for (const f of items.slice(0, 15)) console.log(`     ${f.collection} ${f.id} ${f.path}  ${f.url}`);
       if (items.length > 15) console.log(`     … ${items.length - 15} more in the report`);
     };
     console.log(`\nScanned ${scannedDocs} documents; ${keys.length} different R2 photos are linked.\n`);
-    line('Links still on Cloudinary', cloudinary);
+    line(allowCloudinary ? 'Links still on Cloudinary (allowed)' : 'Links still on Cloudinary', cloudinary, allowCloudinary);
     line('R2 links with no MediaAsset record', unindexed);
     if (checkHttp) line('R2 links whose file does not load', unreachable);
     console.log(
@@ -145,7 +148,7 @@ async function main(): Promise<void> {
     );
     console.log(`\nReport: ${reportPath}`);
 
-    if (cloudinary.length || unindexed.length || unreachable.length) process.exitCode = 1;
+    if ((!allowCloudinary && cloudinary.length) || unindexed.length || unreachable.length) process.exitCode = 1;
   } finally {
     await mongoose.disconnect();
   }

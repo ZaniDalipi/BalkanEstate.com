@@ -156,10 +156,24 @@ describe('runMigration', () => {
     const stats = await runMigration({ apply: true, skipConventionCities: true, skipExternal: true, ...quiet });
 
     expect(stats.migrated).toBe(5);
-    expect(stats.skippedExternal).toBe(1);
+    expect(stats.leftOnCloudinary).toBe(1);
     expect(downloads.some((u) => u.includes('external-listings'))).toBe(false);
     const doc = await db().collection('properties').findOne({ _id: ext.insertedId });
     expect(doc!.images[0]).toMatchObject({ url: extUrl, publicId: EXT_ID });
+  });
+
+  it('--skip-listings moves everything except listing photos and floor plans', async () => {
+    const stats = await runMigration({ apply: true, skipConventionCities: true, skipListings: true, ...quiet });
+
+    // photo + floor plan stay; avatar, licence and the blog image move ("gone" fails)
+    expect(stats.leftOnCloudinary).toBe(2);
+    expect(stats.byKind).toEqual({ avatar: 1, license: 1, legacy: 1 });
+    expect(downloads.some((u) => u.includes('/listings/'))).toBe(false);
+    const property = await db().collection('properties').findOne({ _id: LISTING });
+    expect(property!.imageUrl).toBe(`${CLD}/v1/${PHOTO_ID}.jpg`);
+    expect(property!.images[0].publicId).toBe(PHOTO_ID);
+    expect(property!.floorplans[0].publicId).toBe(PLAN_ID);
+    expect((await db().collection('users').findOne({ _id: USER }))!.avatarUrl).toMatch(/^https:\/\/media\.example\.com\//);
   });
 
   it('is a no-op the second time', async () => {

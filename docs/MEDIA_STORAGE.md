@@ -156,6 +156,22 @@ Some details:
 - It writes `media-migration-report-*.json`.
 - Images Cloudinary no longer has (HTTP 404) are listed as failed and keep their old link; they're already broken today.
 
+### Keeping existing listing photos on Cloudinary
+
+Moving listing photos is optional. New uploads always go to R2. Existing Cloudinary photos keep working: the frontend sends any image host it doesn't recognise through `/api/image-proxy`, which resizes it on our server and caches it, so no new Cloudinary transformations are used.
+
+```bash
+npm run media:migrate:non-listings                # avatars, logos, cities, villas → R2; listing photos stay
+npm run media:check -- --allow-cloudinary         # Cloudinary links reported, not counted as errors
+```
+
+While listing photos stay on Cloudinary:
+- the Cloudinary account (and its storage cost) has to stay;
+- deleting a listing doesn't delete its Cloudinary photos (there's no Cloudinary SDK any more);
+- AI room restyling and advertising-inquiry attachments only work with R2 photos.
+
+Run `npm run media:migrate:apply` at any time to move the rest; anything already moved is skipped.
+
 `npm run media:check` scans every document and lists:
 - any link still on Cloudinary;
 - any R2 link with no `MediaAsset` record;
