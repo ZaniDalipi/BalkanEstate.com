@@ -137,7 +137,8 @@ async function fetchApi<T>(url: string): Promise<ApiResult<T>> {
         'x-be-prerender': '1',
       },
     });
-    if (response.status === 404 || response.status === 410) return { status: 'not-found' };
+    // 400 is what the API answers for an id that cannot exist (malformed).
+    if (response.status === 400 || response.status === 404 || response.status === 410) return { status: 'not-found' };
     if (!response.ok) return { status: 'error' };
     return { status: 'ok', data: (await response.json()) as T };
   } catch {
