@@ -107,7 +107,12 @@ async function main(): Promise<void> {
     if (checkHttp) {
       await mapLimit(keys, HTTP_CONCURRENCY, async (key) => {
         const url = mediaFileUrl(mediaBase, key, MEDIA_MASTER_FILE);
-        const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(15_000) }).catch(() => null);
+        // Some CDNs/proxies refuse HEAD: confirm a failure with a 1-byte GET.
+        let res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(15_000) }).catch(() => null);
+        if (!res?.ok) {
+          res = await fetch(url, { headers: { Range: 'bytes=0-0' }, signal: AbortSignal.timeout(15_000) }).catch(() => null);
+          await res?.body?.cancel().catch(() => undefined);
+        }
         if (!res?.ok) unreachable.push({ ...mediaRefs.get(key)!, url: `${url} (${res ? `HTTP ${res.status}` : 'no answer'})` });
       });
     }

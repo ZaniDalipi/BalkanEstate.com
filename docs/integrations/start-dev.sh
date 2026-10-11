@@ -24,7 +24,7 @@ if [ ! -f "backend/.env" ]; then
     echo "   Copying from .env.example..."
     cp backend/.env.example backend/.env
     echo "   ✅ Created backend/.env"
-    echo "   ⚠️  Please edit backend/.env with your MongoDB URI and Cloudinary credentials"
+    echo "   ⚠️  Please edit backend/.env with your MongoDB URI and R2 (image storage) credentials"
     echo ""
 fi
 

@@ -21,6 +21,12 @@ export interface R2Config {
   privateBucket: string;
   /** e.g. https://media.balkanestateai.com — no trailing slash. */
   publicUrl: string;
+  /**
+   * S3 API endpoint. Default https://{account}.r2.cloudflarestorage.com;
+   * R2_ENDPOINT overrides it (EU-jurisdiction buckets:
+   * https://{account}.eu.r2.cloudflarestorage.com, or a local S3 for tests).
+   */
+  endpoint: string;
 }
 
 export const readR2Config = (env: NodeJS.ProcessEnv = process.env): R2Config | null => {
@@ -39,6 +45,7 @@ export const readR2Config = (env: NodeJS.ProcessEnv = process.env): R2Config | n
     // ever put a document in the public bucket.
     privateBucket: env.R2_PRIVATE_BUCKET?.trim() || `${publicBucket}-private`,
     publicUrl: publicUrl.replace(/\/+$/, ''),
+    endpoint: env.R2_ENDPOINT?.trim().replace(/\/+$/, '') || `https://${accountId}.r2.cloudflarestorage.com`,
   };
 };
 
@@ -63,7 +70,10 @@ export const getR2Client = (): S3Client => {
   if (!cachedClient) {
     cachedClient = new S3Client({
       region: 'auto',
-      endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
+      endpoint: config.endpoint,
+      // Bucket in the path, not the host name: R2 accepts both, and it works
+      // with any endpoint (no DNS per bucket).
+      forcePathStyle: true,
       credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
     });
   }

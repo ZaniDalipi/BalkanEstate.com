@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
     const apiTarget = env.VITE_API_URL || 'http://localhost:5001';
     const wsTarget = env.VITE_WS_URL || 'ws://localhost:5001';
     const isProduction = mode === 'production';
+    const mediaCdnOrigin = (env.VITE_MEDIA_CDN_URL || '').trim().replace(/\/+$/, '');
 
     // Only log in development
     if (mode === 'development') {
@@ -224,11 +225,13 @@ export default defineConfig(({ mode }) => {
                   }
                 }
               },
-              {
-                urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-                handler: 'StaleWhileRevalidate',
+              // Our R2 photos (VITE_MEDIA_CDN_URL). Not CacheFirst: curated city
+              // photos are re-seeded in place under the same URL.
+              ...(mediaCdnOrigin ? [{
+                urlPattern: new RegExp('^' + mediaCdnOrigin.replace(/[.*+?^$()|[\]{}\\/]/g, '\\$&') + '/', 'i'),
+                handler: 'StaleWhileRevalidate' as const,
                 options: {
-                  cacheName: 'cloudinary-images-cache',
+                  cacheName: 'media-images-cache',
                   expiration: {
                     maxEntries: 100,
                     maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
@@ -239,7 +242,7 @@ export default defineConfig(({ mode }) => {
                     statuses: [200]
                   }
                 }
-              },
+              }] : []),
               {
                 urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
                 handler: 'CacheFirst',

@@ -127,6 +127,9 @@ describe('runMigration', () => {
     expect(user!.agentLicense.documentUrl).toBe(`https://api.example.com/api/files/open/${licenseKey}`);
     expect(bucket.has(`media-private/${licenseKey}/original.jpg`)).toBe(true);
     expect([...bucket.keys()].some((k) => k.startsWith(`media/${licenseKey}`))).toBe(false);
+    // …and its owner can still open it: a licence from before FileRecord existed gets one
+    expect(stats.accessRecordsCreated).toBe(1);
+    expect(await db().collection('filerecords').findOne({ publicId: licenseKey })).toMatchObject({ userId: USER, fileType: 'license' });
 
     // access-control record follows
     const record = await db().collection('filerecords').findOne({ userId: USER });
@@ -168,5 +171,6 @@ describe('runMigration', () => {
     // only the one that failed is retried (its plain original URL, then the URL as stored)
     expect(downloads).toEqual([`${CLD}/gone.png`, `${CLD}/v9/gone.png`]);
     expect(again.docsUpdated).toBe(0);
+    expect(again.accessRecordsCreated).toBe(0);
   });
 });

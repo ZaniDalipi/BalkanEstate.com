@@ -68,6 +68,8 @@ import '../models/FileRecord';
 import { storeImage, storedUrlFor } from '../services/media/r2MediaStore';
 import { resolveMediaNames } from '../services/media/mediaNames';
 import { downloadImage } from '../services/mediaService';
+import FileRecord from '../models/FileRecord';
+import { registerFileUpload } from '../services/storageAccessPolicy';
 import {
   findCloudinaryUrls,
   classifyReference,
@@ -92,6 +94,8 @@ export interface Stats {
   byKind: Record<string, number>;
   /** Imported external-listing images left on Cloudinary (--skip-external). */
   skippedExternal: number;
+  /** Access records created for private documents that had none. */
+  accessRecordsCreated: number;
 }
 
 export interface MigrationOptions {
@@ -326,7 +330,7 @@ export async function runMigration(options: MigrationOptions): Promise<Stats> {
     failedIds: new Set(),
     skippedIds: new Set(),
     cloudsSeen: [],
-    stats: { migrated: 0, alreadyMigrated: 0, failed: [], docsUpdated: 0, byKind: {}, skippedExternal: 0 },
+    stats: { migrated: 0, alreadyMigrated: 0, failed: [], docsUpdated: 0, byKind: {}, skippedExternal: 0, accessRecordsCreated: 0 },
   };
 
   // Resume: everything a previous run already moved.
@@ -358,6 +362,8 @@ export async function runMigration(options: MigrationOptions): Promise<Stats> {
     await migrateCollection(run, name, modelByCollection.get(name) || '');
   }
 
+  if (options.apply) await ensurePrivateAccessRecords(run);
+
   if (!options.onlyCollections && !options.skipConventionCities) {
     log('\nConvention city photos (city-*):');
     await migrateConventionCityPhotos(run);
@@ -365,6 +371,35 @@ export async function runMigration(options: MigrationOptions): Promise<Stats> {
 
   return run.stats;
 }
+
+/**
+ * Private documents open through /api/files/open, which needs a FileRecord
+ * naming the owner. Licences and credentials uploaded before FileRecord
+ * existed have none, so give every private photo with a known owner one —
+ * otherwise only admins could open them after the move. Runs after the
+ * FileRecord collection was rewritten, so existing records are kept.
+ */
+const ensurePrivateAccessRecords = async (run: RunState): Promise<void> => {
+  const assets = await MediaAsset.find({ bucket: 'private', ownerId: { $exists: true } })
+    .select('key kind ownerId credentialId bytes')
+    .lean();
+  for (const asset of assets) {
+    if (await FileRecord.exists({ publicId: asset.key })) continue;
+    await registerFileUpload({
+      publicId: asset.key,
+      url: storedUrlFor(asset.key, 'private'),
+      userId: String(asset.ownerId),
+      fileType: asset.kind === 'license' || asset.kind === 'credential' ? asset.kind : 'other',
+      resourceId: asset.credentialId,
+      mimeType: 'image/jpeg',
+      bytes: asset.bytes,
+    });
+    run.stats.accessRecordsCreated++;
+  }
+  if (run.stats.accessRecordsCreated) {
+    (run.options.log ?? console.log)(`Created ${run.stats.accessRecordsCreated} access records for private documents that had none.`);
+  }
+};
 
 /** Sort order: collections whose model classifies references first, FileRecord last. */
 const rank = (collection: string, modelByCollection: Map<string, string>): number => {

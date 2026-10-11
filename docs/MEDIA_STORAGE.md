@@ -126,6 +126,7 @@ db.mediaassets.aggregate([{ $group: { _id: '$ownerId', photos: { $sum: 1 }, byte
    R2_PUBLIC_URL=https://media.balkanestateai.com
    ```
    At startup the server logs `🖼️ Image storage: R2 (bucket …)`.
+   If the buckets were created in the **EU jurisdiction**, also set `R2_ENDPOINT=https://<account id>.eu.r2.cloudflarestorage.com`.
 6. **Frontend build**: add the GitHub secret `VITE_MEDIA_CDN_URL` with the same value as `R2_PUBLIC_URL`. Locally it goes in the root `.env`.
 7. **Link previews**: in Cloudflare → Workers & Pages → balkanestateai → Settings → Variables and Secrets, add `MEDIA_CDN_URL` with the same value, for Production and Preview.
 
@@ -149,10 +150,11 @@ For each Cloudinary image URL in any collection (including URLs inside HTML), th
 
 Some details:
 - Curated city photos (`city-*`) go to `cities/convention/`.
-- Images that Cloudinary served privately stay private. Set `CLOUDINARY_API_SECRET` only if a private document's stored URL isn't already signed.
+- Images that Cloudinary served privately stay private. Each one gets an access record (`FileRecord`) for its owner if it had none — licences from before access records existed would otherwise open for admins only. Set `CLOUDINARY_API_SECRET` only if a private document's stored URL isn't already signed.
 - Images that nothing links to are not copied.
 - The run can be resumed and is safe to repeat.
 - It writes `media-migration-report-*.json`.
+- Images Cloudinary no longer has (HTTP 404) are listed as failed and keep their old link; they're already broken today.
 
 `npm run media:check` scans every document and lists:
 - any link still on Cloudinary;
