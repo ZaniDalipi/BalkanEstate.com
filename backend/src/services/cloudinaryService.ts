@@ -15,7 +15,7 @@ import {
   type MediaKind,
 } from './media/mediaNaming';
 import { resolveMediaOwner } from './media/mediaOwnerResolver';
-import { isR2Enabled, isCloudinaryConfigured } from '../config/r2';
+import { isR2Enabled, isCloudinaryConfigured, missingR2Vars } from '../config/r2';
 import MediaAsset, { type MediaAssetKind } from '../models/MediaAsset';
 import {
   storeImage,
@@ -202,6 +202,10 @@ export const uploadImage = async (
       });
     }
     return toUploadResult(stored);
+  }
+
+  if (!isCloudinaryConfigured()) {
+    throw new Error(`No image storage configured: set ${missingR2Vars().join(', ')} in backend/.env (or CLOUDINARY_*)`);
   }
 
   try {

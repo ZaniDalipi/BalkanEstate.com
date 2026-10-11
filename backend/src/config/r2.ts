@@ -25,11 +25,11 @@ export interface R2Config {
 }
 
 export const readR2Config = (env: NodeJS.ProcessEnv = process.env): R2Config | null => {
-  const accountId = env.R2_ACCOUNT_ID;
-  const accessKeyId = env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = env.R2_SECRET_ACCESS_KEY;
-  const publicBucket = env.R2_BUCKET;
-  const publicUrl = env.R2_PUBLIC_URL;
+  const accountId = env.R2_ACCOUNT_ID?.trim();
+  const accessKeyId = env.R2_ACCESS_KEY_ID?.trim();
+  const secretAccessKey = env.R2_SECRET_ACCESS_KEY?.trim();
+  const publicBucket = env.R2_BUCKET?.trim();
+  const publicUrl = env.R2_PUBLIC_URL?.trim();
   if (!accountId || !accessKeyId || !secretAccessKey || !publicBucket || !publicUrl) return null;
   return {
     accountId,
@@ -38,7 +38,7 @@ export const readR2Config = (env: NodeJS.ProcessEnv = process.env): R2Config | n
     publicBucket,
     // Falls back to the public bucket name + suffix so a single env change can't
     // ever put a document in the public bucket.
-    privateBucket: env.R2_PRIVATE_BUCKET || `${publicBucket}-private`,
+    privateBucket: env.R2_PRIVATE_BUCKET?.trim() || `${publicBucket}-private`,
     publicUrl: publicUrl.replace(/\/+$/, ''),
   };
 };
@@ -79,4 +79,19 @@ export const isCloudinaryConfigured = (): boolean =>
 export const resetR2ConfigForTests = (): void => {
   cachedConfig = undefined;
   cachedClient = undefined;
+};
+
+const R2_REQUIRED_VARS = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_URL'] as const;
+
+/** Which R2 variables are missing or empty. */
+export const missingR2Vars = (env: NodeJS.ProcessEnv = process.env): string[] =>
+  R2_REQUIRED_VARS.filter((name) => !env[name]?.trim());
+
+/** One line for the startup log: where uploads go, or why nowhere. */
+export const describeMediaStorage = (): string => {
+  const config = getR2Config();
+  if (config) return `R2 (bucket ${config.publicBucket}, served from ${config.publicUrl})`;
+  const missing = missingR2Vars();
+  if (isCloudinaryConfigured()) return `Cloudinary (R2 not configured — missing ${missing.join(', ')})`;
+  return `NONE — uploads will fail. Set ${missing.join(', ')} (or CLOUDINARY_*)`;
 };

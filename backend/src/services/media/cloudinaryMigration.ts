@@ -153,7 +153,10 @@ export const planMigration = (
 ): { key: string; kind: MediaAssetKind; context: MediaKeyContext; bucket: 'public' | 'private' } => {
   // Anything Cloudinary kept behind signed delivery stays private.
   const forcedPrivate = ref.deliveryType !== 'upload';
-  if (!target && isCityConventionId(ref.publicId)) {
+  // Convention city photos always keep their fixed folder — getCityImageUrl
+  // builds the URL from the city name — even when a document (a city
+  // showcase, market data row) also references them.
+  if (isCityConventionId(ref.publicId)) {
     return { key: `${CITY_CONVENTION_FOLDER}/${ref.publicId}`, kind: 'city', context: {}, bucket: forcedPrivate ? 'private' : 'public' };
   }
   if (!target) {

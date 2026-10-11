@@ -1,3 +1,5 @@
+// Must stay the first import: modules below read process.env when imported.
+import './config/loadEnv';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -8,6 +10,7 @@ import morgan from 'morgan';
 import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
+import { describeMediaStorage } from './config/r2';
 import { syncCloudinaryPresetsOnStartup } from './services/media/cloudinaryPresetSync';
 import ogRoutes from './routes/ogRoutes';
 import {
@@ -60,6 +63,7 @@ dotenv.config({ path: envFile });
 dotenv.config();
 
 serverLogger.info(`🚀 Server starting in ${process.env.NODE_ENV || 'development'} mode`);
+serverLogger.info(`🖼️  Image storage: ${describeMediaStorage()}`);
 serverLogger.info(`📁 Loading environment from: ${envFile}`);
 
 // Initialize Sentry first (before anything else)

@@ -113,6 +113,13 @@ describe('planMigration', () => {
     expect(planMigration({ publicId: 'doc', deliveryType: 'authenticated' }, null).bucket).toBe('private');
   });
 
+  it('keeps convention city photos in their fixed folder even when a document references them', () => {
+    expect(
+      planMigration({ publicId: 'city-serbia-novi-sad', deliveryType: 'upload' }, { kind: 'city', context: { country: 'Serbia', city: 'Novi Sad' } })
+        .key
+    ).toBe('cities/convention/city-serbia-novi-sad');
+  });
+
   it('sends convention city photos to their fixed folder and the rest to legacy/', () => {
     expect(planMigration({ publicId: 'city-albania-durres', deliveryType: 'upload' }, null)).toMatchObject({
       key: 'cities/convention/city-albania-durres',

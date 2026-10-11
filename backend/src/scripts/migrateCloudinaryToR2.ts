@@ -35,12 +35,11 @@
  */
 import path from 'path';
 import fs from 'fs';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+import { loadedEnvFiles } from '../config/loadEnv';
 
 import mongoose from 'mongoose';
 import cloudinary from '../config/cloudinary';
-import { isR2Enabled, isCloudinaryConfigured } from '../config/r2';
+import { isR2Enabled, isCloudinaryConfigured, missingR2Vars } from '../config/r2';
 import MediaAsset from '../models/MediaAsset';
 // Imported for their collection names (classifyReference keys on model names).
 import '../models/Property';
@@ -270,7 +269,10 @@ export async function runMigration(options: MigrationOptions): Promise<Stats> {
     throw new Error('CLOUDINARY_* must be set (images are read from Cloudinary)');
   }
   if (options.apply && !isR2Enabled()) {
-    throw new Error('R2_* must be set to migrate (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_PUBLIC_URL)');
+    const missing = missingR2Vars();
+    throw new Error(
+      `R2 is not configured — missing or empty: ${missing.join(', ')} (looked in ${loadedEnvFiles.join(' and ')})`
+    );
   }
 
   const run: RunState = {
