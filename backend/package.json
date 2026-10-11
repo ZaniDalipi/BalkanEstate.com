@@ -26,6 +26,7 @@
     "media:migrate": "ts-node src/scripts/migrateCloudinaryToR2.ts",
     "media:check": "ts-node src/scripts/checkMediaLinks.ts",
     "media:migrate:apply": "ts-node src/scripts/migrateCloudinaryToR2.ts --apply",
+    "media:migrate:local": "ts-node src/scripts/migrateCloudinaryToR2.ts --apply --skip-external",
     "seed:all": "npm run seed:products && npm run seed:cities && npm run seed:coupons",
     "seed:all:staging": "NODE_ENV=staging npm run seed:products && NODE_ENV=staging npm run seed:cities",
     "seed:all:production": "NODE_ENV=production npm run seed:products && NODE_ENV=production npm run seed:cities",

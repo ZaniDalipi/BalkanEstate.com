@@ -145,6 +145,20 @@ describe('runMigration', () => {
     expect(photo.source?.cloudinaryPublicId).toBe(PHOTO_ID);
   });
 
+  it('--skip-external leaves imported external-listing images on Cloudinary', async () => {
+    const EXT_ID = 'balkan-estate/external-listings/crozilla/123/e1';
+    const extUrl = `${CLD}/v1/${EXT_ID}.jpg`;
+    const ext = await db().collection('properties').insertOne({ images: [{ url: extUrl, publicId: EXT_ID }] });
+
+    const stats = await runMigration({ apply: true, skipConventionCities: true, skipExternal: true, ...quiet });
+
+    expect(stats.migrated).toBe(5);
+    expect(stats.skippedExternal).toBe(1);
+    expect(downloads.some((u) => u.includes('external-listings'))).toBe(false);
+    const doc = await db().collection('properties').findOne({ _id: ext.insertedId });
+    expect(doc!.images[0]).toMatchObject({ url: extUrl, publicId: EXT_ID });
+  });
+
   it('is a no-op the second time', async () => {
     await runMigration({ apply: true, skipConventionCities: true, ...quiet });
     downloads.length = 0;

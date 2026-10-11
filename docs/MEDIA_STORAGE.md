@@ -137,6 +137,7 @@ The migration reads Cloudinary over plain HTTPS, so it needs no Cloudinary SDK a
 cd backend
 npm run media:migrate          # dry run: lists every image and the folder it would go to
 npm run media:migrate:apply    # copy into R2 and rewrite the database
+npm run media:migrate:local    # same, but leaves imported external-listing photos on Cloudinary (local testing)
 npm run media:check            # verify: no Cloudinary links left, every R2 photo loads
 ```
 
