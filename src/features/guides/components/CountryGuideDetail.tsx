@@ -11,24 +11,24 @@ import {
   BanknotesIcon,
   CalculatorIcon,
   ChartBarIcon,
-  CheckIcon,
   ChevronRightIcon,
   CurrencyEuroIcon,
   DocumentTextIcon,
   GlobeAltIcon,
-  InformationCircleIcon,
+  HomeIcon,
   MapPinIcon,
   ScaleIcon,
   UserGroupIcon,
-  ArrowTrendingUpIcon,
 } from '@/constants';
 import { COUNTRY_GUIDES } from '../data/countryGuides';
-import type { CountryGuide } from '../types/guide.types';
-import { formatEuroRange, formatPercentRange } from '../utils/guideSelectors';
+import type { CountryGuide, GuideFactKey } from '../types/guide.types';
+import { GUIDE_FACT_KEYS } from '../types/guide.types';
+import { guideSources } from '../utils/guideSelectors';
 import { GuideCta } from './GuideCta';
 import { GuideDisclaimer } from './GuideDisclaimer';
 import { GuideLink } from './GuideLink';
-import { OwnershipBadge } from './OwnershipBadge';
+import { PriceStatValue } from './PriceStatValue';
+import { SourceLinks } from './SourceLinks';
 import { useCountryName } from './useCountryName';
 
 interface CountryGuideDetailProps {
@@ -37,7 +37,14 @@ interface CountryGuideDetailProps {
   index: number;
 }
 
-/** `/guides/:slug` — the full guide for one country. */
+const FACT_ICONS: Record<GuideFactKey, React.FC<{ className?: string }>> = {
+  transferTax: ScaleIcon,
+  annualTax: BanknotesIcon,
+  foreignOwnership: GlobeAltIcon,
+  residency: HomeIcon,
+};
+
+/** `/guides/:slug` — the official facts for one country, each with its source. */
 const CountryGuideDetail: React.FC<CountryGuideDetailProps> = ({ guide, index }) => {
   const { t, i18n } = useTranslation('common');
   const countryName = useCountryName();
@@ -48,16 +55,16 @@ const CountryGuideDetail: React.FC<CountryGuideDetailProps> = ({ guide, index })
   const prev = COUNTRY_GUIDES[(index - 1 + COUNTRY_GUIDES.length) % COUNTRY_GUIDES.length];
   const next = COUNTRY_GUIDES[(index + 1) % COUNTRY_GUIDES.length];
   const others = COUNTRY_GUIDES.filter((g) => g.slug !== guide.slug);
+  const sources = guideSources(guide);
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
   const searchCountry = () => navigate(paths.search({ country: guide.country }));
 
-  const facts = [
-    { icon: CurrencyEuroIcon, label: t('common:guides.avgPrice', 'Avg. Price'), value: `${formatEuroRange(guide.avgPricePerSqm, locale)}${t('common:guides.perSqm', '/m²')}` },
-    { icon: ArrowTrendingUpIcon, label: t('common:guides.rentalYield', 'Rental Yield'), value: formatPercentRange(guide.rentalYield, locale), accent: true },
-    { icon: GlobeAltIcon, label: t('common:guides.foreignOwnership', 'Foreign Ownership'), value: guide.foreignBuy },
-    { icon: BanknotesIcon, label: t('common:guides.annualTax', 'Annual Tax'), value: guide.tax },
-    { icon: ScaleIcon, label: t('common:guides.transferTax', 'Transfer Tax'), value: guide.transferTax },
-  ];
+  const factLabels: Record<GuideFactKey, string> = {
+    transferTax: t('common:guides.transferTax', 'Transfer Tax'),
+    annualTax: t('common:guides.annualTax', 'Annual Tax'),
+    foreignOwnership: t('common:guides.foreignOwnership', 'Foreign Ownership'),
+    residency: t('common:guides.residencyInfo', 'Residency Through Property'),
+  };
 
   const tools = [
     { icon: CalculatorIcon, label: t('common:guides.toolMortgage', 'Mortgage calculator'), to: paths.mortgageCalculator() },
@@ -69,20 +76,10 @@ const CountryGuideDetail: React.FC<CountryGuideDetailProps> = ({ guide, index })
     <>
       <SEO
         title={t('common:guides.detailSeoTitle', 'How to Buy Property in {{country}} — Guide for Foreign Buyers', { country: name })}
-        description={t('common:guides.detailSeoDescription', 'Foreign ownership rules, taxes, rental yields and the step-by-step buying process in {{country}}.', { country: name })}
+        description={t('common:guides.detailSeoDescription', 'Official figures on property prices, taxes, foreign ownership and residency in {{country}}, each linked to its source.', { country: name })}
         type="article"
       />
       <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'HowTo',
-            name: title,
-            inLanguage: locale,
-            url: `${origin}${localizePath(paths.guide(guide.slug))}`,
-            step: guide.legalProcess.map((text, i) => ({ '@type': 'HowToStep', position: i + 1, text })),
-          })}
-        </script>
         <script type="application/ld+json">
           {JSON.stringify({
             '@context': 'https://schema.org',
@@ -116,10 +113,7 @@ const CountryGuideDetail: React.FC<CountryGuideDetailProps> = ({ guide, index })
               <span className="text-5xl sm:text-6xl leading-none" aria-hidden="true">{guide.flag}</span>
               <div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">{title}</h1>
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-white/80">
-                  <span>{t('common:guides.completeGuide', 'Complete guide for foreign buyers')}</span>
-                  <OwnershipBadge ownership={guide.ownership} />
-                </div>
+                <p className="mt-3 text-white/80">{t('common:guides.completeGuide', 'Complete guide for foreign buyers')}</p>
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -142,82 +136,73 @@ const CountryGuideDetail: React.FC<CountryGuideDetailProps> = ({ guide, index })
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
-        {/* Key facts */}
-        <section aria-labelledby="guide-facts-heading" className="-mt-6 relative">
-          <h2 id="guide-facts-heading" className="sr-only">{t('common:guides.keyFacts', 'Key facts')}</h2>
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {facts.map(({ icon: Icon, label, value, accent }) => (
-              <div key={label} className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-                <dt className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-neutral-500">
-                  <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
-                  {label}
-                </dt>
-                <dd className={`mt-1.5 text-sm font-semibold leading-snug ${accent ? 'text-green-700' : 'text-neutral-900'}`}>{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-
-        <AdSlot page="guides" placement="in-content" className="my-8" />
-
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="space-y-12 min-w-0">
-            {/* Why buy */}
-            <section aria-labelledby="guide-why-heading">
-              <h2 id="guide-why-heading" className="text-2xl font-bold text-neutral-900">
-                {t('common:guides.whyBuy', 'Why Buy in {{country}}?', { country: name })}
+          <div className="space-y-10 min-w-0">
+            {/* Official price statistic */}
+            <section aria-labelledby="guide-price-heading" className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
+              <h2 id="guide-price-heading" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                <CurrencyEuroIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+                {t('common:guides.officialPrice', 'Official price statistic')}
               </h2>
-              <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-                {guide.highlights.map((item) => (
-                  <li key={item} className="flex items-start gap-3 rounded-xl bg-white p-4 ring-1 ring-neutral-200">
-                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-700">
-                      <CheckIcon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <span className="text-sm leading-relaxed text-neutral-700">{item}</span>
-                  </li>
-                ))}
-              </ul>
+              <p className="mt-2 text-2xl sm:text-3xl">
+                <PriceStatValue stat={guide.price} />
+              </p>
+              {guide.price ? (
+                <>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    {guide.price.measure} · {guide.price.period}
+                  </p>
+                  <SourceLinks sources={[guide.price.source]} className="mt-3" />
+                </>
+              ) : (
+                <p className="mt-1 text-sm text-neutral-600">
+                  {t('common:guides.noOfficialPriceHint', 'We only publish figures from official statistics. We’ll add one as soon as an official source publishes it.')}
+                </p>
+              )}
             </section>
 
-            {/* Buying process timeline */}
-            <section aria-labelledby="guide-process-heading">
-              <h2 id="guide-process-heading" className="text-2xl font-bold text-neutral-900">
-                {t('common:guides.buyingProcess', 'Buying Process (Step by Step)')}
+            {/* Sourced facts */}
+            <section aria-labelledby="guide-facts-heading">
+              <h2 id="guide-facts-heading" className="text-2xl font-bold text-neutral-900">
+                {t('common:guides.keyFacts', 'Key facts')}
               </h2>
-              <ol className="relative mt-6 space-y-6 border-l-2 border-primary-light pl-8">
-                {guide.legalProcess.map((step, i) => (
-                  <li key={step} className="relative">
-                    <span className="absolute -left-[49px] flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-white ring-4 ring-white">
-                      {i + 1}
-                    </span>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                      {t('common:guides.stepLabel', 'Step {{number}}', { number: i + 1 })}
-                    </p>
-                    <p className="mt-0.5 text-sm sm:text-base leading-relaxed text-neutral-800">{step}</p>
-                  </li>
-                ))}
-              </ol>
+              <dl className="mt-5 space-y-3">
+                {GUIDE_FACT_KEYS.map((key) => {
+                  const fact = guide[key];
+                  const Icon = FACT_ICONS[key];
+                  return (
+                    <div key={key} className="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5">
+                      <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                        <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                        {factLabels[key]}
+                      </dt>
+                      <dd className="mt-2">
+                        {fact ? (
+                          <>
+                            <p className="text-sm sm:text-base leading-relaxed text-neutral-800">{fact.text}</p>
+                            <SourceLinks sources={fact.sources} className="mt-2" />
+                          </>
+                        ) : (
+                          <p className="text-sm text-neutral-500">
+                            {t('common:guides.notVerified', 'Not yet verified from an official source. Ask a licensed local lawyer or notary.')}
+                          </p>
+                        )}
+                      </dd>
+                    </div>
+                  );
+                })}
+              </dl>
             </section>
 
-            {/* Residency */}
-            <section className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-              <div className="flex items-start gap-3">
-                <InformationCircleIcon className="h-6 w-6 flex-shrink-0 text-blue-600" aria-hidden="true" />
-                <div>
-                  <h2 className="font-semibold text-blue-900">{t('common:guides.residencyInfo', 'Residency Through Property')}</h2>
-                  <p className="mt-1 text-sm leading-relaxed text-blue-800">{guide.residency}</p>
-                </div>
-              </div>
-            </section>
+            <AdSlot page="guides" placement="in-content" />
 
-            {/* Top cities */}
+            {/* Cities */}
             <section aria-labelledby="guide-cities-heading">
               <h2 id="guide-cities-heading" className="text-2xl font-bold text-neutral-900">
-                {t('common:guides.topCities', 'Top Cities for Property')}
+                {t('common:guides.browseByCity', 'Browse listings by city')}
               </h2>
-              <p className="mt-1 text-sm text-neutral-500">{t('common:guides.topCitiesHint', 'Open live listings in each city.')}</p>
               <ul className="mt-4 flex flex-wrap gap-2">
-                {guide.topCities.map((city) => (
+                {guide.cities.map((city) => (
                   <li key={city}>
                     <GuideLink
                       to={paths.search({ country: guide.country, city })}
@@ -230,6 +215,24 @@ const CountryGuideDetail: React.FC<CountryGuideDetailProps> = ({ guide, index })
                 ))}
               </ul>
             </section>
+
+            {/* All sources */}
+            {sources.length > 0 && (
+              <section aria-labelledby="guide-sources-heading">
+                <h2 id="guide-sources-heading" className="text-lg font-semibold text-neutral-900">
+                  {t('common:guides.sourcesTitle', 'Sources')}
+                </h2>
+                <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-neutral-600">
+                  {sources.map((source) => (
+                    <li key={source.url}>
+                      <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-words">
+                        {source.publisher} — {source.title}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
             <GuideDisclaimer />
 
@@ -296,10 +299,7 @@ const CountryGuideDetail: React.FC<CountryGuideDetailProps> = ({ guide, index })
                   </li>
                 ))}
               </ul>
-              <GuideLink
-                to={paths.guides()}
-                className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
-              >
+              <GuideLink to={paths.guides()} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
                 <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
                 {t('common:guides.backToGuides', 'All guides')}
               </GuideLink>

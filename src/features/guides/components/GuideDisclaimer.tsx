@@ -20,7 +20,7 @@ export const GuideDisclaimer: React.FC<{ className?: string }> = ({ className = 
           <p className="leading-relaxed">
             {t(
               'common:guides.disclaimer',
-              'This guide is general information, not legal or tax advice. Rules and rates change — confirm the details with a licensed local lawyer or notary before you buy.',
+              'Every figure here is taken from an official source and linked to it. Where we found no official source, we say so instead of estimating. This is general information, not legal or tax advice — rules change, so confirm the details with a licensed local lawyer or notary before you buy.',
             )}
           </p>
           <p className="text-amber-800/80">

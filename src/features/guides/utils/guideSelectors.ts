@@ -1,11 +1,11 @@
 /**
  * Pure lookups over the guide data — kept out of the components so the URL
- * validation, filtering and sorting can be tested without a DOM.
+ * validation, filtering and formatting can be tested without a DOM.
  */
 
 import { validateSearchQuery, validateSlug } from '@/shared/utils/validation';
 import { COUNTRY_GUIDES } from '../data/countryGuides';
-import { GUIDE_SORTS, type CountryGuide, type GuideSort, type NumericRange } from '../types/guide.types';
+import type { CountryGuide, PriceStat, Source } from '../types/guide.types';
 
 export type GuideLookup =
   | { status: 'found'; guide: CountryGuide; index: number }
@@ -43,36 +43,28 @@ export function filterGuides(
   const query = normalizeForSearch(sanitized);
   if (!query) return [...guides];
   return guides.filter((guide) =>
-    [guide.country, translateCountry(guide), ...guide.topCities].some((field) =>
+    [guide.country, translateCountry(guide), ...guide.cities].some((field) =>
       normalizeForSearch(field).includes(query),
     ),
   );
 }
 
-const midpoint = (range: NumericRange) => (range.min + range.max) / 2;
-
-/** A new array in the requested order; ties fall back to the English name. */
-export function sortGuides(
+/** Guides sorted by their name in the reader's language. */
+export function sortByName(
   guides: readonly CountryGuide[],
-  sort: GuideSort,
   translateCountry: (guide: CountryGuide) => string = (g) => g.country,
 ): CountryGuide[] {
-  const byName = (a: CountryGuide, b: CountryGuide) => translateCountry(a).localeCompare(translateCountry(b));
-  const sorted = [...guides];
-  switch (sort) {
-    case 'price-asc':
-      return sorted.sort((a, b) => midpoint(a.avgPricePerSqm) - midpoint(b.avgPricePerSqm) || byName(a, b));
-    case 'yield-desc':
-      return sorted.sort((a, b) => midpoint(b.rentalYield) - midpoint(a.rentalYield) || byName(a, b));
-    case 'name':
-    default:
-      return sorted.sort(byName);
-  }
+  return [...guides].sort((a, b) => translateCountry(a).localeCompare(translateCountry(b)));
 }
 
-/** Narrow an untrusted value (a `<select>` change) to a known sort. */
-export function parseGuideSort(value: unknown): GuideSort {
-  return GUIDE_SORTS.includes(value as GuideSort) ? (value as GuideSort) : 'name';
+/** Every distinct source a guide cites, in the order they appear on the page. */
+export function guideSources(guide: CountryGuide): Source[] {
+  const all: Source[] = [
+    ...(guide.price ? [guide.price.source] : []),
+    ...[guide.transferTax, guide.annualTax, guide.foreignOwnership, guide.residency].flatMap((fact) => fact?.sources ?? []),
+  ];
+  const seen = new Set<string>();
+  return all.filter((s) => (seen.has(s.url) ? false : (seen.add(s.url), true)));
 }
 
 /**
@@ -88,31 +80,26 @@ function numberFormat(locale: string, options: Intl.NumberFormatOptions): Intl.N
   }
 }
 
-/** "€600" in the reader's number format. */
-export function formatEuro(value: number, locale: string): string {
-  return numberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
+/**
+ * The headline value of an official price statistic, exactly as published:
+ * "€2,445" for an average, "+5.25%" for an index change. A BAM figure is shown
+ * in KM with its fixed-rate EUR equivalent ("3,147 KM (≈ €1,609)").
+ */
+export function formatPriceStat(stat: PriceStat, locale: string): string {
+  if (stat.kind === 'index-change') {
+    const pct = numberFormat(locale, { style: 'percent', maximumFractionDigits: 2, signDisplay: 'exceptZero' });
+    return pct.format(stat.changePct / 100);
+  }
+  if (stat.currency === 'EUR') {
+    return numberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(stat.amount);
+  }
+  const km = `${numberFormat(locale, { maximumFractionDigits: 0 }).format(stat.amount)} KM`;
+  if (stat.eurAmount === undefined) return km;
+  const eur = numberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(stat.eurAmount);
+  return `${km} (≈ ${eur})`;
 }
 
-/** "9%" in the reader's number format. */
-export function formatPercent(value: number, locale: string): string {
-  return numberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(value / 100);
-}
-
-/** "€1,800–3,500" in the reader's number format. */
-export function formatEuroRange(range: NumericRange, locale: string): string {
-  const fmt = numberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-  const plain = numberFormat(locale, { maximumFractionDigits: 0 });
-  return `${fmt.format(range.min)}–${plain.format(range.max)}`;
-}
-
-/** "5–8%" in the reader's number format. */
-export function formatPercentRange(range: NumericRange, locale: string): string {
-  const fmt = numberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
-  const plain = numberFormat(locale, { maximumFractionDigits: 1 });
-  return `${plain.format(range.min)}–${fmt.format(range.max / 100)}`;
-}
-
-/** Long-form date ("1 October 2026") for the last-reviewed note. */
+/** Long-form date ("11 October 2026") for the last-reviewed note. */
 export function formatReviewDate(isoDate: string, locale: string): string {
   const date = new Date(`${isoDate}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) return isoDate;

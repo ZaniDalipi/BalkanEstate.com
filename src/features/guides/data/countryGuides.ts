@@ -1,327 +1,329 @@
-import type { CountryGuide } from '../types/guide.types';
+import type { CountryGuide, Source } from '../types/guide.types';
 
 /**
- * When the figures below were last checked. Shown on the page next to the
- * disclaimer, so a reader can judge how fresh a tax rate is.
+ * When the facts below were last checked against their sources. Shown on the
+ * page next to the disclaimer.
  */
-export const GUIDES_LAST_REVIEWED = '2026-10-01';
+export const GUIDES_LAST_REVIEWED = '2026-10-11';
 
 /**
  * The ten country guides, in the order the quick-jump bar shows them.
  *
- * Slugs are published URLs (`/guides/montenegro`, and the old `/guides#bosnia`
- * anchors) — do not rename one without a redirect.
+ * Rules for editing this file:
+ * - Every fact must come from an official publication (statistics office,
+ *   central bank, tax authority, ministry, official gazette, Eurostat) and
+ *   cite it. The allowed domains are listed in `src/tests/buying-guides.test.ts`.
+ * - State only what the source says. No estimates, no ranges built by hand,
+ *   no marketing claims. If there is no official source, leave the field out.
+ * - Slugs are published URLs (`/guides/montenegro`, and the old `/guides#bosnia`
+ *   anchors) — do not rename one without a redirect.
  */
+
+const MONSTAT_NEW_DWELLINGS_Q1_2026: Source = {
+  publisher: 'MONSTAT (Statistical Office of Montenegro)',
+  title: 'Prices of dwellings in new residential buildings, I quarter 2026',
+  url: 'https://monstat.org/uploads/files/gradjevinarstvo/Cijene%20stanova%20u%20novogradnji/2026/1/Prices_of_dwellings_in_new_residential_buildings_I_quarter_2026.pdf',
+};
+
 export const COUNTRY_GUIDES: readonly CountryGuide[] = [
   {
     slug: 'montenegro',
-    countryKey: 'montenegro',
-    avgPricePerSqm: { min: 1800, max: 3500 },
-    rentalYield: { min: 5, max: 8 },
-    ownership: 'open',
     country: 'Montenegro',
+    countryKey: 'montenegro',
     flag: '🇲🇪',
-    foreignBuy: 'Yes (apartments freely, land via company)',
-    residency: 'Yes — property ownership grants 1-year renewable residence permit',
-    tax: '0.25-1% annually',
-    transferTax: '3%',
-    topCities: ['Budva', 'Kotor', 'Tivat', 'Podgorica', 'Herceg Novi', 'Bar'],
-    highlights: [
-      'EU candidate country — property values expected to rise with accession',
-      'No restrictions on foreigners buying apartments',
-      'Adriatic coastline with world-class beaches and UNESCO sites',
-      'Residence permit through property ownership',
-      'Low property tax (0.25-1% annually)',
-      'Growing tourism sector driving rental yields of 5-8%',
-    ],
-    legalProcess: [
-      'Find property and agree on price with seller',
-      'Hire a local lawyer to conduct due diligence (title check, permits)',
-      'Sign preliminary contract and pay 10% deposit',
-      'Obtain tax number (PIB) from the tax authority',
-      'Sign the main purchase contract before a notary',
-      'Pay transfer tax (3%) and register at the Real Estate Administration',
-      'Apply for residence permit (optional) at local police station',
-    ],
+    cities: ['Podgorica', 'Budva', 'Kotor', 'Tivat', 'Herceg Novi', 'Bar'],
+    price: {
+      kind: 'avg-per-sqm',
+      amount: 2445,
+      currency: 'EUR',
+      measure: 'Average price of dwellings in new residential buildings (concluded sales contracts)',
+      period: 'Q1 2026',
+      source: MONSTAT_NEW_DWELLINGS_Q1_2026,
+    },
+    transferTax: {
+      text: 'Progressive since 1 January 2024: 3% on the first €150,000 of the tax base, with higher rates above that amount.',
+      sources: [
+        {
+          publisher: 'Government of Montenegro',
+          title: 'Izmjene i dopune Zakona o porezu na promet nepokretnosti – u primjeni od 01.01.2024.',
+          url: 'https://www.gov.me/clanak/izmjene-i-dopune-zakona-o-porezu-na-promet-nepokretnosti-u-primjeni-od-01012024',
+        },
+      ],
+    },
+    annualTax: {
+      text: '0.25%–1.00% of the property’s market value a year, under the Law on Property Tax.',
+      sources: [
+        {
+          publisher: 'Government of Montenegro',
+          title: 'Porez na nepokretnosti',
+          url: 'https://www.gov.me/clanak/porez-na-nepokretnosti',
+        },
+      ],
+    },
+    residency: {
+      text:
+        'Owning real estate in Montenegro is a legal ground for a temporary residence permit, issued for one year. ' +
+        'Amendments to the Law on Foreigners add a minimum property value for this permit (the government’s proposal set €200,000) — confirm the amount in force with the Ministry of Interior.',
+      sources: [
+        {
+          publisher: 'Government of Montenegro',
+          title: 'Temporary residence',
+          url: 'https://www.gov.me/en/article/temporary-residence',
+        },
+        {
+          publisher: 'Government of Montenegro',
+          title: 'Government adopts amendments to the Law on Foreigners',
+          url: 'https://www.gov.me/en/article/government-adopts-amendments-to-the-law-on-foreigners-new-measures-to-regulate-residence',
+        },
+      ],
+    },
   },
   {
     slug: 'albania',
-    countryKey: 'albania',
-    avgPricePerSqm: { min: 800, max: 1500 },
-    rentalYield: { min: 5, max: 9 },
-    ownership: 'open',
     country: 'Albania',
+    countryKey: 'albania',
     flag: '🇦🇱',
-    foreignBuy: 'Yes (except agricultural land)',
-    residency: 'Yes — property ownership supports residence permit application',
-    tax: '0.05-0.2% annually',
-    transferTax: 'None (included in notary fees)',
-    topCities: ['Tirana', 'Saranda', 'Vlora', 'Durres', 'Shkodra'],
-    highlights: [
-      'Lowest property prices in the Mediterranean region',
-      'Albanian Riviera — Europe\'s hidden gem with rapid price appreciation',
-      'EU candidate country with fast-growing economy',
-      'No transfer tax — just notary fees (~1%)',
-      'Tirana undergoing massive modernization and urban development',
-      'Rental yields up to 9% on the Riviera during summer season',
-    ],
-    legalProcess: [
-      'Find property and agree on price',
-      'Hire a local lawyer (essential for foreigners)',
-      'Verify ownership at the Immovable Property Registration Office (ZRPP)',
-      'Sign preliminary agreement at notary',
-      'Obtain Albanian tax identification number (NIPT)',
-      'Sign the final deed of sale at a notary office',
-      'Register the property at ZRPP (takes 1-3 weeks)',
-    ],
+    cities: ['Tirana', 'Durres', 'Vlore', 'Sarande', 'Shkoder'],
   },
   {
     slug: 'serbia',
-    countryKey: 'serbia',
-    avgPricePerSqm: { min: 1200, max: 2500 },
-    rentalYield: { min: 4, max: 6 },
-    ownership: 'conditional',
     country: 'Serbia',
+    countryKey: 'serbia',
     flag: '🇷🇸',
-    foreignBuy: 'EU citizens freely; others need reciprocity agreement',
-    residency: 'Temporary residence available for property owners',
-    tax: '0.4-2% annually',
-    transferTax: '2.5%',
-    topCities: ['Belgrade', 'Novi Sad', 'Niš', 'Subotica'],
-    highlights: [
-      'Belgrade — vibrant capital with strong rental demand',
-      'Novi Sad — European Capital of Culture with growing tourism',
-      'EU candidate country with improving infrastructure',
-      'Strong expat community driving rental market',
-      'Affordable prices compared to EU neighbors',
-      'New Belgrade waterfront project increasing property values',
-    ],
-    legalProcess: [
-      'Find property and negotiate terms',
-      'Hire a local lawyer for due diligence',
-      'Sign preliminary contract with 10% deposit',
-      'Obtain Serbian tax number',
-      'Sign main contract certified by a public notary',
-      'Pay 2.5% transfer tax',
-      'Register ownership at the Republic Geodetic Authority',
-    ],
+    cities: ['Belgrade', 'Novi Sad', 'Nis', 'Subotica'],
+    price: {
+      kind: 'index-change',
+      changePct: 5.25,
+      measure: 'RGZ apartment price index, year-on-year change',
+      period: 'Q2 2026',
+      source: {
+        publisher: 'RGZ (Republic Geodetic Authority of Serbia)',
+        title: 'RGZ Indeks cena stanova',
+        url: 'https://www.rgz.gov.rs/rgz-indeks-cena-stanova',
+      },
+    },
+    transferTax: {
+      text:
+        '2.5% tax on the transfer of absolute rights; the seller is the taxpayer. ' +
+        'The sale is exempt for up to 40 m² (plus 15 m² per household member) when an individual buyer is buying their first home in Serbia.',
+      sources: [
+        {
+          publisher: 'Poreska uprava (Tax Administration of Serbia)',
+          title: 'Porez na prenos apsolutnih prava kod prometa nepokretnosti (October 2025)',
+          url: 'https://purs.gov.rs/upload/media/2025/10/21/760421/Porez_na_prenos_apsolutnih_prava_kod_prometa_nepokretnosti.pdf',
+        },
+      ],
+    },
   },
   {
     slug: 'north-macedonia',
-    countryKey: 'north-macedonia',
-    avgPricePerSqm: { min: 600, max: 1200 },
-    rentalYield: { min: 5, max: 7 },
-    ownership: 'conditional',
     country: 'North Macedonia',
+    countryKey: 'north-macedonia',
     flag: '🇲🇰',
-    foreignBuy: 'Yes (buildings; land through company registration)',
-    residency: 'Temporary residence available',
-    tax: '0.1-0.2% annually',
-    transferTax: '2-4%',
-    topCities: ['Skopje', 'Ohrid', 'Bitola', 'Tetovo'],
-    highlights: [
-      'Cheapest property prices in the Balkans',
-      'Lake Ohrid — UNESCO World Heritage Site with tourism potential',
-      'Skopje undergoing rapid modernization',
-      'Very low annual property tax (0.1-0.2%)',
-      'NATO member since 2020, EU candidate country',
-      'Excellent value for investors seeking emerging markets',
-    ],
-    legalProcess: [
-      'Find property and agree on price',
-      'Hire a local lawyer',
-      'For land purchases, register a local company',
-      'Verify ownership at the Agency for Real Estate Cadastre',
-      'Sign purchase contract at a notary',
-      'Pay transfer tax (2-4%)',
-      'Register at the Cadastre (1-2 weeks)',
-    ],
+    cities: ['Skopje', 'Ohrid', 'Bitola', 'Tetovo'],
   },
   {
     slug: 'kosovo',
-    countryKey: 'kosovo',
-    avgPricePerSqm: { min: 700, max: 1200 },
-    rentalYield: { min: 6, max: 9 },
-    ownership: 'conditional',
     country: 'Kosovo',
+    countryKey: 'kosovo',
     flag: '🇽🇰',
-    foreignBuy: 'Yes (with conditions based on nationality)',
-    residency: 'Available through property ownership',
-    tax: 'Low annual property tax',
-    transferTax: '1-3%',
-    topCities: ['Pristina', 'Prizren', 'Peja', 'Gjakova'],
-    highlights: [
-      'Youngest population in Europe — dynamic market',
-      'Pristina — fast-growing capital with increasing demand',
-      'No dominant property portal — opportunity for discovery',
-      'High rental yields driven by international organizations and diaspora',
-      'Prizren — historic UNESCO-nominated city with tourism growth',
-      'Very affordable entry point for Balkan real estate investment',
-    ],
-    legalProcess: [
-      'Find property and agree on terms',
-      'Engage a local lawyer for title verification',
-      'Obtain a personal number from civil registry',
-      'Sign preliminary agreement with deposit',
-      'Notarize the purchase contract',
-      'Pay transfer tax',
-      'Register at the Kosovo Cadastral Agency',
-    ],
+    cities: ['Prishtina', 'Prizren', 'Peja', 'Gjakova'],
+    price: {
+      kind: 'index-change',
+      changePct: 4.8,
+      measure: 'Residential property price index (Kosovo Agency of Statistics), year-on-year change',
+      period: 'Q3 2025',
+      source: {
+        publisher: 'Central Bank of the Republic of Kosovo',
+        title: 'Annual Report 2025',
+        url: 'https://bqk-kos.org/wp-content/uploads/2026/07/CBK_AnnualReport2025.pdf',
+      },
+    },
   },
   {
     slug: 'croatia',
-    countryKey: 'croatia',
-    avgPricePerSqm: { min: 2000, max: 5000 },
-    rentalYield: { min: 4, max: 7 },
-    ownership: 'conditional',
     country: 'Croatia',
+    countryKey: 'croatia',
     flag: '🇭🇷',
-    foreignBuy: 'EU citizens freely; others need Ministry approval',
-    residency: 'EU residence rules apply (Croatia is an EU member)',
-    tax: 'Since 2025, €0.60–8/m² a year on homes not lived in or let long-term',
-    transferTax: '3%',
-    topCities: ['Split', 'Dubrovnik', 'Zagreb', 'Zadar', 'Rijeka'],
-    highlights: [
-      'EU and Eurozone member — stable legal framework',
-      'World-famous Adriatic coastline and islands',
-      'Dubrovnik, Split — global tourism destinations',
-      'Annual property tax only on homes that are neither lived in nor let long-term',
-      'Strong short-term rental market (Airbnb)',
-      'Schengen area — easy access for EU citizens',
-    ],
-    legalProcess: [
-      'Find property and engage a lawyer',
-      'Non-EU citizens apply for Ministry of Justice approval',
-      'Sign preliminary contract with 10% deposit',
-      'Obtain Croatian OIB (tax identification number)',
-      'Sign main contract at a notary',
-      'Pay 3% transfer tax',
-      'Register ownership at the Land Registry court',
-    ],
+    cities: ['Zagreb', 'Split', 'Dubrovnik', 'Zadar', 'Rijeka'],
+    price: {
+      kind: 'avg-per-sqm',
+      amount: 2861,
+      currency: 'EUR',
+      measure: 'Average price of new dwellings sold (all sellers)',
+      period: 'H2 2025',
+      source: {
+        publisher: 'DZS (Croatian Bureau of Statistics)',
+        title: 'GRAD-2025-4-1/2 Prices of Sold New Dwellings, 2025',
+        url: 'https://podaci.dzs.hr/2025/en/97572',
+      },
+    },
+    transferTax: {
+      text: '3% of the property’s market value. Purchases on which 25% VAT is charged are not subject to this tax.',
+      sources: [
+        {
+          publisher: 'Porezna uprava (Croatian Tax Administration)',
+          title: 'Porez na promet nekretnina',
+          url: 'https://porezna-uprava.gov.hr/hr/porez-na-promet-nekretni-na/4583',
+        },
+      ],
+    },
+    annualTax: {
+      text:
+        'Since 1 January 2025: €0.60–€8.00 per m² of useful area a year, set by the municipality. ' +
+        'Not payable if the property is used for permanent residence or let on a long-term residential lease.',
+      sources: [
+        {
+          publisher: 'Porezna uprava (Croatian Tax Administration)',
+          title: 'Porez na nekretnine',
+          url: 'https://porezna-uprava.gov.hr/hr/porez-na-nekretnine-4816/4816',
+        },
+        {
+          publisher: 'gov.hr',
+          title: 'Porez na nekretnine',
+          url: 'https://gov.hr/hr/porez-na-nekretnine/1472',
+        },
+      ],
+    },
+    foreignOwnership: {
+      text:
+        'Citizens and companies of EU member states, Iceland, Liechtenstein, Norway and Switzerland buy on the same terms as Croatians. ' +
+        'Others need reciprocity with their country and the consent of the Ministry of Justice.',
+      sources: [
+        {
+          publisher: 'Ministry of Justice, Public Administration and Digital Transformation',
+          title: 'Information on reciprocity in the acquisition of ownership rights in real estate',
+          url: 'https://mpudt.gov.hr/information-on-reciprocity-in-the-acquisition-of-ownership-rights-in-real-estate-between-the-republic-of-croatia-and-countries-other-than-eu-member-states-republic-of-iceland-principality-of-liechtenstein-kingdom-of-norway-or-swiss-confederation-25361/25361',
+        },
+      ],
+    },
   },
   {
     slug: 'bosnia',
-    countryKey: 'bosnia-herzegovina',
-    avgPricePerSqm: { min: 800, max: 1500 },
-    rentalYield: { min: 4, max: 6 },
-    ownership: 'conditional',
     country: 'Bosnia and Herzegovina',
+    countryKey: 'bosnia-herzegovina',
     flag: '🇧🇦',
-    foreignBuy: 'Yes (based on reciprocity agreements)',
-    residency: 'Available for property owners',
-    tax: '0.05-0.5% annually',
-    transferTax: '5%',
-    topCities: ['Sarajevo', 'Mostar', 'Banja Luka', 'Tuzla'],
-    highlights: [
-      'Sarajevo — historically rich capital with growing tourism',
-      'Mostar — iconic Old Bridge area attracts international buyers',
-      'Affordable prices with strong appreciation potential',
-      'Two entities with different property laws — get local advice',
-      'Growing tourism sector increasing rental demand',
-      'EU candidate country with ongoing reforms',
-    ],
-    legalProcess: [
-      'Find property and hire a local lawyer (crucial in BiH)',
-      'Verify ownership and check for any encumbrances',
-      'Confirm reciprocity agreement exists for your nationality',
-      'Sign preliminary contract with deposit',
-      'Notarize the purchase agreement',
-      'Pay 5% transfer tax',
-      'Register at the relevant Land Registry',
-    ],
+    cities: ['Sarajevo', 'Mostar', 'Banja Luka', 'Tuzla'],
+    price: {
+      kind: 'avg-per-sqm',
+      amount: 3147,
+      currency: 'BAM',
+      // Converted at the Central Bank of BiH's fixed rate: 1 EUR = 1.95583 KM.
+      eurAmount: 1609,
+      measure: 'Average price of new dwellings sold',
+      period: 'Q2 2025',
+      source: {
+        publisher: 'BHAS (Agency for Statistics of Bosnia and Herzegovina)',
+        title: 'Prices of new dwellings sold, Q2 2025',
+        url: 'https://bhas.gov.ba/data/Publikacije/Saopstenja/2025/CON_05_2025_Q2_1_BS.pdf',
+      },
+    },
   },
   {
     slug: 'bulgaria',
-    countryKey: 'bulgaria',
-    avgPricePerSqm: { min: 800, max: 1800 },
-    rentalYield: { min: 4, max: 6 },
-    ownership: 'conditional',
     country: 'Bulgaria',
+    countryKey: 'bulgaria',
     flag: '🇧🇬',
-    foreignBuy: 'EU citizens can buy freely; others can buy buildings (not land)',
-    residency: 'EU residence rules apply (Bulgaria is an EU member)',
-    tax: '0.01-0.45% annually',
-    transferTax: '0.1-3%',
-    topCities: ['Sofia', 'Burgas', 'Varna', 'Plovdiv', 'Bansko'],
-    highlights: [
-      'EU member — full Schengen member since January 2025',
-      'Black Sea coast resorts with established tourism',
-      'Bansko — popular ski resort with affordable property',
-      'Sofia — growing tech hub with increasing property demand',
-      'Very low property tax (as low as 0.01%)',
-      'Flat 10% income tax rate — attractive for investors',
-    ],
-    legalProcess: [
-      'Find property and engage a lawyer',
-      'Non-EU citizens can buy buildings but not land directly',
-      'Obtain a Bulgarian personal number for foreigners (LNCh)',
-      'Sign preliminary contract with 10% deposit',
-      'Sign notarial deed at a notary office',
-      'Pay local transfer tax (varies by municipality)',
-      'Register at the Property Registry within 7 days',
-    ],
+    cities: ['Sofia', 'Plovdiv', 'Varna', 'Burgas'],
+    price: {
+      kind: 'index-change',
+      changePct: 14.8,
+      measure: 'House price index (new and existing dwellings), year-on-year change — preliminary',
+      period: 'Q1 2026',
+      source: {
+        publisher: 'NSI (National Statistical Institute of Bulgaria)',
+        title: 'Housing price statistics – First quarter of 2026',
+        url: 'https://www.nsi.bg/en/announcement/housing-price-statistics-9055',
+      },
+    },
+    transferTax: {
+      text: 'Local tax on the acquisition of property, set by each municipality between 0.1% and 3%.',
+      sources: [
+        {
+          publisher: 'Ministry of Finance of Bulgaria',
+          title: 'Local Taxes and Fees Act',
+          url: 'https://minfin.bg/upload/60568/Local_Taxes_and_Fees_Act.pdf',
+        },
+      ],
+    },
   },
   {
     slug: 'romania',
-    countryKey: 'romania',
-    avgPricePerSqm: { min: 1000, max: 2200 },
-    rentalYield: { min: 5, max: 7 },
-    ownership: 'conditional',
     country: 'Romania',
+    countryKey: 'romania',
     flag: '🇷🇴',
-    foreignBuy: 'EU citizens freely; others can buy buildings (not land directly)',
-    residency: 'EU residence rules apply (Romania is an EU member)',
-    tax: 'Varies by value and location',
-    transferTax: 'None for the buyer (notary and registration fees apply)',
-    topCities: ['Bucharest', 'Cluj-Napoca', 'Timișoara', 'Brașov', 'Constanța'],
-    highlights: [
-      'EU member with rapidly growing economy',
-      'Cluj-Napoca — tech hub with strong rental demand',
-      'Bucharest — affordable capital with major development',
-      'No transfer tax for buyers — only notary and land-registry fees',
-      'Transylvania — unique cultural heritage attracting international buyers',
-      'Black Sea coast with tourism potential',
-    ],
-    legalProcess: [
-      'Find property and hire a local lawyer',
-      'Non-EU citizens register a Romanian company for land purchases',
-      'Obtain Romanian tax identification number (CIF)',
-      'Sign preliminary contract (promisiune de vanzare)',
-      'Sign authentic sale contract at a notary',
-      'Notary handles tax withholding and payment',
-      'Automatic registration at the Land Book (Cartea Funciara)',
-    ],
+    cities: ['Bucharest', 'Cluj-Napoca', 'Timisoara', 'Brasov', 'Constanta'],
+    price: {
+      kind: 'index-change',
+      changePct: 12.1,
+      measure: 'House price index, year-on-year change',
+      period: 'Q2 2026',
+      source: {
+        publisher: 'Eurostat',
+        title: 'House prices — euro indicators, Q2 2026',
+        url: 'https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/2-01102026-bp',
+      },
+    },
   },
   {
     slug: 'greece',
-    countryKey: 'greece',
-    avgPricePerSqm: { min: 1500, max: 4000 },
-    rentalYield: { min: 3, max: 6 },
-    ownership: 'open',
     country: 'Greece',
+    countryKey: 'greece',
     flag: '🇬🇷',
-    foreignBuy: 'Yes (some border zone restrictions)',
-    residency: 'Golden Visa (5-year residence): €800,000 in Attica, Thessaloniki, Mykonos, Santorini and larger islands; €400,000 elsewhere; €250,000 for commercial-to-residential conversions or listed-building restorations',
-    tax: 'ENFIA tax: 0.1-1.15% annually',
-    transferTax: '3.09%',
-    topCities: ['Athens', 'Thessaloniki', 'Crete', 'Mykonos', 'Santorini'],
-    highlights: [
-      'Golden Visa — EU residence through property investment (thresholds raised in 2024)',
-      'World-famous islands — Mykonos, Santorini, Crete',
-      'Athens — recovering market with strong appreciation potential',
-      'EU and Eurozone member — stable legal framework',
-      'Short-term rental market booming (tourism)',
-      'Rich cultural heritage attracting global buyers',
-    ],
-    legalProcess: [
-      'Find property and hire a Greek lawyer',
-      'Obtain Greek tax number (AFM) from the tax office',
-      'Lawyer conducts title search at the Land Registry',
-      'Sign preliminary agreement with deposit',
-      'Sign the final contract before a notary',
-      'Pay 3.09% transfer tax',
-      'Register at the Land Registry/Cadastre',
-      'Apply for Golden Visa at immigration office (if applicable)',
-    ],
+    cities: ['Athens', 'Thessaloniki', 'Heraklion', 'Chania', 'Rhodes'],
+    price: {
+      kind: 'index-change',
+      changePct: 5.5,
+      measure: 'Index of apartment prices (nationwide), year-on-year change',
+      period: 'Q2 2026',
+      source: {
+        publisher: 'Bank of Greece',
+        title: 'Indices of residential property prices: Q2 2026',
+        url: 'https://www.bankofgreece.gr/en/news-and-media/press-office/news-list/news?announcement=ac5ae869-3e94-4550-b486-ef00c4292e07',
+      },
+    },
+    transferTax: {
+      text:
+        '3% of the property’s taxable value, plus a municipal levy of 3% on that tax (about 3.09% in total), paid by the buyer before the contract is signed.',
+      sources: [
+        {
+          publisher: 'AADE (Independent Authority for Public Revenue)',
+          title: 'Real Estate Transfer Tax',
+          url: 'https://www.aade.gr/en/greeks-abroad-non-residents/property-taxation/real-estate-transfer-tax',
+        },
+      ],
+    },
+    annualTax: {
+      text: 'ENFIA: an annual tax on the property held on 1 January, calculated from each property’s surface area and characteristics.',
+      sources: [
+        {
+          publisher: 'AADE (Independent Authority for Public Revenue)',
+          title: 'Declaration E9 / Unified Property Tax (ENFIA)',
+          url: 'https://www.aade.gr/en/e9enfia',
+        },
+      ],
+    },
+    residency: {
+      text:
+        'Golden Visa through property purchase: at least €800,000 in Attica, Thessaloniki, Mykonos, Santorini and islands with more than 3,100 inhabitants; at least €400,000 elsewhere; ' +
+        '€250,000 for buildings converted from commercial to residential use and for listed buildings. Property bought for a Golden Visa may not be let short-term.',
+      sources: [
+        {
+          publisher: 'Enterprise Greece',
+          title: 'Greece adjusts Golden Visa program amid rising outlook for property market',
+          url: 'https://newsletters.enterprisegreece.gov.gr/newsletter-articles/greece-adjusts-golden-visa-program-amid-rising-outlook-for-property-market/',
+        },
+        {
+          publisher: 'Hellenic Republic — National Registry of Administrative Procedures (MITOS)',
+          title: 'Permanent golden visa (change of use) – Initial issuance',
+          url: 'https://en.mitos.gov.gr/index.php/%CE%94%CE%94:Permanent_golden_visa_(change_of_use)_%E2%80%93_Initial_issuance',
+        },
+        {
+          publisher: 'Hellenic Republic — Housing Policy Portal',
+          title: 'Απαγόρευση βραχυχρόνιας εκμίσθωσης των ακινήτων που αποκτήθηκαν μέσω του προγράμματος golden visa',
+          url: 'https://stegasi.gov.gr/programs/apagorefsi-vrachychronias-ekmisthosis-ton-akiniton-pou-apoktithikan-meso-tou-programmatos-golden-visa/',
+        },
+      ],
+    },
   },
 ];

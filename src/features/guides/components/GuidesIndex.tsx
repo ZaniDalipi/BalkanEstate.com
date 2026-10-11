@@ -5,10 +5,9 @@ import { SEO } from '@/src/components/seo';
 import { AdSlot } from '@/src/features/promo';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { AcademicCapIcon, MagnifyingGlassIcon, XMarkIcon, GlobeAltIcon, CurrencyEuroIcon, ArrowTrendingUpIcon } from '@/constants';
+import { AcademicCapIcon, MagnifyingGlassIcon, XMarkIcon, GlobeAltIcon, DocumentCheckIcon } from '@/constants';
 import { COUNTRY_GUIDES } from '../data/countryGuides';
-import type { GuideSort } from '../types/guide.types';
-import { filterGuides, formatEuro, formatPercent, parseGuideSort, sortGuides } from '../utils/guideSelectors';
+import { filterGuides, sortByName } from '../utils/guideSelectors';
 import { GuideCard } from './GuideCard';
 import { GuideComparisonTable } from './GuideComparisonTable';
 import { GuideDisclaimer } from './GuideDisclaimer';
@@ -18,30 +17,15 @@ import { useCountryName } from './useCountryName';
 const MAX_QUERY_LENGTH = 200;
 const PROCESS_STEPS = [1, 2, 3, 4, 5] as const;
 
-/** `/guides` — every country, searchable and sortable, plus a comparison table. */
+/** `/guides` — every country, searchable, plus a comparison table of official figures. */
 const GuidesIndex: React.FC = () => {
-  const { t, i18n } = useTranslation('common');
+  const { t } = useTranslation('common');
   const countryName = useCountryName();
-  const locale = i18n.language || 'en';
   const searchId = useId();
-  const sortId = useId();
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<GuideSort>('name');
 
-  const visible = useMemo(
-    () => sortGuides(filterGuides(COUNTRY_GUIDES, query, countryName), sort, countryName),
-    [query, sort, countryName],
-  );
-  const sortedForTable = useMemo(() => sortGuides(COUNTRY_GUIDES, sort, countryName), [sort, countryName]);
-
-  const stats = useMemo(() => {
-    const minPrice = Math.min(...COUNTRY_GUIDES.map((g) => g.avgPricePerSqm.min));
-    const maxYield = Math.max(...COUNTRY_GUIDES.map((g) => g.rentalYield.max));
-    return {
-      minPrice: formatEuro(minPrice, locale),
-      maxYield: formatPercent(maxYield, locale),
-    };
-  }, [locale]);
+  const sorted = useMemo(() => sortByName(COUNTRY_GUIDES, countryName), [countryName]);
+  const visible = useMemo(() => filterGuides(sorted, query, countryName), [sorted, query, countryName]);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
 
@@ -90,17 +74,16 @@ const GuidesIndex: React.FC = () => {
             {t('common:guides.subtitle', 'Everything you need to know about buying real estate in the Balkans. Legal requirements, taxes, foreign ownership rules, and investment insights for all 10 countries.')}
           </p>
 
-          <dl className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl">
+          <dl className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
             {[
               { icon: GlobeAltIcon, label: t('common:guides.statCountries', 'Countries covered'), value: String(COUNTRY_GUIDES.length) },
-              { icon: CurrencyEuroIcon, label: t('common:guides.statPricesFrom', 'Prices from (per m²)'), value: stats.minPrice },
-              { icon: ArrowTrendingUpIcon, label: t('common:guides.statYieldUpTo', 'Rental yields up to'), value: stats.maxYield },
+              { icon: DocumentCheckIcon, label: t('common:guides.statSourced', 'Every figure'), value: t('common:guides.statSourcedValue', 'Linked to its official source') },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/15 backdrop-blur-sm">
                 <Icon className="h-6 w-6 flex-shrink-0 text-white/80" aria-hidden="true" />
                 <div>
                   <dt className="text-xs text-white/80">{label}</dt>
-                  <dd className="text-lg font-bold">{value}</dd>
+                  <dd className="text-base font-bold">{value}</dd>
                 </div>
               </div>
             ))}
@@ -111,7 +94,7 @@ const GuidesIndex: React.FC = () => {
       <AdSlot page="guides" placement="in-content" className="max-w-6xl mx-auto px-4 sm:px-6 my-6" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
-        {/* Search + sort */}
+        {/* Search */}
         <section aria-labelledby="guides-list-heading" className="pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -154,29 +137,14 @@ const GuidesIndex: React.FC = () => {
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <label htmlFor={sortId} className="text-sm font-medium text-neutral-600 whitespace-nowrap">
-                  {t('common:guides.sortLabel', 'Sort by')}
-                </label>
-                <select
-                  id={sortId}
-                  value={sort}
-                  onChange={(e) => setSort(parseGuideSort(e.target.value))}
-                  className="w-full sm:w-auto rounded-xl border border-neutral-300 bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                  <option value="name">{t('common:guides.sortName', 'Name (A–Z)')}</option>
-                  <option value="price-asc">{t('common:guides.sortPrice', 'Price (lowest first)')}</option>
-                  <option value="yield-desc">{t('common:guides.sortYield', 'Rental yield (highest first)')}</option>
-                </select>
-              </div>
             </form>
           </div>
 
           {visible.length > 0 ? (
             <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {visible.map((guide) => (
-                <li key={guide.slug} className="flex">
-                  <div className="flex-1 [&>a]:h-full"><GuideCard guide={guide} /></div>
+                <li key={guide.slug}>
+                  <GuideCard guide={guide} />
                 </li>
               ))}
             </ul>
@@ -206,9 +174,9 @@ const GuidesIndex: React.FC = () => {
             {t('common:guides.comparisonTitle', 'Compare countries at a glance')}
           </h2>
           <p className="mt-1 mb-5 text-sm text-neutral-500">
-            {t('common:guides.comparisonSubtitle', 'Typical prices and gross rental yields. Tap a country for the full guide.')}
+            {t('common:guides.comparisonSubtitle', 'Official statistics only. Some offices publish an average price per m², others only a price index — each figure is labelled with what it measures.')}
           </p>
-          <GuideComparisonTable guides={sortedForTable} />
+          <GuideComparisonTable guides={sorted} />
         </section>
 
         {/* How buying works */}
@@ -217,7 +185,7 @@ const GuidesIndex: React.FC = () => {
             {t('common:guides.processTitle', 'How buying works across the Balkans')}
           </h2>
           <p className="mt-1 mb-6 text-sm text-neutral-500">
-            {t('common:guides.processSubtitle', 'The details differ by country, but almost every purchase follows these five stages.')}
+            {t('common:guides.processSubtitle', 'General guidance, not legal advice. Steps and their order differ by country — a local lawyer or notary will confirm what applies to your purchase.')}
           </p>
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {PROCESS_STEPS.map((n) => (

@@ -6,16 +6,45 @@ import { COUNTRY_GUIDES, GUIDES_LAST_REVIEWED } from '@/features/guides/data/cou
 import {
   filterGuides,
   findGuide,
-  formatEuroRange,
-  formatPercentRange,
+  formatPriceStat,
   formatReviewDate,
-  parseGuideSort,
-  sortGuides,
+  guideSources,
+  sortByName,
 } from '@/features/guides/utils/guideSelectors';
+import { GUIDE_FACT_KEYS } from '@/features/guides/types/guide.types';
 import { paths } from '@/src/app/router/paths';
 import { resolveRoute } from '@/app/navigation/sidebarNavigation';
 
 const LANGS = ['en', 'sq', 'bs', 'bg', 'hr', 'el', 'mk', 'me', 'ro', 'sr'];
+
+/**
+ * The only hosts a guide may cite: statistics offices, central banks, tax
+ * authorities, ministries and official gazettes, and EU institutions. Adding a
+ * host here is a deliberate decision that it is an official source.
+ */
+const OFFICIAL_HOSTS = [
+  'gov.me', // Government of Montenegro
+  'monstat.org', // Statistical Office of Montenegro
+  'rgz.gov.rs', // Republic Geodetic Authority of Serbia
+  'purs.gov.rs', // Tax Administration of Serbia
+  'bqk-kos.org', // Central Bank of Kosovo
+  'dzs.hr', // Croatian Bureau of Statistics
+  'porezna-uprava.gov.hr', // Croatian Tax Administration
+  'gov.hr', // Croatian government portal
+  'mpudt.gov.hr', // Croatian Ministry of Justice
+  'bhas.gov.ba', // Agency for Statistics of BiH
+  'nsi.bg', // National Statistical Institute of Bulgaria
+  'minfin.bg', // Bulgarian Ministry of Finance
+  'europa.eu', // Eurostat
+  'bankofgreece.gr', // Bank of Greece
+  'aade.gr', // Greek tax authority
+  'gov.gr', // Greek government portals (MITOS, Housing Policy, Enterprise Greece)
+];
+
+const isOfficial = (url: string) => {
+  const { protocol, hostname } = new URL(url);
+  return protocol === 'https:' && OFFICIAL_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+};
 const readLocale = (lang: string, ns: string) =>
   JSON.parse(readFileSync(resolve(__dirname, `../i18n/locales/${lang}/${ns}.json`), 'utf8'));
 
@@ -53,17 +82,55 @@ describe('guide data', () => {
     for (const slug of slugs) expect(validateSlug(slug).isValid, slug).toBe(true);
   });
 
-  it('has sane numeric ranges and non-empty content', () => {
+  it('cites only official sources, over HTTPS', () => {
     for (const g of COUNTRY_GUIDES) {
-      expect(g.avgPricePerSqm.min, g.slug).toBeGreaterThan(0);
-      expect(g.avgPricePerSqm.min, g.slug).toBeLessThanOrEqual(g.avgPricePerSqm.max);
-      expect(g.rentalYield.min, g.slug).toBeGreaterThan(0);
-      expect(g.rentalYield.max, g.slug).toBeLessThan(25);
-      expect(g.rentalYield.min, g.slug).toBeLessThanOrEqual(g.rentalYield.max);
-      expect(g.highlights.length, g.slug).toBeGreaterThan(0);
-      expect(g.legalProcess.length, g.slug).toBeGreaterThan(0);
-      expect(g.topCities.length, g.slug).toBeGreaterThan(0);
+      for (const source of guideSources(g)) {
+        expect(isOfficial(source.url), `${g.slug}: ${source.url}`).toBe(true);
+        expect(source.publisher.trim(), `${g.slug}: publisher`).not.toBe('');
+        expect(source.title.trim(), `${g.slug}: title`).not.toBe('');
+      }
     }
+  });
+
+  it('never states a fact without a source', () => {
+    for (const g of COUNTRY_GUIDES) {
+      for (const key of GUIDE_FACT_KEYS) {
+        const fact = g[key];
+        if (!fact) continue;
+        expect(fact.text.trim(), `${g.slug}.${key}`).not.toBe('');
+        expect(fact.sources.length, `${g.slug}.${key} has no source`).toBeGreaterThan(0);
+      }
+      if (g.price) {
+        expect(g.price.period.trim(), `${g.slug}.price.period`).not.toBe('');
+        expect(g.price.measure.trim(), `${g.slug}.price.measure`).not.toBe('');
+      }
+    }
+  });
+
+  it('labels price figures with what they are', () => {
+    for (const g of COUNTRY_GUIDES) {
+      const p = g.price;
+      if (!p) continue;
+      if (p.kind === 'avg-per-sqm') {
+        expect(p.amount, g.slug).toBeGreaterThan(0);
+        if (p.currency !== 'EUR') expect(p.eurAmount, `${g.slug} needs a EUR equivalent`).toBeGreaterThan(0);
+      } else {
+        expect(Number.isFinite(p.changePct), g.slug).toBe(true);
+      }
+    }
+  });
+
+  it('converts KM at the fixed rate of 1.95583', () => {
+    for (const g of COUNTRY_GUIDES) {
+      const p = g.price;
+      if (p?.kind === 'avg-per-sqm' && p.currency === 'BAM') {
+        expect(p.eurAmount).toBe(Math.round(p.amount / 1.95583));
+      }
+    }
+  });
+
+  it('lists cities for every guide', () => {
+    for (const g of COUNTRY_GUIDES) expect(g.cities.length, g.slug).toBeGreaterThan(0);
   });
 
   it('has a translated country name for every guide in every locale', () => {
@@ -108,7 +175,7 @@ describe('filterGuides', () => {
   it('matches countries and cities, ignoring case and accents', () => {
     expect(filterGuides(COUNTRY_GUIDES, 'GREECE').map((g) => g.slug)).toEqual(['greece']);
     expect(filterGuides(COUNTRY_GUIDES, 'budva').map((g) => g.slug)).toEqual(['montenegro']);
-    expect(filterGuides(COUNTRY_GUIDES, 'nis').map((g) => g.slug)).toContain('serbia');
+    expect(filterGuides(COUNTRY_GUIDES, 'NOVI sad').map((g) => g.slug)).toEqual(['serbia']);
     expect(filterGuides(COUNTRY_GUIDES, 'timisoara').map((g) => g.slug)).toEqual(['romania']);
   });
 
@@ -123,32 +190,27 @@ describe('filterGuides', () => {
   });
 });
 
-describe('sortGuides', () => {
-  it('sorts by price ascending and yield descending without mutating the input', () => {
+describe('sortByName', () => {
+  it('sorts by name without mutating the input', () => {
     const before = COUNTRY_GUIDES.map((g) => g.slug);
-    const byPrice = sortGuides(COUNTRY_GUIDES, 'price-asc');
-    expect(byPrice[0].slug).toBe('north-macedonia');
-    expect(byPrice[byPrice.length - 1].slug).toBe('croatia');
-    expect(sortGuides(COUNTRY_GUIDES, 'yield-desc')[0].slug).toBe('kosovo');
+    expect(sortByName(COUNTRY_GUIDES)[0].slug).toBe('albania');
     expect(COUNTRY_GUIDES.map((g) => g.slug)).toEqual(before);
-  });
-
-  it('falls back to name for an unknown sort value', () => {
-    expect(parseGuideSort('price-asc')).toBe('price-asc');
-    expect(parseGuideSort('DROP TABLE')).toBe('name');
-    expect(sortGuides(COUNTRY_GUIDES, parseGuideSort(null))[0].slug).toBe('albania');
   });
 });
 
 describe('formatting', () => {
-  it('formats ranges', () => {
-    expect(formatEuroRange({ min: 1800, max: 3500 }, 'en')).toBe('€1,800–3,500');
-    expect(formatPercentRange({ min: 5, max: 8 }, 'en')).toBe('5–8%');
+  it('formats official figures exactly as published', () => {
+    const source = { publisher: 'X', title: 'Y', url: 'https://gov.me' };
+    expect(formatPriceStat({ kind: 'avg-per-sqm', amount: 2445, currency: 'EUR', measure: 'm', period: 'p', source }, 'en')).toBe('€2,445');
+    expect(formatPriceStat({ kind: 'avg-per-sqm', amount: 3147, currency: 'BAM', eurAmount: 1609, measure: 'm', period: 'p', source }, 'en')).toBe('3,147 KM (≈ €1,609)');
+    expect(formatPriceStat({ kind: 'index-change', changePct: 5.25, measure: 'm', period: 'p', source }, 'en')).toBe('+5.25%');
+    expect(formatPriceStat({ kind: 'index-change', changePct: -1.5, measure: 'm', period: 'p', source }, 'en')).toBe('-1.5%');
   });
 
   it('does not throw for unusual locales or bad dates', () => {
-    expect(() => formatEuroRange({ min: 1, max: 2 }, 'me')).not.toThrow();
-    expect(() => formatEuroRange({ min: 1, max: 2 }, 'not a locale!!')).not.toThrow();
+    const stat = { kind: 'index-change', changePct: 1, measure: 'm', period: 'p', source: { publisher: 'X', title: 'Y', url: 'https://gov.me' } } as const;
+    expect(() => formatPriceStat(stat, 'me')).not.toThrow();
+    expect(() => formatPriceStat(stat, 'not a locale!!')).not.toThrow();
     expect(formatReviewDate('not-a-date', 'en')).toBe('not-a-date');
   });
 });

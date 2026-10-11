@@ -1,19 +1,55 @@
 /**
  * A country buying guide.
  *
- * Figures that the page compares or sorts on (price, yield) are numbers, and
- * are formatted for the reader's language at render time. Long-form text
- * (highlights, legal steps) is English-only for now — the page says so when it
- * is shown in another language.
+ * Every fact the page states carries the official source it was taken from,
+ * and is shown with a link to it. A fact with no official source is left out
+ * entirely — the page says "not yet verified" rather than estimating. The test
+ * suite enforces that every source URL is on an official domain.
  */
 
-/** How open a country's market is to buyers from outside the EU. */
-export type ForeignOwnership = 'open' | 'conditional';
-
-export interface NumericRange {
-  min: number;
-  max: number;
+/** An official publication a fact was taken from. */
+export interface Source {
+  /** The institution that published it, e.g. "MONSTAT". */
+  publisher: string;
+  /** The publication or page title. */
+  title: string;
+  /** HTTPS link to the publication. Must be on an official domain (see tests). */
+  url: string;
 }
+
+/** A statement of fact and the official source(s) backing it. */
+export interface SourcedFact {
+  text: string;
+  sources: Source[];
+}
+
+/**
+ * The official price statistic for a country. Statistics offices publish
+ * either an average price per m² or only a price index; we show whichever
+ * exists, exactly as published, and never convert one into the other.
+ */
+export type PriceStat =
+  | {
+      kind: 'avg-per-sqm';
+      /** Value as published, in `currency`. */
+      amount: number;
+      currency: 'EUR' | 'BAM';
+      /** EUR equivalent at an official fixed rate, when `currency` is not EUR. */
+      eurAmount?: number;
+      /** What was measured, e.g. "Average price of new dwellings sold". */
+      measure: string;
+      /** Reference period, e.g. "Q1 2026". */
+      period: string;
+      source: Source;
+    }
+  | {
+      kind: 'index-change';
+      /** Year-on-year change of the official house price index, in percent. */
+      changePct: number;
+      measure: string;
+      period: string;
+      source: Source;
+    };
 
 export interface CountryGuide {
   /** URL segment: `/guides/:slug`. Lowercase, hyphen-separated. */
@@ -23,20 +59,15 @@ export interface CountryGuide {
   /** Key under `common:countries.*` for the translated country name. */
   countryKey: string;
   flag: string;
-  /** Typical asking price, € per m². */
-  avgPricePerSqm: NumericRange;
-  /** Typical gross rental yield, percent. */
-  rentalYield: NumericRange;
-  ownership: ForeignOwnership;
-  foreignBuy: string;
-  residency: string;
-  tax: string;
-  transferTax: string;
-  topCities: string[];
-  highlights: string[];
-  legalProcess: string[];
+  /** Cities linked into search. A navigation aid, not a ranking. */
+  cities: string[];
+  price?: PriceStat;
+  transferTax?: SourcedFact;
+  annualTax?: SourcedFact;
+  foreignOwnership?: SourcedFact;
+  residency?: SourcedFact;
 }
 
-export type GuideSort = 'name' | 'price-asc' | 'yield-desc';
-
-export const GUIDE_SORTS: readonly GuideSort[] = ['name', 'price-asc', 'yield-desc'];
+/** The sourced facts a guide can state, in display order. */
+export const GUIDE_FACT_KEYS = ['transferTax', 'annualTax', 'foreignOwnership', 'residency'] as const;
+export type GuideFactKey = (typeof GUIDE_FACT_KEYS)[number];
