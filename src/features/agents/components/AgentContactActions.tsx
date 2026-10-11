@@ -203,14 +203,14 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                         <div className="absolute inset-0 bg-black/10" />
                         <div className="relative z-10">
                             <div className="flex items-center gap-2.5 sm:gap-3">
-                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
                                     {agencyData.logo ? (
                                         <img
                                             src={optimizeImageUrl(agencyData.logo, { width: 128 }) || agencyData.logo}
                                             alt={agencyData.name}
                                             loading="lazy"
                                             decoding="async"
-                                            className="w-8 h-8 sm:w-12 sm:h-12 object-cover rounded-md sm:rounded-lg"
+                                            className="w-8 h-8 sm:w-12 sm:h-12 object-contain rounded-md sm:rounded-lg"
                                         />
                                     ) : (
                                         <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
