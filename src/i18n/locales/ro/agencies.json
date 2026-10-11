@@ -538,7 +538,8 @@
       "failedToSavePosition": "Salvarea poziției a eșuat",
       "failedToSaveImagePosition": "Salvarea poziției imaginii a eșuat",
       "positionSaved": "Poziția a fost salvată",
-      "failedToGenerateCode": "Generarea codului a eșuat"
+      "failedToGenerateCode": "Generarea codului a eșuat",
+      "joinedWithPro": "Te-ai alăturat {{name}} cu abonament Pro!"
     },
     "agencyPaymentPage": {
       "agencyCreated": "Agenția a fost creată!",

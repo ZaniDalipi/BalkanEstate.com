@@ -265,11 +265,11 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
                                     key={country.code}
                                     onClick={() => handleCountrySearch(country.name)}
                                     className="inline-flex items-center gap-1.5 bg-slate-700/30 hover:bg-slate-700/60 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition-all duration-200 cursor-pointer text-left group"
-                                    title={`Explore cities in ${country.label}`}
-                                    aria-label={`Explore cities in ${country.label}`}
+                                    title={t('footer:exploreCitiesIn', { country: t(`footer:countries.${country.code}`, country.label), defaultValue: 'Explore cities in {{country}}' })}
+                                    aria-label={t('footer:exploreCitiesIn', { country: t(`footer:countries.${country.code}`, country.label), defaultValue: 'Explore cities in {{country}}' })}
                                 >
                                     <span className="text-sm leading-none flex-shrink-0">{country.flag}</span>
-                                    <span className="group-hover:translate-x-0.5 transition-transform duration-200">{country.label}</span>
+                                    <span className="group-hover:translate-x-0.5 transition-transform duration-200">{t(`footer:countries.${country.code}`, country.label)}</span>
                                 </button>
                             ))}
                         </div>

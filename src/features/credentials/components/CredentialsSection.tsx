@@ -559,7 +559,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                     >
                       <option value="">{t('profilePage.credentials.license.selectCountry', 'Select country...')}</option>
                       {BALKAN_COUNTRIES.map((c) => (
-                        <option key={c.code} value={c.code}>{c.name}</option>
+                        <option key={c.code} value={c.code}>{t(`common:countryByCode.${c.code}`, c.name)}</option>
                       ))}
                     </select>
                   </div>
@@ -649,7 +649,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                     >
                       <option value="">{t('profilePage.credentials.license.selectCountry', 'Select country...')}</option>
                       {BALKAN_COUNTRIES.map((c) => (
-                        <option key={c.code} value={c.code}>{c.name}</option>
+                        <option key={c.code} value={c.code}>{t(`common:countryByCode.${c.code}`, c.name)}</option>
                       ))}
                     </select>
                   </div>

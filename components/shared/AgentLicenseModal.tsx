@@ -495,7 +495,7 @@ const AgentLicenseModal: React.FC<AgentLicenseModalProps> = ({
                         </option>
                         {LICENSE_COUNTRIES.map(c => (
                           <option key={c.code} value={c.code}>
-                            {c.flag} {c.label}
+                            {c.flag} {t(`common:countryByCode.${c.code}`, c.label)}
                           </option>
                         ))}
                       </select>

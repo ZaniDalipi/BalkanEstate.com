@@ -96,5 +96,6 @@
       "z360VirtualToursProfessional360": "Z360 Virtual Tours - Ture profesionale 360° të pronave",
       "z360VirtualTours360Property": "Z360 Virtual Tours - Ture 360° të pronave"
     }
-  }
+  },
+  "exploreCitiesIn": "Eksploro qytetet në {{country}}"
 }

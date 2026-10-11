@@ -96,5 +96,6 @@
       "z360VirtualToursProfessional360": "Z360 Virtual Tours - Професионални 360° обиколки на имоти",
       "z360VirtualTours360Property": "Z360 Virtual Tours - 360° обиколки на имоти"
     }
-  }
+  },
+  "exploreCitiesIn": "Разгледайте градовете в {{country}}"
 }

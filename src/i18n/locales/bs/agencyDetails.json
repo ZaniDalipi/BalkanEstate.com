@@ -284,5 +284,15 @@
     "agentCodesTitle": "Kodovi za registraciju agenata",
     "total": "ukupno",
     "seatsFilled": "Popunjeno {{used}} od {{total}} mjesta"
+  },
+  "gradients": {
+    "default": "Okeansko plava",
+    "sunset": "Zalazak sunca",
+    "forest": "Šuma",
+    "royal": "Kraljevsko ljubičasta",
+    "fire": "Vatra",
+    "night": "Noćno nebo",
+    "mint": "Svježa nana",
+    "rose": "Roze zlato"
   }
 }

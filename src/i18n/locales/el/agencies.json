@@ -538,7 +538,8 @@
       "failedToSavePosition": "Η αποθήκευση της θέσης απέτυχε",
       "failedToSaveImagePosition": "Η αποθήκευση της θέσης εικόνας απέτυχε",
       "positionSaved": "Η θέση αποθηκεύτηκε",
-      "failedToGenerateCode": "Η δημιουργία κωδικού απέτυχε"
+      "failedToGenerateCode": "Η δημιουργία κωδικού απέτυχε",
+      "joinedWithPro": "Εντάχθηκατε στο {{name}} με συνδρομή Pro!"
     },
     "agencyPaymentPage": {
       "agencyCreated": "Το γραφείο δημιουργήθηκε!",

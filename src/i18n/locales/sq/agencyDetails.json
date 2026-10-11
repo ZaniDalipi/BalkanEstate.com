@@ -284,5 +284,15 @@
     "agentCodesTitle": "Kodet e regjistrimit të agjentëve",
     "total": "gjithsej",
     "seatsFilled": "{{used}} nga {{total}} vende të zëna"
+  },
+  "gradients": {
+    "default": "Blu oqeani",
+    "sunset": "Perëndim dielli",
+    "forest": "Pyll",
+    "royal": "Vjollcë mbretërore",
+    "fire": "Zjarr",
+    "night": "Qiell nate",
+    "mint": "Mente e freskët",
+    "rose": "Ari rozë"
   }
 }

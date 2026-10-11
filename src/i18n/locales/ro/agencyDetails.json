@@ -364,5 +364,15 @@
     "agentCodesTitle": "Coduri de înregistrare pentru agenți",
     "total": "total",
     "seatsFilled": "{{used}} din {{total}} locuri ocupate"
+  },
+  "gradients": {
+    "default": "Albastru ocean",
+    "sunset": "Apus de soare",
+    "forest": "Pădure",
+    "royal": "Violet regal",
+    "fire": "Foc",
+    "night": "Cer nocturn",
+    "mint": "Mentă proaspătă",
+    "rose": "Aur roz"
   }
 }

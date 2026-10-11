@@ -744,7 +744,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         }
 
         setIsInvitationCodeModalOpen(false);
-        await success(t('agencies:ui.agencyDetailPage.couponRedeemed', 'Coupon Redeemed!'), `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
+        await success(t('agencies:ui.agencyDetailPage.couponRedeemed', 'Coupon Redeemed!'), t('agencies:ui.agencyDetailPage.joinedWithPro', { name: data.agency?.name || agency.name, defaultValue: "You've joined {{name}} with a Pro subscription!" }));
 
         // Silently refetch agency data so the new agent appears in the list immediately
         await fetchAgencyData(true);
@@ -1778,7 +1778,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                   <span className="text-white font-medium text-xs drop-shadow-lg">
-                                    {preset.name}
+                                    {t(`agencyDetails:gradients.${preset.id}`, preset.name)}
                                   </span>
                                 </div>
                                 {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (

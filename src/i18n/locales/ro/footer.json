@@ -96,5 +96,6 @@
       "z360VirtualToursProfessional360": "Z360 Virtual Tours - Tururi profesionale 360° ale proprietăților",
       "z360VirtualTours360Property": "Z360 Virtual Tours - Tururi 360° ale proprietăților"
     }
-  }
+  },
+  "exploreCitiesIn": "Explorează orașele din {{country}}"
 }

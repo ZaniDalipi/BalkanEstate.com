@@ -504,7 +504,8 @@
       "failedToSavePosition": "Failed to save position",
       "failedToSaveImagePosition": "Failed to save image position",
       "positionSaved": "Position Saved",
-      "failedToGenerateCode": "Failed to generate code"
+      "failedToGenerateCode": "Failed to generate code",
+      "joinedWithPro": "You've joined {{name}} with a Pro subscription!"
     },
     "agencyPaymentPage": {
       "agencyCreated": "Agency Created!",

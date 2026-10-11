@@ -502,7 +502,8 @@
       "failedToSavePosition": "Ruajtja e pozicionit dështoi",
       "failedToSaveImagePosition": "Ruajtja e pozicionit të imazhit dështoi",
       "positionSaved": "Pozicioni u ruajt",
-      "failedToGenerateCode": "Gjenerimi i kodit dështoi"
+      "failedToGenerateCode": "Gjenerimi i kodit dështoi",
+      "joinedWithPro": "U bashkuat me {{name}} me abonim Pro!"
     },
     "agencyPaymentPage": {
       "agencyCreated": "Agjencia u krijua!",

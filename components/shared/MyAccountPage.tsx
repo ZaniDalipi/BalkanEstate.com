@@ -1905,7 +1905,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                             >
                                                 <option value="">{t('agent.selectCountry', 'Select country...')}</option>
                                                 {BALKAN_COUNTRIES.map((c) => (
-                                                    <option key={c.code} value={c.code}>{c.name}</option>
+                                                    <option key={c.code} value={c.code}>{t(`common:countryByCode.${c.code}`, c.name)}</option>
                                                 ))}
                                             </select>
                                         </div>

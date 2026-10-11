@@ -871,5 +871,18 @@
       "noAuthenticationTokenFound": "No authentication token found",
       "syncFailed": "Sync failed"
     }
+  },
+  "countryByCode": {
+    "AL": "Albania",
+    "BA": "Bosnia and Herzegovina",
+    "BG": "Bulgaria",
+    "HR": "Croatia",
+    "GR": "Greece",
+    "XK": "Kosovo",
+    "ME": "Montenegro",
+    "MK": "North Macedonia",
+    "RO": "Romania",
+    "RS": "Serbia",
+    "SI": "Slovenia"
   }
 }

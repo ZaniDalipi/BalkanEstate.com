@@ -284,5 +284,15 @@
     "agentCodesTitle": "Agent Registration Codes",
     "total": "total",
     "seatsFilled": "{{used}} of {{total}} seats filled"
+  },
+  "gradients": {
+    "default": "Ocean Blue",
+    "sunset": "Sunset",
+    "forest": "Forest",
+    "royal": "Royal Purple",
+    "fire": "Fire",
+    "night": "Night Sky",
+    "mint": "Mint Fresh",
+    "rose": "Rose Gold"
   }
 }

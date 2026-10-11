@@ -96,5 +96,6 @@
       "z360VirtualToursProfessional360": "Z360 Virtual Tours - Επαγγελματικές περιηγήσεις ακινήτων 360°",
       "z360VirtualTours360Property": "Z360 Virtual Tours - Περιηγήσεις ακινήτων 360°"
     }
-  }
+  },
+  "exploreCitiesIn": "Εξερευνήστε πόλεις: {{country}}"
 }

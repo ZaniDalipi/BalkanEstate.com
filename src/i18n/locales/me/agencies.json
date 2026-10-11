@@ -503,7 +503,8 @@
       "failedToSavePosition": "Čuvanje položaja nije uspjelo",
       "failedToSaveImagePosition": "Čuvanje položaja slike nije uspjelo",
       "positionSaved": "Položaj je sačuvan",
-      "failedToGenerateCode": "Generisanje koda nije uspjelo"
+      "failedToGenerateCode": "Generisanje koda nije uspjelo",
+      "joinedWithPro": "Pridružili ste se agenciji {{name}} uz Pro pretplatu!"
     },
     "agencyPaymentPage": {
       "agencyCreated": "Agencija je napravljena!",

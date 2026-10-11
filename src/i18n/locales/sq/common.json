@@ -858,5 +858,18 @@
       "noAuthenticationTokenFound": "Nuk u gjet token autentikimi",
       "syncFailed": "Sinkronizimi dështoi"
     }
+  },
+  "countryByCode": {
+    "AL": "Shqipëri",
+    "BA": "Bosnjë dhe Hercegovinë",
+    "BG": "Bullgari",
+    "HR": "Kroaci",
+    "GR": "Greqi",
+    "XK": "Kosovë",
+    "ME": "Mal i Zi",
+    "MK": "Maqedoni e Veriut",
+    "RO": "Rumani",
+    "RS": "Serbi",
+    "SI": "Slloveni"
   }
 }

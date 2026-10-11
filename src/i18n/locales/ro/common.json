@@ -858,5 +858,18 @@
       "noAuthenticationTokenFound": "Nu a fost găsit niciun token de autentificare",
       "syncFailed": "Sincronizarea a eșuat"
     }
+  },
+  "countryByCode": {
+    "AL": "Albania",
+    "BA": "Bosnia și Herțegovina",
+    "BG": "Bulgaria",
+    "HR": "Croația",
+    "GR": "Grecia",
+    "XK": "Kosovo",
+    "ME": "Muntenegru",
+    "MK": "Macedonia de Nord",
+    "RO": "România",
+    "RS": "Serbia",
+    "SI": "Slovenia"
   }
 }

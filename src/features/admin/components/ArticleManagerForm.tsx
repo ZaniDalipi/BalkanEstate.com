@@ -671,7 +671,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               )}
               <div className="flex flex-wrap items-center gap-2 mb-4 text-sm text-slate-500">
                 {selectedCountryObj && (
-                  <span className="flex items-center gap-1">{selectedCountryObj.flag} {selectedCountryObj.name}</span>
+                  <span className="flex items-center gap-1">{selectedCountryObj.flag} {t(`common:countryByCode.${selectedCountryObj.code}`, selectedCountryObj.name)}</span>
                 )}
                 {selectedCountryObj && selectedCategory && <span>·</span>}
                 {selectedCategory && (
@@ -812,7 +812,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
               >
                 <option value="">{t('admin:ui.articleManagerForm.noSpecificCountry', '— No specific country —')}</option>
                 {BALKAN_COUNTRIES.map(c => (
-                  <option key={c.code} value={c.name}>{c.flag} {c.name}</option>
+                  <option key={c.code} value={c.name}>{c.flag} {t(`common:countryByCode.${c.code}`, c.name)}</option>
                 ))}
               </select>
               {countryCode && (

@@ -502,7 +502,8 @@
       "failedToSavePosition": "Зачувувањето на позицијата не успеа",
       "failedToSaveImagePosition": "Зачувувањето на позицијата на сликата не успеа",
       "positionSaved": "Позицијата е зачувана",
-      "failedToGenerateCode": "Генерирањето на кодот не успеа"
+      "failedToGenerateCode": "Генерирањето на кодот не успеа",
+      "joinedWithPro": "Се приклучивте кон {{name}} со Pro претплата!"
     },
     "agencyPaymentPage": {
       "agencyCreated": "Агенцијата е креирана!",
