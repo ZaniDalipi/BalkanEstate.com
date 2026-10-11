@@ -182,3 +182,15 @@ export const planMigration = (
     bucket,
   };
 };
+
+/**
+ * The original of a public Cloudinary photo that is still served from
+ * Cloudinary (listing photos kept there instead of migrated), or null.
+ * Only res.cloudinary.com `upload` URLs qualify, so it can't be pointed at
+ * any other host.
+ */
+export const cloudinaryOriginalUrl = (url: string): string | null => {
+  const ref = parseCloudinaryUrl(url);
+  if (!ref || ref.deliveryType !== 'upload' || !url.startsWith('https://')) return null;
+  return `https://res.cloudinary.com/${ref.cloud}/image/upload/${ref.publicId}${ref.format ? `.${ref.format}` : ''}`;
+};

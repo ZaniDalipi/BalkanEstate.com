@@ -154,8 +154,13 @@ describe('every upload goes to R2', () => {
 
 describe('no Cloudinary left in the code', () => {
   const repo = path.resolve(__dirname, '../../..');
-  /** Files allowed to mention Cloudinary: the one-off migration that reads from it, and the check that hunts for leftovers. */
+  /**
+   * Files allowed to mention Cloudinary: the migration that reads from it, the
+   * check that hunts for leftovers, and recognising listing photos kept there.
+   * None of them can upload to Cloudinary.
+   */
   const allowed = [
+    'config/legacyCloudinary.ts',
     'backend/src/scripts/migrateCloudinaryToR2.ts',
     'backend/src/services/media/cloudinaryMigration.ts',
     'backend/src/scripts/checkMediaLinks.ts',

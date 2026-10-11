@@ -114,7 +114,7 @@ db.mediaassets.aggregate([{ $group: { _id: '$ownerId', photos: { $sum: 1 }, byte
    [{ "AllowedOrigins": ["https://balkanestateai.com", "https://www.balkanestateai.com"],
       "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["*"], "MaxAgeSeconds": 86400 }]
    ```
-   For dev, use `http://localhost:3000` as the origin.
+   For the dev bucket, use `http://localhost:3000` and `http://127.0.0.1:3000` as the origins. Without a policy every gallery photo is blocked by the browser even though R2 answers 200; `npm run media:check` tests this.
 4. **API token**: R2 → Manage R2 API Tokens → **Create Account API token**, with Object Read & Write on that environment's two buckets only. Use one token for dev and another for production. Copy the **Access Key ID** and **Secret Access Key**; the secret is shown only once.
 5. **Backend env** (`backend/.env` locally, Railway/Render in production):
    ```

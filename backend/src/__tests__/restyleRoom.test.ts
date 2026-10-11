@@ -65,7 +65,18 @@ describe('restyleRoom controller', () => {
     mockFindByIdAndUpdate.mockResolvedValue({});
   });
 
-  it('returns 400 when imageUrl is not a Cloudinary URL', async () => {
+  it('accepts a listing photo still kept on Cloudinary, fetching its untransformed original', async () => {
+    mockFindById.mockResolvedValue(null);
+    const res = makeRes();
+    await restyleRoom(
+      makeReq({ imageUrl: 'https://res.cloudinary.com/demo/image/upload/t_be_w1080/v17/balkan-estate/listings/p1.jpg', style: 'scandinavian' }),
+      res
+    );
+    expect(global.fetch).toHaveBeenCalledWith('https://res.cloudinary.com/demo/image/upload/balkan-estate/listings/p1.jpg', expect.anything());
+    expect(mockGenerate).toHaveBeenCalled();
+  });
+
+  it('returns 400 when imageUrl is not one of our photos', async () => {
     const res = makeRes();
     await restyleRoom(makeReq({ imageUrl: 'https://evil.example.com/x.jpg', style: 'scandinavian' }), res);
     expect(res.status).toHaveBeenCalledWith(400);

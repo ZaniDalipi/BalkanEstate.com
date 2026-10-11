@@ -120,6 +120,22 @@ async function main(): Promise<void> {
       });
     }
 
+    // CORS: the gallery and editors load photos with crossOrigin="anonymous";
+    // without a bucket CORS policy the browser blocks every one of them even
+    // though R2 answers 200. Ask for one photo the way the site does.
+    const siteOrigin = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, '');
+    let corsProblem: string | null = null;
+    const sampleKey = keys.find((k) => !unreachable.some((u) => u.url.startsWith(mediaFileUrl(mediaBase, k, MEDIA_MASTER_FILE))));
+    if (checkHttp && sampleKey) {
+      const url = mediaFileUrl(mediaBase, sampleKey, MEDIA_MASTER_FILE);
+      const res = await fetch(url, { headers: { Origin: siteOrigin, Range: 'bytes=0-0' }, signal: AbortSignal.timeout(15_000) }).catch(() => null);
+      await res?.body?.cancel().catch(() => undefined);
+      const allowed = res?.headers.get('access-control-allow-origin');
+      if (res?.ok && allowed !== '*' && allowed !== siteOrigin) {
+        corsProblem = `the media bucket sends no CORS header for ${siteOrigin} — add a CORS policy (R2 bucket → Settings → CORS Policy, see docs/MEDIA_STORAGE.md)`;
+      }
+    }
+
     const report = {
       checkedAt: new Date().toISOString(),
       mediaBase,
@@ -128,6 +144,7 @@ async function main(): Promise<void> {
       cloudinaryLinks: cloudinary,
       r2LinksWithoutRecord: unindexed,
       r2LinksNotAnswering: checkHttp ? unreachable : 'skipped (--no-http)',
+      cors: corsProblem ?? 'ok',
       curatedCityPhotosMissing: missingCityPhotos,
     };
     const reportPath = path.resolve(process.cwd(), `media-check-report-${Date.now()}.json`);
@@ -142,13 +159,14 @@ async function main(): Promise<void> {
     line(allowCloudinary ? 'Links still on Cloudinary (allowed)' : 'Links still on Cloudinary', cloudinary, allowCloudinary);
     line('R2 links with no MediaAsset record', unindexed);
     if (checkHttp) line('R2 links whose file does not load', unreachable);
+    if (checkHttp && sampleKey) console.log(corsProblem ? `❌ CORS: ${corsProblem}` : `✅ CORS allows ${siteOrigin}`);
     console.log(
       `${missingCityPhotos.length === 0 ? '✅' : 'ℹ️ '} Curated city photos not in R2: ${missingCityPhotos.length} of ${conventionKeys.length}` +
         (missingCityPhotos.length ? ' (those cities fall back to their own photo — run seedCityImages to add them)' : '')
     );
     console.log(`\nReport: ${reportPath}`);
 
-    if ((!allowCloudinary && cloudinary.length) || unindexed.length || unreachable.length) process.exitCode = 1;
+    if ((!allowCloudinary && cloudinary.length) || unindexed.length || unreachable.length || corsProblem) process.exitCode = 1;
   } finally {
     await mongoose.disconnect();
   }

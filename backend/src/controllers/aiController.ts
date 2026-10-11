@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import sharp from 'sharp';
 import { apiLogger } from '../utils/logger';
 import { originalMediaUrl } from '../utils/mediaUrl';
-import { mediaImageHost } from '../config/imageHosts';
+import { cloudinaryOriginalUrl } from '../services/media/cloudinaryMigration';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
 import Product from '../models/Product';
@@ -282,8 +282,6 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
  */
 const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
 const RESTYLE_MAX_EDGE = 1600;
-/** Our own photo host: the R2 media domain. */
-const allowedImageHosts = (): Set<string> => new Set(mediaImageHost() ? [mediaImageHost() as string] : []);
 
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -309,22 +307,12 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // SSRF guard: only allow https URLs of our own stored photos (listing photos).
-    let parsedUrl: URL;
-    try {
-      parsedUrl = new URL(imageUrl);
-    } catch {
-      res.status(400).json({ message: 'Invalid imageUrl.' });
-      return;
-    }
-    if (parsedUrl.protocol !== 'https:' || !allowedImageHosts().has(parsedUrl.hostname)) {
-      res.status(400).json({ message: 'imageUrl must be a listing photo URL.' });
-      return;
-    }
-
-    // Fetch the full-size master, not the smaller size the browser shows.
-    // We resize it ourselves below.
-    const originalUrl = originalMediaUrl(imageUrl);
+    // SSRF guard: only our own stored photos — on R2, or listing photos still
+    // kept on Cloudinary. Fetch the full-size original, not the smaller size
+    // the browser shows; we resize it ourselves below.
+    const originalUrl = imageUrl.startsWith('https://')
+      ? originalMediaUrl(imageUrl) ?? cloudinaryOriginalUrl(imageUrl)
+      : null;
     if (!originalUrl) {
       res.status(400).json({ message: 'imageUrl must be a listing photo URL.' });
       return;
