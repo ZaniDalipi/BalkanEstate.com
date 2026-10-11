@@ -1952,5 +1952,102 @@
       "failedToLoadStatistics": "Încărcarea statisticilor a eșuat",
       "failedToFetch": "Preluarea a eșuat"
     }
+  },
+  "lists": {
+    "adPages": {
+      "all": "Toate paginile",
+      "home": "Acasă",
+      "search": "Rezultatele căutării",
+      "rentals": "Închirieri",
+      "villas": "Vile",
+      "property-details": "Detaliile proprietății",
+      "agents": "Agenți",
+      "agencies": "Agenții",
+      "business-directory": "Director de afaceri",
+      "blog": "Blog",
+      "guides": "Ghiduri"
+    },
+    "adPlacements": {
+      "sticky-bottom": {
+        "label": "Bară fixă jos",
+        "description": "O bară subțire fixată în partea de jos a ecranului, vizibilă în timpul derulării.",
+        "shape": "Banner lat · 970 × 90"
+      },
+      "sticky-top": {
+        "label": "Bară fixă sus",
+        "description": "O bară subțire fixată chiar în partea de sus a ecranului, mereu vizibilă.",
+        "shape": "Banner lat · 970 × 90"
+      },
+      "header": {
+        "label": "Antet",
+        "description": "Un banner în zona antetului, aproape de începutul conținutului.",
+        "shape": "Banner lat · 970 × 90"
+      },
+      "in-content": {
+        "label": "În conținut",
+        "description": "Un banner mare în conținutul paginii — între secțiuni sau în lista de rezultate."
+      },
+      "sidebar": {
+        "label": "Bară laterală",
+        "description": "Un banner înalt în coloana laterală sau în margini. Pe pagina principală bara din stânga are ordinea 0, iar cea din dreapta 1.",
+        "shape": "Jumătate de pagină · 300 × 600"
+      },
+      "footer": {
+        "label": "Subsol",
+        "description": "Un banner aproape de finalul conținutului, chiar deasupra subsolului."
+      }
+    },
+    "howItWorksContentTypes": {
+      "video": "Tutorial video",
+      "guide": "Ghid pas cu pas",
+      "faq": "Întrebări frecvente",
+      "feature": "Funcție evidențiată"
+    },
+    "howItWorksSubsections": {
+      "getting-started": "Primii pași",
+      "premium-features": "Funcții premium",
+      "agencies": "Pentru agenții",
+      "agents": "Pentru agenți",
+      "buyers": "Pentru cumpărători",
+      "sellers": "Pentru vânzători"
+    },
+    "howItWorksCategories": {
+      "registration": "Înregistrare și autentificare",
+      "subscription": "Abonamente și plăți",
+      "listing-creation": "Crearea anunțurilor",
+      "listing-promotion": "Promovarea anunțurilor",
+      "agency-creation": "Crearea unei agenții",
+      "agency-management": "Gestionarea agenției",
+      "become-agent": "Cum devii agent",
+      "agent-profile": "Profilul agentului",
+      "property-search": "Căutarea proprietăților",
+      "saved-searches": "Căutări salvate și alerte",
+      "messaging": "Mesaje și solicitări",
+      "account-settings": "Setările contului",
+      "general": "General"
+    },
+    "howItWorksIcons": {
+      "user": "Utilizator",
+      "building": "Clădire",
+      "document": "Document",
+      "credit-card": "Card de credit",
+      "check": "Bifă",
+      "search": "Căutare",
+      "home": "Casă",
+      "star": "Stea",
+      "bell": "Clopoțel",
+      "chat": "Chat",
+      "settings": "Setări",
+      "upload": "Încărcare"
+    },
+    "articleCategories": {
+      "guide": "Ghid",
+      "market": "Analiză de piață",
+      "investment": "Investiții",
+      "regulation": "Reglementări",
+      "development": "Dezvoltare",
+      "tourism": "Turism",
+      "lifestyle": "Stil de viață"
+    }
   }
 }

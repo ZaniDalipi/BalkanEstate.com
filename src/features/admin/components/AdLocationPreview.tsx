@@ -188,16 +188,16 @@ const AdLocationPreview: React.FC<Props> = ({ page, placement }) => {
         {/* Explanation */}
         <div className="flex-1 min-w-0 space-y-2 text-sm">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">{route.label}</span>
-            <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-700 text-xs font-medium">{info.label}</span>
+            <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">{t(`admin:lists.adPages.${page}`, route.label)}</span>
+            <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-700 text-xs font-medium">{t(`admin:lists.adPlacements.${placement}.label`, info.label)}</span>
           </div>
-          <p className="text-gray-700">{info.description}</p>
+          <p className="text-gray-700">{t(`admin:lists.adPlacements.${placement}.description`, info.description)}</p>
           <p className="text-gray-500">
             <span className="font-medium text-gray-600">{t('admin:ui.adLocationPreview.showsOn', 'Shows on:')}</span>{' '}
             {page === 'all' ? t('admin:ui.adLocationPreview.everyPageAcrossTheSite', 'every page across the site') : <code className="px-1 py-0.5 rounded bg-gray-100 text-gray-700">{route.path}</code>}
           </p>
           <p className="text-gray-500">
-            <span className="font-medium text-gray-600">{t('admin:ui.adLocationPreview.recommendedImage', 'Recommended image:')}</span> {info.shape}
+            <span className="font-medium text-gray-600">{t('admin:ui.adLocationPreview.recommendedImage', 'Recommended image:')}</span> {t(`admin:lists.adPlacements.${placement}.shape`, info.shape)}
           </p>
         </div>
       </div>

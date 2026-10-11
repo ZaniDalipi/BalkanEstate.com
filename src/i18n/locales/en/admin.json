@@ -1974,5 +1974,104 @@
       "failedToLoadStatistics": "Failed to load statistics",
       "failedToFetch": "Failed to fetch"
     }
+  },
+  "lists": {
+    "adPages": {
+      "all": "All Pages",
+      "home": "Home",
+      "search": "Search Results",
+      "rentals": "Rentals",
+      "villas": "Villas",
+      "property-details": "Property Details",
+      "agents": "Agents",
+      "agencies": "Agencies",
+      "business-directory": "Business Directory",
+      "blog": "Blog",
+      "guides": "Guides"
+    },
+    "adPlacements": {
+      "sticky-bottom": {
+        "label": "Sticky Bottom Bar",
+        "description": "A slim bar pinned to the bottom of the screen that stays visible as the visitor scrolls.",
+        "shape": "Wide banner · 970 × 90"
+      },
+      "sticky-top": {
+        "label": "Sticky Top Bar",
+        "description": "A slim bar pinned to the very top of the screen, always in view.",
+        "shape": "Wide banner · 970 × 90"
+      },
+      "header": {
+        "label": "Header",
+        "description": "A banner in the header area, near the top of the page content.",
+        "shape": "Wide banner · 970 × 90"
+      },
+      "in-content": {
+        "label": "In Content",
+        "description": "A large banner placed inside the page content — between sections, or inside the results feed.",
+        "shape": "Billboard · 970 × 250"
+      },
+      "sidebar": {
+        "label": "Sidebar / Side Rail",
+        "description": "A tall banner in the side column or page margins. On the home page the left rail is order 0 and the right rail is order 1.",
+        "shape": "Half-page · 300 × 600"
+      },
+      "footer": {
+        "label": "Footer",
+        "description": "A banner near the bottom of the page content, just above the footer.",
+        "shape": "Billboard · 970 × 250"
+      }
+    },
+    "howItWorksContentTypes": {
+      "video": "Video Tutorial",
+      "guide": "Step-by-Step Guide",
+      "faq": "FAQ Section",
+      "feature": "Feature Highlight"
+    },
+    "howItWorksSubsections": {
+      "getting-started": "Getting Started",
+      "premium-features": "Premium Features",
+      "agencies": "For Agencies",
+      "agents": "For Agents",
+      "buyers": "For Buyers",
+      "sellers": "For Sellers"
+    },
+    "howItWorksCategories": {
+      "registration": "Registration & Login",
+      "subscription": "Subscriptions & Payments",
+      "listing-creation": "Creating Listings",
+      "listing-promotion": "Promoting Listings",
+      "agency-creation": "Creating an Agency",
+      "agency-management": "Managing Agency",
+      "become-agent": "Becoming an Agent",
+      "agent-profile": "Agent Profile",
+      "property-search": "Searching Properties",
+      "saved-searches": "Saved Searches & Alerts",
+      "messaging": "Messaging & Inquiries",
+      "account-settings": "Account Settings",
+      "general": "General"
+    },
+    "howItWorksIcons": {
+      "user": "User",
+      "building": "Building",
+      "document": "Document",
+      "credit-card": "Credit Card",
+      "check": "Check",
+      "search": "Search",
+      "home": "Home",
+      "star": "Star",
+      "bell": "Bell",
+      "chat": "Chat",
+      "settings": "Settings",
+      "upload": "Upload"
+    },
+    "articleCategories": {
+      "guide": "Guide",
+      "market": "Market Analysis",
+      "investment": "Investment",
+      "regulation": "Regulation",
+      "development": "Development",
+      "tourism": "Tourism",
+      "lifestyle": "Lifestyle"
+    }
   }
 }

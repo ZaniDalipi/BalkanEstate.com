@@ -1965,5 +1965,104 @@
       "failedToLoadStatistics": "Ngarkimi i statistikave dështoi",
       "failedToFetch": "Marrja dështoi"
     }
+  },
+  "lists": {
+    "adPages": {
+      "all": "Të gjitha faqet",
+      "home": "Kryefaqja",
+      "search": "Rezultatet e kërkimit",
+      "rentals": "Qiratë",
+      "villas": "Vilat",
+      "property-details": "Detajet e pronës",
+      "agents": "Agjentët",
+      "agencies": "Agjencitë",
+      "business-directory": "Katalogu i bizneseve",
+      "blog": "Blogu",
+      "guides": "Udhëzuesit"
+    },
+    "adPlacements": {
+      "sticky-bottom": {
+        "label": "Shirit ngjitës poshtë",
+        "description": "Një shirit i hollë i fiksuar në fund të ekranit që mbetet i dukshëm ndërsa vizitori lëviz.",
+        "shape": "Baner i gjerë · 970 × 90"
+      },
+      "sticky-top": {
+        "label": "Shirit ngjitës lart",
+        "description": "Një shirit i hollë i fiksuar në krye të ekranit, gjithmonë i dukshëm.",
+        "shape": "Baner i gjerë · 970 × 90"
+      },
+      "header": {
+        "label": "Koka",
+        "description": "Një baner në zonën e kokës, pranë fillimit të përmbajtjes së faqes.",
+        "shape": "Baner i gjerë · 970 × 90"
+      },
+      "in-content": {
+        "label": "Brenda përmbajtjes",
+        "description": "Një baner i madh brenda përmbajtjes së faqes — midis seksioneve ose brenda listës së rezultateve.",
+        "shape": "Billboard · 970 × 250"
+      },
+      "sidebar": {
+        "label": "Shiriti anësor",
+        "description": "Një baner i gjatë në kolonën anësore ose në skajet e faqes. Në kryefaqe shiriti i majtë është renditja 0 dhe i djathti renditja 1.",
+        "shape": "Gjysmë faqe · 300 × 600"
+      },
+      "footer": {
+        "label": "Fundi i faqes",
+        "description": "Një baner pranë fundit të përmbajtjes, pak mbi fundin e faqes.",
+        "shape": "Billboard · 970 × 250"
+      }
+    },
+    "howItWorksContentTypes": {
+      "video": "Video udhëzues",
+      "guide": "Udhëzues hap pas hapi",
+      "faq": "Pyetje të shpeshta",
+      "feature": "Veçori kryesore"
+    },
+    "howItWorksSubsections": {
+      "getting-started": "Fillimi",
+      "premium-features": "Veçori premium",
+      "agencies": "Për agjencitë",
+      "agents": "Për agjentët",
+      "buyers": "Për blerësit",
+      "sellers": "Për shitësit"
+    },
+    "howItWorksCategories": {
+      "registration": "Regjistrimi dhe hyrja",
+      "subscription": "Abonimet dhe pagesat",
+      "listing-creation": "Krijimi i shpalljeve",
+      "listing-promotion": "Promovimi i shpalljeve",
+      "agency-creation": "Krijimi i një agjencie",
+      "agency-management": "Menaxhimi i agjencisë",
+      "become-agent": "Si të bëheni agjent",
+      "agent-profile": "Profili i agjentit",
+      "property-search": "Kërkimi i pronave",
+      "saved-searches": "Kërkimet e ruajtura dhe njoftimet",
+      "messaging": "Mesazhet dhe kërkesat",
+      "account-settings": "Cilësimet e llogarisë",
+      "general": "Të përgjithshme"
+    },
+    "howItWorksIcons": {
+      "user": "Përdorues",
+      "building": "Ndërtesë",
+      "document": "Dokument",
+      "credit-card": "Kartë krediti",
+      "check": "Kontroll",
+      "search": "Kërkim",
+      "home": "Shtëpi",
+      "star": "Yll",
+      "bell": "Zile",
+      "chat": "Bisedë",
+      "settings": "Cilësime",
+      "upload": "Ngarkim"
+    },
+    "articleCategories": {
+      "guide": "Udhëzues",
+      "market": "Analizë tregu",
+      "investment": "Investim",
+      "regulation": "Rregullore",
+      "development": "Zhvillim",
+      "tourism": "Turizëm",
+      "lifestyle": "Stil jetese"
+    }
   }
 }

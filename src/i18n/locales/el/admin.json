@@ -1965,5 +1965,104 @@
       "failedToLoadStatistics": "Αποτυχία φόρτωσης στατιστικών",
       "failedToFetch": "Αποτυχία λήψης"
     }
+  },
+  "lists": {
+    "adPages": {
+      "all": "Όλες οι σελίδες",
+      "home": "Αρχική",
+      "search": "Αποτελέσματα αναζήτησης",
+      "rentals": "Ενοικιάσεις",
+      "villas": "Βίλες",
+      "property-details": "Στοιχεία ακινήτου",
+      "agents": "Μεσίτες",
+      "agencies": "Πρακτορεία",
+      "business-directory": "Κατάλογος επιχειρήσεων",
+      "blog": "Ιστολόγιο",
+      "guides": "Οδηγοί"
+    },
+    "adPlacements": {
+      "sticky-bottom": {
+        "label": "Σταθερή κάτω μπάρα",
+        "description": "Λεπτή μπάρα στο κάτω μέρος της οθόνης που παραμένει ορατή κατά την κύλιση.",
+        "shape": "Φαρδύ banner · 970 × 90"
+      },
+      "sticky-top": {
+        "label": "Σταθερή πάνω μπάρα",
+        "description": "Λεπτή μπάρα στο πάνω μέρος της οθόνης, πάντα ορατή.",
+        "shape": "Φαρδύ banner · 970 × 90"
+      },
+      "header": {
+        "label": "Κεφαλίδα",
+        "description": "Banner στην κεφαλίδα, κοντά στην αρχή του περιεχομένου.",
+        "shape": "Φαρδύ banner · 970 × 90"
+      },
+      "in-content": {
+        "label": "Μέσα στο περιεχόμενο",
+        "description": "Μεγάλο banner μέσα στο περιεχόμενο — ανάμεσα σε ενότητες ή στη λίστα αποτελεσμάτων.",
+        "shape": "Billboard · 970 × 250"
+      },
+      "sidebar": {
+        "label": "Πλαϊνή στήλη",
+        "description": "Ψηλό banner στην πλαϊνή στήλη ή στα περιθώρια. Στην αρχική η αριστερή στήλη έχει σειρά 0 και η δεξιά 1.",
+        "shape": "Μισή σελίδα · 300 × 600"
+      },
+      "footer": {
+        "label": "Υποσέλιδο",
+        "description": "Banner κοντά στο τέλος του περιεχομένου, ακριβώς πάνω από το υποσέλιδο.",
+        "shape": "Billboard · 970 × 250"
+      }
+    },
+    "howItWorksContentTypes": {
+      "video": "Βίντεο οδηγός",
+      "guide": "Οδηγός βήμα προς βήμα",
+      "faq": "Συχνές ερωτήσεις",
+      "feature": "Κύριο χαρακτηριστικό"
+    },
+    "howItWorksSubsections": {
+      "getting-started": "Ξεκινώντας",
+      "premium-features": "Premium λειτουργίες",
+      "agencies": "Για πρακτορεία",
+      "agents": "Για μεσίτες",
+      "buyers": "Για αγοραστές",
+      "sellers": "Για πωλητές"
+    },
+    "howItWorksCategories": {
+      "registration": "Εγγραφή και σύνδεση",
+      "subscription": "Συνδρομές και πληρωμές",
+      "listing-creation": "Δημιουργία αγγελιών",
+      "listing-promotion": "Προώθηση αγγελιών",
+      "agency-creation": "Δημιουργία πρακτορείου",
+      "agency-management": "Διαχείριση πρακτορείου",
+      "become-agent": "Πώς να γίνετε μεσίτης",
+      "agent-profile": "Προφίλ μεσίτη",
+      "property-search": "Αναζήτηση ακινήτων",
+      "saved-searches": "Αποθηκευμένες αναζητήσεις και ειδοποιήσεις",
+      "messaging": "Μηνύματα και ερωτήματα",
+      "account-settings": "Ρυθμίσεις λογαριασμού",
+      "general": "Γενικά"
+    },
+    "howItWorksIcons": {
+      "user": "Χρήστης",
+      "building": "Κτίριο",
+      "document": "Έγγραφο",
+      "credit-card": "Πιστωτική κάρτα",
+      "check": "Τικ",
+      "search": "Αναζήτηση",
+      "home": "Σπίτι",
+      "star": "Αστέρι",
+      "bell": "Καμπανάκι",
+      "chat": "Συνομιλία",
+      "settings": "Ρυθμίσεις",
+      "upload": "Μεταφόρτωση"
+    },
+    "articleCategories": {
+      "guide": "Οδηγός",
+      "market": "Ανάλυση αγοράς",
+      "investment": "Επένδυση",
+      "regulation": "Νομοθεσία",
+      "development": "Ανάπτυξη",
+      "tourism": "Τουρισμός",
+      "lifestyle": "Τρόπος ζωής"
+    }
   }
 }

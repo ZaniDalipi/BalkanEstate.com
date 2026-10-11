@@ -104,7 +104,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                     }`}
                   >
                     <Icon className="w-6 h-6" />
-                    <span className="text-sm font-medium">{type.label}</span>
+                    <span className="text-sm font-medium">{t(`admin:lists.howItWorksContentTypes.${type.id}`, type.label)}</span>
                   </button>
                 );
               })}
@@ -176,7 +176,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               >
                 {SUBSECTIONS.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.label}
+                    {t(`admin:lists.howItWorksSubsections.${s.id}`, s.label)}
                   </option>
                 ))}
               </select>
@@ -194,7 +194,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.label}
+                    {t(`admin:lists.howItWorksCategories.${c.id}`, c.label)}
                   </option>
                 ))}
               </select>
@@ -393,7 +393,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                         >
                           {ICON_OPTIONS.map((icon) => (
                             <option key={icon.id} value={icon.id}>
-                              {icon.label}
+                              {t(`admin:lists.howItWorksIcons.${icon.id}`, icon.label)}
                             </option>
                           ))}
                         </select>

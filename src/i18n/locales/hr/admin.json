@@ -1957,5 +1957,104 @@
       "failedToLoadStatistics": "Učitavanje statistike nije uspjelo",
       "failedToFetch": "Dohvaćanje nije uspjelo"
     }
+  },
+  "lists": {
+    "adPages": {
+      "all": "Sve stranice",
+      "home": "Početna",
+      "search": "Rezultati pretraživanja",
+      "rentals": "Najam",
+      "villas": "Vile",
+      "property-details": "Detalji nekretnine",
+      "agents": "Agenti",
+      "agencies": "Agencije",
+      "business-directory": "Imenik tvrtki",
+      "blog": "Blog",
+      "guides": "Vodiči"
+    },
+    "adPlacements": {
+      "sticky-bottom": {
+        "label": "Fiksna donja traka",
+        "description": "Tanka traka pričvršćena na dnu zaslona koja ostaje vidljiva dok se posjetitelj pomiče.",
+        "shape": "Široki banner · 970 × 90"
+      },
+      "sticky-top": {
+        "label": "Fiksna gornja traka",
+        "description": "Tanka traka pričvršćena na samom vrhu zaslona, uvijek vidljiva.",
+        "shape": "Široki banner · 970 × 90"
+      },
+      "header": {
+        "label": "Zaglavlje",
+        "description": "Banner u zaglavlju, blizu vrha sadržaja stranice.",
+        "shape": "Široki banner · 970 × 90"
+      },
+      "in-content": {
+        "label": "U sadržaju",
+        "description": "Veliki banner unutar sadržaja — između odjeljaka ili u popisu rezultata.",
+        "shape": "Billboard · 970 × 250"
+      },
+      "sidebar": {
+        "label": "Bočna traka",
+        "description": "Visok banner u bočnom stupcu ili marginama. Na početnoj lijeva traka ima redoslijed 0, a desna 1.",
+        "shape": "Pola stranice · 300 × 600"
+      },
+      "footer": {
+        "label": "Podnožje",
+        "description": "Banner pri dnu sadržaja, odmah iznad podnožja.",
+        "shape": "Billboard · 970 × 250"
+      }
+    },
+    "howItWorksContentTypes": {
+      "video": "Video upute",
+      "guide": "Vodič korak po korak",
+      "faq": "Česta pitanja",
+      "feature": "Istaknuta značajka"
+    },
+    "howItWorksSubsections": {
+      "getting-started": "Početak",
+      "premium-features": "Premium značajke",
+      "agencies": "Za agencije",
+      "agents": "Za agente",
+      "buyers": "Za kupce",
+      "sellers": "Za prodavatelje"
+    },
+    "howItWorksCategories": {
+      "registration": "Registracija i prijava",
+      "subscription": "Pretplate i plaćanja",
+      "listing-creation": "Izrada oglasa",
+      "listing-promotion": "Promocija oglasa",
+      "agency-creation": "Osnivanje agencije",
+      "agency-management": "Upravljanje agencijom",
+      "become-agent": "Postajanje agentom",
+      "agent-profile": "Profil agenta",
+      "property-search": "Pretraživanje nekretnina",
+      "saved-searches": "Spremljena pretraživanja i obavijesti",
+      "messaging": "Poruke i upiti",
+      "account-settings": "Postavke računa",
+      "general": "Općenito"
+    },
+    "howItWorksIcons": {
+      "user": "Korisnik",
+      "building": "Zgrada",
+      "document": "Dokument",
+      "credit-card": "Kreditna kartica",
+      "check": "Kvačica",
+      "search": "Pretraživanje",
+      "home": "Kuća",
+      "star": "Zvijezda",
+      "bell": "Zvonce",
+      "chat": "Razgovor",
+      "settings": "Postavke",
+      "upload": "Prijenos"
+    },
+    "articleCategories": {
+      "guide": "Vodič",
+      "market": "Analiza tržišta",
+      "investment": "Investicije",
+      "regulation": "Propisi",
+      "development": "Gradnja",
+      "tourism": "Turizam",
+      "lifestyle": "Životni stil"
+    }
   }
 }

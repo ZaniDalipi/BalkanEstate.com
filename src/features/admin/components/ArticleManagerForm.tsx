@@ -676,7 +676,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                 {selectedCountryObj && selectedCategory && <span>·</span>}
                 {selectedCategory && (
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${selectedCategory.color}`}>
-                    {selectedCategory.label}
+                    {t(`admin:lists.articleCategories.${selectedCategory.value}`, selectedCategory.label)}
                   </span>
                 )}
               </div>
@@ -796,7 +796,7 @@ const ArticleManagerForm: React.FC<ArticleManagerFormProps> = ({ articleId, onCl
                         : 'bg-white border border-neutral-200 text-slate-600 hover:border-neutral-300'
                     }`}
                   >
-                    {cat.label}
+                    {t(`admin:lists.articleCategories.${cat.value}`, cat.label)}
                   </button>
                 ))}
               </div>
