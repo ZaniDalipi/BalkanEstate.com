@@ -124,5 +124,6 @@
   "inboxWithUnread": "Poruke ({{count}} nepročitanih)",
   "goToAccount": "Idi na moj nalog",
   "userAvatar": "Avatar korisnika",
-  "loginOrRegister": "Prijavite se ili registrujte nalog"
+  "loginOrRegister": "Prijavite se ili registrujte nalog",
+  "guides": "Vodiči za kupovinu"
 }

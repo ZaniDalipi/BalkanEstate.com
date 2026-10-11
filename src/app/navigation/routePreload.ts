@@ -48,6 +48,7 @@ const viewImporters: Partial<Record<AppView, () => Promise<unknown>>> = {
   'business-directory': () => import('@/features/business-directory/components/BusinessDirectoryPage'),
   'how-it-works': () => import('@/components/shared/HowItWorksPage'),
   blog: () => import('@/features/blog/components/BlogPage'),
+  guides: () => import('@/features/guides/components/BuyingGuidesPage'),
   admin: () => import('@/features/admin/components/AdminDashboard'),
   valuation: () => import('@/features/valuation/components/ValuationPage'),
   'mortgage-calculator': () => import('@/features/calculators/components/MortgageCalculatorPage'),

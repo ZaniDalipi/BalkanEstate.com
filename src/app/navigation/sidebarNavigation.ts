@@ -45,6 +45,7 @@ const VIEW_ORDER: AppView[] = [
   'business-directory',
   'how-it-works',
   'blog',
+  'guides',
   'admin',
   'valuation',
   'mortgage-calculator',

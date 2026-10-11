@@ -650,6 +650,28 @@ export function validateSearchQuery(query: string): { isValid: boolean; sanitize
   return { isValid: true, sanitized };
 }
 
+/** Longest slug accepted from a URL segment. */
+export const MAX_SLUG_LENGTH = 80;
+
+/**
+ * Validate a URL slug read from the address bar (`/guides/:slug`): lowercase
+ * letters, digits and single hyphens between them. Anything else — an encoded
+ * `<script>`, a path traversal, a 2 KB string — is rejected before it is used
+ * to look anything up or is echoed back on the page.
+ */
+export function validateSlug(slug: unknown): ValidationResult {
+  if (typeof slug !== 'string' || slug.trim() === '') {
+    return { isValid: false, error: 'Slug is required' };
+  }
+  if (slug.length > MAX_SLUG_LENGTH) {
+    return { isValid: false, error: `Slug must be at most ${MAX_SLUG_LENGTH} characters` };
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    return { isValid: false, error: 'Slug may only contain lowercase letters, digits and hyphens' };
+  }
+  return { isValid: true };
+}
+
 /**
  * Validate property area (square meters)
  */
@@ -953,6 +975,7 @@ export default {
   validateName,
   sanitizeText,
   validateSearchQuery,
+  validateSlug,
   validateArea,
   validateYearBuilt,
   validateCompletionYear,

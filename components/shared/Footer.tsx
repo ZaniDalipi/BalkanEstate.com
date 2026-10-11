@@ -19,7 +19,8 @@ import {
     UserCircleIcon,
     SparklesIcon,
     GlobeAltIcon,
-    ChartBarIcon
+    ChartBarIcon,
+    AcademicCapIcon
 } from '../../constants';
 import FooterCityscape from './FooterCityscape';
 import { navigate } from '@/src/app/router/navigation';
@@ -71,6 +72,7 @@ const Footer: React.FC<FooterProps> = ({ className = '', contained = false }) =>
         { icon: ChartBarIcon, labelKey: 'links.valuation', view: 'valuation' },
         { icon: BuildingLibraryIcon, labelKey: 'links.browseAgencies', view: 'agencies' },
         { icon: SparklesIcon, labelKey: 'links.blog', view: 'blog' },
+        { icon: AcademicCapIcon, labelKey: 'links.guides', view: 'guides' },
     ];
 
     const sellerLinks = [

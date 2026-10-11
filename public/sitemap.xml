@@ -1062,6 +1062,166 @@
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/montenegro</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/montenegro"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/montenegro"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/albania</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/albania"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/albania"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/serbia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/serbia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/serbia"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/north-macedonia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/north-macedonia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/north-macedonia"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/kosovo</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/kosovo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/kosovo"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/croatia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/croatia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/croatia"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/bosnia</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/bosnia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/bosnia"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/bulgaria</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/bulgaria"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/bulgaria"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/romania</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/romania"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/romania"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balkanestateai.com/guides/greece</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://balkanestateai.com/en/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="sq" href="https://balkanestateai.com/sq/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://balkanestateai.com/sr/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://balkanestateai.com/bg/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://balkanestateai.com/hr/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="bs" href="https://balkanestateai.com/bs/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="mk" href="https://balkanestateai.com/mk/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="me" href="https://balkanestateai.com/me/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="ro" href="https://balkanestateai.com/ro/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://balkanestateai.com/el/guides/greece"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balkanestateai.com/guides/greece"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
   <!-- ═══════════════════════════════════════════════════════════════
        TOOLS & RESOURCES

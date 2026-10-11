@@ -77,6 +77,7 @@ export const paths = {
   blog: () => '/blog',
   blogArticle: (slug: string) => `/blog/${seg(slug)}`,
   guides: () => '/guides',
+  guide: (slug: string) => `/guides/${seg(slug)}`,
   valuation: () => '/valuation',
   mortgageCalculator: () => '/mortgage-calculator',
   pricing: () => '/subscribe',
