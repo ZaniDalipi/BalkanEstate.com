@@ -350,9 +350,17 @@ const PAGES = [
 
 // ─── Write files ─────────────────────────────────────────────────────────────
 
+/**
+ * `dist/en/search.html`, not `dist/en/search/index.html`: Cloudflare Pages
+ * serves a directory index only at the trailing-slash URL and 308-redirects
+ * `/en/search` to `/en/search/`, which would make every canonical (and every
+ * sitemap entry) point at a redirect. A `.html` file is served at the URL
+ * without the slash. The language home is `dist/en.html` for the same reason.
+ */
 function outputPathFor(lang, path) {
-  const segments = path === '/' ? [] : path.replace(/^\//, '').split('/');
-  return join(DIST_DIR, ...(lang ? [lang] : []), ...segments, 'index.html');
+  const segments = [...(lang ? [lang] : []), ...(path === '/' ? [] : path.replace(/^\//, '').split('/'))];
+  const last = segments.pop();
+  return join(DIST_DIR, ...segments, `${last}.html`);
 }
 
 function write(file, html) {
