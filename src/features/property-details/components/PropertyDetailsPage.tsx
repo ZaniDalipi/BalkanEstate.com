@@ -1154,7 +1154,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         </AppLink>
       </p>
 
-      {showAds && <AdSlot page="property-details" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" />}
+      {showAds && <AdSlot page="property-details" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" showPlaceholder />}
 
       {/* 3D Map — full-bleed full-width band, rendered outside the main container so it
           spans the full screen width, right after the description to keep readers engaged.

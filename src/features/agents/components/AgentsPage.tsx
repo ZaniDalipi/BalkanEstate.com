@@ -578,7 +578,7 @@ const AgentsPage: React.FC = () => {
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           {/* Ad — horizontal leaderboard above the agent filters/list */}
-          <AdSlot page="agents" placement="in-content" className="mb-6" />
+          <AdSlot page="agents" placement="in-content" className="mb-6" showPlaceholder />
 
           {/* Filters and Sort Section */}
           <div className="mb-6">

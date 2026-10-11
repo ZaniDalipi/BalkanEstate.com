@@ -103,7 +103,7 @@ development, `X-Frame-Options`/security headers, chunk-load recovery middleware 
 | **Privacy policy**: "Advertising and Google AdSense" section with the required disclosures and opt-out links (My Ad Center, aboutads.info, youronlinechoices.eu, Google partner-sites page); Google AdSense, Microsoft Clarity and Sentry listed as processors. **Cookie policy**: Google ad cookies listed. Dates updated. | `PrivacyPolicyPage.tsx`, `CookiePolicyPage.tsx` |
 | Footer and legal footer links are real `<a href>`s (new `AppLink`), with About, Buying Guides, Mortgage Calculator, Contact and Advertise; country chips link to the country guides. | `Footer.tsx`, `LegalFooter.tsx`, `src/app/router/AppLink.tsx` |
 | "Report it to us" link on every listing → contact form pre-filled with the listing URL. | `PropertyDetailsPage.tsx`, `ContactUsPage.tsx` |
-| Ad slots: no "Your Ad Here" outside admin preview; never AdSense over listing photos (overlay only for booked banners, close button only then); no ads on imported listings; no ads on legal, contact, about, pricing, saved pages; no sticky bar over map/search pages. | `Slot.tsx`, `PropertyGallery.tsx`, `App.tsx` |
+| Ad slots: "Your Ad Here" (linking to the advertising contact form) only in **one** slot per page — the main in-content banner on home, listings, guides, blog, agents and the business directory — so advertisers can contact you without pages filling up with empty boxes; secondary slots (side rails, second banners, listing sidebar) collapse when unbooked; never AdSense over listing photos (overlay only for booked banners, close button only then); no ads on imported listings; no ads on legal, contact, about, pricing, saved pages; no sticky bar over map/search pages. | `Slot.tsx`, `PropertyGallery.tsx`, `App.tsx` |
 | City data: removed hard-coded statistics padding; visible notice that growth/demand/yield/investment figures are AI estimates; SEO snippets quote only sourced figures; backend fallback no longer randomises. | `CityRecommendations.tsx`, `CityDashboard.tsx`, `cityMarketDataService.ts`; removed `staticCities.ts` |
 | Listing quality gate: description ≥ 50 characters (in addition to existing title, price, photo and map-location requirements). | `ListingFormHelpers.tsx` |
 | Incomplete listings: meta descriptions and card alt text omit missing facts instead of printing `0`/`undefined`. | `PropertyDetailsPage.tsx`, `PropertyCard.tsx` |
@@ -221,7 +221,7 @@ enough traffic).
 | Who runs the site, listing verification, how to report | **Pass** | `/about`, report link on listings |
 | No ads on pages without publisher content | **Pass** | `App.tsx` `adPage` |
 | No ads overlaying content or interfering with map/search | **Pass** | gallery overlay, sticky bar changes |
-| No placeholder ad boxes | **Pass** | `Slot.tsx` |
+| Placeholder ad boxes limited to one per page | **Needs review** | `Slot.tsx` — a self-promotional box, not a Google ad; if a reviewer objects, remove `showPlaceholder` from the pages during the review |
 | Certified CMP for EEA/UK | **Fail** | E1 |
 | Authentic information (no fabricated statistics) | **Needs review** | E2 — labelled, not removed |
 | Original content (not copied from other sites) | **Needs review** | E3 |

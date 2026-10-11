@@ -245,7 +245,7 @@ const HomePage: React.FC<HomePageProps> = ({ onToggleSidebar }) => {
       {/* Ad — horizontal leaderboard between the hero's stats strip and the
           showcase, on a row of its own so it separates the two sections
           rather than sitting across either. */}
-      <AdSlot page="home" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6" />
+      <AdSlot page="home" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6" showPlaceholder />
 
       <AppShowcaseSection onNavigate={handleNavigate} />
 

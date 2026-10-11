@@ -139,7 +139,7 @@ const BlogPage: React.FC = () => {
       </section>
 
       {/* Ad — horizontal leaderboard below the hero */}
-      <AdSlot page="blog" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-6" />
+      <AdSlot page="blog" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-6" showPlaceholder />
 
       {/* Active filter chips */}
       {(selectedCategory || selectedCountry || selectedTag || searchQuery) && (

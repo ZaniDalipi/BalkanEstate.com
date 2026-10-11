@@ -92,7 +92,7 @@ const GuidesIndexPage: React.FC = () => {
         <GuidesDisclaimer />
       </div>
 
-      <AdSlot page="guides" placement="in-content" className="max-w-6xl mx-auto px-4 sm:px-6 my-6" hidePlaceholder />
+      <AdSlot page="guides" placement="in-content" className="max-w-6xl mx-auto px-4 sm:px-6 my-6" showPlaceholder />
 
       <Footer />
     </div>
@@ -167,7 +167,7 @@ const CountryGuidePage: React.FC<{ guide: CountryGuide }> = ({ guide }) => {
         <GuidesDisclaimer />
       </div>
 
-      <AdSlot page="guides" placement="in-content" className="max-w-4xl mx-auto px-4 sm:px-6 my-6" hidePlaceholder />
+      <AdSlot page="guides" placement="in-content" className="max-w-4xl mx-auto px-4 sm:px-6 my-6" showPlaceholder />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-12">
         <h2 className="text-lg font-semibold text-neutral-900 mb-3">

@@ -577,7 +577,7 @@ const BusinessDirectoryPage: React.FC<BusinessDirectoryPageProps> = ({ selectedL
       )}
 
       {/* Ad — horizontal leaderboard between the hero/stats and the listings */}
-      <AdSlot page="business-directory" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" />
+      <AdSlot page="business-directory" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" showPlaceholder />
 
       {/* === MAIN CONTENT === */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

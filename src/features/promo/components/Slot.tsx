@@ -39,9 +39,15 @@ interface AdSlotProps {
   /** Extra wrapper style. */
   style?: React.CSSProperties;
   /** When there's no booked banner, render nothing instead of the
-   *  "Your Ad Here" placeholder even in admin preview (network fill still
-   *  applies). Outside preview the placeholder is never shown. */
+   *  "Your Ad Here" placeholder, even in admin preview (network fill still
+   *  applies). */
   hidePlaceholder?: boolean;
+  /** Show the "Your Ad Here" placeholder to visitors when nothing is booked.
+   *  Off by default: give it to ONE slot per page (the main in-content
+   *  banner), so advertisers can find and contact us without the page
+   *  turning into a row of empty ad boxes — which is what reviewers read
+   *  as "low value content". Other slots show it only in admin preview. */
+  showPlaceholder?: boolean;
   /** Allow AdSense to fill the slot when nothing is booked (default: true).
    *  Turn off for slots that sit over content — AdSense units must not
    *  overlay or obscure the publisher's content, e.g. listing photos. */
@@ -67,6 +73,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
   className,
   style,
   hidePlaceholder = false,
+  showPlaceholder = false,
   allowNetworkFill = true,
   dismiss,
 }) => {
@@ -176,14 +183,12 @@ const AdSlot: React.FC<AdSlotProps> = ({
     );
   }
 
-  // Nothing booked and nothing from the network: collapse. Public pages never
-  // show an empty "Your Ad Here" box — a page of placeholder ad space reads as
-  // a page with little content of its own, which is exactly what AdSense's
-  // "low value content" review flags. Advertisers find the offer through the
-  // "Advertise with us" link in the footer instead.
-  if (!banner && (hidePlaceholder || !preview.active)) return null;
+  // Nothing booked and nothing from the network: collapse, unless this is the
+  // page's one public placeholder slot (or admin preview is showing where the
+  // unbooked slots sit).
+  if (!banner && (hidePlaceholder || (!preview.active && !showPlaceholder))) return null;
 
-  // Admin preview: show where the unbooked slot sits, sized to the real unit.
+  // "Your Ad Here" — links to the contact form as an advertising lead.
   if (!banner) {
     return (
       <div ref={wrapperRef} className={className} style={{ ...style, ...previewWrap }} role="complementary" aria-label={t('ads.advertisement', 'Advertisement')}>
