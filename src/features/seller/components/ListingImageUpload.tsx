@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FloorplanSpot } from '@/types';
 import FloorPlanPhotoPlacer from './FloorPlanPhotoPlacer';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { XMarkIcon } from '@/constants';
 import { ImageData, FloorPlanDraft, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
 
@@ -127,7 +127,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-3">
                         {floorplans.map((floor, index) => (
                             <div key={floor.previewUrl} className="relative rounded-xl border border-gray-200 bg-white overflow-hidden">
-                                <img src={optimizeCloudinaryUrl(floor.previewUrl, { width: 400, quality: 'auto' }) || floor.previewUrl} alt="" className="w-full h-28 object-contain bg-gray-50" />
+                                <img src={optimizeImageUrl(floor.previewUrl, { width: 400, quality: 'auto' }) || floor.previewUrl} alt="" className="w-full h-28 object-contain bg-gray-50" />
                                 <button
                                     type="button"
                                     aria-label={t('seller:createListing.floors.remove', 'Remove floor plan')}

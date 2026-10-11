@@ -18,14 +18,14 @@ Backend API server for the Balkan Estate real estate application built with Node
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (jsonwebtoken) + bcrypt
-- **File Storage**: Cloudinary
+- **File Storage**: Cloudflare R2 (see docs/MEDIA_STORAGE.md)
 - **Security**: Helmet, CORS
 
 ## Prerequisites
 
 - Node.js (v18 or higher)
 - MongoDB (v6 or higher)
-- Cloudinary account (for image uploads)
+- Cloudflare R2 buckets (for image uploads)
 
 ## Installation
 
@@ -56,10 +56,13 @@ Backend API server for the Balkan Estate real estate application built with Node
    JWT_SECRET=your-super-secret-jwt-key-change-in-production
    JWT_EXPIRES_IN=7d
 
-   # Cloudinary (for image uploads)
-   CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key
-   CLOUDINARY_API_SECRET=your-api-secret
+   # Cloudflare R2 (for image uploads) — see docs/MEDIA_STORAGE.md
+   R2_ACCOUNT_ID=your-account-id
+   R2_ACCESS_KEY_ID=your-access-key-id
+   R2_SECRET_ACCESS_KEY=your-secret-access-key
+   R2_BUCKET=balkanestate-media-dev
+   R2_PRIVATE_BUCKET=balkanestate-media-dev-private
+   R2_PUBLIC_URL=https://pub-xxxx.r2.dev
 
    # Frontend URL (for CORS)
    FRONTEND_URL=http://localhost:5173
@@ -98,16 +101,11 @@ Backend API server for the Balkan Estate real estate application built with Node
    MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/balkan-estate?retryWrites=true&w=majority
    ```
 
-## Cloudinary Setup
+## Image Storage (Cloudflare R2)
 
-1. Create free account at [cloudinary.com](https://cloudinary.com)
-2. Get credentials from Dashboard
-3. Update `.env` with your credentials:
-   ```env
-   CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key
-   CLOUDINARY_API_SECRET=your-api-secret
-   ```
+Create the buckets and an API token, then set the `R2_*` variables above —
+step by step in [docs/MEDIA_STORAGE.md](../docs/MEDIA_STORAGE.md). The server
+logs `Image storage: R2 (…)` at startup when they're picked up.
 
 ## Running the Server
 

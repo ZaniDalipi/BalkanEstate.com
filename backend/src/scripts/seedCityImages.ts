@@ -2,11 +2,10 @@
  * seedCityImages.ts
  *
  * Fetches a representative image for each of the 89 featured cities from
- * Wikipedia / Wikimedia Commons and stores it where getCityImageUrl
- * (config/cloudinaryConfig.ts) looks for it:
+ * Wikipedia / Wikimedia Commons and stores it in R2 where getCityImageUrl
+ * (config/mediaConfig.ts) looks for it:
  *
- *   R2 (when R2_* is set):  cities/convention/city-{country}-{city}/  (all sizes, + MediaAsset)
- *   Cloudinary otherwise:   public id city-{country}-{city}
+ *   cities/convention/city-{country}-{city}/   (all sizes, + a MediaAsset record)
  *
  * Usage:
  *   npx ts-node backend/src/scripts/seedCityImages.ts            # skip existing
@@ -14,14 +13,10 @@
  *   npx ts-node backend/src/scripts/seedCityImages.ts Athens,Greece  # single city
  */
 
-import 'dotenv/config';
-import path from 'path';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+import '../config/loadEnv';
 
 import mongoose from 'mongoose';
 import sharp from 'sharp';
-import cloudinary from '../config/cloudinary';
 import axios from 'axios';
 import { isR2Enabled } from '../config/r2';
 import { CITY_CONVENTION_FOLDER } from '../config/mediaVariants';
@@ -37,7 +32,7 @@ function normalizeName(s: string): string {
   return s.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
 
-function publicId(city: string, country: string): string {
+export function publicId(city: string, country: string): string {
   return `city-${normalizeName(country)}-${normalizeName(city)}`;
 }
 
@@ -48,7 +43,7 @@ const HTTP = axios.create({
 
 // ── All 89 featured cities ────────────────────────────────────────────────────
 
-const CITIES: Array<{ city: string; country: string; wikiAlt?: string }> = [
+export const CITIES: Array<{ city: string; country: string; wikiAlt?: string }> = [
   // Kosovo
   { city: 'Prishtina', country: 'Kosovo', wikiAlt: 'Pristina' },
   { city: 'Prizren', country: 'Kosovo' },
@@ -198,23 +193,17 @@ async function fetchCommonsImageUrl(city: string, country: string): Promise<stri
   return null;
 }
 
-// ── Storage operations (R2, or Cloudinary until R2 is configured) ─────────────
+// ── Storage ───────────────────────────────────────────────────────────────────
 
 /** The R2 key the frontend builds for a convention city photo. */
 export const conventionKey = (pid: string): string => `${CITY_CONVENTION_FOLDER}/${pid}`;
 
-/** Same frame Cloudinary's `lfill` gave: 1200×800, cropped to the interesting part, never enlarged. */
+/** 1200×800, cropped toward the interesting part, never enlarged. */
 const FRAME_WIDTH = 1200;
 const FRAME_HEIGHT = 800;
 
 async function imageExists(pid: string): Promise<boolean> {
-  if (isR2Enabled()) return Boolean(await MediaAsset.exists({ key: conventionKey(pid) }));
-  try {
-    await cloudinary.api.resource(pid);
-    return true;
-  } catch {
-    return false;
-  }
+  return Boolean(await MediaAsset.exists({ key: conventionKey(pid) }));
 }
 
 async function storeInR2(imageUrl: string, pid: string): Promise<boolean> {
@@ -241,27 +230,11 @@ async function storeInR2(imageUrl: string, pid: string): Promise<boolean> {
 }
 
 async function uploadFromUrl(imageUrl: string, pid: string): Promise<boolean> {
-  if (isR2Enabled()) return storeInR2(imageUrl, pid);
-  try {
-    await cloudinary.uploader.upload(imageUrl, {
-      public_id: pid,
-      overwrite: true,
-      resource_type: 'image',
-      transformation: [
-        // `lfill` ("limit fill"): crops to the 1200x800 frame like `fill`,
-        // but never enlarges past the source's own size. Most Commons
-        // originals are well above this, so it rarely engages — it exists for
-        // the smaller-town photos where a plain `fill` would upscale and blur.
-        { width: 1200, height: 800, crop: 'lfill', gravity: 'auto' },
-        { quality: 'auto:good', fetch_format: 'auto' },
-      ],
-    });
-    return true;
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error(`  ✗ Cloudinary upload failed: ${msg}`);
+  if (!isR2Enabled()) {
+    console.error('  ✗ R2 is not configured (R2_* in backend/.env)');
     return false;
   }
+  return storeInR2(imageUrl, pid);
 }
 
 // ── Main seed function ────────────────────────────────────────────────────────
@@ -335,16 +308,15 @@ if (require.main === module) {
 
   console.log(`\nSeed city images — ${force ? 'force mode' : 'skip existing'}${only ? ` — only: ${only}` : ''}\n`);
 
-  // R2 records each photo in MediaAsset, so the CLI needs the database too.
-  const connect = isR2Enabled()
-    ? (() => {
-        if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI is not set (needed to record R2 photos)');
-        return mongoose.connect(process.env.MONGODB_URI);
-      })()
-    : Promise.resolve();
+  // Each photo is recorded in MediaAsset, so the CLI needs the database too.
+  const connect = (async () => {
+    if (!isR2Enabled()) throw new Error('R2 is not configured (R2_* in backend/.env)');
+    if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI is not set');
+    await mongoose.connect(process.env.MONGODB_URI);
+  })();
 
   connect.then(() => seedCityImages(force, only)).then(async ({ ok, skipped, failed }) => {
-    console.log(`\n✅  Done: ${ok} uploaded  ${skipped} skipped  ${failed} failed (${isR2Enabled() ? 'R2' : 'Cloudinary'})`);
+    console.log(`\n✅  Done: ${ok} uploaded  ${skipped} skipped  ${failed} failed `);
     await mongoose.disconnect();
     process.exit(failed > 0 ? 1 : 0);
   }).catch(err => {

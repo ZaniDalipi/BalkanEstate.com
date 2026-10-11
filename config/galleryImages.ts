@@ -24,16 +24,14 @@
  */
 
 import {
-  optimizeCloudinaryUrl,
-  cloudinarySrcSet,
+  optimizeImageUrl,
+  imageSrcSet,
   getPropertyImagePlaceholder,
   buildImageProxyUrl,
   shouldProxyImage,
-  snapCloudinaryWidth,
-} from './cloudinaryConfig';
-
-export const isCloudinaryUrl = (url: string | undefined): url is string =>
-  typeof url === 'string' && url.includes('res.cloudinary.com');
+  snapImageWidth,
+  isMediaCdnUrl,
+} from './mediaConfig';
 
 /**
  * Candidate widths shared by the inline gallery and the fullscreen viewer.
@@ -43,8 +41,7 @@ export const isCloudinaryUrl = (url: string | undefined): url is string =>
  * bytes the gallery already downloaded.
  *
  * It stops at 1920 because that is the stored master's max edge: a wider
- * candidate only upscales on Cloudinary and bills more bandwidth for no extra
- * detail. Each entry is a CLOUDINARY_WIDTH_BUCKETS width, so these are the
+ * candidate would only be the same file again. Each entry is a IMAGE_WIDTH_BUCKETS width, so these are the
  * same derivatives the rest of the app requests.
  */
 export const GALLERY_WIDTHS = [480, 800, 1280, 1920];
@@ -71,7 +68,7 @@ export const GALLERY_SIZES = '(max-width: 640px) 100vw, 115vw';
  *
  * `auto:best` holds a higher floor on flat gradients (sky, white facades) but
  * ships noticeably heavier files, and gallery photos are the bulk of our
- * Cloudinary bandwidth. `auto:good` keeps the per-image analysis at a cost
+ * bandwidth. `auto:good` keeps the per-image analysis at a cost
  * that fits the free plan; revisit if ringing becomes visible.
  */
 export const GALLERY_QUALITY = 'auto:good' as const;
@@ -81,12 +78,12 @@ export const VIEWER_SIZES = '100vw';
 
 export interface ImageSources {
   src: string;
-  /** Empty for non-Cloudinary URLs, which are served through the backend proxy. */
+  /** Empty for other URLs, which are served through the backend proxy. */
   srcSet: string;
   sizes: string;
   /** Tiny blurred stand-in, or '' when the URL cannot produce one. */
   placeholder: string;
-  /** `'anonymous'` for Cloudinary, otherwise undefined — must match on both paths. */
+  /** `'anonymous'` for our media CDN, otherwise undefined — must match on both paths. */
   crossOrigin?: 'anonymous';
 }
 
@@ -94,7 +91,7 @@ export interface ImageSources {
  * Describes one photo once, for both rendering and warming.
  *
  * `fallbackWidth` is the width baked into `src`; it is only used by browsers
- * that ignore `srcSet` and by non-Cloudinary URLs.
+ * that ignore `srcSet` and by URLs that aren't on our media CDN.
  */
 export const getGallerySources = (
   url: string | undefined,
@@ -104,13 +101,13 @@ export const getGallerySources = (
 
   if (!url) return { src: '', srcSet: '', sizes, placeholder: '' };
 
-  if (!isCloudinaryUrl(url)) {
+  if (!isMediaCdnUrl(url)) {
     // External URLs go through the backend proxy, which resizes and caches
-    // each width on our server (no Cloudinary credits).
+    // each width on our server.
     if (!shouldProxyImage(url)) return { src: url, srcSet: '', sizes, placeholder: '' };
     const seen = new Set<number>();
     const srcSet = widths
-      .map(snapCloudinaryWidth)
+      .map(snapImageWidth)
       .filter((w) => (seen.has(w) ? false : (seen.add(w), true)))
       .map((w) => `${buildImageProxyUrl(url, w)} ${w}w`)
       .join(', ');
@@ -118,8 +115,8 @@ export const getGallerySources = (
   }
 
   return {
-    src: optimizeCloudinaryUrl(url, { width: fallbackWidth, quality: GALLERY_QUALITY }),
-    srcSet: cloudinarySrcSet(url, widths, { quality: GALLERY_QUALITY }),
+    src: optimizeImageUrl(url, { width: fallbackWidth, quality: GALLERY_QUALITY }),
+    srcSet: imageSrcSet(url, widths, { quality: GALLERY_QUALITY }),
     sizes,
     placeholder: getPropertyImagePlaceholder(url),
     crossOrigin: 'anonymous',

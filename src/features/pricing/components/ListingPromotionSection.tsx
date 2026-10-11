@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { Animated } from '@/src/components/ui/Animations';
 import { CheckIcon, SparklesIcon } from '@/constants';
@@ -149,7 +149,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
                     }`}
                   >
                     <img
-                      src={optimizeCloudinaryUrl(listing.imageUrl, { width: 128 }) || listing.imageUrl}
+                      src={optimizeImageUrl(listing.imageUrl, { width: 128 }) || listing.imageUrl}
                       alt={listing.address}
                       loading="lazy"
                       decoding="async"

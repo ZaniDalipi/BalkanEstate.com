@@ -10,8 +10,7 @@ import { S3Client } from '@aws-sdk/client-s3';
  *  - R2_PRIVATE_BUCKET  never public. Licences and credentials, read only
  *                       through short-lived presigned URLs.
  *
- * While these are unset the app keeps uploading to Cloudinary, so the switch
- * is a config change, not a deploy.
+ * Without them uploads are refused (production refuses to start).
  */
 
 export interface R2Config {
@@ -71,10 +70,6 @@ export const getR2Client = (): S3Client => {
   return cachedClient;
 };
 
-/** True while Cloudinary credentials are still set (legacy assets, migration). */
-export const isCloudinaryConfigured = (): boolean =>
-  Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
-
 /** Test hook: forget cached settings after changing process.env. */
 export const resetR2ConfigForTests = (): void => {
   cachedConfig = undefined;
@@ -91,7 +86,5 @@ export const missingR2Vars = (env: NodeJS.ProcessEnv = process.env): string[] =>
 export const describeMediaStorage = (): string => {
   const config = getR2Config();
   if (config) return `R2 (bucket ${config.publicBucket}, served from ${config.publicUrl})`;
-  const missing = missingR2Vars();
-  if (isCloudinaryConfigured()) return `Cloudinary (R2 not configured — missing ${missing.join(', ')})`;
-  return `NONE — uploads will fail. Set ${missing.join(', ')} (or CLOUDINARY_*)`;
+  return `NONE — uploads will fail. Set ${missingR2Vars().join(', ')} in backend/.env`;
 };

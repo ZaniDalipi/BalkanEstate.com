@@ -29,7 +29,7 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/src/features/promo/components/Slot', () => ({ default: () => null }));
 
-const photo = (n: number) => `https://res.cloudinary.com/dh8tbq8wy/image/upload/v1700000000/listing/p${n}.jpg`;
+const photo = (n: number) => `https://media.test/listing/p${n}/original.jpg`;
 
 const baseProperty = {
   id: 'p1',

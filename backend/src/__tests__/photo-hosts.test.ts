@@ -10,17 +10,19 @@
 
 // No collection is touched here — see `usesDatabase` in setup.ts.
 process.env.SKIP_TEST_DB = 'true';
+// The allowlist is built when the module loads, from the R2 media domain.
+process.env.R2_PUBLIC_URL = 'https://media.example.com';
 
 import {
   ALLOWED_PHOTO_HOSTS,
-  CLOUDINARY_IMAGE_HOST,
+  mediaImageHost,
   isAllowedPhotoUrl,
   allowedPhotoHostsHint,
 } from '../config/imageHosts';
 
 describe('isAllowedPhotoUrl', () => {
   it('accepts our own uploads', () => {
-    expect(isAllowedPhotoUrl('https://res.cloudinary.com/demo/image/upload/v1/city.jpg')).toBe(true);
+    expect(isAllowedPhotoUrl('https://media.example.com/cities/albania/tirana/p1/original.jpg')).toBe(true);
   });
 
   it('accepts Wikimedia, where the automatic photo chain already ends', () => {
@@ -34,16 +36,16 @@ describe('isAllowedPhotoUrl', () => {
   it('matches the host exactly rather than as a suffix', () => {
     // A suffix match would accept this: it ends with an allowed host without
     // being one.
-    expect(isAllowedPhotoUrl('https://res.cloudinary.com.attacker.example/x.jpg')).toBe(false);
-    expect(isAllowedPhotoUrl('https://notres.cloudinary.com/x.jpg')).toBe(false);
+    expect(isAllowedPhotoUrl('https://media.example.com.attacker.example/x.jpg')).toBe(false);
+    expect(isAllowedPhotoUrl('https://notmedia.example.com/x.jpg')).toBe(false);
   });
 
   it('is case-insensitive on the host, as DNS is', () => {
-    expect(isAllowedPhotoUrl('https://RES.CLOUDINARY.COM/demo/image/upload/x.jpg')).toBe(true);
+    expect(isAllowedPhotoUrl('https://MEDIA.EXAMPLE.COM/p1/original.jpg')).toBe(true);
   });
 
   it('requires https', () => {
-    expect(isAllowedPhotoUrl('http://res.cloudinary.com/demo/image/upload/x.jpg')).toBe(false);
+    expect(isAllowedPhotoUrl('http://media.example.com/p1/original.jpg')).toBe(false);
   });
 
   it('refuses a scheme that is not a photo at all', () => {
@@ -59,8 +61,9 @@ describe('isAllowedPhotoUrl', () => {
 });
 
 describe('the allowlist itself', () => {
-  it('names Cloudinary, so an upload through the app always passes', () => {
-    expect(ALLOWED_PHOTO_HOSTS).toContain(CLOUDINARY_IMAGE_HOST);
+  it('names the R2 media domain, so an upload through the app always passes', () => {
+    expect(ALLOWED_PHOTO_HOSTS).toContain('media.example.com');
+    expect(mediaImageHost()).toBe('media.example.com');
   });
 
   it('lists bare hostnames — the CSP prefixes the scheme itself', () => {
@@ -71,6 +74,6 @@ describe('the allowlist itself', () => {
   });
 
   it('renders a hint an admin can act on', () => {
-    expect(allowedPhotoHostsHint()).toContain(CLOUDINARY_IMAGE_HOST);
+    expect(allowedPhotoHostsHint()).toContain('media.example.com');
   });
 });

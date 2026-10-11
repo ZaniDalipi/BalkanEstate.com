@@ -10,7 +10,7 @@ import { attributeEntries, statsForType, type TypeAttribute } from '../../shared
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '../../shared/property/attributeDisplay';
 import { openExternalUrl } from '../../shared/utils/pwa';
 import { getFloorPlans } from '../../shared/utils/floorplans';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { optimizeImageUrl } from '../../../config/mediaConfig';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
@@ -680,7 +680,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               >
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-primary/20 flex-shrink-0 bg-white shadow-sm">
                   <img
-                    src={optimizeCloudinaryUrl(floorPlans[0].url, { width: 96, quality: 'auto' }) || floorPlans[0].url}
+                    src={optimizeImageUrl(floorPlans[0].url, { width: 96, quality: 'auto' }) || floorPlans[0].url}
                     alt=""
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"

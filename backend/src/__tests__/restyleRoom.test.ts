@@ -1,5 +1,6 @@
 // Every model is mocked below — no database needed (see `usesDatabase` in setup.ts).
 process.env.SKIP_TEST_DB = 'true';
+process.env.R2_PUBLIC_URL = 'https://media.example.com';
 
 import type { Request, Response } from 'express';
 import sharp from 'sharp';
@@ -25,7 +26,7 @@ import User from '../models/User';
 import Product from '../models/Product';
 import { restyleRoom, getRoomStyleUsage } from '../controllers/aiController';
 
-const CLOUDINARY_URL = 'https://res.cloudinary.com/demo/image/upload/v1/room.jpg';
+const PHOTO_URL = 'https://media.example.com/users/u_1/listings/flat_2/photos/p1/original.jpg';
 const FUTURE = new Date(Date.now() + 86_400_000);
 
 const makeRes = () => {
@@ -71,14 +72,14 @@ describe('restyleRoom controller', () => {
     expect(mockGenerate).not.toHaveBeenCalled();
   });
 
-  it('fetches the untransformed original (strict transformations refuse ad-hoc sizes)', async () => {
+  it('fetches the full-size master, not the smaller size the browser shows', async () => {
     mockFindById.mockResolvedValue(null);
     const res = makeRes();
     await restyleRoom(
-      makeReq({ imageUrl: 'https://res.cloudinary.com/demo/image/upload/t_be_w1600/v1/room.jpg', style: 'scandinavian' }),
+      makeReq({ imageUrl: PHOTO_URL.replace('original.jpg', 'w640.webp'), style: 'scandinavian' }),
       res
     );
-    expect(global.fetch).toHaveBeenCalledWith(CLOUDINARY_URL, expect.anything());
+    expect(global.fetch).toHaveBeenCalledWith(PHOTO_URL, expect.anything());
     expect(mockGenerate).toHaveBeenCalledWith(expect.any(String), 'image/jpeg', expect.anything(), expect.anything(), expect.anything(), expect.anything());
   });
 
@@ -90,14 +91,14 @@ describe('restyleRoom controller', () => {
       arrayBuffer: async () => new ArrayBuffer(64),
     });
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }), res);
+    await restyleRoom(makeReq({ imageUrl: PHOTO_URL, style: 'scandinavian' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(mockGenerate).not.toHaveBeenCalled();
   });
 
   it('returns 400 for an unknown style', async () => {
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'not-a-real-style' }), res);
+    await restyleRoom(makeReq({ imageUrl: PHOTO_URL, style: 'not-a-real-style' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(mockGenerate).not.toHaveBeenCalled();
   });
@@ -112,7 +113,7 @@ describe('restyleRoom controller', () => {
       save: jest.fn(),
     });
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }, { _id: 'u1' }), res);
+    await restyleRoom(makeReq({ imageUrl: PHOTO_URL, style: 'scandinavian' }, { _id: 'u1' }), res);
     expect(res.status).toHaveBeenCalledWith(429);
     expect(mockGenerate).not.toHaveBeenCalled();
   });
@@ -129,7 +130,7 @@ describe('restyleRoom controller', () => {
       save: jest.fn(),
     });
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }, { _id: 'u2' }), res);
+    await restyleRoom(makeReq({ imageUrl: PHOTO_URL, style: 'scandinavian' }, { _id: 'u2' }), res);
 
     expect(res.status).not.toHaveBeenCalledWith(429);
     expect(mockGenerate).toHaveBeenCalledTimes(1);
@@ -147,7 +148,7 @@ describe('restyleRoom controller', () => {
       save: jest.fn(),
     });
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'ext-modern' }, { _id: 'u6' }), res);
+    await restyleRoom(makeReq({ imageUrl: PHOTO_URL, style: 'ext-modern' }, { _id: 'u6' }), res);
 
     expect(mockGenerate).toHaveBeenCalledTimes(1);
     // Service is called with category 'exterior' for ext- styles.
@@ -168,7 +169,7 @@ describe('restyleRoom controller', () => {
     });
 
     const res = makeRes();
-    await restyleRoom(makeReq({ imageUrl: CLOUDINARY_URL, style: 'scandinavian' }, { _id: 'u3' }), res);
+    await restyleRoom(makeReq({ imageUrl: PHOTO_URL, style: 'scandinavian' }, { _id: 'u3' }), res);
 
     expect(mockGenerate).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith(

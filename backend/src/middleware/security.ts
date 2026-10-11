@@ -4,6 +4,7 @@
  */
 
 import helmet from 'helmet';
+import { missingR2Vars } from '../config/r2';
 import hpp from 'hpp';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
@@ -57,18 +58,11 @@ export const validateEnvironment = (): void => {
     }
   });
 
-  // Image storage: R2 (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
-  // R2_BUCKET, R2_PUBLIC_URL) or, until the switch, Cloudinary.
+  // Image storage (Cloudflare R2) — production can't take uploads without it.
   if (isProduction) {
-    const r2Vars = ['R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET', 'R2_PUBLIC_URL'];
-    const cloudinaryVars = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'];
-    const r2Missing = r2Vars.filter((v) => !process.env[v]);
-    const hasR2 = r2Missing.length === 0;
-    const hasCloudinary = cloudinaryVars.every((v) => process.env[v]);
-    if (!hasR2 && !hasCloudinary) missing.push(...r2Missing);
-    if (!hasR2 && r2Missing.length < r2Vars.length) {
-      apiLogger.warn(`[ENV WARNING] R2 is partly configured (missing ${r2Missing.join(', ')}) — uploads still go to Cloudinary`);
-    }
+    missing.push(...missingR2Vars());
+  } else if (missingR2Vars().length > 0) {
+    apiLogger.warn(`[ENV WARNING] Image uploads are disabled — missing ${missingR2Vars().join(', ')}`);
   }
 
   // Validate MONGODB_URI format

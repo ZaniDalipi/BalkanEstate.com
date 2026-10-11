@@ -1,18 +1,14 @@
 /**
  * Share-card image resolution for the OG middleware.
  *
- * This mirrors the frontend's `optimizeCloudinaryUrl` (config/cloudinaryConfig.ts):
- * same security checks, same "strip transforms already baked into the URL"
- * behaviour, so a picture already cropped square doesn't get cropped a second
- * time on its way into a share card. It is a separate copy only because the
- * backend is its own package — `tsconfig.rootDir` is `backend/src`, so it
- * cannot import from the frontend tree. Keep the two in step.
+ * Photos on our R2 media CDN are advertised by their JPEG master
+ * (`original.jpg`, ≤1920px — crawlers want JPEG and crop it themselves);
+ * anything else is advertised as is.
+ * Mirrors functions/_og-utils.ts (the Pages Functions copy) — keep in step.
  */
 
 import { OG_BASE_URL } from '../config/ogConstants';
-import { OG_PRESET } from '../config/cloudinaryPresets';
-import { CLOUDINARY_UPLOAD_RE, stripCloudinaryTransforms } from './cloudinaryUrl';
-import { parseMediaUrl, mediaFileUrl, MEDIA_OG_FILE } from '../config/mediaVariants';
+import { parseMediaUrl, mediaFileUrl, MEDIA_MASTER_FILE } from '../config/mediaVariants';
 
 export const DEFAULT_OG_IMAGE = `${OG_BASE_URL}/og-image.jpg`;
 
@@ -26,22 +22,6 @@ export interface OgImage {
   url: string;
   sized: boolean;
 }
-
-/**
- * Cloudinary delivery options for a share card: any picture — including a
- * square or portrait profile photo — is scaled to fit 1200×630 and padded onto
- * white, so the subject is never cropped out.
- *
- * `f_jpg` rather than the usual `f_auto`: crawlers send no useful Accept
- * header, and a WebP some of them can't render means no preview at all. Every
- * parameter is core Cloudinary — no add-on or paid-plan feature.
- *
- * Delivered through the registered `be_og` preset (f_jpg,q_auto,w_1200,h_630,
- * c_pad,b_white — see config/cloudinaryPresets.ts) so it works with strict
- * transformations on.
- */
-const OG_CARD_TRANSFORM = `t_${OG_PRESET}`;
-
 
 /** Normalize one image candidate, or null if it can't be used as og:image. */
 function normalizeOgImage(raw?: string): OgImage | null {
@@ -59,17 +39,11 @@ function normalizeOgImage(raw?: string): OgImage | null {
   // meta tag.
   if (/[\u0000-\u001f\u007f]/.test(url)) return null;
 
-  // R2 photos carry a pre-made 1200×630 JPEG share card (og.jpg).
+  // R2 photos: the JPEG master, whatever size the stored URL pointed at.
   const mediaBase = process.env.R2_PUBLIC_URL || null;
   const media = parseMediaUrl(url, mediaBase);
   if (media && mediaBase) {
-    return { url: mediaFileUrl(mediaBase, media.photoKey, MEDIA_OG_FILE), sized: true };
-  }
-
-  const match = url.match(CLOUDINARY_UPLOAD_RE);
-  if (match) {
-    const [, base, rest] = match;
-    return { url: `${base}${OG_CARD_TRANSFORM}/${stripCloudinaryTransforms(rest)}`, sized: true };
+    return { url: mediaFileUrl(mediaBase, media.photoKey, MEDIA_MASTER_FILE), sized: false };
   }
 
   // Google OAuth avatars carry their own size parameter.

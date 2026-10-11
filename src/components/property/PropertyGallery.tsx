@@ -10,7 +10,7 @@ import {
   ChevronRightIcon,
   BuildingOfficeIcon,
 } from '../../../constants';
-import { optimizeCloudinaryUrl, cloudinarySrcSet, getPropertyImagePlaceholder } from '../../../config/cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet, getPropertyImagePlaceholder } from '../../../config/mediaConfig';
 import PhotoSpotMarker, { PHOTO_SPOT_SIZE } from './PhotoSpotMarker';
 import { getFloorPlans, spotFloor } from '@/shared/utils/floorplans';
 import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } from '../../../config/galleryImages';
@@ -111,8 +111,8 @@ const THUMB_ASPECT = 180 / 128;
 
 /**
  * Candidate widths for a thumbnail card: roughly 1x, 2x and 3x its 195px frame,
- * rounded up to the shared Cloudinary width buckets so the strip reuses the
- * same derivatives as the rest of the app (see CLOUDINARY_WIDTH_BUCKETS).
+ * rounded up to the shared stored image widths so the strip reuses the
+ * same derivatives as the rest of the app (see IMAGE_WIDTH_BUCKETS).
  */
 const THUMB_WIDTHS = [240, 480, 640];
 
@@ -155,8 +155,8 @@ const GalleryThumbnail: React.FC<{ url: string; eager: boolean }> = ({ url, eage
       <img
         // `limit` never crops and never upscales, so the card decides the
         // framing rather than the CDN guessing at it.
-        src={optimizeCloudinaryUrl(url, { width: 480, quality: GALLERY_QUALITY, crop: 'limit' })}
-        srcSet={cloudinarySrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
+        src={optimizeImageUrl(url, { width: 480, quality: GALLERY_QUALITY, crop: 'limit' })}
+        srcSet={imageSrcSet(url, THUMB_WIDTHS, { quality: GALLERY_QUALITY, crop: 'limit' }) || undefined}
         sizes="(max-width: 640px) 180px, 195px"
         alt=""
         className={`relative w-full h-full ${cover ? 'object-cover' : 'object-contain'}`}
@@ -994,7 +994,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               >
                 <span className="relative block overflow-hidden rounded">
                   <img
-                    src={optimizeCloudinaryUrl(currentSpotPlanUrl, { width: 320, quality: 'auto' }) || currentSpotPlanUrl}
+                    src={optimizeImageUrl(currentSpotPlanUrl, { width: 320, quality: 'auto' }) || currentSpotPlanUrl}
                     alt=""
                     className="block w-auto h-auto max-w-[96px] max-h-[72px] sm:max-w-[150px] sm:max-h-[110px]"
                     draggable={false}

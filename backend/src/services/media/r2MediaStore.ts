@@ -7,7 +7,7 @@ import {
 import { getSignedUrl as presign } from '@aws-sdk/s3-request-presigner';
 import mongoose from 'mongoose';
 import { getR2Client, getR2Config } from '../../config/r2';
-import { mediaFileUrl, MEDIA_MASTER_FILE, CITY_CONVENTION_FOLDER } from '../../config/mediaVariants';
+import { mediaFileUrl, withSizeCap, MEDIA_MASTER_FILE, CITY_CONVENTION_FOLDER } from '../../config/mediaVariants';
 import MediaAsset, { IMediaAsset, MediaAssetKind } from '../../models/MediaAsset';
 import { mediaLogger } from '../../utils/logger';
 import { buildMaster, generatePhotoFiles, MasterOptions } from './imageVariants';
@@ -19,6 +19,7 @@ import {
   photoKey,
   photoIdOf,
 } from './mediaKeys';
+import { resolveMediaNames } from './mediaNames';
 
 /**
  * R2 media store — puts photos in the bucket and keeps MediaAsset (MongoDB)
@@ -43,6 +44,19 @@ const UPLOAD_CONCURRENCY = 6;
 const PRESIGN_SECONDS = 3600;
 
 const OBJECT_ID = /^[a-f0-9]{24}$/i;
+
+/** Kinds whose folders carry a user / listing / agency / business name. */
+const NAMED_FOLDER_KINDS: ReadonlySet<MediaAssetKind> = new Set([
+  'property',
+  'floorplan',
+  'avatar',
+  'license',
+  'credential',
+  'agency-logo',
+  'agency-cover',
+  'business-logo',
+  'business-banner',
+]);
 const asObjectId = (id: string | undefined): mongoose.Types.ObjectId | undefined =>
   id && OBJECT_ID.test(id) ? new mongoose.Types.ObjectId(id) : undefined;
 
@@ -134,9 +148,19 @@ const deleteObjects = async (bucket: 'public' | 'private', objectKeys: string[])
  */
 export const storeImage = async (input: Buffer, options: StoreImageOptions): Promise<StoredImage> => {
   const bucket: 'public' | 'private' = options.bucket ?? (PRIVATE_MEDIA_KINDS.has(options.kind) ? 'private' : 'public');
+  // Fixed keys (city photos the frontend finds by name) can't carry a size
+  // cap in their name, so they get every width; all others only what they need.
+  const fixedKey = Boolean(options.key?.startsWith(`${CITY_CONVENTION_FOLDER}/`));
   const master = await buildMaster(input, options.master);
-  const photo = await generatePhotoFiles(master, { masterOnly: bucket === 'private' });
-  const key = options.key || photoKey(mediaFolder(options.kind, options.context), newPhotoId());
+  const photo = await generatePhotoFiles(master, { masterOnly: bucket === 'private', allWidths: fixedKey });
+  const baseKey =
+    options.key ||
+    photoKey(
+      mediaFolder(options.kind, NAMED_FOLDER_KINDS.has(options.kind) ? await resolveMediaNames(options.context) : options.context),
+      newPhotoId()
+    );
+  // `…_w640`: the largest size stored, so the frontend never asks for a bigger one.
+  const key = fixedKey || bucket === 'private' ? baseKey : withSizeCap(baseKey, photo.largestWidth);
 
   const client = getR2Client();
   const name = bucketName(bucket);
@@ -191,7 +215,7 @@ export const storeImage = async (input: Buffer, options: StoreImageOptions): Pro
   return toStored(asset);
 };
 
-/** The MediaAsset for a key, or null when the key isn't one of ours (e.g. still on Cloudinary). */
+/** The MediaAsset for a key, or null when the key isn't one of ours. */
 export const findAsset = (key: string) => MediaAsset.findOne({ key });
 
 /** Remove every file of the given photos from R2 and their MediaAsset records. */
@@ -208,8 +232,8 @@ export const deleteAssets = async (assets: Array<Pick<IMediaAsset, 'key' | 'buck
 };
 
 /**
- * Delete the photos stored under `keys`. Returns the keys that were ours, so
- * the caller can hand the rest to Cloudinary (not yet migrated).
+ * Delete the photos stored under `keys`. Returns the keys that were found
+ * (unknown keys — e.g. a record from before R2 — are skipped).
  */
 export const deleteKeys = async (keys: string[]): Promise<Set<string>> => {
   const clean = [...new Set(keys.filter(Boolean))];

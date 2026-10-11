@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 
 interface DraftPhotoEditorProps {
   images: string[];
@@ -18,7 +18,7 @@ const DraftPhotoEditor: React.FC<DraftPhotoEditorProps> = ({ images, onChange })
     <ul className="grid grid-cols-3 sm:grid-cols-4 gap-2">
       {images.map((url, i) => (
         <li key={url} className="relative group rounded-lg overflow-hidden bg-gray-100 aspect-[4/3]">
-          <img src={optimizeCloudinaryUrl(url, { width: 240, quality: 'auto' })} alt="" loading="lazy" className="w-full h-full object-cover" />
+          <img src={optimizeImageUrl(url, { width: 240, quality: 'auto' })} alt="" loading="lazy" className="w-full h-full object-cover" />
           {i === 0 && (
             <span className="absolute left-1 top-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px]">★</span>
           )}

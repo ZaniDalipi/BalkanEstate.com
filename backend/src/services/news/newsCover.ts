@@ -1,9 +1,9 @@
 /**
- * Choose a news article's cover without storing anything new on Cloudinary.
+ * Choose a news article's cover without storing anything new in storage.
  *
  * Order:
  *  1. A City Gallery photo for a city the article names (title first, then
- *     excerpt) — already on Cloudinary, so it costs nothing extra.
+ *     excerpt) — already in storage, so it costs nothing extra.
  *  2. The article's own og:image URL, kept as a link. It is fetched once, when
  *     the article is saved, and shown through our resizing image proxy.
  *  3. A City Gallery photo from the article's country.

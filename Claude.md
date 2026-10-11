@@ -129,10 +129,10 @@ Every new translation key must be added to all 10 locale files simultaneously.
 
 ## Images
 
-Always use `optimizeCloudinaryUrl(url, { width })` (add `height` for a cropped box) and `cloudinarySrcSet()` —
-never raw image URLs and never hand-built `w_…,c_…` Cloudinary transforms. Cloudinary runs with
-**Strict transformations** on: only the registered presets in `backend/src/config/cloudinaryPresets.ts`
-(`t_be_w480`, `t_be_r4x3_w320`, `t_be_lqip`, `t_be_og`) load. The helper maps every request onto one, and
-routes external feed images through the resizing `/api/image-proxy`. Placeholders: `{ width: 40, blur: 400 }`.
-Backend uploads go through `uploadImage` (sharp-compressed, tagged, A–Z folders from
-`services/media/mediaNaming.ts`) — see "Cloudinary Image Pipeline" in ARCHITECTURE.md.
+Images are stored in Cloudflare R2 — there is no Cloudinary. Always use `optimizeImageUrl(url, { width })`
+(add `height` for a box) and `imageSrcSet()` from `config/mediaConfig.ts` — never raw image URLs and never
+hand-built size file names. Each photo's sizes are made once at upload (`w160…w1920.webp`, `lqip.webp`,
+`original.jpg`, see `backend/src/config/mediaVariants.ts`); the helper picks one and never asks for a size the
+photo doesn't have. External feed images go through the resizing `/api/image-proxy`. Placeholders:
+`{ width: 40, blur: 400 }`. Backend uploads go through `uploadImage`/`uploadMedia` in
+`backend/src/services/mediaService.ts` (indexed in the `MediaAsset` collection) — see docs/MEDIA_STORAGE.md.

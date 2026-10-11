@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
-import { optimizeCloudinaryUrl, isMediaCdnUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, isMediaCdnUrl } from '@/config/mediaConfig';
 import { getGallerySources, warmGallery, VIEWER_SIZES } from '@/config/galleryImages';
 import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
@@ -37,9 +37,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
     const [isSendingToChat, setIsSendingToChat] = useState(false);
     const [showStyler, setShowStyler] = useState(false);
 
-    // The AI Room Styler only works on our own stored listing photos (R2, or Cloudinary until migrated).
+    // The AI Room Styler only works on our own stored listing photos.
     const currentUrl = images[currentIndex]?.url;
-    const canRestyle = !!currentUrl && (isMediaCdnUrl(currentUrl) || currentUrl.includes('res.cloudinary.com'));
+    const canRestyle = !!currentUrl && isMediaCdnUrl(currentUrl);
 
     const openStyler = useCallback(() => {
         if (!state.isAuthenticated) {
@@ -591,7 +591,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     <img
                         // Same placeholder URL the inline gallery uses, so opening
                         // fullscreen paints the blur from cache instead of fetching.
-                        src={currentSources.placeholder || optimizeCloudinaryUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
+                        src={currentSources.placeholder || optimizeImageUrl(images[currentIndex].url, { width: 40, quality: 'auto:eco' })}
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-60 pointer-events-none select-none"

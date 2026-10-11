@@ -207,7 +207,7 @@ export function extractYouTubeId(raw: string): string | null {
 
 /**
  * Validate a video link. Site videos are YouTube links only — video files are
- * never uploaded (Cloudinary bills video by the second and by the GB).
+ * never uploaded (storing video is billed by the second and by the GB).
  */
 export function validateYouTubeUrl(url: string): ValidationResult {
   if (!url || typeof url !== 'string' || url.trim() === '') {
@@ -349,10 +349,10 @@ const mediaCdnHost = ((): string[] => {
   }
 })();
 
-/** Our R2 media domain (VITE_MEDIA_CDN_URL) when set, legacy Cloudinary, and Wikimedia. */
-export const ALLOWED_PHOTO_HOSTS: readonly string[] = [...mediaCdnHost, 'res.cloudinary.com', 'upload.wikimedia.org'];
+/** Our R2 media domain (VITE_MEDIA_CDN_URL) and Wikimedia. */
+export const ALLOWED_PHOTO_HOSTS: readonly string[] = [...mediaCdnHost, 'upload.wikimedia.org'];
 
-/** Host-exact, never a suffix match — `res.cloudinary.com.evil.example` is not it. */
+/** Host-exact, never a suffix match — `upload.wikimedia.org.evil.example` is not it. */
 function isAllowedPhotoHost(url: string): boolean {
   try {
     return ALLOWED_PHOTO_HOSTS.includes(new URL(url).hostname.toLowerCase());

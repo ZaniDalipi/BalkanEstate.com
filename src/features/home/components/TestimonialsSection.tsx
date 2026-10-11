@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -40,7 +40,7 @@ const TestimonialCard: React.FC<{
       <div className="flex items-center gap-3 mt-2">
         {testimonial.avatarUrl ? (
           <img
-            src={optimizeCloudinaryUrl(testimonial.avatarUrl, { width: 128 }) || testimonial.avatarUrl}
+            src={optimizeImageUrl(testimonial.avatarUrl, { width: 128 }) || testimonial.avatarUrl}
             alt={testimonial.name}
             className="w-12 h-12 rounded-full object-cover border-2 border-neutral-100 shadow-sm"
             loading="lazy"

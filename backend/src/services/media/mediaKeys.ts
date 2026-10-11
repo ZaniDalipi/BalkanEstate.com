@@ -1,22 +1,33 @@
 import { randomBytes } from 'crypto';
-import { safeId, slugify } from './mediaNaming';
+import { safeId, slugify, namedSegment } from './mediaNaming';
 import type { MediaAssetKind } from '../../models/MediaAsset';
 
 /**
- * Where each photo lives in R2. Folders are built from ids, never names, so a
- * renamed user or retitled listing never strands a photo or forces a copy.
- * Names live in MongoDB (MediaAsset → User / Property) where they can change.
+ * Where each photo lives in R2. Folders read "{name}_{id}" so the bucket is
+ * browsable by person and listing:
  *
- *   users/{userId}/listings/{propertyId}/photos/{photoId}/w640.webp
+ *   users/zani-dalipi_69a95232…/listings/house-in-split_6a65fc9e…/photos/{photoId}/w640.webp
+ *
+ * The name is taken when the photo is uploaded; a renamed user or retitled
+ * listing keeps its existing folders (the id in them doesn't change). Nothing
+ * finds a photo by folder name — deletes go by id through MediaAsset.
  *
  * Everything here is pure so it can be unit tested without R2 or Mongo.
  */
 
 export interface MediaKeyContext {
   userId?: string;
+  /** Display name of the user — for the readable folder name. */
+  userName?: string;
   propertyId?: string;
+  /** Listing title — for the readable folder name. */
+  propertyTitle?: string;
+  /** The listing's own reference, as the agency/seller entered it (Property.propertyId). */
+  propertyRef?: string;
   agencyId?: string;
+  agencyName?: string;
   businessListingId?: string;
+  businessName?: string;
   credentialId?: string;
   conversationId?: string;
   country?: string;
@@ -32,20 +43,30 @@ export const DRAFTS_SEGMENT = 'drafts';
 
 const seg = (value: string | undefined, fallback: string): string => safeId(value) || fallback;
 
-/** Listing photos/floor plans folder — the drafts folder while there's no listing yet. */
-export const listingMediaFolder = (userId: string | undefined, propertyId: string | undefined, sub: 'photos' | 'floorplans'): string => {
-  const root = `users/${seg(userId, 'unknown')}/listings`;
-  return propertyId ? `${root}/${seg(propertyId, 'unknown')}/${sub}` : `${root}/${DRAFTS_SEGMENT}/${sub}`;
+/** users/{name}_{userId} */
+export const userFolder = (ctx: Pick<MediaKeyContext, 'userId' | 'userName'>): string =>
+  `users/${namedSegment(ctx.userName, ctx.userId)}`;
+
+/** Listing photos/floor plans folder — the user's drafts folder while there's no listing yet. */
+export const listingMediaFolder = (
+  ctx: Pick<MediaKeyContext, 'userId' | 'userName' | 'propertyId' | 'propertyTitle' | 'propertyRef'>,
+  sub: 'photos' | 'floorplans'
+): string => {
+  const root = `${userFolder(ctx)}/listings`;
+  if (!ctx.propertyId) return `${root}/${DRAFTS_SEGMENT}/${sub}`;
+  // "{title}-{reference}_{id}", e.g. house-in-split-ab-123_6a65fc9e…
+  const label = [ctx.propertyTitle, ctx.propertyRef].filter(Boolean).join(' ');
+  return `${root}/${namedSegment(label, ctx.propertyId, 'unknown', 60)}/${sub}`;
 };
 
 /** The folder (without the photo id) a photo of `kind` belongs in. */
 export const mediaFolder = (kind: MediaAssetKind, ctx: MediaKeyContext): string => {
-  const user = `users/${seg(ctx.userId, 'unknown')}`;
+  const user = userFolder(ctx);
   switch (kind) {
     case 'property':
-      return listingMediaFolder(ctx.userId, ctx.propertyId, 'photos');
+      return listingMediaFolder(ctx, 'photos');
     case 'floorplan':
-      return listingMediaFolder(ctx.userId, ctx.propertyId, 'floorplans');
+      return listingMediaFolder(ctx, 'floorplans');
     case 'avatar':
       return `${user}/avatar`;
     case 'license':
@@ -53,13 +74,13 @@ export const mediaFolder = (kind: MediaAssetKind, ctx: MediaKeyContext): string 
     case 'credential':
       return ctx.credentialId ? `${user}/documents/credentials/${seg(ctx.credentialId, 'unknown')}` : `${user}/documents/credentials`;
     case 'agency-logo':
-      return `agencies/${seg(ctx.agencyId || ctx.userId, 'unknown')}/logo`;
+      return `agencies/${namedSegment(ctx.agencyName, ctx.agencyId || ctx.userId)}/logo`;
     case 'agency-cover':
-      return `agencies/${seg(ctx.agencyId || ctx.userId, 'unknown')}/cover`;
+      return `agencies/${namedSegment(ctx.agencyName, ctx.agencyId || ctx.userId)}/cover`;
     case 'business-logo':
-      return `businesses/${seg(ctx.businessListingId || ctx.userId, 'unknown')}/logo`;
+      return `businesses/${namedSegment(ctx.businessName, ctx.businessListingId || ctx.userId)}/logo`;
     case 'business-banner':
-      return `businesses/${seg(ctx.businessListingId || ctx.userId, 'unknown')}/banner`;
+      return `businesses/${namedSegment(ctx.businessName, ctx.businessListingId || ctx.userId)}/banner`;
     case 'site-logo':
       return 'site/logo';
     case 'site-email-logo':
@@ -106,7 +127,7 @@ export const isDraftListingKey = (key: string): boolean => /^users\/[^/]+\/listi
 export const photoIdOf = (key: string): string => key.slice(key.lastIndexOf('/') + 1);
 
 /**
- * Key for a photo migrated from Cloudinary whose owner the migration couldn't
+ * Key for a photo migrated from storage whose owner the migration couldn't
  * tell. Keeps the public id's own path so it stays recognisable.
  */
 export const legacyKey = (cloudinaryPublicId: string): string =>

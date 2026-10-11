@@ -45,7 +45,7 @@ import { buildMapFocusTarget, resolveMapDestination } from '@/shared/map/mapDest
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { AdSlot } from '@/src/features/promo';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import { buildGalleryImages, groupGalleryImagesByTag } from '@/shared/property/galleryImages';
@@ -1006,7 +1006,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
             >
               {currentUser?.avatarUrl ? (
-                <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : currentUser ? (
                 <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
               ) : (
@@ -1310,7 +1310,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                     <div className="w-32 h-20 bg-neutral-100 flex items-center justify-center overflow-hidden">
                       {p.images?.[0]?.url ? (
                         <img
-                          src={optimizeCloudinaryUrl(p.images[0].url, { width: 160, quality: 'auto', crop: 'fill' })}
+                          src={optimizeImageUrl(p.images[0].url, { width: 160, quality: 'auto', crop: 'fill' })}
                           alt={p.title}
                           loading="lazy"
                           className="w-full h-full object-cover"

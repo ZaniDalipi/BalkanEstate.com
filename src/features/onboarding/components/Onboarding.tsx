@@ -1,10 +1,10 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useEffect, useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { LogoIcon, SearchIcon, HomeIcon } from '@/constants';
-import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
+import { ONBOARDING_IMAGES } from '@/config/mediaConfig';
 import { getAgencies } from '@/services/apiService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -294,7 +294,7 @@ const Onboarding: React.FC = () => {
                   >
                     {agency.logo ? (
                       <img
-                        src={optimizeCloudinaryUrl(agency.logo, { width: 64 }) || agency.logo}
+                        src={optimizeImageUrl(agency.logo, { width: 64 }) || agency.logo}
                         alt={agency.name}
                         loading="lazy"
                         decoding="async"

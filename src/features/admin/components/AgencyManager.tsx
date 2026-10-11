@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PencilIcon, TrashIcon, EyeIcon, BuildingOfficeIcon, CheckCircleIcon, XCircleIcon } from '@/constants';
@@ -101,7 +101,7 @@ const AgencyManager: React.FC = () => {
                     <div className="flex items-center">
                       {agency.logo ? (
                         <img
-                          src={optimizeCloudinaryUrl(agency.logo, { width: 128 }) || agency.logo}
+                          src={optimizeImageUrl(agency.logo, { width: 128 }) || agency.logo}
                           alt={agency.name}
                           loading="lazy"
                           decoding="async"

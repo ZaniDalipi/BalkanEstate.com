@@ -14,7 +14,7 @@ import {
   uploadPropertyImages,
   deleteListingMedia,
   organizeListingMedia,
-} from '../services/cloudinaryService';
+} from '../services/mediaService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
@@ -1004,11 +1004,10 @@ export const createProperty = async (
       throw createError;
     }
 
-    // The frontend uploads images to a temp folder before the property exists,
-    // so relocate them now into the listing's own folder
-    // (balkan-estate/users/{a-z}/{name}_{userId}/listings/{title}_{propertyId}/photos) so
-    // Cloudinary stays organized by user + listing. Best-effort: a failure here
-    // must not fail listing creation.
+    // The frontend uploads images as drafts before the property exists, so
+    // file them now under the listing's own folder
+    // (users/{name}_{userId}/listings/{title}-{ref}_{propertyId}/photos).
+    // Best-effort: a failure here must not fail listing creation.
     try {
       if (Array.isArray(property.images) && property.images.length > 0) {
         const organized = await organizeListingMedia(
@@ -1543,7 +1542,7 @@ export const deleteProperty = async (
       return;
     }
 
-    // Delete the listing's media from Cloudinary, keeping one thumbnail for
+    // Delete the listing's media from storage, keeping one thumbnail for
     // the archive record below. The retention job clears that thumbnail once
     // the archive is old enough (see mediaRetentionService).
     const archiveThumbnailPublicId = property.imagePublicId || property.images?.[0]?.publicId;
@@ -1557,13 +1556,12 @@ export const deleteProperty = async (
 
       await deleteListingMedia(String(property.sellerId), String(property._id), {
         publicIds,
-        videoPublicIds: property.generatedVideoPublicId ? [property.generatedVideoPublicId] : [],
         keepPublicIds: archiveThumbnailPublicId ? [archiveThumbnailPublicId] : [],
       });
       propertyLogger.info(`✅ Cleaned up media for property ${property._id}`);
-    } catch (cloudinaryError: any) {
-      propertyLogger.error('⚠️  Error deleting images from Cloudinary:', cloudinaryError);
-      // Continue with property deletion even if Cloudinary cleanup fails
+    } catch (mediaError: any) {
+      propertyLogger.error('⚠️  Error deleting listing images:', mediaError);
+      // Continue with property deletion even if media cleanup fails
     }
 
     // Decrement listing count if property is active or pending

@@ -25,8 +25,8 @@ jest.mock('@aws-sdk/client-s3', () => {
   return { S3Client, PutObjectCommand, DeleteObjectsCommand, CopyObjectCommand, GetObjectCommand };
 });
 
-jest.mock('../services/cloudinaryService', () => {
-  const actual = jest.requireActual('../services/cloudinaryService');
+jest.mock('../services/mediaService', () => {
+  const actual = jest.requireActual('../services/mediaService');
   const sharpLib = jest.requireActual('sharp');
   return {
     ...actual,
@@ -109,9 +109,10 @@ describe('runMigration', () => {
     // shared photo downloaded once, transformations stripped
     expect(downloads.filter((u) => u.includes('/p1'))).toEqual([`${CLD}/${PHOTO_ID}.jpg`]);
 
-    const photoKey = `users/${USER}/listings/${LISTING}/photos/${migratedPhotoId(PHOTO_ID)}`;
-    const planKey = `users/${USER}/listings/${LISTING}/floorplans/${migratedPhotoId(PLAN_ID)}`;
-    const avatarKey = `users/${USER}/avatar/${migratedPhotoId(AVATAR_ID)}`;
+    // 800px masters store w160–w1280, so the folder records that cap.
+    const photoKey = `users/${USER}/listings/${LISTING}/photos/${migratedPhotoId(PHOTO_ID)}_w1280`;
+    const planKey = `users/${USER}/listings/${LISTING}/floorplans/${migratedPhotoId(PLAN_ID)}_w1280`;
+    const avatarKey = `users/${USER}/avatar/${migratedPhotoId(AVATAR_ID)}_w1280`;
     const licenseKey = `users/${USER}/documents/license/${migratedPhotoId(LICENSE_ID)}`;
 
     const property = await db().collection('properties').findOne({ _id: LISTING });
@@ -133,7 +134,7 @@ describe('runMigration', () => {
 
     // URLs inside text: the owner can't be told → legacy/; the missing one is left alone
     const post = await db().collection('blogposts').findOne({});
-    expect(post!.body).toContain(`https://media.example.com/legacy/${BLOG_ID}/original.jpg`);
+    expect(post!.body).toContain(`https://media.example.com/legacy/${BLOG_ID}_w1280/original.jpg`);
     expect(post!.body).toContain(`${CLD}/v9/gone.png`);
 
     const assets = await MediaAsset.find().lean();
@@ -150,7 +151,8 @@ describe('runMigration', () => {
     const again = await runMigration({ apply: true, skipConventionCities: true, ...quiet });
     expect(again.alreadyMigrated).toBe(5);
     expect(again.migrated).toBe(0);
-    expect(downloads).toEqual([`${CLD}/gone.png`]); // only the one that failed is retried
+    // only the one that failed is retried (its plain original URL, then the URL as stored)
+    expect(downloads).toEqual([`${CLD}/gone.png`, `${CLD}/v9/gone.png`]);
     expect(again.docsUpdated).toBe(0);
   });
 });

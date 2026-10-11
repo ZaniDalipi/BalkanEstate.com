@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
@@ -35,7 +35,7 @@ const ProfileAvatar: React.FC<{ agent: Agent }> = ({ agent }) => {
                 </div>
             ) : (
                 <img
-                    src={optimizeCloudinaryUrl(agent.avatarUrl, { width: 320 }) || agent.avatarUrl}
+                    src={optimizeImageUrl(agent.avatarUrl, { width: 320 }) || agent.avatarUrl}
                     alt={agent.name}
                     className="w-full h-full object-cover"
                     onError={() => setError(true)}

@@ -51,7 +51,10 @@ import sharp from 'sharp';
 import MediaAsset from '../models/MediaAsset';
 import Property from '../models/Property';
 import FileRecord from '../models/FileRecord';
-import { ALL_VARIANT_FILES } from '../config/mediaVariants';
+import { variantFilesFor } from '../config/mediaVariants';
+
+/** A 1200px photo stores original + w160 w320 w640 w1280 + lqip. */
+const PHOTO_FILES = variantFilesFor(1200).length;
 import {
   uploadImage,
   organizeListingMedia,
@@ -59,7 +62,7 @@ import {
   deleteImage,
   cleanupOrphanedTempImages,
   deleteUserPersonalMedia,
-} from '../services/cloudinaryService';
+} from '../services/mediaService';
 import { getSignedUrlIfAuthorized } from '../services/storageAccessPolicy';
 
 const USER = new mongoose.Types.ObjectId().toString();
@@ -74,9 +77,9 @@ describe('R2 media store', () => {
   it('stores a listing-form upload as a draft with every size, then files it under the listing', async () => {
     const uploaded = await uploadImage(await photo(), { userId: USER, type: 'property' });
 
-    expect(uploaded.publicId).toMatch(new RegExp(`^users/${USER}/listings/drafts/photos/[a-z0-9]+$`));
+    expect(uploaded.publicId).toMatch(new RegExp(`^users/${USER}/listings/drafts/photos/[a-z0-9]+_w1280$`));
     expect(uploaded.url).toBe(`https://media.example.com/${uploaded.publicId}/original.jpg`);
-    expect(objectsUnder(`media/${uploaded.publicId}/`)).toHaveLength(ALL_VARIANT_FILES.length);
+    expect(objectsUnder(`media/${uploaded.publicId}/`)).toHaveLength(PHOTO_FILES);
 
     const draft = await MediaAsset.findOne({ key: uploaded.publicId }).lean();
     expect(draft).toMatchObject({ kind: 'property', status: 'draft', bucket: 'public', width: 1200, height: 900 });
@@ -85,10 +88,10 @@ describe('R2 media store', () => {
 
     const [filed] = await organizeListingMedia([{ url: uploaded.url, publicId: uploaded.publicId, tag: 'main' }], USER, LISTING);
 
-    expect(filed.publicId).toMatch(new RegExp(`^users/${USER}/listings/${LISTING}/photos/[a-z0-9]+$`));
+    expect(filed.publicId).toMatch(new RegExp(`^users/${USER}/listings/${LISTING}/photos/[a-z0-9]+_w1280$`));
     expect(filed.url).toBe(`https://media.example.com/${filed.publicId}/original.jpg`);
     expect(objectsUnder(`media/${uploaded.publicId}/`)).toHaveLength(0);
-    expect(objectsUnder(`media/${filed.publicId}/`)).toHaveLength(ALL_VARIANT_FILES.length);
+    expect(objectsUnder(`media/${filed.publicId}/`)).toHaveLength(PHOTO_FILES);
 
     const active = await MediaAsset.findOne({ key: filed.publicId }).lean();
     expect(active).toMatchObject({ status: 'active' });
@@ -114,7 +117,7 @@ describe('R2 media store', () => {
     expect(await MediaAsset.exists({ key: a.publicId })).toBeNull();
     expect(objectsUnder(`media/${a.publicId}/`)).toHaveLength(0);
     expect(await MediaAsset.exists({ key: b.publicId })).not.toBeNull();
-    expect(objectsUnder(`media/${b.publicId}/`)).toHaveLength(ALL_VARIANT_FILES.length);
+    expect(objectsUnder(`media/${b.publicId}/`)).toHaveLength(PHOTO_FILES);
     expect(await MediaAsset.exists({ key: other.publicId })).not.toBeNull();
   });
 

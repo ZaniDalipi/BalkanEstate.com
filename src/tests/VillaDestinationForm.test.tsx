@@ -136,7 +136,7 @@ describe('VillaDestinationForm', () => {
     });
 
     it('lets an admin type the credit line, kept exactly as entered', () => {
-        const { onChange } = setup({ imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg' });
+        const { onChange } = setup({ imageUrl: 'https://media.test/a/original.jpg' });
         const input = screen.getByLabelText(/photo credit/i);
         fireEvent.change(input, { target: { value: 'Photo by Jane Doe on Unsplash' } });
         expect(onChange).toHaveBeenCalledWith(
@@ -148,7 +148,7 @@ describe('VillaDestinationForm', () => {
         // Otherwise the next picture inherits the previous photographer's name
         // and the card credits someone who did not take it.
         const { onChange } = setup({
-            imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg',
+            imageUrl: 'https://media.test/a/original.jpg',
             imageCredit: 'Ada L',
             imageCreditUrl: 'https://unsplash.com/@ada',
         });
@@ -163,7 +163,7 @@ describe('VillaDestinationForm', () => {
         // every keystroke re-renders this with brand-new function identities.
         // Focusing the first field on anything but mount pulls the caret out
         // of whichever field is actually being typed in.
-        const draft = draftFor({ imageUrl: 'https://res.cloudinary.com/x/image/upload/a.jpg' });
+        const draft = draftFor({ imageUrl: 'https://media.test/a/original.jpg' });
         const props = () => ({
             draft,
             saving: false,

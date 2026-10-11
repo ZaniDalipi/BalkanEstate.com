@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { optimizeCloudinaryUrl, retryWithOriginalImage } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, retryWithOriginalImage } from '@/config/mediaConfig';
 import DefaultAvatar from './DefaultAvatar';
 
 interface UserAvatarProps {
@@ -11,7 +11,7 @@ interface UserAvatarProps {
   avatarOptions?: string;
   /**
    * Edge length to request the photo at, in device pixels. Only applied to
-   * hosts we can resize (Cloudinary, Google) — a blob: preview or any other
+   * hosts we can resize (our media CDN, Google) — a blob: preview or any other
    * URL is left exactly as given, so a just-picked file still shows.
    */
   width?: number;
@@ -53,10 +53,10 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
     );
   }
 
-  // `optimizeCloudinaryUrl` refuses anything that is not http(s) — a blob: or
+  // `optimizeImageUrl` refuses anything that is not http(s) — a blob: or
   // data: preview would come back empty and drop us to the generated face.
   const resolved = width && /^https?:\/\//i.test(src)
-    ? optimizeCloudinaryUrl(src, { width, quality: 'auto', crop: 'fill' })
+    ? optimizeImageUrl(src, { width, quality: 'auto', crop: 'fill' })
     : src;
 
   return (
@@ -67,7 +67,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
-      // A failed Cloudinary size retries the original before giving up on the photo.
+      // A failed stored size retries the original before giving up on the photo.
       onError={(e) => {
         if (!retryWithOriginalImage(e.currentTarget)) setFailed(true);
       }}

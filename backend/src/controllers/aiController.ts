@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import sharp from 'sharp';
 import { apiLogger } from '../utils/logger';
-import { originalStoredImageUrl } from '../utils/cloudinaryUrl';
-import { CLOUDINARY_IMAGE_HOST, mediaImageHost } from '../config/imageHosts';
+import { originalMediaUrl } from '../utils/mediaUrl';
+import { mediaImageHost } from '../config/imageHosts';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
 import Product from '../models/Product';
@@ -282,9 +282,8 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
  */
 const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
 const RESTYLE_MAX_EDGE = 1600;
-/** Our own photo hosts: the R2 media domain and (legacy) Cloudinary. */
-const allowedImageHosts = (): Set<string> =>
-  new Set([CLOUDINARY_IMAGE_HOST, ...(mediaImageHost() ? [mediaImageHost() as string] : [])]);
+/** Our own photo host: the R2 media domain. */
+const allowedImageHosts = (): Set<string> => new Set(mediaImageHost() ? [mediaImageHost() as string] : []);
 
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -323,11 +322,9 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Fetch the untransformed original, not the resized URL the browser shows:
-    // with "Strict transformations" on, Cloudinary refuses ad-hoc sizes to
-    // server requests, while the original is always allowed (and costs no
-    // transformation credit). We resize it ourselves below.
-    const originalUrl = originalStoredImageUrl(imageUrl);
+    // Fetch the full-size master, not the smaller size the browser shows.
+    // We resize it ourselves below.
+    const originalUrl = originalMediaUrl(imageUrl);
     if (!originalUrl) {
       res.status(400).json({ message: 'imageUrl must be a listing photo URL.' });
       return;

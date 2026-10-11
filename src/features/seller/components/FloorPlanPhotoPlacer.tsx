@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { FloorplanSpot } from '@/types';
 import { normalizeAngle } from '@/shared/utils/validation';
 import { spotFloor } from '@/shared/utils/floorplans';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { ArrowUturnLeftIcon, ArrowUturnRightIcon, TrashIcon, XMarkIcon, CheckIcon } from '@/constants';
 import PhotoSpotMarker, { PHOTO_SPOT_SIZE } from '@/src/components/property/PhotoSpotMarker';
 
@@ -29,10 +29,10 @@ const HANDLE_DISTANCE = 44;
 const STAGE_PADDING = 16;
 
 /**
- * Cloudinary-optimised URL for a photo. Freshly picked photos are blob:
+ * Sized media CDN URL for a photo. Freshly picked photos are blob:
  * previews, which the optimiser rejects — those are shown as they are.
  */
-const photoSrc = (url: string, width: number) => optimizeCloudinaryUrl(url, { width, quality: 'auto' }) || url;
+const photoSrc = (url: string, width: number) => optimizeImageUrl(url, { width, quality: 'auto' }) || url;
 
 type Drag =
     | { kind: 'aim'; index: number; pointerId: number; fresh: boolean }

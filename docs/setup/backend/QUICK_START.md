@@ -336,7 +336,7 @@ const properties = await Property.find().select('title price');
 
 - [Database Setup](./DATABASE_SETUP.md) - Detailed DB configuration
 - [OAuth Setup](./OAUTH_SETUP.md) - Social login
-- [Cloudinary Setup](./CLOUDINARY_SETUP.md) - Image hosting
+- [Media storage (Cloudflare R2)](../../MEDIA_STORAGE.md) - Image hosting
 - [API Reference](../../api/API_REFERENCE.md) - Complete API docs
 - [Backend Architecture](../../architecture/BACKEND_ARCHITECTURE.md) - How it works
 

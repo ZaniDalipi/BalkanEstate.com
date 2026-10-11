@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 /**
  * Load environment variables — import this FIRST, before anything that reads
- * process.env at import time (config/cloudinary.ts does).
+ * process.env at import time.
  *
  * Reads `.env.{NODE_ENV}` (development when unset), then `.env` as fallback;
  * a value set earlier always wins. Both files are looked up in the backend

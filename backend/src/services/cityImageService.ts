@@ -1,9 +1,7 @@
-import { Readable } from 'stream';
 import sharp from 'sharp';
-import cloudinary from '../config/cloudinary';
 import CityMarketData from '../models/CityMarketData';
 import { apiLogger } from '../utils/logger';
-import { isR2Enabled, uploadMedia, deleteImage } from './cloudinaryService';
+import { uploadMedia, deleteImage } from './mediaService';
 
 const IMAGE_MAX_AGE_DAYS = 365; // Wikipedia photos rarely change; each refresh re-bills every derived size
 const MAX_IMAGE_WIDTH = 1200;
@@ -35,7 +33,7 @@ async function fetchWikipediaImageUrl(cityName: string): Promise<string | null> 
 
 /**
  * Download image from URL and fit it to the target frame with sharp, keeping
- * it under Cloudinary's 10MB limit.
+ * it a sensible size before storing.
  */
 async function downloadAndResizeImage(imageUrl: string): Promise<Buffer | null> {
   try {
@@ -65,52 +63,7 @@ async function downloadAndResizeImage(imageUrl: string): Promise<Buffer | null> 
 }
 
 /**
- * Upload a resized image buffer to Cloudinary
- */
-/** Normalises a name to match the frontend's getCityImageUrl format */
-function normalizeName(name: string): string {
-  return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-}
-
-/**
- * Upload an image buffer to Cloudinary.
- * Public ID format: city-{country}-{city}  — must match getCityImageUrl() in cloudinaryConfig.ts
- */
-async function uploadBufferToCloudinary(
-  imageBuffer: Buffer,
-  cityName: string,
-  country = 'unknown'
-): Promise<string | null> {
-  try {
-    const publicId = `city-${normalizeName(country)}-${normalizeName(cityName)}`;
-    const result = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          public_id: publicId,
-          overwrite: true,
-          resource_type: 'image',
-          // The buffer is already resized by sharp; an incoming transformation
-          // here would only add a billed transformation per upload.
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      const readable = new Readable();
-      readable.push(imageBuffer);
-      readable.push(null);
-      readable.pipe(uploadStream);
-    });
-    return result.secure_url;
-  } catch (error: any) {
-    apiLogger.error(`Failed to upload city image for ${cityName}:`, error.message);
-    return null;
-  }
-}
-
-/**
- * Fetch and store a city image from Wikipedia to Cloudinary.
+ * Fetch a city image from Wikipedia and store it in R2.
  * Only fetches if the city has no image or the image is older than IMAGE_MAX_AGE_DAYS.
  */
 export async function refreshCityImage(cityId: string, force = false): Promise<string | null> {
@@ -138,48 +91,34 @@ export async function refreshCityImage(cityId: string, force = false): Promise<s
     return city.imageUrl || null;
   }
 
-  // Download and resize locally before uploading to Cloudinary (avoids 10MB limit)
+  // Download and fit to the frame before storing
   const resizedBuffer = await downloadAndResizeImage(wikiUrl);
   if (!resizedBuffer) return city.imageUrl || null;
 
-  if (isR2Enabled()) {
-    // R2: cities/{country}/{city}/{photoId}. A refresh stores a new photo and
-    // removes the previous one (folders are never overwritten — CDN-cached forever).
-    let stored: { url: string; publicId: string };
-    try {
-      stored = await uploadMedia(resizedBuffer, 'city', { country: city.country, city: city.city }, { preserveQuality: true });
-    } catch (error: any) {
-      apiLogger.error(`Failed to store city image for ${city.city}:`, error.message);
-      return city.imageUrl || null;
-    }
-    const previous = city.imagePublicId;
-    await CityMarketData.findByIdAndUpdate(cityId, {
-      imageUrl: stored.url,
-      imagePublicId: stored.publicId,
-      imageUpdatedAt: new Date(),
-      imageSource: 'auto',
-    });
-    if (previous && previous !== stored.publicId) await deleteImage(previous);
-    apiLogger.info(`Updated city image for ${city.city}: ${stored.url}`);
-    return stored.url;
+  // cities/{country}/{city}/{photoId}. A refresh stores a new photo and
+  // removes the previous one (folders are never overwritten — CDN-cached forever).
+  let stored: { url: string; publicId: string };
+  try {
+    stored = await uploadMedia(resizedBuffer, 'city', { country: city.country, city: city.city }, { preserveQuality: true });
+  } catch (error: any) {
+    apiLogger.error(`Failed to store city image for ${city.city}:`, error.message);
+    return city.imageUrl || null;
   }
-
-  const cloudinaryUrl = await uploadBufferToCloudinary(resizedBuffer, city.city, city.country);
-  if (!cloudinaryUrl) return city.imageUrl || null;
-
+  const previous = city.imagePublicId;
   await CityMarketData.findByIdAndUpdate(cityId, {
-    imageUrl: cloudinaryUrl,
+    imageUrl: stored.url,
+    imagePublicId: stored.publicId,
     imageUpdatedAt: new Date(),
     imageSource: 'auto',
   });
-
-  apiLogger.info(`Updated city image for ${city.city}: ${cloudinaryUrl}`);
-  return cloudinaryUrl;
+  if (previous && previous !== stored.publicId) await deleteImage(previous);
+  apiLogger.info(`Updated city image for ${city.city}: ${stored.url}`);
+  return stored.url;
 }
 
 /**
  * Refresh images for all featured cities.
- * Runs in batches to avoid rate-limiting Wikipedia/Cloudinary.
+ * Runs in batches to avoid rate-limiting Wikipedia.
  */
 export async function refreshAllCityImages(force = false): Promise<number> {
   const cities = await CityMarketData.find({ featured: true }).lean();

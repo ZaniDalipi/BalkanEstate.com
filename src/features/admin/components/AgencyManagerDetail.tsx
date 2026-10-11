@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
@@ -69,7 +69,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
               <div className="flex items-start gap-4">
                 {viewingAgency.logo ? (
                   <img
-                    src={optimizeCloudinaryUrl(viewingAgency.logo, { width: 240 }) || viewingAgency.logo}
+                    src={optimizeImageUrl(viewingAgency.logo, { width: 240 }) || viewingAgency.logo}
                     alt={viewingAgency.name}
                     loading="lazy"
                     decoding="async"

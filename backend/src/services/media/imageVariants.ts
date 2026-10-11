@@ -2,25 +2,26 @@ import { createHash } from 'crypto';
 import sharp from 'sharp';
 import {
   MEDIA_WIDTHS,
-  MEDIA_CROP_RATIO,
   MEDIA_MASTER_FILE,
   MEDIA_LQIP_FILE,
-  MEDIA_OG_FILE,
   widthVariantFile,
-  cropVariantFile,
+  variantWidthsFor,
 } from '../../config/mediaVariants';
 
 /**
- * Turns an upload into the fixed set of files stored for a photo (see
+ * Turns an upload into the files stored for a photo (see
  * config/mediaVariants.ts). All of it runs here with sharp — R2 only stores.
+ *
+ * Memory: sharp's operation cache is off (each upload is processed once, so
+ * caching only holds RAM), and sizes are made one after another from the
+ * ≤1920px master, so one upload holds a single decoded image at a time.
  */
+sharp.cache(false);
 
 /** Limits every decode: rejects decompression bombs before sharp allocates. */
 export const MAX_INPUT_PIXELS = 50_000_000; // ~50 MP, larger than any phone camera
 
 const WEBP_QUALITY = 78;
-const OG_WIDTH = 1200;
-const OG_HEIGHT = 630;
 
 export interface GeneratedFile {
   file: string;
@@ -37,6 +38,8 @@ export interface GeneratedPhoto {
   totalBytes: number;
   /** sha1 of original.jpg. */
   contentHash: string;
+  /** Largest webp width stored (0 for master-only). */
+  largestWidth: number;
 }
 
 export interface MasterOptions {
@@ -81,67 +84,32 @@ export const buildMaster = async (
   return { buffer: data, width: info.width, height: info.height };
 };
 
-/** The largest 4:3 box that fits inside the master — crops are cut from it, never enlarged. */
-const cropBox = (width: number, height: number, target: number): { w: number; h: number } => {
-  const maxCropWidth = Math.floor(Math.min(width, height * MEDIA_CROP_RATIO));
-  const w = Math.max(1, Math.min(target, maxCropWidth));
-  return { w, h: Math.max(1, Math.round(w / MEDIA_CROP_RATIO)) };
-};
-
 /**
  * Every display file for a master. With `masterOnly` (private documents) just
  * the master is returned — those are never resized for display.
  */
 export const generatePhotoFiles = async (
   master: { buffer: Buffer; width: number; height: number },
-  options: { masterOnly?: boolean } = {}
+  options: { masterOnly?: boolean; allWidths?: boolean } = {}
 ): Promise<GeneratedPhoto> => {
   const files: GeneratedFile[] = [{ file: MEDIA_MASTER_FILE, body: master.buffer, contentType: 'image/jpeg' }];
+  // allWidths: fixed keys (city photos found by name) can't carry a size cap.
+  const widths = options.allWidths ? [...MEDIA_WIDTHS] : variantWidthsFor(master.width);
 
   if (!options.masterOnly) {
-    const base = sharp(master.buffer, { limitInputPixels: MAX_INPUT_PIXELS });
-    const jobs: Array<Promise<GeneratedFile>> = [];
-
-    for (const width of MEDIA_WIDTHS) {
-      jobs.push(
-        base
-          .clone()
-          .resize({ width, withoutEnlargement: true })
-          .webp({ quality: WEBP_QUALITY })
-          .toBuffer()
-          .then((body) => ({ file: widthVariantFile(width), body, contentType: 'image/webp' }))
-      );
-      const box = cropBox(master.width, master.height, width);
-      jobs.push(
-        base
-          .clone()
-          // attention = crop toward the most interesting region (Cloudinary's g_auto)
-          .resize(box.w, box.h, { fit: 'cover', position: sharp.strategy.attention })
-          .webp({ quality: WEBP_QUALITY })
-          .toBuffer()
-          .then((body) => ({ file: cropVariantFile(width), body, contentType: 'image/webp' }))
-      );
+    for (const width of widths) {
+      const body = await sharp(master.buffer, { limitInputPixels: MAX_INPUT_PIXELS })
+        .resize({ width, withoutEnlargement: true })
+        .webp({ quality: WEBP_QUALITY, effort: 4 })
+        .toBuffer();
+      files.push({ file: widthVariantFile(width), body, contentType: 'image/webp' });
     }
-
-    jobs.push(
-      base
-        .clone()
-        .resize({ width: 32 })
-        .blur(1.2)
-        .webp({ quality: 40 })
-        .toBuffer()
-        .then((body) => ({ file: MEDIA_LQIP_FILE, body, contentType: 'image/webp' }))
-    );
-    jobs.push(
-      base
-        .clone()
-        .resize(OG_WIDTH, OG_HEIGHT, { fit: 'contain', background: '#ffffff' })
-        .jpeg({ quality: 82, progressive: true, mozjpeg: true })
-        .toBuffer()
-        .then((body) => ({ file: MEDIA_OG_FILE, body, contentType: 'image/jpeg' }))
-    );
-
-    files.push(...(await Promise.all(jobs)));
+    const lqip = await sharp(master.buffer, { limitInputPixels: MAX_INPUT_PIXELS })
+      .resize({ width: 32 })
+      .blur(1.2)
+      .webp({ quality: 40 })
+      .toBuffer();
+    files.push({ file: MEDIA_LQIP_FILE, body: lqip, contentType: 'image/webp' });
   }
 
   return {
@@ -151,5 +119,6 @@ export const generatePhotoFiles = async (
     bytes: master.buffer.length,
     totalBytes: files.reduce((sum, f) => sum + f.body.length, 0),
     contentHash: createHash('sha1').update(master.buffer).digest('hex'),
+    largestWidth: options.masterOnly ? 0 : widths[widths.length - 1],
   };
 };

@@ -9,6 +9,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    // The R2 media CDN origin photo URLs are recognised by (config/mediaConfig.ts).
+    env: { VITE_MEDIA_CDN_URL: 'https://media.test' },
     setupFiles: ['./src/tests/setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist'],

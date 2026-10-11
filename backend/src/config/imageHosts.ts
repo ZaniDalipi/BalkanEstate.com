@@ -17,9 +17,6 @@
  * land on R2 (R2_PUBLIC_URL's host), which is listed automatically.
  */
 
-/** Where our own uploads and transformations lived before R2 (legacy, still served until migrated). */
-export const CLOUDINARY_IMAGE_HOST = 'res.cloudinary.com';
-
 /** Host of the R2 media bucket's public domain (R2_PUBLIC_URL), or null while R2 isn't configured. */
 export const mediaImageHost = (env: NodeJS.ProcessEnv = process.env): string | null => {
   const raw = env.R2_PUBLIC_URL;
@@ -41,14 +38,13 @@ export const mediaImageHost = (env: NodeJS.ProcessEnv = process.env): string | n
  */
 export const ALLOWED_PHOTO_HOSTS: readonly string[] = [
   ...(mediaImageHost() ? [mediaImageHost() as string] : []),
-  CLOUDINARY_IMAGE_HOST,
   'upload.wikimedia.org',
 ];
 
 /**
  * True when `url` is an `https` URL on an allowed host.
  *
- * Host-exact, never a suffix match: `res.cloudinary.com.attacker.example`
+ * Host-exact, never a suffix match: `media.example.com.attacker.example`
  * ends with an allowed host but is not one.
  */
 export function isAllowedPhotoUrl(url: string): boolean {

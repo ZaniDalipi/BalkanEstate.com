@@ -305,7 +305,7 @@ describe('validateCityShowcase', () => {
     city: 'Budva',
     country: 'Montenegro',
     searchQuery: 'Budva',
-    imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg',
+    imageUrl: 'https://media.test/budva/original.jpg',
     displayOrder: 0,
   };
 

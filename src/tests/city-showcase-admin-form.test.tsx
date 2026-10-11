@@ -161,7 +161,7 @@ describe('CityShowcaseForm', () => {
             city: 'Budva',
             country: 'Montenegro',
             searchQuery: 'Budva',
-            imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg',
+            imageUrl: 'https://media.test/budva/original.jpg',
             imagePublicId: '',
             imageCredit: '',
             displayOrder: '0',
@@ -177,7 +177,7 @@ describe('CityShowcaseForm', () => {
             city: 'Budva',
             country: 'Montenegro',
             searchQuery: 'Budva',
-            imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg',
+            imageUrl: 'https://media.test/budva/original.jpg',
             imagePublicId: '',
             imageCredit: '',
             displayOrder: '0',
@@ -199,7 +199,7 @@ describe('CityShowcaseForm', () => {
                 city: 'Budva',
                 country: 'Montenegro',
                 searchQuery: 'Budva',
-                imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg',
+                imageUrl: 'https://media.test/budva/original.jpg',
                 imagePublicId: '',
                 imageCredit: '',
                 displayOrder: '0',
@@ -224,7 +224,7 @@ describe('CityShowcaseForm', () => {
 
         // Leaving it empty must not block save — only a photo, not its credit,
         // is required (many admin-owned photos have no attribution to give).
-        renderForm({ ...emptyCityDraft(0), city: 'Budva', country: 'Montenegro', searchQuery: 'Budva', imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/budva.jpg' });
+        renderForm({ ...emptyCityDraft(0), city: 'Budva', country: 'Montenegro', searchQuery: 'Budva', imageUrl: 'https://media.test/budva/original.jpg' });
         expect(screen.getAllByRole('button', { name: 'admin:cityShowcase.save' }).at(-1)).not.toBeDisabled();
     });
 });

@@ -6,7 +6,8 @@ import Property from '../models/Property';
 import Inquiry from '../models/Inquiry';
 import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
-import { uploadImage } from '../services/cloudinaryService';
+import { uploadImage } from '../services/mediaService';
+import { originalMediaUrl } from '../utils/mediaUrl';
 
 const CONTACT_EMAIL = process.env.CONTACT_EMAIL || 'contact@balkanestateai.com';
 const VALID_SUBJECTS = ['general', 'buying', 'selling', 'agency', 'support', 'partnership', 'advertising'];
@@ -403,7 +404,8 @@ export const sendContactInquiry = async (
     const cleanAdPage = isAdvertising && AD_PAGES.includes(adPage) ? adPage : undefined;
     const cleanAdPlacement = isAdvertising && AD_PLACEMENTS.includes(adPlacement) ? adPlacement : undefined;
     const cleanAttachment =
-      isAdvertising && typeof attachmentUrl === 'string' && /^https:\/\/res\.cloudinary\.com\//.test(attachmentUrl)
+      // Only our own uploads (the R2 media domain) — never an arbitrary link.
+      isAdvertising && typeof attachmentUrl === 'string' && originalMediaUrl(attachmentUrl) !== null
         ? attachmentUrl
         : undefined;
 

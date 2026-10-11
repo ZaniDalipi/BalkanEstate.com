@@ -6,10 +6,10 @@ import {
   batchGetSignedUrls,
   isFileOwner,
 } from '../services/storageAccessPolicy';
-import { deleteImage } from '../services/cloudinaryService';
+import { deleteImage } from '../services/mediaService';
 import { mediaLogger } from '../utils/logger';
 
-// Matches valid Cloudinary public IDs: alphanumeric, hyphens, underscores, slashes, dots
+// Matches valid storage key: alphanumeric, hyphens, underscores, slashes, dots
 const PUBLIC_ID_PATTERN = /^[a-zA-Z0-9_\-/.]+$/;
 const MAX_PUBLIC_ID_LENGTH = 512;
 

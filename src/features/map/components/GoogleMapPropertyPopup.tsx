@@ -3,7 +3,7 @@
  * Extracted from GoogleMapComponent.tsx
  */
 
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
@@ -33,7 +33,7 @@ const GoogleMapPropertyPopup: React.FC<GoogleMapPropertyPopupProps> = ({ propert
     ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url)
     : property.imageUrl;
   // Popup hero: a 640px preset (strict-transformations safe), not the master.
-  const imageUrl = optimizeCloudinaryUrl(rawImageUrl, { width: 640 }) || rawImageUrl;
+  const imageUrl = optimizeImageUrl(rawImageUrl, { width: 640 }) || rawImageUrl;
 
   const [imageLoaded, setImageLoaded] = useState(false);
 

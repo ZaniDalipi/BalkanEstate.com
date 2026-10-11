@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Agent, { ICredential } from '../models/Agent';
 import { IUser } from '../models/User';
-import { uploadImage, deleteImages } from '../services/cloudinaryService';
+import { uploadImage, deleteImages } from '../services/mediaService';
 import { apiLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
 
@@ -252,7 +252,7 @@ export const deleteCredential = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    // Delete document from Cloudinary if exists
+    // Delete document from storage if exists
     if (agent.credentials[credentialIndex].documentPublicId) {
       await deleteImages([agent.credentials[credentialIndex].documentPublicId!]);
     }

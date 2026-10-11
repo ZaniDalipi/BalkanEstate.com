@@ -1,5 +1,4 @@
 import { createHash } from 'crypto';
-import { stripCloudinaryTransforms } from '../../utils/cloudinaryUrl';
 import type { MediaAssetKind } from '../../models/MediaAsset';
 import { CITY_CONVENTION_FOLDER } from '../../config/mediaVariants';
 import { mediaFolder, legacyKey, photoKey, PRIVATE_MEDIA_KINDS, type MediaKeyContext } from './mediaKeys';
@@ -9,6 +8,19 @@ import { mediaFolder, legacyKey, photoKey, PRIVATE_MEDIA_KINDS, type MediaKeyCon
  * finding Cloudinary URLs in documents, and deciding where each photo goes
  * from the document that references it (owner, listing, agency…).
  */
+
+/**
+ * Strip the transformation segments a Cloudinary URL carries, leaving the
+ * versioned public id. Transform tokens look like `key_value` with a 1–3
+ * character key (`c_fill`, `w_1200`, `t_be_w480`); folders and filenames don't.
+ */
+export const stripCloudinaryTransforms = (rest: string): string => {
+  const parts = rest.split('/');
+  const versionIdx = parts.findIndex((part) => /^v\d+$/.test(part));
+  if (versionIdx !== -1) return parts.slice(versionIdx).join('/');
+  const firstNonTransform = parts.findIndex((part) => !part.split(',').every((token) => /^[a-z]{1,3}_/.test(token)));
+  return firstNonTransform !== -1 ? parts.slice(firstNonTransform).join('/') : rest;
+};
 
 /** Every Cloudinary image URL inside a string (a field may hold HTML with several). */
 export const CLOUDINARY_IMAGE_URL_RE =

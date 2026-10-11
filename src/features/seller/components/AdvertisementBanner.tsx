@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedAgencies } from '@/services/apiService';
@@ -172,7 +172,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
         <div className="flex flex-col items-center text-center">
           {currentAd.logo ? (
             <img
-              src={optimizeCloudinaryUrl(currentAd.logo, { width: 240 }) || currentAd.logo}
+              src={optimizeImageUrl(currentAd.logo, { width: 240 }) || currentAd.logo}
               alt={currentAd.name}
               loading="lazy"
               decoding="async"
@@ -228,7 +228,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
         {currentAd.logo && (
           <div className="hidden md:block flex-shrink-0">
             <img
-              src={optimizeCloudinaryUrl(currentAd.logo, { width: 240 }) || currentAd.logo}
+              src={optimizeImageUrl(currentAd.logo, { width: 240 }) || currentAd.logo}
               alt={currentAd.name}
               loading="lazy"
               decoding="async"

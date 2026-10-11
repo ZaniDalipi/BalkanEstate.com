@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion, type PanInfo } from 'framer-
 import { useTranslation } from 'react-i18next';
 import type { FloorplanLevel, PropertyImage } from '@/types';
 import { spotFloor } from '@/shared/utils/floorplans';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { PhotoSpotSquare } from '@/src/components/property/PhotoSpotMarker';
 import FloorPlanMiniMap from './FloorPlanMiniMap';
 
@@ -513,7 +513,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
         for (const i of [activePhoto + 1, activePhoto - 1]) {
             const p = allPhotos[(i + allPhotos.length) % allPhotos.length];
             const img = new Image();
-            img.src = optimizeCloudinaryUrl(p.url, { width: 1920, quality: 'auto' }) || p.url;
+            img.src = optimizeImageUrl(p.url, { width: 1920, quality: 'auto' }) || p.url;
         }
     }, [activePhoto, allPhotos]);
 
@@ -762,7 +762,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
                     {backdropUrl && (
                         <div
                             className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-70"
-                            style={{ backgroundImage: `url("${optimizeCloudinaryUrl(backdropUrl, { width: 40, quality: 'auto:eco' }) || backdropUrl}")` }}
+                            style={{ backgroundImage: `url("${optimizeImageUrl(backdropUrl, { width: 40, quality: 'auto:eco' }) || backdropUrl}")` }}
                             aria-hidden="true"
                         />
                     )}
@@ -848,7 +848,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
                         <img
                             key={imageUrl}
                             ref={imageRef}
-                            src={optimizeCloudinaryUrl(imageUrl, { width: 2400, quality: 'auto' }) || imageUrl}
+                            src={optimizeImageUrl(imageUrl, { width: 2400, quality: 'auto' }) || imageUrl}
                             alt={t('property:floorPlan.viewer.floorPlanAlt', 'Floor Plan')}
                             className={`block select-none ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                             style={{
@@ -893,7 +893,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
                                     {/* Hover preview of the photo */}
                                     <span className="pointer-events-none absolute left-1/2 bottom-full mb-3 -translate-x-1/2 hidden group-hover:block group-focus-visible:block w-44 rounded-md overflow-hidden shadow-2xl ring-2 ring-white bg-black">
                                         <img
-                                            src={optimizeCloudinaryUrl(photo.url, { width: 360, quality: 'auto' }) || photo.url}
+                                            src={optimizeImageUrl(photo.url, { width: 360, quality: 'auto' }) || photo.url}
                                             alt=""
                                             loading="lazy"
                                             className="block w-full h-28 object-cover"
@@ -1155,7 +1155,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
                                 <motion.div
                                     key={currentPhoto.url}
                                     className="absolute inset-0 scale-125 bg-cover bg-center blur-2xl"
-                                    style={{ backgroundImage: `url("${optimizeCloudinaryUrl(currentPhoto.url, { width: 40, quality: 'auto:eco' }) || currentPhoto.url}")` }}
+                                    style={{ backgroundImage: `url("${optimizeImageUrl(currentPhoto.url, { width: 40, quality: 'auto:eco' }) || currentPhoto.url}")` }}
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 0.55 }}
                                     exit={{ opacity: 0 }}
@@ -1192,7 +1192,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
                                     style={{ touchAction: 'pan-y' }}
                                 >
                                     <img
-                                        src={optimizeCloudinaryUrl(currentPhoto.url, { width: 1920, quality: 'auto' }) || currentPhoto.url}
+                                        src={optimizeImageUrl(currentPhoto.url, { width: 1920, quality: 'auto' }) || currentPhoto.url}
                                         alt={t('property:floorPlan.viewer.photoAlt', 'Photo {{current}} of {{total}}', { current: activePhoto + 1, total: allPhotos.length })}
                                         className="block max-w-full max-h-full w-auto h-auto object-contain md:rounded-lg md:shadow-2xl pointer-events-none"
                                         draggable={false}
@@ -1287,7 +1287,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
                                         >
                                             <span className="block bg-white">
                                                 <img
-                                                    src={optimizeCloudinaryUrl(f.url, { width: 360, quality: 'auto' }) || f.url}
+                                                    src={optimizeImageUrl(f.url, { width: 360, quality: 'auto' }) || f.url}
                                                     alt=""
                                                     loading="lazy"
                                                     className="block w-full h-24 object-contain"
