@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import LegalFooter from './LegalFooter';
+import { SEO } from '@/src/components/seo';
 import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 import type { AppView } from '@/types';
@@ -28,6 +29,10 @@ const TermsOfServicePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <SEO
+        title={t('legal:terms.seoTitle', 'Terms of Service')}
+        description={t('legal:terms.seoDescription', 'The terms that apply to using BalkanEstateAI, publishing property listings and paid plans for agents and agencies.')}
+      />
       <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
           {/* Header */}

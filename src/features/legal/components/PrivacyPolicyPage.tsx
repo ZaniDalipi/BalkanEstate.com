@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import LegalFooter from './LegalFooter';
+import { SEO } from '@/src/components/seo';
 import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 import type { AppView } from '@/types';
@@ -24,10 +25,14 @@ const PrivacyPolicyPage: React.FC = () => {
     navigate(pathForView(view as AppView) ?? paths.home(), { direction: 'forward' });
   };
 
-  const lastUpdated = 'January 12, 2026';
+  const lastUpdated = 'October 11, 2026';
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <SEO
+        title={t('legal:privacy.seoTitle', 'Privacy Policy')}
+        description={t('legal:privacy.seoDescription', 'How BalkanEstateAI collects, uses and protects personal data, including cookies, analytics and advertising (Google AdSense), and how to exercise your rights.')}
+      />
       <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
           {/* Header */}
@@ -222,7 +227,22 @@ const PrivacyPolicyPage: React.FC = () => {
                 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">{t('legal:ui.privacyPolicyPage.privacyPolicy', 'Privacy Policy →')}</a>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-1">{t('legal:ui.privacyPolicyPage.cloudflare', 'Cloudflare')}</h4>
+                <h4 className="font-semibold text-gray-800 mb-1">Google AdSense</h4>
+                <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.adsense', 'Advertising, only after you accept marketing cookies. See "Advertising and Google AdSense" below.')}</p>
+                <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-1">Microsoft Clarity</h4>
+                <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.clarity', 'Usage analytics (heatmaps and session recordings), only after you accept analytics cookies.')}</p>
+                <a href="https://privacy.microsoft.com/privacystatement" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-1">Sentry</h4>
+                <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.sentry', 'Error monitoring: technical details of errors in the app, used to find and fix bugs.')}</p>
+                <a href="https://sentry.io/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Privacy Policy →</a>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-1">Cloudflare</h4>
                 <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.cloudflare', 'Security and performance services including DDoS protection and content delivery.')}</p>
                 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">{t('legal:ui.privacyPolicyPage.privacyPolicy', 'Privacy Policy →')}</a>
               </div>
@@ -231,6 +251,35 @@ const PrivacyPolicyPage: React.FC = () => {
                 <p className="text-gray-600 text-sm">{t('legal:privacy.thirdParty.aws', 'Cloud hosting and storage services. Data is stored in EU data centers.')}</p>
                 <a href="https://aws.amazon.com/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">{t('legal:ui.privacyPolicyPage.privacyPolicy', 'Privacy Policy →')}</a>
               </div>
+            </div>
+          </section>
+
+          {/* Advertising — the disclosures the Google AdSense programme policies
+              require of every publisher showing Google ads. */}
+          <section id="advertising">
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">
+              {t('legal:privacy.ads.title', 'Advertising and Google AdSense')}
+            </h2>
+            <div className="space-y-3 text-gray-700 leading-relaxed">
+              <p>{t('legal:privacy.ads.intro', 'Some pages show advertising. Ads from our own advertisers are images we host; other ads are served by Google AdSense. Ads are only requested after you accept marketing cookies in our cookie banner, and you can change that choice at any time.')}</p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>{t('legal:privacy.ads.vendors', 'Third-party vendors, including Google, use cookies to serve ads based on your prior visits to this website or other websites.')}</li>
+                <li>{t('legal:privacy.ads.google', "Google's use of advertising cookies enables it and its partners to serve ads to you based on your visit to this site and/or other sites on the Internet.")}</li>
+                <li>
+                  {t('legal:privacy.ads.optOutGoogle', 'You can opt out of personalised advertising by Google in')}{' '}
+                  <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{t('legal:privacy.ads.adsSettings', 'Google My Ad Center (Ads Settings)')}</a>.
+                </li>
+                <li>
+                  {t('legal:privacy.ads.optOutOthers', 'You can opt out of personalised advertising by other participating third-party vendors at')}{' '}
+                  <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.aboutads.info</a>{' '}
+                  {t('legal:privacy.ads.or', 'or')}{' '}
+                  <a href="https://www.youronlinechoices.eu/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.youronlinechoices.eu</a>.
+                </li>
+              </ul>
+              <p>
+                {t('legal:privacy.ads.howGoogle', 'How Google uses information from sites that use its services:')}{' '}
+                <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">policies.google.com/technologies/partner-sites</a>
+              </p>
             </div>
           </section>
 

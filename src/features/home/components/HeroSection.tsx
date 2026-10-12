@@ -225,8 +225,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         background: 'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 60%)',
         pointerEvents: 'none',
       }} />
+      {/* Anchored to the top, not the bottom: the hero grows when its photo
+          gallery loads, and a bottom-anchored blob moving with it was the
+          largest layout shift on the home page (CLS ≈ 0.27 in Lighthouse). */}
       <div style={{
-        position: 'absolute', bottom: '-40px', left: '-80px',
+        position: 'absolute', top: '320px', left: '-80px',
         width: '350px', height: '350px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 60%)',
         pointerEvents: 'none',

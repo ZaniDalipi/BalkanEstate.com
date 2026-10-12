@@ -342,7 +342,20 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             <div className="property-card__photo absolute inset-0">
               <PropertyImage
                 src={currentImageUrl}
-                alt={`${property.title || propertyTypeLabel} - ${property.beds} bed, ${property.baths} bath ${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'} in ${property.city}, ${property.country}`}
+                // Only the facts the listing has: imported listings often lack
+                // rooms or a city, and "undefined bed, 0 bath" helps no one.
+                alt={[
+                  property.title || propertyTypeLabel,
+                  [
+                    property.beds ? `${property.beds} bed` : '',
+                    property.baths ? `${property.baths} bath` : '',
+                  ].filter(Boolean).join(', '),
+                  `${propertyTypeLabel} for ${isRental ? 'rent' : 'sale'}${
+                    property.city || property.country
+                      ? ` in ${[property.city, property.country].filter(Boolean).join(', ')}`
+                      : ''
+                  }`,
+                ].filter(Boolean).join(' - ')}
                 priority={priority}
                 widths={IMAGE_WIDTHS}
                 sizes={IMAGE_SIZES}

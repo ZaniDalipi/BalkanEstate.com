@@ -744,7 +744,9 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           </motion.button>
         )}
 
-        {/* ── In-gallery ad (only real/paying ads; never a placeholder) ── */}
+        {/* ── In-gallery ad: only a booked banner, never AdSense (ads may not
+            overlay the listing's photos) and never a placeholder. With nothing
+            booked the slot renders nothing, close button included. ── */}
         {showGalleryAd && (
           <div className="absolute inset-x-0 bottom-0 z-20 flex justify-center px-2 pb-2 pointer-events-none">
             <div className="relative w-full max-w-2xl pointer-events-auto">
@@ -754,17 +756,12 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 index={1}
                 format="leaderboard"
                 hidePlaceholder
+                allowNetworkFill={false}
+                dismiss={{
+                  label: t('common:ads.close', 'Close advertisement'),
+                  onDismiss: () => setGalleryAdDismissed(true),
+                }}
               />
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setGalleryAdDismissed(true); }}
-                aria-label={t('common:ads.close', 'Close advertisement')}
-                className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
           </div>
         )}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition, useReducer } from 'react';
-import { RouterProvider, Outlet, useLocation } from 'react-router-dom';
+import { RouterProvider, Outlet } from 'react-router-dom';
 import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
-import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { HelmetProvider } from 'react-helmet-async';
 import { MotionConfig } from 'framer-motion';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
@@ -27,10 +27,10 @@ import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 import { useCookieConsent } from './src/shared/utils/cookieConsent';
 // Lazy load SEO components (don't block initial render)
-const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
-const FAQSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.FAQSchema })));
-import { realEstateFAQs } from './src/components/seo';
+// Static: the page outlet's default <SEO> must mount before the page's own,
+// which a lazy component would not guarantee.
+import { SEO, RouteNoindexContext } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
@@ -152,14 +152,17 @@ const PageOutlet: React.FC = () => {
   return (
     <ViewTransition>
       <ErrorBoundary level="route" key={pageKey}>
-        {noindex && (
-          <Helmet>
-            <meta name="robots" content="noindex, nofollow" />
-          </Helmet>
-        )}
-        <Suspense fallback={<PageLoader />}>
-          <Outlet />
-        </Suspense>
+        <RouteNoindexContext.Provider value={!!noindex}>
+          {/* Defaults for this URL (canonical, robots). Mounted before the
+              page, so the page's own <SEO> takes precedence; pages without
+              one still get a correct canonical. No hreflang here: Helmet
+              merges alternate links from every instance, so defaults would
+              leak onto pages that are deliberately single-language. */}
+          <SEO alternates={false} />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </RouteNoindexContext.Provider>
       </ErrorBoundary>
     </ViewTransition>
   );
@@ -173,7 +176,6 @@ const PageOutlet: React.FC = () => {
 const GlobalHead: React.FC = () => {
   const { i18n } = useTranslation();
   const currentLang = (i18n.language || 'en').split('-')[0];
-  const { pathname } = useLocation();
 
   // Get analytics IDs from environment variables
   const googleAnalyticsId = import.meta.env.VITE_GA_ID;
@@ -185,9 +187,7 @@ const GlobalHead: React.FC = () => {
 
   return (
     <Suspense fallback={null}>
-      <SEO key={pathname} />
       <OrganizationSchema language={currentLang} />
-      <FAQSchema faqs={realEstateFAQs} language={currentLang} />
       {/* Analytics - only loaded if IDs are provided AND the user consented */}
       {((googleAnalyticsId && cookieConsent.analytics) ||
         (facebookPixelId && cookieConsent.marketing)) && (
@@ -257,7 +257,7 @@ const MainLayout: React.FC = () => {
   const isMainTabView = !isAgentDetail && !isAgencyDetail && !isBusinessDetail && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
-    'account', 'blog', 'guides',
+    'account', 'blog', 'guides', 'about',
   ].includes(view);
 
   // Map the current view to an ad-banner "page" so advertisers can target placements.
@@ -288,6 +288,18 @@ const MainLayout: React.FC = () => {
       case 'createAgencyPayment':
       case 'createAgencyConfirm':
       case 'not-found':
+      // Pages without publisher content of their own — legal text, forms,
+      // sign-in, checkout, the visitor's own saved lists. AdSense does not
+      // allow ads on screens like these, and they gain nothing from them.
+      case 'privacy':
+      case 'terms':
+      case 'cookies':
+      case 'refund':
+      case 'contact':
+      case 'about':
+      case 'pricing':
+      case 'saved-searches':
+      case 'saved-properties':
         return null;
       default: return 'all';
     }
@@ -417,8 +429,10 @@ const MainLayout: React.FC = () => {
             so position:fixed works in iOS Safari PWA standalone mode. Hidden on
             admin/dashboard/auth views (adPage === null), and on the property
             details page which has its own in-content + sidebar ad slots (so the
-            sticky bar doesn't overlap them). */}
-        {adPage && !isPropertyDetail && (
+            sticky bar doesn't overlap them), and on the full-height map/search
+            pages, where a bar pinned over the map gets in the way of panning,
+            the results sheet and the map controls. */}
+        {adPage && !isFullHeightView && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>

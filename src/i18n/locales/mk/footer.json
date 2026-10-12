@@ -22,8 +22,11 @@
     "myAccount": "Мојот Профил",
     "howItWorks": "Како функционира",
     "blog": "Блог",
-    "contactUs": "Контактирајте нè",
-    "valuation": "Процена на имот"
+    "about": "За нас",
+    "contactUs": "Контакт",
+    "advertise": "Рекламирајте кај нас",
+    "buyingGuides": "Водичи за купување",
+    "mortgageCalculator": "Калкулатор за кредит"
   },
   "countries": {
     "AL": "Албанија",

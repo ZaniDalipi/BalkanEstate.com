@@ -49,6 +49,9 @@
     "articleCard": {
       "featured": "E veçuar",
       "readArticle": "Lexo artikullin"
-    }
+    },
+  "article": {
+    "updated": "Përditësuar"
   }
+}
 }

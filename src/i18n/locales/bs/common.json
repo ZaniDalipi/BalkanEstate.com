@@ -637,7 +637,11 @@
     "title": "Vodiči za kupovinu nekretnina",
     "topCities": "Najbolji gradovi za nekretnine",
     "transferTax": "Porez na prenos",
-    "whyBuy": "Zašto kupiti u {{country}}?"
+    "whyBuy": "Zašto kupiti u {{country}}?",
+    "readGuide": "Pročitajte vodič →",
+    "lastUpdated": "Posljednje ažuriranje",
+    "otherGuides": "Vodiči za druge zemlje",
+    "officialSources": "Zvanični izvori"
   },
   "removeFromFavorites": "Ukloni iz omiljenih",
   "saved": "Sačuvano",

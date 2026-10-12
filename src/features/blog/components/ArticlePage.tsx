@@ -308,6 +308,13 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
   const publishedDate = article.publishedAt
     ? new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : '';
+  // Shown when the article was edited after it went out, so readers can see
+  // how current it is (a day's grace for same-day typo fixes).
+  const updatedDate =
+    article.updatedAt && article.publishedAt &&
+    new Date(article.updatedAt).getTime() - new Date(article.publishedAt).getTime() > 24 * 60 * 60 * 1000
+      ? new Date(article.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      : null;
   const publishedTime = article.publishedAt
     ? new Date(article.publishedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     : '';
@@ -460,6 +467,9 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   {publishedDate && (
                     <span>{publishedDate}{publishedTime && <span className="text-slate-300 ml-1">· {publishedTime}</span>}</span>
+                  )}
+                  {updatedDate && (
+                    <span>· {t('blog:article.updated', 'Updated')} {updatedDate}</span>
                   )}
                   {publishedDate && article.readTime && <span>·</span>}
                   {article.readTime && (

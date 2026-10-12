@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import MortgageCalculator from './MortgageCalculator';
 import { CalculatorIcon } from '@/constants';
 import Footer from '@/components/shared/Footer';
+import { SEO } from '@/src/components/seo';
 import { MORTGAGE_COUNTRIES as COUNTRIES } from '../data/mortgageMarketData';
 import { validatePrice } from '@/shared/utils/validation';
 
@@ -40,6 +41,10 @@ const MortgageCalculatorPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+      <SEO
+        title={t('calculators:seo.mortgageTitle', 'Mortgage Calculator')}
+        description={t('calculators:seo.mortgageDescription', 'Estimate monthly mortgage repayments and total interest for a property purchase in the Balkans, and compare renting with buying.')}
+      />
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">

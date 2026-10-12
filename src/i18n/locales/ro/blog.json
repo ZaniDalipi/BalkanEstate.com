@@ -49,6 +49,9 @@
     "articleCard": {
       "featured": "Recomandat",
       "readArticle": "Citește articolul"
-    }
+    },
+  "article": {
+    "updated": "Actualizat"
   }
+}
 }

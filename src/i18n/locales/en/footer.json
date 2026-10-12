@@ -22,8 +22,11 @@
     "myAccount": "My Account",
     "howItWorks": "How It Works",
     "blog": "Blog",
+    "about": "About Us",
     "contactUs": "Contact Us",
-    "valuation": "Property Valuation"
+    "advertise": "Advertise with us",
+    "buyingGuides": "Buying Guides",
+    "mortgageCalculator": "Mortgage Calculator"
   },
   "countries": {
     "AL": "Albania",

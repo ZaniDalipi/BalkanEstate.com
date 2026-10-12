@@ -359,9 +359,15 @@ const CityDashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <SEO
         title={t('dashboard.seoTitle', '{{city}}, {{country}} - Real Estate Market Dashboard', { city: city.city, country: city.country })}
-        description={t('dashboard.seoDescription', 'Explore real estate market data for {{city}}, {{country}}. Average price €{{price}}/m², {{trend}} market with {{yield}}% rental yield.', { city: city.city, country: city.country, price: avgPrice.toLocaleString(), trend: city.marketTrend, yield: rentalYield })}
+        // Only sourced figures in the snippet: the price per m² and the live
+        // listing count. Trend and yield are AI estimates (see the notice
+        // above the metrics) and must not be quoted as facts.
+        description={t('dashboard.seoDescriptionSourced', 'Property in {{city}}, {{country}}: average asking price around €{{price}}/m², {{count}} live listings, price history, districts and local amenities.', { city: city.city, country: city.country, price: avgPrice.toLocaleString(), count: city.listingsCount ?? 0 })}
         canonical={`${typeof window !== 'undefined' ? window.location.origin : ''}/explore-cities/${encodeURIComponent(city.city)}/${encodeURIComponent(city.country)}`}
         type="website"
+        // A city page with (almost) no listings is mostly estimates — keep it
+        // out of the index until there is something real to show.
+        noindex={(city.listingsCount ?? 0) < 3}
       />
 
       {/* ─── Immersive mosaic cover ──────────────────────────────────────── */}
@@ -563,6 +569,11 @@ const CityDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Which figures are sourced and which are estimates. */}
+        <p className="mb-4 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-xs sm:text-sm text-violet-900">
+          {t('dashboard.estimatesNotice', 'Price per m² is taken from official or research sources where a source link is shown, or from live listings. Growth, demand, rental-yield and investment figures on this page are AI-generated estimates, not official statistics.')}
+        </p>
 
         {/* Primary metrics row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">

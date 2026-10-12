@@ -639,7 +639,11 @@
     "topCities": "Najbolji gradovi za nekretnine",
     "ctaTitle": "Spremni da pronađete svoju nekretninu?",
     "ctaDescription": "Pretražujte svih 11 balkanskih zemalja uz uparivanje pokretano vještačkom inteligencijom. 10 jezika, provjereni agenti, trenutne procjene.",
-    "ctaButton": "Počni pretragu"
+    "ctaButton": "Počni pretragu",
+    "readGuide": "Pročitajte vodič →",
+    "lastUpdated": "Posljednje ažuriranje",
+    "otherGuides": "Vodiči za druge zemlje",
+    "officialSources": "Zvanični izvori"
   },
   "any": "Bilo koji",
   "usageMeter": {
@@ -870,6 +874,10 @@
     "MK": "Sjeverna Makedonija",
     "RO": "Rumunija",
     "RS": "Srbija",
-    "SI": "Slovenija"
+    "SI": "Slovenija",
+  "loadError": {
+    "title": "Stranica nije mogla da se učita",
+    "retry": "Pokušajte ponovo"
   }
+}
 }

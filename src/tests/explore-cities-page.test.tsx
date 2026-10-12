@@ -42,11 +42,6 @@ vi.mock('@/components/shared/Decorative3D', () => ({
   Decorative3DStyles: () => null,
   RandomCityBubbles: () => null,
 }));
-// The page merges a static fallback city list into the API response; this
-// test is about the tab and follow wiring, so it renders only the mocked rows.
-vi.mock('../features/cities/data/staticCities', () => ({
-  mergeWithStaticFallback: (cities: unknown[]) => cities,
-}));
 
 vi.mock('@/config/mediaConfig', () => ({
   getCityImageUrl: () => 'https://img.test/city.jpg',

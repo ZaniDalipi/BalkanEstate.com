@@ -51,6 +51,9 @@
     "articleCard": {
       "featured": "Featured",
       "readArticle": "Read article"
-    }
+    },
+  "article": {
+    "updated": "Updated"
   }
+}
 }

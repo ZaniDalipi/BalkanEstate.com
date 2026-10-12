@@ -578,11 +578,16 @@ export const getProperty = async (
     // property.save() so this read path never fails full-document schema
     // validation for legacy/feed-imported documents that may be missing
     // fields the ingest upsert doesn't validate (e.g. address/city/country).
-    await Property.updateOne({ _id: property._id }, { $inc: { views: 1 } });
-    property.views += 1;
+    //
+    // Requests from the frontend's server-side renderer (a crawler fetching
+    // the page, flagged with x-be-prerender) are not views by a person.
+    if (req.get('x-be-prerender') !== '1') {
+      await Property.updateOne({ _id: property._id }, { $inc: { views: 1 } });
+      property.views += 1;
 
-    // Update seller's stats in real-time
-    await incrementViewCount(String(property.sellerId._id || property.sellerId));
+      // Update seller's stats in real-time
+      await incrementViewCount(String(property.sellerId._id || property.sellerId));
+    }
 
     // Enrich property with agency logo if seller is an agent
     let enrichedProperty = property.toObject();

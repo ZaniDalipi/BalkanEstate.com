@@ -3,12 +3,19 @@
  * Centralized configuration values used throughout the app
  */
 
+import { API_URL } from '@/src/shared/api/config';
+
 /**
  * API Configuration
  */
 export const API_CONFIG = {
-  /** Base API URL - defaults to localhost in development */
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
+  /**
+   * Base API URL — the one resolver every client shares (env var, else the
+   * production API on the production host, else localhost in development).
+   * This used to fall back to localhost on its own, so pages using it (the
+   * agency page) broke on any build made without VITE_API_URL.
+   */
+  BASE_URL: API_URL,
   /** Request timeout in milliseconds */
   TIMEOUT: 30000,
   /** Maximum retries for failed requests */

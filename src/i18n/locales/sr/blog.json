@@ -49,6 +49,9 @@
     "articleCard": {
       "featured": "Истакнуто",
       "readArticle": "Прочитај чланак"
-    }
+    },
+  "article": {
+    "updated": "Ажурирано"
   }
+}
 }
