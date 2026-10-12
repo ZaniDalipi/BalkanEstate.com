@@ -893,6 +893,7 @@
     "RO": "Romania",
     "RS": "Serbia",
     "SI": "Slovenia"
+  },
   "loadError": {
     "title": "This page could not be loaded",
     "retry": "Try again",
