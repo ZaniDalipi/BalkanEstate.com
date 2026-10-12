@@ -241,6 +241,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
     onViewProperty,
 }) => {
     const { t } = useTranslation(['agents']);
+    // The agent's pin on the map: only when the parent says the coordinates are valid.
+    const agentPosition: [number, number] | null =
+        hasValidCoordinates && agent.lat != null && agent.lng != null ? [agent.lat, agent.lng] : null;
     const [listingTypeFilter, setListingTypeFilter] = useState<'all' | 'sale' | 'rent'>('all');
     const [listingSearch, setListingSearch] = useState('');
 
@@ -657,9 +660,9 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         ))}
                                     </div>
                                 )}
-                                {hasValidCoordinates && <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
+                                {agentPosition && <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
                                     <MapContainer
-                                        center={[agent.lat, agent.lng]}
+                                        center={agentPosition}
                                         zoom={13}
                                         scrollWheelZoom={true}
                                         className="w-full h-80"
@@ -672,7 +675,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                             maxZoom={22}
                                         />
                                         <MapInvalidator />
-                                        <Marker position={[agent.lat, agent.lng]} icon={L.icon({
+                                        <Marker position={agentPosition} icon={L.icon({
                                             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
                                             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
                                             iconSize: [25, 41],
