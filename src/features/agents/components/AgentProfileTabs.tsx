@@ -1044,8 +1044,8 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
                                                     {testimonial.userId?.avatarUrl ? (
                                                         <img
-                                                            src={optimizeImageUrl(t.userId.avatarUrl, { width: 128 }) || t.userId.avatarUrl}
-                                                            alt={t.userId.name || t.clientName}
+                                                            src={optimizeImageUrl(testimonial.userId.avatarUrl, { width: 128 }) || testimonial.userId.avatarUrl}
+                                                            alt={testimonial.userId.name || testimonial.clientName}
                                                             loading="lazy"
                                                             decoding="async"
                                                             className="w-full h-full object-cover"

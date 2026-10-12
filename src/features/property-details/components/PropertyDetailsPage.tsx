@@ -1004,22 +1004,24 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 </svg>
               </button>
 
-            {/* Profile Button - compact avatar for PWA navigation */}
-            <button
-              onClick={handleProfileClick}
-              className="rounded-full border-2 border-neutral-200 bg-white cursor-pointer hover:shadow-md hover:border-primary/30 transition-all overflow-hidden flex-shrink-0 w-9 h-9"
-              aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
-            >
-              {currentUser?.avatarUrl ? (
-                <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
-              ) : currentUser ? (
-                <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-              ) : (
-                <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
-                  <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
-                </div>
-              )}
-            </button>
+              {/* Profile Button - same 40px slot as the icons */}
+              <button
+                type="button"
+                onClick={handleProfileClick}
+                className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden ring-2 ring-white shadow-sm active:scale-90 transition-transform duration-150 touch-manipulation focus:outline-none focus-visible:ring-primary/50"
+                aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
+              >
+                {currentUser?.avatarUrl ? (
+                  <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : currentUser ? (
+                  <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+                ) : (
+                  <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-neutral-400" />
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
