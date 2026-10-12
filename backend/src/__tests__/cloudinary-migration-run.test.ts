@@ -5,6 +5,8 @@
  */
 const bucket = new Map<string, string>();
 const downloads: string[] = [];
+/** Runs during a download — lets a test edit a document mid-migration, as a live user would. */
+let duringDownload: ((url: string) => Promise<void>) | null = null;
 
 jest.mock('@aws-sdk/client-s3', () => {
   class Command {
@@ -32,6 +34,7 @@ jest.mock('../services/mediaService', () => {
     ...actual,
     downloadImage: jest.fn(async (url: string) => {
       downloads.push(url);
+      if (duringDownload) await duringDownload(url);
       if (url.includes('gone')) throw new Error('Image download failed: HTTP 404');
       return sharpLib({ create: { width: 800, height: 600, channels: 3, background: '#88a' } }).jpeg().toBuffer();
     }),
@@ -67,6 +70,7 @@ const db = () => mongoose.connection.db!;
 const quiet = { log: () => undefined };
 
 beforeEach(async () => {
+  duringDownload = null;
   bucket.clear();
   downloads.length = 0;
   await db().collection('properties').insertOne({
@@ -174,6 +178,25 @@ describe('runMigration', () => {
     expect(property!.images[0].publicId).toBe(PHOTO_ID);
     expect(property!.floorplans[0].publicId).toBe(PLAN_ID);
     expect((await db().collection('users').findOne({ _id: USER }))!.avatarUrl).toMatch(/^https:\/\/media\.example\.com\//);
+  });
+
+  it("never overwrites an edit a user makes while the migration runs", async () => {
+    // The seller reorders photos (a new one first) while ours is being copied.
+    duringDownload = async (url) => {
+      if (!url.includes('/p1')) return;
+      duringDownload = null;
+      await db().collection('properties').updateOne(
+        { _id: LISTING },
+        { $set: { images: [{ url: 'https://media.example.com/new/original.jpg', publicId: 'new', tag: 'living' }, { url: `${CLD}/t_be_w480/v1/${PHOTO_ID}.jpg`, publicId: PHOTO_ID, tag: 'main' }] } }
+      );
+    };
+    await runMigration({ apply: true, skipConventionCities: true, ...quiet });
+
+    const property = await db().collection('properties').findOne({ _id: LISTING });
+    // The user's new first photo is intact, and the moved photo is rewritten where it now is.
+    expect(property!.images[0]).toMatchObject({ publicId: 'new', tag: 'living' });
+    expect(property!.images[1].url).toMatch(/^https:\/\/media\.example\.com\/users\//);
+    expect(property!.images[1].publicId).toMatch(/^users\//);
   });
 
   it('is a no-op the second time', async () => {

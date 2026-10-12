@@ -79,7 +79,7 @@ import {
 } from '../services/media/cloudinaryMigration';
 
 /** Collections never touched: the media index itself and high-volume logs. */
-const SKIP_COLLECTIONS = new Set(['mediaassets', 'activitylogs', 'pageviews', 'analytics', 'sessions']);
+const SKIP_COLLECTIONS = new Set(['mediaassets', 'mediamigrationstates', 'activitylogs', 'pageviews', 'analytics', 'sessions']);
 
 interface Migrated {
   key: string;
@@ -103,6 +103,8 @@ export interface MigrationOptions {
   onlyCollections?: string[];
   /** Skip the Cloudinary Admin API listing of convention city photos (tests). */
   skipConventionCities?: boolean;
+  /** Pause after each copied image — keeps a migration on the live server gentle. */
+  throttleMs?: number;
   /** Leave imported external-listing images (…/external-listings/…) on Cloudinary for now. */
   skipExternal?: boolean;
   /**
@@ -216,6 +218,8 @@ const migrateOne = async (run: RunState, ref: CloudinaryRef, target: MigrationTa
     migrated.set(ref.publicId, result);
     stats.migrated++;
     stats.byKind[plan.kind] = (stats.byKind[plan.kind] || 0) + 1;
+    if (stats.migrated % 100 === 0) log(`  … ${stats.migrated} images copied so far (${stats.failed.length} failed)`);
+    if (options.throttleMs) await new Promise((resolve) => setTimeout(resolve, options.throttleMs));
     return result;
   } catch (error: any) {
     failedIds.add(ref.publicId);
@@ -244,11 +248,17 @@ const collectStrings = (value: unknown, pathPrefix: string, out: Array<{ path: s
 
 const isPublicIdField = (path: string): boolean => /publicid$/i.test(path.split('.').pop() || '');
 
-/** Migrate everything one document references; returns the $set to apply. */
-const processDocument = async (run: RunState, modelName: string, doc: any): Promise<Record<string, string>> => {
+/** A field to rewrite: the value it had when read, and its new value. */
+interface FieldChange {
+  from: string;
+  to: string;
+}
+
+/** Migrate everything one document references; returns the fields to rewrite. */
+const processDocument = async (run: RunState, modelName: string, doc: any): Promise<Record<string, FieldChange>> => {
   const strings: Array<{ path: string; value: string }> = [];
   collectStrings(doc, '', strings);
-  const set: Record<string, string> = {};
+  const set: Record<string, FieldChange> = {};
 
   // URLs first, so publicId fields next to them find the mapping.
   for (const { path: fieldPath, value } of strings) {
@@ -262,13 +272,13 @@ const processDocument = async (run: RunState, modelName: string, doc: any): Prom
       const result = await migrateOne(run, ref, target);
       if (result) next = next.split(ref.url).join(result.url);
     }
-    if (next !== value) set[fieldPath] = next;
+    if (next !== value) set[fieldPath] = { from: value, to: next };
   }
 
   for (const { path: fieldPath, value } of strings) {
     if (!isPublicIdField(fieldPath)) continue;
     const result = run.migrated.get(value);
-    if (result && result.key !== value) set[fieldPath] = result.key;
+    if (result && result.key !== value) set[fieldPath] = { from: value, to: result.key };
   }
 
   return set;
@@ -281,10 +291,32 @@ const migrateCollection = async (run: RunState, collectionName: string, modelNam
   let updated = 0;
   for await (const doc of cursor) {
     scanned++;
-    const set = await processDocument(run, modelName, doc);
-    if (Object.keys(set).length === 0) continue;
-    updated++;
-    if (run.options.apply) await collection.updateOne({ _id: doc._id }, { $set: set });
+    let current: any = doc;
+    // The site may be live: a field is only rewritten if it still holds the
+    // value we read, so an edit made meanwhile (say, photos reordered) is
+    // never overwritten. When the document changed, read it again and redo it
+    // (cheap — the images are already copied).
+    for (let attempt = 0; current && attempt < 3; attempt++) {
+      const changes = await processDocument(run, modelName, current);
+      const paths = Object.keys(changes);
+      if (paths.length === 0) break;
+      if (!run.options.apply) {
+        updated++;
+        break;
+      }
+      const filter: Record<string, unknown> = { _id: current._id };
+      const $set: Record<string, string> = {};
+      for (const p of paths) {
+        filter[p] = changes[p].from;
+        $set[p] = changes[p].to;
+      }
+      const result = await collection.updateOne(filter, { $set });
+      if (result.matchedCount > 0) {
+        updated++;
+        break;
+      }
+      current = await collection.findOne({ _id: current._id });
+    }
   }
   run.stats.docsUpdated += updated;
   if (updated > 0) {
@@ -367,6 +399,16 @@ export async function runMigration(options: MigrationOptions): Promise<Stats> {
     // last: it only mirrors references the others already resolved.
     .sort((a, b) => rank(a, modelByCollection) - rank(b, modelByCollection));
 
+  // Curated city photos first when the cloud is known up front: the frontend
+  // finds them by name, so they're worth having on R2 early. Otherwise the
+  // cloud is learnt from the documents and they come last.
+  const conventionCities = !options.onlyCollections && !options.skipConventionCities;
+  const cloudKnown = Boolean(process.env.CLOUDINARY_CLOUD_NAME?.trim());
+  if (conventionCities && cloudKnown) {
+    log('\nConvention city photos (city-*):');
+    await migrateConventionCityPhotos(run);
+  }
+
   log('\nDocuments:');
   for (const name of collections) {
     await migrateCollection(run, name, modelByCollection.get(name) || '');
@@ -374,7 +416,7 @@ export async function runMigration(options: MigrationOptions): Promise<Stats> {
 
   if (options.apply) await ensurePrivateAccessRecords(run);
 
-  if (!options.onlyCollections && !options.skipConventionCities) {
+  if (conventionCities && !cloudKnown) {
     log('\nConvention city photos (city-*):');
     await migrateConventionCityPhotos(run);
   }
