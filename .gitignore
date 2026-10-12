@@ -72,3 +72,4 @@ test-results/
 
 # Vite dev build artifacts
 dev-dist/
+backend/.env.example
