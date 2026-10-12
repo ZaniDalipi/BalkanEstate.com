@@ -344,7 +344,9 @@
       "minRemovals": "…and more than this many listings",
       "saving": "Saving…",
       "save": "Save",
-      "formatAuto": "Auto-detect (any XML property feed)"
+      "formatAuto": "Auto-detect (any XML property feed)",
+      "advanced": "Advanced settings",
+      "advancedHint": "format, password, field mapping, removal safeguards"
     },
     "mapping": {
       "title": "Field mapping",
@@ -509,6 +511,15 @@
       "usedFor": "Imported as",
       "repeated": "repeats within a listing",
       "unused": "not used"
+    },
+    "quickLink": {
+      "title": "Import your listings",
+      "help": "Paste the XML link from your website or CRM. We recognise the format, show you a preview, and after you confirm, keep your listings updated every day.",
+      "label": "XML feed link",
+      "button": "Import",
+      "busy": "Checking…",
+      "or": "No link?",
+      "advanced": "Advanced setup (password-protected feed, own field mapping)"
     }
   }
 }

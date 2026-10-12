@@ -344,7 +344,9 @@
       "minRemovals": "…dhe më shumë se ky numër njoftimesh",
       "saving": "Po ruhet…",
       "save": "Ruaj",
-      "formatAuto": "Zbulim automatik (çdo feed XML pronash)"
+      "formatAuto": "Zbulim automatik (çdo feed XML pronash)",
+      "advanced": "Cilësime të avancuara",
+      "advancedHint": "formati, fjalëkalimi, lidhja e fushave, mbrojtjet për heqjet"
     },
     "mapping": {
       "title": "Përputhja e fushave",
@@ -509,6 +511,15 @@
       "usedFor": "Importohet si",
       "repeated": "përsëritet brenda një shpalljeje",
       "unused": "nuk përdoret"
+    },
+    "quickLink": {
+      "title": "Importoni shpalljet tuaja",
+      "help": "Ngjitni lidhjen XML nga faqja juaj ose CRM. Ne e njohim formatin, ju tregojmë një parapamje dhe, pasi të konfirmoni, i mbajmë shpalljet të përditësuara çdo ditë.",
+      "label": "Lidhja e feed-it XML",
+      "button": "Importo",
+      "busy": "Duke kontrolluar…",
+      "or": "Nuk keni lidhje?",
+      "advanced": "Konfigurim i avancuar (feed me fjalëkalim, lidhje e vetë fushave)"
     }
   }
 }

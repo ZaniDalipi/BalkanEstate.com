@@ -61,6 +61,12 @@ const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMappin
   const [values, setValues] = useState<FeedFormValues>(() =>
     suggestedMapping ? { ...initial, format: 'custom', mapping: suggestedMapping } : initial
   );
+  // Most agencies only need a name and a link; the rest starts open only when it is already in use.
+  const [showAdvanced] = useState(
+    () =>
+      values.format === 'custom' || values.mode === 'delta' || values.credentials.type !== 'none' ||
+      JSON.stringify(values.safeguards) !== JSON.stringify({ maxRemovalRatio: 0.3, minRemovalsForReview: 5 })
+  );
   const set = <K extends keyof FeedFormValues>(key: K, value: FeedFormValues[K]) => setValues((v) => ({ ...v, [key]: value }));
   const setCred = (patch: Partial<FeedFormValues['credentials']>) => set('credentials', { ...values.credentials, ...patch });
 
@@ -93,30 +99,6 @@ const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMappin
             <input className={inputClass} type="url" value={values.url ?? ''} required onChange={(e) => set('url', e.target.value)} placeholder="https://www.your-agency.com/feed.xml" spellCheck={false} />
           </label>
         )}
-        <label className="block text-sm">
-          <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.format', 'Format')}</span>
-          <select className={inputClass} value={values.format} onChange={(e) => {
-            const format = e.target.value as FeedFormValues['format'];
-            // Custom starts from what auto-detection recognised, so only corrections are needed.
-            setValues((v) => ({ ...v, format, mapping: format === 'custom' ? v.mapping ?? feed?.recognisedFormat?.mapping ?? { ...meta.canonical.mapping } : v.mapping }));
-          }}>
-            <option value="auto">{t('agencyDashboard:imports.form.formatAuto', 'Auto-detect (any XML property feed)')}</option>
-            <option value="canonical">{t('agencyDashboard:imports.form.formatCanonical', 'BalkanEstateAI XML (no mapping needed)')}</option>
-            <option value="custom">{t('agencyDashboard:imports.form.formatCustom', 'Other XML format (map fields)')}</option>
-          </select>
-        </label>
-        <label className="block text-sm">
-          <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.mode', 'Feed contents')}</span>
-          <select className={inputClass} value={values.mode} onChange={(e) => set('mode', e.target.value as FeedFormValues['mode'])}>
-            <option value="snapshot">{t('agencyDashboard:imports.mode.snapshot', 'Complete listing (snapshot)')}</option>
-            <option value="delta">{t('agencyDashboard:imports.mode.delta', 'Changes only (delta)')}</option>
-          </select>
-          <span className="mt-1 block text-xs text-gray-500">
-            {values.mode === 'snapshot'
-              ? t('agencyDashboard:imports.form.snapshotHelp', 'Listings missing from a complete, valid feed are deactivated (never deleted).')
-              : t('agencyDashboard:imports.form.deltaHelp', 'Only listings marked "removed" are deactivated; missing listings are left alone.')}
-          </span>
-        </label>
         <label className="block text-sm sm:col-span-2">
           <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.agent', 'Publish listings as')}</span>
           <select className={inputClass} value={values.assignedAgentId} onChange={(e) => set('assignedAgentId', e.target.value)}>
@@ -127,15 +109,51 @@ const FeedForm: React.FC<FeedFormProps> = ({ feed, meta, agents, suggestedMappin
         </label>
       </div>
 
-      {values.sourceType === 'url' && (
-        <FeedAccessFields value={values.credentials} hasSavedSecret={Boolean(feed?.credentials.hasSecret)} onChange={setCred} />
-      )}
+      <details open={showAdvanced} className="rounded-xl border border-gray-200">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-gray-900">
+          {t('agencyDashboard:imports.form.advanced', 'Advanced settings')}
+          <span className="ml-2 font-normal text-gray-500">
+            {t('agencyDashboard:imports.form.advancedHint', 'format, password, field mapping, removal safeguards')}
+          </span>
+        </summary>
+        <div className="space-y-5 border-t border-gray-200 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="block text-sm">
+              <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.format', 'Format')}</span>
+              <select className={inputClass} value={values.format} onChange={(e) => {
+                const format = e.target.value as FeedFormValues['format'];
+                // Custom starts from what auto-detection recognised, so only corrections are needed.
+                setValues((v) => ({ ...v, format, mapping: format === 'custom' ? v.mapping ?? feed?.recognisedFormat?.mapping ?? { ...meta.canonical.mapping } : v.mapping }));
+              }}>
+                <option value="auto">{t('agencyDashboard:imports.form.formatAuto', 'Auto-detect (any XML property feed)')}</option>
+                <option value="canonical">{t('agencyDashboard:imports.form.formatCanonical', 'BalkanEstateAI XML (no mapping needed)')}</option>
+                <option value="custom">{t('agencyDashboard:imports.form.formatCustom', 'Other XML format (map fields)')}</option>
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="font-medium text-gray-700">{t('agencyDashboard:imports.form.mode', 'Feed contents')}</span>
+              <select className={inputClass} value={values.mode} onChange={(e) => set('mode', e.target.value as FeedFormValues['mode'])}>
+                <option value="snapshot">{t('agencyDashboard:imports.mode.snapshot', 'Complete listing (snapshot)')}</option>
+                <option value="delta">{t('agencyDashboard:imports.mode.delta', 'Changes only (delta)')}</option>
+              </select>
+              <span className="mt-1 block text-xs text-gray-500">
+                {values.mode === 'snapshot'
+                  ? t('agencyDashboard:imports.form.snapshotHelp', 'Listings missing from a complete, valid feed are deactivated (never deleted).')
+                  : t('agencyDashboard:imports.form.deltaHelp', 'Only listings marked "removed" are deactivated; missing listings are left alone.')}
+              </span>
+            </label>
+          </div>
+          {values.sourceType === 'url' && (
+            <FeedAccessFields value={values.credentials} hasSavedSecret={Boolean(feed?.credentials.hasSecret)} onChange={setCred} />
+          )}
 
-      {values.format === 'custom' && values.mapping && (
-        <MappingEditor value={values.mapping} fields={meta.fields} pathSuggestions={pathSuggestions} onChange={(mapping) => set('mapping', mapping)} />
-      )}
+          {values.format === 'custom' && values.mapping && (
+            <MappingEditor value={values.mapping} fields={meta.fields} pathSuggestions={pathSuggestions} onChange={(mapping) => set('mapping', mapping)} />
+          )}
 
-      <SafeguardFields value={values.safeguards} onChange={(safeguards) => set('safeguards', safeguards)} />
+          <SafeguardFields value={values.safeguards} onChange={(safeguards) => set('safeguards', safeguards)} />
+        </div>
+      </details>
 
       <MutationError error={error} />
 

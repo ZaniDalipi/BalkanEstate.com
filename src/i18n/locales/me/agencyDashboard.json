@@ -344,7 +344,9 @@
       "minRemovals": "…i više od ovoliko oglasa",
       "saving": "Čuvanje…",
       "save": "Sačuvaj",
-      "formatAuto": "Automatsko prepoznavanje (bilo koji XML feed nekretnina)"
+      "formatAuto": "Automatsko prepoznavanje (bilo koji XML feed nekretnina)",
+      "advanced": "Napredna podešavanja",
+      "advancedHint": "format, lozinka, mapiranje polja, zaštita od uklanjanja"
     },
     "mapping": {
       "title": "Mapiranje polja",
@@ -509,6 +511,15 @@
       "usedFor": "Uvozi se kao",
       "repeated": "ponavlja se unutar oglasa",
       "unused": "ne koristi se"
+    },
+    "quickLink": {
+      "title": "Uvezite svoje oglase",
+      "help": "Zalijepite XML link sa vašeg sajta ili CRM-a. Prepoznajemo format, pokazujemo pregled i, nakon što potvrdite, svakodnevno ažuriramo vaše oglase.",
+      "label": "Link XML feeda",
+      "button": "Uvezi",
+      "busy": "Provjera…",
+      "or": "Nemate link?",
+      "advanced": "Napredno podešavanje (feed sa lozinkom, sopstveno mapiranje polja)"
     }
   }
 }

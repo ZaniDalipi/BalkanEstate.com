@@ -344,7 +344,9 @@
       "minRemovals": "…și mai mult de acest număr de anunțuri",
       "saving": "Se salvează…",
       "save": "Salvează",
-      "formatAuto": "Detectare automată (orice feed XML de proprietăți)"
+      "formatAuto": "Detectare automată (orice feed XML de proprietăți)",
+      "advanced": "Setări avansate",
+      "advancedHint": "format, parolă, maparea câmpurilor, protecție la eliminări"
     },
     "mapping": {
       "title": "Corespondența câmpurilor",
@@ -509,6 +511,15 @@
       "usedFor": "Importat ca",
       "repeated": "se repetă în anunț",
       "unused": "nefolosit"
+    },
+    "quickLink": {
+      "title": "Importați anunțurile",
+      "help": "Lipiți linkul XML de pe site-ul sau din CRM-ul dvs. Recunoaștem formatul, vă arătăm o previzualizare și, după ce confirmați, vă actualizăm anunțurile zilnic.",
+      "label": "Link feed XML",
+      "button": "Importă",
+      "busy": "Se verifică…",
+      "or": "Nu aveți link?",
+      "advanced": "Configurare avansată (feed cu parolă, mapare proprie a câmpurilor)"
     }
   }
 }

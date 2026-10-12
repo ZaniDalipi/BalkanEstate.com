@@ -194,4 +194,30 @@ describe('PropertyImportsSection', () => {
     fireEvent.change(screen.getByLabelText('Search fields or values'), { target: { value: 'pool' } });
     expect(screen.queryByText('Sea view villa')).toBeNull();
   });
+
+  it('imports from a pasted link: creates an auto-detect feed named after the site and previews it', async () => {
+    api.listFeeds.mockResolvedValue({ feeds: [], workerOnline: true });
+    api.createFeed.mockResolvedValue({ ...baseFeed, id: 'f3', format: 'auto', lastPreviewRunId: null });
+    api.requestPreview.mockResolvedValue({ runId: 'r10' });
+    renderSection();
+
+    fireEvent.change(await screen.findByLabelText('XML feed link'), { target: { value: 'https://www.agency.example/export.xml' } });
+    fireEvent.click(screen.getByText('Import'));
+
+    await waitFor(() => expect(api.requestPreview).toHaveBeenCalledWith('ag1', 'f3'));
+    expect(api.createFeed).toHaveBeenCalledWith('ag1', { name: 'agency.example', sourceType: 'url', url: 'https://www.agency.example/export.xml' });
+  });
+
+  it('previews again instead of creating a duplicate when the link is already connected', async () => {
+    api.listFeeds.mockResolvedValue({ feeds: [{ ...baseFeed, url: 'https://agency.example/feed.xml' }], workerOnline: true });
+    api.requestPreview.mockResolvedValue({ runId: 'r11' });
+    api.createFeed.mockClear();
+    renderSection();
+    await screen.findAllByText('Website feed');
+
+    fireEvent.change(screen.getByLabelText('XML feed link'), { target: { value: 'https://agency.example/feed.xml' } });
+    fireEvent.click(screen.getByText('Import'));
+    await waitFor(() => expect(api.requestPreview).toHaveBeenCalledWith('ag1', 'f1'));
+    expect(api.createFeed).not.toHaveBeenCalled();
+  });
 });

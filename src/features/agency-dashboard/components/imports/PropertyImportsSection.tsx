@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PlusIcon } from '@/constants';
 import type { FeedMappingConfig } from '../../types/propertyImports';
 import { useAgencyAgents } from '../../hooks';
 import { useAgencyFeeds, useFeedMeta, useFeedMutations, useFeedRun } from '../../hooks/usePropertyImports';
@@ -8,7 +7,7 @@ import FeedCard from './FeedCard';
 import FeedForm from './FeedForm';
 import FeedPanel from './FeedPanel';
 import MutationError from './MutationError';
-import QuickUploadButton from './QuickUploadButton';
+import QuickLinkImport from './QuickLinkImport';
 import SyncRulesInfo from './SyncRulesInfo';
 
 interface PropertyImportsSectionProps {
@@ -58,6 +57,21 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
       // Shown by MutationError below.
     }
   };
+  // Paste a link and Import: the feed is created with auto-detection and previewed
+  // straight away. A link that is already connected is previewed again instead.
+  const quickLink = async (url: string) => {
+    try {
+      const existing = feeds.find((f) => f.sourceType === 'url' && f.url === url);
+      let host = url;
+      try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { /* the server validates the URL */ }
+      const target = existing ?? (await m.create.mutateAsync({ name: host.slice(0, 80), sourceType: 'url', url }));
+      setSelectedId(target.id);
+      if (target.state === 'draft') await m.preview.mutateAsync(target.id);
+      else m.sync.mutate(target.id);
+    } catch {
+      // Shown by MutationError below.
+    }
+  };
   const agentOptions = agents.map((a) => ({ id: a.userId, name: a.name }));
 
   return (
@@ -69,17 +83,16 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
             {t('agencyDashboard:imports.subtitle', 'Connect the XML feed from your website or CRM. Listings and photos are imported and refreshed every 24 hours.')}
           </p>
         </div>
-        {editing.kind === 'none' && (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <QuickUploadButton busy={m.create.isPending || m.upload.isPending} onFile={quickUpload} />
-            <button type="button" onClick={() => setEditing({ kind: 'new' })}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
-              <PlusIcon className="w-4 h-4" />
-              {t('agencyDashboard:imports.actions.add', 'Connect a feed')}
-            </button>
-          </div>
-        )}
       </div>
+
+      {editing.kind === 'none' && (
+        <QuickLinkImport
+          busy={m.create.isPending || m.upload.isPending || m.preview.isPending}
+          onLink={quickLink}
+          onFile={quickUpload}
+          onAdvanced={() => setEditing({ kind: 'new' })}
+        />
+      )}
 
       {editing.kind !== 'none' && meta && (
         <FeedForm
@@ -113,11 +126,6 @@ const PropertyImportsSection: React.FC<PropertyImportsSectionProps> = ({ agencyI
       )}
 
       {isLoading && <div className="h-32 bg-white rounded-xl border border-gray-200 animate-pulse" />}
-      {!isLoading && feeds.length === 0 && editing.kind === 'none' && (
-        <div className="bg-white rounded-xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-600">
-          {t('agencyDashboard:imports.empty', 'No feed connected yet. Connect your website or CRM feed to import your listings automatically.')}
-        </div>
-      )}
 
       {workerOffline && (
         <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">

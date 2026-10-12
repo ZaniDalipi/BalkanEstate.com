@@ -15,6 +15,15 @@ A complete, fictional example feed is in [`sample-feed.xml`](./sample-feed.xml).
 
 ## Connecting a feed
 
+**The quick way.** In **Agency Dashboard → Property Imports**, paste the XML link your website or CRM gives you
+and press **Import** (or **Upload XML** if you only have a file). The feed is created with *Auto-detect*, named
+after the site, and previewed straight away. Check the preview, tick the authorization statement and press
+**Activate and import now** — from then on the listings are refreshed every 24 hours. Nothing is published before
+that confirmation. Pasting a link that is already connected previews it again instead of adding it twice.
+
+**Advanced setup** (the link under the box, or **Edit** on a feed) opens the full form; format, password,
+field mapping, feed contents and removal safeguards sit under *Advanced settings*:
+
 Only the **agency owner** and **agency admins** can manage imports. Member agents see a notice in this section and
 cannot view or change feeds.
 
