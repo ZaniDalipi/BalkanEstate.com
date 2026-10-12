@@ -89,6 +89,7 @@ export const startAutoMediaMigration = async (options: AutoMigrationOptions = {}
 
   const startDelayMs = options.startDelayMs ?? Number(process.env.MEDIA_MIGRATE_START_DELAY_MS ?? 30_000);
   const throttleMs = options.throttleMs ?? Number(process.env.MEDIA_MIGRATE_THROTTLE_MS ?? 200);
+  mediaLogger.info(`[media-migrate] MEDIA_MIGRATE_ON_START is on — checking Cloudinary → R2 in ${Math.round(startDelayMs / 1000)}s`);
   if (startDelayMs > 0) await new Promise((resolve) => setTimeout(resolve, startDelayMs).unref?.());
   if (mongoose.connection.readyState !== 1) await mongoose.connection.asPromise();
 
