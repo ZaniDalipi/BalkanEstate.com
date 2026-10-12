@@ -137,6 +137,7 @@ import adBannerRoutes from './routes/adBannerRoutes';
 // Import services
 import { initializeGooglePlayService } from './services/googlePlayService';
 import { startCronJobs } from './cron';
+import { startAutoMediaMigration } from './services/media/autoMigration';
 import { initializeAppStoreService } from './services/appStoreService';
 import { scheduleReconciliation } from './workers/reconciliationWorker';
 import { scheduleExpirationWorker } from './workers/subscriptionExpirationWorker';
@@ -186,6 +187,8 @@ connectDB().then(() => {
   ensureAllFeaturedCitiesExist().catch(err =>
     serverLogger.error('Failed to seed featured cities:', err)
   );
+  // Cloudinary → R2, once, in the background (only with MEDIA_MIGRATE_ON_START=true).
+  void startAutoMediaMigration();
 });
 
 

@@ -165,6 +165,17 @@ Some details:
 - It writes `media-migration-report-*.json`.
 - Images Cloudinary no longer has (HTTP 404) are listed as failed and keep their old link; they're already broken today.
 
+### Moving everything from the running server (Railway)
+
+Instead of running the commands yourself, the backend can do it after deploy:
+
+1. Back up the database.
+2. On Railway, add `MEDIA_MIGRATE_ON_START=true` and `CLOUDINARY_CLOUD_NAME=dh8tbq8wy`, then redeploy.
+3. About 30 seconds after start, the logs show `[media-migrate] Moving images from Cloudinary to R2…`, a progress line every 100 images, and finally `[media-migrate] Done: …`.
+4. Remove `MEDIA_MIGRATE_ON_START` (it would do nothing anyway once done) and run `npm run media:check -- --require-r2`.
+
+It runs once in total: a lock in `mediamigrationstates` keeps a second instance or a restart from running it twice, an interrupted run continues where it stopped on the next start, and once `status` is `done` it never runs again. Photos stay visible from Cloudinary until each link switches, and a listing a user edits meanwhile is never overwritten. Images Cloudinary no longer has are listed in that document's `stats.failed`. To run it again, delete the document: `db.mediamigrationstates.deleteOne({ _id: 'cloudinary-to-r2' })`.
+
 ### Moving only part of it
 
 `npm run media:migrate:non-listings` moves avatars, logos, cities and villas but leaves every listing photo on Cloudinary. `npm run media:migrate:apply` moves the rest at any time; anything already moved is skipped.
