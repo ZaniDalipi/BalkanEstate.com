@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -1151,7 +1151,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      // Apply server URL (Cloudinary optimized) to replace the local preview
+      // Apply server URL (media CDN) to replace the local preview
       setAgencyData(prev => ({
         ...prev,
         logo: data.logo || data.agency?.logo || prev.logo,
@@ -1222,7 +1222,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      // Apply server URL (Cloudinary optimized) to replace the local preview
+      // Apply server URL (media CDN) to replace the local preview
       setAgencyData(prev => ({
         ...prev,
         coverImage: data.coverImage || data.agency?.coverImage || prev.coverImage,
@@ -1561,7 +1561,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {agencyData.coverImage ? (
           <>
             <img
-              src={optimizeCloudinaryUrl(agencyData.coverImage, { width: 1600 }) || agencyData.coverImage}
+              src={optimizeImageUrl(agencyData.coverImage, { width: 1600 }) || agencyData.coverImage}
               alt={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
               className={`absolute inset-0 w-full h-full object-cover ${isRepositioningCover ? 'cursor-grab active:cursor-grabbing z-30 select-none' : ''}`}
               style={{
@@ -1874,7 +1874,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {agencyData.logo ? (
                 <>
                   <img
-                    src={optimizeCloudinaryUrl(agencyData.logo, { width: 240 }) || agencyData.logo}
+                    src={optimizeImageUrl(agencyData.logo, { width: 240 }) || agencyData.logo}
                     alt={`${agencyData.name} logo - Real Estate Agency`}
                     className={`w-full h-full object-cover ${isRepositioningLogo ? 'cursor-grab active:cursor-grabbing z-20 select-none' : ''}`}
                     style={{
@@ -3118,7 +3118,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       >
                         {property.imageUrl && (
                           <div className="w-full h-[130px] rounded-lg overflow-hidden mb-2">
-                            <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 480 }) || property.imageUrl} alt={`Property for sale in ${property.city}, ${property.country} - ${property.address}`} className="w-full h-full object-cover" loading="lazy" />
+                            <img src={optimizeImageUrl(property.imageUrl, { width: 480 }) || property.imageUrl} alt={`Property for sale in ${property.city}, ${property.country} - ${property.address}`} className="w-full h-full object-cover" loading="lazy" />
                           </div>
                         )}
                         <p className="font-semibold text-sm mb-1 text-slate-900 line-clamp-2">{property.address}</p>
@@ -3203,7 +3203,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <div className="text-center min-w-[200px]">
                       {agencyData.logo && (
                         <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-slate-300 flex-shrink-0">
-                          <img src={optimizeCloudinaryUrl(agencyData.logo, { width: 128 }) || agencyData.logo} alt={agencyData.name} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={optimizeImageUrl(agencyData.logo, { width: 128 }) || agencyData.logo} alt={agencyData.name} className="w-full h-full object-cover" loading="lazy" />
                         </div>
                       )}
                       <h3 className="font-bold text-slate-900">{agencyData.name}</h3>

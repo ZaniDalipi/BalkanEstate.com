@@ -28,7 +28,7 @@ npm run dev
 - **[Backend Setup](./docs/setup/backend/QUICK_START.md)** - Server configuration
 - **[Database Setup](./docs/setup/backend/DATABASE_SETUP.md)** - MongoDB
 - **[OAuth Setup](./docs/setup/backend/OAUTH_SETUP.md)** - Social login
-- **[Cloudinary Setup](./docs/setup/backend/CLOUDINARY_SETUP.md)** - Image hosting
+- **[Media storage (Cloudflare R2)](../MEDIA_STORAGE.md)** - Image hosting
 
 ### Architecture
 - **[Frontend Architecture](./docs/architecture/FRONTEND_ARCHITECTURE.md)** - React + TanStack Query

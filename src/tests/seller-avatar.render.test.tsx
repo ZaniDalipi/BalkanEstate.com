@@ -61,13 +61,13 @@ describe('SellerAvatar', () => {
     it('shows the uploaded photo when there is one, at the size it renders', () => {
         render(
             <SellerAvatar
-                seller={seller({ avatarUrl: 'https://res.cloudinary.com/demo/image/upload/v1/agent.jpg' })}
+                seller={seller({ avatarUrl: 'https://media.test/agent/original.jpg' })}
                 seed="seller-1"
                 size={32}
             />
         );
 
         // Requested at 2× the CSS size so it stays sharp on a retina screen.
-        expect(screen.getByRole('img').getAttribute('src')).toContain('t_be_w64');
+        expect(screen.getByRole('img').getAttribute('src')).toContain('/w160.webp');
     });
 });

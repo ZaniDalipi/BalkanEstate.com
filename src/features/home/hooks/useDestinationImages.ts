@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getCityImageUrl, optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { getCityImageUrl, optimizeImageUrl } from '@/config/mediaConfig';
 import type { VillaDestination } from '../data/villaDestinations';
 
 /**
  * The corridor card is 18 wide by 25 tall in the geometry's own units, so
  * every request keeps exactly that ratio. Asking for any other shape would
- * make Cloudinary's `c_fill` throw away more of the photo than the card
+ * make a crop throw away more of the photo than the card
  * actually hides, and asking for one that disagrees with the card would leave
  * `object-cover` to crop the difference a second time. Deriving the height
  * from the width is what stops the two drifting apart.
@@ -14,7 +14,7 @@ const CARD_ASPECT = 18 / 25;
 
 /**
  * Widest image worth fetching. The master stored on upload is 2200px, so
- * anything beyond this is Cloudinary upscaling — more bytes, no more detail.
+ * anything beyond this is upscaling — more bytes, no more detail.
  */
 const MAX_IMAGE_WIDTH = 2200;
 
@@ -80,12 +80,12 @@ export interface ResolvedDestinationImage {
 }
 
 /**
- * Resolves each destination to a Cloudinary city photo, falling back to a
+ * Resolves each destination to a curated city photo, falling back to a
  * gradient.
  *
  * The corridor renders gradients on the first frame and swaps in each photo
  * only once it has actually decoded. Preloading out here — rather than reacting
- * to an `onError` inside the corridor — means a missing Cloudinary asset simply
+ * to an `onError` inside the corridor — means a missing city photo simply
  * never swaps in: no broken-image icon, no gap, and the vendored component
  * stays untouched.
  *
@@ -121,22 +121,22 @@ export function useDestinationImages(
                 // The curated one goes through the same crop as the seeded
                 // ones rather than being used as uploaded. The card is a
                 // fixed 18:25 portrait, so an upload of any other shape has
-                // to lose something — `c_fill` with `g_auto` makes Cloudinary
+                // to lose something — a crop makes the browser
                 // pick the crop around the subject instead of blindly taking
                 // the middle, and asking for the card's exact size stops a
                 // large original being downloaded in full and squeezed by the
-                // browser. `optimizeCloudinaryUrl` strips any transform
+                // browser. `optimizeImageUrl` strips any transform
                 // already baked into the stored URL first, and returns
-                // non-Cloudinary URLs untouched.
+                // other URLs untouched.
                 url: dest.imageUrl
-                    ? optimizeCloudinaryUrl(dest.imageUrl, {
+                    ? optimizeImageUrl(dest.imageUrl, {
                         width: imageWidth,
                         height: imageHeight,
                         crop: 'fill',
                         gravity: 'auto',
                         // These are the hero of the section and are shown very
                         // large; `auto:best` spends the extra bytes rather
-                        // than letting Cloudinary trade detail for size.
+                        // than trading detail for size.
                         quality: 'auto:best',
                     }) || dest.imageUrl
                     : getCityImageUrl(dest.imageCity, {

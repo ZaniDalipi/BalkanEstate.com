@@ -12,7 +12,7 @@ import {
   OptionalEmailPreferenceKey,
 } from '../models/User';
 import crypto from 'crypto';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage, isMediaStorageConfigured } from '../services/mediaService';
 import { validatePassword, passwordContainsUserInfo } from '../utils/passwordValidator';
 import { sendVerificationEmail } from '../services/emailVerificationService';
 import { generateTokenPair } from '../services/refreshTokenService';
@@ -1727,12 +1727,7 @@ export const uploadAvatar = async (
       return;
     }
 
-    // Check if Cloudinary is configured
-    const cloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME &&
-                                   process.env.CLOUDINARY_API_KEY &&
-                                   process.env.CLOUDINARY_API_SECRET;
-
-    if (!cloudinaryConfigured) {
+    if (!isMediaStorageConfigured()) {
       res.status(500).json({
         message: 'Image upload service is currently unavailable.',
       });
@@ -1748,7 +1743,7 @@ export const uploadAvatar = async (
     }
 
 
-    // Delete old avatar from Cloudinary if exists
+    // Delete old avatar if exists
     if (user.avatarPublicId) {
       try {
         await deleteImage(user.avatarPublicId);
@@ -1757,8 +1752,7 @@ export const uploadAvatar = async (
       }
     }
 
-    // Upload avatar using centralized cloudinaryService
-    // Path: balkan-estate/users/{userId}/avatar/
+    // Upload avatar → users/{userId}/avatar/{photoId}/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId,
       type: 'avatar',
@@ -1843,10 +1837,10 @@ export const saveAvatarOptions = async (req: Request, res: Response): Promise<vo
     user.avatarUrl = undefined;
     if (user.avatarPublicId) {
       try {
-        const { deleteImage } = require('../services/cloudinaryService');
+        const { deleteImage } = require('../services/mediaService');
         await deleteImage(user.avatarPublicId);
       } catch {
-        // Non-blocking: continue even if cloudinary deletion fails
+        // Non-blocking: continue even if storage deletion fails
       }
       user.avatarPublicId = undefined;
     }
@@ -2451,11 +2445,11 @@ export const deleteAccount = async (req: Request, res: Response): Promise<void> 
       { $set: { status: 'inactive', isActive: false } }
     );
 
-    // Remove the avatar and verification documents from Cloudinary — personal
+    // Remove the avatar and verification documents from storage — personal
     // files must not outlive the account. Best-effort: a media failure is
     // logged and never blocks the deletion itself.
     try {
-      const { deleteUserPersonalMedia } = await import('../services/cloudinaryService');
+      const { deleteUserPersonalMedia } = await import('../services/mediaService');
       await deleteUserPersonalMedia(userId);
     } catch (mediaError) {
       authLogger.error('⚠️ Failed to delete personal media for closed account:', mediaError);

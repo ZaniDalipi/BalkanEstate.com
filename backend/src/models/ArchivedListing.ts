@@ -33,7 +33,7 @@ export interface IArchivedListing extends Document {
   // Single thumbnail image (archived with reduced storage)
   thumbnailUrl?: string;
   thumbnailPublicId?: string;
-  /** Set when the retention job cleared the thumbnail from Cloudinary. */
+  /** Set when the retention job cleared the thumbnail from storage. */
   mediaPurgedAt?: Date;
 
   // Sale/rental details

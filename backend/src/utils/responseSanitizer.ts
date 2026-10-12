@@ -22,9 +22,9 @@ const PROPERTY_DETAIL_ONLY_FIELDS = [
   'rentalHistory',        // Only shown in RentalHistorySection (detail page)
   'tenantRequirements',   // Only shown in RentalTermsSection (detail page)
   'visitAvailability',    // Only shown in PropertyInfo (detail page)
-  'imagePublicId',        // Internal Cloudinary ID — never exposed to client
-  'floorplanPublicId',    // Internal Cloudinary ID
-  'generatedVideoPublicId', // Internal Cloudinary ID
+  'imagePublicId',        // Internal storage key — never exposed to client
+  'floorplanPublicId',    // Internal storage key
+  'generatedVideoPublicId', // Internal storage key
 ] as const;
 
 /**

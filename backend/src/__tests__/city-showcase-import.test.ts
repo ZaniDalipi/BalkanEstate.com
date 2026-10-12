@@ -1,20 +1,20 @@
 /**
  * City Showcase Import Tests
- * Covers `resolveCityPhoto`'s source priority (the curated Cloudinary library
+ * Covers `resolveCityPhoto`'s source priority (the curated city library in R2
  * over the market-data row) and `selectImportCandidates`'s ordering — both
  * pure enough to test without a database.
  */
 
-jest.mock('../config/cloudinary', () => ({
+jest.mock('../config/r2', () => ({ isR2Enabled: () => true }));
+jest.mock('../services/media/r2MediaStore', () => ({
+  storedUrlFor: (key: string) => `https://media.example.com/${key}/original.jpg`,
+}));
+const mockFindOne = jest.fn();
+jest.mock('../models/MediaAsset', () => ({
   __esModule: true,
-  default: {
-    api: {
-      resource: jest.fn(),
-    },
-  },
+  default: { findOne: (...args: unknown[]) => mockFindOne(...args) },
 }));
 
-import cloudinary from '../config/cloudinary';
 import {
   resolveCityPhoto,
   selectImportCandidates,
@@ -23,57 +23,46 @@ import {
   type ImportableCity,
 } from '../services/cityShowcaseImportService';
 
-const mockResource = cloudinary.api.resource as jest.Mock;
+/** What MediaAsset.findOne(...).select(...).lean() resolves to. */
+const libraryHas = (asset: { key: string; bucket: string } | null) =>
+  mockFindOne.mockReturnValueOnce({ select: () => ({ lean: async () => asset }) });
 
 describe('resolveCityPhoto', () => {
   beforeEach(() => {
-    mockResource.mockReset();
+    mockFindOne.mockReset();
   });
 
   const row: ImportableCity = {
     city: 'Durres',
     country: 'Albania',
-    imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/market-data-durres.jpg',
+    imageUrl: 'https://media.example.com/cities/albania/durres/m1/original.jpg',
   };
 
-  it('prefers the curated Cloudinary library over the market-data row', async () => {
+  it('prefers the curated city library over the market-data row', async () => {
     // The library is what `seedCityImages.ts` deliberately curated; the row
     // field is what the automatic, lower-quality pipeline writes. A city
     // covered by both must resolve to the curated one.
-    mockResource.mockResolvedValueOnce({
-      secure_url: 'https://res.cloudinary.com/demo/image/upload/v1/city-albania-durres.jpg',
-    });
+    libraryHas({ key: 'cities/convention/city-albania-durres', bucket: 'public' });
 
     const photo = await resolveCityPhoto(row);
 
-    expect(mockResource).toHaveBeenCalledWith('city-albania-durres');
-    expect(photo).toBe('https://res.cloudinary.com/demo/image/upload/v1/city-albania-durres.jpg');
+    expect(mockFindOne).toHaveBeenCalledWith({ key: 'cities/convention/city-albania-durres' });
+    expect(photo).toBe('https://media.example.com/cities/convention/city-albania-durres/original.jpg');
   });
 
-  it('falls back to the row field when the city has no library asset', async () => {
-    mockResource.mockRejectedValueOnce(new Error('Not found'));
-
-    expect(await resolveCityPhoto(row)).toBe(row.imageUrl);
-  });
-
-  it('falls back to the row field when the library resource has no usable URL', async () => {
-    mockResource.mockResolvedValueOnce({ secure_url: undefined });
-
+  it('falls back to the row field when the city has no library photo', async () => {
+    libraryHas(null);
     expect(await resolveCityPhoto(row)).toBe(row.imageUrl);
   });
 
   it('returns null when neither source has a usable photo', async () => {
-    mockResource.mockRejectedValueOnce(new Error('Not found'));
-
+    libraryHas(null);
     expect(await resolveCityPhoto({ city: 'Nowhere', country: 'Nowhereland' })).toBeNull();
   });
 
   it('rejects a non-https row URL rather than pointing an img src at it', async () => {
-    mockResource.mockRejectedValueOnce(new Error('Not found'));
-
-    expect(
-      await resolveCityPhoto({ ...row, imageUrl: 'javascript:alert(1)' })
-    ).toBeNull();
+    libraryHas(null);
+    expect(await resolveCityPhoto({ ...row, imageUrl: 'javascript:alert(1)' })).toBeNull();
   });
 });
 

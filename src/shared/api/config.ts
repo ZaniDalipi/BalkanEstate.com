@@ -7,7 +7,7 @@ const isProduction =
 // Get API URL with validation and production fallback
 const getApiUrl = (): string => {
   // `?.`: this module is also bundled into Cloudflare Pages Functions (via
-  // config/cloudinaryConfig), where Vite's import.meta.env does not exist.
+  // config/mediaConfig), where Vite's import.meta.env does not exist.
   const envUrl = import.meta.env?.VITE_API_URL;
 
   let url: string;

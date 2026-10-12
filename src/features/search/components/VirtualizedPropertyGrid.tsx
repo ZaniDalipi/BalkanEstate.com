@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useRef, useEffect, memo, useState } from '
 import { Property } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import Footer from '@/components/shared/Footer';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 
 import { useTranslation } from 'react-i18next';
 // Preloads optimised card-size images before they scroll into view
@@ -10,7 +10,7 @@ const preloadImages = (urls: string[]) => {
   urls.forEach(url => {
     if (url) {
       const img = new Image();
-      img.src = optimizeCloudinaryUrl(url, { width: 640, quality: 'auto', crop: 'fill' });
+      img.src = optimizeImageUrl(url, { width: 640, quality: 'auto', crop: 'fill' });
     }
   });
 };

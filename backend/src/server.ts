@@ -1,3 +1,5 @@
+// Must stay the first import: modules below read process.env when imported.
+import './config/loadEnv';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -8,7 +10,7 @@ import morgan from 'morgan';
 import path from 'path';
 import { existsSync } from 'fs';
 import connectDB from './config/database';
-import { syncCloudinaryPresetsOnStartup } from './services/media/cloudinaryPresetSync';
+import { describeMediaStorage } from './config/r2';
 import ogRoutes from './routes/ogRoutes';
 import {
   propertyPageOgMiddleware,
@@ -60,6 +62,7 @@ dotenv.config({ path: envFile });
 dotenv.config();
 
 serverLogger.info(`🚀 Server starting in ${process.env.NODE_ENV || 'development'} mode`);
+serverLogger.info(`🖼️  Image storage: ${describeMediaStorage()}`);
 serverLogger.info(`📁 Loading environment from: ${envFile}`);
 
 // Initialize Sentry first (before anything else)
@@ -185,12 +188,6 @@ connectDB().then(() => {
   );
 });
 
-// Register the Cloudinary delivery presets (named transformations allowed for
-// strict mode). Idempotent and non-blocking; images need them to load once
-// "Strict transformations" is on.
-if (process.env.NODE_ENV !== 'test') {
-  void syncCloudinaryPresetsOnStartup();
-}
 
 // Non-blocking score backfill: updates any agent/agency records with score=0 after DB is ready.
 // Runs in the background so it never delays server startup.

@@ -14,7 +14,7 @@ import {
   uploadPropertyImages,
   deleteListingMedia,
   organizeListingMedia,
-} from '../services/cloudinaryService';
+} from '../services/mediaService';
 import { sortPropertiesWithHighlighting, getHighlightingStats } from '../utils/highlightingUtils';
 import { recordPriceChange, processInstantAlertsForProperty, processInstantPriceDropForProperty } from '../jobs/propertyAlertsJob';
 import { trackUserActivity } from '../services/proBuyerEmailService';
@@ -28,6 +28,7 @@ import {
 } from '../sockets/propertySocket';
 import { propertyLogger } from '../utils/logger';
 import { invalidateCache } from '../middleware/cache';
+import { isDraftListingKey } from '../services/media/mediaKeys';
 import { getObjectIdParam, getParam } from '../utils/validateParams';
 import { respondIfValidationError } from '../middleware/propertyValidation';
 import { TYPE_ATTRIBUTES } from '../config/typeAttributes';
@@ -1003,11 +1004,10 @@ export const createProperty = async (
       throw createError;
     }
 
-    // The frontend uploads images to a temp folder before the property exists,
-    // so relocate them now into the listing's own folder
-    // (balkan-estate/users/{a-z}/{name}_{userId}/listings/{title}_{propertyId}/photos) so
-    // Cloudinary stays organized by user + listing. Best-effort: a failure here
-    // must not fail listing creation.
+    // The frontend uploads images as drafts before the property exists, so
+    // file them now under the listing's own folder
+    // (users/{name}_{userId}/listings/{title}-{ref}_{propertyId}/photos).
+    // Best-effort: a failure here must not fail listing creation.
     try {
       if (Array.isArray(property.images) && property.images.length > 0) {
         const organized = await organizeListingMedia(
@@ -1046,6 +1046,9 @@ export const createProperty = async (
           property.floorplanPublicId = organizedFloorplan.publicId;
         }
       }
+
+      // Anything still in drafts (e.g. the floor-plan gallery).
+      await fileDraftListingMedia(property);
 
       await property.save();
     } catch (organizeError) {
@@ -1110,6 +1113,57 @@ export const createProperty = async (
     if (respondIfValidationError(res, error)) return;
     propertyLogger.error('Create property error:', error);
     res.status(500).json({ message: 'Error creating property' });
+  }
+};
+
+/** A photo uploaded from the listing form before it was attached to a listing. */
+const isUnfiledListingMedia = (publicId?: string): publicId is string =>
+  !!publicId && (isDraftListingKey(publicId) || publicId.includes('/listings/temp'));
+
+/**
+ * File every photo of `property` still sitting in the uploader's drafts under
+ * the listing's own folder — images, the main image, the floor-plan gallery
+ * and the standalone floor plan. Photos added while editing arrive as drafts
+ * just like on create. Returns true when anything moved (caller saves).
+ * Best-effort: a failure leaves the draft refs in place, never fails the request.
+ */
+const fileDraftListingMedia = async (property: InstanceType<typeof Property>): Promise<boolean> => {
+  const refs = new Map<string, { url: string; publicId: string; tag: string }>();
+  const add = (url: string | undefined, publicId: string | undefined, tag: string) => {
+    if (isUnfiledListingMedia(publicId) && !refs.has(publicId)) refs.set(publicId, { url: url ?? '', publicId, tag });
+  };
+  (property.images || []).forEach((img) => add(img.url, img.publicId, img.tag ?? 'other'));
+  add(property.imageUrl, property.imagePublicId, 'other');
+  (property.floorplans || []).forEach((plan: any) => add(plan.url, plan.publicId, 'floorplan'));
+  add(property.floorplanUrl, property.floorplanPublicId, 'floorplan');
+  if (refs.size === 0) return false;
+
+  try {
+    const inputs = [...refs.values()];
+    const filed = await organizeListingMedia(inputs, String(property.sellerId), String(property._id), property.title);
+    const moved = new Map(inputs.map((ref, i) => [ref.publicId, filed[i]]));
+    const swap = <T extends { url?: string; publicId?: string }>(item: T): T => {
+      const next = item.publicId ? moved.get(item.publicId) : undefined;
+      if (next) {
+        item.url = next.url;
+        item.publicId = next.publicId;
+      }
+      return item;
+    };
+    (property.images || []).forEach(swap);
+    (property.floorplans || []).forEach((plan: any) => swap(plan));
+    const main = swap({ url: property.imageUrl, publicId: property.imagePublicId });
+    property.imageUrl = main.url as string;
+    property.imagePublicId = main.publicId;
+    const plan = swap({ url: property.floorplanUrl, publicId: property.floorplanPublicId });
+    property.floorplanUrl = plan.url;
+    property.floorplanPublicId = plan.publicId;
+    property.markModified('images');
+    property.markModified('floorplans');
+    return true;
+  } catch (error) {
+    propertyLogger.error('Failed to file draft listing media (non-fatal):', error);
+    return false;
   }
 };
 
@@ -1217,6 +1271,9 @@ export const updateProperty = async (
       property.priceReducedAt = undefined;
       propertyLogger.info(`📈 Price increased: €${previousPrice} → €${property.price} (cleared reduction)`);
     }
+
+    // Photos added while editing were uploaded as drafts — file them under this listing.
+    await fileDraftListingMedia(property);
 
     await property.save();
 
@@ -1485,7 +1542,7 @@ export const deleteProperty = async (
       return;
     }
 
-    // Delete the listing's media from Cloudinary, keeping one thumbnail for
+    // Delete the listing's media from storage, keeping one thumbnail for
     // the archive record below. The retention job clears that thumbnail once
     // the archive is old enough (see mediaRetentionService).
     const archiveThumbnailPublicId = property.imagePublicId || property.images?.[0]?.publicId;
@@ -1499,13 +1556,12 @@ export const deleteProperty = async (
 
       await deleteListingMedia(String(property.sellerId), String(property._id), {
         publicIds,
-        videoPublicIds: property.generatedVideoPublicId ? [property.generatedVideoPublicId] : [],
         keepPublicIds: archiveThumbnailPublicId ? [archiveThumbnailPublicId] : [],
       });
       propertyLogger.info(`✅ Cleaned up media for property ${property._id}`);
-    } catch (cloudinaryError: any) {
-      propertyLogger.error('⚠️  Error deleting images from Cloudinary:', cloudinaryError);
-      // Continue with property deletion even if Cloudinary cleanup fails
+    } catch (mediaError: any) {
+      propertyLogger.error('⚠️  Error deleting listing images:', mediaError);
+      // Continue with property deletion even if media cleanup fails
     }
 
     // Decrement listing count if property is active or pending

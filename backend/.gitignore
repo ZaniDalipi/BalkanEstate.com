@@ -35,3 +35,7 @@ pnpm-debug.log*
 *.log
 .DS_Store
 uploads/
+
+# Media migration / check reports (scripts/migrateCloudinaryToR2.ts, checkMediaLinks.ts)
+media-migration-report-*.json
+media-check-report-*.json

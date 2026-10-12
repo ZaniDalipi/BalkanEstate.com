@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
@@ -1150,7 +1150,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {state.currentUser.avatarUrl ? (
-                                                        <img src={optimizeCloudinaryUrl(state.currentUser.avatarUrl, { width: 64 }) || state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                        <img src={optimizeImageUrl(state.currentUser.avatarUrl, { width: 64 }) || state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
                                                     ) : (
                                                         <DefaultAvatar gender={state.currentUser.gender} seed={state.currentUser.id || state.currentUser.name} avatarOptions={state.currentUser.avatarOptions} />
                                                     )}

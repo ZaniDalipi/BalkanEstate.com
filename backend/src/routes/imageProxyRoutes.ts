@@ -5,7 +5,7 @@ import { sweepImageProxyCache } from '../services/imageProxy/imageProxyService';
 
 const router = express.Router();
 
-// Resize + cache external (feed) images on our server — never on Cloudinary.
+// Resize + cache external (feed) images on our server — never in storage.
 // GET /api/image-proxy?url=<encoded-url>&w=<width>
 router.get('/', imageProxyRateLimiter, proxyExternalImage);
 

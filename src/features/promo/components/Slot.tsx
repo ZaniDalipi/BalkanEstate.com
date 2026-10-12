@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { useAdBanners, selectByPlacement } from '../hooks/useBanners';
 import { useAdPreview } from '../hooks/usePreview';
 import { trackClick, trackImpression } from '../api/bannerApi';
@@ -244,7 +244,7 @@ const AdSlot: React.FC<AdSlotProps> = ({
   }
 
   // Request ~2× the slot's CSS width so the creative stays sharp on hi-DPI screens.
-  const imageSrc = optimizeCloudinaryUrl(banner.imageUrl, {
+  const imageSrc = optimizeImageUrl(banner.imageUrl, {
     width: isTall ? 700 : 1600,
     quality: 'auto',
   });

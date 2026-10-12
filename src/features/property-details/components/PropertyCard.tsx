@@ -8,7 +8,7 @@ import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
 import { getPriceReductionInfo } from '@/utils/priceUtils';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
-import { optimizeCloudinaryUrl, retryWithOriginalImage } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, retryWithOriginalImage } from '@/config/mediaConfig';
 import { getGallerySources, warmImage, warmGallery } from '@/config/galleryImages';
 import PropertyImage, { getPropertyImageSources } from '@/src/components/ui/PropertyImage';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
@@ -787,7 +787,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <div className="ml-auto flex items-center gap-1.5 min-w-0 max-w-[9.5rem] bg-neutral-50 pl-1.5 pr-2 py-1 rounded-lg border border-neutral-200" title={safeProperty.seller.agencyName}>
                 {safeProperty.seller.agencyLogo && !agencyLogoFailed ? (
                   <img
-                    src={optimizeCloudinaryUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
+                    src={optimizeImageUrl(safeProperty.seller.agencyLogo, { width: 48 }) || safeProperty.seller.agencyLogo}
                     alt={`${safeProperty.seller.agencyName} - Real Estate Agency`}
                     loading="lazy"
                     decoding="async"

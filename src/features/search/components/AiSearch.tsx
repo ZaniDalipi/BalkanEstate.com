@@ -7,7 +7,7 @@ import { generatePropertySlug } from '@/utils/slug';
 import { getAiChatResponse } from '@/services/geminiService';
 import { PaperAirplaneIcon, MicrophoneIcon, StopCircleIcon, SparklesIcon, MapPinIcon, SpeakerWaveIcon, SpeakerXMarkIcon, HeartIcon, XMarkIcon, EyeIcon } from '@/constants';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { useAppContext } from '@/context/AppContext';
 import AiMessageLimitModal from './AiMessageLimitModal';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
@@ -201,7 +201,7 @@ const SwipeCard: React.FC<{
             <AnimatePresence>
                 <motion.img
                     key={currentImgIdx}
-                    src={optimizeCloudinaryUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
+                    src={optimizeImageUrl(images[currentImgIdx] || property.imageUrl, { width: 800, quality: 'auto' })}
                     alt={property.title || `${property.propertyType} in ${property.city}`}
                     className="absolute inset-0 w-full h-full object-cover"
                     draggable={false}

@@ -6,7 +6,9 @@
  * twins) to generate rich link previews for social media crawlers.
  */
 
-import { optimizeCloudinaryUrl } from '../config/cloudinaryConfig';
+import { optimizeImageUrl, MEDIA_CDN_URL } from '../config/mediaConfig';
+import { isCloudinaryPhotoUrl } from '../config/legacyCloudinary';
+import { parseMediaUrl, mediaFileUrl, MEDIA_MASTER_FILE } from '../backend/src/config/mediaVariants';
 
 export const CRAWLER_USER_AGENTS = [
   'facebookexternalhit',
@@ -59,7 +61,34 @@ export function isCrawler(userAgent: string): boolean {
 /** The slice of the Cloudflare Pages Function context these handlers use. */
 export interface PagesContext {
   request: Request;
-  env: { ASSETS: { fetch: (request: Request) => Promise<Response> } };
+  env: {
+    ASSETS: { fetch: (request: Request) => Promise<Response> };
+    /**
+     * Public origin of the R2 media bucket (same value as the backend's
+     * R2_PUBLIC_URL). Set it in Cloudflare → Pages → Settings → Variables:
+     * Pages Functions don't see the Vite build's VITE_MEDIA_CDN_URL.
+     */
+    MEDIA_CDN_URL?: string;
+  };
+}
+
+/** Media origin for this deployment; set from the Pages env by each handler. */
+let mediaCdnUrl = MEDIA_CDN_URL;
+
+/** Read the media origin from the Pages Function env (constant per deployment). */
+export function configureOgMedia(env: { MEDIA_CDN_URL?: string } | undefined): void {
+  const fromEnv = env?.MEDIA_CDN_URL?.trim().replace(/\/+$/, '');
+  if (fromEnv) mediaCdnUrl = fromEnv;
+}
+
+/**
+ * The JPEG master (`original.jpg`, ≤1920px) of a photo on our R2 media CDN —
+ * what link previews advertise (crawlers want JPEG and crop it themselves) —
+ * or null for anything else.
+ */
+export function mediaOgCardUrl(url: string | undefined): string | null {
+  const media = parseMediaUrl(url, mediaCdnUrl);
+  return media ? mediaFileUrl(mediaCdnUrl, media.photoKey, MEDIA_MASTER_FILE) : null;
 }
 
 /**
@@ -150,8 +179,6 @@ export const OG_CARD_OPTIONS = {
   quality: 'auto',
 } as const;
 
-const CLOUDINARY_UPLOAD_RE = /^https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/.+$/i;
-
 /** Normalize one image candidate, or null if it can't be used as og:image. */
 function normalizeOgImage(raw?: string): OgImage | null {
   const url = (raw || '').trim();
@@ -159,17 +186,22 @@ function normalizeOgImage(raw?: string): OgImage | null {
 
   // Site-relative path → absolute; crawlers reject relative og:image values.
   // (Inline DiceBear data: URIs, which crawlers cannot fetch, are rejected by
-  // optimizeCloudinaryUrl's http(s)-only check below.)
+  // optimizeImageUrl's http(s)-only check below.)
   if (url.startsWith('/')) return { url: `${SITE_URL}${url}`, sized: false };
+
+  // R2 photos: their JPEG master (size varies, so no width/height tags).
+  const card = mediaOgCardUrl(url);
+  if (card) return { url: card, sized: false };
 
   // Shared helper: rejects non-http(s) and control-character URLs, strips any
   // transformation already baked into the URL so an existing crop can't shrink
   // the card, and sizes Google OAuth avatars via their own =s{n} parameter.
-  const delivered = optimizeCloudinaryUrl(url, OG_CARD_OPTIONS);
+  const delivered = optimizeImageUrl(url, OG_CARD_OPTIONS);
   if (!delivered) return null;
 
-  // Only a Cloudinary-delivered image is guaranteed to come back at 1200×630.
-  return { url: delivered, sized: CLOUDINARY_UPLOAD_RE.test(url) };
+  // Images still on Cloudinary come back at 1200×630 (its `t_be_og` preset);
+  // nothing else is guaranteed to.
+  return { url: delivered, sized: isCloudinaryPhotoUrl(url) };
 }
 
 /**
@@ -211,7 +243,8 @@ function twitterCardType(image: OgImage): string {
  * Priority: first image from images array > imageUrl > default OG image.
  */
 export function getPropertyImage(property: PropertyData): string {
-  return property.images?.[0]?.url || property.imageUrl || DEFAULT_IMAGE;
+  const url = property.images?.[0]?.url || property.imageUrl;
+  return mediaOgCardUrl(url) || url || DEFAULT_IMAGE;
 }
 
 function formatPrice(price: number, listingType?: string, isNegotiable?: boolean): string {
@@ -314,7 +347,7 @@ export interface ArticleData {
  * Priority: article cover image > default OG image.
  */
 export function getArticleImage(article: ArticleData): string {
-  return article.coverImageUrl || DEFAULT_IMAGE;
+  return mediaOgCardUrl(article.coverImageUrl) || article.coverImageUrl || DEFAULT_IMAGE;
 }
 
 export function buildArticleOgHtml(article: ArticleData, slug: string, lang = 'en'): string {
@@ -377,6 +410,7 @@ export async function handleArticleOgRequest(
   slug: string,
   lang = 'en',
 ): Promise<Response> {
+  configureOgMedia(context.env);
   const userAgent = context.request.headers.get('user-agent') || '';
 
   // Only intercept for social media crawlers
@@ -599,6 +633,7 @@ export async function handleAgentOgRequest(
   slug: string,
   lang = 'en',
 ): Promise<Response> {
+  configureOgMedia(context.env);
   const userAgent = context.request.headers.get('user-agent') || '';
 
   // Only intercept for social media crawlers
@@ -643,6 +678,7 @@ export async function handleAgencyOgRequest(
   slug: string,
   lang = 'en',
 ): Promise<Response> {
+  configureOgMedia(context.env);
   const userAgent = context.request.headers.get('user-agent') || '';
 
   // Only intercept for social media crawlers
@@ -686,6 +722,7 @@ export async function handlePropertyOgRequest(
   slug: string,
   lang = 'en',
 ): Promise<Response> {
+  configureOgMedia(context.env);
   const userAgent = context.request.headers.get('user-agent') || '';
 
   // Only intercept for social media crawlers

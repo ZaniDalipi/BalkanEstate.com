@@ -35,8 +35,8 @@ export interface ICityMarketData extends Document {
   officialSourceName?: string;
   officialSourceUrl?: string;
 
-  // City image (stored in Cloudinary, fetched from Wikipedia once)
-  imageUrl?: string; // Cloudinary URL for city thumbnail
+  // City image (stored in R2, fetched from Wikipedia once)
+  imageUrl?: string; // R2 URL for city thumbnail
   imageUpdatedAt?: Date; // When the image was last fetched/updated
   /**
    * Who chose this photo. `manual` means an admin set it, which makes it
@@ -44,7 +44,7 @@ export interface ICityMarketData extends Document {
    * inherited from the City Gallery or a Villa Destination.
    */
   imageSource?: 'manual' | 'auto';
-  /** Cloudinary public id, kept so a replaced upload can be cleaned up. */
+  /** storage key, kept so a replaced upload can be cleaned up. */
   imagePublicId?: string;
   /** Attribution line, e.g. "Photo by Jane Doe on Unsplash". */
   imageCredit?: string;

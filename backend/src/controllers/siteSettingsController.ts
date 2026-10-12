@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import SiteSettings from '../models/SiteSettings';
 import { apiLogger } from '../utils/logger';
 import { clearSiteSettingsCache } from '../utils/emailTemplateRenderer';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/mediaService';
 
 // Get site settings (singleton)
 export const getSiteSettings = async (_req: Request, res: Response): Promise<void> => {
@@ -74,7 +74,7 @@ export const resetSiteSettings = async (_req: Request, res: Response): Promise<v
   }
 };
 
-// Upload site logo (file upload to Cloudinary)
+// Upload site logo (file upload to R2)
 export const uploadSiteLogo = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;
@@ -124,7 +124,7 @@ export const uploadSiteLogo = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// Upload email logo (file upload to Cloudinary)
+// Upload email logo (file upload to R2)
 export const uploadEmailLogo = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?._id;

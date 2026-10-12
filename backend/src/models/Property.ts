@@ -41,7 +41,7 @@ export const MAX_FLOORPLANS = 10;
 
 export interface IPropertyImage {
   url: string;
-  publicId?: string; // Cloudinary public_id for image management and deletion (optional for backwards compatibility)
+  publicId?: string; // storage key for image management and deletion (optional for backwards compatibility)
   tag: PropertyImageTag;
   floorplanSpot?: IFloorplanSpot;
 }
@@ -112,7 +112,7 @@ export interface IProperty extends Document {
   villaApprovalReviewedAt?: Date;
   villaApprovalReason?: string;
   soldAt?: Date;
-  /** Set when the retention job cleared this listing's media from Cloudinary. */
+  /** Set when the retention job cleared this listing's media from storage. */
   mediaPurgedAt?: Date;
   price: number;
   isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
@@ -154,12 +154,12 @@ export interface IProperty extends Document {
   videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, etc.)
   // Generated video fields (auto-generated property showcase video)
   generatedVideoUrl?: string; // URL for the auto-generated property video
-  generatedVideoPublicId?: string; // Cloudinary public_id for the generated video
+  generatedVideoPublicId?: string; // storage key for the generated video
   generatedVideoFormat?: 'vertical' | 'horizontal' | 'square'; // Video format
   generatedVideoDuration?: number; // Duration in seconds
   hasGeneratedVideo: boolean; // Flag indicating if generated video is available
   imageUrl: string;
-  imagePublicId?: string; // Cloudinary public_id for main image
+  imagePublicId?: string; // storage key for main image
   images: IPropertyImage[];
   lat: number;
   lng: number;
@@ -169,7 +169,7 @@ export interface IProperty extends Document {
   floorplanUrl?: string;
   /** Every floor's plan, in order. floorplanUrl mirrors the first. */
   floorplans?: IFloorplanLevel[];
-  floorplanPublicId?: string; // Cloudinary public_id for floorplan
+  floorplanPublicId?: string; // storage key for floorplan
   lastRenewed: Date;
   views: number;
   saves: number;

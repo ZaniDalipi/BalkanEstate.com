@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import sharp from 'sharp';
 import { apiLogger } from '../utils/logger';
-import { originalCloudinaryUrl } from '../utils/cloudinaryUrl';
+import { originalMediaUrl } from '../utils/mediaUrl';
+import { cloudinaryOriginalUrl } from '../services/media/cloudinaryMigration';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
 import Product from '../models/Product';
@@ -277,11 +278,10 @@ export const aiChat = async (req: Request, res: Response): Promise<void> => {
  * POST /api/ai/restyle-room
  * Restyle a listing's room photo into a chosen interior design style.
  * Expects JSON body { imageUrl, style }. The image is fetched server-side
- * (restricted to Cloudinary) and sent to Gemini's image model.
+ * (restricted to our own photo hosts) and sent to Gemini's image model.
  */
 const MAX_RESTYLE_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
 const RESTYLE_MAX_EDGE = 1600;
-const ALLOWED_IMAGE_HOSTS = new Set(['res.cloudinary.com']);
 
 export const restyleRoom = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -307,26 +307,14 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // SSRF guard: only allow https Cloudinary image URLs (listing photos).
-    let parsedUrl: URL;
-    try {
-      parsedUrl = new URL(imageUrl);
-    } catch {
-      res.status(400).json({ message: 'Invalid imageUrl.' });
-      return;
-    }
-    if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMAGE_HOSTS.has(parsedUrl.hostname)) {
-      res.status(400).json({ message: 'imageUrl must be a Cloudinary https URL.' });
-      return;
-    }
-
-    // Fetch the untransformed original, not the resized URL the browser shows:
-    // with "Strict transformations" on, Cloudinary refuses ad-hoc sizes to
-    // server requests, while the original is always allowed (and costs no
-    // transformation credit). We resize it ourselves below.
-    const originalUrl = originalCloudinaryUrl(imageUrl);
+    // SSRF guard: only our own stored photos — on R2, or listing photos still
+    // kept on Cloudinary. Fetch the full-size original, not the smaller size
+    // the browser shows; we resize it ourselves below.
+    const originalUrl = imageUrl.startsWith('https://')
+      ? originalMediaUrl(imageUrl) ?? cloudinaryOriginalUrl(imageUrl)
+      : null;
     if (!originalUrl) {
-      res.status(400).json({ message: 'imageUrl must be a Cloudinary image URL.' });
+      res.status(400).json({ message: 'imageUrl must be a listing photo URL.' });
       return;
     }
 

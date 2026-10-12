@@ -17,7 +17,11 @@ import {
   type AgencyData,
 } from '@/functions/_og-utils';
 
-const CLOUDINARY = 'https://res.cloudinary.com/balkanestate/image/upload';
+/** Our media CDN origin in tests (vitest.config.ts → VITE_MEDIA_CDN_URL). */
+const CDN = 'https://media.test';
+const AVATAR = `${CDN}/users/erik-sonn_1/avatar/a1_w640/original.jpg`;
+const LOGO = `${CDN}/agencies/erikson_1/logo/l1_w640/original.jpg`;
+const COVER = `${CDN}/agencies/erikson_1/cover/c1/original.jpg`;
 
 const agent = (overrides: Partial<AgentData> = {}): AgentData => ({
   agentId: 'ERIKSON-REAL-ESTATE',
@@ -28,7 +32,7 @@ const agent = (overrides: Partial<AgentData> = {}): AgentData => ({
   totalReviews: 23,
   userId: {
     name: 'Erik Sonn',
-    avatarUrl: `${CLOUDINARY}/v1699999999/avatars/erik.jpg`,
+    avatarUrl: AVATAR,
     city: 'Tirana',
     country: 'Albania',
   },
@@ -42,7 +46,7 @@ const agency = (overrides: Partial<AgencyData> = {}): AgencyData => ({
   country: 'Albania',
   totalAgents: 7,
   totalProperties: 41,
-  logo: `${CLOUDINARY}/v1699999999/logos/erikson.png`,
+  logo: LOGO,
   ...overrides,
 });
 
@@ -57,7 +61,6 @@ const meta = (html: string, key: string): string | null => {
 };
 
 // The registered share-card preset (f_jpg,q_auto,w_1200,h_630,c_pad,b_white).
-const OG_CARD = 't_be_og';
 
 describe('isUsableSlug', () => {
   it('accepts real agent ids and two-segment agency slugs', () => {
@@ -78,8 +81,8 @@ describe('isUsableSlug', () => {
 
 describe('resolveOgImage', () => {
   it('skips DiceBear data URIs, which crawlers cannot fetch', () => {
-    const image = resolveOgImage('data:image/svg+xml;base64,abc', `${CLOUDINARY}/v1/logo.png`);
-    expect(image.url).toContain('logo.png');
+    const image = resolveOgImage('data:image/svg+xml;base64,abc', LOGO);
+    expect(image.url).toBe(LOGO);
   });
 
   it('makes a site-relative path absolute', () => {
@@ -97,24 +100,22 @@ describe('buildAgentOgHtml', () => {
   it('uses the agent avatar as the share image', () => {
     const html = buildAgentOgHtml(agent(), 'ERIKSON-REAL-ESTATE');
 
-    expect(meta(html, 'og:image')).toBe(
-      `${CLOUDINARY}/${OG_CARD}/v1699999999/avatars/erik.jpg`,
-    );
-    expect(meta(html, 'og:image:width')).toBe('1200');
-    expect(meta(html, 'og:image:height')).toBe('630');
-    expect(meta(html, 'twitter:card')).toBe('summary_large_image');
+    // The JPEG master: its size varies, so no card dimensions are claimed.
+    expect(meta(html, 'og:image')).toBe(AVATAR);
+    expect(meta(html, 'og:image:width')).toBeNull();
+    expect(meta(html, 'twitter:card')).toBe('summary');
   });
 
   it('falls back to the agency logo when the agent has no photo', () => {
     const html = buildAgentOgHtml(
       agent({
         userId: { name: 'Erik Sonn' },
-        agencyId: { name: 'Erikson', logo: `${CLOUDINARY}/v1/logos/erikson.png` },
+        agencyId: { name: 'Erikson', logo: LOGO },
       }),
       'ERIKSON-REAL-ESTATE',
     );
 
-    expect(meta(html, 'og:image')).toContain('logos/erikson.png');
+    expect(meta(html, 'og:image')).toBe(LOGO);
   });
 
   // The shared helper clamps Google avatars to 512px — well above Facebook's
@@ -130,19 +131,14 @@ describe('buildAgentOgHtml', () => {
     expect(meta(html, 'twitter:card')).toBe('summary');
   });
 
-  it('strips a crop already baked into the avatar URL instead of stacking on it', () => {
+  it('shares the full-size master even when the stored URL is a small size', () => {
     const html = buildAgentOgHtml(
-      agent({
-        userId: {
-          name: 'Erik Sonn',
-          avatarUrl: `${CLOUDINARY}/c_fill,ar_1:1,w_96/v123/avatars/erik.jpg`,
-        },
-      }),
+      agent({ userId: { name: 'Erik Sonn', avatarUrl: AVATAR.replace('original.jpg', 'w160.webp') } }),
       'ERIKSON-REAL-ESTATE',
     );
 
-    // The 96px square crop must not survive into the 1200x630 card.
-    expect(meta(html, 'og:image')).toBe(`${CLOUDINARY}/${OG_CARD}/v123/avatars/erik.jpg`);
+    // A 160px WebP must not become the share image — crawlers want the JPEG.
+    expect(meta(html, 'og:image')).toBe(AVATAR);
   });
 
   it('builds a profile card with name, location and facts', () => {
@@ -177,20 +173,20 @@ describe('buildAgentOgHtml', () => {
 describe('buildAgencyOgHtml', () => {
   it('prefers the logo over the cover photo — it is the agency\'s profile picture', () => {
     const html = buildAgencyOgHtml(
-      agency({ coverImage: `${CLOUDINARY}/v1/covers/tirana.jpg` }),
+      agency({ coverImage: COVER }),
       'albania/erikson-real-estate',
     );
 
-    expect(meta(html, 'og:image')).toContain('logos/erikson.png');
+    expect(meta(html, 'og:image')).toBe(LOGO);
   });
 
   it('uses the cover photo when there is no logo', () => {
     const html = buildAgencyOgHtml(
-      agency({ logo: undefined, coverImage: `${CLOUDINARY}/v1/covers/tirana.jpg` }),
+      agency({ logo: undefined, coverImage: COVER }),
       'albania/erikson-real-estate',
     );
 
-    expect(meta(html, 'og:image')).toContain('covers/tirana.jpg');
+    expect(meta(html, 'og:image')).toBe(COVER);
   });
 
   it('builds the card title, facts and canonical URL', () => {
@@ -217,5 +213,28 @@ describe('buildAgencyOgHtml', () => {
     const html = buildAgencyOgHtml(agency({ logo: undefined }), 'albania/erikson-real-estate');
 
     expect(meta(html, 'og:image')).toBe(DEFAULT_IMAGE);
+  });
+});
+
+describe('R2 photos in share cards', () => {
+  const MEDIA = 'https://media.example.com';
+  const key = 'users/64a1b2c3d4e5f6a7b8c9d0e1/listings/6650aa11bb22cc33dd44ee55/photos/0abc123';
+
+  it('advertises the JPEG master once the Pages env names the media origin', async () => {
+    const og = await import('@/functions/_og-utils');
+    og.configureOgMedia({ MEDIA_CDN_URL: `${MEDIA}/` });
+
+    expect(og.resolveOgImage(`${MEDIA}/${key}/original.jpg`)).toEqual({ url: `${MEDIA}/${key}/original.jpg`, sized: false });
+    expect(og.resolveOgImage(`${MEDIA}/${key}/w640.webp`).url).toBe(`${MEDIA}/${key}/original.jpg`);
+    expect(og.getPropertyImage({ _id: 'p', images: [{ url: `${MEDIA}/${key}/w320.webp` }] } as any)).toBe(`${MEDIA}/${key}/original.jpg`);
+    expect(og.getArticleImage({ coverImageUrl: `${MEDIA}/news/0xyz/w1280.webp` })).toBe(`${MEDIA}/news/0xyz/original.jpg`);
+  });
+
+  it('leaves other hosts and lookalike paths alone', async () => {
+    const og = await import('@/functions/_og-utils');
+    og.configureOgMedia({ MEDIA_CDN_URL: MEDIA });
+    expect(og.mediaOgCardUrl(`https://elsewhere.example.com/${key}/original.jpg`)).toBeNull();
+    expect(og.mediaOgCardUrl(`${MEDIA}/${key}/notes.txt`)).toBeNull();
+    expect(og.getArticleImage({ coverImageUrl: 'https://images.example.com/a.jpg' })).toBe('https://images.example.com/a.jpg');
   });
 });

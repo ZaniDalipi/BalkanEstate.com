@@ -14,7 +14,7 @@ import {
   PhotoIcon,
 } from '@/constants';
 import { formatPrice } from '@/utils/currency';
-import { optimizeCloudinaryUrl, cloudinarySrcSet } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { ProgressBar } from '../charts';
 import Sparkline from '../charts/Sparkline';
 import {
@@ -86,7 +86,7 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
       ? calculateTrend(property.periodViews, property.previousPeriodViews)
       : null;
   const location = [property.city, property.country].filter(Boolean).join(', ');
-  const imageSrc = imageFailed ? '' : optimizeCloudinaryUrl(property.imageUrl, { width: 320, height: 240 });
+  const imageSrc = imageFailed ? '' : optimizeImageUrl(property.imageUrl, { width: 320, height: 240 });
   // Active is the norm; only flag listings that are not live.
   const status =
     property.status && property.status !== 'active' && KNOWN_STATUSES.includes(property.status)
@@ -139,7 +139,7 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ property, rank, maxViews, hre
         {imageSrc ? (
           <img
             src={imageSrc}
-            srcSet={cloudinarySrcSet(property.imageUrl, [320, 480]) || undefined}
+            srcSet={imageSrcSet(property.imageUrl, [320, 480]) || undefined}
             sizes="112px"
             alt=""
             loading="lazy"

@@ -7,18 +7,19 @@
  *     that curate the same place (an admin override, the City Gallery panel,
  *     a villa destination, or the auto-seeded one). See
  *     `backend/src/services/cityPhotoService.ts`.
- *   - a Cloudinary asset named by convention, `city-{country}-{city}`, which
- *     predates the field and is still how most cities have a picture at all.
+ *   - a curated photo named by convention, `city-{country}-{city}`, which
+ *     predates the field and is still how most cities have a picture at all —
+ *     the existing ones on Cloudinary, and any seeded on R2 since the move.
  *
  * The stored URL is tried first — that is what makes an admin's edit visible —
  * and the convention id is the fallback, so cities nobody has curated keep the
  * photo they already had. Both are returned rather than one chosen, because
  * whether an image loads is only known in the browser: the convention URL is a
  * 404 for any city without that asset, and the stored URL can point at a photo
- * since deleted from Cloudinary.
+ * since deleted from storage.
  */
 
-import { getCityImageUrl, optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { getCityImageUrl, getMediaCdnCityImageUrl, optimizeImageUrl } from '@/config/mediaConfig';
 
 /** Just enough of a city to find its photo. */
 export interface CityPhotoSubject {
@@ -62,19 +63,20 @@ export function cityImageSources(
 
   const stored = usableUrl(subject.imageUrl);
   if (stored) {
-    // Cloudinary URLs get resized to the box they fill; Wikipedia and
+    // Photos on our media CDN get a stored size covering the box; Wikipedia and
     // Unsplash originals come back unchanged; any other host is resized by
     // our image proxy.
-    sources.push(optimizeCloudinaryUrl(stored, {
+    sources.push(optimizeImageUrl(stored, {
       width, height, quality, crop: 'fill', gravity: 'auto',
     }) || stored);
   }
 
-  const convention = getCityImageUrl(subject.city, {
-    ...(subject.country ? { country: subject.country } : {}),
-    width, height, quality,
-  });
-  if (convention !== sources[0]) sources.push(convention);
+  const where = { ...(subject.country ? { country: subject.country } : {}), width, height };
+  const convention = getCityImageUrl(subject.city, { ...where, quality });
+  if (convention && convention !== sources[0]) sources.push(convention);
+  // Seeded on R2 since the move (empty while the media CDN isn't configured).
+  const seeded = getMediaCdnCityImageUrl(subject.city, where);
+  if (seeded) sources.push(seeded);
 
   return sources;
 }

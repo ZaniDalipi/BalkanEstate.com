@@ -1,5 +1,4 @@
-import type { TFunction } from 'i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Conversation, Message } from '@/types';
@@ -33,8 +32,8 @@ const MessageImage: React.FC<{imageUrl: string; t: TFunction}> = ({imageUrl, t})
 
     return (
         <img
-            src={optimizeCloudinaryUrl(imageUrl, { width: 640 }) || imageUrl}
-            alt={t('messages:ui.conversationView.annotatedProperty', 'Annotated property')}
+            src={optimizeImageUrl(imageUrl, { width: 640 }) || imageUrl}
+            alt="Annotated property"
             loading="lazy"
             decoding="async"
             className="max-w-full max-h-48 sm:max-h-64 h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"

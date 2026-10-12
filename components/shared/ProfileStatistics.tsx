@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User, UserRole } from '../../types';
@@ -109,7 +109,7 @@ const SoldPropertyCard: React.FC<{ sale: SaleRecord }> = ({ sale }) => {
       <div className="relative h-36 bg-neutral-100">
         {sale.imageUrl && !imageError ? (
           <img
-            src={optimizeCloudinaryUrl(sale.imageUrl, { width: 480 }) || sale.imageUrl}
+            src={optimizeImageUrl(sale.imageUrl, { width: 480 }) || sale.imageUrl}
             alt={sale.propertyTitle || sale.propertyAddress}
             className="w-full h-full object-cover grayscale-[30%]"
             onError={() => setImageError(true)}

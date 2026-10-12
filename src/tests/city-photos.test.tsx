@@ -69,25 +69,26 @@ describe('cityImageSources', () => {
     expect(sources[1]).toContain('city-albania-tirana');
   });
 
-  it('falls back to the convention id alone when nothing is curated', () => {
+  it('falls back to the convention id alone when nothing is curated — on Cloudinary, then on R2', () => {
     const sources = cityImageSources({ city: 'Budva', country: 'Montenegro' }, { width: 400, height: 200 });
 
-    expect(sources).toHaveLength(1);
-    expect(sources[0]).toContain('city-montenegro-budva');
+    expect(sources).toHaveLength(2);
+    expect(sources[0]).toMatch(/^https:\/\/res\.cloudinary\.com\/.+\/city-montenegro-budva$/);
+    expect(sources[1]).toBe('https://media.test/cities/convention/city-montenegro-budva/w640.webp');
   });
 
-  it('resizes a curated Cloudinary photo to the box it fills', () => {
+  it('sizes a curated photo to the box it fills', () => {
     const [first] = cityImageSources(
       {
         city: 'Split',
         country: 'Croatia',
-        imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/city-split.jpg',
+        imageUrl: 'https://media.test/city-split/original.jpg',
       },
       { width: 800, height: 400 },
     );
 
-    // 800×400 → the 2:1 box preset at 800px wide (c_fill,g_auto,ar_2:1,w_800).
-    expect(first).toContain('t_be_r2x1_w800');
+    // 800×400 → a stored width that covers the box (object-fit: cover).
+    expect(first).toBe('https://media.test/city-split/w1280.webp');
   });
 
   it('passes a photo on a host we cannot transform through untouched', () => {
@@ -102,13 +103,15 @@ describe('cityImageSources', () => {
   it('refuses a stored value that has no business in an img src', () => {
     for (const bad of ['javascript:alert(1)', 'data:image/png;base64,AAA', '   ', 'https://a.example/x\njavascript:1']) {
       const sources = cityImageSources({ city: 'Skopje', country: 'North Macedonia', imageUrl: bad }, { width: 10, height: 10 });
-      expect(sources.every(url => url.startsWith('https://res.cloudinary.com'))).toBe(true);
+      // Only the two convention photos are left.
+      expect(sources).toHaveLength(2);
+      expect(sources.every(url => url.includes('city-north-macedonia-skopje'))).toBe(true);
     }
   });
 });
 
 describe('validateCityPhoto', () => {
-  const CLOUDINARY = 'https://res.cloudinary.com/demo/image/upload/v1/x.jpg';
+  const CLOUDINARY = 'https://media.test/x/original.jpg';
 
   it('accepts a plausible override', () => {
     expect(validateCityPhoto({
@@ -127,12 +130,12 @@ describe('validateCityPhoto', () => {
     // why the check is here and not only in the browser's console.
     const result = validateCityPhoto({ city: 'Tirana', country: 'Albania', imageUrl: 'https://images.example/x.jpg' });
     expect(result.isValid).toBe(false);
-    expect(result.error).toMatch(/res\.cloudinary\.com/);
+    expect(result.error).toMatch(/media\.test/);
   });
 
   it('matches the host exactly, not as a suffix', () => {
     expect(validateCityPhoto({
-      city: 'Tirana', country: 'Albania', imageUrl: 'https://res.cloudinary.com.evil.example/x.jpg',
+      city: 'Tirana', country: 'Albania', imageUrl: 'https://media.test.evil.example/x.jpg',
     }).isValid).toBe(false);
   });
 
@@ -145,7 +148,7 @@ describe('validateCityPhoto', () => {
   it('rejects an over-long URL or credit rather than letting the server truncate it', () => {
     expect(validateCityPhoto({
       city: 'Tirana', country: 'Albania',
-      imageUrl: `https://res.cloudinary.com/demo/image/upload/${'a'.repeat(2100)}`,
+      imageUrl: `https://media.test/${'a'.repeat(2100)}/original.jpg`,
     }).isValid).toBe(false);
 
     expect(validateCityPhoto({
@@ -168,12 +171,12 @@ const photoRow = (overrides: Partial<AdminCityPhoto> = {}): AdminCityPhoto => ({
     countryCode: 'AL',
     featured: true,
     imageUpdatedAt: null,
-    active: { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/auto.jpg', source: 'auto' },
+    active: { imageUrl: 'https://media.test/auto/original.jpg', source: 'auto' },
     candidates: {
         manual: null,
-        cityGallery: { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/gallery.jpg', source: 'city-gallery' },
+        cityGallery: { imageUrl: 'https://media.test/gallery/original.jpg', source: 'city-gallery' },
         villaDestination: null,
-        auto: { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/auto.jpg', source: 'auto' },
+        auto: { imageUrl: 'https://media.test/auto/original.jpg', source: 'auto' },
     },
     ...overrides,
 });
@@ -214,7 +217,7 @@ describe('CityPhotosManager', () => {
                 body: expect.objectContaining({
                     city: 'Tirana',
                     country: 'Albania',
-                    imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/gallery.jpg',
+                    imageUrl: 'https://media.test/gallery/original.jpg',
                 }),
             }));
         });
@@ -241,7 +244,7 @@ describe('CityPhotosManager', () => {
         expect(screen.queryByRole('button', { name: /Clear override/i })).not.toBeInTheDocument();
         unmount();
 
-        const manual = { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/manual.jpg', source: 'manual' as const };
+        const manual = { imageUrl: 'https://media.test/manual/original.jpg', source: 'manual' as const };
         apiRequest.mockResolvedValue({
             cities: [photoRow({ active: manual, candidates: { ...photoRow().candidates, manual } })],
         });
@@ -251,7 +254,7 @@ describe('CityPhotosManager', () => {
     });
 
     it('filters to the cities nobody has reviewed', async () => {
-        const manual = { imageUrl: 'https://res.cloudinary.com/demo/image/upload/v1/manual.jpg', source: 'manual' as const };
+        const manual = { imageUrl: 'https://media.test/manual/original.jpg', source: 'manual' as const };
         apiRequest.mockResolvedValue({
             cities: [
                 photoRow(),

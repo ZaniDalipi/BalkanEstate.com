@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { useAppContext } from '@/context/AppContext';
 import { UsageMeter } from '@/src/shared/components/ui';
 import { roomStylerKeys } from '@/src/shared/query/queryKeys';
@@ -15,7 +15,7 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
 interface RoomStylerModalProps {
-    /** Full Cloudinary URL of the room photo to restyle */
+    /** Full media CDN URL of the room photo to restyle */
     imageUrl: string;
     onClose: () => void;
 }
@@ -49,13 +49,13 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
         setErrorMsg(null);
     }, [mode]);
 
-    // Send a high-res version to the AI for a better result (still a Cloudinary URL).
-    const sourceUrl = optimizeCloudinaryUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
+    // Send a high-res version to the AI for a better result (still a media CDN URL).
+    const sourceUrl = optimizeImageUrl(imageUrl, { width: 1600, quality: 'auto' }) || imageUrl;
 
     // A thumbnail of the same photo, blurred up behind it to fill whatever the
     // picture does not cover — nicer than black bars, and it lets us show the
     // whole photo instead of cropping it to fit the frame.
-    const backdropUrl = optimizeCloudinaryUrl(imageUrl, { width: 48, quality: 'auto:eco' }) || sourceUrl;
+    const backdropUrl = optimizeImageUrl(imageUrl, { width: 48, quality: 'auto:eco' }) || sourceUrl;
 
     // The photo's own proportions, so the stage can take its shape.
     const aspect = useImageAspect(sourceUrl);

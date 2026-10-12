@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import User, { IUser } from '../models/User';
 import Agent from '../models/Agent';
-import { uploadImage, deleteImages } from '../services/cloudinaryService';
+import { uploadImage, deleteImages } from '../services/mediaService';
 import { apiLogger } from '../utils/logger';
 import { validateLicenseNumber, getLicenseFormatHint, SUPPORTED_LICENSE_COUNTRIES } from '../utils/licenseValidation';
 
@@ -30,7 +30,7 @@ export const uploadLicense = async (
       return;
     }
 
-    // Upload license document to Cloudinary
+    // Upload license document to R2
     // Path: balkan-estate/users/{userId}/documents/license/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId: String(currentUser._id),
@@ -159,7 +159,7 @@ export const deleteLicense = async (
       return;
     }
 
-    // Delete from Cloudinary
+    // Delete from storage
     await deleteImages([user.agentLicense.documentPublicId]);
 
     // Clear license data

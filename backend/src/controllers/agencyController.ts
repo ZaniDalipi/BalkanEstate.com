@@ -8,7 +8,7 @@ import Property from '../models/Property';
 import Subscription from '../models/Subscription';
 import Product from '../models/Product';
 import { geocodeAgency } from '../services/geocodingService';
-import { uploadImage, deleteImage, deleteAgencyMedia } from '../services/cloudinaryService';
+import { uploadImage, deleteImage, deleteAgencyMedia, isMediaStorageConfigured, mediaStorageNotConfiguredMessage } from '../services/mediaService';
 import { generateSecureAgentId } from '../utils/secureRandom';
 import { getParam, getObjectIdParam, isValidObjectId } from '../utils/validateParams';
 
@@ -1339,9 +1339,8 @@ export const uploadAgencyLogo = async (
       return;
     }
 
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      agencyLogger.error('Cloudinary not configured');
+    if (!isMediaStorageConfigured()) {
+      agencyLogger.error(mediaStorageNotConfiguredMessage());
       res.status(500).json({ message: 'Image upload service not configured' });
       return;
     }
@@ -1378,7 +1377,7 @@ export const uploadAgencyLogo = async (
       }
     }
 
-    // Upload logo using centralized cloudinaryService
+    // Upload logo using the media service
     // Path: balkan-estate/agencies/{agencyId}/logo/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId,
@@ -1420,9 +1419,8 @@ export const uploadAgencyCover = async (
       return;
     }
 
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      agencyLogger.error('Cloudinary not configured');
+    if (!isMediaStorageConfigured()) {
+      agencyLogger.error(mediaStorageNotConfiguredMessage());
       res.status(500).json({ message: 'Image upload service not configured' });
       return;
     }
@@ -1459,7 +1457,7 @@ export const uploadAgencyCover = async (
       }
     }
 
-    // Upload cover using centralized cloudinaryService
+    // Upload cover using the media service
     // Path: balkan-estate/agencies/{agencyId}/cover/
     const uploadResult = await uploadImage(req.file.buffer, {
       userId,

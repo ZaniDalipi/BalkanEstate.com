@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User } from 'lucide-react';
@@ -99,7 +99,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                 >
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
                         {currentUser.avatarUrl ? (
-                            <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                            <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
                         ) : (
                             <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
                         )}
@@ -448,14 +448,14 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         <div className="absolute inset-0 bg-black/10"></div>
                                         <div className="relative z-10">
                                             <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
-                                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
                                                     {agencyData.logo ? (
                                                         <img
-                                                            src={optimizeCloudinaryUrl(agencyData.logo, { width: 128 }) || agencyData.logo}
+                                                            src={optimizeImageUrl(agencyData.logo, { width: 128 }) || agencyData.logo}
                                                             alt={agencyData.name}
                                                             loading="lazy"
                                                             decoding="async"
-                                                            className="w-8 h-8 sm:w-12 sm:h-12 object-cover rounded-md sm:rounded-lg"
+                                                            className="w-8 h-8 sm:w-12 sm:h-12 object-contain rounded-md sm:rounded-lg"
                                                         />
                                                     ) : (
                                                         <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />

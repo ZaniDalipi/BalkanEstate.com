@@ -8,7 +8,7 @@ import PriceHistoryChart from './PriceHistoryChart';
 import EconomicIndicatorsPanel from './EconomicIndicatorsPanel';
 import { formatPrice } from '@/utils/currency';
 import { useParams } from 'react-router-dom';
-import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { getCityFallbackGradient } from '@/config/mediaConfig';
 import { cityImageSources } from '../utils/cityImage';
 import { useAppContext } from '@/context/AppContext';
 import { searchLocation } from '@/services/osmService';
@@ -314,7 +314,7 @@ const CityDashboard: React.FC = () => {
   };
   const healthInfo = getHealthLabel(marketHealthScore);
 
-  // Curated photo first, then the convention Cloudinary id — see
+  // Curated photo first, then the convention city photo — see
   // `cityImageSources`. Wikipedia is appended below, once its query has landed.
   const heroSources = cityImageSources(
     { city: city.city, country: city.country, imageUrl: city.imageUrl },

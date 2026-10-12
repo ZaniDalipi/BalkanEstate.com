@@ -4,6 +4,7 @@
  */
 
 import helmet from 'helmet';
+import { missingR2Vars } from '../config/r2';
 import hpp from 'hpp';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
@@ -35,9 +36,6 @@ export const validateEnvironment = (): void => {
     'FIELD_ENCRYPTION_KEY',
     'PASSWORD_PEPPER',
     'FINGERPRINT_SECRET',
-    'CLOUDINARY_CLOUD_NAME',
-    'CLOUDINARY_API_KEY',
-    'CLOUDINARY_API_SECRET',
     'RESEND_API_KEY',
     'GEMINI_API_KEY',
     'FRONTEND_URL',
@@ -59,6 +57,13 @@ export const validateEnvironment = (): void => {
       missing.push(varName);
     }
   });
+
+  // Image storage (Cloudflare R2) — production can't take uploads without it.
+  if (isProduction) {
+    missing.push(...missingR2Vars());
+  } else if (missingR2Vars().length > 0) {
+    apiLogger.warn(`[ENV WARNING] Image uploads are disabled — missing ${missingR2Vars().join(', ')}`);
+  }
 
   // Validate MONGODB_URI format
   const mongoUri = process.env.MONGODB_URI;
@@ -194,7 +199,7 @@ export const helmetConfig = helmet({
         "'self'",
       ],
       objectSrc: ["'none'"],
-      mediaSrc: ["'self'", 'https://res.cloudinary.com', 'blob:'],
+      mediaSrc: ["'self'", ...ALLOWED_PHOTO_HOSTS.map(host => `https://${host}`), 'blob:'],
       workerSrc: ["'self'", 'blob:'],
       childSrc: ["'self'", 'blob:'],
       formAction: ["'self'"],

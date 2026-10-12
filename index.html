@@ -187,7 +187,6 @@
     <!-- Preconnect to critical domains (high priority) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
 
     <!-- DNS prefetch for third-party domains (lower priority than preconnect) -->
     <link rel="dns-prefetch" href="https://images.unsplash.com">
@@ -316,10 +315,14 @@
         box-sizing: border-box;
       }
 
-      /* Prevent images from overflowing */
-      img {
-        max-width: 100%;
-        height: auto;
+      /* Prevent images from overflowing. In Tailwind's base layer so size
+         utilities (h-8, w-12…) still win — unlayered, this height: auto
+         overrode them and non-square images grew out of their boxes. */
+      @layer base {
+        img {
+          max-width: 100%;
+          height: auto;
+        }
       }
 
       /* Hide browser default number input spinners */
