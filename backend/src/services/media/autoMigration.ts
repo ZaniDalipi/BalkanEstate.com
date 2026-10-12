@@ -40,15 +40,29 @@ interface MigrationState {
 
 const collection = () => mongoose.connection.db!.collection<MigrationState>(MIGRATION_STATE_COLLECTION);
 
-/** Take the lock unless it's done or another live instance holds it. True when acquired. */
+/** A failure the next run can't fix: Cloudinary no longer has the image. */
+const isPermanentFailure = (error: string): boolean => /HTTP 404\b/.test(error);
+
+/**
+ * Take the lock unless it's done or another live instance holds it. True when
+ * acquired. A run recorded as done but with downloads Cloudinary refused (from
+ * before this rule existed) counts as unfinished.
+ */
 const acquire = async (owner: string): Promise<boolean> => {
   const now = new Date();
   try {
     const result = await collection().findOneAndUpdate(
       {
         _id: STATE_ID,
-        status: { $ne: 'done' },
-        $or: [{ status: { $ne: 'running' } }, { lockedUntil: { $lt: now } }],
+        $and: [
+          {
+            $or: [
+              { status: { $ne: 'done' } },
+              { 'stats.failed': { $elemMatch: { error: { $not: /HTTP 404\b/ } } } },
+            ],
+          },
+          { $or: [{ status: { $ne: 'running' } }, { lockedUntil: { $lt: now } }] },
+        ],
       },
       {
         $set: { status: 'running', owner, lockedUntil: new Date(now.getTime() + LOCK_MS), startedAt: now },
@@ -137,21 +151,37 @@ export const startAutoMediaMigration = async (options: AutoMigrationOptions = {}
       },
     });
 
+    // Done only when nothing is left that a later run could still move:
+    // images Cloudinary no longer has (404) are final, anything else — 401
+    // refused, timeouts — is retried on the next start.
+    const retryable = stats.failed.filter((f) => !isPermanentFailure(f.error));
+    const recorded = { ...stats, failedCount: stats.failed.length, failed: stats.failed.slice(0, 500) };
+    if (retryable.length > 0) {
+      const sample = [...new Set(retryable.map((f) => f.error))].slice(0, 3).join('; ');
+      await collection().updateOne(
+        { _id: STATE_ID, owner },
+        {
+          $set: { status: 'failed', finishedAt: new Date(), stats: recorded, error: `${retryable.length} downloads failed: ${sample}` },
+          $unset: { lockedUntil: '' },
+        }
+      );
+      mediaLogger.warn(
+        `[media-migrate] Not finished: ${stats.migrated} images moved, ${retryable.length} couldn't be downloaded (${sample}). ` +
+          (/HTTP 401|HTTP 403/.test(sample)
+            ? 'Cloudinary is refusing delivery — set CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET so they are fetched through the Cloudinary API. '
+            : '') +
+          'They are retried on the next start.'
+      );
+      return;
+    }
     await collection().updateOne(
       { _id: STATE_ID, owner },
-      {
-        $set: {
-          status: 'done',
-          finishedAt: new Date(),
-          stats: { ...stats, failedCount: stats.failed.length, failed: stats.failed.slice(0, 500) },
-        },
-        $unset: { lockedUntil: '' },
-      }
+      { $set: { status: 'done', finishedAt: new Date(), stats: recorded }, $unset: { lockedUntil: '' } }
     );
     mediaLogger.info(
       `[media-migrate] Done: ${stats.migrated} images moved (${stats.alreadyMigrated} were already on R2), ` +
         `${stats.docsUpdated} documents updated, ${stats.failed.length} failed` +
-        (stats.failed.length ? ' — listed in mediamigrationstates; those keep their Cloudinary link.' : '.')
+        (stats.failed.length ? ' — no longer on Cloudinary (404), listed in mediamigrationstates.' : '.')
     );
   } catch (error: any) {
     mediaLogger.error(`[media-migrate] Stopped: ${error?.message || error}. It continues where it stopped on the next start.`);

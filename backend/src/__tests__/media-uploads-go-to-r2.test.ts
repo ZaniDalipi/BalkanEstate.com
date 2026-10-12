@@ -192,7 +192,8 @@ describe('no Cloudinary left in the code', () => {
       const dir = path.join(repo, root);
       if (!fs.existsSync(dir)) continue;
       for (const file of sourceFiles(dir)) {
-        if (/api\.cloudinary\.com|\/image\/upload['"`]\s*,\s*\{\s*method:\s*['"]POST/i.test(fs.readFileSync(file, 'utf8'))) {
+        // The migration may use the read-only download endpoint; no upload endpoint anywhere.
+        if (/api\.cloudinary\.com\/v1_1\/[^\s'"`]*\/(upload|destroy|explicit|rename)|\/image\/upload['"`]\s*,\s*\{\s*method:\s*['"]POST/i.test(fs.readFileSync(file, 'utf8'))) {
           offenders.push(path.relative(repo, file));
         }
       }
