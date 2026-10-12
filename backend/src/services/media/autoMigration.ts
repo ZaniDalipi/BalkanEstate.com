@@ -81,7 +81,16 @@ export interface AutoMigrationOptions {
  * Resolves when this instance has finished (or decided not to run).
  */
 export const startAutoMediaMigration = async (options: AutoMigrationOptions = {}): Promise<void> => {
-  if (process.env.MEDIA_MIGRATE_ON_START?.trim().toLowerCase() !== 'true') return;
+  // Tolerant of how dashboards store it: "true", 'true', TRUE, 1, yes.
+  const raw = process.env.MEDIA_MIGRATE_ON_START;
+  const flag = raw?.trim().replace(/^["']|["']$/g, '').trim().toLowerCase();
+  if (!flag) return;
+  if (!['true', '1', 'yes', 'on'].includes(flag)) {
+    if (!['false', '0', 'no', 'off'].includes(flag)) {
+      mediaLogger.warn(`[media-migrate] MEDIA_MIGRATE_ON_START=${JSON.stringify(raw)} isn't understood — set it to true to run the migration`);
+    }
+    return;
+  }
   if (!isR2Enabled()) {
     mediaLogger.warn(`[media-migrate] MEDIA_MIGRATE_ON_START is set but R2 isn't configured (missing ${missingR2Vars().join(', ')})`);
     return;

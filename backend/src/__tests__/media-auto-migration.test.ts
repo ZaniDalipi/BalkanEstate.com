@@ -44,6 +44,13 @@ describe('startAutoMediaMigration', () => {
     expect(await state()).toBeNull();
   });
 
+  it('accepts the switch however the dashboard stored it', async () => {
+    process.env.MEDIA_MIGRATE_ON_START = ' "TRUE" ';
+    const run = jest.fn(async () => stats(1));
+    await startAutoMediaMigration({ ...quick, run });
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+
   it('runs once with apply + throttle, records done, and never runs again', async () => {
     const run = jest.fn(async (_o: MigrationOptions) => stats(42));
     await startAutoMediaMigration({ startDelayMs: 0, throttleMs: 150, run });
