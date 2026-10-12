@@ -108,7 +108,12 @@ export const startAutoMediaMigration = async (options: AutoMigrationOptions = {}
     if (!(await acquire(owner))) {
       const state = await collection().findOne({ _id: STATE_ID });
       if (state?.status === 'done') {
-        mediaLogger.info('[media-migrate] Already done — every Cloudinary image was moved. You can remove MEDIA_MIGRATE_ON_START.');
+        const st = state.stats;
+        mediaLogger.info(
+          `[media-migrate] Already done${state.finishedAt ? ` (${state.finishedAt.toISOString()})` : ''}` +
+            (st ? `: ${st.migrated} images moved, ${st.docsUpdated} documents updated, ${st.failedCount} failed` : '') +
+            '. You can remove MEDIA_MIGRATE_ON_START.'
+        );
       } else {
         mediaLogger.info(`[media-migrate] Another instance is migrating (${state?.owner}); not starting here.`);
       }
