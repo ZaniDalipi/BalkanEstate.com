@@ -69,11 +69,12 @@ describe('cityImageSources', () => {
     expect(sources[1]).toContain('city-albania-tirana');
   });
 
-  it('falls back to the convention id alone when nothing is curated', () => {
+  it('falls back to the convention id alone when nothing is curated — on Cloudinary, then on R2', () => {
     const sources = cityImageSources({ city: 'Budva', country: 'Montenegro' }, { width: 400, height: 200 });
 
-    expect(sources).toHaveLength(1);
-    expect(sources[0]).toContain('city-montenegro-budva');
+    expect(sources).toHaveLength(2);
+    expect(sources[0]).toMatch(/^https:\/\/res\.cloudinary\.com\/.+\/city-montenegro-budva$/);
+    expect(sources[1]).toBe('https://media.test/cities/convention/city-montenegro-budva/w640.webp');
   });
 
   it('sizes a curated photo to the box it fills', () => {
@@ -102,7 +103,9 @@ describe('cityImageSources', () => {
   it('refuses a stored value that has no business in an img src', () => {
     for (const bad of ['javascript:alert(1)', 'data:image/png;base64,AAA', '   ', 'https://a.example/x\njavascript:1']) {
       const sources = cityImageSources({ city: 'Skopje', country: 'North Macedonia', imageUrl: bad }, { width: 10, height: 10 });
-      expect(sources.every(url => url.startsWith('https://media.test'))).toBe(true);
+      // Only the two convention photos are left.
+      expect(sources).toHaveLength(2);
+      expect(sources.every(url => url.includes('city-north-macedonia-skopje'))).toBe(true);
     }
   });
 });

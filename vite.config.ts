@@ -225,6 +225,17 @@ export default defineConfig(({ mode }) => {
                   }
                 }
               },
+              // Images uploaded before R2, still served by Cloudinary.
+              {
+                urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+                handler: 'StaleWhileRevalidate',
+                options: {
+                  cacheName: 'cloudinary-images-cache',
+                  expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                  // Only proper CORS responses (not opaque): the annotation canvas needs them.
+                  cacheableResponse: { statuses: [200] },
+                },
+              },
               // Our R2 photos (VITE_MEDIA_CDN_URL). Not CacheFirst: curated city
               // photos are re-seeded in place under the same URL.
               ...(mediaCdnOrigin ? [{

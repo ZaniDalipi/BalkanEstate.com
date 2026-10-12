@@ -1,6 +1,13 @@
 # Media storage (Cloudflare R2)
 
-All photos are stored in Cloudflare R2 and served from Cloudflare's CDN. There is no Cloudinary anymore.
+Every **new** upload is stored in Cloudflare R2 and served from Cloudflare's CDN. Nothing is uploaded to Cloudinary any more.
+
+**Images uploaded before the move stay on Cloudinary, untouched.** They are shown from Cloudinary exactly as before, through the named transformations already registered on the account (`t_be_w480`, `t_be_r4x3_w320`, `t_be_lqip`, `t_be_og`), by `config/legacyCloudinary.ts`. The app no longer talks to the Cloudinary API, so:
+- the Cloudinary account has to stay open while these images are in use;
+- deleting a listing, or replacing an avatar or logo, doesn't delete the old Cloudinary file;
+- curated city photos are looked up on Cloudinary first (`city-{country}-{city}`), then in R2 (`cities/convention/…`, where `seedCityImages` now writes).
+
+Moving them to R2 later is optional; see [Moving existing images from Cloudinary](#moving-existing-images-from-cloudinary-optional).
 
 Each upload is resized **once**, on our server with sharp, into only the sizes that photo needs. Those files go into one folder per photo. Nothing is resized when a page asks for an image, so there are no transformation charges, and R2 charges nothing for bandwidth.
 
@@ -130,7 +137,9 @@ db.mediaassets.aggregate([{ $group: { _id: '$ownerId', photos: { $sum: 1 }, byte
 6. **Frontend build**: add the GitHub secret `VITE_MEDIA_CDN_URL` with the same value as `R2_PUBLIC_URL`. Locally it goes in the root `.env`.
 7. **Link previews**: in Cloudflare → Workers & Pages → balkanestateai → Settings → Variables and Secrets, add `MEDIA_CDN_URL` with the same value, for Production and Preview.
 
-## Moving existing images from Cloudinary
+## Moving existing images from Cloudinary (optional)
+
+Not needed: existing images keep working from Cloudinary. Use this only if you decide to close the Cloudinary account.
 
 The migration reads Cloudinary over plain HTTPS, so it needs no Cloudinary SDK and no API key. It needs `R2_*` and `MONGODB_URI`.
 
@@ -156,29 +165,18 @@ Some details:
 - It writes `media-migration-report-*.json`.
 - Images Cloudinary no longer has (HTTP 404) are listed as failed and keep their old link; they're already broken today.
 
-### Keeping existing listing photos on Cloudinary
+### Moving only part of it
 
-Moving listing photos is optional. New uploads always go to R2. Existing Cloudinary photos keep working: the frontend sends any image host it doesn't recognise through `/api/image-proxy`, which resizes it on our server and caches it, so no new Cloudinary transformations are used.
-
-```bash
-npm run media:migrate:non-listings                # avatars, logos, cities, villas → R2; listing photos stay
-npm run media:check -- --allow-cloudinary         # Cloudinary links reported, not counted as errors
-```
-
-While listing photos stay on Cloudinary:
-- the Cloudinary account (and its storage cost) has to stay;
-- deleting a listing doesn't delete its Cloudinary photos (there's no Cloudinary SDK any more);
-- AI room restyling and advertising-inquiry attachments only work with R2 photos.
-
-Run `npm run media:migrate:apply` at any time to move the rest; anything already moved is skipped.
+`npm run media:migrate:non-listings` moves avatars, logos, cities and villas but leaves every listing photo on Cloudinary. `npm run media:migrate:apply` moves the rest at any time; anything already moved is skipped.
 
 `npm run media:check` scans every document and lists:
-- any link still on Cloudinary;
+- images still on Cloudinary (for information);
+- whether the media bucket's CORS policy allows the site;
 - any R2 link with no `MediaAsset` record;
 - any R2 file that doesn't load (skip this HTTP check with `-- --no-http`);
 - which curated city photos are missing.
 
-It exits with an error if something is wrong. When it's clean, delete the media in the Cloudinary dashboard and close the account.
+It exits with an error if something is wrong. Images still on Cloudinary are listed for information; add `-- --require-r2` to count them as errors (after a full migration). Only then delete the media in the Cloudinary dashboard and close the account.
 
 ## Costs (approximate)
 

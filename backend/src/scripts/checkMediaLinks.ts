@@ -1,10 +1,10 @@
 /**
- * Check that every picture the site shows comes from R2.
+ * Check the image links the site shows: R2 photos exist and load, CORS is set.
  *
  * Scans every string field of every collection (URLs inside HTML/text too)
  * and reports:
- *   1. links still pointing at Cloudinary (res.cloudinary.com) — run
- *      `npm run media:migrate:apply` to move them;
+ *   1. images still on Cloudinary (res.cloudinary.com) — expected for
+ *      anything uploaded before R2;
  *   2. links to our media domain whose photo is missing — no MediaAsset
  *      record, or (unless --no-http) its original.jpg doesn't answer;
  *   3. the curated city photos (cities/convention/…) the frontend finds by
@@ -12,8 +12,10 @@
  *
  *   npm run media:check              (everything, including an HTTP check of each photo)
  *   npm run media:check -- --no-http (database only, fast)
- *   npm run media:check -- --allow-cloudinary
- *     (listing photos deliberately kept on Cloudinary: reported, not a failure)
+ *   npm run media:check -- --require-r2
+ *     (count links still on Cloudinary as errors — only after migrating them;
+ *      by default images uploaded before R2 stay on Cloudinary and are listed
+ *      for information)
  *
  * Exits 1 when anything is wrong, and writes media-check-report-*.json.
  */
@@ -56,7 +58,7 @@ const mapLimit = async <T>(items: T[], limit: number, fn: (item: T) => Promise<v
 
 async function main(): Promise<void> {
   const checkHttp = !process.argv.includes('--no-http');
-  const allowCloudinary = process.argv.includes('--allow-cloudinary');
+  const allowCloudinary = !process.argv.includes('--require-r2');
   const mediaBase = process.env.R2_PUBLIC_URL?.trim().replace(/\/+$/, '');
   if (!mediaBase) throw new Error('R2_PUBLIC_URL is not set (backend/.env)');
   if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI is not set');
@@ -156,7 +158,7 @@ async function main(): Promise<void> {
       if (items.length > 15) console.log(`     … ${items.length - 15} more in the report`);
     };
     console.log(`\nScanned ${scannedDocs} documents; ${keys.length} different R2 photos are linked.\n`);
-    line(allowCloudinary ? 'Links still on Cloudinary (allowed)' : 'Links still on Cloudinary', cloudinary, allowCloudinary);
+    line(allowCloudinary ? 'Images still on Cloudinary (expected)' : 'Links still on Cloudinary', cloudinary, allowCloudinary);
     line('R2 links with no MediaAsset record', unindexed);
     if (checkHttp) line('R2 links whose file does not load', unreachable);
     if (checkHttp && sampleKey) console.log(corsProblem ? `❌ CORS: ${corsProblem}` : `✅ CORS allows ${siteOrigin}`);

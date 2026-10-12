@@ -155,12 +155,15 @@ describe('every upload goes to R2', () => {
 describe('no Cloudinary left in the code', () => {
   const repo = path.resolve(__dirname, '../../..');
   /**
-   * Files allowed to mention Cloudinary: the migration that reads from it, the
-   * check that hunts for leftovers, and recognising listing photos kept there.
-   * None of them can upload to Cloudinary.
+   * Files allowed to mention Cloudinary's image domain: the read-only display
+   * of images that stay there (and the hosts allowed to show them), the
+   * optional migration that reads from it, and the check that lists them.
+   * None of them can upload to Cloudinary (see the upload API test below).
    */
   const allowed = [
     'config/legacyCloudinary.ts',
+    'backend/src/config/imageHosts.ts',
+    'src/shared/utils/validation.ts',
     'backend/src/scripts/migrateCloudinaryToR2.ts',
     'backend/src/services/media/cloudinaryMigration.ts',
     'backend/src/scripts/checkMediaLinks.ts',
@@ -181,6 +184,20 @@ describe('no Cloudinary left in the code', () => {
     for (const pkg of [backendPkg, frontendPkg]) {
       expect(Object.keys({ ...pkg.dependencies, ...pkg.devDependencies })).not.toContain('cloudinary');
     }
+  });
+
+  it('never calls the Cloudinary upload API, anywhere', () => {
+    const offenders: string[] = [];
+    for (const root of ['backend/src', 'src', 'components', 'config', 'functions', 'hooks', 'utils', 'services', 'context']) {
+      const dir = path.join(repo, root);
+      if (!fs.existsSync(dir)) continue;
+      for (const file of sourceFiles(dir)) {
+        if (/api\.cloudinary\.com|\/image\/upload['"`]\s*,\s*\{\s*method:\s*['"]POST/i.test(fs.readFileSync(file, 'utf8'))) {
+          offenders.push(path.relative(repo, file));
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 
   it('never imports the SDK or points at res.cloudinary.com', () => {

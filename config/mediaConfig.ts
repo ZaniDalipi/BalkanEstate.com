@@ -9,8 +9,11 @@
  *   {MEDIA_CDN_URL}/users/{name}_{id}/listings/{title}_{id}/photos/{photoId}/w640.webp
  *
  * The database stores the master (`…/original.jpg`); the helpers below swap
- * in the right size. Nothing is resized on request. External images (listing
- * feeds) go through our resizing proxy.
+ * in the right size. Nothing is resized on request.
+ *
+ * Images uploaded before R2 stay on Cloudinary and are shown from there as
+ * before, through its named presets (config/legacyCloudinary.ts). Other
+ * external images (listing feeds) go through our resizing proxy.
  */
 
 import { API_URL } from '../src/shared/api/config';
@@ -25,6 +28,14 @@ import {
   MEDIA_LQIP_FILE,
   CITY_CONVENTION_FOLDER,
 } from '../backend/src/config/mediaVariants';
+import {
+  cloudinaryPresetUrl,
+  cloudinaryCityImageUrl,
+  originalCloudinaryUrl,
+  isCloudinaryUrl,
+  isCloudinaryPhotoUrl,
+  snapCloudinaryWidth,
+} from './legacyCloudinary';
 
 /**
  * Public origin of the R2 media bucket, e.g. https://media.balkanestateai.com
@@ -68,10 +79,12 @@ export const normalizeName = (name: string): string => {
 // Alias for backward compatibility
 export const normalizeCityName = normalizeName;
 
+const cityPublicId = (cityName: string, country?: string): string =>
+  `city-${country ? normalizeName(country) : 'unknown'}-${normalizeName(cityName)}`;
+
 /**
- * The curated photo of a city (`cities/convention/city-{country}-{city}` on
- * the media CDN, written by seedCityImages), sized for the request. Empty
- * while the media CDN isn't configured.
+ * The curated photo of a city, sized for the request: the existing one on
+ * Cloudinary (public id `city-{country}-{city}`), as before R2.
  */
 export const getCityImageUrl = (
   cityName: string,
@@ -86,18 +99,27 @@ export const getCityImageUrl = (
     gravity?: string;
   } = {}
 ): string => {
-  if (!MEDIA_CDN_URL) return '';
   const { country, width = 800, height = 600 } = options;
-  const publicId = `city-${country ? normalizeName(country) : 'unknown'}-${normalizeName(cityName)}`;
-  return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${publicId}`, pickVariantFile({ width, height }));
+  return cloudinaryCityImageUrl(cityPublicId(cityName, country), { width, height });
 };
 
-/** Blurred placeholder of a city's curated photo (empty without the media CDN). */
-export const getCityImagePlaceholder = (cityName: string, country?: string): string => {
+/**
+ * A city's curated photo seeded on R2 since the move
+ * (`cities/convention/city-{country}-{city}`, written by seedCityImages) —
+ * tried after the Cloudinary one. Empty while the media CDN isn't configured.
+ */
+export const getMediaCdnCityImageUrl = (
+  cityName: string,
+  options: { country?: string; width?: number; height?: number } = {}
+): string => {
   if (!MEDIA_CDN_URL) return '';
-  const publicId = `city-${country ? normalizeName(country) : 'unknown'}-${normalizeName(cityName)}`;
-  return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${publicId}`, MEDIA_LQIP_FILE);
+  const { country, width = 800, height = 600 } = options;
+  return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${cityPublicId(cityName, country)}`, pickVariantFile({ width, height }));
 };
+
+/** Blurred placeholder of a city's curated photo (on Cloudinary). */
+export const getCityImagePlaceholder = (cityName: string, country?: string): string =>
+  cloudinaryCityImageUrl(cityPublicId(cityName, country), { blur: true });
 
 /**
  * Default fallback gradient for cities without images
@@ -146,12 +168,13 @@ export const SUPPORTED_CITIES = [
 // ============================================================================
 
 /**
- * Blurred 32px placeholder (blur-up / LQIP) of a photo on our media CDN, or
- * an empty string for any other URL.
+ * Blurred 32px placeholder (blur-up / LQIP) of a photo on our media CDN or on
+ * Cloudinary, or an empty string for any other URL.
  */
 export const getPropertyImagePlaceholder = (imageUrl: string | undefined): string => {
   const media = parseMediaCdnUrl(imageUrl);
-  return media ? mediaFileUrl(MEDIA_CDN_URL, media.photoKey, MEDIA_LQIP_FILE) : '';
+  if (media) return mediaFileUrl(MEDIA_CDN_URL, media.photoKey, MEDIA_LQIP_FILE);
+  return (imageUrl && isCloudinaryPhotoUrl(imageUrl) && cloudinaryPresetUrl(imageUrl, { blur: true })) || '';
 };
 
 /**
@@ -176,9 +199,9 @@ export const originalMediaCdnUrl = (url: string | undefined | null): string | nu
   return media ? mediaFileUrl(MEDIA_CDN_URL, media.photoKey, MEDIA_MASTER_FILE) : null;
 };
 
-/** The unresized original behind a media CDN size or proxy URL, or null. */
+/** The unresized original behind a media CDN size, Cloudinary preset or proxy URL, or null. */
 export const originalImageUrl = (url: string | undefined | null): string | null =>
-  originalMediaCdnUrl(url) ?? originalProxiedUrl(url);
+  originalMediaCdnUrl(url) ?? originalCloudinaryUrl(url) ?? originalProxiedUrl(url);
 
 /**
  * `onError` for a resized <img>: retry once with the original image. Returns
@@ -232,7 +255,7 @@ export const shouldProxyImage = (rawUrl: string): boolean => {
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
   const host = url.hostname.toLowerCase();
   if (host.endsWith('googleusercontent.com')) return false;
-  if (isMediaCdnUrl(rawUrl)) return false;
+  if (isMediaCdnUrl(rawUrl) || isCloudinaryUrl(rawUrl)) return false;
   if (DIRECT_IMAGE_HOSTS.has(host) || isOwnSiteUrl(url)) return false;
   if (rawUrl.startsWith(`${API_URL}/image-proxy`)) return false;
   // SVGs are never proxied (the proxy rejects them — they can carry script).
@@ -244,8 +267,10 @@ export const shouldProxyImage = (rawUrl: string): boolean => {
  * Size an image URL for display.
  *
  *  - Our media CDN (R2): the pre-generated file for the request, e.g.
- *      {MEDIA_CDN_URL}/users/{u}/listings/{p}/photos/{id}/c640.webp
- *    width×height → 4:3 crop, width → full photo, blur → lqip, jpg → share card.
+ *      {MEDIA_CDN_URL}/users/{u}/listings/{p}/photos/{id}/w640.webp
+ *    width×height → a width covering the box, blur → lqip, jpg → original.jpg.
+ *  - Cloudinary (images from before R2): its named preset for the request, e.g.
+ *      {cloudinary}/image/upload/t_be_w800/v{version}/{path}.jpg
  *  - Google avatars: size parameter.
  *  - Other external images: our resizing proxy.
  *
@@ -297,6 +322,12 @@ export const optimizeImageUrl = (
     return mediaFileUrl(MEDIA_CDN_URL, media.photoKey, file);
   }
 
+  // Cloudinary (images from before R2): onto one registered preset.
+  if (isCloudinaryUrl(url)) {
+    const wantsBlur = typeof blur === 'number' && Number.isFinite(blur) && blur >= 1;
+    return cloudinaryPresetUrl(url, { width: requestedWidth, height: requestedHeight, format, blur: wantsBlur }) ?? url;
+  }
+
   // Google user content URLs (avatars) - resize via URL param
   if (url.includes('googleusercontent.com')) {
     const size = clampDimension(requestedWidth, 512) || 96;
@@ -313,8 +344,8 @@ export const optimizeImageUrl = (
 };
 
 /**
- * A srcSet for a photo on our media CDN — one candidate per stored width.
- * Empty for any other URL.
+ * A srcSet for a photo on our media CDN (one candidate per stored width) or on
+ * Cloudinary (one per preset width). Empty for any other URL.
  */
 export const imageSrcSet = (
   url: string | undefined,
@@ -322,6 +353,14 @@ export const imageSrcSet = (
   _options: Record<string, unknown> = {}
 ): string => {
   if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) return '';
+  if (isCloudinaryPhotoUrl(url)) {
+    const seenPreset = new Set<number>();
+    return widths
+      .map(snapCloudinaryWidth)
+      .filter((w) => (seenPreset.has(w) ? false : (seenPreset.add(w), true)))
+      .map((w) => `${optimizeImageUrl(url, { width: w })} ${w}w`)
+      .join(', ');
+  }
   const media = parseMediaCdnUrl(url);
   if (!media) return '';
   // Widths are snapped to the sizes this photo has, so candidates can collapse

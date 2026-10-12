@@ -7,6 +7,7 @@
  */
 
 import { optimizeImageUrl, MEDIA_CDN_URL } from '../config/mediaConfig';
+import { isCloudinaryPhotoUrl } from '../config/legacyCloudinary';
 import { parseMediaUrl, mediaFileUrl, MEDIA_MASTER_FILE } from '../backend/src/config/mediaVariants';
 
 export const CRAWLER_USER_AGENTS = [
@@ -198,8 +199,9 @@ function normalizeOgImage(raw?: string): OgImage | null {
   const delivered = optimizeImageUrl(url, OG_CARD_OPTIONS);
   if (!delivered) return null;
 
-  // Nothing else is guaranteed to come back at 1200×630.
-  return { url: delivered, sized: false };
+  // Images still on Cloudinary come back at 1200×630 (its `t_be_og` preset);
+  // nothing else is guaranteed to.
+  return { url: delivered, sized: isCloudinaryPhotoUrl(url) };
 }
 
 /**

@@ -50,6 +50,7 @@ vi.mock('../features/cities/data/staticCities', () => ({
 
 vi.mock('@/config/mediaConfig', () => ({
   getCityImageUrl: () => 'https://img.test/city.jpg',
+  getMediaCdnCityImageUrl: () => '',
   getCityFallbackGradient: () => 'linear-gradient(#fff,#000)',
 }));
 

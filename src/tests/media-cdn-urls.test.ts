@@ -84,12 +84,43 @@ describe('media CDN URLs', () => {
     img.remove();
   });
 
-  it('finds curated city photos in their fixed folder', () => {
+  it('finds curated city photos on Cloudinary first, then in their R2 folder', () => {
     expect(cfg.getCityImageUrl('Novi Sad', { country: 'Serbia', width: 400, height: 300 })).toBe(
+      'https://res.cloudinary.com/dh8tbq8wy/image/upload/t_be_r4x3_w480/city-serbia-novi-sad'
+    );
+    expect(cfg.getMediaCdnCityImageUrl('Novi Sad', { country: 'Serbia', width: 400, height: 300 })).toBe(
       `${MEDIA}/cities/convention/city-serbia-novi-sad/w640.webp`
     );
   });
 
+});
+
+describe('images still on Cloudinary', () => {
+  const CLD = 'https://res.cloudinary.com/dh8tbq8wy/image/upload';
+  const PHOTO = `${CLD}/t_be_w1080/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg`;
+
+  it('are served from Cloudinary through its named presets, never our proxy', () => {
+    expect(cfg.shouldProxyImage(PHOTO)).toBe(false);
+    expect(cfg.optimizeImageUrl(PHOTO, { width: 600 })).toBe(`${CLD}/t_be_w640/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg`);
+    expect(cfg.optimizeImageUrl(PHOTO, { width: 400, height: 300 })).toBe(`${CLD}/t_be_r4x3_w480/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg`);
+    expect(cfg.optimizeImageUrl(PHOTO, { width: 1200, height: 630, format: 'jpg' })).toBe(`${CLD}/t_be_og/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg`);
+    expect(cfg.getPropertyImagePlaceholder(PHOTO)).toBe(`${CLD}/t_be_lqip/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg`);
+  });
+
+  it('get a srcset of preset widths and fall back to the original', () => {
+    expect(cfg.imageSrcSet(PHOTO, [300, 320, 800])).toBe(
+      `${CLD}/t_be_w320/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg 320w, ${CLD}/t_be_w800/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg 800w`
+    );
+    expect(cfg.originalImageUrl(PHOTO)).toBe(`${CLD}/v17/balkan-estate/users/z/listings/p/photos/ph1.jpg`);
+  });
+
+  it('leaves private Cloudinary documents untouched', () => {
+    const doc = 'https://res.cloudinary.com/dh8tbq8wy/image/authenticated/s--abc--/v1/balkan-estate/doc.jpg';
+    expect(cfg.optimizeImageUrl(doc, { width: 400 })).toBe(doc);
+  });
+});
+
+describe('other hosts', () => {
   it('treats any other image host as external (resized by our proxy)', () => {
     expect(cfg.optimizeImageUrl('https://feeds.example.com/a.jpg', { width: 480 })).toContain('/image-proxy?url=');
   });

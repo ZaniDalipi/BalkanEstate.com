@@ -1,11 +1,13 @@
 import { retryWithOriginalImage, parseMediaCdnUrl } from '@/config/mediaConfig';
+import { isCloudinaryPhotoUrl } from '@/config/legacyCloudinary';
 
 /**
  * App-wide safety net for resized images.
  *
  * Photos on our media CDN are shown at a pre-generated size (`w640.webp`…);
  * if one is missing, or the browser can't show WebP, the <img> fails.
- * External images go through our resizing proxy (`/api/image-proxy`), which
+ * Images still on Cloudinary use a named preset (`t_be_w800`…), which may not
+ * exist for a size. External images go through our resizing proxy (`/api/image-proxy`), which
  * fails when the API is down or refuses the source. This listener catches both
  * for every image on the page (load errors don't bubble, so it listens in the
  * capture phase) and retries once with the JPEG original, or the external
@@ -29,11 +31,12 @@ export const installCdnImageFallback = (): void => {
       const isProxied = src.includes('/image-proxy?');
       const media = parseMediaCdnUrl(src);
       const isMediaSize = !!media && media.file !== 'original.jpg';
-      if (!isProxied && !isMediaSize) return;
+      const isCloudinaryPreset = isCloudinaryPhotoUrl(src) && /\/image\/upload\/t_/.test(src);
+      if (!isProxied && !isMediaSize && !isCloudinaryPreset) return;
       if (retryWithOriginalImage(target)) {
         // Handled: keep component onError handlers from switching to their fallback.
         event.stopImmediatePropagation();
-        if (import.meta.env.DEV) console.warn(`[cdn] ${isMediaSize ? 'media size' : 'image proxy'} failed, using original:`, src);
+        if (import.meta.env.DEV) console.warn(`[cdn] ${isProxied ? 'image proxy' : 'resized image'} failed, using original:`, src);
       }
     },
     true

@@ -25,6 +25,11 @@ describe('isAllowedPhotoUrl', () => {
     expect(isAllowedPhotoUrl('https://media.example.com/cities/albania/tirana/p1/original.jpg')).toBe(true);
   });
 
+  it('accepts images uploaded before R2, which stay on Cloudinary', () => {
+    expect(isAllowedPhotoUrl('https://res.cloudinary.com/dh8tbq8wy/image/upload/v1/balkan-estate/cities/x.jpg')).toBe(true);
+    expect(isAllowedPhotoUrl('https://res.cloudinary.com.attacker.example/x.jpg')).toBe(false);
+  });
+
   it('accepts Wikimedia, where the automatic photo chain already ends', () => {
     expect(isAllowedPhotoUrl('https://upload.wikimedia.org/wikipedia/commons/a/ab/Tirana.jpg')).toBe(true);
   });

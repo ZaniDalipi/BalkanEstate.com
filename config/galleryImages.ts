@@ -32,6 +32,7 @@ import {
   snapImageWidth,
   isMediaCdnUrl,
 } from './mediaConfig';
+import { isCloudinaryPhotoUrl } from './legacyCloudinary';
 
 /**
  * Candidate widths shared by the inline gallery and the fullscreen viewer.
@@ -101,7 +102,8 @@ export const getGallerySources = (
 
   if (!url) return { src: '', srcSet: '', sizes, placeholder: '' };
 
-  if (!isMediaCdnUrl(url)) {
+  // Our R2 photos and the existing Cloudinary ones come in stored/preset sizes.
+  if (!isMediaCdnUrl(url) && !isCloudinaryPhotoUrl(url)) {
     // External URLs go through the backend proxy, which resizes and caches
     // each width on our server.
     if (!shouldProxyImage(url)) return { src: url, srcSet: '', sizes, placeholder: '' };

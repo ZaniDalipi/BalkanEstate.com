@@ -350,7 +350,7 @@ const mediaCdnHost = ((): string[] => {
 })();
 
 /** Our R2 media domain (VITE_MEDIA_CDN_URL) and Wikimedia. */
-export const ALLOWED_PHOTO_HOSTS: readonly string[] = [...mediaCdnHost, 'upload.wikimedia.org'];
+export const ALLOWED_PHOTO_HOSTS: readonly string[] = [...mediaCdnHost, 'res.cloudinary.com', 'upload.wikimedia.org'];
 
 /** Host-exact, never a suffix match — `upload.wikimedia.org.evil.example` is not it. */
 function isAllowedPhotoHost(url: string): boolean {

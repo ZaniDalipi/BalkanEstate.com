@@ -31,13 +31,15 @@ export const mediaImageHost = (env: NodeJS.ProcessEnv = process.env): string | n
 /**
  * Hosts that may appear in a photo URL an admin sets by hand.
  *
- * Deliberately short. Wikimedia is here because the city-photo fallback chain
+ * Deliberately short. Cloudinary is here because every image uploaded before
+ * the move to R2 stays there and is shown from there. Wikimedia is here because the city-photo fallback chain
  * already ends at a Wikipedia summary image (`CityMarketCard`,
  * `CityDashboard`), so those URLs reach an `<img src>` whether or not anyone
  * pastes one.
  */
 export const ALLOWED_PHOTO_HOSTS: readonly string[] = [
   ...(mediaImageHost() ? [mediaImageHost() as string] : []),
+  'res.cloudinary.com',
   'upload.wikimedia.org',
 ];
 
