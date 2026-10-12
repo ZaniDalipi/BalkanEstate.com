@@ -95,6 +95,35 @@ describe('startAutoMediaMigration', () => {
     expect(await state()).toMatchObject({ status: 'done', runs: 2 });
   });
 
+  it('is not done while Cloudinary refuses downloads — the next start retries', async () => {
+    const refused = jest.fn(async (): Promise<Stats> => ({
+      ...stats(0),
+      failed: [
+        { publicId: 'a', error: 'Image download failed: HTTP 401' },
+        { publicId: 'b', error: 'Image download failed: HTTP 404' },
+      ],
+    }));
+    await startAutoMediaMigration({ ...quick, run: refused });
+    expect(await state()).toMatchObject({ status: 'failed', stats: { failedCount: 2 } });
+
+    const run = jest.fn(async () => stats(2));
+    await startAutoMediaMigration({ ...quick, run });
+    expect(run).toHaveBeenCalledTimes(1);
+    expect((await state())!.status).toBe('done');
+  });
+
+  it('re-runs a run recorded as done although downloads were refused', async () => {
+    await mongoose.connection.db!.collection(MIGRATION_STATE_COLLECTION).insertOne({
+      _id: 'cloudinary-to-r2',
+      status: 'done',
+      stats: { migrated: 0, failedCount: 1, failed: [{ publicId: 'a', error: 'Image download failed: HTTP 401' }] },
+    } as any);
+    const run = jest.fn(async () => stats(4));
+    await startAutoMediaMigration({ ...quick, run });
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(await state()).toMatchObject({ status: 'done', stats: { migrated: 4 } });
+  });
+
   it('takes over a lock whose holder died, but not a live one', async () => {
     const col = mongoose.connection.db!.collection(MIGRATION_STATE_COLLECTION);
     const run = jest.fn(async () => stats(1));

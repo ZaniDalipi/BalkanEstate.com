@@ -54,7 +54,7 @@ process.env.CLOUDINARY_API_SECRET = 's';
 
 import mongoose from 'mongoose';
 import MediaAsset from '../models/MediaAsset';
-import { runMigration } from '../scripts/migrateCloudinaryToR2';
+import { runMigration, cloudinaryApiDownloadUrl } from '../scripts/migrateCloudinaryToR2';
 import { migratedPhotoId } from '../services/media/cloudinaryMigration';
 
 const CLD = 'https://res.cloudinary.com/demo/image/upload';
@@ -92,6 +92,24 @@ beforeEach(async () => {
   });
   await db().collection('filerecords').insertOne({ publicId: AVATAR_ID, url: `${CLD}/v2/${AVATAR_ID}.jpg`, userId: USER, fileType: 'avatar' });
   await db().collection('blogposts').insertOne({ body: `<p>Look <img src="${CLD}/v9/${BLOG_ID}.png"> and <img src="${CLD}/v9/gone.png"></p>` });
+});
+
+describe('cloudinaryApiDownloadUrl', () => {
+  it("signs the API download link the way Cloudinary's private_download_url does", () => {
+    const url = new URL(
+      cloudinaryApiDownloadUrl({ cloud: 'demo', publicId: 'balkan-estate/x/p1', format: 'jpg', deliveryType: 'upload' }, 'KEY', 'SECRET', 1700000000)
+    );
+    expect(url.origin + url.pathname).toBe('https://api.cloudinary.com/v1_1/demo/image/download');
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      public_id: 'balkan-estate/x/p1',
+      format: 'jpg',
+      type: 'upload',
+      timestamp: '1700000000',
+      api_key: 'KEY',
+      // sha1("format=jpg&public_id=balkan-estate/x/p1&timestamp=1700000000&type=upload" + "SECRET")
+      signature: '241ded23b291df56b2f57659a65b9e80fb413f0c',
+    });
+  });
 });
 
 describe('runMigration', () => {
@@ -197,6 +215,20 @@ describe('runMigration', () => {
     expect(property!.images[0]).toMatchObject({ publicId: 'new', tag: 'living' });
     expect(property!.images[1].url).toMatch(/^https:\/\/media\.example\.com\/users\//);
     expect(property!.images[1].publicId).toMatch(/^users\//);
+  });
+
+  it('falls back to the Cloudinary API download when public delivery is refused', async () => {
+    process.env.CLOUDINARY_API_KEY = 'k';
+    duringDownload = async (url) => {
+      if (url.startsWith('https://res.cloudinary.com/')) throw new Error('Image download failed: HTTP 401');
+    };
+    try {
+      const stats = await runMigration({ apply: true, skipConventionCities: true, ...quiet });
+      expect(stats.migrated).toBe(5);
+      expect(downloads.some((u) => u.startsWith('https://api.cloudinary.com/v1_1/demo/image/download?'))).toBe(true);
+    } finally {
+      delete process.env.CLOUDINARY_API_KEY;
+    }
   });
 
   it('is a no-op the second time', async () => {

@@ -143,16 +143,45 @@ export const cloudinaryUrlSignature = (publicIdWithFormat: string, apiSecret: st
  * returns it signed), then one signed with CLOUDINARY_API_SECRET if it's set.
  * No Cloudinary SDK or API call is needed.
  */
+/**
+ * Cloudinary's signed API download link for an original (what its SDK calls
+ * private_download_url). It works when public delivery is refused — e.g.
+ * "Restricted image types" or an account over its delivery limits answers
+ * 401 to every res.cloudinary.com URL. Read-only: it can't upload anything.
+ * Signature: sha1 of the sorted params + API secret.
+ */
+export const cloudinaryApiDownloadUrl = (
+  ref: Pick<CloudinaryRef, 'cloud' | 'publicId' | 'format' | 'deliveryType'>,
+  apiKey: string,
+  apiSecret: string,
+  timestamp: number = Math.floor(Date.now() / 1000)
+): string => {
+  const params: Record<string, string> = {
+    public_id: ref.publicId,
+    timestamp: String(timestamp),
+    type: ref.deliveryType,
+    ...(ref.format ? { format: ref.format } : {}),
+  };
+  const toSign = Object.keys(params)
+    .sort()
+    .map((k) => `${k}=${params[k]}`)
+    .join('&');
+  const signature = createHash('sha1').update(toSign + apiSecret).digest('hex');
+  const query = new URLSearchParams({ ...params, api_key: apiKey, signature });
+  return `https://api.cloudinary.com/v1_1/${ref.cloud}/image/download?${query.toString()}`;
+};
+
 const sourceUrls = (ref: CloudinaryRef): string[] => {
   const file = `${ref.publicId}${ref.format ? `.${ref.format}` : ''}`;
-  if (ref.deliveryType === 'upload') {
-    return [`https://res.cloudinary.com/${ref.cloud}/image/upload/${file}`, ref.url];
-  }
-  const urls = [ref.url];
   const secret = process.env.CLOUDINARY_API_SECRET?.trim();
-  if (secret) {
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
+  const urls =
+    ref.deliveryType === 'upload' ? [`https://res.cloudinary.com/${ref.cloud}/image/upload/${file}`, ref.url] : [ref.url];
+  if (secret && ref.deliveryType !== 'upload') {
     urls.push(`https://res.cloudinary.com/${ref.cloud}/image/${ref.deliveryType}/s--${cloudinaryUrlSignature(file, secret)}--/v1/${file}`);
   }
+  // Last resort, and the only way when Cloudinary refuses public delivery.
+  if (secret && apiKey) urls.push(cloudinaryApiDownloadUrl(ref, apiKey, secret));
   return [...new Set(urls)];
 };
 
