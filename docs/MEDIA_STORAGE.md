@@ -105,6 +105,7 @@ db.mediaassets.aggregate([{ $group: { _id: '$ownerId', photos: { $sum: 1 }, byte
 | Curated city photos | `seedCityImages.ts` / the admin "seed images" button write `cities/convention/city-{country}-{city}/`. `getCityImageUrl` reads them by name. 1-day cache, because `--force` overwrites them |
 | Villa destination photos | `npm run seed:destination-images` writes `destinations/{country}/{name}/` |
 | External feed images | Not stored unless re-hosting is enabled. When it is, they go to `external/{source}/{listing}/`, stored once per source URL |
+| AI room restyling ("Reimagine") | Offered in the photo viewer for our own photos: R2 (the media domain or the bucket's `*.r2.dev` address) and images still on Cloudinary. The server fetches the photo's full-size original from the same place; any other host is refused |
 | Link previews | The photo's `original.jpg` (JPEG). Pages Functions need the `MEDIA_CDN_URL` variable for this |
 
 ## Setup
