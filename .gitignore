@@ -73,3 +73,6 @@ test-results/
 # Vite dev build artifacts
 dev-dist/
 backend/.env.example
+
+# Local Cloudflare Pages/Workers dev state (wrangler pages dev)
+.wrangler/
