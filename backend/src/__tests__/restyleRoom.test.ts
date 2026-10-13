@@ -76,6 +76,30 @@ describe('restyleRoom controller', () => {
     expect(mockGenerate).toHaveBeenCalled();
   });
 
+  it('accepts a photo in an R2 bucket on its public r2.dev address, fetching the master', async () => {
+    mockFindById.mockResolvedValue(null);
+    const res = makeRes();
+    const R2 = 'https://pub-85ad6e6f9bd346a89e1a2f78704b85b0.r2.dev/users/u/listings/l/photos/p1';
+    await restyleRoom(makeReq({ imageUrl: `${R2}/w640.webp`, style: 'scandinavian' }), res);
+    expect(global.fetch).toHaveBeenCalledWith(`${R2}/original.jpg`, expect.anything());
+    expect(mockGenerate).toHaveBeenCalled();
+  });
+
+  it('refuses our folder layout on any host that is not R2', async () => {
+    for (const imageUrl of [
+      'https://evil.example.com/users/u/listings/l/photos/p1/original.jpg',
+      'https://pub-x.r2.dev.evil.example.com/users/u/listings/l/photos/p1/original.jpg',
+      'http://pub-x.r2.dev/users/u/listings/l/photos/p1/original.jpg',
+      'https://pub-x.r2.dev:8443/users/u/listings/l/photos/p1/original.jpg',
+      'https://pub-x.r2.dev/users/../../etc/photos/p1/original.jpg',
+    ]) {
+      const res = makeRes();
+      await restyleRoom(makeReq({ imageUrl, style: 'scandinavian' }), res);
+      expect(res.status).toHaveBeenCalledWith(400);
+    }
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
   it('returns 400 when imageUrl is not one of our photos', async () => {
     const res = makeRes();
     await restyleRoom(makeReq({ imageUrl: 'https://evil.example.com/x.jpg', style: 'scandinavian' }), res);

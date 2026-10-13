@@ -31,13 +31,18 @@ describe('Reimagine button', () => {
     expect(screen.getByRole('button', { name: 'Reimagine this room' })).toBeTruthy();
   });
 
+  it('shows for a photo on an R2 public bucket address (r2.dev)', () => {
+    show('https://pub-85ad6e6f9bd346a89e1a2f78704b85b0.r2.dev/users/69a95232/listings/6acbc388/photos/0mv42zfqkbe42b477/original.jpg');
+    expect(screen.getByRole('button', { name: 'Reimagine this room' })).toBeTruthy();
+  });
+
   it('shows for a photo still on Cloudinary', () => {
     show('https://res.cloudinary.com/dh8tbq8wy/image/upload/v1/balkan-estate/listings/p1.jpg');
     expect(screen.getByRole('button', { name: 'Reimagine this room' })).toBeTruthy();
   });
 
-  it('does not show for an external feed photo', () => {
-    show('https://feeds.example.com/listing/1.jpg');
+  it('does not show for an external feed photo, even with our folder layout', () => {
+    show('https://feeds.example.com/users/a/listings/b/photos/c/original.jpg');
     expect(screen.queryByRole('button', { name: 'Reimagine this room' })).toBeNull();
   });
 });
