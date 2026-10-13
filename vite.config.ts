@@ -13,7 +13,9 @@ export default defineConfig(({ mode }) => {
     const apiTarget = env.VITE_API_URL || 'http://localhost:5001';
     const wsTarget = env.VITE_WS_URL || 'ws://localhost:5001';
     const isProduction = mode === 'production';
-    const mediaCdnOrigin = (env.VITE_MEDIA_CDN_URL || '').trim().replace(/\/+$/, '');
+    // Same default as config/mediaConfig.ts when the variable isn't set where the build runs.
+    const mediaCdnOrigin = ((env.VITE_MEDIA_CDN_URL || '').trim() || (isProduction ? 'https://media.balkanestateai.com' : ''))
+      .replace(/^["']|["']$/g, '').replace(/\/+$/, '').replace(/^(?!https?:\/\/)/i, 'https://');
 
     // Only log in development
     if (mode === 'development') {

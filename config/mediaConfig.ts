@@ -19,6 +19,7 @@
 import { API_URL } from '../src/shared/api/config';
 import {
   parseMediaUrl,
+  parseR2PhotoUrl,
   mediaFileUrl,
   pickVariantFile,
   snapMediaWidth,
@@ -42,12 +43,44 @@ import {
  * (VITE_MEDIA_CDN_URL; must match the backend's R2_PUBLIC_URL). Read
  * defensively: Pages Functions bundle this file without Vite's import.meta.env.
  */
-export const MEDIA_CDN_URL: string = (import.meta.env?.VITE_MEDIA_CDN_URL || '').replace(/\/+$/, '');
+const PRODUCTION_MEDIA_CDN_URL = 'https://media.balkanestateai.com';
+
+/** A usable origin from the env value — tolerates a missing scheme or a trailing slash. */
+const normalizeMediaOrigin = (raw: string | undefined): string => {
+  const value = (raw || '').trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
+  if (!value) return '';
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+};
+
+export const MEDIA_CDN_URL: string =
+  normalizeMediaOrigin(import.meta.env?.VITE_MEDIA_CDN_URL) ||
+  // A production build without the variable (e.g. it wasn't set where the
+  // build runs) must still recognise our own photos.
+  (import.meta.env?.PROD ? PRODUCTION_MEDIA_CDN_URL : '');
 
 /** Photo key + file of a URL on our media CDN, or null. */
-export const parseMediaCdnUrl = (url: string | undefined | null) => parseMediaUrl(url, MEDIA_CDN_URL);
+const mediaCdnHost = ((): string | null => {
+  try {
+    return MEDIA_CDN_URL ? new URL(MEDIA_CDN_URL).hostname : null;
+  } catch {
+    return null;
+  }
+})();
 
-/** True for a photo stored on our media CDN. */
+/**
+ * Bucket origin, photo key and file of one of our R2 photos, or null: on the
+ * configured media CDN, or on an R2 public bucket address (`*.r2.dev`, e.g. a
+ * photo stored before the custom domain) with our folder layout.
+ */
+export const parseMediaCdnUrl = (
+  url: string | undefined | null
+): { origin: string; photoKey: string; file: string } | null => {
+  const media = parseMediaUrl(url, MEDIA_CDN_URL);
+  if (media) return { origin: MEDIA_CDN_URL, ...media };
+  return parseR2PhotoUrl(url, mediaCdnHost);
+};
+
+/** True for a photo stored in our R2 media buckets. */
 export const isMediaCdnUrl = (url: string | undefined | null): boolean => parseMediaCdnUrl(url) !== null;
 
 /** Widths stored for every photo. Requests are rounded *up* to the next one. */
@@ -173,7 +206,7 @@ export const SUPPORTED_CITIES = [
  */
 export const getPropertyImagePlaceholder = (imageUrl: string | undefined): string => {
   const media = parseMediaCdnUrl(imageUrl);
-  if (media) return mediaFileUrl(MEDIA_CDN_URL, media.photoKey, MEDIA_LQIP_FILE);
+  if (media) return mediaFileUrl(media.origin, media.photoKey, MEDIA_LQIP_FILE);
   return (imageUrl && isCloudinaryPhotoUrl(imageUrl) && cloudinaryPresetUrl(imageUrl, { blur: true })) || '';
 };
 
@@ -196,7 +229,7 @@ export const originalProxiedUrl = (url: string | undefined | null): string | nul
 /** The master (`original.jpg`) of a photo on our media CDN, or null. */
 export const originalMediaCdnUrl = (url: string | undefined | null): string | null => {
   const media = parseMediaCdnUrl(url);
-  return media ? mediaFileUrl(MEDIA_CDN_URL, media.photoKey, MEDIA_MASTER_FILE) : null;
+  return media ? mediaFileUrl(media.origin, media.photoKey, MEDIA_MASTER_FILE) : null;
 };
 
 /** The unresized original behind a media CDN size, Cloudinary preset or proxy URL, or null. */
@@ -319,7 +352,7 @@ export const optimizeImageUrl = (
   if (media) {
     const wantsBlur = typeof blur === 'number' && Number.isFinite(blur) && blur >= 1;
     const file = pickVariantFile({ width: requestedWidth, height: requestedHeight, format, blur: wantsBlur }, media.photoKey);
-    return mediaFileUrl(MEDIA_CDN_URL, media.photoKey, file);
+    return mediaFileUrl(media.origin, media.photoKey, file);
   }
 
   // Cloudinary (images from before R2): onto one registered preset.

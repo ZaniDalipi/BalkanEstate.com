@@ -126,6 +126,41 @@ export const mediaFileUrl = (baseUrl: string, photoKey: string, file: string = M
  * Split a URL on our media origin into its photo key and file, or null when it
  * isn't one (another host, or a file name that isn't one of ours).
  */
+/** Top-level folders of the media bucket (see services/media/mediaKeys.ts). */
+const MEDIA_ROOT_FOLDERS = new Set(['users', 'agencies', 'businesses', 'messages', 'cities', 'destinations', 'site', 'news', 'external', 'legacy']);
+
+/**
+ * A photo stored in one of our R2 buckets, recognised by its address rather
+ * than by one configured domain: served from `mediaHost` (our custom domain)
+ * or an R2 public bucket address (`*.r2.dev`), with our folder layout and one
+ * of a photo's stored files. Null for anything else.
+ */
+export const parseR2PhotoUrl = (
+  url: string | undefined | null,
+  mediaHost?: string | null
+): { origin: string; photoKey: string; file: string } | null => {
+  if (!url) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.port) return null;
+  const host = parsed.hostname.toLowerCase();
+  const ownHost = mediaHost ? mediaHost.toLowerCase() : '';
+  if (host !== ownHost && !/^[a-z0-9-]+\.r2\.dev$/.test(host)) return null;
+  const path = decodeURIComponent(parsed.pathname).replace(/^\/+/, '');
+  if (path.includes('..')) return null;
+  const slash = path.lastIndexOf('/');
+  if (slash <= 0) return null;
+  const file = path.slice(slash + 1);
+  const photoKey = path.slice(0, slash);
+  if (!KNOWN_FILES.has(file) && !WIDTH_FILE.test(file)) return null;
+  if (!MEDIA_ROOT_FOLDERS.has(photoKey.split('/')[0])) return null;
+  return { origin: parsed.origin, photoKey, file };
+};
+
 export const parseMediaUrl = (
   url: string | undefined | null,
   baseUrl: string | undefined | null

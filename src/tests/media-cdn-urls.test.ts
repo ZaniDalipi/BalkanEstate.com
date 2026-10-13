@@ -57,6 +57,16 @@ describe('media CDN URLs', () => {
     );
   });
 
+  it('serves photos on an R2 public bucket address from their stored sizes too', () => {
+    const R2 = 'https://pub-85ad6e6f9bd346a89e1a2f78704b85b0.r2.dev';
+    const photo = `${R2}/users/u/listings/l/photos/p1/original.jpg`;
+    expect(cfg.isMediaCdnUrl(photo)).toBe(true);
+    expect(cfg.optimizeImageUrl(photo, { width: 600 })).toBe(`${R2}/users/u/listings/l/photos/p1/w640.webp`);
+    expect(cfg.getPropertyImagePlaceholder(photo)).toBe(`${R2}/users/u/listings/l/photos/p1/lqip.webp`);
+    // anything else on r2.dev (not our layout) is just an external image
+    expect(cfg.isMediaCdnUrl(`${R2}/random/file.png`)).toBe(false);
+  });
+
   it('never sends our photos through the image proxy', () => {
     expect(cfg.shouldProxyImage(MASTER)).toBe(false);
   });

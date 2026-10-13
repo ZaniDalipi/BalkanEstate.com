@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import sharp from 'sharp';
 import { apiLogger } from '../utils/logger';
-import { originalMediaUrl } from '../utils/mediaUrl';
+import { originalMediaUrl, originalR2PhotoUrl } from '../utils/mediaUrl';
 import { cloudinaryOriginalUrl } from '../services/media/cloudinaryMigration';
 import * as geminiService from '../services/geminiService';
 import User from '../models/User';
@@ -311,7 +311,7 @@ export const restyleRoom = async (req: Request, res: Response): Promise<void> =>
     // kept on Cloudinary. Fetch the full-size original, not the smaller size
     // the browser shows; we resize it ourselves below.
     const originalUrl = imageUrl.startsWith('https://')
-      ? originalMediaUrl(imageUrl) ?? cloudinaryOriginalUrl(imageUrl)
+      ? originalMediaUrl(imageUrl) ?? originalR2PhotoUrl(imageUrl) ?? cloudinaryOriginalUrl(imageUrl)
       : null;
     if (!originalUrl) {
       res.status(400).json({ message: 'imageUrl must be a listing photo URL.' });
