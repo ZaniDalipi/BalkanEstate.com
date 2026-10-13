@@ -7,9 +7,8 @@
  *     that curate the same place (an admin override, the City Gallery panel,
  *     a villa destination, or the auto-seeded one). See
  *     `backend/src/services/cityPhotoService.ts`.
- *   - a curated photo named by convention, `city-{country}-{city}`, which
- *     predates the field and is still how most cities have a picture at all —
- *     the existing ones on Cloudinary, and any seeded on R2 since the move.
+ *   - a curated photo in R2 named by convention, `city-{country}-{city}`, which
+ *     predates the field and is still how most cities have a picture at all.
  *
  * The stored URL is tried first — that is what makes an admin's edit visible —
  * and the convention id is the fallback, so cities nobody has curated keep the
@@ -19,7 +18,7 @@
  * since deleted from storage.
  */
 
-import { getCityImageUrl, getMediaCdnCityImageUrl, optimizeImageUrl } from '@/config/mediaConfig';
+import { getCityImageUrl, optimizeImageUrl } from '@/config/mediaConfig';
 
 /** Just enough of a city to find its photo. */
 export interface CityPhotoSubject {
@@ -71,12 +70,11 @@ export function cityImageSources(
     }) || stored);
   }
 
-  const where = { ...(subject.country ? { country: subject.country } : {}), width, height };
-  const convention = getCityImageUrl(subject.city, { ...where, quality });
+  const convention = getCityImageUrl(subject.city, {
+    ...(subject.country ? { country: subject.country } : {}),
+    width, height, quality,
+  });
   if (convention && convention !== sources[0]) sources.push(convention);
-  // Seeded on R2 since the move (empty while the media CDN isn't configured).
-  const seeded = getMediaCdnCityImageUrl(subject.city, where);
-  if (seeded) sources.push(seeded);
 
   return sources;
 }

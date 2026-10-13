@@ -45,7 +45,6 @@ vi.mock('@/components/shared/Decorative3D', () => ({
 
 vi.mock('@/config/mediaConfig', () => ({
   getCityImageUrl: () => 'https://img.test/city.jpg',
-  getMediaCdnCityImageUrl: () => '',
   getCityFallbackGradient: () => 'linear-gradient(#fff,#000)',
 }));
 

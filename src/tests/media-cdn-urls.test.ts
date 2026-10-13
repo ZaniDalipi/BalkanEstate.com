@@ -94,13 +94,11 @@ describe('media CDN URLs', () => {
     img.remove();
   });
 
-  it('finds curated city photos on Cloudinary first, then in their R2 folder', () => {
+  it('finds curated city photos in their R2 folder', () => {
     expect(cfg.getCityImageUrl('Novi Sad', { country: 'Serbia', width: 400, height: 300 })).toBe(
-      'https://res.cloudinary.com/dh8tbq8wy/image/upload/t_be_r4x3_w480/city-serbia-novi-sad'
-    );
-    expect(cfg.getMediaCdnCityImageUrl('Novi Sad', { country: 'Serbia', width: 400, height: 300 })).toBe(
       `${MEDIA}/cities/convention/city-serbia-novi-sad/w640.webp`
     );
+    expect(cfg.getCityImagePlaceholder('Novi Sad', 'Serbia')).toBe(`${MEDIA}/cities/convention/city-serbia-novi-sad/lqip.webp`);
   });
 
 });

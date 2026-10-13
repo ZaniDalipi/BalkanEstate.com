@@ -116,8 +116,10 @@ const cityPublicId = (cityName: string, country?: string): string =>
   `city-${country ? normalizeName(country) : 'unknown'}-${normalizeName(cityName)}`;
 
 /**
- * The curated photo of a city, sized for the request: the existing one on
- * Cloudinary (public id `city-{country}-{city}`), as before R2.
+ * The curated photo of a city (`cities/convention/city-{country}-{city}` on
+ * the media CDN — moved there from Cloudinary, new ones written by
+ * seedCityImages), sized for the request. Without a media CDN (local setups
+ * that don't configure one) the old Cloudinary id is used.
  */
 export const getCityImageUrl = (
   cityName: string,
@@ -133,26 +135,17 @@ export const getCityImageUrl = (
   } = {}
 ): string => {
   const { country, width = 800, height = 600 } = options;
-  return cloudinaryCityImageUrl(cityPublicId(cityName, country), { width, height });
+  const id = cityPublicId(cityName, country);
+  if (!MEDIA_CDN_URL) return cloudinaryCityImageUrl(id, { width, height });
+  return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${id}`, pickVariantFile({ width, height }));
 };
 
-/**
- * A city's curated photo seeded on R2 since the move
- * (`cities/convention/city-{country}-{city}`, written by seedCityImages) —
- * tried after the Cloudinary one. Empty while the media CDN isn't configured.
- */
-export const getMediaCdnCityImageUrl = (
-  cityName: string,
-  options: { country?: string; width?: number; height?: number } = {}
-): string => {
-  if (!MEDIA_CDN_URL) return '';
-  const { country, width = 800, height = 600 } = options;
-  return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${cityPublicId(cityName, country)}`, pickVariantFile({ width, height }));
+/** Blurred placeholder of a city's curated photo. */
+export const getCityImagePlaceholder = (cityName: string, country?: string): string => {
+  const id = cityPublicId(cityName, country);
+  if (!MEDIA_CDN_URL) return cloudinaryCityImageUrl(id, { blur: true });
+  return mediaFileUrl(MEDIA_CDN_URL, `${CITY_CONVENTION_FOLDER}/${id}`, MEDIA_LQIP_FILE);
 };
-
-/** Blurred placeholder of a city's curated photo (on Cloudinary). */
-export const getCityImagePlaceholder = (cityName: string, country?: string): string =>
-  cloudinaryCityImageUrl(cityPublicId(cityName, country), { blur: true });
 
 /**
  * Default fallback gradient for cities without images
