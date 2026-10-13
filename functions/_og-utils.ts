@@ -366,7 +366,7 @@ export function resolveOgImage(...candidates: Array<string | undefined>): OgImag
 function contentImage(url: string | undefined, width = 800): string | null {
   if (!url) return null;
   if (url.startsWith('/')) return `${SITE_URL}${url}`;
-  return optimizeCloudinaryUrl(url, { width }) || null;
+  return optimizeImageUrl(url, { width }) || null;
 }
 
 // ─── Property listing ─────────────────────────────────────────────────────────
@@ -559,6 +559,7 @@ export function buildOgHtml(property: PropertyData, slug: string, lang = 'en'): 
 }
 
 export async function handlePropertyOgRequest(context: PagesContext, slug: string, lang = 'en'): Promise<Response> {
+  configureOgMedia(context.env);
   if (!isCrawler(context.request.headers.get('user-agent') || '')) return passThrough(context);
   if (!isUsableSlug(slug)) return passThrough(context);
 
@@ -686,14 +687,10 @@ export function buildArticleOgHtml(article: ArticleData, slug: string, lang = 'e
  * Fetch article data from the backend API and return OG HTML response.
  * Shared handler used by both blog route functions.
  */
-export async function handleArticleOgRequest(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any,
-  slug: string,
-  lang = 'en',
-): Promise<Response> {
+export async function handleArticleOgRequest(context: PagesContext, slug: string, lang = 'en'): Promise<Response> {
   configureOgMedia(context.env);
-  const userAgent = context.request.headers.get('user-agent') || '';
+  if (!isCrawler(context.request.headers.get('user-agent') || '')) return passThrough(context);
+  if (!isUsableSlug(slug)) return passThrough(context);
 
   const result = await fetchApi<{ article?: ArticleData; data?: ArticleData }>(
     `${API_BASE}/articles/${encodeURIComponent(slug)}`,
@@ -823,6 +820,7 @@ export function buildAgentOgHtml(agent: AgentData, slug: string, lang = 'en'): s
 }
 
 export async function handleAgentOgRequest(context: PagesContext, slug: string, lang = 'en'): Promise<Response> {
+  configureOgMedia(context.env);
   if (!isCrawler(context.request.headers.get('user-agent') || '')) return passThrough(context);
   if (!isUsableSlug(slug)) return passThrough(context);
 
@@ -924,136 +922,14 @@ export function buildAgencyOgHtml(agency: AgencyData, slug: string, lang = 'en')
   return renderPage(FALLBACK_SHELL, buildAgencyPage(agency, slug, lang));
 }
 
-/**
- * Fetch agent data from the backend API and return OG HTML response.
- * Shared handler used by /agents/[slug] and /[lang]/agents/[slug].
- */
-export async function handleAgentOgRequest(
-  context: PagesContext,
-  slug: string,
-  lang = 'en',
-): Promise<Response> {
+export async function handleAgencyOgRequest(context: PagesContext, slug: string, lang = 'en'): Promise<Response> {
   configureOgMedia(context.env);
-  const userAgent = context.request.headers.get('user-agent') || '';
+  if (!isCrawler(context.request.headers.get('user-agent') || '')) return passThrough(context);
+  if (!isUsableSlug(slug)) return passThrough(context);
 
-  // Only intercept for social media crawlers
-  if (!isCrawler(userAgent)) {
-    return context.env.ASSETS.fetch(context.request);
-  }
-
-  if (!isUsableSlug(slug)) {
-    return context.env.ASSETS.fetch(context.request);
-  }
-
-  try {
-    const response = await fetchApi(`${API_BASE}/agents/${encodeURIComponent(slug)}`);
-
-    if (!response.ok) {
-      return context.env.ASSETS.fetch(context.request);
-    }
-
-    const data = await response.json() as { agent?: AgentData; data?: AgentData };
-    const agent = data.agent || data.data;
-
-    if (!agent) {
-      return context.env.ASSETS.fetch(context.request);
-    }
-
-    return ogHtmlResponse(buildAgentOgHtml(agent, slug, lang));
-  } catch {
-    // Unreachable API, malformed JSON or a timeout: the SPA still renders the
-    // page for humans, and the crawler simply keeps the default site card.
-    return context.env.ASSETS.fetch(context.request);
-  }
-}
-
-/**
- * Fetch agency data from the backend API and return OG HTML response.
- *
- * `slug` is the agency's URL identifier — either the two-segment
- * "albania/erikson-real-estate" form or a single-segment slug / id.
- */
-export async function handleAgencyOgRequest(
-  context: PagesContext,
-  slug: string,
-  lang = 'en',
-): Promise<Response> {
-  configureOgMedia(context.env);
-  const userAgent = context.request.headers.get('user-agent') || '';
-
-  // Only intercept for social media crawlers
-  if (!isCrawler(userAgent)) {
-    return context.env.ASSETS.fetch(context.request);
-  }
-
-  if (!isUsableSlug(slug)) {
-    return context.env.ASSETS.fetch(context.request);
-  }
-
-  try {
-    const response = await fetchApi(`${API_BASE}/agencies/${encodeSlugPath(slug)}`);
-
-    if (!response.ok) {
-      return context.env.ASSETS.fetch(context.request);
-    }
-
-    const data = await response.json() as { agency?: AgencyData; data?: AgencyData };
-    const agency = data.agency || data.data;
-
-    if (!agency || !agency.name) {
-      return context.env.ASSETS.fetch(context.request);
-    }
-
-    return ogHtmlResponse(buildAgencyOgHtml(agency, slug, lang));
-  } catch {
-    // Unreachable API, malformed JSON or a timeout: the SPA still renders the
-    // page for humans, and the crawler simply keeps the default site card.
-    return context.env.ASSETS.fetch(context.request);
-  }
-}
-
-/**
- * Fetch property data from the backend API and return OG HTML response.
- * Shared handler used by both route functions.
- */
-export async function handlePropertyOgRequest(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any,
-  slug: string,
-  lang = 'en',
-): Promise<Response> {
-  configureOgMedia(context.env);
-  const userAgent = context.request.headers.get('user-agent') || '';
-
-  // Only intercept for social media crawlers
-  if (!isCrawler(userAgent)) {
-    return context.env.ASSETS.fetch(context.request);
-  }
-
-  try {
-    const response = await fetch(`${API_BASE}/properties/${slug}`);
-
-    if (!response.ok) {
-      return context.env.ASSETS.fetch(context.request);
-    }
-
-    const data = await response.json() as { data?: PropertyData; property?: PropertyData };
-    const property = data.data || data.property || (data as unknown as PropertyData);
-
-    if (!property) {
-      return context.env.ASSETS.fetch(context.request);
-    }
-
-    const html = buildOgHtml(property, slug, lang);
-
-    return new Response(html, {
-      headers: {
-        'Content-Type': 'text/html;charset=UTF-8',
-        'Cache-Control': 'public, max-age=3600',
-      },
-    });
-  } catch {
-    return context.env.ASSETS.fetch(context.request);
+  const result = await fetchApi<{ agency?: AgencyData; data?: AgencyData }>(`${API_BASE}/agencies/${encodeSlugPath(slug)}`);
+  if (result.status === 'not-found') {
+    return respond(context, notFoundPage(lang, 'Agency', '/agencies', 'All agencies'));
   }
   if (result.status === 'error') return passThrough(context);
   const agency = result.data.agency || result.data.data;
