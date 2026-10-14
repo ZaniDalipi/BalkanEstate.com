@@ -105,8 +105,8 @@ const ToolsSection: React.FC<{
           isToolActive ? 'bg-primary-light text-primary-dark' : 'text-neutral-700 hover:bg-neutral-100'
         }`}
       >
-        <div className={`w-5 h-5 flex-shrink-0 ${isToolActive ? 'text-primary' : 'text-neutral-700'}`}>
-          <WrenchScrewdriverIcon />
+        <div className="w-5 h-5 flex-shrink-0" aria-hidden="true">
+          <NavImage name="tools" />
         </div>
         <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm flex-1">{t('nav:extras')}</span>
         <div className="md:hidden group-hover:md:block">
