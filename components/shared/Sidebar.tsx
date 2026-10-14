@@ -13,7 +13,7 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, AgentsIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
 
@@ -244,7 +244,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const baseNavItems = [
       { view: 'home' as AppView, label: t('nav:home'), icon: <NavImage name="home" /> },
       { view: 'search' as AppView, label: t('nav:search'), icon: <NavImage name="buy" /> },
-      { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
+      { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <NavImage name="rent" /> },
       { view: 'villas' as AppView, label: t('nav:villas'), icon: <LuxuryVillaIcon className="h-5 w-5 text-[#FFA500]" /> },
       { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
       { view: 'saved-searches' as AppView, label: t('nav:savedSearches'), icon: <MagnifyingGlassPlusIcon /> },
