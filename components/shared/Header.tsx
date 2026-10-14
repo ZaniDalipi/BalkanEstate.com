@@ -1,6 +1,7 @@
 import React, { useCallback, memo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserIcon, Bars3Icon, UserCircleIcon } from '../../constants';
+import { Bars3Icon } from '../../constants';
+import { NavPicture } from '../../src/shared/illustrations/Illustration';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import UserAvatar from './UserAvatar';
@@ -74,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
         }}
       >
           <div className="absolute inset-0 z-0 rounded-[inherit]" style={{ background: 'rgba(255,255,255,0.15)' }} />
-          <UserIcon className="relative z-10 w-5 h-5" />
+          <NavPicture name="account" className="relative z-10 w-6 h-6" />
           <span className="relative z-10 hidden sm:inline text-sm">{t('nav:loginRegister')}</span>
       </button>
     );

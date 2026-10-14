@@ -15,7 +15,7 @@ const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 const MyListingFeeds = lazy(() => import('../../src/features/listing-sources/components/MyListingFeeds'));
 const ImportReviewQueue = lazy(() => import('../../src/features/listing-sources/components/review/ImportReviewQueue'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, GlobeAltIcon, BellIcon, DocumentCheckIcon } from '../../constants';
+import { BuildingOfficeIcon, XMarkIcon, ShieldCheckIcon, ClockIcon, CheckCircleIcon, BellIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -38,6 +38,7 @@ import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
 import NotificationSettingsSection from '../../src/features/notifications/components/NotificationSettingsSection';
 import { usePendingImportCount } from '../../src/features/listing-sources/hooks/useImportReview';
+import { SoftIcon, NavPicture, type SoftIconName } from '../../src/shared/illustrations/Illustration';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -149,37 +150,37 @@ const TabButton: React.FC<{
     );
 };
 
-const ROLE_HINTS: Record<UserRole, { icon: string; titleKey: string; descKey: string; features: string[]; color: string }> = {
+const ROLE_HINTS: Record<UserRole, { icon: SoftIconName; titleKey: string; descKey: string; features: string[]; color: string }> = {
     [UserRole.BUYER]: {
-        icon: '🔍',
+        icon: 'search',
         titleKey: 'roles.hints.buyer.title',
         descKey: 'roles.hints.buyer.description',
         features: ['roles.hints.buyer.f1', 'roles.hints.buyer.f2', 'roles.hints.buyer.f3'],
         color: 'blue',
     },
     [UserRole.PRIVATE_SELLER]: {
-        icon: '🏠',
+        icon: 'home',
         titleKey: 'roles.hints.privateSeller.title',
         descKey: 'roles.hints.privateSeller.description',
         features: ['roles.hints.privateSeller.f1', 'roles.hints.privateSeller.f2', 'roles.hints.privateSeller.f3'],
         color: 'emerald',
     },
     [UserRole.AGENT]: {
-        icon: '🏢',
+        icon: 'building',
         titleKey: 'roles.hints.agent.title',
         descKey: 'roles.hints.agent.description',
         features: ['roles.hints.agent.f1', 'roles.hints.agent.f2', 'roles.hints.agent.f3'],
         color: 'indigo',
     },
     [UserRole.ADMIN]: {
-        icon: '⚙️',
+        icon: 'gear',
         titleKey: 'roles.hints.admin.title',
         descKey: 'roles.hints.admin.description',
         features: [],
         color: 'gray',
     },
     [UserRole.SUPER_ADMIN]: {
-        icon: '🛡️',
+        icon: 'shield',
         titleKey: 'roles.hints.superAdmin.title',
         descKey: 'roles.hints.superAdmin.description',
         features: [],
@@ -225,10 +226,10 @@ const RoleSelector: React.FC<{
     const { t } = useTranslation(['account']);
     const [pendingRole, setPendingRole] = useState<UserRole | null>(null);
 
-    const roles: { id: UserRole; labelKey: string; icon: string }[] = [
-        { id: UserRole.BUYER, labelKey: 'roles.buyer', icon: '🔍' },
-        { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller', icon: '🏠' },
-        { id: UserRole.AGENT, labelKey: 'roles.agent', icon: '🏢' },
+    const roles: { id: UserRole; labelKey: string; icon: SoftIconName }[] = [
+        { id: UserRole.BUYER, labelKey: 'roles.buyer', icon: 'search' },
+        { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller', icon: 'home' },
+        { id: UserRole.AGENT, labelKey: 'roles.agent', icon: 'building' },
     ];
 
     const isAgencyMember = !!agencyId;
@@ -308,7 +309,7 @@ const RoleSelector: React.FC<{
                                 }
                             `}
                         >
-                            <span className="text-base leading-none hidden xs:inline sm:inline">{role.icon}</span>
+                            <SoftIcon name={role.icon} className="w-5 h-5 hidden xs:inline sm:inline" />
                             <span className="truncate">{t(role.labelKey)}</span>
                         </button>
                     );
@@ -345,7 +346,7 @@ const RoleSelector: React.FC<{
             {hintRole && hint && hintConfig && !(hintRole === UserRole.PRIVATE_SELLER && isAgencyMember) && (
                 <div className={`rounded-2xl border p-4 backdrop-blur-sm transition-all duration-200 animate-in fade-in slide-in-from-top-2 ${colorMap[hintConfig.color]}`}>
                     <div className="flex items-start gap-3">
-                        <span className="text-2xl flex-shrink-0 mt-0.5">{hintConfig.icon}</span>
+                        <SoftIcon name={hintConfig.icon} className="w-9 h-9 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                             <p className="font-bold text-sm leading-tight">{hint.title}</p>
                             <p className="text-xs mt-0.5 opacity-80">{hint.description}</p>
@@ -2371,22 +2372,22 @@ const MyAccountPage: React.FC = () => {
                             <nav className="space-y-2">
                                 {hasSellerTabs && (
                                     <>
-                                        <TabButton label={t('account:tabs.myListings', 'My Listings')} icon={<HomeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
-                                        <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
-                                        <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
-                                        <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
-                                        <TabButton label={t('account:tabs.feeds', 'External Feeds')} icon={<GlobeAltIcon className="w-6 h-6"/>} isActive={activeTab === 'feeds'} onClick={() => setActiveTab('feeds')} tabKey="feeds" />
-                                        <TabButton label={t('account:tabs.importReview', 'Imported Drafts')} icon={<DocumentCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'importReview'} onClick={() => setActiveTab('importReview')} tabKey="importReview" badgeCount={pendingImportCount?.total} />
+                                        <TabButton label={t('account:tabs.myListings', 'My Listings')} icon={<SoftIcon name="home" className="w-7 h-7" />} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
+                                        <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SoftIcon name="sparkles" className="w-7 h-7" />} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
+                                        <TabButton label={t('account:tabs.performance')} icon={<SoftIcon name="chart" className="w-7 h-7" />} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
+                                        <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<SoftIcon name="calendar" className="w-7 h-7" />} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
+                                        <TabButton label={t('account:tabs.feeds', 'External Feeds')} icon={<SoftIcon name="globe" className="w-7 h-7" />} isActive={activeTab === 'feeds'} onClick={() => setActiveTab('feeds')} tabKey="feeds" />
+                                        <TabButton label={t('account:tabs.importReview', 'Imported Drafts')} icon={<SoftIcon name="docCheck" className="w-7 h-7" />} isActive={activeTab === 'importReview'} onClick={() => setActiveTab('importReview')} tabKey="importReview" badgeCount={pendingImportCount?.total} />
                                     </>
                                 )}
-                                <TabButton label={t('account:tabs.myBusinesses', 'My Businesses')} icon={<BuildingStorefrontIcon className="w-6 h-6"/>} isActive={activeTab === 'businesses'} onClick={() => setActiveTab('businesses')} tabKey="businesses" />
-                                <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
-                                <TabButton label={t('account:tabs.subscription', 'Subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
-                                <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<MapPinIcon className="w-6 h-6"/>} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />
-                                <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
-                                <TabButton label={t('account:tabs.notifications', 'Notifications')} icon={<BellIcon className="w-6 h-6"/>} isActive={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} tabKey="notifications" />
+                                <TabButton label={t('account:tabs.myBusinesses', 'My Businesses')} icon={<SoftIcon name="store" className="w-7 h-7" />} isActive={activeTab === 'businesses'} onClick={() => setActiveTab('businesses')} tabKey="businesses" />
+                                <TabButton label={t('account:tabs.profileSettings')} icon={<SoftIcon name="user" className="w-7 h-7" />} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
+                                <TabButton label={t('account:tabs.subscription', 'Subscription')} icon={<SoftIcon name="card" className="w-7 h-7" />} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
+                                <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<SoftIcon name="pin" className="w-7 h-7" />} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />
+                                <TabButton label={t('account:tabs.security')} icon={<SoftIcon name="shield" className="w-7 h-7" />} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
+                                <TabButton label={t('account:tabs.notifications', 'Notifications')} icon={<SoftIcon name="bell" className="w-7 h-7" />} isActive={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} tabKey="notifications" />
                                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all w-full text-left text-red-500 hover:bg-red-50/40 hover:border-red-200/40 border border-transparent backdrop-blur-sm mt-4">
-                                    <ArrowLeftOnRectangleIcon className="w-6 h-6" />
+                                    <NavPicture name="logout" className="w-7 h-7" />
                                     <span>{t('account:logout')}</span>
                                 </button>
                             </nav>

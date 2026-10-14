@@ -10,6 +10,7 @@ import { apiRequest } from '@/src/shared/api';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
 import { navigate } from '@/src/app/router/navigation';
+import { SoftIcon } from '@/src/shared/illustrations/Illustration';
 import { paths } from '@/src/app/router/paths';
 
 interface NotificationData {
@@ -351,7 +352,7 @@ const NotificationCenter: React.FC = () => {
         className="relative p-2 text-neutral-600 hover:text-primary hover:bg-neutral-100 rounded-full transition-colors"
         aria-label={t('common:notifications', 'Notifications')}
       >
-        <Bell className="w-5 h-5" />
+        <SoftIcon name="bell" className="w-6 h-6" />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
             {unreadCount > 99 ? '99+' : unreadCount}

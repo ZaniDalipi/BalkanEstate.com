@@ -19,7 +19,7 @@ import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '@/shared/property/attributeDisplay';
-import { SpecIllustration } from '@/shared/illustrations/Illustration';
+import { SpecIllustration, SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
@@ -277,27 +277,27 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const isLand = property.propertyType === 'land';
 
   // Build luxury amenity chips to show on the card
-  const luxuryAmenityChips: { emoji: string; label: string }[] = isLuxuryVilla ? (() => {
-    const chips: { emoji: string; label: string }[] = [];
+  const luxuryAmenityChips: { icon: SoftIconName; label: string }[] = isLuxuryVilla ? (() => {
+    const chips: { icon: SoftIconName; label: string }[] = [];
     const amenities: string[] = (property.amenities as string[]) || [];
-    if (property.hasPool)                             chips.push({ emoji: '🏊', label: 'Pool' });
-    if (property.hasGarden)                           chips.push({ emoji: '🌿', label: 'Garden' });
-    if (amenities.some(a => a.toLowerCase().includes('sauna')))        chips.push({ emoji: '🧖', label: 'Sauna' });
-    if (amenities.some(a => a.toLowerCase().includes('wine cellar')))  chips.push({ emoji: '🍷', label: t('property:ui.propertyCard.wineCellar', 'Wine Cellar') });
-    if (amenities.some(a => a.toLowerCase().includes('panoramic')))    chips.push({ emoji: '🏔️', label: 'Panoramic' });
-    if (property.breakfastIncluded)           chips.push({ emoji: '🍳', label: 'Breakfast' });
-    if (property.towelsIncluded)              chips.push({ emoji: '🛁', label: 'Towels' });
-    if (property.parkingIncluded)             chips.push({ emoji: '🚗', label: 'Parking' });
+    if (property.hasPool)                             chips.push({ icon: 'pool', label: 'Pool' });
+    if (property.hasGarden)                           chips.push({ icon: 'leaf', label: 'Garden' });
+    if (amenities.some(a => a.toLowerCase().includes('sauna')))        chips.push({ icon: 'spa', label: 'Sauna' });
+    if (amenities.some(a => a.toLowerCase().includes('wine cellar')))  chips.push({ icon: 'wine', label: t('property:ui.propertyCard.wineCellar', 'Wine Cellar') });
+    if (amenities.some(a => a.toLowerCase().includes('panoramic')))    chips.push({ icon: 'mountain', label: 'Panoramic' });
+    if (property.breakfastIncluded)           chips.push({ icon: 'kitchen', label: 'Breakfast' });
+    if (property.towelsIncluded)              chips.push({ icon: 'bath', label: 'Towels' });
+    if (property.parkingIncluded)             chips.push({ icon: 'car', label: 'Parking' });
     return chips.slice(0, 5); // max 5 chips on the card
   })() : [];
 
-  const viewTypeDisplay: Record<string, { emoji: string; label: string }> = {
-    sea: { emoji: '🌊', label: t('property:ui.propertyCard.seaView', 'Sea View') },
-    mountain: { emoji: '⛰️', label: 'Mountain' },
-    park: { emoji: '🌲', label: 'Forest/Lake' },
-    city: { emoji: '🏙️', label: t('property:ui.propertyCard.cityView', 'City View') },
-    garden: { emoji: '🌷', label: t('property:ui.propertyCard.gardenView', 'Garden View') },
-    street: { emoji: '🏘️', label: t('property:ui.propertyCard.streetView', 'Street View') },
+  const viewTypeDisplay: Record<string, { icon: SoftIconName; label: string }> = {
+    sea: { icon: 'sea', label: t('property:ui.propertyCard.seaView', 'Sea View') },
+    mountain: { icon: 'mountain', label: 'Mountain' },
+    park: { icon: 'tree', label: 'Forest/Lake' },
+    city: { icon: 'city', label: t('property:ui.propertyCard.cityView', 'City View') },
+    garden: { icon: 'flower', label: t('property:ui.propertyCard.gardenView', 'Garden View') },
+    street: { icon: 'houses', label: t('property:ui.propertyCard.streetView', 'Street View') },
   };
 
   return (
@@ -420,7 +420,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           {isLuxuryVilla && property.viewType && viewTypeDisplay[property.viewType] && (
             <div className="absolute bottom-3 left-3 z-20 pointer-events-none">
               <span className="bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-[4px] rounded-full flex items-center gap-1 shadow">
-                <span>{viewTypeDisplay[property.viewType].emoji}</span>
+                <SoftIcon name={viewTypeDisplay[property.viewType].icon} className="w-4 h-4" />
                 {viewTypeDisplay[property.viewType].label}
               </span>
             </div>
@@ -716,7 +716,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 key={chip.label}
                 className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-medium bg-[#FFA500]/10 text-[#0252CD] border border-[#FFA500]/20"
               >
-                <span className="text-[10px]">{chip.emoji}</span>
+                <SoftIcon name={chip.icon} className="w-3.5 h-3.5" />
                 {chip.label}
               </span>
             ))}
