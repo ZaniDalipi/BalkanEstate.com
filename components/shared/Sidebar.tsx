@@ -13,7 +13,7 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, ShieldCheckIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon } from '../../constants';
+import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, ShieldCheckIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
 
@@ -388,8 +388,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('nav:viewAnalytics', 'View analytics dashboard')}
                                 aria-current={activeView === 'analytics' ? 'page' : undefined}
                             >
-                                <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'analytics' ? 'text-primary' : 'text-neutral-700'}`} aria-hidden="true">
-                                    <ChartBarIcon />
+                                <div className="w-5 h-5 flex-shrink-0" aria-hidden="true">
+                                    <NavImage name="analytics" />
                                 </div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:analytics')}</span>
                             </button>
