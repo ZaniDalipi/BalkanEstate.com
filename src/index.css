@@ -2249,3 +2249,33 @@ html.reduce-motion .celebration-bar {
   transform: none !important;
   stroke-dashoffset: 0 !important;
 }
+
+/* Sidebar dock magnification.
+   Like the macOS Dock: the row under the pointer grows its icon, the rows
+   either side grow a little, and each label slides right so the bigger
+   icon never covers it. Transforms only, so nothing reflows. Pointer
+   devices only — a tap has no hover — and off for reduced motion. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .sidebar-dock .nav-dock-icon,
+  .sidebar-dock .dock-label {
+    transition: transform 160ms cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+  .sidebar-dock .nav-dock-icon {
+    transform-origin: left center;
+  }
+  .sidebar-dock button:hover .nav-dock-icon {
+    transform: scale(1.55);
+  }
+  .sidebar-dock button:hover .dock-label {
+    transform: translateX(14px);
+  }
+  .sidebar-dock button:has(+ button:hover) .nav-dock-icon,
+  .sidebar-dock button:hover + button .nav-dock-icon {
+    transform: scale(1.22);
+  }
+  .sidebar-dock button:has(+ button:hover) .dock-label,
+  .sidebar-dock button:hover + button .dock-label {
+    transform: translateX(6px);
+  }
+}

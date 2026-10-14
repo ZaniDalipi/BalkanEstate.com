@@ -122,9 +122,9 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             alt=""
             aria-hidden="true"
             draggable={false}
-            className="w-6 h-6 -m-0.5 max-w-none flex-shrink-0 object-contain select-none"
+            className="nav-dock-icon w-7 h-7 -m-1 max-w-none flex-shrink-0 object-contain select-none"
           />
-          <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.flag} {currentLang.nativeName}</span>
+          <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.flag} {currentLang.nativeName}</span>
         </button>
 
         {isOpen && (

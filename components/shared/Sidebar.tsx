@@ -34,15 +34,16 @@ function preloadHandlers(view: AppView) {
 }
 
 /**
- * A 3D nav illustration from public/images/nav. Drawn a little larger than
- * the 20px icon box so its detail survives, without shifting the label.
+ * A 3D nav illustration from public/images/nav. Drawn larger than the 20px
+ * icon box so its detail survives, without shifting the label. Hovering a
+ * row magnifies it Dock-style — see `.sidebar-dock` in src/index.css.
  */
 const NavImage: React.FC<{ name: string }> = ({ name }) => (
   <img
     src={`/images/nav/${name}.webp`}
     alt=""
     draggable={false}
-    className="w-6 h-6 max-w-none -m-0.5 object-contain select-none"
+    className="nav-dock-icon w-7 h-7 max-w-none -m-1 object-contain select-none"
   />
 );
 
@@ -75,7 +76,7 @@ const NavItem: React.FC<{
           </span>
         )}
       </div>
-      <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{label}</span>
+      <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{label}</span>
     </button>
   );
 };
@@ -108,7 +109,7 @@ const ToolsSection: React.FC<{
         <div className="w-5 h-5 flex-shrink-0" aria-hidden="true">
           <NavImage name="tools" />
         </div>
-        <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm flex-1">{t('nav:extras')}</span>
+        <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm flex-1">{t('nav:extras')}</span>
         <div className="md:hidden group-hover:md:block">
           {isExpanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
         </div>
@@ -131,7 +132,7 @@ const ToolsSection: React.FC<{
               <div className={`w-4 h-4 flex-shrink-0 ${activeView === item.view ? 'text-primary' : 'text-neutral-600'}`}>
                 {item.icon}
               </div>
-              <span className="md:hidden group-hover:md:inline whitespace-nowrap">{item.label}</span>
+              <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap">{item.label}</span>
             </button>
           ))}
         </div>
@@ -301,7 +302,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 md:z-50 flex flex-col transition-transform duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] group overflow-hidden ${isOpen ? 'z-[1300] translate-x-0 w-64' : 'z-50 -translate-x-full w-64 invisible md:visible'} md:w-20 md:translate-x-0 hover:md:w-64`}
+                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 md:z-50 flex flex-col sidebar-dock transition-transform duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] group overflow-hidden ${isOpen ? 'z-[1300] translate-x-0 w-64' : 'z-50 -translate-x-full w-64 invisible md:visible'} md:w-20 md:translate-x-0 hover:md:w-64`}
                 aria-label={t('nav:mainNavigation', 'Main navigation')}
                 style={{
                   paddingTop: 'env(safe-area-inset-top, 0px)',
@@ -325,7 +326,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         <LogoIcon className="w-7 h-7 text-primary flex-shrink-0" aria-hidden="true" />
                         {/* A span, not an h1: the sidebar is on every page, and the
                             page's own heading should be its only h1. */}
-                        <span className="text-lg font-bold text-neutral-800 md:hidden group-hover:md:inline whitespace-nowrap">
+                        <span className="text-lg font-bold text-neutral-800 dock-label md:hidden group-hover:md:inline whitespace-nowrap">
                             Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
                         </span>
                     </button>
@@ -365,7 +366,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             aria-label={t('nav:createNewListing', 'Create a new listing')}
                         >
                             <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="new-listing" /></div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
                         </button>
                         <button
                             onClick={handleSubscriptionClick}
@@ -374,7 +375,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             aria-label={t('nav:viewSubscription', 'View subscription plans')}
                         >
                             <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="subscription" /></div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
                         </button>
                         {isAuthenticated && (
                             <button
@@ -391,7 +392,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 <div className="w-5 h-5 flex-shrink-0" aria-hidden="true">
                                     <NavImage name="analytics" />
                                 </div>
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:analytics')}</span>
+                                <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:analytics')}</span>
                             </button>
                         )}
                         <button
@@ -413,7 +414,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                     </span>
                                 )}
                             </div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:inbox')}</span>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:inbox')}</span>
                         </button>
                     </div>
                 </nav>
@@ -443,7 +444,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                     // No photo of their own yet: the branded account icon
                                     <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="account" /></div>
                                 )}
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
+                                <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>
                             <button
                                 onClick={handleLogout}
@@ -451,7 +452,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('auth:logoutAccount', 'Log out of your account')}
                             >
                                 <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="logout" /></div>
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:buttons.logout')}</span>
+                                <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:buttons.logout')}</span>
                             </button>
                         </div>
                     ) : (
@@ -461,7 +462,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             aria-label={t('nav:loginOrRegister', 'Login or register an account')}
                          >
                             <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="account" /></div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
                         </button>
                     )}
                 </div>
