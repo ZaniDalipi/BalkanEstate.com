@@ -6,6 +6,7 @@ import { useFeaturedAgencies } from '../src/features/agencies/hooks/useAgencies'
 import { Agency } from '../types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { NavPicture } from '../src/shared/illustrations/Illustration';
 
 // Gradient presets for agency banners (shared with AgencyDetailPage)
 const GRADIENT_PRESETS = [
@@ -271,9 +272,7 @@ const FeaturedAgencies: React.FC = () => {
             // Empty state
             <div className="col-span-full text-center py-16">
               <div className="max-w-md mx-auto">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center">
-                  <BuildingStorefrontIcon className="w-12 h-12 text-gray-400" />
-                </div>
+                <NavPicture name="agencies" className="w-28 h-28 mx-auto mb-6" />
                 <p className="text-neutral-600 text-lg font-medium mb-2">{t('featured.empty.title')}</p>
                 <p className="text-neutral-500 text-sm">{t('featured.empty.message')}</p>
               </div>

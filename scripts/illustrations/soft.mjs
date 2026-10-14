@@ -389,6 +389,55 @@ export const SOFT = {
     blob('M12 28h40v28H12z', 'blue') +
     disc(32, 40, 4, 'white', { stroke: 1.6, depth: 0.6 }) +
     line('M32 42v6', '#FFFFFF', 3.4),
+  // ── calculators, villas, map ────────────────────────────────────────
+  calculator: () =>
+    blob('M14 6h36v52H14z', 'blue') +
+    blob('M19 11h26v11H19z', 'sky', { stroke: 2, depth: 0.8 }) +
+    [28, 37, 46].map((y) => [19, 28.5, 38].map((x, i) => `<rect x="${x}" y="${y}" width="7" height="6" rx="2" fill="${i === 2 && y === 46 ? 'url(#g-gold)' : 'url(#g-white)'}"/>`).join('')).join('') +
+    logo(36, 12.4, 8.4),
+  scales: () =>
+    tube('M32 10v40', 'grey', 4, 1) +
+    tube('M12 18h40', 'grey', 4, 1) +
+    blob('M22 54h20v4H22z', 'grey', { stroke: 2, depth: 1 }) +
+    line('M12 18 6 34M12 18l6 16M52 18l-6 16M52 18l6 16', '#7D889A', 1.6) +
+    blob('M4 34h16c0 5-3 8-8 8s-8-3-8-8Z', 'blue', { stroke: 2, depth: 1.4 }) +
+    blob('M44 34h16c0 5-3 8-8 8s-8-3-8-8Z', 'gold', { stroke: 2, depth: 1.4 }) +
+    disc(32, 10, 3.4, 'gold', { stroke: 1.6, depth: 0.8 }),
+  moneybag: () =>
+    blob('M24 8h16l-4 8h-8Z', 'gold', { stroke: 2, depth: 1 }) +
+    blob('M28 16h8c12 6 18 16 18 26 0 10-8 14-22 14S10 52 10 42c0-10 6-20 18-26Z', 'gold') +
+    tube('M26 17h12', 'wood', 3, 0.8) +
+    `<text x="32" y="47" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="20" fill="#FFFFFF">€</text>` +
+    gloss('M18 34c2-6 5-10 9-13'),
+  cube: () =>
+    blob('M32 6 54 18v28L32 58 10 46V18Z', 'blue') +
+    blob('M32 6 54 18 32 30 10 18Z', 'sky', { stroke: 2, depth: 0.6 }) +
+    blob('M32 30v28L10 46V18Z', 'blue', { stroke: 2, depth: 0 }) +
+    logo(36, 34, 13, 'logo-white'),
+  diamond: () =>
+    blob('M8 24 20 10h24l12 14-24 30Z', 'sky') +
+    blob('M8 24h48', 'blue', { stroke: 2, depth: 0, fill: false }) +
+    '<path d="M20 10 26 24 32 10 38 24 44 10M26 24l6 30 6-30" fill="none" stroke="#5E9AF2" stroke-width="2" stroke-linejoin="round"/>' +
+    gloss('M16 20l6-7'),
+  concierge: () =>
+    blob('M8 46h48v6H8z', 'grey') +
+    blob('M12 46c0-12 9-20 20-20s20 8 20 20Z', 'gold') +
+    disc(32, 22, 4, 'gold', { stroke: 2, depth: 1 }) +
+    gloss('M18 40c1-6 5-10 10-11'),
+  crown: () =>
+    blob('M10 20l10 12 12-18 12 18 10-12-4 26H14Z', 'gold') +
+    [[10, 18], [32, 12], [54, 18]].map(([x, y]) => disc(x, y, 4, 'gold', { stroke: 2, depth: 1.2 })).join('') +
+    blob('M14 46h36v8H14z', 'gold', { stroke: 2, depth: 1.6 }) +
+    disc(32, 36, 5, 'blue', { stroke: 1.6, depth: 0.8 }),
+  mapGrid: () =>
+    blob('M6 14 22 8l20 6 16-6v42l-16 6-20-6-16 6Z', 'green') +
+    line('M22 8v42M42 14v42', '#2F7D2C', 2) +
+    line('M6 28l16-6 20 6 16-6M6 42l16-6 20 6 16-6', 'rgba(255,255,255,.75)', 2) +
+    blob('M24 30h16v12H24z', 'blue', { stroke: 2, depth: 1 }),
+  legend: () =>
+    blob('M12 6h40v52H12z', 'white') +
+    [[18, 'blue'], [30, 'gold'], [42, 'green']].map(([y, tone]) => disc(21, y, 4, tone, { stroke: 1.6, depth: 0.8 })).join('') +
+    line('M29 18h16M29 30h16M29 42h12', '#9DBBE0', 3),
 };
 
 function medal(tone, n) {

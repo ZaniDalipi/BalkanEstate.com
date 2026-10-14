@@ -5,7 +5,6 @@ import {
   PencilIcon,
   XCircleIcon,
   SearchPlusIcon,
-  MapLegendIcon,
   CrosshairsIcon,
 } from '@/constants';
 import SunPositionControl from './SunPositionControl';
@@ -276,7 +275,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.buildings3D', '3D Buildings')}
                 aria-pressed={show3DBuildings}
               >
-                <SoftIcon name="building" className="w-4 h-4 xl:w-5 xl:h-5" />
+                <SoftIcon name="cube" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.buildings3D', '3D')}</span>
               </button>
 
@@ -306,7 +305,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.cadastralParcels')}
                 aria-pressed={showCadastre}
               >
-                <SoftIcon name="area" className="w-4 h-4 xl:w-5 xl:h-5" />
+                <SoftIcon name="mapGrid" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.parcels', 'Parcels')}</span>
               </button>
 
@@ -336,7 +335,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                 aria-label={t('search:map.legend', 'Legend')}
                 aria-pressed={isLegendOpen}
               >
-                <MapLegendIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
+                <SoftIcon name="legend" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.legend', 'Legend')}</span>
               </button>
               </div>
@@ -424,7 +423,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
                         : 'text-neutral-700 hover:bg-neutral-100/80'
                     }`}
                   >
-                    <MapLegendIcon className="w-5 h-5 flex-shrink-0" />
+                    <SoftIcon name="legend" className="w-6 h-6 flex-shrink-0" />
                     <span className="text-[15px] font-semibold">{t('search:map.legend', 'Legend')}</span>
                   </button>
 

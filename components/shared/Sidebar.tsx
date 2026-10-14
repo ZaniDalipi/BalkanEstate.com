@@ -13,9 +13,10 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon } from '../../constants';
+import { LogoIcon, UsersIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
+import { SoftIcon, NavPicture, type NavPictureName } from '../../src/shared/illustrations/Illustration';
 
 const navLogger = createLogger('SidebarNav');
 
@@ -38,13 +39,8 @@ function preloadHandlers(view: AppView) {
  * icon box so its detail survives, without shifting the label. Hovering a
  * row magnifies it Dock-style — see `.sidebar-dock` in src/index.css.
  */
-const NavImage: React.FC<{ name: string }> = ({ name }) => (
-  <img
-    src={`/images/nav/${name}.webp`}
-    alt=""
-    draggable={false}
-    className="nav-dock-icon w-7 h-7 max-w-none -m-1 object-contain select-none"
-  />
+const NavImage: React.FC<{ name: NavPictureName }> = ({ name }) => (
+  <NavPicture name={name} className="nav-dock-icon w-7 h-7 max-w-none -m-1" />
 );
 
 const NavItem: React.FC<{
@@ -90,8 +86,8 @@ const ToolsSection: React.FC<{
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toolItems = [
-    { view: 'valuation' as AppView, label: t('nav:valuation'), icon: <CurrencyDollarIcon /> },
-    { view: 'mortgage-calculator' as AppView, label: t('nav:mortgageCalculator'), icon: <CalculatorIcon /> },
+    { view: 'valuation' as AppView, label: t('nav:valuation'), icon: <SoftIcon name="moneybag" className="nav-dock-icon w-6 h-6 max-w-none -m-0.5" /> },
+    { view: 'mortgage-calculator' as AppView, label: t('nav:mortgageCalculator'), icon: <SoftIcon name="calculator" className="nav-dock-icon w-6 h-6 max-w-none -m-0.5" /> },
   ];
 
   const isToolActive = toolItems.some(item => item.view === activeView);
@@ -259,7 +255,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
     // Add admin panel for admin users
     const navItems = currentUser?.role === 'admin' || currentUser?.role === 'super_admin'
-      ? [...baseNavItems, { view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <ShieldCheckIcon /> }]
+      ? [...baseNavItems, { view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <SoftIcon name="shield" className="nav-dock-icon w-7 h-7 max-w-none -m-1" /> }]
       : baseNavItems;
 
     // Close sidebar on Escape key

@@ -8,6 +8,7 @@ import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 const RoomStylerModal = lazy(() => import('../../room-styler/components/RoomStylerModal'));
 
@@ -434,9 +435,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                         className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-sm font-medium bg-white/10 text-white/80 hover:text-white hover:bg-white/20 backdrop-blur-sm transition-colors"
                         aria-label={t('property:roomStyler.reimagine', 'Reimagine this room')}
                     >
-                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                        </svg>
+                        <SoftIcon name="sparkles" className="w-5 h-5 flex-shrink-0" />
                         <span className="hidden sm:inline">{t('property:roomStyler.reimagine', 'Reimagine')}</span>
                     </button>
                 )}
@@ -451,9 +450,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                     aria-pressed={annotateMode}
                     aria-label={t('property:ui.imageViewerModal.toggleAnnotationMode', 'Toggle annotation mode')}
                 >
-                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
-                    </svg>
+                    <SoftIcon name="pencil" className="w-5 h-5 flex-shrink-0" />
                     <span className="hidden sm:inline">{annotateMode ? t('property:imageViewer.annotate.done', 'Done') : t('property:imageViewer.annotate.label', 'Annotate')}</span>
                 </button>
 

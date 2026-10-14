@@ -106,4 +106,13 @@ export const SOFT_ICONS = [
   'clock',
   'warning',
   'lock',
+  'calculator',
+  'scales',
+  'moneybag',
+  'cube',
+  'diamond',
+  'concierge',
+  'crown',
+  'mapGrid',
+  'legend',
 ] as const;

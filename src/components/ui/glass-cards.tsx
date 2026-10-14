@@ -8,6 +8,7 @@ import { resolveConstruction } from '@/shared/property/construction';
 import { statsForType, type StatKey } from '@/shared/property/typeAttributes';
 import { resolveDisplayArea } from '@/shared/property/area';
 import type { TFunction } from 'i18next';
+import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,7 +73,7 @@ interface StackedPropertyCardProps {
  * looks like. Split that way so adding a stat to a type is a one-word change
  * there rather than an edit to every card.
  */
-type StatChip = { value: React.ReactNode; label: string; icon: string };
+type StatChip = { value: React.ReactNode; label: string; icon: SoftIconName };
 
 /** Only the fields a chip reads, so a card need not carry a whole Property. */
 type StatSource = {
@@ -114,18 +115,18 @@ const hasStatValue = (property: StatSource, key: StatKey): boolean => {
 };
 
 const STAT_CHIPS: Record<StatKey, (property: StatSource, t: TFunction) => StatChip> = {
-    beds: (property, t) => ({ value: property.beds ?? 0, label: t('featured.bedsLabel'), icon: '🛏' }),
-    baths: (property, t) => ({ value: property.baths ?? 0, label: t('featured.bathsLabel'), icon: '🚿' }),
+    beds: (property, t) => ({ value: property.beds ?? 0, label: t('featured.bedsLabel'), icon: 'bed' }),
+    baths: (property, t) => ({ value: property.baths ?? 0, label: t('featured.bathsLabel'), icon: 'bath' }),
     livingRooms: (property, t) => ({
         value: property.livingRooms ?? 0,
         label: t('featured.livingRoomsLabel', 'Living rooms'),
-        icon: '🛋️',
+        icon: 'sofa',
     }),
-    sqft: (property) => ({ value: resolveDisplayArea(property)?.value ?? 0, label: 'm²', icon: '📐' }),
+    sqft: (property) => ({ value: resolveDisplayArea(property)?.value ?? 0, label: 'm²', icon: 'area' }),
     parking: (property, t) => ({
         value: property.parking ?? 0,
         label: t('featured.spacesLabel', 'Spaces'),
-        icon: '🅿️',
+        icon: 'car',
     }),
     parkingType: (property, t) => ({
         // A word, not a count: the arrangement is translated, and a listing
@@ -134,17 +135,17 @@ const STAT_CHIPS: Record<StatKey, (property: StatSource, t: TFunction) => StatCh
             ? t(`property:details.parkingTypes.${property.parkingType}`, property.parkingType)
             : '—',
         label: t('property:details.parkingType', 'Parking type'),
-        icon: '🚗',
+        icon: 'car',
     }),
     offices: (property, t) => ({
         value: property.offices ?? 0,
         label: t('featured.officesLabel', 'Offices'),
-        icon: '🏢',
+        icon: 'desktop',
     }),
     openPlanArea: (property, t) => ({
         value: property.openPlanArea ?? 0,
         label: t('featured.openPlanLabel', 'Open plan m²'),
-        icon: '🪟',
+        icon: 'area',
     }),
 };
 
@@ -534,10 +535,10 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                 // all when the promised year is missing or already past.
                                 ...(construction.status === 'under-construction'
                                     ? (construction.expectedYear
-                                        ? [{ value: construction.expectedYear, label: t('featured.completionLabel', 'Expected'), icon: '🏗' }]
+                                        ? [{ value: construction.expectedYear, label: t('featured.completionLabel', 'Expected'), icon: 'crane' as const }]
                                         : [])
                                     : property.yearBuilt
-                                        ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: '🏗' }]
+                                        ? [{ value: property.yearBuilt, label: t('featured.builtLabel'), icon: 'calendar' as const }]
                                         : []),
                             ].map((stat) => (
                                 <div
@@ -553,7 +554,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                                         transition: 'all 0.2s ease'
                                     }}
                                 >
-                                    <span style={{ fontSize: '0.75rem' }}>{stat.icon}</span>
+                                    <SoftIcon name={stat.icon} className="w-5 h-5 flex-shrink-0" />
                                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{stat.value}</span>
                                     <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 500 }}>{stat.label}</span>
                                 </div>

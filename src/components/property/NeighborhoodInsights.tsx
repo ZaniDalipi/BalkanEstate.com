@@ -5,11 +5,12 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { useAppContext } from '../../../context/AppContext';
-import { MapPinIcon, SparklesIcon } from '../../../constants';
+import { SparklesIcon } from '../../../constants';
 import { parseMarkdown } from '../../utils/markdown';
 import { createSanitizedMarkup } from '../../shared/utils/sanitize';
 import { validateCoordinates } from '../../shared/utils/validation';
 import { apiRequest } from '../../shared/api';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 // Map language codes to full language names for AI prompt
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -132,9 +133,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
       return (
         <div className="text-center py-1 sm:py-2">
           {/* AI hero badge */}
-          <div className="mx-auto mb-3 sm:mb-4 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/30">
-            <SparklesIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-          </div>
+          <SoftIcon name="sparkles" className="mx-auto mb-3 sm:mb-4 w-14 h-14 sm:w-16 sm:h-16" />
           <h4 className="text-base sm:text-lg font-bold text-neutral-800">
             {t('neighborhood.aiTeaserTitle', 'Want to know more about this property?')}
           </h4>
@@ -223,9 +222,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-neutral-200">
       <div className="flex items-center mb-4">
-        <div className="flex-shrink-0 w-8 h-8 mr-3 text-primary bg-primary-light rounded-full flex items-center justify-center">
-          <MapPinIcon className="w-5 h-5" />
-        </div>
+        <SoftIcon name="pin" className="flex-shrink-0 w-8 h-8 mr-3" />
         <h3 className="text-lg sm:text-xl font-bold text-neutral-800">{t('neighborhood.title')}</h3>
       </div>
       {renderContent()}

@@ -11,12 +11,12 @@ import {
   PencilIcon,
   XCircleIcon,
   SearchPlusIcon,
-  MapLegendIcon,
   CrosshairsIcon,
 } from '@/constants';
 import L from 'leaflet';
 import { type MapStyleType, type ClimateRiskType } from './googleMapConstants';
 import { Legend, ClimateRiskLegend } from './GoogleMapLegend';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 export interface GoogleMapControlsProps {
   isMobile: boolean;
@@ -222,7 +222,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                 aria-haspopup="menu"
                 aria-expanded={isClimateMenuOpen}
               >
-                <span className="text-xs xl:text-sm">🌡️</span>
+                <SoftIcon name="thermometer" className="w-4 h-4 xl:w-5 xl:h-5" />
                 <span className="hidden xl:inline">{t('search:map.climateRisks.title', 'Climate')}</span>
                 <svg className={`w-3 h-3 transition-transform ${isClimateMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -238,7 +238,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-label={showOnlyPromoted ? t('common:aria.showAllListings') : t('common:aria.showOnlyPremium')}
               aria-pressed={showOnlyPromoted}
             >
-              <span className="text-xs xl:text-sm">👑</span>
+              <SoftIcon name="crown" className="w-4 h-4 xl:w-5 xl:h-5" />
               <span className="hidden xl:inline">{t('search:map.promoted', 'Premium')}</span>
               {promotedCount > 0 && !showOnlyPromoted && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold bg-amber-500 text-white rounded-full px-1">
@@ -258,7 +258,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-label={t('common:aria.toggle3DBuildings')}
               aria-pressed={show3DBuildings}
             >
-              <span className="text-xs xl:text-sm">🏢</span>
+              <SoftIcon name="cube" className="w-4 h-4 xl:w-5 xl:h-5" />
               <span className="hidden xl:inline">3D</span>
             </button>
 
@@ -271,7 +271,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-label={t('common:aria.togglePointsOfInterest')}
               aria-pressed={showLandmarks}
             >
-              <span className="text-xs xl:text-sm">🏛️</span>
+              <SoftIcon name="landmark" className="w-4 h-4 xl:w-5 xl:h-5" />
               <span className="hidden xl:inline">POI</span>
             </button>
 
@@ -284,7 +284,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-label={t('common:aria.toggleMeasurementTool')}
               aria-pressed={showMeasurement}
             >
-              <span className="text-xs xl:text-sm">📏</span>
+              <SoftIcon name="ruler" className="w-4 h-4 xl:w-5 xl:h-5" />
               <span className="hidden xl:inline">{t('search:map.measure', 'Measure')}</span>
             </button>
 
@@ -297,7 +297,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-label={t('common:aria.toggleCadastreParcels')}
               aria-pressed={showCadastre}
             >
-              <span className="text-xs xl:text-sm">📐</span>
+              <SoftIcon name="mapGrid" className="w-4 h-4 xl:w-5 xl:h-5" />
               <span className="hidden xl:inline">{t('search:map.cadastre', 'Cadastre')}</span>
             </button>
 
@@ -310,7 +310,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
               aria-label={t('search:map.legend', 'Legend')}
               aria-pressed={isLegendOpen}
             >
-              <MapLegendIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
+              <SoftIcon name="legend" className="w-4 h-4 xl:w-5 xl:h-5" />
               <span className="hidden xl:inline">{t('search:map.legend', 'Legend')}</span>
             </button>
             </div>
@@ -399,7 +399,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       show3DBuildings ? 'bg-slate-600 text-white' : 'hover:bg-gray-100 text-gray-700'
                     }`}
                   >
-                    <span>🏢</span>
+                    <SoftIcon name="cube" className="w-5 h-5" />
                     <span>{t('common:aria.buildings3D', '3D Buildings')}</span>
                   </button>
                   <button
@@ -408,7 +408,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       showLandmarks ? 'bg-primary text-white' : 'hover:bg-gray-100 text-gray-700'
                     }`}
                   >
-                    <span>🏛️</span>
+                    <SoftIcon name="landmark" className="w-5 h-5" />
                     <span>{t('common:aria.poi')}</span>
                   </button>
                   <button
@@ -417,7 +417,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       showCadastre ? 'bg-orange-500 text-white' : 'hover:bg-gray-100 text-gray-700'
                     }`}
                   >
-                    <span>📐</span>
+                    <SoftIcon name="mapGrid" className="w-5 h-5" />
                     <span>{t('common:aria.cadastre')}</span>
                   </button>
                   <button
@@ -426,7 +426,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       showMeasurement ? 'bg-emerald-500 text-white' : 'hover:bg-gray-100 text-gray-700'
                     }`}
                   >
-                    <span>📏</span>
+                    <SoftIcon name="ruler" className="w-5 h-5" />
                     <span>{t('common:aria.measure')}</span>
                   </button>
                   <button
@@ -435,7 +435,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       isLegendOpen ? 'bg-amber-500 text-white' : 'hover:bg-gray-100 text-gray-700'
                     }`}
                   >
-                    <MapLegendIcon className="w-4 h-4" />
+                    <SoftIcon name="legend" className="w-5 h-5" />
                     <span>{t('common:aria.legend')}</span>
                   </button>
 
@@ -468,7 +468,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       showOnlyPromoted ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'hover:bg-gray-100 text-gray-700'
                     }`}
                   >
-                    <span>👑</span>
+                    <SoftIcon name="crown" className="w-5 h-5" />
                     <span>{t('common:aria.premiumOnly')}</span>
                     {promotedCount > 0 && !showOnlyPromoted && (
                       <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center text-[9px] font-bold bg-amber-500 text-white rounded-full px-1">

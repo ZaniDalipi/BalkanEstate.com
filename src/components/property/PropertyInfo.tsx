@@ -15,12 +15,10 @@ import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
   CubeIcon,
-  CubeTransparentIcon,
   CheckCircleIcon,
-  LuxuryVillaIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
-import { SpecIllustration, SoftIcon, type SpecIllustrationName } from '../../shared/illustrations/Illustration';
+import { SpecIllustration, SoftIcon, NavPicture, type SpecIllustrationName } from '../../shared/illustrations/Illustration';
 import { useAppContext } from '../../../context/AppContext';
 import { BALKAN_COUNTRIES } from '../../../constants/countries';
 import { navigate } from '@/src/app/router/navigation';
@@ -434,15 +432,9 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                     className="relative w-14 h-12 -my-1 group-hover:scale-105 transition-transform"
                   />
                 ) : (
-                  <div className={`relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br transition-colors ${
-                    isLuxuryVilla
-                      ? 'from-amber-400/30 to-amber-500/15 group-hover:from-amber-400/40 group-hover:to-amber-500/20'
-                      : 'from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/15'
-                  }`}>
-                    {isLuxuryVilla
-                      ? <LuxuryVillaIcon className="w-5 h-5 text-amber-600" />
-                      : <CubeTransparentIcon className="w-5 h-5 text-primary" />}
-                  </div>
+                  isLuxuryVilla
+                    ? <NavPicture name="villas" className="relative w-14 h-12 -my-1 group-hover:scale-105 transition-transform" />
+                    : <SoftIcon name="cube" className="relative w-12 h-12 -my-1 group-hover:scale-105 transition-transform" />
                 )}
                 <div className="relative">
                   <span className={`block text-[10px] sm:text-xs font-medium uppercase tracking-wider leading-none ${

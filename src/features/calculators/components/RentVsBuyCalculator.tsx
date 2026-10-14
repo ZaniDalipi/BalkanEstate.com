@@ -4,6 +4,7 @@ import TouchSlider, { TONE_GOOD, TONE_WARN } from '@/src/components/ui/TouchSlid
 import { formatPrice, getCurrencySymbol } from '@/utils/currency';
 import { ChevronDownIcon, ChevronUpIcon } from '@/constants';
 import { InfoIcon } from 'lucide-react';
+import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
 
 /** Horizon the "planning to stay" slider covers, in years. */
 const STAY_MIN = 1;
@@ -130,13 +131,13 @@ const AdvancedInput: React.FC<{
 
 // Group header component for advanced settings
 const SettingsGroup: React.FC<{
-  icon: string;
+  icon: SoftIconName;
   title: string;
   children: React.ReactNode;
 }> = ({ icon, title, children }) => (
   <div className="space-y-3">
     <div className="flex items-center gap-2 pb-1 border-b border-neutral-100">
-      <span className="text-sm">{icon}</span>
+      <SoftIcon name={icon} className="w-5 h-5" />
       <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wide">{title}</h4>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -438,7 +439,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg border border-neutral-200 animate-fade-in">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl">⚖️</span>
+        <SoftIcon name="scales" className="w-7 h-7" />
         <h3 className="text-base font-bold text-neutral-800">{t('calculators:rentVsBuy.title')}</h3>
       </div>
 
@@ -469,11 +470,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
             ticks={stayTicks}
             ariaLabel={t('calculators:rentVsBuy.fields.planningToStay')}
             valueText={`${planningToStay} ${t('calculators:rentVsBuy.fields.years')}`}
-            icon={
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-              </svg>
-            }
+            icon={<SoftIcon name="home" className="w-4 h-4" />}
           />
 
           {/* Year markers */}
@@ -516,7 +513,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
           {showAdvanced && (
             <div className="mt-4 space-y-5 pt-4 border-t border-neutral-200 animate-fade-in">
               {/* Loan Settings */}
-              <SettingsGroup icon="🏦" title={t('calculators:rentVsBuy.groups.loanSettings')}>
+              <SettingsGroup icon="landmark" title={t('calculators:rentVsBuy.groups.loanSettings')}>
                 <AdvancedInput
                   label={t('calculators:rentVsBuy.advanced.downPayment')}
                   value={downPaymentPercent}
@@ -552,7 +549,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               </SettingsGroup>
 
               {/* Property Costs */}
-              <SettingsGroup icon="🏠" title={t('calculators:rentVsBuy.groups.propertyCosts')}>
+              <SettingsGroup icon="home" title={t('calculators:rentVsBuy.groups.propertyCosts')}>
                 <AdvancedInput
                   label={t('calculators:rentVsBuy.advanced.propertyTaxes')}
                   value={propertyTaxes}
@@ -588,7 +585,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               </SettingsGroup>
 
               {/* Market Assumptions */}
-              <SettingsGroup icon="📈" title={t('calculators:rentVsBuy.groups.marketAssumptions')}>
+              <SettingsGroup icon="trendUp" title={t('calculators:rentVsBuy.groups.marketAssumptions')}>
                 <AdvancedInput
                   label={t('calculators:rentVsBuy.advanced.homeAppreciation')}
                   value={homeAppreciation}
@@ -612,7 +609,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               </SettingsGroup>
 
               {/* Transaction Costs */}
-              <SettingsGroup icon="💰" title={t('calculators:rentVsBuy.groups.transactionCosts')}>
+              <SettingsGroup icon="moneybag" title={t('calculators:rentVsBuy.groups.transactionCosts')}>
                 <AdvancedInput
                   label={t('calculators:rentVsBuy.advanced.closingCosts')}
                   value={closingCostsPercent}
@@ -636,7 +633,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               </SettingsGroup>
 
               {/* Investment */}
-              <SettingsGroup icon="📊" title={t('calculators:rentVsBuy.groups.investment')}>
+              <SettingsGroup icon="chart" title={t('calculators:rentVsBuy.groups.investment')}>
                 <div className="sm:col-span-2">
                   <AdvancedInput
                     label={t('calculators:rentVsBuy.advanced.investmentReturn')}
@@ -690,7 +687,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className={`p-2 rounded-lg border ${!isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${!isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <span>🏢</span>
+                    <SoftIcon name="building" className="w-5 h-5" />
                     <p className="text-sm">{t('calculators:rentVsBuy.results.rent')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.totalCostToRent')}</p>
@@ -700,7 +697,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 </div>
                 <div className={`p-2 rounded-lg border ${isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <span>🏠</span>
+                    <SoftIcon name="home" className="w-5 h-5" />
                     <p className="text-sm">{t('calculators:rentVsBuy.results.own')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.netCostToOwn')}</p>

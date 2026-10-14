@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ScrollAssemble, ScrollAssembleItem } from '@/src/components/ui/scroll-assemble';
+import { CategoryPicture } from '@/shared/illustrations/Illustration';
 
 interface CategoriesSectionProps {
   onCategoryClick: (propertyType: string, listingType?: string) => void;
@@ -15,20 +16,21 @@ interface CategoriesSectionProps {
 const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, onNavigate }) => {
   const { t } = useTranslation(['home']);
 
-  // Each tile's picture lives in public/images/categories/<key>.webp. It is
+  // Each tile's picture lives in public/images/categories/<picture>.webp. It is
   // drawn larger than its card and rises over the card's top edge, so the
   // building, keys or crown look like they are stepping out of the frame.
   // Hovering a card magnifies its picture Dock-style — `.category-dock` in
   // src/index.css.
   const categories = [
-    { key: 'apartments', type: 'apartment' },
-    { key: 'houses', type: 'house' },
-    { key: 'villas', type: 'villa' },
-    { key: 'land', type: 'land' },
-    { key: 'forRent', type: 'any', listingType: 'rent', image: 'rent' },
+    { key: 'apartments', type: 'apartment', picture: 'apartments' as const },
+    { key: 'houses', type: 'house', picture: 'houses' as const },
+    { key: 'villas', type: 'villa', picture: 'villas' as const },
+    { key: 'land', type: 'land', picture: 'land' as const },
+    { key: 'forRent', type: 'any', listingType: 'rent', picture: 'rent' as const },
     {
       key: 'luxury',
       type: 'villa',
+      picture: 'luxury' as const,
       isLuxury: true,
       // Luxury is the one tile that isn't a search filter. Without this it
       // ran the same `propertyType: 'villa'` search as the Villas tile two
@@ -80,14 +82,9 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, 
               {(cat as any).isLuxury && (
                 <div className="absolute top-0 left-3 right-3 h-0.5 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600" />
               )}
-              <img
-                src={`/images/categories/${(cat as any).image ?? cat.key}.webp`}
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                loading="lazy"
-                decoding="async"
-                className="category-dock__picture pointer-events-none absolute left-1/2 -top-10 sm:-top-12 w-20 h-20 sm:w-24 sm:h-24 object-contain select-none"
+              <CategoryPicture
+                name={cat.picture}
+                className="category-dock__picture pointer-events-none absolute left-1/2 -top-10 sm:-top-12 w-20 h-20 sm:w-24 sm:h-24"
               />
               <span className={`text-xs sm:text-sm font-medium ${(cat as any).isLuxury ? 'text-amber-800 font-semibold' : 'text-slate-700'}`}>
                 {t(`home:categories.${cat.key}`)}

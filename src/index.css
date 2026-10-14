@@ -2279,7 +2279,7 @@ html.reduce-motion .celebration-bar {
    At rest each picture sits half above its card's top edge. Hovering a
    card pops only that picture up, Dock-style: it springs to 1.5x and
    rises, over its neighbours. Without hover (touch) or with reduced
-   motion the pictures simply stay put. */
+   motion the pictures simply stay put. Also used by Quick Access. */
 .category-dock__picture {
   transform: translateX(-50%);
   transform-origin: center bottom;

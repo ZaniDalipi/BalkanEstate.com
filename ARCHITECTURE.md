@@ -1172,6 +1172,39 @@ SqftIcon        // expand arrows (area/m²)
 
 ---
 
+## Illustration System (`src/shared/illustrations`)
+
+Branded 3D pictures sit alongside the line icons above. Small functional
+controls (close, arrows, chevrons, menu) keep the line icons; anything that
+names a thing — a room, a feature, a section, a destination — uses one of
+these. All four are decorative (`alt=""`, `aria-hidden`): the label next to
+them carries the meaning.
+
+| Component | Files | Made by | Used for |
+|-----------|-------|---------|----------|
+| `SpecIllustration` | `public/images/illustrations/spec/*.svg` | `scripts/illustrations/iso.mjs` | isometric property-spec scenes (beds, baths, plot, amenities, distances) |
+| `SoftIcon` | `public/images/illustrations/soft/*.svg` | `scripts/illustrations/soft.mjs` | in-page icons: filters, dashboards, section headers, calculators |
+| `NavPicture` | `public/images/nav/*.webp` | hand-made art | sidebar, bottom bar, quick access — anything pointing at a sidebar destination |
+| `CategoryPicture` | `public/images/categories/*.webp` | hand-made art | home page category tiles |
+
+```bash
+node scripts/illustrations/generate.mjs   # regenerate the SVGs + names.generated.ts
+```
+
+- **Names are typed.** `names.generated.ts` (written by the generator) and the
+  unions in `Illustration.tsx` make a misspelt name a type error, not a broken
+  image. Never build a path to these files by hand — use the components.
+- **A missing file hides itself.** Every picture renders through
+  `DecorativeImage`, which hides the image (keeping its box) if the file fails
+  to load, so a dropped asset never shows a broken-image glyph.
+- **Each scene hides the BalkanEstate two-tower mark** somewhere small; keep
+  that when adding one.
+- **Dock-style hover**: `.sidebar-dock` (sidebar) and `.category-dock`
+  (category row, Quick Access) in `src/index.css` magnify only the hovered
+  picture; both are off for touch and for `prefers-reduced-motion`.
+
+---
+
 ## Schedule Viewing Modal
 
 3-step wizard:

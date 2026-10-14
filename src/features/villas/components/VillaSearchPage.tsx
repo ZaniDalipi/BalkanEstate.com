@@ -26,6 +26,7 @@ import { Property } from '@/types';
 import { VILLA_DESTINATIONS } from '@/src/features/home/data/villaDestinations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, NavPicture } from '@/shared/illustrations/Illustration';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -301,10 +302,10 @@ const useCountUp = (target: number): number => {
 const TrustStrip: React.FC = () => {
     const { t } = useTranslation(['villas']);
     const items = [
-        { icon: '🏛️', title: t('villas:trust.handpicked', 'Handpicked Estates'), desc: t('villas:trust.handpickedDesc', 'Every villa personally vetted for exceptional quality') },
-        { icon: '🎩', title: t('villas:trust.concierge', 'Dedicated Concierge'),  desc: t('villas:trust.conciergeDesc', 'White-glove support from inquiry to checkout')  },
-        { icon: '💎', title: t('villas:trust.bestPrice', 'Best-Price Promise'),  desc: t('villas:trust.bestPriceDesc', 'No hidden fees — ever. Book with total confidence')  },
-        { icon: '🔒', title: t('villas:trust.privacy', 'Complete Privacy'),    desc: t('villas:trust.privacyDesc', 'Your stay, your retreat — absolute discretion guaranteed')    },
+        { icon: 'landmark' as const, title: t('villas:trust.handpicked', 'Handpicked Estates'), desc: t('villas:trust.handpickedDesc', 'Every villa personally vetted for exceptional quality') },
+        { icon: 'concierge' as const, title: t('villas:trust.concierge', 'Dedicated Concierge'),  desc: t('villas:trust.conciergeDesc', 'White-glove support from inquiry to checkout')  },
+        { icon: 'diamond' as const, title: t('villas:trust.bestPrice', 'Best-Price Promise'),  desc: t('villas:trust.bestPriceDesc', 'No hidden fees — ever. Book with total confidence')  },
+        { icon: 'lock' as const, title: t('villas:trust.privacy', 'Complete Privacy'),    desc: t('villas:trust.privacyDesc', 'Your stay, your retreat — absolute discretion guaranteed')    },
     ];
     return (
         // Wraps into a 2x2 grid on a phone rather than scrolling sideways.
@@ -316,7 +317,7 @@ const TrustStrip: React.FC = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-black/[0.05]">
                 {items.map((item, i) => (
                     <div key={i} className="flex items-start gap-2.5 px-3 py-3 sm:px-4">
-                        <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
+                        <SoftIcon name={item.icon} className="w-7 h-7 flex-shrink-0" />
                         <div className="min-w-0">
                             <p className="text-[11px] font-semibold text-neutral-700 leading-tight">{item.title}</p>
                             <p className="text-[10px] text-neutral-400 leading-snug mt-0.5">{item.desc}</p>
@@ -716,7 +717,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         >
                             {/* Left: brand + stats */}
                             <div className="flex items-center gap-2.5 min-w-0">
-                                <span className="text-lg flex-shrink-0">🏛️</span>
+                                <NavPicture name="villas" className="w-7 h-7 flex-shrink-0" />
                                 <span className="text-neutral-900 font-semibold text-base tracking-[-0.01em] flex-shrink-0">
                                     {t('villas:title', 'Luxury Villas')}
                                 </span>
@@ -1177,7 +1178,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[11px] font-semibold backdrop-blur-sm shadow-sm"
                                             style={{ background: 'var(--color-primary)' }}
                                         >
-                                            <span>🏛️</span>
+                                            <NavPicture name="villas" className="w-5 h-5" />
                                             <span>{t('villas:title', 'Luxury Villas')}</span>
                                             {activeFilterCount > 0 && (
                                                 <span
@@ -1225,7 +1226,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         >
                             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-lg">🏛️</span>
+                                    <NavPicture name="villas" className="w-7 h-7" />
                                     <h2 className="text-base font-bold text-gray-900">
                                         {t('villas:filters.title', 'Villa Filters')}
                                     </h2>
