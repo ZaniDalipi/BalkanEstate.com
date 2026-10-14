@@ -13,7 +13,7 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
+import { LogoIcon, AgentsIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
 
@@ -32,6 +32,19 @@ function preloadHandlers(view: AppView) {
   const warm = () => preloadView(view);
   return { onPointerEnter: warm, onPointerDown: warm, onFocus: warm };
 }
+
+/**
+ * A 3D nav illustration from public/images/nav. Drawn a little larger than
+ * the 20px icon box so its detail survives, without shifting the label.
+ */
+const NavImage: React.FC<{ name: string }> = ({ name }) => (
+  <img
+    src={`/images/nav/${name}.webp`}
+    alt=""
+    draggable={false}
+    className="w-6 h-6 max-w-none -m-0.5 object-contain select-none"
+  />
+);
 
 const NavItem: React.FC<{
   view: AppView;
@@ -229,8 +242,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     // Luxury villas are their own curated market (for rent OR for sale), so the
     // entry is always visible — a permanent home in the sidebar.
     const baseNavItems = [
-      { view: 'home' as AppView, label: t('nav:home'), icon: <img src="/images/nav/home.webp" alt="" draggable={false} className="w-6 h-6 max-w-none -m-0.5 object-contain select-none" /> },
-      { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
+      { view: 'home' as AppView, label: t('nav:home'), icon: <NavImage name="home" /> },
+      { view: 'search' as AppView, label: t('nav:search'), icon: <NavImage name="buy" /> },
       { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
       { view: 'villas' as AppView, label: t('nav:villas'), icon: <LuxuryVillaIcon className="h-5 w-5 text-[#FFA500]" /> },
       { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
