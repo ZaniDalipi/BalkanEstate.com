@@ -18,6 +18,8 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, 
   // Each tile's picture lives in public/images/categories/<key>.webp. It is
   // drawn larger than its card and rises over the card's top edge, so the
   // building, keys or crown look like they are stepping out of the frame.
+  // Hovering a card magnifies its picture Dock-style — `.category-dock` in
+  // src/index.css.
   const categories = [
     { key: 'apartments', type: 'apartment' },
     { key: 'houses', type: 'house' },
@@ -56,18 +58,17 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, 
           </p>
         </motion.div>
 
-        <ScrollAssemble count={categories.length} className="grid grid-cols-3 sm:grid-cols-6 gap-x-3 gap-y-14 sm:gap-4 pt-10 sm:pt-12">
+        <ScrollAssemble count={categories.length} className="grid grid-cols-3 sm:grid-cols-6 gap-x-3 gap-y-14 sm:gap-4 pt-10 sm:pt-28">
           {categories.map((cat, i) => (
             <ScrollAssembleItem key={cat.key} index={i}>
             <motion.button
-              whileHover={{ y: -4 }}
               whileTap={{ scale: 0.95 }}
               onClick={() =>
                 (cat as any).path
                   ? onNavigate((cat as any).path)
                   : onCategoryClick(cat.type, (cat as any).listingType)
               }
-              className={`group relative flex w-full flex-col items-center pt-12 sm:pt-14 pb-4 px-2 rounded-2xl transition-all ${
+              className={`category-dock group relative flex w-full flex-col items-center pt-12 sm:pt-14 pb-4 px-2 rounded-2xl transition-all hover:z-10 ${
                 (cat as any).isLuxury
                   ? 'border-2 border-amber-400/60 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-200/60 bg-gradient-to-b from-amber-50 to-white pb-6'
                   : 'border border-neutral-200 hover:border-neutral-300 hover:shadow-md bg-white'
@@ -86,7 +87,7 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, 
                 draggable={false}
                 loading="lazy"
                 decoding="async"
-                className="pointer-events-none absolute left-1/2 -top-10 sm:-top-12 w-20 h-20 sm:w-24 sm:h-24 -translate-x-1/2 object-contain select-none drop-shadow-[0_10px_12px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-out group-hover:-translate-y-2 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none"
+                className="category-dock__picture pointer-events-none absolute left-1/2 -top-10 sm:-top-12 w-20 h-20 sm:w-24 sm:h-24 object-contain select-none"
               />
               <span className={`text-xs sm:text-sm font-medium ${(cat as any).isLuxury ? 'text-amber-800 font-semibold' : 'text-slate-700'}`}>
                 {t(`home:categories.${cat.key}`)}
