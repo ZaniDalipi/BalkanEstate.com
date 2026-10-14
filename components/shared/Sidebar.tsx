@@ -13,7 +13,7 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, ShieldCheckIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon } from '../../constants';
+import { LogoIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
 
@@ -405,8 +405,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             aria-label={totalUnreadCount > 0 ? t('nav:inboxWithUnread', 'Inbox ({{count}} unread)', { count: totalUnreadCount }) : t('nav:inbox')}
                             aria-current={activeView === 'inbox' ? 'page' : undefined}
                         >
-                            <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'inbox' ? 'text-primary' : 'text-neutral-700'} relative`} aria-hidden="true">
-                                <EnvelopeIcon />
+                            <div className="w-5 h-5 flex-shrink-0 relative" aria-hidden="true">
+                                <NavImage name="inbox" />
                                 {totalUnreadCount > 0 && (
                                     <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 ring-2 ring-white shadow" aria-hidden="true">
                                         {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -435,9 +435,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('nav:goToAccount', 'Go to my account')}
                                 aria-current={activeView === 'account' ? 'page' : undefined}
                             >
-                                <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100">
-                                <UserAvatar src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} className="w-full h-full object-cover" />
-                                </div>
+                                {currentUser.avatarUrl ? (
+                                    <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100">
+                                    <UserAvatar src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} className="w-full h-full object-cover" />
+                                    </div>
+                                ) : (
+                                    // No photo of their own yet: the branded account icon
+                                    <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="account" /></div>
+                                )}
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>
                             <button
@@ -445,7 +450,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start"
                                 aria-label={t('auth:logoutAccount', 'Log out of your account')}
                             >
-                                <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                                <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="logout" /></div>
                                 <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:buttons.logout')}</span>
                             </button>
                         </div>
@@ -455,7 +460,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
                             aria-label={t('nav:loginOrRegister', 'Login or register an account')}
                          >
-                            <UserCircleIcon className="w-5 h-5 text-neutral-700 flex-shrink-0" aria-hidden="true" />
+                            <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="account" /></div>
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
                         </button>
                     )}

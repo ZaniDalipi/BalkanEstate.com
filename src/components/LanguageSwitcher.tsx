@@ -117,8 +117,14 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           aria-label={t('aria.changeLanguage')}
           aria-expanded={isOpen}
         >
-          <span className="text-xl flex-shrink-0">{currentLang.flag}</span>
-          <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.nativeName}</span>
+          <img
+            src="/images/nav/language.webp"
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="w-6 h-6 -m-0.5 max-w-none flex-shrink-0 object-contain select-none"
+          />
+          <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.flag} {currentLang.nativeName}</span>
         </button>
 
         {isOpen && (
