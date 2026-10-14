@@ -19,6 +19,7 @@ import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '@/shared/property/attributeDisplay';
+import { SpecIllustration } from '@/shared/illustrations/Illustration';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
@@ -682,7 +683,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 aria-label={`${shown} ${label}`}
               >
                 <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-                <span className="text-sm mb-1 relative z-10 leading-none">{display.icon}</span>
+                <SpecIllustration name={display.illustration} className="w-8 h-7 mb-0.5 relative z-10" />
                 <span className="font-bold text-sm text-neutral-800 leading-none relative z-10 tabular-nums">{shown}</span>
                 <span className="mt-0.5 font-medium text-[9px] leading-tight text-neutral-500 relative z-10">{label}</span>
               </div>
@@ -700,9 +701,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               aria-label={`${safeProperty.sqft} ${t('common:sqm')}`}
             >
               <div className="property-card__stat-glow absolute inset-0 rounded-xl bg-gradient-to-br from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-              <svg className="w-4 h-4 text-blue-600 mb-1 relative z-10 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4M4 16v4h4M16 4h4v4M16 20h4v-4M9 9h6v6H9z" />
-              </svg>
+              <SpecIllustration name="area" className="w-8 h-7 mb-0.5 relative z-10" />
               <span className="font-bold text-sm text-blue-600 leading-none relative z-10 tabular-nums">{safeProperty.sqft}</span>
               <span className="mt-0.5 font-medium text-[9px] leading-tight text-blue-500/80 relative z-10">{t('common:sqm')}</span>
             </div>

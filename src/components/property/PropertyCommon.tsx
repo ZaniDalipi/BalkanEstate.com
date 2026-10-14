@@ -4,10 +4,13 @@
 import React from 'react';
 import { Property } from '../../../types';
 import { optimizeImageUrl } from '../../../config/mediaConfig';
+import { SpecIllustration, type SpecIllustrationName } from '../../shared/illustrations/Illustration';
 
 import { useTranslation } from 'react-i18next';
 interface DetailItemProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  /** A branded scene, drawn in place of the small icon tile. */
+  illustration?: SpecIllustrationName;
   label: string;
   children: React.ReactNode;
 }
@@ -22,18 +25,25 @@ interface DetailItemProps {
  * </DetailItem>
  * ```
  */
-export const DetailItem: React.FC<DetailItemProps> = ({ icon, label, children }) => (
+export const DetailItem: React.FC<DetailItemProps> = ({ icon, illustration, label, children }) => (
   <div className="group relative overflow-hidden rounded-2xl bg-white/50 backdrop-blur-md border border-white/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:bg-white/70 transition-all duration-300">
     {/* Glass top highlight */}
     <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/90 to-transparent" />
 
     <div className="relative p-3.5 flex items-center gap-3">
-      {/* Frosted glass icon */}
-      <div className="relative flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-center text-primary/70 group-hover:text-primary transition-colors duration-300">
-        <div className="w-[18px] h-[18px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>span]:text-sm">
-          {icon}
+      {illustration ? (
+        <SpecIllustration
+          name={illustration}
+          className="flex-shrink-0 w-14 h-12 group-hover:scale-105 transition-transform duration-300"
+        />
+      ) : (
+        /* Frosted glass icon */
+        <div className="relative flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-center text-primary/70 group-hover:text-primary transition-colors duration-300">
+          <div className="w-[18px] h-[18px] flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>span]:text-sm">
+            {icon}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex-1 min-w-0">
         <span className="text-[11px] text-neutral-400 font-medium block leading-tight">{label}</span>

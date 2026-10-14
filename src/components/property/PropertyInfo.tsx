@@ -14,19 +14,14 @@ import { optimizeImageUrl } from '../../../config/mediaConfig';
 import { formatPrice } from '../../../utils/currency';
 import { getPriceReductionInfo } from '../../../utils/priceUtils';
 import {
-  BedIcon,
-  BathIcon,
-  SqftIcon,
-  CalendarIcon,
-  ParkingIcon,
   StarIcon,
   CubeIcon,
   CubeTransparentIcon,
-  LivingRoomIcon,
   CheckCircleIcon,
   LuxuryVillaIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
+import { SpecIllustration, type SpecIllustrationName } from '../../shared/illustrations/Illustration';
 import { useAppContext } from '../../../context/AppContext';
 import { BALKAN_COUNTRIES } from '../../../constants/countries';
 import { navigate } from '@/src/app/router/navigation';
@@ -38,17 +33,16 @@ interface PropertyInfoProps {
 }
 
 /**
- * Property types the type card draws a dedicated icon for. Anything else —
- * `other`, or a type added to the backend before this card learns about it —
- * falls through to the generic cube.
+ * Property types the type card draws a branded scene for. Luxury villas keep
+ * their gold villa mark; anything else — `other`, or a type added to the
+ * backend before this card learns about it — falls through to the generic cube.
  */
-const PROPERTY_TYPES_WITH_ICON: ReadonlySet<string> = new Set([
-  'apartment',
-  'house',
-  'villa',
-  'luxury-villa',
-  'land',
-]);
+const PROPERTY_TYPE_ILLUSTRATIONS: Readonly<Record<string, SpecIllustrationName>> = {
+  apartment: 'apartment',
+  house: 'house',
+  villa: 'villa',
+  land: 'plot',
+};
 
 /**
  * Last-resort label for a type with no translation in the active locale:
@@ -61,12 +55,12 @@ const humanisePropertyType = (value: unknown): string =>
   typeof value === 'string' ? value.replace(/[-_]+/g, ' ').trim() : '';
 
 /**
- * The look of each headline stat.
+ * The tint behind each headline stat.
  *
- * Which stats appear is the type table's decision; only their colour and icon
- * live here. A stat with no entry falls back to a neutral tone and the emoji
- * from `ATTRIBUTE_DISPLAY`, so adding a stat to a type never leaves a blank
- * tile — it just looks plainer until someone gives it a colour.
+ * Which stats appear is the type table's decision; the scene drawn for each
+ * comes from `ATTRIBUTE_DISPLAY`. A stat with no entry here falls back to a
+ * neutral tone, so adding a stat to a type never leaves a blank tile — it
+ * just looks plainer until someone gives it a colour.
  */
 const HEADLINE_STAT_TONES: Record<string, string> = {
   beds: 'bg-blue-50 hover:bg-blue-100',
@@ -77,12 +71,13 @@ const HEADLINE_STAT_TONES: Record<string, string> = {
   openPlanArea: 'bg-sky-50 hover:bg-sky-100',
 };
 
-const HEADLINE_STAT_ICONS: Record<string, React.ReactNode> = {
-  beds: <BedIcon className="w-5 h-5 text-blue-500" />,
-  baths: <BathIcon className="w-5 h-5 text-cyan-500" />,
-  livingRooms: <LivingRoomIcon className="w-5 h-5 text-violet-500" />,
-  parking: <ParkingIcon className="w-5 h-5 text-amber-500" />,
-};
+/** A feature's scene, faded out when the listing does not have it. */
+const FeatureScene: React.FC<{ name: SpecIllustrationName; available: boolean }> = ({ name, available }) => (
+  <SpecIllustration
+    name={name}
+    className={`w-14 h-12 flex-shrink-0 ${available ? '' : 'grayscale opacity-40'}`}
+  />
+);
 
 /**
  * PropertyInfo Component
@@ -439,39 +434,22 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               }`}>
                 {/* Subtle animated shimmer */}
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
-                <div className={`relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br transition-colors ${
-                  isLuxuryVilla
-                    ? 'from-amber-400/30 to-amber-500/15 group-hover:from-amber-400/40 group-hover:to-amber-500/20'
-                    : 'from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/15'
-                }`}>
-                  {property.propertyType === 'apartment' && (
-                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                    </svg>
-                  )}
-                  {property.propertyType === 'house' && (
-                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                  )}
-                  {property.propertyType === 'villa' && (
-                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8" />
-                    </svg>
-                  )}
-                  {property.propertyType === 'land' && (
-                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
-                    </svg>
-                  )}
-                  {isLuxuryVilla && (
-                    <LuxuryVillaIcon className="w-5 h-5 text-amber-600" />
-                  )}
-                  {!PROPERTY_TYPES_WITH_ICON.has(property.propertyType) && (
-                    <CubeTransparentIcon className="w-5 h-5 text-primary" />
-                  )}
-                </div>
+                {PROPERTY_TYPE_ILLUSTRATIONS[property.propertyType] ? (
+                  <SpecIllustration
+                    name={PROPERTY_TYPE_ILLUSTRATIONS[property.propertyType]}
+                    className="relative w-14 h-12 -my-1 group-hover:scale-105 transition-transform"
+                  />
+                ) : (
+                  <div className={`relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br transition-colors ${
+                    isLuxuryVilla
+                      ? 'from-amber-400/30 to-amber-500/15 group-hover:from-amber-400/40 group-hover:to-amber-500/20'
+                      : 'from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/15'
+                  }`}>
+                    {isLuxuryVilla
+                      ? <LuxuryVillaIcon className="w-5 h-5 text-amber-600" />
+                      : <CubeTransparentIcon className="w-5 h-5 text-primary" />}
+                  </div>
+                )}
                 <div className="relative">
                   <span className={`block text-[10px] sm:text-xs font-medium uppercase tracking-wider leading-none ${
                     isLuxuryVilla ? 'text-amber-700/70' : 'text-primary/60'
@@ -533,10 +511,11 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               const display = ATTRIBUTE_DISPLAY[attribute];
 
               return (
-                <div key={attribute} className={`flex items-center gap-3 p-3 rounded-2xl transition-colors cursor-default group ${HEADLINE_STAT_TONES[attribute] ?? 'bg-slate-50 hover:bg-slate-100'}`}>
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform text-lg">
-                    {HEADLINE_STAT_ICONS[attribute] ?? <span>{display.icon}</span>}
-                  </div>
+                <div key={attribute} className={`flex items-center gap-2 p-2.5 pr-3 rounded-2xl transition-colors cursor-default group ${HEADLINE_STAT_TONES[attribute] ?? 'bg-slate-50 hover:bg-slate-100'}`}>
+                  <SpecIllustration
+                    name={display.illustration}
+                    className="w-16 h-[3.25rem] flex-shrink-0 group-hover:scale-105 transition-transform"
+                  />
                   <div className="min-w-0">
                     <p className="text-xl font-bold text-neutral-900 leading-none truncate">{formatAttributeValue(attribute, value)}</p>
                     <p className="text-xs text-neutral-500 mt-0.5 truncate">{t(display.key, display.fallback)}</p>
@@ -552,10 +531,11 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 listing with genuinely no area on file hides the tile rather
                 than print a "0 m²" that looks like a real measurement. */}
             {property.sqft > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-default group">
-                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                  <SqftIcon className="w-5 h-5 text-emerald-500" />
-                </div>
+              <div className="flex items-center gap-2 p-2.5 pr-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-default group">
+                <SpecIllustration
+                  name="area"
+                  className="w-16 h-[3.25rem] flex-shrink-0 group-hover:scale-105 transition-transform"
+                />
                 <div>
                   <p className="text-xl font-bold text-neutral-900 leading-none">{property.sqft}</p>
                   <p className="text-xs text-neutral-500 mt-0.5">m²</p>
@@ -608,11 +588,11 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               // about a year that has not happened. A promise whose year is
               // missing or already past shows the state without a date rather
               // than inventing one.
-              <DetailItem icon={<CalendarIcon />} label={t('features.expectedCompletion', 'Expected completion')}>
+              <DetailItem illustration="construction" label={t('features.expectedCompletion', 'Expected completion')}>
                 {construction.expectedYear ?? t('features.underConstruction', 'Under construction')}
               </DetailItem>
             ) : (
-              <DetailItem icon={<CalendarIcon />} label={t('features.yearBuilt')}>
+              <DetailItem illustration="yearBuilt" label={t('features.yearBuilt')}>
                 {property.yearBuilt}
               </DetailItem>
             )
@@ -626,7 +606,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
             return (
               <DetailItem
                 key={attribute}
-                icon={<span className="text-2xl">{display.icon}</span>}
+                illustration={display.illustration}
                 label={t(display.key, display.fallback)}
               >
                 {formatAttributeValue(attribute, value)}
@@ -635,7 +615,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           })}
 
           {property.furnishing && property.furnishing !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">🛋️</span>} label={t('details.furnishing')}>
+            <DetailItem illustration="furnishing" label={t('details.furnishing')}>
               <span className="capitalize">{property.furnishing.replace('-', ' ')}</span>
             </DetailItem>
           )}
@@ -643,31 +623,31 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
           {property.heatingType &&
             property.heatingType !== 'any' &&
             property.heatingType !== 'none' && (
-              <DetailItem icon={<span className="text-2xl">🔥</span>} label={t('details.heating')}>
+              <DetailItem illustration="heating" label={t('details.heating')}>
                 <span className="capitalize">{property.heatingType.replace('-', ' ')}</span>
               </DetailItem>
             )}
 
           {property.condition && property.condition !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">⭐</span>} label={t('details.condition')}>
+            <DetailItem illustration="condition" label={t('details.condition')}>
               <span className="capitalize">{property.condition.replace('-', ' ')}</span>
             </DetailItem>
           )}
 
           {property.viewType && property.viewType !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">👁️</span>} label={t('details.view')}>
+            <DetailItem illustration="view" label={t('details.view')}>
               <span className="capitalize">{t('details.viewType', { type: property.viewType })}</span>
             </DetailItem>
           )}
 
           {property.energyRating && property.energyRating !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">⚡</span>} label={t('details.energyRating')}>
+            <DetailItem illustration="energy" label={t('details.energyRating')}>
               <span className="font-bold text-lg">{property.energyRating}</span>
             </DetailItem>
           )}
 
           {property.orientation && property.orientation !== 'any' && (
-            <DetailItem icon={<span className="text-2xl">🧭</span>} label={t('details.orientation')}>
+            <DetailItem illustration="orientation" label={t('details.orientation')}>
               <span className="capitalize">{t(`details.orientations.${property.orientation}`)}</span>
             </DetailItem>
           )}
@@ -808,7 +788,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                         : 'bg-red-50 border-red-200 hover:bg-red-100'
                     }`}
                   >
-                    <span className="text-2xl">{property.hasBalcony ? '✓' : '✗'}</span>
+                    <FeatureScene name="balcony" available={property.hasBalcony} />
                     <div>
                       <span className="font-medium text-neutral-800">{t('details.balconyTerrace')}</span>
                       <span
@@ -829,7 +809,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                         : 'bg-red-50 border-red-200 hover:bg-red-100'
                     }`}
                   >
-                    <span className="text-2xl">{property.hasGarden ? '✓' : '✗'}</span>
+                    <FeatureScene name="garden" available={property.hasGarden} />
                     <div>
                       <span className="font-medium text-neutral-800">{t('details.gardenYard')}</span>
                       <span
@@ -850,7 +830,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                         : 'bg-red-50 border-red-200 hover:bg-red-100'
                     }`}
                   >
-                    <span className="text-2xl">{property.hasElevator ? '✓' : '✗'}</span>
+                    <FeatureScene name="elevator" available={property.hasElevator} />
                     <div>
                       <span className="font-medium text-neutral-800">{t('amenities.elevator')}</span>
                       <span
@@ -871,7 +851,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                         : 'bg-red-50 border-red-200 hover:bg-red-100'
                     }`}
                   >
-                    <span className="text-2xl">{property.hasSecurity ? '✓' : '✗'}</span>
+                    <FeatureScene name="security" available={property.hasSecurity} />
                     <div>
                       <span className="font-medium text-neutral-800">{t('amenities.security')}</span>
                       <span
@@ -892,7 +872,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                         : 'bg-red-50 border-red-200 hover:bg-red-100'
                     }`}
                   >
-                    <span className="text-2xl">{property.hasAirConditioning ? '✓' : '✗'}</span>
+                    <FeatureScene name="airConditioning" available={property.hasAirConditioning} />
                     <div>
                       <span className="font-medium text-neutral-800">{t('amenities.airConditioning')}</span>
                       <span
@@ -911,7 +891,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                       property.hasPool ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-red-50 border-red-200 hover:bg-red-100'
                     }`}
                   >
-                    <span className="text-2xl">{property.hasPool ? '✓' : '✗'}</span>
+                    <FeatureScene name="pool" available={property.hasPool} />
                     <div>
                       <span className="font-medium text-neutral-800">{t('amenities.pool')}</span>
                       <span
@@ -932,7 +912,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                         : 'bg-red-50 border-red-200 hover:bg-red-100'
                     }`}
                   >
-                    <span className="text-2xl">{property.petsAllowed ? '✓' : '✗'}</span>
+                    <FeatureScene name="pets" available={property.petsAllowed} />
                     <div>
                       <span className="font-medium text-neutral-800">{t('details.petsAllowed')}</span>
                       <span
@@ -961,7 +941,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {property.distanceToCenter !== undefined && (
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
-                    <span className="text-2xl">🏙️</span>
+                    <SpecIllustration name="city" className="w-14 h-12 flex-shrink-0" />
                     <div>
                       <span className="font-medium text-neutral-800">{t('distances.cityCenter')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">
@@ -972,7 +952,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 )}
                 {property.distanceToSea !== undefined && (
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
-                    <span className="text-2xl">🌊</span>
+                    <SpecIllustration name="sea" className="w-14 h-12 flex-shrink-0" />
                     <div>
                       <span className="font-medium text-neutral-800">{t('distances.sea')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">
@@ -983,7 +963,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 )}
                 {property.distanceToSchool !== undefined && (
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
-                    <span className="text-2xl">🏫</span>
+                    <SpecIllustration name="school" className="w-14 h-12 flex-shrink-0" />
                     <div>
                       <span className="font-medium text-neutral-800">{t('distances.school')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">
@@ -994,7 +974,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                 )}
                 {property.distanceToHospital !== undefined && (
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-100 cursor-default">
-                    <span className="text-2xl">🏥</span>
+                    <SpecIllustration name="hospital" className="w-14 h-12 flex-shrink-0" />
                     <div>
                       <span className="font-medium text-neutral-800">{t('distances.hospital')}</span>
                       <span className="block text-sm text-blue-700 font-semibold">

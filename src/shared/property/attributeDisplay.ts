@@ -13,6 +13,7 @@
  */
 
 import { PARKING_TYPES, type ParkingType, type TypeAttribute } from './typeAttributes';
+import type { SpecIllustrationName } from '../illustrations/Illustration';
 
 export interface AttributeDisplay {
   /** Translation key, resolved against the `property` namespace. */
@@ -20,6 +21,8 @@ export interface AttributeDisplay {
   /** Shown when the active locale has no translation yet. */
   fallback: string;
   icon: string;
+  /** The branded scene drawn for it on the detail page. */
+  illustration: SpecIllustrationName;
   /** Printed after the value — areas are in m², counts have no unit. */
   unit?: string;
   /**
@@ -30,28 +33,29 @@ export interface AttributeDisplay {
 }
 
 export const ATTRIBUTE_DISPLAY: Record<TypeAttribute, AttributeDisplay> = {
-  beds: { key: 'features.bedrooms', fallback: 'Bedrooms', icon: '🛏️' },
-  baths: { key: 'features.bathrooms', fallback: 'Bathrooms', icon: '🚿' },
-  livingRooms: { key: 'details.livingRoomPlural', fallback: 'Living rooms', icon: '🛋️' },
-  kitchens: { key: 'details.kitchens', fallback: 'Kitchens', icon: '🍳' },
-  diningRooms: { key: 'details.diningRooms', fallback: 'Dining rooms', icon: '🍽️' },
-  toilets: { key: 'details.toilets', fallback: 'Toilets (WC)', icon: '🚻' },
-  storageRooms: { key: 'details.storageRooms', fallback: 'Storage rooms', icon: '📦' },
-  offices: { key: 'details.offices', fallback: 'Offices', icon: '💼' },
-  openPlanArea: { key: 'details.openPlanArea', fallback: 'Open-plan area', icon: '🪟', unit: 'm²' },
-  landArea: { key: 'details.landArea', fallback: 'Land area', icon: '🌳', unit: 'm²' },
-  buildingArea: { key: 'details.buildingArea', fallback: 'Building area', icon: '🏗️', unit: 'm²' },
-  grossArea: { key: 'details.grossArea', fallback: 'Gross area', icon: '📐', unit: 'm²' },
-  netArea: { key: 'details.netArea', fallback: 'Net area', icon: '📏', unit: 'm²' },
-  parking: { key: 'features.parking', fallback: 'Parking', icon: '🅿️' },
+  beds: { key: 'features.bedrooms', fallback: 'Bedrooms', icon: '🛏️', illustration: 'beds' },
+  baths: { key: 'features.bathrooms', fallback: 'Bathrooms', icon: '🚿', illustration: 'baths' },
+  livingRooms: { key: 'details.livingRoomPlural', fallback: 'Living rooms', icon: '🛋️', illustration: 'livingRooms' },
+  kitchens: { key: 'details.kitchens', fallback: 'Kitchens', icon: '🍳', illustration: 'kitchen' },
+  diningRooms: { key: 'details.diningRooms', fallback: 'Dining rooms', icon: '🍽️', illustration: 'dining' },
+  toilets: { key: 'details.toilets', fallback: 'Toilets (WC)', icon: '🚻', illustration: 'toilet' },
+  storageRooms: { key: 'details.storageRooms', fallback: 'Storage rooms', icon: '📦', illustration: 'storage' },
+  offices: { key: 'details.offices', fallback: 'Offices', icon: '💼', illustration: 'office' },
+  openPlanArea: { key: 'details.openPlanArea', fallback: 'Open-plan area', icon: '🪟', illustration: 'openPlan', unit: 'm²' },
+  landArea: { key: 'details.landArea', fallback: 'Land area', icon: '🌳', illustration: 'plot', unit: 'm²' },
+  buildingArea: { key: 'details.buildingArea', fallback: 'Building area', icon: '🏗️', illustration: 'house', unit: 'm²' },
+  grossArea: { key: 'details.grossArea', fallback: 'Gross area', icon: '📐', illustration: 'area', unit: 'm²' },
+  netArea: { key: 'details.netArea', fallback: 'Net area', icon: '📏', illustration: 'area', unit: 'm²' },
+  parking: { key: 'features.parking', fallback: 'Parking', icon: '🅿️', illustration: 'garage' },
   parkingType: {
     key: 'details.parkingType',
     fallback: 'Parking type',
     icon: '🚗',
+    illustration: 'garage',
     valueKey: 'details.parkingTypes',
   },
-  floorNumber: { key: 'features.floor', fallback: 'Floor', icon: '🏢' },
-  totalFloors: { key: 'features.floors', fallback: 'Floors', icon: '🏬' },
+  floorNumber: { key: 'features.floor', fallback: 'Floor', icon: '🏢', illustration: 'floors' },
+  totalFloors: { key: 'features.floors', fallback: 'Floors', icon: '🏬', illustration: 'floors' },
 };
 
 /** English names for the parking arrangements, used as translation fallbacks. */
