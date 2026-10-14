@@ -13,7 +13,7 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, ShieldCheckIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, BookOpenIcon } from '../../constants';
+import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, ShieldCheckIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
 
@@ -253,7 +253,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <NavImage name="agencies" /> },
       { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <NavImage name="business" /> },
       { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <NavImage name="how-it-works" /> },
-      { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <BookOpenIcon /> },
+      { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <NavImage name="blog" /> },
     ];
 
     // Add admin panel for admin users
