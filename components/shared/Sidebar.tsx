@@ -13,7 +13,7 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingStorefrontIcon, ShieldCheckIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, BookOpenIcon } from '../../constants';
+import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, ShieldCheckIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, BookOpenIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
 
@@ -251,7 +251,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <NavImage name="saved" /> },
       { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <NavImage name="agents" /> },
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <NavImage name="agencies" /> },
-      { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <BuildingStorefrontIcon /> },
+      { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <NavImage name="business" /> },
       { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <InformationCircleIcon /> },
       { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <BookOpenIcon /> },
     ];
