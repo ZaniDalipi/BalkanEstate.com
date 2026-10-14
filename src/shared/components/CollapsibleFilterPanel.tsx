@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AdjustmentsHorizontalIcon, ChevronDownIcon } from '@/constants';
+import { ChevronDownIcon } from '@/constants';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 interface CollapsibleFilterPanelProps {
     id: string;
@@ -28,7 +29,7 @@ const CollapsibleFilterPanel: React.FC<CollapsibleFilterPanelProps> = ({ id, col
                     aria-controls={id}
                 >
                     <div className="flex items-center gap-2">
-                        <AdjustmentsHorizontalIcon className="w-4 h-4 text-neutral-600" />
+                        <SoftIcon name="sliders" className="w-5 h-5" />
                         <span className="text-sm font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
                         {collapsed && activeCount > 0 && (
                             <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full">

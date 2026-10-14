@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SparklesIcon } from '@/constants';
 import GeminiDescriptionGenerator from './GeminiDescriptionGenerator';
 import type { ImportDraftToPublish, Property } from '@/types';
 import Footer from '@/components/shared/Footer';
 import { useImportDraftPrefill } from '@/src/features/listing-sources/hooks/useDraftListingForm';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 interface CreateListingPageProps {
   /** Editing an existing listing (`/edit-listing/:id`). */
@@ -45,7 +45,7 @@ const CreateListingPage: React.FC<CreateListingPageProps> = ({
         <div className="glass-panel p-4 sm:p-6 lg:p-8 glass-shimmer-border overflow-hidden">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-full bg-blue-50 border border-blue-200">
-              <SparklesIcon className="w-6 h-6 text-blue-600"/>
+              <SoftIcon name="sparkles" className="w-7 h-7" />
             </div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{t('seller:createListing.aiPowered')}</h3>
           </div>

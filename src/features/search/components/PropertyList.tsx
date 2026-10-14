@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
-import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
+import { SearchIcon, XMarkIcon, BellIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import type { OutOfAreaKind } from '../outOfArea';
@@ -14,6 +14,7 @@ import UniversalSearchBox from '../universal/UniversalSearchBox';
 import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
+import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
 
 interface PropertyListProps {
   properties: Property[];
@@ -94,19 +95,29 @@ const FilterButton: React.FC<{
   </button>
 );
 
+/** A filter's heading, with its 3D icon in front. */
+const FilterLabel: React.FC<{ icon?: SoftIconName; className?: string; children: React.ReactNode }> = ({ icon, className, children }) => (
+  <label className={`flex items-center gap-1.5 text-xs font-medium text-neutral-700 ${className ?? 'mb-1'}`}>
+    {icon && <SoftIcon name={icon} className="w-5 h-5 flex-shrink-0" />}
+    {children}
+  </label>
+);
+
 const FilterButtonGroup = <T extends string | number | null>({
   label,
+  icon,
   options,
   selectedValue,
   onChange
 }: {
   label: string;
+  icon?: SoftIconName;
   options: { value: T; label: string }[];
   selectedValue: T;
   onChange: (value: T) => void;
 }) => (
   <div>
-    <label className="block text-xs font-medium text-neutral-700 mb-1">{label}</label>
+    <FilterLabel icon={icon}>{label}</FilterLabel>
     <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
       {options.map(({ value, label: optionLabel }) => (
         <FilterButton
@@ -123,12 +134,13 @@ const FilterButtonGroup = <T extends string | number | null>({
 
 const ToggleSwitch: React.FC<{
   label: string;
+  icon?: SoftIconName;
   value: boolean | null;
   onChange: (value: boolean | null) => void;
   t: (key: string) => string;
-}> = ({ label, value, onChange, t }) => (
+}> = ({ label, icon, value, onChange, t }) => (
   <div className="flex items-center justify-between">
-    <label className="text-xs font-medium text-neutral-700">{label}</label>
+    <FilterLabel icon={icon} className="">{label}</FilterLabel>
     <div className="flex items-center gap-1">
       <button
         onClick={() => onChange(false)}
@@ -176,7 +188,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             {/* Search by Address */}
             <div className="relative">
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:searchLocation')}</label>
+                <FilterLabel icon="pin">{t('search:searchLocation')}</FilterLabel>
                 <UniversalSearchBox
                     value={filters.query}
                     onValueChange={(value) => onFilterChange('query', value)}
@@ -189,7 +201,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
             </div>
 
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.priceRange')}</label>
+                <FilterLabel icon="cash">{t('search:filters.priceRange')}</FilterLabel>
                 <div className="flex items-center gap-2">
                     <div className="relative w-1/2">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">€</span>
@@ -218,7 +230,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
             </div>
 
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.areaRange')}</label>
+                <FilterLabel icon="area">{t('search:filters.areaRange')}</FilterLabel>
                 <div className="flex items-center gap-2">
                     <div className="relative w-1/2">
                         <input
@@ -248,7 +260,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             {/* Price per m² Range */}
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.pricePerSqm', 'Price per m²')}</label>
+                <FilterLabel icon="ruler">{t('search:filters.pricePerSqm', 'Price per m²')}</FilterLabel>
                 <div className="flex items-center gap-2">
                     <div className="relative w-1/2">
                         <input
@@ -278,7 +290,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             {/* Days on Market */}
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.daysOnMarket', 'Listed within')}</label>
+                <FilterLabel icon="calendar">{t('search:filters.daysOnMarket', 'Listed within')}</FilterLabel>
                 <select
                     value={filters.maxDaysListed !== null ? filters.maxDaysListed : ''}
                     onChange={(e) => onFilterChange('maxDaysListed', e.target.value ? parseInt(e.target.value) : null)}
@@ -341,7 +353,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             <div className="border-t border-neutral-200 pt-4">
                 <button type="button" onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="w-full flex justify-between items-center text-left">
-                    <h3 className="text-sm font-semibold text-neutral-800">{t('search:filters.advancedFilters')}</h3>
+                    <h3 className="flex items-center gap-1.5 text-sm font-semibold text-neutral-800"><SoftIcon name="sliders" className="w-6 h-6" />{t('search:filters.advancedFilters')}</h3>
                     {isAdvancedOpen ? <ChevronUpIcon className="w-5 h-5 text-neutral-500" /> : <ChevronDownIcon className="w-5 h-5 text-neutral-500" />}
                 </button>
 
@@ -350,18 +362,21 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <FilterButtonGroup
                                 label={t('search:filters.bedrooms')}
+                                icon="bed"
                                 options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, {value: 3, label: '3+'}, {value: 4, label: '4+'}, ]}
                                 selectedValue={filters.beds}
                                 onChange={(value) => onFilterChange('beds', value)}
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.bathrooms')}
+                                icon="bath"
                                 options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, {value: 3, label: '3+'}, ]}
                                 selectedValue={filters.baths}
                                 onChange={(value) => onFilterChange('baths', value)}
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.livingRooms')}
+                                icon="sofa"
                                 options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, ]}
                                 selectedValue={filters.livingRooms}
                                 onChange={(value) => onFilterChange('livingRooms', value)}
@@ -370,12 +385,14 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <FilterButtonGroup
                                 label={t('search:filters.listingType')}
+                                icon="key"
                                 options={[ {value: 'any', label: t('search:listingTypes.any')}, {value: 'agent', label: t('search:listingTypes.agent')}, {value: 'private', label: t('search:listingTypes.private')}, ]}
                                 selectedValue={filters.sellerType}
                                 onChange={(value) => onFilterChange('sellerType', (value as SellerType) || 'any')}
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.propertyType')}
+                                icon="home"
                                 options={[
                                     { value: 'any', label: t('search:propertyTypes.any') },
                                     ...PROPERTY_TYPE_OPTIONS.map(option => ({
@@ -390,7 +407,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Year Built */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.yearBuilt')}</label>
+                            <FilterLabel icon="calendar">{t('search:filters.yearBuilt')}</FilterLabel>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
@@ -413,6 +430,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         {/* Parking */}
                         <FilterButtonGroup
                             label={t('search:filters.parkingSpaces')}
+                            icon="car"
                             options={[
                                 {value: null, label: t('search:options.any')},
                                 {value: 1, label: '1+'},
@@ -425,7 +443,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Furnishing Status */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.furnishing')}</label>
+                            <FilterLabel icon="sofa">{t('search:filters.furnishing')}</FilterLabel>
                             <select
                                 value={filters.furnishing}
                                 onChange={(e) => onFilterChange('furnishing', e.target.value as FurnishingStatus)}
@@ -440,7 +458,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Heating Type */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.heating')}</label>
+                            <FilterLabel icon="flame">{t('search:filters.heating')}</FilterLabel>
                             <select
                                 value={filters.heatingType}
                                 onChange={(e) => onFilterChange('heatingType', e.target.value as HeatingType)}
@@ -460,7 +478,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Property Condition */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.condition')}</label>
+                            <FilterLabel icon="wrench">{t('search:filters.condition')}</FilterLabel>
                             <select
                                 value={filters.condition}
                                 onChange={(e) => onFilterChange('condition', e.target.value as PropertyCondition)}
@@ -477,7 +495,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* View Type */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.viewType')}</label>
+                            <FilterLabel icon="mountain">{t('search:filters.viewType')}</FilterLabel>
                             <select
                                 value={filters.viewType}
                                 onChange={(e) => onFilterChange('viewType', e.target.value as ViewType)}
@@ -495,7 +513,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Energy Rating */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.energyRating')}</label>
+                            <FilterLabel icon="bolt">{t('search:filters.energyRating')}</FilterLabel>
                             <select
                                 value={filters.energyRating}
                                 onChange={(e) => onFilterChange('energyRating', e.target.value as EnergyRating)}
@@ -515,7 +533,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Floor Number Range (for apartments) */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.floorNumber')}</label>
+                            <FilterLabel icon="building">{t('search:filters.floorNumber')}</FilterLabel>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
@@ -537,51 +555,59 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Amenities Toggle Switches */}
                         <div className="space-y-2 p-3 bg-neutral-50 rounded-lg">
-                            <h4 className="text-xs font-semibold text-neutral-800 mb-2">{t('search:amenities.title')}</h4>
+                            <h4 className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-2"><SoftIcon name="sparkles" className="w-5 h-5" />{t('search:amenities.title')}</h4>
                             <ToggleSwitch
                                 label={t('search:amenities.balcony')}
+                                icon="balcony"
                                 value={filters.hasBalcony}
                                 onChange={(value) => onFilterChange('hasBalcony', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.garden')}
+                                icon="leaf"
                                 value={filters.hasGarden}
                                 onChange={(value) => onFilterChange('hasGarden', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.elevator')}
+                                icon="elevator"
                                 value={filters.hasElevator}
                                 onChange={(value) => onFilterChange('hasElevator', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.security')}
+                                icon="shield"
                                 value={filters.hasSecurity}
                                 onChange={(value) => onFilterChange('hasSecurity', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.airConditioning')}
+                                icon="snowflake"
                                 value={filters.hasAirConditioning}
                                 onChange={(value) => onFilterChange('hasAirConditioning', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.pool')}
+                                icon="pool"
                                 value={filters.hasPool}
                                 onChange={(value) => onFilterChange('hasPool', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.petsAllowed')}
+                                icon="paw"
                                 value={filters.petsAllowed}
                                 onChange={(value) => onFilterChange('petsAllowed', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.has360Tour')}
+                                icon="tour360"
                                 value={filters.has360Tour}
                                 onChange={(value) => onFilterChange('has360Tour', value)}
                                 t={t}
@@ -590,10 +616,10 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Distance Filters */}
                         <div className="space-y-2 p-3 bg-neutral-50 rounded-lg">
-                            <h4 className="text-xs font-semibold text-neutral-800 mb-2">{t('search:distance.title')}</h4>
+                            <h4 className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-2"><SoftIcon name="pin" className="w-5 h-5" />{t('search:distance.title')}</h4>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toCenter')}</label>
+                                    <FilterLabel icon="city">{t('search:distance.toCenter')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -604,7 +630,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toSea')}</label>
+                                    <FilterLabel icon="sea">{t('search:distance.toSea')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -615,7 +641,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toSchool')}</label>
+                                    <FilterLabel icon="landmark">{t('search:distance.toSchool')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -626,7 +652,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toHospital')}</label>
+                                    <FilterLabel icon="shield">{t('search:distance.toHospital')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -641,7 +667,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Amenities Filter */}
                         <div className="space-y-2 p-3 bg-neutral-50 rounded-lg">
-                            <h4 className="text-xs font-semibold text-neutral-800 mb-2">{t('search:amenities.title')}</h4>
+                            <h4 className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-2"><SoftIcon name="sparkles" className="w-5 h-5" />{t('search:amenities.title')}</h4>
                             <div>
                                 <input
                                     type="text"
@@ -907,7 +933,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 aria-controls="desktop-filter-panel"
                             >
                                 <div className="flex items-center gap-2">
-                                    <AdjustmentsHorizontalIcon className="w-4 h-4 text-neutral-600" />
+                                    <SoftIcon name="sliders" className="w-5 h-5" />
                                     <span className="text-sm font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
                                     {isFiltersCollapsed && activeBasicFilterCount > 0 && (
                                         <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full">
@@ -1092,7 +1118,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-50/20 pointer-events-none" />
                                     <div className="relative z-10">
-                                        <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                                        <SoftIcon name="landmark" className="w-14 h-14 mx-auto mb-4 opacity-70" />
                                         <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
                                         <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
                                         <button
@@ -1245,7 +1271,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-50/20 pointer-events-none" />
                                         <div className="relative z-10">
-                                            <BuildingLibraryIcon className="w-9 h-9 text-neutral-300 mx-auto mb-2" />
+                                            <SoftIcon name="landmark" className="w-10 h-10 mx-auto mb-2 opacity-70" />
                                             <h3 className="text-base font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
                                             <p className="text-sm text-neutral-500 mt-1 mb-4">{t('search:results.tryDifferent')}</p>
                                             <button

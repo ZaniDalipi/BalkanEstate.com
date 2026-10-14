@@ -2,16 +2,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BuildingOfficeIcon,
-  MapPinIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  GlobeAltIcon,
-  ClockIcon,
-  UsersIcon,
-  HomeIcon,
   ShieldCheckIcon,
 } from '@/constants';
 import { useAgency } from '@/src/features/agencies/hooks/useAgency';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 interface AgencyInfoCardProps {
   agencyId: string;
@@ -59,22 +53,22 @@ const AgencyInfoCard: React.FC<AgencyInfoCardProps> = ({ agencyId }) => {
 
   const infoItems = [
     {
-      icon: <MapPinIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="pin" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.location', 'Location'),
       value: [agencyData.city, agencyData.country].filter(Boolean).join(', ') || '-',
     },
     {
-      icon: <EnvelopeIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="envelope" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.email', 'Email'),
       value: (agencyData.email as string) || '-',
     },
     {
-      icon: <PhoneIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="phone" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.phone', 'Phone'),
       value: (agencyData.phone as string) || '-',
     },
     {
-      icon: <GlobeAltIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="globe" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.website', 'Website'),
       value: (agencyData.website as string) || '-',
       isLink: !!(agencyData.website),
@@ -83,17 +77,17 @@ const AgencyInfoCard: React.FC<AgencyInfoCardProps> = ({ agencyId }) => {
 
   const statsItems = [
     {
-      icon: <HomeIcon className="w-4 h-4 text-green-600" />,
+      icon: <SoftIcon name="home" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.totalProperties', 'Properties'),
       value: (agencyData.totalProperties as number) ?? 0,
     },
     {
-      icon: <UsersIcon className="w-4 h-4 text-blue-600" />,
+      icon: <SoftIcon name="users" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.totalAgentsCount', 'Agents'),
       value: (agencyData.totalAgents as number) ?? 0,
     },
     {
-      icon: <ClockIcon className="w-4 h-4 text-amber-600" />,
+      icon: <SoftIcon name="clock" className="w-5 h-5" />,
       label: t('agencyDashboard:overview.yearsInBusiness', 'Years'),
       value: (agencyData.yearsInBusiness as number) ?? '-',
     },

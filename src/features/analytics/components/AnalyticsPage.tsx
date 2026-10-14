@@ -13,21 +13,12 @@ import RentalDashboardStats from '@/src/features/rental/components/RentalDashboa
 import {
   ChartBarIcon,
   EyeIcon,
-  LightBulbIcon,
   HomeIcon,
   DocumentArrowDownIcon,
   ArrowLeftIcon,
-  LockClosedIcon,
   StarIcon,
-  ComputerDesktopIcon,
-  GlobeAltIcon,
-  TrophyIcon,
-  ExclamationTriangleIcon,
   ClockIcon,
   SparklesIcon,
-  FireIcon,
-  BoltIcon,
-  RocketLaunchIcon,
 } from '@/constants';
 import {
   StatCard,
@@ -43,6 +34,7 @@ import {
 } from '@/src/features/analytics';
 import { navigate, goBack, localizePath } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 // Animated number counter hook
 const useAnimatedCounter = (end: number, duration: number = 1000) => {
@@ -200,7 +192,7 @@ const AnalyticsPage: React.FC = () => {
 
         <div className="relative text-center bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 max-w-sm w-full">
           <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30">
-            <ChartBarIcon className="h-10 w-10 text-white" />
+            <SoftIcon name="chart" className="h-12 w-12" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">{t('analytics:signInRequired')}</h2>
           <p className="text-white/60 text-sm mb-6">
@@ -278,7 +270,7 @@ const AnalyticsPage: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
-                      <RocketLaunchIcon className="h-6 w-6 text-white" />
+                      <SoftIcon name="rocket" className="h-7 w-7" />
                     </div>
                     <h1 className="text-2xl md:text-3xl font-bold text-white">
                       {t('analytics:title')}
@@ -331,7 +323,7 @@ const AnalyticsPage: React.FC = () => {
               <QuickStat
                 label={t('analytics:stats.today')}
                 value={dashboard?.overview?.todayViews || 0}
-                icon={<BoltIcon className="h-4 w-4" />}
+                icon={<SoftIcon name="bolt" className="h-6 w-6" />}
                 color="from-yellow-400 to-orange-400"
                 loading={isLoading}
               />
@@ -339,7 +331,7 @@ const AnalyticsPage: React.FC = () => {
                 label={t('analytics:stats.weekly')}
                 value={dashboard?.overview?.weeklyViews || 0}
                 change={dashboard?.overview?.weeklyChange}
-                icon={<FireIcon className="h-4 w-4" />}
+                icon={<SoftIcon name="flame" className="h-6 w-6" />}
                 color="from-pink-400 to-rose-400"
                 loading={isLoading}
               />
@@ -347,14 +339,14 @@ const AnalyticsPage: React.FC = () => {
                 label={t('analytics:stats.monthly')}
                 value={dashboard?.overview?.monthlyViews || 0}
                 change={dashboard?.overview?.monthlyChange}
-                icon={<ChartBarIcon className="h-4 w-4" />}
+                icon={<SoftIcon name="chart" className="h-6 w-6" />}
                 color="from-cyan-400 to-blue-400"
                 loading={isLoading}
               />
               <QuickStat
                 label={t('analytics:stats.properties')}
                 value={dashboard?.overview?.totalProperties || 0}
-                icon={<HomeIcon className="h-4 w-4" />}
+                icon={<SoftIcon name="home" className="h-6 w-6" />}
                 color="from-emerald-400 to-teal-400"
                 loading={isLoading}
               />
@@ -368,7 +360,7 @@ const AnalyticsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-red-100 rounded-xl">
-                  <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                  <SoftIcon name="warning" className="h-6 w-6" />
                 </div>
                 <div>
                   <p className="text-red-700 font-medium text-sm">{t('analytics:errors.title', 'Error loading data')}</p>
@@ -515,7 +507,7 @@ const QuickStat: React.FC<QuickStatProps> = ({ label, value, change, icon, color
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all group">
       <div className="flex items-center gap-2 mb-1">
-        <div className={`p-1.5 rounded-lg bg-gradient-to-r ${color}`}>
+        <div className="p-1 rounded-lg bg-white/90 shadow-sm">
           {icon}
         </div>
         <span className="text-white/70 text-xs font-medium">{label}</span>
@@ -562,7 +554,7 @@ const Header: React.FC<HeaderProps> = ({
         </button>
         <div>
           <h1 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-            <ChartBarIcon className="h-5 w-5 text-primary" />
+            <SoftIcon name="chart" className="h-6 w-6" />
             {t('analytics:title')}
           </h1>
           <p className="text-xs text-neutral-500">{t('analytics:subtitle')}</p>
@@ -612,7 +604,7 @@ const InsightsSection: React.FC<InsightsSectionProps> = ({ insights, onNavigateT
   return (
     <div className="mb-6">
       <h2 className="text-sm font-bold text-neutral-900 mb-3 flex items-center gap-2">
-        <LightBulbIcon className="h-4 w-4 text-amber-500" />
+        <SoftIcon name="lightbulb" className="h-5 w-5" />
         {t('analytics:insights.title')}
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -692,7 +684,7 @@ const EmptyState: React.FC<{ onAddProperty: () => void }> = ({ onAddProperty }) 
   const { t } = useTranslation(['analytics']);
   return (
     <div className="text-center py-10">
-      <HomeIcon className="h-10 w-10 text-neutral-200 mx-auto mb-3" />
+      <SoftIcon name="home" className="h-12 w-12 mx-auto mb-3 opacity-60" />
       <p className="text-neutral-500 text-sm mb-4">{t('analytics:properties.noProperties')}</p>
       <button
         onClick={onAddProperty}
@@ -732,7 +724,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {topPerformers && topPerformers.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
           <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
-            <TrophyIcon className="h-4 w-4 text-yellow-500" />
+            <SoftIcon name="trophy" className="h-5 w-5" />
             {t('analytics:sidebar.topPerformers')}
           </h3>
           <div className="space-y-2">
@@ -742,7 +734,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => onPropertyClick(prop.id)}
                 className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-50 cursor-pointer"
               >
-                <span className="text-sm">{['🥇', '🥈', '🥉'][i]}</span>
+                <SoftIcon name={(['medal1', 'medal2', 'medal3'] as const)[i]} className="h-5 w-5" />
                 <span className="flex-1 text-sm text-neutral-700 truncate">
                   {truncateText(prop.title, 20)}
                 </span>
@@ -757,7 +749,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {isPremium && deviceStats && (
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
           <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
-            <ComputerDesktopIcon className="h-4 w-4 text-blue-500" />
+            <SoftIcon name="desktop" className="h-5 w-5" />
             {t('analytics:sidebar.devices')}
           </h3>
           <DeviceChart
@@ -772,7 +764,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {isPremium && trafficStats && (
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
           <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
-            <GlobeAltIcon className="h-4 w-4 text-green-500" />
+            <SoftIcon name="globe" className="h-5 w-5" />
             {t('analytics:sidebar.traffic')}
           </h3>
           <TrafficChart
@@ -789,7 +781,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {isPremium && hourlyDistribution && hourlyDistribution.length === 24 && (
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4">
           <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
-            <ClockIcon className="h-4 w-4 text-purple-500" />
+            <SoftIcon name="clock" className="h-5 w-5" />
             {t('analytics:sidebar.peakHours')}
           </h3>
           <HourlyHeatmap data={hourlyDistribution} />
@@ -800,7 +792,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {needsAttention && needsAttention.length > 0 && (
         <div className="bg-orange-50 rounded-xl border border-orange-200 p-4">
           <h3 className="font-bold text-neutral-900 text-sm mb-3 flex items-center gap-2">
-            <ExclamationTriangleIcon className="h-4 w-4 text-orange-500" />
+            <SoftIcon name="warning" className="h-5 w-5" />
             {t('analytics:sidebar.needsAttention')}
           </h3>
           <div className="space-y-2">
@@ -832,9 +824,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="flex items-center gap-2 mb-2">
           {isPremium ? (
-            <StarIcon className="h-5 w-5 text-yellow-300" />
+            <SoftIcon name="star" className="h-6 w-6" />
           ) : (
-            <LockClosedIcon className="h-5 w-5 text-neutral-400" />
+            <SoftIcon name="lock" className="h-6 w-6" />
           )}
           <h3 className="font-bold text-sm">{isPremium ? t('analytics:premium.proActive') : t('analytics:premium.freePlan')}</h3>
         </div>

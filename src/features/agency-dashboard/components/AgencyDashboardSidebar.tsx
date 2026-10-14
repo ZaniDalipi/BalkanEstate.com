@@ -1,23 +1,16 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ChartBarIcon,
-  UsersIcon,
-  HomeIcon,
-  EnvelopeIcon,
-  ArrowTrendingUpIcon,
-  CurrencyEuroIcon,
   BuildingOfficeIcon,
-  ChatBubbleLeftRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
   XMarkIcon,
-  MagnifyingGlassIcon,
   ArrowTopRightOnSquareIcon,
 } from '@/constants';
 import type { AgencyDashboardSection } from '@/types';
 import type { OverviewData } from '../types';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 interface AgencyDashboardSidebarProps {
   activeSection: AgencyDashboardSection;
@@ -77,19 +70,19 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         {
           id: 'overview',
           label: t('agencyDashboard:sidebar.overview', 'Overview'),
-          icon: <ChartBarIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="chart" className="w-6 h-6" />,
         },
         {
           id: 'agents',
           label: t('agencyDashboard:sidebar.agents', 'Agents'),
-          icon: <UsersIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="users" className="w-6 h-6" />,
           badge: pendingJoinRequests > 0 ? pendingJoinRequests : overview?.totalAgents,
           badgeColor: pendingJoinRequests > 0 ? 'bg-red-500 animate-pulse' : undefined,
         },
         {
           id: 'leads',
           label: t('agencyDashboard:sidebar.leads', 'Leads & Inquiries'),
-          icon: <EnvelopeIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="envelope" className="w-6 h-6" />,
           badge: overview?.inquiriesThisMonth,
           badgeColor: overview?.inquiriesThisMonth ? 'bg-red-500' : undefined,
         },
@@ -102,18 +95,18 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         {
           id: 'properties',
           label: t('agencyDashboard:sidebar.properties', 'Properties'),
-          icon: <HomeIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="home" className="w-6 h-6" />,
           badge: overview?.activeListings,
         },
         {
           id: 'analytics',
           label: t('agencyDashboard:sidebar.analytics', 'Analytics'),
-          icon: <ArrowTrendingUpIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="trendUp" className="w-6 h-6" />,
         },
         {
           id: 'financial',
           label: t('agencyDashboard:sidebar.financial', 'Financial'),
-          icon: <CurrencyEuroIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="cash" className="w-6 h-6" />,
         },
       ],
     },
@@ -124,12 +117,12 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
         {
           id: 'profile',
           label: t('agencyDashboard:sidebar.profile', 'Agency Profile'),
-          icon: <BuildingOfficeIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="building" className="w-6 h-6" />,
         },
         {
           id: 'team',
           label: t('agencyDashboard:sidebar.team', 'Team'),
-          icon: <ChatBubbleLeftRightIcon className="w-5 h-5" />,
+          icon: <SoftIcon name="chat" className="w-6 h-6" />,
         },
       ],
     },
@@ -227,7 +220,7 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
               collapsed ? 'justify-center' : ''
             }`}
           >
-            <MagnifyingGlassIcon className="w-5 h-5" />
+            <SoftIcon name="search" className="w-6 h-6" />
             {!collapsed && (
               <span className="text-sm font-medium">
                 {t('agencyDashboard:sidebar.browseProperties', 'Browse Properties')}

@@ -14,6 +14,9 @@ const TONES = {
   sky: { hi: '#E4F2FF', lo: '#B5D8FA', dk: '#86B6E6' },
   green: { hi: '#9BE07A', lo: '#4FAE45', dk: '#2F7D2C' },
   wood: { hi: '#E7C49A', lo: '#C08A57', dk: '#8E6238' },
+  silver: { hi: '#F4F6F9', lo: '#B9C2CF', dk: '#8790A0' },
+  bronze: { hi: '#F2C8A0', lo: '#C98450', dk: '#8F5528' },
+  orange: { hi: '#FFC27A', lo: '#FF7A2E', dk: '#C2470F' },
 };
 
 const gradDefs = Object.entries(TONES)
@@ -257,7 +260,143 @@ export const SOFT = {
     blob('M38 30h12v10H38z', 'blue', { stroke: 2, depth: 1.4 }) +
     blob('M8 12h8v8H8z', 'grey', { stroke: 2, depth: 1.2 }) +
     blob('M10 52h16v4H10z', 'grey', { stroke: 2, depth: 1 }),
+  // ── rooms & features (filters) ──────────────────────────────────────
+  bed: () =>
+    blob('M6 34h52v12H6z', 'white') +
+    blob('M8 18h10v16H8z', 'wood', { stroke: 2 }) +
+    blob('M20 26h14v8H20z', 'white', { stroke: 2, depth: 1.2 }) +
+    blob('M30 30h28v8H30z', 'blue', { stroke: 2, depth: 1.4 }) +
+    tube('M10 46v8M54 46v8', 'wood', 4, 1),
+  sofa: () =>
+    blob('M12 18h40v18H12z', 'blue') +
+    blob('M6 28h10v20H6zM48 28h10v20H48z', 'blue') +
+    blob('M14 34h36v12H14z', 'sky', { stroke: 2, depth: 1.4 }) +
+    tube('M10 50v5M54 50v5', 'wood', 4, 1) +
+    gloss('M16 21h20'),
+  flame: () =>
+    blob('M32 6c10 12 18 18 18 30a18 18 0 0 1-36 0c0-8 4-12 8-16 0 6 3 9 6 9-2-9 0-16 4-23Z', 'orange') +
+    blob('M32 30c5 6 8 9 8 14a8 8 0 0 1-16 0c0-5 3-8 8-14Z', 'gold', { stroke: 2, depth: 1 }),
+  wrench: () =>
+    tube('M18 46 38 26', 'grey', 9) +
+    blob('M36 10a14 14 0 0 0 18 18l-6 6a12 12 0 0 1-16-16Z', 'grey', { stroke: 4 }) +
+    tube('M12 52 20 44', 'blue', 10),
+  bolt: () =>
+    blob('M36 4 12 36h16l-4 24 26-34H34Z', 'gold') +
+    gloss('M30 14 20 28'),
+  balcony: () =>
+    blob('M10 6h44v30H10z', 'white') +
+    blob('M18 10h28v26H18z', 'sky', { stroke: 2, depth: 1 }) +
+    blob('M6 36h52v6H6z', 'blue', { stroke: 2 }) +
+    tube('M10 42v14M22 42v14M32 42v14M42 42v14M54 42v14', 'blue', 3, 0.8) +
+    tube('M8 56h48', 'blue', 4, 1),
+  elevator: () =>
+    blob('M12 6h40v52H12z', 'grey') +
+    blob('M17 14h14v40H17zM33 14h14v40H33z', 'white', { stroke: 2, depth: 1 }) +
+    blob('M27 4h10v6H27z', 'blue', { stroke: 2, depth: 1 }) +
+    '<path d="M29.5 9l2.5-3 2.5 3Z" fill="#FFFFFF"/>',
+  snowflake: () =>
+    tube('M32 6v52M9 19l46 26M9 45l46-26', 'blue', 5) +
+    tube('M24 10l8 6 8-6M24 54l8-6 8 6', 'sky', 3.4, 1),
+  paw: () =>
+    blob('M32 34c8 0 14 7 14 13 0 5-4 7-8 6-3-1-4-2-6-2s-3 1-6 2c-4 1-8-1-8-6 0-6 6-13 14-13Z', 'blue') +
+    [[16, 26], [25, 16], [39, 16], [48, 26]].map(([x, y]) => disc(x, y, 6, 'blue', { stroke: 2, depth: 1.6 })).join(''),
+  tour360: () =>
+    blob('M32 6 54 18v28L32 58 10 46V18Z', 'blue') +
+    blob('M32 6 54 18 32 30 10 18Z', 'sky', { stroke: 2, depth: 0.6 }) +
+    line('M32 30v28', '#BFD9F5', 2.4) +
+    tube('M6 36c4 10 48 10 52 0', 'gold', 3.4, 1),
+  sliders: () =>
+    tube('M10 18h44M10 32h44M10 46h44', 'grey', 4, 1) +
+    disc(22, 18, 6, 'blue', { stroke: 2, depth: 1.6 }) +
+    disc(42, 32, 6, 'blue', { stroke: 2, depth: 1.6 }) +
+    disc(28, 46, 6, 'blue', { stroke: 2, depth: 1.6 }),
+
+  // ── dashboards ──────────────────────────────────────────────────────
+  users: () =>
+    blob('M4 52c0-8 5-12 11-12s11 4 11 12Z', 'sky') +
+    disc(15, 30, 6, 'sky', { stroke: 2, depth: 1.2 }) +
+    blob('M38 52c0-8 5-12 11-12s11 4 11 12Z', 'sky') +
+    disc(49, 30, 6, 'sky', { stroke: 2, depth: 1.2 }) +
+    blob('M16 56c0-11 7-16 16-16s16 5 16 16Z', 'blue') +
+    disc(32, 26, 9, 'blue', { stroke: 2, depth: 1.6 }) +
+    gloss('M27 21a6 6 0 0 1 4-3'),
+  chat: () =>
+    blob('M24 10h30v22H44l-8 7v-7H24Z', 'sky') +
+    blob('M6 20h32v24H22l-9 8v-8H6Z', 'blue') +
+    line('M13 29h18M13 36h12', '#FFFFFF', 3),
+  envelope: () =>
+    blob('M8 16h48v34H8z', 'white') +
+    blob('M8 16 32 36 56 16', 'blue', { stroke: 4, depth: 1.6, fill: false }) +
+    line('M9 49 26 33M55 49 38 33', '#BCC9DD', 2.4) +
+    logo(45.6, 37, 8.6),
+  phone: () =>
+    blob('M18 4h28v56H18z', 'blue') +
+    blob('M22 10h20v40H22z', 'sky', { stroke: 2, depth: 0.8 }) +
+    disc(32, 55, 2.4, 'white', { stroke: 1, depth: 0.4 }) +
+    logo(28.6, 23, 9.6),
+  trendUp: () =>
+    blob('M8 54h48', 'grey', { stroke: 4, depth: 1.4, fill: false }) +
+    tube('M10 44 24 30 34 38 52 16', 'green', 6) +
+    blob('M42 14h12v12Z', 'green', { stroke: 3, depth: 2 }),
+  trendDown: () =>
+    blob('M8 54h48', 'grey', { stroke: 4, depth: 1.4, fill: false }) +
+    tube('M10 14 24 28 34 20 52 42', 'red', 6) +
+    blob('M42 44h12V32Z', 'red', { stroke: 3, depth: 2 }),
+  eye: () =>
+    blob('M4 32C12 18 22 12 32 12s20 6 28 20C52 46 42 52 32 52S12 46 4 32Z', 'white') +
+    disc(32, 32, 12, 'blue', { stroke: 2, depth: 1.6 }) +
+    disc(32, 32, 5, 'grey', { stroke: 1.6, depth: 0.6 }) +
+    `<circle cx="28" cy="28" r="2.4" fill="#FFFFFF"/>`,
+  trophy: () =>
+    tube('M14 16c-8 0-8 14 4 14M50 16c8 0 8 14-4 14', 'gold', 4, 1.4) +
+    blob('M16 8h32v12c0 10-7 16-16 16S16 30 16 20Z', 'gold') +
+    blob('M28 36h8v8h-8z', 'gold', { stroke: 2, depth: 1 }) +
+    blob('M20 46h24v10H20z', 'blue', { stroke: 2, depth: 1.6 }) +
+    gloss('M22 12v8'),
+  medal1: () => medal('gold', 1),
+  medal2: () => medal('silver', 2),
+  medal3: () => medal('bronze', 3),
+  rocket: () =>
+    blob('M32 4c10 8 14 20 12 34H20C18 24 22 12 32 4Z', 'white') +
+    disc(32, 24, 6, 'blue', { stroke: 2, depth: 1.2 }) +
+    blob('M20 30l-8 12 10-2ZM44 30l8 12-10-2Z', 'blue', { stroke: 2 }) +
+    blob('M26 40c0 8 3 14 6 18 3-4 6-10 6-18Z', 'orange', { stroke: 2, depth: 1 }),
+  download: () =>
+    blob('M8 40h48v14H8z', 'blue') +
+    tube('M32 6v24', 'blue', 7, 1.6) +
+    blob('M20 24l12 13 12-13Z', 'blue', { stroke: 3, depth: 1.6 }),
+  lightbulb: () =>
+    blob('M32 6a17 17 0 0 1 10 31c-2 2-3 4-3 7H25c0-3-1-5-3-7A17 17 0 0 1 32 6Z', 'gold') +
+    blob('M24 46h16v10H24z', 'grey', { stroke: 2, depth: 1.4 }) +
+    gloss('M24 16a10 10 0 0 1 6-4'),
+  desktop: () =>
+    blob('M6 10h52v34H6z', 'blue') +
+    blob('M10 14h44v26H10z', 'sky', { stroke: 2, depth: 0.8 }) +
+    blob('M26 44h12l2 8H24Z', 'grey', { stroke: 2, depth: 1 }) +
+    blob('M18 52h28v4H18z', 'grey', { stroke: 2, depth: 1 }) +
+    logo(28, 20, 13),
+  clock: () =>
+    disc(32, 32, 24, 'blue') +
+    `<circle cx="32" cy="32" r="18" fill="url(#g-white)"/>` +
+    line('M32 20v13l9 6', '#1A56C0', 4) +
+    `<circle cx="32" cy="32" r="2.6" fill="#1A56C0"/>`,
+  warning: () =>
+    blob('M32 6 58 52H6Z', 'gold') +
+    line('M32 22v14', '#FFFFFF', 6) +
+    `<circle cx="32" cy="44" r="3.4" fill="#FFFFFF"/>`,
+  lock: () =>
+    tube('M20 28V20a12 12 0 0 1 24 0v8', 'grey', 6) +
+    blob('M12 28h40v28H12z', 'blue') +
+    disc(32, 40, 4, 'white', { stroke: 1.6, depth: 0.6 }) +
+    line('M32 42v6', '#FFFFFF', 3.4),
 };
+
+function medal(tone, n) {
+  return blob('M18 4h10l6 18h-10ZM46 4H36l-6 18h10Z', 'blue', { stroke: 2, depth: 1 }) +
+    disc(32, 38, 18, tone) +
+    disc(32, 38, 12, tone, { stroke: 2, depth: 0 }) +
+    `<text x="32" y="45" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="18" fill="#FFFFFF">${n}</text>`;
+}
 
 export function renderSoft(name) {
   const body = SOFT[name]();

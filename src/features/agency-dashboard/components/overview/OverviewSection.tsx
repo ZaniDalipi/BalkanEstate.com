@@ -2,15 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAgencyOverview } from '../../hooks/useAgencyOverview';
 import {
-  HomeIcon,
-  UsersIcon,
-  EnvelopeIcon,
-  EyeIcon,
   ArrowTrendingUpIcon,
 } from '@/constants';
 import KpiCard from './KpiCard';
 import OverviewCharts from './OverviewCharts';
 import AgencyInfoCard from './AgencyInfoCard';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 interface OverviewSectionProps {
   agencyId: string;
@@ -48,26 +45,26 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({ agencyId }) => {
     {
       title: t('agencyDashboard:overview.activeListings', 'Active Listings'),
       value: overview?.activeListings ?? 0,
-      icon: <HomeIcon className="w-6 h-6" />,
-      color: 'bg-green-500',
+      icon: <SoftIcon name="home" className="w-8 h-8" />,
+      color: 'bg-green-50',
     },
     {
       title: t('agencyDashboard:overview.totalAgents', 'Total Agents'),
       value: overview?.totalAgents ?? 0,
-      icon: <UsersIcon className="w-6 h-6" />,
-      color: 'bg-blue-500',
+      icon: <SoftIcon name="users" className="w-8 h-8" />,
+      color: 'bg-blue-50',
     },
     {
       title: t('agencyDashboard:overview.inquiriesThisMonth', 'Inquiries This Month'),
       value: overview?.inquiriesThisMonth ?? 0,
-      icon: <EnvelopeIcon className="w-6 h-6" />,
-      color: 'bg-amber-500',
+      icon: <SoftIcon name="envelope" className="w-8 h-8" />,
+      color: 'bg-amber-50',
     },
     {
       title: t('agencyDashboard:overview.totalViews', 'Total Views'),
       value: overview?.totalViews ?? 0,
-      icon: <EyeIcon className="w-6 h-6" />,
-      color: 'bg-purple-500',
+      icon: <SoftIcon name="eye" className="w-8 h-8" />,
+      color: 'bg-purple-50',
     },
   ];
 
