@@ -13,7 +13,7 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, ShieldCheckIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon } from '../../constants';
+import { LogoIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, ShieldCheckIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
 
@@ -364,7 +364,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-white bg-secondary min-h-[44px] hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
                             aria-label={t('nav:createNewListing', 'Create a new listing')}
                         >
-                            <PencilIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                            <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="new-listing" /></div>
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
                         </button>
                         <button
@@ -373,7 +373,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
                             aria-label={t('nav:viewSubscription', 'View subscription plans')}
                         >
-                            <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`} aria-hidden="true"><StarIconSolid /></div>
+                            <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="subscription" /></div>
                             <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
                         </button>
                         {isAuthenticated && (
