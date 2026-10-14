@@ -438,6 +438,61 @@ export const SOFT = {
     blob('M12 6h40v52H12z', 'white') +
     [[18, 'blue'], [30, 'gold'], [42, 'green']].map(([y, tone]) => disc(21, y, 4, tone, { stroke: 1.6, depth: 0.8 })).join('') +
     line('M29 18h16M29 30h16M29 42h12', '#9DBBE0', 3),
+  // ── sun & measuring tools ───────────────────────────────────────────
+  sun: () =>
+    [0, 45, 90, 135, 180, 225, 270, 315].map((a) => {
+      const r = (a * Math.PI) / 180;
+      const x1 = 32 + Math.cos(r) * 20, y1 = 32 + Math.sin(r) * 20, x2 = 32 + Math.cos(r) * 27, y2 = 32 + Math.sin(r) * 27;
+      return tube(`M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}`, 'gold', 5, 1);
+    }).join('') +
+    disc(32, 32, 14, 'gold') + gloss('M24 26a9 9 0 0 1 5-5'),
+  moon: () =>
+    blob('M40 8a22 22 0 1 0 16 34A18 18 0 1 1 40 8Z', 'blue') +
+    disc(48, 14, 2.4, 'gold', { stroke: 1, depth: 0.6 }) + disc(54, 26, 1.8, 'gold', { stroke: 1, depth: 0.6 }) +
+    gloss('M18 24a16 16 0 0 1 8-10'),
+  sunrise: () =>
+    blob('M14 44a18 18 0 0 1 36 0Z', 'orange') +
+    tube('M32 8v8M12 18l5 5M52 18l-5 5', 'gold', 4, 1) +
+    blob('M4 44h56v6H4z', 'sky', { stroke: 2, depth: 1 }) +
+    tube('M24 56l8-6 8 6', 'blue', 3.4, 0.8),
+  sunset: () =>
+    blob('M14 44a18 18 0 0 1 36 0Z', 'red') +
+    tube('M12 18l5 5M52 18l-5 5', 'orange', 4, 1) +
+    blob('M4 44h56v6H4z', 'blue', { stroke: 2, depth: 1 }) +
+    tube('M24 52l8 6 8-6', 'blue', 3.4, 0.8),
+  dusk: () =>
+    blob('M6 42a26 26 0 0 1 52 0Z', 'sky') +
+    blob('M20 42a12 12 0 0 1 24 0Z', 'orange', { stroke: 2, depth: 1 }) +
+    blob('M4 42h56v8H4z', 'blue', { stroke: 2, depth: 1 }) +
+    disc(48, 16, 2.4, 'gold', { stroke: 1, depth: 0.6 }),
+  partlySunny: () =>
+    disc(24, 22, 12, 'gold') +
+    tube('M24 2v5M6 22H1M11 9l-3-3M37 9l3-3', 'gold', 3.4, 0.8) +
+    blob('M18 50a10 10 0 0 1 2-20 14 14 0 0 1 26-2 10 10 0 0 1 4 22Z', 'white'),
+  leafAutumn: () =>
+    blob('M12 52C10 30 24 12 54 10c0 28-16 44-42 42Z', 'orange') +
+    line('M14 50C24 38 34 28 46 18', '#FFE1C2', 3) +
+    gloss('M22 30c4-8 12-13 22-15'),
+  save: () =>
+    blob('M8 8h40l8 8v40H8z', 'blue') +
+    blob('M16 8h24v14H16z', 'white', { stroke: 2, depth: 0.8 }) +
+    blob('M32 11h5v8h-5z', 'grey', { stroke: 1, depth: 0 }) +
+    blob('M16 34h32v22H16z', 'white', { stroke: 2, depth: 0.8 }) +
+    line('M22 42h20M22 49h14', '#9DBBE0', 2.6),
+  trash: () =>
+    blob('M14 18h36l-4 38H18Z', 'grey') +
+    blob('M8 12h48v7H8z', 'red', { stroke: 2, depth: 1.4 }) +
+    blob('M26 6h12v6H26z', 'red', { stroke: 2, depth: 1 }) +
+    line('M26 26v22M38 26v22', '#FFFFFF', 3),
+  target: () =>
+    disc(32, 32, 24, 'red') +
+    `<circle cx="32" cy="32" r="16" fill="url(#g-white)"/>` +
+    disc(32, 32, 9, 'red', { stroke: 1.6, depth: 1 }) +
+    `<circle cx="32" cy="32" r="3" fill="#FFFFFF"/>`,
+  xmark: () =>
+    disc(32, 32, 24, 'red') +
+    line('M22 22l20 20M42 22 22 42', '#FFFFFF', 6) +
+    gloss('M16 22a18 18 0 0 1 9-9'),
 };
 
 function medal(tone, n) {

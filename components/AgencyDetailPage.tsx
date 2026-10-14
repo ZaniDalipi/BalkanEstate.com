@@ -42,6 +42,7 @@ import { SocialShare } from '../src/components/marketing/SocialShare';
 import { goBack, navigate } from '@/src/app/router/navigation';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { paths } from '@/src/app/router/paths';
+import { ListingTypePicture } from '../src/shared/illustrations/Illustration';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -3311,7 +3312,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                     }`}
                   >
-                    {t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: saleCount })}
+                    <ListingTypePicture type="sale" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: saleCount })}
                   </button>
                   <button
                     onClick={() => setPropertyTypeView('rent')}
@@ -3319,7 +3320,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                     }`}
                   >
-                    {t('agencyDetails:properties.forRentCount', 'For Rent ({{count}})', { count: rentCount })}
+                    <ListingTypePicture type="rent" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('agencyDetails:properties.forRentCount', 'For Rent ({{count}})', { count: rentCount })}
                   </button>
                 </div>
               );

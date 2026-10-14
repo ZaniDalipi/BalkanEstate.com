@@ -18,6 +18,7 @@ import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
 import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_EMOJI } from '@/shared/property/galleryImages';
+import { ListingTypePicture } from '../../shared/illustrations/Illustration';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -1106,6 +1107,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 </>
               )}
               <span className={property.listingType === 'rent' ? 'text-blue-300' : 'text-emerald-400'}>
+                <ListingTypePicture type={property.listingType === 'rent' ? 'rent' : 'sale'} className="inline-block w-3.5 h-3.5 mr-0.5 align-[-2px]" />
                 {property.listingType === 'rent' ? t('property:gallery.forRent', 'Rent') : t('property:gallery.forSale', 'Sale')}
               </span>
             </div>
@@ -1162,6 +1164,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
                       property.listingType === 'rent' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'
                     }`}>
+                      <ListingTypePicture type={property.listingType === 'rent' ? 'rent' : 'sale'} className="inline-block w-4 h-4 mr-1 align-[-3px]" />
                       {property.listingType === 'rent' ? t('property:gallery.forRentLong', 'For Rent') : t('property:gallery.forSaleLong', 'For Sale')}
                     </span>
                   </div>

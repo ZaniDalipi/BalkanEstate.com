@@ -6,26 +6,19 @@ import {
     UserIcon,
     HomeIcon,
     StarIcon,
-    TrendingUpIcon,
     ShieldCheckIcon,
     CheckBadgeIcon,
     AcademicCapIcon,
-    TrophyIcon,
-    ChartBarIcon,
     DocumentTextIcon,
     ArrowRightIcon,
-    MapIcon,
     MapPinIcon,
-    HomeModernIcon,
-    BuildingLibraryIcon,
     BanknotesIcon,
     CheckCircleIcon,
     UserCircleIcon,
     ChatBubbleBottomCenterTextIcon,
     MagnifyingGlassIcon,
     PhoneIcon,
-    EnvelopeIcon,
-    GlobeAltIcon,
+    EnvelopeIcon
 } from '@/constants';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
@@ -43,6 +36,7 @@ import { filterPropertiesByQuery, parseSearchTerms } from '../utils/propertySear
 import { pageSlice, pageWindow } from '../utils/listingPagination';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
+import { ListingTypePicture, SoftIcon } from '@/shared/illustrations/Illustration';
 
 // Component to fix map rendering issues in dynamic containers
 const MapInvalidator: React.FC = () => {
@@ -280,7 +274,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                     className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'overview' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                 >
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
-                        <UserIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        <SoftIcon name="user" className="w-5 h-5 md:w-6 md:h-6" />
                         <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.overview')}</span>
                     </div>
                 </button>
@@ -289,7 +283,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                     className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'listings' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                 >
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
-                        <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        <SoftIcon name="home" className="w-5 h-5 md:w-6 md:h-6" />
                         <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.listings')} ({activeListings.length})</span>
                     </div>
                 </button>
@@ -298,7 +292,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                     className={`flex-1 py-2.5 sm:py-3 md:py-4 px-2 sm:px-3 md:px-6 text-center font-semibold transition-colors min-w-[80px] sm:min-w-[100px] ${activeTab === 'reviews' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
                 >
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2">
-                        <StarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        <SoftIcon name="star" className="w-5 h-5 md:w-6 md:h-6" />
                         <span className="text-[11px] sm:text-xs md:text-sm lg:text-base">{t('profilePage.tabs.reviews')} ({stats.reviews})</span>
                     </div>
                 </button>
@@ -327,14 +321,14 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {(agent.officePhone || agent.phone || agent.officeAddress || agent.websiteUrl || agent.email) && (
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <PhoneIcon className="w-6 h-6 text-blue-600" />
+                                    <SoftIcon name="phone" className="w-8 h-8" />
                                     {t('profilePage.contactInfo', 'Contact Information')}
                                 </h3>
                                 <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
                                     {(agent.officePhone || agent.phone) && (
                                         <a href={`tel:${agent.officePhone || agent.phone}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
                                             <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                                                <PhoneIcon className="w-5 h-5 text-green-600" />
+                                                <SoftIcon name="phone" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.officePhone || agent.phone}</div>
@@ -345,7 +339,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {agent.email && (
                                         <a href={`mailto:${agent.email}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
                                             <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+                                                <SoftIcon name="envelope" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.email}</div>
@@ -356,7 +350,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {agent.officeAddress && (
                                         <div className="flex items-center gap-3 text-gray-700">
                                             <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-                                                <MapPinIcon className="w-5 h-5 text-purple-600" />
+                                                <SoftIcon name="pin" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.officeAddress}</div>
@@ -367,7 +361,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                     {agent.websiteUrl && (
                                         <a href={agent.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
                                             <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                                                <GlobeAltIcon className="w-5 h-5 text-indigo-600" />
+                                                <SoftIcon name="globe" className="w-7 h-7" />
                                             </div>
                                             <div>
                                                 <div className="text-sm font-semibold">{agent.websiteUrl.replace(/^https?:\/\//, '')}</div>
@@ -393,7 +387,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {/* Performance Stats */}
                         <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <TrendingUpIcon className="w-6 h-6 text-blue-600" />
+                                <SoftIcon name="trendUp" className="w-8 h-8" />
                                 {t('profilePage.performance.title')}
                             </h3>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -427,7 +421,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {/* Credentials & Certifications */}
                         <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
+                                <SoftIcon name="shield" className="w-8 h-8" />
                                 {t('profilePage.credentials.title')}
                             </h3>
 
@@ -470,7 +464,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {(marketInsights.totalSold > 0 || marketInsights.totalActive > 0 || marketInsights.avgPrice > 0) && (
                         <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <ChartBarIcon className="w-6 h-6 text-blue-600" />
+                                <SoftIcon name="chart" className="w-8 h-8" />
                                 {t('profilePage.marketInsights.title', 'Property Overview')}
                                 {agent.city && <span className="text-sm font-normal text-gray-500 ml-1">- {agent.city}</span>}
                             </h3>
@@ -534,7 +528,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {allAgentProperties.length > 0 && allAgentProperties.some(p => p.lat && p.lng) && (
                             <div>
                                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                                    <SoftIcon name="mapGrid" className="w-7 h-7 sm:w-8 sm:h-8" />
                                     {t('profilePage.propertiesMap.title')}
                                     <span className="text-sm font-normal text-gray-600 ml-2">
                                         ({activeListings.length} {t('profilePage.propertiesMap.active')}, {soldProperties.length} {t('profilePage.propertiesMap.sold')}{rentedProperties.length > 0 ? `, ${rentedProperties.length} ${t('profilePage.propertiesMap.rented', 'Rented')}` : ''})
@@ -642,7 +636,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                         {(hasValidCoordinates || (agent.serviceAreas && agent.serviceAreas.length > 0)) && (
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <MapPinIcon className="w-6 h-6 text-blue-600" />
+                                    <SoftIcon name="pin" className="w-8 h-8" />
                                     {t('profilePage.serviceArea.title')}
                                 </h3>
 
@@ -763,10 +757,10 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div key={spec} className="bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-colors group hover:shadow-md">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                                    {spec.includes('Luxury') ? <TrophyIcon className="w-5 h-5 text-blue-600" /> :
-                                                     spec.includes('Commercial') ? <BuildingLibraryIcon className="w-5 h-5 text-blue-600" /> :
-                                                     spec.includes('Investment') ? <BanknotesIcon className="w-5 h-5 text-blue-600" /> :
-                                                     <HomeModernIcon className="w-5 h-5 text-blue-600" />}
+                                                    {spec.includes('Luxury') ? <SoftIcon name="crown" className="w-7 h-7" /> :
+                                                     spec.includes('Commercial') ? <SoftIcon name="store" className="w-7 h-7" /> :
+                                                     spec.includes('Investment') ? <SoftIcon name="moneybag" className="w-7 h-7" /> :
+                                                     <SoftIcon name="home" className="w-7 h-7" />}
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{spec}</span>
                                             </div>
@@ -777,7 +771,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-blue-100 rounded-lg">
-                                                    <HomeModernIcon className="w-5 h-5 text-blue-600" />
+                                                    <SoftIcon name="home" className="w-7 h-7" />
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{t('profilePage.expertise.residential')}</span>
                                             </div>
@@ -785,7 +779,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-green-100 rounded-lg">
-                                                    <UserIcon className="w-5 h-5 text-green-600" />
+                                                    <SoftIcon name="user" className="w-7 h-7" />
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{t('profilePage.expertise.firstTimeBuyers')}</span>
                                             </div>
@@ -793,7 +787,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         <div className="bg-white border border-gray-200 rounded-xl p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-purple-100 rounded-lg">
-                                                    <BuildingLibraryIcon className="w-5 h-5 text-purple-600" />
+                                                    <SoftIcon name="landmark" className="w-7 h-7" />
                                                 </div>
                                                 <span className="font-semibold text-gray-800">{t('profilePage.expertise.propertyManagement')}</span>
                                             </div>
@@ -901,7 +895,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 listingTypeFilter === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                                             }`}
                                         >
-                                            {t('profilePage.listingsTab.forSale', 'For Sale')} ({saleCount})
+                                            <ListingTypePicture type="sale" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('profilePage.listingsTab.forSale', 'For Sale')} ({saleCount})
                                         </button>
                                         <button
                                             onClick={() => setListingTypeFilter('rent')}
@@ -909,7 +903,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 listingTypeFilter === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                                             }`}
                                         >
-                                            {t('profilePage.listingsTab.forRent', 'For Rent')} ({rentCount})
+                                            <ListingTypePicture type="rent" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('profilePage.listingsTab.forRent', 'For Rent')} ({rentCount})
                                         </button>
                                     </div>
                                 );
@@ -1090,7 +1084,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </div>
                         ) : (
                             <div className="text-center py-12">
-                                <StarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                <SoftIcon name="star" className="w-16 h-16 mx-auto mb-4" />
                                 <p className="text-gray-600 text-lg mb-2">{t('profilePage.reviewsTab.noReviews')}</p>
                                 <p className="text-gray-500">{t('profilePage.reviewsTab.beFirstToReview', { name: firstName })}</p>
                             </div>

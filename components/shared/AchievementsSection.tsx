@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations/Illustration';
 import {
   TrophyIcon,
   AcademicCapIcon,
@@ -344,7 +345,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
         <div className="relative flex items-center gap-3">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-white/80 to-amber-50/60 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_2px_8px_rgba(217,119,6,0.15)] flex items-center justify-center">
-            <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600/80" />
+            <SoftIcon name="trophy" className="w-7 h-7 sm:w-8 sm:h-8" />
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-neutral-900">
@@ -547,7 +548,7 @@ const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
           <div className="relative">
             <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-white/80 to-amber-50/50 backdrop-blur-sm border border-white/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_4px_12px_rgba(217,119,6,0.1)] flex items-center justify-center">
-              <TrophyIcon className="w-7 h-7 sm:w-8 sm:h-8 text-amber-500/60" />
+              <SoftIcon name="trophy" className="w-10 h-10 sm:w-12 sm:h-12" />
             </div>
             <p className="text-sm sm:text-base text-neutral-500 max-w-sm mx-auto">
               {isOwner

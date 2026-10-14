@@ -193,11 +193,11 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
       <div style="min-width: 150px; font-family: system-ui, -apple-system, sans-serif;">
         ${nameInfo}
         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-          <span style="font-size: 16px;">🏢</span>
+          <img src="/images/illustrations/soft/building.svg" alt="" aria-hidden="true" width="18" height="18" onerror="this.style.visibility='hidden'" />
           <span style="font-weight: 500; color: #374151;">${typeInfo}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px; color: #6b7280; font-size: 13px;">
-          <span>📏</span>
+          <img src="/images/illustrations/soft/ruler.svg" alt="" aria-hidden="true" width="16" height="16" onerror="this.style.visibility='hidden'" />
           <span>Height: ${heightInfo}</span>
         </div>
       </div>

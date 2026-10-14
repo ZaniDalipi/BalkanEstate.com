@@ -7,6 +7,7 @@ import * as api from '../../../../services/apiService';
 import { replaceQueryString } from '@/src/app/router/navigation';
 
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 interface MeasurementPoint {
   lat: number;
   lng: number;
@@ -477,7 +478,9 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           >
             <Popup>
               <div className="text-xs">
-                <strong>{isFirstPoint && points.length >= 3 && !isPolygonClosed ? t('search:ui.measurementTool.startPointClickToClose', '🎯 Start Point (click to close)') : `Point ${index + 1}`}</strong>
+                <strong>{isFirstPoint && points.length >= 3 && !isPolygonClosed
+                  ? <><SoftIcon name="target" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.measurementTool.startPointClickToClose', 'Start Point (click to close)')}</>
+                  : `Point ${index + 1}`}</strong>
                 <br />
                 {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
                 {index > 0 && (
@@ -502,7 +505,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
       >
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-1">
-            {isViewMode ? '👁️' : '📏'} {isViewMode && viewMeasurementData ? viewMeasurementData.name : t('search:ui.measurementTool.measure', 'Measure')}
+            <SoftIcon name={isViewMode ? 'eye' : 'ruler'} className="w-5 h-5" /> {isViewMode && viewMeasurementData ? viewMeasurementData.name : t('search:ui.measurementTool.measure', 'Measure')}
           </h3>
           <button
             onClick={onClose}
@@ -517,7 +520,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
           <div className="mb-2 p-1.5 bg-blue-50 rounded text-[10px] text-blue-700">
             <span className="font-medium">{t('search:ui.measurementTool.viewingSavedMeasurement', 'Viewing saved measurement')}</span>
             {viewMeasurementData.address && (
-              <div className="text-blue-600 mt-0.5">📍 {viewMeasurementData.address}</div>
+              <div className="text-blue-600 mt-0.5"><SoftIcon name="pin" className="inline-block w-3.5 h-3.5 mr-0.5 align-[-2px]" />{viewMeasurementData.address}</div>
             )}
           </div>
         )}
@@ -565,7 +568,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             }}
             className="w-full px-2 py-1.5 mb-2 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
           >
-            {t('search:ui.measurementTool.startNewMeasurement', '✏️ Start New Measurement')}
+            <SoftIcon name="pencil" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.measurementTool.startNewMeasurement', 'Start New Measurement')}
           </button>
         )}
 
@@ -595,7 +598,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             onClick={handleClosePolygon}
             className="w-full px-2 py-1.5 mb-2 text-xs font-medium rounded bg-emerald-600 text-white hover:bg-emerald-700"
           >
-            {t('search:ui.measurementTool.closePolygon', '🔷 Close Polygon')}
+            <SoftIcon name="area" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.measurementTool.closePolygon', 'Close Polygon')}
           </button>
         )}
 
@@ -605,7 +608,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             onClick={() => setShowSaveDialog(true)}
             className="w-full px-2 py-1.5 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700"
           >
-            {t('search:ui.measurementTool.save', '💾 Save')}
+            <SoftIcon name="save" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.measurementTool.save', 'Save')}
           </button>
         )}
       </div>
@@ -630,7 +633,8 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                {t('search:ui.measurementTool.saveMeasurement', '💾 Save Measurement')}
+                <SoftIcon name="save" className="w-6 h-6" />
+                {t('search:ui.measurementTool.saveMeasurement', 'Save Measurement')}
               </h3>
               <button
                 onClick={() => {
@@ -647,7 +651,9 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             <div className="bg-gray-50 rounded-lg p-3 mb-4">
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-500">{t('search:ui.measurementTool.type', 'Type:')}</span>
-                <span className="font-medium">{isPolygonClosed ? t('search:ui.measurementTool.area2', '🔷 Area') : t('search:ui.measurementTool.distance', '📏 Distance')}</span>
+                <span className="font-medium">{isPolygonClosed
+                  ? <><SoftIcon name="area" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.measurementTool.area2', 'Area')}</>
+                  : <><SoftIcon name="ruler" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.measurementTool.distance', 'Distance')}</>}</span>
               </div>
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-500">{t('search:ui.measurementTool.points', 'Points:')}</span>
@@ -668,7 +674,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             {/* Login notice */}
             {!isLoggedIn && (
               <div className="text-sm text-amber-700 bg-amber-50 p-3 rounded-lg mb-4 flex items-start gap-2">
-                <span className="text-lg">⚠️</span>
+                <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                 <span>{t('search:ui.measurementTool.logInToSaveMeasurements', 'Log in to save measurements to your profile. Otherwise, they will be saved locally.')}</span>
               </div>
             )}
@@ -711,7 +717,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
             {/* Error */}
             {saveError && (
               <div className="mt-3 text-sm text-red-600 bg-red-50 p-3 rounded-lg flex items-start gap-2">
-                <span className="text-lg">❌</span>
+                <SoftIcon name="xmark" className="w-6 h-6 flex-shrink-0" />
                 <span>{saveError}</span>
               </div>
             )}
@@ -740,7 +746,7 @@ const MeasurementTool: React.FC<MeasurementToolProps> = ({ enabled, onSave, onCl
                   </>
                 ) : (
                   <>
-                    <span>💾</span>
+                    <SoftIcon name="save" className="w-5 h-5" />
                     <span>{t('search:ui.measurementTool.saveTo', 'Save to')} {isLoggedIn ? t('search:ui.measurementTool.profile', 'Profile') : t('search:ui.measurementTool.device', 'Device')}</span>
                   </>
                 )}

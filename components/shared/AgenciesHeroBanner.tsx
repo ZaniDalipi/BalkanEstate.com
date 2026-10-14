@@ -1,15 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations/Illustration';
 import {
   MagnifyingGlassIcon,
   BuildingOfficeIcon,
-  UsersIcon,
-  HomeIcon,
   SparklesIcon,
-  GlobeAltIcon,
-  ShieldCheckIcon,
-  StarIcon,
-  TrophyIcon
+  GlobeAltIcon
 } from '@/constants';
 
 interface AgenciesHeroBannerProps {
@@ -101,8 +97,8 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <BuildingOfficeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <SoftIcon name="building" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalAgencies}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -114,8 +110,8 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <SoftIcon name="users" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalAgents}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -127,8 +123,8 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
-                  <HomeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
+                  <SoftIcon name="home" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalProperties.toLocaleString()}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -194,17 +190,17 @@ const AgenciesHeroBanner: React.FC<AgenciesHeroBannerProps> = ({
           {/* Trust badges */}
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8 sm:mt-10">
             <div className="flex items-center gap-2 text-white/50">
-              <ShieldCheckIcon className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
+              <SoftIcon name="shield" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-xs sm:text-sm font-medium">{t('agencies.verifiedAgencies')}</span>
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">
-              <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+              <SoftIcon name="trophy" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-xs sm:text-sm font-medium">{t('agencies.topRated')}</span>
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">
-              <StarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+              <SoftIcon name="star" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-xs sm:text-sm font-medium">{t('agencies.premiumSupport')}</span>
             </div>
           </div>

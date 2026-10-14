@@ -14,7 +14,7 @@ import UniversalSearchBox from '../universal/UniversalSearchBox';
 import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
-import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/shared/illustrations/Illustration';
 
 interface PropertyListProps {
   properties: Property[];
@@ -95,10 +95,19 @@ const FilterButton: React.FC<{
   </button>
 );
 
-/** A filter's heading, with its 3D icon in front. */
-const FilterLabel: React.FC<{ icon?: SoftIconName; className?: string; children: React.ReactNode }> = ({ icon, className, children }) => (
+/**
+ * A filter's heading, with its 3D icon in front. `listingType` shows the same
+ * Rent / Buy pictures as the sidebar.
+ */
+type FilterIcon = SoftIconName | 'listingType';
+const FilterLabel: React.FC<{ icon?: FilterIcon; className?: string; children: React.ReactNode }> = ({ icon, className, children }) => (
   <label className={`flex items-center gap-1.5 text-xs font-medium text-neutral-700 ${className ?? 'mb-1'}`}>
-    {icon && <SoftIcon name={icon} className="w-5 h-5 flex-shrink-0" />}
+    {icon === 'listingType' ? (
+      <span className="flex -space-x-1.5 flex-shrink-0">
+        <ListingTypePicture type="rent" className="w-5 h-5" />
+        <ListingTypePicture type="sale" className="w-5 h-5" />
+      </span>
+    ) : icon && <SoftIcon name={icon} className="w-5 h-5 flex-shrink-0" />}
     {children}
   </label>
 );
@@ -111,7 +120,7 @@ const FilterButtonGroup = <T extends string | number | null>({
   onChange
 }: {
   label: string;
-  icon?: SoftIconName;
+  icon?: FilterIcon;
   options: { value: T; label: string }[];
   selectedValue: T;
   onChange: (value: T) => void;
@@ -385,7 +394,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <FilterButtonGroup
                                 label={t('search:filters.listingType')}
-                                icon="key"
+                                icon="listingType"
                                 options={[ {value: 'any', label: t('search:listingTypes.any')}, {value: 'agent', label: t('search:listingTypes.agent')}, {value: 'private', label: t('search:listingTypes.private')}, ]}
                                 selectedValue={filters.sellerType}
                                 onChange={(value) => onFilterChange('sellerType', (value as SellerType) || 'any')}

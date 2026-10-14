@@ -23,6 +23,7 @@ import { useAppContext } from '../../../context/AppContext';
 import { BALKAN_COUNTRIES } from '../../../constants/countries';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { ListingTypePicture } from '../../shared/illustrations/Illustration';
 
 interface PropertyInfoProps {
   property: Property;
@@ -460,9 +461,7 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property, onOpenFloo
                       ? 'bg-blue-100/80'
                       : 'bg-emerald-100/80'
                   }`}>
-                    {property.listingType === 'rent'
-                      ? <SoftIcon name="key" className="w-7 h-7" />
-                      : <SoftIcon name="cash" className="w-7 h-7" />}
+                    <ListingTypePicture type={property.listingType === 'rent' ? 'rent' : 'sale'} className="w-8 h-8" />
                   </div>
                   <div>
                     <span className={`block text-[10px] sm:text-xs font-medium uppercase tracking-wider leading-none ${

@@ -1,4 +1,5 @@
 import type { Agency } from '@/src/shared/types';
+import type { SoftIconName } from '@/shared/illustrations/Illustration';
 
 export const AGENCY_MAX_SCORE = 160;
 
@@ -18,7 +19,7 @@ export interface AgencyAchievementBadge {
 
 export interface AgencyScoringMetricDef {
   key: keyof Omit<AgencyScoreBreakdown, 'total'>;
-  icon: string;
+  icon: SoftIconName;
   labelKey: string;
   formulaKey: string;
   descKey: string;
@@ -32,7 +33,7 @@ export interface AgencyScoringMetricDef {
 export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   {
     key: 'listings',
-    icon: '🏠',
+    icon: 'home',
     labelKey: 'agencies:scoring.metrics.listings.label',
     formulaKey: 'agencies:scoring.metrics.listings.formula',
     descKey: 'agencies:scoring.metrics.listings.desc',
@@ -44,7 +45,7 @@ export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   },
   {
     key: 'team',
-    icon: '👥',
+    icon: 'users',
     labelKey: 'agencies:scoring.metrics.team.label',
     formulaKey: 'agencies:scoring.metrics.team.formula',
     descKey: 'agencies:scoring.metrics.team.desc',
@@ -56,7 +57,7 @@ export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   },
   {
     key: 'experience',
-    icon: '📅',
+    icon: 'calendar',
     labelKey: 'agencies:scoring.metrics.experience.label',
     formulaKey: 'agencies:scoring.metrics.experience.formula',
     descKey: 'agencies:scoring.metrics.experience.desc',
@@ -68,7 +69,7 @@ export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   },
   {
     key: 'featured',
-    icon: '✨',
+    icon: 'sparkles',
     labelKey: 'agencies:scoring.metrics.featured.label',
     formulaKey: 'agencies:scoring.metrics.featured.formula',
     descKey: 'agencies:scoring.metrics.featured.desc',

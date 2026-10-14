@@ -16,7 +16,6 @@ import {
   StarIcon,
   SearchIcon,
   FilterIcon,
-  TrophyIcon,
   UsersIcon,
   UserIcon,
   HomeIcon,
@@ -41,6 +40,7 @@ import { API_URL } from '../src/shared/api/config';
 import { tokenService } from '../src/shared/api/tokenService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations/Illustration';
 
 // Gradient presets for agency banners (same as AgencyDetailPage)
 const GRADIENT_PRESETS = [
@@ -211,10 +211,10 @@ const AgenciesListPage: React.FC = () => {
   };
 
   const getRankStyle = (index: number) => {
-    if (index === 0) return { bg: 'from-amber-400 to-amber-600', css: 'linear-gradient(135deg, #fbbf24, #d97706)', text: t('agencies.rank1st'), emoji: '🏆' };
-    if (index === 1) return { bg: 'from-slate-300 to-slate-500', css: 'linear-gradient(135deg, #cbd5e1, #64748b)', text: t('agencies.rank2nd'), emoji: '🥈' };
-    if (index === 2) return { bg: 'from-orange-400 to-orange-600', css: 'linear-gradient(135deg, #fb923c, #ea580c)', text: t('agencies.rank3rd'), emoji: '🥉' };
-    return { bg: 'from-primary to-primary-dark', css: 'linear-gradient(135deg, #1e293b, #0f172a, #1e1b4b)', text: `${index + 1}`, emoji: '' };
+    if (index === 0) return { bg: 'from-amber-400 to-amber-600', css: 'linear-gradient(135deg, #fbbf24, #d97706)', text: t('agencies.rank1st'), medal: 'medal1' as const };
+    if (index === 1) return { bg: 'from-slate-300 to-slate-500', css: 'linear-gradient(135deg, #cbd5e1, #64748b)', text: t('agencies.rank2nd'), medal: 'medal2' as const };
+    if (index === 2) return { bg: 'from-orange-400 to-orange-600', css: 'linear-gradient(135deg, #fb923c, #ea580c)', text: t('agencies.rank3rd'), medal: 'medal3' as const };
+    return { bg: 'from-primary to-primary-dark', css: 'linear-gradient(135deg, #1e293b, #0f172a, #1e1b4b)', text: `${index + 1}`, medal: null };
   };
 
   const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => {
@@ -264,14 +264,14 @@ const AgenciesListPage: React.FC = () => {
 
             {/* Score badge — top left */}
             <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-lg border border-white/20">
-              <TrophyIcon className="w-3 h-3 text-amber-400" />
+              <SoftIcon name="trophy" className="w-4 h-4" />
               <span className="text-white text-xs font-bold">{score} pts</span>
             </div>
 
             {/* Rank badge — top right */}
             {index < 10 && (
               <div className="absolute top-3 right-3 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-bold flex items-center gap-1 border border-white/30">
-                {rankStyle.emoji && <span>{rankStyle.emoji}</span>}
+                {rankStyle.medal && <SoftIcon name={rankStyle.medal} className="w-4 h-4" />}
                 <span>#{index + 1}</span>
               </div>
             )}
@@ -665,10 +665,10 @@ const AgenciesListPage: React.FC = () => {
                 <div className="max-w-md mx-auto">
                   <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 sm:mb-6 relative">
                     <div className="absolute inset-0 bg-gray-200 rounded-2xl flex items-center justify-center transform rotate-6">
-                      <BuildingOfficeIcon className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400" />
+                      <SoftIcon name="building" className="w-16 h-16 sm:w-20 sm:h-20" />
                     </div>
                     <div className="absolute top-0 right-0 w-6 h-6 sm:w-8 sm:h-8 bg-amber-100 rounded-full flex items-center justify-center animate-bounce">
-                      <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                      <SoftIcon name="sparkles" className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
@@ -700,7 +700,7 @@ const AgenciesListPage: React.FC = () => {
                 {agencies.length >= 3 && (
                   <div className="mb-6 sm:mb-10">
                     <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                      <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+                      <SoftIcon name="trophy" className="w-7 h-7 sm:w-8 sm:h-8" />
                       <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('agencies.topAgencies')}</h3>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -760,8 +760,8 @@ const AgenciesListPage: React.FC = () => {
           {/* Create Your Agency CTA */}
           <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-white rounded-2xl sm:rounded-3xl border border-primary/20 sm:border-2 p-6 sm:p-8 md:p-12 mb-6 sm:mb-8">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-primary to-primary-dark rounded-xl sm:rounded-full mb-4 sm:mb-6">
-                <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-white shadow-md ring-1 ring-primary/10 rounded-xl sm:rounded-full mb-4 sm:mb-6">
+                <SoftIcon name="building" className="w-8 h-8 sm:w-10 sm:h-10" />
               </div>
               <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-2 sm:mb-4">
                 {t('agencies.readyToGrow')}

@@ -23,6 +23,7 @@ import { SpecIllustration, SoftIcon, type SoftIconName } from '@/shared/illustra
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
+import { ListingTypePicture } from '@/shared/illustrations/Illustration';
 
 /**
  * Column counts as literal classes: Tailwind scans source text, so an
@@ -437,10 +438,12 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               </div>
             ) : isRental ? (
               <div className="bg-blue-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
+                <ListingTypePicture type="rent" className="w-3.5 h-3.5" />
                 {t('property:forRent', 'FOR RENT').toUpperCase()}
               </div>
             ) : (
               <div className="bg-emerald-500/85 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
+                <ListingTypePicture type="sale" className="w-3.5 h-3.5" />
                 {t('property:forSale', 'FOR SALE').toUpperCase()}
               </div>
             )}

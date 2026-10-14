@@ -5,6 +5,7 @@ import { formatPrice, getCurrencySymbol } from '@/utils/currency';
 import { ChevronDownIcon, ChevronUpIcon } from '@/constants';
 import { InfoIcon } from 'lucide-react';
 import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { ListingTypePicture } from '@/shared/illustrations/Illustration';
 
 /** Horizon the "planning to stay" slider covers, in years. */
 const STAY_MIN = 1;
@@ -687,7 +688,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className={`p-2 rounded-lg border ${!isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${!isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <SoftIcon name="building" className="w-5 h-5" />
+                    <ListingTypePicture type="rent" className="w-6 h-6" />
                     <p className="text-sm">{t('calculators:rentVsBuy.results.rent')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.totalCostToRent')}</p>
@@ -697,7 +698,7 @@ const RentVsBuyCalculator: React.FC<RentVsBuyCalculatorProps> = ({ propertyPrice
                 </div>
                 <div className={`p-2 rounded-lg border ${isBuyCheaper ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                   <div className={`flex items-center gap-1.5 font-bold ${isBuyCheaper ? 'text-green-700' : 'text-red-700'}`}>
-                    <SoftIcon name="home" className="w-5 h-5" />
+                    <ListingTypePicture type="sale" className="w-6 h-6" />
                     <p className="text-sm">{t('calculators:rentVsBuy.results.own')}</p>
                   </div>
                   <p className="text-[11px] text-neutral-500 mt-0.5">{t('calculators:rentVsBuy.results.netCostToOwn')}</p>

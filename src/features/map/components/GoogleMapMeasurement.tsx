@@ -14,6 +14,7 @@ import {
   type MeasurementPoint,
   type LocalMeasurement,
 } from '../hooks';
+import { SoftIcon } from '@/shared/illustrations/Illustration';
 
 export interface GoogleMapMeasurementProps {
   showMeasurement: boolean;
@@ -101,7 +102,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-sm text-gray-800 flex items-center gap-2">
-              <span>📏</span>
+              <SoftIcon name="ruler" className="w-5 h-5" />
               {t('search:map.measure', 'Measure Land')}
             </h3>
             <button
@@ -121,7 +122,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 measurementMode === 'area' ? 'bg-white shadow text-emerald-600' : 'text-gray-600 hover:bg-white/50'
               }`}
             >
-              {t('search:ui.googleMapMeasurement.area', '📐 Area')}
+              <SoftIcon name="area" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.googleMapMeasurement.area', 'Area')}
             </button>
             <button
               onClick={() => { setMeasurementMode('distance'); setMeasurementPoints([]); }}
@@ -129,7 +130,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 measurementMode === 'distance' ? 'bg-white shadow text-emerald-600' : 'text-gray-600 hover:bg-white/50'
               }`}
             >
-              {t('search:ui.googleMapMeasurement.distance', '📍 Distance')}
+              <SoftIcon name="pin" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.googleMapMeasurement.distance', 'Distance')}
             </button>
           </div>
 
@@ -182,7 +183,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
                 className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {t('search:ui.googleMapMeasurement.save', '💾 Save')}
+                <SoftIcon name="save" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.googleMapMeasurement.save', 'Save')}
               </button>
             ) : (
               <button
@@ -190,7 +191,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                 disabled={measurementPoints.length < 2 || (measurementMode === 'area' && measurementPoints.length < 3)}
                 className="flex-1 py-2 text-xs font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {t('search:ui.googleMapMeasurement.keep', '💾 Keep')}
+                <SoftIcon name="save" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.googleMapMeasurement.keep', 'Keep')}
               </button>
             )}
             <button
@@ -198,7 +199,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
               disabled={measurementPoints.length === 0}
               className="flex-1 py-2 text-xs font-semibold rounded-lg bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {t('search:ui.googleMapMeasurement.new', '🗑️ New')}
+              <SoftIcon name="trash" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.googleMapMeasurement.new', 'New')}
             </button>
           </div>
 
@@ -216,7 +217,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
             <div className="px-5 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">📏</span>
+                  <SoftIcon name="ruler" className="w-7 h-7" />
                   <div>
                     <h3 className="font-bold text-lg">{t('search:map.saveMeasurement', 'Save Measurement')}</h3>
                     <p className="text-xs text-white/80">
@@ -283,7 +284,9 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
               {/* Measurement details */}
               <div className="p-3 bg-indigo-50 rounded-xl">
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="text-indigo-600 font-semibold">{pendingMeasurement.mode === 'area' ? t('search:ui.googleMapMeasurement.area', '📐 Area') : t('search:ui.googleMapMeasurement.distance', '📍 Distance')}</span>
+                  <span className="text-indigo-600 font-semibold">{pendingMeasurement.mode === 'area'
+                    ? <><SoftIcon name="area" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.googleMapMeasurement.area', 'Area')}</>
+                    : <><SoftIcon name="pin" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:ui.googleMapMeasurement.distance', 'Distance')}</>}</span>
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-700">{pendingMeasurement.points.length} points</span>
                   {pendingMeasurement.mode === 'area' && (
@@ -308,9 +311,10 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                   </div>
                   {!measurementIsPro && measurementCount >= measurementMaxAllowed - 1 && (
                     <p className="text-xs text-amber-600 mt-1">
+                      <SoftIcon name="warning" className="inline-block w-4 h-4 mr-1 align-[-3px]" />
                       {isAtMeasurementLimit
-                        ? t('search:ui.googleMapMeasurement.youVeReachedTheFree', '⚠️ You\'ve reached the free limit. Upgrade to Pro for more!')
-                        : t('search:ui.googleMapMeasurement.n1SlotRemainingUpgradeTo', '⚠️ 1 slot remaining. Upgrade to Pro for more measurements.')
+                        ? t('search:ui.googleMapMeasurement.youVeReachedTheFree', 'You\'ve reached the free limit. Upgrade to Pro for more!')
+                        : t('search:ui.googleMapMeasurement.n1SlotRemainingUpgradeTo', '1 slot remaining. Upgrade to Pro for more measurements.')
                       }
                     </p>
                   )}
@@ -321,7 +325,7 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
               {measurementSaveError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
                   <div className="flex items-start gap-2">
-                    <span className="text-red-500 text-lg">❌</span>
+                    <SoftIcon name="xmark" className="w-6 h-6 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-semibold text-red-700">
                         {t('search:map.saveFailed', 'Could not save')}
@@ -357,12 +361,12 @@ const GoogleMapMeasurement: React.FC<GoogleMapMeasurementProps> = ({
                   </>
                 ) : isAtMeasurementLimit && isAuthenticated ? (
                   <>
-                    <span>🔒</span>
+                    <SoftIcon name="lock" className="w-5 h-5" />
                     <span>{t('search:map.limitReached', 'Limit Reached')}</span>
                   </>
                 ) : (
                   <>
-                    <span>💾</span>
+                    <SoftIcon name="save" className="w-5 h-5" />
                     <span>{t('search:map.saveToProfile', 'Save to Profile')}</span>
                   </>
                 )}
