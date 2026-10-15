@@ -620,7 +620,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
         <p className="text-xs text-blue-800">
-          {t('search:map.tips')}
+          <SoftIcon name="lightbulb" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('search:map.tips')}
         </p>
       </div>
 
