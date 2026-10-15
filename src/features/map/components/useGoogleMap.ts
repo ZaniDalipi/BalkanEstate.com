@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import L from 'leaflet';
 import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
+import { SmoothMarkerClusterer } from '../utils/smoothClusterer';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
 import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/usecases/measurement';
 import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
@@ -582,7 +583,9 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       maxZoom: MAP_MAX_ZOOM,
     });
 
-    const clusterer = new MarkerClusterer({
+    // Animates clusters splitting and merging as the zoom changes, instead of
+    // swapping the whole layer on every idle — see smoothClusterer.ts.
+    const clusterer = new SmoothMarkerClusterer({
       map: mapInstance,
       onClusterClick: (event, cluster, map) =>
         clusterActivationRef.current?.onClusterClick(event, cluster, map),
