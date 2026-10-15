@@ -1240,6 +1240,18 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
 
 ---
 
+## List / Map Switch (`LiquidGlassSwitch`)
+
+- The orb and pill move by `transform` only (never `left`/`transition-all`), so
+  the slide runs on the compositor.
+- A tap updates the switch at once and calls `onChange` two animation frames
+  later: the slide is already running when the parent mounts the map or swaps
+  the list, so that work can't make the orb stutter.
+- Orb icons all stay mounted and crossfade; transitions are off under
+  `prefers-reduced-motion`.
+
+---
+
 ## Schedule Viewing Modal
 
 3-step wizard:

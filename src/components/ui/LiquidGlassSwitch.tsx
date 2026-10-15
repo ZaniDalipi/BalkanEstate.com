@@ -2,7 +2,7 @@
 // Beautiful liquid glass style toggle switch inspired by Dribbble design
 // https://dribbble.com/shots/26295473-Liquid-Glass-Switch
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface SwitchOption {
   value: string;
@@ -34,7 +34,34 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
   size = 'md',
   variant = 'orb',
 }) => {
-  const activeIndex = options.findIndex((opt) => opt.value === value);
+  // The switch shows the tapped option at once and tells the parent two frames
+  // later: the orb's transform transition is then already running on the
+  // compositor, so the heavy work the parent does (mounting the map, swapping
+  // the list) can't stall the slide.
+  const [shownValue, setShownValue] = useState(value);
+  const pendingFrame = useRef<number | null>(null);
+
+  useEffect(() => {
+    setShownValue(value);
+  }, [value]);
+
+  useEffect(() => () => {
+    if (pendingFrame.current !== null) cancelAnimationFrame(pendingFrame.current);
+  }, []);
+
+  const select = (next: string) => {
+    if (next === shownValue) return;
+    setShownValue(next);
+    if (pendingFrame.current !== null) cancelAnimationFrame(pendingFrame.current);
+    pendingFrame.current = requestAnimationFrame(() => {
+      pendingFrame.current = requestAnimationFrame(() => {
+        pendingFrame.current = null;
+        onChange(next);
+      });
+    });
+  };
+
+  const activeIndex = Math.max(0, options.findIndex((opt) => opt.value === shownValue));
 
   // Size configurations with generous padding for multi-language support
   const sizeConfig = {
@@ -74,10 +101,6 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
   };
 
   const config = sizeConfig[size];
-
-  // Calculate dimensions
-  const activeOption = options[activeIndex];
-  const hasIcon = !!activeOption?.icon;
 
   // Calculate option widths based on content with generous padding for all languages
   // Use character count as rough estimate for text width + fixed padding
@@ -143,12 +166,13 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
         {/* Sliding Pill Highlight (for pill variant) */}
         {variant === 'pill' && (
           <div
-            className="absolute rounded-full bg-white shadow-md transition-all duration-300 ease-out"
+            className="absolute left-0 rounded-full bg-white shadow-md transition-[transform,width] duration-300 ease-out motion-reduce:transition-none"
             style={{
               height: config.trackHeight - config.trackPadding * 2,
               width: optionWidths[activeIndex],
-              left: getPillLeft(),
+              transform: `translate3d(${getPillLeft()}px, 0, 0)`,
               top: config.trackPadding,
+              willChange: 'transform',
             }}
           />
         )}
@@ -159,15 +183,19 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
           style={{ padding: `0 ${config.trackPadding}px` }}
         >
           {options.map((option, index) => {
-            const isActive = option.value === value;
+            const isActive = option.value === shownValue;
 
             return (
               <button
                 key={option.value}
-                onClick={() => onChange(option.value)}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-label={option.label}
+                onClick={() => select(option.value)}
                 className={`
                   relative z-20 flex items-center justify-center font-semibold
-                  transition-all duration-300 ease-out
+                  transition-[opacity,color] duration-300 ease-out motion-reduce:transition-none
                   ${config.text}
                   ${variant === 'orb'
                     ? (isActive ? 'opacity-0' : 'text-neutral-500 hover:text-neutral-600')
@@ -183,7 +211,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
               >
                 {option.icon && (
                   <span
-                    className={`flex-shrink-0 ${config.iconSize} transition-all duration-300`}
+                    className={`flex-shrink-0 ${config.iconSize}`}
                     style={{ color: 'inherit' }}
                   >
                     {option.icon}
@@ -202,12 +230,13 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
       {/* Sliding Glass Orb - only for orb variant */}
       {variant === 'orb' && (
         <div
-          className="absolute pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="absolute left-0 top-0 pointer-events-none transition-transform duration-[450ms] ease-[cubic-bezier(0.32,1.25,0.5,1)] motion-reduce:transition-none"
           style={{
             width: config.orbSize,
             height: config.orbSize,
-            top: 0,
-            left: getOrbLeft(),
+            transform: `translate3d(${getOrbLeft()}px, 0, 0)`,
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
             zIndex: 10,
           }}
         >
@@ -273,18 +302,22 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
             }}
           />
 
-          {/* Content inside orb - icon with glow */}
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            {hasIcon && (
+          {/* Content inside orb - every icon stays mounted and crossfades, so
+              nothing re-renders or re-rasterises mid-slide */}
+          <div className="absolute inset-0 z-10">
+            {options.map((option, index) => option.icon && (
               <span
-                className={`${config.orbIconSize} text-white [&>svg]:w-full [&>svg]:h-full`}
+                key={option.value}
+                className={`absolute inset-0 m-auto ${config.orbIconSize} text-white [&>svg]:w-full [&>svg]:h-full transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none`}
                 style={{
+                  opacity: index === activeIndex ? 1 : 0,
+                  transform: index === activeIndex ? 'scale(1)' : 'scale(0.6)',
                   filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
                 }}
               >
-                {activeOption.icon}
+                {option.icon}
               </span>
-            )}
+            ))}
           </div>
         </div>
       )}
