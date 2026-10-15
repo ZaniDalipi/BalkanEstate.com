@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ScrollAssemble, ScrollAssembleItem } from '@/src/components/ui/scroll-assemble';
-import { CategoryPicture } from '@/shared/illustrations/Illustration';
+import { CategoryPicture } from '@/src/shared/illustrations';
 
 interface CategoriesSectionProps {
   onCategoryClick: (propertyType: string, listingType?: string) => void;
@@ -16,7 +16,7 @@ interface CategoriesSectionProps {
 const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick, onNavigate }) => {
   const { t } = useTranslation(['home']);
 
-  // Each tile's picture lives in public/images/categories/<picture>.webp. It is
+  // Each tile's picture lives in public/images/illustrations/categories/<picture>.webp. It is
   // drawn larger than its card and rises over the card's top edge, so the
   // building, keys or crown look like they are stepping out of the frame.
   // Hovering a card magnifies its picture Dock-style — `.category-dock` in

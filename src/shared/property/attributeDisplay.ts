@@ -13,7 +13,7 @@
  */
 
 import { PARKING_TYPES, type ParkingType, type TypeAttribute } from './typeAttributes';
-import type { SpecIllustrationName } from '../illustrations/Illustration';
+import type { SpecIllustrationName } from '../illustrations';
 
 export interface AttributeDisplay {
   /** Translation key, resolved against the `property` namespace. */

@@ -38,7 +38,7 @@ import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
 import NotificationSettingsSection from '../../src/features/notifications/components/NotificationSettingsSection';
 import { usePendingImportCount } from '../../src/features/listing-sources/hooks/useImportReview';
-import { SoftIcon, NavPicture, type SoftIconName } from '../../src/shared/illustrations/Illustration';
+import { SoftIcon, NavPicture, type SoftIconName } from '@/src/shared/illustrations';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [

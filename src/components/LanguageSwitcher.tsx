@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languages, getCurrentLanguage, type LanguageCode } from '../i18n';
 import { changeLanguage } from '../app/router/navigation';
-import { NavPicture } from '../shared/illustrations/Illustration';
+import { NavPicture } from '@/src/shared/illustrations';
 
 interface LanguageSwitcherProps {
   variant?: 'dropdown' | 'compact' | 'full' | 'sidebar';

@@ -4,8 +4,8 @@ import TouchSlider, { TONE_GOOD, TONE_WARN } from '@/src/components/ui/TouchSlid
 import { formatPrice, getCurrencySymbol } from '@/utils/currency';
 import { ChevronDownIcon, ChevronUpIcon } from '@/constants';
 import { InfoIcon } from 'lucide-react';
-import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
-import { ListingTypePicture } from '@/shared/illustrations/Illustration';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 /** Horizon the "planning to stay" slider covers, in years. */
 const STAY_MIN = 1;

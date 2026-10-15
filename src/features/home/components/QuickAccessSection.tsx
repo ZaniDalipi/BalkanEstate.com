@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ScrollAssemble, ScrollAssembleItem } from '@/src/components/ui/scroll-assemble';
 import { User } from '@/types';
-import { NavPicture, type NavPictureName } from '@/shared/illustrations/Illustration';
+import { NavPicture, type NavPictureName } from '@/src/shared/illustrations';
 
 interface QuickAccessSectionProps {
   user: User;

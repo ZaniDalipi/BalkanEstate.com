@@ -7,6 +7,7 @@ import type { Agency } from '@/src/shared/types';
 import { calcAgencyScore, getAgencyAchievementBadge, AGENCY_SCORING_METRIC_DEFS, AGENCY_MAX_SCORE } from '@/src/features/agencies/utils/agencyScoring';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const MEDAL_COLORS = {
   0: { bg: '#FFD700', text: '#92710A', glow: 'rgba(255, 215, 0, 0.4)', gradient: 'linear-gradient(135deg, #FFD700, #FFC107)' },
@@ -79,7 +80,7 @@ const AgencyPodiumCard: React.FC<{
           filter: 'drop-shadow(0 4px 10px rgba(255,180,0,0.7))',
           animation: isVisible ? 'tas-agency-bounce 2.4s ease-in-out infinite' : 'none',
           pointerEvents: 'none',
-        }}>👑</div>
+        }}><SoftIcon name="crown" className="w-9 h-9" /></div>
       )}
 
       {/* Agency Card */}
@@ -274,7 +275,7 @@ const AgencyPodiumCard: React.FC<{
               border: `1px solid ${badge.color}28`,
               borderRadius: '999px', padding: '2px 8px',
             }}>
-              {badge.label}
+              <SoftIcon name={badge.icon} className="inline-block w-3.5 h-3.5 mr-1 align-[-2px]" />{badge.label}
             </div>
           )}
         </div>
@@ -388,7 +389,7 @@ const TopAgenciesSection: React.FC = () => {
             marginBottom: '0.75rem',
           }}
         >
-          <span style={{ fontSize: '14px' }}>🏢</span>
+          <SoftIcon name="building" className="w-5 h-5" />
           <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#0252CD', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             {t('topAgencies.badge', 'Agencies of the Month')}
           </span>

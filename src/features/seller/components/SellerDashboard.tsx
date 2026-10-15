@@ -4,7 +4,7 @@ import GeminiDescriptionGenerator from './GeminiDescriptionGenerator';
 import type { ImportDraftToPublish, Property } from '@/types';
 import Footer from '@/components/shared/Footer';
 import { useImportDraftPrefill } from '@/src/features/listing-sources/hooks/useDraftListingForm';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface CreateListingPageProps {
   /** Editing an existing listing (`/edit-listing/:id`). */

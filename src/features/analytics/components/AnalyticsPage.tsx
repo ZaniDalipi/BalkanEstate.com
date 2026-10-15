@@ -34,7 +34,7 @@ import {
 } from '@/src/features/analytics';
 import { navigate, goBack, localizePath } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Animated number counter hook
 const useAnimatedCounter = (end: number, duration: number = 1000) => {

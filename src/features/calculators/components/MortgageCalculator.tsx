@@ -11,7 +11,7 @@ import {
   formatEur,
   MORTGAGE_DATA_YEAR,
 } from '../data/mortgageMarketData';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface MortgageCalculatorProps {
   propertyPrice: number;

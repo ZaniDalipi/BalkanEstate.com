@@ -42,7 +42,7 @@ import { SocialShare } from '../src/components/marketing/SocialShare';
 import { goBack, navigate } from '@/src/app/router/navigation';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { paths } from '@/src/app/router/paths';
-import { ListingTypePicture } from '../src/shared/illustrations/Illustration';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 // Map icon SVG for section headers
 const MapIcon: React.FC<{ className?: string }> = ({ className }) => (

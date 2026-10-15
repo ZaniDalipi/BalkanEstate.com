@@ -10,7 +10,7 @@ import {
   SPEED_LABELS,
   formatTime,
 } from '../hooks/useShadowTimelapse';
-import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface ShadowTimelapseControlProps {
   /** Location latitude for accurate sun calculations */

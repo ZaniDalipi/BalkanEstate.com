@@ -19,11 +19,11 @@ import { canonicalPlaceName } from '@/shared/geo';
 import { resolveConstruction } from '@/shared/property/construction';
 import { attributeEntries, statsForType, type TypeAttribute } from '@/shared/property/typeAttributes';
 import { ATTRIBUTE_DISPLAY, PARKING_TYPE_FALLBACKS, isParkingTypeValue } from '@/shared/property/attributeDisplay';
-import { SpecIllustration, SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SpecIllustration, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
-import { ListingTypePicture } from '@/shared/illustrations/Illustration';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 /**
  * Column counts as literal classes: Tailwind scans source text, so an

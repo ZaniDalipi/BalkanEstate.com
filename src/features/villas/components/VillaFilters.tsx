@@ -4,7 +4,7 @@ import { Filters } from '@/types';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import { Button } from '@/components/ui/liquid-glass-button';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface VillaFiltersProps {
     filters: Filters;

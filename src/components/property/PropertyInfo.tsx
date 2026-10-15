@@ -18,12 +18,12 @@ import {
   CheckCircleIcon,
 } from '../../../constants';
 import { DetailItem } from './PropertyCommon';
-import { SpecIllustration, SoftIcon, NavPicture, type SpecIllustrationName } from '../../shared/illustrations/Illustration';
+import { SpecIllustration, SoftIcon, NavPicture, type SpecIllustrationName } from '@/src/shared/illustrations';
 import { useAppContext } from '../../../context/AppContext';
 import { BALKAN_COUNTRIES } from '../../../constants/countries';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { ListingTypePicture } from '../../shared/illustrations/Illustration';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 interface PropertyInfoProps {
   property: Property;

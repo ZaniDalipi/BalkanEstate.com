@@ -16,7 +16,7 @@ import { createLogger } from '@/shared/utils/logger';
 import { LogoIcon, UsersIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
-import { SoftIcon, NavPicture, type NavPictureName } from '../../src/shared/illustrations/Illustration';
+import { SoftIcon, NavPicture, type NavPictureName } from '@/src/shared/illustrations';
 
 const navLogger = createLogger('SidebarNav');
 

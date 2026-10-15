@@ -15,7 +15,7 @@ import { useUnfinishedListingDrafts } from '@/src/features/seller/hooks/useUnfin
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { useRouteView } from '@/src/app/router/useRouteView';
-import { ListingTypePicture } from '../../src/shared/illustrations/Illustration';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 // Video Icon component
 const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (

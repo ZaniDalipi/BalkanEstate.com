@@ -5,7 +5,7 @@ import {
   ShieldCheckIcon,
 } from '@/constants';
 import { useAgency } from '@/src/features/agencies/hooks/useAgency';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgencyInfoCardProps {
   agencyId: string;

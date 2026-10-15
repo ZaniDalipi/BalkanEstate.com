@@ -16,7 +16,7 @@ import {
 import L from 'leaflet';
 import { type MapStyleType, type ClimateRiskType } from './googleMapConstants';
 import { Legend, ClimateRiskLegend } from './GoogleMapLegend';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 export interface GoogleMapControlsProps {
   isMobile: boolean;

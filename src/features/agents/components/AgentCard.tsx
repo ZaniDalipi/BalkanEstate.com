@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { calcScore, getAchievementBadge, MAX_SCORE } from '../utils/agentScoring';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgentCardProps {
   agent: Agent;
@@ -184,7 +185,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                 border: `1px solid ${achievementBadge.color}28`,
               }}
             >
-              {achievementBadge.label}
+              <SoftIcon name={achievementBadge.icon} className="inline-block w-3.5 h-3.5 mr-1 align-[-2px]" />{achievementBadge.label}
             </span>
           )}
         </div>

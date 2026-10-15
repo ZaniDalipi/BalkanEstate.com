@@ -10,7 +10,7 @@ import { apiRequest } from '@/src/shared/api';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
 import { navigate } from '@/src/app/router/navigation';
-import { SoftIcon } from '@/src/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { paths } from '@/src/app/router/paths';
 
 interface NotificationData {

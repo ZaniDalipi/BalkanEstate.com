@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SoftIcon } from '@/src/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 import {
   MagnifyingGlassIcon,
   BuildingOfficeIcon,

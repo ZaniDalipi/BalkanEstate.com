@@ -220,7 +220,7 @@
       "viewAllArticles": "Виж всички статии"
     },
     "topAgentsSection": {
-      "howPointsAreCalculated": "📊 Как се изчисляват точките",
+      "howPointsAreCalculated": "Как се изчисляват точките",
       "maxPossible180Pts": "Максимум: 180 точки",
       "metrics": {
         "rating": {

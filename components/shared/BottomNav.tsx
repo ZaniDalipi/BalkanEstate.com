@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView } from '../../types';
-import { NavPicture, type NavPictureName } from '../../src/shared/illustrations/Illustration';
+import { NavPicture, type NavPictureName } from '@/src/shared/illustrations';
 import UserAvatar from './UserAvatar';
 import { usePWAEnvironment } from '@/src/app/hooks/usePWAEnvironment';
 import { navigate, localizePath } from '@/src/app/router/navigation';

@@ -7,7 +7,7 @@ import {
 import KpiCard from './KpiCard';
 import OverviewCharts from './OverviewCharts';
 import AgencyInfoCard from './AgencyInfoCard';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface OverviewSectionProps {
   agencyId: string;

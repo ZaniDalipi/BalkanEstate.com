@@ -1175,28 +1175,63 @@ SqftIcon        // expand arrows (area/m²)
 ## Illustration System (`src/shared/illustrations`)
 
 Branded 3D pictures sit alongside the line icons above. Small functional
-controls (close, arrows, chevrons, menu) keep the line icons; anything that
-names a thing — a room, a feature, a section, a destination — uses one of
-these. All four are decorative (`alt=""`, `aria-hidden`): the label next to
-them carries the meaning.
+controls (close, arrows, chevrons, menu, form inputs) keep the line icons;
+anything that names a thing — a room, a feature, a section, a status, a
+destination — uses one of these. All are decorative (`alt=""`,
+`aria-hidden`): the label next to them carries the meaning.
 
-| Component | Files | Made by | Used for |
-|-----------|-------|---------|----------|
-| `SpecIllustration` | `public/images/illustrations/spec/*.svg` | `scripts/illustrations/iso.mjs` | isometric property-spec scenes (beds, baths, plot, amenities, distances) |
-| `SoftIcon` | `public/images/illustrations/soft/*.svg` | `scripts/illustrations/soft.mjs` | in-page icons: filters, dashboards, section headers, calculators |
-| `NavPicture` | `public/images/nav/*.webp` | hand-made art | sidebar, bottom bar, quick access — anything pointing at a sidebar destination |
-| `CategoryPicture` | `public/images/categories/*.webp` | hand-made art | home page category tiles |
+```
+src/shared/illustrations/
+├── index.ts                 # public API — import everything from here
+├── types.ts                 # typed name unions + NAV_PICTURES / CATEGORY_PICTURES
+├── assets.ts                # the only place that builds file URLs (+ softIconHtml)
+├── components/              # one component per file
+│   ├── DecorativeImage.tsx  #   the shared <img>: decorative, hides itself on error
+│   ├── SoftIcon.tsx
+│   ├── SpecIllustration.tsx
+│   ├── NavPicture.tsx
+│   ├── CategoryPicture.tsx
+│   └── ListingTypePicture.tsx
+└── generated/names.ts       # written by the generator — do not edit
 
-```bash
-node scripts/illustrations/generate.mjs   # regenerate the SVGs + names.generated.ts
+public/images/illustrations/
+├── soft/        *.svg   generated — scripts/illustrations/soft.mjs
+├── spec/        *.svg   generated — scripts/illustrations/iso.mjs
+├── nav/         *.webp  hand-made sidebar pictures
+└── categories/  *.webp  hand-made home category pictures
 ```
 
-- **Names are typed.** `names.generated.ts` (written by the generator) and the
-  unions in `Illustration.tsx` make a misspelt name a type error, not a broken
-  image. Never build a path to these files by hand — use the components.
-- **A missing file hides itself.** Every picture renders through
-  `DecorativeImage`, which hides the image (keeping its box) if the file fails
-  to load, so a dropped asset never shows a broken-image glyph.
+```ts
+import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/src/shared/illustrations';
+```
+
+| Component | Used for |
+|-----------|----------|
+| `SoftIcon` | in-page icons: section headers, stat tiles, tabs, badges, filters, dashboards |
+| `SpecIllustration` | isometric property-spec scenes (beds, baths, plot, amenities, distances) |
+| `NavPicture` | sidebar, bottom bar, quick access — anything pointing at a sidebar destination |
+| `CategoryPicture` | home page category tiles |
+| `ListingTypePicture` | rent / buy, wherever a listing type is shown |
+
+```bash
+node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and generated/names.ts
+```
+
+- **Import from the barrel only** (`@/src/shared/illustrations`), never from
+  a file inside it.
+- **Names are typed.** A misspelt name is a type error, not a broken image.
+  Never write a path to these files by hand: components use the URL builders
+  in `assets.ts`, and HTML strings for map popups use `softIconHtml(name)`.
+- **Every file is checked.** `src/tests/illustrations.render.test.tsx` fails
+  if any typed name has no file on disk.
+- **A missing file hides itself.** `DecorativeImage` hides the image (keeping
+  its box) if the file fails to load, so a dropped asset never shows a
+  broken-image glyph.
+- **No emoji as icons.** Use a `SoftIcon` next to the text instead, and keep
+  emoji out of translation strings (typographic marks like ✓ ★ ✦ are fine).
+- **Adding an icon:** draw it in `scripts/illustrations/soft.mjs` (64×64
+  grid, `blob`/`tube`/`disc` helpers, existing tones), run the generator,
+  and check it in `docs/illustrations-preview.html`.
 - **Each scene hides the BalkanEstate two-tower mark** somewhere small; keep
   that when adding one.
 - **Dock-style hover**: `.sidebar-dock` (sidebar) and `.category-dock`

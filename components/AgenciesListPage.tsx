@@ -40,7 +40,7 @@ import { API_URL } from '../src/shared/api/config';
 import { tokenService } from '../src/shared/api/tokenService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { SoftIcon } from '@/src/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Gradient presets for agency banners (same as AgencyDetailPage)
 const GRADIENT_PRESETS = [

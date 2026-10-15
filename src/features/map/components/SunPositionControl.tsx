@@ -6,7 +6,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next';
 import { getTimePeriod, TimePeriod } from './Buildings3DLayer';
 import { type Season, calculateSunriseSunset, getSeasonDayOfYear } from './SunArcAnimation';
-import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface SunPositionControlProps {
   onDateTimeChange: (dateTime: Date) => void;

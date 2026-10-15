@@ -9,7 +9,7 @@ import 'leaflet/dist/leaflet.css';
 import { useCinematicFlythrough, type FlythroughPhase } from '../hooks/useCinematicFlythrough';
 import { useShadowTimelapse, type TimePeriod } from '../hooks/useShadowTimelapse';
 import { MAP_TILE_LAYERS } from '@/config/mapStyles';
-import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 /**
  * 3D tilt configurations for different animation phases

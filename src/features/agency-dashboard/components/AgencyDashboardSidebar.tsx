@@ -10,7 +10,7 @@ import {
 } from '@/constants';
 import type { AgencyDashboardSection } from '@/types';
 import type { OverviewData } from '../types';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgencyDashboardSidebarProps {
   activeSection: AgencyDashboardSection;

@@ -36,7 +36,7 @@ import { filterPropertiesByQuery, parseSearchTerms } from '../utils/propertySear
 import { pageSlice, pageWindow } from '../utils/listingPagination';
 import { Credential } from '@/src/features/credentials/api/credentialApi';
 import CredentialsSection from '@/src/features/credentials/components/CredentialsSection';
-import { ListingTypePicture, SoftIcon } from '@/shared/illustrations/Illustration';
+import { ListingTypePicture, SoftIcon } from '@/src/shared/illustrations';
 
 // Component to fix map rendering issues in dynamic containers
 const MapInvalidator: React.FC = () => {

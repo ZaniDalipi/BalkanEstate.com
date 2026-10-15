@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { SCORING_METRIC_DEFS, MAX_SCORE } from '../utils/agentScoring';
 import { ChevronDownIcon } from '@/constants';
 import { cn } from '@/lib/utils';
+import { SoftIcon } from '@/src/shared/illustrations';
+import type { SoftIconName } from '@/src/shared/illustrations';
 
 interface AgentScoringPanelProps {
   /** Start collapsed (overrides the default responsive behaviour) */
@@ -11,7 +13,7 @@ interface AgentScoringPanelProps {
 }
 
 interface MetricCardProps {
-  icon: string;
+  icon: SoftIconName;
   label: string;
   formula: string;
   desc: string;
@@ -32,7 +34,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     style={{ background: bg, border: `1px solid ${border}` }}
     className="rounded-2xl p-4 flex flex-col items-center text-center gap-2"
   >
-    <span className="text-2xl leading-none" role="img" aria-hidden="true">{icon}</span>
+    <SoftIcon name={icon} className="w-10 h-10" />
 
     <span className="text-xs font-bold text-gray-900 leading-tight">{label}</span>
 

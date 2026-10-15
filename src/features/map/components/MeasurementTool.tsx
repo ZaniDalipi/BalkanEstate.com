@@ -7,7 +7,7 @@ import * as api from '../../../../services/apiService';
 import { replaceQueryString } from '@/src/app/router/navigation';
 
 import { useTranslation } from 'react-i18next';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 interface MeasurementPoint {
   lat: number;
   lng: number;

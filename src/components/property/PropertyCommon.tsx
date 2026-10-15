@@ -4,7 +4,7 @@
 import React from 'react';
 import { Property } from '../../../types';
 import { optimizeImageUrl } from '../../../config/mediaConfig';
-import { SpecIllustration, type SpecIllustrationName } from '../../shared/illustrations/Illustration';
+import { SpecIllustration, type SpecIllustrationName } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 interface DetailItemProps {

@@ -6,7 +6,7 @@ import { useFeaturedAgencies } from '../src/features/agencies/hooks/useAgencies'
 import { Agency } from '../types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { NavPicture } from '../src/shared/illustrations/Illustration';
+import { NavPicture } from '@/src/shared/illustrations';
 
 // Gradient presets for agency banners (shared with AgencyDetailPage)
 const GRADIENT_PRESETS = [

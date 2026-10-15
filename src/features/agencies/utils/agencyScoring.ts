@@ -1,5 +1,5 @@
 import type { Agency } from '@/src/shared/types';
-import type { SoftIconName } from '@/shared/illustrations/Illustration';
+import type { SoftIconName } from '@/src/shared/illustrations';
 
 export const AGENCY_MAX_SCORE = 160;
 
@@ -14,6 +14,7 @@ export interface AgencyScoreBreakdown {
 export interface AgencyAchievementBadge {
   key: string;
   label: string;
+  icon: SoftIconName;
   color: string;
 }
 
@@ -116,10 +117,10 @@ export function getAgencyAchievementBadge(agency: Agency): AgencyAchievementBadg
   const agents   = clampPositive(agency.totalAgents);
   const years    = clampPositive(agency.yearsInBusiness);
 
-  if (props >= 20)                    return { key: 'marketLeader',  label: '🏆 Market Leader',   color: '#f59e0b' };
-  if (agency.isFeatured)              return { key: 'featured',      label: '✨ Featured Agency',  color: '#8b5cf6' };
-  if (agents >= 8)                    return { key: 'topTeam',       label: '👥 Top Team',         color: '#3b82f6' };
-  if (years >= 10)                    return { key: 'established',   label: '📅 Established',      color: '#10b981' };
-  if (props >= 5 && agents >= 3)      return { key: 'growingFast',   label: '📈 Growing Fast',     color: '#06b6d4' };
+  if (props >= 20)                    return { key: 'marketLeader',  label: 'Market Leader',   icon: 'trophy', color: '#f59e0b' };
+  if (agency.isFeatured)              return { key: 'featured',      label: 'Featured Agency',  icon: 'sparkles', color: '#8b5cf6' };
+  if (agents >= 8)                    return { key: 'topTeam',       label: 'Top Team',         icon: 'users', color: '#3b82f6' };
+  if (years >= 10)                    return { key: 'established',   label: 'Established',      icon: 'calendar', color: '#10b981' };
+  if (props >= 5 && agents >= 3)      return { key: 'growingFast',   label: 'Growing Fast',     icon: 'trendUp', color: '#06b6d4' };
   return null;
 }

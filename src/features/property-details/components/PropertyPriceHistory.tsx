@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { usePriceHistory } from '../hooks/usePriceHistory';
 import { toIntlLocale } from '@/src/shared/utils/intlLocale';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // ── SVG chart constants ────────────────────────────────────────────────────────
 const W = 700;

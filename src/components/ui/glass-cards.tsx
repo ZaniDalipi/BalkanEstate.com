@@ -8,7 +8,7 @@ import { resolveConstruction } from '@/shared/property/construction';
 import { statsForType, type StatKey } from '@/shared/property/typeAttributes';
 import { resolveDisplayArea } from '@/shared/property/area';
 import type { TFunction } from 'i18next';
-import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 gsap.registerPlugin(ScrollTrigger);
 

@@ -18,7 +18,7 @@ import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
 import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_EMOJI } from '@/shared/property/galleryImages';
-import { ListingTypePicture } from '../../shared/illustrations/Illustration';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 interface PropertyGalleryProps {
   property: Property;

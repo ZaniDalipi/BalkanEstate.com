@@ -1,7 +1,7 @@
 import React, { useCallback, memo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bars3Icon } from '../../constants';
-import { NavPicture } from '../../src/shared/illustrations/Illustration';
+import { NavPicture } from '@/src/shared/illustrations';
 import { UserRole } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import UserAvatar from './UserAvatar';

@@ -5,7 +5,7 @@ import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import { getCurrencySymbol } from '@/utils/currency';
 import { Button } from '@/components/ui/liquid-glass-button';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface RentalFiltersProps {
     filters: Filters;

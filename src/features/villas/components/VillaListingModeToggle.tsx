@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { VillaListingMode } from '../hooks/useVillaSearch';
-import { ListingTypePicture } from '@/shared/illustrations/Illustration';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 interface VillaListingModeToggleProps {
   mode: VillaListingMode;

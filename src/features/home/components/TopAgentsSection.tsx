@@ -8,6 +8,7 @@ import type { Agent } from '@/src/shared/types';
 import { calcScore, getAchievementBadge, SCORING_METRIC_DEFS } from '@/src/features/agents/utils/agentScoring';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const MEDAL = {
   0: {
@@ -59,7 +60,7 @@ const ScoringPanel: React.FC = () => {
       marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.4rem',
     }}>
       <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-        {t('home:ui.topAgentsSection.howPointsAreCalculated', '📊 How points are calculated')}
+        <SoftIcon name="chart" className="inline-block w-4 h-4 mr-1.5 align-[-3px]" />{t('home:ui.topAgentsSection.howPointsAreCalculated', 'How points are calculated')}
       </span>
       <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#94a3b8', background: 'rgba(148,163,184,0.1)', borderRadius: '999px', padding: '2px 10px', border: '1px solid rgba(148,163,184,0.2)' }}>
         {t('home:ui.topAgentsSection.maxPossible180Pts', 'Max possible: 180 pts')}
@@ -71,7 +72,7 @@ const ScoringPanel: React.FC = () => {
         const text = HOME_METRIC_LABELS[m.key];
         return (
           <div key={m.key} style={{ background: m.bg, border: `1px solid ${m.border}`, borderRadius: '16px', padding: '1rem 1rem 0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.3rem' }}>
-            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>{m.icon}</span>
+            <SoftIcon name={m.icon} className="w-10 h-10" />
             <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a' }}>{t(`home:ui.topAgentsSection.metrics.${m.key}.label`, text.label)}</span>
             <span style={{ fontSize: '0.78rem', fontWeight: 800, color: m.color, background: `${m.color}14`, borderRadius: '8px', padding: '2px 8px' }}>{t(`home:ui.topAgentsSection.metrics.${m.key}.formula`, text.formula)}</span>
             <p style={{ fontSize: '0.63rem', color: '#64748b', lineHeight: 1.5, margin: '0.1rem 0 0.3rem' }}>{t(`home:ui.topAgentsSection.metrics.${m.key}.desc`, text.desc)}</p>
@@ -155,7 +156,7 @@ const AgentPodiumCard: React.FC<{
             filter: 'drop-shadow(0 4px 10px rgba(255,180,0,0.65))',
             animation: vis ? 'tas-bounce 2.4s ease-in-out infinite' : 'none',
           }}>
-            👑
+            <SoftIcon name="crown" className="w-9 h-9" />
           </div>
         )}
 
@@ -294,7 +295,7 @@ const AgentPodiumCard: React.FC<{
             borderRadius: '999px',
             padding: '2px 9px',
           }}>
-            {badge.label}
+            <SoftIcon name={badge.icon} className="inline-block w-3.5 h-3.5 mr-1 align-[-2px]" />{badge.label}
           </div>
         )}
       </div>
@@ -390,7 +391,7 @@ const TopAgentsSection: React.FC = () => {
           background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.25)',
           marginBottom: '0.75rem',
         }}>
-          <span style={{ fontSize: '14px' }}>🏆</span>
+          <SoftIcon name="trophy" className="w-5 h-5" />
           <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#92710A', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             {t('topAgents.badge', 'Top Agents of the Week')}
           </span>

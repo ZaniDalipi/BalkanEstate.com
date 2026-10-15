@@ -14,7 +14,7 @@ import UniversalSearchBox from '../universal/UniversalSearchBox';
 import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
-import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/src/shared/illustrations';
 
 interface PropertyListProps {
   properties: Property[];

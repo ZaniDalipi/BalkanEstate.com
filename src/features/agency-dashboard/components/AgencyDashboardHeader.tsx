@@ -7,7 +7,7 @@ import {
 import { useAppContext } from '@/context/AppContext';
 import UserAvatar from '@/components/shared/UserAvatar';
 import type { OverviewData } from '../types';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgencyDashboardHeaderProps {
   overview: OverviewData | null;

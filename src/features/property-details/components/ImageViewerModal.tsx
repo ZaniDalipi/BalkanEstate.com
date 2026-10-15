@@ -8,7 +8,7 @@ import { useAppContext } from '@/context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../../services/apiService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const RoomStylerModal = lazy(() => import('../../room-styler/components/RoomStylerModal'));
 

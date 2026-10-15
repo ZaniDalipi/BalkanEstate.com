@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AGENCY_SCORING_METRIC_DEFS, AGENCY_MAX_SCORE } from '../utils/agencyScoring';
 import { ChevronDownIcon } from '@/constants';
 import { cn } from '@/lib/utils';
-import { SoftIcon, type SoftIconName } from '@/shared/illustrations/Illustration';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface AgencyScoringPanelProps {
   defaultCollapsed?: boolean;

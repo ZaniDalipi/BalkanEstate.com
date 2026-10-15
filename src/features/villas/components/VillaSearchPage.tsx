@@ -26,7 +26,7 @@ import { Property } from '@/types';
 import { VILLA_DESTINATIONS } from '@/src/features/home/data/villaDestinations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { SoftIcon, NavPicture } from '@/shared/illustrations/Illustration';
+import { SoftIcon, NavPicture } from '@/src/shared/illustrations';
 
 const ITEMS_PER_PAGE = 20;
 

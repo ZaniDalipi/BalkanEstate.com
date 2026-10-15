@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { useRecentlyViewed } from '@/src/hooks/useRecentlyViewed';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface Props {
   onPropertyClick: (property: Property) => void;
@@ -52,11 +53,7 @@ const RecentlyViewedSection: React.FC<Props> = ({ onPropertyClick }) => {
         <div className="flex items-center justify-between mb-2">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-                <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
+              <SoftIcon name="clock" className="w-8 h-8" />
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {t('home:recentlyViewed.title', 'Recently Viewed')}
               </h2>

@@ -10,7 +10,7 @@ import { parseMarkdown } from '../../utils/markdown';
 import { createSanitizedMarkup } from '../../shared/utils/sanitize';
 import { validateCoordinates } from '../../shared/utils/validation';
 import { apiRequest } from '../../shared/api';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Map language codes to full language names for AI prompt
 const LANGUAGE_NAMES: Record<string, string> = {

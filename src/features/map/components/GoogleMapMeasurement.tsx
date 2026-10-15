@@ -14,7 +14,7 @@ import {
   type MeasurementPoint,
   type LocalMeasurement,
 } from '../hooks';
-import { SoftIcon } from '@/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 export interface GoogleMapMeasurementProps {
   showMeasurement: boolean;

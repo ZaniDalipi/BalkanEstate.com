@@ -13,7 +13,7 @@ import MapOptionsPanel, { MapOptionType, ClimateRiskType } from './MapOptionsPan
 import { ClimateRiskLegend } from './ClimateRiskLayer';
 import { Legend } from '@/src/components/map/MapPropertyMarker';
 import { TILE_LAYERS, type TileLayerType } from './useMapComponent';
-import { SoftIcon } from '@/src/shared/illustrations/Illustration';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface MapFilterControlsProps {
   isMobile: boolean;
