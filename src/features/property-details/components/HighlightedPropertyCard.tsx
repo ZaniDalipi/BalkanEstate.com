@@ -95,9 +95,35 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
     });
   }, [displayImages, IMAGE_WIDTHS]);
 
+  // Only the slide on screen, the one fading out and the next one are
+  // mounted. Mounting all five (×5 cards) decoded ~25 large photos at once,
+  // which is enough to get the page killed on an iPhone.
+  const previousIndexRef = useRef(0);
+  const [previousIndex, setPreviousIndex] = useState(0);
+  useEffect(() => {
+    setPreviousIndex(previousIndexRef.current);
+    previousIndexRef.current = currentImageIndex;
+  }, [currentImageIndex]);
+  const mountedSlides = useMemo(
+    () => new Set([currentImageIndex, previousIndex, (currentImageIndex + 1) % displayImages.length]),
+    [currentImageIndex, previousIndex, displayImages.length]
+  );
+
+  // Pause autoplay while the card is off screen — e.g. the list has slid away
+  // behind the map on a phone — so it isn't swapping photos nobody can see.
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isOnScreen, setIsOnScreen] = useState(true);
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(([entry]) => setIsOnScreen(entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Auto-advance carousel every 3 seconds when not hovered
   useEffect(() => {
-    if (!isAutoPlaying || displayImages.length <= 1) return;
+    if (!isAutoPlaying || !isOnScreen || displayImages.length <= 1) return;
 
     const interval = setInterval(() => {
       if (!isHovered) {
@@ -106,7 +132,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, isHovered, displayImages.length]);
+  }, [isAutoPlaying, isOnScreen, isHovered, displayImages.length]);
 
   const handlePrevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -189,6 +215,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
   return (
     <div
+      ref={cardRef}
       className={`group bg-white rounded-2xl overflow-hidden shadow-md ${tierStyles.border} ${tierStyles.glow} transition-all duration-300 cursor-pointer flex flex-col md:flex-row w-full ${
         isHovered ? 'shadow-xl scale-[1.005]' : ''
       }`}
@@ -203,7 +230,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {displayImages.map((imgUrl, index) => (
+        {displayImages.map((imgUrl, index) => !mountedSlides.has(index) ? null : (
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-500 ${
