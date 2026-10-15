@@ -1494,7 +1494,7 @@
     "uploadImage": "Učitaj sliku",
     "bestFitSize": "Najbolje odgovara",
     "imageHint3": "Svaki oblik slike radi — automatski se uklapa uz zamućenu pozadinu, pa nikad ne izgleda razvučeno ili isječeno. Koristite veliku sliku (~1000px+) za oštar rezultat.",
-    "imageLowRes": "⚠ Slika je samo {{w}}×{{h}}px — može izgledati mutno. Koristite veću sliku (~1000px ili više).",
+    "imageLowRes": "Slika je samo {{w}}×{{h}}px — može izgledati mutno. Koristite veću sliku (~1000px ili više).",
     "imageGood2": "✓ Slika je {{w}}×{{h}}px — izgleda dobro.",
     "bannerTitle": "Naslov / oznaka",
     "titlePlaceholder": "npr. Ljetnja kampanja — Banka X",

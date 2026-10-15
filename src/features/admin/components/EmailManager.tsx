@@ -2,7 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   MagnifyingGlassIcon,
-  EnvelopeIcon,
   PencilIcon,
   EyeIcon,
   PaperAirplaneIcon,
@@ -11,6 +10,7 @@ import {
   XCircleIcon,
   ChevronDownIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useEmailManager } from './useEmailManager';
 import { EditEmailModal, PreviewEmailModal, TestEmailModal } from './EmailManagerForm';
 
@@ -218,7 +218,11 @@ const EmailManager: React.FC = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{email.headerEmoji || '📧'}</span>
+                        {email.headerEmoji ? (
+                          <span className="text-xl">{email.headerEmoji}</span>
+                        ) : (
+                          <SoftIcon name="envelope" className="w-6 h-6 flex-shrink-0" />
+                        )}
                         <h3 className="font-medium text-gray-900">{email.name}</h3>
                         {email.isActive ? (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
@@ -298,7 +302,7 @@ const EmailManager: React.FC = () => {
 
       {filteredEmails.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <EnvelopeIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+          <SoftIcon name="envelope" className="w-12 h-12 mx-auto mb-4" />
           <p className="text-gray-500">{t('admin:emailManager.noEmailsFound')}</p>
         </div>
       )}

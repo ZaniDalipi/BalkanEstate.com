@@ -7,11 +7,10 @@ import {
   TrashIcon,
   CheckCircleIcon,
   XCircleIcon,
-  PhotoIcon,
   EyeIcon,
-  CursorArrowRaysIcon,
   ArrowTopRightOnSquareIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAdBannerManager, PLACEMENT_OPTIONS, PAGE_OPTIONS } from './useAdBannerManager';
 import AdBannerManagerForm from './AdBannerManagerForm';
 import { buildAdPreviewUrl } from './AdLocationPreview';
@@ -114,7 +113,7 @@ const AdBannerManager: React.FC = () => {
       {/* List */}
       {banners.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <PhotoIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <SoftIcon name="photo" className="w-16 h-16 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             {t('admin:adBanners.noBanners', 'No ad banners yet')}
           </h3>
@@ -148,7 +147,7 @@ const AdBannerManager: React.FC = () => {
                       <img src={optimizeImageUrl(item.imageUrl, { width: 320 }) || item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <PhotoIcon className="w-6 h-6 text-gray-300" />
+                        <SoftIcon name="photo" className="w-8 h-8" />
                       </div>
                     )}
                   </div>
@@ -187,11 +186,11 @@ const AdBannerManager: React.FC = () => {
                   {/* Stats */}
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <span className="flex items-center gap-1" title={t('admin:adBanners.impressions', 'Impressions')}>
-                      <EyeIcon className="w-4 h-4" />
+                      <SoftIcon name="eye" className="w-5 h-5 flex-shrink-0" />
                       {(item.impressions || 0).toLocaleString()}
                     </span>
                     <span className="flex items-center gap-1" title={t('admin:adBanners.clicks', 'Clicks')}>
-                      <CursorArrowRaysIcon className="w-4 h-4" />
+                      <SoftIcon name="target" className="w-5 h-5 flex-shrink-0" />
                       {(item.clicks || 0).toLocaleString()}
                     </span>
                     <span className="text-xs text-gray-400">{ctr}{t('admin:ui.adBannerManager.ctr', '% CTR')}</span>

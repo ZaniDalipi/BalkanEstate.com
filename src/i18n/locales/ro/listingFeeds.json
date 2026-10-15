@@ -316,11 +316,11 @@
       "sampleItemFoundFieldsWill": "Element exemplu găsit — câmpurile vor fi mapate la import",
       "headerName": "Nume antet",
       "value": "Valoare",
-      "fieldMapping": "🔧 Maparea câmpurilor (",
+      "fieldMapping": "Maparea câmpurilor (",
       "fields": "câmpuri)",
       "eGTitleImages0": "ex. title, images[0], $.item.name",
       "removeThisField": "Elimină acest câmp",
-      "useJsonpathNotationForNested": "💡 Folosește notația JSONPath pentru date imbricate:",
+      "useJsonpathNotationForNested": "Folosește notația JSONPath pentru date imbricate:",
       "orBareKeysForTop": "sau chei simple pentru nivelul superior:",
       "pleasePasteAJsonSample": "Lipește o mostră JSON pentru analiză."
     },

@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import PaymentWindow from './PaymentWindow';
-import {
-  BuildingOfficeIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-} from '../../constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { useAppContext } from '../../context/AppContext';
 import { BALKAN_LOCATIONS, CityData } from '../../utils/balkanLocations';
 import { canCreateAgency } from '../../src/shared/utils/subscriptionHelpers';
@@ -15,7 +11,7 @@ import { createAgency } from '../../src/features/agencies/api/agencyApi';
 import { uploadRequest } from '../../src/shared/api/httpClient';
 import { API_URL } from '../../src/shared/api/config';
 import MapLocationPicker from '../../src/features/seller/components/MapLocationPicker';
-import { ChevronLeft, ChevronRight, X, Upload, ImageIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Upload } from 'lucide-react';
 import PhoneInput, { validateFullPhone } from '../../src/shared/components/ui/PhoneInput';
 import ConfirmationModal from '../../src/shared/components/ui/ConfirmationModal';
 import { navigate } from '@/src/app/router/navigation';
@@ -57,13 +53,13 @@ const DEFAULT_HOURS: Record<string, string> = {
 
 // ─── Step definitions ─────────────────────────────────────────────────────────
 
-const STEPS = [
-  { id: 1, label: 'Agency Info',  icon: '🏢' },
-  { id: 2, label: 'Location',     icon: '📍' },
-  { id: 3, label: 'Contact',      icon: '📞' },
-  { id: 4, label: 'Professional', icon: '🎓' },
-  { id: 5, label: 'Online',       icon: '🌐' },
-] as const;
+const STEPS: ReadonlyArray<{ id: number; label: string; icon: SoftIconName }> = [
+  { id: 1, label: 'Agency Info',  icon: 'building' },
+  { id: 2, label: 'Location',     icon: 'pin' },
+  { id: 3, label: 'Contact',      icon: 'phone' },
+  { id: 4, label: 'Professional', icon: 'gradCap' },
+  { id: 5, label: 'Online',       icon: 'globe' },
+];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -80,7 +76,7 @@ const Required = () => <span className="text-red-500 ml-0.5">*</span>;
 const FieldError = ({ field, fieldErrors }: { field: string; fieldErrors: Record<string, string> }) =>
   fieldErrors[field] ? (
     <p className="flex items-center gap-1 text-xs text-red-600 mt-1.5 font-medium">
-      <ExclamationTriangleIcon className="w-3.5 h-3.5" />
+      <SoftIcon name="warning" className="w-4 h-4 flex-shrink-0" />
       {fieldErrors[field]}
     </p>
   ) : null;
@@ -587,7 +583,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   </div>
                 ) : (
                   <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
-                    <ImageIcon className="w-6 h-6 text-gray-400" />
+                    <SoftIcon name="photo" className="w-10 h-10" />
                   </div>
                 )}
                 <div className="flex-1">
@@ -906,9 +902,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           {/* ── Header ──────────────────────────────────────────────── */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                <BuildingOfficeIcon className="w-5 h-5 text-white" />
-              </div>
+              <SoftIcon name="building" className="w-9 h-9 flex-shrink-0" />
               <div className="min-w-0">
                 <h2 className="text-base font-bold text-gray-900 leading-tight">
                   {state.pendingAgencyData ? t('agents:agencyCreation.header.edit', 'Edit Agency Details') : t('agents:agencyCreation.header.create', 'Create Your Agency')}
@@ -951,7 +945,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                 <span className={`text-[10px] font-semibold uppercase tracking-wide ${
                   s.id === step ? 'text-blue-600' : s.id < step ? 'text-green-600' : 'text-gray-400'
                 }`}>
-                  {s.icon} {t(`agents:agencyCreation.steps.${s.label.toLowerCase().replace(/\s+(\w)/g, (_, c) => c.toUpperCase())}`, s.label)}
+                  <SoftIcon name={s.icon} className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t(`agents:agencyCreation.steps.${s.label.toLowerCase().replace(/\s+(\w)/g, (_, c) => c.toUpperCase())}`, s.label)}
                 </span>
               </div>
             ))}
@@ -961,7 +955,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           {!agencyEligibility.allowed && (
             <div className="mx-5 mb-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex-shrink-0">
               <div className="flex items-start gap-2.5">
-                <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-amber-800">
                     {agencyEligibility.reason?.includes('agent') ? t('agents:agencyCreation.eligibility.agentRequired', 'Agent Status Required') : t('agents:agencyCreation.eligibility.proRequired', 'Pro Subscription Required')}
@@ -989,7 +983,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
           {canSkipPayment && (
             <div className="mx-5 mb-3 flex-shrink-0">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                <CheckCircleIcon className="w-3.5 h-3.5" />
+                <SoftIcon name="check" className="w-4 h-4 flex-shrink-0" />
                 {t('agents:agencyCreation.enterprise.active', 'Enterprise Active — No Payment Required')}
               </div>
             </div>
@@ -1000,7 +994,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
             {/* Global error */}
             {globalError && (
               <div className="mb-4 p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5">
-                <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                 <p className="text-sm text-red-700 font-medium">{globalError}</p>
               </div>
             )}
@@ -1045,7 +1039,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
                   </>
                 ) : canSkipPayment ? (
                   <>
-                    <BuildingOfficeIcon className="w-4 h-4" />
+                    <SoftIcon name="building" className="w-5 h-5 flex-shrink-0" />
                     {t('agents:agencyCreation.buttons.create', 'Create Agency')}
                   </>
                 ) : (

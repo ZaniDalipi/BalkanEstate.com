@@ -33,6 +33,7 @@ import ArticleManager from './ArticleManager';
 import AdBannerManager from './AdBannerManager';
 import type { AdminSection } from '@/types';
 import { tokenService } from '@/src/shared/api/tokenService';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Map URL sections to AdminView types
 const urlToAdminView: Record<AdminSection, AdminView> = {
@@ -134,11 +135,7 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
+          <SoftIcon name="lock" className="w-16 h-16 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:errors.accessDenied')}</h2>
           <p className="text-gray-600 mb-6">{t('admin:errors.pleaseLogin')}</p>
           <button
@@ -157,19 +154,13 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-            </svg>
-          </div>
+          <SoftIcon name="shield" className="w-16 h-16 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin:errors.accessDenied')}</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           {error.includes('VPN') && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-left">
               <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+                <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                 <p className="text-sm text-yellow-800">
                   {t('admin:errors.vpnRequired', { defaultValue: 'The admin panel requires VPN connection for security. Please connect to the authorized VPN and refresh.' })}
                 </p>

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { agencyDashboardKeys } from '../../api/agencyDashboardKeys';
 import { getTeamNotes } from '../../api/agencyDashboardApi';
-import { DocumentTextIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { TeamNote } from '../../types';
 
 interface TeamNotesProps {
@@ -65,7 +65,7 @@ const TeamNotes: React.FC<TeamNotesProps> = ({ agencyId, onCreateNote, isCreatin
         </div>
       ) : !notes || notes.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <DocumentTextIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <SoftIcon name="clipboard" className="w-14 h-14 mx-auto mb-3" />
           <p className="text-gray-500 text-sm">
             {t('agencyDashboard:team.noNotes', 'No team notes yet. Be the first to post!')}
           </p>

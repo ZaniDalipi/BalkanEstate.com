@@ -1,7 +1,8 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { Animated } from '@/src/components/ui/Animations';
-import { CheckIcon, SparklesIcon } from '@/constants';
+import { CheckIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { type UserListing } from './usePricingPage';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -45,9 +46,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
     <Animated variant="fadeInUp" className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">🚀</span>
-        </div>
+        <SoftIcon name="rocket" className="w-16 h-16 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-gray-900">{t('pricing:listing.title', 'Listing Promotion Plans')}</h3>
         <p className="mt-2 text-gray-600">{t('pricing:listing.subtitle', 'Boost your property listings to get more visibility and inquiries')}</p>
       </div>
@@ -199,9 +198,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
           }`}
           onClick={() => onPromoteListing('featured')}
         >
-          <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-4">
-            <span className="text-2xl">⭐</span>
-          </div>
+          <SoftIcon name="star" className="w-12 h-12 mb-4" />
           <h4 className="text-xl font-bold text-gray-900">{t('pricing:listing.tiers.featured.title', 'Featured')}</h4>
           <p className="text-sm text-gray-600 mt-1">{t('pricing:listing.tiers.featured.description', 'Priority in search')}</p>
           <div className="mt-4">
@@ -233,13 +230,11 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
         >
           <div className="absolute -top-3 left-1/2 -translate-x-1/2">
             <span className="inline-flex items-center gap-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-              <SparklesIcon className="w-3 h-3" />
+              <SoftIcon name="sparkles" className="w-4 h-4" />
               {t('pricing:badges.popular', 'Popular')}
             </span>
           </div>
-          <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center mb-4 mt-2">
-            <span className="text-2xl">💎</span>
-          </div>
+          <SoftIcon name="diamond" className="w-12 h-12 mb-4 mt-2" />
           <h4 className="text-xl font-bold text-gray-900">{t('pricing:listing.tiers.highlight.title', 'Highlight')}</h4>
           <p className="text-sm text-gray-600 mt-1">{t('pricing:listing.tiers.highlight.description', 'Stand out')}</p>
           <div className="mt-4">
@@ -269,9 +264,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
           }`}
           onClick={() => onPromoteListing('premium')}
         >
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mb-4">
-            <span className="text-2xl">🏆</span>
-          </div>
+          <SoftIcon name="trophy" className="w-12 h-12 mb-4" />
           <h4 className="text-xl font-bold text-gray-900">{t('pricing:listing.tiers.premium.title', 'Premium')}</h4>
           <p className="text-sm text-gray-600 mt-1">{t('pricing:listing.tiers.premium.description', 'Homepage featured')}</p>
           <div className="mt-4">
@@ -296,9 +289,7 @@ const ListingPromotionSection: React.FC<ListingPromotionSectionProps> = ({
       {/* How it works */}
       <div className="mt-8 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-200">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-lg">💡</span>
-          </div>
+          <SoftIcon name="lightbulb" className="w-10 h-10 flex-shrink-0" />
           <div>
             <h4 className="font-bold text-gray-900">{t('pricing:listing.howItWorks', 'How it works:')}</h4>
             <p className="text-sm text-gray-600 mt-1">

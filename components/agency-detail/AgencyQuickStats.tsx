@@ -5,12 +5,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  HomeIcon,
-  StarIcon,
-  UserGroupIcon,
-  CalendarIcon,
-} from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface AgencyQuickStatsProps {
   listingsCount: number;
@@ -29,36 +24,28 @@ const AgencyQuickStats: React.FC<AgencyQuickStatsProps> = ({
 
   const stats = [
     {
-      icon: HomeIcon,
+      icon: 'home' as SoftIconName,
       value: listingsCount,
       label: t('agencies.listedProperties'),
       bgColor: 'rgba(59, 130, 246, 0.05)',
-      iconBgColor: 'bg-primary/15',
-      iconColor: 'text-primary',
     },
     {
-      icon: UserGroupIcon,
+      icon: 'users' as SoftIconName,
       value: agentsCount,
       label: t('agencies.agents'),
       bgColor: 'rgba(16, 185, 129, 0.05)',
-      iconBgColor: 'bg-emerald-500/15',
-      iconColor: 'text-emerald-600',
     },
     {
-      icon: CalendarIcon,
+      icon: 'calendar' as SoftIconName,
       value: `${yearsInBusiness}+`,
       label: t('agencies.years'),
       bgColor: 'rgba(139, 92, 246, 0.05)',
-      iconBgColor: 'bg-violet-500/15',
-      iconColor: 'text-violet-600',
     },
     {
-      icon: StarIcon,
+      icon: 'star' as SoftIconName,
       value: rating.toFixed(1),
       label: t('profile.rating'),
       bgColor: 'rgba(245, 158, 11, 0.05)',
-      iconBgColor: 'bg-amber-500/15',
-      iconColor: 'text-amber-500',
     },
   ];
 
@@ -70,9 +57,7 @@ const AgencyQuickStats: React.FC<AgencyQuickStatsProps> = ({
           className="text-center p-4 rounded-xl border border-slate-200/60"
           style={{ background: stat.bgColor }}
         >
-          <div className={`w-10 h-10 mx-auto mb-2 rounded-xl ${stat.iconBgColor} flex items-center justify-center`}>
-            <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
-          </div>
+          <SoftIcon name={stat.icon} className="w-10 h-10 mx-auto mb-2" />
           <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
           <div className="text-xs text-slate-500 font-medium">{stat.label}</div>
         </div>

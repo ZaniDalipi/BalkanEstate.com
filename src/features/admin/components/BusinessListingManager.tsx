@@ -3,7 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiRequest } from '@/src/shared/api';
 import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
-import { BuildingStorefrontIcon, TrashIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { TrashIcon, MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 
 interface AdminBusinessListing extends BusinessListing {
@@ -92,9 +93,7 @@ const BusinessListingManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-            <BuildingStorefrontIcon className="w-5 h-5 text-primary" />
-          </div>
+          <SoftIcon name="store" className="w-10 h-10 flex-shrink-0" />
           <div>
             <h1 className="text-xl font-bold text-neutral-900">{t('admin:ui.businessListingManager.businessListings', 'Business Listings')}</h1>
             <p className="text-sm text-neutral-500">{total} {t('admin:ui.businessListingManager.totalListings', 'total listings')}</p>
@@ -144,7 +143,7 @@ const BusinessListingManager: React.FC = () => {
           </div>
         ) : listings.length === 0 ? (
           <div className="p-12 text-center text-neutral-400">
-            <BuildingStorefrontIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
+            <SoftIcon name="store" className="w-10 h-10 mx-auto mb-3" />
             <p className="text-sm">{t('admin:ui.businessListingManager.noBusinessListingsFound', 'No business listings found')}</p>
           </div>
         ) : (
@@ -169,9 +168,7 @@ const BusinessListingManager: React.FC = () => {
                         {listing.logoUrl ? (
                           <img src={optimizeImageUrl(listing.logoUrl, { width: 64 }) || listing.logoUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
                         ) : (
-                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <BuildingStorefrontIcon className="w-4 h-4 text-primary" />
-                          </div>
+                          <SoftIcon name="store" className="w-8 h-8 flex-shrink-0" />
                         )}
                         <div>
                           <p className="font-medium text-neutral-900 truncate max-w-[200px]">{listing.name}</p>

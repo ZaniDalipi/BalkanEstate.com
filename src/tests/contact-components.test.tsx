@@ -223,8 +223,8 @@ describe('ContactSuccess', () => {
     const onReset = vi.fn();
     const { container } = render(<ContactSuccess onReset={onReset} />);
 
-    // Check for the SVG checkmark icon
-    const svg = container.querySelector('svg');
-    expect(svg).toBeInTheDocument();
+    // The success state shows the branded "check" soft icon
+    const icon = container.querySelector('img[src$="/soft/check.svg"]');
+    expect(icon).toBeInTheDocument();
   });
 });

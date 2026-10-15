@@ -5,6 +5,7 @@ import type { DashboardAgent } from '../../types';
 import AgentTable from './AgentTable';
 import AgentPerformanceCard from './AgentPerformanceCard';
 import InviteAgentPanel from './InviteAgentPanel';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgentManagementSectionProps {
   agencyId: string;
@@ -18,11 +19,7 @@ const AgentManagementSection: React.FC<AgentManagementSectionProps> = ({ agencyI
   if (error) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-        <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01" />
-          </svg>
-        </div>
+        <SoftIcon name="warning" className="w-14 h-14 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           {t('agencyDashboard:agents.errorTitle', 'Failed to load agents')}
         </h3>

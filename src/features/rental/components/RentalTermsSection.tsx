@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { getCurrencySymbol } from '@/utils/currency';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface RentalTermsSectionProps {
     property: Property;
@@ -62,9 +63,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
             {/* Header */}
             <div className="px-4 sm:px-6 py-4 bg-blue-50 border-b border-blue-100">
                 <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                    </svg>
+                    <SoftIcon name="docCheck" className="w-7 h-7 flex-shrink-0" />
                     <h3 className="text-lg font-bold text-neutral-800">{t('rental:details.rentalTerms')}</h3>
                 </div>
             </div>
@@ -74,11 +73,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Rent Period */}
                     <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+                        <SoftIcon name="calendar" className="w-8 h-8 flex-shrink-0" />
                         <div>
                             <p className="text-xs text-neutral-500">{t('rental:details.rentPeriod')}</p>
                             <p className="text-sm font-semibold text-neutral-800">{rentPeriodLabel}</p>
@@ -88,11 +83,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Security Deposit */}
                     {property.securityDeposit != null && property.securityDeposit > 0 && (
                         <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="lock" className="w-8 h-8 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.securityDeposit')}</p>
                                 <p className="text-sm font-semibold text-neutral-800">
@@ -105,11 +96,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Stay / Lease Duration */}
                     {(property.minimumLeaseDuration || property.maximumLeaseDuration) && (
                         <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="clock" className="w-8 h-8 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-neutral-500">
                                     {isDaily
@@ -128,11 +115,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Check-in / Check-out times (daily only) */}
                     {isDaily && property.checkInTime && (
                         <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="key" className="w-8 h-8 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.checkInOut', 'Check-in / Check-out')}</p>
                                 <p className="text-sm font-semibold text-neutral-800">
@@ -145,11 +128,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Cleaning Fee (daily only) */}
                     {isDaily && property.cleaningFee != null && property.cleaningFee > 0 && (
                         <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="sparkles" className="w-8 h-8 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.cleaningFee', 'Cleaning Fee')}</p>
                                 <p className="text-sm font-semibold text-neutral-800">
@@ -162,11 +141,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Cancellation Policy (daily only) */}
                     {isDaily && property.cancellationPolicy && (
                         <div className="flex items-start gap-3 sm:col-span-2">
-                            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="warning" className="w-8 h-8 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.cancellationPolicy', 'Cancellation Policy')}</p>
                                 <p className="text-sm font-semibold text-neutral-800">
@@ -178,11 +153,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
 
                     {/* Available From */}
                     <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
+                        <SoftIcon name="calendar" className="w-8 h-8 flex-shrink-0" />
                         <div>
                             <p className="text-xs text-neutral-500">{t('rental:details.availableFrom')}</p>
                             <p className="text-sm font-semibold text-neutral-800">
@@ -196,11 +167,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Max Occupants */}
                     {property.maxOccupants && property.maxOccupants > 0 && (
                         <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="users" className="w-8 h-8 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.maxOccupants')}</p>
                                 <p className="text-sm font-semibold text-neutral-800">
@@ -212,11 +179,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
 
                     {/* Utilities Included */}
                     <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.utilitiesIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
-                            <svg className={`w-4 h-4 ${property.utilitiesIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
+                        <SoftIcon name="bolt" className={`w-8 h-8 flex-shrink-0 ${property.utilitiesIncluded ? '' : 'opacity-40 grayscale'}`} />
                         <div>
                             <p className="text-xs text-neutral-500">{t('rental:details.utilitiesIncluded')}</p>
                             <p className={`text-sm font-semibold ${property.utilitiesIncluded ? 'text-green-700' : 'text-neutral-500'}`}>
@@ -227,11 +190,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
 
                     {/* Internet Included */}
                     <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.internetIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
-                            <svg className={`w-4 h-4 ${property.internetIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                            </svg>
-                        </div>
+                        <SoftIcon name="globe" className={`w-8 h-8 flex-shrink-0 ${property.internetIncluded ? '' : 'opacity-40 grayscale'}`} />
                         <div>
                             <p className="text-xs text-neutral-500">{t('rental:details.internetIncluded')}</p>
                             <p className={`text-sm font-semibold ${property.internetIncluded ? 'text-green-700' : 'text-neutral-500'}`}>
@@ -243,11 +202,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Breakfast (daily only) */}
                     {isDaily && (
                         <div className="flex items-start gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.breakfastIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
-                                <svg className={`w-4 h-4 ${property.breakfastIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="kitchen" className={`w-8 h-8 flex-shrink-0 ${property.breakfastIncluded ? '' : 'opacity-40 grayscale'}`} />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.breakfastIncluded', 'Breakfast')}</p>
                                 <p className={`text-sm font-semibold ${property.breakfastIncluded ? 'text-green-700' : 'text-neutral-500'}`}>
@@ -260,11 +215,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Towels & Linen (daily only) */}
                     {isDaily && (
                         <div className="flex items-start gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.towelsIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
-                                <svg className={`w-4 h-4 ${property.towelsIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="bath" className={`w-8 h-8 flex-shrink-0 ${property.towelsIncluded ? '' : 'opacity-40 grayscale'}`} />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.towelsIncluded', 'Towels & Linen')}</p>
                                 <p className={`text-sm font-semibold ${property.towelsIncluded ? 'text-green-700' : 'text-neutral-500'}`}>
@@ -277,11 +228,7 @@ const RentalTermsSection: React.FC<RentalTermsSectionProps> = ({ property }) => 
                     {/* Parking (daily only) */}
                     {isDaily && (
                         <div className="flex items-start gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${property.parkingIncluded ? 'bg-green-50' : 'bg-neutral-50'}`}>
-                                <svg className={`w-4 h-4 ${property.parkingIncluded ? 'text-green-600' : 'text-neutral-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 1h8l2-1zM13 6h2.5a2.5 2.5 0 010 5H13V6z" />
-                                </svg>
-                            </div>
+                            <SoftIcon name="car" className={`w-8 h-8 flex-shrink-0 ${property.parkingIncluded ? '' : 'opacity-40 grayscale'}`} />
                             <div>
                                 <p className="text-xs text-neutral-500">{t('rental:details.parkingIncluded', 'Parking')}</p>
                                 <p className={`text-sm font-semibold ${property.parkingIncluded ? 'text-green-700' : 'text-neutral-500'}`}>

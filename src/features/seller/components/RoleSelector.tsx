@@ -7,6 +7,7 @@ import {
 } from '@/shared/utils/subscriptionHelpers';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface RoleSelectorProps {
     currentUser: User;
@@ -36,14 +37,14 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
     const hasAgent = isRegisteredAgent;
 
-    const getRoleIcon = (role: UserRole) => {
+    const getRoleIcon = (role: UserRole): SoftIconName => {
         switch (role) {
             case UserRole.AGENT:
-                return '🏢';
+                return 'building';
             case UserRole.PRIVATE_SELLER:
-                return '🏠';
+                return 'home';
             default:
-                return '👤';
+                return 'user';
         }
     };
 
@@ -266,7 +267,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
             {!isRegisteredAgent && (
                 <div className="mt-4 p-3 glass-fieldset border-blue-200">
                     <div className="flex items-start gap-2">
-                        <span className="text-blue-600 text-lg">💼</span>
+                        <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
                         <div>
                             <p className="text-sm font-medium text-blue-600">
                                 {t('seller:roleSelector.becomeAgent.title', 'Want to post as an agent?')}
@@ -284,7 +285,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
 
 interface RoleCardProps {
     role: UserRole;
-    icon: string;
+    icon: SoftIconName;
     label: string;
     subscription: {
         plan: string;
@@ -345,7 +346,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
             )}
 
             <div className="flex items-start gap-3">
-                <span className="text-3xl">{icon}</span>
+                <SoftIcon name={icon} className="w-10 h-10 flex-shrink-0" />
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-bold text-gray-800">{label}</h4>
@@ -443,13 +444,14 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                 {subscription.isPro && (subscription.featuredCoupons || subscription.highlightedCoupons) ? (
                                     <div className="mt-2 p-2 glass-fieldset border-purple-200 rounded text-xs space-y-1.5">
                                         <p className="text-purple-600 font-semibold flex items-center gap-1">
-                                            <span>🎟️</span> {t('seller:ui.roleSelector.promotionCoupons', 'Promotion Coupons')}
+                                            <SoftIcon name="ticket" className="w-5 h-5" /> {t('seller:ui.roleSelector.promotionCoupons', 'Promotion Coupons')}
                                         </p>
                                         <div className="grid grid-cols-2 gap-2">
                                             {subscription.featuredCoupons !== undefined && (
                                                 <div className="bg-gray-50 p-1.5 rounded">
                                                     <p className="text-purple-600 font-medium">
-                                                        {t('seller:ui.roleSelector.featured', '⭐ Featured:')} {subscription.featuredCoupons}
+                                                        <SoftIcon name="star" className="inline-block w-4 h-4 mr-1 align-[-3px]" />
+                                                        {t('seller:ui.roleSelector.featured', 'Featured:')} {subscription.featuredCoupons}
                                                     </p>
                                                     <p className="text-purple-500 text-[11px]">
                                                         {subscription.featuredDuration} {t('seller:ui.roleSelector.daysEach', 'days each')}
@@ -459,7 +461,8 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                             {subscription.highlightedCoupons !== undefined && (
                                                 <div className="bg-gray-50 p-1.5 rounded">
                                                     <p className="text-amber-500 font-medium">
-                                                        {t('seller:ui.roleSelector.highlighted', '🔥 Highlighted:')} {subscription.highlightedCoupons}
+                                                        <SoftIcon name="flame" className="inline-block w-4 h-4 mr-1 align-[-3px]" />
+                                                        {t('seller:ui.roleSelector.highlighted', 'Highlighted:')} {subscription.highlightedCoupons}
                                                     </p>
                                                     <p className="text-amber-500 text-[11px]">
                                                         {subscription.highlightedDuration} {t('seller:ui.roleSelector.daysEach', 'days each')}

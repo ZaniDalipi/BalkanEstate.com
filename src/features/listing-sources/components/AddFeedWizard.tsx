@@ -8,6 +8,7 @@ import {
   detectFeed,
   createMyListingSource,
 } from '../api/listingSourceApi';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 /**
  * Normalize MongoDB Extended JSON ({ "$oid": "..." }, { "$date": ... }, etc.)
@@ -311,11 +312,11 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
     }
   };
 
-  const methodOptions: { id: DetectMethod; labelKey: string; descKey: string; icon: string }[] = [
-    { id: 'url',       labelKey: 'method.url',       descKey: 'method.urlDesc',       icon: '🔗' },
-    { id: 'rss',       labelKey: 'method.rss',       descKey: 'method.rssDesc',       icon: '📡' },
-    { id: 'sampleJson', labelKey: 'method.sampleJson', descKey: 'method.sampleJsonDesc', icon: '{ }' },
-    { id: 'customApi', labelKey: 'method.customApi', descKey: 'method.customApiDesc', icon: '🔑' },
+  const methodOptions: { id: DetectMethod; labelKey: string; descKey: string; icon: SoftIconName }[] = [
+    { id: 'url',       labelKey: 'method.url',       descKey: 'method.urlDesc',       icon: 'link' },
+    { id: 'rss',       labelKey: 'method.rss',       descKey: 'method.rssDesc',       icon: 'megaphone' },
+    { id: 'sampleJson', labelKey: 'method.sampleJson', descKey: 'method.sampleJsonDesc', icon: 'clipboard' },
+    { id: 'customApi', labelKey: 'method.customApi', descKey: 'method.customApiDesc', icon: 'key' },
   ];
 
   return (
@@ -348,7 +349,7 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
-                <span className="text-lg">{opt.icon}</span>
+                <SoftIcon name={opt.icon} className="w-7 h-7" />
                 <span className="text-sm font-semibold text-gray-800 leading-tight">
                   {t(`listingFeeds:${opt.labelKey}`)}
                 </span>
@@ -593,8 +594,9 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                 onClick={() => setShowFieldMapEditor(!showFieldMapEditor)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
-                <span className="text-sm font-semibold text-gray-700">
-                  {t('listingFeeds:ui.addFeedWizard.fieldMapping', '🔧 Field mapping (')}{Object.keys(editingFieldMap).length} {t('listingFeeds:ui.addFeedWizard.fields', 'fields)')}
+                <span className="text-sm font-semibold text-gray-700 inline-flex items-center gap-1.5">
+                  <SoftIcon name="wrench" className="w-5 h-5" />
+                  {t('listingFeeds:ui.addFeedWizard.fieldMapping', 'Field mapping (')}{Object.keys(editingFieldMap).length} {t('listingFeeds:ui.addFeedWizard.fields', 'fields)')}
                 </span>
                 <span className="text-lg text-gray-400 leading-none">{showFieldMapEditor ? '▼' : '▶'}</span>
               </button>
@@ -628,7 +630,8 @@ const AddFeedWizard: React.FC<Props> = ({ onCancel, onSaved }) => {
                     </div>
                   ))}
                   <p className="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-300">
-                    {t('listingFeeds:ui.addFeedWizard.useJsonpathNotationForNested', '💡 Use JSONPath notation for nested data:')} <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">$.images[0].url</code> {t('listingFeeds:ui.addFeedWizard.orBareKeysForTop', 'or bare keys for top-level:')}  <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">image_url</code>
+                    <SoftIcon name="lightbulb" className="inline-block w-4 h-4 mr-1 align-[-3px]" />
+                    {t('listingFeeds:ui.addFeedWizard.useJsonpathNotationForNested', 'Use JSONPath notation for nested data:')} <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">$.images[0].url</code> {t('listingFeeds:ui.addFeedWizard.orBareKeysForTop', 'or bare keys for top-level:')}  <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs">image_url</code>
                   </p>
                 </div>
               )}

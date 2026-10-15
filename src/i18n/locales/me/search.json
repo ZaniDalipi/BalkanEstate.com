@@ -223,7 +223,7 @@
     "dragToAdjust": "Povuci me za prilagođavanje lokacije",
     "locationSet": "Lokacija Postavljena",
     "dragging": "Povlačenje...",
-    "tips": "💡 Savjeti: Koristite polje za pretragu da pronađete Vaše selo/grad, zumirajte sa +/- dugmićima ili točkićem miša, pomičite mapu povlačenjem, i povucite crveni marker na tačnu lokaciju Vaše nekretnine.",
+    "tips": "Savjeti: Koristite polje za pretragu da pronađete Vaše selo/grad, zumirajte sa +/- dugmićima ili točkićem miša, pomičite mapu povlačenjem, i povucite crveni marker na tačnu lokaciju Vaše nekretnine.",
     "latitude": "Geografska Širina:",
     "longitude": "Geografska Dužina:",
     "location": "Lokacija",
@@ -606,8 +606,8 @@
       "viewToggle": "Promijeni prikaz"
     },
     "aiSearch": {
-      "agent": "👔 Agent",
-      "private": "👤 Privatno",
+      "agent": "Agent",
+      "private": "Privatno",
       "stopRecording": "Zaustavi snimanje",
       "startVoiceAssistant": "Pokreni glasovnog asistenta"
     },

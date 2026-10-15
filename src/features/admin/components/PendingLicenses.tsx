@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ShieldCheckIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import {
   getPendingLicenses,
   approveLicense,
@@ -77,9 +76,7 @@ const PendingLicenses: React.FC = () => {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-          <ShieldCheckIcon className="w-5 h-5 text-amber-600" />
-        </div>
+        <SoftIcon name="shield" className="w-10 h-10 flex-shrink-0" />
         <div>
           <h2 className="text-lg font-bold text-gray-900">
             {t('pendingLicenses.title', 'Pending License Verifications')}
@@ -99,7 +96,7 @@ const PendingLicenses: React.FC = () => {
 
       {agents.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-          <CheckCircleIcon className="w-10 h-10 text-green-300 mx-auto mb-3" />
+          <SoftIcon name="check" className="w-10 h-10 mx-auto mb-3" />
           <p className="text-sm font-medium text-gray-500">
             {t('pendingLicenses.empty', 'No pending license verifications')}
           </p>
@@ -172,7 +169,7 @@ const PendingLicenses: React.FC = () => {
                     </div>
                   )}
                   <div className="flex items-center gap-1.5 text-amber-600">
-                    <ClockIcon className="w-3.5 h-3.5" />
+                    <SoftIcon name="clock" className="w-4 h-4 flex-shrink-0" />
                     <span>{t('pendingLicenses.pending', 'Pending')}</span>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FireIcon, StarIconSolid } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { PromotionDuration, ExtensionTierStyle } from './usePromotionSelector';
 
 // === Types ===
@@ -53,8 +53,8 @@ const PromotionSummary: React.FC<PromotionSummaryProps> = ({
             : 'bg-neutral-50 border-neutral-300'
       }`}>
         <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
-          {focusUrgent && <FireIcon className="w-4 h-4 text-red-500" />}
-          {isExtension && <StarIconSolid className="w-4 h-4 text-current" />}
+          {focusUrgent && <SoftIcon name="flame" className="w-5 h-5" />}
+          {isExtension && <SoftIcon name="star" className="w-5 h-5" />}
           {focusUrgent
             ? t('common:promotions.urgentBadgeSummary', 'Urgent Badge Summary')
             : isExtension
@@ -148,16 +148,14 @@ const PromotionSummary: React.FC<PromotionSummaryProps> = ({
             </span>
           ) : focusUrgent ? (
             <span className="flex items-center justify-center gap-2">
-              <FireIcon className="w-4 h-4" />
+              <SoftIcon name="flame" className="w-5 h-5" />
               {wantsTierUpgrade
                 ? t('common:promotions.upgradeAndAddUrgent', 'Upgrade & Add Urgent - €{{price}}', { price: priceInfo.final.toFixed(2) })
                 : t('common:promotions.addUrgentBadgePrice', 'Add Urgent Badge - €{{price}}', { price: priceInfo.final.toFixed(2) })}
             </span>
           ) : isExtension ? (
             <span className="flex items-center justify-center gap-2">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
-              </svg>
+              <SoftIcon name="clock" className="w-5 h-5" />
               {t('common:promotions.extendDays', 'Extend +{{days}} days - €{{price}}', { days: selectedDuration, price: priceInfo.final.toFixed(2) })}
             </span>
           ) : (

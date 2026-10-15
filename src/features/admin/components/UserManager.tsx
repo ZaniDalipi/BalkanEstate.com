@@ -6,12 +6,11 @@ import {
   TrashIcon,
   CheckIcon,
   XCircleIcon,
-  EnvelopeIcon,
-  PhoneIcon,
   ShieldCheckIcon,
   EyeIcon,
   ArrowPathIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useUserManager } from './useUserManager';
 import UserManagerDetail from './UserManagerDetail';
 import UserAvatar from '@/components/shared/UserAvatar';
@@ -190,12 +189,12 @@ const UserManager: React.FC = () => {
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-1 text-sm text-gray-900">
-                    <EnvelopeIcon className="w-4 h-4 text-gray-400" />
+                    <SoftIcon name="envelope" className="w-5 h-5 flex-shrink-0" />
                     {user.email}
                   </div>
                   {user.phone && (
                     <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                      <PhoneIcon className="w-3 h-3 text-gray-400" />
+                      <SoftIcon name="phone" className="w-4 h-4 flex-shrink-0" />
                       {user.phone}
                     </div>
                   )}

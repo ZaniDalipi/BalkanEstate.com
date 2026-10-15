@@ -239,7 +239,7 @@
     "dragToAdjust": "Click anywhere or drag me to adjust location",
     "locationSet": "Location set",
     "dragging": "Dragging...",
-    "tips": "💡 Tips: Use the search box to find your village/town, zoom with +/- buttons or scroll wheel, pan by dragging the map, and click anywhere on the map (or drag the red marker) to set your exact property location.",
+    "tips": "Tips: Use the search box to find your village/town, zoom with +/- buttons or scroll wheel, pan by dragging the map, and click anywhere on the map (or drag the red marker) to set your exact property location.",
     "latitude": "Latitude:",
     "longitude": "Longitude:",
     "location": "Location",
@@ -613,8 +613,8 @@
       "n11pm": "11PM"
     },
     "aiSearch": {
-      "agent": "👔 Agent",
-      "private": "👤 Private",
+      "agent": "Agent",
+      "private": "Private",
       "stopRecording": "Stop recording",
       "startVoiceAssistant": "Start voice assistant"
     },

@@ -4,6 +4,7 @@
  */
 
 import { API_URL } from '@/src/shared/api/config';
+import type { SoftIconName } from '@/src/shared/illustrations';
 
 /**
  * API Configuration
@@ -149,14 +150,14 @@ export const TIMEOUTS = {
 } as const;
 
 /**
- * Promotion tiers configuration
+ * Promotion tiers configuration (`icon` is a SoftIconName — render with <SoftIcon />)
  */
 export const PROMOTION_TIERS = {
-  standard: { name: 'Standard', color: 'text-gray-700', bg: 'bg-gray-100', icon: '✨' },
-  featured: { name: 'Featured', color: 'text-violet-600', bg: 'bg-violet-50', icon: '⭐' },
-  highlight: { name: 'Highlight', color: 'text-sky-700', bg: 'bg-sky-100', icon: '💎' },
-  premium: { name: 'Premium', color: 'text-amber-700', bg: 'bg-amber-100', icon: '👑' },
-} as const;
+  standard: { name: 'Standard', color: 'text-gray-700', bg: 'bg-gray-100', icon: 'sparkles' },
+  featured: { name: 'Featured', color: 'text-violet-600', bg: 'bg-violet-50', icon: 'star' },
+  highlight: { name: 'Highlight', color: 'text-sky-700', bg: 'bg-sky-100', icon: 'diamond' },
+  premium: { name: 'Premium', color: 'text-amber-700', bg: 'bg-amber-100', icon: 'crown' },
+} as const satisfies Record<string, { name: string; color: string; bg: string; icon: SoftIconName }>;
 
 /**
  * Admin sections

@@ -17,8 +17,8 @@ import { getGallerySources, warmGallery, shouldCoverFrame, GALLERY_QUALITY } fro
 import AdSlot from '@/src/features/promo/components/Slot';
 import { LiquidGlassSwitch } from '../ui/LiquidGlassSwitch';
 import { useMediaQuery } from '@/src/hooks/useMediaQuery';
-import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_EMOJI } from '@/shared/property/galleryImages';
-import { ListingTypePicture } from '@/src/shared/illustrations';
+import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_ICONS } from '@/shared/property/galleryImages';
+import { ListingTypePicture, SoftIcon } from '@/src/shared/illustrations';
 
 interface PropertyGalleryProps {
   property: Property;
@@ -789,9 +789,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 />
                 {/* Generated video badge */}
                 <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 bg-gradient-to-r from-primary to-primary-dark backdrop-blur-sm text-white font-semibold px-3 py-1.5 rounded-full text-xs">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
+                  <SoftIcon name="video" className="w-5 h-5" />
                   <span>{t('property:gallery.propertyShowcase', 'Property Showcase')}</span>
                 </div>
                 {/* Sound toggle button */}
@@ -927,10 +925,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             ) : (
               <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 p-6">
                 <div className="text-center">
-                  <svg className="w-16 h-16 text-neutral-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <SoftIcon name="video" className="w-16 h-16 mx-auto mb-4" />
                   <p className="text-neutral-300 text-sm mb-4">
                     {t('property:gallery.videoEmbedNotSupported', 'This video link cannot be embedded directly')}
                   </p>
@@ -1024,11 +1019,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     onClick={(e) => { e.stopPropagation(); onNavigateTo3DTour?.(); }}
                     className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse hover:animate-none"
                   >
-                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                      <path d="M2 12h20" />
-                    </svg>
+                    <SoftIcon name="tour360" className="w-5 h-5 flex-shrink-0" />
                     <span>{t('property:gallery.enter3DTour', 'Enter 3D Tour')}</span>
                   </button>
                 )}
@@ -1038,11 +1029,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                     aria-label={t('property:gallery.view3DMap', '3D Location Map')}
                     className="flex items-center gap-1.5 whitespace-nowrap bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-semibold rounded-full px-3 py-1.5 shadow-lg hover:scale-105 active:scale-95 transition-all"
                   >
-                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-                      <line x1="8" y1="2" x2="8" y2="18" />
-                      <line x1="16" y1="6" x2="16" y2="22" />
-                    </svg>
+                    <SoftIcon name="cube" className="w-5 h-5 flex-shrink-0" />
                     <span>{t('property:gallery.view3DMap', '3D Location Map')}</span>
                   </button>
                 )}
@@ -1099,9 +1086,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <div className="sm:hidden absolute bottom-3 right-3 z-[3] flex items-center gap-1.5 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full pointer-events-none">
               {property.propertyType && (
                 <>
-                  <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                  </svg>
+                  <SoftIcon name="home" className="w-4 h-4 flex-shrink-0" />
                   <span className="capitalize">{t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}</span>
                   <span className="opacity-50">|</span>
                 </>
@@ -1125,18 +1110,14 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 )}
                 {(property.city || property.country) && (
                   <div className="flex items-center gap-1.5 text-white/80 text-sm mb-3">
-                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                    </svg>
+                    <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
                     <span>{[property.city, property.country].filter(Boolean).join(', ')}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1.5 flex-wrap mb-3">
                   {property.propertyType && (
                     <span className="flex items-center gap-1 bg-white/15 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                      </svg>
+                      <SoftIcon name="home" className="w-4 h-4" />
                       {t(`property:propertyTypes.${property.propertyType}`, property.propertyType)}
                     </span>
                   )}
@@ -1187,31 +1168,21 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 value: 'video',
                 label: t('actions.video', 'Video'),
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
+                  <SoftIcon name="video" className="w-full h-full" />
                 ),
               }] : []),
               {
                 value: 'photos',
                 label: t('actions.photos'),
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                  </svg>
+                  <SoftIcon name="photo" className="w-full h-full" />
                 ),
               },
               {
                 value: 'streetview',
                 label: t('actions.streetView'),
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="5" r="3" />
-                    <path d="M12 8v4" />
-                    <path d="M8 21l4-9 4 9" />
-                  </svg>
+                  <SoftIcon name="user" className="w-full h-full" />
                 ),
               },
             ]}
@@ -1234,31 +1205,21 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 value: 'video',
                 label: t('actions.video', 'Video'),
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
+                  <SoftIcon name="video" className="w-full h-full" />
                 ),
               }] : []),
               {
                 value: 'photos',
                 label: t('actions.photos'),
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-                  </svg>
+                  <SoftIcon name="photo" className="w-full h-full" />
                 ),
               },
               {
                 value: 'streetview',
                 label: t('actions.streetView'),
                 icon: (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="5" r="3" />
-                    <path d="M12 8v4" />
-                    <path d="M8 21l4-9 4 9" />
-                  </svg>
+                  <SoftIcon name="user" className="w-full h-full" />
                 ),
               },
             ]}
@@ -1271,11 +1232,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         {/* Header row: camera icon + "Photos" label + category pills */}
         <div className="flex items-center gap-2 mb-3 overflow-x-auto scrollbar-hide">
           <div className="flex items-center gap-1.5 flex-shrink-0 mr-1">
-            <svg className="w-4 h-4 text-neutral-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="9" cy="9" r="2" />
-              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-            </svg>
+            <SoftIcon name="photo" className="w-6 h-6" />
             <span className="text-sm font-bold text-neutral-800">{t('property:photos.title', 'Photos')}</span>
           </div>
 
@@ -1288,11 +1245,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                 : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
             }`}
           >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="9" cy="9" r="2" />
-              <path d="M21 15l-3.086-3.086a2 2 0 00-2.828 0L6 21" />
-            </svg>
+            <SoftIcon name="photo" className="w-4 h-4" />
             {t('property:photos.all', 'All')} {allImages.length}
           </button>
 
@@ -1307,7 +1260,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
                   : 'bg-neutral-100 text-neutral-600 border-neutral-200 hover:bg-neutral-200'
               }`}
             >
-              <span aria-hidden="true" className="text-sm leading-none">{IMAGE_TAG_EMOJI[tag] ?? IMAGE_TAG_EMOJI.other}</span>
+              <SoftIcon name={IMAGE_TAG_ICONS[tag] ?? IMAGE_TAG_ICONS.other} className="w-5 h-5" />
               {t(`property:photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })} {categorizedImages[tag]?.length || 0}
             </button>
           ))}

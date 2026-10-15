@@ -1,11 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ChartBarIcon,
-  CursorArrowRaysIcon,
-  ClockIcon,
-  ArrowPathIcon,
-} from '@/constants';
+import { ArrowPathIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { useActivityLog, filterOptions, dateRangeOptions } from './useActivityLog';
 import { AnalyticsDashboard, HeatmapPanel, ActivityList } from './ActivityLogContent';
 
@@ -30,9 +26,9 @@ const ActivityLog: React.FC = () => {
   } = useActivityLog();
 
   const tabs = [
-    { key: 'analytics' as const, label: t('admin:activityLog.analyticsDashboard'), icon: ChartBarIcon },
-    { key: 'heatmap' as const, label: t('admin:activityLog.interactionHeatmap'), icon: CursorArrowRaysIcon },
-    { key: 'activity' as const, label: t('admin:activityLog.activityLog'), icon: ClockIcon },
+    { key: 'analytics' as const, label: t('admin:activityLog.analyticsDashboard'), icon: 'chart' as SoftIconName },
+    { key: 'heatmap' as const, label: t('admin:activityLog.interactionHeatmap'), icon: 'target' as SoftIconName },
+    { key: 'activity' as const, label: t('admin:activityLog.activityLog'), icon: 'clock' as SoftIconName },
   ];
 
   return (
@@ -42,7 +38,7 @@ const ActivityLog: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
-              <ChartBarIcon className="w-7 h-7" />
+              <SoftIcon name="chart" className="w-8 h-8 flex-shrink-0" />
               {t('admin:activityLog.title')}
             </h1>
             <p className="text-blue-200 mt-1">{t('admin:activityLog.subtitle')}</p>
@@ -75,7 +71,7 @@ const ActivityLog: React.FC = () => {
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
-              <tab.icon className="w-5 h-5" />
+              <SoftIcon name={tab.icon} className="w-6 h-6 flex-shrink-0" />
               <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}

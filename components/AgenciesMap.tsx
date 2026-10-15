@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Agency } from '../types';
-import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, StarIcon } from '../constants';
+import { SoftIcon, softIconHtml } from '@/src/shared/illustrations';
 
 // Fix for default icon issue with bundlers
 let DefaultIcon = L.icon({
@@ -33,11 +33,10 @@ const createAgencyMarkerIcon = (isFeatured: boolean) => {
   const color = isFeatured ? '#f59e0b' : '#1f2937'; // Amber for featured, gray for regular
 
   const svgHtml = `
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-      <circle cx="24" cy="24" r="22" fill="${color}" stroke="#FFFFFF" stroke-width="3"/>
-      <path d="M24 14 L28 18 L28 30 L32 30 L32 32 L16 32 L16 30 L20 30 L20 18 Z M22 20 L22 22 L26 22 L26 20 Z M22 24 L22 26 L26 26 L26 24 Z" fill="white"/>
-      ${isFeatured ? '<circle cx="34" cy="14" r="6" fill="#fbbf24" stroke="#FFFFFF" stroke-width="2"/><text x="34" y="17" font-family="Arial" font-size="10" font-weight="bold" fill="#000" text-anchor="middle">★</text>' : ''}
-    </svg>
+    <div style="position:relative;width:48px;height:48px;border-radius:9999px;background:#FFFFFF;border:3px solid ${color};box-sizing:border-box;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+      ${softIconHtml('building', 32, 'vertical-align:middle;')}
+      ${isFeatured ? `<span style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:9999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,0.25);">${softIconHtml('star', 16, 'vertical-align:middle;')}</span>` : ''}
+    </div>
   `;
 
   return L.divIcon({
@@ -114,7 +113,7 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
     return (
       <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-2xl">
         <div className="text-center">
-          <BuildingOfficeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <SoftIcon name="building" className="w-16 h-16 mx-auto mb-4" />
           <p className="text-gray-600 font-semibold">{t('agencies.map.noLocationData')}</p>
         </div>
       </div>
@@ -178,15 +177,13 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                       className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                      <BuildingOfficeIcon className="w-6 h-6 text-gray-500" />
-                    </div>
+                    <SoftIcon name="building" className="w-12 h-12 flex-shrink-0" />
                   )}
                   <div className="flex-1">
                     <h3 className="font-bold text-base text-gray-900 leading-tight">{agency.name}</h3>
                     {agency.isFeatured && (
                       <div className="flex items-center gap-1 mt-1">
-                        <StarIcon className="w-3 h-3 text-amber-500" />
+                        <SoftIcon name="star" className="w-4 h-4 flex-shrink-0" />
                         <span className="text-xs font-semibold text-amber-600">{t('agencies.featured')}</span>
                       </div>
                     )}
@@ -229,11 +226,11 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
                 {/* Contact */}
                 <div className="space-y-1.5 text-xs border-t border-gray-200 pt-3">
                   <div className="flex items-center gap-2 text-gray-600">
-                    <PhoneIcon className="w-4 h-4" />
+                    <SoftIcon name="phone" className="w-5 h-5 flex-shrink-0" />
                     <span>{agency.phone}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
-                    <EnvelopeIcon className="w-4 h-4" />
+                    <SoftIcon name="envelope" className="w-5 h-5 flex-shrink-0" />
                     <span className="truncate">{agency.email}</span>
                   </div>
                 </div>
@@ -283,15 +280,15 @@ const AgenciesMap: React.FC<AgenciesMapProps> = ({ agencies, onAgencyClick }) =>
           <h4 className="font-bold text-sm mb-2 text-gray-900">{t('agencies.map.legend')}</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gray-900 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-3 h-3 text-white" />
+              <div className="w-6 h-6 rounded-full bg-white border-2 border-gray-900 flex items-center justify-center">
+                <SoftIcon name="building" className="w-4 h-4" />
               </div>
               <span className="text-xs font-semibold text-gray-700">{t('agencies.map.regularAgency')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center relative">
-                <BuildingOfficeIcon className="w-3 h-3 text-white" />
-                <span className="absolute -top-1 -right-1 text-xs">⭐</span>
+              <div className="w-6 h-6 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center relative">
+                <SoftIcon name="building" className="w-4 h-4" />
+                <SoftIcon name="star" className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5" />
               </div>
               <span className="text-xs font-semibold text-gray-700">{t('agencies.map.featuredAgency')}</span>
             </div>

@@ -11,6 +11,7 @@ import {
   VideoPreview,
   saveVideoToDevice,
 } from '../api/videoApi';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface VideoGeneratorProps {
   property: Property;
@@ -19,12 +20,6 @@ interface VideoGeneratorProps {
 }
 
 // Icons
-const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-  </svg>
-);
-
 const SpinnerIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={`animate-spin ${className}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -41,12 +36,6 @@ const MusicNoteIcon: React.FC<{ className?: string }> = ({ className }) => (
 const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
 );
 
@@ -75,16 +64,10 @@ const FacebookIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const ShareIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-  </svg>
-);
-
-const FORMAT_OPTIONS: { value: VideoFormat; label: string; icon: string; description: string }[] = [
-  { value: 'vertical', label: 'Reels (9:16)', icon: '📱', description: 'Instagram Reels & TikTok' },
-  { value: 'horizontal', label: 'Landscape (16:9)', icon: '🖥️', description: 'YouTube & Websites' },
-  { value: 'square', label: 'Square (1:1)', icon: '⬜', description: 'Instagram Feed' },
+const FORMAT_OPTIONS: { value: VideoFormat; label: string; icon: SoftIconName; description: string }[] = [
+  { value: 'vertical', label: 'Reels (9:16)', icon: 'phone', description: 'Instagram Reels & TikTok' },
+  { value: 'horizontal', label: 'Landscape (16:9)', icon: 'desktop', description: 'YouTube & Websites' },
+  { value: 'square', label: 'Square (1:1)', icon: 'photo', description: 'Instagram Feed' },
 ];
 
 const MUSIC_OPTIONS: { value: MusicStyle; label: string; description: string }[] = [
@@ -99,11 +82,11 @@ const QUALITY_OPTIONS: { value: VideoQuality; label: string; description: string
   { value: 'standard', label: 'Standard (1080p)', description: 'Full quality, larger file' },
 ];
 
-const BACKGROUND_OPTIONS: { value: BackgroundStyle; label: string; description: string; icon: string }[] = [
-  { value: 'elegant', label: 'Elegant Dark', description: 'Premium dark with gold accents', icon: '✨' },
-  { value: 'gradient', label: 'Gradient', description: 'Purple-blue gradient (Canva style)', icon: '🎨' },
-  { value: 'dark', label: 'Pure Dark', description: 'Clean dark background', icon: '🌙' },
-  { value: 'blur', label: 'Blur Effect', description: 'Blurred background effect', icon: '🔲' },
+const BACKGROUND_OPTIONS: { value: BackgroundStyle; label: string; description: string; icon: SoftIconName }[] = [
+  { value: 'elegant', label: 'Elegant Dark', description: 'Premium dark with gold accents', icon: 'sparkles' },
+  { value: 'gradient', label: 'Gradient', description: 'Purple-blue gradient (Canva style)', icon: 'dusk' },
+  { value: 'dark', label: 'Pure Dark', description: 'Clean dark background', icon: 'moon' },
+  { value: 'blur', label: 'Blur Effect', description: 'Blurred background effect', icon: 'filter' },
 ];
 
 const VideoGenerator: React.FC<VideoGeneratorProps> = ({
@@ -163,7 +146,7 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary-dark px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <VideoIcon className="w-6 h-6 text-white" />
+          <SoftIcon name="video" className="w-8 h-8 flex-shrink-0" />
           <div>
             <h3 className="text-lg font-semibold text-white">{t('seller:ui.videoGenerator.videoGenerator', 'Video Generator')}</h3>
             <p className="text-white/80 text-sm">{t('seller:ui.videoGenerator.createAStunningVideoReel', 'Create a stunning video reel from your property photos')}</p>
@@ -176,7 +159,7 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
         {!hasImages ? (
           // No images warning
           <div className="text-center py-8">
-            <VideoIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+            <SoftIcon name="video" className="w-16 h-16 mx-auto mb-4" />
             <h4 className="text-lg font-medium text-neutral-700 mb-2">{t('seller:ui.videoGenerator.noImagesAvailable', 'No Images Available')}</h4>
             <p className="text-neutral-500">
               {t('seller:ui.videoGenerator.uploadPropertyImagesFirstTo', 'Upload property images first to generate a video showcase.')}
@@ -194,9 +177,7 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({
         ) : status === 'completed' && generatedVideo ? (
           // Success state
           <div className="text-center py-6">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckIcon className="w-8 h-8 text-green-600" />
-            </div>
+            <SoftIcon name="check" className="w-16 h-16 mx-auto mb-4" />
             <h4 className="text-lg font-medium text-neutral-700 mb-2">{t('seller:ui.videoGenerator.yourVideoIsReady', 'Your Video Is Ready!')}</h4>
             <p className="text-neutral-500 text-sm mb-6">
               {Math.round(generatedVideo.duration)}{t('seller:ui.videoGenerator.sVideoDownloadItPost', 's video — download it, post it, then add the link to your listing.')}
@@ -325,7 +306,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
                   : 'border-neutral-200 hover:border-neutral-300'
               }`}
             >
-              <span className="text-2xl block mb-1">{option.icon}</span>
+              <SoftIcon name={option.icon} className="w-8 h-8 mx-auto mb-1" />
               <span className="text-sm font-medium block text-neutral-800">{t(`seller:ui.videoGenerator.format.${option.value}.label`, option.label)}</span>
               <span className="text-xs text-neutral-500">{t(`seller:ui.videoGenerator.format.${option.value}.description`, option.description)}</span>
             </button>
@@ -368,7 +349,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
                   : 'border-neutral-200 hover:border-neutral-300'
               }`}
             >
-              <span className="text-lg block mb-1">{option.icon}</span>
+              <SoftIcon name={option.icon} className="w-7 h-7 mb-1" />
               <span className="text-sm font-medium block text-neutral-800">{t(`seller:ui.videoGenerator.background.${option.value}.label`, option.label)}</span>
               <span className="text-xs text-neutral-500">{t(`seller:ui.videoGenerator.background.${option.value}.description`, option.description)}</span>
             </button>
@@ -462,7 +443,7 @@ const VideoOptionsForm: React.FC<VideoOptionsFormProps> = ({
         onClick={onGenerate}
         className="w-full py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
       >
-        <VideoIcon className="w-5 h-5" />
+        <SoftIcon name="video" className="w-6 h-6" />
         {t('seller:ui.videoGenerator.generateVideo', 'Generate Video')}
       </button>
 
@@ -490,7 +471,7 @@ const PostToPlatforms: React.FC = () => {
   return (
     <div className="border-t border-neutral-200 pt-6">
       <div className="flex items-center justify-center gap-2 mb-2">
-        <ShareIcon className="w-5 h-5 text-neutral-500" />
+        <SoftIcon name="share" className="w-6 h-6" />
         <h5 className="text-sm font-medium text-neutral-700">{t('seller:ui.videoGenerator.postItThenAddThe', 'Post it, then add the link to your listing')}</h5>
       </div>
       <p className="text-xs text-neutral-500 mb-4 text-center">

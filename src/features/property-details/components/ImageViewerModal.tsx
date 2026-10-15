@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, BuildingOfficeIcon } from '@/constants';
+import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@/constants';
 import { optimizeImageUrl, isMediaCdnUrl } from '@/config/mediaConfig';
 import { isCloudinaryPhotoUrl } from '@/config/legacyCloudinary';
 import { getGallerySources, warmGallery, VIEWER_SIZES } from '@/config/galleryImages';
@@ -611,7 +611,7 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({ images, startIndex,
                 >
                     {imageError ? (
                         <div className="flex flex-col items-center justify-center text-white p-8">
-                            <BuildingOfficeIcon className="w-20 h-20 text-neutral-500"/>
+                            <SoftIcon name="photo" className="w-20 h-20 opacity-70" />
                             <p className="mt-4 text-sm font-medium text-white/70">{t('property:imageViewer.loadError', 'Image could not be loaded')}</p>
                         </div>
                     ) : (

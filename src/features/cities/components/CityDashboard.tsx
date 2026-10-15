@@ -22,21 +22,10 @@ import type { SuburbEntry } from '@/src/shared/types/suburb.types';
 const CitySuburbMap = lazy(() => import('./CitySuburbMap'));
 import {
   MapPinIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  ChartBarIcon,
-  CalendarIcon,
-  HomeIcon,
-  FireIcon,
-  StarIcon,
-  BuildingOfficeIcon,
   GlobeAltIcon,
-  CurrencyEuroIcon,
-  HomeModernIcon,
-  LightBulbIcon,
-  ShieldCheckIcon,
   InformationCircleIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -228,11 +217,12 @@ const CityDashboard: React.FC = () => {
     if (trend === 'declining') return t('trends.declining');
     return t('trends.stable');
   };
-  const getTrendIcon = (trend: string) => {
-    if (trend === 'rising') return <ArrowTrendingUpIcon className="w-5 h-5 text-green-600" />;
-    if (trend === 'declining') return <ArrowTrendingDownIcon className="w-5 h-5 text-red-600" />;
-    return <ChartBarIcon className="w-5 h-5 text-neutral-500" />;
-  };
+  const getTrendIcon = (trend: string) => (
+    <SoftIcon
+      name={trend === 'rising' ? 'trendUp' : trend === 'declining' ? 'trendDown' : 'chart'}
+      className="w-6 h-6 flex-shrink-0"
+    />
+  );
   const getDemandInfo = (score: number) => {
     if (score >= 70) return { label: t('cityCard.demandHigh', 'High'), color: 'text-green-600', barColor: 'from-green-400 to-green-500' };
     if (score >= 40) return { label: t('cityCard.demandMedium', 'Moderate'), color: 'text-amber-600', barColor: 'from-amber-400 to-amber-500' };
@@ -268,7 +258,7 @@ const CityDashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center p-8">
-          <GlobeAltIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+          <SoftIcon name="globe" className="block w-16 h-16 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-neutral-700 mb-2">
             {t('dashboard.notFound', 'City not found')}
           </h2>
@@ -458,7 +448,7 @@ const CityDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <MapPinIcon className="w-7 h-7 text-white/90 drop-shadow-lg flex-shrink-0" />
+                <SoftIcon name="pin" className="w-8 h-8 drop-shadow-lg flex-shrink-0" />
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg leading-none">
                   {city.city}
                 </h1>
@@ -481,9 +471,7 @@ const CityDashboard: React.FC = () => {
         {/* Data sources explainer banner */}
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex items-start gap-3 p-4 bg-violet-50 border border-violet-200 rounded-xl">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-sm">
-              <LightBulbIcon className="w-4 h-4 text-white" />
-            </div>
+            <SoftIcon name="lightbulb" className="w-8 h-8 flex-shrink-0" />
             <div>
               <p className="text-xs font-bold text-violet-800 uppercase tracking-wide mb-0.5">{t('exploreCities:ui.cityDashboard.balkanestateAi', 'BalkanEstate AI')}</p>
               <p className="text-[11px] text-violet-600 leading-relaxed">
@@ -492,9 +480,7 @@ const CityDashboard: React.FC = () => {
             </div>
           </div>
           <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-              <ShieldCheckIcon className="w-4 h-4 text-white" />
-            </div>
+            <SoftIcon name="shield" className="w-8 h-8 flex-shrink-0" />
             <div>
               <p className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-0.5">{t('exploreCities:ui.cityDashboard.officialSources', 'Official Sources')}</p>
               <p className="text-[11px] text-blue-600 leading-relaxed">
@@ -508,7 +494,7 @@ const CityDashboard: React.FC = () => {
         <div className="flex items-center gap-3 mb-6">
           <div className="h-px flex-1 bg-violet-100" />
           <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
-            <LightBulbIcon className="w-3 h-3" />
+            <SoftIcon name="lightbulb" className="w-4 h-4 flex-shrink-0" />
             {t('exploreCities:ui.cityDashboard.balkanestateAiAnalysis', 'BalkanEstate AI Analysis')}
           </span>
           <div className="h-px flex-1 bg-violet-100" />
@@ -537,7 +523,7 @@ const CityDashboard: React.FC = () => {
             {/* Breakdown */}
             <div className="flex-1 w-full">
               <h3 className="text-lg font-bold text-neutral-900 mb-1 flex items-center gap-2">
-                <ShieldCheckIcon className="w-5 h-5 text-primary" />
+                <SoftIcon name="shield" className="w-6 h-6 flex-shrink-0" />
                 {t('dashboard.marketHealth', 'Market Health Score')}
               </h3>
               <p className={`text-sm font-bold mb-4 ${healthInfo.color}`}>{healthInfo.label}</p>
@@ -581,9 +567,7 @@ const CityDashboard: React.FC = () => {
           <div className={`bg-white rounded-xl shadow-md p-4 sm:p-5 border transition-colors ${showOfficialPrice ? 'border-blue-200' : 'border-neutral-100'}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${showOfficialPrice ? 'bg-blue-100' : 'bg-primary/10'}`}>
-                  <HomeIcon className={`w-4 h-4 ${showOfficialPrice ? 'text-blue-600' : 'text-primary'}`} />
-                </div>
+                <SoftIcon name="home" className="w-8 h-8 flex-shrink-0" />
                 <span className="text-xs font-medium text-neutral-500">{t('exploreCities:ui.cityDashboard.avgPriceM', 'Avg. Price /m²')}</span>
               </div>
               <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
@@ -619,7 +603,7 @@ const CityDashboard: React.FC = () => {
             <p className="text-[10px] mt-1">
               {showOfficialPrice
                 ? <span className="text-blue-500 font-semibold flex items-center gap-1">
-                    <ShieldCheckIcon className="w-3 h-3" />
+                    <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
                     {t('exploreCities:ui.cityDashboard.bisResidentialPropertyPriceIndex', 'BIS Residential Property Price Index')}
                   </span>
                 : showListingPrice
@@ -632,7 +616,7 @@ const CityDashboard: React.FC = () => {
                       className="text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1"
                       title={city.officialSourceName}
                     >
-                      <ShieldCheckIcon className="w-3 h-3" />
+                      <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
                       {t('exploreCities:ui.cityDashboard.officialData', 'Official data ↗')}
                     </a>
                   : <span className="text-violet-400">{t('exploreCities:ui.cityDashboard.balkanestateAiEstimate', 'BalkanEstate AI estimate')}</span>
@@ -643,9 +627,7 @@ const CityDashboard: React.FC = () => {
           {/* Median Price */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-                <ChartBarIcon className="w-4 h-4 text-violet-600" />
-              </div>
+              <SoftIcon name="chart" className="w-8 h-8 flex-shrink-0" />
               <span className="text-xs font-medium text-neutral-500">{t('cityCard.medianPrice')}</span>
             </div>
             <span className="text-2xl sm:text-3xl font-black text-primary">{formatPrice(medianPrice, city.countryCode)}</span>
@@ -654,15 +636,7 @@ const CityDashboard: React.FC = () => {
           {/* YoY Growth — AI estimate + optional BIS official */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${yoyGrowth > 0 ? 'bg-green-100' : yoyGrowth < 0 ? 'bg-red-100' : 'bg-neutral-100'}`}>
-                {yoyGrowth > 0 ? (
-                  <ArrowTrendingUpIcon className="w-4 h-4 text-green-600" />
-                ) : yoyGrowth < 0 ? (
-                  <ArrowTrendingDownIcon className="w-4 h-4 text-red-600" />
-                ) : (
-                  <ChartBarIcon className="w-4 h-4 text-neutral-500" />
-                )}
-              </div>
+              <SoftIcon name={yoyGrowth > 0 ? 'trendUp' : yoyGrowth < 0 ? 'trendDown' : 'chart'} className="w-8 h-8 flex-shrink-0" />
               <span className="text-xs font-medium text-neutral-500">{t('cityCard.yoyGrowth')}</span>
             </div>
             <span className={`text-2xl sm:text-3xl font-black ${yoyGrowth > 0 ? 'text-green-600' : yoyGrowth < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
@@ -670,7 +644,7 @@ const CityDashboard: React.FC = () => {
             </span>
             {bisYoY !== null && (
               <div className="mt-1.5 flex items-center gap-1 text-[10px]">
-                <ShieldCheckIcon className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
                 <span className="text-blue-600 font-semibold">BIS: {bisYoY > 0 ? '+' : ''}{bisYoY}%</span>
               </div>
             )}
@@ -679,9 +653,7 @@ const CityDashboard: React.FC = () => {
           {/* Rental Yield */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                <StarIcon className="w-4 h-4 text-blue-600" />
-              </div>
+              <SoftIcon name="star" className="w-8 h-8 flex-shrink-0" />
               <span className="text-xs font-medium text-neutral-500">{t('cityCard.rentalYield')}</span>
             </div>
             <span className="text-2xl sm:text-3xl font-black text-blue-600">{rentalYield}%</span>
@@ -689,7 +661,7 @@ const CityDashboard: React.FC = () => {
         </div>
 
         <p className="text-[10px] text-blue-500 mb-3 flex items-center gap-1">
-          <ShieldCheckIcon className="w-3 h-3" />
+          <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
           {t('exploreCities:ui.cityDashboard.pricesAnchoredToOfficialGovernment', 'Prices anchored to official government data — tap')} <span className="font-bold">{t('exploreCities:ui.cityDashboard.official', 'Official')}</span> {t('exploreCities:ui.cityDashboard.onThePriceCardTo', 'on the price card to see the BIS index.')}
         </p>
 
@@ -697,7 +669,7 @@ const CityDashboard: React.FC = () => {
         {hasBIS && (
           <div className="mb-6 flex flex-wrap items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <ShieldCheckIcon className="w-4 h-4 text-blue-600" />
+              <SoftIcon name="shield" className="w-5 h-5 flex-shrink-0" />
               <span className="text-xs font-bold text-blue-800 uppercase tracking-wide">{t('exploreCities:ui.cityDashboard.officialReference', 'Official Reference')}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -728,14 +700,14 @@ const CityDashboard: React.FC = () => {
           {/* Market Activity */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6">
             <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-violet-500" />
+              <SoftIcon name="calendar" className="w-6 h-6 flex-shrink-0" />
               {t('dashboard.marketActivity', 'Market Activity')}
             </h3>
             <div className="space-y-4">
               {/* Active listings */}
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <HomeIcon className="w-5 h-5 text-primary" />
+                  <SoftIcon name="home" className="w-6 h-6 flex-shrink-0" />
                   <span className="text-sm font-medium text-neutral-700">{t('dashboard.activeListings', 'Active Listings')}</span>
                 </div>
                 <span className="text-lg font-bold text-neutral-900">{listingsCount.toLocaleString()}</span>
@@ -743,7 +715,7 @@ const CityDashboard: React.FC = () => {
               {/* Sold last month */}
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <ChartBarIcon className="w-5 h-5 text-green-500" />
+                  <SoftIcon name="chart" className="w-6 h-6 flex-shrink-0" />
                   <span className="text-sm font-medium text-neutral-700">{t('dashboard.soldLastMonth', 'Sold Last Month')}</span>
                 </div>
                 <span className="text-lg font-bold text-neutral-900">{soldLastMonth.toLocaleString()}</span>
@@ -751,7 +723,7 @@ const CityDashboard: React.FC = () => {
               {/* Average days on market */}
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <CalendarIcon className="w-5 h-5 text-amber-500" />
+                  <SoftIcon name="calendar" className="w-6 h-6 flex-shrink-0" />
                   <span className="text-sm font-medium text-neutral-700">{t('cityCard.daysOnMarket')}</span>
                 </div>
                 <span className="text-lg font-bold text-neutral-900">{daysOnMarket} {t('cityCard.daysUnit')}</span>
@@ -759,13 +731,7 @@ const CityDashboard: React.FC = () => {
               {/* MoM Growth */}
               <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  {momGrowth > 0 ? (
-                    <ArrowTrendingUpIcon className="w-5 h-5 text-green-500" />
-                  ) : momGrowth < 0 ? (
-                    <ArrowTrendingDownIcon className="w-5 h-5 text-red-500" />
-                  ) : (
-                    <ChartBarIcon className="w-5 h-5 text-neutral-400" />
-                  )}
+                  <SoftIcon name={momGrowth > 0 ? 'trendUp' : momGrowth < 0 ? 'trendDown' : 'chart'} className="w-6 h-6 flex-shrink-0" />
                   <span className="text-sm font-medium text-neutral-700">{t('dashboard.momGrowth', 'Monthly Price Change')}</span>
                 </div>
                 <span className={`text-lg font-bold ${momGrowth > 0 ? 'text-green-600' : momGrowth < 0 ? 'text-red-600' : 'text-neutral-700'}`}>
@@ -778,7 +744,7 @@ const CityDashboard: React.FC = () => {
           {/* Demand & Investment Scores */}
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6">
             <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              <StarIcon className="w-5 h-5 text-amber-500" />
+              <SoftIcon name="star" className="w-6 h-6 flex-shrink-0" />
               {t('dashboard.investmentOverview', 'Investment Overview')}
             </h3>
             <div className="space-y-6">
@@ -786,7 +752,7 @@ const CityDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-neutral-700 flex items-center gap-2">
-                    <FireIcon className="w-4 h-4 text-amber-500" />
+                    <SoftIcon name="flame" className="w-5 h-5 flex-shrink-0" />
                     {t('cityCard.demand')}
                   </span>
                   <span className={`text-sm font-bold ${demandInfo.color} px-3 py-1 rounded-full bg-white border border-current/15`}>
@@ -810,7 +776,7 @@ const CityDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-neutral-700 flex items-center gap-2">
-                    <StarIcon className="w-4 h-4 text-blue-500" />
+                    <SoftIcon name="star" className="w-5 h-5 flex-shrink-0" />
                     {t('cityCard.investment')}
                   </span>
                   <span className={`text-sm font-bold ${investmentInfo.color} px-3 py-1 rounded-full bg-white border border-current/15`}>
@@ -851,7 +817,7 @@ const CityDashboard: React.FC = () => {
           {city.topNeighborhoods && city.topNeighborhoods.length > 0 && (
             <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6">
               <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                <BuildingOfficeIcon className="w-5 h-5 text-primary" />
+                <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
                 {t('sections.topNeighborhoods')}
               </h3>
               <div className="space-y-3">
@@ -871,7 +837,7 @@ const CityDashboard: React.FC = () => {
           {city.highlights && city.highlights.length > 0 && (
             <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6">
               <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                <ChartBarIcon className="w-5 h-5 text-violet-500" />
+                <SoftIcon name="chart" className="w-6 h-6 flex-shrink-0" />
                 {t('sections.marketInsights')}
               </h3>
               <div className="space-y-3">
@@ -890,7 +856,7 @@ const CityDashboard: React.FC = () => {
         <div className="flex items-center gap-3 mb-6">
           <div className="h-px flex-1 bg-blue-100" />
           <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest px-3 py-1 bg-blue-50 border border-blue-200 rounded-full flex items-center gap-1.5">
-            <ShieldCheckIcon className="w-3 h-3" />
+            <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
             {t('exploreCities:ui.cityDashboard.officialMarketData', 'Official Market Data')}
           </span>
           <div className="h-px flex-1 bg-blue-100" />
@@ -913,7 +879,7 @@ const CityDashboard: React.FC = () => {
             />
           ) : (
             <div className="text-center py-10 text-neutral-400 text-sm">
-              <ChartBarIcon className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
+              <SoftIcon name="chart" className="block w-12 h-12 mx-auto mb-2" />
               {t('exploreCities:ui.cityDashboard.priceHistoryIsBeingPrepared', 'Price history is being prepared for')} {city.city}.
             </div>
           )}
@@ -930,7 +896,7 @@ const CityDashboard: React.FC = () => {
         <div className="flex items-center gap-3 mb-6">
           <div className="h-px flex-1 bg-violet-100" />
           <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest px-3 py-1 bg-violet-50 border border-violet-200 rounded-full flex items-center gap-1.5">
-            <LightBulbIcon className="w-3 h-3" />
+            <SoftIcon name="lightbulb" className="w-4 h-4 flex-shrink-0" />
             {t('exploreCities:ui.cityDashboard.balkanestateAiAnalysis', 'BalkanEstate AI Analysis')}
           </span>
           <div className="h-px flex-1 bg-violet-100" />
@@ -942,7 +908,7 @@ const CityDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
             <div className="flex flex-col gap-1">
               <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                <MapPinIcon className="w-5 h-5 text-primary" />
+                <SoftIcon name="pin" className="w-6 h-6 flex-shrink-0" />
                 {t('exploreCities:ui.cityDashboard.exploreNeighborhoods', 'Explore Neighborhoods')}
               </h3>
               {suburbData && (
@@ -1018,7 +984,7 @@ const CityDashboard: React.FC = () => {
           {/* Error state */}
           {!suburbLoading && suburbError && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <GlobeAltIcon className="w-12 h-12 text-neutral-300 mb-3" />
+              <SoftIcon name="globe" className="w-12 h-12 mb-3 flex-shrink-0" />
               <p className="text-neutral-500 text-sm">
                 {t('exploreCities:ui.cityDashboard.neighborhoodDataIsBeingPrepared', 'Neighborhood data is being prepared. Check back soon.')}
               </p>
@@ -1052,7 +1018,7 @@ const CityDashboard: React.FC = () => {
                   {/* Mobile hint (shown only when nothing selected) */}
                   {!selectedSuburb && (
                     <p className="lg:hidden text-xs text-neutral-400 text-center -mt-1 mb-1 flex items-center justify-center gap-1">
-                      <MapPinIcon className="w-3 h-3" />
+                      <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                       {t('exploreCities:ui.cityDashboard.tapANeighbourhoodOnThe', 'Tap a neighbourhood on the map for details')}
                     </p>
                   )}
@@ -1068,7 +1034,7 @@ const CityDashboard: React.FC = () => {
                       />
                     ) : (
                       <div className="hidden lg:flex h-full flex-col items-center justify-center py-10 text-center border-2 border-dashed border-neutral-200 rounded-xl">
-                        <MapPinIcon className="w-10 h-10 text-neutral-300 mb-2" />
+                        <SoftIcon name="pin" className="w-12 h-12 mb-2 flex-shrink-0" />
                         <p className="text-sm font-medium text-neutral-500">{t('exploreCities:ui.cityDashboard.clickANeighborhood', 'Click a neighborhood')}</p>
                         <p className="text-xs text-neutral-400 mt-1">{t('exploreCities:ui.cityDashboard.toSeeDetailedStats', 'to see detailed stats')}</p>
                       </div>
@@ -1121,7 +1087,7 @@ const CityDashboard: React.FC = () => {
           {/* Empty state (no suburbs for this city) */}
           {!suburbLoading && !suburbError && (!suburbData || suburbData.suburbs.length === 0) && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <MapPinIcon className="w-12 h-12 text-neutral-300 mb-3" />
+              <SoftIcon name="pin" className="w-12 h-12 mb-3 flex-shrink-0" />
               <p className="text-neutral-500 text-sm">{t('exploreCities:ui.cityDashboard.noNeighborhoodDataAvailableFor', 'No neighborhood data available for')} {city.city} {t('exploreCities:ui.cityDashboard.yet', 'yet.')}</p>
             </div>
           )}
@@ -1130,7 +1096,7 @@ const CityDashboard: React.FC = () => {
         {/* Price Estimator - What different apartment sizes cost */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
           <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
-            <CurrencyEuroIcon className="w-5 h-5 text-green-600" />
+            <SoftIcon name="cash" className="w-6 h-6 flex-shrink-0" />
             {t('dashboard.priceEstimator', 'Price Estimator')}
           </h3>
           <p className="text-sm text-neutral-500 mb-5">{t('dashboard.priceEstimatorDesc', 'Estimated property prices based on average €{{price}}/m² in {{city}}', { price: avgPrice.toLocaleString(), city: city.city })}</p>
@@ -1155,7 +1121,7 @@ const CityDashboard: React.FC = () => {
         {/* What You Can Buy - Budget tiers */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
           <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
-            <HomeModernIcon className="w-5 h-5 text-primary" />
+            <SoftIcon name="houses" className="w-6 h-6 flex-shrink-0" />
             {t('dashboard.whatYouCanBuy', 'What Your Budget Gets You')}
           </h3>
           <p className="text-sm text-neutral-500 mb-5">{t('dashboard.whatYouCanBuyDesc', 'Approximate property sizes for different budgets in {{city}}', { city: city.city })}</p>
@@ -1198,7 +1164,7 @@ const CityDashboard: React.FC = () => {
         {/* Rental Income Calculator */}
         <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
           <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
-            <LightBulbIcon className="w-5 h-5 text-amber-500" />
+            <SoftIcon name="moneybag" className="w-6 h-6 flex-shrink-0" />
             {t('dashboard.rentalIncome', 'Rental Income Projections')}
           </h3>
           <p className="text-sm text-neutral-500 mb-5">{t('dashboard.rentalIncomeDesc', 'Estimated rental income based on {{yield}}% annual yield in {{city}}', { yield: rentalYield, city: city.city })}</p>
@@ -1235,7 +1201,7 @@ const CityDashboard: React.FC = () => {
         {countryCities && countryCities.length > 1 && (
           <div className="bg-white rounded-xl shadow-md border border-neutral-100 p-5 sm:p-6 mb-8">
             <h3 className="text-lg font-bold text-neutral-900 mb-2 flex items-center gap-2">
-              <ChartBarIcon className="w-5 h-5 text-blue-500" />
+              <SoftIcon name="chart" className="w-6 h-6 flex-shrink-0" />
               {t('dashboard.countryComparison', 'Price Comparison in {{country}}', { country: city.country })}
             </h3>
             <p className="text-sm text-neutral-500 mb-5">{t('dashboard.countryComparisonDesc', 'Average price per m² compared to other cities in {{country}}', { country: city.country })}</p>
@@ -1271,7 +1237,7 @@ const CityDashboard: React.FC = () => {
         {countryCities && countryCities.filter(c => c.city !== city.city).length > 0 && (
           <div className="mb-8">
             <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              <GlobeAltIcon className="w-5 h-5 text-fuchsia-500" />
+              <SoftIcon name="globe" className="w-6 h-6 flex-shrink-0" />
               {t('dashboard.otherCitiesIn', 'Other Cities in {{country}}', { country: city.country })}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1350,9 +1316,7 @@ const CityDashboard: React.FC = () => {
         <div className="mb-8 p-4 rounded-xl border border-neutral-200 bg-neutral-50">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex items-start gap-3 flex-1">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-sm flex-shrink-0">
-                <LightBulbIcon className="w-4 h-4 text-white" />
-              </div>
+              <SoftIcon name="lightbulb" className="w-9 h-9 flex-shrink-0" />
               <div>
                 <p className="text-xs font-bold text-violet-700 uppercase tracking-wide">{t('exploreCities:ui.cityDashboard.balkanestateAi', 'BalkanEstate AI')}</p>
                 <p className="text-[11px] text-neutral-500 mt-0.5">
@@ -1362,9 +1326,7 @@ const CityDashboard: React.FC = () => {
             </div>
             <div className="hidden sm:block w-px bg-neutral-200 self-stretch" />
             <div className="flex items-start gap-3 flex-1">
-              <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm flex-shrink-0">
-                <ShieldCheckIcon className="w-4 h-4 text-white" />
-              </div>
+              <SoftIcon name="shield" className="w-9 h-9 flex-shrink-0" />
               <div>
                 <p className="text-xs font-bold text-blue-700 uppercase tracking-wide">{t('exploreCities:ui.cityDashboard.officialSources', 'Official Sources')}</p>
                 <p className="text-[11px] text-neutral-500 mt-0.5 space-x-1">

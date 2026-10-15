@@ -316,11 +316,11 @@
       "sampleItemFoundFieldsWill": "Намерен примерен елемент — полетата ще бъдат съпоставени при импорта",
       "headerName": "Име на заглавката",
       "value": "Стойност",
-      "fieldMapping": "🔧 Съпоставяне на полета (",
+      "fieldMapping": "Съпоставяне на полета (",
       "fields": "полета)",
       "eGTitleImages0": "напр. title, images[0], $.item.name",
       "removeThisField": "Премахни полето",
-      "useJsonpathNotationForNested": "💡 Използвайте JSONPath нотация за вложени данни:",
+      "useJsonpathNotationForNested": "Използвайте JSONPath нотация за вложени данни:",
       "orBareKeysForTop": "или прости ключове за най-горното ниво:",
       "pleasePasteAJsonSample": "Поставете JSON пример за анализ."
     },

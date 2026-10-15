@@ -7,8 +7,8 @@ import {
   TrashIcon,
   EyeIcon,
   CheckIcon,
-  StarIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { PromotionPlan } from '../api/adminApi';
 
 // ============================================================================
@@ -249,7 +249,7 @@ export const EditPlanModal: React.FC<{
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
           <h3 className="text-xl font-bold flex items-center gap-2">
-            {plan.id ? <PencilIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
+            <SoftIcon name={plan.id ? 'pencil' : 'plus'} className="w-6 h-6 flex-shrink-0" />
             {plan.id ? t('admin:promotionPlans.editPlan', 'Edit Plan') : t('admin:promotionPlans.createPlan', 'Create Plan')}
           </h3>
           <div className="flex items-center gap-2">
@@ -341,7 +341,7 @@ export const EditPlanModal: React.FC<{
               {/* Pricing */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
                 <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                  <span className="text-lg">&euro;</span>
+                  <SoftIcon name="cash" className="w-6 h-6 flex-shrink-0" />
                   {t('admin:promotionPlans.pricing', 'Pricing')}
                   {plan.category === 'agency' && (
                     <span className="px-2 py-0.5 bg-amber-200 text-amber-700 text-xs font-bold rounded-full ml-auto">
@@ -468,7 +468,7 @@ export const EditPlanModal: React.FC<{
               {/* Features */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
                 <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
-                  <CheckIcon className="w-5 h-5" />
+                  <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
                   {t('admin:promotionPlans.features', 'Features')}
                 </h4>
                 <div className="space-y-2 mb-3 max-h-32 overflow-y-auto">
@@ -506,7 +506,7 @@ export const EditPlanModal: React.FC<{
               {/* Display Settings */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4">
                 <h4 className="font-semibold text-purple-900 mb-3 flex items-center gap-2">
-                  <StarIcon className="w-5 h-5" />
+                  <SoftIcon name="star" className="w-6 h-6 flex-shrink-0" />
                   {t('admin:promotionPlans.displaySettings', 'Display Settings')}
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
@@ -565,7 +565,7 @@ export const EditPlanModal: React.FC<{
                 {plan.isSpecialOffer && (
                   <div className="mt-4 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-xl p-4">
                     <h4 className="font-semibold text-rose-900 mb-3 flex items-center gap-2">
-                      <span className="text-lg">🔥</span>
+                      <SoftIcon name="flame" className="w-6 h-6 flex-shrink-0" />
                       {t('admin:promotionPlans.offerSettings', 'Special Offer Settings')}
                     </h4>
                     <div className="grid grid-cols-2 gap-4">

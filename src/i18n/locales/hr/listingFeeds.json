@@ -316,11 +316,11 @@
       "sampleItemFoundFieldsWill": "Pronađena primjer stavka — polja će se mapirati pri uvozu",
       "headerName": "Naziv zaglavlja",
       "value": "Vrijednost",
-      "fieldMapping": "🔧 Mapiranje polja (",
+      "fieldMapping": "Mapiranje polja (",
       "fields": "polja)",
       "eGTitleImages0": "npr. title, images[0], $.item.name",
       "removeThisField": "Ukloni ovo polje",
-      "useJsonpathNotationForNested": "💡 Koristite JSONPath notaciju za ugniježđene podatke:",
+      "useJsonpathNotationForNested": "Koristite JSONPath notaciju za ugniježđene podatke:",
       "orBareKeysForTop": "ili obične ključeve za najvišu razinu:",
       "pleasePasteAJsonSample": "Zalijepite JSON primjer za analizu."
     },

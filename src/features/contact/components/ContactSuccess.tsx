@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface ContactSuccessProps {
   onReset: () => void;
@@ -15,11 +16,7 @@ const ContactSuccess: React.FC<ContactSuccessProps> = ({ onReset }) => {
 
   return (
     <div className="text-center py-10 px-4">
-      <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100/80 backdrop-blur-sm mb-5">
-        <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
+      <SoftIcon name="check" className="mx-auto h-16 w-16 mb-5" />
       <h3 className="text-2xl font-bold text-neutral-900 mb-2">
         {t('contact:success.title', 'Message Sent!')}
       </h3>

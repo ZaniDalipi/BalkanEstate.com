@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface ProfileFormProps {
   agency: Record<string, unknown>;
@@ -41,7 +42,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ agency, onSave, isSaving }) =
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <SoftIcon name="building" className="w-7 h-7 flex-shrink-0" />
         {t('agencyDashboard:profile.basicInfo', 'Basic Information')}
       </h3>
 

@@ -9,6 +9,8 @@ import { Property } from '@/types';
 import { formatPrice } from '@/utils/currency';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { resolveDisplayArea } from '@/shared/property/area';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { PROMOTION_TIER_ICONS } from '../googleMapConstants';
 
 // Promotion tier colors
 const PROMOTION_TIER_COLORS: Record<string, string> = {
@@ -132,9 +134,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
-            </svg>
+            <SoftIcon name="building" className="w-10 h-10 opacity-70" />
           </div>
         )}
         {/* Gradient overlay */}
@@ -190,9 +190,7 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
             className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold text-white shadow backdrop-blur-sm"
             style={{ backgroundColor: `${PROMOTION_TIER_COLORS[property.promotionTier]}ee` }}
           >
-            {property.promotionTier === 'premium' ? '👑' :
-             property.promotionTier === 'highlight' ? '💎' :
-             property.promotionTier === 'featured' ? '⭐' : '✨'}
+            <SoftIcon name={PROMOTION_TIER_ICONS[property.promotionTier] ?? 'sparkles'} className="w-4 h-4" />
           </div>
         )}
 
@@ -222,19 +220,19 @@ const MapPropertyPopup: React.FC<MapPropertyPopupProps> = ({ property, onClose, 
         <div className="flex items-center gap-2 text-[10px] text-gray-600 mb-2">
           {property.propertyType !== 'land' && property.beds !== undefined && (
             <span className="flex items-center gap-0.5">
-              <span>🛏️</span>
+              <SoftIcon name="bed" className="w-4 h-4" />
               <span>{property.beds}</span>
             </span>
           )}
           {property.propertyType !== 'land' && property.baths !== undefined && (
             <span className="flex items-center gap-0.5">
-              <span>🚿</span>
+              <SoftIcon name="bath" className="w-4 h-4" />
               <span>{property.baths}</span>
             </span>
           )}
           {area && (
             <span className="flex items-center gap-0.5">
-              <span>📐</span>
+              <SoftIcon name="area" className="w-4 h-4" />
               <span>{area.value.toLocaleString()}m²</span>
             </span>
           )}

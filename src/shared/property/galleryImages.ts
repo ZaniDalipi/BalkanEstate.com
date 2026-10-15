@@ -1,34 +1,35 @@
 import { PROPERTY_IMAGE_TAGS, type PropertyImageTag } from '@/shared/types/property.types';
+import type { SoftIconName } from '@/src/shared/illustrations';
 
 export interface GalleryImage {
   url: string;
   tag: PropertyImageTag;
 }
 
-/** Icon shown next to each photo category in the gallery filters. */
-export const IMAGE_TAG_EMOJI: Record<PropertyImageTag | 'all', string> = {
-  all: '📷',
-  exterior: '🏠',
-  living_room: '🛋️',
-  kitchen: '🍳',
-  dining_room: '🍽️',
-  bedroom: '🛏️',
-  kids_room: '🧸',
-  bathroom: '🚿',
-  wc: '🚽',
-  hallway: '🚪',
-  office: '💼',
-  laundry: '🧺',
-  storage: '📦',
-  balcony: '🪴',
-  terrace: '☀️',
-  garden: '🌳',
-  pool: '🏊',
-  garage: '🚗',
-  basement: '🧱',
-  attic: '🪜',
-  view: '🌅',
-  other: '📸',
+/** Soft icon shown next to each photo category in the gallery filters. */
+export const IMAGE_TAG_ICONS: Record<PropertyImageTag | 'all', SoftIconName> = {
+  all: 'photo',
+  exterior: 'home',
+  living_room: 'sofa',
+  kitchen: 'kitchen',
+  dining_room: 'wine',
+  bedroom: 'bed',
+  kids_room: 'heart',
+  bathroom: 'bath',
+  wc: 'bath',
+  hallway: 'key',
+  office: 'desktop',
+  laundry: 'sparkles',
+  storage: 'cube',
+  balcony: 'balcony',
+  terrace: 'sun',
+  garden: 'tree',
+  pool: 'pool',
+  garage: 'car',
+  basement: 'building',
+  attic: 'houses',
+  view: 'mountain',
+  other: 'camera',
 };
 
 const isImageTag = (tag: unknown): tag is PropertyImageTag =>

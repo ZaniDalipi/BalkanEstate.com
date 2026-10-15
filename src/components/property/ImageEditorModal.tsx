@@ -7,6 +7,7 @@ import { Property } from '../../../types';
 import { useAppContext } from '../../../context/AppContext';
 import { createConversation, sendMessage, uploadMessageImage } from '../../../services/apiService';
 import { ArrowUturnLeftIcon, XMarkIcon, ArrowDownTrayIcon } from '../../../constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { navigate } from '@/src/app/router/navigation';
 // Aliased: this file's own `paths` are the strokes drawn on the image.
 import { paths as appPaths } from '@/src/app/router/paths';
@@ -411,11 +412,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
         <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10 p-4">
           <div className="bg-white rounded-xl p-5 sm:p-6 max-w-sm w-full shadow-2xl animate-fade-in">
             <div className="flex justify-center mb-3">
-              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+              <SoftIcon name="check" className="w-14 h-14" />
             </div>
 
             <h3 className="text-lg font-semibold text-gray-900 text-center mb-1">

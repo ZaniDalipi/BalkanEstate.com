@@ -316,11 +316,11 @@
       "sampleItemFoundFieldsWill": "U gjet një element shembull — fushat do të përputhen gjatë importit",
       "headerName": "Emri i kokës",
       "value": "Vlera",
-      "fieldMapping": "🔧 Përputhja e fushave (",
+      "fieldMapping": "Përputhja e fushave (",
       "fields": "fusha)",
       "eGTitleImages0": "p.sh., title, images[0], $.item.name",
       "removeThisField": "Hiq këtë fushë",
-      "useJsonpathNotationForNested": "💡 Përdorni shënimin JSONPath për të dhëna të ndërthurura:",
+      "useJsonpathNotationForNested": "Përdorni shënimin JSONPath për të dhëna të ndërthurura:",
       "orBareKeysForTop": "ose çelësa të thjeshtë për nivelin e parë:",
       "pleasePasteAJsonSample": "Ngjitni një shembull JSON për analizë."
     },

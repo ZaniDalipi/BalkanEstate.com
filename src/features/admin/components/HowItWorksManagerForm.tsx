@@ -1,15 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  PlayCircleIcon,
   PlusIcon,
   TrashIcon,
-  BookOpenIcon,
-  QuestionMarkCircleIcon,
-  SparklesIcon,
   ChevronUpIcon,
   ChevronDownIcon,
 } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import {
   type SiteContent,
   type Step,
@@ -25,14 +22,14 @@ import {
 interface ContentTypeOption {
   id: string;
   label: string;
-  icon: React.FC<{ className?: string }>;
+  icon: SoftIconName;
 }
 
 const CONTENT_TYPES: ContentTypeOption[] = [
-  { id: 'video', label: 'Video Tutorial', icon: PlayCircleIcon },
-  { id: 'guide', label: 'Step-by-Step Guide', icon: BookOpenIcon },
-  { id: 'faq', label: 'FAQ Section', icon: QuestionMarkCircleIcon },
-  { id: 'feature', label: 'Feature Highlight', icon: SparklesIcon },
+  { id: 'video', label: 'Video Tutorial', icon: 'video' },
+  { id: 'guide', label: 'Step-by-Step Guide', icon: 'clipboard' },
+  { id: 'faq', label: 'FAQ Section', icon: 'chat' },
+  { id: 'feature', label: 'Feature Highlight', icon: 'sparkles' },
 ];
 
 interface HowItWorksManagerFormProps {
@@ -91,7 +88,6 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {CONTENT_TYPES.map((type) => {
-                const Icon = type.icon;
                 return (
                   <button
                     key={type.id}
@@ -103,7 +99,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <Icon className="w-6 h-6" />
+                    <SoftIcon name={type.icon} className="w-8 h-8" />
                     <span className="text-sm font-medium">{t(`admin:lists.howItWorksContentTypes.${type.id}`, type.label)}</span>
                   </button>
                 );
@@ -411,7 +407,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
 
                 {formData.steps.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <BookOpenIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <SoftIcon name="clipboard" className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm">{t('admin:howItWorks.noStepsAdded')}</p>
                   </div>
                 )}
@@ -474,7 +470,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
 
                 {formData.faqs.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <QuestionMarkCircleIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <SoftIcon name="chat" className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm">{t('admin:howItWorks.noFaqsAdded')}</p>
                   </div>
                 )}
@@ -521,7 +517,7 @@ const HowItWorksManagerForm: React.FC<HowItWorksManagerFormProps> = ({
 
                 {formData.features.length === 0 && (
                   <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <SparklesIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <SoftIcon name="sparkles" className="w-8 h-8 mx-auto mb-2" />
                     <p className="text-sm">{t('admin:howItWorks.noFeaturesAdded')}</p>
                   </div>
                 )}

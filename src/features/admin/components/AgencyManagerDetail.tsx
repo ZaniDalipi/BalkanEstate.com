@@ -1,7 +1,8 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
+import { XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
 import { apiRequest } from '@/src/shared/api';
@@ -76,9 +77,7 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                     className="w-24 h-24 rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <BuildingOfficeIcon className="w-12 h-12 text-blue-600" />
-                  </div>
+                  <SoftIcon name="building" className="w-24 h-24 flex-shrink-0" />
                 )}
                 <div className="flex-1">
                   <h4 className="text-2xl font-bold text-gray-900">{viewingAgency.name}</h4>

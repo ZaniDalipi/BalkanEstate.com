@@ -5,6 +5,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { softIconHtml, type SoftIconName } from '@/src/shared/illustrations';
 
 interface Landmark {
   id: number;
@@ -35,20 +36,20 @@ interface LandmarksLayerProps {
   onLandmarkClick?: (landmark: Landmark) => void;
 }
 
-// Landmark type to icon emoji mapping
-const LANDMARK_ICONS: Record<LandmarkType, string> = {
-  monument: '🏛️',
-  museum: '🏛️',
-  castle: '🏰',
-  church: '⛪',
-  mosque: '🕌',
-  attraction: '⭐',
-  viewpoint: '🔭',
-  historic: '📜',
-  stadium: '🏟️',
-  university: '🎓',
-  hospital: '🏥',
-  park: '🌳',
+// Landmark type to soft icon mapping
+const LANDMARK_ICONS: Record<LandmarkType, SoftIconName> = {
+  monument: 'landmark',
+  museum: 'landmark',
+  castle: 'crown',
+  church: 'landmark',
+  mosque: 'landmark',
+  attraction: 'star',
+  viewpoint: 'eye',
+  historic: 'clipboard',
+  stadium: 'trophy',
+  university: 'gradCap',
+  hospital: 'plus',
+  park: 'tree',
 };
 
 // Landmark type colors for night mode
@@ -86,7 +87,7 @@ const getLandmarkType = (tags: Record<string, string>): LandmarkType => {
 
 // Create custom marker icon for landmark
 const createLandmarkIcon = (type: LandmarkType, isNightMode: boolean): L.DivIcon => {
-  const emoji = LANDMARK_ICONS[type];
+  const icon = softIconHtml(LANDMARK_ICONS[type], 22, 'vertical-align:middle;');
   const colors = LANDMARK_COLORS[type];
 
   const nightModeStyle = isNightMode
@@ -110,7 +111,7 @@ const createLandmarkIcon = (type: LandmarkType, isNightMode: boolean): L.DivIcon
         transition: transform 0.2s ease;
         cursor: pointer;
       " class="landmark-icon-inner">
-        ${emoji}
+        ${icon}
       </div>
     `,
     iconSize: [36, 36],
@@ -591,7 +592,7 @@ const LandmarksLayer: React.FC<LandmarksLayerProps> = ({
               gap: 8px;
               margin-bottom: 8px;
             ">
-              <span style="font-size: 20px;">${LANDMARK_ICONS[landmark.type]}</span>
+              ${softIconHtml(LANDMARK_ICONS[landmark.type], 22, 'vertical-align:middle;flex-shrink:0;')}
               <strong style="font-size: 14px;">${landmark.name}</strong>
             </div>
             ${landmark.tags.description ? `<p style="font-size: 12px; margin: 0; color: ${isNightMode ? '#94a3b8' : '#666'};">${landmark.tags.description}</p>` : ''}

@@ -5,7 +5,7 @@ import { Property, PropertyStatus, UserRole } from '../../types';
 import { formatPrice } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { useRealtimeProperties, useMyListingsInfinite } from '../../src/features/properties/hooks';
-import { EyeIcon, HeartIcon, InquiriesIcon, PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon, CalendarIcon } from '../../constants';
+import { PencilIcon, SparklesIcon, CheckCircleIcon, ClockIcon, ArrowPathIcon, BuildingOfficeIcon, TrashIcon } from '../../constants';
 import Modal from './Modal';
 import ListingCardSkeleton from './ListingCardSkeleton';
 import * as api from '../../services/apiService';
@@ -15,7 +15,7 @@ import { useUnfinishedListingDrafts } from '@/src/features/seller/hooks/useUnfin
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { useRouteView } from '@/src/app/router/useRouteView';
-import { ListingTypePicture } from '@/src/shared/illustrations';
+import { ListingTypePicture, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 // Video Icon component
 const VideoIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -39,16 +39,12 @@ const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
         }`}>
             {isAgent ? (
                 <>
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"/>
-                    </svg>
+                    <SoftIcon name="building" className="w-4 h-4" />
                     {t('account:roles.agent', 'Agent')}
                 </>
             ) : (
                 <>
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                    </svg>
+                    <SoftIcon name="home" className="w-4 h-4" />
                     {t('account:roles.privateSeller', 'Private Seller')}
                 </>
             )}
@@ -58,17 +54,17 @@ const RoleBadge: React.FC<{ role?: UserRole | string }> = ({ role }) => {
 
 const StatusBadge: React.FC<{ status: PropertyStatus }> = ({ status }) => {
     const { t } = useTranslation(['seller']);
-    const statusStyles: Record<string, { bg: string, text: string, icon?: React.ReactNode }> = {
-        active: { bg: 'bg-green-100', text: 'text-green-800', icon: <CheckCircleIcon className="w-4 h-4"/> },
-        draft: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: <PencilIcon className="w-4 h-4" /> },
-        pending: { bg: 'bg-blue-100', text: 'text-blue-800', icon: <ClockIcon className="w-4 h-4" /> },
-        sold: { bg: 'bg-neutral-200', text: 'text-neutral-700', icon: <CheckCircleIcon className="w-4 h-4" /> },
-        rented: { bg: 'bg-orange-100', text: 'text-orange-800', icon: <CheckCircleIcon className="w-4 h-4" /> },
+    const statusStyles: Record<string, { bg: string, text: string, icon: SoftIconName }> = {
+        active: { bg: 'bg-green-100', text: 'text-green-800', icon: 'check' },
+        draft: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'pencil' },
+        pending: { bg: 'bg-blue-100', text: 'text-blue-800', icon: 'clock' },
+        sold: { bg: 'bg-neutral-200', text: 'text-neutral-700', icon: 'tag' },
+        rented: { bg: 'bg-orange-100', text: 'text-orange-800', icon: 'key' },
     };
     const style = statusStyles[status] || statusStyles.draft;
     return (
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.text}`}>
-            {style.icon}
+            <SoftIcon name={style.icon} className="w-5 h-5" />
             <span className="capitalize">{t(`seller:myListings.${status}`, status)}</span>
         </span>
     );
@@ -117,7 +113,7 @@ const ListingCard: React.FC<{
             <div className="w-full sm:w-56 h-44 bg-neutral-100 rounded-lg overflow-hidden flex items-center justify-center">
                 {imageError ? (
                     <div className="w-full h-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center">
-                        <BuildingOfficeIcon className="w-12 h-12 text-neutral-400" />
+                        <SoftIcon name="building" className="w-12 h-12" />
                     </div>
                 ) : (
                     <img
@@ -138,9 +134,7 @@ const ListingCard: React.FC<{
                         <RoleBadge role={property.createdAsRole} />
                         {!hasValidCoordinates && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700" title={t('account:ui.myListings.thisPropertyWonTAppear', 'This property won\'t appear on the map. Edit to set location.')}>
-                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
-                                </svg>
+                                <SoftIcon name="warning" className="w-4 h-4" />
                                 {t('seller:myListings.noMapLocation', 'No Map Location')}
                             </span>
                         )}
@@ -169,12 +163,12 @@ const ListingCard: React.FC<{
             <div className="flex-grow"></div>
 
             <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-neutral-500 mt-3 pt-3 border-t">
-                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.views', 'Views')}><EyeIcon className="w-4 h-4" /> {property.views || 0}</div>
-                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.saves', 'Saves')}><HeartIcon className="w-4 h-4" /> {property.saves || 0}</div>
-                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.inquiries', 'Inquiries')}><InquiriesIcon className="w-4 h-4" /> {property.inquiries || 0}</div>
+                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.views', 'Views')}><SoftIcon name="eye" className="w-5 h-5" /> {property.views || 0}</div>
+                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.saves', 'Saves')}><SoftIcon name="heart" className="w-5 h-5" /> {property.saves || 0}</div>
+                <div className="flex items-center gap-1.5" title={t('account:ui.myListings.inquiries', 'Inquiries')}><SoftIcon name="chat" className="w-5 h-5" /> {property.inquiries || 0}</div>
                 {property.lastRenewed && isActionable && (
                     <div className="flex items-center gap-1.5 text-green-600" title={t('account:ui.myListings.lastRenewed', 'Last Renewed')}>
-                        <CalendarIcon className="w-4 h-4"/>
+                        <SoftIcon name="calendar" className="w-5 h-5" />
                         <span className="text-xs font-medium">
                             {new Date(property.lastRenewed).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
@@ -182,7 +176,7 @@ const ListingCard: React.FC<{
                 )}
                 {property.status === 'rented' && property.rentedUntil && (
                     <div className="flex items-center gap-1.5 text-orange-600" title={t('account:ui.myListings.rentedUntil', 'Rented until')}>
-                        <CalendarIcon className="w-4 h-4"/>
+                        <SoftIcon name="calendar" className="w-5 h-5" />
                         <span className="text-xs font-medium">
                             {t('seller:myListings.rentedUntil', 'Rented until {{date}}', { date: new Date(property.rentedUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) })}
                         </span>
@@ -1089,9 +1083,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                                     : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                             }`}
                         >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                            </svg>
+                            <SoftIcon name="home" className="w-5 h-5" />
                             {t('account:roles.privateSeller', 'Private Seller')} ({roleCounts.private_seller})
                         </button>
                         <button
@@ -1102,9 +1094,7 @@ const MyListings: React.FC<{ sellerId: string }> = ({ sellerId }) => {
                                     : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                             }`}
                         >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"/>
-                            </svg>
+                            <SoftIcon name="building" className="w-5 h-5" />
                             {t('account:roles.agent', 'Agent')} ({roleCounts.agent})
                         </button>
                     </div>

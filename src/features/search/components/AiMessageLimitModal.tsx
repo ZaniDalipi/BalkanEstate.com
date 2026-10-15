@@ -5,6 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import { UserRole } from '@/types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AiMessageLimitInfo {
   limit: number;
@@ -18,12 +19,6 @@ interface AiMessageLimitModalProps {
   onClose: () => void;
   limitInfo: AiMessageLimitInfo | null;
 }
-
-const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-  </svg>
-);
 
 const ArrowRightIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -62,9 +57,7 @@ const AiMessageLimitModal: React.FC<AiMessageLimitModalProps> = ({
         {/* Animated icon */}
         <div className="relative w-24 h-24 mx-auto mb-6">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full opacity-20 animate-pulse" />
-          <div className="absolute inset-2 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center">
-            <SparklesIcon className="w-10 h-10 text-white" />
-          </div>
+          <SoftIcon name="sparkles" className="absolute inset-2 w-20 h-20" />
         </div>
 
         {/* Title */}
@@ -93,23 +86,17 @@ const AiMessageLimitModal: React.FC<AiMessageLimitModalProps> = ({
           </p>
           <ul className="space-y-2">
             <li className="flex items-start gap-2 text-sm text-violet-700">
-              <svg className="w-5 h-5 text-violet-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
               {t('search:ai.limitReached.benefit1')}
             </li>
             <li className="flex items-start gap-2 text-sm text-violet-700">
-              <svg className="w-5 h-5 text-violet-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
               {isSeller
                 ? t('search:ai.limitReached.sellerBenefit2')
                 : t('search:ai.limitReached.buyerBenefit2')}
             </li>
             <li className="flex items-start gap-2 text-sm text-violet-700">
-              <svg className="w-5 h-5 text-violet-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
               {isSeller
                 ? t('search:ai.limitReached.sellerBenefit3')
                 : t('search:ai.limitReached.buyerBenefit3')}

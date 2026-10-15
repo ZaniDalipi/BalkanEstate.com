@@ -11,7 +11,8 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, ArrowPathIcon, CurrencyDollarIcon, CheckIcon } from '@/constants';
+import { PencilIcon, ArrowPathIcon, CheckIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { usePricingManager } from './usePricingManager';
 import PricingManagerForm from './PricingManagerForm';
 
@@ -71,7 +72,7 @@ const PricingManager: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold flex items-center gap-3">
-              <CurrencyDollarIcon className="w-7 h-7" />
+              <SoftIcon name="cash" className="w-8 h-8 flex-shrink-0" />
               {t('admin:pricing.title', 'Pricing & Products')}
             </h2>
             <p className="text-blue-200 mt-1">{t('admin:pricing.subtitle', 'Manage subscription plans and pricing')}</p>
@@ -151,8 +152,9 @@ const PricingManager: React.FC = () => {
                         <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                           {product.name}
                           {product.highlighted && (
-                            <span className="px-2 py-0.5 text-xs bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800 rounded-full font-medium border border-amber-200">
-                              ⭐ {t('admin:common.featured', 'Featured')}
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800 rounded-full font-medium border border-amber-200">
+                              <SoftIcon name="star" className="w-4 h-4 flex-shrink-0" />
+                              {t('admin:common.featured', 'Featured')}
                             </span>
                           )}
                         </div>

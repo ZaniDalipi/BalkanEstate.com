@@ -16,15 +16,16 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
-const ICON_CLASS = 'w-4 h-4 flex-shrink-0';
+const ICON_CLASS = 'w-5 h-5 flex-shrink-0';
 
 interface SectionDef {
   /** Matches the data-section attribute on the target element ('top' = page top) */
   key: string;
   labelKey: string;
   fallback: string;
-  icon: React.ReactNode;
+  icon: SoftIconName;
 }
 
 // Static definitions live outside the component so the scroll/active-tracking
@@ -35,91 +36,55 @@ const SECTION_DEFS: readonly SectionDef[] = [
     key: 'top',
     labelKey: 'property:sectionNav.overview',
     fallback: 'Overview',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-      </svg>
-    ),
+    icon: 'info',
   },
   {
     key: 'details',
     labelKey: 'property:sectionNav.details',
     fallback: 'Details',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
+    icon: 'clipboard',
   },
   {
     key: 'neighborhood',
     labelKey: 'property:sectionNav.neighborhood',
     fallback: 'Neighborhood',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
+    icon: 'houses',
   },
   {
     key: 'availability',
     labelKey: 'property:sectionNav.availability',
     fallback: 'Availability',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: 'calendar',
   },
   {
     key: 'map',
     labelKey: 'property:sectionNav.map',
     fallback: '3D Map',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-      </svg>
-    ),
+    icon: 'mapGrid',
   },
   {
     key: 'calculators',
     labelKey: 'property:sectionNav.calculators',
     fallback: 'Calculators',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m-6 4h.01M15 11h.01M9 15h.01M15 15h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
-      </svg>
-    ),
+    icon: 'calculator',
   },
   {
     key: 'price-history',
     labelKey: 'property:sectionNav.priceHistory',
     fallback: 'Price History',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-      </svg>
-    ),
+    icon: 'chart',
   },
   {
     key: 'area-prices',
     labelKey: 'property:sectionNav.areaPrices',
     fallback: 'Area Prices',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM12 8v6m-2-4.5c0-.828.895-1.5 2-1.5s2 .672 2 1.5-.895 1.5-2 1.5-2 .672-2 1.5.895 1.5 2 1.5 2-.672 2-1.5" />
-      </svg>
-    ),
+    icon: 'pin',
   },
   {
     key: 'similar',
     labelKey: 'property:sectionNav.similar',
     fallback: 'Similar Homes',
-    icon: (
-      <svg className={ICON_CLASS} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-      </svg>
-    ),
+    icon: 'home',
   },
 ] as const;
 
@@ -277,7 +242,7 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
                         : 'bg-white text-neutral-700 border-neutral-200 shadow-sm hover:bg-primary-light hover:text-primary-dark hover:border-primary/40'
                     }`}
                   >
-                    {s.icon}
+                    <SoftIcon name={s.icon} className={ICON_CLASS} />
                     <span>{s.label}</span>
                   </button>
                 </li>
@@ -344,7 +309,7 @@ const PropertySectionNav: React.FC<{ variant: 'bar' | 'rail' }> = ({ variant }) 
                       isActive ? 'text-primary-dark' : 'text-neutral-800 group-hover/item:text-primary'
                     }`}
                   >
-                    <span className={isActive ? 'text-primary' : 'text-neutral-500'}>{s.icon}</span>
+                    <SoftIcon name={s.icon} className={ICON_CLASS} />
                     {s.label}
                   </span>
                 </button>

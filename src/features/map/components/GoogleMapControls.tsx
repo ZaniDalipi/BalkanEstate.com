@@ -16,7 +16,23 @@ import {
 import L from 'leaflet';
 import { type MapStyleType, type ClimateRiskType } from './googleMapConstants';
 import { Legend, ClimateRiskLegend } from './GoogleMapLegend';
-import { SoftIcon } from '@/src/shared/illustrations';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
+
+const CLIMATE_RISK_ICONS: Record<Exclude<ClimateRiskType, 'none'>, SoftIconName> = {
+  flood: 'sea',
+  fire: 'flame',
+  wind: 'leafAutumn',
+  air: 'leaf',
+  heat: 'sun',
+};
+
+const MAP_STYLE_ICONS: Record<MapStyleType, SoftIconName> = {
+  clean: 'sparkles',
+  color: 'flower',
+  street: 'city',
+  satellite: 'globe',
+  hybrid: 'globe',
+};
 
 export interface GoogleMapControlsProps {
   isMobile: boolean;
@@ -200,11 +216,16 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                   <button
                     key={risk}
                     onClick={() => { setSelectedClimateRisk(risk); setIsClimateMenuOpen(false); }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
                       selectedClimateRisk === risk ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-700'
                     }`}
                   >
-                    {risk === 'none' ? `✕ ${t('search:map.climateRisks.none', 'None')}` : risk === 'flood' ? `💧 ${t('search:map.climateRisks.flood', 'Flood')}` : risk === 'fire' ? `🔥 ${t('search:map.climateRisks.fire', 'Fire')}` : risk === 'wind' ? `💨 ${t('search:map.climateRisks.wind', 'Wind')}` : risk === 'air' ? `🌬️ ${t('search:map.climateRisks.airQuality', 'Air Quality')}` : `☀️ ${t('search:map.climateRisks.heat', 'Heat')}`}
+                    {risk === 'none' ? `✕ ${t('search:map.climateRisks.none', 'None')}` : (
+                      <>
+                        <SoftIcon name={CLIMATE_RISK_ICONS[risk]} className="w-5 h-5 flex-shrink-0" />
+                        {risk === 'flood' ? t('search:map.climateRisks.flood', 'Flood') : risk === 'fire' ? t('search:map.climateRisks.fire', 'Fire') : risk === 'wind' ? t('search:map.climateRisks.wind', 'Wind') : risk === 'air' ? t('search:map.climateRisks.airQuality', 'Air Quality') : t('search:map.climateRisks.heat', 'Heat')}
+                      </>
+                    )}
                   </button>
                 ))}
               </div>
@@ -379,13 +400,16 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       <button
                         key={style}
                         onClick={() => setMapStyle(style)}
-                        className={`flex-1 py-1.5 text-[10px] font-semibold rounded-lg transition-all ${
+                        className={`flex-1 py-1.5 text-[10px] font-semibold rounded-lg transition-all flex items-center justify-center ${
                           mapStyle === style
                             ? 'bg-primary text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
+                        aria-label={t(`search:map.${style}`)}
+                        aria-pressed={mapStyle === style}
+                        title={t(`search:map.${style}`)}
                       >
-                        {style === 'clean' ? '✨' : style === 'color' ? '🎨' : style === 'street' ? '🗺️' : '🛰️'}
+                        <SoftIcon name={MAP_STYLE_ICONS[style]} className="w-5 h-5" />
                       </button>
                     ))}
                   </div>
@@ -448,13 +472,16 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       <button
                         key={risk}
                         onClick={() => setSelectedClimateRisk(risk)}
-                        className={`px-2 py-1 text-[10px] font-semibold rounded-lg transition-all ${
+                        className={`px-2 py-1 text-[10px] font-semibold rounded-lg transition-all flex items-center justify-center ${
                           selectedClimateRisk === risk
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
+                        aria-label={t(`search:map.climateRisks.${risk === 'air' ? 'airQuality' : risk}`)}
+                        aria-pressed={selectedClimateRisk === risk}
+                        title={t(`search:map.climateRisks.${risk === 'air' ? 'airQuality' : risk}`)}
                       >
-                        {risk === 'none' ? '✕' : risk === 'flood' ? '💧' : risk === 'fire' ? '🔥' : risk === 'wind' ? '💨' : risk === 'air' ? '🌬️' : '☀️'}
+                        {risk === 'none' ? '✕' : <SoftIcon name={CLIMATE_RISK_ICONS[risk]} className="w-5 h-5" />}
                       </button>
                     ))}
                   </div>
@@ -519,7 +546,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
                       aria-label={t('search:map.switchTo', { view: mapTypeLabel })}
                       title={t('search:map.switchTo', { view: mapTypeLabel })}
                     >
-                      <span className="text-base leading-none">{isSatellite ? '🗺️' : '🛰️'}</span>
+                      <SoftIcon name={isSatellite ? 'city' : 'globe'} className="w-5 h-5" />
                       <span className="text-[9px] font-semibold leading-none">{mapTypeLabel}</span>
                     </button>
                   );

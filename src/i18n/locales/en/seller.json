@@ -20,7 +20,7 @@
     "remainingListings": "{{count}} listing(s) remaining",
     "availableListings": "{{count}} listing(s) available",
     "shared": "(shared)",
-    "highlightCoupons": "🎟️ Highlight Coupons: {{available}}/{{total}}",
+    "highlightCoupons": "Highlight Coupons: {{available}}/{{total}}",
     "couponsDescription": "Use to promote your listings",
     "noSubscriptionData": "No subscription data",
     "proRequired": {
@@ -421,9 +421,9 @@
       "strict": "Strict",
       "nonRefundable": "Non-refundable",
       "included": "Included in Price",
-      "breakfast": "🍳 Breakfast",
-      "towels": "🛁 Towels & Linen",
-      "parking": "🚗 Parking"
+      "breakfast": "Breakfast",
+      "towels": "Towels & Linen",
+      "parking": "Parking"
     },
     "preview": {
       "banner": "Preview Mode",
@@ -987,7 +987,7 @@
       "avgPriceM": "Avg. Price/m²",
       "daysToSell": "Days to Sell",
       "yoyGrowth": "YoY Growth",
-      "liveMarketDataPoweredBy": "📊 Live market data powered by AI • Updated",
+      "liveMarketDataPoweredBy": "Live market data powered by AI • Updated",
       "marketTrends": "Market Trends",
       "timeOnMarket": "Time on Market",
       "proTip": "Pro Tip",
@@ -998,9 +998,9 @@
     },
     "roleSelector": {
       "promotionCoupons": "Promotion Coupons",
-      "featured": "⭐ Featured:",
+      "featured": "Featured:",
       "daysEach": "days each",
-      "highlighted": "🔥 Highlighted:",
+      "highlighted": "Highlighted:",
       "usedThisMonth": "Used this month:"
     },
     "whackAnIconAnimation": {

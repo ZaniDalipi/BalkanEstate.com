@@ -7,10 +7,8 @@ import {
   PencilIcon,
   CheckCircleIcon,
   XCircleIcon,
-  BookOpenIcon,
-  QuestionMarkCircleIcon,
-  SparklesIcon,
 } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { useHowItWorksManager, SUBSECTIONS, CATEGORIES, convertToYouTubeEmbedUrl, isYouTubeUrl } from './useHowItWorksManager';
 import HowItWorksManagerForm from './HowItWorksManagerForm';
 
@@ -47,12 +45,12 @@ const HowItWorksManager: React.FC = () => {
     removeFeature,
   } = useHowItWorksManager();
 
-  const getContentTypeIcon = (type: string) => {
+  const getContentTypeIcon = (type: string): SoftIconName => {
     switch (type) {
-      case 'guide': return <BookOpenIcon className="w-5 h-5" />;
-      case 'faq': return <QuestionMarkCircleIcon className="w-5 h-5" />;
-      case 'feature': return <SparklesIcon className="w-5 h-5" />;
-      default: return <PlayCircleIcon className="w-5 h-5" />;
+      case 'guide': return 'clipboard';
+      case 'faq': return 'chat';
+      case 'feature': return 'sparkles';
+      default: return 'video';
     }
   };
 
@@ -163,7 +161,7 @@ const HowItWorksManager: React.FC = () => {
                         )
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                          {getContentTypeIcon(item.contentType)}
+                          <SoftIcon name={getContentTypeIcon(item.contentType)} className="w-10 h-10" />
                           <span className="mt-2 text-sm font-medium text-gray-600 capitalize">
                             {item.contentType}
                           </span>
@@ -239,7 +237,7 @@ const HowItWorksManager: React.FC = () => {
 
       {filteredContent.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <BookOpenIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <SoftIcon name="clipboard" className="w-16 h-16 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">{t('admin:howItWorks.noContent')}</h3>
           <p className="text-gray-500 mb-4">{t('admin:howItWorks.noContentDesc')}</p>
           <button

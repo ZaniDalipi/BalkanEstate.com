@@ -7,6 +7,7 @@
 // solar altitude: white-yellow at midday, orange near the horizon.
 
 import React from 'react';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface SunIndicatorProps {
   /** Degrees clockwise from north. */
@@ -61,8 +62,8 @@ export const SunIndicator: React.FC<SunIndicatorProps> = ({ azimuth, altitude, b
         className="absolute left-0 right-0 top-0 h-px"
         style={{ background: 'linear-gradient(90deg, rgba(255,200,120,0) 0%, rgba(255,215,150,0.55) 12%, rgba(255,235,190,0.7) 50%, rgba(255,215,150,0.55) 88%, rgba(255,200,120,0) 100%)' }}
       />
-      <span className="absolute -top-2.5 -translate-x-1/2 text-sm leading-none opacity-80" style={{ left: `${sunriseAt}%` }}>{'\u{1F305}'}</span>
-      <span className="absolute -top-2.5 -translate-x-1/2 text-sm leading-none opacity-80" style={{ left: `${sunsetAt}%` }}>{'\u{1F307}'}</span>
+      <span className="absolute -top-2.5 -translate-x-1/2 leading-none opacity-90" style={{ left: `${sunriseAt}%` }}><SoftIcon name="sunrise" className="w-4 h-4" /></span>
+      <span className="absolute -top-2.5 -translate-x-1/2 leading-none opacity-90" style={{ left: `${sunsetAt}%` }}><SoftIcon name="sunset" className="w-4 h-4" /></span>
 
       {/* Full-width carrier moved with a transform (GPU-composited, no layout),
           so the sun glides in a straight line frame by frame */}

@@ -6,13 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGoogleMapLoader, GOOGLE_MAPS_MAP_ID } from '@/src/features/map/hooks/useGoogleMapLoader';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import {
-  MapPinIcon,
   PhoneIcon,
   XMarkIcon,
-  BuildingStorefrontIcon,
-  UserIcon,
-  CheckBadgeIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface BusinessDirectoryMapProps {
   listings: BusinessListing[];
@@ -201,7 +198,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
     return (
       <div className="w-full h-full flex items-center justify-center bg-neutral-100 rounded-2xl">
         <div className="text-center p-6">
-          <MapPinIcon className="w-10 h-10 text-neutral-400 mx-auto mb-3" />
+          <SoftIcon name="pin" className="block w-12 h-12 mx-auto mb-3" />
           <p className="text-neutral-600 font-medium">{t('map.loadError', 'Could not load map')}</p>
         </div>
       </div>
@@ -225,7 +222,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
     return (
       <div className="w-full h-full flex items-center justify-center bg-neutral-100 rounded-2xl">
         <div className="text-center p-6">
-          <MapPinIcon className="w-10 h-10 text-neutral-400 mx-auto mb-3" />
+          <SoftIcon name="pin" className="block w-12 h-12 mx-auto mb-3" />
           <p className="text-neutral-600 font-medium">{t('map.noLocations', 'No locations to display')}</p>
           <p className="text-neutral-400 text-sm mt-1">{t('map.noLocationsHint', 'Businesses with addresses will appear here on the map')}</p>
         </div>
@@ -342,14 +339,11 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
                           <h3 className="font-bold text-sm text-neutral-900 truncate flex items-center gap-1">
                             {selectedListing.name}
                             {selectedListing.isVerified && (
-                              <CheckBadgeIcon className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                              <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
                             )}
                           </h3>
                           <p className="text-xs text-neutral-500 flex items-center gap-1">
-                            {selectedListing.listingType === 'individual'
-                              ? <UserIcon className="w-3 h-3" />
-                              : <BuildingStorefrontIcon className="w-3 h-3" />
-                            }
+                            <SoftIcon name={selectedListing.listingType === 'individual' ? 'user' : 'store'} className="w-4 h-4 flex-shrink-0" />
                             {t(`categories.${selectedListing.category}`)}
                           </p>
                         </div>
@@ -367,7 +361,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
                   {/* Location */}
                   <div className="px-3 pb-2">
                     <div className="flex items-center gap-1.5 text-xs text-neutral-600">
-                      <MapPinIcon className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
+                      <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">
                         {selectedListing.address && `${selectedListing.address}, `}
                         {selectedListing.city}, {selectedListing.country}
@@ -436,7 +430,7 @@ const BusinessDirectoryMap: React.FC<BusinessDirectoryMapProps> = ({ listings, o
 
       {/* Listing count badge */}
       <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-neutral-200 text-xs font-medium text-neutral-700 flex items-center gap-1.5">
-        <MapPinIcon className="w-3.5 h-3.5 text-primary" />
+        <SoftIcon name="pin" className="w-4 h-4" />
         {t('map.listingCount', { count: mappableListings.length, defaultValue: '{{count}} on map' })}
       </div>
     </div>

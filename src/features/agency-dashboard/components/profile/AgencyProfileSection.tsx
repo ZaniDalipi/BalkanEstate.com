@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAgency, useUpdateAgency } from '@/src/features/agencies/hooks';
 import ProfileForm from './ProfileForm';
 import AchievementsPanel from './AchievementsPanel';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgencyProfileSectionProps {
   agencyId: string;
@@ -29,6 +30,7 @@ const AgencyProfileSection: React.FC<AgencyProfileSectionProps> = ({ agencyId })
   if (error || !agency) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <SoftIcon name="warning" className="w-12 h-12 mx-auto mb-2" />
         <p className="text-red-700 font-medium">
           {t('agencyDashboard:profile.loadError', 'Failed to load agency profile.')}
         </p>

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { getCurrencySymbol } from '@/utils/currency';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface RentAffordabilityCalculatorProps {
     property: Property;
@@ -35,9 +36,7 @@ const RentAffordabilityCalculator: React.FC<RentAffordabilityCalculatorProps> = 
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
             <div className="px-4 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
                 <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
+                    <SoftIcon name="calculator" className="w-7 h-7 flex-shrink-0" />
                     <h3 className="text-sm font-bold text-neutral-800">{t('rental:affordability.title', 'Rent Affordability')}</h3>
                 </div>
             </div>
@@ -96,25 +95,7 @@ const RentAffordabilityCalculator: React.FC<RentAffordabilityCalculatorProps> = 
                             isStretched ? 'bg-amber-50 border border-amber-200' :
                             'bg-red-50 border border-red-200'
                         }`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                isAffordable ? 'bg-emerald-100' :
-                                isStretched ? 'bg-amber-100' :
-                                'bg-red-100'
-                            }`}>
-                                {isAffordable ? (
-                                    <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                ) : isStretched ? (
-                                    <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                ) : (
-                                    <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                )}
-                            </div>
+                            <SoftIcon name={isAffordable ? 'check' : isStretched ? 'warning' : 'xmark'} className="w-8 h-8 flex-shrink-0" />
                             <div>
                                 <p className={`text-xs font-bold ${
                                     isAffordable ? 'text-emerald-800' : isStretched ? 'text-amber-800' : 'text-red-800'

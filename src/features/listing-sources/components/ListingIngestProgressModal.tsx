@@ -7,6 +7,7 @@ import type { IngestStats, ListingSource } from '../api/listingSourceApi';
 import { useOpenImportReview } from '../hooks/useOpenImportReview';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,12 +27,6 @@ interface Props {
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 const Ico = {
-  globe: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
-  check: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full"><path d="M20 6 9 17l-5-5"/></svg>,
-  plus:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-  arrow: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>,
-  clock: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-  warn:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
   ext:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
 };
 
@@ -93,7 +88,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
           <>
             <div className="w-10 h-10 rounded-full bg-white border border-emerald-200 text-emerald-600 flex items-center justify-center shadow-sm"
                  style={{ animation: 'pulse-glow 1.8s ease-in-out infinite' }}>
-              <div className="w-5 h-5">{Ico.globe}</div>
+              <SoftIcon name="globe" className="w-7 h-7" />
             </div>
             <div>
               <p className="text-emerald-700 font-semibold text-sm tracking-wide">{t('crawlScanning')}</p>
@@ -141,7 +136,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
           <>
             <div className="w-11 h-11 rounded-full bg-white border border-emerald-200 text-emerald-500 flex items-center justify-center shadow-sm"
                  style={{ animation: 'pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards' }}>
-              <div className="w-5 h-5">{Ico.check}</div>
+              <SoftIcon name="check" className="w-8 h-8" />
             </div>
             <p className="text-emerald-700 font-semibold text-sm">{t('importComplete')}</p>
           </>
@@ -151,7 +146,7 @@ const CrawlHero: React.FC<CrawlHeroProps> = memo(({ phase, fetched, processed, c
         {phase === 'error' && (
           <>
             <div className="w-11 h-11 rounded-full bg-white border border-red-200 text-red-400 flex items-center justify-center shadow-sm">
-              <div className="w-5 h-5">{Ico.warn}</div>
+              <SoftIcon name="warning" className="w-8 h-8" />
             </div>
             <p className="text-red-600 font-semibold text-sm">{t('importFailed')}</p>
           </>
@@ -164,7 +159,7 @@ CrawlHero.displayName = 'CrawlHero';
 
 // ─── StatRow ─────────────────────────────────────────────────────────────────
 
-interface StatItem { label: string; value: number; color: string; bgActive: string; ringActive: string; icon: React.ReactNode; }
+interface StatItem { label: string; value: number; color: string; bgActive: string; ringActive: string; icon: SoftIconName; }
 
 const AnimatedStat: React.FC<StatItem> = ({ label, value, color, bgActive, ringActive, icon }) => {
   const prevRef = useRef(value);
@@ -183,7 +178,7 @@ const AnimatedStat: React.FC<StatItem> = ({ label, value, color, bgActive, ringA
     <div className={`flex flex-col items-center gap-1 rounded-xl py-2.5 px-1 ring-1 transition-all duration-300 ${
       bumping ? `${bgActive} ${ringActive} shadow-sm` : 'bg-gray-50 ring-gray-100'
     }`} style={{ transform: bumping ? 'scale(1.07)' : 'scale(1)', transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.3s, box-shadow 0.3s' }}>
-      <div className={`w-4 h-4 ${color} opacity-70`}>{icon}</div>
+      <SoftIcon name={icon} className="w-5 h-5" />
       <span className={`text-xl font-extrabold tabular-nums leading-none ${color}`}
             style={{ transform: bumping ? 'scale(1.18)' : 'scale(1)', display: 'inline-block', transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {value}
@@ -325,11 +320,11 @@ const ListingIngestProgressModal: React.FC<Props> = ({
   try { sourceHost = sourceUrl ? new URL(sourceUrl).hostname.replace(/^www\./, '') : ''; } catch { /* */ }
 
   const statItems: StatItem[] = [
-    { label: t('statScanned'),  value: stats.fetched,   color: 'text-gray-600',    bgActive: 'bg-gray-100',    ringActive: 'ring-gray-300',    icon: Ico.globe  },
-    { label: t('statNew'),      value: stats.imported,  color: 'text-emerald-600', bgActive: 'bg-emerald-50',  ringActive: 'ring-emerald-300', icon: Ico.plus   },
-    { label: t('statUpdated'),  value: stats.updated,   color: 'text-blue-600',    bgActive: 'bg-blue-50',     ringActive: 'ring-blue-300',    icon: Ico.arrow  },
-    { label: t('statQueued'),   value: stats.deferred,  color: 'text-amber-600',   bgActive: 'bg-amber-50',    ringActive: 'ring-amber-300',   icon: Ico.clock  },
-    { label: t('statFailed'),   value: stats.failed,    color: 'text-red-500',     bgActive: 'bg-red-50',      ringActive: 'ring-red-300',     icon: Ico.warn   },
+    { label: t('statScanned'),  value: stats.fetched,   color: 'text-gray-600',    bgActive: 'bg-gray-100',    ringActive: 'ring-gray-300',    icon: 'globe'    },
+    { label: t('statNew'),      value: stats.imported,  color: 'text-emerald-600', bgActive: 'bg-emerald-50',  ringActive: 'ring-emerald-300', icon: 'plus'     },
+    { label: t('statUpdated'),  value: stats.updated,   color: 'text-blue-600',    bgActive: 'bg-blue-50',     ringActive: 'ring-blue-300',    icon: 'refresh'  },
+    { label: t('statQueued'),   value: stats.deferred,  color: 'text-amber-600',   bgActive: 'bg-amber-50',    ringActive: 'ring-amber-300',   icon: 'clock'    },
+    { label: t('statFailed'),   value: stats.failed,    color: 'text-red-500',     bgActive: 'bg-red-50',      ringActive: 'ring-red-300',     icon: 'warning'  },
   ];
 
   const incompleteCount = resolvedFinalStats?.incompleteCount ?? 0;
@@ -343,9 +338,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
 
         {/* ── Header ── */}
         <div className="flex items-center gap-3 pr-8">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0">
-            <div className="w-5 h-5">{Ico.globe}</div>
-          </div>
+          <SoftIcon name="globe" className="w-10 h-10 flex-shrink-0" />
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-bold text-gray-900 truncate leading-tight">{source.name}</h2>
             <div className="flex items-center gap-1.5 mt-0.5">
@@ -404,7 +397,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         {/* ── Error banner ── */}
         {phase === 'error' && errorMessage && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex gap-3">
-            <div className="text-red-400 w-4 h-4 flex-shrink-0 mt-0.5">{Ico.warn}</div>
+            <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-red-900">{t('listingFeeds:syncFailed')}</p>
               <p className="text-xs text-red-700 mt-0.5 break-all">{errorMessage}</p>
@@ -465,7 +458,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         {/* ── Completion banners ── */}
         {phase === 'finished' && reviewMode && queuedForReview > 0 && (
           <div className="bg-primary/5 border border-primary/30 rounded-xl px-4 py-3 flex gap-3">
-            <div className="text-primary w-4 h-4 flex-shrink-0 mt-0.5">{Ico.check}</div>
+            <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900">{t('listingFeeds:review.syncQueuedTitle')}</p>
               <p className="text-xs text-gray-600 mt-0.5">{t('listingFeeds:review.syncQueuedBody', { count: queuedForReview })}</p>
@@ -478,7 +471,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         )}
         {phase === 'finished' && !reviewMode && stats.imported > 0 && incompleteCount > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-3">
-            <div className="text-amber-500 w-4 h-4 flex-shrink-0 mt-0.5">{Ico.warn}</div>
+            <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-amber-900">{t('listingFeeds:incompleteListingsTitle')}</p>
               <p className="text-xs text-amber-700 mt-0.5">{t('listingFeeds:incompleteListingsBody', { count: incompleteCount })}</p>
@@ -491,7 +484,7 @@ const ListingIngestProgressModal: React.FC<Props> = ({
         )}
         {phase === 'finished' && !reviewMode && stats.imported > 0 && !incompleteCount && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex gap-3">
-            <div className="text-emerald-500 w-4 h-4 flex-shrink-0 mt-0.5">{Ico.check}</div>
+            <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-emerald-900">{t('listingFeeds:incompleteListingsTitle')}</p>
               <p className="text-xs text-emerald-700 mt-0.5">{t('listingFeeds:incompleteListingsBodyGeneric')}</p>

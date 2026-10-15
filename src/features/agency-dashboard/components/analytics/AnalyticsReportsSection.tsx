@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAgencyAnalytics } from '../../hooks';
 import { exportAnalyticsCsv } from '../../api/agencyDashboardApi';
-import { ArrowDownTrayIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import TimeSeriesChart from './TimeSeriesChart';
 import AgentComparisonChart from './AgentComparisonChart';
 
@@ -79,7 +79,7 @@ const AnalyticsReportsSection: React.FC<AnalyticsReportsSectionProps> = ({ agenc
             disabled={isExporting || isLoading}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <ArrowDownTrayIcon className="w-4 h-4" />
+            <SoftIcon name="download" className="w-5 h-5 flex-shrink-0" />
             {isExporting
               ? t('agencyDashboard:analytics.exporting', 'Exporting...')
               : t('agencyDashboard:analytics.exportCsv', 'Export CSV')}

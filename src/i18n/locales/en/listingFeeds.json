@@ -317,11 +317,11 @@
       "headerName": "Header name",
       "value": "Value",
       "xApiKey": "X-API-Key",
-      "fieldMapping": "🔧 Field mapping (",
+      "fieldMapping": "Field mapping (",
       "fields": "fields)",
       "eGTitleImages0": "e.g., title, images[0], $.item.name",
       "removeThisField": "Remove this field",
-      "useJsonpathNotationForNested": "💡 Use JSONPath notation for nested data:",
+      "useJsonpathNotationForNested": "Use JSONPath notation for nested data:",
       "orBareKeysForTop": "or bare keys for top-level:",
       "pleasePasteAJsonSample": "Please paste a JSON sample to analyze."
     },

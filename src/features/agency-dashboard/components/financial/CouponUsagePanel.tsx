@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TicketIcon, CheckBadgeIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { CouponInfo } from '../../types';
 
 interface CouponSummary {
@@ -120,7 +120,7 @@ const CouponSection: React.FC<CouponSectionProps> = ({
                   className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50 rounded-lg text-xs"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <TicketIcon className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    <SoftIcon name="ticket" className="w-4 h-4 flex-shrink-0" />
                     <span className="font-mono text-gray-700 truncate">{coupon.code}</span>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -133,7 +133,7 @@ const CouponSection: React.FC<CouponSectionProps> = ({
                       <span className="text-gray-400">{formatDate(coupon.usedAt)}</span>
                     )}
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize ${statusStyles[coupon.status]}`}>
-                      {coupon.status === 'used' && <CheckBadgeIcon className="w-3 h-3" />}
+                      {coupon.status === 'used' && <SoftIcon name="check" className="w-3.5 h-3.5 flex-shrink-0" />}
                       {coupon.status}
                     </span>
                   </div>
@@ -182,7 +182,8 @@ const CouponUsagePanel: React.FC<CouponUsagePanelProps> = ({
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+        <SoftIcon name="ticket" className="w-7 h-7 flex-shrink-0" />
         {t('agencyDashboard:financial.coupons', 'Coupons')}
       </h3>
       <div className="space-y-6">

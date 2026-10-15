@@ -11,14 +11,8 @@ import { AppView } from '@/types';
 import { getMyListings } from '@/src/features/properties/api/propertyApi';
 import RentalDashboardStats from '@/src/features/rental/components/RentalDashboardStats';
 import {
-  ChartBarIcon,
-  EyeIcon,
-  HomeIcon,
   DocumentArrowDownIcon,
   ArrowLeftIcon,
-  StarIcon,
-  ClockIcon,
-  SparklesIcon,
 } from '@/constants';
 import {
   StatCard,
@@ -277,7 +271,7 @@ const AnalyticsPage: React.FC = () => {
                     </h1>
                     {isPremium && (
                       <span className="flex items-center gap-1 px-2.5 py-1 bg-amber-400/90 text-amber-900 text-xs font-bold rounded-full">
-                        <StarIcon className="h-3 w-3" />
+                        <SoftIcon name="star" className="h-4 w-4" />
                         PRO
                       </span>
                     )}
@@ -384,7 +378,7 @@ const AnalyticsPage: React.FC = () => {
             title={t('analytics:stats.today')}
             value={dashboard?.overview?.todayViews || 0}
             subtitle={t('analytics:stats.liveViews')}
-            icon={ClockIcon}
+            icon="clock"
             loading={isLoading}
             color="blue"
             delay={0}
@@ -393,7 +387,7 @@ const AnalyticsPage: React.FC = () => {
             title={t('analytics:stats.weekly')}
             value={dashboard?.overview?.weeklyViews || 0}
             change={dashboard?.overview?.weeklyChange}
-            icon={ChartBarIcon}
+            icon="chart"
             loading={isLoading}
             color="purple"
             delay={100}
@@ -402,7 +396,7 @@ const AnalyticsPage: React.FC = () => {
             title={t('analytics:stats.monthly')}
             value={dashboard?.overview?.monthlyViews || 0}
             change={dashboard?.overview?.monthlyChange}
-            icon={EyeIcon}
+            icon="eye"
             loading={isLoading}
             color="green"
             chartData={weeklyData}
@@ -412,7 +406,7 @@ const AnalyticsPage: React.FC = () => {
             title={t('analytics:stats.properties')}
             value={dashboard?.overview?.totalProperties || 0}
             subtitle={t('analytics:stats.activeProperties', { count: dashboard?.overview?.activeProperties || 0 })}
-            icon={HomeIcon}
+            icon="home"
             loading={isLoading}
             color="orange"
             delay={300}
@@ -421,7 +415,7 @@ const AnalyticsPage: React.FC = () => {
             title={t('analytics:stats.avgPerProperty')}
             value={dashboard?.overview?.avgViewsPerProperty || 0}
             subtitle={t('analytics:stats.promoted', { count: dashboard?.overview?.promotedProperties || 0 })}
-            icon={StarIcon}
+            icon="star"
             loading={isLoading}
             color="blue"
             delay={400}

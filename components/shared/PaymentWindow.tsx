@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
 import {
-  CreditCardIcon,
   CheckCircleIcon,
-  ClockIcon,
-  LockClosedIcon,
   ArrowTopRightOnSquareIcon,
-  ExclamationTriangleIcon,
 } from '../../constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '../../context/AppContext';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
@@ -720,9 +717,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           <div className="space-y-6">
             {/* Header */}
             <div className="text-center pb-4 border-b border-neutral-200">
-              <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <CheckCircleIcon className="w-10 h-10 text-white" />
-              </div>
+              <SoftIcon name="check" className="w-20 h-20 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-neutral-800 mb-2">
                 {subscriptionCheck.isSamePlan ? t('payment:subscription.alreadySubscribed') : t('payment:subscription.subscriptionActive')}
               </h2>
@@ -757,9 +752,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             {/* Info Message */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex gap-3">
-                <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <SoftIcon name="info" className="w-7 h-7 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-blue-900 mb-1">
                     {subscriptionCheck.isDowngrade ? t('payment:subscription.wantToSwitch') : t('payment:subscription.manageYourSubscription')}
@@ -807,9 +800,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       return (
         <Modal isOpen={isOpen} onClose={onClose} title="" fullScreenOnMobile>
           <div className="max-w-md mx-auto text-center py-4 sm:py-6">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <ExclamationTriangleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
-            </div>
+            <SoftIcon name="warning" className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4" />
             <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-2">{t('payment:ui.paymentWindow.activationFailed', 'Activation Failed')}</h2>
             <p className="text-sm text-neutral-600 mb-2 px-2">{errorMessage}</p>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-5 text-left">
@@ -845,9 +836,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       return (
         <Modal isOpen={isOpen} onClose={onClose} title="" fullScreenOnMobile>
           <div className="text-center py-4 sm:py-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg animate-bounce">
-              <CheckCircleIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
-            </div>
+            <SoftIcon name="check" className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 animate-bounce" />
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2 sm:mb-3">
               {t('payment:ui.paymentWindow.subscriptionActivated', 'Subscription Activated!')}
             </h2>
@@ -856,9 +845,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             </p>
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4 sm:mb-6 text-left">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                </div>
+                <SoftIcon name="check" className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-green-800 text-sm sm:text-base">{planName}</p>
                   <p className="text-xs sm:text-sm text-green-600">{t('payment:ui.paymentWindow.nowActiveOnYourAccount', 'Now active on your account')}</p>
@@ -910,7 +897,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                       <div className="p-3 sm:p-4">
                         <div className="flex justify-between items-start mb-3 sm:mb-4">
                           <div className="w-8 h-5 sm:w-10 sm:h-6 bg-amber-300 rounded-sm"></div>
-                          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>
+                          <SoftIcon name="lightbulb" className="w-5 h-5 sm:w-6 sm:h-6 opacity-70" />
                         </div>
                         <div className="flex gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                           <div className="h-1.5 w-6 sm:w-8 bg-white/30 rounded"></div>
@@ -956,7 +943,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   {appliedDiscountCode && codeValidation?.valid && (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 sm:gap-2">
-                        <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                        <SoftIcon name="check" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                         <div>
                           <p className="text-xs sm:text-sm text-green-700 font-medium">
                             {t('payment:checkout.codeApplied', { code: appliedDiscountCode })}
@@ -977,7 +964,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 {/* Free activation info */}
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
                   <div className="flex gap-2 sm:gap-3">
-                    <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                    <SoftIcon name="check" className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0" />
                     <div className="flex-1">
                       <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">{t('payment:checkout.freeSubscriptionReady')}</p>
                       <p className="text-[10px] sm:text-xs text-green-700 leading-relaxed">
@@ -1020,11 +1007,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     className="w-full p-3 sm:p-4 flex items-center justify-between gap-3 hover:bg-primary/10 transition-colors"
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-                        </svg>
-                      </div>
+                      <SoftIcon name="ticket" className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
                       <div className="text-left">
                         <p className="text-sm sm:text-base font-semibold text-neutral-800">{t('payment:checkout.haveCoupon')}</p>
                         <p className="text-[10px] sm:text-xs text-neutral-500">{t('payment:checkout.enterCodeToActivate')}</p>
@@ -1095,7 +1078,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                         {appliedDiscountCode && codeValidation?.valid && (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-2.5 flex items-center justify-between gap-2 mb-3">
                             <div className="flex items-center gap-2">
-                              <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                              <SoftIcon name="check" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                               <div>
                                 <p className="text-xs sm:text-sm text-green-700 font-medium">{t('payment:checkout.codeApplied', { code: appliedDiscountCode })}</p>
                                 <p className="text-[10px] sm:text-xs text-green-600">{codeValidation.message}</p>
@@ -1117,9 +1100,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 {/* Option 2: Self-payment (Coming soon) */}
                 <div className="rounded-lg sm:rounded-xl border border-neutral-200 bg-neutral-50 p-3 sm:p-4">
                   <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                      <CreditCardIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
-                    </div>
+                    <SoftIcon name="creditCard" className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
                     <div>
                       <p className="text-sm sm:text-base font-semibold text-neutral-800">{t('payment:comingSoon.selfServicePayment')}</p>
                       <p className="text-[10px] sm:text-xs text-neutral-500">{t('payment:comingSoon.launchingSoon')}</p>
@@ -1128,7 +1109,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                   {/* Payment method badges */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
-                      <CreditCardIcon className="w-3 h-3" /> {t('payment:ui.paymentWindow.card', 'Card')}
+                      <SoftIcon name="creditCard" className="w-4 h-4" /> {t('payment:ui.paymentWindow.card', 'Card')}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none"><path d="M12.24 10.285V14.4h5.92c-.24 1.54-1.77 4.5-5.92 4.5-3.56 0-6.47-2.95-6.47-6.58s2.91-6.58 6.47-6.58c2.03 0 3.39.86 4.17 1.61l2.84-2.73C17.46 3.09 15.1 2 12.24 2 6.73 2 2.24 6.48 2.24 12s4.49 10 10 10c5.77 0 9.6-4.06 9.6-9.77 0-.66-.07-1.16-.16-1.66h-9.44z" fill="#4285F4"/></svg>
@@ -1139,7 +1120,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                       {t('payment:ui.paymentWindow.applePay', 'Apple Pay')}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-neutral-200 rounded text-[10px] sm:text-xs text-neutral-600 font-medium">
-                      <svg className="w-3 h-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" /></svg>
+                      <SoftIcon name="landmark" className="w-4 h-4" />
                       {t('payment:ui.paymentWindow.bank', 'Bank')}
                     </span>
                   </div>
@@ -1158,9 +1139,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                     href="mailto:sales@balkanestateai.com?subject=Subscription%20Request%20-%20BalkanEstate"
                     className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-lg hover:from-primary-dark hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                    <SoftIcon name="envelope" className="w-5 h-5" />
                     {t('payment:ui.paymentWindow.salesBalkanestateaiCom', 'sales@balkanestateai.com')}
                   </a>
                   <p className="text-[10px] sm:text-xs text-neutral-400 mt-2">{t('payment:comingSoon.responseTime')}</p>
@@ -1218,7 +1197,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             {/* Instructions */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <div className="flex gap-3">
-                <ClockIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                <SoftIcon name="clock" className="w-7 h-7 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-amber-900 mb-1">
                     {t('payment:inProgress.waitingTitle')}
@@ -1233,7 +1212,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             {/* Auto-renewal notice */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex gap-3">
-                <CreditCardIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                <SoftIcon name="creditCard" className="w-7 h-7 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-blue-900 mb-1">
                     {t('payment:inProgress.subscriptionInfo')}
@@ -1282,9 +1261,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
       <div className="max-w-md mx-auto">
         {showError ? (
           <div className="text-center py-6 sm:py-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ExclamationTriangleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
-            </div>
+            <SoftIcon name="warning" className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4" />
             <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 mb-2">
               {t('payment:errors.title')}
             </h2>
@@ -1319,9 +1296,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
         ) : showSuccess ? (
           <div className="text-center py-8">
             {/* Success Animation */}
-            <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce">
-              <CheckCircleIcon className="w-14 h-14 text-white" />
-            </div>
+            <SoftIcon name="check" className="w-24 h-24 mx-auto mb-6 animate-bounce" />
 
             <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-3">
               {t('payment:success.title')}
@@ -1334,9 +1309,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             {/* Plan activated info */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-left">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
-                </div>
+                <SoftIcon name="check" className="w-10 h-10 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-green-800">{planName}</p>
                   <p className="text-sm text-green-600">{t('payment:success.nowActive')}</p>
@@ -1370,9 +1343,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
           <div className="space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="text-center pb-3 sm:pb-4 border-b border-neutral-200">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary to-primary-dark rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
-                <CreditCardIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-              </div>
+              <SoftIcon name="creditCard" className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4" />
               <h2 className="text-lg sm:text-2xl font-bold text-neutral-800 mb-1 sm:mb-2">{t('payment:checkout.secureCheckout')}</h2>
               <p className="text-xs sm:text-sm text-neutral-500">{t('payment:checkout.secureCheckoutDescription')}</p>
             </div>
@@ -1449,7 +1420,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               {appliedDiscountCode && codeValidation?.valid && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3 flex items-center justify-between gap-2 mb-2 sm:mb-3">
                   <div className="flex items-center gap-1.5 sm:gap-2">
-                    <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                    <SoftIcon name="check" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                     <div>
                       <p className="text-xs sm:text-sm text-green-700 font-medium">
                         {t('payment:checkout.codeApplied', { code: appliedDiscountCode })}
@@ -1468,7 +1439,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
 
               {discountPercent > 0 && !appliedDiscountCode && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-2 sm:p-3 flex items-center gap-1.5 sm:gap-2">
-                  <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                  <SoftIcon name="check" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   <p className="text-xs sm:text-sm text-green-700 font-medium">
                     {t('payment:checkout.discountApplied', { percent: discountPercent })}
                   </p>
@@ -1479,7 +1450,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             {/* Security Notice */}
             {finalPrice === 0 || finalPrice < 0.01 ? (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
-                <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <SoftIcon name="check" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs sm:text-sm font-semibold text-green-900 mb-0.5 sm:mb-1">{t('payment:checkout.freeSubscriptionActivated')}</p>
                   <p className="text-[10px] sm:text-xs text-green-700 leading-relaxed">
@@ -1489,7 +1460,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               </div>
             ) : (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
-                <LockClosedIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <SoftIcon name="lock" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs sm:text-sm font-semibold text-blue-900 mb-0.5 sm:mb-1">{t('payment:checkout.secureExternalPayment')}</p>
                   <p className="text-[10px] sm:text-xs text-blue-700 leading-relaxed">
@@ -1504,7 +1475,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
               <div className="flex flex-wrap items-center justify-center gap-3 py-2">
                 {/* Card */}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
-                  <CreditCardIcon className="w-4 h-4 text-neutral-500" />
+                  <SoftIcon name="creditCard" className="w-5 h-5" />
                   <span className="text-xs text-neutral-600 font-medium">{t('payment:ui.paymentWindow.card', 'Card')}</span>
                 </div>
                 {/* Google Pay */}
@@ -1523,9 +1494,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
                 </div>
                 {/* Bank Transfer */}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg">
-                  <svg className="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                  </svg>
+                  <SoftIcon name="landmark" className="w-5 h-5" />
                   <span className="text-xs text-neutral-600 font-medium">{t('payment:ui.paymentWindow.bank', 'Bank')}</span>
                 </div>
               </div>
@@ -1534,9 +1503,7 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             {/* Tax/VAT Notice */}
             {finalPrice > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 flex gap-2 sm:gap-3">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <SoftIcon name="info" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs sm:text-sm font-semibold text-amber-900 mb-0.5 sm:mb-1">
                     {t('payment:taxNotice.title')}
@@ -1623,12 +1590,12 @@ const PaymentWindow: React.FC<PaymentWindowProps> = ({
             <div className="pt-3 sm:pt-4 border-t border-neutral-200">
               <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-neutral-400">
                 <div className="flex items-center gap-1">
-                  <LockClosedIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <SoftIcon name="lock" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>{t('payment:checkout.sslSecured')}</span>
                 </div>
                 <span className="hidden sm:inline">•</span>
                 <div className="flex items-center gap-1">
-                  <CheckCircleIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                  <SoftIcon name="shield" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>{t('payment:checkout.pciCompliant')}</span>
                 </div>
                 <span className="hidden sm:inline">•</span>

@@ -9,18 +9,8 @@
 import React from 'react';
 import type { SuburbEntry } from '@/src/shared/types/suburb.types';
 import { buildApartmentPriceEstimates, formatTypicalSize } from '../utils/priceEstimates';
-import {
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  MapPinIcon,
-  HomeIcon,
-  FireIcon,
-  CalendarIcon,
-  CurrencyEuroIcon,
-  StarIcon,
-  ChartBarIcon,
-  ShieldCheckIcon,
-} from '@/constants';
+import { MapPinIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 import i18n from '@/src/i18n';
@@ -68,7 +58,8 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
   // a grid of confident "€0" tiles.
   const aptPrices = buildApartmentPriceEstimates(stats.avgPricePerSqm);
 
-  const rankLabel = rank === 1 ? '🥇 Most Premium' : rank === 2 ? '🥈 2nd Premium' : rank === 3 ? '🥉 3rd Premium' : `#${rank}`;
+  const rankLabel = rank === 1 ? 'Most Premium' : rank === 2 ? '2nd Premium' : rank === 3 ? '3rd Premium' : `#${rank}`;
+  const rankMedal: SoftIconName | null = rank === 1 ? 'medal1' : rank === 2 ? 'medal2' : rank === 3 ? 'medal3' : null;
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-neutral-100 overflow-hidden flex flex-col">
@@ -85,13 +76,16 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <MapPinIcon className="w-4 h-4 text-primary flex-shrink-0" />
+              <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
               <h3 className="text-base font-bold text-neutral-900 truncate">{name}</h3>
             </div>
             {nameLocal && nameLocal !== name && (
               <p className="text-xs text-neutral-400 mt-0.5 ml-6 truncate">{nameLocal}</p>
             )}
-            <span className="inline-block ml-6 mt-1 text-[10px] font-semibold text-neutral-500">{rankLabel}</span>
+            <span className="inline-flex items-center gap-1 ml-6 mt-1 text-[10px] font-semibold text-neutral-500">
+              {rankMedal && <SoftIcon name={rankMedal} className="w-4 h-4" />}
+              {rankLabel}
+            </span>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -143,9 +137,7 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
         <div className="grid grid-cols-2 gap-2">
           <div className="p-3 bg-neutral-50 rounded-lg">
             <div className="flex items-center gap-1.5 mb-1">
-              {growthPos
-                ? <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-green-500" />
-                : <ArrowTrendingDownIcon className="w-3.5 h-3.5 text-red-500" />}
+              <SoftIcon name={growthPos ? 'trendUp' : 'trendDown'} className="w-5 h-5 flex-shrink-0" />
               <span className="text-[10px] text-neutral-500 font-medium">{t('exploreCities:ui.suburbDetailPanel.yoyGrowth', 'YoY Growth')}</span>
             </div>
             <div className={`text-xl font-black ${growthPos ? 'text-green-600' : 'text-red-500'}`}>
@@ -155,7 +147,7 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
 
           <div className="p-3 bg-neutral-50 rounded-lg">
             <div className="flex items-center gap-1.5 mb-1">
-              <StarIcon className="w-3.5 h-3.5 text-blue-500" />
+              <SoftIcon name="star" className="w-5 h-5 flex-shrink-0" />
               <span className="text-[10px] text-neutral-500 font-medium">{t('exploreCities:ui.suburbDetailPanel.rentalYield', 'Rental Yield')}</span>
             </div>
             <div className="text-xl font-black text-blue-600">{stats.rentalYield}%</div>
@@ -163,7 +155,7 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
 
           <div className="p-3 bg-neutral-50 rounded-lg">
             <div className="flex items-center gap-1.5 mb-1">
-              <CalendarIcon className="w-3.5 h-3.5 text-amber-500" />
+              <SoftIcon name="calendar" className="w-5 h-5 flex-shrink-0" />
               <span className="text-[10px] text-neutral-500 font-medium">{t('exploreCities:ui.suburbDetailPanel.daysOnMarket', 'Days on Market')}</span>
             </div>
             <div className="text-xl font-black text-neutral-900">
@@ -173,7 +165,7 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
 
           <div className="p-3 bg-neutral-50 rounded-lg">
             <div className="flex items-center gap-1.5 mb-1">
-              <HomeIcon className="w-3.5 h-3.5 text-primary" />
+              <SoftIcon name="home" className="w-5 h-5 flex-shrink-0" />
               <span className="text-[10px] text-neutral-500 font-medium">{t('exploreCities:ui.suburbDetailPanel.activeListings', 'Active Listings')}</span>
             </div>
             <div className="text-xl font-black text-neutral-900">{stats.listingsCount.toLocaleString()}</div>
@@ -210,7 +202,7 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
 
         {/* ── Investment grade detail ─────────────────────── */}
         <div className={`flex items-center gap-3 p-3 rounded-lg border ${grade.bg} ${grade.text === 'text-green-700' ? 'border-green-200' : grade.text === 'text-blue-700' ? 'border-blue-200' : grade.text === 'text-amber-700' ? 'border-amber-200' : 'border-red-200'}`}>
-          <ShieldCheckIcon className={`w-5 h-5 flex-shrink-0 ${grade.text}`} />
+          <SoftIcon name="shield" className="w-6 h-6 flex-shrink-0" />
           <div>
             <div className={`text-xs font-bold ${grade.text}`}>{t('exploreCities:ui.suburbDetailPanel.grade', 'Grade')} {grade.grade} — {grade.label}</div>
             <div className={`text-[10px] ${grade.text} opacity-75`}>{grade.desc}</div>
@@ -221,11 +213,12 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-neutral-700 flex items-center gap-1.5">
-              <FireIcon className="w-3.5 h-3.5 text-amber-500" />
+              <SoftIcon name="flame" className="w-5 h-5 flex-shrink-0" />
               {t('exploreCities:ui.suburbDetailPanel.buyerDemand', 'Buyer Demand')}
             </span>
-            <span className="text-xs font-bold text-neutral-700">
-              {stats.demandScore >= 70 ? t('exploreCities:ui.suburbDetailPanel.high', '🔥 High') : stats.demandScore >= 40 ? t('exploreCities:ui.suburbDetailPanel.medium', '📊 Medium') : t('exploreCities:ui.suburbDetailPanel.low', '📉 Low')}
+            <span className="text-xs font-bold text-neutral-700 inline-flex items-center gap-1">
+              <SoftIcon name={stats.demandScore >= 70 ? 'flame' : stats.demandScore >= 40 ? 'chart' : 'trendDown'} className="w-4 h-4" />
+              {stats.demandScore >= 70 ? t('exploreCities:ui.suburbDetailPanel.high', 'High') : stats.demandScore >= 40 ? t('exploreCities:ui.suburbDetailPanel.medium', 'Medium') : t('exploreCities:ui.suburbDetailPanel.low', 'Low')}
               <span className="text-neutral-400 font-normal ml-1">({stats.demandScore}/100)</span>
             </span>
           </div>
@@ -243,7 +236,7 @@ const SuburbDetailPanel: React.FC<SuburbDetailPanelProps> = ({
         {/* ── Property mix ────────────────────────────────── */}
         <div>
           <p className="text-xs font-medium text-neutral-700 mb-2.5 flex items-center gap-1.5">
-            <ChartBarIcon className="w-3.5 h-3.5 text-primary" />
+            <SoftIcon name="chart" className="w-5 h-5 flex-shrink-0" />
             {t('exploreCities:ui.suburbDetailPanel.propertyMix', 'Property Mix')}
           </p>
           <div className="space-y-2">

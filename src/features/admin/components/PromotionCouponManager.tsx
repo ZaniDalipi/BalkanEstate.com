@@ -10,6 +10,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlusIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { type PromotionCoupon } from '../hooks/usePromotionCouponData';
 import { usePromotionCouponManager } from './usePromotionCouponManager';
 import { CreateCouponModal } from './PromotionCouponManagerForm';
@@ -228,7 +229,7 @@ const PromotionCouponManager: React.FC = () => {
 
         {filteredCoupons.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            <div className="text-4xl mb-4">🎟️</div>
+            <SoftIcon name="ticket" className="w-12 h-12 mx-auto mb-4" />
             <p>{t('admin:promotionCoupons.noCouponsFound')}</p>
             <p className="text-sm mt-1">{t('admin:promotionCoupons.createFirstCoupon')}</p>
           </div>
