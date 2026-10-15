@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListingData, TagListInput, TriStateCheckbox, labelClasses, selectClasses, FieldErrors, fieldAnchorId } from './ListingFormHelpers';
 import { hasHabitableInterior } from '@/shared/constants/propertyTypes';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface ListingPropertyFeaturesProps {
     listingData: ListingData;
@@ -28,17 +29,17 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
     // filters match on (e.g. 'sauna', 'wine cellar', 'panoramic view'), so a
     // one-tap choice here makes the listing discoverable by those filters —
     // no need for the seller to type the precise wording.
-    const QUICK_AMENITIES: { tag: string; labelKey: string; fallback: string; emoji: string }[] = [
-        { tag: 'sauna',          labelKey: 'seller:createListing.quickAmenities.sauna',       fallback: 'Sauna',        emoji: '🧖' },
-        { tag: 'wine cellar',    labelKey: 'seller:createListing.quickAmenities.wineCellar',  fallback: 'Wine Cellar',  emoji: '🍷' },
-        { tag: 'panoramic view', labelKey: 'seller:createListing.quickAmenities.panoramic',   fallback: 'Panoramic',    emoji: '🏔️' },
-        { tag: 'jacuzzi',        labelKey: 'seller:createListing.quickAmenities.jacuzzi',     fallback: 'Jacuzzi',      emoji: '🛁' },
-        { tag: 'hot tub',        labelKey: 'seller:createListing.quickAmenities.hotTub',      fallback: 'Hot Tub',      emoji: '♨️' },
-        { tag: 'gym',            labelKey: 'seller:createListing.quickAmenities.gym',         fallback: 'Gym',          emoji: '🏋️' },
-        { tag: 'fireplace',      labelKey: 'seller:createListing.quickAmenities.fireplace',   fallback: 'Fireplace',    emoji: '🔥' },
-        { tag: 'bbq',            labelKey: 'seller:createListing.quickAmenities.bbq',         fallback: 'BBQ',          emoji: '🍖' },
-        { tag: 'home cinema',    labelKey: 'seller:createListing.quickAmenities.homeCinema',  fallback: 'Home Cinema',  emoji: '🎬' },
-        { tag: 'beach access',   labelKey: 'seller:createListing.quickAmenities.beachAccess', fallback: 'Beach Access', emoji: '🏖️' },
+    const QUICK_AMENITIES: { tag: string; labelKey: string; fallback: string; icon: SoftIconName }[] = [
+        { tag: 'sauna',          labelKey: 'seller:createListing.quickAmenities.sauna',       fallback: 'Sauna',        icon: 'spa' },
+        { tag: 'wine cellar',    labelKey: 'seller:createListing.quickAmenities.wineCellar',  fallback: 'Wine Cellar',  icon: 'wine' },
+        { tag: 'panoramic view', labelKey: 'seller:createListing.quickAmenities.panoramic',   fallback: 'Panoramic',    icon: 'mountain' },
+        { tag: 'jacuzzi',        labelKey: 'seller:createListing.quickAmenities.jacuzzi',     fallback: 'Jacuzzi',      icon: 'bath' },
+        { tag: 'hot tub',        labelKey: 'seller:createListing.quickAmenities.hotTub',      fallback: 'Hot Tub',      icon: 'pool' },
+        { tag: 'gym',            labelKey: 'seller:createListing.quickAmenities.gym',         fallback: 'Gym',          icon: 'bolt' },
+        { tag: 'fireplace',      labelKey: 'seller:createListing.quickAmenities.fireplace',   fallback: 'Fireplace',    icon: 'flame' },
+        { tag: 'bbq',            labelKey: 'seller:createListing.quickAmenities.bbq',         fallback: 'BBQ',          icon: 'kitchen' },
+        { tag: 'home cinema',    labelKey: 'seller:createListing.quickAmenities.homeCinema',  fallback: 'Home Cinema',  icon: 'video' },
+        { tag: 'beach access',   labelKey: 'seller:createListing.quickAmenities.beachAccess', fallback: 'Beach Access', icon: 'sea' },
     ];
 
     // Which feature questions make sense for this listing.
@@ -86,7 +87,7 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                 {/* Quick-pick premium amenities — one tap adds the matching tag */}
                 <p className="text-xs font-medium text-gray-500 mt-3 mb-1.5">{t('seller:createListing.quickAmenities.label', 'Popular amenities')}</p>
                 <div className="flex flex-wrap gap-2">
-                    {QUICK_AMENITIES.map(({ tag, labelKey, fallback, emoji }) => {
+                    {QUICK_AMENITIES.map(({ tag, labelKey, fallback, icon }) => {
                         const active = amenityActive(tag);
                         return (
                             <button
@@ -100,7 +101,7 @@ const ListingPropertyFeatures: React.FC<ListingPropertyFeaturesProps> = memo(({
                                         : 'bg-black/[0.03] text-gray-600 border-black/[0.07] hover:border-primary/30'
                                 }`}
                             >
-                                <span aria-hidden="true">{emoji}</span>
+                                <SoftIcon name={icon} className="w-5 h-5" />
                                 {t(labelKey, fallback)}
                             </button>
                         );

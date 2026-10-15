@@ -10,6 +10,7 @@ import {
 } from '../hooks/useSubscriptionExpiry';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 interface Props {
@@ -178,7 +179,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
           />
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/20 text-3xl mb-3">⏰</div>
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/95 mb-3"><SoftIcon name="clock" className="w-10 h-10" /></div>
               <h2 className="text-xl font-bold text-white">{t('subscription:ui.subscriptionExpiryModals.subscriptionExpiringSoon', 'Subscription Expiring Soon')}</h2>
               <p className="text-amber-100 text-sm mt-1">
                 {t('subscription:ui.subscriptionExpiryModals.lessThan', 'Less than')} {hoursLeft} hour{hoursLeft !== 1 ? 's' : ''} remaining
@@ -224,7 +225,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="bg-gradient-to-r from-red-500 to-rose-600 px-6 py-5 text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/20 text-3xl mb-3">⚡</div>
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/95 mb-3"><SoftIcon name="bolt" className="w-10 h-10" /></div>
               <h2 className="text-xl font-bold text-white">{t('subscription:ui.subscriptionExpiryModals.yourSubscriptionHasExpired', 'Your Subscription Has Expired')}</h2>
               <p className="text-red-100 text-sm mt-1">{t('subscription:ui.subscriptionExpiryModals.yourAccountHasBeenDowngraded', 'Your account has been downgraded to the free plan')}</p>
             </div>

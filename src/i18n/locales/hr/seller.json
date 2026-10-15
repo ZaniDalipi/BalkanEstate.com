@@ -16,7 +16,7 @@
     "remainingListings": "{{count}} preostalih oglasa",
     "availableListings": "{{count}} dostupnih oglasa",
     "shared": "(dijeljeno)",
-    "highlightCoupons": "🎟️ Kuponi za isticanje: {{available}}/{{total}}",
+    "highlightCoupons": "Kuponi za isticanje: {{available}}/{{total}}",
     "couponsDescription": "Koristite za promociju vaših oglasa",
     "noSubscriptionData": "Nema podataka o pretplati",
     "proRequired": {
@@ -417,9 +417,9 @@
       "strict": "Stroga",
       "nonRefundable": "Bez povrata",
       "included": "Uključeno u cijenu",
-      "breakfast": "🍳 Doručak",
-      "towels": "🛁 Ručnici i posteljina",
-      "parking": "🚗 Parkiralište"
+      "breakfast": "Doručak",
+      "towels": "Ručnici i posteljina",
+      "parking": "Parkiralište"
     },
     "preview": {
       "banner": "Način pregleda",
@@ -987,7 +987,7 @@
       "avgPriceM": "Prosječna cijena/m²",
       "daysToSell": "Dana do prodaje",
       "yoyGrowth": "Godišnji rast",
-      "liveMarketDataPoweredBy": "📊 Tržišni podaci uživo uz AI • Ažurirano",
+      "liveMarketDataPoweredBy": "Tržišni podaci uživo uz AI • Ažurirano",
       "marketTrends": "Tržišni trendovi",
       "timeOnMarket": "Vrijeme na tržištu",
       "proTip": "Profesionalni savjet",
@@ -998,9 +998,9 @@
     },
     "roleSelector": {
       "promotionCoupons": "Promotivni kuponi",
-      "featured": "⭐ Istaknuto:",
+      "featured": "Istaknuto:",
       "daysEach": "dana svaki",
-      "highlighted": "🔥 Naglašeno:",
+      "highlighted": "Naglašeno:",
       "usedThisMonth": "Iskorišteno ovog mjeseca:"
     },
     "whackAnIconAnimation": {

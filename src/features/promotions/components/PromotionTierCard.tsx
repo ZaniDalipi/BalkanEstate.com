@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { StarIconSolid } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import type { PromotionTier, PromotionDuration } from './usePromotionSelector';
 
 // === Types ===
@@ -58,25 +58,12 @@ const tierStyles = {
   },
 };
 
-// === Tier Icon Helper ===
+// === Tier Icons ===
 
-const TierIcon: React.FC<{ tierId: PromotionTier; size: string }> = ({ tierId, size }) => {
-  if (tierId === 'featured') {
-    return <StarIconSolid className={`${size} text-white`} />;
-  }
-  if (tierId === 'highlight') {
-    return (
-      <svg className={`${size} text-white`} viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L9.5 9.5H2L8 14L5.5 22L12 17L18.5 22L16 14L22 9.5H14.5L12 2Z" />
-      </svg>
-    );
-  }
-  // premium
-  return (
-    <svg className={`${size} text-white`} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5ZM19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z" />
-    </svg>
-  );
+const TIER_ICONS: Record<PromotionTier, SoftIconName> = {
+  featured: 'star',
+  highlight: 'diamond',
+  premium: 'crown',
 };
 
 // === Component ===
@@ -120,9 +107,7 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
         )}
 
         <div className="text-center pt-2">
-          <div className={`inline-flex items-center justify-center w-12 h-12 ${style.iconBg} rounded-xl shadow-lg mb-2`}>
-            <TierIcon tierId={tierId} size="w-6 h-6" />
-          </div>
+          <SoftIcon name={TIER_ICONS[tierId]} className="inline-block w-12 h-12 mb-2" />
           <h3 className="text-base font-bold text-gray-900 mb-1">
             {tier.name}
           </h3>
@@ -158,9 +143,7 @@ const PromotionTierCard: React.FC<PromotionTierCardProps> = ({
       )}
 
       <div className="text-center mb-4 pt-2">
-        <div className={`inline-flex items-center justify-center w-14 h-14 ${style.iconBg} rounded-2xl shadow-lg mb-3`}>
-          <TierIcon tierId={tierId} size="w-7 h-7" />
-        </div>
+        <SoftIcon name={TIER_ICONS[tierId]} className="inline-block w-14 h-14 mb-3" />
         <h3 className="text-lg font-bold text-gray-900 mb-1">
           {tier.name}
         </h3>

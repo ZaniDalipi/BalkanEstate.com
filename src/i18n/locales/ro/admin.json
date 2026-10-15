@@ -1493,7 +1493,7 @@
     "uploadImage": "Încarcă imagine",
     "bestFitSize": "Potrivire optimă",
     "imageHint3": "Orice formă de imagine funcționează — se încadrează automat cu un fundal estompat, deci nu arată niciodată întinsă sau decupată. Folosește o imagine mare (~1000px+) pentru un rezultat clar.",
-    "imageLowRes": "⚠ Imaginea are doar {{w}}×{{h}}px — poate arăta neclară. Folosește o imagine mai mare (~1000px sau mai mult).",
+    "imageLowRes": "Imaginea are doar {{w}}×{{h}}px — poate arăta neclară. Folosește o imagine mai mare (~1000px sau mai mult).",
     "imageGood2": "✓ Imaginea are {{w}}×{{h}}px — arată bine.",
     "bannerTitle": "Titlu / etichetă",
     "titlePlaceholder": "ex. Campanie de vară — Banca X",

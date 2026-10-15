@@ -1,9 +1,11 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useRef, useEffect } from 'react';
 import { Animated } from '@/src/components/ui/Animations';
-import { BoltIcon, CheckIcon, SparklesIcon } from '@/constants';
+import { CheckIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { type PromotionPlan } from '../hooks/usePricingData';
 import { type UserListing } from './usePricingPage';
+import { planIconName } from '../utils/planIcon';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -31,7 +33,6 @@ interface OfferColorPreset {
   cardBgSelected: string;
   border: string;
   borderSelected: string;
-  iconBg: string;
   priceText: string;
   labelBg: string;
   featureCheck: string;
@@ -46,7 +47,6 @@ const OFFER_COLOR_PRESETS: Record<string, OfferColorPreset> = {
     cardBgSelected: 'bg-slate-900',
     border: 'border-slate-700',
     borderSelected: 'border-amber-400',
-    iconBg: 'bg-gradient-to-br from-amber-400 to-yellow-500',
     priceText: 'text-amber-400',
     labelBg: 'bg-amber-500/20 text-amber-300',
     featureCheck: 'text-amber-400',
@@ -59,7 +59,6 @@ const OFFER_COLOR_PRESETS: Record<string, OfferColorPreset> = {
     cardBgSelected: 'bg-purple-100',
     border: 'border-purple-200',
     borderSelected: 'border-purple-400',
-    iconBg: 'bg-purple-500',
     priceText: 'text-purple-600',
     labelBg: 'bg-purple-100 text-purple-700',
     featureCheck: 'text-purple-500',
@@ -72,7 +71,6 @@ const OFFER_COLOR_PRESETS: Record<string, OfferColorPreset> = {
     cardBgSelected: 'bg-cyan-100',
     border: 'border-cyan-300',
     borderSelected: 'border-cyan-400',
-    iconBg: 'bg-gradient-to-br from-cyan-400 to-blue-500',
     priceText: 'text-cyan-600',
     labelBg: 'bg-cyan-100 text-cyan-700',
     featureCheck: 'text-cyan-500',
@@ -85,7 +83,6 @@ const OFFER_COLOR_PRESETS: Record<string, OfferColorPreset> = {
     cardBgSelected: 'bg-amber-100',
     border: 'border-amber-200',
     borderSelected: 'border-amber-400',
-    iconBg: 'bg-gradient-to-br from-amber-400 to-yellow-500',
     priceText: 'text-amber-600',
     labelBg: 'bg-amber-100 text-amber-700',
     featureCheck: 'text-amber-500',
@@ -98,7 +95,6 @@ const OFFER_COLOR_PRESETS: Record<string, OfferColorPreset> = {
     cardBgSelected: 'bg-gray-200',
     border: 'border-gray-300',
     borderSelected: 'border-gray-500',
-    iconBg: 'bg-gradient-to-br from-gray-400 to-gray-500',
     priceText: 'text-gray-900',
     labelBg: 'bg-gray-200 text-gray-700',
     featureCheck: 'text-gray-600',
@@ -111,7 +107,6 @@ const OFFER_COLOR_PRESETS: Record<string, OfferColorPreset> = {
     cardBgSelected: 'bg-rose-100',
     border: 'border-rose-200',
     borderSelected: 'border-rose-400',
-    iconBg: 'bg-gradient-to-br from-rose-500 to-pink-500',
     priceText: 'text-rose-600',
     labelBg: 'bg-rose-100 text-rose-700',
     featureCheck: 'text-rose-500',
@@ -180,9 +175,7 @@ const SpecialOffersSection: React.FC<SpecialOffersSectionProps> = ({
     <Animated variant="fadeInUp" className="max-w-5xl mx-auto mt-12">
       {/* Section Header */}
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <BoltIcon className="w-8 h-8 text-rose-500" />
-        </div>
+        <SoftIcon name="bolt" className="w-16 h-16 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-gray-900">
           {t('pricing:specialOffers.title', 'Special Offers')}
         </h3>
@@ -332,16 +325,14 @@ const SpecialOffersSection: React.FC<SpecialOffersSectionProps> = ({
                 {offer.offerLabel && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className={`inline-flex items-center gap-1 bg-gradient-to-r ${colors.badge} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg`}>
-                      <SparklesIcon className="w-3 h-3" />
+                      <SoftIcon name="sparkles" className="w-4 h-4" />
                       {offer.offerLabel}
                     </span>
                   </div>
                 )}
 
                 {/* Icon */}
-                <div className={`w-12 h-12 ${colors.iconBg} rounded-xl flex items-center justify-center mb-4 ${offer.offerLabel ? 'mt-2' : ''}`}>
-                  <span className="text-2xl">{offer.icon || '🔥'}</span>
-                </div>
+                <SoftIcon name={planIconName(offer.icon, 'flame')} className={`w-12 h-12 mb-4 ${offer.offerLabel ? 'mt-2' : ''}`} />
 
                 {/* Title & Description */}
                 <h4 className={`text-xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{offer.name}</h4>
@@ -378,7 +369,7 @@ const SpecialOffersSection: React.FC<SpecialOffersSectionProps> = ({
                 {/* Countdown */}
                 {timeLeft !== null && timeLeft > 0 && (
                   <div className={`mt-4 flex items-center gap-1.5 text-xs font-semibold ${colors.countdownText}`}>
-                    <BoltIcon className="w-3.5 h-3.5" />
+                    <SoftIcon name="bolt" className="w-4 h-4" />
                     {timeLeft === 1
                       ? t('pricing:specialOffers.lastDay', 'Last day!')
                       : t('pricing:specialOffers.daysLeft', '{{days}} days left', { days: timeLeft })}

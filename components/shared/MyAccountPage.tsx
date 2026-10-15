@@ -15,7 +15,7 @@ const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 const MyListingFeeds = lazy(() => import('../../src/features/listing-sources/components/MyListingFeeds'));
 const ImportReviewQueue = lazy(() => import('../../src/features/listing-sources/components/review/ImportReviewQueue'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, XMarkIcon, ShieldCheckIcon, ClockIcon, CheckCircleIcon, BellIcon } from '../../constants';
+import { XMarkIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -438,9 +438,7 @@ const LoginHistorySection: React.FC = () => {
     return (
         <div className="bg-blue-50/60 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4">
             <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <SoftIcon name="docCheck" className="w-6 h-6 flex-shrink-0" />
                 <div className="flex-1">
                     <h4 className="font-semibold text-blue-800 text-sm mb-2">{t('security.recentLoginActivity')}</h4>
                     {loginHistory.length === 0 ? (
@@ -590,12 +588,7 @@ const ChangePasswordSection: React.FC = () => {
         const isErr = type === 'error';
         return (
             <div className={`mb-4 p-3 ${isErr ? 'bg-red-50/60 border-red-200/50' : 'bg-green-50/60 border-green-200/50'} backdrop-blur-sm border rounded-xl flex items-start gap-2`}>
-                <svg className={`w-5 h-5 ${isErr ? 'text-red-600' : 'text-green-600'} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {isErr
-                        ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    }
-                </svg>
+                <SoftIcon name={isErr ? 'warning' : 'check'} className="w-6 h-6 flex-shrink-0" />
                 <p className={`${isErr ? 'text-red-800' : 'text-green-800'} text-sm`}>{message}</p>
             </div>
         );
@@ -725,7 +718,7 @@ const DeleteAgencySection: React.FC = () => {
     return (
         <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4">
             <div className="flex items-start gap-3">
-                <BuildingOfficeIcon className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
                 <div className="flex-1">
                     <h4 className="font-semibold text-red-800 text-sm">{t('security.deleteAgency', 'Delete Agency')}</h4>
                     <p className="text-sm text-red-700 mt-1">
@@ -815,9 +808,7 @@ const DeleteAccountSection: React.FC = () => {
     return (
         <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6">
             <div className="flex items-start gap-3 mb-4">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                <SoftIcon name="trash" className="w-6 h-6 flex-shrink-0" />
                 <div>
                     <h4 className="font-semibold text-red-800 text-sm">{t('security.deleteAccount', 'Delete Account')}</h4>
                     <p className="text-sm text-red-700 mt-1">
@@ -848,9 +839,7 @@ const DeleteAccountSection: React.FC = () => {
 
             {error && (
                 <div className="mb-4 p-3 bg-red-100/60 border border-red-300/50 rounded-xl flex items-start gap-2">
-                    <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
                     <p className="text-sm text-red-700">{error}</p>
                 </div>
             )}
@@ -903,9 +892,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
             {/* Logout from All Devices */}
             <div className="bg-yellow-50/60 backdrop-blur-sm border border-yellow-200/50 rounded-2xl p-4">
                 <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+                    <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                     <div className="flex-1">
                         <h4 className="font-semibold text-yellow-800 text-sm">{t('security.logoutAllDevices')}</h4>
                         <p className="text-sm text-yellow-700 mt-1">
@@ -1678,9 +1665,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             onClick={() => setIsAvatarCustomizerOpen(true)}
                             className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary/80 backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary transition-all border border-primary/30"
                         >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                            </svg>
+                            <SoftIcon name="pencil" className="w-5 h-5" />
                             {t('profile.customizeAvatar', 'Customize Avatar')}
                         </button>
                         <p className="text-xs text-neutral-500 mt-2.5">
@@ -1801,7 +1786,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                     onClick={handleAgencyClick}
                                     className="mt-2 text-sm text-primary hover:text-primary-dark font-semibold flex items-center gap-1 bg-white/30 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/40 hover:bg-white/50 transition-all"
                                 >
-                                    <BuildingOfficeIcon className="w-4 h-4" />
+                                    <SoftIcon name="building" className="w-5 h-5" />
                                     {t('agent.viewAgencyDetails')}
                                 </button>
                             )}
@@ -1821,7 +1806,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                         <div className="relative md:col-span-2">
                             {formData.licenseNumber && formData.licenseVerified ? (
                                 <div className="flex items-center gap-3 p-4 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-xl">
-                                    <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
                                     <div className="flex-1">
                                         <p className="text-sm font-semibold text-green-800">
                                             {t('agent.licenseVerified', 'License Verified')}
@@ -1832,7 +1817,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             ) : formData.licenseNumber && !formData.licenseVerified ? (
                                 <div className="flex items-center justify-between p-4 bg-amber-50/80 backdrop-blur-sm border border-amber-200/50 rounded-xl">
                                     <div className="flex items-center gap-3">
-                                        <ClockIcon className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                                        <SoftIcon name="clock" className="w-6 h-6 flex-shrink-0" />
                                         <div>
                                             <p className="text-sm font-semibold text-amber-800">
                                                 {t('agent.licensePending', 'License Pending Review')}
@@ -1846,7 +1831,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                 </div>
                             ) : licenseSuccess ? (
                                 <div className="flex items-center gap-3 p-4 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-xl">
-                                    <ShieldCheckIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <SoftIcon name="shield" className="w-6 h-6 flex-shrink-0" />
                                     <div>
                                         <p className="text-sm font-semibold text-green-800">
                                             {t('agent.licenseSubmitted', 'License Submitted')}
@@ -1859,9 +1844,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             ) : !showLicenseForm ? (
                                 <div className="flex items-center justify-between p-4 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-xl">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-100/80 flex items-center justify-center flex-shrink-0">
-                                            <ShieldCheckIcon className="w-5 h-5 text-blue-600" />
-                                        </div>
+                                        <SoftIcon name="shield" className="w-10 h-10 flex-shrink-0" />
                                         <div>
                                             <p className="text-sm font-semibold text-blue-800">
                                                 {t('agent.noLicenseYet', 'No License on File')}
@@ -2227,9 +2210,7 @@ const MyAccountPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50/60 to-indigo-50/40 flex items-center justify-center px-4">
                 <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl p-10 max-w-sm w-full text-center space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                        <BellIcon className="w-7 h-7 text-primary" />
-                    </div>
+                    <SoftIcon name="bell" className="w-14 h-14 mx-auto" />
                     <div>
                         <h2 className="text-xl font-bold text-neutral-800">{t('account:mustBeLoggedIn', 'Sign in to continue')}</h2>
                         <p className="text-sm text-neutral-500 mt-1">{t('account:loginToManagePrefs', 'Log in to manage your email and notification preferences.')}</p>
@@ -2351,12 +2332,12 @@ const MyAccountPage: React.FC = () => {
                                             className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-xl border border-primary/20 hover:bg-primary/20 transition-all cursor-pointer"
                                             title={t('account:ui.myAccountPage.viewAgencyDetails', 'View agency details')}
                                         >
-                                            <BuildingOfficeIcon className="w-4 h-4 text-primary" />
+                                            <SoftIcon name="building" className="w-5 h-5" />
                                             <span className="text-xs font-semibold text-primary">{state.currentUser.agencyName}</span>
                                         </button>
                                     ) : (
                                         <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-white/30 backdrop-blur-sm rounded-xl border border-white/40">
-                                            <BuildingOfficeIcon className="w-4 h-4 text-gray-500" />
+                                            <SoftIcon name="building" className="w-5 h-5" />
                                             <span className="text-xs font-semibold text-gray-600">{t('account:agent.independentAgent', 'Independent Agent')}</span>
                                         </div>
                                     )

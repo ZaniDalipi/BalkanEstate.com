@@ -14,6 +14,7 @@ import { getFloorPlans } from '@/shared/utils/floorplans';
 import ListingSubmitOverlay from './ListingSubmitOverlay';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { buildGalleryImages } from '@/shared/property/galleryImages';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface ListingPreviewProps {
     property: Property;
@@ -106,10 +107,7 @@ const ListingPreview: React.FC<ListingPreviewProps> = ({
             <div className="sticky top-0 z-20" style={{ background: 'linear-gradient(135deg, rgba(0,122,255,0.9), rgba(88,86,214,0.85))', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
                 <div className="max-w-screen-xl mx-auto px-3 sm:px-4 md:px-6 py-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                        <svg className="w-5 h-5 flex-shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
+                        <SoftIcon name="eye" className="w-6 h-6 flex-shrink-0" />
                         <span className="font-semibold text-sm sm:text-base truncate text-white">
                             {t('seller:createListing.preview.banner', 'Preview Mode')}
                         </span>

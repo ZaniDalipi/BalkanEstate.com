@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  BuildingOfficeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
@@ -133,8 +132,8 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center">
-              <BuildingOfficeIcon className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-white/95 rounded-lg flex items-center justify-center">
+              <SoftIcon name="building" className="w-6 h-6" />
             </div>
             <span className="font-bold text-white text-sm">
               {t('agencyDashboard:sidebar.title', 'Agency Dashboard')}
@@ -142,8 +141,8 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
           </div>
         )}
         {collapsed && (
-          <div className="w-8 h-8 mx-auto bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center">
-            <BuildingOfficeIcon className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 mx-auto bg-white/95 rounded-lg flex items-center justify-center">
+            <SoftIcon name="building" className="w-6 h-6" />
           </div>
         )}
         <button

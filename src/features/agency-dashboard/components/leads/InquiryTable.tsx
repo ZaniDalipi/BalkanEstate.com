@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeftIcon, ChevronRightIcon, EnvelopeIcon } from '@/constants';
+import { ChevronLeftIcon, ChevronRightIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { DashboardInquiry } from '../../types';
 
 interface InquiryTableProps {
@@ -40,9 +41,7 @@ const InquiryTable: React.FC<InquiryTableProps> = ({
   if (!isLoading && inquiries.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <EnvelopeIcon className="w-8 h-8 text-gray-400" />
-        </div>
+        <SoftIcon name="envelope" className="w-16 h-16 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-1">
           {t('agencyDashboard:leads.emptyTitle', 'No inquiries found')}
         </h3>

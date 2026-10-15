@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useUpdateBusinessListing, useUploadBusinessLogo, useUploadBusinessBanner } from '../hooks';
 import { BUSINESS_CATEGORIES, type BusinessCategory, type CreateBusinessListingData, type ListingType, type BusinessListing, PRICE_RANGES, PAYMENT_METHODS, BALKAN_LANGUAGES, type PriceRange, type PaymentMethod } from '@/src/shared/types/businessListing.types';
 import { Animated } from '@/src/components/ui/Animations';
-import { BuildingStorefrontIcon, UserIcon, MapPinIcon } from '@/constants';
+import { MapPinIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
 import PhoneInput, { parsePhoneValue } from '@/src/shared/components/ui/PhoneInput';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
@@ -20,27 +21,27 @@ type FieldErrorKey = 'name' | 'category' | 'contactPhone' | 'country' | 'city';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
-const CATEGORY_ICONS: Record<string, string> = {
-  construction: '\u{1F3D7}',
-  renovation: '\u{1F528}',
-  cleaning: '\u{2728}',
-  moving: '\u{1F69A}',
-  interior_design: '\u{1F3A8}',
-  architecture: '\u{1F4D0}',
-  plumbing: '\u{1F6BF}',
-  electrical: '\u{26A1}',
-  landscaping: '\u{1F333}',
-  security: '\u{1F512}',
-  real_estate_law: '\u{2696}',
-  insurance: '\u{1F6E1}',
-  home_inspection: '\u{1F50D}',
-  pest_control: '\u{1F41B}',
-  painting: '\u{1F58C}',
-  roofing: '\u{1F3E0}',
-  hvac: '\u{2744}',
-  furniture: '\u{1FA91}',
-  appliances: '\u{1F4FA}',
-  other: '\u{1F4CB}',
+const CATEGORY_ICONS: Record<string, SoftIconName> = {
+  construction: 'crane',
+  renovation: 'wrench',
+  cleaning: 'sparkles',
+  moving: 'car',
+  interior_design: 'sofa',
+  architecture: 'ruler',
+  plumbing: 'bath',
+  electrical: 'bolt',
+  landscaping: 'tree',
+  security: 'lock',
+  real_estate_law: 'scales',
+  insurance: 'shield',
+  home_inspection: 'search',
+  pest_control: 'warning',
+  painting: 'pencil',
+  roofing: 'home',
+  hvac: 'snowflake',
+  furniture: 'bed',
+  appliances: 'kitchen',
+  other: 'clipboard',
 };
 
 const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listing, onBack, onSuccess }) => {
@@ -466,9 +467,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
         {displayError && (
           <Animated variant="scaleIn">
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3 sticky top-4 z-50 shadow-lg shadow-red-100/50">
-              <svg className="w-5 h-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
+              <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
               <span className="flex-1">{displayError}</span>
               <button
                 type="button"
@@ -528,11 +527,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                       : 'border-neutral-200 hover:border-neutral-300 bg-white'
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    listingType === 'business' ? 'bg-primary/10' : 'bg-neutral-100'
-                  }`}>
-                    <BuildingStorefrontIcon className={`w-6 h-6 ${listingType === 'business' ? 'text-primary' : 'text-neutral-400'}`} />
-                  </div>
+                  <SoftIcon name="store" className={`w-12 h-12 ${listingType === 'business' ? '' : 'opacity-60'}`} />
                   <span className={`font-semibold text-sm ${listingType === 'business' ? 'text-primary' : 'text-neutral-600'}`}>
                     {t('types.business')}
                   </span>
@@ -547,11 +542,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                       : 'border-neutral-200 hover:border-neutral-300 bg-white'
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    listingType === 'individual' ? 'bg-violet-100' : 'bg-neutral-100'
-                  }`}>
-                    <UserIcon className={`w-6 h-6 ${listingType === 'individual' ? 'text-violet-500' : 'text-neutral-400'}`} />
-                  </div>
+                  <SoftIcon name="user" className={`w-12 h-12 ${listingType === 'individual' ? '' : 'opacity-60'}`} />
                   <span className={`font-semibold text-sm ${listingType === 'individual' ? 'text-violet-600' : 'text-neutral-600'}`}>
                     {t('types.individual')}
                   </span>
@@ -573,9 +564,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                     <img src={logoPreview} alt={t('businessDirectory:ui.editBusinessListingForm.preview', 'Preview')} className="w-full h-full object-cover rounded-xl" />
                   ) : (
                     <div className="text-center">
-                      <svg className="w-8 h-8 mx-auto text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                      </svg>
+                      <SoftIcon name="photo" className="block w-10 h-10 mx-auto" />
                     </div>
                   )}
                 </div>
@@ -618,9 +607,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                     <img src={bannerPreview} alt={t('businessDirectory:ui.editBusinessListingForm.bannerPreview', 'Banner preview')} className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-center">
-                      <svg className="w-10 h-10 mx-auto text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                      </svg>
+                      <SoftIcon name="photo" className="block w-12 h-12 mx-auto" />
                       <p className="text-xs text-neutral-400 mt-1">{t('form.bannerHint', '1200 x 400px recommended')}</p>
                     </div>
                   )}
@@ -694,7 +681,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
                           : 'border-neutral-200 text-neutral-600 hover:border-primary/30 hover:bg-neutral-50'
                       }`}
                     >
-                      <span className="text-lg">{CATEGORY_ICONS[cat]}</span>
+                      <SoftIcon name={CATEGORY_ICONS[cat]} className="w-7 h-7" />
                       <span className="text-center leading-tight">{t(`categories.${cat}`)}</span>
                     </button>
                   ))}
@@ -850,7 +837,7 @@ const EditBusinessListingForm: React.FC<EditBusinessListingFormProps> = ({ listi
           <Animated variant="fadeInUp" delay={150}>
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm space-y-4">
               <div className="flex items-center gap-2">
-                <MapPinIcon className="w-5 h-5 text-primary" />
+                <SoftIcon name="pin" className="w-6 h-6 flex-shrink-0" />
                 <h2 className="text-lg font-semibold text-neutral-900">{t('form.sections.businessLocation')}</h2>
               </div>
               <p className="text-sm text-neutral-500">{t('form.locationHint')}</p>

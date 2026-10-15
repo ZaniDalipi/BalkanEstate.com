@@ -16,7 +16,7 @@
     "remainingListings": "Остават {{count}} обяви",
     "availableListings": "Налични {{count}} обяви",
     "shared": "(общо)",
-    "highlightCoupons": "🎟️ Купони за Акцент: {{available}}/{{total}}",
+    "highlightCoupons": "Купони за Акцент: {{available}}/{{total}}",
     "couponsDescription": "Използвайте за промотиране на вашите обяви",
     "noSubscriptionData": "Няма налични данни за абонамент",
     "proRequired": {
@@ -417,9 +417,9 @@
       "strict": "Строга",
       "nonRefundable": "Без възстановяване",
       "included": "Включено в цената",
-      "breakfast": "🍳 Закуска",
-      "towels": "🛁 Кърпи и спално бельо",
-      "parking": "🚗 Паркинг"
+      "breakfast": "Закуска",
+      "towels": "Кърпи и спално бельо",
+      "parking": "Паркинг"
     },
     "preview": {
       "banner": "Режим на преглед",
@@ -986,7 +986,7 @@
       "avgPriceM": "Средна цена/m²",
       "daysToSell": "Дни до продажба",
       "yoyGrowth": "Годишен ръст",
-      "liveMarketDataPoweredBy": "📊 Пазарни данни на живо с AI • Обновено",
+      "liveMarketDataPoweredBy": "Пазарни данни на живо с AI • Обновено",
       "marketTrends": "Пазарни тенденции",
       "timeOnMarket": "Време на пазара",
       "proTip": "Професионален съвет",
@@ -997,9 +997,9 @@
     },
     "roleSelector": {
       "promotionCoupons": "Промоционални купони",
-      "featured": "⭐ Препоръчано:",
+      "featured": "Препоръчано:",
       "daysEach": "дни всеки",
-      "highlighted": "🔥 Акцентирано:",
+      "highlighted": "Акцентирано:",
       "usedThisMonth": "Използвани този месец:"
     },
     "whackAnIconAnimation": {

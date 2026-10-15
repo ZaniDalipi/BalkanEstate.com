@@ -122,7 +122,7 @@ const AgentScoringPanel: React.FC<AgentScoringPanelProps> = ({
         className="w-full flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5 sm:py-4 hover:bg-gray-50 transition-colors duration-150 text-left"
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-base" aria-hidden="true">📊</span>
+          <SoftIcon name="chart" className="w-6 h-6 flex-shrink-0" />
           <span className="text-sm font-bold text-gray-900 truncate">
             {t('agents:scoring.panelTitle', 'How the ranking score works')}
           </span>

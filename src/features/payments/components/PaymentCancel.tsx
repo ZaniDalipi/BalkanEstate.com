@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { XCircleIcon, ArrowLeftIcon } from '@/constants';
+import { ArrowLeftIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -20,9 +21,7 @@ const PaymentCancel: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
         <div className="text-center">
           {/* Cancel Icon */}
-          <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <XCircleIcon className="w-16 h-16 text-white" />
-          </div>
+          <SoftIcon name="xmark" className="w-24 h-24 mx-auto mb-6" />
 
           <h1 className="text-3xl font-bold text-neutral-800 mb-2">{t('cancel.title')}</h1>
           <p className="text-lg text-neutral-600 mb-6">

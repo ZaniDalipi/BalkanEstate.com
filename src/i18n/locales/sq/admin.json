@@ -1492,7 +1492,7 @@
     "uploadImage": "Ngarko imazh",
     "bestFitSize": "Përshtatja më e mirë",
     "imageHint3": "Çdo formë imazhi funksionon — përshtatet automatikisht me sfond të turbullt, kështu nuk duket kurrë i zgjatur apo i prerë. Përdorni imazh të madh (~1000px+) për rezultat të qartë.",
-    "imageLowRes": "⚠ Imazhi është vetëm {{w}}×{{h}}px — mund të duket i turbullt. Përdorni imazh më të madh (~1000px ose më shumë).",
+    "imageLowRes": "Imazhi është vetëm {{w}}×{{h}}px — mund të duket i turbullt. Përdorni imazh më të madh (~1000px ose më shumë).",
     "imageGood2": "✓ Imazhi është {{w}}×{{h}}px — duket mirë.",
     "bannerTitle": "Titulli / Etiketa",
     "titlePlaceholder": "p.sh. Fushata e verës — Banka X",

@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { QuarterlyPricePoint } from '@/src/shared/types/cityInsights.types';
-import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 export interface PriceHistoryChartProps {
@@ -97,7 +97,7 @@ const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
       <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
         <div>
           <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-            <ChartBarIcon className="w-5 h-5 text-primary" />
+            <SoftIcon name="chart" className="w-6 h-6 flex-shrink-0" />
             {t('exploreCities:ui.priceHistoryChart.n8YearPriceHistory', '8-Year Price History')}
           </h3>
           <p className="text-xs text-neutral-500 mt-0.5">
@@ -108,7 +108,7 @@ const PriceHistoryChart: React.FC<PriceHistoryChartProps> = ({
           <div className="px-3 py-1.5 rounded-lg bg-neutral-50 border border-neutral-200">
             <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">{t('exploreCities:ui.priceHistoryChart.yoy', 'YoY')}</p>
             <p className={`text-sm font-black flex items-center gap-1 ${isGrowing ? 'text-green-600' : 'text-red-500'}`}>
-              {isGrowing ? <ArrowTrendingUpIcon className="w-3.5 h-3.5" /> : <ArrowTrendingDownIcon className="w-3.5 h-3.5" />}
+              <SoftIcon name={isGrowing ? 'trendUp' : 'trendDown'} className="w-4 h-4" />
               {isGrowing ? '+' : ''}{growthYoY}%
             </p>
           </div>

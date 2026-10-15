@@ -1,10 +1,8 @@
 import React from 'react';
 import { translateAndReplacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
 import { Animated } from '@/src/components/ui/Animations';
-import {
-  CheckIcon,
-  SparklesIcon,
-} from '@/constants';
+import { CheckIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { type Product } from '../hooks/usePricingData';
 import { formatLimit } from './usePricingPage';
 import EnterprisePlanCard from './EnterprisePlanCard';
@@ -67,7 +65,7 @@ const SellerPlansSection: React.FC<SellerPlansSectionProps> = ({
         {/* Badge - Outside the card */}
         <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
           <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-red-500 to-rose-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
-            <SparklesIcon className="w-3.5 h-3.5" />
+            <SoftIcon name="sparkles" className="w-4 h-4" />
             {t('pricing:badges.mostPopular', 'MOST POPULAR')}
           </span>
         </div>

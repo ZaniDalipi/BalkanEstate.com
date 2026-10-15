@@ -10,6 +10,7 @@ import {
     type TypeAttribute,
 } from '@/shared/property/typeAttributes';
 import { typeHasMeasuredBreakdown } from '@/shared/property/area';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 /** English shown while a locale still lacks the parking-type keys. */
 const PARKING_TYPE_FALLBACKS: Record<ParkingType, string> = {
@@ -262,9 +263,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                     <FieldError message={fieldErrors.price} />
                     {listingData.isNegotiable && (
                         <div className="flex items-center gap-2 h-12 px-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 font-medium text-sm">
-                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
+                            <SoftIcon name="chat" className="w-5 h-5 flex-shrink-0" />
                             {t('seller:createListing.fields.priceByNegotiation', 'Price will be shown as "By Negotiation"')}
                         </div>
                     )}
@@ -304,7 +303,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                     </div>
                     {listingData.propertyType === 'luxury-villa' && (
                         <div className="mt-1.5 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-secondary/10 border border-secondary/30 w-fit">
-                            <span className="text-sm leading-none">🏛️</span>
+                            <SoftIcon name="landmark" className="w-4 h-4 flex-shrink-0" />
                             <span className="text-[11px] font-semibold text-primary-dark">{t('seller:createListing.luxuryVillaBadge', 'Appears in Luxury Villas')}</span>
                         </div>
                     )}
@@ -366,7 +365,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
             {listingData.propertyType === 'luxury-villa' && listingData.listingType === 'rent' && (
                 <fieldset className="space-y-4 p-4 rounded-2xl border border-[#FFA500]/30 bg-[#FFA500]/5">
                     <legend className="px-2 text-sm font-semibold text-[#0252CD] flex items-center gap-2">
-                        <span>🏛️</span>
+                        <SoftIcon name="landmark" className="w-5 h-5" />
                         {t('seller:createListing.dailyRental.title', 'Daily Rental Details')}
                     </legend>
 
@@ -445,10 +444,10 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                         <p className={labelClasses}>{t('seller:createListing.dailyRental.included', 'Included in Price')}</p>
                         <div className="flex flex-wrap gap-3 mt-2">
                             {([
-                                { field: 'breakfastIncluded' as const, label: t('seller:createListing.dailyRental.breakfast', '🍳 Breakfast') },
-                                { field: 'towelsIncluded'    as const, label: t('seller:createListing.dailyRental.towels',    '🛁 Towels & Linen') },
-                                { field: 'parkingIncluded'   as const, label: t('seller:createListing.dailyRental.parking',   '🚗 Parking') },
-                            ]).map(({ field, label }) => {
+                                { field: 'breakfastIncluded' as const, icon: 'kitchen' as SoftIconName, label: t('seller:createListing.dailyRental.breakfast', 'Breakfast') },
+                                { field: 'towelsIncluded'    as const, icon: 'bath' as SoftIconName,    label: t('seller:createListing.dailyRental.towels',    'Towels & Linen') },
+                                { field: 'parkingIncluded'   as const, icon: 'car' as SoftIconName,     label: t('seller:createListing.dailyRental.parking',   'Parking') },
+                            ]).map(({ field, icon, label }) => {
                                 const active = !!listingData[field];
                                 return (
                                     <button
@@ -461,6 +460,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                                                 : 'bg-white text-gray-500 border-gray-200 hover:border-[#FFA500]/60 hover:text-[#0252CD]'
                                         }`}
                                     >
+                                        <SoftIcon name={icon} className="w-5 h-5" />
                                         {label}
                                     </button>
                                 );

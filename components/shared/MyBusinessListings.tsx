@@ -7,14 +7,11 @@ import { useNotification } from '@/src/shared/hooks/useNotification';
 import { generateBusinessSlug } from '@/utils/slug';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 import {
-  BuildingStorefrontIcon,
-  UserIcon,
-  MapPinIcon,
   EyeIcon,
   PencilIcon,
-  CheckBadgeIcon,
   ArrowLeftIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
@@ -119,9 +116,7 @@ const MyBusinessListings: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-2xl flex items-center justify-center">
-          <BuildingStorefrontIcon className="w-8 h-8 text-red-400" />
-        </div>
+        <SoftIcon name="store" className="block w-16 h-16 mx-auto mb-4" />
         <h3 className="text-lg font-bold text-neutral-700 mb-2">
           {t('businessDirectory:myBusinesses.errorTitle', 'Failed to load businesses')}
         </h3>
@@ -181,9 +176,7 @@ const MyBusinessListings: React.FC = () => {
       {/* Empty state */}
       {listings.length === 0 && (
         <div className="text-center py-16 px-4">
-          <div className="w-20 h-20 mx-auto mb-5 bg-gradient-to-br from-primary/10 to-blue-500/10 rounded-3xl flex items-center justify-center">
-            <BuildingStorefrontIcon className="w-10 h-10 text-primary/60" />
-          </div>
+          <SoftIcon name="store" className="block w-20 h-20 mx-auto mb-5" />
           <h3 className="text-lg font-bold text-neutral-700 mb-2">
             {t('businessDirectory:myBusinesses.emptyTitle', 'No businesses yet')}
           </h3>
@@ -260,7 +253,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
           </span>
           {listing.isVerified && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/80 text-emerald-600 backdrop-blur-sm border border-white/30 flex items-center gap-0.5">
-              <CheckBadgeIcon className="w-3 h-3" />
+              <SoftIcon name="shield" className="w-4 h-4" />
               {t('verified')}
             </span>
           )}
@@ -269,7 +262,7 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
         {/* Type badge */}
         <div className="absolute top-2 right-2">
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/80 backdrop-blur-sm border border-white/30 text-neutral-700 flex items-center gap-0.5">
-            {isIndividual ? <UserIcon className="w-3 h-3" /> : <BuildingStorefrontIcon className="w-3 h-3" />}
+            <SoftIcon name={isIndividual ? 'user' : 'store'} className="w-4 h-4" />
             {isIndividual ? t('types.individual') : t('types.business')}
           </span>
         </div>
@@ -298,18 +291,18 @@ const BusinessListingCard: React.FC<BusinessListingCardProps> = ({ listing, onVi
 
         {/* Location */}
         <div className="flex items-center gap-1.5 text-xs text-neutral-500 mb-3">
-          <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+          <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">{listing.city}, {listing.country}</span>
         </div>
 
         {/* Stats row */}
         <div className="flex items-center gap-3 text-xs text-neutral-400 mb-3">
           <span className="flex items-center gap-1">
-            <EyeIcon className="w-3.5 h-3.5" />
+            <SoftIcon name="eye" className="w-4 h-4" />
             {listing.views} {t('detail.stats.views')}
           </span>
           <span className="flex items-center gap-1">
-            <BuildingStorefrontIcon className="w-3.5 h-3.5" />
+            <SoftIcon name="store" className="w-4 h-4" />
             {listing.services.length} {t('detail.stats.services')}
           </span>
         </div>

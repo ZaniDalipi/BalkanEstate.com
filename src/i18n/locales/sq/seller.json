@@ -16,7 +16,7 @@
     "remainingListings": "{{count}} listim(e) të mbetura",
     "availableListings": "{{count}} listim(e) të disponueshme",
     "shared": "(i përbashkët)",
-    "highlightCoupons": "🎟️ Kuponë Theksimi: {{available}}/{{total}}",
+    "highlightCoupons": "Kuponë Theksimi: {{available}}/{{total}}",
     "couponsDescription": "Përdorni për të promovuar listimet tuaja",
     "noSubscriptionData": "Nuk ka të dhëna abonimi",
     "proRequired": {
@@ -417,9 +417,9 @@
       "strict": "E rreptë",
       "nonRefundable": "Pa rimbursim",
       "included": "Përfshirë në çmim",
-      "breakfast": "🍳 Mëngjes",
-      "towels": "🛁 Peshqirë dhe çarçafë",
-      "parking": "🚗 Parkim"
+      "breakfast": "Mëngjes",
+      "towels": "Peshqirë dhe çarçafë",
+      "parking": "Parkim"
     },
     "preview": {
       "banner": "Modaliteti i pamjes paraprake",
@@ -986,7 +986,7 @@
       "avgPriceM": "Çmimi mesatar/m²",
       "daysToSell": "Ditë deri në shitje",
       "yoyGrowth": "Rritja vjetore",
-      "liveMarketDataPoweredBy": "📊 Të dhëna tregu në kohë reale me AI • Përditësuar",
+      "liveMarketDataPoweredBy": "Të dhëna tregu në kohë reale me AI • Përditësuar",
       "marketTrends": "Tendencat e tregut",
       "timeOnMarket": "Koha në treg",
       "proTip": "Këshillë profesionale",
@@ -997,9 +997,9 @@
     },
     "roleSelector": {
       "promotionCoupons": "Kupona promovimi",
-      "featured": "⭐ E veçuar:",
+      "featured": "E veçuar:",
       "daysEach": "ditë secili",
-      "highlighted": "🔥 E theksuar:",
+      "highlighted": "E theksuar:",
       "usedThisMonth": "Përdorur këtë muaj:"
     },
     "whackAnIconAnimation": {

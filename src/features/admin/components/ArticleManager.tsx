@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ArticleManagerForm from './ArticleManagerForm';
 import { tokenService } from '@/src/shared/api/tokenService';
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 interface Article {
@@ -145,9 +146,7 @@ const ArticleManager: React.FC = () => {
       {/* Error banner */}
       {error && (
         <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
           <button onClick={fetchArticles} className="ml-auto underline hover:no-underline">{t('admin:ui.articleManager.retry', 'Retry')}</button>
         </div>
@@ -162,9 +161,7 @@ const ArticleManager: React.FC = () => {
         </div>
       ) : articles.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <svg className="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+          <SoftIcon name="clipboard" className="w-12 h-12 mb-4" />
           <p className="text-slate-500 font-medium">{t('admin:ui.articleManager.noArticlesFound', 'No articles found')}</p>
           <p className="text-slate-400 text-sm mt-1">
             {statusFilter !== 'all' ? `No ${statusFilter} articles yet` : t('admin:ui.articleManager.createYourFirstArticleTo', 'Create your first article to get started')}

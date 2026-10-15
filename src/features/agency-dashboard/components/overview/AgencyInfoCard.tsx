@@ -1,9 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  BuildingOfficeIcon,
-  ShieldCheckIcon,
-} from '@/constants';
 import { useAgency } from '@/src/features/agencies/hooks/useAgency';
 import { SoftIcon } from '@/src/shared/illustrations';
 
@@ -100,20 +96,20 @@ const AgencyInfoCard: React.FC<AgencyInfoCardProps> = ({ agencyId }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-start gap-4 mb-5">
-        <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0">
-          {agencyData.logo ? (
+        {agencyData.logo ? (
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0">
             <img src={agencyData.logo as string} alt={agencyData.name as string} className="w-14 h-14 rounded-xl object-cover" />
-          ) : (
-            <BuildingOfficeIcon className="w-7 h-7 text-white" />
-          )}
-        </div>
+          </div>
+        ) : (
+          <SoftIcon name="building" className="w-14 h-14 flex-shrink-0" />
+        )}
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-bold text-gray-900 truncate">
             {agencyData.name as string}
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium capitalize">
-              <ShieldCheckIcon className="w-3 h-3" />
+              <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" />
               {agencyType}
             </span>
             {agencyData.isFeatured && (

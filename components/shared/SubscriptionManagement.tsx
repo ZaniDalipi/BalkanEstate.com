@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleIcon, XCircleIcon, SparklesIcon, HomeIcon, ChartBarIcon } from '../../constants';
+import { CheckCircleIcon, XCircleIcon } from '../../constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '../../context/AppContext';
 import { User } from '../../types';
 import PaymentWindow from './PaymentWindow';
@@ -187,20 +188,6 @@ const PLAN_TIERS: Record<string, number> = {
   agency_yearly: 3,          // Enterprise for agency creators
   agency_agent_yearly: 2,
 };
-
-// Gift/Coupon icon component
-const GiftIconComponent: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-  </svg>
-);
-
-// Team Icon component
-const TeamIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-  </svg>
-);
 
 // Copy icon component
 const CopyIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -1138,9 +1125,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
 
           <div className="text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 mb-2">
-              <SparklesIcon className="w-10 h-10 text-primary" />
-            </div>
+            <SoftIcon name="sparkles" className="inline-block w-20 h-20 mb-2" />
 
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-3">
@@ -1166,7 +1151,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               href="/subscribe"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-dark text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 mt-4 cursor-pointer"
             >
-              <SparklesIcon className="w-5 h-5" />
+              <SoftIcon name="sparkles" className="w-6 h-6" />
               {t('management.viewPlans', 'View Plans & Pricing')}
             </a>
           </div>
@@ -1197,7 +1182,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         {subscriptionDetails.isCoupon && (
           <div className="absolute top-0 left-0 right-0 flex justify-center -mt-0">
             <div className="flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-yellow-900 rounded-b-lg shadow-md">
-              <GiftIconComponent className="w-4 h-4" />
+              <SoftIcon name="ticket" className="w-5 h-5" />
               <span className="text-xs font-bold">{t('management.couponApplied', 'COUPON APPLIED')}</span>
             </div>
           </div>
@@ -1206,8 +1191,8 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 ${subscriptionDetails.isCoupon ? 'mt-4' : ''}`}>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-white/20 rounded-lg flex-shrink-0">
-                <ChartBarIcon className="w-6 h-6" />
+              <div className="p-1.5 bg-white/95 rounded-lg flex-shrink-0">
+                <SoftIcon name="chart" className="w-7 h-7" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-2xl font-bold truncate">{subscriptionDetails.currentPlan.name}</h2>
@@ -1312,9 +1297,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <HomeIcon className="w-5 h-5 text-blue-600" />
-            </div>
+            <SoftIcon name="home" className="w-9 h-9 flex-shrink-0" />
             <div>
               <p className="font-semibold text-neutral-800">
                 {isYearlyPlan
@@ -1403,9 +1386,9 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               const isOverLimit = used >= limit;
 
               if (isOverLimit) {
-                return <span className="text-red-600 font-semibold">⚠️ {isYearlyPlan ? t('subscription:ui.subscriptionManagement.annual', 'Annual') : t('subscription:ui.subscriptionManagement.monthly', 'Monthly')} {t('subscription:ui.subscriptionManagement.limitReached2', 'limit reached.')} {!isYearlyPlan && t('subscription:ui.subscriptionManagement.waitForNextMonthOr', 'Wait for next month or ')}{t('subscription:ui.subscriptionManagement.upgradeYourPlan', 'Upgrade your plan.')}</span>;
+                return <span className="text-red-600 font-semibold"><SoftIcon name="warning" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{isYearlyPlan ? t('subscription:ui.subscriptionManagement.annual', 'Annual') : t('subscription:ui.subscriptionManagement.monthly', 'Monthly')} {t('subscription:ui.subscriptionManagement.limitReached2', 'limit reached.')} {!isYearlyPlan && t('subscription:ui.subscriptionManagement.waitForNextMonthOr', 'Wait for next month or ')}{t('subscription:ui.subscriptionManagement.upgradeYourPlan', 'Upgrade your plan.')}</span>;
               } else if (percentage >= 90) {
-                return <span className="text-amber-600">{t('subscription:ui.subscriptionManagement.almostThere', '⚡ Almost there! (')}{Math.round(percentage)}{t('subscription:ui.subscriptionManagement.used', '% used)')}</span>;
+                return <span className="text-amber-600"><SoftIcon name="bolt" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('subscription:ui.subscriptionManagement.almostThere', 'Almost there! (')}{Math.round(percentage)}{t('subscription:ui.subscriptionManagement.used', '% used)')}</span>;
               } else if (percentage >= 80) {
                 return <span className="text-amber-500">{Math.round(percentage)}{t('subscription:ui.subscriptionManagement.of', '% of')} {isYearlyPlan ? 'annual' : 'monthly'} {t('subscription:ui.subscriptionManagement.limitUsed', 'limit used')}</span>;
               } else {
@@ -1424,9 +1407,10 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <div className="mt-4 pt-4 border-t border-neutral-200">
                 <button
                   onClick={() => setShowRequestMoreModal(true)}
-                  className="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 font-medium text-sm transition-colors"
+                  className="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 font-medium text-sm transition-colors inline-flex items-center justify-center gap-2"
                 >
-                  {t('subscription:ui.subscriptionManagement.requestMoreListings', '📧 Request More Listings')}
+                  <SoftIcon name="envelope" className="w-5 h-5" />
+                  {t('subscription:ui.subscriptionManagement.requestMoreListings', 'Request More Listings')}
                 </button>
               </div>
             ) : null;
@@ -1437,16 +1421,14 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {/* What's Included in Your Plan - Prominent Feature Breakdown */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm">
         <h3 className="text-lg font-bold text-neutral-800 mb-4 flex items-center gap-2">
-          <SparklesIcon className="w-5 h-5 text-primary" />
+          <SoftIcon name="sparkles" className="w-6 h-6" />
           {t('management.whatsIncluded.title', { plan: subscriptionDetails.currentPlan.name })}
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Listings - from DB product */}
           <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-              <HomeIcon className="w-5 h-5 text-blue-600" />
-            </div>
+            <SoftIcon name="home" className="w-9 h-9 flex-shrink-0" />
             <div>
               <p className="font-semibold text-neutral-800">
                 {t('management.activeListings', { count: user.subscription?.listingsLimit ?? currentProduct?.listingsLimit ?? subscriptionDetails.currentPlan.listingLimit, defaultValue: '{{count}} Active Listings' })}
@@ -1464,11 +1446,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
           {/* Saved Searches - from DB product */}
           <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
-            <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
-              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
+            <SoftIcon name="search" className="w-9 h-9 flex-shrink-0" />
             <div>
               <p className="font-semibold text-neutral-800">
                 {(currentProduct?.savedSearchesLimit ?? -1) === -1 || subscriptionDetails.currentPlan.savedSearchesLimit === 'unlimited'
@@ -1488,9 +1466,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
             const hasPromoCoupons = promoCoupons > 0 || isShared;
             return (
               <div className={`flex items-start gap-3 p-3 ${hasPromoCoupons ? 'bg-amber-50' : 'bg-neutral-50'} rounded-lg`}>
-                <div className={`p-2 ${hasPromoCoupons ? 'bg-amber-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-                  <GiftIconComponent className={`w-5 h-5 ${hasPromoCoupons ? 'text-amber-600' : 'text-neutral-400'}`} />
-                </div>
+                <SoftIcon name="ticket" className={`w-9 h-9 flex-shrink-0 ${hasPromoCoupons ? '' : 'opacity-50 grayscale'}`} />
                 <div>
                   <p className={`font-semibold ${hasPromoCoupons ? 'text-neutral-800' : 'text-neutral-400'}`}>
                     {isShared
@@ -1513,9 +1489,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
           {/* Analytics - from plan */}
           <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'bg-green-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'bg-green-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <ChartBarIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'text-green-600' : 'text-neutral-400'}`} />
-            </div>
+            <SoftIcon name="chart" className={`w-9 h-9 flex-shrink-0 ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? '' : 'opacity-50 grayscale'}`} />
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.analyticsLevel !== 'basic' ? 'text-neutral-800' : 'text-neutral-400'}`}>
                 {subscriptionDetails.currentPlan.analyticsLevel === 'full'
@@ -1534,11 +1508,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
           {/* Support - from plan */}
           <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'bg-indigo-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'bg-indigo-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <svg className={`w-5 h-5 ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'text-indigo-600' : 'text-neutral-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
+            <SoftIcon name="concierge" className={`w-9 h-9 flex-shrink-0 ${subscriptionDetails.currentPlan.supportType !== 'email' ? '' : 'opacity-50 grayscale'}`} />
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.supportType !== 'email' ? 'text-neutral-800' : 'text-neutral-400'}`}>
                 {subscriptionDetails.currentPlan.supportType === 'agency'
@@ -1559,9 +1529,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
 
           {/* Verified Badge - Pro only */}
           <div className={`flex items-start gap-3 p-3 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-50' : 'bg-neutral-50'} rounded-lg`}>
-            <div className={`p-2 ${subscriptionDetails.currentPlan.tier >= 1 ? 'bg-cyan-100' : 'bg-neutral-100'} rounded-lg flex-shrink-0`}>
-              <CheckCircleIcon className={`w-5 h-5 ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-cyan-600' : 'text-neutral-400'}`} />
-            </div>
+            <SoftIcon name="shield" className={`w-9 h-9 flex-shrink-0 ${subscriptionDetails.currentPlan.tier >= 1 ? '' : 'opacity-50 grayscale'}`} />
             <div>
               <p className={`font-semibold ${subscriptionDetails.currentPlan.tier >= 1 ? 'text-neutral-800' : 'text-neutral-400'}`}>
                 {subscriptionDetails.currentPlan.tier >= 1
@@ -1589,7 +1557,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 href="/subscribe"
                 className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
               >
-                <SparklesIcon className="w-4 h-4" />
+                <SoftIcon name="sparkles" className="w-5 h-5" />
                 {t('management.upgradeNow')}
               </a>
             </div>
@@ -1609,9 +1577,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
               <>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <TeamIcon className="w-5 h-5 text-purple-600" />
-                    </div>
+                    <SoftIcon name="users" className="w-9 h-9 flex-shrink-0" />
                     <div>
                       <p className="font-semibold text-neutral-800">{t('management.teamMembers', 'Team Members')}</p>
                       <p className="text-sm text-neutral-500">
@@ -1799,9 +1765,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
+                      <SoftIcon name="envelope" className="w-5 h-5" />
                       {t('management.sendViaEmail', 'Send via Email')}
                     </>
                   )}
@@ -1845,9 +1809,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {subscriptionDetails.isCoupon && (
         <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-yellow-100 rounded-lg flex-shrink-0">
-              <GiftIconComponent className="w-5 h-5 text-yellow-600" />
-            </div>
+            <SoftIcon name="ticket" className="w-9 h-9 flex-shrink-0" />
             <div>
               <h4 className="font-semibold text-yellow-900">{t('management.couponTitle', 'Coupon Subscription')}</h4>
               <p className="text-sm text-yellow-700 mt-1">
@@ -1865,11 +1827,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {isPendingCancellation && (
         <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
-              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
+            <SoftIcon name="warning" className="w-9 h-9 flex-shrink-0" />
             <div className="flex-1">
               <h4 className="font-semibold text-orange-900">{t('management.cancelPending', 'Subscription Cancellation Pending')}</h4>
               <p className="text-sm text-orange-700 mt-1">
@@ -1906,11 +1864,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {isCancelledButActive && !isPendingCancellation && (
         <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-red-100 rounded-lg flex-shrink-0">
-              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
+            <SoftIcon name="xmark" className="w-9 h-9 flex-shrink-0" />
             <div className="flex-1">
               <h4 className="font-semibold text-red-900">{t('management.cancelled', 'Subscription Cancelled')}</h4>
               <p className="text-sm text-red-700 mt-1">
@@ -1921,7 +1875,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                   href="/subscribe"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
                 >
-                  <SparklesIcon className="w-4 h-4" />
+                  <SoftIcon name="sparkles" className="w-5 h-5" />
                   {t('management.resubscribe', 'Resubscribe')}
                 </a>
               </div>
@@ -1934,10 +1888,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {!isPendingCancellation && !isCancelledButActive && subscriptionDetails.isActive && (
         <div className="bg-white rounded-xl border border-neutral-200 p-4 shadow-sm">
           <h3 className="text-lg font-bold text-neutral-800 mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            <SoftIcon name="gear" className="w-6 h-6" />
             {t('management.settings', 'Subscription Settings')}
           </h3>
 
@@ -2036,11 +1987,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
       {!subscriptionDetails.isCoupon && subscriptionDetails.currentPlan.price > 0 && subscriptionDetails.isActive && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
+            <SoftIcon name="info" className="w-9 h-9 flex-shrink-0" />
             <div>
               <h4 className="font-semibold text-blue-900">{t('management.proRatedPricing', 'Pro-rated Upgrade Pricing')}</h4>
               <p className="text-sm text-blue-700 mt-1">
@@ -2114,15 +2061,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="text-center mb-6">
-              <div className={`w-16 h-16 ${subscriptionDetails?.isCoupon ? 'bg-yellow-100' : 'bg-red-100'} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                {subscriptionDetails?.isCoupon ? (
-                  <GiftIconComponent className="w-8 h-8 text-yellow-600" />
-                ) : (
-                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                )}
-              </div>
+              <SoftIcon name={subscriptionDetails?.isCoupon ? 'ticket' : 'warning'} className="w-16 h-16 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-neutral-800 mb-2">
                 {subscriptionDetails?.isCoupon ? t('management.cancelFreeTrial', 'Cancel Free Trial?') : t('management.cancelSubscriptionQuestion', 'Cancel Subscription?')}
               </h3>
@@ -2185,9 +2124,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
                 {subscriptionDetails && subscriptionDetails.remainingValue > 0 && (
                   <div className="bg-green-50 rounded-xl p-4 mb-4 border border-green-200">
                     <h4 className="text-sm font-semibold text-green-800 mb-2 flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <SoftIcon name="cash" className="w-5 h-5" />
                       {t('management.cancelModal.refundAvailable', 'Refund Available')}
                     </h4>
                     <div className="space-y-1 text-sm">
@@ -2306,9 +2243,7 @@ const SubscriptionManagement: React.FC<SubscriptionManagementProps> = ({ userId 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-lg">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-lg">
-                📧
-              </div>
+              <SoftIcon name="envelope" className="w-10 h-10 flex-shrink-0" />
               <h3 className="text-lg font-bold text-neutral-900">{t('subscription:ui.subscriptionManagement.requestMoreListings2', 'Request More Listings')}</h3>
             </div>
 

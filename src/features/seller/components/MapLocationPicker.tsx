@@ -8,6 +8,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { reverseGeocode } from '@/services/osmService';
 import { findCityCentre, formatDistanceKm } from '@/shared/geo';
 import { MIN_QUERY_LENGTH, useLocationSearch, type LocationSuggestion } from '../hooks/useLocationSearch';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Fix for default markers in Leaflet with Vite/webpack bundlers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -532,10 +533,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
                   className="w-full text-left px-4 py-3 hover:bg-neutral-100 border-b border-neutral-100 last:border-b-0 transition-colors"
                 >
                   <div className="flex items-start gap-2">
-                    <svg className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
+                    <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-neutral-900 truncate">{suggestion.title}</p>
                       <p className="text-xs text-neutral-500 mt-0.5 truncate">
@@ -571,10 +569,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ lat, lng, address
           {isGettingLocation ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
+            <SoftIcon name="pin" className="w-5 h-5" />
           )}
           <span className="hidden sm:inline">{t('search:map.useMyLocation')}</span>
         </button>

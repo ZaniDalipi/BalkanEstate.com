@@ -16,7 +16,7 @@
     "remainingListings": "{{count}} εναπομένουσες αγγελίες",
     "availableListings": "{{count}} διαθέσιμες αγγελίες",
     "shared": "(κοινόχρηστο)",
-    "highlightCoupons": "🎟️ Κουπόνια επισήμανσης: {{available}}/{{total}}",
+    "highlightCoupons": "Κουπόνια επισήμανσης: {{available}}/{{total}}",
     "couponsDescription": "Χρησιμοποιήστε τα για προώθηση των αγγελιών σας",
     "noSubscriptionData": "Δεν υπάρχουν δεδομένα συνδρομής",
     "proRequired": {
@@ -417,9 +417,9 @@
       "strict": "Αυστηρή",
       "nonRefundable": "Χωρίς επιστροφή χρημάτων",
       "included": "Περιλαμβάνεται στην τιμή",
-      "breakfast": "🍳 Πρωινό",
-      "towels": "🛁 Πετσέτες και λευκά είδη",
-      "parking": "🚗 Στάθμευση"
+      "breakfast": "Πρωινό",
+      "towels": "Πετσέτες και λευκά είδη",
+      "parking": "Στάθμευση"
     },
     "preview": {
       "banner": "Λειτουργία προεπισκόπησης",
@@ -986,7 +986,7 @@
       "avgPriceM": "Μέση τιμή/m²",
       "daysToSell": "Ημέρες έως την πώληση",
       "yoyGrowth": "Ετήσια ανάπτυξη",
-      "liveMarketDataPoweredBy": "📊 Ζωντανά δεδομένα αγοράς με AI • Ενημερώθηκε",
+      "liveMarketDataPoweredBy": "Ζωντανά δεδομένα αγοράς με AI • Ενημερώθηκε",
       "marketTrends": "Τάσεις αγοράς",
       "timeOnMarket": "Χρόνος στην αγορά",
       "proTip": "Επαγγελματική συμβουλή",
@@ -997,9 +997,9 @@
     },
     "roleSelector": {
       "promotionCoupons": "Κουπόνια προώθησης",
-      "featured": "⭐ Προβεβλημένο:",
+      "featured": "Προβεβλημένο:",
       "daysEach": "ημέρες ο καθένας",
-      "highlighted": "🔥 Επισημασμένο:",
+      "highlighted": "Επισημασμένο:",
       "usedThisMonth": "Χρησιμοποιήθηκαν αυτόν τον μήνα:"
     },
     "whackAnIconAnimation": {

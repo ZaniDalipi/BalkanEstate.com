@@ -8,10 +8,8 @@ import {
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon,
   HomeIcon,
-  UsersIcon,
-  EnvelopeIcon,
-  BuildingOfficeIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { tokenService } from '@/src/shared/api/tokenService';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { useAppContext } from '@/context/AppContext';
@@ -67,26 +65,22 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
     {
       label: t('admin:sidebar.users'),
       value: stats?.totalUsers || 0,
-      icon: <UsersIcon className="w-4 h-4" />,
-      color: 'text-blue-600'
+      icon: <SoftIcon name="users" className="w-5 h-5" />
     },
     {
       label: t('admin:sidebar.properties'),
       value: stats?.totalProperties || 0,
-      icon: <HomeIcon className="w-4 h-4" />,
-      color: 'text-green-600'
+      icon: <SoftIcon name="home" className="w-5 h-5" />
     },
     {
       label: t('admin:sidebar.agencies'),
       value: stats?.totalAgencies || 0,
-      icon: <BuildingOfficeIcon className="w-4 h-4" />,
-      color: 'text-purple-600'
+      icon: <SoftIcon name="building" className="w-5 h-5" />
     },
     {
       label: t('admin:sidebar.inquiries'),
       value: stats?.newInquiries || 0,
-      icon: <EnvelopeIcon className="w-4 h-4" />,
-      color: 'text-red-600',
+      icon: <SoftIcon name="envelope" className="w-5 h-5" />,
       isAlert: (stats?.newInquiries || 0) > 0
     }
   ];
@@ -109,7 +103,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
             <div className="hidden md:flex items-center gap-6">
               {quickStats.map((stat, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <span className={stat.color}>{stat.icon}</span>
+                  <span className="flex-shrink-0">{stat.icon}</span>
                   <div className="text-sm">
                     <span className="text-gray-500">{stat.label}:</span>
                     <span className={`ml-1 font-semibold ${stat.isAlert ? 'text-red-600' : 'text-gray-900'}`}>
@@ -154,9 +148,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                     {(stats?.newInquiries || 0) > 0 ? (
                       <div className="p-4 hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                         <div className="flex items-start gap-3">
-                          <div className="p-2 bg-red-100 rounded-lg">
-                            <EnvelopeIcon className="w-5 h-5 text-red-600" />
-                          </div>
+                          <SoftIcon name="envelope" className="w-9 h-9 flex-shrink-0" />
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900">
                               {t('admin:header.newInquiries', { count: stats?.newInquiries })}
@@ -171,9 +163,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                     {(stats?.unverifiedUsers || 0) > 0 ? (
                       <div className="p-4 hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                         <div className="flex items-start gap-3">
-                          <div className="p-2 bg-yellow-100 rounded-lg">
-                            <UsersIcon className="w-5 h-5 text-yellow-600" />
-                          </div>
+                          <SoftIcon name="users" className="w-9 h-9 flex-shrink-0" />
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900">
                               {t('admin:header.unverifiedUsers', { count: stats?.unverifiedUsers })}
@@ -187,7 +177,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                     ) : null}
                     {(!stats?.newInquiries && !stats?.unverifiedUsers) && (
                       <div className="p-8 text-center">
-                        <BellIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <SoftIcon name="bell" className="w-12 h-12 mx-auto mb-3" />
                         <p className="text-sm text-gray-500">{t('admin:header.noNotifications')}</p>
                       </div>
                     )}

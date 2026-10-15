@@ -8,6 +8,7 @@ import { HowItWorksTab } from '../../types';
 import Footer from './Footer';
 import { API_URL } from '../../src/shared/api/config';
 import { useHowItWorksPrices } from '../../src/shared/query/hooks';
+import { SoftIcon, type SoftIconName } from '../../src/shared/illustrations';
 
 // Helper function to replace placeholders in feature strings with actual product values
 const replacePlaceholdersInFeature = (feature: any, product: any): string => {
@@ -99,125 +100,9 @@ import {
 } from './Decorative3D';
 
 // Icons
-const BuildingIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-  </svg>
-);
-
-const UserGroupIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-  </svg>
-);
-
-const UserIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
-
-const HomeIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-  </svg>
-);
-
-const SearchIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-);
-
-const HeartIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-);
-
-const ChatIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-  </svg>
-);
-
-const TicketIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-  </svg>
-);
-
-const StarIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-  </svg>
-);
-
 const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-);
-
-const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-  </svg>
-);
-
-const ChartIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-  </svg>
-);
-
-const BellIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-  </svg>
-);
-
-const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-  </svg>
-);
-
-const SunIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-  </svg>
-);
-
-const RulerIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 6l.707.707M6 6l-.707.707M6 6v12m0-12h12m0 12v.707M18 18h-.707M18 18l.707-.707M18 18l-.707.707M18 18V6m0 12H6m12-12h.707M18 6l-.707.707M18 6l.707-.707M6 18l.707-.707M6 18l-.707.707M6 18v-.707" />
-  </svg>
-);
-
-const LocationMarkerIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
-
-const LightBulbIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-  </svg>
-);
-
-const CalculatorIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-  </svg>
-);
-
-const FireIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
   </svg>
 );
 
@@ -264,12 +149,12 @@ const HowItWorksPage: React.FC = () => {
   const handleTabChange = (tabId: HowItWorksTab) => navigate(paths.howItWorks(tabId));
 
   const tabs = [
-    { id: 'getting-started' as HowItWorksTab, label: t('howItWorks:tabs.gettingStarted'), icon: StarIcon, color: 'cyan' },
-    { id: 'premium-features' as HowItWorksTab, label: t('howItWorks:tabs.premiumFeatures'), icon: SparklesIcon, color: 'amber' },
-    { id: 'agencies' as HowItWorksTab, label: t('howItWorks:tabs.forAgencies'), icon: BuildingIcon, color: 'orange' },
-    { id: 'agents' as HowItWorksTab, label: t('howItWorks:tabs.forAgents'), icon: UserGroupIcon, color: 'purple' },
-    { id: 'buyers' as HowItWorksTab, label: t('howItWorks:tabs.forBuyers'), icon: SearchIcon, color: 'blue' },
-    { id: 'sellers' as HowItWorksTab, label: t('howItWorks:tabs.forSellers'), icon: HomeIcon, color: 'green' },
+    { id: 'getting-started' as HowItWorksTab, label: t('howItWorks:tabs.gettingStarted'), icon: 'star' as SoftIconName, color: 'cyan' },
+    { id: 'premium-features' as HowItWorksTab, label: t('howItWorks:tabs.premiumFeatures'), icon: 'sparkles' as SoftIconName, color: 'amber' },
+    { id: 'agencies' as HowItWorksTab, label: t('howItWorks:tabs.forAgencies'), icon: 'building' as SoftIconName, color: 'orange' },
+    { id: 'agents' as HowItWorksTab, label: t('howItWorks:tabs.forAgents'), icon: 'users' as SoftIconName, color: 'purple' },
+    { id: 'buyers' as HowItWorksTab, label: t('howItWorks:tabs.forBuyers'), icon: 'search' as SoftIconName, color: 'blue' },
+    { id: 'sellers' as HowItWorksTab, label: t('howItWorks:tabs.forSellers'), icon: 'home' as SoftIconName, color: 'green' },
   ];
 
   const getTabColor = (tab: HowItWorksTab) => {
@@ -387,10 +272,7 @@ const HowItWorksPage: React.FC = () => {
             return (
               <div className="relative w-full rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-primary/5 to-primary/10" style={{ paddingBottom: '56.25%' }}>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
-                  <svg className="w-16 h-16 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <SoftIcon name="video" className="w-16 h-16 mb-3" />
                   <span className="text-lg font-medium">{t('howItWorks:videoTutorials.comingSoon')}</span>
                 </div>
               </div>
@@ -436,22 +318,14 @@ const HowItWorksPage: React.FC = () => {
                     ) : (
                       <div className="relative w-full bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center" style={{ paddingBottom: '56.25%' }}>
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-400">
-                          <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
+                          <SoftIcon name="video" className="w-12 h-12 mb-2" />
                           <span className="text-sm">{t('howItWorks:videoTutorials.comingSoon')}</span>
                         </div>
                       </div>
                     )}
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-primary">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </span>
+                        <SoftIcon name="video" className="w-6 h-6 flex-shrink-0" />
                         <h4 className="font-semibold text-neutral-800">
                           {dbVideo.title}
                         </h4>
@@ -474,7 +348,6 @@ const HowItWorksPage: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg p-2 flex flex-wrap gap-2 justify-center">
           {tabs.map((tab) => {
-            const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
@@ -487,7 +360,7 @@ const HowItWorksPage: React.FC = () => {
                 }`}
                 style={isActive ? { backgroundColor: tab.color === 'cyan' ? '#06b6d4' : tab.color === 'orange' ? '#f97316' : tab.color === 'purple' ? '#a855f7' : tab.color === 'blue' ? '#3b82f6' : '#22c55e' } : {}}
               >
-                <Icon className="w-5 h-5" />
+                <SoftIcon name={tab.icon} className="w-6 h-6" />
                 <span>{tab.label}</span>
               </button>
             );
@@ -502,9 +375,7 @@ const HowItWorksPage: React.FC = () => {
           <div className="animate-fade-in">
             {/* Main Value Prop */}
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-cyan-100 rounded-full mb-4">
-                <StarIcon className="w-8 h-8 text-cyan-600" />
-              </div>
+              <SoftIcon name="star" className="inline-block w-16 h-16 mb-4" />
               <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:gettingStarted.welcome.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
                 {t('howItWorks:gettingStarted.welcome.subtitle')}
@@ -518,20 +389,19 @@ const HowItWorksPage: React.FC = () => {
                 <h3 className="text-2xl font-bold mb-6 text-center">{t('howItWorks:gettingStarted.mainNavigation.title')}</h3>
                 <div className="grid md:grid-cols-5 gap-4">
                   {[
-                    { name: t('howItWorks:gettingStarted.mainNavigation.home.name'), desc: t('howItWorks:gettingStarted.mainNavigation.home.desc'), icon: HomeIcon, path: '/' },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.search.name'), desc: t('howItWorks:gettingStarted.mainNavigation.search.desc'), icon: SearchIcon, path: '/search' },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.agents.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agents.desc'), icon: UserGroupIcon, path: '/agents' },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.agencies.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agencies.desc'), icon: BuildingIcon, path: '/agencies' },
-                    { name: t('howItWorks:gettingStarted.mainNavigation.explore.name'), desc: t('howItWorks:gettingStarted.mainNavigation.explore.desc'), icon: MapIcon, path: '/explore' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.home.name'), desc: t('howItWorks:gettingStarted.mainNavigation.home.desc'), icon: 'home' as SoftIconName, path: '/' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.search.name'), desc: t('howItWorks:gettingStarted.mainNavigation.search.desc'), icon: 'search' as SoftIconName, path: '/search' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.agents.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agents.desc'), icon: 'users' as SoftIconName, path: '/agents' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.agencies.name'), desc: t('howItWorks:gettingStarted.mainNavigation.agencies.desc'), icon: 'building' as SoftIconName, path: '/agencies' },
+                    { name: t('howItWorks:gettingStarted.mainNavigation.explore.name'), desc: t('howItWorks:gettingStarted.mainNavigation.explore.desc'), icon: 'mapGrid' as SoftIconName, path: '/explore' },
                   ].map((nav) => {
-                    const NavIcon = nav.icon;
                     return (
                       <button
                         key={nav.name}
                         onClick={() => navigateTo(nav.path)}
                         className="bg-white/20 backdrop-blur rounded-xl p-4 text-center hover:bg-white/30 hover:scale-105 transition-all cursor-pointer"
                       >
-                        <NavIcon className="w-8 h-8 mx-auto mb-2" />
+                        <SoftIcon name={nav.icon} className="block w-9 h-9 mx-auto mb-2" />
                         <h4 className="font-semibold">{nav.name}</h4>
                         <p className="text-xs text-cyan-100 mt-1">{nav.desc}</p>
                       </button>
@@ -554,7 +424,7 @@ const HowItWorksPage: React.FC = () => {
                   <VideoPlaceholder
                     videoKey="getting-started-create-account"
                     videos={videos}
-                    fallbackIcon={<UserIcon className="w-16 h-16 text-cyan-300 mx-auto mb-2" />}
+                    fallbackIcon={<SoftIcon name="user" className="block w-16 h-16 mx-auto mb-2" />}
                     fallbackTitle={t('howItWorks:gettingStarted.createAccount.signUpModal')}
                     fallbackSubtitle={t('howItWorks:gettingStarted.createAccount.clickSignUp')}
                     className="aspect-video bg-gradient-to-br from-cyan-100 to-teal-50"
@@ -626,7 +496,7 @@ const HowItWorksPage: React.FC = () => {
                   </p>
                   <div className="bg-blue-50 rounded-xl p-5 border border-blue-200">
                     <div className="flex items-start gap-3">
-                      <MapIcon className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                      <SoftIcon name="mapGrid" className="w-7 h-7 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.panZoom.title')}</h4>
                         <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.panZoom.desc')}</p>
@@ -635,7 +505,7 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                   <div className="bg-purple-50 rounded-xl p-5 border border-purple-200">
                     <div className="flex items-start gap-3">
-                      <SearchIcon className="w-6 h-6 text-purple-500 flex-shrink-0" />
+                      <SoftIcon name="search" className="w-7 h-7 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.drawCustomAreas.title')}</h4>
                         <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.drawCustomAreas.desc')}</p>
@@ -644,7 +514,7 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                   <div className="bg-green-50 rounded-xl p-5 border border-green-200">
                     <div className="flex items-start gap-3">
-                      <HomeIcon className="w-6 h-6 text-green-500 flex-shrink-0" />
+                      <SoftIcon name="home" className="w-7 h-7 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.clickProperties.title')}</h4>
                         <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.clickProperties.desc')}</p>
@@ -653,7 +523,7 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                   <div className="bg-orange-50 rounded-xl p-5 border border-orange-200">
                     <div className="flex items-start gap-3">
-                      <StarIcon className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                      <SoftIcon name="star" className="w-7 h-7 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.interactiveMap.filterResults.title')}</h4>
                         <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.interactiveMap.filterResults.desc')}</p>
@@ -667,7 +537,7 @@ const HowItWorksPage: React.FC = () => {
                   <VideoPlaceholder
                     videoKey="getting-started-map-search"
                     videos={videos}
-                    fallbackIcon={<MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />}
+                    fallbackIcon={<SoftIcon name="mapGrid" className="block w-16 h-16 mx-auto mb-2" />}
                     fallbackTitle={t('howItWorks:gettingStarted.interactiveMap.mapView')}
                     fallbackSubtitle={t('howItWorks:gettingStarted.interactiveMap.mapViewDesc')}
                     className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-50"
@@ -690,7 +560,7 @@ const HowItWorksPage: React.FC = () => {
                 >
                   <div className="aspect-square bg-gradient-to-br from-red-100 to-pink-50 flex items-center justify-center">
                     <div className="text-center p-4">
-                      <HeartIcon className="w-12 h-12 text-red-400 mx-auto mb-2" />
+                      <SoftIcon name="heart" className="block w-12 h-12 mx-auto mb-2" />
                       <p className="text-red-500 font-semibold">{t('howItWorks:gettingStarted.savingProperties.saveToFavorites.title')}</p>
                     </div>
                   </div>
@@ -706,7 +576,7 @@ const HowItWorksPage: React.FC = () => {
                 >
                   <div className="aspect-square bg-gradient-to-br from-purple-100 to-indigo-50 flex items-center justify-center">
                     <div className="text-center p-4">
-                      <SearchIcon className="w-12 h-12 text-purple-400 mx-auto mb-2" />
+                      <SoftIcon name="search" className="block w-12 h-12 mx-auto mb-2" />
                       <p className="text-purple-500 font-semibold">{t('howItWorks:gettingStarted.savingProperties.saveSearch.title')}</p>
                     </div>
                   </div>
@@ -722,7 +592,7 @@ const HowItWorksPage: React.FC = () => {
                 >
                   <div className="aspect-square bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center">
                     <div className="text-center p-4">
-                      <BellIcon className="w-12 h-12 text-amber-400 mx-auto mb-2" />
+                      <SoftIcon name="bell" className="block w-12 h-12 mx-auto mb-2" />
                       <p className="text-amber-500 font-semibold">{t('howItWorks:gettingStarted.savingProperties.getNotified.title')}</p>
                     </div>
                   </div>
@@ -746,7 +616,7 @@ const HowItWorksPage: React.FC = () => {
                   <VideoPlaceholder
                     videoKey="getting-started-contact-agents"
                     videos={videos}
-                    fallbackIcon={<ChatIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />}
+                    fallbackIcon={<SoftIcon name="chat" className="block w-16 h-16 mx-auto mb-2" />}
                     fallbackTitle={t('howItWorks:gettingStarted.contactingSellers.contactForm')}
                     fallbackSubtitle={t('howItWorks:gettingStarted.contactingSellers.onEveryPage')}
                     className="aspect-video bg-gradient-to-br from-green-100 to-emerald-50"
@@ -757,7 +627,7 @@ const HowItWorksPage: React.FC = () => {
                   <h4 className="text-lg font-semibold text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.multipleWays')}</h4>
                   <div className="bg-green-50 rounded-xl p-4 border border-green-200">
                     <div className="flex items-center gap-3">
-                      <ChatIcon className="w-5 h-5 text-green-600" />
+                      <SoftIcon name="chat" className="w-6 h-6" />
                       <div>
                         <span className="font-medium text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.directMessage.title')}</span>
                         <p className="text-xs text-neutral-600">{t('howItWorks:gettingStarted.contactingSellers.directMessage.desc')}</p>
@@ -766,9 +636,7 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                   <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                     <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
+                      <SoftIcon name="phone" className="w-6 h-6 flex-shrink-0" />
                       <div>
                         <span className="font-medium text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.phoneCall.title')}</span>
                         <p className="text-xs text-neutral-600">{t('howItWorks:gettingStarted.contactingSellers.phoneCall.desc')}</p>
@@ -777,9 +645,7 @@ const HowItWorksPage: React.FC = () => {
                   </div>
                   <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
                     <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
+                      <SoftIcon name="envelope" className="w-6 h-6 flex-shrink-0" />
                       <div>
                         <span className="font-medium text-neutral-800">{t('howItWorks:gettingStarted.contactingSellers.email.title')}</span>
                         <p className="text-xs text-neutral-600">{t('howItWorks:gettingStarted.contactingSellers.email.desc')}</p>
@@ -835,9 +701,7 @@ const HowItWorksPage: React.FC = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-white rounded-xl p-5 border border-neutral-200">
                     <h4 className="font-semibold text-neutral-800 mb-3 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                      <SoftIcon name="camera" className="w-6 h-6" />
                       {t('howItWorks:gettingStarted.createListing.photoTips.title')}
                     </h4>
                     <ul className="text-sm text-neutral-600 space-y-2">
@@ -862,9 +726,7 @@ const HowItWorksPage: React.FC = () => {
 
                   <div className="bg-white rounded-xl p-5 border border-neutral-200">
                     <h4 className="font-semibold text-neutral-800 mb-3 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                      <SoftIcon name="clipboard" className="w-6 h-6" />
                       {t('howItWorks:gettingStarted.createListing.descriptionTips.title')}
                     </h4>
                     <ul className="text-sm text-neutral-600 space-y-2">
@@ -902,9 +764,7 @@ const HowItWorksPage: React.FC = () => {
                   onClick={() => navigateTo('/account?tab=profile')}
                   className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:scale-[1.02] text-left"
                 >
-                  <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
-                    <UserIcon className="w-6 h-6 text-indigo-600" />
-                  </div>
+                  <SoftIcon name="user" className="w-12 h-12 mb-4" />
                   <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.profileSettings.title')}</h4>
                   <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.profileSettings.desc')}</p>
                   <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.profileSettings.access')}</p>
@@ -914,9 +774,7 @@ const HowItWorksPage: React.FC = () => {
                   onClick={() => navigateTo('/account?tab=subscription')}
                   className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:scale-[1.02] text-left"
                 >
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-                    <TicketIcon className="w-6 h-6 text-green-600" />
-                  </div>
+                  <SoftIcon name="ticket" className="w-12 h-12 mb-4" />
                   <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.subscription.title')}</h4>
                   <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.subscription.desc')}</p>
                   <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.subscription.access')}</p>
@@ -926,9 +784,7 @@ const HowItWorksPage: React.FC = () => {
                   onClick={() => navigateTo('/account?tab=settings')}
                   className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:scale-[1.02] text-left"
                 >
-                  <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
-                    <BellIcon className="w-6 h-6 text-amber-600" />
-                  </div>
+                  <SoftIcon name="bell" className="w-12 h-12 mb-4" />
                   <h4 className="font-semibold text-neutral-800 mb-2">{t('howItWorks:gettingStarted.managingAccount.notifications.title')}</h4>
                   <p className="text-sm text-neutral-600 mb-3">{t('howItWorks:gettingStarted.managingAccount.notifications.desc')}</p>
                   <p className="text-xs text-neutral-400">{t('howItWorks:gettingStarted.managingAccount.notifications.access')}</p>
@@ -941,36 +797,28 @@ const HowItWorksPage: React.FC = () => {
               <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">{t('howItWorks:gettingStarted.proTips.title')}</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckIcon className="w-5 h-5" />
-                  </div>
+                  <SoftIcon name="check" className="w-10 h-10 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.completeProfile.title')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.completeProfile.desc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckIcon className="w-5 h-5" />
-                  </div>
+                  <SoftIcon name="check" className="w-10 h-10 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.useSavedSearches.title')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.useSavedSearches.desc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckIcon className="w-5 h-5" />
-                  </div>
+                  <SoftIcon name="check" className="w-10 h-10 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.exploreCities.title')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.exploreCities.desc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckIcon className="w-5 h-5" />
-                  </div>
+                  <SoftIcon name="check" className="w-10 h-10 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-neutral-800 mb-1">{t('howItWorks:gettingStarted.proTips.enableNotifications.title')}</h4>
                     <p className="text-sm text-neutral-600">{t('howItWorks:gettingStarted.proTips.enableNotifications.desc')}</p>
@@ -986,9 +834,7 @@ const HowItWorksPage: React.FC = () => {
           <div className="animate-fade-in">
             {/* Main Value Prop */}
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
-                <SparklesIcon className="w-8 h-8 text-amber-600" />
-              </div>
+              <SoftIcon name="sparkles" className="inline-block w-16 h-16 mb-4" />
               <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:premiumFeatures.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
                 {t('howItWorks:premiumFeatures.subtitle')}
@@ -1002,7 +848,7 @@ const HowItWorksPage: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-center gap-8">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-4">
-                      <SearchIcon className="w-10 h-10" />
+                      <SoftIcon name="search" className="w-10 h-10 flex-shrink-0" />
                       <div>
                         <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.aiSearch.badge')}</span>
                         <h3 className="text-2xl font-bold mt-1">{t('howItWorks:premiumFeatures.aiSearch.title')}</h3>
@@ -1024,7 +870,7 @@ const HowItWorksPage: React.FC = () => {
                   <div className="w-full md:w-80 bg-white/20 rounded-2xl p-6">
                     <div className="bg-white rounded-xl p-4 text-neutral-800">
                       <div className="flex items-center gap-2 mb-3">
-                        <SparklesIcon className="w-5 h-5 text-amber-500" />
+                        <SoftIcon name="sparkles" className="w-6 h-6" />
                         <span className="font-medium text-sm">{t('howItWorks:ui.howItWorksPage.aiSearch', 'AI Search')}</span>
                       </div>
                       <div className="bg-neutral-100 rounded-lg p-3 mb-3">
@@ -1043,9 +889,7 @@ const HowItWorksPage: React.FC = () => {
             {/* AI Auto Description */}
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold">
-                  <LightBulbIcon className="w-5 h-5" />
-                </div>
+                <SoftIcon name="lightbulb" className="w-10 h-10 flex-shrink-0" />
                 <div>
                   <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.aiDescription.badge')}</span>
                   <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:premiumFeatures.aiDescription.title')}</h3>
@@ -1082,7 +926,7 @@ const HowItWorksPage: React.FC = () => {
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
               <div className="relative">
                 <div className="flex items-center gap-3 mb-6">
-                  <SunIcon className="w-10 h-10" />
+                  <SoftIcon name="sun" className="w-10 h-10 flex-shrink-0" />
                   <div>
                     <span className="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.interactiveMap3D.badge')}</span>
                     <h3 className="text-2xl font-bold mt-1">{t('howItWorks:premiumFeatures.interactiveMap3D.title')}</h3>
@@ -1121,9 +965,7 @@ const HowItWorksPage: React.FC = () => {
               {/* Measurements Tool */}
               <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <RulerIcon className="w-6 h-6 text-blue-600" />
-                  </div>
+                  <SoftIcon name="ruler" className="w-12 h-12 flex-shrink-0" />
                   <div>
                     <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.measurements.badge')}</span>
                     <h4 className="font-semibold text-neutral-800">{t('howItWorks:premiumFeatures.measurements.title')}</h4>
@@ -1151,9 +993,7 @@ const HowItWorksPage: React.FC = () => {
               {/* POI (Points of Interest) */}
               <div className="bg-white rounded-2xl border border-neutral-200 p-8 hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                    <LocationMarkerIcon className="w-6 h-6 text-green-600" />
-                  </div>
+                  <SoftIcon name="pin" className="w-12 h-12 flex-shrink-0" />
                   <div>
                     <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.poi.badge')}</span>
                     <h4 className="font-semibold text-neutral-800">{t('howItWorks:premiumFeatures.poi.title')}</h4>
@@ -1181,9 +1021,7 @@ const HowItWorksPage: React.FC = () => {
             {/* AI Insights */}
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center">
-                  <LightBulbIcon className="w-5 h-5" />
-                </div>
+                <SoftIcon name="lightbulb" className="w-10 h-10 flex-shrink-0" />
                 <div>
                   <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.insights.badge')}</span>
                   <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:premiumFeatures.insights.title')}</h3>
@@ -1205,7 +1043,7 @@ const HowItWorksPage: React.FC = () => {
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
               <div className="relative">
                 <div className="flex items-center gap-3 mb-2">
-                  <CalculatorIcon className="w-8 h-8" />
+                  <SoftIcon name="calculator" className="w-8 h-8 flex-shrink-0" />
                   <h3 className="text-2xl font-bold">{t('howItWorks:premiumFeatures.calculators.title')}</h3>
                 </div>
                 <p className="text-indigo-200 mb-8">{t('howItWorks:premiumFeatures.calculators.subtitle')}</p>
@@ -1232,9 +1070,7 @@ const HowItWorksPage: React.FC = () => {
             {/* Analytics Dashboard */}
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-cyan-500 text-white rounded-full flex items-center justify-center">
-                  <ChartIcon className="w-5 h-5" />
-                </div>
+                <SoftIcon name="chart" className="w-10 h-10 flex-shrink-0" />
                 <div>
                   <span className="bg-cyan-100 text-cyan-700 text-xs font-bold px-2 py-1 rounded-full">{t('howItWorks:premiumFeatures.analytics.badge')}</span>
                   <h3 className="text-2xl font-bold text-neutral-800">{t('howItWorks:premiumFeatures.analytics.title')}</h3>
@@ -1320,14 +1156,14 @@ const HowItWorksPage: React.FC = () => {
               </div>
               {/* Benefits */}
               <div className="mt-8 grid md:grid-cols-4 gap-6">
-                {['faster', 'visibility', 'standOut', 'analytics'].map((benefit) => (
+                {([
+                  ['faster', 'flame'],
+                  ['visibility', 'search'],
+                  ['standOut', 'star'],
+                  ['analytics', 'chart'],
+                ] as [string, SoftIconName][]).map(([benefit, icon]) => (
                   <div key={benefit} className="text-center">
-                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      {benefit === 'faster' && <FireIcon className="w-6 h-6 text-amber-600" />}
-                      {benefit === 'visibility' && <SearchIcon className="w-6 h-6 text-amber-600" />}
-                      {benefit === 'standOut' && <StarIcon className="w-6 h-6 text-amber-600" />}
-                      {benefit === 'analytics' && <ChartIcon className="w-6 h-6 text-amber-600" />}
-                    </div>
+                    <SoftIcon name={icon} className="block w-12 h-12 mx-auto mb-3" />
                     <h4 className="font-semibold text-neutral-800 mb-1">{t(`howItWorks:listingPromotions.benefits.${benefit}.title`)}</h4>
                     <p className="text-sm text-neutral-600">{t(`howItWorks:listingPromotions.benefits.${benefit}.desc`)}</p>
                   </div>
@@ -1370,9 +1206,7 @@ const HowItWorksPage: React.FC = () => {
           <div className="animate-fade-in">
             {/* Main Value Prop */}
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-4">
-                <BuildingIcon className="w-8 h-8 text-orange-600" />
-              </div>
+              <SoftIcon name="building" className="inline-block w-16 h-16 mb-4" />
               <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:agencies.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
                 {t('howItWorks:agencies.subtitle')}
@@ -1423,28 +1257,27 @@ const HowItWorksPage: React.FC = () => {
                   step: '1',
                   title: t('howItWorks:agencies.steps.subscribe.title'),
                   description: t('howItWorks:agencies.steps.subscribe.desc'),
-                  icon: TicketIcon,
+                  icon: 'ticket' as SoftIconName,
                 },
                 {
                   step: '2',
                   title: t('howItWorks:agencies.steps.createAgency.title'),
                   description: t('howItWorks:agencies.steps.createAgency.desc'),
-                  icon: BuildingIcon,
+                  icon: 'building' as SoftIconName,
                 },
                 {
                   step: '3',
                   title: t('howItWorks:agencies.steps.generateCoupons.title'),
                   description: t('howItWorks:agencies.steps.generateCoupons.desc'),
-                  icon: UserGroupIcon,
+                  icon: 'users' as SoftIconName,
                 },
                 {
                   step: '4',
                   title: t('howItWorks:agencies.steps.growTogether.title'),
                   description: t('howItWorks:agencies.steps.growTogether.desc'),
-                  icon: ChartIcon,
+                  icon: 'chart' as SoftIconName,
                 },
               ].map((item) => {
-                const Icon = item.icon;
                 return (
                   <div key={item.step} className="relative">
                     <div className="bg-white rounded-2xl border border-neutral-200 p-6 h-full hover:shadow-lg transition-shadow">
@@ -1452,7 +1285,7 @@ const HowItWorksPage: React.FC = () => {
                         <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
                           <span className="text-orange-600 font-bold">{item.step}</span>
                         </div>
-                        <Icon className="w-6 h-6 text-orange-500" />
+                        <SoftIcon name={item.icon} className="w-7 h-7" />
                       </div>
                       <h4 className="font-semibold text-neutral-800 mb-2">{item.title}</h4>
                       <p className="text-sm text-neutral-600">{item.description}</p>
@@ -1498,9 +1331,7 @@ const HowItWorksPage: React.FC = () => {
         {activeTab === 'agents' && (
           <div className="animate-fade-in">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-                <UserGroupIcon className="w-8 h-8 text-purple-600" />
-              </div>
+              <SoftIcon name="users" className="inline-block w-16 h-16 mb-4" />
               <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:agents.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
                 {t('howItWorks:agents.subtitle')}
@@ -1512,9 +1343,7 @@ const HowItWorksPage: React.FC = () => {
               {/* Independent Agent */}
               <div className="bg-white rounded-2xl border-2 border-purple-200 p-8 hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                    <UserIcon className="w-6 h-6 text-purple-600" />
-                  </div>
+                  <SoftIcon name="user" className="w-12 h-12 flex-shrink-0" />
                   <div>
                     <h3 className="font-bold text-neutral-800">{t('howItWorks:agents.independent.title')}</h3>
                     <span className="text-sm text-purple-600">{t('howItWorks:agents.independent.planType')}</span>
@@ -1554,8 +1383,8 @@ const HowItWorksPage: React.FC = () => {
                   {t('howItWorks:agents.agency.free')}
                 </div>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                    <BuildingIcon className="w-6 h-6" />
+                  <div className="w-12 h-12 bg-white/95 rounded-full flex items-center justify-center">
+                    <SoftIcon name="building" className="w-9 h-9" />
                   </div>
                   <div>
                     <h3 className="font-bold">{t('howItWorks:agents.agency.title')}</h3>
@@ -1626,9 +1455,7 @@ const HowItWorksPage: React.FC = () => {
         {activeTab === 'buyers' && (
           <div className="animate-fade-in">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <SearchIcon className="w-8 h-8 text-blue-600" />
-              </div>
+              <SoftIcon name="search" className="inline-block w-16 h-16 mb-4" />
               <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:buyers.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
                 {t('howItWorks:buyers.subtitle')}
@@ -1702,49 +1529,45 @@ const HowItWorksPage: React.FC = () => {
             <div className="grid md:grid-cols-3 gap-6 mb-12">
               {[
                 {
-                  icon: MapIcon,
+                  icon: 'mapGrid' as SoftIconName,
                   title: t('howItWorks:buyers.searchTools.interactiveMap.title'),
                   description: t('howItWorks:buyers.searchTools.interactiveMap.desc'),
                   color: 'blue',
                 },
                 {
-                  icon: HeartIcon,
+                  icon: 'heart' as SoftIconName,
                   title: t('howItWorks:buyers.searchTools.saveFavorites.title'),
                   description: t('howItWorks:buyers.searchTools.saveFavorites.desc'),
                   color: 'red',
                 },
                 {
-                  icon: BellIcon,
+                  icon: 'bell' as SoftIconName,
                   title: t('howItWorks:buyers.searchTools.savedSearches.title'),
                   description: t('howItWorks:buyers.searchTools.savedSearches.desc'),
                   color: 'purple',
                 },
                 {
-                  icon: ChatIcon,
+                  icon: 'chat' as SoftIconName,
                   title: t('howItWorks:buyers.searchTools.directMessaging.title'),
                   description: t('howItWorks:buyers.searchTools.directMessaging.desc'),
                   color: 'green',
                 },
                 {
-                  icon: ChartIcon,
+                  icon: 'chart' as SoftIconName,
                   title: t('howItWorks:buyers.searchTools.marketInsights.title'),
                   description: t('howItWorks:buyers.searchTools.marketInsights.desc'),
                   color: 'orange',
                 },
                 {
-                  icon: UserIcon,
+                  icon: 'user' as SoftIconName,
                   title: t('howItWorks:buyers.searchTools.agentProfiles.title'),
                   description: t('howItWorks:buyers.searchTools.agentProfiles.desc'),
                   color: 'indigo',
                 },
               ].map((feature, idx) => {
-                const Icon = feature.icon;
                 return (
                   <div key={idx} className="bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-lg transition-all hover:-translate-y-1">
-                    <div className={`w-12 h-12 bg-${feature.color}-100 rounded-xl flex items-center justify-center mb-4`}
-                         style={{ backgroundColor: feature.color === 'blue' ? '#dbeafe' : feature.color === 'red' ? '#fee2e2' : feature.color === 'purple' ? '#f3e8ff' : feature.color === 'green' ? '#dcfce7' : feature.color === 'orange' ? '#ffedd5' : '#e0e7ff' }}>
-                      <Icon className={`w-6 h-6 ${feature.color === 'blue' ? 'text-blue-600' : feature.color === 'red' ? 'text-red-600' : feature.color === 'purple' ? 'text-purple-600' : feature.color === 'green' ? 'text-green-600' : feature.color === 'orange' ? 'text-orange-600' : 'text-indigo-600'}`} />
-                    </div>
+                    <SoftIcon name={feature.icon} className="block w-12 h-12 mb-4" />
                     <h3 className="font-semibold text-neutral-800 mb-2">{feature.title}</h3>
                     <p className="text-sm text-neutral-600">{feature.description}</p>
                   </div>
@@ -1757,19 +1580,16 @@ const HowItWorksPage: React.FC = () => {
               <h3 className="text-xl font-bold text-neutral-800 mb-6 text-center">{t('howItWorks:buyers.journey.title')}</h3>
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 {[
-                  { step: t('howItWorks:buyers.journey.search.step'), icon: SearchIcon, desc: t('howItWorks:buyers.journey.search.desc') },
-                  { step: t('howItWorks:buyers.journey.save.step'), icon: HeartIcon, desc: t('howItWorks:buyers.journey.save.desc') },
-                  { step: t('howItWorks:buyers.journey.compare.step'), icon: ChartIcon, desc: t('howItWorks:buyers.journey.compare.desc') },
-                  { step: t('howItWorks:buyers.journey.contact.step'), icon: ChatIcon, desc: t('howItWorks:buyers.journey.contact.desc') },
-                  { step: t('howItWorks:buyers.journey.visit.step'), icon: HomeIcon, desc: t('howItWorks:buyers.journey.visit.desc') },
+                  { step: t('howItWorks:buyers.journey.search.step'), icon: 'search' as SoftIconName, desc: t('howItWorks:buyers.journey.search.desc') },
+                  { step: t('howItWorks:buyers.journey.save.step'), icon: 'heart' as SoftIconName, desc: t('howItWorks:buyers.journey.save.desc') },
+                  { step: t('howItWorks:buyers.journey.compare.step'), icon: 'chart' as SoftIconName, desc: t('howItWorks:buyers.journey.compare.desc') },
+                  { step: t('howItWorks:buyers.journey.contact.step'), icon: 'chat' as SoftIconName, desc: t('howItWorks:buyers.journey.contact.desc') },
+                  { step: t('howItWorks:buyers.journey.visit.step'), icon: 'home' as SoftIconName, desc: t('howItWorks:buyers.journey.visit.desc') },
                 ].map((item, idx) => {
-                  const Icon = item.icon;
                   return (
                     <React.Fragment key={item.step}>
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <Icon className="w-8 h-8 text-white" />
-                        </div>
+                        <SoftIcon name={item.icon} className="block w-16 h-16 mx-auto mb-2" />
                         <p className="font-semibold text-neutral-800">{item.step}</p>
                         <p className="text-xs text-neutral-500">{item.desc}</p>
                       </div>
@@ -1791,7 +1611,7 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center relative">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <MapIcon className="w-16 h-16 text-blue-300 mx-auto mb-2" />
+                        <SoftIcon name="mapGrid" className="block w-16 h-16 mx-auto mb-2" />
                         <p className="text-blue-400 font-medium">{t('howItWorks:buyers.seeItInAction.mapDemo.title')}</p>
                         <p className="text-blue-300 text-sm">{t('howItWorks:buyers.seeItInAction.mapDemo.coming')}</p>
                       </div>
@@ -1808,7 +1628,7 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-video bg-gradient-to-br from-red-100 to-pink-50 flex items-center justify-center relative">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <HeartIcon className="w-16 h-16 text-red-300 mx-auto mb-2" />
+                        <SoftIcon name="heart" className="block w-16 h-16 mx-auto mb-2" />
                         <p className="text-red-400 font-medium">{t('howItWorks:buyers.seeItInAction.saveDemo.title')}</p>
                         <p className="text-red-300 text-sm">{t('howItWorks:buyers.seeItInAction.saveDemo.coming')}</p>
                       </div>
@@ -1828,9 +1648,7 @@ const HowItWorksPage: React.FC = () => {
         {activeTab === 'sellers' && (
           <div className="animate-fade-in">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <HomeIcon className="w-8 h-8 text-green-600" />
-              </div>
+              <SoftIcon name="home" className="inline-block w-16 h-16 mb-4" />
               <h2 className="text-3xl font-bold text-neutral-800 mb-3">{t('howItWorks:sellers.title')}</h2>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
                 {t('howItWorks:sellers.subtitle')}
@@ -1985,7 +1803,7 @@ const HowItWorksPage: React.FC = () => {
                   <div key={promo.title} className="border border-neutral-200 rounded-xl p-5 hover:border-green-300 transition-colors">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-semibold text-neutral-800">{promo.title}</h4>
-                      <StarIcon className={`w-5 h-5 ${promo.color === 'amber' ? 'text-amber-500' : promo.color === 'orange' ? 'text-orange-500' : 'text-blue-500'}`} />
+                      <SoftIcon name="star" className="w-6 h-6" />
                     </div>
                     <div className="flex items-baseline gap-1 mb-3">
                       <span className="text-2xl font-bold text-neutral-800">{promo.price}</span>
@@ -2013,7 +1831,7 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-50 flex items-center justify-center relative">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <HomeIcon className="w-16 h-16 text-green-300 mx-auto mb-2" />
+                        <SoftIcon name="home" className="block w-16 h-16 mx-auto mb-2" />
                         <p className="text-green-400 font-medium">{t('howItWorks:sellers.seeItInAction.listingDemo.title')}</p>
                         <p className="text-green-300 text-sm">{t('howItWorks:sellers.seeItInAction.listingDemo.coming')}</p>
                       </div>
@@ -2030,7 +1848,7 @@ const HowItWorksPage: React.FC = () => {
                   <div className="aspect-video bg-gradient-to-br from-emerald-100 to-teal-50 flex items-center justify-center relative">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <ChartIcon className="w-16 h-16 text-emerald-300 mx-auto mb-2" />
+                        <SoftIcon name="chart" className="block w-16 h-16 mx-auto mb-2" />
                         <p className="text-emerald-400 font-medium">{t('howItWorks:sellers.seeItInAction.analyticsDemo.title')}</p>
                         <p className="text-emerald-300 text-sm">{t('howItWorks:sellers.seeItInAction.analyticsDemo.coming')}</p>
                       </div>

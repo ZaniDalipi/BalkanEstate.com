@@ -4,8 +4,8 @@ import {
   XMarkIcon,
   CheckIcon,
   XCircleIcon,
-  ShieldCheckIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { User, UserEditForm } from './useUserManager';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
@@ -129,19 +129,19 @@ const UserManagerDetail: React.FC<UserManagerDetailProps> = ({
                     <div className="flex items-center gap-2">
                       {viewingUser.licenseVerified ? (
                         <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.licenseVerified')}
+                          <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" /> {t('userDetail.licenseVerified')}
                         </span>
                       ) : viewingUser.licenseStatus === 'pending' ? (
                         <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
-                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.licensePending', 'License Pending')}
+                          <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" /> {t('userDetail.licensePending', 'License Pending')}
                         </span>
                       ) : viewingUser.licenseStatus === 'rejected' ? (
                         <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.licenseRejected', 'License Rejected')}
+                          <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" /> {t('userDetail.licenseRejected', 'License Rejected')}
                         </span>
                       ) : (
                         <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
-                          <ShieldCheckIcon className="w-3 h-3" /> {t('userDetail.noLicense', 'No License')}
+                          <SoftIcon name="shield" className="w-4 h-4 flex-shrink-0" /> {t('userDetail.noLicense', 'No License')}
                         </span>
                       )}
                     </div>

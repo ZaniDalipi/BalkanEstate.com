@@ -1,13 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 import {
   HeartIcon,
   HomeIcon,
-  UsersIcon,
-  SparklesIcon,
-  MapPinIcon,
-  StarIcon,
-  BuildingOfficeIcon
+  StarIcon
 } from '@/constants';
 
 type TabOption = 'properties' | 'agents' | 'agencies';
@@ -74,11 +71,11 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
           {/* Badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-              <HeartIcon className="w-4 h-4 text-rose-400" />
+              <SoftIcon name="heart" className="w-5 h-5" />
               <span className="text-white/90 font-semibold text-sm uppercase tracking-wider">
                 {t('saved:favorites.badge')}
               </span>
-              <HeartIcon className="w-4 h-4 text-rose-400" />
+              <SoftIcon name="heart" className="w-5 h-5" />
             </div>
           </div>
 
@@ -100,8 +97,8 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-rose-500 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30">
-                  <HomeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/30">
+                  <SoftIcon name="home" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{savedPropertiesCount}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -113,8 +110,8 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/30">
-                  <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/30">
+                  <SoftIcon name="users" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{savedAgentsCount}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -126,8 +123,8 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
-                  <BuildingOfficeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
+                  <SoftIcon name="building" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{savedAgenciesCount}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -149,7 +146,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                       : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
                   }`}
                 >
-                  <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <SoftIcon name="home" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                   <span className="truncate">{t('saved:favorites.tabs.properties')}</span>
                   {savedPropertiesCount > 0 && (
                     <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs shrink-0 ${
@@ -168,7 +165,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                       : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
                   }`}
                 >
-                  <UsersIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <SoftIcon name="users" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                   <span className="truncate">{t('saved:favorites.tabs.agents')}</span>
                   {savedAgentsCount > 0 && (
                     <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs shrink-0 ${
@@ -187,7 +184,7 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
                       : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
                   }`}
                 >
-                  <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <SoftIcon name="building" className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                   <span className="truncate">{t('saved:favorites.tabs.agencies', 'Agencies')}</span>
                   {savedAgenciesCount > 0 && (
                     <span className={`ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs shrink-0 ${
@@ -204,17 +201,17 @@ const SavedItemsHeroBanner: React.FC<SavedItemsHeroBannerProps> = ({
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 mt-8 text-white/50 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
-              <HeartIcon className="w-4 h-4 text-rose-400" />
+              <SoftIcon name="heart" className="w-5 h-5" />
               <span>{t('saved:favorites.badges.quickAccess')}</span>
             </div>
             <span className="hidden sm:inline">&bull;</span>
             <div className="flex items-center gap-2">
-              <BuildingOfficeIcon className="w-4 h-4 text-pink-400" />
+              <SoftIcon name="building" className="w-5 h-5" />
               <span>{t('saved:favorites.badges.organized')}</span>
             </div>
             <span className="hidden sm:inline">&bull;</span>
             <div className="flex items-center gap-2">
-              <SparklesIcon className="w-4 h-4 text-fuchsia-400" />
+              <SoftIcon name="sparkles" className="w-5 h-5" />
               <span>{t('saved:favorites.badges.compare')}</span>
             </div>
           </div>

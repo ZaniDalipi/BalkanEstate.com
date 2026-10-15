@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useScoreManagement } from '../hooks/useScoreManagement';
 
 interface ScoreManagementPanelProps {
@@ -55,8 +56,9 @@ export const ScoreManagementPanel: React.FC<ScoreManagementPanelProps> = ({ clas
     >
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 id="score-mgmt-title" className="text-base font-bold text-gray-900">
-            📊 {t('scoring.title', 'Score Management')}
+          <h2 id="score-mgmt-title" className="text-base font-bold text-gray-900 flex items-center gap-2">
+            <SoftIcon name="chart" className="w-6 h-6 flex-shrink-0" />
+            {t('scoring.title', 'Score Management')}
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">{t('scoring.description', 'Recompute composite scores for agents and agencies.')}</p>
         </div>

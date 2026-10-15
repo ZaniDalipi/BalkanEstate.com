@@ -316,11 +316,11 @@
       "sampleItemFoundFieldsWill": "Βρέθηκε δείγμα — τα πεδία θα αντιστοιχιστούν κατά την εισαγωγή",
       "headerName": "Όνομα κεφαλίδας",
       "value": "Τιμή",
-      "fieldMapping": "🔧 Αντιστοίχιση πεδίων (",
+      "fieldMapping": "Αντιστοίχιση πεδίων (",
       "fields": "πεδία)",
       "eGTitleImages0": "π.χ. title, images[0], $.item.name",
       "removeThisField": "Αφαίρεση πεδίου",
-      "useJsonpathNotationForNested": "💡 Χρησιμοποιήστε σημειογραφία JSONPath για εμφωλευμένα δεδομένα:",
+      "useJsonpathNotationForNested": "Χρησιμοποιήστε σημειογραφία JSONPath για εμφωλευμένα δεδομένα:",
       "orBareKeysForTop": "ή απλά κλειδιά για το ανώτερο επίπεδο:",
       "pleasePasteAJsonSample": "Επικολλήστε ένα δείγμα JSON για ανάλυση."
     },

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import UpgradePlanCard from './UpgradePlanCard';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Types
 interface UpgradeOption {
@@ -52,11 +53,7 @@ const UpgradeOptionsGrid: React.FC<UpgradeOptionsGridProps> = ({
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-4 sm:p-6">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-red-100 rounded-lg flex-shrink-0">
-            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+          <SoftIcon name="warning" className="w-9 h-9 flex-shrink-0" />
           <div>
             <h4 className="font-semibold text-red-900">
               {t('errors.loadingPlans', 'Failed to load plans')}
@@ -86,11 +83,7 @@ const UpgradeOptionsGrid: React.FC<UpgradeOptionsGridProps> = ({
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+          <SoftIcon name="info" className="w-9 h-9 flex-shrink-0" />
           <div>
             <h4 className="font-semibold text-blue-900">
               {t('messages.noPlans', 'No plans available')}
@@ -143,7 +136,7 @@ const UpgradeOptionsGrid: React.FC<UpgradeOptionsGridProps> = ({
       {/* Mobile Helper Text */}
       <div className="sm:hidden mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-xs text-blue-700 flex items-center gap-2">
-          <span>💡</span>
+          <SoftIcon name="lightbulb" className="w-5 h-5 flex-shrink-0" />
           {t('tips.swipeToCompare', 'Scroll to see all plans')}
         </p>
       </div>
@@ -151,7 +144,7 @@ const UpgradeOptionsGrid: React.FC<UpgradeOptionsGridProps> = ({
       {/* Tablet Helper Text */}
       <div className="hidden sm:block lg:hidden mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-xs sm:text-sm text-blue-700 flex items-center gap-2">
-          <span>ℹ️</span>
+          <SoftIcon name="info" className="w-5 h-5 flex-shrink-0" />
           {t('tips.tabletCompare', 'All your plan options are displayed above')}
         </p>
       </div>

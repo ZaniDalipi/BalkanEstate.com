@@ -2,7 +2,8 @@ import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { addAgentReview } from '../../services/apiService';
-import { StarIcon, EnvelopeIcon, HomeIcon } from '../../constants';
+import { StarIcon, EnvelopeIcon } from '../../constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { Property } from '../../types';
 import { formatPrice } from '../../utils/currency';
 
@@ -148,9 +149,7 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
         {showProperties && agentProperties.length > 0 && (
           <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <HomeIcon className="w-8 h-8 text-blue-600" />
-              </div>
+              <SoftIcon name="home" className="inline-block w-16 h-16 mb-4" />
               <h4 className="text-xl font-bold text-gray-900 mb-2">
                 {t('reviews.beforeLeaving.title')}
               </h4>
@@ -209,7 +208,7 @@ const AgentReviewForm: React.FC<AgentReviewFormProps> = ({
 
             {agentProperties.length === 0 && (
               <div className="text-center py-8 text-gray-500">
-                <HomeIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <SoftIcon name="home" className="w-12 h-12 mx-auto mb-3 opacity-60" />
                 <p>{t('reviews.noActiveListings')}</p>
                 <p className="text-sm mt-2">{t('reviews.contactDirectly')}</p>
                 {onContactAgent && (

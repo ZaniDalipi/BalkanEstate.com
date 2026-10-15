@@ -6,16 +6,12 @@ import {
   PencilIcon,
   TrashIcon,
   EyeIcon,
-  HomeIcon,
   SparklesIcon,
-  BedIcon,
-  BathIcon,
-  SqftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  FunnelIcon,
   ArrowPathIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { usePropertyManager, getPropertyImage } from './usePropertyManager';
 import { PropertyViewModal, PropertyEditModal } from './PropertyManagerDetail';
 
@@ -91,9 +87,7 @@ const PropertyManager: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-blue-50 rounded-xl p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <HomeIcon className="w-5 h-5 text-blue-600" />
-              </div>
+              <SoftIcon name="houses" className="w-9 h-9 flex-shrink-0" />
               <div>
                 <div className="text-2xl font-bold text-gray-900">{totalProperties}</div>
                 <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.totalProperties', 'Total Properties')}</div>
@@ -102,9 +96,7 @@ const PropertyManager: React.FC = () => {
           </div>
           <div className="bg-green-50 rounded-xl p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <HomeIcon className="w-5 h-5 text-green-600" />
-              </div>
+              <SoftIcon name="home" className="w-9 h-9 flex-shrink-0" />
               <div>
                 <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
                 <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.active', 'Active')}</div>
@@ -113,9 +105,7 @@ const PropertyManager: React.FC = () => {
           </div>
           <div className="bg-yellow-50 rounded-xl p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <HomeIcon className="w-5 h-5 text-yellow-600" />
-              </div>
+              <SoftIcon name="clock" className="w-9 h-9 flex-shrink-0" />
               <div>
                 <div className="text-2xl font-bold text-gray-900">{stats.pending}</div>
                 <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.pending', 'Pending')}</div>
@@ -124,9 +114,7 @@ const PropertyManager: React.FC = () => {
           </div>
           <div className="bg-purple-50 rounded-xl p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <SparklesIcon className="w-5 h-5 text-purple-600" />
-              </div>
+              <SoftIcon name="sparkles" className="w-9 h-9 flex-shrink-0" />
               <div>
                 <div className="text-2xl font-bold text-gray-900">{stats.promoted}</div>
                 <div className="text-xs text-gray-500">{t('admin:ui.propertyManager.promoted', 'Promoted')}</div>
@@ -139,7 +127,7 @@ const PropertyManager: React.FC = () => {
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="flex items-center gap-2 mb-4">
-          <FunnelIcon className="w-5 h-5 text-gray-400" />
+          <SoftIcon name="filter" className="w-6 h-6 flex-shrink-0" />
           <span className="font-medium text-gray-700">{t('admin:ui.propertyManager.filters', 'Filters')}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -188,17 +176,13 @@ const PropertyManager: React.FC = () => {
       {/* Success/Error Messages */}
       {successMessage && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-800 flex items-center gap-3">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
+          <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
           {successMessage}
         </div>
       )}
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 flex items-center gap-3">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-          </svg>
+          <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
           {error}
         </div>
       )}
@@ -233,9 +217,7 @@ const PropertyManager: React.FC = () => {
                           className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <HomeIcon className="w-6 h-6 text-gray-400" />
-                        </div>
+                        <SoftIcon name="home" className="w-14 h-14 flex-shrink-0" />
                       )}
                       <div className="min-w-0">
                         <div className="font-medium text-gray-900 truncate max-w-[200px]" title={property.title}>
@@ -247,7 +229,7 @@ const PropertyManager: React.FC = () => {
                           </span>
                           {property.isPromoted && (
                             <span className="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded flex items-center gap-1">
-                              <SparklesIcon className="w-3 h-3" />
+                              <SoftIcon name="sparkles" className="w-4 h-4 flex-shrink-0" />
                               {t('admin:ui.propertyManager.promoted', 'Promoted')}
                             </span>
                           )}
@@ -269,19 +251,19 @@ const PropertyManager: React.FC = () => {
                     <div className="flex flex-col gap-1 text-xs text-gray-600">
                       {(property.bedrooms || property.beds) && (
                         <div className="flex items-center gap-1">
-                          <BedIcon className="w-3.5 h-3.5" />
+                          <SoftIcon name="bed" className="w-4 h-4 flex-shrink-0" />
                           {property.bedrooms || property.beds} {t('admin:ui.propertyManager.beds', 'beds')}
                         </div>
                       )}
                       {(property.bathrooms || property.baths) && (
                         <div className="flex items-center gap-1">
-                          <BathIcon className="w-3.5 h-3.5" />
+                          <SoftIcon name="bath" className="w-4 h-4 flex-shrink-0" />
                           {property.bathrooms || property.baths} {t('admin:ui.propertyManager.baths', 'baths')}
                         </div>
                       )}
                       {(property.area || property.sqft) && (
                         <div className="flex items-center gap-1">
-                          <SqftIcon className="w-3.5 h-3.5" />
+                          <SoftIcon name="area" className="w-4 h-4 flex-shrink-0" />
                           {property.area || property.sqft} m²
                         </div>
                       )}
@@ -353,7 +335,7 @@ const PropertyManager: React.FC = () => {
 
           {properties.length === 0 && !isLoading && (
             <div className="text-center py-16">
-              <HomeIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <SoftIcon name="home" className="w-12 h-12 mx-auto mb-4" />
               <p className="text-gray-500 font-medium">{t('admin:ui.propertyManager.noPropertiesFound', 'No properties found')}</p>
               <p className="text-gray-400 text-sm mt-1">{t('admin:ui.propertyManager.tryAdjustingYourFilters', 'Try adjusting your filters')}</p>
             </div>

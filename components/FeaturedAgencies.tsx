@@ -1,12 +1,12 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BuildingStorefrontIcon, SparklesIcon, ArrowRightIcon, MapPinIcon } from '../constants';
+import { ArrowRightIcon } from '../constants';
 import { useFeaturedAgencies } from '../src/features/agencies/hooks/useAgencies';
 import { Agency } from '../types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { NavPicture } from '@/src/shared/illustrations';
+import { NavPicture, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 // Gradient presets for agency banners (shared with AgencyDetailPage)
 const GRADIENT_PRESETS = [
@@ -65,27 +65,19 @@ const FeaturedAgencies: React.FC = () => {
     };
   }, [hasAnimated]);
 
-  // Color gradients for agency cards
-  const cardStyles = [
-    { gradient: "from-violet-600 via-purple-600 to-indigo-700", accent: "violet" },
-    { gradient: "from-rose-500 via-pink-500 to-fuchsia-600", accent: "rose" },
-    { gradient: "from-amber-500 via-orange-500 to-red-500", accent: "amber" },
-    { gradient: "from-emerald-500 via-teal-500 to-cyan-600", accent: "emerald" },
-  ];
-
   // Get agency type badge info
-  const getAgencyTypeInfo = (type?: string) => {
+  const getAgencyTypeInfo = (type?: string): { icon: SoftIconName; label: string } => {
     switch (type) {
       case 'luxury':
-        return { emoji: '👑', label: t('featured.agencyTypes.luxury') };
+        return { icon: 'crown', label: t('featured.agencyTypes.luxury') };
       case 'commercial':
-        return { emoji: '🏢', label: t('featured.agencyTypes.commercial') };
+        return { icon: 'building', label: t('featured.agencyTypes.commercial') };
       case 'boutique':
-        return { emoji: '🗝️', label: t('featured.agencyTypes.boutique') };
+        return { icon: 'key', label: t('featured.agencyTypes.boutique') };
       case 'team':
-        return { emoji: '👥', label: t('featured.agencyTypes.team') };
+        return { icon: 'users', label: t('featured.agencyTypes.team') };
       default:
-        return { emoji: '🏠', label: t('featured.agencyTypes.default') };
+        return { icon: 'home', label: t('featured.agencyTypes.default') };
     }
   };
 
@@ -111,7 +103,7 @@ const FeaturedAgencies: React.FC = () => {
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-6">
-            <SparklesIcon className="w-4 h-4 text-primary" />
+            <SoftIcon name="sparkles" className="w-5 h-5 flex-shrink-0" />
             <span className="text-sm font-semibold text-primary">{t('featured.badge')}</span>
           </div>
 
@@ -152,7 +144,6 @@ const FeaturedAgencies: React.FC = () => {
           ) : agencies.length > 0 ? (
             agencies.map((agency, index) => {
               const typeInfo = getAgencyTypeInfo(agency.type);
-              const style = cardStyles[index % cardStyles.length];
 
               return (
                 <div
@@ -190,7 +181,7 @@ const FeaturedAgencies: React.FC = () => {
                       {/* Type Badge - Bottom Left */}
                       <div className="absolute bottom-4 left-4">
                         <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full">
-                          <span className="text-lg">{typeInfo.emoji}</span>
+                          <SoftIcon name={typeInfo.icon} className="w-6 h-6 flex-shrink-0" />
                           <span className="text-white text-sm font-medium">{typeInfo.label}</span>
                         </div>
                       </div>
@@ -198,7 +189,7 @@ const FeaturedAgencies: React.FC = () => {
                       {/* Featured Badge - Bottom Right */}
                       <div className="absolute bottom-4 right-4">
                         <div className="flex items-center gap-1.5 bg-amber-400 text-amber-900 px-3 py-1.5 rounded-full shadow-lg">
-                          <SparklesIcon className="w-4 h-4" />
+                          <SoftIcon name="sparkles" className="w-5 h-5 flex-shrink-0" />
                           <span className="text-sm font-bold">{t('featured.badge')}</span>
                         </div>
                       </div>
@@ -214,9 +205,7 @@ const FeaturedAgencies: React.FC = () => {
                               loading="lazy"
                             />
                           ) : (
-                            <div className={`w-full h-full bg-gradient-to-br ${style.gradient} flex items-center justify-center`}>
-                              <BuildingStorefrontIcon className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
-                            </div>
+                            <SoftIcon name="store" className="w-16 h-16 sm:w-20 sm:h-20" />
                           )}
                         </div>
                       </div>
@@ -231,7 +220,7 @@ const FeaturedAgencies: React.FC = () => {
                         </h3>
                         {agency.city && (
                           <div className="flex items-center justify-center gap-1.5 text-neutral-500">
-                            <MapPinIcon className="w-4 h-4" />
+                            <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
                             <span className="text-sm">{agency.city}{agency.country ? `, ${agency.country}` : ''}</span>
                           </div>
                         )}
@@ -289,7 +278,7 @@ const FeaturedAgencies: React.FC = () => {
               onClick={handleExploreAll}
               className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
             >
-              <SparklesIcon className="w-5 h-5" />
+              <SoftIcon name="sparkles" className="w-6 h-6 flex-shrink-0" />
               <span>{t('featured.exploreAll')}</span>
               <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>

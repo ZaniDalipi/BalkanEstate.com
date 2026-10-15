@@ -3,21 +3,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import {
-    PhoneIcon,
-    EnvelopeIcon,
     ChatBubbleBottomCenterTextIcon,
-    CheckCircleIcon,
-    UsersIcon,
     ChevronRightIcon,
-    UserCircleIcon,
-    ShieldCheckIcon,
-    AcademicCapIcon,
-    TrophyIcon,
     XMarkIcon,
     BuildingOfficeIcon,
-    HomeIcon,
-    MapPinIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import UserAvatar from '@/components/shared/UserAvatar';
@@ -97,7 +88,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                         href={`tel:${agent.phone}`}
                         className="flex items-center gap-3 bg-white/10 hover:bg-white/20 active:bg-white/25 p-4 rounded-xl mb-3 transition-colors min-h-[56px]"
                     >
-                        <PhoneIcon className="w-6 h-6 flex-shrink-0" />
+                        <SoftIcon name="phone" className="w-8 h-8 flex-shrink-0" />
                         <div className="min-w-0">
                             <div className="font-semibold">{t('profilePage.contact.callDirect')}</div>
                             <div className="text-lg font-bold truncate">{agent.phone}</div>
@@ -110,7 +101,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                         href={`mailto:${agent.email}`}
                         className="flex items-center gap-3 bg-white/10 hover:bg-white/20 active:bg-white/25 p-4 rounded-xl mb-3 transition-colors min-h-[56px]"
                     >
-                        <EnvelopeIcon className="w-6 h-6 flex-shrink-0" />
+                        <SoftIcon name="envelope" className="w-8 h-8 flex-shrink-0" />
                         <div className="min-w-0">
                             <div className="font-semibold">{t('profilePage.contact.sendEmail')}</div>
                             <div className="text-sm truncate">{agent.email}</div>
@@ -213,7 +204,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                                             className="w-8 h-8 sm:w-12 sm:h-12 object-contain rounded-md sm:rounded-lg"
                                         />
                                     ) : (
-                                        <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+                                        <SoftIcon name="building" className="w-8 h-8 sm:w-11 sm:h-11" />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -229,14 +220,14 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                         <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
                             <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
                                 <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                                    <UsersIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
+                                    <SoftIcon name="users" className="w-5 h-5 sm:w-6 sm:h-6" />
                                     <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.agents')}</span>
                                 </div>
                                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalAgents || 0}</p>
                             </div>
                             <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
                                 <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                                    <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
+                                    <SoftIcon name="home" className="w-5 h-5 sm:w-6 sm:h-6" />
                                     <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.properties')}</span>
                                 </div>
                                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalProperties || 0}</p>
@@ -246,7 +237,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                         {/* Location */}
                         {agencyData.city && (
                             <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-gray-600 bg-white rounded-lg p-2 sm:p-3 border border-gray-200">
-                                <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-500" />
+                                <SoftIcon name="pin" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                                 <span className="text-xs sm:text-sm truncate">{agencyData.city}, {agencyData.country}</span>
                             </div>
                         )}
@@ -277,7 +268,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                     {t('profilePage.appraisal.requestAppraisal')}
                 </button>
                 <div className="text-center text-sm text-gray-500 mt-3">
-                    <CheckCircleIcon className="w-4 h-4 inline mr-1 text-green-500" />
+                    <SoftIcon name="check" className="inline-block w-5 h-5 mr-1 align-[-4px]" />
                     {t('profilePage.appraisal.freeNoObligation')}
                 </div>
             </div>
@@ -285,7 +276,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
             {/* Similar Agents / Agents from Same Agency */}
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <UsersIcon className="w-5 h-5 text-blue-600" />
+                    <SoftIcon name="users" className="w-7 h-7 flex-shrink-0" />
                     {isAgencyAgent ? t('profilePage.similarAgents.fromSameAgency') : t('profilePage.similarAgents.otherInArea')}
                 </h3>
                 {loadingSimilarAgents ? (
@@ -330,7 +321,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                     </div>
                 ) : (
                     <div className="text-center py-6">
-                        <UsersIcon className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                        <SoftIcon name="users" className="block w-12 h-12 mx-auto mb-2" />
                         <p className="text-gray-600 font-medium">{t('profilePage.similarAgents.noSimilarAgents')}</p>
                     </div>
                 )}
@@ -349,7 +340,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                 <div className="space-y-3">
                     {agent.licenseVerified && agent.licenseNumber && (
                     <div className="flex items-center gap-3">
-                        <ShieldCheckIcon className="w-5 h-5 text-green-500" />
+                        <SoftIcon name="shield" className="w-7 h-7 flex-shrink-0" />
                         <div>
                             <p className="font-medium text-gray-900">{t('profilePage.credentials.licensedAgent')}</p>
                             <p className="text-sm text-gray-600 font-mono">{agent.licenseNumber}</p>
@@ -358,7 +349,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                     )}
                     {agent.certifications && agent.certifications.length > 0 && (
                     <div className="flex items-center gap-3">
-                        <AcademicCapIcon className="w-5 h-5 text-blue-500" />
+                        <SoftIcon name="gradCap" className="w-7 h-7 flex-shrink-0" />
                         <div>
                             <p className="font-medium text-gray-900">{t('profilePage.credentials.professionalCertifications')}</p>
                             <p className="text-sm text-gray-600">{agent.certifications.join(', ')}</p>
@@ -367,7 +358,7 @@ const AgentContactActions: React.FC<AgentContactActionsProps> = ({
                     )}
                     {agent.awards && agent.awards.length > 0 && (
                     <div className="flex items-center gap-3">
-                        <TrophyIcon className="w-5 h-5 text-amber-500" />
+                        <SoftIcon name="trophy" className="w-7 h-7 flex-shrink-0" />
                         <div>
                             <p className="font-medium text-gray-900">{t('profilePage.credentials.awardsRecognition')}</p>
                             <p className="text-sm text-gray-600">{agent.awards.join(', ')}</p>

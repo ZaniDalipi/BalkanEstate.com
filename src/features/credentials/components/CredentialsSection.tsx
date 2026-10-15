@@ -3,18 +3,14 @@ import { useTranslation } from 'react-i18next';
 import {
   PlusIcon,
   XMarkIcon,
-  AcademicCapIcon,
   ShieldCheckIcon,
-  DocumentTextIcon,
   PencilIcon,
   TrashIcon,
   CheckCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  CalendarIcon,
-  TrophyIcon,
-  UsersIcon,
 } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { Credential, addCredential, updateCredential, deleteCredential, isPrivateDocumentUrl, openPrivateDocument } from '../api/credentialApi';
 import { convertToUploadableImage } from '@/shared/utils/imageConversion';
 import { submitLicense, getLicenseFormatHint } from '../api/licenseApi';
@@ -136,27 +132,27 @@ const isValidDMY = (dmy: string): boolean => {
 const FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
 
-const TYPE_CONFIG: Record<string, { icon: React.ReactNode; gradient: string; accent: string; labelColor: string }> = {
+const TYPE_CONFIG: Record<string, { icon: SoftIconName; gradient: string; accent: string; labelColor: string }> = {
   license: {
-    icon: <ShieldCheckIcon className="w-5 h-5 text-white" />,
+    icon: 'shield',
     gradient: 'from-emerald-400 to-emerald-600',
     accent: 'text-emerald-600',
     labelColor: 'bg-emerald-50 text-emerald-700',
   },
   certification: {
-    icon: <AcademicCapIcon className="w-5 h-5 text-white" />,
+    icon: 'gradCap',
     gradient: 'from-blue-400 to-indigo-600',
     accent: 'text-blue-600',
     labelColor: 'bg-blue-50 text-blue-700',
   },
   award: {
-    icon: <TrophyIcon className="w-5 h-5 text-white" />,
+    icon: 'trophy',
     gradient: 'from-amber-400 to-orange-500',
     accent: 'text-amber-600',
     labelColor: 'bg-amber-50 text-amber-700',
   },
   membership: {
-    icon: <UsersIcon className="w-5 h-5 text-white" />,
+    icon: 'users',
     gradient: 'from-violet-400 to-purple-600',
     accent: 'text-violet-600',
     labelColor: 'bg-violet-50 text-violet-700',
@@ -456,9 +452,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-            <AcademicCapIcon className="w-4.5 h-4.5 text-white" />
-          </div>
+          <SoftIcon name="gradCap" className="w-8 h-8 flex-shrink-0" />
           <div>
             <h3 className="text-base font-bold text-gray-900 leading-tight">
               {t('profilePage.credentials.professionalCertifications')}
@@ -485,9 +479,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
         <div className="mb-4">
           {licenseStatus === 'verified' && (
             <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
-              <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-                <CheckCircleIcon className="w-5 h-5 text-green-600" />
-              </div>
+              <SoftIcon name="check" className="w-10 h-10 flex-shrink-0" />
               <div>
                 <p className="text-sm font-bold text-green-800">
                   {t('profilePage.credentials.license.verified', 'License Verified')}
@@ -502,9 +494,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
 
           {licenseStatus === 'pending' && (
             <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <ClockIcon className="w-5 h-5 text-amber-600" />
-              </div>
+              <SoftIcon name="clock" className="w-10 h-10 flex-shrink-0" />
               <div>
                 <p className="text-sm font-bold text-amber-800">
                   {t('profilePage.credentials.license.pending', 'License Pending Review')}
@@ -522,9 +512,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
           {licenseStatus === 'rejected' && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
-                </div>
+                <SoftIcon name="warning" className="w-10 h-10 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-bold text-red-800">
                     {t('profilePage.credentials.license.rejected', 'License Rejected')}
@@ -612,9 +600,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
           {licenseStatus === 'none' && !licenseSuccess && (
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheckIcon className="w-5 h-5 text-blue-600" />
-                </div>
+                <SoftIcon name="shield" className="w-10 h-10 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-bold text-blue-800">
                     {t('profilePage.credentials.license.getVerified', 'Get Verified')}
@@ -701,7 +687,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
 
           {licenseSuccess && (licenseStatus === 'none' || licenseStatus === 'rejected') && (
             <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
-              <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
               <p className="text-sm font-medium text-green-800">
                 {t('profilePage.credentials.license.submitted', 'License submitted! It will be reviewed by an admin shortly.')}
               </p>
@@ -713,7 +699,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       {/* Success Toast */}
       {successMessage && (
         <div className="mb-3 flex items-center gap-2 px-3.5 py-2.5 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700 font-medium animate-in fade-in slide-in-from-top-1">
-          <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+          <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
           {successMessage}
         </div>
       )}
@@ -721,7 +707,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       {/* Error Toast */}
       {submitError && !showModal && (
         <div className="mb-3 flex items-center gap-2 px-3.5 py-2.5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
-          <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
+          <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
           {submitError}
         </div>
       )}
@@ -729,9 +715,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
       {/* Credentials List */}
       {credentials.length === 0 ? (
         <div className="text-center py-10 bg-gradient-to-b from-gray-50/80 to-white rounded-2xl border border-dashed border-gray-200">
-          <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-3">
-            <AcademicCapIcon className="w-7 h-7 text-blue-300" />
-          </div>
+          <SoftIcon name="gradCap" className="block w-14 h-14 mx-auto mb-3" />
           <p className="text-sm font-medium text-gray-500">{t('profilePage.credentials.empty.title', 'No certifications added yet')}</p>
           <p className="text-xs text-gray-400 mt-1 max-w-[240px] mx-auto">
             {t('profilePage.credentials.empty.subtitle', 'Showcase your professional qualifications and build trust with clients')}
@@ -777,8 +761,8 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                 {/* ── Header band ── */}
                 <div className={`flex items-center justify-between px-4 py-3 bg-gradient-to-r ${expired ? 'from-gray-300 to-gray-400' : typeConfig.gradient}`}>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="scale-75">{typeConfig.icon}</span>
+                    <div className="w-7 h-7 rounded-lg bg-white/95 flex items-center justify-center">
+                      <SoftIcon name={typeConfig.icon} className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-[0.18em] text-white/90">
                       {cred.type}
@@ -812,7 +796,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                     )}
                     {issueDateFormatted && (
                       <span className="inline-flex items-center gap-1 text-[11px] text-gray-500">
-                        <CalendarIcon className="w-3 h-3 text-gray-400" />
+                        <SoftIcon name="calendar" className="w-4 h-4" />
                         {issueDateFormatted}
                       </span>
                     )}
@@ -846,7 +830,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                       }}
                       className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
                     >
-                      <DocumentTextIcon className="w-3.5 h-3.5" />
+                      <SoftIcon name="docCheck" className="w-4 h-4" />
                       {t('profilePage.credentials.viewDocument', 'View Document')}
                     </a>
                   ) : <div />}
@@ -954,9 +938,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                             : 'border-gray-100 hover:border-gray-200 text-gray-500 hover:text-gray-700'
                         }`}
                       >
-                        <div className={`w-8 h-8 rounded-lg ${selected ? config.bg : 'bg-gray-50'} flex items-center justify-center`}>
-                          {config.icon}
-                        </div>
+                        <SoftIcon name={config.icon} className={`w-8 h-8 flex-shrink-0 ${selected ? '' : 'opacity-60'}`} />
                         <span className="text-sm font-semibold capitalize">{type}</span>
                       </button>
                     );
@@ -1089,9 +1071,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                   <label htmlFor="credential-file-upload" className="cursor-pointer block">
                     {selectedFile ? (
                       <div className="flex items-center justify-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                          <DocumentTextIcon className="w-5 h-5 text-blue-600" />
-                        </div>
+                        <SoftIcon name="docCheck" className="w-10 h-10 flex-shrink-0" />
                         <div className="text-left min-w-0">
                           <p className="text-sm font-semibold text-blue-700 truncate max-w-[200px]">{selectedFile.name}</p>
                           <p className="text-[11px] text-blue-500">
@@ -1114,9 +1094,7 @@ const CredentialsSection: React.FC<CredentialsSectionProps> = ({
                       </div>
                     ) : (
                       <div>
-                        <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-2">
-                          <DocumentTextIcon className="w-6 h-6 text-gray-400" />
-                        </div>
+                        <SoftIcon name="docCheck" className="block w-12 h-12 mx-auto mb-2" />
                         <p className="text-sm font-medium text-gray-600">{t('profilePage.credentials.form.clickToUpload', 'Click to upload certificate')}</p>
                         <p className="text-[11px] text-gray-400 mt-0.5">{t('profilePage.credentials.form.fileTypes', 'JPG, PNG, WebP, or PDF up to 10 MB')}</p>
                       </div>

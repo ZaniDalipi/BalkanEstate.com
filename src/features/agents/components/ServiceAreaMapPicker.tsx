@@ -2,7 +2,8 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { XMarkIcon, MapPinIcon } from '@/constants';
+import { XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 const BALKANS_CENTER: [number, number] = [42.0, 21.4];
@@ -202,7 +203,7 @@ const ServiceAreaMapPicker: React.FC<Props> = ({ areas, onAdd, onRemove, centerL
               key={`${area}-${i}`}
               className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm font-medium"
             >
-              <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
               {area}
               <button
                 type="button"

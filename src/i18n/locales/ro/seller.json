@@ -16,7 +16,7 @@
     "remainingListings": "{{count}} anunțuri rămase",
     "availableListings": "{{count}} anunțuri disponibile",
     "shared": "(partajat)",
-    "highlightCoupons": "🎟️ Cupoane de evidențiere: {{available}}/{{total}}",
+    "highlightCoupons": "Cupoane de evidențiere: {{available}}/{{total}}",
     "couponsDescription": "Folosește-le pentru a-ți promova anunțurile",
     "noSubscriptionData": "Niciun dat despre abonament",
     "proRequired": {
@@ -417,9 +417,9 @@
       "strict": "Strictă",
       "nonRefundable": "Nerambursabil",
       "included": "Inclus în preț",
-      "breakfast": "🍳 Mic dejun",
-      "towels": "🛁 Prosoape și lenjerie",
-      "parking": "🚗 Parcare"
+      "breakfast": "Mic dejun",
+      "towels": "Prosoape și lenjerie",
+      "parking": "Parcare"
     },
     "preview": {
       "banner": "Mod previzualizare",
@@ -987,7 +987,7 @@
       "avgPriceM": "Preț mediu/m²",
       "daysToSell": "Zile până la vânzare",
       "yoyGrowth": "Creștere anuală",
-      "liveMarketDataPoweredBy": "📊 Date de piață live cu AI • Actualizat",
+      "liveMarketDataPoweredBy": "Date de piață live cu AI • Actualizat",
       "marketTrends": "Tendințe de piață",
       "timeOnMarket": "Timp pe piață",
       "proTip": "Sfat profesionist",
@@ -998,9 +998,9 @@
     },
     "roleSelector": {
       "promotionCoupons": "Cupoane de promovare",
-      "featured": "⭐ Recomandat:",
+      "featured": "Recomandat:",
       "daysEach": "zile fiecare",
-      "highlighted": "🔥 Evidențiat:",
+      "highlighted": "Evidențiat:",
       "usedThisMonth": "Folosite luna aceasta:"
     },
     "whackAnIconAnimation": {

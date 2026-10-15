@@ -5,11 +5,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  PhoneIcon,
-  EnvelopeIcon,
-  MapPinIcon,
-} from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgencyContactCardProps {
   phone?: string;
@@ -29,9 +25,7 @@ const AgencyContactCard: React.FC<AgencyContactCardProps> = ({
   return (
     <div className="bg-slate-50/80 rounded-xl p-5 border border-slate-200/60">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <PhoneIcon className="w-4 h-4 text-white" />
-        </div>
+        <SoftIcon name="phone" className="w-8 h-8" />
         <h3 className="text-sm font-bold text-slate-900">{t('agencies.contact.getInTouch')}</h3>
       </div>
       <div className="space-y-3">
@@ -40,9 +34,7 @@ const AgencyContactCard: React.FC<AgencyContactCardProps> = ({
             href={`tel:${phone}`}
             className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-300">
-              <PhoneIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-            </div>
+            <SoftIcon name="phone" className="w-10 h-10 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
             <div>
               <div className="text-xs text-slate-400 font-medium">{t('agencies.contact.phone')}</div>
               <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">
@@ -56,9 +48,7 @@ const AgencyContactCard: React.FC<AgencyContactCardProps> = ({
             href={`mailto:${email}`}
             className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-300">
-              <EnvelopeIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-            </div>
+            <SoftIcon name="envelope" className="w-10 h-10 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
             <div>
               <div className="text-xs text-slate-400 font-medium">{t('agencies.contact.email')}</div>
               <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">
@@ -69,9 +59,7 @@ const AgencyContactCard: React.FC<AgencyContactCardProps> = ({
         )}
         {address && (
           <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-100">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <MapPinIcon className="w-5 h-5 text-primary" />
-            </div>
+            <SoftIcon name="pin" className="w-10 h-10 flex-shrink-0" />
             <div>
               <div className="text-xs text-slate-400 font-medium">{t('agencies.contact.address')}</div>
               <span className="font-medium text-slate-700 text-sm leading-snug">

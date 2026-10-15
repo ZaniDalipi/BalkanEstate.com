@@ -1,11 +1,8 @@
 import React from 'react';
 import { translateAndReplacePlaceholders } from '@/src/shared/utils/featurePlaceholders';
 import { Animated } from '@/src/components/ui/Animations';
-import {
-  BuildingOfficeIcon,
-  CheckIcon,
-  UserGroupIcon,
-} from '@/constants';
+import { CheckIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { type Product } from '../hooks/usePricingData';
 import { formatLimit } from './usePricingPage';
 
@@ -41,7 +38,7 @@ const EnterprisePlanCard: React.FC<EnterprisePlanCardProps> = ({
       {/* Badge - Outside the card to prevent clipping */}
       <div className="absolute -top-0 left-1/2 -translate-x-1/2 z-20">
         <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
-          <UserGroupIcon className="w-3.5 h-3.5" />
+          <SoftIcon name="users" className="w-4 h-4" />
           {t('pricing:badges.bestForTeams', 'BEST FOR TEAMS')}
         </span>
       </div>
@@ -53,7 +50,7 @@ const EnterprisePlanCard: React.FC<EnterprisePlanCardProps> = ({
 
         <div className="text-center pt-2 relative z-10">
           <div className="flex items-center justify-center gap-2">
-            <BuildingOfficeIcon className="w-7 h-7 text-amber-400" />
+            <SoftIcon name="building" className="w-8 h-8" />
             <h3 className="text-2xl font-bold">{enterpriseProduct.name}</h3>
           </div>
           <p className="mt-2 text-sm text-gray-400">

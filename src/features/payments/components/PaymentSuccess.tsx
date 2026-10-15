@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
-import { CheckCircleIcon, ArrowLeftIcon, LogoIcon, BuildingOfficeIcon, TicketIcon, ClipboardDocumentIcon } from '@/constants';
+import { ArrowLeftIcon, LogoIcon, ClipboardDocumentIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { verifyPayment as verifyPaymentApi, getSubscriptionStatus, type VerifyPaymentResponse } from '../api/paymentApi';
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
@@ -335,9 +336,7 @@ const PaymentSuccess: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-4xl">❌</span>
-          </div>
+          <SoftIcon name="xmark" className="w-16 h-16 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('success.verificationFailed')}</h2>
           <p className="text-neutral-600 mb-6">{error}</p>
           <button
@@ -359,12 +358,10 @@ const PaymentSuccess: React.FC = () => {
         <div className="text-center">
           {/* Success Icon with Animation */}
           <div className="relative mb-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
-              <CheckCircleIcon className="w-16 h-16 text-white" />
-            </div>
+            <SoftIcon name="check" className="w-24 h-24 mx-auto animate-bounce" />
             {/* Confetti Effect */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-6xl animate-ping opacity-20">🎉</div>
+              <SoftIcon name="party" className="w-16 h-16 animate-ping opacity-20" />
             </div>
           </div>
 
@@ -444,9 +441,7 @@ const PaymentSuccess: React.FC = () => {
           {agencyCreated && (
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5 mb-6 text-left">
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-amber-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <BuildingOfficeIcon className="w-7 h-7 text-amber-700" />
-                </div>
+                <SoftIcon name="building" className="w-12 h-12 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="font-bold text-amber-900 mb-1">{t('payment:ui.paymentSuccess.agencyCreatedSuccessfully', 'Agency Created Successfully!')}</h3>
                   <p className="text-sm text-amber-700 mb-3">
@@ -471,7 +466,7 @@ const PaymentSuccess: React.FC = () => {
                       onClick={handleViewAgency}
                       className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                     >
-                      <BuildingOfficeIcon className="w-5 h-5" />
+                      <SoftIcon name="building" className="w-6 h-6" />
                       {t('payment:ui.paymentSuccess.viewYourAgency', 'View Your Agency')}
                     </button>
                   )}
@@ -484,9 +479,7 @@ const PaymentSuccess: React.FC = () => {
           {agencyCreated && agentCoupons.length > 0 && (
             <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-xl p-5 mb-6 text-left">
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-purple-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <TicketIcon className="w-7 h-7 text-purple-700" />
-                </div>
+                <SoftIcon name="ticket" className="w-12 h-12 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="font-bold text-purple-900 mb-1">{t('payment:ui.paymentSuccess.teamInvitationCodes', 'Team Invitation Codes')}</h3>
                   <p className="text-sm text-purple-700 mb-3">

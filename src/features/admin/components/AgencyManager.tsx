@@ -1,7 +1,8 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, TrashIcon, EyeIcon, BuildingOfficeIcon, CheckCircleIcon, XCircleIcon } from '@/constants';
+import { PencilIcon, TrashIcon, EyeIcon, CheckCircleIcon, XCircleIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAgencyManager } from './useAgencyManager';
 import AgencyManagerDetail from './AgencyManagerDetail';
 
@@ -108,9 +109,7 @@ const AgencyManager: React.FC = () => {
                           className="w-12 h-12 rounded object-cover mr-3"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded bg-blue-100 flex items-center justify-center mr-3">
-                          <BuildingOfficeIcon className="w-6 h-6 text-blue-600" />
-                        </div>
+                        <SoftIcon name="building" className="w-12 h-12 mr-3 flex-shrink-0" />
                       )}
                       <div>
                         <div className="font-medium text-gray-900">{agency.name}</div>

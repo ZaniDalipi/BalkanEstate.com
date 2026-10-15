@@ -3,19 +3,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agent } from '@/types';
 import {
-    UserIcon,
-    HomeIcon,
-    StarIcon,
-    ShieldCheckIcon,
-    CheckBadgeIcon,
-    AcademicCapIcon,
     DocumentTextIcon,
     ArrowRightIcon,
-    MapPinIcon,
-    BanknotesIcon,
-    CheckCircleIcon,
-    UserCircleIcon,
-    ChatBubbleBottomCenterTextIcon,
     MagnifyingGlassIcon,
     PhoneIcon,
     EnvelopeIcon
@@ -430,9 +419,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 {agent.licenseVerified && agent.licenseNumber && (
                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5">
                                     <div className="flex items-start gap-4">
-                                        <div className="bg-blue-600 text-white p-3 rounded-lg flex-shrink-0">
-                                            <CheckBadgeIcon className="w-6 h-6" />
-                                        </div>
+                                        <SoftIcon name="shield" className="w-12 h-12 flex-shrink-0" />
                                         <div className="flex-1">
                                             <h4 className="font-bold text-gray-900 text-lg mb-1">{t('profilePage.credentials.licensedAgent')}</h4>
                                             <p className="text-blue-700 font-mono text-sm font-semibold">
@@ -501,7 +488,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                 {/* Price Range */}
                                 {marketInsights.priceRange && marketInsights.priceRange.min !== marketInsights.priceRange.max && (
                                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 mb-5">
-                                        <BanknotesIcon className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                                        <SoftIcon name="cash" className="w-6 h-6 flex-shrink-0" />
                                         <div className="text-sm text-gray-700">
                                             <span className="font-medium">{t('profilePage.marketInsights.priceRange', 'Price Range')}:</span>{' '}
                                             <span className="font-semibold text-gray-900">{formatPrice(marketInsights.priceRange.min, agent.country)}</span>
@@ -648,7 +635,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                                 key={area}
                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm font-medium"
                                             >
-                                                <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                                                 {area}
                                             </span>
                                         ))}
@@ -1071,7 +1058,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                                         {(t as any).response && (
                                             <div className="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500">
                                                 <div className="flex items-start gap-3">
-                                                    <ChatBubbleBottomCenterTextIcon className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                    <SoftIcon name="chat" className="w-6 h-6 flex-shrink-0" />
                                                     <div>
                                                         <p className="font-semibold text-gray-900 mb-1">{t('agents:ui.agentProfileTabs.responseFrom', 'Response from')} {firstName}</p>
                                                         <p className="text-gray-700">{(t as any).response}</p>
@@ -1084,7 +1071,7 @@ const AgentProfileTabs: React.FC<AgentProfileTabsProps> = ({
                             </div>
                         ) : (
                             <div className="text-center py-12">
-                                <SoftIcon name="star" className="w-16 h-16 mx-auto mb-4" />
+                                <SoftIcon name="star" className="block w-16 h-16 mx-auto mb-4" />
                                 <p className="text-gray-600 text-lg mb-2">{t('profilePage.reviewsTab.noReviews')}</p>
                                 <p className="text-gray-500">{t('profilePage.reviewsTab.beFirstToReview', { name: firstName })}</p>
                             </div>

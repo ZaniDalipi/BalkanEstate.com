@@ -2,7 +2,8 @@ import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFeaturedAgencies } from '@/services/apiService';
-import { XMarkIcon, BuildingOfficeIcon } from '@/constants';
+import { XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '@/context/AppContext';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -145,7 +146,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
         >
           <XMarkIcon className="w-5 h-5" />
         </button>
-        <div className="font-semibold">⚠️ {t('advertisement.notAvailable')}</div>
+        <div className="font-semibold inline-flex items-center gap-1.5"><SoftIcon name="warning" className="w-5 h-5" /> {t('advertisement.notAvailable')}</div>
         <div className="text-sm mt-1">{error}</div>
       </div>
     );
@@ -179,7 +180,7 @@ const AdvertisementBanner: React.FC<AdvertisementBannerProps> = ({ position = 't
               className="w-16 h-16 rounded-full border-2 border-white mb-3 object-cover"
             />
           ) : (
-            <BuildingOfficeIcon className="w-16 h-16 mb-3" />
+            <SoftIcon name="building" className="w-16 h-16 mb-3" />
           )}
 
           <div className="text-xs font-bold mb-1 opacity-80">{t('advertisement.featuredAgency')}</div>

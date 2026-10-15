@@ -2,16 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import { apiRequest } from '@/src/shared/api';
-import {
-  Cog6ToothIcon,
-  EnvelopeIcon,
-  ShieldCheckIcon,
-  CurrencyEuroIcon,
-  BellIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  ArrowPathIcon,
-} from '@/constants';
+import { ArrowPathIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface SettingsSection {
   id: string;
@@ -122,11 +114,11 @@ const SystemSettings: React.FC = () => {
   };
 
   const sections: SettingsSection[] = [
-    { id: 'general', title: t('admin:settings.generalTab'), description: t('admin:settings.generalDesc'), icon: <Cog6ToothIcon className="w-5 h-5" /> },
-    { id: 'email', title: t('admin:settings.emailTab'), description: t('admin:settings.emailDesc'), icon: <EnvelopeIcon className="w-5 h-5" /> },
-    { id: 'security', title: t('admin:settings.securityTab'), description: t('admin:settings.securityDesc'), icon: <ShieldCheckIcon className="w-5 h-5" /> },
-    { id: 'notifications', title: t('admin:settings.notificationsTab'), description: t('admin:settings.notificationsDesc'), icon: <BellIcon className="w-5 h-5" /> },
-    { id: 'pricing', title: t('admin:settings.pricingTab'), description: t('admin:settings.pricingDesc'), icon: <CurrencyEuroIcon className="w-5 h-5" /> },
+    { id: 'general', title: t('admin:settings.generalTab'), description: t('admin:settings.generalDesc'), icon: <SoftIcon name="gear" className="w-7 h-7 flex-shrink-0" /> },
+    { id: 'email', title: t('admin:settings.emailTab'), description: t('admin:settings.emailDesc'), icon: <SoftIcon name="envelope" className="w-7 h-7 flex-shrink-0" /> },
+    { id: 'security', title: t('admin:settings.securityTab'), description: t('admin:settings.securityDesc'), icon: <SoftIcon name="shield" className="w-7 h-7 flex-shrink-0" /> },
+    { id: 'notifications', title: t('admin:settings.notificationsTab'), description: t('admin:settings.notificationsDesc'), icon: <SoftIcon name="bell" className="w-7 h-7 flex-shrink-0" /> },
+    { id: 'pricing', title: t('admin:settings.pricingTab'), description: t('admin:settings.pricingDesc'), icon: <SoftIcon name="cash" className="w-7 h-7 flex-shrink-0" /> },
   ];
 
   const requestPasswordConfirmation = (action: 'save' | 'reset') => {
@@ -534,9 +526,7 @@ const SystemSettings: React.FC = () => {
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  <span className={activeTab === section.id ? 'text-white' : 'text-gray-400'}>
-                    {section.icon}
-                  </span>
+                  {section.icon}
                   <div>
                     <div className="font-medium">{section.title}</div>
                     <div className={`text-xs ${activeTab === section.id ? 'text-blue-100' : 'text-gray-500'}`}>
@@ -554,11 +544,7 @@ const SystemSettings: React.FC = () => {
               <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
                 saveMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
               }`}>
-                {saveMessage.type === 'success' ? (
-                  <CheckCircleIcon className="w-5 h-5" />
-                ) : (
-                  <ExclamationTriangleIcon className="w-5 h-5" />
-                )}
+                <SoftIcon name={saveMessage.type === 'success' ? 'check' : 'warning'} className="w-6 h-6 flex-shrink-0" />
                 {saveMessage.text}
               </div>
             )}
@@ -597,9 +583,7 @@ const SystemSettings: React.FC = () => {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-amber-100 rounded-lg">
-                <ShieldCheckIcon className="w-6 h-6 text-amber-600" />
-              </div>
+              <SoftIcon name="lock" className="w-10 h-10 flex-shrink-0" />
               <div>
                 <h3 className="text-lg font-bold text-gray-900">{t('admin:settings.confirmPassword')}</h3>
                 <p className="text-sm text-gray-500">{t('admin:settings.confirmPasswordDesc')}</p>

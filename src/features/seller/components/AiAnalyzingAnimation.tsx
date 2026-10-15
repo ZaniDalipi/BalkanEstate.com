@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { BedIcon, BathIcon, LivingRoomIcon, SqftIcon, ParkingIcon, CubeIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 const baseIcons = [
-    { id: 1, icon: <BedIcon className="w-6 h-6 text-primary" /> },
-    { id: 2, icon: <BathIcon className="w-6 h-6 text-primary" /> },
-    { id: 3, icon: <LivingRoomIcon className="w-6 h-6 text-primary" /> },
-    { id: 4, icon: <SqftIcon className="w-6 h-6 text-primary" /> },
-    { id: 5, icon: <ParkingIcon className="w-6 h-6 text-primary" /> },
-    { id: 6, icon: <CubeIcon className="w-6 h-6 text-primary" /> },
+    { id: 1, icon: <SoftIcon name="bed" className="w-8 h-8" /> },
+    { id: 2, icon: <SoftIcon name="bath" className="w-8 h-8" /> },
+    { id: 3, icon: <SoftIcon name="sofa" className="w-8 h-8" /> },
+    { id: 4, icon: <SoftIcon name="area" className="w-8 h-8" /> },
+    { id: 5, icon: <SoftIcon name="car" className="w-8 h-8" /> },
+    { id: 6, icon: <SoftIcon name="cube" className="w-8 h-8" /> },
 ];
 
 const GRAVITY = 0.1;

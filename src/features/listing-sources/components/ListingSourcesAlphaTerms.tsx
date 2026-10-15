@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type TermsStatus, acceptTerms, getTermsStatus } from '../api/listingSourceApi';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface Props {
   /** Called once the user successfully accepts the terms. */
@@ -51,10 +52,7 @@ const ListingSourcesAlphaTerms: React.FC<Props> = ({ onAccepted }) => {
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           {/* Warning banner */}
           <div className="bg-amber-50 border-b border-amber-200 px-6 py-4 flex gap-3">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
+            <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-amber-800">
                 {t('listingFeeds:termsBetaWarning', 'This is an experimental alpha feature')}

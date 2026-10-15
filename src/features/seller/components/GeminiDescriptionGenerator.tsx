@@ -2,7 +2,8 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { SparklesIcon, MapPinIcon, XMarkIcon } from '@/constants';
+import { XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import MarketInsightsAnimation from './MarketInsightsAnimation';
 import MapLocationPicker from './MapLocationPicker';
 import PromotionSelector from '@/src/features/promotions/components/PromotionSelector';
@@ -24,7 +25,7 @@ import { LiquidGlassControl } from '@/components/ui/liquid-glass-control';
 import { Button } from '@/components/ui/liquid-glass-button';
 import { getCurrencySymbol } from '@/utils/currency';
 import {
-    LANGUAGES, UploadIcon, TagListInput,
+    LANGUAGES, TagListInput,
     inputBaseClasses, labelClasses, selectClasses,
     errorFieldClasses, errorLabelClasses, fieldAnchorId, FieldError, RequiredMark, FIELD_ERROR_ORDER,
 } from './ListingFormHelpers';
@@ -143,7 +144,7 @@ const GeminiDescriptionGenerator: React.FC<{
                         <div className="absolute inset-0 rounded-full border-4 border-gray-200" />
                         <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 border-r-blue-400 animate-spin" />
                         <div className="absolute inset-2 flex items-center justify-center">
-                            <SparklesIcon className="w-8 h-8 text-purple-500" />
+                            <SoftIcon name="sparkles" className="w-10 h-10" />
                         </div>
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -207,20 +208,12 @@ const GeminiDescriptionGenerator: React.FC<{
                         {
                             value: 'sale',
                             label: t('seller:createListing.listingType.sale', 'For Sale'),
-                            icon: (
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            ),
+                            icon: <SoftIcon name="cash" className="w-5 h-5" />,
                         },
                         {
                             value: 'rent',
                             label: t('seller:createListing.listingType.rent', 'For Rent'),
-                            icon: (
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                </svg>
-                            ),
+                            icon: <SoftIcon name="key" className="w-5 h-5" />,
                         },
                     ]}
                     value={listingData.listingType}
@@ -231,9 +224,7 @@ const GeminiDescriptionGenerator: React.FC<{
             {/* Rental / Luxury Villa indicator */}
             {isLuxuryVilla ? (
                 <div className="flex items-center gap-3 p-3 mb-6 rounded-xl border border-secondary/40 bg-secondary/5">
-                    <div className="p-2 rounded-full bg-secondary/10 flex-shrink-0">
-                        <span className="text-lg leading-none">🏛️</span>
-                    </div>
+                    <SoftIcon name="landmark" className="w-9 h-9 flex-shrink-0" />
                     <div>
                         <span className="text-sm font-bold text-primary-dark">{t('seller:createListing.luxuryVillaBanner.title', 'Luxury Villas Collection')}</span>
                         <p className="text-xs text-primary/70">{t('seller:createListing.luxuryVillaBanner.hint', 'This listing will appear in the exclusive Luxury Villas tab — visible to premium buyers searching for high-end Balkan retreats.')}</p>
@@ -241,11 +232,7 @@ const GeminiDescriptionGenerator: React.FC<{
                 </div>
             ) : isRental && (
                 <div className="flex items-center gap-3 p-3 glass-fieldset border-blue-200 mb-6">
-                    <div className="p-2 rounded-full bg-blue-50">
-                        <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                        </svg>
-                    </div>
+                    <SoftIcon name="key" className="w-8 h-8 flex-shrink-0" />
                     <div>
                         <span className="text-sm font-semibold text-blue-600">{t('rental:form.rentalListing')}</span>
                         <p className="text-xs text-blue-500/70">{t('rental:form.rentalListingHint')}</p>
@@ -269,7 +256,7 @@ const GeminiDescriptionGenerator: React.FC<{
                         {
                             value: 'ai',
                             label: t('seller:createListing.mode.aiCreator'),
-                            icon: <SparklesIcon className="w-4 h-4" />,
+                            icon: <SoftIcon name="sparkles" className="w-5 h-5" />,
                         },
                     ]}
                     value={mode}
@@ -386,7 +373,7 @@ const GeminiDescriptionGenerator: React.FC<{
                             {selectedCity && listingData.lat !== 0 && listingData.lng !== 0 && (
                                 <div className="md:col-span-2">
                                     <p className="mb-2 text-xs text-gray-400">
-                                        <MapPinIcon className="w-3 h-3 inline-block mr-1" />
+                                        <SoftIcon name="pin" className="inline-block w-4 h-4 mr-1 align-[-3px]" />
                                         {t('seller:createListing.ai.locationHint', 'Adding location helps AI generate more accurate, location-specific descriptions')}
                                     </p>
                                     <MapLocationPicker
@@ -406,14 +393,14 @@ const GeminiDescriptionGenerator: React.FC<{
                         </div>
 
                         <label htmlFor="image-upload" className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer glass-fieldset transition-colors ${fieldErrors.images ? 'border-red-500 bg-red-50/60 hover:bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><UploadIcon className={`w-10 h-10 mb-3 ${fieldErrors.images ? 'text-red-400' : 'text-gray-300'}`} /><p className="mb-2 text-sm text-gray-400"><span className={`font-semibold ${fieldErrors.images ? 'text-red-600' : 'text-gray-600'}`}>{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-gray-300">{t('seller:createListing.upload.fileTypes')}</p></div>
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6"><SoftIcon name="camera" className="w-12 h-12 mb-3" /><p className="mb-2 text-sm text-gray-400"><span className={`font-semibold ${fieldErrors.images ? 'text-red-600' : 'text-gray-600'}`}>{t('seller:createListing.upload.clickToUpload')}</span></p><p className="text-xs text-gray-300">{t('seller:createListing.upload.fileTypes')}</p></div>
                             <input id="image-upload" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} aria-invalid={!!fieldErrors.images} aria-required="true" />
                         </label>
                         <FieldError message={fieldErrors.images} />
                         {images.length > 0 && (
                             <div className="mt-4"><p className="font-semibold text-sm mb-2 text-gray-600">{t('seller:createListing.upload.imagesSelected', { count: images.length })}</p><div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">{images.map((img, index) => (<div key={img.previewUrl} className="relative group"><img src={img.previewUrl} alt={`preview ${index}`} className="w-full h-24 object-cover rounded-lg border border-gray-200" />{/* Always shown on touch screens (no hover there) */}<button type="button" onClick={() => removeImage(index)} aria-label={t('seller:createListing.imageManagement.removePhoto', 'Delete photo {{n}}', { n: index + 1 })} title={t('seller:createListing.imageManagement.removePhoto', 'Delete photo {{n}}', { n: index + 1 })} className="absolute top-1 right-1 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-red-500/90 hover:bg-red-600 text-white shadow-md transition-opacity opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><XMarkIcon className="w-4 h-4" /></button></div>))}</div></div>
                         )}
-                         <Button type="button" variant="cool" size="xl" onClick={handleGenerate} className="w-full mt-6 text-lg font-bold rounded-xl" disabled={images.length === 0}><SparklesIcon className="w-6 h-6"/>{t('seller:createListing.generate')}</Button>
+                         <Button type="button" variant="cool" size="xl" onClick={handleGenerate} className="w-full mt-6 text-lg font-bold rounded-xl" disabled={images.length === 0}><SoftIcon name="sparkles" className="w-7 h-7" />{t('seller:createListing.generate')}</Button>
                     </div>
                 </div>
             )}
@@ -449,9 +436,7 @@ const GeminiDescriptionGenerator: React.FC<{
                     {isRental && (
                         <fieldset className="space-y-6 glass-fieldset border-blue-200">
                             <div className="flex items-center gap-2 mb-2">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                </svg>
+                                <SoftIcon name="key" className="w-6 h-6" />
                                 <h3 className="text-base font-bold text-gray-700">{t('rental:form.rentalDetails')}</h3>
                             </div>
 
@@ -688,9 +673,7 @@ const GeminiDescriptionGenerator: React.FC<{
                     <fieldset className="space-y-4 glass-fieldset border-amber-200">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                                <SoftIcon name="calendar" className="w-6 h-6" />
                                 <h3 className="text-base font-bold text-gray-700">{t('seller:createListing.visitAvailability.title', 'Visit Availability')}</h3>
                             </div>
                             <label className="flex items-center gap-2 cursor-pointer">
@@ -815,11 +798,7 @@ const GeminiDescriptionGenerator: React.FC<{
                     {/* 360 Virtual Tour URL */}
                     <fieldset className="space-y-4 glass-fieldset border-purple-200">
                         <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                                <path d="M2 12h20" />
-                            </svg>
+                            <SoftIcon name="tour360" className="w-7 h-7" />
                             <h3 className="text-base font-semibold text-purple-600">{t('seller:createListing.virtualTour.title')}</h3>
                         </div>
                         <p className="text-sm text-purple-500/70 mb-3">
@@ -847,9 +826,7 @@ const GeminiDescriptionGenerator: React.FC<{
                     {/* Property Video URL */}
                     <fieldset className="space-y-4 glass-fieldset border-red-200">
                         <div className="flex items-center gap-2 mb-2">
-                            <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                            </svg>
+                            <SoftIcon name="video" className="w-7 h-7" />
                             <h3 className="text-base font-semibold text-red-600">{t('seller:createListing.video.title', 'Property Video')}</h3>
                         </div>
                         <p className="text-sm text-red-500/70 mb-3">
@@ -900,9 +877,7 @@ const GeminiDescriptionGenerator: React.FC<{
                     {!propertyToEdit && (
                         <div className="glass-fieldset border-gray-200">
                             <div className="flex items-start gap-3 mb-4">
-                                <div className="flex-shrink-0">
-                                    <span className="text-2xl">🚀</span>
-                                </div>
+                                <SoftIcon name="rocket" className="w-8 h-8 flex-shrink-0" />
                                 <div className="flex-1">
                                     <h3 className="text-base font-bold text-gray-800 mb-1">
                                         {t('seller:createListing.promotion.title')}
@@ -953,9 +928,7 @@ const GeminiDescriptionGenerator: React.FC<{
                     {errorSummary.length > 0 && (
                         <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4">
                             <p className="flex items-center gap-2 text-sm font-semibold text-red-700">
-                                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                                </svg>
+                                <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                                 {t('newListing:validation.fixHighlighted', 'Please complete the fields highlighted in red:')}
                             </p>
                             <ul className="mt-2 ml-7 list-disc space-y-1 text-sm text-red-600">
@@ -976,10 +949,7 @@ const GeminiDescriptionGenerator: React.FC<{
                             disabled={isCompressing || isUploading}
                             className="font-bold w-full sm:w-auto rounded-xl"
                         >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
+                            <SoftIcon name="eye" className="w-6 h-6" />
                             {t('seller:createListing.buttons.previewListing', 'Preview Listing')}
                         </Button>
                         <Button

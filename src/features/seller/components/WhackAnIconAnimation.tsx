@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { BedIcon, BathIcon, LivingRoomIcon, SqftIcon, ParkingIcon, CubeIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 const icons = [
-    { id: 1, icon: <BedIcon className="w-8 h-8 text-primary" /> },
-    { id: 2, icon: <BathIcon className="w-8 h-8 text-primary" /> },
-    { id: 3, icon: <LivingRoomIcon className="w-8 h-8 text-primary" /> },
-    { id: 4, icon: <SqftIcon className="w-8 h-8 text-primary" /> },
-    { id: 5, icon: <ParkingIcon className="w-8 h-8 text-primary" /> },
-    { id: 6, icon: <CubeIcon className="w-8 h-8 text-primary" /> },
+    { id: 1, icon: <SoftIcon name="bed" className="w-10 h-10" /> },
+    { id: 2, icon: <SoftIcon name="bath" className="w-10 h-10" /> },
+    { id: 3, icon: <SoftIcon name="sofa" className="w-10 h-10" /> },
+    { id: 4, icon: <SoftIcon name="area" className="w-10 h-10" /> },
+    { id: 5, icon: <SoftIcon name="car" className="w-10 h-10" /> },
+    { id: 6, icon: <SoftIcon name="cube" className="w-10 h-10" /> },
 ];
 
 const GRID_SIZE = 9;

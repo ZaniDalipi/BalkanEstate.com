@@ -316,11 +316,11 @@
       "sampleItemFoundFieldsWill": "Пронајдена примерок ставка — полињата ќе се мапираат при увоз",
       "headerName": "Име на заглавие",
       "value": "Вредност",
-      "fieldMapping": "🔧 Мапирање на полиња (",
+      "fieldMapping": "Мапирање на полиња (",
       "fields": "полиња)",
       "eGTitleImages0": "на пр., title, images[0], $.item.name",
       "removeThisField": "Отстрани го полето",
-      "useJsonpathNotationForNested": "💡 Користете JSONPath нотација за вгнездени податоци:",
+      "useJsonpathNotationForNested": "Користете JSONPath нотација за вгнездени податоци:",
       "orBareKeysForTop": "или едноставни клучеви за најгорното ниво:",
       "pleasePasteAJsonSample": "Залепете JSON примерок за анализа."
     },

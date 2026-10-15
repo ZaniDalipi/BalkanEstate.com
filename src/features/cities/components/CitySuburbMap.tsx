@@ -29,6 +29,7 @@ import type {
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import { getTileLayer } from '@/config/mapStyles';
 import { tessellateDistricts } from '../utils/districtTessellation';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 import { useTranslation } from 'react-i18next';
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -460,13 +461,14 @@ const CitySuburbMap: React.FC<CitySuburbMapProps> = ({
       {/* Boundary source badge */}
       <div className="absolute top-3 right-3 z-[1000]">
         <span
-          className={`text-[9px] font-bold px-2 py-1 rounded-full ${
+          className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-2 py-1 rounded-full ${
             usingRealBoundaries
               ? 'bg-blue-100 text-blue-700'
               : 'bg-violet-100 text-violet-700'
           }`}
         >
-          {usingRealBoundaries ? t('exploreCities:ui.citySuburbMap.osmBoundaries', '📍 OSM boundaries') : t('exploreCities:ui.citySuburbMap.approxDistricts', '◇ Approx. districts')}
+          {usingRealBoundaries && <SoftIcon name="pin" className="w-3.5 h-3.5" />}
+          {usingRealBoundaries ? t('exploreCities:ui.citySuburbMap.osmBoundaries', 'OSM boundaries') : t('exploreCities:ui.citySuburbMap.approxDistricts', '◇ Approx. districts')}
         </span>
       </div>
 

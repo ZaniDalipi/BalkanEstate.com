@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleIcon, XCircleIcon, ClockIcon } from '@/constants';
+import { CheckCircleIcon, XCircleIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import {
   getVillaApprovals,
@@ -85,7 +86,7 @@ const VillaApprovals: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <span className="text-xl">✦</span>
+        <SoftIcon name="diamond" className="w-7 h-7 flex-shrink-0" />
         <h2 className="text-lg font-bold text-gray-900">{t('admin:villas.title', 'Luxury Villa Approvals')}</h2>
       </div>
       <p className="text-sm text-gray-500 -mt-2">
@@ -116,7 +117,7 @@ const VillaApprovals: React.FC = () => {
         </div>
       ) : villas.length === 0 ? (
         <div className="py-12 text-center text-gray-400 flex flex-col items-center gap-2">
-          <ClockIcon className="w-10 h-10 opacity-40" />
+          <SoftIcon name="clock" className="w-10 h-10" />
           <p>{t('admin:villas.empty', 'No villas here.')}</p>
         </div>
       ) : (

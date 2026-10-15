@@ -4,18 +4,7 @@ import { Agent } from '@/types';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import StarRating from '@/components/shared/StarRating';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
-import {
-  BuildingOfficeIcon,
-  CheckBadgeIcon,
-  MapPinIcon,
-  CurrencyDollarIcon,
-  HomeIcon,
-  ChevronRightIcon,
-  ChartBarIcon,
-  TrophyIcon,
-  ArrowTrendingUpIcon,
-  BoltIcon
-} from '@/constants';
+import { ChevronRightIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { formatPrice } from '@/utils/currency';
 import { slugify } from '@/utils/slug';
@@ -172,9 +161,9 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         {/* Ranking score */}
         <div className="flex items-center gap-1 flex-wrap">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-xs font-bold text-blue-600 shadow-[3px_3px_6px_rgba(0,0,0,0.06),-3px_-3px_6px_rgba(255,255,255,0.8)] transition-all duration-300 group-hover:text-blue-700">
-            <ChartBarIcon className="w-3.5 h-3.5" />
+            <SoftIcon name="chart" className="w-4 h-4" />
             <span>{performanceScore} pts</span>
-            <ArrowTrendingUpIcon className="w-3 h-3 text-blue-400" />
+            <SoftIcon name="trendUp" className="w-4 h-4" />
           </div>
           {achievementBadge && (
             <span
@@ -194,7 +183,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         <div className="flex items-center gap-2">
           {agent.licenseVerified ? (
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[2px_2px_4px_rgba(0,0,0,0.1)] transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]">
-              <CheckBadgeIcon className="h-3 w-3 text-white" />
+              <SoftIcon name="shield" className="w-4 h-4" />
               <span className="text-[10px] font-bold text-white tracking-wide uppercase">{t('agents:card.licensed', 'Licensed')}</span>
             </div>
           ) : null}
@@ -244,7 +233,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
       {/* Location */}
       {(agent.address || agent.city || agent.country || agent.serviceAreas?.[0] || agent.officeAddress) && (
         <div className="flex items-center justify-center gap-1.5 mt-2">
-          <MapPinIcon className="w-3.5 h-3.5 text-blue-500 transition-transform duration-300 group-hover:scale-110" />
+          <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
           <p className="text-xs font-medium text-gray-500 group-hover:text-blue-600 transition-colors duration-300 truncate max-w-[200px]">
             {agent.address || [agent.city, agent.country].filter(Boolean).join(', ') || agent.serviceAreas?.[0] || agent.officeAddress}
           </p>
@@ -297,7 +286,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         {/* Price range */}
         <div className="rounded-2xl bg-white p-3 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.04),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all duration-300 group-hover:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.03),inset_-1px_-1px_2px_rgba(255,255,255,0.6)]">
           <div className="flex items-center gap-1.5 mb-1">
-            <CurrencyDollarIcon className="w-3.5 h-3.5 text-blue-500" />
+            <SoftIcon name="cash" className="w-5 h-5 flex-shrink-0" />
             <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{t('agents:card.priceRange')}</span>
           </div>
           <p className="text-xs font-bold text-blue-700 truncate">{getPriceRange()}</p>
@@ -306,10 +295,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         {/* Sales */}
         <div className="rounded-2xl bg-white p-3 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.04),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all duration-300 group-hover:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.03),inset_-1px_-1px_2px_rgba(255,255,255,0.6)]">
           <div className="flex items-center gap-1.5 mb-1">
-            <HomeIcon className="w-3.5 h-3.5 text-blue-500" />
+            <SoftIcon name="home" className="w-5 h-5 flex-shrink-0" />
             <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{t('agents:card.sales')}</span>
             {agent.propertiesSold > 10 && (
-              <TrophyIcon className="w-3 h-3 text-amber-500" />
+              <SoftIcon name="trophy" className="w-4 h-4 flex-shrink-0" />
             )}
           </div>
           <div className="flex items-baseline gap-1">
@@ -321,7 +310,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         {/* Active listings */}
         <div className="rounded-2xl bg-white p-3 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.04),inset_-2px_-2px_4px_rgba(255,255,255,0.8)] transition-all duration-300 group-hover:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.03),inset_-1px_-1px_2px_rgba(255,255,255,0.6)]">
           <div className="flex items-center gap-1.5 mb-1">
-            <HomeIcon className="w-3.5 h-3.5 text-blue-500" />
+            <SoftIcon name="clipboard" className="w-5 h-5 flex-shrink-0" />
             <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{t('agents:card.active')}</span>
           </div>
           <div className="flex items-baseline gap-1">
@@ -352,7 +341,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
                   />
                 </div>
               ) : (
-                <BuildingOfficeIcon className="w-3.5 h-3.5 text-gray-500" />
+                <SoftIcon name="building" className="w-5 h-5 flex-shrink-0" />
               )}
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{t('agents:card.agencyRates')}</span>
             </div>
@@ -361,7 +350,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, index = 0 }) => {
         ) : (
           <div className="rounded-2xl bg-white p-3 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.04),inset_-2px_-2px_4px_rgba(255,255,255,0.8)]">
             <div className="flex items-center gap-1.5 mb-1">
-              <BoltIcon className="w-3.5 h-3.5 text-blue-500" />
+              <SoftIcon name="bolt" className="w-5 h-5 flex-shrink-0" />
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{t('agents:card.performanceScore')}</span>
             </div>
             <p className="text-xs font-bold text-blue-700">{performanceScore} pts</p>

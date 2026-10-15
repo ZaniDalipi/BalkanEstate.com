@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bookmark, Mail, AlertTriangle } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { CityMarketData } from '@/services/apiService';
 import type { SavedCity } from '../api/savedCitiesApi';
 import { savedCityKey } from '../api/savedCitiesApi';
@@ -63,7 +63,7 @@ const SavedCitiesPanel: React.FC<SavedCitiesPanelProps> = ({
   if (hasError) {
     return (
       <div className="flex items-start gap-3 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3.5 text-sm text-amber-800">
-        <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
         <span>{t('saved.loadError', 'We could not load your saved places. Please try again.')}</span>
       </div>
     );
@@ -85,7 +85,7 @@ const SavedCitiesPanel: React.FC<SavedCitiesPanelProps> = ({
       {/* What following actually does — stated where the reader acts on it. */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-primary/5 border border-primary/15 px-4 py-3">
         <p className="flex items-center gap-2 text-sm text-neutral-700">
-          <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+          <SoftIcon name="envelope" className="w-5 h-5 flex-shrink-0" />
           {t('saved.emailNotice', 'You get an email when the market in these cities moves.')}
         </p>
         <button
@@ -148,9 +148,7 @@ const SavedCitiesPanel: React.FC<SavedCitiesPanelProps> = ({
 
 const EmptyState: React.FC<{ title: string; message: string }> = ({ title, message }) => (
   <div className="bg-white rounded-2xl shadow-md border border-neutral-200 p-12 text-center">
-    <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-      <Bookmark className="w-9 h-9 text-primary" />
-    </div>
+    <SoftIcon name="save" className="block w-20 h-20 mx-auto mb-6" />
     <h3 className="text-xl font-semibold text-neutral-800 mb-2">{title}</h3>
     <p className="text-neutral-500 max-w-md mx-auto">{message}</p>
   </div>

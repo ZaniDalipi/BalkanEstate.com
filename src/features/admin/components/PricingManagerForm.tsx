@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/constants';
+import { ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { Product } from '../api/adminApi';
 import { availablePlaceholders, replacePlaceholders, hasPlaceholders } from '@/src/shared/utils/featurePlaceholders';
 
@@ -52,7 +53,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
           <h3 className="text-xl font-bold flex items-center gap-2">
-            <PencilIcon className="w-5 h-5" />
+            <SoftIcon name="pencil" className="w-6 h-6 flex-shrink-0" />
             {t('admin:pricing.editProduct', 'Edit Product')}
           </h3>
           <button
@@ -187,7 +188,7 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
             {/* Listings Limit - Most important for sellers/agents */}
             <div className="bg-white border-2 border-green-300 rounded-lg p-4 mb-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🏠</span>
+                <SoftIcon name="home" className="w-6 h-6 flex-shrink-0" />
                 <h5 className="font-semibold text-green-800">{t('admin:pricing.form.listingsLimit', 'Listings Limit')}</h5>
               </div>
               <p className="text-xs text-gray-600 mb-2">{t('admin:pricing.form.listingsLimitDesc', 'Maximum number of active property listings allowed for this plan')}</p>

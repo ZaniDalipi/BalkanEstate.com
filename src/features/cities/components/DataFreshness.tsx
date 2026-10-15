@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock } from 'lucide-react';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 export interface DataFreshnessProps {
   /** ISO string or Date of the last fetch. Anything unparseable renders nothing. */
@@ -100,7 +100,7 @@ const DataFreshness: React.FC<DataFreshnessProps> = ({
       className={`inline-flex items-center gap-1.5 text-[11px] text-neutral-500 ${className}`}
       title={exact}
     >
-      <Clock className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+      <SoftIcon name="clock" className="w-4 h-4 flex-shrink-0" />
       <span>
         {sourceLabel
           ? t('freshness.labelWithSource', 'Data fetched {{age}} · {{source}}', { age, source: sourceLabel })

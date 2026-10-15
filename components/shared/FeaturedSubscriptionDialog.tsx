@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
 import { createFeaturedSubscription } from '../../services/apiService';
-import { SparklesIcon, CheckCircleIcon, XMarkIcon } from '../../constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { API_URL } from '../../src/shared/api/config';
 import { csrfHeaders, ensureCsrfToken } from '../../src/shared/api/httpClient';
 import { tokenService } from '../../src/shared/api/tokenService';
@@ -194,9 +194,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
       <div className="p-6">
         {success ? (
           <div className="text-center py-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircleIcon className="w-10 h-10 text-green-600" />
-            </div>
+            <SoftIcon name="check" className="w-16 h-16 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-neutral-800 mb-2">
               {t('agencies:featuredDialog.subscriptionCreated', 'Subscription Created!')}
             </h3>
@@ -209,7 +207,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-500 to-primary rounded-lg p-6 text-white mb-6">
               <div className="flex items-center gap-3 mb-3">
-                <SparklesIcon className="w-8 h-8" />
+                <SoftIcon name="sparkles" className="w-10 h-10 flex-shrink-0" />
                 <h3 className="text-2xl font-bold">{t('agencies:featuredDialog.getFeatured', 'Get Featured!')}</h3>
               </div>
               <p className="text-purple-100">
@@ -269,7 +267,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
                   <ul className="space-y-2">
                     {selectedFeatures.map((feature, index) => (
                       <li key={index} className="flex items-center gap-2 text-sm text-neutral-700">
-                        <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -326,7 +324,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
             {couponApplied && finalPrice !== null && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                  <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
                   <p className="text-sm font-semibold text-green-800">{t('agencies:featuredDialog.couponAppliedSuccess', 'Coupon Applied Successfully!')}</p>
                 </div>
                 <div className="text-sm text-green-700">
@@ -346,7 +344,7 @@ const FeaturedSubscriptionDialog: React.FC<FeaturedSubscriptionDialogProps> = ({
             {/* Error */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center gap-2">
-                <XMarkIcon className="w-5 h-5 text-red-600" />
+                <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                 <p className="text-sm text-red-800">{error}</p>
               </div>
             )}
