@@ -493,6 +493,93 @@ export const SOFT = {
     disc(32, 32, 24, 'red') +
     line('M22 22l20 20M42 22 22 42', '#FFFFFF', 6) +
     gloss('M16 22a18 18 0 0 1 9-9'),
+  // ── status, media & paperwork ───────────────────────────────────────
+  check: () =>
+    disc(32, 32, 24, 'green') +
+    line('M21 33l8 8 15-17', '#FFFFFF', 6) +
+    gloss('M16 22a18 18 0 0 1 9-9'),
+  gradCap: () =>
+    blob('M18 32v10c0 5 6 9 14 9s14-4 14-9V32Z', 'blue', { stroke: 2 }) +
+    blob('M4 26 32 14 60 26 32 38Z', 'blue') +
+    blob('M4 26 32 14 60 26 32 38Z', 'sky', { stroke: 1, depth: 0 }) +
+    logo(28.2, 20, 9) +
+    tube('M54 29v14', 'gold', 3, 0.8) +
+    disc(54, 46, 3.4, 'gold', { stroke: 1.6, depth: 0.8 }),
+  photo: () =>
+    blob('M6 12h52v40H6z', 'white') +
+    blob('M10 16h44v32H10z', 'sky', { stroke: 2, depth: 0.6 }) +
+    blob('M10 48 24 30l10 12 6-7 14 13Z', 'green', { stroke: 2, depth: 0.8 }) +
+    disc(44, 25, 5, 'gold', { stroke: 1.6, depth: 0.8 }),
+  camera: () =>
+    blob('M22 12h20l4 8H18Z', 'grey', { stroke: 2, depth: 1 }) +
+    blob('M6 20h52v32H6z', 'blue') +
+    disc(32, 36, 12, 'white', { stroke: 2, depth: 1.2 }) +
+    disc(32, 36, 7, 'sky', { stroke: 1.6, depth: 0.6 }) +
+    disc(49, 27, 2.6, 'gold', { stroke: 1, depth: 0.4 }) +
+    gloss('M11 24h12'),
+  ticket: () =>
+    blob('M6 16h52v10a6 6 0 0 0 0 12v10H6V38a6 6 0 0 0 0-12Z', 'gold') +
+    line('M40 18v28', 'rgba(255,255,255,.8)', 2.4) +
+    logo(18, 25, 14, 'logo-white') +
+    gloss('M11 20h18'),
+  mic: () =>
+    blob('M22 8h20v28a10 10 0 0 1-20 0Z', 'blue') +
+    tube('M14 32a18 18 0 0 0 36 0', 'grey', 4, 1) +
+    tube('M32 50v6M22 58h20', 'grey', 4, 1) +
+    gloss('M27 14v14'),
+  share: () =>
+    tube('M18 32 44 18M18 32l26 14', 'grey', 4, 1) +
+    disc(46, 16, 9, 'blue') + disc(46, 48, 9, 'blue') + disc(16, 32, 9, 'blue') +
+    gloss('M10 28a7 7 0 0 1 4-4'),
+  clipboard: () =>
+    blob('M12 10h40v48H12z', 'wood') +
+    blob('M17 16h30v38H17z', 'white', { stroke: 2, depth: 0.6 }) +
+    blob('M24 6h16v9H24z', 'grey', { stroke: 2, depth: 1 }) +
+    line('M22 27h20M22 35h20M22 43h12', '#9DBBE0', 3),
+  party: () =>
+    blob('M8 56 20 20l24 24Z', 'gold') +
+    line('M14 40l10 10M17 30l17 17', 'rgba(255,255,255,.8)', 2.6) +
+    disc(46, 12, 3.4, 'red', { stroke: 1.4, depth: 0.6 }) +
+    disc(54, 30, 3, 'blue', { stroke: 1.4, depth: 0.6 }) +
+    disc(34, 8, 2.6, 'green', { stroke: 1.4, depth: 0.6 }) +
+    tube('M30 22c4-6 2-10 6-14M42 34c6-4 10-2 14-6', 'blue', 3, 0.6),
+  refresh: () =>
+    tube('M50 26A19 19 0 0 0 15 22', 'blue', 6) +
+    tube('M14 38a19 19 0 0 0 35 4', 'blue', 6) +
+    blob('M44 26h12V14Z', 'blue', { stroke: 2.4, depth: 1.4 }) +
+    blob('M20 38H8v12Z', 'blue', { stroke: 2.4, depth: 1.4 }),
+  creditCard: () =>
+    blob('M6 16h52v34H6z', 'blue') +
+    blob('M6 22h52v7H6z', 'grey', { stroke: 1, depth: 0 }) +
+    blob('M12 36h10v8H12z', 'gold', { stroke: 2, depth: 1 }) +
+    disc(44, 40, 5, 'red', { stroke: 1.4, depth: 0.6 }) + disc(51, 40, 5, 'gold', { stroke: 1.4, depth: 0.6 }),
+  heart: () =>
+    blob('M32 54C14 42 6 32 6 22a12 12 0 0 1 26-6 12 12 0 0 1 26 6c0 10-8 20-26 32Z', 'red') +
+    gloss('M13 20a7 7 0 0 1 6-6'),
+  tag: () =>
+    blob('M8 8h24l26 26-24 24L8 32Z', 'gold') +
+    disc(20, 20, 4.4, 'white', { stroke: 1.6, depth: 0.6 }) +
+    logo(30, 30, 11, 'logo-white'),
+  megaphone: () =>
+    blob('M10 26h10v14H10z', 'grey', { stroke: 2, depth: 1 }) +
+    blob('M20 26 48 12v42L20 40Z', 'blue') +
+    blob('M14 40h8l4 14h-8Z', 'grey', { stroke: 2, depth: 1 }) +
+    tube('M54 26v14', 'gold', 4, 0.8),
+  video: () =>
+    blob('M6 16h38v32H6z', 'blue') +
+    blob('M44 26 58 18v28L44 38Z', 'sky', { stroke: 2.4, depth: 1.2 }) +
+    blob('M20 24l12 8-12 8Z', 'white', { stroke: 2, depth: 0.8 }),
+  link: () =>
+    tube('M28 22l6-6a9 9 0 0 1 13 13l-6 6', 'blue', 6) +
+    tube('M36 42l-6 6a9 9 0 0 1-13-13l6-6', 'blue', 6) +
+    tube('M26 38l12-12', 'grey', 5, 1),
+  filter: () =>
+    blob('M8 10h48L38 32v18l-12 6V32Z', 'blue') +
+    gloss('M14 14h20'),
+  plus: () =>
+    disc(32, 32, 24, 'blue') +
+    line('M32 20v24M20 32h24', '#FFFFFF', 6) +
+    gloss('M16 22a18 18 0 0 1 9-9'),
 };
 
 function medal(tone, n) {
