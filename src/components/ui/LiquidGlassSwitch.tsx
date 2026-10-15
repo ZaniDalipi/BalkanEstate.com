@@ -142,7 +142,9 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
 
   return (
     <div
-      className={`relative inline-flex items-center ${className}`}
+      // touch-manipulation: two quick taps must switch twice, never zoom the
+      // page (iOS double-tap zoom). No grey tap flash behind the orb either.
+      className={`relative inline-flex items-center touch-manipulation select-none [-webkit-tap-highlight-color:transparent] ${className}`}
       style={{
         width: trackWidth,
         height: containerHeight,
@@ -195,6 +197,7 @@ export const LiquidGlassSwitch: React.FC<LiquidGlassSwitchProps> = ({
                 onClick={() => select(option.value)}
                 className={`
                   relative z-20 flex items-center justify-center font-semibold
+                  touch-manipulation [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-full
                   transition-[opacity,color] duration-300 ease-out motion-reduce:transition-none
                   ${config.text}
                   ${variant === 'orb'

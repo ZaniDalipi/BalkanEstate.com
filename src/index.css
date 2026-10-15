@@ -2294,3 +2294,63 @@ html.reduce-motion .celebration-bar {
     filter: drop-shadow(0 18px 22px rgba(15, 23, 42, 0.3));
   }
 }
+
+/* ============================================================================
+   Search pages — List / Map switch on phones and tablets
+   The list slides off to the left while the map behind it eases forward out
+   of a slight zoom-out; switching back reverses it. Only transform and opacity
+   animate, so it runs on the compositor and a tap mid-slide just turns it
+   around. Once a panel has slid away it turns `visibility: hidden` (after the
+   slide, via the delayed visibility transition) so the phone stops painting a
+   full-screen layer nobody can see. The resting map has `transform: none` so
+   the map library's tap coordinates are never scaled. Split view (lg+) is
+   untouched.
+   ============================================================================ */
+@media (max-width: 1023.98px) {
+  .search-list-panel,
+  .search-map-stage {
+    --view-switch-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    transition:
+      transform 480ms var(--view-switch-ease),
+      opacity 480ms var(--view-switch-ease),
+      visibility 0s linear 0s;
+    backface-visibility: hidden;
+  }
+
+  .search-list-panel[data-shown='true'] {
+    transform: none;
+  }
+
+  .search-list-panel[data-shown='false'] {
+    transform: translate3d(-100%, 0, 0);
+    visibility: hidden;
+    pointer-events: none;
+    transition-delay: 0s, 0s, 480ms;
+  }
+
+  .search-map-stage[data-shown='true'] {
+    transform: none;
+    opacity: 1;
+  }
+
+  .search-map-stage[data-shown='false'] {
+    transform: translate3d(12%, 0, 0) scale(0.94);
+    opacity: 0.5;
+    visibility: hidden;
+    pointer-events: none;
+    transition-delay: 0s, 0s, 480ms;
+  }
+}
+
+@media (max-width: 1023.98px) and (prefers-reduced-motion: reduce) {
+  .search-list-panel,
+  .search-map-stage {
+    transition: opacity 150ms linear, visibility 0s linear 0s;
+  }
+  .search-list-panel[data-shown='false'],
+  .search-map-stage[data-shown='false'] {
+    transform: none;
+    opacity: 0;
+    transition-delay: 0s, 150ms;
+  }
+}

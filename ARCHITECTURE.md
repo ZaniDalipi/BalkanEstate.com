@@ -1249,6 +1249,16 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   the list, so that work can't make the orb stutter.
 - Orb icons all stay mounted and crossfade; transitions are off under
   `prefers-reduced-motion`.
+- The switch is `touch-action: manipulation` with no tap highlight: two quick
+  taps switch twice and never trigger iOS double-tap zoom.
+- **Panels** (Search, Rentals, Villas, phone and tablet only): the list panel
+  carries `search-list-panel`, the map's inner wrapper `search-map-stage`, each
+  with `data-shown`. The CSS in `src/index.css` slides the list off to the left
+  while the map eases in from a slight zoom-out and fade (transform and opacity
+  only, so a tap mid-slide simply reverses it). A panel that has slid away goes
+  `visibility: hidden` after the slide so the phone stops painting it, and the
+  resting map has `transform: none` so map taps are never scaled. Split view
+  (lg+) is untouched; reduced motion gets a short crossfade.
 
 ---
 

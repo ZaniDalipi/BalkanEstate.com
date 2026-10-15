@@ -301,7 +301,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${(isMobile || isTablet) && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
-                 <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-neutral-200 ${ showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : '' } lg:translate-x-0 transition-transform duration-300`}>
+                 <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200`}
+                    data-shown={!showViewToggle || mobileView === 'list'}>
                     {mountList && searchMode !== 'ai' && (
                         <SearchHeader
                             t={t as any}
@@ -320,7 +321,10 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Right Panel: Map --- */}
                 {/* On mobile/tablet: full-width behind list panel. On lg: 50% map, on xl+: 40% map */}
                 <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
-                    <div className="absolute inset-0 overflow-hidden">
+                    <div
+                        className="search-map-stage absolute inset-0 overflow-hidden"
+                        data-shown={!showViewToggle || mobileView === 'map'}
+                    >
                         {mountMap && <MapComponent {...mapProps} />}
                     </div>
 
