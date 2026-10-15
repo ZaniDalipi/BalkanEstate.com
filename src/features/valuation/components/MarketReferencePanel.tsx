@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { motion } from 'framer-motion';
 import { useCityMarketData } from '@/src/features/cities/hooks/useCityQueries';
 import {
@@ -102,11 +103,7 @@ const MarketReferencePanel: React.FC<MarketReferencePanelProps> = ({
       <div className="px-5 py-4 bg-gradient-to-r from-primary/[0.07] to-transparent border-b border-neutral-100">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
-              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </span>
+            <SoftIcon name="chart" className="w-9 h-9 flex-shrink-0" />
             <div>
               <h3 className="text-sm font-bold text-neutral-800 leading-tight">{t('valuation:marketReference.title', 'Market price reference')}</h3>
               <p className="text-[11px] text-neutral-500">{t('valuation:marketReference.subtitle', 'Compare €/m² by data source')}</p>

@@ -6,6 +6,7 @@ import { ContainerScroll } from '@/src/components/ui/ContainerScroll';
 import { useHowItWorksContent, HowItWorksContent } from '../hooks/useHowItWorksContent';
 import { getProperties } from '@/src/features/properties/api/propertyApi';
 import { extractYouTubeId } from '@/src/shared/utils/validation';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface AppShowcaseSectionProps {
   onNavigate: (path: string) => void;
@@ -17,113 +18,57 @@ const STATIC_FEATURES = [
     titleKey: 'showcase.feature_aiSearch_title',
     descKey: 'showcase.feature_aiSearch_desc',
     gradient: 'from-blue-500 to-cyan-400',
-    iconBg: 'bg-blue-500/10',
     route: { view: 'search', path: '/search' },
-    icon: (
-      <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none">
-        <circle cx="11" cy="11" r="5" stroke="currentColor" strokeWidth={2} />
-        <path d="M14.5 14.5L19 19" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
-        <path d="M8 11h6M11 8v6" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" opacity={0.5} />
-      </svg>
-    ),
+    icon: 'sparkles' as SoftIconName,
   },
   {
     titleKey: 'showcase.feature_3dMap_title',
     descKey: 'showcase.feature_3dMap_desc',
     gradient: 'from-emerald-500 to-teal-400',
-    iconBg: 'bg-emerald-500/10',
     route: { view: 'search', path: '/search?view=map' },
-    icon: (
-      <svg className="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none">
-        <path d="M3 7l6-3 6 3 6-3v14l-6 3-6-3-6 3V7z" fill="currentColor" opacity={0.12} />
-        <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth={1.8} />
-        <path d="M12 12.5v2" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" />
-      </svg>
-    ),
+    icon: 'mapGrid' as SoftIconName,
   },
   {
     titleKey: 'showcase.feature_messaging_title',
     descKey: 'showcase.feature_messaging_desc',
     gradient: 'from-violet-500 to-purple-400',
-    iconBg: 'bg-violet-500/10',
     route: { view: 'messages', path: '/messages' },
-    icon: (
-      <svg className="w-5 h-5 text-violet-500" viewBox="0 0 24 24" fill="none">
-        <rect x="4" y="6" width="16" height="9" rx="3" stroke="currentColor" strokeWidth={1.8} />
-        <path d="M8 17l-2 3v-3" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" />
-        <circle cx="9" cy="10.5" r="1" fill="currentColor" />
-        <circle cx="12" cy="10.5" r="1" fill="currentColor" />
-        <circle cx="15" cy="10.5" r="1" fill="currentColor" />
-      </svg>
-    ),
+    icon: 'chat' as SoftIconName,
   },
   {
     titleKey: 'showcase.feature_valuation_title',
     descKey: 'showcase.feature_valuation_desc',
     gradient: 'from-amber-500 to-orange-400',
-    iconBg: 'bg-amber-500/10',
     route: { view: 'search', path: '/search' },
-    icon: (
-      <svg className="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none">
-        <rect x="6" y="12" width="3" height="6" rx="1" fill="currentColor" opacity={0.5} />
-        <rect x="10.5" y="8" width="3" height="10" rx="1" fill="currentColor" opacity={0.7} />
-        <rect x="15" y="5" width="3" height="13" rx="1" fill="currentColor" />
-      </svg>
-    ),
+    icon: 'chart' as SoftIconName,
   },
   {
     titleKey: 'showcase.feature_calculators_title',
     descKey: 'showcase.feature_calculators_desc',
     gradient: 'from-rose-500 to-pink-400',
-    iconBg: 'bg-rose-500/10',
     route: { view: 'how-it-works', path: '/how-it-works' },
-    icon: (
-      <svg className="w-5 h-5 text-rose-500" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth={1.8} />
-        <text x="12" y="16" textAnchor="middle" fontSize="11" fontWeight="700" fill="currentColor">&#8364;</text>
-      </svg>
-    ),
+    icon: 'calculator' as SoftIconName,
   },
   {
     titleKey: 'showcase.feature_promotions_title',
     descKey: 'showcase.feature_promotions_desc',
     gradient: 'from-indigo-500 to-blue-400',
-    iconBg: 'bg-indigo-500/10',
     route: { view: 'create-listing', path: '/create-listing' },
-    icon: (
-      <svg className="w-5 h-5 text-indigo-500" viewBox="0 0 24 24" fill="none">
-        <path d="M12 3l2.5 5.5L20 9.5l-4 4 1 5.5L12 16.5 7 19l1-5.5-4-4 5.5-1L12 3z" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" fill="currentColor" opacity={0.15} />
-      </svg>
-    ),
+    icon: 'star' as SoftIconName,
   },
   {
     titleKey: 'showcase.feature_languages_title',
     descKey: 'showcase.feature_languages_desc',
     gradient: 'from-sky-500 to-blue-400',
-    iconBg: 'bg-sky-500/10',
     route: { view: 'settings', path: '/settings' },
-    icon: (
-      <svg className="w-5 h-5 text-sky-500" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth={1.8} />
-        <ellipse cx="12" cy="12" rx="3.5" ry="7.5" stroke="currentColor" strokeWidth={1.3} />
-        <path d="M4.5 12h15" stroke="currentColor" strokeWidth={1.3} />
-      </svg>
-    ),
+    icon: 'globe' as SoftIconName,
   },
   {
     titleKey: 'showcase.feature_profiles_title',
     descKey: 'showcase.feature_profiles_desc',
     gradient: 'from-teal-500 to-cyan-400',
-    iconBg: 'bg-teal-500/10',
     route: { view: 'agents', path: '/agents' },
-    icon: (
-      <svg className="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none">
-        <circle cx="9" cy="7" r="3" stroke="currentColor" strokeWidth={1.8} />
-        <circle cx="16" cy="8" r="2.5" stroke="currentColor" strokeWidth={1.5} opacity={0.6} />
-        <path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" />
-        <path d="M14 19c0-2.5 1.5-4.5 3.5-4.5S21 16.5 21 19" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" opacity={0.6} />
-      </svg>
-    ),
+    icon: 'users' as SoftIconName,
   },
 ];
 
@@ -340,7 +285,7 @@ const VideoCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({
       {item.description && <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 line-clamp-2">{item.description}</p>}
       {item.estimatedTime && (
         <span className="inline-flex items-center gap-1 mt-1.5 text-[9px] md:text-[10px] text-slate-400">
-          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" strokeLinecap="round" /></svg>
+          <SoftIcon name="clock" className="w-4 h-4" />
           {item.estimatedTime}
         </span>
       )}
@@ -362,11 +307,9 @@ const GuideCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({
     <div className="flex items-start gap-3">
       <motion.div
         whileHover={{ scale: 1.1, rotate: 5 }}
-        className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0"
+        className="w-8 h-8 flex items-center justify-center flex-shrink-0"
       >
-        <svg className="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <SoftIcon name="clipboard" className="w-8 h-8" />
       </motion.div>
       <div className="min-w-0">
         <h4 className="text-xs md:text-sm font-semibold text-slate-800 line-clamp-1">{item.title}</h4>
@@ -394,12 +337,9 @@ const FAQCard: React.FC<{ item: HowItWorksContent; onClick: () => void }> = ({ i
     <div className="flex items-start gap-3">
       <motion.div
         whileHover={{ scale: 1.1, rotate: 5 }}
-        className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0"
+        className="w-8 h-8 flex items-center justify-center flex-shrink-0"
       >
-        <svg className="w-4 h-4 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <circle cx="12" cy="12" r="9" />
-          <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <SoftIcon name="info" className="w-8 h-8" />
       </motion.div>
       <div className="min-w-0">
         <h4 className="text-xs md:text-sm font-semibold text-slate-800 line-clamp-1">{item.title}</h4>
@@ -602,11 +542,7 @@ const AppShowcaseSection: React.FC<AppShowcaseSectionProps> = ({ onNavigate }) =
                     onClick={() => handleFeatureClick(feature.route)}
                     className="rounded-xl p-3 border border-neutral-100/50 bg-white cursor-pointer group hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
                   >
-                    <div
-                      className={`w-9 h-9 rounded-lg ${feature.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}
-                    >
-                      {feature.icon}
-                    </div>
+                    <SoftIcon name={feature.icon} className="w-9 h-9 mb-2 group-hover:scale-110 transition-transform" />
                     <h4 className="text-[10px] md:text-xs font-semibold text-slate-800 leading-tight">
                       {t(`home:${feature.titleKey}`)}
                     </h4>

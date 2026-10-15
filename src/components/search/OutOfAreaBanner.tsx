@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapPinIcon, XCircleIcon } from '@/constants';
+import { XCircleIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { validateSearchQuery } from '@/shared/utils/validation';
 import type { OutOfAreaKind } from '@/src/features/search/outOfArea';
 
@@ -65,7 +66,7 @@ const OutOfAreaBanner: React.FC<OutOfAreaBannerProps> = ({
       data-testid="out-of-area-banner"
       className="mb-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2"
     >
-      <MapPinIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+      <SoftIcon name="pin" className="h-5 w-5 flex-shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold leading-snug text-neutral-800 break-words">{title}</p>
         <p className="text-[11px] leading-snug text-neutral-600">{body}</p>

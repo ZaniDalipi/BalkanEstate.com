@@ -59,7 +59,8 @@ describe('analytics PropertyRow', () => {
         maxViews={10}
       />
     );
-    expect(container.querySelector('img')).toBeNull();
+    // No listing photo: only decorative (aria-hidden) soft icons may render.
+    expect(container.querySelector('img:not([aria-hidden="true"])')).toBeNull();
     expect(screen.getByText('7')).toBeTruthy();
     expect(container.querySelector('svg polyline')).toBeNull();
   });

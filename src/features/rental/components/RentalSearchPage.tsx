@@ -24,6 +24,7 @@ import Footer from '@/components/shared/Footer';
 import { Property } from '@/types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -274,9 +275,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-3">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-primary/80 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" />
-                                    </svg>
+                                    <SoftIcon name="key" className="w-7 h-7 flex-shrink-0" />
                                     <h1 className="text-lg font-semibold text-neutral-900 tracking-[-0.01em]">{t('rental:title', 'Properties for Rent')}</h1>
                                 </div>
                                 <p className="text-xs mt-0.5 text-neutral-500">
@@ -323,15 +322,15 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         {/* Quick-filter chips (view type + key amenities) */}
                         <div className="px-4 pb-3 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                             {[
-                                { label: '⛰ Mountain', field: 'viewType' as const, value: 'mountain' },
-                                { label: '🌊 Sea View', field: 'viewType' as const, value: 'sea' },
-                                { label: '🌲 Lake / Forest', field: 'viewType' as const, value: 'park' },
-                                { label: '🏙 City View', field: 'viewType' as const, value: 'city' },
-                                { label: '🏊 Pool', field: 'hasPool' as const, value: true },
-                                { label: '🌿 Garden', field: 'hasGarden' as const, value: true },
-                                { label: '🛁 Sauna', field: 'amenities' as const, value: 'sauna' },
-                                { label: '🍷 Wine Cellar', field: 'amenities' as const, value: 'wine cellar' },
-                                { label: '🌅 Panoramic', field: 'amenities' as const, value: 'panoramic view' },
+                                { icon: 'mountain' as SoftIconName, label: 'Mountain', field: 'viewType' as const, value: 'mountain' },
+                                { icon: 'sea' as SoftIconName, label: 'Sea View', field: 'viewType' as const, value: 'sea' },
+                                { icon: 'tree' as SoftIconName, label: 'Lake / Forest', field: 'viewType' as const, value: 'park' },
+                                { icon: 'city' as SoftIconName, label: 'City View', field: 'viewType' as const, value: 'city' },
+                                { icon: 'pool' as SoftIconName, label: 'Pool', field: 'hasPool' as const, value: true },
+                                { icon: 'leaf' as SoftIconName, label: 'Garden', field: 'hasGarden' as const, value: true },
+                                { icon: 'spa' as SoftIconName, label: 'Sauna', field: 'amenities' as const, value: 'sauna' },
+                                { icon: 'wine' as SoftIconName, label: 'Wine Cellar', field: 'amenities' as const, value: 'wine cellar' },
+                                { icon: 'sunrise' as SoftIconName, label: 'Panoramic', field: 'amenities' as const, value: 'panoramic view' },
                             ].map((chip) => {
                                 const isActive = chip.field === 'amenities'
                                     ? (filters.amenities || []).includes(chip.value as string)
@@ -350,13 +349,13 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                                 handleFilterChange(chip.field, isActive ? (chip.field === 'viewType' ? 'any' : null) : chip.value);
                                             }
                                         }}
-                                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
+                                        className={`flex-shrink-0 inline-flex items-center gap-1 pl-1.5 pr-3 py-1 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
                                             isActive
                                                 ? 'bg-primary/10 text-primary border-primary/40'
                                                 : 'bg-black/[0.03] text-neutral-500 border-black/[0.07] hover:border-primary/30 hover:text-primary'
                                         }`}
                                     >
-                                        {chip.label}
+                                        <SoftIcon name={chip.icon} className="w-4 h-4 flex-shrink-0" />{chip.label}
                                     </button>
                                 );
                             })}
@@ -374,7 +373,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                                 : 'bg-black/[0.03] text-neutral-500 border-black/[0.07] hover:border-primary/30 hover:text-primary'
                                         }`}
                                     >
-                                        {label === 'Any' ? label : `🛏 ${label}`}
+                                        {label === 'Any' ? label : <span className="inline-flex items-center gap-1"><SoftIcon name="bed" className="w-4 h-4" />{label}</span>}
                                     </button>
                                 );
                             })}
@@ -429,7 +428,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     )}
                                     {filters.query && (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium truncate max-w-[140px]">
-                                            <MapIcon className="w-3 h-3 flex-shrink-0" />
+                                            <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                                             <span className="truncate">{filters.query}</span>
                                         </span>
                                     )}
@@ -514,7 +513,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             </div>
                         ) : listProperties.length === 0 ? (
                             <div className="text-center py-12">
-                                <div className="text-4xl mb-3 opacity-60">🏠</div>
+                                <SoftIcon name="home" className="w-12 h-12 mx-auto mb-3" />
                                 <h3 className="text-lg font-semibold text-gray-600 mb-1">{t('rental:noProperties')}</h3>
                                 <p className="text-sm text-gray-400 mb-4">{t('rental:noPropertiesHint')}</p>
                                 <button

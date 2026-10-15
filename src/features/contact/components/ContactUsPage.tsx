@@ -16,36 +16,12 @@ import type { AppView } from '@/types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 import { SEO } from '@/src/components/seo';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Inline SVG icons to avoid importing full icon set
 const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-  </svg>
-);
-
-const EnvelopeIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-  </svg>
-);
-
-const PhoneIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-  </svg>
-);
-
-const MapPinIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-  </svg>
-);
-
-const ClockIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
@@ -148,25 +124,25 @@ const ContactUsPage: React.FC = () => {
 
   const contactInfoItems = [
     {
-      icon: EnvelopeIcon,
+      icon: 'envelope' as const,
       label: t('contact:info.email', 'Email'),
       value: CONTACT_CONFIG.email.contact,
       href: `mailto:${CONTACT_CONFIG.email.contact}`,
     },
     {
-      icon: PhoneIcon,
+      icon: 'phone' as const,
       label: t('contact:info.phone', 'Phone'),
       value: CONTACT_CONFIG.phone.primary,
       href: `tel:${CONTACT_CONFIG.phone.primaryTel}`,
     },
     {
-      icon: MapPinIcon,
+      icon: 'pin' as const,
       label: t('contact:info.location', 'Location'),
       value: t('contact:info.locationValue', 'Balkans Region'),
       href: undefined,
     },
     {
-      icon: ClockIcon,
+      icon: 'clock' as const,
       label: t('contact:info.hours', 'Business Hours'),
       value: t('contact:info.hoursValue', 'Mon-Fri, 9:00-18:00 CET'),
       href: undefined,
@@ -239,12 +215,9 @@ const ContactUsPage: React.FC = () => {
                 </h3>
                 <div className="space-y-5">
                   {contactInfoItems.map((item) => {
-                    const Icon = item.icon;
                     const content = (
                       <div className="flex items-start gap-3.5 group">
-                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                          <Icon className="w-5 h-5 text-primary" />
-                        </div>
+                        <SoftIcon name={item.icon} className="flex-shrink-0 w-10 h-10 group-hover:scale-105 transition-transform" />
                         <div>
                           <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">
                             {item.label}

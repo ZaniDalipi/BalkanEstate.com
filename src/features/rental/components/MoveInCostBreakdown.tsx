@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { getCurrencySymbol } from '@/utils/currency';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface MoveInCostBreakdownProps {
     property: Property;
@@ -58,41 +59,25 @@ const MoveInCostBreakdown: React.FC<MoveInCostBreakdownProps> = ({ property }) =
             label: firstRentLabel,
             amount: periodRent,
             color: 'bg-blue-500',
-            icon: (
-                <svg className="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-            ),
+            icon: <SoftIcon name="home" className="w-5 h-5 flex-shrink-0" />,
         },
         ...(deposit > 0 ? [{
             label: t('rental:moveIn.securityDeposit', 'Security deposit'),
             amount: deposit,
             color: 'bg-amber-500',
-            icon: (
-                <svg className="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            ),
+            icon: <SoftIcon name="lock" className="w-5 h-5 flex-shrink-0" />,
         }] : []),
         ...(!property.utilitiesIncluded ? [{
             label: utilitiesLabel,
             amount: estimatedUtilities,
             color: 'bg-orange-400',
-            icon: (
-                <svg className="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-            ),
+            icon: <SoftIcon name="bolt" className="w-5 h-5 flex-shrink-0" />,
         }] : []),
         ...(!property.internetIncluded ? [{
             label: internetLabel,
             amount: estimatedInternet,
             color: 'bg-purple-400',
-            icon: (
-                <svg className="w-3.5 h-3.5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                </svg>
-            ),
+            icon: <SoftIcon name="globe" className="w-5 h-5 flex-shrink-0" />,
         }] : []),
     ];
 
@@ -109,9 +94,7 @@ const MoveInCostBreakdown: React.FC<MoveInCostBreakdownProps> = ({ property }) =
                 className="w-full px-4 py-3 bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100 flex items-center justify-between"
             >
                 <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+                    <SoftIcon name="cash" className="w-7 h-7 flex-shrink-0" />
                     <h3 className="text-sm font-bold text-neutral-800">{t('rental:moveIn.title', 'Move-in Cost')}</h3>
                 </div>
                 <div className="flex items-center gap-2">

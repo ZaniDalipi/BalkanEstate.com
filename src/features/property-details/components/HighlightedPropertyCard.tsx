@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
@@ -268,14 +268,14 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
         {/* Promotion Badge - compact iOS pill */}
         <div className={`absolute top-2.5 left-2.5 ${tierStyles.badge} text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1 z-10`}>
-          <StarIconSolid className="w-2.5 h-2.5" />
+          <SoftIcon name={promotionTier === 'premium' ? 'crown' : promotionTier === 'highlight' ? 'diamond' : promotionTier === 'featured' ? 'star' : 'sparkles'} className="w-4 h-4" />
           {tierStyles.label}
         </div>
 
         {/* Urgent Badge - iOS compact */}
         {property.hasUrgentBadge && (
           <div className="absolute top-2.5 right-11 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full animate-pulse flex items-center gap-1 z-10">
-            <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
+            <SoftIcon name="flame" className="w-4 h-4" /> {t('property:status.urgent').toUpperCase()}
           </div>
         )}
 
@@ -301,9 +301,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           <div>
             {property.isNegotiable ? (
               <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs md:text-sm font-semibold px-2 py-1 rounded-full border border-amber-200">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+                <SoftIcon name="chat" className="w-4 h-4 md:w-5 md:h-5" />
                 {t('property:byNegotiation', 'By Negotiation')}
               </span>
             ) : (
@@ -342,7 +340,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
         {/* Location */}
         <div className="flex items-center gap-1.5 mb-2.5 text-neutral-600">
-          <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+          <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
           <span className="text-xs truncate">{property.address}</span>
         </div>
 
@@ -352,19 +350,19 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         <div className="flex items-center gap-4 mb-2.5 text-neutral-600">
           {typeHasAttribute(property.propertyType, 'beds') && (
             <div className="flex items-center gap-1">
-              <BedIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="bed" className="w-5 h-5" />
               <span className="text-sm font-semibold">{property.beds ?? 0}</span>
             </div>
           )}
           {typeHasAttribute(property.propertyType, 'baths') && (
             <div className="flex items-center gap-1">
-              <BathIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="bath" className="w-5 h-5" />
               <span className="text-sm font-semibold">{property.baths ?? 0}</span>
             </div>
           )}
           {typeHasAttribute(property.propertyType, 'livingRooms') && (
             <div className="flex items-center gap-1">
-              <LivingRoomIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="sofa" className="w-5 h-5" />
               <span className="text-sm font-semibold">{property.livingRooms ?? 0}</span>
             </div>
           )}
@@ -375,7 +373,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               measurement nobody gave. */}
           {property.sqft > 0 && (
             <div className="flex items-center gap-1">
-              <SqftIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="area" className="w-5 h-5" />
               <span className="text-sm font-bold text-primary">{property.sqft} {t('common:sqm')}</span>
             </div>
           )}

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import PropertyList from './PropertyList';
 import { Property, ChatMessage, AiSearchQuery } from '@/types';
-import { Bars3Icon, UserCircleIcon, AdjustmentsHorizontalIcon, Squares2x2Icon, PencilIcon, XMarkIcon, MapIcon } from '@/constants';
+import { Bars3Icon, UserCircleIcon, AdjustmentsHorizontalIcon, Squares2x2Icon, XMarkIcon, MapIcon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import AiSearch from './AiSearch';
@@ -20,6 +20,7 @@ import SearchMobileFilters from './SearchMobileFilters';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -333,8 +334,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                     boxShadow: '0 8px 32px rgba(2, 82, 205, 0.35)',
                                 }}
                             >
-                                <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                                    <PencilIcon className="w-5 h-5 text-white" />
+                                <div className="flex-shrink-0 w-10 h-10 bg-white/95 rounded-lg flex items-center justify-center">
+                                    <SoftIcon name="pencil" className="w-7 h-7" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     {/* Second argument is the English fallback: without it a

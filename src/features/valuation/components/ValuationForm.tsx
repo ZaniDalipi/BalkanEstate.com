@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { searchLocation } from '@/services/osmService';
 import { NominatimResult } from '@/types';
 import { canonicalPlaceName, formatCityPlace, formatGeocodedPlace } from '@/shared/geo';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import type { ValuationInput, PropertyType, PropertyCondition, ViewType, Furnishing } from '../types';
 
 interface ValuationFormProps {
@@ -12,76 +13,28 @@ interface ValuationFormProps {
 }
 
 // Property type icons
-const PropertyTypeIcon: React.FC<{ type: PropertyType; className?: string }> = ({ type, className = 'w-6 h-6' }) => {
-  const icons: Record<PropertyType, React.ReactElement> = {
-    apartment: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-    house: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
-    villa: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-      </svg>
-    ),
-    // Same villa silhouette with a crown, matching the luxury-villa branding
-    // used on the cards and map pins.
-    'luxury-villa': (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21h18M4 12h16v9H4v-9zM8 16v2m4-2v2m4-2v2" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 9l1.6-4L9 7.5 12 3l3 4.5L17.4 5 19 9H5z" />
-      </svg>
-    ),
-    land: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-      </svg>
-    ),
-    other: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-  };
-  return icons[type] || icons.other;
+const PROPERTY_TYPE_ICONS: Record<PropertyType, SoftIconName> = {
+  apartment: 'building',
+  house: 'home',
+  villa: 'landmark',
+  'luxury-villa': 'crown',
+  land: 'tree',
+  other: 'houses',
 };
+const PropertyTypeIcon: React.FC<{ type: PropertyType; className?: string }> = ({ type, className = 'w-8 h-8' }) => (
+  <SoftIcon name={PROPERTY_TYPE_ICONS[type] ?? 'home'} className={className} />
+);
 
 // Amenity icons
-const AmenityIcon: React.FC<{ type: string; className?: string }> = ({ type, className = 'w-5 h-5' }) => {
-  const icons: Record<string, React.ReactElement> = {
-    balcony: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 6v8a2 2 0 002 2h12a2 2 0 002-2V6M4 6l2-4h12l2 4M8 16v4m8-4v4M6 20h12" />
-      </svg>
-    ),
-    garden: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg>
-    ),
-    elevator: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7l4-4 4 4M8 17l4 4 4-4M3 12h18" />
-      </svg>
-    ),
-    parking: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h4a4 4 0 110 8H8V7z M8 7v8" />
-      </svg>
-    ),
-    pool: (
-      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 15c2.483 0 4.345-1.5 5-2 .655.5 2.517 2 5 2s4.345-1.5 5-2c.655.5 2.517 2 5 2M3 19c2.483 0 4.345-1.5 5-2 .655.5 2.517 2 5 2s4.345-1.5 5-2c.655.5 2.517 2 5 2M12 3v8m-4-4l4 4 4-4" />
-      </svg>
-    ),
-  };
-  return icons[type] || <span />;
+const AMENITY_ICONS: Record<string, SoftIconName> = {
+  balcony: 'balcony',
+  garden: 'leaf',
+  elevator: 'elevator',
+  parking: 'car',
+  pool: 'pool',
 };
+const AmenityIcon: React.FC<{ type: string; className?: string }> = ({ type, className = 'w-6 h-6' }) =>
+  AMENITY_ICONS[type] ? <SoftIcon name={AMENITY_ICONS[type]} className={className} /> : <span />;
 
 // Reusable +/- counter for room fields (keeps every room control identical).
 const RoomCounter: React.FC<{
@@ -332,12 +285,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
       {/* Section 1: Location */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
+          <SoftIcon name="pin" className="w-8 h-8" />
           <h3 className="text-lg font-bold text-neutral-800">{t('valuation:form.locationSection', 'Location')}</h3>
         </div>
 
@@ -379,10 +327,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                     className="w-full text-left px-4 py-3 hover:bg-primary/5 border-b border-neutral-100 last:border-b-0 transition-colors first:rounded-t-2xl last:rounded-b-2xl"
                   >
                     <div className="flex items-start gap-3">
-                      <svg className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                      <SoftIcon name="pin" className="w-6 h-6 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-neutral-900 line-clamp-2">{formatGeocodedPlace(result).primary}</p>
                         <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{formatGeocodedPlace(result).secondary || result.type?.replace('_', ' ')}</p>
@@ -396,9 +341,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
         </div>
         {city && country && (
           <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
+            <SoftIcon name="check" className="w-5 h-5" />
             <span className="font-medium">{formatCityPlace(city, country).full}</span>
           </div>
         )}
@@ -407,11 +350,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
       {/* Section 2: Property Type */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-          </div>
+          <SoftIcon name="building" className="w-8 h-8" />
           <h3 className="text-lg font-bold text-neutral-800">{t('valuation:form.propertyType')}</h3>
         </div>
 
@@ -427,7 +366,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                   : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50 hover:bg-neutral-50'
               }`}
             >
-              <PropertyTypeIcon type={type.value} className={`w-6 h-6 ${propertyType === type.value ? 'text-primary' : 'text-neutral-500'}`} />
+              <PropertyTypeIcon type={type.value} className={`w-8 h-8 ${propertyType === type.value ? '' : 'opacity-70'}`} />
               <span className="text-xs font-semibold">{type.label}</span>
             </button>
           ))}
@@ -437,11 +376,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
       {/* Section 3: Property Details */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-            <svg className="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
+          <SoftIcon name="clipboard" className="w-8 h-8" />
           <h3 className="text-lg font-bold text-neutral-800">{t('valuation:form.detailsSection', 'Property Details')}</h3>
         </div>
 
@@ -655,7 +590,7 @@ const ValuationForm: React.FC<ValuationFormProps> = ({ onSubmit, isLoading = fal
                         : 'bg-white text-neutral-600 border-neutral-200 hover:border-primary/50'
                     }`}
                   >
-                    <AmenityIcon type={amenity.icon} className={`w-5 h-5 ${amenity.value ? 'text-primary' : 'text-neutral-500'}`} />
+                    <AmenityIcon type={amenity.icon} className={`w-6 h-6 ${amenity.value ? '' : 'opacity-70'}`} />
                     <span className="text-xs font-semibold">{amenity.label}</span>
                   </button>
                 ))}

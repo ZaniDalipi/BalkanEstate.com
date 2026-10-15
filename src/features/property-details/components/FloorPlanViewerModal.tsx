@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { XMarkIcon, MagnifyingGlassPlusIcon, MagnifyingGlassMinusIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion, type PanInfo } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -772,9 +773,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
             {mode === 'annotate' && (
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
                     <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-200 text-xs sm:text-sm rounded-full backdrop-blur-md border border-amber-500/30 animate-pulse">
-                        <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
-                        </svg>
+                        <SoftIcon name="pencil" className="w-5 h-5 flex-shrink-0" />
                         {t('property:floorPlan.viewer.clickToAddLabel', 'Click anywhere on the floor plan to add a room label')}
                     </div>
                 </div>
@@ -794,9 +793,7 @@ const FloorPlanViewerModal: React.FC<FloorPlanViewerModalProps> = ({ floors, pro
             {hasError && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center">
                     <div className="flex flex-col items-center gap-4 p-8 bg-neutral-900/90 rounded-2xl border border-red-500/30 max-w-sm mx-4">
-                        <svg className="w-16 h-16 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                        </svg>
+                        <SoftIcon name="warning" className="w-16 h-16" />
                         <div className="text-center">
                             <h3 className="text-white font-semibold text-lg mb-1">{t('property:floorPlan.viewer.loadFailed', 'Failed to Load Floor Plan')}</h3>
                             <p className="text-white/60 text-sm">{t('property:floorPlan.viewer.loadFailedDesc', 'The floor plan image could not be loaded. It may have been moved or deleted.')}</p>

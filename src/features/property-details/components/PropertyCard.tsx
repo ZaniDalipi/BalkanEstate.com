@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, ScaleIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
+import { ScaleIcon } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import { preloadRoute } from '@/app/navigation/routePreload';
 import { generatePropertySlug } from '@/utils/slug';
@@ -471,9 +471,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* iOS-style Price Drop Badge */}
             {!isSold && !isRented && property.originalPrice && property.originalPrice > property.price && (
               <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
+                <SoftIcon name="trendDown" className="w-4 h-4" />
                 {t('property:priceDrop', 'PRICE DROP').toUpperCase()}
               </div>
             )}
@@ -481,9 +479,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* iOS-style Price Increase Badge */}
             {!isSold && !isRented && property.originalPrice && property.originalPrice < property.price && (
               <div className="bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
+                <SoftIcon name="trendUp" className="w-4 h-4" />
                 {t('property:priceUp', 'PRICE UP').toUpperCase()}
               </div>
             )}
@@ -510,7 +506,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                   ? 'bg-gradient-to-r from-violet-500 to-purple-400'
                   : 'bg-neutral-500/85'
               }`}>
-                <StarIconSolid className="w-2.5 h-2.5" />
+                <SoftIcon name={promotionTier === 'premium' ? 'crown' : promotionTier === 'highlight' ? 'diamond' : promotionTier === 'featured' ? 'star' : 'sparkles'} className="w-4 h-4" />
                 {promotionTier === 'premium' && t('property:map.tiers.premium', 'PREMIUM').toUpperCase()}
                 {promotionTier === 'highlight' && t('property:map.tiers.highlight', 'HIGHLIGHT').toUpperCase()}
                 {promotionTier === 'featured' && t('property:map.tiers.featured', 'FEATURED').toUpperCase()}
@@ -521,7 +517,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
             {/* iOS-style Urgent Badge */}
             {!isSold && isActivelyPromoted && property.hasUrgentBadge && (
               <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full animate-pulse flex items-center gap-1">
-                <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
+                <SoftIcon name="flame" className="w-4 h-4" /> {t('property:status.urgent').toUpperCase()}
               </div>
             )}
 
@@ -530,7 +526,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                 it is — just without a date it can no longer stand behind. */}
             {!isSold && !isRented && construction.status === 'under-construction' && (
               <div className="bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1">
-                <span aria-hidden="true">🏗</span>
+                <SoftIcon name="crane" className="w-4 h-4" />
                 {construction.expectedYear
                   ? t('property:status.completionYear', { year: construction.expectedYear, defaultValue: 'READY {{year}}' }).toUpperCase()
                   : t('property:status.underConstruction', 'UNDER CONSTRUCTION').toUpperCase()}
@@ -584,9 +580,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               return (
                 <div className="text-right">
                   <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs sm:text-sm font-semibold px-2.5 py-1 rounded-full border border-amber-200">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
+                    <SoftIcon name="chat" className="w-4 h-4 sm:w-5 sm:h-5" />
                     {t('property:byNegotiation', 'By Negotiation')}
                   </span>
                 </div>
@@ -646,7 +640,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
         {/* Location - Clickable for navigation */}
         <div className="property-card__location flex items-center gap-1.5 mb-3">
-          <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+          <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
           <div className="text-xs sm:text-sm text-neutral-600 truncate flex items-center gap-1">
             <button
               onClick={(e) => onLocationClick(e, 'city')}
@@ -731,9 +725,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
           <div className="flex items-center gap-2.5 mt-2.5 px-2.5 py-2 rounded-xl bg-gray-50 border border-gray-100">
             {property.checkInTime && (
               <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                <svg className="w-3 h-3 text-[#FFA500] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <SoftIcon name="clock" className="w-4 h-4 flex-shrink-0" />
                 <span>{property.checkInTime}{property.checkOutTime ? `–${property.checkOutTime}` : ''}</span>
               </div>
             )}
@@ -741,9 +733,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
               <>
                 {property.checkInTime && <span className="text-gray-200">·</span>}
                 <div className="flex items-center gap-1 text-[10px] text-gray-500">
-                  <svg className="w-3 h-3 text-[#FFA500] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
+                  <SoftIcon name="cash" className="w-4 h-4 flex-shrink-0" />
                   <span>+€{property.cleaningFee} {t('rental:details.cleaningFee', 'cleaning')}</span>
                 </div>
               </>
@@ -815,7 +805,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
                     }}
                   />
                 ) : (
-                  <BuildingOfficeIcon className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+                  <SoftIcon name="building" className="w-5 h-5 flex-shrink-0" />
                 )}
                 <p className="min-w-0 text-[10px] font-medium text-neutral-700 truncate">
                   <span className="sr-only">{t('property:seller.agency')}: </span>
@@ -978,7 +968,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, showToast, showCo
     return (
       <div className="bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-neutral-200 w-full flex flex-col">
         <div className="w-full h-36 sm:h-40 md:h-44 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-          <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+          <SoftIcon name="building" className="w-12 h-12 opacity-70" />
         </div>
         <div className="p-2.5 sm:p-3.5">
           <div className="h-3.5 bg-neutral-200 rounded w-3/4 mb-1.5 animate-pulse" />

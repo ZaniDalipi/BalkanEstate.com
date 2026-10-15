@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPrice } from '@/utils/currency';
 import type { PropertyValuation } from '../types';
@@ -36,11 +37,7 @@ const ValuationHistory: React.FC<ValuationHistoryProps> = ({ items, onOpen, onRe
     <div className="bg-white rounded-2xl border border-neutral-200 shadow-lg overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-primary/[0.07] to-transparent border-b border-neutral-100">
         <div className="flex items-center gap-2.5">
-          <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
-            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </span>
+          <SoftIcon name="clock" className="w-9 h-9 flex-shrink-0" />
           <div>
             <h3 className="text-sm font-bold text-neutral-800 leading-tight">
               {t('valuation:history.title', 'Your saved valuations')}

@@ -67,6 +67,7 @@ import {
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { CLOSED_MARKER_COLOR, closedMarkerLabel, isClosedListing } from '@/src/shared/map/closedListing';
+import { softIconHtml } from '@/src/shared/illustrations';
 
 // Inject CSS for marker entrance fly-in animation (Google Maps variant)
 if (typeof window !== 'undefined') {
@@ -1741,7 +1742,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           const html = `
             <div style="font-family:system-ui,-apple-system,sans-serif;font-size:13px;min-width:200px;">
               <div style="font-weight:700;font-size:15px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e5720e;color:#333;">
-                📋 Cadastre Parcel
+                ${softIconHtml('clipboard', 18, 'vertical-align:-4px;margin-right:4px;')}Cadastre Parcel
               </div>
               ${allRows.length > 0 ? `<table style="border-collapse:collapse;">${allRows.join('')}</table>` : '<div style="color:#888;">No details available for this location</div>'}
               <div style="margin-top:8px;font-size:11px;color:#999;">${cadastreConfig.attribution}</div>

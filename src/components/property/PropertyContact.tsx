@@ -5,7 +5,8 @@ import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, Agency } from '../../../types';
-import { PhoneIcon, ShareIcon, MapPinIcon, UsersIcon, HomeIcon, BuildingOfficeIcon, ChevronRightIcon } from '../../../constants';
+import { PhoneIcon, BuildingOfficeIcon, ChevronRightIcon } from '../../../constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '../../../context/AppContext';
 import * as api from '../../../services/apiService';
 import MortgageCalculator from '@/src/features/calculators/components/MortgageCalculator';
@@ -145,9 +146,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               href={`tel:${property.seller.phone}`}
               className="flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-green-50 hover:border-green-200 hover:text-green-600 transition-all duration-200"
             >
-              <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
+              <SoftIcon name="phone" className="w-8 h-8 mb-1" />
               <span className="text-xs font-medium">{t('property:actions.call', 'Call')}</span>
             </a>
           ) : (
@@ -155,9 +154,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               disabled
               className="flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-100 text-neutral-300 cursor-not-allowed"
             >
-              <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
+              <SoftIcon name="phone" className="w-8 h-8 mb-1 opacity-40 grayscale" />
               <span className="text-xs font-medium">{t('property:actions.call', 'Call')}</span>
             </button>
           )}
@@ -167,9 +164,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             onClick={() => setShowInquiryModal(true)}
             className="flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all duration-200"
           >
-            <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+            <SoftIcon name="envelope" className="w-8 h-8 mb-1" />
             <span className="text-xs font-medium">{t('property:actions.email', 'Email')}</span>
           </button>
 
@@ -179,7 +174,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
               onClick={handleShare}
               className="w-full flex flex-col items-center justify-center p-3 rounded-xl border-2 bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-500 transition-all duration-200"
             >
-              <ShareIcon className="w-6 h-6 mb-1" />
+              <SoftIcon name="share" className="w-8 h-8 mb-1" />
               <span className="text-xs font-medium">{t('property:actions.share')}</span>
             </button>
 
@@ -443,7 +438,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
                       className="w-8 h-8 sm:w-12 sm:h-12 object-contain rounded-md sm:rounded-lg"
                     />
                   ) : (
-                    <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+                    <SoftIcon name="building" className="w-8 h-8 sm:w-11 sm:h-11" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -459,14 +454,14 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
               <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                  <UsersIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
+                  <SoftIcon name="users" className="w-5 h-5 sm:w-6 sm:h-6" />
                   <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('agents:profilePage.agencyCard.agents', 'Agents')}</span>
                 </div>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalAgents || 0}</p>
               </div>
               <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                  <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
+                  <SoftIcon name="home" className="w-5 h-5 sm:w-6 sm:h-6" />
                   <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('agents:profilePage.agencyCard.properties', 'Properties')}</span>
                 </div>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalProperties || 0}</p>
@@ -476,7 +471,7 @@ export const PropertyContact: React.FC<PropertyContactProps> = ({
             {/* Location */}
             {agencyData.city && (
               <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-gray-600 bg-white rounded-lg p-2 sm:p-3 border border-gray-200">
-                <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-500" />
+                <SoftIcon name="pin" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 <span className="text-xs sm:text-sm truncate">{formatCityPlace(agencyData.city, agencyData.country).full}</span>
               </div>
             )}

@@ -30,6 +30,7 @@ import MapPopupOverlay from './MapPopupOverlay';
 import GoogleMapControls from './GoogleMapControls';
 import GoogleMapMeasurement from './GoogleMapMeasurement';
 import { mapContainerStyle } from './googleMapConstants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 /**
  * Main GoogleMapComponent - composes hook + sub-components
@@ -182,7 +183,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = (props) => {
 
         {/* Debug info overlay — desktop only */}
         <div className="hidden sm:block absolute top-4 left-4 z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md">
-          <span>🔍{hook.zoom.toFixed(1)}/21 📍{hook.center.lat.toFixed(3)},{hook.center.lng.toFixed(3)} 📌{hook.validProperties.length}</span>
+          <span className="inline-flex items-center gap-0.5"><SoftIcon name="search" className="w-3.5 h-3.5" />{hook.zoom.toFixed(1)}/21 <SoftIcon name="pin" className="w-3.5 h-3.5 ml-1" />{hook.center.lat.toFixed(3)},{hook.center.lng.toFixed(3)} <SoftIcon name="home" className="w-3.5 h-3.5 ml-1" />{hook.validProperties.length}</span>
         </div>
 
         {/* Measurement Tool Panel + Save Modal */}

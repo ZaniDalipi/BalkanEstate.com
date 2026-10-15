@@ -223,7 +223,7 @@
     "dragToAdjust": "Më tërhiq për të rregulluar vendndodhjen",
     "locationSet": "Vendndodhja u vendos",
     "dragging": "Duke tërhequr...",
-    "tips": "💡 Këshilla: Përdorni kutinë e kërkimit për të gjetur fshatin/qytetin tuaj, zmadho me butonat +/- ose rrotën e miut, lëviz hartën duke e tërhequr dhe tërhiq shënuesin e kuq në vendndodhjen e saktë të pronës.",
+    "tips": "Këshilla: Përdorni kutinë e kërkimit për të gjetur fshatin/qytetin tuaj, zmadho me butonat +/- ose rrotën e miut, lëviz hartën duke e tërhequr dhe tërhiq shënuesin e kuq në vendndodhjen e saktë të pronës.",
     "latitude": "Gjerësia:",
     "longitude": "Gjatësia:",
     "location": "Vendndodhja",
@@ -606,8 +606,8 @@
       "viewToggle": "Ndrysho pamjen"
     },
     "aiSearch": {
-      "agent": "👔 Agjent",
-      "private": "👤 Privat",
+      "agent": "Agjent",
+      "private": "Privat",
       "stopRecording": "Ndalo regjistrimin",
       "startVoiceAssistant": "Nis asistentin zanor"
     },

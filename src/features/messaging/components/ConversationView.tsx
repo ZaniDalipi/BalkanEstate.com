@@ -6,7 +6,8 @@ import { Conversation, Message } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import MessageInput from './MessageInput';
 import { formatPrice } from '@/utils/currency';
-import { CalendarIcon, ChevronLeftIcon, BuildingOfficeIcon, ShieldExclamationIcon, TrashIcon } from '@/constants';
+import { ChevronLeftIcon, TrashIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { getConversation, sendMessage as sendMessageAPI, uploadMessageImage, getSecurityWarning } from '@/services/apiService';
 import { generatePropertySlug } from '@/utils/slug';
 import { socketService } from '@/services/socketService';
@@ -260,7 +261,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                     </div>
                 ) : imageError ? (
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-lg flex-shrink-0">
-                        <BuildingOfficeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-400" />
+                        <SoftIcon name="building" className="w-7 h-7 sm:w-9 sm:h-9" />
                     </div>
                 ) : (
                     <img
@@ -320,7 +321,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
             {/* Security Alert */}
             {showSecurityAlert && (
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 sm:p-3 flex items-start gap-2 animate-fade-in flex-shrink-0">
-                    <ShieldExclamationIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <SoftIcon name="shield" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                     <div className="text-xs sm:text-sm text-yellow-800">
                         <p className="font-semibold">{t('security.sensitiveInfoDetected')}</p>
                         <p className="text-[10px] sm:text-xs mt-0.5">{t('security.sensitiveInfoMessage')}</p>
@@ -333,7 +334,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                 <div className="bg-blue-50 border-b border-blue-200 p-2 flex-shrink-0">
                     <details className="cursor-pointer">
                         <summary className="text-[10px] sm:text-xs text-blue-800 font-semibold flex items-center gap-1.5">
-                            <ShieldExclamationIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <SoftIcon name="lock" className="w-4 h-4 sm:w-5 sm:h-5" />
                             {t('security.noticeTitle')}
                         </summary>
                         <div className="mt-2 text-[10px] sm:text-xs text-blue-700 whitespace-pre-line">
@@ -454,7 +455,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({ conversation, onBac
                         onClick={() => handleSendMessage(t('quickReplies.scheduleTourMessage'))}
                         className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-primary-dark bg-primary-light rounded-full hover:bg-primary/20 transition-colors whitespace-nowrap"
                     >
-                        <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4"/> {t('quickReplies.scheduleTour')}
+                        <SoftIcon name="calendar" className="w-4 h-4 sm:w-5 sm:h-5" /> {t('quickReplies.scheduleTour')}
                     </button>
                     <button
                         onClick={() => handleSendMessage(t('quickReplies.requestInfoMessage'))}

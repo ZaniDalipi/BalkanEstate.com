@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { optimizeImageUrl, getPropertyImagePlaceholder } from '@/config/mediaConfig';
-import { BuildingOfficeIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface PropertyImageProps {
   src: string | undefined;
@@ -91,7 +91,7 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   if (error || !src) {
     return (
       <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-        <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+        <SoftIcon name="building" className="w-12 h-12 opacity-70" />
       </div>
     );
   }

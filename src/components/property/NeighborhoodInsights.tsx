@@ -145,7 +145,7 @@ export const NeighborhoodInsights: React.FC<NeighborhoodInsightsProps> = ({
           </p>
           {!isAuthenticated && (
             <p className="text-xs sm:text-sm text-amber-600 mb-4 font-semibold">
-              🔒 {t('neighborhood.loginRequired')}
+              <SoftIcon name="lock" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('neighborhood.loginRequired')}
             </p>
           )}
           <button

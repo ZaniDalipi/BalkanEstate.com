@@ -129,7 +129,7 @@ const MapFilterControls: React.FC<MapFilterControlsProps> = ({
 
       {/* Debug Info Display - shows zoom level and coordinates */}
       <div className={`absolute ${show3DBuildings ? 'top-4 right-4' : 'top-4 left-4'} z-[1001] bg-black/80 text-white text-[10px] font-mono px-2 py-1 rounded-md backdrop-blur-sm shadow-md`}>
-        <span>🔍{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} 📍{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
+        <span className="inline-flex items-center gap-0.5"><SoftIcon name="search" className="w-3.5 h-3.5" />{currentZoom}/{TILE_LAYERS[mapType]?.maxZoom || 21} <SoftIcon name="pin" className="w-3.5 h-3.5 ml-1" />{mapCenterLat.toFixed(3)},{mapCenterLng.toFixed(3)}</span>
       </div>
 
       {/* Climate Risk Legend - TOP LEFT, under zoom display (both mobile and desktop) */}

@@ -9,6 +9,7 @@ import { useShadowTimelapse } from '../hooks/useShadowTimelapse';
 import { mapLogger } from '@/src/shared/utils/logger';
 import type { Map3DBuildingsProps } from './Map3DConstants';
 import { TIME_LIGHTING } from './Map3DConstants';
+import { softIconHtml, type SoftIconName } from '@/src/shared/illustrations';
 import { BuildingShadowLayer, collectBuildingCasters, type ShadowLayerStatus } from './BuildingShadowLayer';
 import {
   currentHourInZone,
@@ -111,27 +112,27 @@ export function use3DMap(props: Map3DBuildingsProps) {
   const [showPOI, setShowPOI] = useState(!isPhone);
 
   // POI category styling
-  const POI_CATEGORIES: Record<string, { icon: string; color: string; label: string }> = {
-    university: { icon: '🎓', color: '#7c3aed', label: 'University' },
-    school: { icon: '🏫', color: '#2563eb', label: 'School' },
-    hospital: { icon: '🏥', color: '#dc2626', label: 'Hospital' },
-    clinic: { icon: '⚕️', color: '#ef4444', label: 'Clinic' },
-    pharmacy: { icon: '💊', color: '#10b981', label: 'Pharmacy' },
-    supermarket: { icon: '🛒', color: '#f59e0b', label: 'Supermarket' },
-    mall: { icon: '🏬', color: '#ec4899', label: 'Shopping Mall' },
-    marketplace: { icon: '🏪', color: '#f97316', label: 'Market' },
-    restaurant: { icon: '🍽️', color: '#ea580c', label: 'Restaurant' },
-    cafe: { icon: '☕', color: '#92400e', label: 'Café' },
-    bank: { icon: '🏦', color: '#1d4ed8', label: 'Bank' },
-    atm: { icon: '💳', color: '#3b82f6', label: 'ATM' },
-    bus_station: { icon: '🚌', color: '#059669', label: 'Bus Station' },
-    train_station: { icon: '🚂', color: '#0891b2', label: 'Train Station' },
-    parking: { icon: '🅿️', color: '#6366f1', label: 'Parking' },
-    park: { icon: '🌳', color: '#16a34a', label: 'Park' },
-    gym: { icon: '🏋️', color: '#9333ea', label: 'Gym' },
-    place_of_worship: { icon: '⛪', color: '#78716c', label: 'Place of Worship' },
-    kindergarten: { icon: '💒', color: '#f472b6', label: 'Kindergarten' },
-    police: { icon: '👮', color: '#1e3a5f', label: 'Police' },
+  const POI_CATEGORIES: Record<string, { icon: SoftIconName; color: string; label: string }> = {
+    university: { icon: 'gradCap', color: '#7c3aed', label: 'University' },
+    school: { icon: 'gradCap', color: '#2563eb', label: 'School' },
+    hospital: { icon: 'plus', color: '#dc2626', label: 'Hospital' },
+    clinic: { icon: 'plus', color: '#ef4444', label: 'Clinic' },
+    pharmacy: { icon: 'heart', color: '#10b981', label: 'Pharmacy' },
+    supermarket: { icon: 'store', color: '#f59e0b', label: 'Supermarket' },
+    mall: { icon: 'store', color: '#ec4899', label: 'Shopping Mall' },
+    marketplace: { icon: 'store', color: '#f97316', label: 'Market' },
+    restaurant: { icon: 'kitchen', color: '#ea580c', label: 'Restaurant' },
+    cafe: { icon: 'kitchen', color: '#92400e', label: 'Café' },
+    bank: { icon: 'landmark', color: '#1d4ed8', label: 'Bank' },
+    atm: { icon: 'creditCard', color: '#3b82f6', label: 'ATM' },
+    bus_station: { icon: 'car', color: '#059669', label: 'Bus Station' },
+    train_station: { icon: 'ticket', color: '#0891b2', label: 'Train Station' },
+    parking: { icon: 'car', color: '#6366f1', label: 'Parking' },
+    park: { icon: 'tree', color: '#16a34a', label: 'Park' },
+    gym: { icon: 'bolt', color: '#9333ea', label: 'Gym' },
+    place_of_worship: { icon: 'landmark', color: '#78716c', label: 'Place of Worship' },
+    kindergarten: { icon: 'users', color: '#f472b6', label: 'Kindergarten' },
+    police: { icon: 'shield', color: '#1e3a5f', label: 'Police' },
   };
 
   // Fetch nearby POIs from Overpass API
@@ -242,7 +243,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             max-width: 180px;
             transition: transform 0.2s, box-shadow 0.2s;
           ">
-            <span style="font-size: 14px;">${cat.icon}</span>
+            ${softIconHtml(cat.icon, 18, 'vertical-align:middle;flex-shrink:0;')}
             <div style="overflow: hidden;">
               <div style="font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; font-size: 10px;">
                 ${escapeHtml(name)}
@@ -1005,9 +1006,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
               font-family: system-ui, -apple-system, sans-serif;
               animation: doorPulse 2s ease-in-out infinite;
             ">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-              </svg>
+              ${softIconHtml('tour360', 16, 'vertical-align:middle;')}
               <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
             </div>
           </div>
@@ -1338,9 +1337,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
               font-family: system-ui, -apple-system, sans-serif;
               animation: doorPulse 2s ease-in-out infinite;
             ">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-              </svg>
+              ${softIconHtml('tour360', 24, 'vertical-align:middle;')}
               <span style="font-size: 13px; font-weight: 800; letter-spacing: 0.3px;">360\u00B0 Tour</span>
             </div>
           </div>
@@ -1570,7 +1567,7 @@ export function use3DMap(props: Map3DBuildingsProps) {
             align-items: center;
             gap: 4px;
           ">
-            <span style="font-size: 12px;">\u{1F3E2}</span>
+            ${softIconHtml('building', 14, 'vertical-align:middle;')}
             <span>${levels}F</span>
           </div>
           <div style="

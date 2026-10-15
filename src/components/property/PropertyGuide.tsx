@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface PropertyGuideProps {
   property: Property;
@@ -12,7 +13,7 @@ interface PropertyGuideProps {
 
 interface GuideMessage {
   text: string;
-  emoji?: string;
+  icon?: SoftIconName;
   action?: {
     label: string;
     onClick: () => void;
@@ -50,14 +51,14 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
   // Generate contextual messages based on property
   const getMessages = useCallback((): GuideMessage[] => {
     const messages: GuideMessage[] = [
-      { text: t('guide.messages.welcome'), emoji: "👋" },
+      { text: t('guide.messages.welcome'), icon: 'home' },
     ];
 
     // Price insight
     if (property.price) {
       messages.push({
         text: t('guide.messages.mortgageHint'),
-        emoji: "💰",
+        icon: 'cash',
         action: {
           label: t('guide.actions.calculate'),
           onClick: () => {
@@ -71,7 +72,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     if (property.tourUrl) {
       messages.push({
         text: t('guide.messages.tourAvailable'),
-        emoji: "🎥",
+        icon: 'video',
         action: {
           label: t('guide.actions.takeTour'),
           onClick: () => window.open(property.tourUrl, '_blank')
@@ -83,7 +84,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     if (property.condition === 'new' || property.condition === 'excellent') {
       messages.push({
         text: t('guide.messages.goodCondition', { condition: property.condition }),
-        emoji: "✨"
+        icon: 'sparkles'
       });
     }
 
@@ -91,7 +92,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     if (property.hasPool) {
       messages.push({
         text: t('guide.messages.hasPool'),
-        emoji: "🏊"
+        icon: 'pool'
       });
     }
 
@@ -99,7 +100,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     if (property.distanceToSea && property.distanceToSea < 5) {
       messages.push({
         text: t('guide.messages.nearBeach', { distance: property.distanceToSea.toFixed(1) }),
-        emoji: "🏖️"
+        icon: 'sea'
       });
     }
 
@@ -107,7 +108,7 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     if (property.images && property.images.length > 5) {
       messages.push({
         text: t('guide.messages.manyPhotos', { count: property.images.length }),
-        emoji: "📸"
+        icon: 'camera'
       });
     }
 
@@ -115,19 +116,19 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
     if (property.floorplanUrl) {
       messages.push({
         text: t('guide.messages.floorPlan'),
-        emoji: "📐"
+        icon: 'area'
       });
     }
 
     // General tips
     messages.push({
       text: t('guide.messages.saveHint'),
-      emoji: "❤️"
+      icon: 'heart'
     });
 
     messages.push({
       text: t('guide.messages.contactHint'),
-      emoji: "💬"
+      icon: 'chat'
     });
 
     return messages;
@@ -247,8 +248,8 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
 
             {/* Message content */}
             <div className="flex items-start gap-3">
-              {currentMessage.emoji && (
-                <span className="text-3xl flex-shrink-0 animate-bounce-subtle">{currentMessage.emoji}</span>
+              {currentMessage.icon && (
+                <SoftIcon name={currentMessage.icon} className="w-10 h-10 flex-shrink-0 animate-bounce-subtle" />
               )}
               <div className="flex-1">
                 <p className="text-sm text-neutral-700 leading-relaxed">
@@ -322,19 +323,19 @@ export const PropertyGuide: React.FC<PropertyGuideProps> = ({ property, onDismis
               onClick={() => document.querySelector('.heart-button, [aria-label*="favorite"]')?.dispatchEvent(new Event('click', { bubbles: true }))}
               className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-lg border border-neutral-200 hover:bg-red-50 hover:border-red-200 transition-all text-sm font-medium"
             >
-              <span>❤️</span> {t('guide.quickActions.save')}
+              <SoftIcon name="heart" className="w-5 h-5" /> {t('guide.quickActions.save')}
             </button>
             <button
               onClick={() => document.querySelector('[href^="tel:"]')?.dispatchEvent(new Event('click', { bubbles: true }))}
               className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-lg border border-neutral-200 hover:bg-green-50 hover:border-green-200 transition-all text-sm font-medium"
             >
-              <span>📞</span> {t('guide.quickActions.call')}
+              <SoftIcon name="phone" className="w-5 h-5" /> {t('guide.quickActions.call')}
             </button>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-lg border border-neutral-200 hover:bg-blue-50 hover:border-blue-200 transition-all text-sm font-medium"
             >
-              <span>⬆️</span> {t('guide.quickActions.top')}
+              <span aria-hidden="true">↑</span> {t('guide.quickActions.top')}
             </button>
           </div>
         </div>

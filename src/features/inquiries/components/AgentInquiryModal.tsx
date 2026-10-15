@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sendAgentInquiry } from '@/services/apiService';
 import { XMarkIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import UserAvatar from '@/components/shared/UserAvatar';
 
@@ -69,22 +70,22 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
     }
   }, [isOpen, success]);
 
-  const inquiryTypes: { key: InquiryType; icon: string; label: string; template: string }[] = [
+  const inquiryTypes: { key: InquiryType; icon: SoftIconName; label: string; template: string }[] = [
     {
       key: 'buy',
-      icon: '🏠',
+      icon: 'home',
       label: t('agents:inquiry.findProperty', 'Looking for property'),
       template: t('agents:inquiry.template1', 'Hi, I am looking for a property in your area. Can you help me find suitable options based on my requirements?'),
     },
     {
       key: 'sell',
-      icon: '📋',
+      icon: 'clipboard',
       label: t('agents:inquiry.sellProperty', 'Selling property'),
       template: t('agents:inquiry.template2', 'Hi, I am interested in selling my property. Could you provide a market valuation and discuss your services?'),
     },
     {
       key: 'market',
-      icon: '📊',
+      icon: 'chart',
       label: t('agents:inquiry.marketInfo', 'Market information'),
       template: t('agents:inquiry.template3', 'Hi, I would like to learn more about the real estate market in your area. Can we schedule a consultation?'),
     },
@@ -239,11 +240,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
         >
           {success ? (
             <div className="text-center py-12 px-6">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+              <SoftIcon name="check" className="mx-auto h-16 w-16 mb-4" />
               <h3 className="text-xl font-bold text-neutral-900 mb-2">
                 {t('agents:inquiry.successTitle', 'Message Sent!')}
               </h3>
@@ -284,7 +281,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
                       ].join(' ')}
                       style={{ touchAction: 'manipulation' }}
                     >
-                      <span className="text-xl sm:text-lg leading-none">{icon}</span>
+                      <SoftIcon name={icon} className="w-7 h-7 sm:w-6 sm:h-6 flex-shrink-0" />
                       <span>{label}</span>
                     </button>
                   ))}
@@ -294,9 +291,7 @@ const AgentInquiryModal: React.FC<AgentInquiryModalProps> = ({
               {/* ── Error banner ── */}
               {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
-                  <svg className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
+                  <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
                   <p className="text-red-700 text-sm">{error}</p>
                 </div>
               )}

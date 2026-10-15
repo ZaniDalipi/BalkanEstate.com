@@ -836,7 +836,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     )}
                                     {filters.query && (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-villa-gold-bright)]/10 text-[var(--color-primary)] text-[11px] font-medium max-w-[140px]">
-                                            <MapIcon className="w-3 h-3 flex-shrink-0" />
+                                            <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                                             <span className="truncate">{filters.query}</span>
                                             <button
                                                 onClick={() => handleFilterChange('query', '')}
@@ -990,7 +990,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <TrustStrip />
                                     <div className="flex justify-center py-8 px-3">
                                         <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full border border-[var(--color-villa-gold-bright)]/10">
-                                            <div className="text-5xl mb-3">🏛️</div>
+                                            <SoftIcon name="landmark" className="w-14 h-14 mx-auto mb-3" />
                                             <h3 className="text-gray-800 font-bold text-lg mb-1">
                                                 {t('villas:noProperties', 'No luxury villas found')}
                                             </h3>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import MortgageCalculator from './MortgageCalculator';
-import { CalculatorIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { MORTGAGE_COUNTRIES as COUNTRIES } from '../data/mortgageMarketData';
@@ -53,9 +53,7 @@ const MortgageCalculatorPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-6">
-              <CalculatorIcon className="w-8 h-8 text-primary" />
-            </div>
+            <SoftIcon name="calculator" className="inline-block w-16 h-16 mb-6" />
             <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 mb-4">
               {t('calculators:mortgage.title')}
             </h1>
@@ -186,31 +184,19 @@ const MortgageCalculatorPage: React.FC = () => {
             className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6"
           >
             <div className="text-center p-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
+              <SoftIcon name="cash" className="inline-block w-12 h-12 mb-4" />
               <h3 className="font-bold text-neutral-800 mb-2">{t('calculators:mortgage.features.accurate', 'Accurate Estimates')}</h3>
               <p className="text-sm text-neutral-600">{t('calculators:mortgage.features.accurateDesc', 'Get precise monthly payment calculations')}</p>
             </div>
 
             <div className="text-center p-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
+              <SoftIcon name="calculator" className="inline-block w-12 h-12 mb-4" />
               <h3 className="font-bold text-neutral-800 mb-2">{t('calculators:mortgage.features.flexible', 'Flexible Terms')}</h3>
               <p className="text-sm text-neutral-600">{t('calculators:mortgage.features.flexibleDesc', 'Compare different loan terms and rates')}</p>
             </div>
 
             <div className="text-center p-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-xl mb-4">
-                <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
+              <SoftIcon name="globe" className="inline-block w-12 h-12 mb-4" />
               <h3 className="font-bold text-neutral-800 mb-2">{t('calculators:mortgage.features.local', 'Local Currencies')}</h3>
               <p className="text-sm text-neutral-600">{t('calculators:mortgage.features.localDesc', 'Support for all Balkan currencies')}</p>
             </div>

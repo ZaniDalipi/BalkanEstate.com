@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@/constants';
 import { STAT_CARD_COLORS, StatCardColor } from '@/src/features/analytics/constants';
 import { MiniBarChart } from '../charts';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 export interface StatCardProps {
   title: string;
   value: number | string;
   subtitle?: string;
   change?: number;
-  icon: React.ComponentType<{ className?: string }>;
+  /** Soft 3D icon shown in the card header. */
+  icon: SoftIconName;
   loading?: boolean;
   color?: StatCardColor;
   chartData?: number[];
@@ -24,7 +26,7 @@ const StatCard: React.FC<StatCardProps> = ({
   value,
   subtitle,
   change,
-  icon: Icon,
+  icon,
   loading,
   color = 'blue',
   chartData,
@@ -63,9 +65,7 @@ const StatCard: React.FC<StatCardProps> = ({
         <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
           {title}
         </p>
-        <div className={`p-2 rounded-lg ${colorClasses.bg}`}>
-          <Icon className={`h-4 w-4 ${colorClasses.text}`} />
-        </div>
+        <SoftIcon name={icon} className="w-9 h-9 flex-shrink-0" />
       </div>
 
       {/* Value with change indicator */}

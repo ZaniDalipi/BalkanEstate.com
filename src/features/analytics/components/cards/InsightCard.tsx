@@ -1,15 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  SparklesIcon,
-  TrophyIcon,
-  ArrowTrendingUpIcon,
-  ExclamationTriangleIcon,
-  ClockIcon,
-  CurrencyEuroIcon,
-  FireIcon,
-  LightBulbIcon,
-} from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { Insight } from '@/src/data/api/ViewStatsApiClient';
 import { INSIGHT_PRIORITY_CONFIG } from '@/src/features/analytics/constants';
 import { truncateText } from '@/src/features/analytics/utils/helpers';
@@ -22,14 +13,14 @@ export interface InsightCardProps {
 /**
  * Icon mapping for insight types
  */
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  sparkles: SparklesIcon,
-  trophy: TrophyIcon,
-  'trending-up': ArrowTrendingUpIcon,
-  exclamation: ExclamationTriangleIcon,
-  clock: ClockIcon,
-  currency: CurrencyEuroIcon,
-  fire: FireIcon,
+const ICON_MAP: Record<string, SoftIconName> = {
+  sparkles: 'sparkles',
+  trophy: 'trophy',
+  'trending-up': 'trendUp',
+  exclamation: 'warning',
+  clock: 'clock',
+  currency: 'cash',
+  fire: 'flame',
 };
 
 /**
@@ -39,7 +30,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
   const { t } = useTranslation(['analytics']);
   const config = INSIGHT_PRIORITY_CONFIG[insight.priority];
-  const Icon = ICON_MAP[insight.icon] || LightBulbIcon;
+  const icon = ICON_MAP[insight.icon] || 'lightbulb';
 
   return (
     <div
@@ -50,9 +41,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ insight, onAction }) => {
 
       <div className="flex items-start gap-3 pl-2">
         {/* Icon */}
-        <div className={`p-2 rounded-xl bg-white/80 backdrop-blur-md shadow-sm border border-white/50 ${config.icon}`}>
-          <Icon className="h-4 w-4" />
-        </div>
+        <SoftIcon name={icon} className="w-9 h-9 flex-shrink-0" />
 
         {/* Content */}
         <div className="flex-1 min-w-0">

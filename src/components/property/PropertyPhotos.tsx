@@ -5,7 +5,8 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Property, PropertyImageTag } from '../../../types';
 import { optimizeImageUrl } from '../../../config/mediaConfig';
-import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_EMOJI } from '@/shared/property/galleryImages';
+import { buildGalleryImages, groupGalleryImagesByTag, IMAGE_TAG_ICONS } from '@/shared/property/galleryImages';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface PropertyPhotosProps {
   property: Property;
@@ -91,7 +92,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
                   : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 hover:scale-102'
               }`}
             >
-              <span>{IMAGE_TAG_EMOJI.all}</span>
+              <SoftIcon name={IMAGE_TAG_ICONS.all} className="w-5 h-5" />
               <span>{t('photos.all')}</span>
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                 activeCategory === 'all' ? 'bg-white/20' : 'bg-neutral-200'
@@ -109,7 +110,7 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 hover:scale-102'
                 }`}
               >
-                <span>{IMAGE_TAG_EMOJI[tag as PropertyImageTag] ?? IMAGE_TAG_EMOJI.all}</span>
+                <SoftIcon name={IMAGE_TAG_ICONS[tag as PropertyImageTag] ?? IMAGE_TAG_ICONS.all} className="w-5 h-5" />
                 <span>{t(`photos.categories.${tag}`, { defaultValue: tag.replace('_', ' ') })}</span>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                   activeCategory === tag ? 'bg-white/20' : 'bg-neutral-200'
@@ -160,8 +161,8 @@ export const PropertyPhotos: React.FC<PropertyPhotosProps> = ({
               <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
                 hoveredIndex === index && index !== currentImageIndex ? 'opacity-100' : 'opacity-0'
               }`}>
-                <span className="text-white text-xs font-semibold bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                  👁️ {t('photos.view', 'View')}
+                <span className="inline-flex items-center gap-1 text-white text-xs font-semibold bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                  <SoftIcon name="eye" className="w-4 h-4" />{t('photos.view', 'View')}
                 </span>
               </div>
 

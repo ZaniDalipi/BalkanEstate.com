@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties, useProperty } from '@/src/features/properties/hooks';
-import { ArrowLeftIcon, SparklesIcon, UserIcon, HomeIcon, XMarkIcon } from '@/constants';
+import { ArrowLeftIcon, SparklesIcon, UserIcon, XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { formatPrice } from '@/utils/currency';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ImageViewerModal from './ImageViewerModal';
@@ -822,9 +823,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {property.status === 'sold' && (
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))' }}>
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
             <span className="font-semibold text-sm md:text-base">
               {t('property:status.soldBanner', 'This property has been sold')}
             </span>
@@ -836,9 +835,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {localStatus === 'rented' && (
         <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 px-4" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))' }}>
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-            </svg>
+            <SoftIcon name="key" className="w-6 h-6 flex-shrink-0" />
             <span className="font-semibold text-sm md:text-base">
               {property.rentedUntil ? (
                 <>
@@ -900,18 +897,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             <div className="hidden sm:flex items-center gap-2 sm:gap-3 text-xs text-neutral-500">
               {daysListedText && (
                 <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <SoftIcon name="clock" className="w-4 h-4" />
                   <span className="whitespace-nowrap">{daysListedText}</span>
                 </span>
               )}
               {property.views !== undefined && property.views > 0 && (
                 <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                  <SoftIcon name="eye" className="w-4 h-4" />
                   <span>{property.views.toLocaleString()}</span>
                 </span>
               )}
@@ -1326,7 +1318,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               />
               <div className="min-w-0 flex-1">
                 <p className="font-bold text-sm text-neutral-900 truncate leading-tight">{sellerDisplay.name}</p>
-                <p className="text-xs text-neutral-500 leading-tight">{t('property:seller.moreFromAgent', 'More listings from this agent')} ✨</p>
+                <p className="text-xs text-neutral-500 leading-tight">{t('property:seller.moreFromAgent', 'More listings from this agent')} <SoftIcon name="sparkles" className="inline-block w-4 h-4 align-[-3px]" /></p>
               </div>
               <button
                 type="button"
@@ -1359,7 +1351,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <HomeIcon className="w-6 h-6 text-neutral-300" />
+                        <SoftIcon name="home" className="w-8 h-8 opacity-60" />
                       )}
                     </div>
                     <div className="p-2">

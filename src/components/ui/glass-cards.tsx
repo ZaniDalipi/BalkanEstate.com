@@ -485,10 +485,7 @@ const StackedPropertyCard: React.FC<StackedPropertyCardProps & { isMobile?: bool
                             gap: '0.35rem',
                             marginBottom: '1rem'
                         }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                <circle cx="12" cy="10" r="3" />
-                            </svg>
+                            <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                             <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
                                 {formatCityPlace(property.city, property.country).full}
                             </span>
