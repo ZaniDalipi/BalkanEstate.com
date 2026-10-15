@@ -690,7 +690,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                 {/* Left Panel: Search + Filters + Property List */}
                 <div
-                    className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`}
+                    className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200`}
+                    data-shown={!showViewToggle || mobileView === 'list'}
                     style={{ background: '#F8F9FC' }}
                 >
                     {/* Spacer matching the floating mobile/tablet header, so
@@ -1055,7 +1056,10 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                 {/* Right Panel: Map */}
                 <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
-                    <div className="absolute inset-0 overflow-hidden">
+                    <div
+                        className="search-map-stage absolute inset-0 overflow-hidden"
+                        data-shown={!showViewToggle || mobileView === 'map'}
+                    >
                         {mountMap && <MapComponent {...mapProps} />}
                     </div>
                     {/* Pin colour key — gold = for rent, emerald = for sale */}

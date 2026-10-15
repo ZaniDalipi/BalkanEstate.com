@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { optimizeImageUrl, getPropertyImagePlaceholder } from '@/config/mediaConfig';
 import { BuildingOfficeIcon } from '@/constants';
 
@@ -86,7 +86,19 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   onLoad,
 }) => {
   const [loaded, setLoaded] = useState(false);
+  // The blurred placeholder is a blur(40px) layer at 150% of the card — on a
+  // phone each one is an offscreen GPU buffer. Once the photo has faded in
+  // nothing can see it, so it goes.
+  const [placeholderGone, setPlaceholderGone] = useState(false);
   const [error, setError] = useState(!src);
+
+  // Wait out the fade (the longest is 300ms; callers can also override the
+  // transition through imgClassName, so don't rely on transitionend).
+  useEffect(() => {
+    if (!loaded) return;
+    const timer = window.setTimeout(() => setPlaceholderGone(true), 600);
+    return () => window.clearTimeout(timer);
+  }, [loaded]);
 
   if (error || !src) {
     return (
@@ -102,16 +114,18 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   return (
     <>
       {/* Blurred LQIP backdrop — loads immediately, fills the container while the main image arrives */}
-      <img
-        src={placeholder}
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        width={40}
-        height={30}
-        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80 pointer-events-none select-none"
-      />
+      {!placeholderGone && (
+        <img
+          src={placeholder}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          width={40}
+          height={30}
+          className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80 pointer-events-none select-none"
+        />
+      )}
       {/* Main image — fades in once loaded; priority images get high fetchpriority for LCP */}
       <img
         src={mainSrc}

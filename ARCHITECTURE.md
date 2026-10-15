@@ -1249,6 +1249,22 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   the list, so that work can't make the orb stutter.
 - Orb icons all stay mounted and crossfade; transitions are off under
   `prefers-reduced-motion`.
+- The switch is `touch-action: manipulation` with no tap highlight: two quick
+  taps switch twice and never trigger iOS double-tap zoom.
+- **Panels** (Search, Rentals, Villas, phone and tablet only): the list panel
+  carries `search-list-panel`, the map's inner wrapper `search-map-stage`, each
+  with `data-shown`. The CSS in `src/index.css` slides the list off to the left
+  while the map eases in from the right and fades up (transform and opacity
+  only, so a tap mid-slide simply reverses it). The map stage is never scaled
+  (it holds the WebGL map). A panel that has slid away goes `visibility:
+  hidden` after the slide and its animations pause. Split view (lg+) is
+  untouched; reduced motion gets a short crossfade.
+- **iOS memory budget.** Safari kills the page ("A problem repeatedly
+  occurred") when compositing memory runs out, and both panels stay mounted.
+  So inside the list on phones `backdrop-blur` is switched off (each blur is a
+  GPU buffer, a list holds hundreds), `PropertyImage` drops its blurred
+  placeholder once the photo has faded in, and `HighlightedPropertyCard` mounts
+  only the current, previous and next slide and pauses autoplay off screen.
 
 ---
 
