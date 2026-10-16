@@ -802,6 +802,9 @@
     "openPlanLabel": "Open plan m²"
   },
   "areaPrices": {
+    "loadError": "We couldn't load prices for this area.",
+    "retry": "Try again",
+    "retrying": "Retrying…",
     "title": "Neighbourhood prices",
     "subtitle": "Nearby homes: {{count}} within {{radius}} km",
     "empty": "Not enough homes nearby yet to compare prices.",

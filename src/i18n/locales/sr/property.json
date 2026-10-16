@@ -803,6 +803,9 @@
     "openPlanLabel": "Отворени простор m²"
   },
   "areaPrices": {
+    "loadError": "Nismo uspeli da učitamo cene za ovo područje.",
+    "retry": "Pokušaj ponovo",
+    "retrying": "Ponovni pokušaj…",
     "title": "Цене у комшилуку",
     "subtitle": "Некретнине у близини: {{count}} у кругу од {{radius}} km",
     "empty": "Још нема довољно некретнина у близини за поређење цена.",

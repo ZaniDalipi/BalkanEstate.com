@@ -30,11 +30,39 @@ export interface NeighborhoodPricesProps {
 }
 
 const NeighborhoodPrices: React.FC<NeighborhoodPricesProps> = ({ property }) => {
-  const { data, isLoading, error } = useAreaPrices(property.id);
+  const { data, isLoading, error, refetch, isFetching } = useAreaPrices(property.id);
 
   if (isLoading) return <NeighborhoodPricesSkeleton />;
-  if (error || !data) return null;
-  return <NeighborhoodPricesBody data={data} />;
+  if (data) return <NeighborhoodPricesBody data={data} />;
+  // Never render nothing: the section menu always links here, so a failed
+  // request must still leave a visible section (with a way to try again).
+  return <NeighborhoodPricesUnavailable failed={!!error} retrying={isFetching} onRetry={() => refetch()} />;
+};
+
+const NeighborhoodPricesUnavailable: React.FC<{ failed: boolean; retrying: boolean; onRetry: () => void }> = ({ failed, retrying, onRetry }) => {
+  const { t } = useTranslation(['property']);
+  return (
+    <section className="bg-gradient-to-br from-white to-neutral-50 rounded-2xl border border-neutral-200 p-4 sm:p-6 shadow-sm">
+      <h3 className="text-xl sm:text-2xl font-bold text-neutral-800">{t('property:areaPrices.title', 'Neighbourhood prices')}</h3>
+      <div className="mt-1 flex flex-wrap items-center gap-3">
+        <p className="text-sm text-neutral-500">
+          {failed
+            ? t('property:areaPrices.loadError', "We couldn't load prices for this area.")
+            : t('property:areaPrices.empty', 'Not enough homes nearby yet to compare prices.')}
+        </p>
+        {failed && (
+          <button
+            type="button"
+            onClick={onRetry}
+            disabled={retrying}
+            className="text-sm font-semibold text-primary hover:underline disabled:opacity-60"
+          >
+            {retrying ? t('property:areaPrices.retrying', 'Retrying…') : t('property:areaPrices.retry', 'Try again')}
+          </button>
+        )}
+      </div>
+    </section>
+  );
 };
 
 const NeighborhoodPricesBody: React.FC<{ data: AreaPricesResponse }> = ({ data }) => {
@@ -43,6 +71,8 @@ const NeighborhoodPricesBody: React.FC<{ data: AreaPricesResponse }> = ({ data }
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const { stats, subject, neighbours } = data;
   const hasNeighbours = neighbours.length > 0;
+  // No home with a usable value (no m² given anywhere) leaves nothing to plot.
+  const stripHasData = subject.value !== null || neighbours.some((n) => n.value !== null);
   const trendHasData = data.trend.filter((p) => p.askingValue !== null || p.closedValue !== null).length >= 2;
   const chips = [!data.sameTypeOnly && format.labels.widerTypes, format.labels.basisNote].filter(Boolean) as string[];
 
@@ -70,6 +100,7 @@ const NeighborhoodPricesBody: React.FC<{ data: AreaPricesResponse }> = ({ data }
         <>
           <AreaPriceSummary stats={stats} subjectValue={subject.value} format={format} />
 
+          {stripHasData && (
           <div className="mb-5">
             <h4 className="text-sm font-semibold text-neutral-700 mb-1">{t('property:areaPrices.stripTitle', 'Where this home sits')}</h4>
             <p className="text-xs text-neutral-500 mb-2">{format.labels.stripHint}</p>
@@ -82,6 +113,7 @@ const NeighborhoodPricesBody: React.FC<{ data: AreaPricesResponse }> = ({ data }
               onHighlight={setHighlightedId}
             />
           </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-5">
             <div className="md:col-span-3 h-72 sm:h-80 rounded-xl overflow-hidden border border-neutral-200 relative z-0">

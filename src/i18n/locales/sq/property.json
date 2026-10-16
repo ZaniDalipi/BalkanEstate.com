@@ -802,6 +802,9 @@
     "openPlanLabel": "Hapësirë e hapur m²"
   },
   "areaPrices": {
+    "loadError": "Nuk mundëm të ngarkojmë çmimet për këtë zonë.",
+    "retry": "Provo përsëri",
+    "retrying": "Duke provuar…",
     "title": "Çmimet në lagje",
     "subtitle": "Shtëpi në afërsi: {{count}} brenda {{radius}} km",
     "empty": "Ende nuk ka mjaftueshëm shtëpi në afërsi për të krahasuar çmimet.",

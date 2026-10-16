@@ -6,7 +6,7 @@ import { getAreaPrices } from '../api/areaPricesApi';
 const isObjectId = (value: string): boolean => /^[a-f\d]{24}$/i.test(value);
 
 export function useAreaPrices(propertyId: string | null | undefined) {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: propertyKeys.areaPrices(propertyId ?? ''),
     queryFn: () => getAreaPrices(propertyId!),
     enabled: !!propertyId && isObjectId(propertyId),
@@ -20,5 +20,5 @@ export function useAreaPrices(propertyId: string | null | undefined) {
     },
   });
 
-  return { data: data ?? null, isLoading, error };
+  return { data: data ?? null, isLoading, error, refetch, isFetching };
 }

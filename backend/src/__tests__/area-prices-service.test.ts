@@ -172,6 +172,24 @@ describe('toNeighbour', () => {
     expect(n.closedValue).toBe(8);
     expect(JSON.stringify(n)).not.toContain('Private Person');
   });
+
+  it('skips malformed dates instead of throwing', () => {
+    const bad = new Date('not a date');
+    const n = toNeighbour(
+      listing({
+        status: 'sold',
+        soldAt: bad,
+        createdAt: bad,
+        rentalHistory: [{ startDate: bad, monthlyRent: 700 }],
+      }),
+      42.66,
+      21.16,
+      SALE
+    );
+    expect(n.closedAt).toBeUndefined();
+    expect(n.listedAt).toBeUndefined();
+    expect(() => buildTrend([listing({ createdAt: bad, status: 'sold', soldAt: bad })], SALE)).not.toThrow();
+  });
 });
 
 describe('buildTrend', () => {

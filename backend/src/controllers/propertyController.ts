@@ -2593,8 +2593,11 @@ export const getAreaPrices = async (
         .limit(500)
         .lean()) as unknown as AreaListing[];
 
-      // The box's corners reach past the radius; keep the circle.
-      return rows.filter((r) => distanceMeters(subject.lat, subject.lng, r.lat, r.lng) <= radiusKm * 1000);
+      // The box's corners reach past the radius; keep the circle. Rows without
+      // usable coordinates are dropped too — the map cannot place them.
+      return rows.filter((r) =>
+        Number.isFinite(r.lat) && Number.isFinite(r.lng) &&
+        distanceMeters(subject.lat, subject.lng, r.lat, r.lng) <= radiusKm * 1000);
     };
 
     let listings: AreaListing[] = [];

@@ -803,6 +803,9 @@
     "openPlanLabel": "Spațiu deschis m²"
   },
   "areaPrices": {
+    "loadError": "Nu am putut încărca prețurile pentru această zonă.",
+    "retry": "Încearcă din nou",
+    "retrying": "Se reîncearcă…",
     "title": "Prețuri în cartier",
     "subtitle": "Locuințe în apropiere: {{count}} pe o rază de {{radius}} km",
     "empty": "Încă nu sunt destule locuințe în apropiere pentru a compara prețurile.",
