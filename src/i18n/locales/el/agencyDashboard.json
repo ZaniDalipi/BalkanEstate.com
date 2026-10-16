@@ -25,7 +25,8 @@
     "closeSidebar": "Κλείσιμο πλαϊνής γραμμής",
     "navLabel": "Πλοήγηση πίνακα ελέγχου",
     "expandSidebar": "Ανάπτυξη πλαϊνής γραμμής",
-    "collapseSidebar": "Σύμπτυξη πλαϊνής γραμμής"
+    "collapseSidebar": "Σύμπτυξη πλαϊνής γραμμής",
+    "residences": "Residences"
   },
   "header": {
     "listings": "Καταχωρίσεις",

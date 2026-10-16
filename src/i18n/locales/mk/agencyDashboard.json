@@ -25,7 +25,8 @@
     "closeSidebar": "Затвори ја страничната лента",
     "navLabel": "Навигација на контролната табла",
     "expandSidebar": "Прошири ја страничната лента",
-    "collapseSidebar": "Собери ја страничната лента"
+    "collapseSidebar": "Собери ја страничната лента",
+    "residences": "Residences"
   },
   "header": {
     "listings": "Огласи",
