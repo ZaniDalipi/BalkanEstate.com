@@ -1,0 +1,176 @@
+import mongoose, { Document, Schema } from 'mongoose';
+import {
+  DEVELOPMENT_CATEGORIES,
+  DEVELOPMENT_CONSTRUCTION_STATUSES,
+  DEVELOPMENT_STATUSES,
+  type DevelopmentCategory,
+  type DevelopmentConstructionStatus,
+  type DevelopmentStatus,
+} from '../config/developments';
+
+/**
+ * A development / residence: the root of the
+ * Development → Building → Entrance → Floor → Unit → Listing hierarchy.
+ *
+ * Inventory (units) is NEVER embedded here — units live in their own
+ * collection so a project can scale to thousands of units without an
+ * unbounded document. `stats` is a denormalised cache kept by the inventory
+ * services, not a source of truth.
+ */
+export interface IDevelopmentContact {
+  name?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface IDevelopmentStats {
+  buildings: number;
+  units: number;
+  available: number;
+}
+
+export interface IDevelopment extends Document {
+  /** The account that owns the project — a user or an agency. */
+  ownerId: mongoose.Types.ObjectId;
+  ownerType: 'user' | 'agency';
+  /** Set when ownerType === 'agency'. */
+  agencyId?: mongoose.Types.ObjectId;
+  name: string;
+  slug: string;
+  description?: string;
+  country: string;
+  city: string;
+  municipality?: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+  category: DevelopmentCategory;
+  constructionStatus: DevelopmentConstructionStatus;
+  expectedCompletionDate?: Date;
+  amenities: string[];
+  website?: string;
+  contact?: IDevelopmentContact;
+  coverMediaId?: mongoose.Types.ObjectId;
+  status: DevelopmentStatus;
+  publishedAt?: Date;
+  stats: IDevelopmentStats;
+  /** Soft delete — set instead of removing so links/audit stay resolvable. */
+  deletedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const DevelopmentSchema: Schema = new Schema(
+  {
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+    ownerType: {
+      type: String,
+      enum: ['user', 'agency'],
+      required: true,
+      default: 'user',
+    },
+    agencyId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Agency',
+      index: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+    },
+    slug: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    description: {
+      type: String,
+      maxlength: 10000,
+    },
+    country: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    city: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    municipality: { type: String, trim: true },
+    address: { type: String, trim: true },
+    lat: { type: Number, min: -90, max: 90 },
+    lng: { type: Number, min: -180, max: 180 },
+    category: {
+      type: String,
+      enum: DEVELOPMENT_CATEGORIES,
+      required: true,
+      index: true,
+    },
+    constructionStatus: {
+      type: String,
+      enum: DEVELOPMENT_CONSTRUCTION_STATUSES,
+      required: true,
+      default: 'planned',
+      index: true,
+    },
+    expectedCompletionDate: { type: Date },
+    amenities: {
+      type: [String],
+      default: [],
+    },
+    website: { type: String, trim: true },
+    contact: {
+      name: { type: String, trim: true },
+      email: { type: String, trim: true },
+      phone: { type: String, trim: true },
+    },
+    coverMediaId: {
+      type: Schema.Types.ObjectId,
+      ref: 'MediaAsset',
+    },
+    status: {
+      type: String,
+      enum: DEVELOPMENT_STATUSES,
+      required: true,
+      default: 'draft',
+      index: true,
+    },
+    publishedAt: { type: Date },
+    stats: {
+      buildings: { type: Number, default: 0, min: 0 },
+      units: { type: Number, default: 0, min: 0 },
+      available: { type: Number, default: 0, min: 0 },
+    },
+    deletedAt: { type: Date, index: true },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Slug is unique only among live (non-deleted) developments, so a deleted
+// project does not keep its slug hostage forever.
+DevelopmentSchema.index(
+  { slug: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { deletedAt: { $exists: false } },
+    name: 'development_slug_unique',
+  }
+);
+DevelopmentSchema.index({ ownerId: 1, status: 1 });
+DevelopmentSchema.index({ agencyId: 1, status: 1 });
+DevelopmentSchema.index({ country: 1, city: 1, status: 1 });
+// Public discovery default sort
+DevelopmentSchema.index({ status: 1, publishedAt: -1 });
+
+export default mongoose.model<IDevelopment>('Development', DevelopmentSchema);
