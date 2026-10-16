@@ -21,6 +21,7 @@ import type {
   Paginated,
   PublicUnit,
   UnitsSummary,
+  PublicUnitDetail,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -64,6 +65,11 @@ export const getPublicDevelopmentUnits = (
 ): Promise<{ units: PublicUnit[]; summary: UnitsSummary }> =>
   apiRequest<{ units: PublicUnit[]; summary: UnitsSummary }>(
     `${PUBLIC}/${encodeURIComponent(slug)}/units`
+  );
+
+export const getPublicUnit = (slug: string, unitId: string): Promise<PublicUnitDetail> =>
+  apiRequest<PublicUnitDetail>(
+    `${PUBLIC}/${encodeURIComponent(slug)}/units/${encodeURIComponent(unitId)}`
   );
 
 // --- Dashboard: development lifecycle -------------------------------------

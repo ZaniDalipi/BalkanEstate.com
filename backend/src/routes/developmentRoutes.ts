@@ -1,5 +1,10 @@
 import express from 'express';
-import { listPublic, getPublicBySlug, listPublicUnits } from '../controllers/developmentController';
+import {
+  listPublic,
+  getPublicBySlug,
+  listPublicUnits,
+  getPublicUnit,
+} from '../controllers/developmentController';
 
 const router = express.Router();
 
@@ -8,6 +13,7 @@ const router = express.Router();
  * developments and never any private ownership, lead, or team information.
  */
 router.get('/', listPublic);
+router.get('/:slug/units/:unitId', getPublicUnit);
 router.get('/:slug/units', listPublicUnits);
 router.get('/:slug', getPublicBySlug);
 

@@ -104,7 +104,11 @@
     "listings_one": "{{count}} listing",
     "listings_other": "{{count}} listings",
     "priceOnRequest": "Price on request",
-    "viewListing": "View listing"
+    "viewListing": "View listing",
+    "viewDetails": "View details",
+    "orientation": "Orientation",
+    "requestInfo": "Request info",
+    "connectedListings": "Connected listings"
   },
   "attach": {
     "title": "Attach existing listing",
@@ -151,5 +155,11 @@
     "allBuildings": "All buildings",
     "noneForFilter": "No units match this filter.",
     "from": "From"
+  },
+  "hero": {
+    "viewUnits": "View available units"
+  },
+  "amenities": {
+    "heading": "Amenities & facilities"
   }
 }

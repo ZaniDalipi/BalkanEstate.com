@@ -231,3 +231,24 @@ export interface UnitsSummary {
   priceMax: number | null;
   currency: string;
 }
+
+/** A marketing listing attached to a unit, as shown on the unit detail page. */
+export interface LinkedListing {
+  id: string;
+  title?: string;
+  imageUrl?: string;
+  images?: { url: string }[];
+  price?: number;
+  listingType?: 'sale' | 'rent';
+  beds?: number;
+  baths?: number;
+  sqft?: number;
+  createdByName?: string;
+  createdByAgencyName?: string;
+}
+
+export interface PublicUnitDetail {
+  unit: PublicUnit;
+  development: { name: string; slug: string; city: string; country: string };
+  listings: LinkedListing[];
+}

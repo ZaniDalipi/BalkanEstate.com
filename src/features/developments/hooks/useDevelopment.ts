@@ -4,6 +4,7 @@ import {
   getMyDevelopment,
   getPublicDevelopment,
   getPublicDevelopmentUnits,
+  getPublicUnit,
   getDevelopmentStructure,
   listUnits,
 } from '../api/developmentsApi';
@@ -52,6 +53,23 @@ export function usePublicDevelopmentUnits(slug: string | undefined) {
   return {
     units: query.data?.units ?? [],
     summary: query.data?.summary,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+
+/** A single public unit with its context and linked listings (detail page). */
+export function usePublicUnit(slug: string | undefined, unitId: string | undefined) {
+  const query = useQuery({
+    queryKey: [...developmentKeys.publicDetail(slug ?? ''), 'unit', unitId ?? ''] as const,
+    queryFn: () => getPublicUnit(slug as string, unitId as string),
+    enabled: !!slug && !!unitId,
+    staleTime: 2 * 60_000,
+  });
+  return {
+    unit: query.data?.unit,
+    development: query.data?.development,
+    listings: query.data?.listings ?? [],
     isLoading: query.isLoading,
     error: query.error,
   };

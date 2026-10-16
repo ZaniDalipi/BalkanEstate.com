@@ -7,6 +7,7 @@ import { EmptyState } from '../shared/States';
 
 interface UnitsBrowserProps {
   units: PublicUnit[];
+  slug: string;
 }
 
 type Filter = 'all' | UnitAvailability;
@@ -16,7 +17,7 @@ type Filter = 'all' | UnitAvailability;
  * filter, over a responsive grid of unit cards. Available units are surfaced
  * first. Pure client-side filtering over the already-loaded units.
  */
-export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units }) => {
+export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units, slug }) => {
   const { t } = useTranslation('developments');
   const [filter, setFilter] = useState<Filter>('all');
   const [building, setBuilding] = useState<string>('all');
@@ -103,7 +104,7 @@ export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units }) => {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((u) => (
-            <UnitCard key={u.id} unit={u} />
+            <UnitCard key={u.id} unit={u} slug={slug} />
           ))}
         </div>
       )}

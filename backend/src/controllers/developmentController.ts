@@ -5,6 +5,7 @@ import DevelopmentBuilding from '../models/DevelopmentBuilding';
 import DevelopmentEntrance from '../models/DevelopmentEntrance';
 import DevelopmentFloor from '../models/DevelopmentFloor';
 import DevelopmentUnit from '../models/DevelopmentUnit';
+import Property from '../models/Property';
 import DevelopmentAuditLog from '../models/DevelopmentAuditLog';
 import { createLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
@@ -418,5 +419,64 @@ export const listPublicUnits = async (req: Request, res: Response): Promise<void
     res.json({ units: enriched, summary });
   } catch (error) {
     sendServiceError(res, error, 'list public units');
+  }
+};
+
+/**
+ * GET /api/developments/:slug/units/:unitId — one unit of a published
+ * development, with its building/floor context and the marketing listings
+ * attached to it (basic fields + a small gallery), for the unit detail page.
+ */
+export const getPublicUnit = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const slug = String(req.params.slug || '').toLowerCase();
+    const development = await Development.findOne({
+      slug,
+      status: 'published',
+      deletedAt: { $exists: false },
+    }).lean();
+    if (!development) {
+      res.status(404).json({ message: 'Development not found' });
+      return;
+    }
+
+    const unitId = getObjectIdParam(req, res, 'unitId');
+    if (!unitId) return;
+
+    const unit = await DevelopmentUnit.findOne({
+      _id: unitId,
+      developmentId: development._id,
+      deletedAt: { $exists: false },
+    });
+    if (!unit) {
+      res.status(404).json({ message: 'Unit not found' });
+      return;
+    }
+
+    const [building, floor, listings] = await Promise.all([
+      DevelopmentBuilding.findById(unit.buildingId).select('name').lean(),
+      DevelopmentFloor.findById(unit.floorId).select('label level').lean(),
+      Property.find({ _id: { $in: unit.listingIds ?? [] }, status: { $ne: 'draft' } })
+        .select('title imageUrl images price listingType beds baths sqft createdByName createdByAgencyName')
+        .limit(10)
+        .lean(),
+    ]);
+
+    res.json({
+      unit: {
+        ...unit.toJSON(),
+        buildingName: building?.name ?? null,
+        floorLabel: floor?.label ?? null,
+      },
+      development: {
+        name: development.name,
+        slug: development.slug,
+        city: development.city,
+        country: development.country,
+      },
+      listings: listings.map((l) => ({ ...l, id: String(l._id), _id: undefined })),
+    });
+  } catch (error) {
+    sendServiceError(res, error, 'get public unit');
   }
 };

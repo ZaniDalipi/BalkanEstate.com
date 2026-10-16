@@ -58,6 +58,7 @@ export const paths = {
   // Residences / Developments
   developments: (query?: QueryInit) => withQuery('/developments', query),
   development: (slug: string) => `/developments/${seg(slug)}`,
+  developmentUnit: (slug: string, unitId: string) => `/developments/${seg(slug)}/units/${seg(unitId)}`,
   developmentsDashboard: () => '/dashboard/developments',
   developmentNew: () => '/dashboard/developments/new',
   developmentManage: (id: string) => `/dashboard/developments/${seg(id)}`,

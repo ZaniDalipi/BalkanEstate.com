@@ -66,6 +66,7 @@ const AboutPage = lazy(() => import('@/src/features/legal/components/AboutPage')
 const BlogPage = lazy(() => import('@/src/features/blog/components/BlogPage'));
 const PublicDevelopmentsPage = lazy(() => import('@/src/features/developments/components/public/PublicDevelopmentsPage'));
 const PublicDevelopmentPage = lazy(() => import('@/src/features/developments/components/public/PublicDevelopmentPage'));
+const UnitDetailPage = lazy(() => import('@/src/features/developments/components/public/UnitDetailPage'));
 const DevelopmentsDashboardPage = lazy(() => import('@/src/features/developments/components/dashboard/DevelopmentsDashboardPage'));
 const CreateDevelopmentForm = lazy(() => import('@/src/features/developments/components/dashboard/CreateDevelopmentForm'));
 const DevelopmentManagePage = lazy(() => import('@/src/features/developments/components/dashboard/DevelopmentManagePage'));
@@ -131,6 +132,7 @@ const pageRoutes: AppRoute[] = [
 
   // Residences / Developments (public, read-only)
   page('developments', { view: 'developments' }, guarded(<PublicDevelopmentsPage />)),
+  page('developments/:slug/units/:unitId', { view: 'developments', pageParams: ['slug', 'unitId'] }, guarded(<UnitDetailPage />)),
   page('developments/:slug', { view: 'developments', pageParams: ['slug'] }, guarded(<PublicDevelopmentPage />)),
 
   // The user's own space

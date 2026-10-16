@@ -10,6 +10,7 @@ import { formatPrice, formatArea } from '../../utils/format';
 
 interface UnitCardProps {
   unit: PublicUnit;
+  slug: string;
 }
 
 const Spec: React.FC<{ icon: React.ReactNode; value: React.ReactNode }> = ({ icon, value }) => (
@@ -24,16 +25,25 @@ const Spec: React.FC<{ icon: React.ReactNode; value: React.ReactNode }> = ({ ico
  * availability, with a direct link to the marketing listing when one is
  * attached. A sold/rented unit is dimmed so the grid reads at a glance.
  */
-export const UnitCard: React.FC<UnitCardProps> = ({ unit }) => {
+export const UnitCard: React.FC<UnitCardProps> = ({ unit, slug }) => {
   const { t } = useTranslation('developments');
   const area = unit.netArea ?? unit.totalArea ?? unit.grossArea;
   const sold = unit.availability === 'sold' || unit.availability === 'rented';
-  const hasListing = !!unit.primaryListingId;
+  const open = () => navigate(paths.developmentUnit(slug, unit.id));
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          open();
+        }
+      }}
       className={cn(
-        'flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-md',
+        'flex cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         sold && 'opacity-70'
       )}
     >
@@ -77,16 +87,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit }) => {
             </p>
           ) : null}
         </div>
-        {hasListing && (
-          <button
-            type="button"
-            onClick={() => navigate(paths.property(String(unit.primaryListingId)))}
-            className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            {t('unit.viewListing')}
-            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </button>
-        )}
+        <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+          {t('unit.viewDetails')}
+          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+        </span>
       </div>
     </div>
   );
