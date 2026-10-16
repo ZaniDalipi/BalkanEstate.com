@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
 import { useInventoryMutations, useDevelopmentStructure } from '../../../hooks';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/src/components/ui/button';
 import { AvailabilityBadge } from '../../shared/Badges';
 import { EmptyState } from '../../shared/States';
 import type { DevelopmentUnit } from '../../../types';

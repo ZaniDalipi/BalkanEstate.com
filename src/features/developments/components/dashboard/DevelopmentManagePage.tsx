@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { navigate, goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/src/components/ui/button';
 import { useMyDevelopment, useDevelopmentUnits } from '../../hooks';
 import { usePublishDevelopment } from '../../hooks';
 import { StatusPill } from '../shared/Badges';
