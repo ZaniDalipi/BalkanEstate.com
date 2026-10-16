@@ -1,6 +1,12 @@
 # Residences & Developments System — Architecture & Implementation Plan
 
-> Status: **Phase 1 (design) complete · Phase 2 (backend foundation) in progress.**
+> Status: **Phase 1 (design), Phase 2 (data foundation) and Phase 3 (development CRUD + listing attachment API) complete.**
+>
+> **Billing decision (confirmed by owner):** creating a development requires an
+> active subscription plan. The create route is gated by
+> `requireActiveSubscription` (`user.hasActiveSubscription()`). Development/unit
+> creation does **not** consume the monthly listing allowance
+> (`listingLimitService` is untouched); that can be revisited later.
 > This document is the single source of truth for the Developments / Residences
 > feature. It is written against the **existing** BalkanEstateAI codebase and
 > deliberately reuses its conventions. Nothing here changes billing, subscription,
@@ -113,8 +119,8 @@ New feature slice `src/features/developments/{api,components,hooks,types}`:
 
 - **Phase 1 — Audit + design** ✅ (this doc).
 - **Phase 2 — Core data + permissions** (in progress): models, Property extension, `developmentAuth`, migration, model/permission unit tests. No routes wired yet → zero runtime impact.
-- **Phase 3 — Listing integration**: attach/detach/bulk/search/conflict services + endpoints + tests (mandatory before visual features).
-- **Phase 4 — Dashboard**: wizard, inventory mgmt, team, publish.
+- **Phase 3 — Listing integration** ✅: development CRUD (+ owner-membership bootstrap, subscription-plan gate), inventory (buildings/floors/units + availability), attach/detach/bulk/conflict services, public + dashboard routes wired into `server.ts`, audit log. Tests: pure conflict-detection + schema/permission (green now) and DB-backed attach/detach integration (CI).
+- **Phase 4 — Dashboard** (frontend): wizard, inventory mgmt, team, publish.
 - **Phase 5 — Public pages**: discovery, detail, building, floor, unit + SEO/structured data + list fallbacks.
 - **Phase 6 — Visual builder**: SVG editor, hotspots, preview, publish.
 - **Phase 7 — Integrations**: map, floor plans, tours, saved/viewings, analytics.

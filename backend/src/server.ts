@@ -78,6 +78,8 @@ initializeKeyPair();
 // Import routes
 import authRoutes from './routes/authRoutes';
 import propertyRoutes from './routes/propertyRoutes';
+import developmentRoutes from './routes/developmentRoutes';
+import developmentDashboardRoutes from './routes/developmentDashboardRoutes';
 import villaDestinationRoutes from './routes/villaDestinationRoutes';
 import cityShowcaseRoutes from './routes/cityShowcaseRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
@@ -352,6 +354,11 @@ app.use('/api/webhooks', webhookRoutes); // Webhooks from payment provider - no 
 
 // Standard API routes
 app.use('/api/properties', propertyRoutes);
+// Residences / Developments — public discovery and authored dashboard.
+// Register the dashboard (authored) routes before the public slug route so
+// '/api/developments/:slug' never shadows the dashboard mount.
+app.use('/api/dashboard/developments', developmentDashboardRoutes);
+app.use('/api/developments', developmentRoutes);
 app.use('/api/villa-destinations', villaDestinationRoutes);
 app.use('/api/city-showcase', cityShowcaseRoutes);
 app.use('/api/favorites', favoriteRoutes);

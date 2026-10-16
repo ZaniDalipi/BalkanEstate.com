@@ -7,6 +7,7 @@ import DevelopmentUnit from '../models/DevelopmentUnit';
 import DevelopmentMembership from '../models/DevelopmentMembership';
 import DevelopmentClaim from '../models/DevelopmentClaim';
 import DevelopmentScene from '../models/DevelopmentScene';
+import DevelopmentAuditLog from '../models/DevelopmentAuditLog';
 import Property from '../models/Property';
 import { logger } from '../utils/logger';
 
@@ -38,6 +39,7 @@ const DEVELOPMENT_MODELS = [
   DevelopmentMembership,
   DevelopmentClaim,
   DevelopmentScene,
+  DevelopmentAuditLog,
 ];
 
 export async function up(): Promise<void> {
