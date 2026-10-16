@@ -4,6 +4,7 @@ import Development from '../models/Development';
 import DevelopmentBuilding from '../models/DevelopmentBuilding';
 import DevelopmentEntrance from '../models/DevelopmentEntrance';
 import DevelopmentFloor from '../models/DevelopmentFloor';
+import DevelopmentUnit from '../models/DevelopmentUnit';
 import DevelopmentAuditLog from '../models/DevelopmentAuditLog';
 import { createLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
@@ -358,5 +359,64 @@ export const getPublicBySlug = async (req: Request, res: Response): Promise<void
     res.json({ development, buildings, floors });
   } catch (error) {
     sendServiceError(res, error, 'get public development');
+  }
+};
+
+/**
+ * GET /api/developments/:slug/units — the published development's units, each
+ * enriched with its building name and floor label (so the buyer-facing browser
+ * can group and filter without extra round-trips), plus a summary used for the
+ * stats bar and price range.
+ */
+export const listPublicUnits = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const slug = String(req.params.slug || '').toLowerCase();
+    const development = await Development.findOne({
+      slug,
+      status: 'published',
+      deletedAt: { $exists: false },
+    })
+      .select('_id')
+      .lean();
+    if (!development) {
+      res.status(404).json({ message: 'Development not found' });
+      return;
+    }
+
+    const [units, buildings, floors] = await Promise.all([
+      DevelopmentUnit.find({ developmentId: development._id, deletedAt: { $exists: false } }).sort({
+        buildingId: 1,
+        unitNumber: 1,
+      }),
+      DevelopmentBuilding.find({ developmentId: development._id, deletedAt: { $exists: false } })
+        .select('_id name')
+        .lean(),
+      DevelopmentFloor.find({ developmentId: development._id, deletedAt: { $exists: false } })
+        .select('_id label level')
+        .lean(),
+    ]);
+
+    const buildingName = new Map(buildings.map((b) => [String(b._id), b.name]));
+    const floorLabel = new Map(floors.map((f) => [String(f._id), f.label]));
+
+    const enriched = units.map((u) => ({
+      ...u.toJSON(),
+      buildingName: buildingName.get(String(u.buildingId)) ?? null,
+      floorLabel: floorLabel.get(String(u.floorId)) ?? null,
+    }));
+
+    const priced = units.filter((u) => typeof u.price === 'number' && (u.price as number) > 0);
+    const prices = priced.map((u) => u.price as number);
+    const summary = {
+      total: units.length,
+      available: units.filter((u) => u.availability === 'available').length,
+      priceMin: prices.length ? Math.min(...prices) : null,
+      priceMax: prices.length ? Math.max(...prices) : null,
+      currency: priced[0]?.currency ?? 'EUR',
+    };
+
+    res.json({ units: enriched, summary });
+  } catch (error) {
+    sendServiceError(res, error, 'list public units');
   }
 };

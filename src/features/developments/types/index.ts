@@ -217,3 +217,17 @@ export interface Paginated<T> {
   items: T[];
   total: number;
 }
+
+/** A unit as exposed to the public, enriched with its building/floor labels. */
+export interface PublicUnit extends DevelopmentUnit {
+  buildingName?: string | null;
+  floorLabel?: string | null;
+}
+
+export interface UnitsSummary {
+  total: number;
+  available: number;
+  priceMin: number | null;
+  priceMax: number | null;
+  currency: string;
+}

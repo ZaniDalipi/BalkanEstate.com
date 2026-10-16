@@ -3,6 +3,7 @@ import { developmentKeys } from '../api/developmentKeys';
 import {
   getMyDevelopment,
   getPublicDevelopment,
+  getPublicDevelopmentUnits,
   getDevelopmentStructure,
   listUnits,
 } from '../api/developmentsApi';
@@ -35,6 +36,22 @@ export function usePublicDevelopment(slug: string | undefined) {
     development: query.data?.development,
     buildings: query.data?.buildings ?? [],
     floors: query.data?.floors ?? [],
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+
+/** Public units of a published development (buyer-facing browser). */
+export function usePublicDevelopmentUnits(slug: string | undefined) {
+  const query = useQuery({
+    queryKey: [...developmentKeys.publicDetail(slug ?? ''), 'units'] as const,
+    queryFn: () => getPublicDevelopmentUnits(slug as string),
+    enabled: !!slug,
+    staleTime: 2 * 60_000,
+  });
+  return {
+    units: query.data?.units ?? [],
+    summary: query.data?.summary,
     isLoading: query.isLoading,
     error: query.error,
   };

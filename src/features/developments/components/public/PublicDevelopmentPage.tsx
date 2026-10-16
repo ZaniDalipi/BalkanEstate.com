@@ -5,8 +5,10 @@ import { MapPin, Globe, ArrowLeft } from 'lucide-react';
 import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { navigate, goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { usePublicDevelopment } from '../../hooks';
-import { LoadingState, EmptyState, ErrorState } from '../shared/States';
+import { usePublicDevelopment, usePublicDevelopmentUnits } from '../../hooks';
+import { LoadingState, ErrorState } from '../shared/States';
+import { StatsBar } from './StatsBar';
+import { UnitsBrowser } from './UnitsBrowser';
 import type { DevelopmentFloor } from '../../types';
 
 /**
@@ -18,6 +20,7 @@ const PublicDevelopmentPage: React.FC = () => {
   const { t } = useTranslation('developments');
   const { slug } = useParams();
   const { development, buildings, floors, isLoading, error } = usePublicDevelopment(slug);
+  const { units, summary } = usePublicDevelopmentUnits(slug);
 
   if (isLoading) {
     return (
@@ -98,41 +101,35 @@ const PublicDevelopmentPage: React.FC = () => {
         <p className="mb-6 whitespace-pre-line text-sm text-foreground/90">{development.description}</p>
       )}
 
-      <section aria-labelledby="buildings-heading">
-        <h2 id="buildings-heading" className="mb-3 text-lg font-semibold text-foreground">
-          {t('detail.buildings')}
-        </h2>
+      <StatsBar summary={summary} buildings={buildings.length} />
 
-        {buildings.length === 0 ? (
-          <EmptyState title={t('building.none')} />
-        ) : (
-          <ul className="space-y-4">
+      <section aria-labelledby="units-heading" className="mb-10">
+        <h2 id="units-heading" className="mb-3 text-xl font-bold text-foreground">
+          {t('units.heading')}
+        </h2>
+        <UnitsBrowser units={units} />
+      </section>
+
+      {buildings.length > 0 && (
+        <section aria-labelledby="buildings-heading" className="mb-6">
+          <h2 id="buildings-heading" className="mb-3 text-lg font-semibold text-foreground">
+            {t('detail.buildings')}
+          </h2>
+          <ul className="flex flex-wrap gap-3">
             {buildings.map((b) => {
               const bFloors = floorsByBuilding(b.id);
               return (
-                <li key={b.id} className="rounded-2xl border border-border bg-card p-4">
-                  <h3 className="text-base font-semibold text-foreground">{b.name}</h3>
-                  {b.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">{b.description}</p>
-                  )}
-                  {bFloors.length > 0 && (
-                    <ul className="mt-3 flex flex-wrap gap-2">
-                      {bFloors.map((f) => (
-                        <li
-                          key={f.id}
-                          className="rounded-lg border border-border px-2.5 py-1 text-xs text-foreground"
-                        >
-                          {f.label}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                <li key={b.id} className="rounded-2xl border border-border bg-card px-4 py-3">
+                  <h3 className="text-sm font-semibold text-foreground">{b.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {t('detail.floors')}: {bFloors.length}
+                  </p>
                 </li>
               );
             })}
           </ul>
-        )}
-      </section>
+        </section>
+      )}
     </main>
   );
 };

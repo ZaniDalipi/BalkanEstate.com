@@ -19,6 +19,8 @@ import type {
   PreviewResult,
   BulkAttachResult,
   Paginated,
+  PublicUnit,
+  UnitsSummary,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -56,6 +58,13 @@ export interface PublicDevelopmentDetail {
 
 export const getPublicDevelopment = (slug: string): Promise<PublicDevelopmentDetail> =>
   apiRequest<PublicDevelopmentDetail>(`${PUBLIC}/${encodeURIComponent(slug)}`);
+
+export const getPublicDevelopmentUnits = (
+  slug: string
+): Promise<{ units: PublicUnit[]; summary: UnitsSummary }> =>
+  apiRequest<{ units: PublicUnit[]; summary: UnitsSummary }>(
+    `${PUBLIC}/${encodeURIComponent(slug)}/units`
+  );
 
 // --- Dashboard: development lifecycle -------------------------------------
 

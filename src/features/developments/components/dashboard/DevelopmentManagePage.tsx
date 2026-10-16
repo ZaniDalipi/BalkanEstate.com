@@ -104,7 +104,7 @@ const DevelopmentManagePage: React.FC = () => {
         <h2 id="units-heading" className="mb-3 text-lg font-semibold text-foreground">
           {t('detail.units')}
         </h2>
-        <UnitsTable units={units} onAttach={setAttachUnit} />
+        <UnitsTable developmentId={development.id} units={units} onAttach={setAttachUnit} />
       </section>
 
       {attachUnit && (

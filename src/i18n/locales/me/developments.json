@@ -102,7 +102,9 @@
     "availability": "Availability",
     "none": "No units yet.",
     "listings_one": "{{count}} listing",
-    "listings_other": "{{count}} listings"
+    "listings_other": "{{count}} listings",
+    "priceOnRequest": "Price on request",
+    "viewListing": "View listing"
   },
   "attach": {
     "title": "Attach existing listing",
@@ -142,5 +144,12 @@
     "hint": "Drag & drop or click — JPG/PNG, up to 10 MB",
     "invalidType": "Please choose an image file.",
     "tooLarge": "Image is too large (max 10 MB)."
+  },
+  "units": {
+    "heading": "Available homes",
+    "filterAll": "All",
+    "allBuildings": "All buildings",
+    "noneForFilter": "No units match this filter.",
+    "from": "From"
   }
 }
