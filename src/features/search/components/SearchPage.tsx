@@ -18,6 +18,7 @@ import SearchHeader from './SearchHeader';
 import SearchLocationBar from './SearchLocationBar';
 import SearchMobileFilters from './SearchMobileFilters';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
+import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon } from '@/src/shared/illustrations';
@@ -140,6 +141,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
     const mountMap = useDeferredMount(!isMapOnScreen);
     const isListOnScreen = showSplitView || mobileView === 'list';
     const mountList = useDeferredMount(!isListOnScreen);
+    // Once the list has slid away behind the map, stop rendering it at all.
+    const listSettledHidden = useSettledHidden(!isListOnScreen);
 
     const mapProps = {
         // The same set the list is drawn from, so a search never lists
@@ -303,7 +306,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
                  <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200`}
-                    data-shown={!showViewToggle || mobileView === 'list'}>
+                    data-shown={!showViewToggle || mobileView === 'list'}
+                    data-settled={listSettledHidden}>
                     {mountList && searchMode !== 'ai' && (
                         <SearchHeader
                             t={t as any}

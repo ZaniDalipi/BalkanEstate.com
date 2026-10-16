@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
+import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { interleaveInFeedAds } from '@/features/promo';
@@ -630,6 +631,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     // it are a screenful of DOM nobody is looking at, built in that same commit.
     const isListOnScreen = !showViewToggle || mobileView === 'list';
     const mountList = useDeferredMount(!isListOnScreen);
+    // Once the list has slid away behind the map, stop rendering it at all.
+    const listSettledHidden = useSettledHidden(!isListOnScreen);
 
     const mapProps = {
         // The same set the list is drawn from, so a search never lists
@@ -692,6 +695,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                 <div
                     className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200`}
                     data-shown={!showViewToggle || mobileView === 'list'}
+                    data-settled={listSettledHidden}
                     style={{ background: '#F8F9FC' }}
                 >
                     {/* Spacer matching the floating mobile/tablet header, so

@@ -17,8 +17,8 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import L from 'leaflet';
-import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
-import { SmoothMarkerClusterer } from '../utils/smoothClusterer';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { SmoothMarkerClusterer, ViewportClusterAlgorithm } from '../utils/smoothClusterer';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
 import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/usecases/measurement';
 import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
@@ -589,9 +589,14 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       map: mapInstance,
       onClusterClick: (event, cluster, map) =>
         clusterActivationRef.current?.onClusterClick(event, cluster, map),
-      algorithm: new SuperClusterAlgorithm({
+      // Only the bubbles and pins on screen (plus a margin) are built. The
+      // whole-region algorithm put every listing in the Balkans on the map as
+      // its own styled element once zoomed in — thousands of layers, which is
+      // what got the page killed on iPhones.
+      algorithm: new ViewportClusterAlgorithm({
         radius: 60,
         maxZoom: 15,
+        viewportPadding: 120,
       }),
       renderer: createClusterRenderer({
         getAriaLabel: (count) =>

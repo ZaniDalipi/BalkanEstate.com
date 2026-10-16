@@ -25,6 +25,8 @@ import {
   MarkerClusterer,
   MarkerClustererEvents,
   MarkerUtils,
+  SuperClusterViewportAlgorithm,
+  type AlgorithmInput,
   type Cluster,
   type Marker,
   type MarkerClustererOptions,
@@ -154,6 +156,22 @@ const contentOf = (marker: Marker | undefined): HTMLElement | null => {
 
 const canAnimate = (el: HTMLElement | null): el is HTMLElement =>
   Boolean(el && typeof el.animate === 'function');
+
+/**
+ * Clusters only what is on screen (plus a margin), so a zoomed-in map never
+ * holds a DOM pin for every listing in the region.
+ *
+ * Guards a bug in the stock algorithm: it only builds its index when the
+ * marker list changes, so a map that draws before any listings have arrived
+ * (zero markers, same as its initial empty list) asks an index that was never
+ * built and throws "Cannot read properties of undefined (reading 'range')".
+ */
+export class ViewportClusterAlgorithm extends SuperClusterViewportAlgorithm {
+  cluster(input: AlgorithmInput): Cluster[] {
+    if (this.markers.length === 0) return [];
+    return super.cluster(input);
+  }
+}
 
 export class SmoothMarkerClusterer extends MarkerClusterer {
   /** Markers mid fly-out, removed from the map when their animation ends. */
