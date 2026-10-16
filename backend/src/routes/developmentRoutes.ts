@@ -5,6 +5,7 @@ import {
   listPublicUnits,
   getPublicUnit,
 } from '../controllers/developmentController';
+import { getPublishedScene } from '../controllers/developmentSceneController';
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ const router = express.Router();
  * developments and never any private ownership, lead, or team information.
  */
 router.get('/', listPublic);
+router.get('/:slug/scene', getPublishedScene);
 router.get('/:slug/units/:unitId', getPublicUnit);
 router.get('/:slug/units', listPublicUnits);
 router.get('/:slug', getPublicBySlug);

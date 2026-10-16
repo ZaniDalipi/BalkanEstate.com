@@ -47,6 +47,7 @@ export type UploadType = Extract<
   | 'agency-logo'
   | 'agency-cover'
   | 'development-cover'
+  | 'development-scene'
   | 'business-logo'
   | 'business-banner'
   | 'site-logo'

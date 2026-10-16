@@ -27,6 +27,14 @@ import {
   previewConflicts,
   bulkAttachListings,
 } from '../controllers/developmentListingController';
+import {
+  upsertSceneImage,
+  listScenes,
+  getScene,
+  saveDraft,
+  publishScene,
+  deleteScene,
+} from '../controllers/developmentSceneController';
 
 const router = express.Router();
 
@@ -142,6 +150,39 @@ router.post(
   developmentAuth,
   requireDevelopmentPermission('listing.attach'),
   bulkAttachListings
+);
+
+// Interactive scenes (visual map / floor-plan editor)
+router.get('/:developmentId/scenes', protect, developmentAuth, listScenes);
+router.post(
+  '/:developmentId/scenes',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('scene.edit'),
+  upload.single('image'),
+  upsertSceneImage
+);
+router.get('/:developmentId/scenes/:sceneId', protect, developmentAuth, getScene);
+router.patch(
+  '/:developmentId/scenes/:sceneId/draft',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('scene.edit'),
+  saveDraft
+);
+router.post(
+  '/:developmentId/scenes/:sceneId/publish',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('publish'),
+  publishScene
+);
+router.delete(
+  '/:developmentId/scenes/:sceneId',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('scene.edit'),
+  deleteScene
 );
 
 export default router;

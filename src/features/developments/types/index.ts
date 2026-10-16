@@ -252,3 +252,47 @@ export interface PublicUnitDetail {
   development: { name: string; slug: string; city: string; country: string };
   listings: LinkedListing[];
 }
+
+// --- Interactive scenes (visual map / floor-plan editor) ------------------
+
+export type HotspotShape = 'polygon' | 'rect';
+export type HotspotLinkType = 'building' | 'entrance' | 'floor' | 'unit' | 'listing';
+export type SceneTargetType = 'development' | 'building' | 'floor';
+
+export interface Hotspot {
+  id: string;
+  shape: HotspotShape;
+  /** Vertices (polygon) or the two opposite corners (rect), each [x,y] in 0–1. */
+  points: number[][];
+  label?: string;
+  linkType: HotspotLinkType;
+  linkId: string;
+  z: number;
+}
+
+export interface SceneVersion {
+  hotspots: Hotspot[];
+  version: number;
+  publishedAt?: string;
+}
+
+export interface Scene {
+  id: string;
+  developmentId: string;
+  targetType: SceneTargetType;
+  targetId: string;
+  imageUrl: string;
+  imageWidth: number;
+  imageHeight: number;
+  draft: SceneVersion;
+  published?: SceneVersion;
+  version: number;
+}
+
+export interface PublishedScene {
+  targetType: SceneTargetType;
+  imageUrl: string;
+  imageWidth: number;
+  imageHeight: number;
+  hotspots: Hotspot[];
+}

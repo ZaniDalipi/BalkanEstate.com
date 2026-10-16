@@ -10,6 +10,7 @@ import { usePublishDevelopment } from '../../hooks';
 import { StatusPill } from '../shared/Badges';
 import { LoadingState, ErrorState } from '../shared/States';
 import { CoverImageUpload } from '../shared/CoverImageUpload';
+import { SceneEditor } from '../scene/SceneEditor';
 import { QuickAddInventory } from './inventory/QuickAddInventory';
 import { UnitsTable } from './inventory/UnitsTable';
 import { AttachListingPanel } from './listings/AttachListingPanel';
@@ -98,6 +99,14 @@ const DevelopmentManagePage: React.FC = () => {
         <div className="rounded-2xl border border-border bg-card p-4">
           <QuickAddInventory developmentId={development.id} />
         </div>
+      </section>
+
+      <section aria-labelledby="map-heading" className="mb-8">
+        <h2 id="map-heading" className="mb-1 text-lg font-semibold text-foreground">
+          {t('scene.heading')}
+        </h2>
+        <p className="mb-3 text-sm text-muted-foreground">{t('scene.subtitle')}</p>
+        <SceneEditor developmentId={development.id} targetType="development" targetId={development.id} />
       </section>
 
       <section aria-labelledby="units-heading" className="mb-8">

@@ -42,7 +42,10 @@ export interface IDevelopmentScene extends Document {
   developmentId: mongoose.Types.ObjectId;
   targetType: SceneTargetType;
   targetId: mongoose.Types.ObjectId;
-  imageMediaId: mongoose.Types.ObjectId;
+  imageMediaId?: mongoose.Types.ObjectId;
+  /** Scene image URL + storage key (mirrors the cover-image pattern). */
+  imageUrl: string;
+  imagePublicId?: string;
   imageWidth: number;
   imageHeight: number;
   draft: ISceneVersion;
@@ -103,8 +106,9 @@ const DevelopmentSceneSchema: Schema = new Schema(
     imageMediaId: {
       type: Schema.Types.ObjectId,
       ref: 'MediaAsset',
-      required: true,
     },
+    imageUrl: { type: String, required: true },
+    imagePublicId: { type: String },
     imageWidth: { type: Number, required: true, min: 1 },
     imageHeight: { type: Number, required: true, min: 1 },
     draft: { type: SceneVersionSchema, default: () => ({ hotspots: [], version: 0 }) },

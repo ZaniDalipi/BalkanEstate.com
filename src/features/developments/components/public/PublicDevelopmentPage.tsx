@@ -9,6 +9,7 @@ import { LoadingState, ErrorState } from '../shared/States';
 import { ResidenceHero } from './ResidenceHero';
 import { StatsBar } from './StatsBar';
 import { UnitsBrowser } from './UnitsBrowser';
+import { SceneViewer } from '../scene/SceneViewer';
 import type { DevelopmentFloor } from '../../types';
 
 /**
@@ -93,6 +94,9 @@ const PublicDevelopmentPage: React.FC = () => {
           </ul>
         </section>
       )}
+
+      {/* Renders only when the owner has published an interactive map. */}
+      <SceneViewer slug={development.slug} units={units} />
 
       <section ref={unitsRef} aria-labelledby="units-heading" className="mt-10 scroll-mt-20">
         <h2 id="units-heading" className="mb-4 text-2xl font-bold text-foreground">

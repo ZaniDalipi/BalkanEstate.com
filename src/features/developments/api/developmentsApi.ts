@@ -22,6 +22,10 @@ import type {
   PublicUnit,
   UnitsSummary,
   PublicUnitDetail,
+  Scene,
+  Hotspot,
+  PublishedScene,
+  SceneTargetType,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -71,6 +75,18 @@ export const getPublicUnit = (slug: string, unitId: string): Promise<PublicUnitD
   apiRequest<PublicUnitDetail>(
     `${PUBLIC}/${encodeURIComponent(slug)}/units/${encodeURIComponent(unitId)}`
   );
+
+export const getPublishedScene = (
+  slug: string,
+  targetType: SceneTargetType = 'development',
+  targetId?: string
+): Promise<{ scene: PublishedScene | null }> => {
+  const qs = new URLSearchParams({ targetType });
+  if (targetId) qs.set('targetId', targetId);
+  return apiRequest<{ scene: PublishedScene | null }>(
+    `${PUBLIC}/${encodeURIComponent(slug)}/scene?${qs.toString()}`
+  );
+};
 
 // --- Dashboard: development lifecycle -------------------------------------
 
@@ -238,6 +254,53 @@ export const detachListing = (
   listingId: string
 ): Promise<{ unit: DevelopmentUnit }> =>
   apiRequest(`${DASH}/${developmentId}/units/${unitId}/listings/${listingId}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+
+// --- Dashboard: scenes (visual map editor) --------------------------------
+
+export const listScenes = (developmentId: string): Promise<{ scenes: Scene[] }> =>
+  apiRequest(`${DASH}/${developmentId}/scenes`, { requiresAuth: true });
+
+export const upsertSceneImage = (
+  developmentId: string,
+  targetType: SceneTargetType,
+  file: File,
+  targetId?: string
+): Promise<{ scene: Scene }> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('targetType', targetType);
+  if (targetId) formData.append('targetId', targetId);
+  return uploadRequest<{ scene: Scene }>(`${DASH}/${developmentId}/scenes`, formData);
+};
+
+export const saveSceneDraft = (
+  developmentId: string,
+  sceneId: string,
+  hotspots: Hotspot[]
+): Promise<{ scene: Scene }> =>
+  apiRequest(`${DASH}/${developmentId}/scenes/${sceneId}/draft`, {
+    method: 'PATCH',
+    body: { hotspots },
+    requiresAuth: true,
+  });
+
+export const publishScene = (
+  developmentId: string,
+  sceneId: string
+): Promise<{ scene: Scene }> =>
+  apiRequest(`${DASH}/${developmentId}/scenes/${sceneId}/publish`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+
+export const deleteScene = (
+  developmentId: string,
+  sceneId: string
+): Promise<{ success: boolean }> =>
+  apiRequest(`${DASH}/${developmentId}/scenes/${sceneId}`, {
     method: 'DELETE',
     requiresAuth: true,
   });

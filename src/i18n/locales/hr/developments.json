@@ -161,5 +161,40 @@
   },
   "amenities": {
     "heading": "Amenities & facilities"
+  },
+  "scene": {
+    "heading": "Interactive map",
+    "subtitle": "Upload an aerial render or site plan, then draw clickable regions over buildings or units.",
+    "exploreHeading": "Explore the development",
+    "uploadImage": "Upload a map image",
+    "uploadHint": "Aerial render, facade or site plan — JPG/PNG",
+    "replace": "Replace image",
+    "saveDraft": "Save draft",
+    "publish": "Publish map",
+    "regions": "Regions",
+    "empty": "No regions yet. Pick a shape tool and draw over the image.",
+    "selectHint": "Select a region to edit its link.",
+    "drawHint": "Rectangle: drag. Polygon: click points, double-click to close.",
+    "deleteRegion": "Delete region",
+    "linkType": "Links to",
+    "linkTarget": "Target",
+    "linkIdPlaceholder": "Paste the ID",
+    "label": "Label (optional)",
+    "labelPlaceholder": "e.g. Building C",
+    "needLink": "Every region needs a target before saving.",
+    "saved": "Draft saved.",
+    "published": "Map published.",
+    "tools": {
+      "select": "Select",
+      "rect": "Rectangle",
+      "polygon": "Polygon"
+    },
+    "linkTypes": {
+      "building": "Building",
+      "entrance": "Entrance",
+      "floor": "Floor",
+      "unit": "Unit",
+      "listing": "Listing"
+    }
   }
 }
