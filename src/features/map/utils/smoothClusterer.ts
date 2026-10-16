@@ -12,6 +12,8 @@
  *                      bubble, which scales in where they meet
  *   unchanged        → a bubble with the same listings keeps its DOM element,
  *                      so nothing flashes at all
+ *   data refresh     → a bubble whose count changed glides to its new spot,
+ *                      dropped listings fade out, new ones fade in
  *
  * Animations run through the Web Animations API, which composes over the
  * inline hover transforms the marker divs carry and leaves no style behind.
@@ -41,8 +43,16 @@ export interface ClusterSnapshot<M> {
   members: readonly M[];
 }
 
-export type EnterPlan = { kind: 'reuse'; from: number } | { kind: 'split'; from: number } | { kind: 'appear' };
-export type ExitPlan = { kind: 'merge'; into: number } | { kind: 'fade' } | { kind: 'kept' };
+export type EnterPlan =
+  | { kind: 'reuse'; from: number }
+  | { kind: 'morph'; from: number }
+  | { kind: 'split'; from: number }
+  | { kind: 'appear' };
+export type ExitPlan =
+  | { kind: 'merge'; into: number }
+  | { kind: 'replaced' }
+  | { kind: 'fade' }
+  | { kind: 'kept' };
 
 export interface TransitionPlan {
   /** One entry per new cluster, indexed like the `next` input. */
@@ -60,11 +70,15 @@ const sameMembers = <M>(a: readonly M[], b: readonly M[]): boolean => {
 /**
  * Pure diff between two cluster layouts.
  *
- * A new cluster whose listings all sat inside one old cluster came out of it
- * (split) and flies from there; an old cluster whose listings all ended up in
- * one new cluster went into it (merge) and flies there. Identical member sets
- * are kept as-is. Anything else — fresh data, a regrouping across clusters —
- * just fades.
+ * - reuse: identical listings — the bubble stays exactly as it is.
+ * - morph: a bubble that mostly holds the same listings as an old bubble
+ *   (a refresh added or dropped a few) is the same bubble with a new count,
+ *   so it slides from the old spot with no fade or pulse.
+ * - split: every listing came out of one bigger old cluster, so it flies out
+ *   from there.
+ * - merge: every listing of an old cluster went into one new cluster, so the
+ *   old one flies into it.
+ * - anything else (fresh data, regrouping across clusters) fades.
  */
 export function planClusterTransition<M>(
   prev: readonly ClusterSnapshot<M>[],
@@ -76,22 +90,47 @@ export function planClusterTransition<M>(
   next.forEach((cluster, index) => cluster.members.forEach((m) => nextOf.set(m, index)));
 
   const kept = new Set<number>();
+  const morphed = new Set<number>();
 
   const enter: EnterPlan[] = next.map((cluster) => {
-    const first = cluster.members[0];
-    const from = first === undefined ? undefined : prevOf.get(first);
-    if (from === undefined || !cluster.members.every((m) => prevOf.get(m) === from)) {
-      return { kind: 'appear' };
-    }
-    if (sameMembers(prev[from].members, cluster.members)) {
+    // The old cluster this one shares the most listings with.
+    const shared = new Map<number, number>();
+    cluster.members.forEach((m) => {
+      const from = prevOf.get(m);
+      if (from !== undefined) shared.set(from, (shared.get(from) ?? 0) + 1);
+    });
+    let from = -1;
+    let overlap = 0;
+    shared.forEach((count, index) => {
+      if (count > overlap) {
+        from = index;
+        overlap = count;
+      }
+    });
+    if (from < 0) return { kind: 'appear' };
+
+    const source = prev[from].members;
+    if (overlap === cluster.members.length && sameMembers(source, cluster.members)) {
       kept.add(from);
       return { kind: 'reuse', from };
     }
-    return { kind: 'split', from };
+    const bothGroups = source.length > 1 && cluster.members.length > 1;
+    if (
+      bothGroups &&
+      !morphed.has(from) &&
+      overlap * 2 > source.length &&
+      overlap * 2 > cluster.members.length
+    ) {
+      morphed.add(from);
+      return { kind: 'morph', from };
+    }
+    if (overlap === cluster.members.length) return { kind: 'split', from };
+    return { kind: 'appear' };
   });
 
   const exit: ExitPlan[] = prev.map((cluster, index) => {
     if (kept.has(index)) return { kind: 'kept' };
+    if (morphed.has(index)) return { kind: 'replaced' };
     const first = cluster.members[0];
     const into = first === undefined ? undefined : nextOf.get(first);
     if (into !== undefined && cluster.members.every((m) => nextOf.get(m) === into)) {
@@ -137,13 +176,28 @@ export class SmoothMarkerClusterer extends MarkerClusterer {
 
     if (changed || changed === undefined) {
       const prev = this.clusters.filter((cluster) => cluster.marker != null);
-      // Nothing on screen yet (first load, or data replaced wholesale): the
-      // page plays its own entrance animation, so don't stack another on it.
-      const animate = prev.length > 0 && !prefersReducedMotion();
-      this.swapClusters(prev, clusters, map, animate);
+      this.swapClusters(prev, clusters, map, !prefersReducedMotion());
     }
 
     google.maps.event.trigger(this, MarkerClustererEvents.CLUSTERING_END, this);
+  }
+
+  /**
+   * A listing dropped by a data refresh fades out instead of blinking off.
+   * Only a pin actually on screen needs that; one folded inside a bubble just
+   * leaves, and the bubble's count updates on the next render.
+   */
+  removeMarker(marker: Marker, noDraw?: boolean): boolean {
+    const onScreen = !prefersReducedMotion() &&
+      this.clusters.some((cluster) => cluster.markers.length === 1 && cluster.marker === marker);
+    if (!onScreen) return super.removeMarker(marker, noDraw);
+
+    const index = this.markers.indexOf(marker);
+    if (index === -1) return false;
+    this.markers.splice(index, 1);
+    this.animateOut(marker, MarkerUtils.getPosition(marker), null);
+    if (!noDraw) this.render();
+    return true;
   }
 
   onRemove(): void {
@@ -153,6 +207,11 @@ export class SmoothMarkerClusterer extends MarkerClusterer {
   }
 
   private swapClusters(prev: Cluster[], next: Cluster[], map: google.maps.Map, animate: boolean) {
+    // Nothing on screen yet (first load, or a search that had no results):
+    // ease everything in rather than popping it on.
+    const firstPaint = prev.length === 0;
+    let bubbleIndex = 0;
+
     const snapshot = (cluster: Cluster) => ({ members: cluster.markers ?? [] });
     const plan = planClusterTransition(prev.map(snapshot), next.map(snapshot));
 
@@ -203,6 +262,18 @@ export class SmoothMarkerClusterer extends MarkerClusterer {
       MarkerUtils.setMap(cluster.marker!, map);
 
       if (!animate || enter.kind === 'reuse') return;
+      if (firstPaint) {
+        // Pins already running the page's fly-in keep it; everything else
+        // eases in, lightly staggered.
+        if (!contentOf(cluster.marker)?.classList.contains('gmarker-entrance-fly')) {
+          this.animateIn(cluster.marker!, cluster.position, null, Math.min(bubbleIndex++ * 35, 280));
+        }
+        return;
+      }
+      if (enter.kind === 'morph') {
+        this.slideIn(cluster.marker!, cluster.position, prev[enter.from].position);
+        return;
+      }
       const origin = enter.kind === 'split' ? prev[enter.from].position : null;
       this.animateIn(cluster.marker!, cluster.position, origin);
     });
@@ -214,6 +285,12 @@ export class SmoothMarkerClusterer extends MarkerClusterer {
       // Still a visible singleton in the new layout — leave it alone.
       if (shownSingles.has(marker)) return;
 
+      if (exit.kind === 'replaced') {
+        // Its successor is already drawn on top, sliding from this spot; drop
+        // the old bubble a frame later so there's never a gap between them.
+        requestAnimationFrame(() => MarkerUtils.setMap(marker, null));
+        return;
+      }
       const target = exit.kind === 'merge' ? next[exit.into].position : null;
       if (animate) this.animateOut(marker, cluster.position, target);
       else MarkerUtils.setMap(marker, null);
@@ -247,7 +324,27 @@ export class SmoothMarkerClusterer extends MarkerClusterer {
     return { x, y };
   }
 
-  private animateIn(marker: Marker, position: google.maps.LatLng, origin: google.maps.LatLng | null) {
+  /** Same bubble, new count: glide from where it was, no fade or pulse. */
+  private slideIn(marker: Marker, position: google.maps.LatLng, origin: google.maps.LatLng) {
+    const el = contentOf(marker);
+    if (!canAnimate(el)) return;
+    const offset = this.offsetBetween(origin, position);
+    if (!offset || (offset.x === 0 && offset.y === 0)) return;
+    el.animate(
+      [
+        { transform: `translate(${offset.x}px, ${offset.y}px)` },
+        { transform: 'translate(0, 0)' },
+      ],
+      { duration: ENTER_MS, easing: EASE_OUT, fill: 'backwards' },
+    );
+  }
+
+  private animateIn(
+    marker: Marker,
+    position: google.maps.LatLng,
+    origin: google.maps.LatLng | null,
+    delay = 0,
+  ) {
     const el = contentOf(marker);
     if (!canAnimate(el)) return;
     const offset = origin ? this.offsetBetween(origin, position) : null;
@@ -259,11 +356,12 @@ export class SmoothMarkerClusterer extends MarkerClusterer {
         { transform: start, opacity: 0 },
         { transform: 'translate(0, 0) scale(1)', opacity: 1 },
       ],
-      { duration: ENTER_MS, easing: EASE_OUT, fill: 'backwards' },
+      { duration: ENTER_MS, easing: EASE_OUT, delay, fill: 'backwards' },
     );
   }
 
   private animateOut(marker: Marker, position: google.maps.LatLng, target: google.maps.LatLng | null) {
+    if (this.exiting.has(marker)) return; // already on its way out
     const el = contentOf(marker);
     if (!canAnimate(el)) {
       MarkerUtils.setMap(marker, null);
