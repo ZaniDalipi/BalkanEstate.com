@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { planClusterTransition } from '../features/map/utils/smoothClusterer';
+import { SuperClusterViewportAlgorithm, type AlgorithmInput } from '@googlemaps/markerclusterer';
+import { planClusterTransition, ViewportClusterAlgorithm } from '../features/map/utils/smoothClusterer';
 
 const c = (...members: string[]) => ({ members });
 
@@ -60,5 +61,25 @@ describe('planClusterTransition on a data refresh', () => {
     const plan = planClusterTransition([c('a', 'b', 'c')], [c('a', 'b'), c('a2', 'c')]);
     expect(plan.enter[0]).toEqual({ kind: 'morph', from: 0 });
     expect(plan.enter[1]).toEqual({ kind: 'appear' });
+  });
+});
+
+describe('ViewportClusterAlgorithm', () => {
+  // A fixed viewport, so the test needs no live google.maps projection.
+  const fixedView = { zoom: 8, view: [19, 39, 23, 43] as [number, number, number, number] };
+  const input = {} as AlgorithmInput;
+
+  it('returns no clusters when the map draws before any listings arrive', () => {
+    class Guarded extends ViewportClusterAlgorithm {
+      protected getViewportState() { return fixedView; }
+    }
+    expect(new Guarded({ maxZoom: 15 }).cluster(input)).toEqual([]);
+  });
+
+  it('guards a real crash in the stock algorithm', () => {
+    class Stock extends SuperClusterViewportAlgorithm {
+      protected getViewportState() { return fixedView; }
+    }
+    expect(() => new Stock({ maxZoom: 15 }).cluster(input)).toThrow(/range/);
   });
 });
