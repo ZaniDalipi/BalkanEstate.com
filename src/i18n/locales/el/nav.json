@@ -124,5 +124,6 @@
   "inboxWithUnread": "Εισερχόμενα ({{count}} μη αναγνωσμένα)",
   "goToAccount": "Μετάβαση στον λογαριασμό μου",
   "userAvatar": "Άβαταρ χρήστη",
-  "loginOrRegister": "Συνδεθείτε ή δημιουργήστε λογαριασμό"
+  "loginOrRegister": "Συνδεθείτε ή δημιουργήστε λογαριασμό",
+  "developments": "Residences"
 }

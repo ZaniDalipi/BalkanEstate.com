@@ -124,5 +124,6 @@
   "inboxWithUnread": "Поруке ({{count}} непрочитаних)",
   "goToAccount": "Иди на мој налог",
   "userAvatar": "Аватар корисника",
-  "loginOrRegister": "Пријавите се или региструјте налог"
+  "loginOrRegister": "Пријавите се или региструјте налог",
+  "developments": "Residences"
 }

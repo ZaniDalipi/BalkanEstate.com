@@ -43,6 +43,7 @@ const VIEW_ORDER: AppView[] = [
   'agents',
   'agencies',
   'business-directory',
+  'developments',
   'how-it-works',
   'blog',
   'admin',

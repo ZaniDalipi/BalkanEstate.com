@@ -249,6 +249,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <NavImage name="agents" /> },
       { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <NavImage name="agencies" /> },
       { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <NavImage name="business" /> },
+      { view: 'developments' as AppView, label: t('nav:developments', 'Residences'), icon: <SoftIcon name="building" className="nav-dock-icon w-7 h-7 max-w-none -m-1" /> },
       { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <NavImage name="how-it-works" /> },
       { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <NavImage name="blog" /> },
     ];

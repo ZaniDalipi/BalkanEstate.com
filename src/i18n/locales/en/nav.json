@@ -124,5 +124,6 @@
   "inboxWithUnread": "Inbox ({{count}} unread)",
   "goToAccount": "Go to my account",
   "userAvatar": "User avatar",
-  "loginOrRegister": "Login or register an account"
+  "loginOrRegister": "Login or register an account",
+  "developments": "Residences"
 }

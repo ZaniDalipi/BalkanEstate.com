@@ -124,5 +124,6 @@
   "inboxWithUnread": "Входящи ({{count}} непрочетени)",
   "goToAccount": "Към моя профил",
   "userAvatar": "Аватар на потребителя",
-  "loginOrRegister": "Влезте или регистрирайте профил"
+  "loginOrRegister": "Влезте или регистрирайте профил",
+  "developments": "Residences"
 }

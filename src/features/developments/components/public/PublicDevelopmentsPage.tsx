@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { Button } from '@/components/ui/button';
 import { usePublicDevelopments } from '../../hooks';
 import { DevelopmentCard } from '../shared/DevelopmentCard';
 import { LoadingState, EmptyState, ErrorState } from '../shared/States';
@@ -17,9 +18,18 @@ const PublicDevelopmentsPage: React.FC = () => {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t('public.title')}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t('public.title')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+        </div>
+        <Button
+          variant="outline"
+          className="shrink-0"
+          onClick={() => navigate(paths.developmentsDashboard())}
+        >
+          {t('nav.dashboard')}
+        </Button>
       </header>
 
       {isLoading && <LoadingState rows={6} />}
