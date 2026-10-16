@@ -13,6 +13,7 @@ import { useRoomStylerUsage } from '../hooks/useRoomStylerUsage';
 import BeforeAfterSlider from './BeforeAfterSlider';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { saveImage } from '@/src/shared/utils/pwa';
 
 interface RoomStylerModalProps {
     /** Full media CDN URL of the room photo to restyle */
@@ -84,6 +85,14 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
             }
         }
     }, [sourceUrl, selectedStyle, t, queryClient]);
+
+    // A plain <a download> with a data: URL does nothing on iOS Safari and
+    // opens an error page in the installed PWA, so go through saveImage.
+    const handleDownload = useCallback(() => {
+        if (!resultUrl) return;
+        const ext = resultUrl.match(/^data:image\/(\w+)/)?.[1]?.replace('jpeg', 'jpg') || 'png';
+        saveImage(resultUrl, `balkanestate-${selectedStyle}.${ext}`).catch(() => {});
+    }, [resultUrl, selectedStyle]);
 
     const goToPricing = useCallback(() => {
         onClose();
@@ -282,13 +291,13 @@ const RoomStylerModal: React.FC<RoomStylerModalProps> = ({ imageUrl, onClose }) 
                         </span>
                         <div className="flex items-center gap-2">
                             {status === 'done' && resultUrl && (
-                                <a
-                                    href={resultUrl}
-                                    download={`balkanestate-${selectedStyle}.png`}
+                                <button
+                                    type="button"
+                                    onClick={handleDownload}
                                     className="flex-1 whitespace-nowrap rounded-lg border border-neutral-300 px-4 py-2.5 text-center text-sm font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800 sm:flex-none"
                                 >
                                     {t('property:roomStyler.download', 'Download HD')}
-                                </a>
+                                </button>
                             )}
                             <button
                                 type="button"

@@ -11,6 +11,7 @@ import { SoftIcon } from '@/src/shared/illustrations';
 import { navigate } from '@/src/app/router/navigation';
 // Aliased: this file's own `paths` are the strokes drawn on the image.
 import { paths as appPaths } from '@/src/app/router/paths';
+import { saveImage } from '@/src/shared/utils/pwa';
 
 type Point = { x: number; y: number };
 type Path = { points: Point[]; color: string; lineWidth: number };
@@ -210,10 +211,7 @@ export const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ imageUrl, pr
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const link = document.createElement('a');
-    link.download = `property-${property.id}-annotated.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    await saveImage(canvas.toDataURL('image/png'), `property-${property.id}-annotated.png`).catch(() => {});
   };
 
   const handleSendToAgent = async () => {
