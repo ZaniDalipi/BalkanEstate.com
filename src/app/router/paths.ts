@@ -55,6 +55,13 @@ export const paths = {
   /** An agency record's page: by slug when it has one, else by id. */
   agencyOf: (agency: { slug?: string; _id?: string; id?: string }): string =>
     paths.agency(agency.slug || agency._id || agency.id || ''),
+  // Residences / Developments
+  developments: (query?: QueryInit) => withQuery('/developments', query),
+  development: (slug: string) => `/developments/${seg(slug)}`,
+  developmentsDashboard: () => '/dashboard/developments',
+  developmentNew: () => '/dashboard/developments/new',
+  developmentManage: (id: string) => `/dashboard/developments/${seg(id)}`,
+
   createAgency: () => '/create-agency',
   createAgencyPayment: () => '/create-agency/payment',
   createAgencyConfirm: () => '/create-agency/confirm',
@@ -118,6 +125,8 @@ const VIEW_PATHS: Partial<Record<AppView, string>> = {
   agents: paths.agents(),
   agencies: paths.agencies(),
   'business-directory': paths.businessDirectory(),
+  developments: paths.developments(),
+  'development-dashboard': paths.developmentsDashboard(),
   admin: paths.admin(),
   'agency-dashboard': paths.agencyDashboard(),
   analytics: paths.analytics(),

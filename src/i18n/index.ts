@@ -55,6 +55,7 @@ import enValuation from './locales/en/valuation.json';
 import enHowItWorks from './locales/en/howItWorks.json';
 import enRental from './locales/en/rental.json';
 import enAgencyDashboard from './locales/en/agencyDashboard.json';
+import enDevelopments from './locales/en/developments.json';
 import enHome from './locales/en/home.json';
 import enBusinessDirectory from './locales/en/businessDirectory.json';
 import enListingFeeds from './locales/en/listingFeeds.json';
@@ -86,7 +87,7 @@ const NAMESPACES = [
   'seller', 'agents', 'modals', 'payment', 'saved', 'exploreCities',
   'analytics', 'subscription', 'agencies', 'agencyDetails', 'agentProfile',
   'newListing', 'valuation', 'howItWorks', 'rental', 'agencyDashboard', 'home', 'businessDirectory', 'villas',
-  'listingFeeds', 'blog', 'legal', 'contact',
+  'listingFeeds', 'blog', 'legal', 'contact', 'developments',
 ] as const;
 
 // English resources (always available as fallback)
@@ -127,6 +128,7 @@ const enResources = {
   villas: enVillas,
   legal: enLegal,
   contact: enContact,
+  developments: enDevelopments,
 };
 
 // Track which language bundles have been loaded

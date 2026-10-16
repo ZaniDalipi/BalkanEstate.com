@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { IUser } from '../models/User';
 import Development from '../models/Development';
 import DevelopmentBuilding from '../models/DevelopmentBuilding';
+import DevelopmentEntrance from '../models/DevelopmentEntrance';
 import DevelopmentFloor from '../models/DevelopmentFloor';
 import DevelopmentAuditLog from '../models/DevelopmentAuditLog';
 import { createLogger } from '../utils/logger';
@@ -84,6 +85,25 @@ export const listMine = async (req: Request, res: Response): Promise<void> => {
 export const getOne = async (req: Request, res: Response): Promise<void> => {
   // developmentAuth already loaded and authorized req.development.
   res.json({ development: req.development, role: req.developmentRole });
+};
+
+/**
+ * GET /api/dashboard/developments/:developmentId/structure
+ * The development's buildings, entrances and floors — what the inventory and
+ * attach UIs need to place a unit. Any authorized member may read it.
+ */
+export const getStructure = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const developmentId = req.development!._id;
+    const [buildings, entrances, floors] = await Promise.all([
+      DevelopmentBuilding.find({ developmentId, deletedAt: { $exists: false } }).sort({ order: 1 }),
+      DevelopmentEntrance.find({ developmentId, deletedAt: { $exists: false } }).sort({ order: 1 }),
+      DevelopmentFloor.find({ developmentId, deletedAt: { $exists: false } }).sort({ order: 1 }),
+    ]);
+    res.json({ buildings, entrances, floors });
+  } catch (error) {
+    sendServiceError(res, error, 'get development structure');
+  }
 };
 
 /** PATCH /api/dashboard/developments/:developmentId */

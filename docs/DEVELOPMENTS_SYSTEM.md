@@ -1,6 +1,6 @@
 # Residences & Developments System — Architecture & Implementation Plan
 
-> Status: **Phase 1 (design), Phase 2 (data foundation) and Phase 3 (development CRUD + listing attachment API) complete.**
+> Status: **Phases 1–3 (design, data foundation, dev CRUD + attachment API) and Phase 4/5 (frontend slice: dashboard + public pages + attach UI) complete.**
 >
 > **Billing decision (confirmed by owner):** creating a development requires an
 > active subscription plan. The create route is gated by
@@ -120,8 +120,7 @@ New feature slice `src/features/developments/{api,components,hooks,types}`:
 - **Phase 1 — Audit + design** ✅ (this doc).
 - **Phase 2 — Core data + permissions** (in progress): models, Property extension, `developmentAuth`, migration, model/permission unit tests. No routes wired yet → zero runtime impact.
 - **Phase 3 — Listing integration** ✅: development CRUD (+ owner-membership bootstrap, subscription-plan gate), inventory (buildings/floors/units + availability), attach/detach/bulk/conflict services, public + dashboard routes wired into `server.ts`, audit log. Tests: pure conflict-detection + schema/permission (green now) and DB-backed attach/detach integration (CI).
-- **Phase 4 — Dashboard** (frontend): wizard, inventory mgmt, team, publish.
-- **Phase 5 — Public pages**: discovery, detail, building, floor, unit + SEO/structured data + list fallbacks.
+- **Phase 4/5 — Frontend slice** ✅: `src/features/developments` (types, api client + query keys, query/mutation hooks, i18n-key validation). Dashboard: list, plan-gated create form (surfaces subscription-required → pricing), manage page with inventory quick-add (building/floor/unit), units table, and the attach panel (preview → confirm; conflicts shown; `force` only for non-blocking). Public: discovery grid + detail page with accessible list-based building/floor navigation. Routes in `routes.tsx`/`paths.ts` (public open; dashboard behind `SignedInRoute`). i18n `developments` namespace in all 10 locales. Backend added `GET …/:id/structure`. Verified: feature tsc-clean, validation vitest green. **Remaining here:** interactive explorer (East Gate), detach/availability UI controls, bulk-attach UI, team/leads/analytics pages, unit detail pages, SEO/structured data.
 - **Phase 6 — Visual builder**: SVG editor, hotspots, preview, publish.
 - **Phase 7 — Integrations**: map, floor plans, tours, saved/viewings, analytics.
 - **Phase 8 — QA/launch**: security, regression, perf, a11y, i18n ×10, migrations, rollback.

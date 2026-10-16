@@ -9,6 +9,7 @@ import {
   create,
   listMine,
   getOne,
+  getStructure,
   update,
   publish,
   remove,
@@ -42,6 +43,7 @@ router.get('/', protect, listMine);
 
 // Single development
 router.get('/:developmentId', protect, developmentAuth, getOne);
+router.get('/:developmentId/structure', protect, developmentAuth, getStructure);
 router.patch(
   '/:developmentId',
   protect,

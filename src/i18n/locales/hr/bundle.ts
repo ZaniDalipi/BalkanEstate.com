@@ -35,6 +35,7 @@ import blog from './blog.json';
 import villas from './villas.json';
 import legal from './legal.json';
 import contact from './contact.json';
+import developments from './developments.json';
 
 export default {
   common, nav, property, auth, search, messages, footer, newsletter,
@@ -43,4 +44,5 @@ export default {
   agencyDetails, agentProfile, newListing, valuation, howItWorks, rental, agencyDashboard, home,
   businessDirectory, listingFeeds, blog,
   villas, legal, contact,
+  developments,
 };
