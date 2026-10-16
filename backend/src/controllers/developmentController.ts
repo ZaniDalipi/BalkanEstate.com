@@ -8,6 +8,11 @@ import DevelopmentAuditLog from '../models/DevelopmentAuditLog';
 import { createLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
 import {
+  uploadImage,
+  deleteImage,
+  isMediaStorageConfigured,
+} from '../services/mediaService';
+import {
   createDevelopment,
   listDevelopmentsForUser,
   updateDevelopment,
@@ -150,6 +155,58 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
     res.json({ success: true });
   } catch (error) {
     sendServiceError(res, error, 'delete development');
+  }
+};
+
+/**
+ * POST /api/dashboard/developments/:developmentId/cover
+ * Upload (or replace) the development's cover image. Multipart field: `cover`.
+ * Mirrors the agency cover-upload flow (media service + url/publicId on the doc).
+ */
+export const uploadCover = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+    if (!isMediaStorageConfigured()) {
+      res.status(500).json({ message: 'Image upload service not configured' });
+      return;
+    }
+    const development = req.development!;
+
+    // Remove the previous cover so storage doesn't accumulate orphans.
+    if (development.coverImagePublicId) {
+      try {
+        await deleteImage(development.coverImagePublicId);
+      } catch (err) {
+        log.warn('Could not delete old development cover:', err);
+      }
+    }
+
+    const result = await uploadImage(req.file.buffer, {
+      userId: String(currentUser(req)._id),
+      developmentId: String(development._id),
+      developmentName: development.name,
+      type: 'development-cover',
+      maxWidth: 1920,
+      maxHeight: 720,
+    });
+
+    development.coverImage = result.url;
+    development.coverImagePublicId = result.publicId;
+    await development.save();
+
+    await DevelopmentAuditLog.create({
+      developmentId: development._id,
+      action: 'development.update',
+      actorId: currentUser(req)._id,
+      metadata: { cover: true },
+    });
+
+    res.json({ coverImage: result.url, development });
+  } catch (error) {
+    sendServiceError(res, error, 'upload development cover');
   }
 };
 

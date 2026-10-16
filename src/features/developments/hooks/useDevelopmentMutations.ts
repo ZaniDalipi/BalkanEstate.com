@@ -11,6 +11,7 @@ import {
   setUnitAvailability,
   attachListing,
   detachListing,
+  uploadDevelopmentCover,
 } from '../api/developmentsApi';
 import type {
   CreateDevelopmentPayload,
@@ -55,6 +56,19 @@ export function usePublishDevelopment(id: string) {
     },
   });
   return { setStatus: mutation.mutateAsync, isLoading: mutation.isPending, error: mutation.error };
+}
+
+/** Upload / replace the development cover image. */
+export function useUploadDevelopmentCover(id: string) {
+  const qc = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (file: File) => uploadDevelopmentCover(id, file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: developmentKeys.detail(id) });
+      qc.invalidateQueries({ queryKey: developmentKeys.mine() });
+    },
+  });
+  return { uploadCover: mutation.mutateAsync, isUploading: mutation.isPending, error: mutation.error };
 }
 
 export function useDeleteDevelopment(id: string) {

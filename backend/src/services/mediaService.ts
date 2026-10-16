@@ -46,6 +46,7 @@ export type UploadType = Extract<
   | 'credential'
   | 'agency-logo'
   | 'agency-cover'
+  | 'development-cover'
   | 'business-logo'
   | 'business-banner'
   | 'site-logo'
@@ -64,6 +65,8 @@ export interface UploadOptions {
   propertyRef?: string;
   agencyId?: string;
   agencyName?: string;
+  developmentId?: string;
+  developmentName?: string;
   businessListingId?: string;
   businessName?: string;
   credentialId?: string;
@@ -131,6 +134,8 @@ const keyContextOf = (options: Partial<UploadOptions> & MediaKeyContext): MediaK
   propertyRef: options.propertyRef,
   agencyId: options.agencyId,
   agencyName: options.agencyName,
+  developmentId: options.developmentId,
+  developmentName: options.developmentName,
   businessListingId: options.businessListingId,
   businessName: options.businessName,
   credentialId: options.credentialId,

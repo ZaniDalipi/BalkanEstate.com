@@ -51,6 +51,9 @@ export interface IDevelopment extends Document {
   website?: string;
   contact?: IDevelopmentContact;
   coverMediaId?: mongoose.Types.ObjectId;
+  /** Cover image URL + storage key (mirrors the Agency cover pattern). */
+  coverImage?: string;
+  coverImagePublicId?: string;
   status: DevelopmentStatus;
   publishedAt?: Date;
   stats: IDevelopmentStats;
@@ -137,6 +140,8 @@ const DevelopmentSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'MediaAsset',
     },
+    coverImage: { type: String },
+    coverImagePublicId: { type: String },
     status: {
       type: String,
       enum: DEVELOPMENT_STATUSES,

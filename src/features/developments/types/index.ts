@@ -77,6 +77,7 @@ export interface Development {
   amenities: string[];
   website?: string;
   contact?: DevelopmentContact;
+  coverImage?: string;
   status: DevelopmentStatus;
   publishedAt?: string;
   stats: DevelopmentStats;

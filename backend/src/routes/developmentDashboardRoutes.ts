@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 import { protect } from '../middleware/auth';
 import { requireActiveSubscription } from '../middleware/checkSubscription';
 import {
@@ -12,6 +13,7 @@ import {
   getStructure,
   update,
   publish,
+  uploadCover,
   remove,
   addBuilding,
   addFloor,
@@ -27,6 +29,12 @@ import {
 } from '../controllers/developmentListingController';
 
 const router = express.Router();
+
+// In-memory upload for the cover image (handed to the media service as a buffer).
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+});
 
 /**
  * Authored (dashboard) development routes.
@@ -44,6 +52,14 @@ router.get('/', protect, listMine);
 // Single development
 router.get('/:developmentId', protect, developmentAuth, getOne);
 router.get('/:developmentId/structure', protect, developmentAuth, getStructure);
+router.post(
+  '/:developmentId/cover',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('media.upload'),
+  upload.single('cover'),
+  uploadCover
+);
 router.patch(
   '/:developmentId',
   protect,

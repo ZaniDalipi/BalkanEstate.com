@@ -3,7 +3,7 @@
  * (token injection, CSRF, 401 refresh). Thin transport only — no business
  * logic, no React. Responses are narrowed to the feature's types.
  */
-import { apiRequest } from '@/src/shared/api';
+import { apiRequest, uploadRequest } from '@/src/shared/api';
 import type {
   Development,
   DevelopmentBuilding,
@@ -87,6 +87,18 @@ export interface DevelopmentStructure {
 
 export const getDevelopmentStructure = (id: string): Promise<DevelopmentStructure> =>
   apiRequest<DevelopmentStructure>(`${DASH}/${id}/structure`, { requiresAuth: true });
+
+export const uploadDevelopmentCover = (
+  id: string,
+  file: File
+): Promise<{ coverImage: string; development: Development }> => {
+  const formData = new FormData();
+  formData.append('cover', file);
+  return uploadRequest<{ coverImage: string; development: Development }>(
+    `${DASH}/${id}/cover`,
+    formData
+  );
+};
 
 export const createDevelopment = (payload: CreateDevelopmentPayload): Promise<{ development: Development }> =>
   apiRequest<{ development: Development }>(DASH, {

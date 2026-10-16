@@ -134,5 +134,13 @@
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
     "categoryRequired": "Please choose a category."
+  },
+  "cover": {
+    "heading": "Cover image",
+    "upload": "Upload a cover image",
+    "change": "Change cover image",
+    "hint": "Drag & drop or click — JPG/PNG, up to 10 MB",
+    "invalidType": "Please choose an image file.",
+    "tooLarge": "Image is too large (max 10 MB)."
   }
 }

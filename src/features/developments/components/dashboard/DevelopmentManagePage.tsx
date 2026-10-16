@@ -9,6 +9,7 @@ import { useMyDevelopment, useDevelopmentUnits } from '../../hooks';
 import { usePublishDevelopment } from '../../hooks';
 import { StatusPill } from '../shared/Badges';
 import { LoadingState, ErrorState } from '../shared/States';
+import { CoverImageUpload } from '../shared/CoverImageUpload';
 import { QuickAddInventory } from './inventory/QuickAddInventory';
 import { UnitsTable } from './inventory/UnitsTable';
 import { AttachListingPanel } from './listings/AttachListingPanel';
@@ -82,6 +83,13 @@ const DevelopmentManagePage: React.FC = () => {
           )}
         </div>
       </header>
+
+      <section aria-labelledby="cover-heading" className="mb-8">
+        <h2 id="cover-heading" className="mb-3 text-lg font-semibold text-foreground">
+          {t('cover.heading')}
+        </h2>
+        <CoverImageUpload developmentId={development.id} coverImage={development.coverImage} />
+      </section>
 
       <section aria-labelledby="inventory-heading" className="mb-8">
         <h2 id="inventory-heading" className="mb-3 text-lg font-semibold text-foreground">

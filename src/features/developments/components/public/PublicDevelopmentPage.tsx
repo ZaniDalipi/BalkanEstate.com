@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Globe, ArrowLeft } from 'lucide-react';
+import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { navigate, goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { usePublicDevelopment } from '../../hooks';
@@ -56,8 +57,20 @@ const PublicDevelopmentPage: React.FC = () => {
         {t('public.backToList')}
       </button>
 
+      {development.coverImage && (
+        <div className="mb-6 overflow-hidden rounded-3xl">
+          <img
+            src={optimizeImageUrl(development.coverImage, { width: 1600 })}
+            srcSet={imageSrcSet(development.coverImage)}
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            alt={development.name}
+            className="aspect-[16/7] w-full object-cover"
+          />
+        </div>
+      )}
+
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{development.name}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{development.name}</h1>
         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4" aria-hidden="true" />
           {[development.address, development.city, development.country].filter(Boolean).join(', ')}
