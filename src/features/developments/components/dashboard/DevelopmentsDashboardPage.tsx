@@ -19,15 +19,17 @@ const DevelopmentsDashboardPage: React.FC = () => {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('nav.dashboard')}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">{t('nav.dashboard')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+        {/* On its own row (left-aligned) so it never lands under the app's
+            top-right floating action bar. */}
+        <div className="mt-4">
+          <Button onClick={() => navigate(paths.developmentNew())}>
+            <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {t('list.create')}
+          </Button>
         </div>
-        <Button onClick={() => navigate(paths.developmentNew())} className="shrink-0">
-          <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
-          {t('list.create')}
-        </Button>
       </header>
 
       {isLoading && <LoadingState rows={4} />}

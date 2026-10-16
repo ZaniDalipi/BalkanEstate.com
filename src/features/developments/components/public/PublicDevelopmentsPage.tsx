@@ -18,18 +18,16 @@ const PublicDevelopmentsPage: React.FC = () => {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('public.title')}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">{t('public.title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+        {/* Action sits on its own row (left-aligned) so it never lands under
+            the app's top-right floating action bar. */}
+        <div className="mt-4">
+          <Button onClick={() => navigate(paths.developmentsDashboard())}>
+            {t('nav.dashboard')}
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          className="shrink-0"
-          onClick={() => navigate(paths.developmentsDashboard())}
-        >
-          {t('nav.dashboard')}
-        </Button>
       </header>
 
       {isLoading && <LoadingState rows={6} />}
@@ -37,7 +35,14 @@ const PublicDevelopmentsPage: React.FC = () => {
       {!isLoading && error && <ErrorState message={t('errors.loadFailed')} />}
 
       {!isLoading && !error && developments.length === 0 && (
-        <EmptyState title={t('public.empty')} />
+        <EmptyState
+          title={t('public.empty')}
+          action={
+            <Button onClick={() => navigate(paths.developmentsDashboard())}>
+              {t('nav.dashboard')}
+            </Button>
+          }
+        />
       )}
 
       {!isLoading && !error && developments.length > 0 && (

@@ -58,22 +58,16 @@ const DevelopmentManagePage: React.FC = () => {
         {t('nav.dashboard')}
       </button>
 
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">{development.name}</h1>
-            <StatusPill status={development.status} />
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {development.city}, {development.country} · {t(`category.${development.category}`)}
-          </p>
-        </div>
+      <header className="mb-6">
         <div className="flex items-center gap-2">
-          {isPublished && (
-            <Button variant="ghost" onClick={() => navigate(paths.development(development.slug))}>
-              {t('public.viewDetails')}
-            </Button>
-          )}
+          <h1 className="text-2xl font-bold text-foreground">{development.name}</h1>
+          <StatusPill status={development.status} />
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {development.city}, {development.country} · {t(`category.${development.category}`)}
+        </p>
+        {/* Actions on their own row so they clear the app's top-right floating bar. */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <Button
             variant={isPublished ? 'outline' : 'default'}
             disabled={isPublishing}
@@ -81,6 +75,11 @@ const DevelopmentManagePage: React.FC = () => {
           >
             {isPublished ? t('detail.unpublish') : t('detail.publish')}
           </Button>
+          {isPublished && (
+            <Button variant="ghost" onClick={() => navigate(paths.development(development.slug))}>
+              {t('public.viewDetails')}
+            </Button>
+          )}
         </div>
       </header>
 
