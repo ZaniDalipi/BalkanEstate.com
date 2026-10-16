@@ -2338,6 +2338,13 @@ html.reduce-motion .celebration-bar {
     transition-delay: 0s, 0s, 420ms;
   }
 
+  /* Once the list has finished sliding away (data-settled, set from JS after
+     the slide) the browser skips rendering it entirely and may drop its
+     photos and layers; it stays mounted and keeps its scroll position. */
+  .search-list-panel[data-settled='true'] {
+    content-visibility: hidden;
+  }
+
   /* Pulsing pins, cluster halos, badge pings: nothing to see while hidden. */
   .search-list-panel[data-shown='false'] *,
   .search-map-stage[data-shown='false'] * {

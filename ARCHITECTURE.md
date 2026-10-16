@@ -1265,6 +1265,13 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
   GPU buffer, a list holds hundreds), `PropertyImage` drops its blurred
   placeholder once the photo has faded in, and `HighlightedPropertyCard` mounts
   only the current, previous and next slide and pauses autoplay off screen.
+  Once the list has finished sliding away (`useSettledHidden`), it gets
+  `content-visibility: hidden`: still mounted, scroll kept, but not rendered.
+- **Map pins are built for the screen only.** The Google map clusters with
+  `SuperClusterViewportAlgorithm` (`useGoogleMap.ts`): bubbles and pins exist
+  only inside the visible area plus a margin. The whole-region algorithm put
+  every listing in the Balkans on the map as its own styled element once zoomed
+  in, which is too many layers for an iPhone.
 
 ---
 
