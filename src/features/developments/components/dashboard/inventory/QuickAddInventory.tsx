@@ -90,7 +90,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
             <select className={selectClass} value={floorBuildingId} onChange={(e) => setFloorBuildingId(e.target.value)}>
               <option value="">—</option>
               {buildings.map((b) => (
-                <option key={b._id} value={b._id}>{b.name}</option>
+                <option key={b.id} value={b.id}>{b.name}</option>
               ))}
             </select>
           </label>
@@ -139,7 +139,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
             >
               <option value="">—</option>
               {buildings.map((b) => (
-                <option key={b._id} value={b._id}>{b.name}</option>
+                <option key={b.id} value={b.id}>{b.name}</option>
               ))}
             </select>
           </label>
@@ -153,7 +153,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
             >
               <option value="">—</option>
               {floorsForUnitBuilding.map((f) => (
-                <option key={f._id} value={f._id}>{f.label}</option>
+                <option key={f.id} value={f.id}>{f.label}</option>
               ))}
             </select>
           </label>

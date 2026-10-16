@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate, goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
+import { FormSelect } from '../shared/FormSelect';
 import { useCreateDevelopment } from '../../hooks';
 import {
   DEVELOPMENT_CATEGORIES,
@@ -18,34 +20,64 @@ type ApiError = { statusCode?: number; details?: { subscriptionRequired?: boolea
 
 const isSubscriptionError = (err: unknown): boolean => {
   const e = err as ApiError | null;
-  return !!e && (e.statusCode === 403 && !!e.details?.subscriptionRequired);
+  return !!e && e.statusCode === 403 && !!e.details?.subscriptionRequired;
 };
 
 const EMPTY: CreateDevelopmentPayload = {
   name: '',
   country: '',
   city: '',
+  address: '',
   category: 'apartment_building',
   constructionStatus: 'planned',
 };
 
 /**
- * Step 1 of the development wizard: basic information. Creating is gated on an
- * active subscription plan server-side; a subscription error routes the user to
- * the pricing page. Further steps (buildings, floors, units, media) are done in
- * the development's dashboard after it exists.
+ * Step 1 of the development wizard: basic information.
+ *
+ * Location uses the app's standard Balkan country/city catalog: a country
+ * dropdown drives a dependent city dropdown, and picking a city auto-fills the
+ * coordinates and a default address — the same pattern as the listing and
+ * business-listing forms, so it is consistent and professional. Creating is
+ * gated on an active subscription plan server-side; a subscription error routes
+ * the user to pricing.
  */
 const CreateDevelopmentForm: React.FC = () => {
   const { t } = useTranslation('developments');
   const { create, isLoading } = useCreateDevelopment();
 
   const [form, setForm] = useState<CreateDevelopmentPayload>(EMPTY);
+  const [cities, setCities] = useState<CityData[]>([]);
   const [errors, setErrors] = useState<CreateDevelopmentErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [needsPlan, setNeedsPlan] = useState(false);
 
   const set = <K extends keyof CreateDevelopmentPayload>(key: K, value: CreateDevelopmentPayload[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const countryOptions = useMemo(
+    () => BALKAN_LOCATIONS.map((c) => ({ value: c.name, label: c.name })),
+    []
+  );
+  const cityOptions = useMemo(() => cities.map((c) => ({ value: c.name, label: c.name })), [cities]);
+
+  const onCountryChange = (country: string) => {
+    const match = BALKAN_LOCATIONS.find((c) => c.name === country);
+    setCities(match?.cities ?? []);
+    // Reset dependent fields when the country changes.
+    setForm((prev) => ({ ...prev, country, city: '', lat: undefined, lng: undefined, address: '' }));
+  };
+
+  const onCityChange = (cityName: string) => {
+    const city = cities.find((c) => c.name === cityName);
+    setForm((prev) => ({
+      ...prev,
+      city: cityName,
+      lat: city?.lat,
+      lng: city?.lng,
+      address: city ? `${cityName}, ${prev.country}` : prev.address,
+    }));
   };
 
   const fieldError = (key: keyof CreateDevelopmentErrors): string | undefined =>
@@ -66,8 +98,9 @@ const CreateDevelopmentForm: React.FC = () => {
         name: form.name.trim(),
         country: form.country.trim(),
         city: form.city.trim(),
+        address: form.address?.trim() || undefined,
       });
-      navigate(paths.developmentManage(development._id));
+      navigate(paths.developmentManage(development.id));
     } catch (err) {
       if (isSubscriptionError(err)) {
         setNeedsPlan(true);
@@ -85,7 +118,7 @@ const CreateDevelopmentForm: React.FC = () => {
         <p className="mt-1 text-sm text-muted-foreground">{t('wizard.basics')}</p>
       </header>
 
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-card p-5 space-y-5" noValidate>
         <Input
           label={t('wizard.name')}
           placeholder={t('wizard.namePlaceholder')}
@@ -96,56 +129,54 @@ const CreateDevelopmentForm: React.FC = () => {
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
+          <FormSelect
             label={t('wizard.country')}
+            placeholder={t('wizard.selectCountry')}
+            options={countryOptions}
             value={form.country}
-            onChange={(e) => set('country', e.target.value)}
+            onChange={(e) => onCountryChange(e.target.value)}
             error={fieldError('country')}
             required
           />
-          <Input
+          <FormSelect
             label={t('wizard.city')}
+            placeholder={form.country ? t('wizard.selectCity') : t('wizard.selectCountryFirst')}
+            options={cityOptions}
             value={form.city}
-            onChange={(e) => set('city', e.target.value)}
+            onChange={(e) => onCityChange(e.target.value)}
             error={fieldError('city')}
+            disabled={!form.country}
             required
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label className="block w-full">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">{t('wizard.category')}</span>
-            <select
-              value={form.category}
-              onChange={(e) => set('category', e.target.value as DevelopmentCategory)}
-              className="min-h-[44px] w-full rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[40px]"
-            >
-              {DEVELOPMENT_CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {t(`category.${c}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+        <Input
+          label={t('wizard.address')}
+          value={form.address ?? ''}
+          onChange={(e) => set('address', e.target.value)}
+          helperText={t('wizard.addressHelper')}
+        />
 
-          <label className="block w-full">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">{t('wizard.constructionStatus')}</span>
-            <select
-              value={form.constructionStatus}
-              onChange={(e) => set('constructionStatus', e.target.value as DevelopmentConstructionStatus)}
-              className="min-h-[44px] w-full rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[40px]"
-            >
-              {DEVELOPMENT_CONSTRUCTION_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {t(`construction.${s}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormSelect
+            label={t('wizard.category')}
+            options={DEVELOPMENT_CATEGORIES.map((c) => ({ value: c, label: t(`category.${c}`) }))}
+            value={form.category}
+            onChange={(e) => set('category', e.target.value as DevelopmentCategory)}
+            required
+          />
+          <FormSelect
+            label={t('wizard.constructionStatus')}
+            options={DEVELOPMENT_CONSTRUCTION_STATUSES.map((s) => ({ value: s, label: t(`construction.${s}`) }))}
+            value={form.constructionStatus}
+            onChange={(e) => set('constructionStatus', e.target.value as DevelopmentConstructionStatus)}
+            required
+          />
         </div>
 
         <Input
           label={t('wizard.website')}
+          placeholder="https://"
           value={form.website ?? ''}
           onChange={(e) => set('website', e.target.value)}
           inputMode="url"
@@ -161,15 +192,15 @@ const CreateDevelopmentForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate(paths.pricing())}
-                className="mt-2 font-medium underline underline-offset-2"
+                className="mt-2 font-semibold underline underline-offset-2"
               >
-                {t('wizard.title')}
+                {t('errors.viewPlans')}
               </button>
             )}
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
           <Button type="button" variant="ghost" onClick={() => goBack(paths.developmentsDashboard())}>
             {t('wizard.cancel')}
           </Button>

@@ -58,7 +58,7 @@ export interface DevelopmentStats {
 }
 
 export interface Development {
-  _id: string;
+  id: string;
   ownerId: string;
   ownerType: 'user' | 'agency';
   agencyId?: string;
@@ -85,7 +85,7 @@ export interface Development {
 }
 
 export interface DevelopmentBuilding {
-  _id: string;
+  id: string;
   developmentId: string;
   name: string;
   code?: string;
@@ -97,7 +97,7 @@ export interface DevelopmentBuilding {
 }
 
 export interface DevelopmentFloor {
-  _id: string;
+  id: string;
   developmentId: string;
   buildingId: string;
   entranceId?: string;
@@ -108,7 +108,7 @@ export interface DevelopmentFloor {
 }
 
 export interface DevelopmentUnit {
-  _id: string;
+  id: string;
   developmentId: string;
   buildingId: string;
   entranceId?: string;

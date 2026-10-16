@@ -42,7 +42,7 @@ export const AttachListingPanel: React.FC<AttachListingPanelProps> = ({
     setMessage(null);
     setIsPreviewing(true);
     try {
-      const result = await previewAttachment(developmentId, unit._id, trimmedId);
+      const result = await previewAttachment(developmentId, unit.id, trimmedId);
       setConflicts(result.conflicts);
     } catch {
       setMessage({ type: 'error', text: t('errors.generic') });
@@ -55,7 +55,7 @@ export const AttachListingPanel: React.FC<AttachListingPanelProps> = ({
     if (!trimmedId || hasBlocking) return;
     setMessage(null);
     try {
-      await attach({ unitId: unit._id, listingId: trimmedId, force });
+      await attach({ unitId: unit.id, listingId: trimmedId, force });
       setMessage({ type: 'success', text: t('attach.success') });
       setConflicts(null);
       setListingId('');

@@ -54,10 +54,10 @@ const DevelopmentsDashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {developments.map((d) => (
             <DevelopmentCard
-              key={d._id}
+              key={d.id}
               development={d}
               showStatus
-              onOpen={() => navigate(paths.developmentManage(d._id))}
+              onOpen={() => navigate(paths.developmentManage(d.id))}
             />
           ))}
         </div>

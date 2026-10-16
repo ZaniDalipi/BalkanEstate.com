@@ -95,9 +95,9 @@ const PublicDevelopmentPage: React.FC = () => {
         ) : (
           <ul className="space-y-4">
             {buildings.map((b) => {
-              const bFloors = floorsByBuilding(b._id);
+              const bFloors = floorsByBuilding(b.id);
               return (
-                <li key={b._id} className="rounded-2xl border border-border bg-card p-4">
+                <li key={b.id} className="rounded-2xl border border-border bg-card p-4">
                   <h3 className="text-base font-semibold text-foreground">{b.name}</h3>
                   {b.description && (
                     <p className="mt-1 text-sm text-muted-foreground">{b.description}</p>
@@ -106,7 +106,7 @@ const PublicDevelopmentPage: React.FC = () => {
                     <ul className="mt-3 flex flex-wrap gap-2">
                       {bFloors.map((f) => (
                         <li
-                          key={f._id}
+                          key={f.id}
                           className="rounded-lg border border-border px-2.5 py-1 text-xs text-foreground"
                         >
                           {f.label}

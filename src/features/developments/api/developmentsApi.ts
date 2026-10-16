@@ -81,7 +81,7 @@ export const getMyDevelopment = (id: string): Promise<{ development: Development
 
 export interface DevelopmentStructure {
   buildings: DevelopmentBuilding[];
-  entrances: { _id: string; buildingId: string; name: string }[];
+  entrances: { id: string; buildingId: string; name: string }[];
   floors: DevelopmentFloor[];
 }
 

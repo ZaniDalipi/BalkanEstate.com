@@ -62,7 +62,11 @@
     "website": "Website",
     "submit": "Create development",
     "creating": "Creating…",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "selectCountry": "Select a country",
+    "selectCity": "Select a city",
+    "selectCountryFirst": "Select a country first",
+    "addressHelper": "Street address (optional) — auto-filled from the city."
   },
   "detail": {
     "overview": "Overview",
@@ -121,7 +125,8 @@
     "updateFailed": "Could not save your changes.",
     "loadFailed": "Could not load developments.",
     "notFound": "Development not found.",
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "viewPlans": "View subscription plans"
   },
   "validation": {
     "nameRequired": "Project name is required.",

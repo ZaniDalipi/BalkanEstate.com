@@ -3,7 +3,19 @@ import { IUser } from '../models/User';
 import Property from '../models/Property';
 import DevelopmentUnit from '../models/DevelopmentUnit';
 import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
+import { resolveId } from '../utils/idObfuscation';
 import { sendServiceError } from './developmentController';
+
+/**
+ * Resolve a body id that may be the obfuscated public id (what the client UI
+ * exposes) or a raw hex ObjectId, to a raw hex ObjectId. Returns null for
+ * anything that is neither, so callers can 400.
+ */
+const resolveBodyId = (value: unknown): string | null => {
+  if (!value || typeof value !== 'string') return null;
+  const resolved = resolveId(value);
+  return resolved && isValidObjectId(resolved) ? resolved : null;
+};
 import {
   attachListingToUnit,
   detachListingFromUnit,
@@ -20,8 +32,8 @@ export const attach = async (req: Request, res: Response): Promise<void> => {
   try {
     const unitId = getObjectIdParam(req, res, 'unitId');
     if (!unitId) return;
-    const listingId = req.body?.listingId;
-    if (!listingId || !isValidObjectId(String(listingId))) {
+    const listingId = resolveBodyId(req.body?.listingId);
+    if (!listingId) {
       res.status(400).json({ message: 'A valid listingId is required' });
       return;
     }
@@ -29,7 +41,7 @@ export const attach = async (req: Request, res: Response): Promise<void> => {
       user: currentUser(req),
       developmentId: String(req.development!._id),
       unitId,
-      listingId: String(listingId),
+      listingId,
       force: req.body?.force === true,
     });
     res.status(200).json(result);
@@ -43,8 +55,8 @@ export const previewConflicts = async (req: Request, res: Response): Promise<voi
   try {
     const unitId = getObjectIdParam(req, res, 'unitId');
     if (!unitId) return;
-    const listingId = req.body?.listingId;
-    if (!listingId || !isValidObjectId(String(listingId))) {
+    const listingId = resolveBodyId(req.body?.listingId);
+    if (!listingId) {
       res.status(400).json({ message: 'A valid listingId is required' });
       return;
     }
@@ -104,20 +116,20 @@ export const bulkAttachListings = async (req: Request, res: Response): Promise<v
       res.status(400).json({ message: 'A bulk attach is limited to 200 items' });
       return;
     }
+    const normalized: BulkAttachItem[] = [];
     for (const item of items) {
-      if (
-        !item ||
-        !isValidObjectId(String(item.listingId)) ||
-        !isValidObjectId(String(item.unitId))
-      ) {
+      const listingId = resolveBodyId(item?.listingId);
+      const unitId = resolveBodyId(item?.unitId);
+      if (!listingId || !unitId) {
         res.status(400).json({ message: 'Each item needs a valid listingId and unitId' });
         return;
       }
+      normalized.push({ listingId, unitId });
     }
     const result = await bulkAttach({
       user: currentUser(req),
       developmentId: String(req.development!._id),
-      items: items as BulkAttachItem[],
+      items: normalized,
       force: req.body?.force === true,
     });
     res.json(result);

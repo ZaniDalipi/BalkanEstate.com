@@ -36,7 +36,7 @@ export const UnitsTable: React.FC<UnitsTableProps> = ({ units, onAttach }) => {
         </thead>
         <tbody className="divide-y divide-border">
           {units.map((u) => (
-            <tr key={u._id} className="hover:bg-muted/30">
+            <tr key={u.id} className="hover:bg-muted/30">
               <td className="px-4 py-2 font-medium text-foreground">{u.unitNumber}</td>
               <td className="px-4 py-2 text-muted-foreground">{u.unitType}</td>
               <td className="px-4 py-2">

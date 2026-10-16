@@ -88,7 +88,7 @@ const DevelopmentManagePage: React.FC = () => {
           {t('detail.inventory')}
         </h2>
         <div className="rounded-2xl border border-border bg-card p-4">
-          <QuickAddInventory developmentId={development._id} />
+          <QuickAddInventory developmentId={development.id} />
         </div>
       </section>
 
@@ -105,7 +105,7 @@ const DevelopmentManagePage: React.FC = () => {
             {t('detail.listings')}
           </h2>
           <AttachListingPanel
-            developmentId={development._id}
+            developmentId={development.id}
             unit={attachUnit}
             onClose={() => setAttachUnit(null)}
             onAttached={() => {
