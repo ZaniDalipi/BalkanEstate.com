@@ -196,5 +196,28 @@
       "unit": "Unit",
       "listing": "Listing"
     }
+  },
+  "follow": {
+    "title": "Follow {{name}}",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "signIn": "Sign in to follow",
+    "signedOutHint": "Get notified when new homes become available or prices drop.",
+    "hint": "Follow to get alerts about new units, price drops and availability changes.",
+    "prefsHeading": "Notification preferences",
+    "prefs": {
+      "newUnits": "New units become available",
+      "priceReductions": "Price reductions",
+      "availabilityChanges": "Availability changes",
+      "newBuildings": "New buildings or phases"
+    },
+    "filtersHeading": "Your filters (optional)",
+    "min": "Min",
+    "max": "Max",
+    "savePrefs": "Save preferences",
+    "saved": "Preferences saved.",
+    "errBeds": "Min bedrooms cannot exceed max.",
+    "errPrice": "Min price cannot exceed max.",
+    "errArea": "Min area cannot exceed max."
   }
 }

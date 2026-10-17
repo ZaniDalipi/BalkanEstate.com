@@ -228,13 +228,54 @@ export const setUnitAvailability = async (
       `availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`
     );
   }
+  // Read the prior state so we only alert followers on a real transition
+  // INTO 'available' (not when it was already available).
+  const prior = await DevelopmentUnit.findOne({
+    _id: unitId,
+    developmentId,
+    deletedAt: { $exists: false },
+  }).select('availability');
+
   const unit = await DevelopmentUnit.findOneAndUpdate(
     { _id: unitId, developmentId, deletedAt: { $exists: false } },
     { $set: { availability } },
     { new: true }
   );
-  if (unit) await recomputeDevelopmentStats(developmentId);
+  if (unit) {
+    await recomputeDevelopmentStats(developmentId);
+    if (availability === 'available' && prior?.availability !== 'available') {
+      // Fire-and-forget: alerting never blocks or fails the availability change.
+      void notifyFollowersOnAvailable(String(developmentId), unit);
+    }
+  }
   return unit;
+};
+
+/**
+ * Resolve the development's name/slug and notify matching followers that a unit
+ * is now available. Isolated so the alert import stays lazy and errors here
+ * cannot affect the availability write.
+ */
+const notifyFollowersOnAvailable = async (
+  developmentId: string,
+  unit: IDevelopmentUnit
+): Promise<void> => {
+  try {
+    const [{ notifyFollowersUnitAvailable }, Development] = await Promise.all([
+      import('./developmentAlertService'),
+      import('../../models/Development').then((m) => m.default),
+    ]);
+    const dev = await Development.findById(developmentId).select('name slug').lean();
+    if (!dev) return;
+    await notifyFollowersUnitAvailable({
+      developmentId,
+      developmentName: dev.name,
+      developmentSlug: dev.slug,
+      unit,
+    });
+  } catch {
+    /* already logged inside the alert service; never throw */
+  }
 };
 
 /** True for a MongoDB duplicate-key (E11000) error, however it is wrapped. */

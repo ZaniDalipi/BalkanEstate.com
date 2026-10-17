@@ -9,6 +9,7 @@ import { LoadingState, ErrorState } from '../shared/States';
 import { ResidenceHero } from './ResidenceHero';
 import { StatsBar } from './StatsBar';
 import { UnitsBrowser } from './UnitsBrowser';
+import { FollowCard } from './FollowCard';
 import { SceneViewer } from '../scene/SceneViewer';
 import type { DevelopmentFloor } from '../../types';
 
@@ -67,6 +68,10 @@ const PublicDevelopmentPage: React.FC = () => {
 
       <div className="mt-6">
         <StatsBar summary={summary} buildings={buildings.length} />
+      </div>
+
+      <div className="mt-6">
+        <FollowCard slug={development.slug} developmentName={development.name} />
       </div>
 
       {development.description && (

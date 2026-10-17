@@ -20,6 +20,9 @@ export type NotificationType =
   | 'new_listing'           // New property matches a saved search
   | 'price_drop'            // Price decreased on a watched property
   | 'price_increase'        // Price increased on a watched property
+  | 'development_unit_available' // A unit became available in a followed residence
+  | 'development_price_drop'     // A unit's price dropped in a followed residence
+  | 'development_update'         // General update on a followed residence
   | 'system';               // System notifications
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
@@ -79,6 +82,9 @@ const NotificationSchema: Schema = new Schema(
         'new_listing',
         'price_drop',
         'price_increase',
+        'development_unit_available',
+        'development_price_drop',
+        'development_update',
         'system',
       ],
       required: true,

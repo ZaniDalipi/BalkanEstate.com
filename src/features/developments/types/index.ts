@@ -296,3 +296,28 @@ export interface PublishedScene {
   imageHeight: number;
   hotspots: Hotspot[];
 }
+
+// --- Follow & alerts ------------------------------------------------------
+
+export interface FollowPreferences {
+  newUnits: boolean;
+  priceReductions: boolean;
+  availabilityChanges: boolean;
+  newBuildings: boolean;
+}
+
+export interface FollowFilters {
+  minBeds?: number;
+  maxBeds?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
+}
+
+export interface DevelopmentFollow {
+  id: string;
+  developmentId: string;
+  preferences: FollowPreferences;
+  filters: FollowFilters;
+}

@@ -26,6 +26,9 @@ import type {
   Hotspot,
   PublishedScene,
   SceneTargetType,
+  DevelopmentFollow,
+  FollowPreferences,
+  FollowFilters,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -254,6 +257,32 @@ export const detachListing = (
   listingId: string
 ): Promise<{ unit: DevelopmentUnit }> =>
   apiRequest(`${DASH}/${developmentId}/units/${unitId}/listings/${listingId}`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+
+// --- Follow & alerts (signed-in buyers) -----------------------------------
+
+export interface FollowStatus {
+  following: boolean;
+  follow?: DevelopmentFollow;
+}
+
+export const getFollowStatus = (slug: string): Promise<FollowStatus> =>
+  apiRequest<FollowStatus>(`${PUBLIC}/${encodeURIComponent(slug)}/follow`, { requiresAuth: true });
+
+export const followDevelopment = (
+  slug: string,
+  payload: { preferences: FollowPreferences; filters: FollowFilters }
+): Promise<FollowStatus> =>
+  apiRequest<FollowStatus>(`${PUBLIC}/${encodeURIComponent(slug)}/follow`, {
+    method: 'POST',
+    body: payload,
+    requiresAuth: true,
+  });
+
+export const unfollowDevelopment = (slug: string): Promise<{ following: boolean }> =>
+  apiRequest(`${PUBLIC}/${encodeURIComponent(slug)}/follow`, {
     method: 'DELETE',
     requiresAuth: true,
   });
