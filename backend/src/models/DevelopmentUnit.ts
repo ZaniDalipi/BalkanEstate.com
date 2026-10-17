@@ -114,13 +114,18 @@ DevelopmentUnitSchema.index({ developmentId: 1, availability: 1 });
 // building-scoped otherwise. Two partial unique indexes keep these apart so a
 // building that reuses "1" across two staircases is valid, while a duplicate
 // within the same scope is rejected. Both ignore soft-deleted units.
+//
+// MongoDB rejects `$exists: false` in a partial filter ("Expression not
+// supported in partial index: $not"), so the filters use `null` — which
+// matches a missing field or an explicit null — and `$type: 'objectId'` for
+// "an entrance is set". The two filters are exact complements.
 DevelopmentUnitSchema.index(
   { entranceId: 1, unitNumber: 1 },
   {
     unique: true,
     partialFilterExpression: {
-      entranceId: { $exists: true },
-      deletedAt: { $exists: false },
+      entranceId: { $type: 'objectId' },
+      deletedAt: null,
     },
     name: 'unit_number_per_entrance_unique',
   }
@@ -130,8 +135,8 @@ DevelopmentUnitSchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      entranceId: { $exists: false },
-      deletedAt: { $exists: false },
+      entranceId: null,
+      deletedAt: null,
     },
     name: 'unit_number_per_building_unique',
   }

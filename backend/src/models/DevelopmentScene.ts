@@ -148,7 +148,8 @@ DevelopmentSceneSchema.index(
   { developmentId: 1, targetType: 1, targetId: 1 },
   {
     unique: true,
-    partialFilterExpression: { deletedAt: { $exists: false } },
+    // `deletedAt: null` matches a missing field; MongoDB rejects `$exists: false`.
+    partialFilterExpression: { deletedAt: null },
     name: 'scene_per_target_unique',
   }
 );

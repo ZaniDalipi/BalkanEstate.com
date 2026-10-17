@@ -56,11 +56,13 @@ const DevelopmentBuildingSchema: Schema = new Schema(
 
 DevelopmentBuildingSchema.index({ developmentId: 1, order: 1 });
 // A building slug is unique within its development (among live buildings).
+// `deletedAt: null` matches a missing field; MongoDB rejects `$exists: false`
+// in partial index filters.
 DevelopmentBuildingSchema.index(
   { developmentId: 1, slug: 1 },
   {
     unique: true,
-    partialFilterExpression: { deletedAt: { $exists: false } },
+    partialFilterExpression: { deletedAt: null },
     name: 'building_slug_per_development_unique',
   }
 );

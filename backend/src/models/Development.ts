@@ -163,12 +163,13 @@ const DevelopmentSchema: Schema = new Schema(
 );
 
 // Slug is unique only among live (non-deleted) developments, so a deleted
-// project does not keep its slug hostage forever.
+// project does not keep its slug hostage forever. `deletedAt: null` matches a
+// missing field; MongoDB rejects `$exists: false` in partial index filters.
 DevelopmentSchema.index(
   { slug: 1 },
   {
     unique: true,
-    partialFilterExpression: { deletedAt: { $exists: false } },
+    partialFilterExpression: { deletedAt: null },
     name: 'development_slug_unique',
   }
 );

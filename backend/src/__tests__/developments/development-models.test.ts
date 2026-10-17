@@ -142,7 +142,7 @@ describe('DevelopmentScene hotspot coordinates', () => {
       developmentId: oid(),
       targetType: 'floor',
       targetId: oid(),
-      imageMediaId: oid(),
+      imageUrl: 'https://cdn.example.com/floor.jpg',
       imageWidth: 1600,
       imageHeight: 900,
       draft: {
@@ -167,12 +167,13 @@ describe('DevelopmentScene hotspot coordinates', () => {
   });
 
   it('rejects out-of-range (non-normalised) points', async () => {
+    // Every other field is valid, so a rejection can only come from the points.
     await expect(
       DevelopmentScene.create({
         developmentId: oid(),
         targetType: 'building',
         targetId: oid(),
-        imageMediaId: oid(),
+        imageUrl: 'https://cdn.example.com/facade.jpg',
         imageWidth: 800,
         imageHeight: 600,
         draft: {
@@ -192,7 +193,7 @@ describe('DevelopmentScene hotspot coordinates', () => {
           ],
         },
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow(/points/i);
   });
 });
 
