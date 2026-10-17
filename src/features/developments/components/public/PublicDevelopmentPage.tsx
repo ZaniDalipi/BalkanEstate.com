@@ -101,10 +101,15 @@ const PublicDevelopmentPage: React.FC = () => {
 
       <ResidenceHero development={development} onViewUnits={() => scrollToId('units')} />
 
+      {/* Floating KPI strip overlapping the hero's lower edge. */}
+      <div className="relative z-10 -mt-10 px-2 sm:-mt-12 sm:px-8">
+        <StatsBar summary={summary} buildings={buildings.length} />
+      </div>
+
       {/* Sticky in-page section nav */}
       <nav
         aria-label="sections"
-        className="sticky top-0 z-20 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/85 px-4 backdrop-blur"
+        className="sticky top-0 z-20 -mx-4 mt-6 overflow-x-auto border-b border-border bg-background/85 px-4 backdrop-blur"
       >
         <ul className="flex gap-1 py-2">
           {sections.map((s) => (
@@ -121,37 +126,39 @@ const PublicDevelopmentPage: React.FC = () => {
         </ul>
       </nav>
 
-      <div className="mt-6">
-        <StatsBar summary={summary} buildings={buildings.length} />
-      </div>
-
       {units.length > 0 && (
-        <div className="mt-6 rounded-2xl border border-border bg-card p-4">
+        <div className="mt-6 rounded-2xl border border-border bg-card p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold text-foreground">{t('units.availabilityHeading')}</h2>
           <AvailabilityBar units={units} />
         </div>
       )}
 
-      <section id="overview" className="mt-8 scroll-mt-20">
-        <h2 className="mb-3 text-lg font-semibold text-foreground">{t('detail.overview')}</h2>
+      <section id="overview" className="mt-10 scroll-mt-20">
+        <h2 className="mb-4 flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
+          <span className="h-5 w-1 rounded-full bg-gradient-to-b from-teal-400 to-emerald-500" aria-hidden="true" />
+          {t('detail.overview')}
+        </h2>
         <KeyFacts development={development} buildings={buildings.length} />
         {development.description && (
-          <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-foreground/90">
+          <p className="mt-5 max-w-3xl whitespace-pre-line text-[15px] leading-relaxed text-foreground/85">
             {development.description}
           </p>
         )}
       </section>
 
       {development.amenities && development.amenities.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold text-foreground">{t('amenities.heading')}</h2>
+        <section className="mt-10">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
+            <span className="h-5 w-1 rounded-full bg-gradient-to-b from-teal-400 to-emerald-500" aria-hidden="true" />
+            {t('amenities.heading')}
+          </h2>
           <ul className="flex flex-wrap gap-2">
             {development.amenities.map((a) => (
               <li
                 key={a}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-sm text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground shadow-sm"
               >
-                <Check className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                <Check className="h-3.5 w-3.5 text-teal-500" aria-hidden="true" />
                 {a}
               </li>
             ))}
@@ -178,8 +185,9 @@ const PublicDevelopmentPage: React.FC = () => {
         </div>
       )}
 
-      <section ref={unitsRef} id="units" aria-labelledby="units-heading" className="mt-10 scroll-mt-20">
-        <h2 id="units-heading" className="mb-4 text-2xl font-bold text-foreground">
+      <section ref={unitsRef} id="units" aria-labelledby="units-heading" className="mt-12 scroll-mt-20">
+        <h2 id="units-heading" className="mb-5 flex items-center gap-2.5 text-2xl font-extrabold tracking-tight text-foreground">
+          <span className="h-6 w-1.5 rounded-full bg-gradient-to-b from-teal-400 to-emerald-500" aria-hidden="true" />
           {t('units.heading')}
         </h2>
         <UnitsBrowser units={matchedUnits} slug={development.slug} />

@@ -13,12 +13,12 @@ const Fact: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactN
   label,
   value,
 }) => (
-  <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+  <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+    <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-teal-400/15 text-primary ring-1 ring-primary/10">
       {icon}
     </span>
     <div className="min-w-0">
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="mt-0.5 font-semibold text-foreground">{value}</div>
     </div>
   </div>

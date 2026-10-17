@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MapPin, Globe, ChevronDown } from 'lucide-react';
+import { MapPin, Globe, ArrowDown, CalendarClock } from 'lucide-react';
 import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
 import type { Development } from '../../types';
@@ -12,20 +12,31 @@ interface ResidenceHeroProps {
 }
 
 /**
- * Full-bleed residence hero: the cover image with a dark gradient and the
- * project's name, location, category and a primary CTA overlaid — the look of
- * a premium development landing page. Falls back to a branded gradient when no
- * cover image has been uploaded yet.
+ * Full-bleed residence hero — a cinematic cover with layered gradients, glass
+ * chips for category / construction status / completion, the project name and
+ * location, and primary actions. Designed as the attention-grabbing top of a
+ * premium development page; falls back to a branded gradient with no cover.
  */
 export const ResidenceHero: React.FC<ResidenceHeroProps> = ({ development, onViewUnits }) => {
-  const { t } = useTranslation('developments');
-  const { coverImage, name, city, country, address, category, constructionStatus, website } = development;
+  const { t, i18n } = useTranslation('developments');
+  const { coverImage, name, city, country, address, category, constructionStatus, website, expectedCompletionDate } =
+    development;
+
+  const completion = expectedCompletionDate
+    ? new Date(expectedCompletionDate).toLocaleDateString(i18n.language || 'en', { month: 'short', year: 'numeric' })
+    : null;
+
+  const Chip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+      {children}
+    </span>
+  );
 
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-3xl',
-        !coverImage && 'bg-gradient-to-br from-primary/25 via-primary/10 to-muted'
+        'relative overflow-hidden rounded-[28px] shadow-2xl ring-1 ring-black/5',
+        !coverImage && 'bg-gradient-to-br from-primary/30 via-primary/10 to-muted'
       )}
     >
       {coverImage && (
@@ -34,44 +45,52 @@ export const ResidenceHero: React.FC<ResidenceHeroProps> = ({ development, onVie
           srcSet={imageSrcSet(coverImage)}
           sizes="(max-width: 1200px) 100vw, 1200px"
           alt={name}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full scale-105 object-cover"
         />
       )}
-      {/* Readability scrim */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+      {/* Layered scrims: a top vignette for the chips, a deep bottom for the title. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/40 to-transparent" />
 
-      <div className="relative flex min-h-[320px] flex-col justify-end gap-3 p-6 sm:min-h-[420px] sm:p-10">
+      <div className="relative flex min-h-[380px] flex-col justify-end gap-4 p-6 sm:min-h-[480px] sm:p-10">
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-            {t(`category.${category}`)}
-          </span>
-          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+          <Chip>{t(`category.${category}`)}</Chip>
+          <Chip>
+            <span className="h-1.5 w-1.5 rounded-full bg-teal-400" aria-hidden="true" />
             {t(`construction.${constructionStatus}`)}
-          </span>
+          </Chip>
+          {completion && (
+            <Chip>
+              <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
+              {completion}
+            </Chip>
+          )}
         </div>
 
-        <h1 className="max-w-3xl text-3xl font-bold leading-tight text-white sm:text-5xl">{name}</h1>
+        <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-6xl">
+          {name}
+        </h1>
 
-        <p className="flex items-center gap-1.5 text-sm text-white/90">
-          <MapPin className="h-4 w-4" aria-hidden="true" />
+        <p className="flex items-center gap-1.5 text-sm text-white/90 sm:text-base">
+          <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
           {[address, city, country].filter(Boolean).join(', ')}
         </p>
 
-        <div className="mt-2 flex flex-wrap items-center gap-3">
+        <div className="mt-1 flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={onViewUnits}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
+            className="group inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-slate-900 shadow-lg transition-transform hover:-translate-y-0.5"
           >
             {t('hero.viewUnits')}
-            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+            <ArrowDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
           </button>
           {website && (
             <a
               href={website}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/25"
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-white/30 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
             >
               <Globe className="h-4 w-4" aria-hidden="true" />
               {t('wizard.website')}
