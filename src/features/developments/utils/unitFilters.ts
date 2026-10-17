@@ -11,13 +11,15 @@ export interface UnitCriteria {
   beds: number[];
   /** Selected unit types (DevelopmentUnit.unitType values). */
   types: string[];
+  /** Selected apartment feature flags (big_terrace, duplex, …); matched with AND. */
+  features: string[];
   minArea?: number;
   maxArea?: number;
   minLevel?: number;
   maxLevel?: number;
 }
 
-export const EMPTY_CRITERIA: UnitCriteria = { beds: [], types: [] };
+export const EMPTY_CRITERIA: UnitCriteria = { beds: [], types: [], features: [] };
 
 /** The usable floor area for filtering: total, then net, then gross. */
 export const unitArea = (u: PublicUnit): number | undefined =>
@@ -28,6 +30,8 @@ export interface FilterBounds {
   bedOptions: number[];
   /** Distinct unit types present. */
   types: string[];
+  /** Distinct feature flags present across the units. */
+  features: string[];
   areaMin: number | null;
   areaMax: number | null;
   levelMin: number | null;
@@ -38,12 +42,14 @@ export interface FilterBounds {
 export const deriveFilterBounds = (units: PublicUnit[]): FilterBounds => {
   const beds = new Set<number>();
   const types = new Set<string>();
+  const features = new Set<string>();
   const areas: number[] = [];
   const levels: number[] = [];
 
   for (const u of units) {
     if (typeof u.beds === 'number') beds.add(u.beds);
     if (u.unitType) types.add(u.unitType);
+    (u.features ?? []).forEach((f) => features.add(f));
     const a = unitArea(u);
     if (typeof a === 'number' && a > 0) areas.push(a);
     if (typeof u.floorLevel === 'number') levels.push(u.floorLevel);
@@ -52,6 +58,7 @@ export const deriveFilterBounds = (units: PublicUnit[]): FilterBounds => {
   return {
     bedOptions: Array.from(beds).sort((a, b) => a - b),
     types: Array.from(types).sort(),
+    features: Array.from(features).sort(),
     areaMin: areas.length ? Math.floor(Math.min(...areas)) : null,
     areaMax: areas.length ? Math.ceil(Math.max(...areas)) : null,
     levelMin: levels.length ? Math.min(...levels) : null,
@@ -63,6 +70,7 @@ export const deriveFilterBounds = (units: PublicUnit[]): FilterBounds => {
 export const hasActiveCriteria = (c: UnitCriteria): boolean =>
   c.beds.length > 0 ||
   c.types.length > 0 ||
+  c.features.length > 0 ||
   c.minArea != null ||
   c.maxArea != null ||
   c.minLevel != null ||
@@ -89,6 +97,12 @@ export const unitMatchesCriteria = (
   }
 
   if (c.types.length > 0 && !c.types.includes(u.unitType)) return false;
+
+  // Features are matched with AND: the unit must have every selected feature.
+  if (c.features.length > 0) {
+    const owned = new Set(u.features ?? []);
+    if (!c.features.every((f) => owned.has(f))) return false;
+  }
 
   if (c.minArea != null || c.maxArea != null) {
     const a = unitArea(u);

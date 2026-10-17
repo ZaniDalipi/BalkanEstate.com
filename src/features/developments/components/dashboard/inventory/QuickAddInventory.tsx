@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
+import { cn } from '@/src/lib/utils';
 import { useInventoryMutations, useDevelopmentStructure } from '../../../hooks';
+import { UNIT_FEATURES } from '../../../types';
 
 /**
  * Compact inventory builder: add a building, a floor (within a building), and a
@@ -23,7 +25,11 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
   const [unitFloorId, setUnitFloorId] = useState('');
   const [unitNumber, setUnitNumber] = useState('');
   const [unitType, setUnitType] = useState('apartment');
+  const [unitFeatures, setUnitFeatures] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const toggleFeature = (f: string) =>
+    setUnitFeatures((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
 
   const selectClass =
     'min-h-[40px] w-full rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring';
@@ -122,8 +128,12 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
                   floorId: unitFloorId,
                   unitNumber: unitNumber.trim(),
                   unitType: unitType.trim() || 'apartment',
+                  features: unitFeatures,
                 }),
-              () => setUnitNumber('')
+              () => {
+                setUnitNumber('');
+                setUnitFeatures([]);
+              }
             );
           }}
         >
@@ -166,6 +176,32 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
           >
             {t('unit.add')}
           </Button>
+
+          {/* Apartment features — the "big terrace / duplex" toggles buyers filter on. */}
+          <div className="sm:col-span-2 lg:col-span-5">
+            <span className="mb-1.5 block text-sm font-medium text-gray-700">{t('filters.apartmentType')}</span>
+            <div className="flex flex-wrap gap-1.5">
+              {UNIT_FEATURES.map((f) => {
+                const on = unitFeatures.includes(f);
+                return (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => toggleFeature(f)}
+                    aria-pressed={on}
+                    className={cn(
+                      'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                      on
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-input text-gray-600 hover:border-primary/50'
+                    )}
+                  >
+                    {t(`feature.${f}`, f.replace(/_/g, ' '))}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </form>
       )}
     </div>

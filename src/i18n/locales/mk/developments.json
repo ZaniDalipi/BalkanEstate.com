@@ -263,5 +263,19 @@
   },
   "explorer": {
     "hide": "Сокриј"
+  },
+  "feature": {
+    "big_terrace": "Со голема тераса",
+    "duplex": "Дуплекс",
+    "penthouse": "Пентхаус",
+    "studio": "Гарсоњера",
+    "garden": "Градина",
+    "corner": "Агол стан",
+    "furnished": "Опремен",
+    "parking": "Паркинг",
+    "storage": "Остава",
+    "sea_view": "Поглед на море",
+    "two_sided": "Двостран",
+    "smart_home": "Паметен дом"
   }
 }

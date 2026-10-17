@@ -56,6 +56,30 @@ export const UNIT_AVAILABILITY_STATES = [
 export type UnitAvailability = (typeof UNIT_AVAILABILITY_STATES)[number];
 
 /**
+ * Apartment feature flags — the "Apartment type" toggles buyers filter on
+ * (East Gate B2: "With big terrace", "Duplex", …). A unit may carry any
+ * combination. Kept as a closed set so the filter UI and the editor share one
+ * vocabulary; anything outside it is dropped on write.
+ */
+export const UNIT_FEATURES = [
+  'big_terrace',
+  'duplex',
+  'penthouse',
+  'studio',
+  'garden',
+  'corner',
+  'furnished',
+  'parking',
+  'storage',
+  'sea_view',
+  'two_sided',
+  'smart_home',
+] as const;
+export type UnitFeature = (typeof UNIT_FEATURES)[number];
+export const isUnitFeature = (value: unknown): value is UnitFeature =>
+  typeof value === 'string' && (UNIT_FEATURES as readonly string[]).includes(value);
+
+/**
  * Floor kinds. Deliberately expressive because floor numbering differs across
  * the Balkans — do not assume floors start at 0 or share a naming convention.
  * The numeric `level` orders floors; the `kind` + `label` describe them.

@@ -50,39 +50,47 @@ describe('unitMatchesCriteria', () => {
 
   it('treats the max bed option as N+', () => {
     const u = unit({ beds: 5 });
-    expect(unitMatchesCriteria(u, { beds: [4], types: [] }, 4)).toBe(true);
-    expect(unitMatchesCriteria(unit({ beds: 2 }), { beds: [4], types: [] }, 4)).toBe(false);
+    expect(unitMatchesCriteria(u, { beds: [4], types: [], features: [] }, 4)).toBe(true);
+    expect(unitMatchesCriteria(unit({ beds: 2 }), { beds: [4], types: [], features: [] }, 4)).toBe(false);
   });
 
   it('respects exact bed counts below the max', () => {
-    expect(unitMatchesCriteria(unit({ beds: 2 }), { beds: [1, 2], types: [] }, 4)).toBe(true);
-    expect(unitMatchesCriteria(unit({ beds: 3 }), { beds: [1, 2], types: [] }, 4)).toBe(false);
+    expect(unitMatchesCriteria(unit({ beds: 2 }), { beds: [1, 2], types: [], features: [] }, 4)).toBe(true);
+    expect(unitMatchesCriteria(unit({ beds: 3 }), { beds: [1, 2], types: [], features: [] }, 4)).toBe(false);
   });
 
   it('filters by unit type', () => {
-    expect(unitMatchesCriteria(unit({ unitType: 'duplex' }), { beds: [], types: ['duplex'] })).toBe(true);
-    expect(unitMatchesCriteria(unit({ unitType: 'apartment' }), { beds: [], types: ['duplex'] })).toBe(false);
+    expect(unitMatchesCriteria(unit({ unitType: 'duplex' }), { beds: [], types: ['duplex'], features: [] })).toBe(true);
+    expect(unitMatchesCriteria(unit({ unitType: 'apartment' }), { beds: [], types: ['duplex'], features: [] })).toBe(false);
+  });
+
+  it('filters by feature flags with AND', () => {
+    const u = unit({ features: ['big_terrace', 'duplex'] });
+    expect(unitMatchesCriteria(u, { beds: [], types: [], features: ['big_terrace'] })).toBe(true);
+    expect(unitMatchesCriteria(u, { beds: [], types: [], features: ['big_terrace', 'duplex'] })).toBe(true);
+    expect(unitMatchesCriteria(u, { beds: [], types: [], features: ['big_terrace', 'garden'] })).toBe(false);
+    expect(unitMatchesCriteria(unit({ features: [] }), { beds: [], types: [], features: ['duplex'] })).toBe(false);
   });
 
   it('filters by area range and excludes units without an area', () => {
-    expect(unitMatchesCriteria(unit({ totalArea: 80 }), { beds: [], types: [], minArea: 60, maxArea: 100 })).toBe(true);
-    expect(unitMatchesCriteria(unit({ totalArea: 50 }), { beds: [], types: [], minArea: 60 })).toBe(false);
-    expect(unitMatchesCriteria(unit({}), { beds: [], types: [], minArea: 60 })).toBe(false);
+    expect(unitMatchesCriteria(unit({ totalArea: 80 }), { beds: [], types: [], features: [], minArea: 60, maxArea: 100 })).toBe(true);
+    expect(unitMatchesCriteria(unit({ totalArea: 50 }), { beds: [], types: [], features: [], minArea: 60 })).toBe(false);
+    expect(unitMatchesCriteria(unit({}), { beds: [], types: [], features: [], minArea: 60 })).toBe(false);
   });
 
   it('filters by floor level range', () => {
-    expect(unitMatchesCriteria(unit({ floorLevel: 5 }), { beds: [], types: [], minLevel: 2, maxLevel: 8 })).toBe(true);
-    expect(unitMatchesCriteria(unit({ floorLevel: 1 }), { beds: [], types: [], minLevel: 2 })).toBe(false);
+    expect(unitMatchesCriteria(unit({ floorLevel: 5 }), { beds: [], types: [], features: [], minLevel: 2, maxLevel: 8 })).toBe(true);
+    expect(unitMatchesCriteria(unit({ floorLevel: 1 }), { beds: [], types: [], features: [], minLevel: 2 })).toBe(false);
   });
 
   it('combines all constraints with AND', () => {
-    const u = unit({ beds: 2, unitType: 'apartment', totalArea: 75, floorLevel: 4 });
+    const u = unit({ beds: 2, unitType: 'apartment', totalArea: 75, floorLevel: 4, features: ['big_terrace'] });
     expect(
-      unitMatchesCriteria(u, { beds: [2], types: ['apartment'], minArea: 60, maxArea: 90, minLevel: 2, maxLevel: 6 }, 4)
+      unitMatchesCriteria(u, { beds: [2], types: ['apartment'], features: ['big_terrace'], minArea: 60, maxArea: 90, minLevel: 2, maxLevel: 6 }, 4)
     ).toBe(true);
     // Same unit, but the area floor is now above its 75 m² → excluded.
     expect(
-      unitMatchesCriteria(u, { beds: [2], types: ['apartment'], minArea: 80 }, 4)
+      unitMatchesCriteria(u, { beds: [2], types: ['apartment'], features: [], minArea: 80 }, 4)
     ).toBe(false);
   });
 });

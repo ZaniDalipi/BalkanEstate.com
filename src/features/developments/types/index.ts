@@ -123,6 +123,7 @@ export interface DevelopmentUnit {
   baths?: number;
   orientation?: string;
   viewType?: string;
+  features?: string[];
   price?: number;
   currency?: string;
   pricePerSqm?: number;
@@ -130,6 +131,23 @@ export interface DevelopmentUnit {
   listingIds: string[];
   primaryListingId?: string;
 }
+
+/** Apartment feature flags buyers filter on — mirrors backend UNIT_FEATURES. */
+export const UNIT_FEATURES = [
+  'big_terrace',
+  'duplex',
+  'penthouse',
+  'studio',
+  'garden',
+  'corner',
+  'furnished',
+  'parking',
+  'storage',
+  'sea_view',
+  'two_sided',
+  'smart_home',
+] as const;
+export type UnitFeature = (typeof UNIT_FEATURES)[number];
 
 // --- Request/response payloads -------------------------------------------
 
@@ -179,6 +197,7 @@ export interface CreateUnitPayload {
   grossArea?: number;
   beds?: number;
   baths?: number;
+  features?: string[];
   price?: number;
   currency?: string;
   availability?: UnitAvailability;

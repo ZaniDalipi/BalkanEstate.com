@@ -32,6 +32,8 @@ export interface IDevelopmentUnit extends Document {
   terraces?: number;
   orientation?: string;
   viewType?: string;
+  /** Apartment feature flags (big_terrace, duplex, …) — see UNIT_FEATURES. */
+  features: string[];
   price?: number;
   currency?: string;
   pricePerSqm?: number;
@@ -82,6 +84,7 @@ const DevelopmentUnitSchema: Schema = new Schema(
     terraces: { type: Number, min: 0 },
     orientation: { type: String, trim: true },
     viewType: { type: String, trim: true },
+    features: { type: [String], default: [] },
     price: { type: Number, min: 0 },
     currency: { type: String, trim: true, maxlength: 8 },
     pricePerSqm: { type: Number, min: 0 },

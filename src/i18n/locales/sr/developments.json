@@ -263,5 +263,19 @@
   },
   "explorer": {
     "hide": "Sakrij"
+  },
+  "feature": {
+    "big_terrace": "Sa velikom terasom",
+    "duplex": "Duplex",
+    "penthouse": "Penthaus",
+    "studio": "Garsonjera",
+    "garden": "Bašta",
+    "corner": "Ugaoni stan",
+    "furnished": "Namešten",
+    "parking": "Parking",
+    "storage": "Ostava",
+    "sea_view": "Pogled na more",
+    "two_sided": "Dvostran",
+    "smart_home": "Pametan dom"
   }
 }

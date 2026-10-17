@@ -263,5 +263,19 @@
   },
   "explorer": {
     "hide": "Скрий"
+  },
+  "feature": {
+    "big_terrace": "С голяма тераса",
+    "duplex": "Мезонет",
+    "penthouse": "Пентхаус",
+    "studio": "Студио",
+    "garden": "Градина",
+    "corner": "Ъглов апартамент",
+    "furnished": "Обзаведен",
+    "parking": "Паркинг",
+    "storage": "Мазе",
+    "sea_view": "Морска гледка",
+    "two_sided": "Двустранен",
+    "smart_home": "Умен дом"
   }
 }

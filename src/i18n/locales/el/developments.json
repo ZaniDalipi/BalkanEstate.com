@@ -263,5 +263,19 @@
   },
   "explorer": {
     "hide": "Απόκρυψη"
+  },
+  "feature": {
+    "big_terrace": "Με μεγάλη βεράντα",
+    "duplex": "Μεζονέτα",
+    "penthouse": "Ρετιρέ",
+    "studio": "Στούντιο",
+    "garden": "Κήπος",
+    "corner": "Γωνιακό",
+    "furnished": "Επιπλωμένο",
+    "parking": "Πάρκινγκ",
+    "storage": "Αποθήκη",
+    "sea_view": "Θέα θάλασσα",
+    "two_sided": "Διαμπερές",
+    "smart_home": "Έξυπνο σπίτι"
   }
 }

@@ -263,5 +263,19 @@
   },
   "explorer": {
     "hide": "Ascunde"
+  },
+  "feature": {
+    "big_terrace": "Cu terasă mare",
+    "duplex": "Duplex",
+    "penthouse": "Penthouse",
+    "studio": "Garsonieră",
+    "garden": "Grădină",
+    "corner": "De colț",
+    "furnished": "Mobilat",
+    "parking": "Parcare",
+    "storage": "Depozitare",
+    "sea_view": "Vedere la mare",
+    "two_sided": "Pe două laturi",
+    "smart_home": "Casă inteligentă"
   }
 }

@@ -263,5 +263,19 @@
   },
   "explorer": {
     "hide": "Fshih"
+  },
+  "feature": {
+    "big_terrace": "Me tarracë të madhe",
+    "duplex": "Dupleks",
+    "penthouse": "Penthouse",
+    "studio": "Studio",
+    "garden": "Kopsht",
+    "corner": "Qoshe",
+    "furnished": "I mobiluar",
+    "parking": "Parkim",
+    "storage": "Depo",
+    "sea_view": "Pamje nga deti",
+    "two_sided": "Dykahësh",
+    "smart_home": "Shtëpi inteligjente"
   }
 }

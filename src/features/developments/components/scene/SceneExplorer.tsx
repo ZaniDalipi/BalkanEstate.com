@@ -158,7 +158,7 @@ export const SceneExplorer: React.FC<SceneExplorerProps> = ({ slug, units, crite
           <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-slate-950/80 px-4 pb-4 pt-9 text-white backdrop-blur-sm sm:px-6">
             <button
               type="button"
-              onClick={() => onChange({ beds: [], types: [] })}
+              onClick={() => onChange({ beds: [], types: [], features: [] })}
               className="absolute right-4 top-2 inline-flex items-center gap-1 text-xs font-semibold text-teal-300 hover:text-teal-200"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -195,27 +195,27 @@ export const SceneExplorer: React.FC<SceneExplorerProps> = ({ slug, units, crite
                 </div>
               )}
 
-              {/* Apartment type */}
-              {bounds.types.length > 1 && (
+              {/* Apartment type (feature flags) */}
+              {bounds.features.length > 0 && (
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-wide text-white/90">{t('filters.apartmentType')}</p>
-                  <div className="flex flex-col gap-1.5">
-                    {bounds.types.map((ty) => {
-                      const on = criteria.types.includes(ty);
+                  <div className="flex max-h-24 flex-col gap-1.5 overflow-y-auto pr-1">
+                    {bounds.features.map((f) => {
+                      const on = criteria.features.includes(f);
                       return (
-                        <label key={ty} className="flex cursor-pointer items-center gap-2 text-sm capitalize">
+                        <label key={f} className="flex cursor-pointer items-center gap-2 text-sm">
                           <input
                             type="checkbox"
                             checked={on}
                             onChange={() =>
                               onChange({
                                 ...criteria,
-                                types: on ? criteria.types.filter((x) => x !== ty) : [...criteria.types, ty],
+                                features: on ? criteria.features.filter((x) => x !== f) : [...criteria.features, f],
                               })
                             }
                             className="h-4 w-4 accent-teal-400"
                           />
-                          <span className="text-white/85">{ty.replace(/_/g, ' ')}</span>
+                          <span className="text-white/85">{t(`feature.${f}`, f.replace(/_/g, ' '))}</span>
                         </label>
                       );
                     })}

@@ -87,15 +87,15 @@ export const UnitFilters: React.FC<UnitFiltersProps> = ({ units, criteria, onCha
       beds: criteria.beds.includes(b) ? criteria.beds.filter((x) => x !== b) : [...criteria.beds, b],
     });
 
-  const toggleType = (ty: string) =>
+  const toggleFeature = (f: string) =>
     onChange({
       ...criteria,
-      types: criteria.types.includes(ty) ? criteria.types.filter((x) => x !== ty) : [...criteria.types, ty],
+      features: criteria.features.includes(f) ? criteria.features.filter((x) => x !== f) : [...criteria.features, f],
     });
 
   const canFilter =
     bounds.bedOptions.length > 0 ||
-    bounds.types.length > 1 ||
+    bounds.features.length > 0 ||
     bounds.areaMin != null ||
     bounds.levelMin != null;
   if (!canFilter) return null;
@@ -112,7 +112,7 @@ export const UnitFilters: React.FC<UnitFiltersProps> = ({ units, criteria, onCha
           {active && (
             <button
               type="button"
-              onClick={() => onChange({ beds: [], types: [] })}
+              onClick={() => onChange({ beds: [], types: [], features: [] })}
               className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -154,28 +154,28 @@ export const UnitFilters: React.FC<UnitFiltersProps> = ({ units, criteria, onCha
           </div>
         )}
 
-        {bounds.types.length > 1 && (
+        {bounds.features.length > 0 && (
           <div>
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {t('filters.apartmentType')}
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {bounds.types.map((ty) => {
-                const on = criteria.types.includes(ty);
+              {bounds.features.map((f) => {
+                const on = criteria.features.includes(f);
                 return (
                   <button
-                    key={ty}
+                    key={f}
                     type="button"
-                    onClick={() => toggleType(ty)}
+                    onClick={() => toggleFeature(f)}
                     aria-pressed={on}
                     className={cn(
-                      'h-9 rounded-lg border px-3 text-sm font-medium capitalize transition-colors',
+                      'h-9 rounded-lg border px-3 text-sm font-medium transition-colors',
                       on
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border text-foreground hover:border-primary/50'
                     )}
                   >
-                    {ty.replace(/_/g, ' ')}
+                    {t(`feature.${f}`, f.replace(/_/g, ' '))}
                   </button>
                 );
               })}

@@ -11,9 +11,16 @@ import {
   FLOOR_KINDS,
   UNIT_AVAILABILITY_STATES,
   isUnitAvailability,
+  isUnitFeature,
   type FloorKind,
   type UnitAvailability,
 } from '../../config/developments';
+
+/** Keep only known feature flags, de-duplicated. */
+const sanitizeFeatures = (input?: unknown): string[] => {
+  if (!Array.isArray(input)) return [];
+  return Array.from(new Set(input.filter(isUnitFeature)));
+};
 
 type Id = mongoose.Types.ObjectId | string;
 
@@ -129,6 +136,7 @@ export interface CreateUnitInput {
   terraces?: number;
   orientation?: string;
   viewType?: string;
+  features?: string[];
   price?: number;
   currency?: string;
   pricePerSqm?: number;
@@ -173,6 +181,7 @@ export const createUnit = async (
       terraces: input.terraces,
       orientation: input.orientation,
       viewType: input.viewType,
+      features: sanitizeFeatures(input.features),
       price: input.price,
       currency: input.currency,
       pricePerSqm: input.pricePerSqm,

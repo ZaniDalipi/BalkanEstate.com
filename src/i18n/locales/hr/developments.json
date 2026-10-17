@@ -263,5 +263,19 @@
   },
   "explorer": {
     "hide": "Sakrij"
+  },
+  "feature": {
+    "big_terrace": "S velikom terasom",
+    "duplex": "Duplex",
+    "penthouse": "Penthouse",
+    "studio": "Garsonijera",
+    "garden": "Vrt",
+    "corner": "Kutni stan",
+    "furnished": "Namješten",
+    "parking": "Parking",
+    "storage": "Spremište",
+    "sea_view": "Pogled na more",
+    "two_sided": "Dvostran",
+    "smart_home": "Pametni dom"
   }
 }

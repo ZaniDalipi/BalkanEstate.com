@@ -211,12 +211,28 @@ async function run(): Promise<void> {
           const beds = rnd(0, 4);
           const area = round2(38 + beds * 22 + rnd(0, 18) + level * 0.8);
           const pricePerSqm = 1700 + rnd(0, 700) + level * 20;
+          const uType = unitTypeFor(level, bd.floors, u, beds);
+
+          // Feature flags so the "Apartment type" filter has real variety.
+          const features: string[] = [];
+          if (uType === 'duplex') features.push('duplex');
+          if (uType === 'penthouse') features.push('penthouse', 'big_terrace', 'smart_home');
+          if (uType === 'studio') features.push('studio');
+          if (level >= bd.floors - 1 && uType !== 'penthouse') features.push('big_terrace');
+          if (u === 1) features.push('corner');
+          if (level <= 1) features.push('garden');
+          if (beds >= 3) features.push('two_sided');
+          if (availIdx % 2 === 0) features.push('parking');
+          if (availIdx % 3 === 0) features.push('storage');
+          if (bd.code === 'S1' || bd.code === 'S2') features.push('sea_view');
+
           const unit = await DevelopmentUnit.create({
             developmentId: development._id,
             buildingId: building._id,
             floorId: floor._id,
             unitNumber: `${bd.code}${level}0${u}`,
-            unitType: unitTypeFor(level, bd.floors, u, beds),
+            unitType: uType,
+            features,
             beds,
             baths: Math.max(1, beds - 1),
             netArea: round2(area * 0.85),

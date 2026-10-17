@@ -247,6 +247,20 @@
   "explorer": {
     "hide": "Hide"
   },
+  "feature": {
+    "big_terrace": "With big terrace",
+    "duplex": "Duplex",
+    "penthouse": "Penthouse",
+    "studio": "Studio",
+    "garden": "Garden",
+    "corner": "Corner unit",
+    "furnished": "Furnished",
+    "parking": "Parking",
+    "storage": "Storage",
+    "sea_view": "Sea view",
+    "two_sided": "Two-sided",
+    "smart_home": "Smart home"
+  },
   "suggest": {
     "heading": "Is this home part of a residence?",
     "subtitle": "We found developments near this location. Attach your listing so buyers discover it inside the residence.",
