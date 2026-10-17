@@ -193,6 +193,8 @@
     "addBuildingsHint": "Add buildings and floors to map individual facades and floor plans.",
     "editingTarget": "Editing: {{target}}",
     "noPlanForTarget": "No interactive plan has been published for this yet.",
+    "listingOfUnit": "Listing of unit {{unit}}",
+    "noAttachedListings": "Attach a listing to a unit first, then it appears here.",
     "tools": {
       "select": "Select",
       "rect": "Rectangle",
@@ -228,6 +230,16 @@
     "errBeds": "Min bedrooms cannot exceed max.",
     "errPrice": "Min price cannot exceed max.",
     "errArea": "Min area cannot exceed max."
+  },
+  "filters": {
+    "heading": "Find your home",
+    "bedrooms": "Bedrooms",
+    "apartmentType": "Apartment type",
+    "area": "Area",
+    "floors": "Floors",
+    "clear": "Clear filters",
+    "matchCount_one": "{{count}} home",
+    "matchCount_other": "{{count}} homes"
   },
   "suggest": {
     "heading": "Is this home part of a residence?",

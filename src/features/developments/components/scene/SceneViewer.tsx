@@ -10,6 +10,11 @@ import type { Hotspot, PublicUnit, SceneTargetType } from '../../types';
 interface SceneViewerProps {
   slug: string;
   units: PublicUnit[];
+  /**
+   * When set, unit regions whose id is not in the set are dimmed — the scene
+   * reacts live to the explorer's filter bar. Undefined means no filtering.
+   */
+  highlightUnitIds?: Set<string>;
 }
 
 /** One level of the drill-down stack (site plan → building → floor). */
@@ -36,7 +41,7 @@ const AVAILABILITY_FILL: Record<string, string> = {
  * navigate to the unit; listing regions navigate to the listing. A breadcrumb
  * walks back up. Renders nothing when the development itself has no scene.
  */
-export const SceneViewer: React.FC<SceneViewerProps> = ({ slug, units }) => {
+export const SceneViewer: React.FC<SceneViewerProps> = ({ slug, units, highlightUnitIds }) => {
   const { t } = useTranslation('developments');
   const [stack, setStack] = useState<Crumb[]>([{ type: 'development', label: t('scene.sitePlan') }]);
   const current = stack[stack.length - 1];
@@ -53,8 +58,12 @@ export const SceneViewer: React.FC<SceneViewerProps> = ({ slug, units }) => {
   const atRoot = stack.length === 1;
   if (atRoot && !isLoading && (!scene || scene.hotspots.length === 0)) return null;
 
+  const DIMMED = 'rgba(148,163,184,0.12)';
+
   const colorOf = (h: Hotspot): string => {
     if (h.linkType === 'unit') {
+      // A unit filtered out by the explorer's criteria fades into the backdrop.
+      if (highlightUnitIds && !highlightUnitIds.has(h.linkId)) return DIMMED;
       const av = availabilityByUnit.get(h.linkId);
       if (av && AVAILABILITY_FILL[av]) return AVAILABILITY_FILL[av];
     }

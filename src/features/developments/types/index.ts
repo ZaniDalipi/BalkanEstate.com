@@ -222,6 +222,7 @@ export interface Paginated<T> {
 export interface PublicUnit extends DevelopmentUnit {
   buildingName?: string | null;
   floorLabel?: string | null;
+  floorLevel?: number | null;
 }
 
 export interface UnitsSummary {

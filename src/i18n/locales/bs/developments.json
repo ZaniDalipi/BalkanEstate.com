@@ -204,7 +204,9 @@
     "targetPicker": "Šta mapirati",
     "addBuildingsHint": "Dodajte zgrade i spratove da mapirate fasade i planove spratova.",
     "editingTarget": "Uređivanje: {{target}}",
-    "noPlanForTarget": "Za ovo još nije objavljen interaktivni plan."
+    "noPlanForTarget": "Za ovo još nije objavljen interaktivni plan.",
+    "listingOfUnit": "Oglas za stan {{unit}}",
+    "noAttachedListings": "Prvo povežite oglas sa stanom pa će se pojaviti ovdje."
   },
   "follow": {
     "title": "Follow {{name}}",
@@ -245,5 +247,15 @@
     "none": "Nema rezidencija u blizini ove lokacije.",
     "error": "Nije moguće učitati obližnje rezidencije.",
     "viewResidence": "Pogledaj rezidenciju"
+  },
+  "filters": {
+    "heading": "Pronađite svoj dom",
+    "bedrooms": "Spavaće sobe",
+    "apartmentType": "Tip stana",
+    "area": "Površina",
+    "floors": "Spratovi",
+    "clear": "Očisti filtere",
+    "matchCount_one": "{{count}} stan",
+    "matchCount_other": "{{count}} stanova"
   }
 }

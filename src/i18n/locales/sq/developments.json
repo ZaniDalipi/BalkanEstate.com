@@ -204,7 +204,9 @@
     "targetPicker": "Çfarë të hartoni",
     "addBuildingsHint": "Shtoni ndërtesa dhe kate për të hartuar fasadat dhe planet e kateve.",
     "editingTarget": "Duke redaktuar: {{target}}",
-    "noPlanForTarget": "Ende nuk është publikuar një plan interaktiv për këtë."
+    "noPlanForTarget": "Ende nuk është publikuar një plan interaktiv për këtë.",
+    "listingOfUnit": "Shpallja e banesës {{unit}}",
+    "noAttachedListings": "Lidhni fillimisht një shpallje me një banesë dhe do të shfaqet këtu."
   },
   "follow": {
     "title": "Follow {{name}}",
@@ -245,5 +247,15 @@
     "none": "Nuk u gjetën rezidenca pranë kësaj vendndodhjeje.",
     "error": "Nuk u ngarkuan dot rezidencat e afërta.",
     "viewResidence": "Shiko rezidencën"
+  },
+  "filters": {
+    "heading": "Gjeni shtëpinë tuaj",
+    "bedrooms": "Dhoma gjumi",
+    "apartmentType": "Lloji i banesës",
+    "area": "Sipërfaqja",
+    "floors": "Katet",
+    "clear": "Pastro filtrat",
+    "matchCount_one": "{{count}} banesë",
+    "matchCount_other": "{{count}} banesa"
   }
 }

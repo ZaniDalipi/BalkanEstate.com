@@ -204,7 +204,9 @@
     "targetPicker": "Ce să cartografiezi",
     "addBuildingsHint": "Adaugă clădiri și etaje pentru a cartografia fațade și planuri de etaj.",
     "editingTarget": "Se editează: {{target}}",
-    "noPlanForTarget": "Încă nu a fost publicat un plan interactiv pentru acesta."
+    "noPlanForTarget": "Încă nu a fost publicat un plan interactiv pentru acesta.",
+    "listingOfUnit": "Anunțul unității {{unit}}",
+    "noAttachedListings": "Conectează mai întâi un anunț la o unitate și va apărea aici."
   },
   "follow": {
     "title": "Follow {{name}}",
@@ -245,5 +247,15 @@
     "none": "Nu s-au găsit ansambluri în apropierea acestei locații.",
     "error": "Nu s-au putut încărca ansamblurile din apropiere.",
     "viewResidence": "Vezi ansamblul"
+  },
+  "filters": {
+    "heading": "Găsește-ți casa",
+    "bedrooms": "Dormitoare",
+    "apartmentType": "Tip apartament",
+    "area": "Suprafață",
+    "floors": "Etaje",
+    "clear": "Șterge filtrele",
+    "matchCount_one": "{{count}} locuință",
+    "matchCount_other": "{{count}} locuințe"
   }
 }

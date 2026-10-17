@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Check } from 'lucide-react';
@@ -11,10 +11,18 @@ import { StatsBar } from './StatsBar';
 import { KeyFacts } from './KeyFacts';
 import { AvailabilityBar } from './AvailabilityBar';
 import { UnitsBrowser } from './UnitsBrowser';
+import { UnitFilters } from './UnitFilters';
 import { FollowCard } from './FollowCard';
 import { ResidenceLocation } from './ResidenceLocation';
 import { SceneViewer } from '../scene/SceneViewer';
 import type { DevelopmentFloor } from '../../types';
+import {
+  deriveFilterBounds,
+  unitMatchesCriteria,
+  hasActiveCriteria,
+  EMPTY_CRITERIA,
+  type UnitCriteria,
+} from '../../utils/unitFilters';
 
 /** Smooth-scroll to a section by id, accounting for the sticky nav offset. */
 const scrollToId = (id: string) => {
@@ -33,6 +41,20 @@ const PublicDevelopmentPage: React.FC = () => {
   const { development, buildings, floors, isLoading, error } = usePublicDevelopment(slug);
   const { units, summary } = usePublicDevelopmentUnits(slug);
   const unitsRef = useRef<HTMLDivElement>(null);
+
+  const [criteria, setCriteria] = useState<UnitCriteria>(EMPTY_CRITERIA);
+  const bedsMax = useMemo(() => {
+    const opts = deriveFilterBounds(units).bedOptions;
+    return opts.length ? opts[opts.length - 1] : undefined;
+  }, [units]);
+  const matchedUnits = useMemo(
+    () => (hasActiveCriteria(criteria) ? units.filter((u) => unitMatchesCriteria(u, criteria, bedsMax)) : units),
+    [units, criteria, bedsMax]
+  );
+  const highlightUnitIds = useMemo(
+    () => (hasActiveCriteria(criteria) ? new Set(matchedUnits.map((u) => u.id)) : undefined),
+    [matchedUnits, criteria]
+  );
 
   const sections = useMemo(
     () => [
@@ -146,16 +168,28 @@ const PublicDevelopmentPage: React.FC = () => {
         <FollowCard slug={development.slug} developmentName={development.name} />
       </div>
 
+      {/* Explorer filter bar — drives both the interactive plans and the grid. */}
+      {units.length > 0 && (
+        <div className="mt-8">
+          <UnitFilters
+            units={units}
+            criteria={criteria}
+            onChange={setCriteria}
+            matchCount={matchedUnits.length}
+          />
+        </div>
+      )}
+
       {/* Interactive plans — renders only when the owner has published a scene. */}
       <div id="plans" className="scroll-mt-20">
-        <SceneViewer slug={development.slug} units={units} />
+        <SceneViewer slug={development.slug} units={units} highlightUnitIds={highlightUnitIds} />
       </div>
 
       <section ref={unitsRef} id="units" aria-labelledby="units-heading" className="mt-10 scroll-mt-20">
         <h2 id="units-heading" className="mb-4 text-2xl font-bold text-foreground">
           {t('units.heading')}
         </h2>
-        <UnitsBrowser units={units} slug={development.slug} />
+        <UnitsBrowser units={matchedUnits} slug={development.slug} />
       </section>
 
       <ResidenceLocation development={development} />

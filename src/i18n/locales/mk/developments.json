@@ -204,7 +204,9 @@
     "targetPicker": "Што да се мапира",
     "addBuildingsHint": "Додадете згради и катови за да мапирате фасади и планови на катови.",
     "editingTarget": "Уредување: {{target}}",
-    "noPlanForTarget": "Сè уште не е објавен интерактивен план за ова."
+    "noPlanForTarget": "Сè уште не е објавен интерактивен план за ова.",
+    "listingOfUnit": "Оглас за стан {{unit}}",
+    "noAttachedListings": "Прво поврзете оглас со стан, потоа ќе се појави тука."
   },
   "follow": {
     "title": "Follow {{name}}",
@@ -245,5 +247,15 @@
     "none": "Нема резиденции во близина на оваа локација.",
     "error": "Не може да се вчитаат блиските резиденции.",
     "viewResidence": "Погледни резиденција"
+  },
+  "filters": {
+    "heading": "Најдете го вашиот дом",
+    "bedrooms": "Спални",
+    "apartmentType": "Тип на стан",
+    "area": "Површина",
+    "floors": "Катови",
+    "clear": "Исчисти филтри",
+    "matchCount_one": "{{count}} дом",
+    "matchCount_other": "{{count}} домови"
   }
 }

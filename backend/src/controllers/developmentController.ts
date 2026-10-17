@@ -399,11 +399,13 @@ export const listPublicUnits = async (req: Request, res: Response): Promise<void
 
     const buildingName = new Map(buildings.map((b) => [String(b._id), b.name]));
     const floorLabel = new Map(floors.map((f) => [String(f._id), f.label]));
+    const floorLevel = new Map(floors.map((f) => [String(f._id), f.level]));
 
     const enriched = units.map((u) => ({
       ...u.toJSON(),
       buildingName: buildingName.get(String(u.buildingId)) ?? null,
       floorLabel: floorLabel.get(String(u.floorId)) ?? null,
+      floorLevel: floorLevel.get(String(u.floorId)) ?? null,
     }));
 
     const priced = units.filter((u) => typeof u.price === 'number' && (u.price as number) > 0);
@@ -467,6 +469,7 @@ export const getPublicUnit = async (req: Request, res: Response): Promise<void> 
         ...unit.toJSON(),
         buildingName: building?.name ?? null,
         floorLabel: floor?.label ?? null,
+        floorLevel: floor?.level ?? null,
       },
       development: {
         name: development.name,

@@ -51,12 +51,17 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, targetT
     setDirty(false);
   }, [scene?.id, scene?.draft?.version]);
 
-  // Link target options from the development's structure + units.
+  // Link target options from the development's structure + units. The `listing`
+  // options are the development's units that already carry an attached listing,
+  // so the owner can place one of their listings on the facade/floor directly.
   const linkOptions = useMemo(
     () => ({
       building: buildings.map((b) => ({ id: b.id, label: b.name })),
       floor: floors.map((f) => ({ id: f.id, label: f.label })),
       unit: units.map((u) => ({ id: u.id, label: u.unitNumber })),
+      listing: units
+        .filter((u) => u.primaryListingId)
+        .map((u) => ({ id: u.primaryListingId as string, label: u.unitNumber })),
     }),
     [buildings, floors, units]
   );
@@ -248,7 +253,8 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, targetT
 
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('scene.linkTarget')}</label>
-              {selected.linkType === 'listing' || selected.linkType === 'entrance' ? (
+              {selected.linkType === 'entrance' ||
+              (selected.linkType === 'listing' && linkOptions.listing.length === 0) ? (
                 <input
                   value={selected.linkId}
                   onChange={(e) => patchSelected({ linkId: e.target.value })}
@@ -262,12 +268,15 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, targetT
                   className="min-h-[36px] w-full rounded-lg border border-input bg-background px-2 text-sm"
                 >
                   <option value="">—</option>
-                  {(linkOptions[selected.linkType as 'building' | 'floor' | 'unit'] ?? []).map((o) => (
+                  {(linkOptions[selected.linkType as 'building' | 'floor' | 'unit' | 'listing'] ?? []).map((o) => (
                     <option key={o.id} value={o.id}>
-                      {o.label}
+                      {selected.linkType === 'listing' ? t('scene.listingOfUnit', { unit: o.label }) : o.label}
                     </option>
                   ))}
                 </select>
+              )}
+              {selected.linkType === 'listing' && linkOptions.listing.length === 0 && (
+                <p className="mt-1 text-xs text-muted-foreground">{t('scene.noAttachedListings')}</p>
               )}
             </div>
 
