@@ -196,7 +196,12 @@
       "floor": "Floor",
       "unit": "Unit",
       "listing": "Listing"
-    }
+    },
+    "sitePlan": "Κάτοψη οικοπέδου (αεροφωτογραφία)",
+    "targetPicker": "Τι να χαρτογραφήσετε",
+    "addBuildingsHint": "Προσθέστε κτίρια και ορόφους για να χαρτογραφήσετε προσόψεις και κατόψεις ορόφων.",
+    "editingTarget": "Επεξεργασία: {{target}}",
+    "noPlanForTarget": "Δεν έχει δημοσιευτεί ακόμη διαδραστική κάτοψη για αυτό."
   },
   "follow": {
     "title": "Follow {{name}}",

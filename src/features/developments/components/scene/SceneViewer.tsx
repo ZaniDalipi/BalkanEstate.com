@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ChevronRight } from 'lucide-react';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { usePublishedScene } from '../../hooks';
@@ -9,8 +10,13 @@ import type { Hotspot, PublicUnit, SceneTargetType } from '../../types';
 interface SceneViewerProps {
   slug: string;
   units: PublicUnit[];
-  targetType?: SceneTargetType;
-  targetId?: string;
+}
+
+/** One level of the drill-down stack (site plan → building → floor). */
+interface Crumb {
+  type: SceneTargetType;
+  id?: string;
+  label: string;
 }
 
 const AVAILABILITY_FILL: Record<string, string> = {
@@ -23,19 +29,19 @@ const AVAILABILITY_FILL: Record<string, string> = {
 };
 
 /**
- * Public interactive viewer: renders a development's published scene (aerial /
- * facade / floor plan) with its clickable regions. Unit regions are tinted by
- * availability; clicking a region navigates to the unit or listing it links to.
- * Renders nothing when no scene has been published for the target.
+ * Public interactive viewer with drill-down: starts on the development site
+ * plan and, when a building or floor region is clicked, descends into that
+ * target's own published scene (a facade or floor plan) — the East Gate
+ * site-map → building → floor flow. Unit regions are tinted by availability and
+ * navigate to the unit; listing regions navigate to the listing. A breadcrumb
+ * walks back up. Renders nothing when the development itself has no scene.
  */
-export const SceneViewer: React.FC<SceneViewerProps> = ({
-  slug,
-  units,
-  targetType = 'development',
-  targetId,
-}) => {
+export const SceneViewer: React.FC<SceneViewerProps> = ({ slug, units }) => {
   const { t } = useTranslation('developments');
-  const { scene } = usePublishedScene(slug, targetType, targetId);
+  const [stack, setStack] = useState<Crumb[]>([{ type: 'development', label: t('scene.sitePlan') }]);
+  const current = stack[stack.length - 1];
+
+  const { scene, isLoading } = usePublishedScene(slug, current.type, current.id);
 
   const availabilityByUnit = useMemo(() => {
     const m = new Map<string, string>();
@@ -43,7 +49,9 @@ export const SceneViewer: React.FC<SceneViewerProps> = ({
     return m;
   }, [units]);
 
-  if (!scene || !scene.hotspots || scene.hotspots.length === 0) return null;
+  // At the root with nothing published, stay out of the page entirely.
+  const atRoot = stack.length === 1;
+  if (atRoot && !isLoading && (!scene || scene.hotspots.length === 0)) return null;
 
   const colorOf = (h: Hotspot): string => {
     if (h.linkType === 'unit') {
@@ -54,25 +62,66 @@ export const SceneViewer: React.FC<SceneViewerProps> = ({
   };
 
   const onHotspotClick = (h: Hotspot) => {
-    if (h.linkType === 'unit') navigate(paths.developmentUnit(slug, h.linkId));
-    else if (h.linkType === 'listing') navigate(paths.property(h.linkId));
-    // building / floor / entrance links are informational in this view.
+    if (h.linkType === 'unit') {
+      navigate(paths.developmentUnit(slug, h.linkId));
+    } else if (h.linkType === 'listing') {
+      navigate(paths.property(h.linkId));
+    } else if (h.linkType === 'building' || h.linkType === 'floor') {
+      // Descend into the clicked target's own scene.
+      setStack((prev) => [
+        ...prev,
+        { type: h.linkType as SceneTargetType, id: h.linkId, label: h.label || t(`scene.linkTypes.${h.linkType}`) },
+      ]);
+    }
   };
+
+  const goTo = (index: number) => setStack((prev) => prev.slice(0, index + 1));
 
   return (
     <section aria-labelledby="explore-heading" className="mt-10">
       <h2 id="explore-heading" className="mb-3 text-2xl font-bold text-foreground">
         {t('scene.exploreHeading')}
       </h2>
-      <HotspotCanvas
-        imageUrl={scene.imageUrl}
-        imageWidth={scene.imageWidth}
-        imageHeight={scene.imageHeight}
-        hotspots={scene.hotspots}
-        mode="view"
-        colorOf={colorOf}
-        onHotspotClick={onHotspotClick}
-      />
+
+      {/* Breadcrumb trail */}
+      {stack.length > 1 && (
+        <nav aria-label="breadcrumb" className="mb-3 flex flex-wrap items-center gap-1 text-sm">
+          {stack.map((c, i) => {
+            const last = i === stack.length - 1;
+            return (
+              <span key={`${c.type}-${c.id ?? 'root'}-${i}`} className="flex items-center gap-1">
+                {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />}
+                {last ? (
+                  <span className="font-medium text-foreground">{c.label}</span>
+                ) : (
+                  <button type="button" onClick={() => goTo(i)} className="text-primary hover:underline">
+                    {c.label}
+                  </button>
+                )}
+              </span>
+            );
+          })}
+        </nav>
+      )}
+
+      {scene && scene.hotspots.length > 0 ? (
+        <HotspotCanvas
+          imageUrl={scene.imageUrl}
+          imageWidth={scene.imageWidth}
+          imageHeight={scene.imageHeight}
+          hotspots={scene.hotspots}
+          mode="view"
+          colorOf={colorOf}
+          onHotspotClick={onHotspotClick}
+        />
+      ) : (
+        !isLoading && (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+            {t('scene.noPlanForTarget')}
+          </div>
+        )
+      )}
+
       {/* Legend */}
       <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
         {(['available', 'reserved', 'sold'] as const).map((s) => (

@@ -196,7 +196,12 @@
       "floor": "Floor",
       "unit": "Unit",
       "listing": "Listing"
-    }
+    },
+    "sitePlan": "План на обекта (отгоре)",
+    "targetPicker": "Какво да се картира",
+    "addBuildingsHint": "Добавете сгради и етажи, за да картирате фасади и етажни планове.",
+    "editingTarget": "Редактиране: {{target}}",
+    "noPlanForTarget": "Все още няма публикуван интерактивен план за това."
   },
   "follow": {
     "title": "Follow {{name}}",

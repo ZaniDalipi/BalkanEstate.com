@@ -196,7 +196,12 @@
       "floor": "Floor",
       "unit": "Unit",
       "listing": "Listing"
-    }
+    },
+    "sitePlan": "Plani i vendit (nga ajri)",
+    "targetPicker": "Çfarë të hartoni",
+    "addBuildingsHint": "Shtoni ndërtesa dhe kate për të hartuar fasadat dhe planet e kateve.",
+    "editingTarget": "Duke redaktuar: {{target}}",
+    "noPlanForTarget": "Ende nuk është publikuar një plan interaktiv për këtë."
   },
   "follow": {
     "title": "Follow {{name}}",

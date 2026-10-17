@@ -10,7 +10,7 @@ import { usePublishDevelopment } from '../../hooks';
 import { StatusPill } from '../shared/Badges';
 import { LoadingState, ErrorState } from '../shared/States';
 import { CoverImageUpload } from '../shared/CoverImageUpload';
-import { SceneEditor } from '../scene/SceneEditor';
+import { SceneStudio } from '../scene/SceneStudio';
 import { QuickAddInventory } from './inventory/QuickAddInventory';
 import { UnitsTable } from './inventory/UnitsTable';
 import { AttachListingPanel } from './listings/AttachListingPanel';
@@ -106,7 +106,7 @@ const DevelopmentManagePage: React.FC = () => {
           {t('scene.heading')}
         </h2>
         <p className="mb-3 text-sm text-muted-foreground">{t('scene.subtitle')}</p>
-        <SceneEditor developmentId={development.id} targetType="development" targetId={development.id} />
+        <SceneStudio developmentId={development.id} />
       </section>
 
       <section aria-labelledby="units-heading" className="mb-8">

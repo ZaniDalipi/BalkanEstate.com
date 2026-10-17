@@ -196,7 +196,12 @@
       "floor": "Floor",
       "unit": "Unit",
       "listing": "Listing"
-    }
+    },
+    "sitePlan": "Plan de amplasament (aerian)",
+    "targetPicker": "Ce să cartografiezi",
+    "addBuildingsHint": "Adaugă clădiri și etaje pentru a cartografia fațade și planuri de etaj.",
+    "editingTarget": "Se editează: {{target}}",
+    "noPlanForTarget": "Încă nu a fost publicat un plan interactiv pentru acesta."
   },
   "follow": {
     "title": "Follow {{name}}",

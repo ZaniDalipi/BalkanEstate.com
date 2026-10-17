@@ -196,7 +196,12 @@
       "floor": "Floor",
       "unit": "Unit",
       "listing": "Listing"
-    }
+    },
+    "sitePlan": "Plan lokacije (iz zraka)",
+    "targetPicker": "Što mapirati",
+    "addBuildingsHint": "Dodajte zgrade i katove za mapiranje pročelja i tlocrta katova.",
+    "editingTarget": "Uređivanje: {{target}}",
+    "noPlanForTarget": "Za ovo još nije objavljen interaktivni plan."
   },
   "follow": {
     "title": "Follow {{name}}",

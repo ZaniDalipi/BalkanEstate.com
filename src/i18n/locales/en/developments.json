@@ -185,6 +185,11 @@
     "needLink": "Every region needs a target before saving.",
     "saved": "Draft saved.",
     "published": "Map published.",
+    "sitePlan": "Site plan (aerial)",
+    "targetPicker": "What to map",
+    "addBuildingsHint": "Add buildings and floors to map individual facades and floor plans.",
+    "editingTarget": "Editing: {{target}}",
+    "noPlanForTarget": "No interactive plan has been published for this yet.",
     "tools": {
       "select": "Select",
       "rect": "Rectangle",

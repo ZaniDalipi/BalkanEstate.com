@@ -196,7 +196,12 @@
       "floor": "Floor",
       "unit": "Unit",
       "listing": "Listing"
-    }
+    },
+    "sitePlan": "План на локација (од воздух)",
+    "targetPicker": "Што да се мапира",
+    "addBuildingsHint": "Додадете згради и катови за да мапирате фасади и планови на катови.",
+    "editingTarget": "Уредување: {{target}}",
+    "noPlanForTarget": "Сè уште не е објавен интерактивен план за ова."
   },
   "follow": {
     "title": "Follow {{name}}",
