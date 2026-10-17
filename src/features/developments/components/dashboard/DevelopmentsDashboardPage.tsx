@@ -8,19 +8,29 @@ import { useMyDevelopments } from '../../hooks';
 import { DevelopmentCard } from '../shared/DevelopmentCard';
 import { LoadingState, EmptyState, ErrorState } from '../shared/States';
 
+interface DevelopmentsDashboardPageProps {
+  /** When embedded inside the account page, drop the standalone <main> chrome. */
+  embedded?: boolean;
+}
+
 /**
  * Dashboard landing: the developments the signed-in user owns or belongs to,
  * plus the entry point to create a new one. Creating is gated server-side on an
  * active subscription plan; the create form surfaces that if it applies.
+ *
+ * Rendered both as a standalone route (`/dashboard/developments`) and embedded
+ * in the account page's "Residences" tab, so sellers find it from their profile.
  */
-const DevelopmentsDashboardPage: React.FC = () => {
+const DevelopmentsDashboardPage: React.FC<DevelopmentsDashboardPageProps> = ({ embedded = false }) => {
   const { t } = useTranslation('developments');
   const { developments, isLoading, error, refetch } = useMyDevelopments();
 
+  const Wrapper = embedded ? 'div' : 'main';
+
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
+    <Wrapper className={embedded ? 'w-full' : 'mx-auto w-full max-w-6xl px-4 py-8'}>
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t('nav.dashboard')}</h1>
+        {!embedded && <h1 className="text-2xl font-bold text-foreground">{t('nav.dashboard')}</h1>}
         <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
         {/* On its own row (left-aligned) so it never lands under the app's
             top-right floating action bar. */}
@@ -62,7 +72,7 @@ const DevelopmentsDashboardPage: React.FC = () => {
           ))}
         </div>
       )}
-    </main>
+    </Wrapper>
   );
 };
 
