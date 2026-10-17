@@ -11,10 +11,9 @@ import { StatsBar } from './StatsBar';
 import { KeyFacts } from './KeyFacts';
 import { AvailabilityBar } from './AvailabilityBar';
 import { UnitsBrowser } from './UnitsBrowser';
-import { UnitFilters } from './UnitFilters';
 import { FollowCard } from './FollowCard';
 import { ResidenceLocation } from './ResidenceLocation';
-import { SceneViewer } from '../scene/SceneViewer';
+import { SceneExplorer } from '../scene/SceneExplorer';
 import type { DevelopmentFloor } from '../../types';
 import {
   deriveFilterBounds,
@@ -50,10 +49,6 @@ const PublicDevelopmentPage: React.FC = () => {
   const matchedUnits = useMemo(
     () => (hasActiveCriteria(criteria) ? units.filter((u) => unitMatchesCriteria(u, criteria, bedsMax)) : units),
     [units, criteria, bedsMax]
-  );
-  const highlightUnitIds = useMemo(
-    () => (hasActiveCriteria(criteria) ? new Set(matchedUnits.map((u) => u.id)) : undefined),
-    [matchedUnits, criteria]
   );
 
   const sections = useMemo(
@@ -168,22 +163,20 @@ const PublicDevelopmentPage: React.FC = () => {
         <FollowCard slug={development.slug} developmentName={development.name} />
       </div>
 
-      {/* Explorer filter bar — drives both the interactive plans and the grid. */}
+      {/* Immersive B2-style explorer: full-bleed plan with an overlaid filter
+          bar. Falls back to a plain filter bar when no scene is published. Its
+          criteria also drive the unit grid below. */}
       {units.length > 0 && (
-        <div className="mt-8">
-          <UnitFilters
+        <div id="plans" className="mt-8 scroll-mt-20">
+          <SceneExplorer
+            slug={development.slug}
             units={units}
             criteria={criteria}
             onChange={setCriteria}
-            matchCount={matchedUnits.length}
+            badge={development.name}
           />
         </div>
       )}
-
-      {/* Interactive plans — renders only when the owner has published a scene. */}
-      <div id="plans" className="scroll-mt-20">
-        <SceneViewer slug={development.slug} units={units} highlightUnitIds={highlightUnitIds} />
-      </div>
 
       <section ref={unitsRef} id="units" aria-labelledby="units-heading" className="mt-10 scroll-mt-20">
         <h2 id="units-heading" className="mb-4 text-2xl font-bold text-foreground">

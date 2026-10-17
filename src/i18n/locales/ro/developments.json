@@ -260,5 +260,8 @@
     "clear": "Șterge filtrele",
     "matchCount_one": "{{count}} locuință",
     "matchCount_other": "{{count}} locuințe"
+  },
+  "explorer": {
+    "hide": "Ascunde"
   }
 }

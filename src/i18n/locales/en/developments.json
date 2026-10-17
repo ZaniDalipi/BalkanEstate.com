@@ -244,6 +244,9 @@
     "matchCount_one": "{{count}} home",
     "matchCount_other": "{{count}} homes"
   },
+  "explorer": {
+    "hide": "Hide"
+  },
   "suggest": {
     "heading": "Is this home part of a residence?",
     "subtitle": "We found developments near this location. Attach your listing so buyers discover it inside the residence.",

@@ -260,5 +260,8 @@
     "clear": "Καθαρισμός φίλτρων",
     "matchCount_one": "{{count}} κατοικία",
     "matchCount_other": "{{count}} κατοικίες"
+  },
+  "explorer": {
+    "hide": "Απόκρυψη"
   }
 }

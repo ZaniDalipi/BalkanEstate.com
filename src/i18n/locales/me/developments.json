@@ -260,5 +260,8 @@
     "clear": "Obriši filtere",
     "matchCount_one": "{{count}} stan",
     "matchCount_other": "{{count}} stanova"
+  },
+  "explorer": {
+    "hide": "Sakrij"
   }
 }

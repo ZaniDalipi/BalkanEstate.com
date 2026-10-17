@@ -260,5 +260,8 @@
     "clear": "Изчисти филтрите",
     "matchCount_one": "{{count}} жилище",
     "matchCount_other": "{{count}} жилища"
+  },
+  "explorer": {
+    "hide": "Скрий"
   }
 }

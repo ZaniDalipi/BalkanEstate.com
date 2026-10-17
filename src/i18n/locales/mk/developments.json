@@ -260,5 +260,8 @@
     "clear": "Исчисти филтри",
     "matchCount_one": "{{count}} дом",
     "matchCount_other": "{{count}} домови"
+  },
+  "explorer": {
+    "hide": "Сокриј"
   }
 }

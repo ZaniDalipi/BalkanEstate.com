@@ -260,5 +260,8 @@
     "clear": "Pastro filtrat",
     "matchCount_one": "{{count}} banesë",
     "matchCount_other": "{{count}} banesa"
+  },
+  "explorer": {
+    "hide": "Fshih"
   }
 }
