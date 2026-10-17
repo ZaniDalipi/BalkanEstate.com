@@ -79,7 +79,9 @@
     "publish": "Publish",
     "unpublish": "Unpublish",
     "published": "Published",
-    "draft": "Draft"
+    "draft": "Draft",
+    "completion": "Expected completion",
+    "location": "Location"
   },
   "building": {
     "add": "Add building",
@@ -155,7 +157,8 @@
     "filterAll": "All",
     "allBuildings": "All buildings",
     "noneForFilter": "No units match this filter.",
-    "from": "From"
+    "from": "From",
+    "availabilityHeading": "Availability"
   },
   "hero": {
     "viewUnits": "View available units"
