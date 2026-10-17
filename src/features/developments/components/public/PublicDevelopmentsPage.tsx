@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAppContext } from '@/context/AppContext';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { Button } from '@/src/components/ui/button';
@@ -14,20 +15,25 @@ import { LoadingState, EmptyState, ErrorState } from '../shared/States';
  */
 const PublicDevelopmentsPage: React.FC = () => {
   const { t } = useTranslation('developments');
+  const { state } = useAppContext();
+  const isAuthed = !!state.isAuthenticated;
   const { developments, isLoading, error } = usePublicDevelopments({ limit: 40 });
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">{t('public.title')}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
-        {/* Action sits on its own row (left-aligned) so it never lands under
-            the app's top-right floating action bar. */}
-        <div className="mt-4">
-          <Button onClick={() => navigate(paths.developmentsDashboard())}>
-            {t('nav.dashboard')}
-          </Button>
-        </div>
+        <p className="mt-1 text-sm text-muted-foreground">{t('public.subtitle')}</p>
+        {/* "My Developments" is only relevant to signed-in users who manage
+            their own projects; a visitor just browses. Left-aligned on its own
+            row so it never lands under the app's top-right floating bar. */}
+        {isAuthed && (
+          <div className="mt-4">
+            <Button onClick={() => navigate(paths.developmentsDashboard())}>
+              {t('nav.dashboard')}
+            </Button>
+          </div>
+        )}
       </header>
 
       {isLoading && <LoadingState rows={6} />}
@@ -38,9 +44,11 @@ const PublicDevelopmentsPage: React.FC = () => {
         <EmptyState
           title={t('public.empty')}
           action={
-            <Button onClick={() => navigate(paths.developmentsDashboard())}>
-              {t('nav.dashboard')}
-            </Button>
+            isAuthed ? (
+              <Button onClick={() => navigate(paths.developmentsDashboard())}>
+                {t('nav.dashboard')}
+              </Button>
+            ) : undefined
           }
         />
       )}

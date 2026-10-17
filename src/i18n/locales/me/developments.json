@@ -18,7 +18,8 @@
     "available_one": "{{count}} unit available",
     "available_other": "{{count}} units available",
     "viewDetails": "View details",
-    "backToList": "Back to residences"
+    "backToList": "Back to residences",
+    "subtitle": "Explore new residential developments across the Balkans."
   },
   "status": {
     "draft": "Draft",
