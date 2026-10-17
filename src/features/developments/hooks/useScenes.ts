@@ -7,6 +7,7 @@ import {
   publishScene,
   deleteScene,
   getPublishedScene,
+  getAttachableListings,
 } from '../api/developmentsApi';
 import type { Hotspot, SceneTargetType } from '../types';
 
@@ -61,6 +62,25 @@ export function useSceneMutations(developmentId: string) {
     isPublishing: publish.isPending,
     remove: remove.mutateAsync,
     error: uploadImage.error || saveDraft.error || publish.error || remove.error,
+  };
+}
+
+/**
+ * The caller's controllable listings for the scene editor's listing picker.
+ * `q` is a server-side search; keep queries distinct per search term and short-
+ * lived so the dropdown stays responsive.
+ */
+export function useAttachableListings(developmentId: string | undefined, q: string) {
+  const query = useQuery({
+    queryKey: [...developmentKeys.detail(developmentId ?? ''), 'attachable-listings', q] as const,
+    queryFn: () => getAttachableListings(developmentId as string, q),
+    enabled: !!developmentId,
+    staleTime: 30_000,
+  });
+  return {
+    listings: query.data?.listings ?? [],
+    isLoading: query.isLoading,
+    error: query.error,
   };
 }
 

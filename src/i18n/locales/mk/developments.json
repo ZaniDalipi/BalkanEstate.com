@@ -206,7 +206,10 @@
     "editingTarget": "Уредување: {{target}}",
     "noPlanForTarget": "Сè уште не е објавен интерактивен план за ова.",
     "listingOfUnit": "Оглас за стан {{unit}}",
-    "noAttachedListings": "Прво поврзете оглас со стан, потоа ќе се појави тука."
+    "noAttachedListings": "Прво поврзете оглас со стан, потоа ќе се појави тука.",
+    "searchListings": "Пребарајте ги вашите огласи…",
+    "noListingsFound": "Не се пронајдени огласи.",
+    "listingSelected": "Избран оглас"
   },
   "follow": {
     "title": "Follow {{name}}",

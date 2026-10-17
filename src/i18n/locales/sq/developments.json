@@ -206,7 +206,10 @@
     "editingTarget": "Duke redaktuar: {{target}}",
     "noPlanForTarget": "Ende nuk është publikuar një plan interaktiv për këtë.",
     "listingOfUnit": "Shpallja e banesës {{unit}}",
-    "noAttachedListings": "Lidhni fillimisht një shpallje me një banesë dhe do të shfaqet këtu."
+    "noAttachedListings": "Lidhni fillimisht një shpallje me një banesë dhe do të shfaqet këtu.",
+    "searchListings": "Kërko në shpalljet tuaja…",
+    "noListingsFound": "Nuk u gjetën shpallje.",
+    "listingSelected": "Shpallja e zgjedhur"
   },
   "follow": {
     "title": "Follow {{name}}",

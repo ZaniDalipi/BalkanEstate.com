@@ -11,6 +11,7 @@ import {
 } from '../../hooks';
 import type { Hotspot, HotspotLinkType, HotspotShape, SceneTargetType } from '../../types';
 import { HotspotCanvas, type Tool } from './HotspotCanvas';
+import { ListingLinkPicker } from './ListingLinkPicker';
 
 interface SceneEditorProps {
   developmentId: string;
@@ -52,16 +53,13 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, targetT
   }, [scene?.id, scene?.draft?.version]);
 
   // Link target options from the development's structure + units. The `listing`
-  // options are the development's units that already carry an attached listing,
-  // so the owner can place one of their listings on the facade/floor directly.
+  // target is handled separately by a searchable picker over the owner's
+  // listings (see ListingLinkPicker).
   const linkOptions = useMemo(
     () => ({
       building: buildings.map((b) => ({ id: b.id, label: b.name })),
       floor: floors.map((f) => ({ id: f.id, label: f.label })),
       unit: units.map((u) => ({ id: u.id, label: u.unitNumber })),
-      listing: units
-        .filter((u) => u.primaryListingId)
-        .map((u) => ({ id: u.primaryListingId as string, label: u.unitNumber })),
     }),
     [buildings, floors, units]
   );
@@ -253,8 +251,16 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, targetT
 
             <div>
               <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('scene.linkTarget')}</label>
-              {selected.linkType === 'entrance' ||
-              (selected.linkType === 'listing' && linkOptions.listing.length === 0) ? (
+              {selected.linkType === 'listing' ? (
+                <ListingLinkPicker
+                  developmentId={developmentId}
+                  value={selected.linkId}
+                  onPick={(id, title) =>
+                    patchSelected({ linkId: id, label: selected.label || title })
+                  }
+                  onClear={() => patchSelected({ linkId: '' })}
+                />
+              ) : selected.linkType === 'entrance' ? (
                 <input
                   value={selected.linkId}
                   onChange={(e) => patchSelected({ linkId: e.target.value })}
@@ -268,15 +274,12 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, targetT
                   className="min-h-[36px] w-full rounded-lg border border-input bg-background px-2 text-sm"
                 >
                   <option value="">—</option>
-                  {(linkOptions[selected.linkType as 'building' | 'floor' | 'unit' | 'listing'] ?? []).map((o) => (
+                  {(linkOptions[selected.linkType as 'building' | 'floor' | 'unit'] ?? []).map((o) => (
                     <option key={o.id} value={o.id}>
-                      {selected.linkType === 'listing' ? t('scene.listingOfUnit', { unit: o.label }) : o.label}
+                      {o.label}
                     </option>
                   ))}
                 </select>
-              )}
-              {selected.linkType === 'listing' && linkOptions.listing.length === 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">{t('scene.noAttachedListings')}</p>
               )}
             </div>
 

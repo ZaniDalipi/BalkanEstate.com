@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { IUser } from '../models/User';
 import Property from '../models/Property';
+import Agency from '../models/Agency';
 import DevelopmentUnit from '../models/DevelopmentUnit';
 import { getObjectIdParam, isValidObjectId } from '../utils/validateParams';
-import { resolveId } from '../utils/idObfuscation';
+import { resolveId, encodeId } from '../utils/idObfuscation';
 import { sendServiceError } from './developmentController';
 
 /**
@@ -135,5 +136,60 @@ export const bulkAttachListings = async (req: Request, res: Response): Promise<v
     res.json(result);
   } catch (error) {
     sendServiceError(res, error, 'bulk attach listings');
+  }
+};
+
+/** Escape a user string for safe use inside a RegExp. */
+const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * GET /api/dashboard/developments/:developmentId/attachable-listings?q=
+ * Every listing the caller controls — their own plus any created by an agency
+ * they own or administer — as lightweight options for the scene editor's
+ * "place a listing on the map" picker. Drafts are excluded; an optional `q`
+ * matches the title, address or custom id.
+ */
+export const listControllableListings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = currentUser(req);
+
+    // Agencies the caller owns or administers → their listings are controllable.
+    const agencies = await Agency.find({ $or: [{ ownerId: user._id }, { admins: user._id }] })
+      .select('_id')
+      .lean();
+    const agencyIds = agencies.map((a) => a._id);
+
+    const ownership: Record<string, unknown>[] = [{ sellerId: user._id }];
+    if (agencyIds.length > 0) ownership.push({ createdByAgencyId: { $in: agencyIds } });
+
+    const filter: Record<string, unknown> = {
+      $or: ownership,
+      status: { $in: ['active', 'pending'] },
+    };
+
+    const q = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 100) : '';
+    if (q) {
+      const rx = new RegExp(escapeRegex(q), 'i');
+      filter.$and = [{ $or: [{ title: rx }, { address: rx }, { city: rx }, { propertyId: rx }] }];
+    }
+
+    const listings = await Property.find(filter)
+      .select('title imageUrl images price listingType city status')
+      .sort({ updatedAt: -1 })
+      .limit(50)
+      .lean();
+
+    res.json({
+      listings: listings.map((l) => ({
+        id: encodeId(String(l._id)),
+        title: l.title ?? '',
+        imageUrl: l.imageUrl ?? (Array.isArray(l.images) && l.images[0] ? l.images[0].url : undefined),
+        price: l.price,
+        listingType: l.listingType,
+        city: l.city,
+      })),
+    });
+  } catch (error) {
+    sendServiceError(res, error, 'list controllable listings');
   }
 };

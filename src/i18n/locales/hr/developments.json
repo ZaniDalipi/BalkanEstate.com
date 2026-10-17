@@ -206,7 +206,10 @@
     "editingTarget": "Uređivanje: {{target}}",
     "noPlanForTarget": "Za ovo još nije objavljen interaktivni plan.",
     "listingOfUnit": "Oglas za stan {{unit}}",
-    "noAttachedListings": "Prvo povežite oglas sa stanom pa će se pojaviti ovdje."
+    "noAttachedListings": "Prvo povežite oglas sa stanom pa će se pojaviti ovdje.",
+    "searchListings": "Pretražite svoje oglase…",
+    "noListingsFound": "Nema pronađenih oglasa.",
+    "listingSelected": "Oglas odabran"
   },
   "follow": {
     "title": "Follow {{name}}",

@@ -30,6 +30,7 @@ import type {
   FollowPreferences,
   FollowFilters,
   NearbySuggestion,
+  ControllableListing,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -299,6 +300,18 @@ export const requestAttachment = (
     body: payload,
     requiresAuth: true,
   });
+
+/** Listings the caller controls, for the scene editor's listing picker. */
+export const getAttachableListings = (
+  developmentId: string,
+  q?: string
+): Promise<{ listings: ControllableListing[] }> => {
+  const qs = q && q.trim() ? `?q=${encodeURIComponent(q.trim())}` : '';
+  return apiRequest<{ listings: ControllableListing[] }>(
+    `${DASH}/${developmentId}/attachable-listings${qs}`,
+    { requiresAuth: true }
+  );
+};
 
 // --- Follow & alerts (signed-in buyers) -----------------------------------
 

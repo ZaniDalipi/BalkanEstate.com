@@ -195,6 +195,9 @@
     "noPlanForTarget": "No interactive plan has been published for this yet.",
     "listingOfUnit": "Listing of unit {{unit}}",
     "noAttachedListings": "Attach a listing to a unit first, then it appears here.",
+    "searchListings": "Search your listings…",
+    "noListingsFound": "No listings found.",
+    "listingSelected": "Listing selected",
     "tools": {
       "select": "Select",
       "rect": "Rectangle",

@@ -206,7 +206,10 @@
     "editingTarget": "Редактиране: {{target}}",
     "noPlanForTarget": "Все още няма публикуван интерактивен план за това.",
     "listingOfUnit": "Обява за апартамент {{unit}}",
-    "noAttachedListings": "Първо свържете обява с апартамент и тя ще се появи тук."
+    "noAttachedListings": "Първо свържете обява с апартамент и тя ще се появи тук.",
+    "searchListings": "Търсете в обявите си…",
+    "noListingsFound": "Няма намерени обяви.",
+    "listingSelected": "Избрана обява"
   },
   "follow": {
     "title": "Follow {{name}}",

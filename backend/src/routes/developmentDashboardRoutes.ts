@@ -26,6 +26,7 @@ import {
   detach,
   previewConflicts,
   bulkAttachListings,
+  listControllableListings,
 } from '../controllers/developmentListingController';
 import {
   upsertSceneImage,
@@ -160,6 +161,14 @@ router.post(
   developmentAuth,
   requireDevelopmentPermission('listing.attach'),
   attachListing
+);
+// The caller's controllable listings, for the scene editor's listing picker.
+router.get(
+  '/:developmentId/attachable-listings',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('listing.attach'),
+  listControllableListings
 );
 
 // Interactive scenes (visual map / floor-plan editor)

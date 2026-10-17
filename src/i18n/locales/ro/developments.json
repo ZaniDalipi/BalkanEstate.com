@@ -206,7 +206,10 @@
     "editingTarget": "Se editează: {{target}}",
     "noPlanForTarget": "Încă nu a fost publicat un plan interactiv pentru acesta.",
     "listingOfUnit": "Anunțul unității {{unit}}",
-    "noAttachedListings": "Conectează mai întâi un anunț la o unitate și va apărea aici."
+    "noAttachedListings": "Conectează mai întâi un anunț la o unitate și va apărea aici.",
+    "searchListings": "Caută în anunțurile tale…",
+    "noListingsFound": "Nu s-au găsit anunțuri.",
+    "listingSelected": "Anunț selectat"
   },
   "follow": {
     "title": "Follow {{name}}",

@@ -206,7 +206,10 @@
     "editingTarget": "Επεξεργασία: {{target}}",
     "noPlanForTarget": "Δεν έχει δημοσιευτεί ακόμη διαδραστική κάτοψη για αυτό.",
     "listingOfUnit": "Αγγελία διαμερίσματος {{unit}}",
-    "noAttachedListings": "Συνδέστε πρώτα μια αγγελία σε διαμέρισμα και θα εμφανιστεί εδώ."
+    "noAttachedListings": "Συνδέστε πρώτα μια αγγελία σε διαμέρισμα και θα εμφανιστεί εδώ.",
+    "searchListings": "Αναζήτηση στις αγγελίες σας…",
+    "noListingsFound": "Δεν βρέθηκαν αγγελίες.",
+    "listingSelected": "Επιλεγμένη αγγελία"
   },
   "follow": {
     "title": "Follow {{name}}",

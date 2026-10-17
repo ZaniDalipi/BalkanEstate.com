@@ -331,3 +331,13 @@ export interface NearbySuggestion {
   matchScore: number;
   canAttach: boolean;
 }
+
+/** A listing the caller controls, for the scene editor's listing picker. */
+export interface ControllableListing {
+  id: string;
+  title: string;
+  imageUrl?: string;
+  price?: number;
+  listingType?: 'sale' | 'rent';
+  city?: string;
+}
