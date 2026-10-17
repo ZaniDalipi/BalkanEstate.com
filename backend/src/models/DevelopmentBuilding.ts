@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 import {
   DEVELOPMENT_CONSTRUCTION_STATUSES,
   type DevelopmentConstructionStatus,
@@ -66,6 +67,9 @@ DevelopmentBuildingSchema.index(
     name: 'building_slug_per_development_unique',
   }
 );
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentBuildingSchema, ['developmentId', 'coverMediaId', 'facadeMediaId']);
 
 export default mongoose.model<IDevelopmentBuilding>(
   'DevelopmentBuilding',

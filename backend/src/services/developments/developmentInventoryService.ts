@@ -288,7 +288,11 @@ const notifyFollowersOnAvailable = async (
 };
 
 /** True for a MongoDB duplicate-key (E11000) error, however it is wrapped. */
+/**
+ * A unique-index violation. Only code 11000 — any other MongoServerError (a
+ * timeout, a write conflict) is a real failure, not "already exists".
+ */
 export const isDuplicateKeyError = (error: unknown): boolean => {
-  const e = error as { code?: number; name?: string } | null;
-  return !!e && (e.code === 11000 || e.name === 'MongoServerError');
+  const e = error as { code?: number } | null;
+  return !!e && e.code === 11000;
 };

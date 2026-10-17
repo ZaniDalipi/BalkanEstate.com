@@ -3,11 +3,15 @@ import {
   SCENE_TARGET_TYPES,
   HOTSPOT_LINK_TYPES,
   HOTSPOT_SHAPES,
+  SCENE_VIEW_DIRECTIONS,
+  SCENE_VIEW_KEY_PATTERN,
+  DEFAULT_SCENE_VIEW_KEY,
   type SceneTargetType,
   type HotspotLinkType,
   type HotspotShape,
+  type SceneViewDirection,
 } from '../config/developments';
-import { encodeId } from '../utils/idObfuscation';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 
 /**
  * A visual-editor scene: an interactive image (aerial render, building facade,
@@ -43,6 +47,16 @@ export interface IDevelopmentScene extends Document {
   developmentId: mongoose.Types.ObjectId;
   targetType: SceneTargetType;
   targetId: mongoose.Types.ObjectId;
+  /**
+   * A target (building, floor, site) can have several camera perspectives —
+   * front, back, aerial, courtyard… Each is its own scene, keyed by `viewKey`
+   * (unique per target). Legacy single-view scenes are `main`.
+   */
+  viewKey: string;
+  viewName?: string;
+  viewDirection: SceneViewDirection;
+  /** Display order among the target's views (ascending). */
+  sortOrder: number;
   imageMediaId?: mongoose.Types.ObjectId;
   /** Scene image URL + storage key (mirrors the cover-image pattern). */
   imageUrl: string;
@@ -104,6 +118,17 @@ const DevelopmentSceneSchema: Schema = new Schema(
     },
     targetType: { type: String, enum: SCENE_TARGET_TYPES, required: true },
     targetId: { type: Schema.Types.ObjectId, required: true },
+    viewKey: {
+      type: String,
+      required: true,
+      default: DEFAULT_SCENE_VIEW_KEY,
+      trim: true,
+      lowercase: true,
+      match: [SCENE_VIEW_KEY_PATTERN, 'viewKey must be a short lowercase slug'],
+    },
+    viewName: { type: String, trim: true, maxlength: 60 },
+    viewDirection: { type: String, enum: SCENE_VIEW_DIRECTIONS, default: 'front' },
+    sortOrder: { type: Number, default: 0, min: 0, max: 999 },
     imageMediaId: {
       type: Schema.Types.ObjectId,
       ref: 'MediaAsset',
@@ -120,39 +145,26 @@ const DevelopmentSceneSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-/**
- * Encode the ObjectId references so JSON responses speak the same obfuscated
- * ids as the rest of the API. The global toJSON transform only rewrites `_id`,
- * which left `targetId`/`developmentId` as raw ObjectIds — and the owner editor
- * matches a scene to its selected target by comparing `scene.targetId` against
- * the encoded building/floor/development id, so a raw value never matched and an
- * already-uploaded scene kept showing the empty upload prompt.
- */
-DevelopmentSceneSchema.set('toJSON', {
-  transform(_doc, ret: Record<string, unknown>) {
-    if (ret._id) {
-      ret.id = encodeId(String(ret._id));
-      delete ret._id;
-    }
-    if (ret.developmentId) ret.developmentId = encodeId(String(ret.developmentId));
-    if (ret.targetId) ret.targetId = encodeId(String(ret.targetId));
-    if (ret.imageMediaId) ret.imageMediaId = encodeId(String(ret.imageMediaId));
-    delete ret.__v;
-    return ret;
-  },
-});
+// Encode every reference in JSON. The owner editor matches a scene to its
+// selected target by comparing `scene.targetId` with the encoded building/floor
+// id; a raw value never matched and an uploaded scene showed the empty prompt.
+encodeRefsOnJSON(DevelopmentSceneSchema, ['developmentId', 'targetId', 'imageMediaId']);
 
-// One scene per (development, target). The visual editor edits exactly one
-// scene per building facade / floor plan / development aerial.
+// One scene per (development, target, view): a building may have a front,
+// back, aerial… view, but never two "front" views.
+// `deletedAt: null` matches a missing field; MongoDB rejects `$exists: false`.
+// Supersedes the single-view index `scene_per_target_unique`, which
+// scripts/migrateSceneViews.ts drops where it was ever built.
 DevelopmentSceneSchema.index(
-  { developmentId: 1, targetType: 1, targetId: 1 },
+  { developmentId: 1, targetType: 1, targetId: 1, viewKey: 1 },
   {
     unique: true,
-    // `deletedAt: null` matches a missing field; MongoDB rejects `$exists: false`.
     partialFilterExpression: { deletedAt: null },
-    name: 'scene_per_target_unique',
+    name: 'scene_per_target_view_unique',
   }
 );
+// Reading every view of a target, in display order.
+DevelopmentSceneSchema.index({ developmentId: 1, targetType: 1, targetId: 1, sortOrder: 1 });
 
 export default mongoose.model<IDevelopmentScene>(
   'DevelopmentScene',

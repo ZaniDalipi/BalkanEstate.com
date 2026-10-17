@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 import { FLOOR_KINDS, type FloorKind } from '../config/developments';
 
 /**
@@ -51,6 +52,9 @@ const DevelopmentFloorSchema: Schema = new Schema(
 );
 
 DevelopmentFloorSchema.index({ buildingId: 1, entranceId: 1, order: 1 });
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentFloorSchema, ['developmentId', 'buildingId', 'entranceId', 'floorplanMediaId']);
 
 export default mongoose.model<IDevelopmentFloor>(
   'DevelopmentFloor',

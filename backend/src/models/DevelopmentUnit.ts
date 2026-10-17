@@ -1,8 +1,21 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 import {
   UNIT_AVAILABILITY_STATES,
+  UNIT_VISIBILITIES,
+  PRICE_VISIBILITIES,
   type UnitAvailability,
+  type UnitVisibility,
+  type PriceVisibility,
 } from '../config/developments';
+
+/** An image stored directly on a unit (floorplan or gallery entry). */
+export interface IUnitImage {
+  url: string;
+  publicId?: string;
+  width?: number;
+  height?: number;
+}
 
 /**
  * The canonical physical unit — the single source of truth for availability.
@@ -28,6 +41,11 @@ export interface IDevelopmentUnit extends Document {
   grossArea?: number;
   beds?: number;
   baths?: number;
+  livingRooms?: number;
+  /** Outdoor area that is not a terrace (garden, yard), m². */
+  externalArea?: number;
+  /** Terrace area, m². `netArea` is the internal area; `totalArea` the sum. */
+  terraceArea?: number;
   balconies?: number;
   terraces?: number;
   orientation?: string;
@@ -38,6 +56,13 @@ export interface IDevelopmentUnit extends Document {
   currency?: string;
   pricePerSqm?: number;
   availability: UnitAvailability;
+  /** `hidden` = the spec's hidden/draft: absent from every public endpoint. */
+  visibility: UnitVisibility;
+  /** `on_request` keeps the unit public but strips its price from public responses. */
+  priceVisibility: PriceVisibility;
+  description?: string;
+  floorplan?: IUnitImage;
+  gallery: IUnitImage[];
   floorplanMediaId?: mongoose.Types.ObjectId;
   mediaIds: mongoose.Types.ObjectId[];
   tour360Url?: string;
@@ -51,6 +76,16 @@ export interface IDevelopmentUnit extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+const UnitImageSchema = new Schema<IUnitImage>(
+  {
+    url: { type: String, required: true, trim: true, maxlength: 2048 },
+    publicId: { type: String, trim: true },
+    width: { type: Number, min: 1 },
+    height: { type: Number, min: 1 },
+  },
+  { _id: false }
+);
 
 const DevelopmentUnitSchema: Schema = new Schema(
   {
@@ -80,6 +115,9 @@ const DevelopmentUnitSchema: Schema = new Schema(
     grossArea: { type: Number, min: 0 },
     beds: { type: Number, min: 0 },
     baths: { type: Number, min: 0 },
+    livingRooms: { type: Number, min: 0 },
+    externalArea: { type: Number, min: 0 },
+    terraceArea: { type: Number, min: 0 },
     balconies: { type: Number, min: 0 },
     terraces: { type: Number, min: 0 },
     orientation: { type: String, trim: true },
@@ -95,6 +133,18 @@ const DevelopmentUnitSchema: Schema = new Schema(
       default: 'not_released',
       index: true,
     },
+    visibility: { type: String, enum: UNIT_VISIBILITIES, default: 'public' },
+    priceVisibility: { type: String, enum: PRICE_VISIBILITIES, default: 'public' },
+    description: { type: String, trim: true, maxlength: 4000 },
+    floorplan: { type: UnitImageSchema, default: undefined },
+    gallery: {
+      type: [UnitImageSchema],
+      default: [],
+      validate: {
+        validator: (v: unknown[]) => Array.isArray(v) && v.length <= 30,
+        message: 'A unit gallery holds at most 30 images',
+      },
+    },
     floorplanMediaId: { type: Schema.Types.ObjectId, ref: 'MediaAsset' },
     mediaIds: [{ type: Schema.Types.ObjectId, ref: 'MediaAsset' }],
     tour360Url: { type: String, trim: true },
@@ -108,6 +158,8 @@ const DevelopmentUnitSchema: Schema = new Schema(
 );
 
 DevelopmentUnitSchema.index({ developmentId: 1, availability: 1 });
+// The public explorer reads "every visible unit of a development" on each page load.
+DevelopmentUnitSchema.index({ developmentId: 1, visibility: 1 });
 // (floorId is already indexed via `index: true` on the field above.)
 
 // Unit number uniqueness is entrance-scoped when an entrance is present, and
@@ -141,6 +193,9 @@ DevelopmentUnitSchema.index(
     name: 'unit_number_per_building_unique',
   }
 );
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentUnitSchema, ['developmentId', 'buildingId', 'entranceId', 'floorId', 'floorplanMediaId', 'mediaIds', 'listingIds', 'primaryListingId']);
 
 export default mongoose.model<IDevelopmentUnit>(
   'DevelopmentUnit',

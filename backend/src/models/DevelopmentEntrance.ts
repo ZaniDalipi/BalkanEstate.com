@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 
 /**
  * An entrance / section within a building. Optional: many buildings have a
@@ -40,6 +41,9 @@ const DevelopmentEntranceSchema: Schema = new Schema(
 );
 
 DevelopmentEntranceSchema.index({ buildingId: 1, order: 1 });
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentEntranceSchema, ['developmentId', 'buildingId']);
 
 export default mongoose.model<IDevelopmentEntrance>(
   'DevelopmentEntrance',

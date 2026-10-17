@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 import {
   DEVELOPMENT_CATEGORIES,
   DEVELOPMENT_CONSTRUCTION_STATUSES,
@@ -178,5 +179,8 @@ DevelopmentSchema.index({ agencyId: 1, status: 1 });
 DevelopmentSchema.index({ country: 1, city: 1, status: 1 });
 // Public discovery default sort
 DevelopmentSchema.index({ status: 1, publishedAt: -1 });
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentSchema, ['ownerId', 'agencyId', 'coverMediaId']);
 
 export default mongoose.model<IDevelopment>('Development', DevelopmentSchema);

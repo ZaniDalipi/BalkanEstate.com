@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { IUser } from '../models/User';
 import Development from '../models/Development';
 import DevelopmentBuilding from '../models/DevelopmentBuilding';
@@ -27,6 +28,7 @@ import {
   createUnit,
   listUnits,
   setUnitAvailability,
+  isDuplicateKeyError,
 } from '../services/developments/developmentInventoryService';
 
 const log = createLogger('DevelopmentController');
@@ -36,11 +38,39 @@ const log = createLogger('DevelopmentController');
  * without one is a genuine 500. Keeps controllers thin and consistent.
  */
 export const sendServiceError = (res: Response, error: unknown, context: string): void => {
-  const e = error as { statusCode?: number; message?: string; conflicts?: unknown } | null;
+  const e = error as {
+    statusCode?: number;
+    message?: string;
+    conflicts?: unknown;
+    errors?: unknown;
+    code?: unknown;
+    currentVersion?: unknown;
+  } | null;
   if (e && typeof e.statusCode === 'number') {
     const body: Record<string, unknown> = { message: e.message };
     if (e.conflicts) body.conflicts = e.conflicts;
+    if (Array.isArray(e.errors)) body.errors = e.errors;
+    if (typeof e.code === 'string') body.code = e.code;
+    if (e.currentVersion !== undefined) body.currentVersion = e.currentVersion;
     res.status(e.statusCode).json(body);
+    return;
+  }
+  // Schema rule broken by client input (min/max/enum/maxlength): a 400 with
+  // the offending fields, not a 500.
+  if (error instanceof mongoose.Error.ValidationError) {
+    res.status(400).json({
+      message: 'Validation failed',
+      errors: Object.values(error.errors).map((err) => ({ field: err.path, message: err.message })),
+    });
+    return;
+  }
+  // A malformed id or wrong type in the input.
+  if (error instanceof mongoose.Error.CastError) {
+    res.status(400).json({ message: `Invalid ${error.path}` });
+    return;
+  }
+  if (isDuplicateKeyError(error)) {
+    res.status(409).json({ message: 'A record with these details already exists' });
     return;
   }
   log.error(`${context} failed:`, error);

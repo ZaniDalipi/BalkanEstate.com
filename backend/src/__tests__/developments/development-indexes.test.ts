@@ -19,7 +19,7 @@ const UNIQUE_INDEXES: Array<[mongoose.Model<any>, string]> = [
   [DevelopmentBuilding, 'building_slug_per_development_unique'],
   [DevelopmentUnit, 'unit_number_per_entrance_unique'],
   [DevelopmentUnit, 'unit_number_per_building_unique'],
-  [DevelopmentScene, 'scene_per_target_unique'],
+  [DevelopmentScene, 'scene_per_target_view_unique'],
 ];
 
 describe('development model indexes', () => {
@@ -63,5 +63,48 @@ describe('development model indexes', () => {
     await expect(
       DevelopmentBuilding.create({ developmentId, name: 'A3', slug: 'block-a', order: 2 })
     ).resolves.toBeDefined();
+  });
+
+  it('allows several views of one building but never two with the same key', async () => {
+    await DevelopmentScene.syncIndexes();
+    const base = {
+      developmentId: oid(),
+      targetType: 'building',
+      targetId: oid(),
+      imageUrl: 'https://cdn.example.com/b.jpg',
+      imageWidth: 1600,
+      imageHeight: 900,
+    };
+    await DevelopmentScene.create({ ...base, viewKey: 'front', viewDirection: 'front' });
+    await expect(DevelopmentScene.create({ ...base, viewKey: 'back', viewDirection: 'back' })).resolves.toBeDefined();
+    await expect(DevelopmentScene.create({ ...base, viewKey: 'front' })).rejects.toThrow(/duplicate key/i);
+  });
+
+  it('defaults a scene to the main view', async () => {
+    const scene = await DevelopmentScene.create({
+      developmentId: oid(),
+      targetType: 'floor',
+      targetId: oid(),
+      imageUrl: 'https://cdn.example.com/f.jpg',
+      imageWidth: 800,
+      imageHeight: 600,
+    });
+    expect(scene.viewKey).toBe('main');
+    expect(scene.viewDirection).toBe('front');
+    expect(scene.sortOrder).toBe(0);
+  });
+
+  it('rejects a view key that is not a short lowercase slug', async () => {
+    await expect(
+      DevelopmentScene.create({
+        developmentId: oid(),
+        targetType: 'building',
+        targetId: oid(),
+        viewKey: 'Front View!',
+        imageUrl: 'https://cdn.example.com/x.jpg',
+        imageWidth: 10,
+        imageHeight: 10,
+      })
+    ).rejects.toThrow(/viewKey/);
   });
 });

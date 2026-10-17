@@ -56,6 +56,45 @@ export const UNIT_AVAILABILITY_STATES = [
 export type UnitAvailability = (typeof UNIT_AVAILABILITY_STATES)[number];
 
 /**
+ * Whether a unit exists for buyers at all. `hidden` is the spec's
+ * "hidden/draft": the unit is invisible on every public endpoint — not listed,
+ * not counted, and any explorer hotspot pointing at it is stripped.
+ */
+export const UNIT_VISIBILITIES = ['public', 'hidden'] as const;
+export type UnitVisibility = (typeof UNIT_VISIBILITIES)[number];
+export const isUnitVisibility = (value: unknown): value is UnitVisibility =>
+  typeof value === 'string' && (UNIT_VISIBILITIES as readonly string[]).includes(value);
+
+/**
+ * Whether a unit's price may be shown publicly. `on_request` keeps the unit
+ * visible but strips price and price-per-m² from every public response.
+ */
+export const PRICE_VISIBILITIES = ['public', 'on_request'] as const;
+export type PriceVisibility = (typeof PRICE_VISIBILITIES)[number];
+export const isPriceVisibility = (value: unknown): value is PriceVisibility =>
+  typeof value === 'string' && (PRICE_VISIBILITIES as readonly string[]).includes(value);
+
+/** Camera perspective of a building view (a scene). */
+export const SCENE_VIEW_DIRECTIONS = [
+  'front',
+  'back',
+  'left',
+  'right',
+  'aerial',
+  'courtyard',
+  'custom',
+] as const;
+export type SceneViewDirection = (typeof SCENE_VIEW_DIRECTIONS)[number];
+export const isSceneViewDirection = (value: unknown): value is SceneViewDirection =>
+  typeof value === 'string' && (SCENE_VIEW_DIRECTIONS as readonly string[]).includes(value);
+
+/** A view key is a short slug unique per target: 'main', 'front', 'courtyard-2'. */
+export const SCENE_VIEW_KEY_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/;
+export const DEFAULT_SCENE_VIEW_KEY = 'main';
+/** Upper bound on hotspots per view — enough for a tower of several hundred units. */
+export const MAX_HOTSPOTS_PER_SCENE = 2000;
+
+/**
  * Apartment feature flags — the "Apartment type" toggles buyers filter on
  * (East Gate B2: "With big terrace", "Duplex", …). A unit may carry any
  * combination. Kept as a closed set so the filter UI and the editor share one
