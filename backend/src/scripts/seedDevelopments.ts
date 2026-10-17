@@ -5,7 +5,8 @@
  * attached listings on the facade, and follow/alerts.
  *
  * Usage:
- *   DEV_SEED_EMAIL=you@example.com npm run seed:developments
+ *   npm run seed:developments                              # most recent user
+ *   DEV_SEED_EMAIL=you@example.com npm run seed:developments   # a specific user
  *
  * Idempotent: it removes any previous demo (slug `east-gate-living-demo`) and
  * its buildings/floors/units/scenes/follows before re-creating it, so you can
@@ -62,22 +63,52 @@ interface SeededUnit {
 }
 
 async function run(): Promise<void> {
+  // DEV_SEED_EMAIL is optional. With it, the demo is owned by that user; without
+  // it, the seed owns the demo with the most recently created user, so a plain
+  // `npm run seed:developments` just works.
   const email = process.env.DEV_SEED_EMAIL;
-  if (!email) {
-    log.error('❌ DEV_SEED_EMAIL is required. Usage: DEV_SEED_EMAIL=you@example.com npm run seed:developments');
-    process.exit(1);
-  }
 
   const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
   await mongoose.connect(mongoUri);
   log.info(`Connected to ${mongoUri}`);
 
   try {
-    const owner = await User.findOne({ email: email.toLowerCase() });
+    let owner = email
+      ? await User.findOne({ email: email.toLowerCase() })
+      : await User.findOne({}).sort({ createdAt: -1 });
+
     if (!owner) {
-      log.error(`❌ No user found with email ${email}. Create/sign up that user first.`);
-      process.exit(1);
+      if (email && process.env.DEV_SEED_CREATE === 'true') {
+        // Opt-in: create a minimal user so seeding is never blocked. This is a
+        // local demo convenience; sign-in still needs a password reset.
+        const created = new User({
+          email: email.toLowerCase(),
+          name: email.split('@')[0] || 'Demo Owner',
+          password: `Seed!${Math.random().toString(36).slice(2, 10)}A1`,
+          isVerified: true,
+        } as never);
+        await created.save();
+        owner = created;
+        log.info(`👤 Created a new user ${email} (DEV_SEED_CREATE=true).`);
+      } else if (email) {
+        // The named user doesn't exist — show which ones do.
+        const others = await User.find({}).sort({ createdAt: -1 }).limit(15).select('email').lean();
+        log.error(`❌ No user found with email ${email}.`);
+        if (others.length > 0) {
+          log.error('   Run it without an email to use the most recent user, or pick one:');
+          others.forEach((u) => log.error(`     • ${u.email}`));
+        } else {
+          log.error('   This database has no users yet. Sign up in the app first,');
+          log.error('   or create one: DEV_SEED_CREATE=true DEV_SEED_EMAIL=you@example.com npm run seed:developments');
+        }
+        process.exit(1);
+      } else {
+        log.error('❌ This database has no users yet — sign up in the app first, then re-run.');
+        process.exit(1);
+      }
     }
+    if (!owner) throw new Error('Owner resolution failed');
+    log.info(`Seeding demo owned by ${owner.email}`);
 
     // --- Clean any previous demo -----------------------------------------
     const existing = await Development.findOne({ slug: SLUG });
