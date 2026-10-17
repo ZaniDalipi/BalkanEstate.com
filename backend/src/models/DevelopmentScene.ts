@@ -7,6 +7,7 @@ import {
   type HotspotLinkType,
   type HotspotShape,
 } from '../config/developments';
+import { encodeId } from '../utils/idObfuscation';
 
 /**
  * A visual-editor scene: an interactive image (aerial render, building facade,
@@ -118,6 +119,28 @@ const DevelopmentSceneSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+/**
+ * Encode the ObjectId references so JSON responses speak the same obfuscated
+ * ids as the rest of the API. The global toJSON transform only rewrites `_id`,
+ * which left `targetId`/`developmentId` as raw ObjectIds — and the owner editor
+ * matches a scene to its selected target by comparing `scene.targetId` against
+ * the encoded building/floor/development id, so a raw value never matched and an
+ * already-uploaded scene kept showing the empty upload prompt.
+ */
+DevelopmentSceneSchema.set('toJSON', {
+  transform(_doc, ret: Record<string, unknown>) {
+    if (ret._id) {
+      ret.id = encodeId(String(ret._id));
+      delete ret._id;
+    }
+    if (ret.developmentId) ret.developmentId = encodeId(String(ret.developmentId));
+    if (ret.targetId) ret.targetId = encodeId(String(ret.targetId));
+    if (ret.imageMediaId) ret.imageMediaId = encodeId(String(ret.imageMediaId));
+    delete ret.__v;
+    return ret;
+  },
+});
 
 // One scene per (development, target). The visual editor edits exactly one
 // scene per building facade / floor plan / development aerial.
