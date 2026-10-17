@@ -220,5 +220,22 @@
     "errBeds": "Min bedrooms cannot exceed max.",
     "errPrice": "Min price cannot exceed max.",
     "errArea": "Min area cannot exceed max."
+  },
+  "suggest": {
+    "heading": "Da li je ovaj dom dio rezidencije?",
+    "subtitle": "Pronašli smo projekte u blizini ove lokacije. Povežite svoj oglas da ga kupci otkriju unutar rezidencije.",
+    "distanceKm": "{{km}} km udaljeno",
+    "match": "{{score}}% podudaranje",
+    "attach": "Poveži s ovom rezidencijom",
+    "attached": "Povezano",
+    "attaching": "Povezivanje…",
+    "request": "Zatraži pristup",
+    "requesting": "Slanje zahtjeva…",
+    "requested": "Pristup zatražen",
+    "requestHint": "Vi ne upravljate ovom rezidencijom — zatražit ćemo odobrenje od vlasnika.",
+    "saveFirst": "Prvo sačuvajte oglas, zatim ga povežite s rezidencijom.",
+    "none": "Nema rezidencija u blizini ove lokacije.",
+    "error": "Nije moguće učitati obližnje rezidencije.",
+    "viewResidence": "Pogledaj rezidenciju"
   }
 }

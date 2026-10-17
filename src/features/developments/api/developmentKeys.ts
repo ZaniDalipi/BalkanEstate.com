@@ -19,4 +19,8 @@ export const developmentKeys = {
   detail: (id: string) => [...developmentKeys.all, 'detail', id] as const,
   units: (id: string, filters?: object) =>
     [...developmentKeys.detail(id), 'units', { filters }] as const,
+
+  // Listing-creation suggestions (nearby developments for a point)
+  nearby: (params?: object) =>
+    [...developmentKeys.all, 'nearby', { params }] as const,
 } as const;

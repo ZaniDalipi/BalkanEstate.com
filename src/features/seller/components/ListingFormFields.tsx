@@ -20,6 +20,7 @@ const PARKING_TYPE_FALLBACKS: Record<ParkingType, string> = {
     outdoor: 'Outdoor',
 };
 import MapLocationPicker from './MapLocationPicker';
+import { ResidenceSuggestions } from '@/src/features/developments/components/public/ResidenceSuggestions';
 import NumberInputWithSteppers from '@/components/shared/NumberInputWithSteppers';
 import type { ListingData, ImageData, FieldErrors } from './ListingFormHelpers';
 import {
@@ -52,6 +53,8 @@ interface ListingFormFieldsProps {
     getZoomLevel: number;
     cityData: CityData | null;
     fieldErrors: FieldErrors;
+    /** Saved listing id (edit mode) — enables attaching to a nearby residence. */
+    listingId?: string;
 }
 
 
@@ -113,6 +116,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
     getZoomLevel,
     cityData,
     fieldErrors,
+    listingId,
 }) => {
     const { t } = useTranslation(['newListing', 'seller', 'common', 'validation']);
 
@@ -209,6 +213,16 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
                             onLocationChange={handleMapLocationChange}
                             onAddressChange={handleMapAddressChange}
                         />
+                        <div className="mt-3">
+                            <ResidenceSuggestions
+                                lat={listingData.lat}
+                                lng={listingData.lng}
+                                country={selectedCountry}
+                                city={selectedCity}
+                                listingId={listingId}
+                                enabled={!!selectedCity}
+                            />
+                        </div>
                     </div>
                 )}
 
@@ -669,6 +683,7 @@ const ListingFormFields: React.FC<ListingFormFieldsProps> = memo(({
     prev.handlePriceChange === next.handlePriceChange &&
     prev.handleMapLocationChange === next.handleMapLocationChange &&
     prev.handleMapAddressChange === next.handleMapAddressChange &&
+    prev.listingId === next.listingId &&
     prev.setListingData === next.setListingData
 ));
 

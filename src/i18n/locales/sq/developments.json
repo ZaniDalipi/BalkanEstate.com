@@ -220,5 +220,22 @@
     "errBeds": "Min bedrooms cannot exceed max.",
     "errPrice": "Min price cannot exceed max.",
     "errArea": "Min area cannot exceed max."
+  },
+  "suggest": {
+    "heading": "A është kjo shtëpi pjesë e një rezidence?",
+    "subtitle": "Gjetëm projekte pranë kësaj vendndodhjeje. Lidhni shpalljen tuaj që blerësit ta zbulojnë brenda rezidencës.",
+    "distanceKm": "{{km}} km larg",
+    "match": "{{score}}% përputhje",
+    "attach": "Lidhe me këtë rezidencë",
+    "attached": "E lidhur",
+    "attaching": "Duke lidhur…",
+    "request": "Kërko akses",
+    "requesting": "Duke dërguar kërkesën…",
+    "requested": "Aksesi u kërkua",
+    "requestHint": "Ju nuk e menaxhoni këtë rezidencë — do t’i kërkojmë pronarit miratimin.",
+    "saveFirst": "Ruani fillimisht shpalljen, pastaj lidheni me një rezidencë.",
+    "none": "Nuk u gjetën rezidenca pranë kësaj vendndodhjeje.",
+    "error": "Nuk u ngarkuan dot rezidencat e afërta.",
+    "viewResidence": "Shiko rezidencën"
   }
 }

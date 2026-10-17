@@ -321,3 +321,12 @@ export interface DevelopmentFollow {
   preferences: FollowPreferences;
   filters: FollowFilters;
 }
+
+// --- Listing-creation suggestions -----------------------------------------
+
+export interface NearbySuggestion {
+  development: Development;
+  distanceM: number;
+  matchScore: number;
+  canAttach: boolean;
+}

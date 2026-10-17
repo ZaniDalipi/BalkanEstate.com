@@ -220,5 +220,22 @@
     "errBeds": "Min bedrooms cannot exceed max.",
     "errPrice": "Min price cannot exceed max.",
     "errArea": "Min area cannot exceed max."
+  },
+  "suggest": {
+    "heading": "Face parte această locuință dintr-un ansamblu?",
+    "subtitle": "Am găsit proiecte în apropierea acestei locații. Conectează anunțul tău pentru ca cumpărătorii să îl descopere în cadrul ansamblului.",
+    "distanceKm": "la {{km}} km",
+    "match": "{{score}}% potrivire",
+    "attach": "Conectează la acest ansamblu",
+    "attached": "Conectat",
+    "attaching": "Se conectează…",
+    "request": "Solicită acces",
+    "requesting": "Se trimite cererea…",
+    "requested": "Acces solicitat",
+    "requestHint": "Nu administrezi acest ansamblu — vom cere aprobarea proprietarului.",
+    "saveFirst": "Salvează mai întâi anunțul, apoi conectează-l la un ansamblu.",
+    "none": "Nu s-au găsit ansambluri în apropierea acestei locații.",
+    "error": "Nu s-au putut încărca ansamblurile din apropiere.",
+    "viewResidence": "Vezi ansamblul"
   }
 }

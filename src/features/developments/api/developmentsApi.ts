@@ -29,6 +29,7 @@ import type {
   DevelopmentFollow,
   FollowPreferences,
   FollowFilters,
+  NearbySuggestion,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -258,6 +259,44 @@ export const detachListing = (
 ): Promise<{ unit: DevelopmentUnit }> =>
   apiRequest(`${DASH}/${developmentId}/units/${unitId}/listings/${listingId}`, {
     method: 'DELETE',
+    requiresAuth: true,
+  });
+
+// --- Listing-creation suggestions -----------------------------------------
+
+export const getNearbyDevelopments = (params: {
+  lat: number;
+  lng: number;
+  country?: string;
+  city?: string;
+  limit?: number;
+}): Promise<{ suggestions: NearbySuggestion[] }> => {
+  const qs = new URLSearchParams({ lat: String(params.lat), lng: String(params.lng) });
+  if (params.country) qs.set('country', params.country);
+  if (params.city) qs.set('city', params.city);
+  if (params.limit) qs.set('limit', String(params.limit));
+  return apiRequest<{ suggestions: NearbySuggestion[] }>(`${PUBLIC}/nearby?${qs.toString()}`, {
+    requiresAuth: true,
+  });
+};
+
+export const attachListingToDevelopment = (
+  developmentId: string,
+  listingId: string
+): Promise<{ property: unknown }> =>
+  apiRequest(`${DASH}/${developmentId}/attach-listing`, {
+    method: 'POST',
+    body: { listingId },
+    requiresAuth: true,
+  });
+
+export const requestAttachment = (
+  slug: string,
+  payload: { listingId?: string; note?: string }
+): Promise<{ claim: unknown; alreadyRequested?: boolean }> =>
+  apiRequest(`${PUBLIC}/${encodeURIComponent(slug)}/request-attachment`, {
+    method: 'POST',
+    body: payload,
     requiresAuth: true,
   });
 

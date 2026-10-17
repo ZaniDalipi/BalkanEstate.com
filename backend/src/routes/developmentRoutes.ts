@@ -13,6 +13,10 @@ import {
   unfollow,
   listFollowing,
 } from '../controllers/developmentFollowController';
+import {
+  nearbyDevelopments,
+  requestAttachment,
+} from '../controllers/developmentSuggestionController';
 
 const router = express.Router();
 
@@ -26,6 +30,7 @@ const router = express.Router();
  */
 router.get('/', listPublic);
 router.get('/following', protect, listFollowing);
+router.get('/nearby', protect, nearbyDevelopments);
 
 router.get('/:slug/scene', getPublishedScene);
 router.get('/:slug/units/:unitId', getPublicUnit);
@@ -35,6 +40,7 @@ router.get('/:slug/units', listPublicUnits);
 router.get('/:slug/follow', protect, getStatus);
 router.post('/:slug/follow', protect, follow);
 router.delete('/:slug/follow', protect, unfollow);
+router.post('/:slug/request-attachment', protect, requestAttachment);
 
 router.get('/:slug', getPublicBySlug);
 

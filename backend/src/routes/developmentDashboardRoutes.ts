@@ -35,6 +35,7 @@ import {
   publishScene,
   deleteScene,
 } from '../controllers/developmentSceneController';
+import { attachListing } from '../controllers/developmentSuggestionController';
 
 const router = express.Router();
 
@@ -150,6 +151,15 @@ router.post(
   developmentAuth,
   requireDevelopmentPermission('listing.attach'),
   bulkAttachListings
+);
+// Associate a listing with the development (no specific unit) — used by the
+// "attach to this nearby development" suggestion.
+router.post(
+  '/:developmentId/attach-listing',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('listing.attach'),
+  attachListing
 );
 
 // Interactive scenes (visual map / floor-plan editor)

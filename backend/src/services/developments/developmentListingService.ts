@@ -344,6 +344,73 @@ const demotePrimaryIfNeeded = async (
   );
 };
 
+/**
+ * Associate a listing with a development at the development level (no specific
+ * unit). Used by the "attach to this nearby development" suggestion during
+ * listing editing. Caller must control the listing (checked here); the route
+ * already enforced the caller's development attach permission. If the listing
+ * was previously on a unit, it is cleanly removed from that unit first.
+ */
+export const attachListingToDevelopmentLevel = async (params: {
+  user: IUser;
+  developmentId: string;
+  listingId: string;
+}): Promise<IProperty> => {
+  const { user, developmentId, listingId } = params;
+  const property = await Property.findById(listingId);
+  if (!property) throw new NotFoundError('Listing not found');
+  if (!(await callerControlsListing(user, property))) {
+    throw new AuthorizationError('You do not control this listing.');
+  }
+  if (property.status === 'sold' || property.status === 'rented') {
+    throw new ValidationError(`This listing is ${property.status} and cannot be attached.`);
+  }
+
+  // Idempotent no-op if already associated with exactly this development and no unit.
+  if (String(property.developmentId ?? '') === String(developmentId) && !property.unitId) {
+    return property;
+  }
+
+  await withOptionalTransaction(async (session) => {
+    // Remove from any previous unit so inventory stays consistent.
+    if (property.unitId) {
+      await DevelopmentUnit.updateOne(
+        { _id: property.unitId },
+        { $pull: { listingIds: property._id } },
+        { session }
+      );
+      await demotePrimaryIfNeeded(
+        property.unitId as mongoose.Types.ObjectId,
+        property._id as mongoose.Types.ObjectId,
+        session
+      );
+    }
+    property.developmentId = new mongoose.Types.ObjectId(developmentId);
+    property.buildingId = undefined;
+    property.entranceId = undefined;
+    property.floorId = undefined;
+    property.unitId = undefined;
+    await property.save({ session });
+
+    await DevelopmentAuditLog.create(
+      [
+        {
+          developmentId,
+          action: 'listing.attach',
+          actorId: user._id,
+          targetType: 'development',
+          metadata: { listingId: String(property._id), level: 'development' },
+        },
+      ],
+      { session }
+    );
+  });
+
+  await recomputeDevelopmentStats(developmentId);
+  log.info(`Listing ${listingId} attached at development level to ${developmentId}`);
+  return (await Property.findById(listingId)) as IProperty;
+};
+
 export interface BulkAttachItem {
   listingId: string;
   unitId: string;

@@ -220,5 +220,22 @@
     "errBeds": "Min bedrooms cannot exceed max.",
     "errPrice": "Min price cannot exceed max.",
     "errArea": "Min area cannot exceed max."
+  },
+  "suggest": {
+    "heading": "Is this home part of a residence?",
+    "subtitle": "We found developments near this location. Attach your listing so buyers discover it inside the residence.",
+    "distanceKm": "{{km}} km away",
+    "match": "{{score}}% match",
+    "attach": "Attach to this residence",
+    "attached": "Attached",
+    "attaching": "Attaching…",
+    "request": "Request access",
+    "requesting": "Requesting…",
+    "requested": "Access requested",
+    "requestHint": "You don't manage this residence — we'll ask its owner to approve the attachment.",
+    "saveFirst": "Save the listing first, then attach it to a residence.",
+    "none": "No residences found near this location.",
+    "error": "Could not load nearby residences.",
+    "viewResidence": "View residence"
   }
 }
