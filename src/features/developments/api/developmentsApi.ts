@@ -3,7 +3,7 @@
  * (token injection, CSRF, 401 refresh). Thin transport only — no business
  * logic, no React. Responses are narrowed to the feature's types.
  */
-import { apiRequest, uploadRequest } from '@/src/shared/api';
+import { apiRequest, uploadRequest, blobRequest } from '@/src/shared/api';
 import type {
   Development,
   DevelopmentBuilding,
@@ -31,6 +31,17 @@ import type {
   FollowFilters,
   NearbySuggestion,
   ControllableListing,
+  DashboardUnit,
+  UnitListQuery,
+  UpdateUnitPayload,
+  BulkUnitUpdatePayload,
+  UpdateBuildingPayload,
+  UpdateFloorPayload,
+  UpsertSceneImageInput,
+  UpsertSceneImageResult,
+  SceneViewMetaPayload,
+  PublicSceneView,
+  UnitInquiryPayload,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -92,6 +103,28 @@ export const getPublishedScene = (
     `${PUBLIC}/${encodeURIComponent(slug)}/scene?${qs.toString()}`
   );
 };
+
+/** Every published view of a target, in display order, hotspots pre-filtered for visitors. */
+export const getPublicViews = (
+  slug: string,
+  targetType: SceneTargetType = 'development',
+  targetId?: string
+): Promise<{ views: PublicSceneView[] }> => {
+  const qs = new URLSearchParams({ targetType });
+  if (targetId) qs.set('targetId', targetId);
+  return apiRequest<{ views: PublicSceneView[] }>(`${PUBLIC}/${encodeURIComponent(slug)}/views?${qs.toString()}`);
+};
+
+/** Inquiry about a unit that has no published listing (when the residence allows it). */
+export const sendUnitInquiry = (
+  slug: string,
+  unitId: string,
+  payload: UnitInquiryPayload
+): Promise<{ message: string }> =>
+  apiRequest(`${PUBLIC}/${encodeURIComponent(slug)}/units/${unitId}/inquiries`, {
+    method: 'POST',
+    body: payload,
+  });
 
 // --- Dashboard: development lifecycle -------------------------------------
 
@@ -203,19 +236,81 @@ export const createUnit = (
 
 export const listUnits = async (
   developmentId: string,
-  filters: { buildingId?: string; floorId?: string; availability?: string; limit?: number; skip?: number } = {}
-): Promise<Paginated<DevelopmentUnit>> => {
+  filters: UnitListQuery = {}
+): Promise<Paginated<DashboardUnit>> => {
   const qs = new URLSearchParams();
   Object.entries(filters).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
   });
   const query = qs.toString();
-  const raw = await apiRequest<{ units: DevelopmentUnit[]; total: number }>(
+  const raw = await apiRequest<{ units: DashboardUnit[]; total: number }>(
     `${DASH}/${developmentId}/units${query ? `?${query}` : ''}`,
     { requiresAuth: true }
   );
   return { items: raw.units ?? [], total: raw.total ?? 0 };
 };
+
+export const updateUnit = (
+  developmentId: string,
+  unitId: string,
+  patch: UpdateUnitPayload
+): Promise<{ unit: DashboardUnit }> =>
+  apiRequest(`${DASH}/${developmentId}/units/${unitId}`, {
+    method: 'PATCH',
+    body: patch,
+    requiresAuth: true,
+  });
+
+export const deleteUnit = (developmentId: string, unitId: string): Promise<{ success: boolean }> =>
+  apiRequest(`${DASH}/${developmentId}/units/${unitId}`, { method: 'DELETE', requiresAuth: true });
+
+export const bulkUpdateUnits = (
+  developmentId: string,
+  payload: BulkUnitUpdatePayload
+): Promise<{ updated: number }> =>
+  apiRequest(`${DASH}/${developmentId}/units/bulk`, {
+    method: 'POST',
+    body: payload,
+    requiresAuth: true,
+  });
+
+/** The inventory as CSV (auth-gated, so fetched as a blob rather than linked). */
+export const downloadUnitsCsv = async (developmentId: string): Promise<Blob> => {
+  const { blob } = await blobRequest(`${DASH}/${developmentId}/units/export.csv`, { method: 'GET' });
+  return blob;
+};
+
+export const uploadUnitFloorplan = (
+  developmentId: string,
+  unitId: string,
+  file: File
+): Promise<{ unit: DashboardUnit }> => {
+  const formData = new FormData();
+  formData.append('floorplan', file);
+  return uploadRequest(`${DASH}/${developmentId}/units/${unitId}/floorplan`, formData);
+};
+
+export const updateBuilding = (
+  developmentId: string,
+  buildingId: string,
+  patch: UpdateBuildingPayload
+): Promise<{ building: DevelopmentBuilding }> =>
+  apiRequest(`${DASH}/${developmentId}/buildings/${buildingId}`, {
+    method: 'PATCH',
+    body: patch,
+    requiresAuth: true,
+  });
+
+export const updateFloor = (
+  developmentId: string,
+  floorId: string,
+  patch: UpdateFloorPayload
+): Promise<{ floor: DevelopmentFloor }> =>
+  apiRequest(`${DASH}/${developmentId}/floors/${floorId}`, {
+    method: 'PATCH',
+    body: patch,
+    requiresAuth: true,
+  });
 
 export const setUnitAvailability = (
   developmentId: string,
@@ -344,27 +439,55 @@ export const unfollowDevelopment = (slug: string): Promise<{ following: boolean 
 export const listScenes = (developmentId: string): Promise<{ scenes: Scene[] }> =>
   apiRequest(`${DASH}/${developmentId}/scenes`, { requiresAuth: true });
 
+/** Upload or replace the image of one view of a target (creates the view if new). */
 export const upsertSceneImage = (
   developmentId: string,
-  targetType: SceneTargetType,
-  file: File,
-  targetId?: string
-): Promise<{ scene: Scene }> => {
+  input: UpsertSceneImageInput
+): Promise<UpsertSceneImageResult> => {
   const formData = new FormData();
-  formData.append('image', file);
-  formData.append('targetType', targetType);
-  if (targetId) formData.append('targetId', targetId);
-  return uploadRequest<{ scene: Scene }>(`${DASH}/${developmentId}/scenes`, formData);
+  formData.append('image', input.file);
+  formData.append('targetType', input.targetType);
+  if (input.targetId) formData.append('targetId', input.targetId);
+  if (input.viewKey) formData.append('viewKey', input.viewKey);
+  if (input.viewName) formData.append('viewName', input.viewName);
+  if (input.viewDirection) formData.append('viewDirection', input.viewDirection);
+  if (input.sortOrder !== undefined) formData.append('sortOrder', String(input.sortOrder));
+  if (input.clearHotspots) formData.append('clearHotspots', 'true');
+  return uploadRequest<UpsertSceneImageResult>(`${DASH}/${developmentId}/scenes`, formData);
 };
 
+export const updateSceneView = (
+  developmentId: string,
+  sceneId: string,
+  patch: SceneViewMetaPayload
+): Promise<{ scene: Scene }> =>
+  apiRequest(`${DASH}/${developmentId}/scenes/${sceneId}`, {
+    method: 'PATCH',
+    body: patch,
+    requiresAuth: true,
+  });
+
+export const unpublishScene = (developmentId: string, sceneId: string): Promise<{ scene: Scene }> =>
+  apiRequest(`${DASH}/${developmentId}/scenes/${sceneId}/unpublish`, {
+    method: 'POST',
+    requiresAuth: true,
+  });
+
+/**
+ * Save a view's draft regions. `baseVersion` is the draft version the editor
+ * loaded; the server answers 409 (code 'version_conflict', currentVersion) if
+ * someone saved in between, instead of silently overwriting their work. A 400
+ * carries `errors: HotspotIssue[]` naming each rejected region.
+ */
 export const saveSceneDraft = (
   developmentId: string,
   sceneId: string,
-  hotspots: Hotspot[]
+  hotspots: Hotspot[],
+  baseVersion?: number
 ): Promise<{ scene: Scene }> =>
   apiRequest(`${DASH}/${developmentId}/scenes/${sceneId}/draft`, {
     method: 'PATCH',
-    body: { hotspots },
+    body: baseVersion === undefined ? { hotspots } : { hotspots, baseVersion },
     requiresAuth: true,
   });
 

@@ -8,6 +8,7 @@ import {
   getDevelopmentStructure,
   listUnits,
 } from '../api/developmentsApi';
+import type { UnitListQuery } from '../types';
 
 /** A single development the caller can author (dashboard). */
 export function useMyDevelopment(id: string | undefined) {
@@ -45,7 +46,7 @@ export function usePublicDevelopment(slug: string | undefined) {
 /** Public units of a published development (buyer-facing browser). */
 export function usePublicDevelopmentUnits(slug: string | undefined) {
   const query = useQuery({
-    queryKey: [...developmentKeys.publicDetail(slug ?? ''), 'units'] as const,
+    queryKey: developmentKeys.publicUnits(slug ?? ''),
     queryFn: () => getPublicDevelopmentUnits(slug as string),
     enabled: !!slug,
     staleTime: 2 * 60_000,
@@ -61,7 +62,7 @@ export function usePublicDevelopmentUnits(slug: string | undefined) {
 /** A single public unit with its context and linked listings (detail page). */
 export function usePublicUnit(slug: string | undefined, unitId: string | undefined) {
   const query = useQuery({
-    queryKey: [...developmentKeys.publicDetail(slug ?? ''), 'unit', unitId ?? ''] as const,
+    queryKey: developmentKeys.publicUnit(slug ?? '', unitId ?? ''),
     queryFn: () => getPublicUnit(slug as string, unitId as string),
     enabled: !!slug && !!unitId,
     staleTime: 2 * 60_000,
@@ -78,7 +79,7 @@ export function usePublicUnit(slug: string | undefined, unitId: string | undefin
 /** Buildings, entrances and floors of a development (dashboard inventory). */
 export function useDevelopmentStructure(id: string | undefined) {
   const query = useQuery({
-    queryKey: [...developmentKeys.detail(id ?? ''), 'structure'] as const,
+    queryKey: developmentKeys.structure(id ?? ''),
     queryFn: () => getDevelopmentStructure(id as string),
     enabled: !!id,
   });
@@ -91,15 +92,14 @@ export function useDevelopmentStructure(id: string | undefined) {
   };
 }
 
-/** Paginated units of a development (dashboard inventory). */
-export function useDevelopmentUnits(
-  id: string | undefined,
-  filters: { buildingId?: string; floorId?: string; availability?: string; limit?: number; skip?: number } = {}
-) {
+/** Paginated, searchable, sortable units of a development (dashboard inventory). */
+export function useDevelopmentUnits(id: string | undefined, filters: UnitListQuery = {}) {
   const query = useQuery({
     queryKey: developmentKeys.units(id ?? '', filters),
     queryFn: () => listUnits(id as string, filters),
     enabled: !!id,
+    // Keep the previous page on screen while the next one loads (no table flash).
+    placeholderData: (prev) => prev,
   });
   return {
     units: query.data?.items ?? [],

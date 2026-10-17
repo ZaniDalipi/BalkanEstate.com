@@ -7,7 +7,7 @@ import {
 } from '../api/developmentsApi';
 import type { FollowFilters, FollowPreferences } from '../types';
 
-const followKey = (slug: string) => [...developmentKeys.publicDetail(slug), 'follow'] as const;
+const followKey = (slug: string) => developmentKeys.follow(slug);
 
 /**
  * Follow state + mutations for a development. Only queries when `enabled`

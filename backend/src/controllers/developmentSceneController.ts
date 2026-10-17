@@ -331,3 +331,19 @@ export const getPublishedScene = async (req: Request, res: Response): Promise<vo
     sendServiceError(res, error, 'get published scene');
   }
 };
+
+// --- Explorer contract stubs (implemented by the scenes/views slice) -------
+// Registered in the routers now so the route files never need concurrent edits.
+
+const notImplemented = (res: Response): void => {
+  res.status(501).json({ message: 'Not implemented yet' });
+};
+
+/** PATCH /api/dashboard/developments/:developmentId/scenes/:sceneId — view name/direction/order. */
+export const updateSceneMeta = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+
+/** POST /api/dashboard/developments/:developmentId/scenes/:sceneId/unpublish */
+export const unpublishScene = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+
+/** GET /api/developments/:slug/views?targetType=&targetId= — public, filtered hotspots. */
+export const listPublicViews = async (_req: Request, res: Response): Promise<void> => notImplemented(res);

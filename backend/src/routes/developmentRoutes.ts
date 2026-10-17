@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { protect } from '../middleware/auth';
 import {
   listPublic,
@@ -6,7 +7,8 @@ import {
   listPublicUnits,
   getPublicUnit,
 } from '../controllers/developmentController';
-import { getPublishedScene } from '../controllers/developmentSceneController';
+import { getPublishedScene, listPublicViews } from '../controllers/developmentSceneController';
+import { sendUnitInquiry } from '../controllers/developmentInquiryController';
 import {
   follow,
   getStatus,
@@ -19,6 +21,16 @@ import {
 } from '../controllers/developmentSuggestionController';
 
 const router = express.Router();
+
+// Same budget as the platform's other public inquiry endpoints (inquiryRoutes).
+const unitInquiryRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  message: { message: 'Too many inquiries sent. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'development' || !process.env.NODE_ENV,
+});
 
 /**
  * Public development routes. Read endpoints expose only published developments
@@ -33,7 +45,9 @@ router.get('/following', protect, listFollowing);
 router.get('/nearby', protect, nearbyDevelopments);
 
 router.get('/:slug/scene', getPublishedScene);
+router.get('/:slug/views', listPublicViews);
 router.get('/:slug/units/:unitId', getPublicUnit);
+router.post('/:slug/units/:unitId/inquiries', unitInquiryRateLimiter, sendUnitInquiry);
 router.get('/:slug/units', listPublicUnits);
 
 // Follow / alerts (signed-in buyers)

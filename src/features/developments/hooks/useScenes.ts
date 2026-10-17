@@ -3,21 +3,21 @@ import { developmentKeys } from '../api/developmentKeys';
 import {
   listScenes,
   upsertSceneImage,
+  updateSceneView,
   saveSceneDraft,
   publishScene,
+  unpublishScene,
   deleteScene,
   getPublishedScene,
+  getPublicViews,
   getAttachableListings,
 } from '../api/developmentsApi';
-import type { Hotspot, SceneTargetType } from '../types';
+import type { Hotspot, SceneTargetType, SceneViewMetaPayload, UpsertSceneImageInput } from '../types';
 
-const scenesKey = (developmentId: string) =>
-  [...developmentKeys.detail(developmentId), 'scenes'] as const;
-
-/** All scenes of a development (dashboard editor). */
+/** All scenes (every view of every target) of a development — dashboard editor. */
 export function useScenes(developmentId: string | undefined) {
   const query = useQuery({
-    queryKey: scenesKey(developmentId ?? ''),
+    queryKey: developmentKeys.scenes(developmentId ?? ''),
     queryFn: () => listScenes(developmentId as string),
     enabled: !!developmentId,
   });
@@ -29,50 +29,71 @@ export function useScenes(developmentId: string | undefined) {
   };
 }
 
-/** Scene mutations: upload/replace image, save draft hotspots, publish, delete. */
+/**
+ * Scene/view mutations. Publishing or unpublishing also invalidates the public
+ * cache so an owner previewing their own residence sees the change at once.
+ */
 export function useSceneMutations(developmentId: string) {
   const qc = useQueryClient();
-  const invalidate = () => qc.invalidateQueries({ queryKey: scenesKey(developmentId) });
+  const invalidate = () => qc.invalidateQueries({ queryKey: developmentKeys.scenes(developmentId) });
+  const invalidateWithPublic = () => {
+    invalidate();
+    qc.invalidateQueries({ queryKey: developmentKeys.public() });
+  };
 
   const uploadImage = useMutation({
-    mutationFn: (vars: { targetType: SceneTargetType; file: File; targetId?: string }) =>
-      upsertSceneImage(developmentId, vars.targetType, vars.file, vars.targetId),
+    mutationFn: (input: UpsertSceneImageInput) => upsertSceneImage(developmentId, input),
+    onSuccess: invalidate,
+  });
+  const updateView = useMutation({
+    mutationFn: (vars: { sceneId: string; patch: SceneViewMetaPayload }) =>
+      updateSceneView(developmentId, vars.sceneId, vars.patch),
     onSuccess: invalidate,
   });
   const saveDraft = useMutation({
-    mutationFn: (vars: { sceneId: string; hotspots: Hotspot[] }) =>
-      saveSceneDraft(developmentId, vars.sceneId, vars.hotspots),
+    mutationFn: (vars: { sceneId: string; hotspots: Hotspot[]; baseVersion?: number }) =>
+      saveSceneDraft(developmentId, vars.sceneId, vars.hotspots, vars.baseVersion),
     onSuccess: invalidate,
   });
   const publish = useMutation({
     mutationFn: (sceneId: string) => publishScene(developmentId, sceneId),
-    onSuccess: invalidate,
+    onSuccess: invalidateWithPublic,
+  });
+  const unpublish = useMutation({
+    mutationFn: (sceneId: string) => unpublishScene(developmentId, sceneId),
+    onSuccess: invalidateWithPublic,
   });
   const remove = useMutation({
     mutationFn: (sceneId: string) => deleteScene(developmentId, sceneId),
-    onSuccess: invalidate,
+    onSuccess: invalidateWithPublic,
   });
 
   return {
     uploadImage: uploadImage.mutateAsync,
     isUploading: uploadImage.isPending,
+    updateView: updateView.mutateAsync,
+    isUpdatingView: updateView.isPending,
     saveDraft: saveDraft.mutateAsync,
     isSaving: saveDraft.isPending,
     publish: publish.mutateAsync,
     isPublishing: publish.isPending,
+    unpublish: unpublish.mutateAsync,
+    isUnpublishing: unpublish.isPending,
     remove: remove.mutateAsync,
-    error: uploadImage.error || saveDraft.error || publish.error || remove.error,
+    isRemoving: remove.isPending,
+    error:
+      uploadImage.error || updateView.error || saveDraft.error || publish.error || unpublish.error || remove.error,
   };
 }
 
 /**
  * The caller's controllable listings for the scene editor's listing picker.
- * `q` is a server-side search; keep queries distinct per search term and short-
- * lived so the dropdown stays responsive.
+ * Pass an already-debounced `q` (see useDebouncedValue) so typing does not
+ * fire a request per keystroke.
  */
 export function useAttachableListings(developmentId: string | undefined, q: string) {
   const query = useQuery({
-    queryKey: [...developmentKeys.detail(developmentId ?? ''), 'attachable-listings', q] as const,
+    queryKey: developmentKeys.attachableListings(developmentId ?? '', q),
     queryFn: () => getAttachableListings(developmentId as string, q),
     enabled: !!developmentId,
     staleTime: 30_000,
@@ -84,17 +105,37 @@ export function useAttachableListings(developmentId: string | undefined, q: stri
   };
 }
 
-/** The published scene for a target, for the public interactive viewer. */
+/** The (legacy, single) published scene for a target. Prefer usePublicViews. */
 export function usePublishedScene(
   slug: string | undefined,
   targetType: SceneTargetType = 'development',
   targetId?: string
 ) {
   const query = useQuery({
-    queryKey: [...developmentKeys.publicDetail(slug ?? ''), 'scene', targetType, targetId ?? ''] as const,
+    queryKey: developmentKeys.publicScene(slug ?? '', targetType, targetId ?? ''),
     queryFn: () => getPublishedScene(slug as string, targetType, targetId),
     enabled: !!slug,
     staleTime: 2 * 60_000,
   });
   return { scene: query.data?.scene ?? null, isLoading: query.isLoading, error: query.error };
+}
+
+/** Every published view of a target, in display order — the explorer's perspectives. */
+export function usePublicViews(
+  slug: string | undefined,
+  targetType: SceneTargetType = 'development',
+  targetId?: string
+) {
+  const query = useQuery({
+    queryKey: developmentKeys.publicViews(slug ?? '', targetType, targetId ?? ''),
+    queryFn: () => getPublicViews(slug as string, targetType, targetId),
+    enabled: !!slug && (targetType === 'development' || !!targetId),
+    staleTime: 2 * 60_000,
+  });
+  return {
+    views: query.data?.views ?? [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }

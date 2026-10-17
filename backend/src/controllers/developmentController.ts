@@ -513,3 +513,25 @@ export const getPublicUnit = async (req: Request, res: Response): Promise<void> 
     sendServiceError(res, error, 'get public unit');
   }
 };
+
+// --- Explorer contract stubs (implemented by the units/inventory slice) ----
+// Registered in the routers now so the route files never need concurrent edits.
+
+const notImplemented = (res: Response): void => {
+  res.status(501).json({ message: 'Not implemented yet' });
+};
+
+/** PATCH /:developmentId/units/:unitId — field-level authz (unit.manage / price.change / availability.change). */
+export const updateUnit = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+/** DELETE /:developmentId/units/:unitId — soft delete. */
+export const deleteUnit = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+/** POST /:developmentId/units/bulk — { unitIds, availability?, visibility? }. */
+export const bulkUpdateUnits = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+/** GET /:developmentId/units/export.csv */
+export const exportUnitsCsv = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+/** POST /:developmentId/units/:unitId/floorplan (multipart field `floorplan`). */
+export const uploadUnitFloorplan = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+/** PATCH /:developmentId/buildings/:buildingId */
+export const updateBuilding = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+/** PATCH /:developmentId/floors/:floorId */
+export const updateFloor = async (_req: Request, res: Response): Promise<void> => notImplemented(res);

@@ -2,6 +2,8 @@ import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth';
 import { requireActiveSubscription } from '../middleware/checkSubscription';
+import { mutationRateLimiter, uploadRateLimiter } from '../middleware/security';
+import { withUploadErrors } from '../middleware/uploadErrors';
 import {
   developmentAuth,
   requireDevelopmentPermission,
@@ -20,6 +22,13 @@ import {
   addUnit,
   getUnits,
   updateAvailability,
+  updateUnit,
+  deleteUnit,
+  bulkUpdateUnits,
+  exportUnitsCsv,
+  uploadUnitFloorplan,
+  updateBuilding,
+  updateFloor,
 } from '../controllers/developmentController';
 import {
   attach,
@@ -35,15 +44,30 @@ import {
   saveDraft,
   publishScene,
   deleteScene,
+  updateSceneMeta,
+  unpublishScene,
 } from '../controllers/developmentSceneController';
 import { attachListing } from '../controllers/developmentSuggestionController';
 
 const router = express.Router();
 
-// In-memory upload for the cover image (handed to the media service as a buffer).
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+/** A single-image upload whose errors become clear 4xx responses (withUploadErrors). */
+const singleImage = (field: string) =>
+  withUploadErrors(upload.single(field), { field, maxFiles: 1, maxFileSizeBytes: MAX_IMAGE_BYTES });
+
+// In-memory upload for cover, scene and floorplan images (handed to the media
+// service as a buffer). Raster formats only: SVG is refused because an uploaded
+// SVG can carry script. The media service still decodes every file, so a
+// mislabelled non-image fails there too.
+const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  limits: { fileSize: MAX_IMAGE_BYTES, files: 1 }, // 10 MB, one file
+  fileFilter: (_req, file, cb) => {
+    if (ACCEPTED_IMAGE_TYPES.has(file.mimetype)) cb(null, true);
+    else cb(new Error('Only JPG, PNG, WebP or AVIF images are accepted'));
+  },
 });
 
 /**
@@ -67,7 +91,7 @@ router.post(
   protect,
   developmentAuth,
   requireDevelopmentPermission('media.upload'),
-  upload.single('cover'),
+  singleImage('cover'),
   uploadCover
 );
 router.patch(
@@ -108,6 +132,22 @@ router.post(
   requireDevelopmentPermission('floor.manage'),
   addFloor
 );
+router.patch(
+  '/:developmentId/buildings/:buildingId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('building.manage'),
+  updateBuilding
+);
+router.patch(
+  '/:developmentId/floors/:floorId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('floor.manage'),
+  updateFloor
+);
 router.post(
   '/:developmentId/units',
   protect,
@@ -116,6 +156,43 @@ router.post(
   addUnit
 );
 router.get('/:developmentId/units', protect, developmentAuth, getUnits);
+// Static unit paths before /units/:unitId so they are not captured as an id.
+router.get('/:developmentId/units/export.csv', protect, developmentAuth, exportUnitsCsv);
+// Bulk edits: the handler requires availability.change and/or unit.manage
+// depending on which fields the request changes (field-level authz).
+router.post(
+  '/:developmentId/units/bulk',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  bulkUpdateUnits
+);
+// General unit edit: field-level authz in the handler (unit.manage for
+// structure, price.change for price fields, availability.change for status).
+router.patch(
+  '/:developmentId/units/:unitId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  updateUnit
+);
+router.delete(
+  '/:developmentId/units/:unitId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('unit.manage'),
+  deleteUnit
+);
+router.post(
+  '/:developmentId/units/:unitId/floorplan',
+  protect,
+  uploadRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('media.upload'),
+  singleImage('floorplan'),
+  uploadUnitFloorplan
+);
 router.patch(
   '/:developmentId/units/:unitId/availability',
   protect,
@@ -176,15 +253,25 @@ router.get('/:developmentId/scenes', protect, developmentAuth, listScenes);
 router.post(
   '/:developmentId/scenes',
   protect,
+  uploadRateLimiter,
   developmentAuth,
   requireDevelopmentPermission('scene.edit'),
-  upload.single('image'),
+  singleImage('image'),
   upsertSceneImage
 );
 router.get('/:developmentId/scenes/:sceneId', protect, developmentAuth, getScene);
 router.patch(
+  '/:developmentId/scenes/:sceneId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('scene.edit'),
+  updateSceneMeta
+);
+router.patch(
   '/:developmentId/scenes/:sceneId/draft',
   protect,
+  mutationRateLimiter,
   developmentAuth,
   requireDevelopmentPermission('scene.edit'),
   saveDraft
@@ -195,6 +282,13 @@ router.post(
   developmentAuth,
   requireDevelopmentPermission('publish'),
   publishScene
+);
+router.post(
+  '/:developmentId/scenes/:sceneId/unpublish',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('publish'),
+  unpublishScene
 );
 router.delete(
   '/:developmentId/scenes/:sceneId',

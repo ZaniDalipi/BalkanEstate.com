@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Check, X } from 'lucide-react';
 import { useAttachableListings } from '../../hooks';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { formatPrice } from '../../utils/format';
 
 interface ListingLinkPickerProps {
@@ -26,7 +27,9 @@ export const ListingLinkPicker: React.FC<ListingLinkPickerProps> = ({
 }) => {
   const { t } = useTranslation('developments');
   const [q, setQ] = useState('');
-  const { listings, isLoading } = useAttachableListings(developmentId, q);
+  // Debounced so typing a title does not send one request per keystroke.
+  const debouncedQ = useDebouncedValue(q.trim(), 300);
+  const { listings, isLoading } = useAttachableListings(developmentId, debouncedQ);
 
   const selected = listings.find((l) => l.id === value);
 
