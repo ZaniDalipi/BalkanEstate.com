@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 
 /**
  * A buyer following a development, with their alert preferences and optional
@@ -70,6 +71,9 @@ DevelopmentFollowSchema.index(
   { unique: true, name: 'follow_per_user_per_development_unique' }
 );
 DevelopmentFollowSchema.index({ userId: 1, createdAt: -1 });
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentFollowSchema, ['developmentId', 'userId']);
 
 export default mongoose.model<IDevelopmentFollow>(
   'DevelopmentFollow',

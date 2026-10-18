@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 import {
   DEVELOPMENT_ROLES,
   MEMBERSHIP_STATUSES,
@@ -61,6 +62,9 @@ DevelopmentMembershipSchema.index(
   { unique: true, name: 'membership_per_user_per_development_unique' }
 );
 DevelopmentMembershipSchema.index({ userId: 1, status: 1 });
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentMembershipSchema, ['developmentId', 'userId', 'invitedBy']);
 
 export default mongoose.model<IDevelopmentMembership>(
   'DevelopmentMembership',

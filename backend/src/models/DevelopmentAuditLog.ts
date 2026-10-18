@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 
 /**
  * Append-only audit trail for development-scoped actions (attach, detach,
@@ -64,6 +65,9 @@ const DevelopmentAuditLogSchema: Schema = new Schema(
 );
 
 DevelopmentAuditLogSchema.index({ developmentId: 1, createdAt: -1 });
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentAuditLogSchema, ['developmentId', 'actorId', 'targetId']);
 
 export default mongoose.model<IDevelopmentAuditLog>(
   'DevelopmentAuditLog',

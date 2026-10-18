@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
 import { CLAIM_STATUSES, type ClaimStatus } from '../config/developments';
 
 /**
@@ -52,6 +53,9 @@ const DevelopmentClaimSchema: Schema = new Schema(
 );
 
 DevelopmentClaimSchema.index({ developmentId: 1, status: 1 });
+
+// Encode every reference in JSON so the client compares like with like.
+encodeRefsOnJSON(DevelopmentClaimSchema, ['developmentId', 'claimantId', 'evidenceMediaIds', 'reviewedBy']);
 
 export default mongoose.model<IDevelopmentClaim>(
   'DevelopmentClaim',

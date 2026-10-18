@@ -590,6 +590,10 @@ export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): 
     'url', 'imageUrl', 'previewUrl', 'floorplanUrl', 'tourUrl',
     'virtualTour360Url', 'avatarUrl', 'publicId', 'images',
     'text', 'message', 'description', 'title', 'name', 'content', 'excerpt', // User-facing text fields - React handles XSS escaping
+    // Residence explorer plain-text fields, rendered only as React text (never
+    // as HTML). Escaping them stored "Owner's view" as "Owner&#x27;s view",
+    // which React then displayed literally.
+    'label', 'viewName', 'unitNumber', 'unitType', 'orientation', 'viewType', 'note',
     'bodyTemplate', 'footerHtml', 'headerHtml', 'subject', 'preheaderText', 'headerGradient' // Email template fields - contain intentional HTML edited by admins
   ]);
 
