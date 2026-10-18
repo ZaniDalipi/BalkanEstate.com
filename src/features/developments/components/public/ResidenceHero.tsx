@@ -52,7 +52,7 @@ export const ResidenceHero: React.FC<ResidenceHeroProps> = ({ development, onVie
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
       <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/40 to-transparent" />
 
-      <div className="relative flex min-h-[380px] flex-col justify-end gap-4 p-6 sm:min-h-[480px] sm:p-10">
+      <div className="relative flex min-h-[400px] flex-col justify-end gap-4 px-6 pb-20 pt-6 sm:min-h-[500px] sm:px-10 sm:pb-24 sm:pt-10">
         <div className="flex flex-wrap gap-2">
           <Chip>{t(`category.${category}`)}</Chip>
           <Chip>

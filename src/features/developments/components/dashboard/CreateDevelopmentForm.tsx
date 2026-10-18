@@ -118,7 +118,7 @@ const CreateDevelopmentForm: React.FC = () => {
         <p className="mt-1 text-sm text-muted-foreground">{t('wizard.basics')}</p>
       </header>
 
-      <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-card p-5 space-y-5" noValidate>
+      <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-white p-5 space-y-5" noValidate>
         <Input
           label={t('wizard.name')}
           placeholder={t('wizard.namePlaceholder')}

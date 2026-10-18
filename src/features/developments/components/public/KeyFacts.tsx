@@ -13,7 +13,7 @@ const Fact: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactN
   label,
   value,
 }) => (
-  <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+  <div className="flex items-start gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
     <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-teal-400/15 text-primary ring-1 ring-primary/10">
       {icon}
     </span>
@@ -42,7 +42,7 @@ export const KeyFacts: React.FC<KeyFactsProps> = ({ development, buildings }) =>
   const location = [development.municipality, development.city, development.country].filter(Boolean).join(', ');
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <Fact
         icon={<HardHat className="h-4 w-4" aria-hidden="true" />}
         label={t('wizard.constructionStatus')}

@@ -96,7 +96,7 @@ const DevelopmentManagePage: React.FC = () => {
         <h2 id="inventory-heading" className="mb-3 text-lg font-semibold text-foreground">
           {t('detail.inventory')}
         </h2>
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="rounded-2xl border border-border bg-white p-4">
           <QuickAddInventory developmentId={development.id} />
         </div>
       </section>

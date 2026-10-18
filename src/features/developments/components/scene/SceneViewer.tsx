@@ -125,7 +125,7 @@ export const SceneViewer: React.FC<SceneViewerProps> = ({ slug, units, highlight
         />
       ) : (
         !isLoading && (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-dashed border-border bg-white p-8 text-center text-sm text-muted-foreground">
             {t('scene.noPlanForTarget')}
           </div>
         )

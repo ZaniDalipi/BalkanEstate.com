@@ -16,7 +16,7 @@ const SpecItem: React.FC<{ icon: React.ReactNode; label: string; value: React.Re
   label,
   value,
 }) => (
-  <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
+  <div className="flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2">
     <span className="text-primary">{icon}</span>
     <div>
       <div className="text-sm font-semibold text-foreground">{value}</div>
@@ -32,7 +32,7 @@ const ListingRow: React.FC<{ listing: LinkedListing }> = ({ listing }) => {
     <button
       type="button"
       onClick={() => navigate(paths.property(listing.id))}
-      className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:border-primary/50"
+      className="flex w-full items-center gap-3 rounded-2xl border border-border bg-white p-3 text-left transition-colors hover:border-primary/50"
     >
       <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
         {img && (

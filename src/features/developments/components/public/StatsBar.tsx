@@ -26,8 +26,8 @@ const Tile: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactN
       {icon}
     </span>
     <div className="min-w-0">
-      <div className="truncate text-xl font-extrabold leading-tight tracking-tight text-foreground">{value}</div>
-      <div className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="truncate text-xl font-extrabold leading-tight tracking-tight text-slate-900">{value}</div>
+      <div className="truncate text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</div>
     </div>
   </div>
 );
@@ -46,7 +46,7 @@ export const StatsBar: React.FC<StatsBarProps> = ({ summary, buildings }) => {
       : '—';
 
   return (
-    <div className="grid grid-cols-2 divide-border rounded-2xl border border-border bg-card/95 shadow-xl ring-1 ring-black/5 backdrop-blur-md sm:grid-cols-4 sm:divide-x">
+    <div className="grid grid-cols-2 divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)] sm:grid-cols-4 sm:divide-x">
       <Tile icon={<Building2 className="h-5 w-5" aria-hidden="true" />} label={t('detail.buildings')} value={buildings} />
       <Tile icon={<Home className="h-5 w-5" aria-hidden="true" />} label={t('detail.units')} value={summary?.total ?? 0} />
       <Tile

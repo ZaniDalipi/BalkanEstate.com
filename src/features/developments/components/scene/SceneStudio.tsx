@@ -61,7 +61,7 @@ export const SceneStudio: React.FC<SceneStudioProps> = ({ developmentId }) => {
   return (
     <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
       {/* Target rail */}
-      <aside className="rounded-2xl border border-border bg-card p-2">
+      <aside className="rounded-2xl border border-border bg-white p-2">
         <p className="px-2 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {t('scene.targetPicker')}
         </p>

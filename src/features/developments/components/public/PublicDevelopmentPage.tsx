@@ -127,7 +127,7 @@ const PublicDevelopmentPage: React.FC = () => {
       </nav>
 
       {units.length > 0 && (
-        <div className="mt-6 rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-border bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold text-foreground">{t('units.availabilityHeading')}</h2>
           <AvailabilityBar units={units} />
         </div>
@@ -156,7 +156,7 @@ const PublicDevelopmentPage: React.FC = () => {
             {development.amenities.map((a) => (
               <li
                 key={a}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground shadow-sm"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-1.5 text-sm text-foreground shadow-sm"
               >
                 <Check className="h-3.5 w-3.5 text-teal-500" aria-hidden="true" />
                 {a}
@@ -204,7 +204,7 @@ const PublicDevelopmentPage: React.FC = () => {
             {buildings.map((b) => {
               const bFloors = floorsByBuilding(b.id);
               return (
-                <li key={b.id} className="rounded-2xl border border-border bg-card px-4 py-3">
+                <li key={b.id} className="rounded-2xl border border-border bg-white px-4 py-3">
                   <h3 className="text-sm font-semibold text-foreground">{b.name}</h3>
                   <p className="text-xs text-muted-foreground">
                     {t('detail.floors')}: {bFloors.length}

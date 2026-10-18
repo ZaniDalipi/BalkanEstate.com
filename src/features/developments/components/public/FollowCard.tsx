@@ -90,7 +90,7 @@ export const FollowCard: React.FC<FollowCardProps> = ({ slug, developmentName })
   // --- Not signed in ------------------------------------------------------
   if (!isAuthed) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="rounded-2xl border border-border bg-white p-5">
         <div className="mb-2 flex items-center gap-2">
           <Bell className="h-5 w-5 text-primary" aria-hidden="true" />
           <h3 className="text-base font-semibold text-foreground">{t('follow.title', { name: developmentName })}</h3>
@@ -103,7 +103,7 @@ export const FollowCard: React.FC<FollowCardProps> = ({ slug, developmentName })
 
   // --- Signed in ----------------------------------------------------------
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="rounded-2xl border border-border bg-white p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {following ? (

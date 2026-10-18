@@ -35,7 +35,7 @@ export const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
       type="button"
       onClick={onOpen}
       className={cn(
-        'group flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-card text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'group flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-white text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         className
       )}
     >

@@ -203,7 +203,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, targetT
       </div>
 
       {/* Sidebar: hotspot list + link editor */}
-      <aside className="rounded-2xl border border-border bg-card p-4">
+      <aside className="rounded-2xl border border-border bg-white p-4">
         <h3 className="mb-2 text-sm font-semibold text-foreground">
           {t('scene.regions')} ({hotspots.length})
         </h3>

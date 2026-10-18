@@ -69,7 +69,7 @@ export const AttachListingPanel: React.FC<AttachListingPanelProps> = ({
 
   return (
     <aside
-      className="rounded-2xl border border-border bg-card p-4"
+      className="rounded-2xl border border-border bg-white p-4"
       aria-label={t('attach.title')}
     >
       <div className="mb-3 flex items-center justify-between">

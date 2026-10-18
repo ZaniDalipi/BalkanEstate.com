@@ -91,7 +91,7 @@ const SuggestionRow: React.FC<{ suggestion: NearbySuggestion; listingId?: string
   };
 
   return (
-    <li className="rounded-xl border border-border bg-card p-3">
+    <li className="rounded-xl border border-border bg-white p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <a

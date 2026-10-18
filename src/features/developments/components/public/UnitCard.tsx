@@ -43,7 +43,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, slug }) => {
         }
       }}
       className={cn(
-        'flex cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'flex cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         sold && 'opacity-70'
       )}
     >
