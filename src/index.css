@@ -519,19 +519,38 @@ html[data-zoom] {
   font-size: calc(100% * var(--zoom-scale, 1));
 }
 
-/* Phone held sideways. It gets the desktop layout (it is ≥768px wide) but
-   only ~360–460px of height, and at phone-sized type every control, card and
-   heading was as big as in portrait, so the page looked zoomed in and showed
-   one card at a time. One step down on the root size shrinks every rem-based
-   Tailwind size and space together (16px → 14px), the same lever the zoom
-   compensation above uses; viewport units are untouched. Form fields keep
-   16px (index.html) so iOS still doesn't zoom in when one is focused. */
+/* Fluid root size: text follows the screen, not a fixed number.
+   Every Tailwind size and space is in rem, so scaling the root scales the
+   whole interface together (the same lever the zoom compensation above uses;
+   viewport units are untouched). Sizes are CSS pixels, which the browser
+   already maps to the screen's density, so this only has to follow the
+   screen's size.
+
+   - Phones held sideways get the desktop layout (they are ≥768px wide) with
+     only ~360–460px of height, which is what limits them: the root follows
+     the height, 3.1% of it, from 12px (a 390px-tall iPhone) to 14px (460px+).
+     The bounds are percentages of the browser's own default, so someone who
+     raised their default text size keeps it, scaled.
+     At a fixed phone size the page looked zoomed in, one card at a time.
+   - Narrow phones in portrait ease from 16px down to 15px below ~390px wide.
+
+   Form fields keep 16px (index.html) so iOS doesn't zoom in on focus. */
 @media (orientation: landscape) and (max-height: 500px) {
   html {
-    font-size: 87.5%;
+    --fluid-root: clamp(75%, 3.1dvh, 87.5%);
+    font-size: var(--fluid-root);
   }
   html[data-zoom] {
-    font-size: calc(87.5% * var(--zoom-scale, 1));
+    font-size: calc(var(--fluid-root) * var(--zoom-scale, 1));
+  }
+}
+@media (orientation: portrait) and (max-width: 400px) {
+  html {
+    --fluid-root: clamp(93.75%, 4.1vw, 100%);
+    font-size: var(--fluid-root);
+  }
+  html[data-zoom] {
+    font-size: calc(var(--fluid-root) * var(--zoom-scale, 1));
   }
 }
 

@@ -357,6 +357,13 @@
           min-height: 44px;
         }
       }
+      /* Phone held sideways: 44px rows would eat a 360–460px screen. 32px
+         keeps a comfortable fingertip target for the compact toolbars. */
+      @media (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+        button, a, input, select, textarea {
+          min-height: 32px;
+        }
+      }
 
       /* Prevent accidental zoom on mobile */
       html {

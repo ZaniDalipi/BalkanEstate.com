@@ -1286,10 +1286,16 @@ Height is handled separately:
   `useShortLandscape()` in `src/hooks/useMediaQuery.ts` — keep them in step.
   Use `landscape:` to tighten padding, headline sizes and control heights; never
   to swap layouts.
-- **Root size steps down** on a short landscape screen (`html { font-size:
-  87.5% }` in `src/index.css`, composed with the zoom compensation), so every
-  rem-based size shrinks together and the page no longer looks zoomed in. Form
-  fields stay at 16px there (`index.html`) so iOS never zooms on focus.
+- **Fluid root size** (`--fluid-root` in `src/index.css`, composed with the
+  zoom compensation): on a short landscape screen the root follows the screen
+  height (`clamp(75%, 3.1dvh, 87.5%)`, ≈12–14px); narrow portrait phones ease
+  from 16px to 15px. Every rem-based size scales together, so text is tied to
+  the screen, not fixed. Form fields stay at 16px (`index.html`) so iOS never
+  zooms on focus, and touch targets drop from 44px to 32px minimum in
+  landscape.
+- **Search controls are one toolbar row** on a sideways phone (mode switch,
+  Filters, Search, Reset, Save; the filter panel opens as a full-width row
+  below) and fold away on the first move down the results.
 - **Listings go two (search) or three (rentals, villas) across** when the list
   is full-width on a sideways phone (`max-lg:landscape:grid-cols-*`).
 - **Floating header** (`components/shared/Header.tsx`): short labels and
