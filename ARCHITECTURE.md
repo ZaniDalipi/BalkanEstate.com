@@ -1286,6 +1286,12 @@ Height is handled separately:
   `useShortLandscape()` in `src/hooks/useMediaQuery.ts` — keep them in step.
   Use `landscape:` to tighten padding, headline sizes and control heights; never
   to swap layouts.
+- **Root size steps down** on a short landscape screen (`html { font-size:
+  87.5% }` in `src/index.css`, composed with the zoom compensation), so every
+  rem-based size shrinks together and the page no longer looks zoomed in. Form
+  fields stay at 16px there (`index.html`) so iOS never zooms on focus.
+- **Listings go two (search) or three (rentals, villas) across** when the list
+  is full-width on a sideways phone (`max-lg:landscape:grid-cols-*`).
 - **Floating header** (`components/shared/Header.tsx`): short labels and
   avatar-only account button under `landscape:`, and `useHideOnScroll` slides it
   away while page content scrolls down (back on the way up, always near the

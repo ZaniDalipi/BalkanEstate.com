@@ -976,7 +976,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3">
                                         {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} index={i} />)}
                                     </div>
                                 </>
@@ -1029,7 +1029,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     />
                                     <TrustStrip />
                                     <HighlightedPropertiesSection properties={listProperties} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                         {interleaveInFeedAds(
                                             listProperties.slice(0, visibleCount).map((property, index) => (
                                                 <AnimatedVillaCard
@@ -1046,7 +1046,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {visibleCount < listProperties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}

@@ -509,7 +509,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         )}
                         <div className="p-3">
                         {!mountList ? null : (isLoading || isSearchFiltering) ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3">
                                 {[...Array(6)].map((_, i) => (
                                     <PropertyCardSkeleton key={i} index={i} />
                                 ))}
@@ -537,7 +537,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             <>
                                 <RentalCardAnimationStyles />
                                 <HighlightedPropertiesSection properties={listProperties} />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3">
                                     {interleaveInFeedAds(
                                         listProperties.slice(0, visibleCount).map((property, index) => (
                                             <AnimatedPropertyCard
@@ -554,7 +554,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 {visibleCount < listProperties.length && (
                                     <div ref={loadMoreRef}>
                                         {isLoadingMore && (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3 mt-3">
                                                 {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                     <PropertyCardSkeleton key={i} index={i} />
                                                 ))}

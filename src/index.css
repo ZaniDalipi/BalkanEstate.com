@@ -519,6 +519,22 @@ html[data-zoom] {
   font-size: calc(100% * var(--zoom-scale, 1));
 }
 
+/* Phone held sideways. It gets the desktop layout (it is ≥768px wide) but
+   only ~360–460px of height, and at phone-sized type every control, card and
+   heading was as big as in portrait, so the page looked zoomed in and showed
+   one card at a time. One step down on the root size shrinks every rem-based
+   Tailwind size and space together (16px → 14px), the same lever the zoom
+   compensation above uses; viewport units are untouched. Form fields keep
+   16px (index.html) so iOS still doesn't zoom in when one is focused. */
+@media (orientation: landscape) and (max-height: 500px) {
+  html {
+    font-size: 87.5%;
+  }
+  html[data-zoom] {
+    font-size: calc(87.5% * var(--zoom-scale, 1));
+  }
+}
+
 /* The app shell is sized in dvh; make sure its wrapper can never be the thing
    that stops short of the viewport. */
 #root {
