@@ -168,7 +168,7 @@ const ContactUsPage: React.FC = () => {
 
           {/* Page Header */}
           <div className="text-center mb-10">
-            <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-3">
+            <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-3 landscape:text-2xl">
               {t('contact:title', 'Contact Us')}
             </h1>
             <p className="text-neutral-600 max-w-lg mx-auto text-base sm:text-lg">

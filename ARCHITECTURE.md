@@ -1275,6 +1275,41 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
 
 ---
 
+## Responsive Layout — any device, either orientation
+
+Breakpoints are width-based, so a phone held sideways (≥768px wide, ~360–460px
+tall) gets the desktop shell: sidebar rail, floating header, split list/map.
+Height is handled separately:
+
+- **`landscape:` variant** (`src/index.css`) = `(orientation: landscape) and
+  (max-height: 500px)`. Its JS twin is `SHORT_LANDSCAPE_QUERY` /
+  `useShortLandscape()` in `src/hooks/useMediaQuery.ts` — keep them in step.
+  Use `landscape:` to tighten padding, headline sizes and control heights; never
+  to swap layouts.
+- **Floating header** (`components/shared/Header.tsx`): short labels and
+  avatar-only account button under `landscape:`, and `useHideOnScroll` slides it
+  away while page content scrolls down (back on the way up, always near the
+  top). The hook listens to every scroll in the capture phase and ignores the
+  sidebar, menus and dialogs.
+- **Sidebar rail width** is `--sidebar-rail-w` = `5rem + safe-area-inset-left`.
+  The rail pads itself by the inset, so on a notched phone in landscape a flat
+  5rem left the icons ~2rem. Anything placed beside the rail uses
+  `md:pl-(--sidebar-rail-w)` / `md:left-(--sidebar-rail-w)`, never `md:pl-20`.
+- **Search / Rentals / Villas list column**: on a short landscape screen the
+  search controls (mode tabs, filters, header chips) fold away while the results
+  scroll down and return on the way up, so the column shows listings, not
+  controls.
+- **Page heroes**: hero `h1`s carry `landscape:text-2xl/3xl` and hero wrappers
+  `landscape:py-6/8`, so a hero never fills a sideways phone on its own.
+- **Centred dialogs** use `.dialog-fit` (`src/index.css`): capped at the visible
+  height (minus notch and backdrop padding) and scrolling inside, so their
+  buttons stay reachable at 360px tall. `Modal.tsx` already caps itself.
+- `e2e/responsive-layout.spec.ts` guards it: no sideways scroll on key pages
+  from 360px phones to desktop in both orientations, and a compact header on a
+  sideways phone.
+
+---
+
 ## Schedule Viewing Modal
 
 3-step wizard:

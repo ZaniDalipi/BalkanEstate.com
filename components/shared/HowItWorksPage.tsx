@@ -201,9 +201,9 @@ const HowItWorksPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 relative">
+        <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 landscape:py-8 relative">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 landscape:text-2xl">
               {t('howItWorks:hero.title')}
             </h1>
             <p className="text-xl text-white/80 max-w-2xl mx-auto">

@@ -1828,7 +1828,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         </div>
 
         {/* Agency Identity - Centered Content (relative so hero grows with content) */}
-        <div className={`relative z-10 flex flex-col items-center justify-center min-h-[28rem] md:min-h-[32rem] px-4 pt-24 pb-20 ${isRepositioningCover ? 'pointer-events-none opacity-30' : ''}`}>
+        <div className={`relative z-10 flex flex-col items-center justify-center min-h-[28rem] md:min-h-[32rem] landscape:min-h-[20rem] px-4 pt-24 pb-20 landscape:pt-16 landscape:pb-10 ${isRepositioningCover ? 'pointer-events-none opacity-30' : ''}`}>
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -1916,7 +1916,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           </div>
 
           {/* Agency Name */}
-          <h1 className="mt-8 text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center tracking-tight">
+          <h1 className="mt-8 text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center tracking-tight landscape:text-2xl">
             {agencyData.name}
           </h1>
 

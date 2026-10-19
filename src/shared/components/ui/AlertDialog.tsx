@@ -118,7 +118,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex justify-center items-center p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-md w-full relative overflow-hidden"
+        className="bg-white rounded-xl shadow-2xl max-w-md w-full relative dialog-fit"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}

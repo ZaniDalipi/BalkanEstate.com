@@ -138,7 +138,7 @@ const GoogleMapControls: React.FC<GoogleMapControlsProps> = ({
 
       {/* Desktop Controls */}
       {!isMobile && !hideControls && (
-        <div className="absolute bottom-24 right-4 z-[1000] flex-col items-end gap-2 hidden md:flex">
+        <div className="absolute bottom-24 landscape:bottom-6 right-4 landscape:right-2 z-[1000] flex-col items-end gap-2 landscape:gap-1.5 hidden md:flex">
           {/* Main control bar */}
           <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-1 xl:p-1.5 rounded-full shadow-xl shadow-black/10 flex items-center gap-1 xl:gap-1.5 transition-all duration-300">
             <button

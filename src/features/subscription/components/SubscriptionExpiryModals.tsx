@@ -177,7 +177,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={handleDismissWarning}
           />
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md dialog-fit animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 text-center">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/95 mb-3"><SoftIcon name="clock" className="w-10 h-10" /></div>
               <h2 className="text-xl font-bold text-white">{t('subscription:ui.subscriptionExpiryModals.subscriptionExpiringSoon', 'Subscription Expiring Soon')}</h2>
@@ -223,7 +223,7 @@ const SubscriptionExpiryModals: React.FC<Props> = ({
       {showExpired && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md dialog-fit animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="bg-gradient-to-r from-red-500 to-rose-600 px-6 py-5 text-center">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/95 mb-3"><SoftIcon name="bolt" className="w-10 h-10" /></div>
               <h2 className="text-xl font-bold text-white">{t('subscription:ui.subscriptionExpiryModals.yourSubscriptionHasExpired', 'Your Subscription Has Expired')}</h2>

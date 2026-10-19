@@ -65,7 +65,7 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 landscape:py-6">
         <div className="max-w-7xl mx-auto">
           {/* Badge */}
           <div className="flex justify-center mb-6">
@@ -78,7 +78,7 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
 
           {/* Main heading */}
           <div className="text-center mb-8 sm:mb-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight landscape:text-3xl">
               {t('hero.title', 'Explore Real Estate')}
               <span className="block mt-2 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
                 {t('hero.titleHighlight', 'Markets Across the Balkans')}

@@ -44,7 +44,7 @@ const RefundPolicyPage: React.FC = () => {
                 <ArrowLeftIcon className="w-5 h-5" />
                 <span className="font-medium">{t('common:back', 'Back')}</span>
               </button>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 landscape:text-2xl">
                 {t('legal:refund.title', 'Refund Policy')}
               </h1>
               <p className="text-gray-600">

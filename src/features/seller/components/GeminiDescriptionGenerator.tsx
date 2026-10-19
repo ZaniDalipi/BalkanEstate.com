@@ -138,7 +138,7 @@ const GeminiDescriptionGenerator: React.FC<{
     const generatingModal = isGenerating
         ? createPortal(
             <div className="fixed inset-0 z-[5000] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/50 max-w-sm w-full mx-4 text-center">
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 sm:p-10 landscape:p-6 shadow-2xl border border-white/50 max-w-sm w-full mx-4 text-center dialog-fit">
                     {/* Animated spinner */}
                     <div className="relative w-20 h-20 mx-auto mb-6">
                         <div className="absolute inset-0 rounded-full border-4 border-gray-200" />

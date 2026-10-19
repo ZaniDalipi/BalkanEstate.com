@@ -390,7 +390,7 @@ const CreateAgencyPage: React.FC = () => {
         type="warning"
       />
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 sm:py-16 landscape:py-6">
         <div className="absolute inset-0 opacity-10">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -418,7 +418,7 @@ const CreateAgencyPage: React.FC = () => {
             <SoftIcon name="building" className="w-16 h-16" />
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 landscape:text-2xl">
             {t('create.title', 'Create Your Agency')}
           </h1>
           <p className="text-lg text-white/70 max-w-2xl mx-auto">

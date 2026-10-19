@@ -135,7 +135,7 @@ const Onboarding: React.FC = () => {
               </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 tracking-tight mb-3">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 tracking-tight mb-3 landscape:text-3xl">
               Balkan<span className="text-primary">Estate</span><span className="text-neutral-400 font-medium">{t('seller:ui.onboarding.ai', '.AI')}</span>
             </h1>
 

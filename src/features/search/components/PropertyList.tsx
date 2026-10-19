@@ -15,6 +15,7 @@ import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/src/shared/illustrations';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 
 interface PropertyListProps {
   properties: Property[];
@@ -811,6 +812,11 @@ const PropertyList = memo<PropertyListProps>((props) => {
     // results, fold the filter panel away so the list gets the room. The panel's
     // max-height/opacity transition handles the animation.
     const lastListScrollTop = useRef(0);
+    // A phone held sideways has ~400px for the whole column: the search
+    // controls alone would fill it. There they fold away while the results
+    // scroll down and come back on the way up, so the list gets the screen.
+    const isShortLandscape = useShortLandscape();
+    const [areControlsTucked, setAreControlsTucked] = useState(false);
     const handleListScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const top = e.currentTarget.scrollTop;
         const delta = top - lastListScrollTop.current;
@@ -818,7 +824,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
         if (!isFiltersCollapsed && delta > 0 && top > 24) {
             setIsFiltersCollapsed(true);
         }
+        if (top <= 24 || delta < -6) setAreControlsTucked(false);
+        else if (delta > 6) setAreControlsTucked(true);
     };
+    const tuckControls = isShortLandscape && areControlsTucked && searchMode === 'manual';
 
     // Count active basic filters (shown in collapse toggle badge)
     const activeBasicFilterCount = [
@@ -918,14 +927,14 @@ const PropertyList = memo<PropertyListProps>((props) => {
         return (
             <div className="flex flex-col h-full bg-transparent">
                 {/* TOP CONTROLS SECTION */}
-                <div className={`${searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
-                    <div className="p-4 pb-2 flex-shrink-0">
+                <div className={`${searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0'} border-b border-neutral-200 ${tuckControls ? 'hidden' : ''}`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
+                    <div className="p-4 pb-2 landscape:px-3 landscape:pt-2 landscape:pb-1 flex-shrink-0">
                         <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
-                            <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
+                            <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                             {isAuthenticated ? (
-                                <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
+                                <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                             ) : (
-                                <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}>
+                                <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}>
                                      {t('search:ai.title')}
                                 </button>
                             )}
@@ -933,11 +942,11 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     </div>
 
                     {searchMode === 'manual' && (
-                        <div className="px-4 pt-2 pb-1 flex-shrink-0">
+                        <div className="px-4 pt-2 pb-1 landscape:px-3 landscape:pt-1 flex-shrink-0">
                             <button
                                 type="button"
                                 onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
+                                className="w-full flex items-center justify-between px-3 py-2 landscape:py-1.5 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
                                 aria-expanded={!isFiltersCollapsed}
                                 aria-controls="desktop-filter-panel"
                             >
@@ -984,11 +993,11 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
                     {/* Action buttons - always visible outside collapsible panel */}
                     {searchMode === 'manual' && (
-                        <div className="px-4 py-2 flex-shrink-0 space-y-2">
+                        <div className="px-4 py-2 landscape:px-3 landscape:py-1.5 flex-shrink-0 space-y-2 landscape:space-y-0 landscape:flex landscape:items-center landscape:gap-2">
                             <button
                                 onClick={onSearchClick}
                                 disabled={isSearchingLocation}
-                                className="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+                                className="w-full landscape:flex-1 py-2.5 landscape:py-2 px-4 landscape:px-3 landscape:text-sm bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
                             >
                                 {isSearchingLocation ? (
                                     <>
@@ -999,10 +1008,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     t('search:searchButton')
                                 )}
                             </button>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 landscape:flex-[2]">
                                 <button
                                     onClick={onResetFilters}
-                                    className="flex-1 py-2 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
+                                    className="flex-1 py-2 px-4 landscape:px-2 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
                                     aria-label={t('search:filters.resetFilters')}
                                 >
                                     {t('search:filters.resetFilters')}
@@ -1010,7 +1019,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 <button
                                     onClick={onSaveSearch}
                                     disabled={isSaving}
-                                    className="flex-1 py-2 px-4 border border-primary text-primary rounded-lg text-sm font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
+                                    className="flex-1 py-2 px-4 landscape:px-2 border border-primary text-primary rounded-lg text-sm font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
                                 >
                                     {isSaving ? (
                                         <>

@@ -67,8 +67,8 @@ const GuidesIndexPage: React.FC = () => {
       />
 
       <div className="bg-gradient-to-br from-primary-600 to-primary-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20 landscape:py-8">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 landscape:text-2xl">
             {t('common:guides.title', 'Property Buying Guides')}
           </h1>
           <p className="text-lg sm:text-xl text-primary-100 max-w-3xl">

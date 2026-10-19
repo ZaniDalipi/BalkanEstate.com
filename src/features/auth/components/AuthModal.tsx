@@ -958,7 +958,7 @@ const AuthPage: React.FC = () => {
                         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
                     >
                         {/* Magical Logo Container */}
-                        <div className="flex justify-center items-center mb-6 pt-4 md:pt-0">
+                        <div className="flex justify-center items-center mb-6 pt-4 md:pt-0 landscape:mb-3 landscape:pt-0">
                             <div className="relative group">
                                 {/* Outer glow rings */}
                                 <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/40 via-blue-400/30 to-primary/40 blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 animate-pulse" style={{ animationDuration: '3s' }} />
@@ -966,7 +966,7 @@ const AuthPage: React.FC = () => {
 
                                 {/* Main container with floating animation */}
                                 <div
-                                    className="relative p-4 rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-2xl shadow-primary/20"
+                                    className="relative p-4 landscape:p-2 rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-2xl shadow-primary/20"
                                     style={{
                                         animation: 'float 4s ease-in-out infinite',
                                     }}
@@ -979,7 +979,7 @@ const AuthPage: React.FC = () => {
                                     <div className="absolute bottom-3 left-3 w-1.5 h-1.5 bg-primary rounded-full opacity-50 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }} />
 
                                     {/* Logo SVG - Full size display */}
-                                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+                                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 landscape:w-12 landscape:h-12 flex items-center justify-center">
                                         <LogoIcon className="w-full h-full drop-shadow-lg" />
                                     </div>
                                 </div>
@@ -991,7 +991,7 @@ const AuthPage: React.FC = () => {
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 text-center mb-6">
+                        <h2 className="text-xl sm:text-2xl landscape:text-lg font-bold text-neutral-800 text-center mb-6 landscape:mb-3">
                             {state.authModalView === 'login' ? t('auth:login.subtitle') :
                              state.authModalView === 'signup' ? t('auth:signup.subtitle') : ''}
                         </h2>

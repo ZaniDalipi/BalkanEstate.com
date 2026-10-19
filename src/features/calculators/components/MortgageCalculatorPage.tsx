@@ -46,7 +46,7 @@ const MortgageCalculatorPage: React.FC = () => {
         description={t('calculators:seo.mortgageDescription', 'Estimate monthly mortgage repayments and total interest for a property purchase in the Balkans, and compare renting with buying.')}
       />
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-12 sm:py-16">
+      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent py-12 sm:py-16 landscape:py-6">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -54,7 +54,7 @@ const MortgageCalculatorPage: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <SoftIcon name="calculator" className="inline-block w-16 h-16 mb-6" />
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 mb-4">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900 mb-4 landscape:text-2xl">
               {t('calculators:mortgage.title')}
             </h1>
             <p className="text-lg text-neutral-600 max-w-2xl mx-auto">

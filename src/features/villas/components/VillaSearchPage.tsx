@@ -11,6 +11,7 @@ import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
 import CollapsibleFilterPanel from '@/src/shared/components/CollapsibleFilterPanel';
 import { useScrollDirection } from '@/src/shared/hooks/useScrollDirection';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
@@ -508,6 +509,10 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     // visitor scrolls down through the results.
     const [isDesktopFiltersCollapsed, setIsDesktopFiltersCollapsed] = useState(true);
     const { onScroll: handleListScroll, isScrollingDown: isListScrollingDown } = useScrollDirection();
+    // Phone held sideways: the header and filters alone fill the ~400px column,
+    // so they fold away while the results scroll down (back on the way up).
+    const isShortLandscape = useShortLandscape();
+    const tuckListChrome = isShortLandscape && isListScrollingDown;
     useEffect(() => {
         if (isListScrollingDown) setIsDesktopFiltersCollapsed(true);
     }, [isListScrollingDown]);
@@ -713,7 +718,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         context, so the dropdown's own z-index is confined to
                         it: at z-20 the whole subtree painted under the bar, and
                         the bar cut a white stripe through the suggestions. */}
-                    <div className="hidden lg:block sticky top-0 z-[110]">
+                    <div className={`hidden ${tuckListChrome ? '' : 'lg:block'} sticky top-0 z-[110]`}>
 
                         {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div

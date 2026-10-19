@@ -1113,6 +1113,8 @@ html[data-zoom] {
 }
 
 /* Custom Media Query Variants for landscape modes */
+/* `landscape:` = a phone turned sideways (wide but ~400px tall). The JS twin is
+   SHORT_LANDSCAPE_QUERY in src/hooks/useMediaQuery.ts — keep them in step. */
 @custom-variant landscape (@media (orientation: landscape) and (max-height: 500px));
 @custom-variant tablet-landscape (@media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px));
 
@@ -1363,6 +1365,18 @@ html[data-zoom] {
   }
 }
 
+/* A centred dialog that never outgrows the screen. A phone held sideways is
+   ~360px tall, so a fixed-height card ran off the top and bottom with no way
+   to reach its buttons; this caps it at the visible height (less the notch
+   and the backdrop's padding) and lets it scroll inside instead. */
+.dialog-fit {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* Prevent iOS overscroll rubber-band on modal/drawer backgrounds */
 .overscroll-none {
   overscroll-behavior: none;
@@ -1404,6 +1418,11 @@ html[data-zoom] {
      plus a small gap, with a 44px floor for Android devices that report 0. */
 :root {
   --floating-search-top-pad: calc(env(safe-area-inset-top, 0px) + 8px);
+  /* Width of the desktop sidebar rail (md+). The rail pads itself by the left
+     safe-area inset, so on a notched phone held sideways a flat 5rem left only
+     ~2rem for the icons; the inset is added on top instead. Anything that has
+     to sit beside the rail (the page column, fixed bars) uses this. */
+  --sidebar-rail-w: calc(5rem + env(safe-area-inset-left, 0px));
 }
 
 /* Top of the home hero.
@@ -1419,6 +1438,14 @@ html[data-zoom] {
 @media (min-width: 640px) {
   .hero-top-pad {
     padding-top: max(6rem, calc(env(safe-area-inset-top, 0px) + 4rem));
+  }
+}
+
+/* Phone held sideways: ~400px tall, so the 6rem drop would push the search
+   box below the fold. Just enough to clear the floating header (~3.25rem). */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero-top-pad {
+    padding-top: max(3.75rem, calc(env(safe-area-inset-top, 0px) + 3.25rem));
   }
 }
 
