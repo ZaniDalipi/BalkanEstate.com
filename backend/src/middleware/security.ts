@@ -178,6 +178,8 @@ export const helmetConfig = helmet({
         'https://mt1.google.com', // Google raster tiles
         'https://unpkg.com',
         'https://api.mapbox.com', // MapLibre
+        'https://www.googletagmanager.com', // Google Analytics fallback pixel
+        'https://*.google-analytics.com',
       ],
       connectSrc: [
         "'self'",
@@ -185,7 +187,11 @@ export const helmetConfig = helmet({
         'https://www.balkanestateai.com',
         'wss://api.balkanestateai.com',
         'https://nominatim.openstreetmap.org',
+        // Google Analytics 4 sends hits to regional hosts (region1.…) as well
         'https://www.google-analytics.com',
+        'https://*.google-analytics.com',
+        'https://*.analytics.google.com',
+        'https://www.googletagmanager.com',
         'https://connect.facebook.net',
         'https://*.sentry.io', // Error tracking
         // Development URLs

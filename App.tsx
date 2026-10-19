@@ -177,8 +177,9 @@ const GlobalHead: React.FC = () => {
   const { i18n } = useTranslation();
   const currentLang = (i18n.language || 'en').split('-')[0];
 
-  // Get analytics IDs from environment variables
-  const googleAnalyticsId = import.meta.env.VITE_GA_ID;
+  // Get analytics IDs from environment variables. GA falls back to this site's
+  // own measurement ID so a build without the secret still reports.
+  const googleAnalyticsId = import.meta.env.VITE_GA_ID || 'G-JJ7H3FLB50';
   const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
 
   // Analytics and marketing tags may only load once the user has consented to
