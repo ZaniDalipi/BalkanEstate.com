@@ -1290,8 +1290,8 @@ Height is handled separately:
   zoom compensation): on a short landscape screen the root follows the screen
   height (`clamp(75%, 3.1dvh, 87.5%)`, ≈12–14px); narrow portrait phones ease
   from 16px to 15px. Every rem-based size scales together, so text is tied to
-  the screen, not fixed. Form fields stay at 16px (`index.html`) so iOS never
-  zooms on focus, and touch targets drop from 44px to 32px minimum in
+  the screen, not fixed. Form fields follow it too (`maximum-scale=1` in the
+  viewport meta stops iOS zooming on focus), and touch targets drop from 44px to 32px minimum in
   landscape.
 - **Search controls are one toolbar row** on a sideways phone (mode switch,
   Filters, Search, Reset, Save; the filter panel opens as a full-width row
@@ -1313,6 +1313,13 @@ Height is handled separately:
   controls.
 - **Page heroes**: hero `h1`s carry `landscape:text-2xl/3xl` and hero wrappers
   `landscape:py-6/8`, so a hero never fills a sideways phone on its own.
+- **Layering (z-index) — keep overlays aware of the chrome.** Sidebar rail 50,
+  floating header 1001, full-screen sheets (the filter sheets on Search,
+  Rentals, Villas) 1100, menu drawer 1300, dialogs 5000+. A full-screen sheet
+  sits above the rail and header (it can stay open while a phone rotates into
+  the ≥768px layout that shows them); a fixed bar that should sit *beside*
+  the rail (comparison bar, property action bar) starts at
+  `md:left-(--sidebar-rail-w)`.
 - **Centred dialogs** use `.dialog-fit` (`src/index.css`): capped at the visible
   height (minus notch and backdrop padding) and scrolling inside, so their
   buttons stay reachable at 360px tall. `Modal.tsx` already caps itself.

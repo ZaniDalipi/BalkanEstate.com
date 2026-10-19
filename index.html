@@ -41,7 +41,11 @@
     </script>
 
     <link rel="icon" type="image/svg+xml" href="/icons/logo-3d.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- maximum-scale=1 stops iOS Safari zooming the page when a form field
+         under 16px is tapped, so fields can follow the fluid text size (see
+         index.css → Fluid root size). iOS still allows pinch-zoom with it;
+         elsewhere pinch-zoom is already off (html { touch-action } below). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
 
     <!-- Per-page head. Replaced for every prerendered page (scripts/prerender.mjs)
          and every server-rendered detail page (functions/), and taken over by
@@ -377,8 +381,9 @@
          Tailwind's text-sm/text-xs/text-[11px] utilities (14px/12px/11px),
          which trigger it. Forcing 16px only on touch-width viewports fixes
          the zoom without changing how fields look on desktop. A phone held
-         sideways is wider than 767px, so it is matched by height and touch. */
-      @media (max-width: 767px), (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+         sideways is not matched: there fields follow the fluid text size and
+         maximum-scale=1 in the viewport meta prevents the zoom instead. */
+      @media (max-width: 767px) {
         input,
         select,
         textarea {

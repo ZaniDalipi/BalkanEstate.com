@@ -669,7 +669,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
             {/* Mobile Filters Modal */}
             {(isMobile || isTablet) && isFiltersOpen && (
-                <div className="fixed inset-0 z-30 flex flex-col">
+                <div className="fixed inset-0 z-[1100] flex flex-col">
+                    {/* z-[1100]: a full-screen sheet, so above the sidebar rail (50) and the floating header (1001); below the menu drawer (1300) and dialogs (5000+). */}
                     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
                     <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
                         <div className="relative w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto glass-scrollbar glass-panel" onClick={e => e.stopPropagation()}>

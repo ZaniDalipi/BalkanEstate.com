@@ -81,3 +81,44 @@ test('floating header is compact on a phone held sideways', async ({ browser }) 
   expect(box!.width).toBeLessThanOrEqual(360);
   await context.close();
 });
+
+test('filter sheet stays on top of the sidebar and header after rotating to landscape', async ({ browser }) => {
+  // Open filters on a phone in portrait, then turn it sideways: at ≥768px wide
+  // the sidebar rail and the floating header appear, and the still-open sheet
+  // used to slide under both, hiding its title, close button and left edge.
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+  });
+  const page = await context.newPage();
+  await prepare(page);
+  await page.goto('/en/search');
+  await settle(page);
+
+  await page.getByRole('button', { name: /open filters/i }).click();
+  const close = page.getByRole('button', { name: /close filters/i });
+  await expect(close).toBeVisible();
+
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.waitForTimeout(600);
+
+  const hits = await page.evaluate(() => {
+    const btn = [...document.querySelectorAll('button')].find(
+      (b) => /close filters/i.test(b.getAttribute('aria-label') || ''),
+    );
+    const title = document.getElementById('filters-title');
+    if (!btn || !title) return { closeHit: false, titleHit: false };
+    const at = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return !!hit && (hit === el || el.contains(hit));
+    };
+    const r = title.getBoundingClientRect();
+    const leftHit = document.elementFromPoint(r.left + 2, r.top + r.height / 2);
+    return { closeHit: at(btn), titleHit: !!leftHit && (leftHit === title || title.contains(leftHit)) };
+  });
+  expect(hits.closeHit, 'close button must not be covered').toBe(true);
+  expect(hits.titleHit, 'sheet title must not be covered by the sidebar').toBe(true);
+  await context.close();
+});

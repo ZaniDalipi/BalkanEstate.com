@@ -1060,7 +1060,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     value={filters.sortBy}
                                     onChange={(e) => onSortChange(e.target.value)}
                                     aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs !py-1.5 landscape:!py-0.5`}
+                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs landscape:text-sm !py-1.5 landscape:!py-0.5`}
                                 >
                                     {filters.query.trim() && (
                                         <option value="relevance">{t('search:sort.relevance')}</option>
@@ -1167,15 +1167,17 @@ const PropertyList = memo<PropertyListProps>((props) => {
     
     // Mobile Layout
     return (
-        <div className="flex flex-col bg-white h-full" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' }}>
+        // The 70px clears the phone's floating search bar over the results. Inside
+        // the filter sheet (no list) there is no such bar, only the sheet's own header.
+        <div className="flex flex-col bg-white h-full" style={showList ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' } : undefined}>
             {showFilters && (
-                 <div className="p-4 flex-shrink-0">
+                 <div className="p-4 landscape:px-3 landscape:py-1.5 flex-shrink-0">
                     <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
-                        <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
+                        <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                         {isAuthenticated ? (
-                            <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
+                            <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                         ) : (
-                            <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}> {t('search:ai.title')}</button>
+                            <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}> {t('search:ai.title')}</button>
                         )}
                     </div>
                 </div>

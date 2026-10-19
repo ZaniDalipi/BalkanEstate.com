@@ -534,7 +534,8 @@ html[data-zoom] {
      At a fixed phone size the page looked zoomed in, one card at a time.
    - Narrow phones in portrait ease from 16px down to 15px below ~390px wide.
 
-   Form fields keep 16px (index.html) so iOS doesn't zoom in on focus. */
+   Form fields follow it too; maximum-scale=1 in the viewport meta keeps iOS
+   from zooming in when a small field is focused. */
 @media (orientation: landscape) and (max-height: 500px) {
   html {
     --fluid-root: clamp(75%, 3.1dvh, 87.5%);

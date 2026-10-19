@@ -101,20 +101,20 @@ const SearchMobileFilters: React.FC<SearchMobileFiltersProps> = ({
             <div className="flex-shrink-0 p-3 sm:p-4 border-t border-neutral-200 bg-white flex items-center gap-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] landscape:p-2 landscape:pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
                  <button
                     onClick={onReset}
-                    className="min-h-[44px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                    className="min-h-[44px] landscape:min-h-[34px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                  >
                     {t('search:ui.searchMobileFilters.reset', 'Reset')}
                  </button>
                  <button
                     onClick={onSave}
                     disabled={isSaving}
-                    className="min-h-[44px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors disabled:opacity-50 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                    className="min-h-[44px] landscape:min-h-[34px] px-3 py-2 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors disabled:opacity-50 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                  >
                     {isSaving ? 'Saving...' : t('search:ui.searchMobileFilters.saveSearch', 'Save Search')}
                  </button>
                  <button
                     onClick={onApply}
-                    className="flex-grow min-h-[44px] px-3 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark active:bg-primary-dark transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50"
+                    className="flex-grow min-h-[44px] landscape:min-h-[34px] px-3 py-2 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark active:bg-primary-dark transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/50"
                  >
                     {t('search:ui.searchMobileFilters.showResults', 'Show Results')}
                  </button>
