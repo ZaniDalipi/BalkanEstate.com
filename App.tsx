@@ -464,7 +464,7 @@ const MainLayout: React.FC = () => {
           </button>
         )}
 
-        <div className={`relative transition-[filter] duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isBlurredBehindModal ? 'blur-sm' : ''} ${isOverlayVisible ? 'pointer-events-none' : ''}`}>
+        <div className={`relative transition-[filter] duration-300 ease-in-out h-full flex flex-col md:pl-(--sidebar-rail-w) overflow-x-hidden max-w-full ${isBlurredBehindModal ? 'blur-sm' : ''} ${isOverlayVisible ? 'pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>

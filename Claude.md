@@ -117,6 +117,9 @@ Mutations (POST/PUT/PATCH/DELETE) automatically receive the `X-CSRF-Token` heade
 - `@media (display-mode: standalone)` block in `src/index.css` adds status-bar safe area padding.
 - CSS custom property `--floating-search-top-pad` switches between browser (8px) and PWA (`max(safe-area-inset-top + 8px, 44px)`) values — use it for any overlay that must clear the notch.
 - Viewport meta uses `viewport-fit=cover` so `env(safe-area-inset-*)` variables work correctly.
+- Phones held sideways get the desktop layout with ~400px of height: tighten with the `landscape:` variant
+  (JS: `useShortLandscape()`), size beside the sidebar with `--sidebar-rail-w`, and give centred dialogs
+  `.dialog-fit`. See ARCHITECTURE.md → Responsive Layout.
 
 ---
 

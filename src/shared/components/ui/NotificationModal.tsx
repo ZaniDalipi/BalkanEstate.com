@@ -122,7 +122,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
       aria-describedby="notification-message"
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative overflow-hidden animate-fade-in"
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative dialog-fit animate-fade-in"
         onClick={handleContentClick}
       >
         {/* Decorative gradient header */}

@@ -21,7 +21,7 @@ export function NotFound() {
 							className="bg-[url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif)] h-[250px] sm:h-[350px] md:h-[400px] bg-center bg-no-repeat bg-contain"
 							aria-hidden="true"
 						>
-							<h1 className="text-center text-black text-6xl sm:text-7xl md:text-8xl pt-6 sm:pt-8">
+							<h1 className="text-center text-black text-6xl sm:text-7xl md:text-8xl pt-6 sm:pt-8 landscape:text-3xl">
 								404
 							</h1>
 						</div>

@@ -743,7 +743,7 @@ const BusinessDetailPage: React.FC<BusinessDetailPageProps> = ({ listingId, onBa
             <motion.div className="flex-1 text-center lg:text-left min-w-0 pt-2 sm:pt-6 lg:pt-8" variants={fadeUpVariants}>
               {/* Name + badges row */}
               <div className="flex flex-col lg:flex-row items-center lg:items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight">{listing.name}</h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight landscape:text-2xl">{listing.name}</h1>
                 <div className="flex items-center gap-2 flex-wrap">
                   {listing.isVerified && (
                     <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-100">

@@ -12,6 +12,7 @@ import { interleaveInFeedAds } from '@/features/promo';
 import RentalFilters from './RentalFilters';
 import CollapsibleFilterPanel from '@/src/shared/components/CollapsibleFilterPanel';
 import { useScrollDirection } from '@/src/shared/hooks/useScrollDirection';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 import Toast from '@/components/shared/Toast';
 import { useRentalSearch } from '../hooks/useRentalSearch';
 import UniversalSearchBox from '@/src/features/search/universal/UniversalSearchBox';
@@ -129,6 +130,10 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
     // visitor scrolls down through the results.
     const [isDesktopFiltersCollapsed, setIsDesktopFiltersCollapsed] = useState(true);
     const { onScroll: handleListScroll, isScrollingDown: isListScrollingDown } = useScrollDirection();
+    // Phone held sideways: the header and filters alone fill the ~400px column,
+    // so they fold away while the results scroll down (back on the way up).
+    const isShortLandscape = useShortLandscape();
+    const tuckListChrome = isShortLandscape && isListScrollingDown;
     useEffect(() => {
         if (isListScrollingDown) setIsDesktopFiltersCollapsed(true);
     }, [isListScrollingDown]);
@@ -274,10 +279,10 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     {/* Header with city search — desktop only (mobile uses floating pill bar).
                         Soft liquid-glass bar: frosted white, hairline edge, muted text. */}
                     <div
-                        className="hidden lg:block sticky top-0 z-20 border-b border-black/[0.06]"
+                        className={`hidden ${tuckListChrome ? '' : 'lg:block'} sticky top-0 z-20 border-b border-black/[0.06]`}
                         style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
                     >
-                        <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-3">
+                        <div className="px-4 pt-3 pb-2 landscape:pt-2 landscape:pb-1 flex items-center justify-between gap-3">
                             <div>
                                 <div className="flex items-center gap-2">
                                     <SoftIcon name="key" className="w-7 h-7 flex-shrink-0" />
@@ -386,7 +391,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     </div>
 
                     {/* Desktop Filters */}
-                    <div className="hidden lg:block" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <div className={`hidden ${tuckListChrome ? '' : 'lg:block'}`} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                         <CollapsibleFilterPanel
                             id="rental-desktop-filter-panel"
                             collapsed={isDesktopFiltersCollapsed}
@@ -504,7 +509,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         )}
                         <div className="p-3">
                         {!mountList ? null : (isLoading || isSearchFiltering) ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3">
                                 {[...Array(6)].map((_, i) => (
                                     <PropertyCardSkeleton key={i} index={i} />
                                 ))}
@@ -532,7 +537,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             <>
                                 <RentalCardAnimationStyles />
                                 <HighlightedPropertiesSection properties={listProperties} />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3">
                                     {interleaveInFeedAds(
                                         listProperties.slice(0, visibleCount).map((property, index) => (
                                             <AnimatedPropertyCard
@@ -549,7 +554,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 {visibleCount < listProperties.length && (
                                     <div ref={loadMoreRef}>
                                         {isLoadingMore && (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3 mt-3">
                                                 {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                     <PropertyCardSkeleton key={i} index={i} />
                                                 ))}
@@ -664,7 +669,8 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
             {/* Mobile Filters Modal */}
             {(isMobile || isTablet) && isFiltersOpen && (
-                <div className="fixed inset-0 z-30 flex flex-col">
+                <div className="fixed inset-0 z-[1100] flex flex-col">
+                    {/* z-[1100]: a full-screen sheet, so above the sidebar rail (50) and the floating header (1001); below the menu drawer (1300) and dialogs (5000+). */}
                     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
                     <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
                         <div className="relative w-full sm:max-w-md sm:rounded-xl rounded-t-xl max-h-[85vh] overflow-y-auto glass-scrollbar glass-panel" onClick={e => e.stopPropagation()}>

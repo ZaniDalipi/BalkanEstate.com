@@ -1275,6 +1275,60 @@ node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and ge
 
 ---
 
+## Responsive Layout — any device, either orientation
+
+Breakpoints are width-based, so a phone held sideways (≥768px wide, ~360–460px
+tall) gets the desktop shell: sidebar rail, floating header, split list/map.
+Height is handled separately:
+
+- **`landscape:` variant** (`src/index.css`) = `(orientation: landscape) and
+  (max-height: 500px)`. Its JS twin is `SHORT_LANDSCAPE_QUERY` /
+  `useShortLandscape()` in `src/hooks/useMediaQuery.ts` — keep them in step.
+  Use `landscape:` to tighten padding, headline sizes and control heights; never
+  to swap layouts.
+- **Fluid root size** (`--fluid-root` in `src/index.css`, composed with the
+  zoom compensation): on a short landscape screen the root follows the screen
+  height (`clamp(75%, 3.1dvh, 87.5%)`, ≈12–14px); narrow portrait phones ease
+  from 16px to 15px. Every rem-based size scales together, so text is tied to
+  the screen, not fixed. Form fields follow it too (`maximum-scale=1` in the
+  viewport meta stops iOS zooming on focus), and touch targets drop from 44px to 32px minimum in
+  landscape.
+- **Search controls are one toolbar row** on a sideways phone (mode switch,
+  Filters, Search, Reset, Save; the filter panel opens as a full-width row
+  below) and fold away on the first move down the results.
+- **Listings go two (search) or three (rentals, villas) across** when the list
+  is full-width on a sideways phone (`max-lg:landscape:grid-cols-*`).
+- **Floating header** (`components/shared/Header.tsx`): short labels and
+  avatar-only account button under `landscape:`, and `useHideOnScroll` slides it
+  away while page content scrolls down (back on the way up, always near the
+  top). The hook listens to every scroll in the capture phase and ignores the
+  sidebar, menus and dialogs.
+- **Sidebar rail width** is `--sidebar-rail-w` = `5rem + safe-area-inset-left`.
+  The rail pads itself by the inset, so on a notched phone in landscape a flat
+  5rem left the icons ~2rem. Anything placed beside the rail uses
+  `md:pl-(--sidebar-rail-w)` / `md:left-(--sidebar-rail-w)`, never `md:pl-20`.
+- **Search / Rentals / Villas list column**: on a short landscape screen the
+  search controls (mode tabs, filters, header chips) fold away while the results
+  scroll down and return on the way up, so the column shows listings, not
+  controls.
+- **Page heroes**: hero `h1`s carry `landscape:text-2xl/3xl` and hero wrappers
+  `landscape:py-6/8`, so a hero never fills a sideways phone on its own.
+- **Layering (z-index) — keep overlays aware of the chrome.** Sidebar rail 50,
+  floating header 1001, full-screen sheets (the filter sheets on Search,
+  Rentals, Villas) 1100, menu drawer 1300, dialogs 5000+. A full-screen sheet
+  sits above the rail and header (it can stay open while a phone rotates into
+  the ≥768px layout that shows them); a fixed bar that should sit *beside*
+  the rail (comparison bar, property action bar) starts at
+  `md:left-(--sidebar-rail-w)`.
+- **Centred dialogs** use `.dialog-fit` (`src/index.css`): capped at the visible
+  height (minus notch and backdrop padding) and scrolling inside, so their
+  buttons stay reachable at 360px tall. `Modal.tsx` already caps itself.
+- `e2e/responsive-layout.spec.ts` guards it: no sideways scroll on key pages
+  from 360px phones to desktop in both orientations, and a compact header on a
+  sideways phone.
+
+---
+
 ## Schedule Viewing Modal
 
 3-step wizard:

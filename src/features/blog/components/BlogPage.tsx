@@ -108,14 +108,14 @@ const BlogPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-12 sm:py-16 md:py-24 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+      <section className="py-12 sm:py-16 md:py-24 landscape:py-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 landscape:text-3xl">
               {t('title', 'Balkan Real Estate Blog')}
             </h1>
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-8">

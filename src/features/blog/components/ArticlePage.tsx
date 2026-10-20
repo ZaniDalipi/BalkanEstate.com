@@ -434,7 +434,7 @@ const ArticlePage: React.FC<ArticlePageProps> = ({ slug, onTagClick }) => {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl sm:text-4xl md:text-[2.625rem] font-bold text-slate-900 mb-4 leading-tight tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-[2.625rem] font-bold text-slate-900 mb-4 leading-tight tracking-tight landscape:text-2xl">
             {article.title}
           </h1>
 

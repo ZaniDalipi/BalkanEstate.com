@@ -449,7 +449,7 @@ const CityDashboard: React.FC = () => {
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <SoftIcon name="pin" className="w-8 h-8 drop-shadow-lg flex-shrink-0" />
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg leading-none">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-lg leading-none landscape:text-2xl">
                   {city.city}
                 </h1>
               </div>

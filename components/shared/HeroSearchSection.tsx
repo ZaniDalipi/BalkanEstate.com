@@ -212,7 +212,7 @@ const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 mb-6 leading-tight landscape:text-3xl">
               {title}
               <span className="block mt-3 animate-gradient-x">
                 {titleHighlight}

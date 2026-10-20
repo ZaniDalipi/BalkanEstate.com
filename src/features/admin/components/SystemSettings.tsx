@@ -581,7 +581,7 @@ const SystemSettings: React.FC = () => {
       {/* Password Confirmation Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 dialog-fit">
             <div className="flex items-center gap-3 mb-4">
               <SoftIcon name="lock" className="w-10 h-10 flex-shrink-0" />
               <div>

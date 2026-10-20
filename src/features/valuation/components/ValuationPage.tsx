@@ -136,7 +136,7 @@ const ValuationPage: React.FC = () => {
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-20 landscape:py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -155,7 +155,7 @@ const ValuationPage: React.FC = () => {
             </motion.div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-neutral-900 mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-neutral-900 mb-6 leading-tight landscape:text-3xl">
               {t('valuation:page.title', 'What\'s Your Property Worth?')}
             </h1>
 

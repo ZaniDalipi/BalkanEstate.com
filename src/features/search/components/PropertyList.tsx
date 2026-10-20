@@ -15,6 +15,7 @@ import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/src/shared/illustrations';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 
 interface PropertyListProps {
   properties: Property[];
@@ -811,6 +812,11 @@ const PropertyList = memo<PropertyListProps>((props) => {
     // results, fold the filter panel away so the list gets the room. The panel's
     // max-height/opacity transition handles the animation.
     const lastListScrollTop = useRef(0);
+    // A phone held sideways has ~400px for the whole column: the search
+    // controls alone would fill it. There they fold away while the results
+    // scroll down and come back on the way up, so the list gets the screen.
+    const isShortLandscape = useShortLandscape();
+    const [areControlsTucked, setAreControlsTucked] = useState(false);
     const handleListScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const top = e.currentTarget.scrollTop;
         const delta = top - lastListScrollTop.current;
@@ -818,7 +824,11 @@ const PropertyList = memo<PropertyListProps>((props) => {
         if (!isFiltersCollapsed && delta > 0 && top > 24) {
             setIsFiltersCollapsed(true);
         }
+        // Fold on the first real move down so the results get the screen at once.
+        if (top <= 8 || delta < -6) setAreControlsTucked(false);
+        else if (delta > 2) setAreControlsTucked(true);
     };
+    const tuckControls = isShortLandscape && areControlsTucked && searchMode === 'manual';
 
     // Count active basic filters (shown in collapse toggle badge)
     const activeBasicFilterCount = [
@@ -918,14 +928,17 @@ const PropertyList = memo<PropertyListProps>((props) => {
         return (
             <div className="flex flex-col h-full bg-transparent">
                 {/* TOP CONTROLS SECTION */}
-                <div className={`${searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
-                    <div className="p-4 pb-2 flex-shrink-0">
-                        <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
-                            <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
+                {/* On a phone held sideways the manual-search controls become one
+                    toolbar row — mode switch, Filters, Search, Reset, Save — with the
+                    filter panel opening as a full-width row underneath (flex order). */}
+                <div className={`${tuckControls ? 'hidden' : searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0 landscape:flex landscape:flex-wrap landscape:items-center landscape:gap-x-1.5 landscape:gap-y-1 landscape:px-2 landscape:py-1'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
+                    <div className={`p-4 pb-2 flex-shrink-0 ${searchMode === 'manual' ? 'landscape:order-1 landscape:p-0' : 'landscape:px-3 landscape:pt-2 landscape:pb-1'}`}>
+                        <div className="bg-neutral-100 p-1 landscape:p-0.5 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto landscape:mx-0">
+                            <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 landscape:w-auto px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full text-sm landscape:text-[0.6875rem] whitespace-nowrap font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                             {isAuthenticated ? (
-                                <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
+                                <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 landscape:w-auto px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full text-sm landscape:text-[0.6875rem] whitespace-nowrap font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                             ) : (
-                                <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}>
+                                <button onClick={() => onOpenAuthModal?.()} className="w-1/2 landscape:w-auto px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full text-sm landscape:text-[0.6875rem] whitespace-nowrap font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}>
                                      {t('search:ai.title')}
                                 </button>
                             )}
@@ -933,17 +946,17 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     </div>
 
                     {searchMode === 'manual' && (
-                        <div className="px-4 pt-2 pb-1 flex-shrink-0">
+                        <div className="px-4 pt-2 pb-1 flex-shrink-0 landscape:order-2 landscape:flex-1 landscape:min-w-[6.5rem] landscape:p-0">
                             <button
                                 type="button"
                                 onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
+                                className="w-full flex items-center justify-between px-3 py-2 landscape:px-2 landscape:py-1 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
                                 aria-expanded={!isFiltersCollapsed}
                                 aria-controls="desktop-filter-panel"
                             >
                                 <div className="flex items-center gap-2">
-                                    <SoftIcon name="sliders" className="w-5 h-5" />
-                                    <span className="text-sm font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
+                                    <SoftIcon name="sliders" className="w-5 h-5 landscape:w-4 landscape:h-4" />
+                                    <span className="text-sm landscape:text-[0.6875rem] font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
                                     {isFiltersCollapsed && activeBasicFilterCount > 0 && (
                                         <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full">
                                             {activeBasicFilterCount}
@@ -958,13 +971,13 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     {searchMode === 'manual' ? (
                         <div
                             id="desktop-filter-panel"
-                            className="relative z-[60] overflow-hidden transition-[max-height,opacity] duration-[600ms] ease-in-out"
+                            className="relative z-[60] overflow-hidden transition-[max-height,opacity] duration-[600ms] ease-in-out landscape:order-4 landscape:basis-full"
                             style={isFiltersCollapsed
                                 ? { maxHeight: 0, opacity: 0 }
                                 : { maxHeight: '50vh', opacity: 1 }
                             }
                         >
-                            <div className="px-4 pb-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
+                            <div className="px-4 pb-4 landscape:px-1 landscape:pb-2 overflow-y-auto" style={{ maxHeight: '50vh' }}>
                                 <FilterControls {...props} />
                             </div>
                         </div>
@@ -984,11 +997,11 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
                     {/* Action buttons - always visible outside collapsible panel */}
                     {searchMode === 'manual' && (
-                        <div className="px-4 py-2 flex-shrink-0 space-y-2">
+                        <div className="px-4 py-2 flex-shrink-0 space-y-2 landscape:space-y-0 landscape:order-3 landscape:p-0 landscape:flex landscape:items-center landscape:gap-1.5">
                             <button
                                 onClick={onSearchClick}
                                 disabled={isSearchingLocation}
-                                className="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+                                className="w-full landscape:w-auto py-2.5 landscape:py-1 px-4 landscape:px-3 landscape:text-[0.6875rem] whitespace-nowrap bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
                             >
                                 {isSearchingLocation ? (
                                     <>
@@ -999,10 +1012,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     t('search:searchButton')
                                 )}
                             </button>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 landscape:gap-1.5">
                                 <button
                                     onClick={onResetFilters}
-                                    className="flex-1 py-2 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
+                                    className="flex-1 landscape:flex-none py-2 px-4 landscape:py-1 landscape:px-2.5 border border-neutral-300 text-neutral-600 rounded-lg text-sm landscape:text-[0.6875rem] whitespace-nowrap font-bold bg-white hover:bg-neutral-100 transition-colors"
                                     aria-label={t('search:filters.resetFilters')}
                                 >
                                     {t('search:filters.resetFilters')}
@@ -1010,7 +1023,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 <button
                                     onClick={onSaveSearch}
                                     disabled={isSaving}
-                                    className="flex-1 py-2 px-4 border border-primary text-primary rounded-lg text-sm font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
+                                    className="flex-1 landscape:flex-none py-2 px-4 landscape:py-1 landscape:px-2.5 border border-primary text-primary rounded-lg text-sm landscape:text-[0.6875rem] whitespace-nowrap font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
                                 >
                                     {isSaving ? (
                                         <>
@@ -1035,7 +1048,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                         in the document, so this is the element navigation has to
                         reset on a push and restore on a back. */}
                     <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container onScroll={handleListScroll}>
-                        <div className="px-4 py-2.5 border-b border-neutral-200 flex items-center justify-between gap-2 sticky top-0 bg-white z-[100]">
+                        <div className="px-4 py-2.5 landscape:px-3 landscape:py-1 border-b border-neutral-200 flex items-center justify-between gap-2 sticky top-0 bg-white z-[100]">
                             <div className="min-w-0">
                                 <p className="text-xs text-neutral-500 font-semibold whitespace-nowrap">{t('search:resultsFound', { count: properties.length })}</p>
                                 {!outOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} />}
@@ -1047,7 +1060,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     value={filters.sortBy}
                                     onChange={(e) => onSortChange(e.target.value)}
                                     aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs !py-1.5`}
+                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs landscape:text-sm !py-1.5 landscape:!py-0.5`}
                                 >
                                     {filters.query.trim() && (
                                         <option value="relevance">{t('search:sort.relevance')}</option>
@@ -1081,7 +1094,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 />
                             )}
                             {(isLoadingProperties || isSearchFiltering) ? (
-                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
+                                <div className="grid grid-cols-1 xl:grid-cols-2 max-lg:landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} index={index} />
                                     ))}
@@ -1089,7 +1102,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                             ) : properties.length > 0 ? (
                                 <>
                                     {outOfArea !== 'promoted' && <HighlightedPropertiesSection properties={properties} />}
-                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 property-grid-transition">
+                                    <div className="grid grid-cols-1 xl:grid-cols-2 max-lg:landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 property-grid-transition">
                                         {interleaveInFeedAds(
                                             properties.slice(0, visibleCount).map((prop, index) => (
                                                 <AnimatedPropertyCard
@@ -1106,7 +1119,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     {visibleCount < properties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 mt-4">
+                                                <div className="grid grid-cols-1 xl:grid-cols-2 max-lg:landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}
@@ -1154,15 +1167,17 @@ const PropertyList = memo<PropertyListProps>((props) => {
     
     // Mobile Layout
     return (
-        <div className="flex flex-col bg-white h-full" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' }}>
+        // The 70px clears the phone's floating search bar over the results. Inside
+        // the filter sheet (no list) there is no such bar, only the sheet's own header.
+        <div className="flex flex-col bg-white h-full" style={showList ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' } : undefined}>
             {showFilters && (
-                 <div className="p-4 flex-shrink-0">
+                 <div className="p-4 landscape:px-3 landscape:py-1.5 flex-shrink-0">
                     <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
-                        <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
+                        <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                         {isAuthenticated ? (
-                            <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
+                            <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                         ) : (
-                            <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}> {t('search:ai.title')}</button>
+                            <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}> {t('search:ai.title')}</button>
                         )}
                     </div>
                 </div>

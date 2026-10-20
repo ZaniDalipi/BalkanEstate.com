@@ -54,7 +54,7 @@ const AboutPage: React.FC = () => {
       <FAQSchema faqs={realEstateFAQs} />
 
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 sm:py-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 landscape:text-2xl">
           {t('legal:about.title', 'About BalkanEstateAI')}
         </h1>
         <p className="mt-4 text-lg text-neutral-700 leading-relaxed">

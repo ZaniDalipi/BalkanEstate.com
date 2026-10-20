@@ -238,10 +238,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       {/* hero-top-pad rather than a plain pt-*: installed as a PWA there is no
           browser chrome above this, so the heading started directly under the
           status bar and behind the floating menu button. */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 hero-top-pad pb-16 sm:pb-28 hero-stagger">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 hero-top-pad pb-16 sm:pb-28 landscape:pb-10 hero-stagger">
         {/* Title */}
         <h1
-          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
+          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl landscape:text-3xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
           style={{ minHeight: '2.6em' }}
         >
           <span className="block">
@@ -264,21 +264,21 @@ const HeroSection: React.FC<HeroSectionProps> = ({
               />
             </span>
           </span>
-          <span className="block text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">
+          <span className="block text-slate-600 text-xl sm:text-3xl md:text-4xl lg:text-5xl landscape:text-2xl font-semibold">
             {t('home:hero.titleEnd')}
           </span>
         </h1>
 
         {/* Subtitle */}
         <p
-          className="mt-4 sm:mt-5 text-center text-sm sm:text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed px-2 hero-fade-up"
+          className="mt-4 sm:mt-5 landscape:mt-2 text-center text-sm sm:text-base md:text-lg landscape:text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed px-2 hero-fade-up"
           style={{ animationDelay: '0.08s' }}
         >
           {t('home:hero.subtitle')}
         </p>
 
         {/* Search Bar — liquid glass */}
-        <div className="mt-6 sm:mt-8 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
+        <div className="mt-6 sm:mt-8 landscape:mt-4 max-w-2xl mx-auto relative z-20 hero-fade-up" style={{ animationDelay: '0.16s' }} ref={wrapperRef}>
           <div style={{
             position: 'relative',
             zIndex: 10,
@@ -328,7 +328,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 placeholder={t('home:hero.searchPlaceholder')}
-                className="flex-1 py-3.5 sm:py-5 px-3 text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none focus:outline-none focus:ring-0 min-w-0"
+                className="flex-1 py-3.5 sm:py-5 landscape:py-3 px-3 text-base text-slate-900 placeholder-slate-400 bg-transparent outline-none focus:outline-none focus:ring-0 min-w-0"
                 style={{ boxShadow: 'none' }}
                 aria-label={t('home:hero.searchPlaceholder')}
               />
@@ -451,7 +451,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* CTA Buttons — liquid glass */}
-        <div className="mt-5 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
+        <div className="mt-5 sm:mt-6 landscape:mt-4 flex flex-wrap justify-center gap-2 sm:gap-3 hero-fade-up" style={{ animationDelay: '0.24s' }}>
           <button
             onClick={() => onNavigate('/search')}
             style={{
@@ -498,7 +498,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         {belowActions}
 
         {/* Stats Strip — liquid glass card */}
-        <div className="mt-10 sm:mt-12 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
+        <div className="mt-10 sm:mt-12 landscape:mt-6 max-w-3xl mx-auto hero-fade-up" style={{ animationDelay: '0.32s' }}>
           <div style={{
             borderRadius: '20px',
             padding: '1rem 1.5rem',

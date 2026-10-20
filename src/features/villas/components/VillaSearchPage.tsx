@@ -11,6 +11,7 @@ import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
 import CollapsibleFilterPanel from '@/src/shared/components/CollapsibleFilterPanel';
 import { useScrollDirection } from '@/src/shared/hooks/useScrollDirection';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
@@ -508,6 +509,10 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     // visitor scrolls down through the results.
     const [isDesktopFiltersCollapsed, setIsDesktopFiltersCollapsed] = useState(true);
     const { onScroll: handleListScroll, isScrollingDown: isListScrollingDown } = useScrollDirection();
+    // Phone held sideways: the header and filters alone fill the ~400px column,
+    // so they fold away while the results scroll down (back on the way up).
+    const isShortLandscape = useShortLandscape();
+    const tuckListChrome = isShortLandscape && isListScrollingDown;
     useEffect(() => {
         if (isListScrollingDown) setIsDesktopFiltersCollapsed(true);
     }, [isListScrollingDown]);
@@ -713,7 +718,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         context, so the dropdown's own z-index is confined to
                         it: at z-20 the whole subtree painted under the bar, and
                         the bar cut a white stripe through the suggestions. */}
-                    <div className="hidden lg:block sticky top-0 z-[110]">
+                    <div className={`hidden ${tuckListChrome ? '' : 'lg:block'} sticky top-0 z-[110]`}>
 
                         {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div
@@ -971,7 +976,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3">
                                         {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} index={i} />)}
                                     </div>
                                 </>
@@ -1024,7 +1029,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     />
                                     <TrustStrip />
                                     <HighlightedPropertiesSection properties={listProperties} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                         {interleaveInFeedAds(
                                             listProperties.slice(0, visibleCount).map((property, index) => (
                                                 <AnimatedVillaCard
@@ -1041,7 +1046,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {visibleCount < listProperties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}
@@ -1225,7 +1230,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
             {/* Mobile Filters Modal */}
             {(isMobile || isTablet) && isFiltersOpen && (
-                <div className="fixed inset-0 z-30 flex flex-col">
+                <div className="fixed inset-0 z-[1100] flex flex-col">
+                    {/* z-[1100]: a full-screen sheet, so above the sidebar rail (50) and the floating header (1001); below the menu drawer (1300) and dialogs (5000+). */}
                     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
                     <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
                         <div

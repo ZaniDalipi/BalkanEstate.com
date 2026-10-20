@@ -462,7 +462,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             </div>
 
             {(isMobile || isTablet) && isFiltersOpen && (
-                <div className="fixed inset-0 z-30 flex flex-col">
+                <div className="fixed inset-0 z-[1100] flex flex-col">
+                    {/* z-[1100]: a full-screen sheet, so above the sidebar rail (50) and the floating header (1001); below the menu drawer (1300) and dialogs (5000+). */}
                     <div className="absolute inset-0 bg-black/50" onClick={() => updateSearchPageState({ isFiltersOpen: false })}></div>
                     <div className="relative w-full h-full" onClick={(e) => { e.stopPropagation(); updateSearchPageState({ isFiltersOpen: false }); }}>
                         <div className="absolute inset-0 bg-white" onClick={e => e.stopPropagation()}>
