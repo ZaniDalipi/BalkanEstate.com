@@ -22,6 +22,7 @@ import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 
 const AiChatModal: React.FC<{
     isOpen: boolean;
@@ -121,6 +122,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
         onFlyComplete,
         userLocation,
     } = useSearchPage();
+    // A sideways phone has ~400px of height: the small switch leaves the listings visible.
+    const isShortLandscape = useShortLandscape();
 
     // Stable callback for opening auth modal - avoids passing dispatch to PropertyList
     const handleOpenAuthModal = React.useCallback(() => {
@@ -454,7 +457,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                         updateSearchPageState({ mobileView: val as 'list' | 'map' });
                                         if (val === 'map') setShowMapHint(false);
                                     }}
-                                    size="md"
+                                    size={isShortLandscape ? 'sm' : 'md'}
                                 />
                             </div>
                         </div>

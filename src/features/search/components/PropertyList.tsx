@@ -1050,7 +1050,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container onScroll={handleListScroll}>
                         <div className="px-4 py-2.5 landscape:px-3 landscape:py-1 border-b border-neutral-200 flex items-center justify-between gap-2 sticky top-0 bg-white z-[100]">
                             <div className="min-w-0">
-                                <p className="text-xs text-neutral-500 font-semibold whitespace-nowrap">{t('search:resultsFound', { count: properties.length })}</p>
+                                <p className="text-xs landscape:text-[0.6875rem] text-neutral-500 font-semibold whitespace-nowrap">{t('search:resultsFound', { count: properties.length })}</p>
                                 {!outOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} />}
                             </div>
                             <div className="relative z-[101]">
@@ -1060,7 +1060,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     value={filters.sortBy}
                                     onChange={(e) => onSortChange(e.target.value)}
                                     aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs landscape:text-sm !py-1.5 landscape:!py-0.5`}
+                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 landscape:pl-2 landscape:pr-6 text-xs landscape:text-[0.6875rem] !py-1.5 landscape:!py-0.5`}
                                 >
                                     {filters.query.trim() && (
                                         <option value="relevance">{t('search:sort.relevance')}</option>
