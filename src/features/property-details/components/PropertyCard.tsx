@@ -92,6 +92,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
   const [agencyLogoFailed, setAgencyLogoFailed] = useState(false);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef(0);
 
   const allImages = useMemo(() => {
     const base = property.imageUrl ? [property.imageUrl] : [];
@@ -116,12 +117,15 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
 
   const handleImageTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
   }, []);
 
   const handleImageTouchEnd = useCallback((e: React.TouchEvent) => {
     if (touchStartXRef.current === null) return;
     const diff = touchStartXRef.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) {
+    const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
+    // Only a mostly-sideways swipe changes the photo; a vertical one scrolls the list.
+    if (Math.abs(diff) > 40 && Math.abs(diff) > Math.abs(diffY)) {
       if (diff > 0) {
         setSlideDirection('right');
         setCurrentImageIndex(prev => (prev + 1) % allImages.length);
@@ -329,7 +333,7 @@ const PropertyCardInner = memo<PropertyCardInnerProps>(({
       {/* Image Section */}
       <div className="relative overflow-hidden">
         <div
-          className="property-card__media relative w-full aspect-[4/3] overflow-hidden bg-neutral-200"
+          className="property-card__media relative w-full aspect-[4/3] overflow-hidden bg-neutral-200 touch-pan-y select-none"
           onTouchStart={handleImageTouchStart}
           onTouchEnd={handleImageTouchEnd}
         >

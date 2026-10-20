@@ -43,9 +43,10 @@
     <link rel="icon" type="image/svg+xml" href="/icons/logo-3d.svg" />
     <!-- maximum-scale=1 stops iOS Safari zooming the page when a form field
          under 16px is tapped, so fields can follow the fluid text size (see
-         index.css → Fluid root size). iOS still allows pinch-zoom with it;
-         elsewhere pinch-zoom is already off (html { touch-action } below). -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+         index.css → Fluid root size). user-scalable=no keeps the page at
+         full width with no pinch-zoom; elsewhere html { touch-action } below
+         does the same. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 
     <!-- Per-page head. Replaced for every prerendered page (scripts/prerender.mjs)
          and every server-rendered detail page (functions/), and taken over by
@@ -258,6 +259,10 @@
       html, body {
         overflow-x: hidden;
         max-width: 100vw;
+        /* clip (unlike hidden) also stops iOS from panning the page sideways
+           when a swipe overshoots, so the screen stays full width. */
+        overflow-x: clip;
+        overscroll-behavior-x: none;
       }
 
       /* Fix for mobile browser chrome (address bar) and webviews */
