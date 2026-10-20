@@ -168,7 +168,7 @@ const SocialButton: React.FC<{ icon: React.ReactNode; label: string, onClick: ()
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className="w-full flex items-center justify-center gap-3 py-3.5 px-4
+        className="w-full flex items-center justify-center gap-3 py-3.5 landscape:py-2 px-4
                    bg-white/60 backdrop-blur-sm border border-white/40
                    rounded-2xl hover:bg-white/80 hover:border-white/60
                    hover:shadow-lg hover:shadow-primary/5
@@ -491,7 +491,7 @@ const AuthPage: React.FC = () => {
 
     // Glassmorphism input styles
     const glassInputClasses = (hasError: boolean) => `
-        block w-full px-4 py-4 text-base text-neutral-900
+        block w-full px-4 py-4 landscape:py-2.5 text-base landscape:text-sm text-neutral-900
         bg-white/50 backdrop-blur-sm rounded-2xl
         border-2 transition-all duration-300
         ${hasError
@@ -509,10 +509,10 @@ const AuthPage: React.FC = () => {
                 return (
                     <>
                         {/* Glass tab switcher */}
-                        <div className="bg-white/30 backdrop-blur-md p-1.5 rounded-2xl flex items-center space-x-1 border border-white/40 shadow-inner mb-6">
+                        <div className="bg-white/30 backdrop-blur-md p-1.5 landscape:p-1 rounded-2xl flex items-center space-x-1 border border-white/40 shadow-inner mb-6 landscape:mb-3 landscape:mr-10">
                             <button
                                 onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'login' })}
-                                className={`w-1/2 px-4 py-2.5 rounded-xl text-base font-semibold transition-all duration-300 ${
+                                className={`w-1/2 px-4 py-2.5 landscape:py-1.5 rounded-xl text-base landscape:text-sm font-semibold transition-all duration-300 ${
                                     state.authModalView === 'login'
                                         ? 'bg-white/90 text-primary shadow-lg shadow-primary/10'
                                         : 'text-neutral-600 hover:bg-white/40'
@@ -522,7 +522,7 @@ const AuthPage: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'signup' })}
-                                className={`w-1/2 px-4 py-2.5 rounded-xl text-base font-semibold transition-all duration-300 ${
+                                className={`w-1/2 px-4 py-2.5 landscape:py-1.5 rounded-xl text-base landscape:text-sm font-semibold transition-all duration-300 ${
                                     state.authModalView === 'signup'
                                         ? 'bg-white/90 text-primary shadow-lg shadow-primary/10'
                                         : 'text-neutral-600 hover:bg-white/40'
@@ -540,9 +540,12 @@ const AuthPage: React.FC = () => {
                             </div>
                         )}
 
-                        <form onSubmit={handleEmailSubmit} noValidate className="space-y-4">
+                        {/* Phone held sideways: fields pair up two across (email | password;
+                            signing up, email and phone get a row each, then password | confirm)
+                            so the whole form fits the short screen. */}
+                        <form onSubmit={handleEmailSubmit} noValidate className="space-y-4 landscape:space-y-0 landscape:grid landscape:grid-cols-2 landscape:gap-x-3 landscape:gap-y-2.5 landscape:items-start">
                             {/* Email field */}
-                            <div>
+                            <div className={state.authModalView === 'signup' ? 'landscape:col-span-2' : undefined}>
                                 <input
                                     type="email"
                                     id="email"
@@ -567,7 +570,7 @@ const AuthPage: React.FC = () => {
 
                             {/* Phone number field (signup only, required) */}
                             {state.authModalView === 'signup' && (
-                                <div>
+                                <div className="landscape:col-span-2">
                                     <div className={`flex items-center rounded-2xl border-2 transition-all duration-300 bg-white/50 backdrop-blur-sm overflow-hidden ${
                                         fieldErrors.phone && touched.phone
                                             ? 'border-red-300 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-100'
@@ -588,7 +591,7 @@ const AuthPage: React.FC = () => {
                                                     setFieldErrors(prev => ({ ...prev, phone: err || undefined }));
                                                 }
                                             }}
-                                            className="bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 border-none focus:outline-none focus:ring-0 cursor-pointer max-w-[140px] flex-shrink-0"
+                                            className="bg-transparent text-sm text-neutral-700 font-medium pl-4 pr-1 py-4 landscape:py-2.5 border-none focus:outline-none focus:ring-0 cursor-pointer max-w-[140px] flex-shrink-0"
                                         >
                                             {ALL_PHONE_COUNTRY_CODES.map((cc, i) => (
                                                 <React.Fragment key={`${cc.country}-${cc.code}`}>
@@ -617,7 +620,7 @@ const AuthPage: React.FC = () => {
                                                 }
                                             }}
                                             onBlur={() => handleBlur('phone')}
-                                            className="flex-1 min-w-0 bg-transparent text-base text-neutral-900 px-3 py-4 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
+                                            className="flex-1 min-w-0 bg-transparent text-base landscape:text-sm text-neutral-900 px-3 py-4 landscape:py-2.5 border-none focus:outline-none focus:ring-0 placeholder:text-neutral-400"
                                             placeholder={getPhonePlaceholder(phoneCountryCode)}
                                             autoComplete="tel-national"
                                         />
@@ -673,7 +676,7 @@ const AuthPage: React.FC = () => {
 
                             {/* Forgot password link */}
                             {state.authModalView === 'login' && (
-                                <div className="text-right">
+                                <div className="text-right landscape:col-span-2 landscape:-mt-1">
                                     <button
                                         type="button"
                                         onClick={() => dispatch({ type: 'SET_AUTH_MODAL_VIEW', payload: 'forgotPassword'})}
@@ -730,7 +733,7 @@ const AuthPage: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full mt-4 py-4 px-6 rounded-2xl text-base font-bold text-white
+                                className="w-full mt-4 py-4 px-6 landscape:col-span-2 landscape:mt-1 landscape:py-2.5 rounded-2xl text-base landscape:text-sm font-bold text-white
                                            bg-gradient-to-r from-primary to-primary-dark
                                            hover:from-primary-dark hover:to-primary
                                            shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30
@@ -754,12 +757,12 @@ const AuthPage: React.FC = () => {
                         {/* Social login section */}
                         {(availableProviders.google || availableProviders.apple) && (
                             <>
-                                <div className="my-6 flex items-center">
+                                <div className="my-6 landscape:my-3 flex items-center">
                                     <div className="flex-grow h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent"></div>
                                     <span className="flex-shrink mx-4 text-neutral-500 font-medium text-sm">{t('auth:login.orContinueWith')}</span>
                                     <div className="flex-grow h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent"></div>
                                 </div>
-                                <div className="space-y-3">
+                                <div className="space-y-3 landscape:space-y-0 landscape:grid landscape:grid-cols-2 landscape:gap-2">
                                     {availableProviders.google && (
                                         <SocialButton
                                             icon={<GoogleIcon/>}
@@ -904,7 +907,7 @@ const AuthPage: React.FC = () => {
 
             {/* Backdrop with animated gradient */}
             <div
-                className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center p-0 md:p-4 overflow-y-auto overflow-x-hidden"
+                className="fixed inset-0 z-[5000] flex justify-center items-start md:items-center landscape:items-center p-0 md:p-4 landscape:p-2 overflow-y-auto overflow-x-hidden"
                 onClick={handleBackdropClick}
             >
                 {/* Glassmorphism backdrop */}
@@ -920,6 +923,8 @@ const AuthPage: React.FC = () => {
                 <div
                     className="relative bg-white/80 backdrop-blur-2xl w-full min-h-screen
                                md:min-h-0 md:h-auto md:max-w-md md:max-h-[90vh]
+                               landscape:min-h-0 landscape:h-auto landscape:max-w-3xl landscape:max-h-[calc(100dvh-1rem)]
+                               landscape:rounded-3xl landscape:my-2
                                md:rounded-3xl md:shadow-2xl md:shadow-black/20
                                md:border md:border-white/50
                                flex flex-col md:my-4 overflow-y-auto
@@ -954,9 +959,13 @@ const AuthPage: React.FC = () => {
 
                     {/* Content */}
                     <div
-                        className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-16 md:pb-8"
+                        className="relative p-6 sm:p-8 w-full max-w-md mx-auto pb-16 md:pb-8
+                                   landscape:max-w-none landscape:grid landscape:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] landscape:gap-6 landscape:items-center landscape:px-6 landscape:pb-5"
                         style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
                     >
+                        {/* Phone held sideways: a wide card, brand on the left and the
+                            form on the right, so every field shows at once. */}
+                        <div className="landscape:flex landscape:flex-col landscape:items-center landscape:justify-center">
                         {/* Magical Logo Container */}
                         <div className="flex justify-center items-center mb-6 pt-4 md:pt-0 landscape:mb-3 landscape:pt-0">
                             <div className="relative group">
@@ -979,7 +988,7 @@ const AuthPage: React.FC = () => {
                                     <div className="absolute bottom-3 left-3 w-1.5 h-1.5 bg-primary rounded-full opacity-50 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.5s' }} />
 
                                     {/* Logo SVG - Full size display */}
-                                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 landscape:w-12 landscape:h-12 flex items-center justify-center">
+                                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 landscape:w-16 landscape:h-16 flex items-center justify-center">
                                         <LogoIcon className="w-full h-full drop-shadow-lg" />
                                     </div>
                                 </div>
@@ -991,12 +1000,15 @@ const AuthPage: React.FC = () => {
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-xl sm:text-2xl landscape:text-lg font-bold text-neutral-800 text-center mb-6 landscape:mb-3">
+                        <h2 className="text-xl sm:text-2xl landscape:text-lg font-bold text-neutral-800 text-center mb-6 landscape:mb-0">
                             {state.authModalView === 'login' ? t('auth:login.subtitle') :
                              state.authModalView === 'signup' ? t('auth:signup.subtitle') : ''}
                         </h2>
+                        </div>
 
-                        {renderContent()}
+                        <div className="landscape:min-w-0">
+                            {renderContent()}
+                        </div>
                     </div>
                 </div>
             </div>

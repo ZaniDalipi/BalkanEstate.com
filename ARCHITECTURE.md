@@ -1320,6 +1320,11 @@ Height is handled separately:
   the ≥768px layout that shows them); a fixed bar that should sit *beside*
   the rail (comparison bar, property action bar) starts at
   `md:left-(--sidebar-rail-w)`.
+- **Login / sign-up** (`AuthModal.tsx`): sideways, the card goes wide (up to
+  `max-w-3xl`) with the logo and heading on the left and the form on the
+  right; fields pair up two across (log in: email | password; sign up: email,
+  phone, then password | confirm), so every field and the submit button are on
+  screen without scrolling. Portrait and desktop keep the single column.
 - **Centred dialogs** use `.dialog-fit` (`src/index.css`): capped at the visible
   height (minus notch and backdrop padding) and scrolling inside, so their
   buttons stay reachable at 360px tall. `Modal.tsx` already caps itself.

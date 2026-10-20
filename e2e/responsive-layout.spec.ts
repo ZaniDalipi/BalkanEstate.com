@@ -122,3 +122,44 @@ test('filter sheet stays on top of the sidebar and header after rotating to land
   expect(hits.titleHit, 'sheet title must not be covered by the sidebar').toBe(true);
   await context.close();
 });
+
+for (const vp of [{ width: 900, height: 410 }, { width: 667, height: 375 }]) {
+  test(`login and sign-up show every field without scrolling on a sideways phone (${vp.width}×${vp.height})`, async ({ browser }) => {
+    // Sideways, the auth card goes wide (brand left, form right) with fields
+    // two across, so nothing has to be scrolled to.
+    const context = await browser.newContext({ viewport: vp, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    await prepare(page);
+    await page.goto('/en/login');
+    await page.waitForSelector('input[type="email"]', { timeout: 20000 });
+    await page.waitForTimeout(800);
+
+    const allInView = () =>
+      page.evaluate(() => {
+        const dialog = document.querySelector('form')?.closest('div.relative.bg-white\\/80');
+        const fields = [...document.querySelectorAll('form input:not([type="hidden"]), form button[type="submit"]')];
+        const vh = window.innerHeight;
+        return {
+          count: fields.length,
+          fits: fields.every((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && r.top >= 0 && r.bottom <= vh;
+          }),
+          scrolls: dialog ? dialog.scrollHeight > dialog.clientHeight + 1 : false,
+        };
+      });
+
+    const login = await allInView();
+    expect(login.count, 'email, password and submit').toBeGreaterThanOrEqual(3);
+    expect(login.fits, 'every login field on screen').toBe(true);
+    expect(login.scrolls, 'login card should not need scrolling').toBe(false);
+
+    await page.getByRole('button', { name: /create account/i }).first().click();
+    await page.waitForTimeout(600);
+    const signup = await allInView();
+    expect(signup.count, 'email, phone, password, confirm and submit').toBeGreaterThanOrEqual(5);
+    expect(signup.fits, 'every sign-up field on screen').toBe(true);
+    expect(signup.scrolls, 'sign-up card should not need scrolling').toBe(false);
+    await context.close();
+  });
+}
