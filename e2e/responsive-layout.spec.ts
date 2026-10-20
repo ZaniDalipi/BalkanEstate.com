@@ -163,3 +163,24 @@ for (const vp of [{ width: 900, height: 410 }, { width: 667, height: 375 }]) {
     await context.close();
   });
 }
+
+test('a wide phone held sideways gets one panel and the List/Map switch, not the split view', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 1100, height: 462 }, hasTouch: true, isMobile: true });
+  const page = await context.newPage();
+  await prepare(page);
+  for (const path of ['/en/search', '/en/rentals', '/en/villas']) {
+    await page.goto(path);
+    await settle(page);
+    await expect(page.getByRole('tablist', { name: /view toggle/i }).first(), `${path}: switch shown`).toBeVisible();
+    const widths = await page.evaluate(() => {
+      const list = document.querySelector('.search-list-panel')?.getBoundingClientRect();
+      const map = document.querySelector('.search-map-stage')?.parentElement?.getBoundingClientRect();
+      const main = document.querySelector('main#main-content')?.getBoundingClientRect();
+      return { list: list?.width ?? 0, map: map?.width ?? 0, main: main?.width ?? 1 };
+    });
+    // Each panel spans the whole page column; the switch picks which one shows.
+    expect(widths.list / widths.main, `${path}: list full width`).toBeGreaterThan(0.95);
+    expect(widths.map / widths.main, `${path}: map full width`).toBeGreaterThan(0.95);
+  }
+  await context.close();
+});

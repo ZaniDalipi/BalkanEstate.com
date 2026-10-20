@@ -15,6 +15,7 @@ import { useRealtimeProperties, useClosedProperties } from '@/src/features/prope
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 import { resolveVillaSearchTarget } from './villaSearchTarget';
+import { getSearchLayout } from '@/src/shared/utils/searchLayout';
 
 const VILLA_DEFAULTS: Partial<Filters> = {
     listingType: 'rent',
@@ -133,7 +134,7 @@ export function useVillaSearch() {
     }, []);
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
+    const [isTablet, setIsTablet] = useState(() => getSearchLayout() === 'tablet');
     const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
@@ -248,7 +249,7 @@ export function useVillaSearch() {
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
-            setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+            setIsTablet(getSearchLayout() === 'tablet');
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);

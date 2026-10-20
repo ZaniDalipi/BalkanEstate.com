@@ -305,7 +305,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${(isMobile || isTablet) && isFiltersOpen ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* --- Left Panel: List & Filters --- */}
                 {/* On mobile/tablet: full-width overlay with slide animation. On lg+: side panel in split view */}
-                 <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200`}
+                 <div className={`absolute inset-0 z-10 h-full w-full bg-white flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-neutral-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || mobileView === 'list'}
                     data-settled={listSettledHidden}>
                     {mountList && searchMode !== 'ai' && (
@@ -325,7 +325,7 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
 
                 {/* --- Right Panel: Map --- */}
                 {/* On mobile/tablet: full-width behind list panel. On lg: 50% map, on xl+: 40% map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
+                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || mobileView === 'map'}
@@ -378,7 +378,8 @@ const SearchPage: React.FC<SearchPageProps> = ({ onToggleSidebar }) => {
                                 style={{
                                     paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
-                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                    // Stop short of the floating header (Subscribe / New / account) on md+.
+                                    paddingRight: 'max(calc(env(safe-area-inset-right, 0px) + 8px), var(--floating-header-w, 0px))',
                                 }}
                             >
                                 <div ref={searchWrapperRef} className="pointer-events-auto w-full space-y-2">

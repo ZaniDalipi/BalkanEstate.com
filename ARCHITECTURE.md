@@ -1307,6 +1307,18 @@ Height is handled separately:
   The rail pads itself by the inset, so on a notched phone in landscape a flat
   5rem left the icons ~2rem. Anything placed beside the rail uses
   `md:pl-(--sidebar-rail-w)` / `md:left-(--sidebar-rail-w)`, never `md:pl-20`.
+- **One panel at a time on a sideways phone.** `getSearchLayout()`
+  (`src/shared/utils/searchLayout.ts`) returns `mobile` / `tablet` / `split`;
+  any short landscape screen is `tablet`, even at 1024px+, so Search, Rentals
+  and Villas show the List/Map switch and one full panel instead of a cramped
+  split. The panels' `lg:` split widths are undone with `landscape:` classes,
+  and the slide rules in `src/index.css` cover short landscape too. In tablet
+  mode the floating search bar replaces the desktop list header (Rentals had
+  neither on tablets before).
+- **`--floating-header-w`** on `<html>` is published by the floating header
+  (Subscribe / New / account): how much of the top-right corner it takes, 0
+  when it isn't shown. Floating search bars pad their right side by it so they
+  stop short of the header instead of sliding under it.
 - **Search / Rentals / Villas list column**: on a short landscape screen the
   search controls (mode tabs, filters, header chips) fold away while the results
   scroll down and return on the way up, so the column shows listings, not

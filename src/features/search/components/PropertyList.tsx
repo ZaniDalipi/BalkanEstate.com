@@ -1094,7 +1094,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 />
                             )}
                             {(isLoadingProperties || isSearchFiltering) ? (
-                                <div className="grid grid-cols-1 xl:grid-cols-2 max-lg:landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4">
+                                <div className="grid grid-cols-1 xl:grid-cols-2 landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} index={index} />
                                     ))}
@@ -1102,7 +1102,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                             ) : properties.length > 0 ? (
                                 <>
                                     {outOfArea !== 'promoted' && <HighlightedPropertiesSection properties={properties} />}
-                                    <div className="grid grid-cols-1 xl:grid-cols-2 max-lg:landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 property-grid-transition">
+                                    <div className="grid grid-cols-1 xl:grid-cols-2 landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 property-grid-transition">
                                         {interleaveInFeedAds(
                                             properties.slice(0, visibleCount).map((prop, index) => (
                                                 <AnimatedPropertyCard
@@ -1119,7 +1119,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     {visibleCount < properties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 xl:grid-cols-2 max-lg:landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 mt-4">
+                                                <div className="grid grid-cols-1 xl:grid-cols-2 landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}
