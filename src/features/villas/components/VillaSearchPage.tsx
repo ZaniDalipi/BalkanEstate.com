@@ -698,7 +698,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                 {/* Left Panel: Search + Filters + Property List */}
                 <div
-                    className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200`}
+                    className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || mobileView === 'list'}
                     data-settled={listSettledHidden}
                     style={{ background: '#F8F9FC' }}
@@ -718,7 +718,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         context, so the dropdown's own z-index is confined to
                         it: at z-20 the whole subtree painted under the bar, and
                         the bar cut a white stripe through the suggestions. */}
-                    <div className={`hidden ${tuckListChrome ? '' : 'lg:block'} sticky top-0 z-[110]`}>
+                    <div className={`hidden ${tuckListChrome || isTablet ? '' : 'lg:block'} sticky top-0 z-[110]`}>
 
                         {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div
@@ -976,7 +976,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-5 landscape:gap-3">
                                         {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} index={i} />)}
                                     </div>
                                 </>
@@ -1029,7 +1029,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     />
                                     <TrustStrip />
                                     <HighlightedPropertiesSection properties={listProperties} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                         {interleaveInFeedAds(
                                             listProperties.slice(0, visibleCount).map((property, index) => (
                                                 <AnimatedVillaCard
@@ -1046,7 +1046,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {visibleCount < listProperties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}
@@ -1064,7 +1064,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                 </div>
 
                 {/* Right Panel: Map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
+                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || mobileView === 'map'}
@@ -1118,7 +1118,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     // top and a pill below the bar.
                                     paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
-                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                    // Stop short of the floating header (Subscribe / New / account) on md+.
+                                    paddingRight: 'max(calc(env(safe-area-inset-right, 0px) + 8px), var(--floating-header-w, 0px))',
                                 }}
                             >
                                 <div className="pointer-events-auto w-full space-y-1.5">
@@ -1129,7 +1130,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     >
                                         <button
                                             onClick={onToggleSidebar}
-                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50"
+                                            className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50"
                                             aria-label={t('common:aria.openMenu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800" />

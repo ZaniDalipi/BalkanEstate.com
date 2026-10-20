@@ -2370,7 +2370,9 @@ html.reduce-motion .celebration-bar {
    phone stops painting and ticking a full-screen layer nobody can see.
    Split view (lg+) is untouched.
    ============================================================================ */
-@media (max-width: 1023.98px) {
+/* Below 1024px, and on any phone held sideways (getSearchLayout() in
+   src/shared/utils/searchLayout.ts treats those as tablets too). */
+@media (max-width: 1023.98px), (orientation: landscape) and (max-height: 500px) {
   .search-list-panel,
   .search-map-stage {
     --view-switch-ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -2424,7 +2426,8 @@ html.reduce-motion .celebration-bar {
   }
 }
 
-@media (max-width: 1023.98px) and (prefers-reduced-motion: reduce) {
+@media (max-width: 1023.98px) and (prefers-reduced-motion: reduce),
+       (orientation: landscape) and (max-height: 500px) and (prefers-reduced-motion: reduce) {
   .search-list-panel,
   .search-map-stage {
     transition: opacity 150ms linear, visibility 0s linear 0s;
