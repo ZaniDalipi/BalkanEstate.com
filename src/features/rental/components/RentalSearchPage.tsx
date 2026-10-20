@@ -270,16 +270,16 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
 
             <div className={`flex h-full w-full flex-col lg:flex-row transition-all duration-300 relative ${isFiltersOpen && (isMobile || isTablet) ? 'blur-sm pointer-events-none' : ''}`}>
                 {/* Left Panel: Search + Filters + Property List */}
-                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200`}
+                <div className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
                     data-shown={!showViewToggle || mobileView === 'list'}
                     data-settled={listSettledHidden} style={{ background: 'linear-gradient(180deg, rgba(248,249,252,0.98) 0%, rgba(238,241,248,0.95) 100%)' }}>
                     {/* Spacer for floating mobile header */}
-                    {isMobile && <div className="h-14 flex-shrink-0" />}
+                    {(isMobile || isTablet) && <div className="h-14 flex-shrink-0" />}
 
                     {/* Header with city search — desktop only (mobile uses floating pill bar).
                         Soft liquid-glass bar: frosted white, hairline edge, muted text. */}
                     <div
-                        className={`hidden ${tuckListChrome ? '' : 'lg:block'} sticky top-0 z-20 border-b border-black/[0.06]`}
+                        className={`hidden ${tuckListChrome || isTablet ? '' : 'lg:block'} sticky top-0 z-20 border-b border-black/[0.06]`}
                         style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
                     >
                         <div className="px-4 pt-3 pb-2 landscape:pt-2 landscape:pb-1 flex items-center justify-between gap-3">
@@ -391,7 +391,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                     </div>
 
                     {/* Desktop Filters */}
-                    <div className={`hidden ${tuckListChrome ? '' : 'lg:block'}`} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <div className={`hidden ${tuckListChrome || isTablet ? '' : 'lg:block'}`} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                         <CollapsibleFilterPanel
                             id="rental-desktop-filter-panel"
                             collapsed={isDesktopFiltersCollapsed}
@@ -509,7 +509,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                         )}
                         <div className="p-3">
                         {!mountList ? null : (isLoading || isSearchFiltering) ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-3">
                                 {[...Array(6)].map((_, i) => (
                                     <PropertyCardSkeleton key={i} index={i} />
                                 ))}
@@ -537,7 +537,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                             <>
                                 <RentalCardAnimationStyles />
                                 <HighlightedPropertiesSection properties={listProperties} />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-3">
                                     {interleaveInFeedAds(
                                         listProperties.slice(0, visibleCount).map((property, index) => (
                                             <AnimatedPropertyCard
@@ -554,7 +554,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                 {visibleCount < listProperties.length && (
                                     <div ref={loadMoreRef}>
                                         {isLoadingMore && (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 max-lg:landscape:grid-cols-3 gap-3 mt-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-3 mt-3">
                                                 {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                     <PropertyCardSkeleton key={i} index={i} />
                                                 ))}
@@ -573,7 +573,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 </div>
 
                 {/* Right Panel: Map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
+                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
                     <div
                         className="search-map-stage absolute inset-0 overflow-hidden"
                         data-shown={!showViewToggle || mobileView === 'map'}
@@ -585,14 +585,18 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                 {/* Mobile/Tablet View Overlays */}
                 {showViewToggle && !isFiltersOpen && (
                     <>
-                        {/* Mobile-only: floating search bar overlay (matches buy page pattern) */}
-                        {isMobile && (
+                        {/* Mobile and tablet (incl. a phone held sideways): floating search
+                            bar overlay (matches buy page pattern). Tablets had no search or
+                            filters in list view: this bar was phone-only and the desktop
+                            header only shows in split view. */}
+                        {(isMobile || isTablet) && (
                             <div
                                 className="absolute top-0 left-0 right-0 z-[100] pb-2 landscape:pb-1.5 pointer-events-none"
                                 style={{
                                     paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
-                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                    // Stop short of the floating header (Subscribe / New / account) on md+.
+                                    paddingRight: 'max(calc(env(safe-area-inset-right, 0px) + 8px), var(--floating-header-w, 0px))',
                                 }}
                             >
                                 <div className="pointer-events-auto w-full space-y-2">
@@ -604,7 +608,7 @@ const RentalSearchPage: React.FC<RentalSearchPageProps> = ({ onToggleSidebar }) 
                                     >
                                         <button
                                             onClick={onToggleSidebar}
-                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
+                                            className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                                             aria-label={t('common:aria.openMenu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800"/>

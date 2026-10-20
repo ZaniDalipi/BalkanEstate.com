@@ -1,4 +1,4 @@
-import React, { useCallback, memo, lazy, Suspense } from 'react';
+import React, { useCallback, memo, lazy, Suspense, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bars3Icon } from '../../constants';
 import { NavPicture } from '@/src/shared/illustrations';
@@ -26,6 +26,35 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
   // the floating bar shrinks and slides away while the page scrolls down.
   const isShortLandscape = useShortLandscape();
   const isHiddenByScroll = useHideOnScroll(Boolean(isFloating) && isShortLandscape);
+
+  // Publish how much of the top-right corner the floating bar takes, as
+  // --floating-header-w on <html>, so other floating chrome (the search pills
+  // on Search / Rentals / Villas) can stop short of it instead of sliding
+  // underneath and losing its buttons. 0 whenever this bar isn't on screen.
+  const floatingRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const el = floatingRef.current;
+    if (!isFloating || !el) {
+      root.style.setProperty('--floating-header-w', '0px');
+      return;
+    }
+    const publish = () => {
+      const r = el.getBoundingClientRect();
+      // Its width plus its gap from the right edge plus a small breathing gap.
+      const taken = Math.max(0, Math.round(window.innerWidth - r.left + 8));
+      root.style.setProperty('--floating-header-w', `${taken}px`);
+    };
+    publish();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(publish) : null;
+    ro?.observe(el);
+    window.addEventListener('resize', publish);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', publish);
+      root.style.setProperty('--floating-header-w', '0px');
+    };
+  }, [isFloating]);
 
   const handleAccountClick = useCallback(() => {
     if (isAuthenticated) {
@@ -105,6 +134,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isFloating }) => {
     // PropertyDetailsPage has its own complete header with back, share, favorite, profile
     return (
       <header
+        ref={floatingRef}
         className={`fixed z-[1001] transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none ${isHiddenByScroll ? '-translate-y-[calc(100%+16px)] opacity-0 pointer-events-none' : ''}`}
         style={{
           top: 'calc(env(safe-area-inset-top, 0px) + 8px)',
