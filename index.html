@@ -3,6 +3,42 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Google tag (gtag.js) — Google Analytics 4, G-JJ7H3FLB50.
+         Kept here in the static HTML (not added by React) so Google's tag
+         checker and crawlers can see it. It runs in Google Consent Mode:
+         storage is denied by default, so no analytics or ad cookies are set
+         until the visitor accepts them in the cookie banner. A choice made on
+         an earlier visit is re-applied below; the version and 183-day expiry
+         must stay in step with src/shared/utils/cookieConsent.ts, and later
+         changes are sent by src/shared/utils/googleConsent.ts. -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500
+      });
+      try {
+        var consent = JSON.parse(localStorage.getItem('balkanestate_cookie_consent_record') || 'null');
+        var age = consent ? Date.now() - new Date(consent.timestamp).getTime() : NaN;
+        if (consent && consent.version === 1 && consent.preferences && age >= 0 && age <= 1000 * 60 * 60 * 24 * 183) {
+          var ads = consent.preferences.marketing ? 'granted' : 'denied';
+          gtag('consent', 'update', {
+            ad_storage: ads,
+            ad_user_data: ads,
+            ad_personalization: ads,
+            analytics_storage: consent.preferences.analytics ? 'granted' : 'denied'
+          });
+        }
+      } catch (e) {}
+      gtag('js', new Date());
+      gtag('config', 'G-JJ7H3FLB50');
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JJ7H3FLB50"></script>
+
     <!-- Ziggy Polyfill: Prevents errors from external scripts expecting Laravel Ziggy -->
     <script>
       (function() {

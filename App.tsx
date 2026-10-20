@@ -25,7 +25,12 @@ import { OpenSidebarContext } from './src/app/router/layoutContext';
 import { lazyWithRetry } from './src/app/router/lazyWithRetry';
 import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
-import { useCookieConsent } from './src/shared/utils/cookieConsent';
+import {
+  COOKIE_CONSENT_EVENT,
+  getEffectiveCookiePreferences,
+  useCookieConsent,
+} from './src/shared/utils/cookieConsent';
+import { updateGoogleConsent } from './src/shared/utils/googleConsent';
 // Lazy load SEO components (don't block initial render)
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
 // Static: the page outlet's default <SEO> must mount before the page's own,
@@ -177,9 +182,15 @@ const GlobalHead: React.FC = () => {
   const { i18n } = useTranslation();
   const currentLang = (i18n.language || 'en').split('-')[0];
 
-  // Get analytics IDs from environment variables. GA falls back to this site's
-  // own measurement ID so a build without the secret still reports.
-  const googleAnalyticsId = import.meta.env.VITE_GA_ID || 'G-JJ7H3FLB50';
+  // Google Analytics is loaded by index.html in consent mode; this passes later
+  // banner choices on to it (an earlier visit's choice is applied there).
+  useEffect(() => {
+    const apply = () => updateGoogleConsent(getEffectiveCookiePreferences());
+    window.addEventListener(COOKIE_CONSENT_EVENT, apply);
+    return () => window.removeEventListener(COOKIE_CONSENT_EVENT, apply);
+  }, []);
+
+  // Get analytics IDs from environment variables
   const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
 
   // Analytics and marketing tags may only load once the user has consented to
@@ -190,12 +201,8 @@ const GlobalHead: React.FC = () => {
     <Suspense fallback={null}>
       <OrganizationSchema language={currentLang} />
       {/* Analytics - only loaded if IDs are provided AND the user consented */}
-      {((googleAnalyticsId && cookieConsent.analytics) ||
-        (facebookPixelId && cookieConsent.marketing)) && (
-        <Analytics
-          googleAnalyticsId={cookieConsent.analytics ? googleAnalyticsId : undefined}
-          facebookPixelId={cookieConsent.marketing ? facebookPixelId : undefined}
-        />
+      {facebookPixelId && cookieConsent.marketing && (
+        <Analytics facebookPixelId={facebookPixelId} />
       )}
       {/* Microsoft Clarity - Heatmaps & Session Recordings (analytics consent) */}
       {cookieConsent.analytics && <ClarityInit />}

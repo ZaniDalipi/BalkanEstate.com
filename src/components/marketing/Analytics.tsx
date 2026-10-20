@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 
 interface AnalyticsProps {
-  googleAnalyticsId?: string;
   facebookPixelId?: string;
   hotjarId?: string;
 }
@@ -21,65 +20,27 @@ declare global {
 
 /**
  * Analytics Component
- * Integrates Google Analytics 4, Facebook Pixel, and Hotjar
+ * Integrates Facebook Pixel and Hotjar. Google Analytics 4 is the gtag snippet in
+ * index.html; trackEvent and trackEcommerce below send to it as well.
  *
  * Usage:
  * <Analytics
- *   googleAnalyticsId="G-XXXXXXXXXX"
  *   facebookPixelId="123456789"
  *   hotjarId={123456}
  * />
  */
 export const Analytics: React.FC<AnalyticsProps> = ({
-  googleAnalyticsId,
   facebookPixelId,
   hotjarId,
 }) => {
-  // Load gtag.js once. It is set up here rather than as an inline <script>:
-  // the production CSP only runs inline scripts carrying the server's nonce,
-  // which a tag added in the browser never has.
-  useEffect(() => {
-    if (!googleAnalyticsId || document.getElementById('gtag-js')) return;
-
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function gtag() {
-      // gtag.js only reads the `arguments` object, not a plain array.
-      // eslint-disable-next-line prefer-rest-params
-      window.dataLayer.push(arguments);
-    };
-    window.gtag('js', new Date());
-    // Page views are sent below on each navigation, so turn off the automatic
-    // one here to avoid counting the first page twice.
-    window.gtag('config', googleAnalyticsId, {
-      send_page_view: false,
-      cookie_flags: 'SameSite=None;Secure',
-    });
-
-    const script = document.createElement('script');
-    script.id = 'gtag-js';
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`;
-    document.head.appendChild(script);
-  }, [googleAnalyticsId]);
-
   // Track a page view on every navigation (and on the first render).
   const { pathname } = useLocation();
   useEffect(() => {
-    // Google Analytics page view
-    if (googleAnalyticsId && window.gtag) {
-      window.gtag('event', 'page_view', {
-        page_path: pathname,
-        page_location: window.location.href,
-        page_title: document.title,
-        send_to: googleAnalyticsId,
-      });
-    }
-
     // Facebook Pixel page view
     if (facebookPixelId && window.fbq) {
       window.fbq('track', 'PageView');
     }
-  }, [pathname, googleAnalyticsId, facebookPixelId]);
+  }, [pathname, facebookPixelId]);
 
   return (
     <Helmet>
