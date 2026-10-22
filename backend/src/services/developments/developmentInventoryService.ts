@@ -23,6 +23,10 @@ import {
   type PriceVisibility,
 } from '../../config/developments';
 
+/** A trimmed string, or '' for anything that isn't a string (so bad input is a 400, not a crash). */
+const text = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
+
+
 /** Keep only known feature flags, de-duplicated. */
 const sanitizeFeatures = (input?: unknown): string[] => {
   if (!Array.isArray(input)) return [];
@@ -66,11 +70,11 @@ export const createBuilding = async (
     order?: number;
   }
 ): Promise<IDevelopmentBuilding> => {
-  if (!input.name?.trim()) throw new ValidationError('building name is required');
+  if (!text(input.name)) throw new ValidationError('building name is required');
   const slug = await uniqueBuildingSlug(developmentId, input.name);
   const building = await DevelopmentBuilding.create({
     developmentId,
-    name: input.name.trim(),
+    name: text(input.name),
     code: input.code,
     slug,
     description: input.description,
@@ -89,11 +93,11 @@ export const createEntrance = async (
   buildingId: Id,
   input: { name: string; code?: string; order?: number }
 ) => {
-  if (!input.name?.trim()) throw new ValidationError('entrance name is required');
+  if (!text(input.name)) throw new ValidationError('entrance name is required');
   return DevelopmentEntrance.create({
     developmentId,
     buildingId,
-    name: input.name.trim(),
+    name: text(input.name),
     code: input.code,
     order: input.order ?? 0,
   });
@@ -110,7 +114,7 @@ export const createFloor = async (
     order?: number;
   }
 ): Promise<IDevelopmentFloor> => {
-  if (!input.label?.trim()) throw new ValidationError('floor label is required');
+  if (!text(input.label)) throw new ValidationError('floor label is required');
   if (typeof input.level !== 'number' || !Number.isFinite(input.level)) {
     throw new ValidationError('floor level must be a number');
   }
@@ -132,7 +136,7 @@ export const createFloor = async (
     developmentId,
     buildingId: building._id,
     entranceId,
-    label: input.label.trim(),
+    label: text(input.label),
     level: input.level,
     kind: input.kind ?? 'standard',
     order: input.order ?? 0,
@@ -205,8 +209,8 @@ export const createUnit = async (
   developmentId: Id,
   input: CreateUnitInput
 ): Promise<IDevelopmentUnit> => {
-  if (!input.unitNumber?.trim()) throw new ValidationError('unitNumber is required');
-  if (!input.unitType?.trim()) throw new ValidationError('unitType is required');
+  if (!text(input.unitNumber)) throw new ValidationError('unitNumber is required');
+  if (!text(input.unitType)) throw new ValidationError('unitType is required');
   if (
     input.availability !== undefined &&
     !isUnitAvailability(input.availability)
@@ -229,8 +233,8 @@ export const createUnit = async (
       buildingId: placement.building._id,
       floorId: placement.floor._id,
       entranceId: placement.entranceId,
-      unitNumber: input.unitNumber.trim(),
-      unitType: input.unitType.trim(),
+      unitNumber: text(input.unitNumber),
+      unitType: text(input.unitType),
       totalArea: input.totalArea,
       netArea: input.netArea,
       grossArea: input.grossArea,

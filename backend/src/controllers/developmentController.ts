@@ -28,6 +28,7 @@ import {
   isDuplicateKeyError,
 } from '../services/developments/developmentInventoryService';
 import * as unitAdmin from '../services/developments/unitAdminService';
+import { listAuditEntries } from '../services/developments/developmentAuditQuery';
 import {
   getPublicDevelopmentDetail,
   listPublicUnits as listPublicUnitsService,
@@ -490,6 +491,69 @@ export const uploadUnitFloorplan = async (req: Request, res: Response): Promise<
     res.json({ unit });
   } catch (error) {
     sendServiceError(res, error, 'upload unit floorplan');
+  }
+};
+
+/** DELETE /:developmentId/units/:unitId/floorplan */
+export const deleteUnitFloorplan = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const unit = await unitAdmin.removeUnitFloorplan({
+      development: req.development!,
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      unitId: req.params.unitId,
+    });
+    res.json({ unit });
+  } catch (error) {
+    sendServiceError(res, error, 'delete unit floorplan');
+  }
+};
+
+/** POST /:developmentId/units/:unitId/gallery (multipart `images`, up to 10) */
+export const uploadUnitGallery = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const files = Array.isArray(req.files) ? req.files : [];
+    if (files.length === 0) {
+      res.status(400).json({ message: 'No files uploaded' });
+      return;
+    }
+    const unit = await unitAdmin.addUnitGalleryImages({
+      development: req.development!,
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      unitId: req.params.unitId,
+      files: files.map((f) => f.buffer),
+    });
+    res.status(201).json({ unit });
+  } catch (error) {
+    sendServiceError(res, error, 'upload unit gallery');
+  }
+};
+
+/** DELETE /:developmentId/units/:unitId/gallery/:index */
+export const deleteUnitGalleryImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const unit = await unitAdmin.removeUnitGalleryImage({
+      development: req.development!,
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      unitId: req.params.unitId,
+      index: req.params.index,
+    });
+    res.json({ unit });
+  } catch (error) {
+    sendServiceError(res, error, 'delete unit gallery image');
+  }
+};
+
+/** GET /:developmentId/audit — the development's activity trail, newest first. */
+export const listAudit = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await listAuditEntries(req.development!._id as mongoose.Types.ObjectId, {
+      limit: req.query.limit,
+      skip: req.query.skip,
+      action: req.query.action,
+    });
+    res.json(result);
+  } catch (error) {
+    sendServiceError(res, error, 'list audit entries');
   }
 };
 

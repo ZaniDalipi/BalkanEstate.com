@@ -27,6 +27,10 @@ import {
   bulkUpdateUnits,
   exportUnitsCsv,
   uploadUnitFloorplan,
+  deleteUnitFloorplan,
+  uploadUnitGallery,
+  deleteUnitGalleryImage,
+  listAudit,
   updateBuilding,
   updateFloor,
 } from '../controllers/developmentController';
@@ -53,6 +57,14 @@ const router = express.Router();
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 /** A single-image upload whose errors become clear 4xx responses (withUploadErrors). */
+const MAX_GALLERY_FILES = 10;
+const galleryImages = (field: string) =>
+  withUploadErrors(uploadMany.array(field, MAX_GALLERY_FILES), {
+    field,
+    maxFiles: MAX_GALLERY_FILES,
+    maxFileSizeBytes: MAX_IMAGE_BYTES,
+  });
+
 const singleImage = (field: string) =>
   withUploadErrors(upload.single(field), { field, maxFiles: 1, maxFileSizeBytes: MAX_IMAGE_BYTES });
 
@@ -64,6 +76,15 @@ const ACCEPTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', '
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_IMAGE_BYTES, files: 1 }, // 10 MB, one file
+  fileFilter: (_req, file, cb) => {
+    if (ACCEPTED_IMAGE_TYPES.has(file.mimetype)) cb(null, true);
+    else cb(new Error('Only JPG, PNG, WebP or AVIF images are accepted'));
+  },
+});
+// Same rules, several files at once (unit gallery).
+const uploadMany = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_IMAGE_BYTES, files: 10 },
   fileFilter: (_req, file, cb) => {
     if (ACCEPTED_IMAGE_TYPES.has(file.mimetype)) cb(null, true);
     else cb(new Error('Only JPG, PNG, WebP or AVIF images are accepted'));
@@ -193,6 +214,32 @@ router.post(
   singleImage('floorplan'),
   uploadUnitFloorplan
 );
+router.delete(
+  '/:developmentId/units/:unitId/floorplan',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('unit.manage'),
+  deleteUnitFloorplan
+);
+router.post(
+  '/:developmentId/units/:unitId/gallery',
+  protect,
+  uploadRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('media.upload'),
+  galleryImages('images'),
+  uploadUnitGallery
+);
+router.delete(
+  '/:developmentId/units/:unitId/gallery/:index',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('unit.manage'),
+  deleteUnitGalleryImage
+);
+router.get('/:developmentId/audit', protect, developmentAuth, requireDevelopmentPermission('team.manage'), listAudit);
 router.patch(
   '/:developmentId/units/:unitId/availability',
   protect,

@@ -15,6 +15,10 @@ import {
   type DevelopmentConstructionStatus,
 } from '../../config/developments';
 
+/** A trimmed string, or '' for anything that isn't a string (so bad input is a 400, not a crash). */
+const text = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
+
+
 const log = createLogger('DevelopmentService');
 
 export interface CreateDevelopmentInput {
@@ -88,9 +92,9 @@ export const createDevelopment = async (
     );
   }
   assertWebsite(input.website);
-  if (!input.name?.trim()) throw new ValidationError('name is required');
-  if (!input.country?.trim()) throw new ValidationError('country is required');
-  if (!input.city?.trim()) throw new ValidationError('city is required');
+  if (!text(input.name)) throw new ValidationError('name is required');
+  if (!text(input.country)) throw new ValidationError('country is required');
+  if (!text(input.city)) throw new ValidationError('city is required');
 
   // Agency ownership grants the agency's owner/admins full rights, so only
   // they may create a development under that agency.
@@ -112,11 +116,11 @@ export const createDevelopment = async (
     ownerId: user._id,
     ownerType,
     agencyId,
-    name: input.name.trim(),
+    name: text(input.name),
     slug,
     description: input.description,
-    country: input.country.trim(),
-    city: input.city.trim(),
+    country: text(input.country),
+    city: text(input.city),
     municipality: input.municipality,
     address: input.address,
     lat: input.lat,

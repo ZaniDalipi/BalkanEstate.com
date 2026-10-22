@@ -15,6 +15,7 @@ import {
   ConstructionStatus,
   normalizeConstructionFields,
 } from '../utils/constructionStatus';
+import { registerListingDevelopmentCleanup } from './hooks/listingDevelopmentCleanup';
 
 /**
  * Where on the floor plan a photo was taken, and which way the camera faced.
@@ -1011,5 +1012,8 @@ PropertySchema.index(
     name: 'source_listing_unique',
   }
 );
+
+// Residence units must not keep references to deleted listings.
+registerListingDevelopmentCleanup(PropertySchema);
 
 export default mongoose.model<IProperty>('Property', PropertySchema);

@@ -71,6 +71,12 @@ export interface DashboardUnitJSON extends Record<string, unknown> {
  * Enrich units for the dashboard with ONE batched Property query (statuses and
  * titles of every linked listing) and one query each for buildings/floors.
  */
+const withoutPublicId = (img: unknown): unknown => {
+  if (!img || typeof img !== 'object') return img;
+  const { publicId: _omit, ...rest } = img as Record<string, unknown>;
+  return rest;
+};
+
 export const toDashboardUnits = async (
   developmentId: Id,
   units: IDevelopmentUnit[]
@@ -102,8 +108,12 @@ export const toDashboardUnits = async (
       linked.map((l) => l.status)
     );
     const floor = floorById.get(String(u.floorId));
+    const json = u.toJSON() as Record<string, unknown>;
+    // Storage keys stay server-side; the dashboard only needs URLs.
+    if (json.floorplan) json.floorplan = withoutPublicId(json.floorplan);
+    if (Array.isArray(json.gallery)) json.gallery = json.gallery.map(withoutPublicId);
     return {
-      ...(u.toJSON() as Record<string, unknown>),
+      ...json,
       effectiveAvailability: effective.availability,
       availabilitySource: effective.source,
       buildingName: buildingName.get(String(u.buildingId)) ?? null,
@@ -143,6 +153,8 @@ export interface UnitListQuery {
   floorId?: unknown;
   availability?: unknown;
   visibility?: unknown;
+  /** 'true' → only units with at least one linked listing; 'false' → only units without. */
+  hasListing?: unknown;
   sort?: unknown;
   limit?: unknown;
   skip?: unknown;
@@ -181,6 +193,12 @@ export const listDashboardUnits = async (
     }
     // Legacy units predate the field; treat missing as public.
     match.visibility = q.visibility === 'public' ? { $ne: 'hidden' } : 'hidden';
+  }
+  if (present(q.hasListing)) {
+    if (q.hasListing !== 'true' && q.hasListing !== 'false') {
+      throw new ValidationError('hasListing must be true or false');
+    }
+    match['listingIds.0'] = { $exists: q.hasListing === 'true' };
   }
   if (present(q.search)) {
     if (typeof q.search !== 'string') throw new ValidationError('search must be a string');
@@ -765,6 +783,147 @@ const finiteNumber = (value: unknown, field: string): number => {
 };
 
 const BUILDING_FIELDS = ['name', 'code', 'description', 'totalFloors', 'basementLevels', 'order'] as const;
+
+export const MAX_UNIT_GALLERY = 30;
+
+/**
+ * Append uploaded images to a unit's gallery (max {@link MAX_UNIT_GALLERY}).
+ * Uploads happen first; if saving fails the new images are removed again.
+ */
+export const addUnitGalleryImages = async (params: {
+  development: IDevelopment;
+  actorId: Id;
+  unitId: unknown;
+  files: Buffer[];
+}): Promise<DashboardUnitJSON> => {
+  const { development, actorId, files } = params;
+  const developmentId = development._id as mongoose.Types.ObjectId;
+  const unit = await requireRefInDevelopment(DevelopmentUnit, params.unitId, developmentId, 'unitId');
+  if (files.length === 0) throw new ValidationError('No images uploaded');
+  if ((unit.gallery?.length ?? 0) + files.length > MAX_UNIT_GALLERY) {
+    throw new ValidationError(`A unit gallery holds at most ${MAX_UNIT_GALLERY} images`);
+  }
+  if (!isMediaStorageConfigured()) throw new StorageNotConfiguredError();
+
+  const uploaded: Array<{ url: string; publicId: string; width?: number; height?: number }> = [];
+  try {
+    for (const file of files) {
+      // Sequential on purpose: keeps memory and storage-API concurrency bounded.
+      // eslint-disable-next-line no-await-in-loop
+      const r = await uploadImage(file, {
+        userId: String(actorId),
+        developmentId: String(developmentId),
+        developmentName: development.name,
+        type: 'development-scene',
+        maxWidth: 2400,
+        maxHeight: 2400,
+      });
+      uploaded.push({ url: r.url, publicId: r.publicId, width: r.width || undefined, height: r.height || undefined });
+    }
+    // Guarded on the current size so two concurrent uploads can't exceed the cap.
+    const updated = await DevelopmentUnit.findOneAndUpdate(
+      {
+        _id: unit._id,
+        developmentId,
+        deletedAt: LIVE,
+        [`gallery.${MAX_UNIT_GALLERY - uploaded.length}`]: { $exists: false },
+      },
+      { $push: { gallery: { $each: uploaded } } },
+      { new: true, runValidators: true }
+    );
+    if (!updated) throw new ValidationError(`A unit gallery holds at most ${MAX_UNIT_GALLERY} images`);
+    await recordDevelopmentAudit({
+      developmentId,
+      action: 'unit.update',
+      actorId,
+      targetType: 'unit',
+      targetId: updated._id as mongoose.Types.ObjectId,
+      metadata: { gallery: { added: uploaded.length } },
+    });
+    return toDashboardUnit(developmentId, updated);
+  } catch (err) {
+    await Promise.all(
+      uploaded.map((u) => deleteImage(u.publicId).catch((e) => log.warn('Could not roll back gallery image:', e)))
+    );
+    throw err;
+  }
+};
+
+/** Remove one gallery image by its position (as listed in the unit's gallery). */
+export const removeUnitGalleryImage = async (params: {
+  development: IDevelopment;
+  actorId: Id;
+  unitId: unknown;
+  index: unknown;
+}): Promise<DashboardUnitJSON> => {
+  const { development, actorId } = params;
+  const developmentId = development._id as mongoose.Types.ObjectId;
+  const unit = await requireRefInDevelopment(DevelopmentUnit, params.unitId, developmentId, 'unitId');
+  const index = Number(params.index);
+  const gallery = unit.gallery ?? [];
+  if (!Number.isInteger(index) || index < 0 || index >= gallery.length) {
+    throw new NotFoundError('Gallery image not found');
+  }
+  const target = gallery[index];
+  // Pull by URL (gallery entries have no _id); URLs are unique per upload.
+  const updated = await DevelopmentUnit.findOneAndUpdate(
+    { _id: unit._id, developmentId, deletedAt: LIVE },
+    { $pull: { gallery: { url: target.url } } },
+    { new: true }
+  );
+  if (!updated) throw new NotFoundError('unitId not found in this development');
+  if (target.publicId) {
+    try {
+      await deleteImage(target.publicId);
+    } catch (err) {
+      log.warn('Could not delete gallery image:', err);
+    }
+  }
+  await recordDevelopmentAudit({
+    developmentId,
+    action: 'unit.update',
+    actorId,
+    targetType: 'unit',
+    targetId: updated._id as mongoose.Types.ObjectId,
+    metadata: { gallery: { removed: 1 } },
+  });
+  return toDashboardUnit(developmentId, updated);
+};
+
+/** Remove a unit's floor plan image. */
+export const removeUnitFloorplan = async (params: {
+  development: IDevelopment;
+  actorId: Id;
+  unitId: unknown;
+}): Promise<DashboardUnitJSON> => {
+  const { development, actorId } = params;
+  const developmentId = development._id as mongoose.Types.ObjectId;
+  const unit = await requireRefInDevelopment(DevelopmentUnit, params.unitId, developmentId, 'unitId');
+  if (!unit.floorplan) return toDashboardUnit(developmentId, unit);
+  const old = unit.floorplan;
+  const updated = await DevelopmentUnit.findOneAndUpdate(
+    { _id: unit._id, developmentId, deletedAt: LIVE },
+    { $unset: { floorplan: 1 } },
+    { new: true }
+  );
+  if (!updated) throw new NotFoundError('unitId not found in this development');
+  if (old.publicId) {
+    try {
+      await deleteImage(old.publicId);
+    } catch (err) {
+      log.warn('Could not delete unit floorplan:', err);
+    }
+  }
+  await recordDevelopmentAudit({
+    developmentId,
+    action: 'unit.update',
+    actorId,
+    targetType: 'unit',
+    targetId: updated._id as mongoose.Types.ObjectId,
+    metadata: { floorplan: true, changes: { floorplan: { from: old.url, to: null } } },
+  });
+  return toDashboardUnit(developmentId, updated);
+};
 
 export const updateBuilding = async (params: {
   developmentId: mongoose.Types.ObjectId;

@@ -2,6 +2,7 @@ import DevelopmentFollow, { type IFollowFilters } from '../../models/Development
 import { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import { createNotificationWithPush } from '../engagementService';
 import { createLogger } from '../../utils/logger';
+import { encodeId } from '../../utils/idObfuscation';
 
 const log = createLogger('DevelopmentAlertService');
 
@@ -76,7 +77,7 @@ export const notifyFollowersUnitAvailable = async (params: {
           priority: 'normal',
           data: {
             developmentSlug: params.developmentSlug,
-            unitId: String(params.unit._id),
+            unitId: encodeId(String(params.unit._id)),
           },
         })
       )
