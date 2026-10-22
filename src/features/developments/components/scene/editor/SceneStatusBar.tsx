@@ -76,11 +76,11 @@ export const SceneStatusBar: React.FC<SceneStatusBarProps> = ({ scene, sync, iss
           </Button>
         </div>
       </div>
-      {issueCount > 0 && (
-        <p id="scene-publish-blocked" className="text-xs text-red-700">
-          {t('editor.status.issueCount', '{{count}} region(s) need attention before publishing.', { count: issueCount })}
-        </p>
-      )}
+      {/* The line is always reserved so the canvas below never jumps while drawing. */}
+      <p id="scene-publish-blocked" className="min-h-[1rem] text-xs text-red-700" aria-live="polite">
+        {issueCount > 0 &&
+          t('editor.status.issueCount', '{{count}} region(s) need attention before publishing.', { count: issueCount })}
+      </p>
       <SyncNoticeBanner sync={sync} />
     </div>
   );

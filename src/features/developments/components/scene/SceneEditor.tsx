@@ -63,7 +63,6 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
         <div className="min-w-0 space-y-2">
           <EditorToolbar
             editor={editor}
-            linkType={linkType}
             showLabels={showLabels}
             onToggleLabels={() => setShowLabels((v) => !v)}
             preview={preview}

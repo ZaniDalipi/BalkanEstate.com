@@ -39,8 +39,11 @@ const VIEWS = ['city', 'park', 'sea', 'courtyard'];
 // without a real upload. Swap for your own render in the editor.
 const AERIAL_IMG = 'https://picsum.photos/seed/eastgate-aerial/1280/820';
 const FACADE_IMG = 'https://picsum.photos/seed/eastgate-facade/1200/900';
-const IMG_W = 1280;
-const IMG_H = 820;
+const FACADE_BACK_IMG = 'https://picsum.photos/seed/eastgate-facade-back/1200/900';
+const AERIAL_W = 1280;
+const AERIAL_H = 820;
+const FACADE_W = 1200;
+const FACADE_H = 900;
 
 const pick = <T>(arr: readonly T[], i: number): T => arr[i % arr.length];
 const rnd = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -315,9 +318,13 @@ async function run(): Promise<void> {
       developmentId: development._id,
       targetType: 'development',
       targetId: development._id,
+      viewKey: 'main',
+      viewName: 'Aerial',
+      viewDirection: 'aerial',
+      sortOrder: 0,
       imageUrl: AERIAL_IMG,
-      imageWidth: IMG_W,
-      imageHeight: IMG_H,
+      imageWidth: AERIAL_W,
+      imageHeight: AERIAL_H,
       draft: { hotspots: aerialHotspots, version: 1 },
       published: { hotspots: aerialHotspots, version: 1, publishedAt: new Date() },
       version: 1,
@@ -350,17 +357,34 @@ async function run(): Promise<void> {
         z: idx,
       };
     });
-    await DevelopmentScene.create({
-      developmentId: development._id,
-      targetType: 'building',
-      targetId: firstBuilding.id,
-      imageUrl: FACADE_IMG,
-      imageWidth: IMG_W,
-      imageHeight: IMG_H,
-      draft: { hotspots: facadeHotspots, version: 1 },
-      published: { hotspots: facadeHotspots, version: 1, publishedAt: new Date() },
-      version: 1,
-    });
+    // Two camera views of the facade (front + back, mirrored columns) so the
+    // explorer's view switcher has something to switch between.
+    const backHotspots = facadeHotspots.map((h) => ({
+      ...h,
+      id: `${h.id}_back`,
+      points: h.points.map(([x, y]) => [round2(1 - x), y]),
+    }));
+    const facadeViews = [
+      { viewKey: 'main', viewName: 'Front', viewDirection: 'front', sortOrder: 0, imageUrl: FACADE_IMG, hotspots: facadeHotspots },
+      { viewKey: 'back', viewName: 'Back', viewDirection: 'back', sortOrder: 1, imageUrl: FACADE_BACK_IMG, hotspots: backHotspots },
+    ];
+    for (const v of facadeViews) {
+      await DevelopmentScene.create({
+        developmentId: development._id,
+        targetType: 'building',
+        targetId: firstBuilding.id,
+        viewKey: v.viewKey,
+        viewName: v.viewName,
+        viewDirection: v.viewDirection,
+        sortOrder: v.sortOrder,
+        imageUrl: v.imageUrl,
+        imageWidth: FACADE_W,
+        imageHeight: FACADE_H,
+        draft: { hotspots: v.hotspots, version: 1 },
+        published: { hotspots: v.hotspots, version: 1, publishedAt: new Date() },
+        version: 1,
+      });
+    }
 
     await Development.updateOne(
       { _id: development._id },
@@ -371,7 +395,7 @@ async function run(): Promise<void> {
     log.info('✅ Demo development seeded:');
     log.info(`   Buildings: ${buildingDefs.length} · Units: ${unitCount} · Available: ${availableCount}`);
     log.info(`   Listings attached to units: ${attachedCount}`);
-    log.info(`   Scenes: site aerial (${aerialHotspots.length} buildings) + ${buildingDefs[0].name} facade (${facadeHotspots.length} units)`);
+    log.info(`   Scenes: site aerial (${aerialHotspots.length} buildings) + ${buildingDefs[0].name} facade, 2 views (${facadeHotspots.length} units)`);
     log.info(`   Public page: ${base}/en/developments/${SLUG}`);
     log.info(`   Dashboard:   ${base}/en/dashboard/developments`);
     if (attachedCount === 0) {

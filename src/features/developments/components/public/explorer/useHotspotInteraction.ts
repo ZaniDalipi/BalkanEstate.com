@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { Hotspot } from '../../../types';
 
@@ -20,6 +20,16 @@ export interface HoverState {
 export function useHotspotInteraction(consumeDrag: () => boolean, onActivate: (h: Hotspot) => void) {
   const [hover, setHover] = useState<HoverState | null>(null);
   const pointerType = useRef<string>('mouse');
+
+  // A tap preview is anchored to where the finger was; once the page scrolls
+  // it would float over unrelated content, so drop it.
+  const touchOpen = hover?.touch === true;
+  useEffect(() => {
+    if (!touchOpen) return undefined;
+    const close = () => setHover(null);
+    window.addEventListener('scroll', close, { passive: true, capture: true });
+    return () => window.removeEventListener('scroll', close, { capture: true });
+  }, [touchOpen]);
 
   const activate = useCallback(
     (h: Hotspot) => {

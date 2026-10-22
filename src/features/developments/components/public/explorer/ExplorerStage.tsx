@@ -62,10 +62,12 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
       onKeyDown={onKeyDown}
       className={cn(
         'bg-slate-900',
-        full ? 'fixed inset-0 z-[4000] flex items-center justify-center overflow-hidden' : 'relative w-full'
+        // Off full screen, desktop keeps the controls in bands above/below the
+        // image so they never cover the top or ground-floor apartments.
+        full ? 'fixed inset-0 z-[4000] flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
       )}
     >
-      <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative'}>
+      <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
         {view && (
           <ExplorerCanvas
             key={view.viewKey}
@@ -109,7 +111,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
         <BuildingChips buildings={p.buildings} activeId={p.activeBuildingId} onSelect={p.onBuilding} />
       </div>
 
-      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-20 sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3')}>
+      <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3')}>
         <ExplorerLegend counts={p.legend} selected={p.selectedAvailability} onToggle={p.onToggleAvailability} />
       </div>
 

@@ -34,7 +34,7 @@ export const BuildingChips: React.FC<BuildingChipsProps> = ({ buildings, activeI
               on ? 'border-primary bg-primary text-white' : 'border-white/60 bg-white/95 text-slate-900 hover:bg-white'
             )}
           >
-            <span className="text-sm font-semibold leading-tight">{b.code || b.name}</span>
+            <span className="max-w-[12rem] truncate text-sm font-semibold leading-tight">{b.name}</span>
             {b.stats && (
               <span className={cn('text-[11px] leading-tight', on ? 'text-white/85' : 'text-slate-500')}>
                 {t('explorer.availableCount', { count: b.stats.available, defaultValue: '{{count}} available' })}

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Check,
   Eye,
   EyeOff,
   Grid3x3,
@@ -12,15 +11,12 @@ import {
   Square,
   Tag,
   Undo2,
-  X,
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import type { EditorTool, PolygonEditor } from '../../../hooks/usePolygonEditor';
-import type { HotspotLinkType } from '../../../types';
 
 interface EditorToolbarProps {
   editor: PolygonEditor;
-  linkType: HotspotLinkType;
   showLabels: boolean;
   onToggleLabels: () => void;
   preview: boolean;
@@ -35,14 +31,13 @@ const off = 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50';
 /** Tools, history, snapping and display toggles above the canvas. */
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   editor,
-  linkType,
   showLabels,
   onToggleLabels,
   preview,
   onTogglePreview,
 }) => {
   const { t } = useTranslation('developments');
-  const { state, dispatch, canUndo, canRedo, nextId } = editor;
+  const { state, dispatch, canUndo, canRedo } = editor;
   const allHidden = state.hotspots.length > 0 && state.hidden.length === state.hotspots.length;
 
   const tool = (value: EditorTool, Icon: typeof Square, label: string, shortcut: string) => (
@@ -80,24 +75,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         {tool('rect', Square, t('scene.tools.rect', 'Rectangle'), 'R')}
         {tool('polygon', Hexagon, t('scene.tools.polygon', 'Polygon'), 'P')}
       </div>
-
-      {state.drawing && (
-        <div className="flex gap-1.5">
-          <button
-            type="button"
-            className={cn(btn, on)}
-            disabled={state.drawing.length < 3}
-            onClick={() => dispatch({ type: 'DRAW_FINISH', id: nextId(), linkType })}
-          >
-            <Check className="h-4 w-4" aria-hidden="true" />
-            {t('editor.toolbar.finish', 'Finish')}
-          </button>
-          <button type="button" className={cn(btn, off)} onClick={() => dispatch({ type: 'DRAW_CANCEL' })}>
-            <X className="h-4 w-4" aria-hidden="true" />
-            {t('editor.toolbar.cancel', 'Cancel')}
-          </button>
-        </div>
-      )}
 
       <span className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" aria-hidden="true" />
       <button type="button" className={cn(btn, off)} onClick={() => dispatch({ type: 'UNDO' })} disabled={!canUndo || preview} aria-label={t('editor.toolbar.undo', 'Undo')} title={`${t('editor.toolbar.undo', 'Undo')} (Ctrl+Z)`}>

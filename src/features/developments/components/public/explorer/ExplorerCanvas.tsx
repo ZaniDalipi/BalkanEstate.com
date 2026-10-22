@@ -69,7 +69,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
 
   const sizeStyle: React.CSSProperties = fullscreen
     ? { aspectRatio: `${W} / ${H}`, width: `min(100vw, calc(100dvh * ${W / H}))` }
-    : { aspectRatio: `${W} / ${H}`, width: `min(100%, calc(82dvh * ${W / H}))` };
+    : { aspectRatio: `${W} / ${H}`, width: `min(100%, calc(min(82dvh, 100dvh - 13rem) * ${W / H}))` };
 
   return (
     <div
@@ -87,6 +87,10 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
           sizes="100vw"
           alt={view.viewName || t('scene.exploreHeading', 'Explore the development')}
           draggable={false}
+          // A failed image hides itself so buyers see the dark stage, not a broken-image icon.
+          onError={(e) => {
+            e.currentTarget.style.visibility = 'hidden';
+          }}
           className="pointer-events-none absolute inset-0 h-full w-full object-fill"
         />
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full" role="group" aria-label={t('explorer.regions', 'Apartments and buildings')}>

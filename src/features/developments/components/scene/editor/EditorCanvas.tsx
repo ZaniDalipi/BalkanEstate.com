@@ -8,6 +8,7 @@ import { useEditorViewport } from '../../../hooks/useEditorViewport';
 import { ShapesLayer } from './ShapesLayer';
 import { VertexHandles } from './VertexHandles';
 import { DrawingLayer } from './DrawingLayer';
+import { DrawControls } from './DrawControls';
 import { useCanvasPointer } from './useCanvasPointer';
 import type { RegionPaint } from './canvasUtils';
 
@@ -133,6 +134,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         </svg>
       </div>
 
+      {!preview && <DrawControls editor={editor} linkType={linkType} />}
       <div className="absolute bottom-2 right-2 flex flex-col gap-1.5" onPointerDown={(e) => e.stopPropagation()}>
         <button type="button" className={zoomBtn} onClick={vp.zoomIn} disabled={!vp.canZoomIn} aria-label={t('editor.zoom.in', 'Zoom in')}>
           <Plus className="h-4 w-4" aria-hidden="true" />

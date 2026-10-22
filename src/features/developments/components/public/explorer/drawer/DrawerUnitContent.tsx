@@ -52,7 +52,7 @@ export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unit
             <AvailabilityBadge state={unit.availability} />
           </div>
           <p className="mt-1 text-sm text-slate-500">
-            {[unit.buildingName, unit.floorLabel ? `${t('explorer.floor', 'Floor')} ${unit.floorLabel}` : null, unit.unitType ? t(`explorer.unitType.${unit.unitType}`, unit.unitType.replace(/_/g, ' ')) : null]
+            {[unit.buildingName, unit.floorLabel || null, unit.unitType ? t(`explorer.unitType.${unit.unitType}`, unit.unitType.replace(/_/g, ' ')) : null]
               .filter(Boolean)
               .join(' · ')}
           </p>

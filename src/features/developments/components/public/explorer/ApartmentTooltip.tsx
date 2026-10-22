@@ -26,7 +26,7 @@ const UnitFacts: React.FC<{ unit: PublicUnit }> = ({ unit }) => {
     unit.unitType ? t(`explorer.unitType.${unit.unitType}`, unit.unitType.replace(/_/g, ' ')) : null,
     typeof unit.beds === 'number' ? txt.bedrooms(unit.beds) : null,
     txt.area(unit) || null,
-    unit.floorLabel ? `${t('explorer.floor', 'Floor')} ${unit.floorLabel}` : null,
+    unit.floorLabel || null,
   ].filter(Boolean);
   return (
     <>
@@ -62,7 +62,7 @@ export const ApartmentTooltip: React.FC<ApartmentTooltipProps> = ({ anchor, unit
     <div
       ref={ref}
       role="tooltip"
-      className="fixed z-[4600] w-max max-w-[260px] rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
+      className="fixed z-[4400] w-max max-w-[260px] rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
       style={{ left: pos?.left ?? anchor.x, top: pos?.top ?? anchor.y, visibility: pos ? 'visible' : 'hidden', pointerEvents: interactive ? 'auto' : 'none' }}
     >
       {unit ? <UnitFacts unit={unit} /> : <p className="text-sm font-semibold text-slate-900">{text}</p>}
