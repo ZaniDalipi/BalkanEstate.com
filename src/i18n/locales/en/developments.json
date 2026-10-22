@@ -366,7 +366,22 @@
       "northwest": "North-west",
       "southeast": "South-east",
       "southwest": "South-west"
-    }
+    },
+    "card": {
+      "apartment": "Apartment",
+      "area": "Area",
+      "rooms": "Bedrooms",
+      "price": "Price",
+      "viewApartment": "View apartment",
+      "available": "Available",
+      "floors": "Floors",
+      "priceFrom": "Prices from",
+      "exploreBuilding": "Explore building",
+      "exploreFloor": "Explore floor"
+    },
+    "showAvailability": "Show availability",
+    "noUnitsInBuilding": "No apartments are listed for this building yet.",
+    "stackingPlan": "Apartments by floor"
   },
   "feature": {
     "big_terrace": "With big terrace",
@@ -417,7 +432,7 @@
       "polygon": "Click to add points. Close by clicking the first point, pressing Enter or tapping Finish. Esc cancels.",
       "preview": "Preview: this is how visitors see the published view. Turn preview off to edit.",
       "rect": "Drag to draw a rectangle.",
-      "select": "Click a region to select it. Scroll to zoom; hold Space and drag (or use two fingers) to pan."
+      "select": "Click a region to select it. Ctrl/⌘ + scroll or pinch to zoom; when zoomed, drag the picture or scroll to move around."
     },
     "image": {
       "badType": "Use a JPG, PNG, WebP or AVIF image.",

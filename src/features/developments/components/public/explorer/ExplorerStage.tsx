@@ -10,6 +10,8 @@ import { ExplorerBreadcrumb, type Crumb } from './ExplorerBreadcrumb';
 import { BuildingChips } from './BuildingChips';
 import { ExplorerLegend } from './ExplorerLegend';
 import { usePseudoFullscreen } from './usePseudoFullscreen';
+import { useDisplayMode } from './useDisplayMode';
+import type { BuildingFacts } from './useRegionCard';
 
 export interface ExplorerStageProps {
   views: PublicSceneView[];
@@ -26,6 +28,7 @@ export interface ExplorerStageProps {
   unitsById: Map<string, PublicUnit>;
   matchedIds?: Set<string>;
   buildingsById: Map<string, DevelopmentBuilding>;
+  buildingFacts?: Map<string, BuildingFacts>;
   onActivate: (h: Hotspot) => void;
   /** The shared filter panel, shown over the stage on demand. */
   filters: React.ReactNode;
@@ -45,6 +48,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const { t } = useTranslation('developments');
   const fs = usePseudoFullscreen<HTMLElement>();
   const [showFilters, setShowFilters] = useState(false);
+  const [mode, setMode] = useDisplayMode();
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
   const float = full ? 'absolute' : 'relative sm:absolute';
@@ -77,6 +81,8 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
             unitsById={p.unitsById}
             matchedIds={p.matchedIds}
             buildingsById={p.buildingsById}
+            buildingFacts={p.buildingFacts}
+            mode={mode}
             onActivate={p.onActivate}
             fullscreen={full}
           />
@@ -104,7 +110,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
           </div>
         </div>
 
-        <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2">
+        <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-3 lg:translate-x-0">
           <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
         </div>
       </div>
@@ -114,7 +120,13 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
       </div>
 
       <div className={cn(float, 'z-10 px-3 py-3 sm:bottom-[4.25rem] sm:left-3 sm:p-0 lg:bottom-3', full && 'bottom-20 left-3 p-0 lg:bottom-3')}>
-        <ExplorerLegend counts={p.legend} selected={p.selectedAvailability} onToggle={p.onToggleAvailability} />
+        <ExplorerLegend
+          counts={p.legend}
+          selected={p.selectedAvailability}
+          onToggle={p.onToggleAvailability}
+          showAvailability={mode === 'availability'}
+          onToggleShowAvailability={() => setMode(mode === 'availability' ? 'clean' : 'availability')}
+        />
       </div>
 
       {showFilters && (

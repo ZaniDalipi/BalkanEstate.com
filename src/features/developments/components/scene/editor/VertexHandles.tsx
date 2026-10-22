@@ -33,7 +33,7 @@ export const VertexHandles: React.FC<VertexHandlesProps> = ({
   const hit = (coarse ? 22 : 10) * pxUnit;
 
   return (
-    <g>
+    <g data-vertex-handle="">
       {edgeMidpoints(outline).map(([x, y], i) => (
         <g
           key={`m-${i}`}

@@ -383,7 +383,22 @@
       "northwest": "Veriperëndim",
       "southeast": "Juglindje",
       "southwest": "Jugperëndim"
-    }
+    },
+    "card": {
+      "apartment": "Apartamenti",
+      "area": "Sipërfaqja",
+      "rooms": "Dhoma gjumi",
+      "price": "Çmimi",
+      "viewApartment": "Shiko apartamentin",
+      "available": "Të lira",
+      "floors": "Kate",
+      "priceFrom": "Çmimet nga",
+      "exploreBuilding": "Eksploro ndërtesën",
+      "exploreFloor": "Eksploro katin"
+    },
+    "showAvailability": "Shfaq disponueshmërinë",
+    "noUnitsInBuilding": "Ende nuk ka apartamente të listuara për këtë ndërtesë.",
+    "stackingPlan": "Apartamentet sipas katit"
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",
@@ -417,7 +432,7 @@
       "polygon": "Klikoni për të shtuar pika. Mbylleni duke klikuar pikën e parë, duke shtypur Enter ose duke prekur Përfundo. Esc anulon.",
       "preview": "Parapamje: kështu e shohin vizitorët pamjen e publikuar. Çaktivizoni parapamjen për të redaktuar.",
       "rect": "Tërhiqni për të vizatuar një drejtkëndësh.",
-      "select": "Klikoni një zonë për ta zgjedhur. Rrotulloni për zmadhim; mbani Space dhe tërhiqni (ose me dy gishta) për lëvizje."
+      "select": "Kliko një zonë për ta zgjedhur. Ctrl/⌘ + rrotullim ose shtrëngim për zmadhim; kur është zmadhuar, tërhiq figurën ose rrotullo për të lëvizur."
     },
     "image": {
       "badType": "Përdorni një imazh JPG, PNG, WebP ose AVIF.",

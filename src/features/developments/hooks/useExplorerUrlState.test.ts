@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+
+const navigateMock = vi.hoisted(() => vi.fn());
+vi.mock('@/src/app/router/navigation', async (orig) => ({
+  ...(await orig<typeof import('@/src/app/router/navigation')>()),
+  navigate: navigateMock,
+}));
 import { buildExplorerSearch, parseExplorerSearch, useExplorerUrlState } from './useExplorerUrlState';
 import { EMPTY_CRITERIA, type UnitCriteria } from '../utils/unitFilters';
 
@@ -72,7 +78,13 @@ describe('useExplorerUrlState', () => {
     expect(push).not.toHaveBeenCalled();
 
     act(() => result.current.setNav({ building: 'b2' }));
+    // Entering a building is a history step (so Back leaves it again)…
+    expect(navigateMock).toHaveBeenCalledTimes(1);
+    expect(new URLSearchParams(navigateMock.mock.calls[0][0].split('?')[1]).get('b')).toBe('b2');
     act(() => vi.advanceTimersByTime(300));
     expect(new URLSearchParams(window.location.search).get('b')).toBe('b2');
+    // …switching camera view inside it is not.
+    act(() => result.current.setNav({ building: 'b2', view: 'back' }));
+    expect(navigateMock).toHaveBeenCalledTimes(1);
   });
 });

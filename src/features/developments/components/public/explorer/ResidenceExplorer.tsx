@@ -10,6 +10,8 @@ import { filterUnits, hasActiveCriteria, toggleIn, type UnitCriteria } from '../
 import { UnitFilters } from '../UnitFilters';
 import { ExplorerStage } from './ExplorerStage';
 import { useExplorerTarget } from './useExplorerTarget';
+import { computeBuildingFacts } from './useRegionCard';
+import { StackingPlan } from './StackingPlan';
 
 export interface ResidenceExplorerProps {
   slug: string;
@@ -41,6 +43,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
 
   const unitsById = useMemo(() => new Map(p.units.map((u) => [u.id, u])), [p.units]);
   const buildingsById = useMemo(() => new Map(p.buildings.map((b) => [b.id, b])), [p.buildings]);
+  const buildingFacts = useMemo(() => computeBuildingFacts(p.units), [p.units]);
   const matched = useMemo(() => filterUnits(p.units, p.criteria), [p.units, p.criteria]);
   const matchedIds = useMemo(
     () => (hasActiveCriteria(p.criteria) ? new Set(matched.map((u) => u.id)) : undefined),
@@ -70,20 +73,39 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
   };
 
   if (!target.isLoading && target.views.length === 0) {
+    const back = target.crumbs.length > 1 ? target.crumbs[target.crumbs.length - 2] : undefined;
+    const building = target.buildingId ? buildingsById.get(target.buildingId) : undefined;
+    // No picture for this building/floor yet: still open it, as a floor-by-floor plan.
+    const scopedUnits = p.units.filter((u) => (floorId ? u.floorId === floorId : u.buildingId === target.buildingId));
     return (
-      <div className="mx-auto flex max-w-6xl flex-col items-start gap-3 rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-600">{t('explorer.noViewsForTarget', 'No interactive view has been published for this yet.')}</p>
-        {target.crumbs.length > 1 && (
-          <button
-            type="button"
-            onClick={() => p.onNavChange(target.navForCrumb(target.crumbs.length - 2))}
-            className="inline-flex min-h-[44px] items-center gap-1 text-sm font-semibold text-primary"
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            {target.crumbs[target.crumbs.length - 2].label}
-          </button>
-        )}
-      </div>
+      <>
+        {p.header}
+        <section className="bg-slate-900 px-4 py-6 sm:px-8" aria-label={building?.name ?? t('explorer.heading', 'Interactive residence explorer')}>
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                {back && (
+                  <button
+                    type="button"
+                    onClick={() => p.onNavChange(target.navForCrumb(target.crumbs.length - 2))}
+                    className="mb-1 inline-flex min-h-[44px] items-center gap-1 text-sm font-semibold text-teal-300 hover:text-teal-200"
+                  >
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                    {back.label}
+                  </button>
+                )}
+                <h2 className="text-xl font-bold text-white">{building?.name ?? t('scene.linkTypes.building', 'Building')}</h2>
+              </div>
+            </div>
+            <StackingPlan
+              floors={p.floors.filter((f) => f.buildingId === target.buildingId && (!floorId || f.id === floorId))}
+              units={scopedUnits}
+              matchedIds={matchedIds}
+              onOpenUnit={p.onOpenUnit}
+            />
+          </div>
+        </section>
+      </>
     );
   }
 
@@ -105,6 +127,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
       unitsById={unitsById}
       matchedIds={matchedIds}
       buildingsById={buildingsById}
+      buildingFacts={buildingFacts}
       onActivate={onActivate}
       activeFilters={hasActiveCriteria(p.criteria)}
       filters={

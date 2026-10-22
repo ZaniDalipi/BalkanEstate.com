@@ -135,12 +135,14 @@ export const toPublicUnit = (
   json.floorLabel = floor?.label ?? null;
   json.floorLevel = floor?.level ?? null;
 
+  for (const f of UNIT_DETAIL_FIELDS) delete json[f];
+  // The floor plan is small (one URL) and the explorer's hover card previews it,
+  // so the list carries it too; description and gallery stay detail-only.
+  const floorplan = stripImage(unit.floorplan);
+  if (floorplan) json.floorplan = floorplan;
   if (opts.detail) {
-    json.floorplan = stripImage(unit.floorplan);
-    if (!json.floorplan) delete json.floorplan;
+    if (typeof unit.description === 'string' && unit.description) json.description = unit.description;
     json.gallery = (unit.gallery ?? []).map(stripImage).filter(Boolean);
-  } else {
-    for (const f of UNIT_DETAIL_FIELDS) delete json[f];
   }
   return json;
 };

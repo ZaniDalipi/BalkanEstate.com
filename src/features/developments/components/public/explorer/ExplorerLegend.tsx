@@ -10,6 +10,9 @@ interface ExplorerLegendProps {
   counts: Array<{ state: UnitAvailability; count: number }>;
   selected: readonly UnitAvailability[];
   onToggle: (state: UnitAvailability) => void;
+  /** Whether every apartment is coloured by availability (vs. only on hover). */
+  showAvailability: boolean;
+  onToggleShowAvailability: () => void;
 }
 
 /**
@@ -17,7 +20,7 @@ interface ExplorerLegendProps {
  * it filters to (or releases) that state. Swatches repeat the polygon pattern
  * motif so the legend decodes the map without colour.
  */
-export const ExplorerLegend: React.FC<ExplorerLegendProps> = ({ counts, selected, onToggle }) => {
+export const ExplorerLegend: React.FC<ExplorerLegendProps> = ({ counts, selected, onToggle, showAvailability, onToggleShowAvailability }) => {
   const { t } = useTranslation('developments');
   const label = useAvailabilityLabel();
   if (counts.length === 0) return null;
@@ -29,6 +32,24 @@ export const ExplorerLegend: React.FC<ExplorerLegendProps> = ({ counts, selected
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
+      <button
+        type="button"
+        role="switch"
+        aria-checked={showAvailability}
+        onClick={onToggleShowAvailability}
+        className={cn(
+          'inline-flex min-h-[44px] items-center gap-2 rounded-full border px-3 text-xs font-semibold shadow-sm transition-colors sm:min-h-[36px]',
+          showAvailability ? 'border-teal-700 bg-teal-700 text-white' : 'border-white/60 bg-white/90 text-slate-700 hover:bg-white'
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={cn('relative h-4 w-7 rounded-full transition-colors', showAvailability ? 'bg-white/40' : 'bg-slate-300')}
+        >
+          <span className={cn('absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-all', showAvailability ? 'left-3.5' : 'left-0.5')} />
+        </span>
+        {t('explorer.showAvailability', 'Show availability')}
+      </button>
       {counts.map(({ state, count }) => {
         const on = selected.includes(state);
         const meta = AVAILABILITY_META[state];

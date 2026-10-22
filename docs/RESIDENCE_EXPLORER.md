@@ -16,6 +16,38 @@ Apartment drawer → existing listing** (when the unit has one).
 | --- | --- | --- |
 | ![Inventory](./images/residence-explorer/12-inventory.png) | ![Unit edit](./images/residence-explorer/13-unit-edit.png) | ![Editor](./images/residence-explorer/15-editor-new-region.png) |
 
+| Residence picture: building hover | Apartment hover card | Building without its own picture |
+| --- | --- | --- |
+| ![Building hover](./images/residence-explorer/21-residence-building-hover.png) | ![Apartment card](./images/residence-explorer/24-apartment-card.png) | ![Floor plan grid](./images/residence-explorer/22-stacking-plan.png) |
+
+**How regions look.** By default (East Gate style) regions are invisible so the
+rendering reads as a photo. The hovered or focused region lights up with a
+translucent fill and a thin light outline: apartments in their availability
+colour (available = teal), buildings in the brand teal. Units matching active
+filters get a soft tint. The legend's **Show availability** switch colours every
+apartment at once (with the colour-blind patterns); the choice is remembered per
+browser. The styling lives in `components/public/explorer/regionPaint.ts`.
+
+**Hover card.** Anchored to the region's top centre with an arrow, it lists:
+
+- apartments: floor-plan preview, number, floor, area, bedrooms, price, status, **View apartment**
+- buildings: available of total, floors, price from, **Explore building**
+
+The pointer can move onto the card and press its button. On touch, the first tap
+shows it.
+
+**Residence picture.** Building regions on the residence (site plan) picture get
+a name tag (the building's code, else its name) and open that building. A
+building that has no picture of its own opens as a floor-by-floor grid of its
+apartments, so every building can be opened. Entering a building adds a browser
+history step, so Back returns to the residence.
+
+**Zoom.** In the public explorer and the editor, Ctrl/⌘ + wheel or a pinch zooms.
+When zoomed, the wheel or a two-finger swipe moves the picture in any direction
+(Shift + wheel moves sideways), and dragging moves it too. In the editor, drag
+on empty picture with the select tool; a drag that starts on a region still
+edits that region.
+
 Screenshots come from Playwright runs against the real app (Vite + Express +
 MongoDB) with the demo seed. The sandbox could not reach picsum.photos, so the
 building images are local placeholder drawings.

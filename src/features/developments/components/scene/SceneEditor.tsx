@@ -94,7 +94,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
                 ? t('editor.hint.polygon', 'Click to add points. Close by clicking the first point, pressing Enter or tapping Finish. Esc cancels.')
                 : state.tool === 'rect'
                   ? t('editor.hint.rect', 'Drag to draw a rectangle.')
-                  : t('editor.hint.select', 'Click a region to select it. Scroll to zoom; hold Space and drag (or use two fingers) to pan.')}
+                  : t('editor.hint.select', 'Click a region to select it. Ctrl/⌘ + scroll or pinch to zoom; when zoomed, drag the picture or scroll to move around.')}
           </p>
         </div>
 

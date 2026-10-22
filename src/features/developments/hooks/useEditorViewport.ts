@@ -7,8 +7,12 @@
  * the transform, so the editor never needs to know the zoom to map a click to
  * image space.
  *
- * Gestures: wheel zooms at the cursor; +/- buttons zoom at the centre; pan with
- * Space+drag, middle-button drag, or two fingers (which also pinch-zoom).
+ * Gestures: Ctrl/⌘+wheel (and trackpad pinch) zooms at the cursor, as does a
+ * plain wheel while at fit; once zoomed, the wheel / two-finger swipe pans in
+ * any direction (Shift+wheel pans sideways). +/- buttons zoom at the centre.
+ * Pan by dragging the background (when the editor allows it via
+ * `canDragPan`), Space+drag, middle-button drag, or two fingers (which also
+ * pinch-zoom).
  * Panning handlers run in the CAPTURE phase so they win over the editor's own
  * pointer handlers; `onPanStart` lets the editor abort a drag it had started
  * with the first finger.
@@ -67,9 +71,11 @@ interface UseEditorViewportOptions {
   aspect: number;
   /** Called when a pan/pinch begins, so the editor can cancel its own drag. */
   onPanStart?: () => void;
+  /** Whether a plain left-button press on this target should pan (e.g. empty background while zoomed). */
+  canDragPan?: (e: React.PointerEvent<HTMLDivElement>) => boolean;
 }
 
-export function useEditorViewport({ aspect, onPanStart }: UseEditorViewportOptions) {
+export function useEditorViewport({ aspect, onPanStart, canDragPan }: UseEditorViewportOptions) {
   const [frameEl, setFrameEl] = useState<HTMLDivElement | null>(null);
   const [frame, setFrame] = useState<Size>({ w: 0, h: 0 });
   const [view, setView] = useState<ViewState>({ zoom: 1, tx: 0, ty: 0 });
@@ -79,6 +85,10 @@ export function useEditorViewport({ aspect, onPanStart }: UseEditorViewportOptio
   const panRef = useRef<{ x: number; y: number; dist: number } | null>(null);
   const onPanStartRef = useRef(onPanStart);
   onPanStartRef.current = onPanStart;
+  const canDragPanRef = useRef(canDragPan);
+  canDragPanRef.current = canDragPan;
+  const viewRef = useRef(view);
+  viewRef.current = view;
 
   const base = fitSize(frame, aspect);
   const baseRef = useRef(base);
@@ -129,11 +139,20 @@ export function useEditorViewport({ aspect, onPanStart }: UseEditorViewportOptio
     if (!frameEl) return undefined;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0015));
+      // Pinch on a trackpad arrives as ctrl+wheel.
+      const zooming = e.ctrlKey || e.metaKey || viewRef.current.zoom <= MIN_ZOOM + 1e-6;
+      if (zooming) {
+        zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)));
+        return;
+      }
+      // Zoomed in: the wheel / two-finger swipe moves the picture freely.
+      const dx = e.shiftKey && e.deltaX === 0 ? e.deltaY : e.deltaX;
+      const dy = e.shiftKey && e.deltaX === 0 ? 0 : e.deltaY;
+      apply((v) => ({ ...v, tx: v.tx - dx, ty: v.ty - dy }));
     };
     frameEl.addEventListener('wheel', onWheel, { passive: false });
     return () => frameEl.removeEventListener('wheel', onWheel);
-  }, [frameEl, zoomAt]);
+  }, [frameEl, zoomAt, apply]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -164,7 +183,8 @@ export function useEditorViewport({ aspect, onPanStart }: UseEditorViewportOptio
   const onPointerDownCapture = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'touch') pointers.current.set(e.pointerId, localPoint(e.clientX, e.clientY));
     const twoFingers = e.pointerType === 'touch' && pointers.current.size >= 2;
-    if (!(e.button === 1 || spaceHeld || twoFingers)) return;
+    const dragPan = e.button === 0 && e.pointerType !== 'touch' && !!canDragPanRef.current?.(e);
+    if (!(e.button === 1 || spaceHeld || twoFingers || dragPan)) return;
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.setPointerCapture?.(e.pointerId);

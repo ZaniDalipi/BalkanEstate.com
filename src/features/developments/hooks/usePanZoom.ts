@@ -166,13 +166,23 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
     const el = containerRef.current;
     if (!el) return undefined;
     const onWheel = (e: WheelEvent) => {
-      if (!wheelAlwaysZooms && !e.ctrlKey && !e.metaKey && tRef.current.scale <= 1) return;
+      const zoomed = tRef.current.scale > 1.01;
+      if (!wheelAlwaysZooms && !e.ctrlKey && !e.metaKey && !zoomed) return;
       e.preventDefault();
-      zoomBy(Math.exp(-e.deltaY * 0.0015), local(e.clientX, e.clientY));
+      if (zoomed && !e.ctrlKey && !e.metaKey) {
+        // Zoomed in: the wheel / two-finger swipe moves the picture freely
+        // (Shift+wheel sideways); Ctrl/⌘+wheel or a pinch keeps zooming.
+        const dx = e.shiftKey && e.deltaX === 0 ? e.deltaY : e.deltaX;
+        const dy = e.shiftKey && e.deltaX === 0 ? 0 : e.deltaY;
+        const t = tRef.current;
+        apply({ ...t, x: t.x - dx, y: t.y - dy });
+        return;
+      }
+      zoomBy(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), local(e.clientX, e.clientY));
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
-  }, [zoomBy, wheelAlwaysZooms]);
+  }, [zoomBy, wheelAlwaysZooms, apply]);
 
   return {
     containerRef,

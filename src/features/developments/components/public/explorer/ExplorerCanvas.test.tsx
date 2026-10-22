@@ -56,13 +56,47 @@ describe('ExplorerCanvas', () => {
     expect(document.querySelector('[data-hotspot-id="h4"]')).not.toHaveAttribute('role');
   });
 
-  it('dims units that do not match the filters and draws a pattern on non-solid states', () => {
+  it('keeps regions invisible at rest and lights the hovered one up (clean mode)', () => {
+    renderCanvas();
+    const fillOf = (id: string) => document.querySelector(`[data-hotspot-id="${id}"] polygon`)!.getAttribute('fill');
+    expect(fillOf('h1')).toBe('rgba(255,255,255,0.001)');
+    fireEvent.focus(screen.getByRole('button', { name: /Apt A12/ }));
+    expect(document.querySelector('[data-hotspot-id="h1"]')).toHaveAttribute('data-active', 'true');
+    expect(fillOf('h1')).toBe('rgba(20,184,166,0.5)');
+  });
+
+  it('tints filter matches, hides non-matches, and patterns non-solid states in availability mode', () => {
     renderCanvas({ matchedIds: new Set(['u2']) });
     expect(document.querySelector('[data-hotspot-id="h1"]')).toHaveAttribute('data-dimmed', 'true');
     const sold = document.querySelector('[data-hotspot-id="h2"]')!;
     expect(sold).toHaveAttribute('data-dimmed', 'false');
+    expect(sold.querySelector('polygon')!.getAttribute('fill')).toBe('rgba(239,68,68,0.26)');
+  });
+
+  it('availability mode colours every unit and draws the pattern on non-solid states', () => {
+    renderCanvas({ mode: 'availability' });
+    const sold = document.querySelector('[data-hotspot-id="h2"]')!;
     expect(sold.querySelector('polygon[fill="url(#be-av-sold)"]')).not.toBeNull();
     expect(document.querySelector('pattern#be-av-sold')).not.toBeNull();
+  });
+
+  it('labels building regions with a clickable name tag', () => {
+    const onActivate = renderCanvas();
+    const tag = screen.getByText('B2');
+    fireEvent.click(tag);
+    expect(onActivate).toHaveBeenCalledWith(expect.objectContaining({ linkType: 'building', linkId: 'b9' }));
+  });
+
+  it('building card shows availability and an explore action', () => {
+    const onActivate = renderCanvas({
+      buildingFacts: new Map([['b9', { units: 20, available: 14, floors: 6, priceFrom: 90000, currency: 'EUR' }]]),
+    });
+    fireEvent.focus(screen.getByRole('button', { name: /B2/ }));
+    const card = screen.getByRole('tooltip');
+    expect(card).toHaveTextContent('14 of 20 available');
+    expect(card).toHaveTextContent('Floors');
+    fireEvent.click(screen.getByRole('button', { name: /Explore building/ }));
+    expect(onActivate).toHaveBeenCalledWith(expect.objectContaining({ linkId: 'b9' }));
   });
 
   it('opens with Enter/Space and with a mouse click', () => {
@@ -80,6 +114,8 @@ describe('ExplorerCanvas', () => {
     fireEvent.focus(screen.getByRole('button', { name: /Apt A12/ }));
     const tip = screen.getByRole('tooltip');
     expect(tip).toHaveTextContent('Apt A12');
+    expect(tip).toHaveTextContent('Apartment');
     expect(tip).toHaveTextContent('Price on request');
+    expect(screen.getByRole('button', { name: /View apartment/ })).toBeInTheDocument();
   });
 });

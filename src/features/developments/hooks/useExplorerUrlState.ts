@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { replaceQueryString } from '@/src/app/router/navigation';
+import { navigate, replaceQueryString } from '@/src/app/router/navigation';
 import { useDebouncedValue } from './useDebouncedValue';
 import { UNIT_AVAILABILITY_STATES, type UnitAvailability } from '../types';
 import { EMPTY_CRITERIA, UNIT_FLAGS, type UnitCriteria, type UnitFlag } from '../utils/unitFilters';
@@ -97,14 +97,18 @@ const currentSearch = () => (typeof window === 'undefined' ? '' : window.locatio
  * Explorer filters + navigation, mirrored into the query string so a reload or
  * a shared link lands on the same view. React state is the source of truth and
  * updates immediately; the URL follows 300 ms later with `replaceState` (no
- * history entry per slider tick, no routing pass). Shared by the explorer and
- * the unit grid so both always show the same selection.
+ * history entry per slider tick, no routing pass). Moving between residence,
+ * building and floor is different: it pushes a history entry, so the browser's
+ * Back button steps back out of a building. Shared by the explorer and the unit
+ * grid so both always show the same selection.
  */
 export function useExplorerUrlState(delayMs = 300) {
   const [state, setState] = useState<ExplorerUrlState>(() => parseExplorerSearch(currentSearch()));
   const debounced = useDebouncedValue(state, delayMs);
   const latest = useRef(debounced);
   latest.current = debounced;
+  const current = useRef(state);
+  current.current = state;
 
   useEffect(() => {
     const next = buildExplorerSearch(debounced, currentSearch());
@@ -114,9 +118,15 @@ export function useExplorerUrlState(delayMs = 300) {
   // Back/forward (e.g. closing the unit drawer) lands on an entry whose query
   // was written earlier; re-stamp the current selection so the URL never lies.
   useEffect(() => {
+    // Back/forward between explorer levels adopts the entry's building/floor/view;
+    // filters keep their current value.
     const onPop = () =>
       setTimeout(() => {
-        const next = buildExplorerSearch(latest.current, currentSearch());
+        const urlNav = parseExplorerSearch(currentSearch()).nav;
+        const sameNav = (a: ExplorerNav, b: ExplorerNav) => a.building === b.building && a.floor === b.floor && a.view === b.view;
+        const nav = sameNav(urlNav, latest.current.nav) ? latest.current.nav : urlNav;
+        if (!sameNav(nav, current.current.nav)) setState((s) => ({ ...s, nav }));
+        const next = buildExplorerSearch({ criteria: latest.current.criteria, nav }, currentSearch());
         if (next !== currentSearch().replace(/^\?/, '')) replaceQueryString(next);
       }, 0);
     window.addEventListener('popstate', onPop);
@@ -127,7 +137,16 @@ export function useExplorerUrlState(delayMs = 300) {
     (criteria: UnitCriteria) => setState((s) => ({ ...s, criteria })),
     []
   );
-  const setNav = useCallback((nav: ExplorerNav) => setState((s) => ({ ...s, nav })), []);
+  const setNav = useCallback((nav: ExplorerNav) => {
+    const prev = current.current.nav;
+    setState((s) => ({ ...s, nav }));
+    // Entering or leaving a building/floor is a step the Back button should undo;
+    // switching camera views within one is not.
+    if (nav.building !== prev.building || nav.floor !== prev.floor) {
+      const qs = buildExplorerSearch({ criteria: current.current.criteria, nav }, currentSearch());
+      navigate(`${window.location.pathname}${qs ? `?${qs}` : ''}`);
+    }
+  }, []);
 
   return { criteria: state.criteria, nav: state.nav, setCriteria, setNav };
 }

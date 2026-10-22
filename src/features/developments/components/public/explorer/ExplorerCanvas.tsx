@@ -5,19 +5,25 @@ import { cn } from '@/src/lib/utils';
 import type { DevelopmentBuilding, Hotspot, PublicSceneView, PublicUnit } from '../../../types';
 import { usePanZoom } from '../../../hooks/usePanZoom';
 import { AvailabilityPatterns } from './AvailabilityPatterns';
+import { BuildingLabels } from './BuildingLabels';
 import { HotspotShape } from './HotspotShape';
-import { ApartmentTooltip } from './ApartmentTooltip';
+import { RegionCard } from './RegionCard';
 import { ZoomControls } from './ZoomControls';
+import type { RegionDisplayMode } from './regionPaint';
 import { useHotspotInteraction } from './useHotspotInteraction';
+import { useRegionCard, type BuildingFacts } from './useRegionCard';
 import { useUnitText } from './useUnitText';
 
 export interface ExplorerCanvasProps {
   view: Pick<PublicSceneView, 'imageUrl' | 'imageWidth' | 'imageHeight' | 'hotspots' | 'viewName'>;
   unitsById: Map<string, PublicUnit>;
-  /** Units matching the active filters; undefined = no filters (nothing dimmed). */
+  /** Units matching the active filters; undefined = no filters. */
   matchedIds?: Set<string>;
   buildingsById?: Map<string, DevelopmentBuilding>;
+  buildingFacts?: Map<string, BuildingFacts>;
   onActivate: (h: Hotspot) => void;
+  /** 'clean' (default): regions appear on hover; 'availability': always coloured. */
+  mode?: RegionDisplayMode;
   /** Fill the viewport (pseudo full-screen): fit the image inside it. */
   fullscreen?: boolean;
   className?: string;
@@ -25,30 +31,32 @@ export interface ExplorerCanvasProps {
 
 /**
  * The explorer's rendering: the camera view image with an SVG overlay of
- * regions (normalised 0–1 points scaled into the image's own viewBox), all in
- * one pan/zoom layer so regions stay glued to the facade at any zoom. Unit
- * regions show EFFECTIVE availability (colour + pattern) and dim when the
- * filters exclude them.
+ * regions (normalised 0–1 points scaled into the image's own viewBox) and the
+ * building name tags, all in one pan/zoom layer so they stay glued to the
+ * facade at any zoom. Hovering (or tapping) a region lights it up and opens its
+ * card; clicking opens it.
  */
 export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   view,
   unitsById,
   matchedIds,
   buildingsById,
+  buildingFacts,
   onActivate,
+  mode = 'clean',
   fullscreen,
   className,
 }) => {
   const { t } = useTranslation('developments');
   const txt = useUnitText();
   const pz = usePanZoom({ wheelAlwaysZooms: fullscreen });
-  const { hover, bind, activate, dismiss } = useHotspotInteraction(pz.consumeDrag, onActivate);
+  const { hover, bind, activate, dismiss, cardHandlers, showFor, scheduleClose } = useHotspotInteraction(pz.consumeDrag, onActivate);
+  const cardFor = useRegionCard(unitsById, buildingsById, buildingFacts);
   const W = view.imageWidth || 1600;
   const H = view.imageHeight || 900;
 
   const hotspots = useMemo(() => [...view.hotspots].sort((a, b) => (a.z ?? 0) - (b.z ?? 0)), [view.hotspots]);
   const hovered = hover ? hotspots.find((h) => h.id === hover.id) : undefined;
-  const hoveredUnit = hovered?.linkType === 'unit' ? unitsById.get(hovered.linkId) : undefined;
 
   const describe = (h: Hotspot): string | undefined => {
     if (h.linkType === 'unit') {
@@ -61,15 +69,10 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
     return h.label;
   };
 
-  const actionLabel = hovered?.linkType === 'unit'
-    ? t('unit.viewDetails', 'View details')
-    : hovered?.linkType === 'listing'
-      ? t('unit.viewListing', 'View listing')
-      : t('explorer.explore', 'Explore');
-
   const sizeStyle: React.CSSProperties = fullscreen
     ? { aspectRatio: `${W} / ${H}`, width: `min(100vw, calc(100dvh * ${W / H}))` }
     : { aspectRatio: `${W} / ${H}`, width: `min(100%, calc(min(82dvh, 100dvh - 13rem) * ${W / H}))` };
+  const card = hovered ? cardFor(hovered) : undefined;
 
   return (
     <div
@@ -105,7 +108,8 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
                 width={W}
                 height={H}
                 state={unit?.availability}
-                dimmed={!!unit && !!matchedIds && !matchedIds.has(unit.id)}
+                matched={unit && matchedIds ? matchedIds.has(unit.id) : undefined}
+                mode={mode}
                 active={hover?.id === h.id}
                 label={describe(h)}
                 interactive={interactive}
@@ -114,20 +118,29 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
             );
           })}
         </svg>
+        <BuildingLabels
+          hotspots={hotspots}
+          buildingsById={buildingsById}
+          activeId={hover?.id}
+          onHover={showFor}
+          onLeave={(h) => scheduleClose(h.id)}
+          onSelect={activate}
+        />
       </div>
 
       <div className="absolute bottom-3 right-3 z-10 hidden sm:block">
         <ZoomControls onZoomIn={pz.zoomIn} onZoomOut={pz.zoomOut} onReset={pz.reset} isZoomed={pz.isZoomed} />
       </div>
 
-      {hover && hovered && (
-        <ApartmentTooltip
-          anchor={{ x: hover.x, y: hover.y }}
-          unit={hoveredUnit}
-          text={hoveredUnit ? undefined : describe(hovered)}
-          interactive={hover.touch && hovered.linkType !== 'entrance'}
-          actionLabel={actionLabel}
-          onAction={() => activate(hovered)}
+      {hover && hovered && card && (
+        <RegionCard
+          anchor={hover.rect}
+          unit={card.unit}
+          title={card.title}
+          facts={card.facts}
+          actionLabel={hovered.linkType !== 'entrance' ? card.actionLabel : undefined}
+          onAction={hovered.linkType !== 'entrance' ? () => activate(hovered) : undefined}
+          {...cardHandlers}
         />
       )}
     </div>

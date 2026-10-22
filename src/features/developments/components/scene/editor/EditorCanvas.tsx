@@ -50,11 +50,22 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const { t } = useTranslation('developments');
   const aspect = imageWidth > 0 && imageHeight > 0 ? imageWidth / imageHeight : 16 / 10;
   const cancelRef = useRef<() => void>(() => {});
-  const vp = useEditorViewport({ aspect, onPanStart: () => cancelRef.current() });
+  const panAllowed = useRef<(e: React.PointerEvent<HTMLDivElement>) => boolean>(() => false);
+  const vp = useEditorViewport({
+    aspect,
+    onPanStart: () => cancelRef.current(),
+    canDragPan: (e) => panAllowed.current(e),
+  });
   const pointer = useCanvasPointer({ editor, renderedWidth: vp.renderedWidth, linkType, disabled: preview });
   cancelRef.current = pointer.cancel;
 
   const { state, dispatch, issues } = editor;
+  // Zoomed in with the select tool (or in preview), dragging empty picture
+  // moves it; drags that start on a region or handle keep editing it.
+  panAllowed.current = (e) =>
+    vp.zoom > 1 + 1e-6 &&
+    (preview || state.tool === 'select') &&
+    !(e.target as Element).closest?.('[data-hotspot-id],[data-vertex-handle]');
   const pxUnit = aspect / Math.max(1, vp.renderedWidth);
   const hidden = useMemo(() => new Set(state.hidden), [state.hidden]);
   const issueIds = useMemo(() => new Set(Object.keys(issues)), [issues]);
@@ -70,7 +81,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
       {...vp.frameHandlers}
       className={cn(
         'relative w-full touch-none select-none overflow-hidden rounded-xl bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-        vp.spaceHeld || vp.isPanning ? 'cursor-grab' : ''
+        vp.isPanning ? 'cursor-grabbing' : vp.spaceHeld || (vp.zoom > 1 + 1e-6 && (preview || state.tool === 'select')) ? 'cursor-grab' : ''
       )}
       style={{ aspectRatio: `${aspect}`, maxHeight: '72vh' }}
       role="application"

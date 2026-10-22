@@ -66,6 +66,25 @@ test.describe('Residence explorer (public)', () => {
     expect(errors).toEqual([]);
   });
 
+  test('residence picture: building card opens a building, even one without its own picture', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Hover flow');
+    await prepare(page);
+    await page.goto(`/en/developments/${SLUG}`);
+    const regions = page.getByRole('group', { name: REGIONS }).first();
+    await expect(regions).toBeVisible({ timeout: 30000 });
+    await regions.getByRole('button', { name: /Seaside Tower 2/ }).first().hover();
+    const card = page.getByRole('tooltip');
+    await expect(card).toContainText('Seaside Tower 2');
+    await expect(card).toContainText(/of \d+ available/);
+    // The card survives the pointer moving onto it, and its button opens the building.
+    await card.getByRole('button', { name: /Explore building/ }).click();
+    await expect(page.getByRole('list', { name: 'Apartments by floor' })).toBeVisible({ timeout: 10000 });
+    // Back returns to the residence picture.
+    await page.goBack();
+    await expect(page.getByRole('group', { name: REGIONS }).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('list', { name: 'Apartments by floor' })).toBeHidden();
+  });
+
   test('unit without a listing accepts an inquiry', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Covered on desktop');
     await prepare(page);
@@ -161,6 +180,31 @@ test.describe('Residence explorer (owner)', () => {
     const panel = page.getByRole('tabpanel', { name: 'Activity' });
     await expect(panel.getByText(/Updated unit|Changed price|Saved draft|Created/).first()).toBeVisible({ timeout: 15000 });
     await expect(panel.getByText('Local Dev').first()).toBeVisible();
+  });
+
+  test('editor: when zoomed, the picture moves freely left/right by drag and wheel', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Pointer gestures');
+    await openManage(page);
+    await page.getByRole('tab', { name: 'Interactive explorer' }).click();
+    const canvas = page.getByLabel('Region editor canvas');
+    await expect(canvas).toBeVisible({ timeout: 15000 });
+    const content = canvas.locator('> div').first();
+    const tx = async () => Number((await content.evaluate((el) => (el as HTMLElement).style.transform)).match(/translate\((-?[\d.]+)px/)?.[1]);
+    await page.getByRole('button', { name: 'Zoom in' }).click();
+    await page.getByRole('button', { name: 'Zoom in' }).click();
+    const start = await tx();
+    // Drag on empty picture (the sky above the seeded building regions).
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.9, box.y + 12);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.9 - 120, box.y + 12, { steps: 6 });
+    await page.mouse.up();
+    const afterDrag = await tx();
+    expect(afterDrag).toBeLessThan(start - 50);
+    // A sideways wheel / trackpad swipe moves it back.
+    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.5);
+    await page.mouse.wheel(-200, 0);
+    await expect.poll(tx).toBeGreaterThan(afterDrag + 100);
   });
 
   test('editor: a drawn polygon is saved where it was drawn', async ({ page, isMobile }) => {

@@ -385,7 +385,22 @@
       "southwest": "Jugozapad"
     },
     "availableCount_few": "{{count}} dostupna",
-    "bedrooms_few": "{{count}} spavaće sobe"
+    "bedrooms_few": "{{count}} spavaće sobe",
+    "card": {
+      "apartment": "Stan",
+      "area": "Površina",
+      "rooms": "Spavaće sobe",
+      "price": "Cijena",
+      "viewApartment": "Pogledaj stan",
+      "available": "Slobodno",
+      "floors": "Katovi",
+      "priceFrom": "Cijene od",
+      "exploreBuilding": "Istraži zgradu",
+      "exploreFloor": "Istraži kat"
+    },
+    "showAvailability": "Prikaži dostupnost",
+    "noUnitsInBuilding": "Za ovu zgradu još nema navedenih stanova.",
+    "stackingPlan": "Stanovi po katovima"
   },
   "feature": {
     "big_terrace": "S velikom terasom",
@@ -419,7 +434,7 @@
       "polygon": "Kliknite za dodavanje točaka. Zatvorite klikom na prvu točku, tipkom Enter ili dodirom na Završi. Esc poništava.",
       "preview": "Pregled: ovako posjetitelji vide objavljeni prikaz. Isključite pregled za uređivanje.",
       "rect": "Povucite za crtanje pravokutnika.",
-      "select": "Kliknite zonu za odabir. Pomičite kotačić za zumiranje; držite Space i povucite (ili dva prsta) za pomicanje."
+      "select": "Kliknite područje da ga odaberete. Ctrl/⌘ + pomicanje ili štipanje za zumiranje; kad je zumirano, povucite sliku ili pomičite kotačić za kretanje."
     },
     "image": {
       "badType": "Koristite JPG, PNG, WebP ili AVIF sliku.",

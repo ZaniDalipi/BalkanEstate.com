@@ -385,7 +385,22 @@
       "southwest": "Sud-vest"
     },
     "availableCount_few": "{{count}} disponibile",
-    "bedrooms_few": "{{count}} dormitoare"
+    "bedrooms_few": "{{count}} dormitoare",
+    "card": {
+      "apartment": "Apartament",
+      "area": "Suprafață",
+      "rooms": "Dormitoare",
+      "price": "Preț",
+      "viewApartment": "Vezi apartamentul",
+      "available": "Disponibile",
+      "floors": "Etaje",
+      "priceFrom": "Prețuri de la",
+      "exploreBuilding": "Explorează clădirea",
+      "exploreFloor": "Explorează etajul"
+    },
+    "showAvailability": "Arată disponibilitatea",
+    "noUnitsInBuilding": "Încă nu sunt listate apartamente pentru această clădire.",
+    "stackingPlan": "Apartamente pe etaje"
   },
   "feature": {
     "big_terrace": "Cu terasă mare",
@@ -419,7 +434,7 @@
       "polygon": "Faceți clic pentru a adăuga puncte. Închideți făcând clic pe primul punct, apăsând Enter sau atingând Finalizează. Esc anulează.",
       "preview": "Previzualizare: așa văd vizitatorii vederea publicată. Dezactivați previzualizarea pentru a edita.",
       "rect": "Trageți pentru a desena un dreptunghi.",
-      "select": "Faceți clic pe o zonă pentru a o selecta. Derulați pentru zoom; țineți Space și trageți (sau două degete) pentru deplasare."
+      "select": "Faceți clic pe o zonă pentru a o selecta. Ctrl/⌘ + derulare sau ciupire pentru zoom; când este mărit, trageți imaginea sau derulați pentru a vă deplasa."
     },
     "image": {
       "badType": "Folosiți o imagine JPG, PNG, WebP sau AVIF.",

@@ -1,13 +1,8 @@
 import React from 'react';
 import type { Hotspot, UnitAvailability } from '../../../types';
 import { toPolygon, type Point } from '../../../utils/polygonGeometry';
-import {
-  AVAILABILITY_META,
-  DIMMED_FILL,
-  NEUTRAL_FILL,
-  NEUTRAL_FILL_STRONG,
-  availabilityPatternId,
-} from '../../../utils/availability';
+import { availabilityPatternId } from '../../../utils/availability';
+import { regionPaint, type RegionDisplayMode } from './regionPaint';
 
 export interface HotspotShapeProps {
   hotspot: Hotspot;
@@ -15,7 +10,9 @@ export interface HotspotShapeProps {
   height: number;
   /** Effective availability for unit links; undefined for other link types. */
   state?: UnitAvailability;
-  dimmed: boolean;
+  /** Filters active: whether this unit matches (undefined when no filters or not a unit). */
+  matched?: boolean;
+  mode: RegionDisplayMode;
   active: boolean;
   /** Accessible name; when absent the shape is decorative-only (not focusable). */
   label?: string;
@@ -31,17 +28,19 @@ export interface HotspotShapeProps {
 }
 
 /**
- * One clickable region on the rendering. Unit regions are filled with their
- * availability colour plus that state's pattern (non-colour cue); filtered-out
- * units fade to DIMMED_FILL; building/floor/listing regions use the neutral
- * fill. Focusable with Enter/Space activation.
+ * One clickable region on the rendering, painted by {@link regionPaint}:
+ * invisible at rest in the default 'clean' mode, a translucent fill with a
+ * light outline when hovered/focused, a soft tint for filter matches, or
+ * permanent availability colours (+ patterns) in 'availability' mode.
+ * Focusable with Enter/Space activation.
  */
 export const HotspotShape: React.FC<HotspotShapeProps> = ({
   hotspot,
   width,
   height,
   state,
-  dimmed,
+  matched,
+  mode,
   active,
   label,
   interactive,
@@ -51,11 +50,8 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
   const pts = toPolygon(hotspot.shape, hotspot.points as Point[])
     .map(([x, y]) => `${x * width},${y * height}`)
     .join(' ');
-  const meta = state ? AVAILABILITY_META[state] : undefined;
-  const fill = dimmed ? DIMMED_FILL : meta ? (active ? meta.fillStrong : meta.fill) : active ? NEUTRAL_FILL_STRONG : NEUTRAL_FILL;
-  const stroke = dimmed ? 'rgba(255,255,255,0.35)' : meta ? meta.color : 'rgba(255,255,255,0.9)';
-  const showPattern = !dimmed && meta && meta.pattern !== 'solid' && state;
-  const strokeW = Math.max(1.5, width / 700) * (active ? 2 : 1);
+  const paint = regionPaint({ mode, state, active, matched });
+  const strokeW = Math.max(1.2, width / 900) * paint.strokeScale;
 
   return (
     <g
@@ -64,7 +60,8 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
       aria-label={label}
       data-hotspot-id={hotspot.id}
       data-state={state}
-      data-dimmed={dimmed ? 'true' : 'false'}
+      data-dimmed={matched === false ? 'true' : 'false'}
+      data-active={active ? 'true' : 'false'}
       className={interactive ? 'cursor-pointer outline-none' : undefined}
       onKeyDown={(e) => {
         if (interactive && (e.key === 'Enter' || e.key === ' ')) {
@@ -74,10 +71,17 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
       }}
       {...events}
     >
-      <polygon points={pts} fill={fill} stroke={stroke} strokeWidth={strokeW} strokeLinejoin="round" />
-      {showPattern && <polygon points={pts} fill={`url(#${availabilityPatternId(state)})`} pointerEvents="none" />}
-      {active && (
-        <polygon points={pts} fill="none" stroke="#ffffff" strokeWidth={strokeW * 0.6} strokeDasharray={`${strokeW * 3} ${strokeW * 2}`} pointerEvents="none" />
+      <polygon
+        points={pts}
+        fill={paint.fill}
+        stroke={paint.stroke}
+        strokeWidth={strokeW}
+        strokeLinejoin="round"
+        pointerEvents="all"
+        style={{ transition: 'fill 120ms ease, stroke 120ms ease' }}
+      />
+      {paint.pattern && state && (
+        <polygon points={pts} fill={`url(#${availabilityPatternId(state)})`} opacity={0.55} pointerEvents="none" />
       )}
     </g>
   );
