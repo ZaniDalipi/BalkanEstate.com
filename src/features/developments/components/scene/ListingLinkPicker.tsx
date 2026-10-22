@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Check, X } from 'lucide-react';
-import { useAttachableListings } from '../../hooks';
+import { useAttachableListings } from '../../hooks/useScenes';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { formatPrice } from '../../utils/format';
 
@@ -39,13 +39,13 @@ export const ListingLinkPicker: React.FC<ListingLinkPickerProps> = ({
       {value && (
         <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 px-2 py-1.5 text-sm">
           <span className="min-w-0 truncate text-foreground">
-            {selected?.title || t('scene.listingSelected')}
+            {selected?.title || t('scene.listingSelected', 'Listing selected')}
           </span>
           <button
             type="button"
             onClick={onClear}
-            className="shrink-0 text-muted-foreground hover:text-foreground"
-            aria-label={t('filters.clear')}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label={t('editor.link.clear', 'Remove link')}
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -58,17 +58,18 @@ export const ListingLinkPicker: React.FC<ListingLinkPickerProps> = ({
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={t('scene.searchListings')}
-          className="min-h-[36px] w-full rounded-lg border border-input bg-background pl-8 pr-2 text-sm"
+          placeholder={t('scene.searchListings', 'Search your listings…')}
+          aria-label={t('scene.searchListings', 'Search your listings…')}
+          className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white pl-8 pr-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-[36px]"
         />
       </div>
 
       {/* Results */}
       <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
         {isLoading ? (
-          <p className="px-3 py-2 text-xs text-muted-foreground">{t('wizard.creating')}</p>
+          <p className="px-3 py-2 text-xs text-muted-foreground">{t('editor.link.loading', 'Loading…')}</p>
         ) : listings.length === 0 ? (
-          <p className="px-3 py-2 text-xs text-muted-foreground">{t('scene.noListingsFound')}</p>
+          <p className="px-3 py-2 text-xs text-muted-foreground">{t('scene.noListingsFound', 'No listings found.')}</p>
         ) : (
           <ul>
             {listings.map((l) => {
@@ -78,7 +79,8 @@ export const ListingLinkPicker: React.FC<ListingLinkPickerProps> = ({
                   <button
                     type="button"
                     onClick={() => onPick(l.id, l.title)}
-                    className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-sm hover:bg-muted"
+                    aria-pressed={isSel}
+                    className="flex min-h-[44px] w-full items-center gap-2 px-2 py-1.5 text-left text-sm hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
                   >
                     {l.imageUrl ? (
                       <img src={l.imageUrl} alt="" className="h-9 w-9 shrink-0 rounded object-cover" />
@@ -86,7 +88,7 @@ export const ListingLinkPicker: React.FC<ListingLinkPickerProps> = ({
                       <span className="h-9 w-9 shrink-0 rounded bg-muted" aria-hidden="true" />
                     )}
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-foreground">{l.title || t('scene.listingSelected')}</span>
+                      <span className="block truncate text-foreground">{l.title || t('scene.listingSelected', 'Listing selected')}</span>
                       <span className="block truncate text-xs text-muted-foreground">
                         {[l.city, l.price ? formatPrice(l.price) : null].filter(Boolean).join(' · ')}
                       </span>

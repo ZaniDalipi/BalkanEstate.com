@@ -47,6 +47,12 @@ const toPointsAttr = (pts: number[][], w: number, h: number): string =>
   pts.map(([x, y]) => `${x * w},${y * h}`).join(' ');
 
 /**
+ * Public/read-only hotspot renderer (used by SceneViewer / SceneExplorer).
+ * The owner-side editor no longer uses this component: it lives in
+ * ./editor (EditorCanvas, ShapesLayer, VertexHandles, DrawingLayer) with
+ * zoom/pan, vertex editing and undo. The legacy `mode="edit"` path is kept
+ * only for API compatibility and should not gain new features.
+ *
  * Renders an image with an SVG hotspot overlay in pixel space (measured from
  * the element), so normalised 0–1 coordinates stay aligned at any size. In edit
  * mode it draws rectangles (drag) and polygons (click points, double-click or
