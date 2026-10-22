@@ -4,6 +4,10 @@ import {
   unitMatchesCriteria,
   hasActiveCriteria,
   EMPTY_CRITERIA,
+  filterUnits,
+  unitArea,
+  unitHasFlag,
+  toggleIn,
 } from './unitFilters';
 import type { PublicUnit } from '../types';
 
@@ -92,5 +96,82 @@ describe('unitMatchesCriteria', () => {
     expect(
       unitMatchesCriteria(u, { beds: [2], types: ['apartment'], features: [], minArea: 80 }, 4)
     ).toBe(false);
+  });
+});
+
+describe('extended criteria', () => {
+  const base = EMPTY_CRITERIA;
+
+  it('treats the max bath option as N+', () => {
+    expect(unitMatchesCriteria(unit({ baths: 3 }), { ...base, baths: [2] }, undefined, 2)).toBe(true);
+    expect(unitMatchesCriteria(unit({ baths: 1 }), { ...base, baths: [2] }, undefined, 2)).toBe(false);
+    expect(unitMatchesCriteria(unit({}), { ...base, baths: [1] })).toBe(false);
+  });
+
+  it('filters by price range and excludes price-on-request units', () => {
+    expect(unitMatchesCriteria(unit({ price: 120000 }), { ...base, minPrice: 100000, maxPrice: 150000 })).toBe(true);
+    expect(unitMatchesCriteria(unit({ price: 90000 }), { ...base, minPrice: 100000 })).toBe(false);
+    expect(unitMatchesCriteria(unit({ priceOnRequest: true }), { ...base, maxPrice: 150000 })).toBe(false);
+    expect(unitMatchesCriteria(unit({ priceOnRequest: true, price: 1 }), { ...base, maxPrice: 150000 })).toBe(false);
+  });
+
+  it('filters by effective availability with OR', () => {
+    const c = { ...base, availability: ['available', 'reserved'] as const };
+    expect(unitMatchesCriteria(unit({ availability: 'reserved' }), { ...c, availability: [...c.availability] })).toBe(true);
+    expect(unitMatchesCriteria(unit({ availability: 'sold' }), { ...c, availability: [...c.availability] })).toBe(false);
+  });
+
+  it('filters by orientation case-insensitively', () => {
+    expect(unitMatchesCriteria(unit({ orientation: 'South' }), { ...base, orientations: ['south'] })).toBe(true);
+    expect(unitMatchesCriteria(unit({ orientation: 'north' }), { ...base, orientations: ['south'] })).toBe(false);
+    expect(unitMatchesCriteria(unit({}), { ...base, orientations: ['south'] })).toBe(false);
+  });
+
+  it('derives terrace / balcony / duplex / penthouse / furnished flags', () => {
+    expect(unitHasFlag(unit({ terraces: 1 }), 'terrace')).toBe(true);
+    expect(unitHasFlag(unit({ terraceArea: 12 }), 'terrace')).toBe(true);
+    expect(unitHasFlag(unit({ features: ['big_terrace'] }), 'terrace')).toBe(true);
+    expect(unitHasFlag(unit({}), 'terrace')).toBe(false);
+    expect(unitHasFlag(unit({ balconies: 2 }), 'balcony')).toBe(true);
+    expect(unitHasFlag(unit({ balconies: 0 }), 'balcony')).toBe(false);
+    expect(unitHasFlag(unit({ features: ['duplex', 'penthouse', 'furnished'] }), 'duplex')).toBe(true);
+    const u = unit({ balconies: 1, features: ['penthouse'] });
+    expect(unitMatchesCriteria(u, { ...base, flags: ['balcony', 'penthouse'] })).toBe(true);
+    expect(unitMatchesCriteria(u, { ...base, flags: ['balcony', 'furnished'] })).toBe(false);
+  });
+
+  it('uses the same area field for display and filtering (total, then net, then gross)', () => {
+    expect(unitArea({ totalArea: 80, netArea: 70 })).toBe(80);
+    expect(unitArea({ netArea: 70, grossArea: 90 })).toBe(70);
+    expect(unitArea({ grossArea: 90 })).toBe(90);
+    expect(unitMatchesCriteria(unit({ totalArea: 80, netArea: 55 }), { ...base, minArea: 60 })).toBe(true);
+  });
+
+  it('derives bath, price, orientation and flag bounds', () => {
+    const b = deriveFilterBounds([
+      unit({ baths: 1, price: 100000, orientation: 'south', balconies: 1 }),
+      unit({ baths: 2, price: 250000, features: ['duplex'] }),
+      unit({ priceOnRequest: true }),
+    ]);
+    expect(b.bathOptions).toEqual([1, 2]);
+    expect(b.priceMin).toBe(100000);
+    expect(b.priceMax).toBe(250000);
+    expect(b.orientations).toEqual(['south']);
+    expect(b.flags).toEqual(['balcony', 'duplex']);
+  });
+
+  it('filterUnits applies N+ thresholds from the data and short-circuits empty criteria', () => {
+    const units = [unit({ beds: 1 }), unit({ beds: 3 }), unit({ beds: 4 })];
+    expect(filterUnits(units, base)).toBe(units);
+    expect(filterUnits(units, { ...base, beds: [4] })).toHaveLength(1);
+    expect(filterUnits(units, { ...base, beds: [3] })).toHaveLength(1);
+  });
+
+  it('toggleIn adds and removes values in optional lists', () => {
+    const once = toggleIn(base, 'flags', 'terrace');
+    expect(once.flags).toEqual(['terrace']);
+    expect(toggleIn(once, 'flags', 'terrace').flags).toEqual([]);
+    expect(hasActiveCriteria(once)).toBe(true);
+    expect(hasActiveCriteria({ ...base, maxPrice: 5 })).toBe(true);
   });
 });

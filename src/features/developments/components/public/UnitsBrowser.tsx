@@ -1,112 +1,88 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/src/lib/utils';
-import type { PublicUnit, UnitAvailability } from '../../types';
+import type { PublicUnit } from '../../types';
+import { AVAILABILITY_ORDER } from '../../utils/availability';
 import { UnitCard } from './UnitCard';
 import { EmptyState } from '../shared/States';
 
 interface UnitsBrowserProps {
+  /** Units already narrowed by the shared explorer filters. */
   units: PublicUnit[];
   slug: string;
+  onOpenUnit?: (unitId: string) => void;
+  /** Whether filters are narrowing `units` (changes the empty-state copy). */
+  filtered?: boolean;
 }
 
-type Filter = 'all' | UnitAvailability;
+const PAGE = 24;
 
 /**
- * Buyer-facing unit browser: availability filter chips plus an optional building
- * filter, over a responsive grid of unit cards. Available units are surfaced
- * first. Pure client-side filtering over the already-loaded units.
+ * Responsive grid of unit cards for the units the shared filters let
+ * through (availability, beds, area… live in UnitFilters / the explorer, so
+ * the grid and the facade always agree). Adds a building picker for
+ * multi-building residences; pursuable units sort first.
  */
-export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units, slug }) => {
+export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units, slug, onOpenUnit, filtered }) => {
   const { t } = useTranslation('developments');
-  const [filter, setFilter] = useState<Filter>('all');
-  const [building, setBuilding] = useState<string>('all');
+  const [building, setBuilding] = useState('all');
+  const [limit, setLimit] = useState(PAGE);
 
-  // Which availability states actually occur, to avoid dead chips.
-  const presentStates = useMemo(() => {
-    const set = new Set<UnitAvailability>();
-    units.forEach((u) => set.add(u.availability));
-    return set;
-  }, [units]);
-
-  const buildingNames = useMemo(() => {
-    const set = new Set<string>();
-    units.forEach((u) => u.buildingName && set.add(u.buildingName));
-    return Array.from(set);
-  }, [units]);
-
-  const AVAILABILITY_ORDER: UnitAvailability[] = [
-    'available',
-    'reserved',
-    'not_released',
-    'sold',
-    'rented',
-    'unavailable',
-  ];
-
-  const filtered = useMemo(() => {
-    const rank = (u: PublicUnit) => (u.availability === 'available' ? 0 : 1);
-    return units
-      .filter((u) => (filter === 'all' ? true : u.availability === filter))
-      .filter((u) => (building === 'all' ? true : u.buildingName === building))
-      .slice()
-      .sort((a, b) => rank(a) - rank(b));
-  }, [units, filter, building]);
-
-  const chip = (value: Filter, label: string) => (
-    <button
-      key={value}
-      type="button"
-      onClick={() => setFilter(value)}
-      aria-pressed={filter === value}
-      className={cn(
-        'rounded-full border px-3 py-1 text-sm font-medium transition-colors',
-        filter === value
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
-      )}
-    >
-      {label}
-    </button>
+  const buildingNames = useMemo(
+    () => Array.from(new Set(units.map((u) => u.buildingName).filter((b): b is string => !!b))),
+    [units]
   );
 
+  const shown = useMemo(() => {
+    const rank = (u: PublicUnit) => AVAILABILITY_ORDER.indexOf(u.availability);
+    return units
+      .filter((u) => building === 'all' || u.buildingName === building)
+      .slice()
+      .sort((a, b) => rank(a) - rank(b) || a.unitNumber.localeCompare(b.unitNumber, undefined, { numeric: true }));
+  }, [units, building]);
+
   if (units.length === 0) {
-    return <EmptyState title={t('unit.none')} />;
+    return <EmptyState title={filtered ? t('units.noneForFilter', 'No units match this filter.') : t('unit.none', 'No units yet.')} />;
   }
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {chip('all', t('units.filterAll'))}
-        {AVAILABILITY_ORDER.filter((s) => presentStates.has(s)).map((s) =>
-          chip(s, t(`availability.${s}`))
-        )}
-
-        {buildingNames.length > 1 && (
+      {buildingNames.length > 1 && (
+        <div className="mb-4 flex justify-end">
           <select
             value={building}
             onChange={(e) => setBuilding(e.target.value)}
-            className="ml-auto min-h-[36px] rounded-full border border-border bg-background px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label={t('detail.buildings')}
+            className="min-h-[44px] rounded-full border border-slate-200 bg-white px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label={t('detail.buildings', 'Buildings')}
           >
-            <option value="all">{t('units.allBuildings')}</option>
+            <option value="all">{t('units.allBuildings', 'All buildings')}</option>
             {buildingNames.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
+              <option key={b} value={b}>{b}</option>
             ))}
           </select>
-        )}
-      </div>
-
-      {filtered.length === 0 ? (
-        <EmptyState title={t('units.noneForFilter')} />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((u) => (
-            <UnitCard key={u.id} unit={u} slug={slug} />
-          ))}
         </div>
+      )}
+
+      {shown.length === 0 ? (
+        <EmptyState title={t('units.noneForFilter', 'No units match this filter.')} />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {shown.slice(0, limit).map((u) => (
+              <UnitCard key={u.id} unit={u} slug={slug} onOpen={onOpenUnit} />
+            ))}
+          </div>
+          {shown.length > limit && (
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setLimit((l) => l + PAGE)}
+                className="min-h-[44px] rounded-full border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-800 hover:border-primary/50"
+              >
+                {t('explorer.showMore', { count: shown.length - limit, defaultValue: 'Show more ({{count}})' })}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

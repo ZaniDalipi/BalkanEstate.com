@@ -43,19 +43,21 @@ export const StatsBar: React.FC<StatsBarProps> = ({ summary, buildings }) => {
       ? summary.priceMin === summary.priceMax
         ? formatPrice(summary.priceMin, summary.currency)
         : `${formatPrice(summary.priceMin, summary.currency)}+`
-      : '—';
+      : summary && summary.total > 0
+        ? t('unit.priceOnRequest', 'Price on request')
+        : '—';
 
   return (
     <div className="grid grid-cols-2 divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_-12px_rgba(15,23,42,0.35)] sm:grid-cols-4 sm:divide-x">
-      <Tile icon={<Building2 className="h-5 w-5" aria-hidden="true" />} label={t('detail.buildings')} value={buildings} />
-      <Tile icon={<Home className="h-5 w-5" aria-hidden="true" />} label={t('detail.units')} value={summary?.total ?? 0} />
+      <Tile icon={<Building2 className="h-5 w-5" aria-hidden="true" />} label={t('detail.buildings', 'Buildings')} value={buildings} />
+      <Tile icon={<Home className="h-5 w-5" aria-hidden="true" />} label={t('detail.units', 'Units')} value={summary?.total ?? 0} />
       <Tile
         icon={<KeyRound className="h-5 w-5" aria-hidden="true" />}
-        label={t('availability.available')}
+        label={t('availability.available', 'Available')}
         value={summary?.available ?? 0}
         accent
       />
-      <Tile icon={<Tag className="h-5 w-5" aria-hidden="true" />} label={t('units.from')} value={priceRange} />
+      <Tile icon={<Tag className="h-5 w-5" aria-hidden="true" />} label={t('units.from', 'From')} value={priceRange} />
     </div>
   );
 };
