@@ -432,7 +432,11 @@
       "clear": "Remove link",
       "loading": "Loading…",
       "noResults": "No matches.",
-      "search": "Search…"
+      "search": "Search…",
+      "unitFallback": "Unit {{id}}",
+      "searching": "Searching…",
+      "truncated": "Showing first {{n}} — type to search",
+      "refine": "Showing first {{n}} matches — keep typing to narrow down"
     },
     "notice": {
       "blocked": "Fix the highlighted regions before publishing.",
@@ -664,7 +668,13 @@
       "uploadedTitle": "Floorplan uploaded",
       "uploaded": "The floorplan is saved.",
       "badType": "Use a JPG, PNG or WebP image.",
-      "tooLarge": "The image must be 10 MB or smaller."
+      "tooLarge": "The image must be 10 MB or smaller.",
+      "remove": "Remove floor plan",
+      "removing": "Removing…",
+      "removeTitle": "Remove the floor plan?",
+      "removeMessage": "The floor plan image is removed from this unit.",
+      "removedTitle": "Floor plan removed",
+      "removed": "The unit no longer has a floor plan."
     },
     "listingStatus": {
       "active": "Active",
@@ -672,6 +682,25 @@
       "sold": "Sold",
       "rented": "Rented",
       "draft": "Draft"
+    },
+    "gallery": {
+      "title": "Photos",
+      "remaining": "{{used}} of {{max}} · {{remaining}} remaining",
+      "none": "No photos yet.",
+      "alt": "Unit photo {{n}}",
+      "remove": "Remove photo {{n}}",
+      "removeTitle": "Remove this photo?",
+      "removeMessage": "The photo is removed from the unit gallery and the explorer.",
+      "removeConfirm": "Remove photo",
+      "add": "Add photos",
+      "uploading": "Uploading…",
+      "uploadingStatus": "Uploading photos…",
+      "badType": "Use JPG, PNG, WebP or AVIF images.",
+      "tooLarge": "Each image must be 10 MB or smaller.",
+      "tooMany": "Add at most 10 photos at a time.",
+      "full": "A unit can have at most {{max}} photos. {{remaining}} more can be added.",
+      "addedTitle": "Photos added",
+      "added": "Photos added to the gallery: {{n}}."
     }
   },
   "manage": {
@@ -681,7 +710,8 @@
       "inventory": "Inventory",
       "explorer": "Interactive explorer",
       "listings": "Linked listings",
-      "settings": "Settings"
+      "settings": "Settings",
+      "activity": "Activity"
     },
     "overview": {
       "status": "Status",
@@ -707,12 +737,79 @@
       "detachedFrom": "Removed from unit {{number}}.",
       "detachAria": "Detach {{title}}",
       "none": "No linked listing",
-      "summary": "{{linked}} of {{count}} units on this page have a linked listing."
+      "summary": "{{linked}} of {{count}} units on this page have a linked listing.",
+      "attachToUnit": "Attach listing to a unit",
+      "pickUnitTitle": "Attach a listing to a unit",
+      "pickUnitResults": "Units",
+      "pickUnitMore": "Showing {{shown}} of {{total}} units. Search by unit number to narrow down.",
+      "linkedCount": "Linked listings: {{n}}",
+      "searchLinked": "Search units with linked listings",
+      "noneLinked": "No unit has a linked listing yet.",
+      "noneLinkedHint": "Attach one of your listings to a unit so buyers can open it from the explorer.",
+      "linkedTotal": "Units with a linked listing: {{n}}"
     },
     "settings": {
       "heading": "Explorer settings",
       "allowInquiries": "Accept inquiries for units without a listing",
       "allowInquiriesHint": "Buyers can contact you from the apartment drawer. Inquiries arrive in your inbox."
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "subtitle": "Every change your team made to this residence, newest first.",
+    "filterLabel": "Filter activity",
+    "filters": {
+      "all": "All",
+      "units": "Units",
+      "prices": "Prices",
+      "explorer": "Explorer",
+      "listings": "Listings",
+      "structure": "Structure"
+    },
+    "unknownActor": "Unknown user",
+    "loadFailed": "Could not load the activity.",
+    "loadMoreFailed": "Could not load more activity. Try again.",
+    "empty": "No activity yet.",
+    "emptyFiltered": "Nothing in this category yet.",
+    "showing": "Showing {{shown}} of {{total}}",
+    "loadMore": "Load more",
+    "detail": {
+      "photosAdded": "Photos added: {{n}}",
+      "photoRemoved": "Photo removed",
+      "floorplanUploaded": "Floor plan uploaded",
+      "floorplanRemoved": "Floor plan removed",
+      "unitNumber": "Unit {{number}}",
+      "unitsUpdated": "Units updated: {{n}}",
+      "regions": "Regions: {{n}}",
+      "fields": "Changed: {{fields}}"
+    },
+    "actions": {
+      "listing_attach": "Attached a listing",
+      "listing_detach": "Detached a listing",
+      "availability_change": "Changed availability",
+      "price_change": "Changed price",
+      "unit_create": "Created unit",
+      "unit_update": "Updated unit",
+      "unit_delete": "Deleted unit",
+      "unit_bulk_update": "Bulk-updated units",
+      "floor_create": "Added floor",
+      "floor_update": "Updated floor",
+      "building_create": "Added building",
+      "building_update": "Updated building",
+      "scene_upload": "Uploaded explorer image",
+      "scene_update": "Updated explorer view",
+      "scene_draft": "Saved explorer draft",
+      "scene_publish": "Published explorer view",
+      "scene_unpublish": "Unpublished explorer view",
+      "scene_delete": "Deleted explorer view",
+      "development_create": "Created development",
+      "development_update": "Updated development",
+      "development_publish": "Changed publication status",
+      "development_delete": "Deleted development",
+      "membership_grant": "Added team member",
+      "membership_revoke": "Removed team member",
+      "claim_create": "Requested attachment",
+      "claim_review": "Reviewed attachment request"
     }
   }
 }

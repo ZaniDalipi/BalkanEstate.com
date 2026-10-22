@@ -434,7 +434,11 @@
       "clear": "Elimină legătura",
       "loading": "Se încarcă…",
       "noResults": "Niciun rezultat.",
-      "search": "Caută…"
+      "search": "Caută…",
+      "unitFallback": "Unitatea {{id}}",
+      "searching": "Se caută…",
+      "truncated": "Se afișează primele {{n}} — tastați pentru a căuta",
+      "refine": "Se afișează primele {{n}} rezultate — continuați să tastați pentru a restrânge"
     },
     "notice": {
       "blocked": "Corectați zonele evidențiate înainte de publicare.",
@@ -666,7 +670,13 @@
       "uploadedTitle": "Plan încărcat",
       "uploaded": "Planul a fost salvat.",
       "badType": "Folosiți o imagine JPG, PNG sau WebP.",
-      "tooLarge": "Imaginea trebuie să aibă cel mult 10 MB."
+      "tooLarge": "Imaginea trebuie să aibă cel mult 10 MB.",
+      "remove": "Elimină planul",
+      "removing": "Se elimină…",
+      "removeTitle": "Elimini planul?",
+      "removeMessage": "Imaginea planului este eliminată de la această unitate.",
+      "removedTitle": "Plan eliminat",
+      "removed": "Unitatea nu mai are un plan."
     },
     "listingStatus": {
       "active": "Activ",
@@ -674,6 +684,25 @@
       "sold": "Vândut",
       "rented": "Închiriat",
       "draft": "Ciornă"
+    },
+    "gallery": {
+      "title": "Fotografii",
+      "remaining": "{{used}} din {{max}} · mai rămân {{remaining}}",
+      "none": "Încă nu există fotografii.",
+      "alt": "Fotografia unității {{n}}",
+      "remove": "Elimină fotografia {{n}}",
+      "removeTitle": "Elimini această fotografie?",
+      "removeMessage": "Fotografia este eliminată din galeria unității și din explorator.",
+      "removeConfirm": "Elimină fotografia",
+      "add": "Adaugă fotografii",
+      "uploading": "Se încarcă…",
+      "uploadingStatus": "Se încarcă fotografiile…",
+      "badType": "Folosiți imagini JPG, PNG, WebP sau AVIF.",
+      "tooLarge": "Fiecare imagine trebuie să aibă cel mult 10 MB.",
+      "tooMany": "Adăugați cel mult 10 fotografii odată.",
+      "full": "O unitate poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
+      "addedTitle": "Fotografii adăugate",
+      "added": "Fotografii adăugate în galerie: {{n}}."
     }
   },
   "manage": {
@@ -683,7 +712,8 @@
       "inventory": "Inventar",
       "explorer": "Explorator interactiv",
       "listings": "Anunțuri asociate",
-      "settings": "Setări"
+      "settings": "Setări",
+      "activity": "Activitate"
     },
     "overview": {
       "status": "Stare",
@@ -709,12 +739,79 @@
       "detachedFrom": "Eliminat din unitatea {{number}}.",
       "detachAria": "Dezasociază {{title}}",
       "none": "Niciun anunț asociat",
-      "summary": "{{linked}} din {{count}} unități de pe această pagină au un anunț asociat."
+      "summary": "{{linked}} din {{count}} unități de pe această pagină au un anunț asociat.",
+      "attachToUnit": "Atașează un anunț la o unitate",
+      "pickUnitTitle": "Atașați un anunț la o unitate",
+      "pickUnitResults": "Unități",
+      "pickUnitMore": "Se afișează {{shown}} din {{total}} unități. Căutați după numărul unității pentru a restrânge.",
+      "linkedCount": "Anunțuri atașate: {{n}}",
+      "searchLinked": "Caută unități cu anunțuri atașate",
+      "noneLinked": "Nicio unitate nu are încă un anunț atașat.",
+      "noneLinkedHint": "Atașați unul dintre anunțurile dvs. la o unitate, ca cumpărătorii să îl poată deschide din explorator.",
+      "linkedTotal": "Unități cu anunț atașat: {{n}}"
     },
     "settings": {
       "heading": "Setări explorator",
       "allowInquiries": "Acceptă solicitări pentru unități fără anunț",
       "allowInquiriesHint": "Cumpărătorii vă pot contacta din panoul apartamentului. Solicitările ajung în inboxul dvs."
+    }
+  },
+  "activity": {
+    "title": "Activitate",
+    "subtitle": "Toate modificările făcute de echipa dvs. la această rezidență, cele mai noi primele.",
+    "filterLabel": "Filtrează activitatea",
+    "filters": {
+      "all": "Toate",
+      "units": "Unități",
+      "prices": "Prețuri",
+      "explorer": "Explorator",
+      "listings": "Anunțuri",
+      "structure": "Structură"
+    },
+    "unknownActor": "Utilizator necunoscut",
+    "loadFailed": "Activitatea nu a putut fi încărcată.",
+    "loadMoreFailed": "Nu s-a putut încărca mai multă activitate. Încercați din nou.",
+    "empty": "Încă nu există activitate.",
+    "emptyFiltered": "Încă nimic în această categorie.",
+    "showing": "Se afișează {{shown}} din {{total}}",
+    "loadMore": "Încarcă mai multe",
+    "detail": {
+      "photosAdded": "Fotografii adăugate: {{n}}",
+      "photoRemoved": "Fotografie eliminată",
+      "floorplanUploaded": "Plan încărcat",
+      "floorplanRemoved": "Plan eliminat",
+      "unitNumber": "Unitatea {{number}}",
+      "unitsUpdated": "Unități actualizate: {{n}}",
+      "regions": "Zone: {{n}}",
+      "fields": "Modificat: {{fields}}"
+    },
+    "actions": {
+      "listing_attach": "A atașat un anunț",
+      "listing_detach": "A detașat un anunț",
+      "availability_change": "A modificat disponibilitatea",
+      "price_change": "A modificat prețul",
+      "unit_create": "A creat o unitate",
+      "unit_update": "A actualizat unitatea",
+      "unit_delete": "A șters unitatea",
+      "unit_bulk_update": "A actualizat unități în bloc",
+      "floor_create": "A adăugat un etaj",
+      "floor_update": "A actualizat etajul",
+      "building_create": "A adăugat o clădire",
+      "building_update": "A actualizat clădirea",
+      "scene_upload": "A încărcat o imagine în explorator",
+      "scene_update": "A actualizat o vedere din explorator",
+      "scene_draft": "A salvat o ciornă în explorator",
+      "scene_publish": "A publicat o vedere din explorator",
+      "scene_unpublish": "A retras publicarea unei vederi din explorator",
+      "scene_delete": "A șters o vedere din explorator",
+      "development_create": "A creat proiectul",
+      "development_update": "A actualizat proiectul",
+      "development_publish": "A modificat starea publicării",
+      "development_delete": "A șters proiectul",
+      "membership_grant": "A adăugat un membru în echipă",
+      "membership_revoke": "A eliminat un membru din echipă",
+      "claim_create": "A solicitat atașarea",
+      "claim_review": "A analizat cererea de atașare"
     }
   }
 }

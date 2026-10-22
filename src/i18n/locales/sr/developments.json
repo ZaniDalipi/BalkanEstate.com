@@ -434,7 +434,11 @@
       "clear": "Ukloni vezu",
       "loading": "Učitavanje…",
       "noResults": "Nema rezultata.",
-      "search": "Pretraži…"
+      "search": "Pretraži…",
+      "unitFallback": "Јединица {{id}}",
+      "searching": "Претрага…",
+      "truncated": "Приказано првих {{n}} — куцајте за претрагу",
+      "refine": "Приказано првих {{n}} резултата — наставите да куцате да сузите избор"
     },
     "notice": {
       "blocked": "Ispravite označene zone pre objave.",
@@ -666,7 +670,13 @@
       "uploadedTitle": "Тлоцрт отпремљен",
       "uploaded": "Тлоцрт је сачуван.",
       "badType": "Користите JPG, PNG или WebP слику.",
-      "tooLarge": "Слика мора бити 10 MB или мања."
+      "tooLarge": "Слика мора бити 10 MB или мања.",
+      "remove": "Уклони основу",
+      "removing": "Уклањање…",
+      "removeTitle": "Уклонити основу?",
+      "removeMessage": "Слика основе се уклања са ове јединице.",
+      "removedTitle": "Основа уклоњена",
+      "removed": "Јединица више нема основу."
     },
     "listingStatus": {
       "active": "Активан",
@@ -674,6 +684,25 @@
       "sold": "Продато",
       "rented": "Изнајмљено",
       "draft": "Нацрт"
+    },
+    "gallery": {
+      "title": "Фотографије",
+      "remaining": "{{used}} од {{max}} · преостало {{remaining}}",
+      "none": "Још нема фотографија.",
+      "alt": "Фотографија јединице {{n}}",
+      "remove": "Уклони фотографију {{n}}",
+      "removeTitle": "Уклонити ову фотографију?",
+      "removeMessage": "Фотографија се уклања из галерије јединице и из прегледача.",
+      "removeConfirm": "Уклони фотографију",
+      "add": "Додај фотографије",
+      "uploading": "Отпремање…",
+      "uploadingStatus": "Отпремање фотографија…",
+      "badType": "Користите JPG, PNG, WebP или AVIF слике.",
+      "tooLarge": "Свака слика мора имати највише 10 MB.",
+      "tooMany": "Додајте највише 10 фотографија одједном.",
+      "full": "Јединица може имати највише {{max}} фотографија. Може се додати још {{remaining}}.",
+      "addedTitle": "Фотографије додате",
+      "added": "Фотографија додато у галерију: {{n}}."
     }
   },
   "manage": {
@@ -683,7 +712,8 @@
       "inventory": "Инвентар",
       "explorer": "Интерактивни прегледач",
       "listings": "Повезани огласи",
-      "settings": "Подешавања"
+      "settings": "Подешавања",
+      "activity": "Активност"
     },
     "overview": {
       "status": "Статус",
@@ -709,12 +739,79 @@
       "detachedFrom": "Уклоњено из јединице {{number}}.",
       "detachAria": "Одвоји {{title}}",
       "none": "Нема повезаног огласа",
-      "summary": "{{linked}} од {{count}} јединица на овој страници има повезан оглас."
+      "summary": "{{linked}} од {{count}} јединица на овој страници има повезан оглас.",
+      "attachToUnit": "Повежи оглас са јединицом",
+      "pickUnitTitle": "Повежите оглас са јединицом",
+      "pickUnitResults": "Јединице",
+      "pickUnitMore": "Приказано {{shown}} од {{total}} јединица. Претражите по броју јединице да сузите избор.",
+      "linkedCount": "Повезани огласи: {{n}}",
+      "searchLinked": "Претражи јединице са повезаним огласима",
+      "noneLinked": "Ниједна јединица још нема повезан оглас.",
+      "noneLinkedHint": "Повежите један од својих огласа са јединицом како би га купци могли отворити из прегледача.",
+      "linkedTotal": "Јединице са повезаним огласом: {{n}}"
     },
     "settings": {
       "heading": "Подешавања истраживача",
       "allowInquiries": "Примај упите за јединице без огласа",
       "allowInquiriesHint": "Купци вас могу контактирати из панела стана. Упити стижу у ваше сандуче."
+    }
+  },
+  "activity": {
+    "title": "Активност",
+    "subtitle": "Све промене које је ваш тим направио на овој резиденцији, најновије прве.",
+    "filterLabel": "Филтрирај активност",
+    "filters": {
+      "all": "Све",
+      "units": "Јединице",
+      "prices": "Цене",
+      "explorer": "Прегледач",
+      "listings": "Огласи",
+      "structure": "Структура"
+    },
+    "unknownActor": "Непознат корисник",
+    "loadFailed": "Активност није могуће учитати.",
+    "loadMoreFailed": "Није могуће учитати још активности. Покушајте поново.",
+    "empty": "Још нема активности.",
+    "emptyFiltered": "Још ништа у овој категорији.",
+    "showing": "Приказано {{shown}} од {{total}}",
+    "loadMore": "Учитај још",
+    "detail": {
+      "photosAdded": "Додато фотографија: {{n}}",
+      "photoRemoved": "Фотографија уклоњена",
+      "floorplanUploaded": "Основа отпремљена",
+      "floorplanRemoved": "Основа уклоњена",
+      "unitNumber": "Јединица {{number}}",
+      "unitsUpdated": "Ажурирано јединица: {{n}}",
+      "regions": "Регије: {{n}}",
+      "fields": "Промењено: {{fields}}"
+    },
+    "actions": {
+      "listing_attach": "Повезао оглас",
+      "listing_detach": "Уклонио везу са огласом",
+      "availability_change": "Променио доступност",
+      "price_change": "Променио цену",
+      "unit_create": "Креирао јединицу",
+      "unit_update": "Ажурирао јединицу",
+      "unit_delete": "Обрисао јединицу",
+      "unit_bulk_update": "Групно ажурирао јединице",
+      "floor_create": "Додао спрат",
+      "floor_update": "Ажурирао спрат",
+      "building_create": "Додао зграду",
+      "building_update": "Ажурирао зграду",
+      "scene_upload": "Отпремио слику прегледача",
+      "scene_update": "Ажурирао приказ прегледача",
+      "scene_draft": "Сачувао нацрт прегледача",
+      "scene_publish": "Објавио приказ прегледача",
+      "scene_unpublish": "Повукао објаву приказа прегледача",
+      "scene_delete": "Обрисао приказ прегледача",
+      "development_create": "Креирао пројекат",
+      "development_update": "Ажурирао пројекат",
+      "development_publish": "Променио статус објаве",
+      "development_delete": "Обрисао пројекат",
+      "membership_grant": "Додао члана тима",
+      "membership_revoke": "Уклонио члана тима",
+      "claim_create": "Затражио повезивање",
+      "claim_review": "Прегледао захтев за повезивање"
     }
   }
 }

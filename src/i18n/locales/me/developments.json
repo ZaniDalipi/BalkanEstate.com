@@ -434,7 +434,11 @@
       "clear": "Ukloni vezu",
       "loading": "Učitavanje…",
       "noResults": "Nema rezultata.",
-      "search": "Pretraži…"
+      "search": "Pretraži…",
+      "unitFallback": "Jedinica {{id}}",
+      "searching": "Pretraga…",
+      "truncated": "Prikazano prvih {{n}} — kucajte za pretragu",
+      "refine": "Prikazano prvih {{n}} rezultata — nastavite da kucate da suzite izbor"
     },
     "notice": {
       "blocked": "Ispravite označene zone prije objave.",
@@ -666,7 +670,13 @@
       "uploadedTitle": "Tlocrt otpremljen",
       "uploaded": "Tlocrt je sačuvan.",
       "badType": "Koristite JPG, PNG ili WebP sliku.",
-      "tooLarge": "Slika mora biti 10 MB ili manja."
+      "tooLarge": "Slika mora biti 10 MB ili manja.",
+      "remove": "Ukloni tlocrt",
+      "removing": "Uklanjanje…",
+      "removeTitle": "Ukloniti tlocrt?",
+      "removeMessage": "Slika tlocrta se uklanja sa ove jedinice.",
+      "removedTitle": "Tlocrt uklonjen",
+      "removed": "Jedinica više nema tlocrt."
     },
     "listingStatus": {
       "active": "Aktivan",
@@ -674,6 +684,25 @@
       "sold": "Prodato",
       "rented": "Iznajmljeno",
       "draft": "Nacrt"
+    },
+    "gallery": {
+      "title": "Fotografije",
+      "remaining": "{{used}} od {{max}} · preostalo {{remaining}}",
+      "none": "Još nema fotografija.",
+      "alt": "Fotografija jedinice {{n}}",
+      "remove": "Ukloni fotografiju {{n}}",
+      "removeTitle": "Ukloniti ovu fotografiju?",
+      "removeMessage": "Fotografija se uklanja iz galerije jedinice i iz preglednika.",
+      "removeConfirm": "Ukloni fotografiju",
+      "add": "Dodaj fotografije",
+      "uploading": "Otpremanje…",
+      "uploadingStatus": "Otpremanje fotografija…",
+      "badType": "Koristite JPG, PNG, WebP ili AVIF slike.",
+      "tooLarge": "Svaka slika mora imati najviše 10 MB.",
+      "tooMany": "Dodajte najviše 10 fotografija odjednom.",
+      "full": "Jedinica može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
+      "addedTitle": "Fotografije dodate",
+      "added": "Fotografija dodato u galeriju: {{n}}."
     }
   },
   "manage": {
@@ -683,7 +712,8 @@
       "inventory": "Inventar",
       "explorer": "Interaktivni preglednik",
       "listings": "Povezani oglasi",
-      "settings": "Podešavanja"
+      "settings": "Podešavanja",
+      "activity": "Aktivnost"
     },
     "overview": {
       "status": "Status",
@@ -709,12 +739,79 @@
       "detachedFrom": "Uklonjeno iz jedinice {{number}}.",
       "detachAria": "Odvoji {{title}}",
       "none": "Nema povezanog oglasa",
-      "summary": "{{linked}} od {{count}} jedinica na ovoj stranici ima povezan oglas."
+      "summary": "{{linked}} od {{count}} jedinica na ovoj stranici ima povezan oglas.",
+      "attachToUnit": "Poveži oglas sa jedinicom",
+      "pickUnitTitle": "Povežite oglas sa jedinicom",
+      "pickUnitResults": "Jedinice",
+      "pickUnitMore": "Prikazano {{shown}} od {{total}} jedinica. Pretražite po broju jedinice da suzite izbor.",
+      "linkedCount": "Povezani oglasi: {{n}}",
+      "searchLinked": "Pretraži jedinice sa povezanim oglasima",
+      "noneLinked": "Nijedna jedinica još nema povezan oglas.",
+      "noneLinkedHint": "Povežite jedan od svojih oglasa sa jedinicom kako bi ga kupci mogli otvoriti iz preglednika.",
+      "linkedTotal": "Jedinice sa povezanim oglasom: {{n}}"
     },
     "settings": {
       "heading": "Podešavanja istraživača",
       "allowInquiries": "Primaj upite za jedinice bez oglasa",
       "allowInquiriesHint": "Kupci vas mogu kontaktirati iz panela stana. Upiti stižu u vaše sanduče."
+    }
+  },
+  "activity": {
+    "title": "Aktivnost",
+    "subtitle": "Sve promjene koje je vaš tim napravio na ovoj rezidenciji, najnovije prve.",
+    "filterLabel": "Filtriraj aktivnost",
+    "filters": {
+      "all": "Sve",
+      "units": "Jedinice",
+      "prices": "Cijene",
+      "explorer": "Preglednik",
+      "listings": "Oglasi",
+      "structure": "Struktura"
+    },
+    "unknownActor": "Nepoznat korisnik",
+    "loadFailed": "Aktivnost nije moguće učitati.",
+    "loadMoreFailed": "Nije moguće učitati još aktivnosti. Pokušajte ponovo.",
+    "empty": "Još nema aktivnosti.",
+    "emptyFiltered": "Još ništa u ovoj kategoriji.",
+    "showing": "Prikazano {{shown}} od {{total}}",
+    "loadMore": "Učitaj još",
+    "detail": {
+      "photosAdded": "Dodato fotografija: {{n}}",
+      "photoRemoved": "Fotografija uklonjena",
+      "floorplanUploaded": "Tlocrt otpremljen",
+      "floorplanRemoved": "Tlocrt uklonjen",
+      "unitNumber": "Jedinica {{number}}",
+      "unitsUpdated": "Ažurirano jedinica: {{n}}",
+      "regions": "Regije: {{n}}",
+      "fields": "Promijenjeno: {{fields}}"
+    },
+    "actions": {
+      "listing_attach": "Povezao oglas",
+      "listing_detach": "Uklonio vezu sa oglasom",
+      "availability_change": "Promijenio dostupnost",
+      "price_change": "Promijenio cijenu",
+      "unit_create": "Kreirao jedinicu",
+      "unit_update": "Ažurirao jedinicu",
+      "unit_delete": "Obrisao jedinicu",
+      "unit_bulk_update": "Grupno ažurirao jedinice",
+      "floor_create": "Dodao sprat",
+      "floor_update": "Ažurirao sprat",
+      "building_create": "Dodao zgradu",
+      "building_update": "Ažurirao zgradu",
+      "scene_upload": "Otpremio sliku preglednika",
+      "scene_update": "Ažurirao prikaz preglednika",
+      "scene_draft": "Sačuvao nacrt preglednika",
+      "scene_publish": "Objavio prikaz preglednika",
+      "scene_unpublish": "Povukao objavu prikaza preglednika",
+      "scene_delete": "Obrisao prikaz preglednika",
+      "development_create": "Kreirao projekat",
+      "development_update": "Ažurirao projekat",
+      "development_publish": "Promijenio status objave",
+      "development_delete": "Obrisao projekat",
+      "membership_grant": "Dodao člana tima",
+      "membership_revoke": "Uklonio člana tima",
+      "claim_create": "Zatražio povezivanje",
+      "claim_review": "Pregledao zahtjev za povezivanje"
     }
   }
 }

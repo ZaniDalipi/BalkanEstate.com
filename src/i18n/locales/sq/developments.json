@@ -432,7 +432,11 @@
       "clear": "Hiq lidhjen",
       "loading": "Duke ngarkuar…",
       "noResults": "Asnjë përputhje.",
-      "search": "Kërko…"
+      "search": "Kërko…",
+      "unitFallback": "Njësia {{id}}",
+      "searching": "Duke kërkuar…",
+      "truncated": "Shfaqen {{n}} të parat — shkruani për të kërkuar",
+      "refine": "Shfaqen {{n}} përputhjet e para — vazhdoni të shkruani për të ngushtuar kërkimin"
     },
     "notice": {
       "blocked": "Rregulloni zonat e theksuara para publikimit.",
@@ -664,7 +668,13 @@
       "uploadedTitle": "Planimetria u ngarkua",
       "uploaded": "Planimetria u ruajt.",
       "badType": "Përdorni një imazh JPG, PNG ose WebP.",
-      "tooLarge": "Imazhi duhet të jetë 10 MB ose më i vogël."
+      "tooLarge": "Imazhi duhet të jetë 10 MB ose më i vogël.",
+      "remove": "Hiq planimetrinë",
+      "removing": "Po hiqet…",
+      "removeTitle": "Të hiqet planimetria?",
+      "removeMessage": "Imazhi i planimetrisë hiqet nga kjo njësi.",
+      "removedTitle": "Planimetria u hoq",
+      "removed": "Njësia nuk ka më planimetri."
     },
     "listingStatus": {
       "active": "Aktive",
@@ -672,6 +682,25 @@
       "sold": "Shitur",
       "rented": "Dhënë me qira",
       "draft": "Draft"
+    },
+    "gallery": {
+      "title": "Fotot",
+      "remaining": "{{used}} nga {{max}} · edhe {{remaining}}",
+      "none": "Ende nuk ka foto.",
+      "alt": "Foto e njësisë {{n}}",
+      "remove": "Hiq foton {{n}}",
+      "removeTitle": "Të hiqet kjo foto?",
+      "removeMessage": "Fotoja hiqet nga galeria e njësisë dhe nga eksploruesi.",
+      "removeConfirm": "Hiq foton",
+      "add": "Shto foto",
+      "uploading": "Po ngarkohet…",
+      "uploadingStatus": "Po ngarkohen fotot…",
+      "badType": "Përdorni imazhe JPG, PNG, WebP ose AVIF.",
+      "tooLarge": "Çdo imazh duhet të jetë deri në 10 MB.",
+      "tooMany": "Shtoni deri në 10 foto njëherësh.",
+      "full": "Një njësi mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
+      "addedTitle": "Fotot u shtuan",
+      "added": "Foto të shtuara në galeri: {{n}}."
     }
   },
   "manage": {
@@ -681,7 +710,8 @@
       "inventory": "Inventari",
       "explorer": "Eksplorues interaktiv",
       "listings": "Shpalljet e lidhura",
-      "settings": "Cilësimet"
+      "settings": "Cilësimet",
+      "activity": "Aktiviteti"
     },
     "overview": {
       "status": "Statusi",
@@ -707,12 +737,79 @@
       "detachedFrom": "U hoq nga njësia {{number}}.",
       "detachAria": "Shkëput {{title}}",
       "none": "Asnjë shpallje e lidhur",
-      "summary": "{{linked}} nga {{count}} njësi në këtë faqe kanë një shpallje të lidhur."
+      "summary": "{{linked}} nga {{count}} njësi në këtë faqe kanë një shpallje të lidhur.",
+      "attachToUnit": "Lidh një shpallje me një njësi",
+      "pickUnitTitle": "Lidh një shpallje me një njësi",
+      "pickUnitResults": "Njësitë",
+      "pickUnitMore": "Shfaqen {{shown}} nga {{total}} njësi. Kërkoni sipas numrit të njësisë për të ngushtuar.",
+      "linkedCount": "Shpallje të lidhura: {{n}}",
+      "searchLinked": "Kërko njësi me shpallje të lidhura",
+      "noneLinked": "Asnjë njësi nuk ka ende shpallje të lidhur.",
+      "noneLinkedHint": "Lidhni një nga shpalljet tuaja me një njësi që blerësit ta hapin nga eksploruesi.",
+      "linkedTotal": "Njësi me shpallje të lidhur: {{n}}"
     },
     "settings": {
       "heading": "Cilësimet e eksploruesit",
       "allowInquiries": "Prano kërkesa për njësi pa shpallje",
       "allowInquiriesHint": "Blerësit mund t'ju kontaktojnë nga paneli i apartamentit. Kërkesat vijnë në kutinë tuaj."
+    }
+  },
+  "activity": {
+    "title": "Aktiviteti",
+    "subtitle": "Çdo ndryshim që ekipi juaj ka bërë në këtë rezidencë, më të rejat në fillim.",
+    "filterLabel": "Filtro aktivitetin",
+    "filters": {
+      "all": "Të gjitha",
+      "units": "Njësitë",
+      "prices": "Çmimet",
+      "explorer": "Eksploruesi",
+      "listings": "Shpalljet",
+      "structure": "Struktura"
+    },
+    "unknownActor": "Përdorues i panjohur",
+    "loadFailed": "Aktiviteti nuk u ngarkua.",
+    "loadMoreFailed": "Nuk u ngarkua më shumë aktivitet. Provoni përsëri.",
+    "empty": "Ende nuk ka aktivitet.",
+    "emptyFiltered": "Ende asgjë në këtë kategori.",
+    "showing": "Shfaqen {{shown}} nga {{total}}",
+    "loadMore": "Ngarko më shumë",
+    "detail": {
+      "photosAdded": "Foto të shtuara: {{n}}",
+      "photoRemoved": "Foto u hoq",
+      "floorplanUploaded": "Planimetria u ngarkua",
+      "floorplanRemoved": "Planimetria u hoq",
+      "unitNumber": "Njësia {{number}}",
+      "unitsUpdated": "Njësi të përditësuara: {{n}}",
+      "regions": "Zona: {{n}}",
+      "fields": "Ndryshuar: {{fields}}"
+    },
+    "actions": {
+      "listing_attach": "Lidhi një shpallje",
+      "listing_detach": "Shkëputi një shpallje",
+      "availability_change": "Ndryshoi disponueshmërinë",
+      "price_change": "Ndryshoi çmimin",
+      "unit_create": "Krijoi njësi",
+      "unit_update": "Përditësoi njësinë",
+      "unit_delete": "Fshiu njësinë",
+      "unit_bulk_update": "Përditësoi njësi në masë",
+      "floor_create": "Shtoi kat",
+      "floor_update": "Përditësoi katin",
+      "building_create": "Shtoi ndërtesë",
+      "building_update": "Përditësoi ndërtesën",
+      "scene_upload": "Ngarkoi imazh të eksploruesit",
+      "scene_update": "Përditësoi pamjen e eksploruesit",
+      "scene_draft": "Ruajti draftin e eksploruesit",
+      "scene_publish": "Publikoi pamjen e eksploruesit",
+      "scene_unpublish": "Hoqi nga publikimi pamjen e eksploruesit",
+      "scene_delete": "Fshiu pamjen e eksploruesit",
+      "development_create": "Krijoi projektin",
+      "development_update": "Përditësoi projektin",
+      "development_publish": "Ndryshoi statusin e publikimit",
+      "development_delete": "Fshiu projektin",
+      "membership_grant": "Shtoi anëtar ekipi",
+      "membership_revoke": "Hoqi anëtar ekipi",
+      "claim_create": "Kërkoi lidhje",
+      "claim_review": "Shqyrtoi kërkesën për lidhje"
     }
   }
 }
