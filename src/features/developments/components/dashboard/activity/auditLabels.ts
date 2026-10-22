@@ -38,6 +38,37 @@ export const ACTION_LABELS: Record<string, string> = {
 export const actionKey = (action: string) => `activity.actions.${action.replace(/\./g, '_')}`;
 
 /** Human-readable label of an action; unknown actions show as recorded. */
+/**
+ * Field → [i18n key, English default], reusing the unit editor's labels so the
+ * Activity tab names fields the same way the form does.
+ */
+const FIELD_LABELS: Record<string, [string, string]> = {
+  unitNumber: ['unit.number', 'Unit number'],
+  unitType: ['unit.type', 'Type'],
+  beds: ['unit.beds', 'Beds'],
+  baths: ['unit.baths', 'Baths'],
+  livingRooms: ['inventory.edit.livingRooms', 'Living rooms'],
+  netArea: ['inventory.edit.netArea', 'Internal area'],
+  totalArea: ['inventory.edit.totalArea', 'Total area'],
+  externalArea: ['inventory.edit.externalArea', 'External area'],
+  terraceArea: ['inventory.edit.terraceArea', 'Terrace area'],
+  balconies: ['inventory.edit.balconies', 'Balconies'],
+  terraces: ['inventory.edit.terraces', 'Terraces'],
+  orientation: ['unit.orientation', 'Orientation'],
+  viewType: ['inventory.edit.viewType', 'View'],
+  price: ['unit.price', 'Price'],
+  currency: ['inventory.edit.currency', 'Currency'],
+  pricePerSqm: ['inventory.edit.pricePerSqm', 'Price per m²'],
+  priceVisibility: ['inventory.edit.priceVisibility', 'Price shown to buyers'],
+  features: ['inventory.edit.features', 'Features'],
+  description: ['inventory.edit.description', 'Description'],
+};
+
+const fieldLabel = (t: TFunction, field: string): string => {
+  const entry = FIELD_LABELS[field];
+  return entry ? String(t(entry[0], entry[1])) : field;
+};
+
 export const actionLabel = (t: TFunction, action: string): string =>
   action in ACTION_LABELS ? String(t(actionKey(action), ACTION_LABELS[action])) : action;
 
@@ -82,7 +113,7 @@ export function entryDetail(t: TFunction, entry: AuditEntry, locale = 'en'): str
   }
   if (isObj(m.changes)) {
     const fields = Object.keys(m.changes);
-    if (fields.length > 0) return String(t('activity.detail.fields', 'Changed: {{fields}}', { fields: fields.join(', ') }));
+    if (fields.length > 0) return String(t('activity.detail.fields', 'Changed: {{fields}}', { fields: fields.map((f) => fieldLabel(t, f)).join(', ') }));
   }
   return null;
 }
