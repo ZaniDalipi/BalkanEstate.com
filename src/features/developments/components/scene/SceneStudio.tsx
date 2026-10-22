@@ -11,6 +11,8 @@ import { useConfirmDiscard } from './editor/useUnsavedGuard';
 
 interface SceneStudioProps {
   developmentId: string;
+  /** Reports unsaved region edits so a parent can guard its own navigation (e.g. tabs). */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 interface TargetOption {
@@ -29,7 +31,7 @@ const byOrder = (a: Scene, b: Scene) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) 
  * or add one of its camera views, then draw regions with {@link SceneEditor}.
  * Switching target or view with unsaved edits asks first.
  */
-export const SceneStudio: React.FC<SceneStudioProps> = ({ developmentId }) => {
+export const SceneStudio: React.FC<SceneStudioProps> = ({ developmentId, onDirtyChange: reportDirty }) => {
   const { t } = useTranslation('developments');
   const { buildings, floors } = useDevelopmentStructure(developmentId);
   const { scenes } = useScenes(developmentId);
@@ -67,10 +69,14 @@ export const SceneStudio: React.FC<SceneStudioProps> = ({ developmentId }) => {
   const views = viewsByTarget.get(active.key) ?? [];
   const scene = views.find((v) => v.id === activeSceneId) ?? views[0] ?? null;
 
-  const onDirtyChange = useCallback((d: boolean) => {
-    dirtyRef.current = d;
-    setDirty(d);
-  }, []);
+  const onDirtyChange = useCallback(
+    (d: boolean) => {
+      dirtyRef.current = d;
+      setDirty(d);
+      reportDirty?.(d);
+    },
+    [reportDirty]
+  );
 
   /** Run a switch only after the owner agreed to drop unsaved edits (if any). */
   const guarded = async (fn: () => void) => {

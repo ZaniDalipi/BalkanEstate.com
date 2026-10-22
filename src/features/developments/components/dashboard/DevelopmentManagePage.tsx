@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
@@ -8,6 +8,7 @@ import { useMyDevelopment } from '../../hooks/useDevelopment';
 import { StatusPill } from '../shared/Badges';
 import { LoadingState, ErrorState } from '../shared/States';
 import { SceneStudio } from '../scene/SceneStudio';
+import { useConfirmDiscard } from '../scene/editor/useUnsavedGuard';
 import { QuickAddInventory } from './inventory/QuickAddInventory';
 import { InventoryTable } from './inventory/InventoryTable';
 import { roleCan } from './inventory/permissions';
@@ -30,6 +31,18 @@ const DevelopmentManagePage: React.FC = () => {
   const { id } = useParams();
   const { development, role, isLoading, error, refetch } = useMyDevelopment(id);
   const [tab, setTab] = useTabParam<TabId>(TAB_IDS);
+  // Leaving the explorer tab unmounts the editor, so ask before dropping unsaved region edits.
+  const explorerDirty = useRef(false);
+  const confirmDiscard = useConfirmDiscard();
+  const onExplorerDirty = useCallback((d: boolean) => {
+    explorerDirty.current = d;
+  }, []);
+  const selectTab = async (next: TabId) => {
+    if (next === tab) return;
+    if (tab === 'explorer' && explorerDirty.current && !(await confirmDiscard())) return;
+    explorerDirty.current = false;
+    setTab(next);
+  };
 
   if (isLoading) {
     return (
@@ -91,7 +104,7 @@ const DevelopmentManagePage: React.FC = () => {
         </p>
       </header>
 
-      <ManageTabs tabs={tabs} active={tab} onSelect={setTab} label={t('manage.tabs.label', 'Manage development')} idPrefix={PREFIX} />
+      <ManageTabs tabs={tabs} active={tab} onSelect={selectTab} label={t('manage.tabs.label', 'Manage development')} idPrefix={PREFIX} />
 
       {panel('overview', <OverviewPanel development={development} canPublish={roleCan(role, 'publish')} />)}
       {panel(
@@ -118,7 +131,7 @@ const DevelopmentManagePage: React.FC = () => {
             {t('scene.heading', 'Interactive map')}
           </h2>
           <p className="mb-3 text-sm text-slate-600">{t('scene.subtitle', 'Draw clickable regions on your images.')}</p>
-          <SceneStudio developmentId={development.id} />
+          <SceneStudio developmentId={development.id} onDirtyChange={onExplorerDirty} />
         </section>
       )}
       {panel('listings', <LinkedListingsPanel developmentId={development.id} role={role} />)}
