@@ -262,7 +262,128 @@
     "matchCount_other": "{{count}} banesa"
   },
   "explorer": {
-    "hide": "Fshih"
+    "hide": "Fshih",
+    "apt": "Apt",
+    "comingSoon": "Së shpejti",
+    "availableCount_one": "{{count}} në dispozicion",
+    "availableCount_other": "{{count}} në dispozicion",
+    "availableOfTotal": "{{available}} nga {{total}} në dispozicion",
+    "bedrooms_one": "{{count}} dhomë gjumi",
+    "bedrooms_other": "{{count}} dhoma gjumi",
+    "studio": "Studio",
+    "floor": "Kati",
+    "heading": "Eksploruesi interaktiv i rezidencës",
+    "regions": "Apartamente dhe ndërtesa",
+    "breadcrumb": "Navigimi i eksploruesit",
+    "residence": "Rezidenca",
+    "explore": "Eksploro",
+    "legend": "Legjenda e disponueshmërisë",
+    "views": "Pamjet e kamerës",
+    "prevView": "Pamja e mëparshme",
+    "nextView": "Pamja e radhës",
+    "zoomIn": "Zmadho",
+    "zoomOut": "Zvogëlo",
+    "resetZoom": "Rivendos zmadhimin",
+    "fullscreen": "Ekran i plotë",
+    "exitFullscreen": "Dil nga ekrani i plotë",
+    "filtersActive": "Filtra aktivë",
+    "closeFilters": "Mbyll filtrat",
+    "noViewsForTarget": "Ende nuk është publikuar asnjë pamje interaktive për këtë.",
+    "sections": "Seksionet e faqes",
+    "showMore": "Shfaq më shumë ({{count}})",
+    "primaryListing": "Njoftimi kryesor",
+    "compareLimitTitle": "Kufiri i krahasimit",
+    "compareLimit": "Mund të krahasoni deri në 5 prona.",
+    "filters": {
+      "min": "minimumi",
+      "max": "maksimumi",
+      "more": "Më shumë filtra",
+      "less": "Më pak filtra",
+      "baths": "Banjo",
+      "price": "Çmimi",
+      "availability": "Disponueshmëria",
+      "unitType": "Lloji i njësisë",
+      "orientation": "Orientimi",
+      "features": "Karakteristikat"
+    },
+    "flag": {
+      "terrace": "Tarracë",
+      "balcony": "Ballkon",
+      "duplex": "Dupleks",
+      "penthouse": "Penthaus",
+      "furnished": "E mobiluar"
+    },
+    "direction": {
+      "front": "Pamja ballore",
+      "back": "Pamja e pasme",
+      "left": "Pamja majtas",
+      "right": "Pamja djathtas",
+      "aerial": "Pamja ajrore",
+      "courtyard": "Pamja e oborrit",
+      "custom": "Pamje"
+    },
+    "spec": {
+      "netArea": "Sipërfaqja e brendshme",
+      "terrace": "Tarraca",
+      "outdoor": "Sipërfaqja e jashtme",
+      "balconies": "Ballkone"
+    },
+    "drawer": {
+      "title": "Detajet e apartamentit",
+      "close": "Mbyll",
+      "loadError": "Ky apartament nuk mund të ngarkohej.",
+      "notAvailable": "Ky apartament nuk është më në dispozicion.",
+      "openGallery": "Hap fotot",
+      "photo": "Foto",
+      "floorplan": "Plani i katit",
+      "inquire": "Dërgo kërkesë",
+      "scheduleViewing": "Cakto vizitë",
+      "save": "Ruaj",
+      "saved": "U ruajt",
+      "compare": "Krahaso",
+      "compared": "Në krahasim",
+      "openListing": "Hap njoftimin e plotë"
+    },
+    "inquiry": {
+      "heading": "Pyet për këtë apartament",
+      "name": "Emri",
+      "email": "Email",
+      "phone": "Telefoni (opsional)",
+      "message": "Mesazhi",
+      "submit": "Dërgo kërkesë",
+      "sending": "Duke dërguar…",
+      "success": "Faleminderit — kërkesa juaj u dërgua. Zhvilluesi do t'ju kontaktojë së shpejti.",
+      "error": "Kërkesa juaj nuk mund të dërgohej. Ju lutemi provoni përsëri.",
+      "defaultMessage": "Përshëndetje, jam i interesuar për apartamentin {{unit}} në {{development}}. Ju lutem më dërgoni më shumë informacion.",
+      "errors": {
+        "required": "Kjo fushë është e detyrueshme.",
+        "invalid": "Ju lutemi kontrolloni këtë vlerë.",
+        "tooShort": "Kjo është shumë e shkurtër.",
+        "tooLong": "Kjo është shumë e gjatë."
+      }
+    },
+    "unitType": {
+      "apartment": "Apartament",
+      "studio": "Studio",
+      "duplex": "Dupleks",
+      "penthouse": "Penthaus",
+      "maisonette": "Mezonetë",
+      "townhouse": "Shtëpi në rresht",
+      "villa": "Vilë",
+      "office": "Zyrë",
+      "retail": "Dyqan",
+      "commercial": "Komerciale"
+    },
+    "orientation": {
+      "north": "Veri",
+      "south": "Jug",
+      "east": "Lindje",
+      "west": "Perëndim",
+      "northeast": "Verilindje",
+      "northwest": "Veriperëndim",
+      "southeast": "Juglindje",
+      "southwest": "Jugperëndim"
+    }
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",
@@ -277,5 +398,321 @@
     "sea_view": "Pamje nga deti",
     "two_sided": "Dykahësh",
     "smart_home": "Shtëpi inteligjente"
+  },
+  "editor": {
+    "actions": {
+      "publish": "Publiko",
+      "publishing": "Duke publikuar…",
+      "saving": "Duke ruajtur…",
+      "unpublish": "Hiq publikimin"
+    },
+    "canvas": {
+      "label": "Hapësira e redaktimit të zonave"
+    },
+    "conflict": {
+      "message": "Dikush tjetër e ruajti këtë pamje ndërsa ju po redaktonit. Ndryshimet tuaja nuk u ruajtën.",
+      "reload": "Ngarko versionin më të ri (hidh ndryshimet e mia)"
+    },
+    "hint": {
+      "polygon": "Klikoni për të shtuar pika. Mbylleni duke klikuar pikën e parë, duke shtypur Enter ose duke prekur Përfundo. Esc anulon.",
+      "preview": "Parapamje: kështu e shohin vizitorët pamjen e publikuar. Çaktivizoni parapamjen për të redaktuar.",
+      "rect": "Tërhiqni për të vizatuar një drejtkëndësh.",
+      "select": "Klikoni një zonë për ta zgjedhur. Rrotulloni për zmadhim; mbani Space dhe tërhiqni (ose me dy gishta) për lëvizje."
+    },
+    "image": {
+      "badType": "Përdorni një imazh JPG, PNG, WebP ose AVIF.",
+      "dimensions": "{{width}} × {{height}} px",
+      "hint": "JPG, PNG, WebP ose AVIF · deri në 10 MB",
+      "lowRes": "rezolucion i ulët; 1600 px ose më shumë duket më qartë",
+      "required": "Zgjidhni fillimisht një imazh.",
+      "tooLarge": "Imazhi është më i madh se 10 MB.",
+      "uploadFailed": "Ngarkimi dështoi."
+    },
+    "link": {
+      "clear": "Hiq lidhjen",
+      "loading": "Duke ngarkuar…",
+      "noResults": "Asnjë përputhje.",
+      "search": "Kërko…"
+    },
+    "notice": {
+      "blocked": "Rregulloni zonat e theksuara para publikimit.",
+      "blockedSave": "Çdo zonë ka nevojë për një formë të vlefshme dhe një lidhje para se drafti të ruhet.",
+      "dismiss": "Mbyll",
+      "invalid": "Serveri refuzoi disa zona. Ato janë theksuar në listë.",
+      "published": "Pamja u publikua. Vizitorët tani i shohin këto zona.",
+      "unpublished": "Publikimi i pamjes u hoq. Vizitorët nuk e shohin më."
+    },
+    "region": {
+      "duplicate": "Dyfisho",
+      "shortcuts": "Tërhiqni për ta lëvizur · tërhiqni një dorezë për të ndryshuar formën · klikim i dyfishtë në pikën e brinjës shton një pikë · Delete heq pikën ose zonën e zgjedhur · shigjetat lëvizin pak (Shift ×10) · D dyfishon"
+    },
+    "regions": {
+      "backward": "Dërgo prapa",
+      "forward": "Sill përpara",
+      "hide": "Fshih në redaktues",
+      "issues": "Probleme",
+      "show": "Shfaq në redaktues",
+      "unnamed": "Zonë e palidhur"
+    },
+    "status": {
+      "draft": "Draft",
+      "issueCount": "{{count}} zonë(a) kanë nevojë për vëmendje para publikimit.",
+      "published": "Publikuar",
+      "publishedAt": "Publikuar më {{date}}",
+      "unpublished": "Ndryshime të papublikuara",
+      "unsaved": "Ndryshime të paruajtura"
+    },
+    "toolbar": {
+      "cancel": "Anulo",
+      "finish": "Përfundo",
+      "hideAll": "Fshih të gjitha zonat",
+      "label": "Mjetet e redaktuesit",
+      "labels": "Shfaq etiketat",
+      "preview": "Parapamje",
+      "redo": "Ribëj",
+      "snapGrid": "Ngjit te rrjeta",
+      "snapVertices": "Ngjit te kulmet",
+      "tools": "Mjetet e vizatimit",
+      "undo": "Zhbëj"
+    },
+    "unsaved": {
+      "discard": "Hidh ndryshimet",
+      "keep": "Vazhdo redaktimin",
+      "message": "Keni ndryshime në zona që nuk janë ruajtur. Nëse vazhdoni, ato do të humbasin.",
+      "title": "Të hidhen ndryshimet e paruajtura?"
+    },
+    "views": {
+      "add": "Shto pamje",
+      "aspectMessage": "Raporti i aspektit ndryshon nga imazhi i vjetër, kështu që zonat ekzistuese mund të mos përputhen më. Të fshihen të gjitha zonat e kësaj pamjeje, apo të mbahen dhe të rregullohen me dorë?",
+      "aspectTitle": "Imazhi i ri ka formë tjetër",
+      "clearRegions": "Fshi zonat",
+      "delete": "Fshi pamjen",
+      "deleteMessage": "Imazhi dhe të gjitha zonat e tij hiqen përgjithmonë. Vizitorët nuk do ta shohin më këtë pamje.",
+      "deleteTitle": "Të fshihet kjo pamje?",
+      "direction": "Drejtimi",
+      "empty": "Ende asnjë pamje. Ngarkoni një vizualizim ose plan për të filluar hartimin e zonave.",
+      "failed": "Diçka shkoi keq. Ju lutemi provoni përsëri.",
+      "imageInfo": "{{width}} × {{height}} px · çelësi {{key}}",
+      "imageReplaced": "Imazhi u zëvendësua.",
+      "keepRegions": "Mbaj zonat",
+      "keptRegions": "Imazhi u zëvendësua. Kontrolloni që çdo zonë të përputhet ende.",
+      "key": "Çelësi: {{key}}",
+      "label": "Pamjet",
+      "moveLeft": "Lëviz pamjen majtas",
+      "moveRight": "Lëviz pamjen djathtas",
+      "name": "Emri i pamjes",
+      "namePlaceholder": "p.sh. Ana e rrugës",
+      "order": "Renditja",
+      "regionsCleared": "Imazhi u zëvendësua dhe zonat u fshinë.",
+      "saveSettings": "Ruaj",
+      "settings": "Cilësimet e pamjes",
+      "uploading": "Duke ngarkuar…"
+    },
+    "zoom": {
+      "fit": "Përshtat me ekranin",
+      "in": "Zmadho",
+      "out": "Zvogëlo"
+    },
+    "directions": {
+      "front": "Përpara",
+      "back": "Prapa",
+      "left": "Majtas",
+      "right": "Djathtas",
+      "aerial": "Nga ajri",
+      "courtyard": "Oborri",
+      "custom": "Tjetër"
+    },
+    "issues": {
+      "non_finite": "Koordinata të pavlefshme",
+      "out_of_bounds": "Jashtë imazhit",
+      "invalid_rect": "Drejtkëndësh i pavlefshëm",
+      "too_few_points": "Duhen të paktën 3 pika",
+      "too_many_points": "Shumë pika",
+      "duplicate_points": "Dy pika mbivendosen",
+      "zero_area": "Shumë e vogël",
+      "self_intersecting": "Brinjët kryqëzohen",
+      "missing_link": "Mungon lidhja",
+      "invalid_link_type": "Lloj lidhjeje i pavlefshëm",
+      "link_not_found": "Elementi i lidhur nuk ekziston më",
+      "invalid_shape": "Formë e pavlefshme",
+      "too_many_hotspots": "Shumë zona në këtë pamje",
+      "invalid_id": "ID e zonës e pavlefshme",
+      "invalid_label": "Etiketa është shumë e gjatë"
+    }
+  },
+  "inventory": {
+    "search": "Kërko njësi",
+    "searchPlaceholder": "Kërko sipas numrit të njësisë",
+    "exportCsv": "Eksporto CSV",
+    "exporting": "Duke eksportuar…",
+    "exportFailed": "Eksportimi dështoi",
+    "loading": "Duke u ngarkuar…",
+    "loadFailed": "Njësitë nuk u ngarkuan.",
+    "retry": "Provo përsëri",
+    "noMatches": "Asnjë njësi nuk përputhet me këta filtra.",
+    "emptyHint": "Shtoni ndërtesa, kate dhe njësi më sipër për të ndërtuar inventarin.",
+    "selectAll": "Zgjidh të gjitha njësitë në këtë faqe",
+    "selectUnit": "Zgjidh njësinë {{number}}",
+    "editUnit": "Redakto njësinë {{number}}",
+    "sortBy": "Rendit sipas",
+    "toggleDirection": "Ndrysho drejtimin e renditjes",
+    "availability": {
+      "declared": "E deklaruar",
+      "effective": "Blerësit shohin",
+      "fromListing": "Blerësit e shohin këtë për shkak të statusit të një shpalljeje të lidhur",
+      "fromUnit": "Blerësit shohin disponueshmërinë e vetë njësisë"
+    },
+    "visibility": {
+      "public": "Publike",
+      "hidden": "E fshehur"
+    },
+    "col": {
+      "buildingFloor": "Ndërtesa / kati",
+      "bedsBaths": "Dhoma gjumi / banjo",
+      "floor": "Kati",
+      "visibility": "Dukshmëria",
+      "updated": "Përditësuar",
+      "actions": "Veprime"
+    },
+    "filters": {
+      "building": "Ndërtesa",
+      "floor": "Kati",
+      "availability": "Disponueshmëria",
+      "visibility": "Dukshmëria",
+      "allBuildings": "Të gjitha ndërtesat",
+      "allFloors": "Të gjitha katet",
+      "anyAvailability": "Çdo disponueshmëri",
+      "anyVisibility": "Çdo dukshmëri",
+      "clear": "Pastro filtrat"
+    },
+    "pagination": {
+      "label": "Faqet e inventarit",
+      "range": "{{from}}–{{to}} nga {{total}}",
+      "perPage": "Për faqe",
+      "previous": "Mëparshme",
+      "next": "Tjetra"
+    },
+    "bulk": {
+      "label": "Veprime në grup",
+      "selected": "{{count}} të zgjedhura",
+      "setAvailability": "Vendos disponueshmërinë",
+      "setVisibility": "Vendos dukshmërinë",
+      "apply": "Zbato",
+      "applyVisibility": "Zbato dukshmërinë",
+      "clear": "Pastro zgjedhjen",
+      "confirmTitle": "Të përditësohen {{count}} njësi?",
+      "confirmMessage": "Vendos {{change}} për {{count}} njësitë e zgjedhura.",
+      "successTitle": "Njësitë u përditësuan",
+      "successMessage": "{{count}} njësi u përditësuan.",
+      "errorTitle": "Përditësimi dështoi"
+    },
+    "errors": {
+      "forbidden": "Roli juaj nuk lejohet ta bëjë këtë ndryshim."
+    },
+    "edit": {
+      "title": "Redakto njësinë {{number}}",
+      "identity": "Njësia",
+      "layout": "Planimetria dhe madhësia",
+      "pricing": "Çmimi",
+      "details": "Karakteristikat dhe përshkrimi",
+      "features": "Karakteristikat",
+      "description": "Përshkrimi",
+      "livingRooms": "Dhoma ndenjeje",
+      "netArea": "Sipërfaqja e brendshme",
+      "totalArea": "Sipërfaqja totale",
+      "externalArea": "Sipërfaqja e jashtme",
+      "terraceArea": "Sipërfaqja e tarracës",
+      "balconies": "Ballkone",
+      "terraces": "Tarraca",
+      "viewType": "Pamja",
+      "currency": "Monedha",
+      "pricePerSqm": "Çmimi për m²",
+      "priceVisibility": "Çmimi që u shfaqet blerësve",
+      "pricePublic": "Shfaq çmimin",
+      "priceLocked": "Roli juaj nuk mund të ndryshojë çmimet.",
+      "forbiddenPrice": "Roli juaj nuk lejohet të ndryshojë çmimet. Anuloni ndryshimet e çmimit ose pyesni pronarin ose menaxherin.",
+      "forbiddenAvailability": "Roli juaj nuk lejohet të ndryshojë disponueshmërinë.",
+      "selectBuilding": "Zgjidh një ndërtesë",
+      "selectFloor": "Zgjidh një kat",
+      "save": "Ruaj ndryshimet",
+      "saving": "Duke ruajtur…",
+      "savedTitle": "Njësia u ruajt",
+      "saved": "Njësia {{number}} u përditësua.",
+      "errors": {
+        "required": "E detyrueshme",
+        "nonNegative": "Shkruani një numër 0 ose më të madh",
+        "integer": "Shkruani një numër të plotë",
+        "currency": "Përdorni një kod monedhe me 3 shkronja, p.sh. EUR",
+        "tooLong": "Ky tekst është shumë i gjatë"
+      }
+    },
+    "delete": {
+      "title": "Të fshihet njësia {{number}}?",
+      "message": "Njësia hiqet nga inventari dhe eksploruesi. Shpalljet e lidhura nuk fshihen.",
+      "confirm": "Fshi njësinë",
+      "doneTitle": "Njësia u fshi",
+      "done": "Njësia {{number}} u fshi."
+    },
+    "floorplan": {
+      "title": "Planimetria",
+      "alt": "Planimetria e njësisë",
+      "none": "Ende pa planimetri.",
+      "choose": "Zgjidh imazhin",
+      "replace": "Zëvendëso imazhin",
+      "upload": "Ngarko planimetrinë",
+      "uploading": "Duke ngarkuar…",
+      "uploadedTitle": "Planimetria u ngarkua",
+      "uploaded": "Planimetria u ruajt.",
+      "badType": "Përdorni një imazh JPG, PNG ose WebP.",
+      "tooLarge": "Imazhi duhet të jetë 10 MB ose më i vogël."
+    },
+    "listingStatus": {
+      "active": "Aktive",
+      "pending": "Në pritje",
+      "sold": "Shitur",
+      "rented": "Dhënë me qira",
+      "draft": "Draft"
+    }
+  },
+  "manage": {
+    "tabs": {
+      "label": "Menaxho projektin",
+      "overview": "Përmbledhje",
+      "inventory": "Inventari",
+      "explorer": "Eksplorues interaktiv",
+      "listings": "Shpalljet e lidhura",
+      "settings": "Cilësimet"
+    },
+    "overview": {
+      "status": "Statusi",
+      "publishedHint": "Blerësit mund ta gjejnë këtë rezidencë.",
+      "draftHint": "Vetëm ekipi juaj mund ta shohë këtë rezidencë.",
+      "units": "Njësitë",
+      "total": "Gjithsej"
+    },
+    "inventory": {
+      "quickAdd": "Shto ndërtesa, kate dhe njësi"
+    },
+    "listings": {
+      "attachTitle": "Lidh një shpallje me njësinë {{number}}",
+      "search": "Kërko shpallje",
+      "searchPlaceholder": "Kërkoni shpalljet tuaja sipas titullit",
+      "results": "Shpalljet tuaja",
+      "noResults": "Nuk u gjetën shpallje.",
+      "alreadyLinked": "E lidhur",
+      "checking": "Duke kontrolluar për konflikte…",
+      "attachedTo": "U lidh me njësinë {{number}}.",
+      "detachTitle": "Të shkëputet shpallja?",
+      "detachMessage": "“{{title}}” nuk do të jetë më e lidhur me njësinë {{number}}. Vetë shpallja nuk ndryshohet.",
+      "detachedFrom": "U hoq nga njësia {{number}}.",
+      "detachAria": "Shkëput {{title}}",
+      "none": "Asnjë shpallje e lidhur",
+      "summary": "{{linked}} nga {{count}} njësi në këtë faqe kanë një shpallje të lidhur."
+    },
+    "settings": {
+      "heading": "Cilësimet e eksploruesit",
+      "allowInquiries": "Prano kërkesa për njësi pa shpallje",
+      "allowInquiriesHint": "Blerësit mund t'ju kontaktojnë nga paneli i apartamentit. Kërkesat vijnë në kutinë tuaj."
+    }
   }
 }

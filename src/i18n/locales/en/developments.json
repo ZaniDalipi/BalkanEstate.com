@@ -245,7 +245,128 @@
     "matchCount_other": "{{count}} homes"
   },
   "explorer": {
-    "hide": "Hide"
+    "hide": "Hide",
+    "apt": "Apt",
+    "comingSoon": "Coming soon",
+    "availableCount_one": "{{count}} available",
+    "availableCount_other": "{{count}} available",
+    "availableOfTotal": "{{available}} of {{total}} available",
+    "bedrooms_one": "{{count}} bedroom",
+    "bedrooms_other": "{{count}} bedrooms",
+    "studio": "Studio",
+    "floor": "Floor",
+    "heading": "Interactive residence explorer",
+    "regions": "Apartments and buildings",
+    "breadcrumb": "Explorer navigation",
+    "residence": "Residence",
+    "explore": "Explore",
+    "legend": "Availability legend",
+    "views": "Camera views",
+    "prevView": "Previous view",
+    "nextView": "Next view",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetZoom": "Reset zoom",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "filtersActive": "Filters active",
+    "closeFilters": "Close filters",
+    "noViewsForTarget": "No interactive view has been published for this yet.",
+    "sections": "Page sections",
+    "showMore": "Show more ({{count}})",
+    "primaryListing": "Primary listing",
+    "compareLimitTitle": "Comparison limit",
+    "compareLimit": "You can compare up to 5 homes.",
+    "filters": {
+      "min": "minimum",
+      "max": "maximum",
+      "more": "More filters",
+      "less": "Fewer filters",
+      "baths": "Bathrooms",
+      "price": "Price",
+      "availability": "Availability",
+      "unitType": "Unit type",
+      "orientation": "Orientation",
+      "features": "Features"
+    },
+    "flag": {
+      "terrace": "Terrace",
+      "balcony": "Balcony",
+      "duplex": "Duplex",
+      "penthouse": "Penthouse",
+      "furnished": "Furnished"
+    },
+    "direction": {
+      "front": "Front view",
+      "back": "Back view",
+      "left": "Left view",
+      "right": "Right view",
+      "aerial": "Aerial view",
+      "courtyard": "Courtyard view",
+      "custom": "View"
+    },
+    "spec": {
+      "netArea": "Internal area",
+      "terrace": "Terrace",
+      "outdoor": "Outdoor area",
+      "balconies": "Balconies"
+    },
+    "drawer": {
+      "title": "Apartment details",
+      "close": "Close",
+      "loadError": "This apartment could not be loaded.",
+      "notAvailable": "This apartment is no longer available.",
+      "openGallery": "Open photos",
+      "photo": "Photo",
+      "floorplan": "Floor plan",
+      "inquire": "Send inquiry",
+      "scheduleViewing": "Schedule viewing",
+      "save": "Save",
+      "saved": "Saved",
+      "compare": "Compare",
+      "compared": "In comparison",
+      "openListing": "Open full listing"
+    },
+    "inquiry": {
+      "heading": "Ask about this apartment",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone (optional)",
+      "message": "Message",
+      "submit": "Send inquiry",
+      "sending": "Sending…",
+      "success": "Thank you — your inquiry was sent. The developer will get back to you soon.",
+      "error": "Your inquiry could not be sent. Please try again.",
+      "defaultMessage": "Hello, I'm interested in apartment {{unit}} at {{development}}. Please send me more information.",
+      "errors": {
+        "required": "This field is required.",
+        "invalid": "Please check this value.",
+        "tooShort": "This is too short.",
+        "tooLong": "This is too long."
+      }
+    },
+    "unitType": {
+      "apartment": "Apartment",
+      "studio": "Studio",
+      "duplex": "Duplex",
+      "penthouse": "Penthouse",
+      "maisonette": "Maisonette",
+      "townhouse": "Townhouse",
+      "villa": "Villa",
+      "office": "Office",
+      "retail": "Retail",
+      "commercial": "Commercial"
+    },
+    "orientation": {
+      "north": "North",
+      "south": "South",
+      "east": "East",
+      "west": "West",
+      "northeast": "North-east",
+      "northwest": "North-west",
+      "southeast": "South-east",
+      "southwest": "South-west"
+    }
   },
   "feature": {
     "big_terrace": "With big terrace",
@@ -277,5 +398,321 @@
     "none": "No residences found near this location.",
     "error": "Could not load nearby residences.",
     "viewResidence": "View residence"
+  },
+  "editor": {
+    "actions": {
+      "publish": "Publish",
+      "publishing": "Publishing…",
+      "saving": "Saving…",
+      "unpublish": "Unpublish"
+    },
+    "canvas": {
+      "label": "Region editor canvas"
+    },
+    "conflict": {
+      "message": "Someone else saved this view while you were editing. Your changes were not saved.",
+      "reload": "Reload latest (discard my changes)"
+    },
+    "hint": {
+      "polygon": "Click to add points. Close by clicking the first point, pressing Enter or tapping Finish. Esc cancels.",
+      "preview": "Preview: this is how visitors see the published view. Turn preview off to edit.",
+      "rect": "Drag to draw a rectangle.",
+      "select": "Click a region to select it. Scroll to zoom; hold Space and drag (or use two fingers) to pan."
+    },
+    "image": {
+      "badType": "Use a JPG, PNG, WebP or AVIF image.",
+      "dimensions": "{{width}} × {{height}} px",
+      "hint": "JPG, PNG, WebP or AVIF · up to 10 MB",
+      "lowRes": "low resolution; 1600 px wide or more looks sharper",
+      "required": "Choose an image first.",
+      "tooLarge": "The image is larger than 10 MB.",
+      "uploadFailed": "Upload failed."
+    },
+    "link": {
+      "clear": "Remove link",
+      "loading": "Loading…",
+      "noResults": "No matches.",
+      "search": "Search…"
+    },
+    "notice": {
+      "blocked": "Fix the highlighted regions before publishing.",
+      "blockedSave": "Every region needs a valid shape and a link before the draft can be saved.",
+      "dismiss": "Dismiss",
+      "invalid": "The server rejected some regions. They are highlighted in the list.",
+      "published": "View published. Visitors now see these regions.",
+      "unpublished": "View unpublished. Visitors no longer see it."
+    },
+    "region": {
+      "duplicate": "Duplicate",
+      "shortcuts": "Drag to move · drag a handle to reshape · double-click an edge dot to add a point · Delete removes the selected point or region · arrows nudge (Shift ×10) · D duplicates"
+    },
+    "regions": {
+      "backward": "Send backward",
+      "forward": "Bring forward",
+      "hide": "Hide in editor",
+      "issues": "Issues",
+      "show": "Show in editor",
+      "unnamed": "Unlinked region"
+    },
+    "status": {
+      "draft": "Draft",
+      "issueCount": "{{count}} region(s) need attention before publishing.",
+      "published": "Published",
+      "publishedAt": "Published {{date}}",
+      "unpublished": "Unpublished changes",
+      "unsaved": "Unsaved changes"
+    },
+    "toolbar": {
+      "cancel": "Cancel",
+      "finish": "Finish",
+      "hideAll": "Hide all regions",
+      "label": "Editor tools",
+      "labels": "Show labels",
+      "preview": "Preview",
+      "redo": "Redo",
+      "snapGrid": "Snap to grid",
+      "snapVertices": "Snap to vertices",
+      "tools": "Drawing tools",
+      "undo": "Undo"
+    },
+    "unsaved": {
+      "discard": "Discard changes",
+      "keep": "Keep editing",
+      "message": "You have region edits that are not saved. If you continue they will be lost.",
+      "title": "Discard unsaved changes?"
+    },
+    "views": {
+      "add": "Add view",
+      "aspectMessage": "Its aspect ratio differs from the old image, so existing regions may no longer line up. Clear all regions of this view, or keep them and adjust by hand?",
+      "aspectTitle": "The new image has a different shape",
+      "clearRegions": "Clear regions",
+      "delete": "Delete view",
+      "deleteMessage": "The image and all its regions are removed for good. Visitors will no longer see this view.",
+      "deleteTitle": "Delete this view?",
+      "direction": "Direction",
+      "empty": "No views yet. Upload a rendering or plan to start mapping regions.",
+      "failed": "Something went wrong. Please try again.",
+      "imageInfo": "{{width}} × {{height}} px · key {{key}}",
+      "imageReplaced": "Image replaced.",
+      "keepRegions": "Keep regions",
+      "keptRegions": "Image replaced. Check that every region still lines up.",
+      "key": "Key: {{key}}",
+      "label": "Views",
+      "moveLeft": "Move view left",
+      "moveRight": "Move view right",
+      "name": "View name",
+      "namePlaceholder": "e.g. Street side",
+      "order": "Order",
+      "regionsCleared": "Image replaced and regions cleared.",
+      "saveSettings": "Save",
+      "settings": "View settings",
+      "uploading": "Uploading…"
+    },
+    "zoom": {
+      "fit": "Fit to screen",
+      "in": "Zoom in",
+      "out": "Zoom out"
+    },
+    "directions": {
+      "front": "Front",
+      "back": "Back",
+      "left": "Left",
+      "right": "Right",
+      "aerial": "Aerial",
+      "courtyard": "Courtyard",
+      "custom": "Custom"
+    },
+    "issues": {
+      "non_finite": "Invalid coordinates",
+      "out_of_bounds": "Outside the image",
+      "invalid_rect": "Invalid rectangle",
+      "too_few_points": "Needs at least 3 points",
+      "too_many_points": "Too many points",
+      "duplicate_points": "Two points overlap",
+      "zero_area": "Too small",
+      "self_intersecting": "Edges cross each other",
+      "missing_link": "Missing link",
+      "invalid_link_type": "Invalid link type",
+      "link_not_found": "Linked item no longer exists",
+      "invalid_shape": "Invalid shape",
+      "too_many_hotspots": "Too many regions in this view",
+      "invalid_id": "Invalid region id",
+      "invalid_label": "Label is too long"
+    }
+  },
+  "inventory": {
+    "search": "Search units",
+    "searchPlaceholder": "Search by unit number",
+    "exportCsv": "Export CSV",
+    "exporting": "Exporting…",
+    "exportFailed": "Export failed",
+    "loading": "Loading…",
+    "loadFailed": "Could not load units.",
+    "retry": "Retry",
+    "noMatches": "No units match these filters.",
+    "emptyHint": "Add buildings, floors and units above to build your inventory.",
+    "selectAll": "Select all units on this page",
+    "selectUnit": "Select unit {{number}}",
+    "editUnit": "Edit unit {{number}}",
+    "sortBy": "Sort by",
+    "toggleDirection": "Toggle sort direction",
+    "availability": {
+      "declared": "Declared",
+      "effective": "Buyers see",
+      "fromListing": "Buyers see this because of a linked listing’s status",
+      "fromUnit": "Buyers see the unit’s own availability"
+    },
+    "visibility": {
+      "public": "Public",
+      "hidden": "Hidden"
+    },
+    "col": {
+      "buildingFloor": "Building / floor",
+      "bedsBaths": "Beds / baths",
+      "floor": "Floor",
+      "visibility": "Visibility",
+      "updated": "Updated",
+      "actions": "Actions"
+    },
+    "filters": {
+      "building": "Building",
+      "floor": "Floor",
+      "availability": "Availability",
+      "visibility": "Visibility",
+      "allBuildings": "All buildings",
+      "allFloors": "All floors",
+      "anyAvailability": "Any availability",
+      "anyVisibility": "Any visibility",
+      "clear": "Clear filters"
+    },
+    "pagination": {
+      "label": "Inventory pages",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "perPage": "Per page",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "bulk": {
+      "label": "Bulk actions",
+      "selected": "{{count}} selected",
+      "setAvailability": "Set availability",
+      "setVisibility": "Set visibility",
+      "apply": "Apply",
+      "applyVisibility": "Apply visibility",
+      "clear": "Clear selection",
+      "confirmTitle": "Update {{count}} units?",
+      "confirmMessage": "Set {{change}} on {{count}} selected units.",
+      "successTitle": "Units updated",
+      "successMessage": "{{count}} units updated.",
+      "errorTitle": "Update failed"
+    },
+    "errors": {
+      "forbidden": "Your role is not allowed to make this change."
+    },
+    "edit": {
+      "title": "Edit unit {{number}}",
+      "identity": "Unit",
+      "layout": "Layout & size",
+      "pricing": "Pricing",
+      "details": "Features & description",
+      "features": "Features",
+      "description": "Description",
+      "livingRooms": "Living rooms",
+      "netArea": "Internal area",
+      "totalArea": "Total area",
+      "externalArea": "External area",
+      "terraceArea": "Terrace area",
+      "balconies": "Balconies",
+      "terraces": "Terraces",
+      "viewType": "View",
+      "currency": "Currency",
+      "pricePerSqm": "Price per m²",
+      "priceVisibility": "Price shown to buyers",
+      "pricePublic": "Show price",
+      "priceLocked": "Your role cannot change prices.",
+      "forbiddenPrice": "Your role is not allowed to change prices. Undo the price changes or ask an owner or manager.",
+      "forbiddenAvailability": "Your role is not allowed to change availability.",
+      "selectBuilding": "Select a building",
+      "selectFloor": "Select a floor",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "savedTitle": "Unit saved",
+      "saved": "Unit {{number}} was updated.",
+      "errors": {
+        "required": "Required",
+        "nonNegative": "Enter a number of 0 or more",
+        "integer": "Enter a whole number",
+        "currency": "Use a 3-letter currency code, e.g. EUR",
+        "tooLong": "This text is too long"
+      }
+    },
+    "delete": {
+      "title": "Delete unit {{number}}?",
+      "message": "The unit is removed from the inventory and the explorer. Linked listings are not deleted.",
+      "confirm": "Delete unit",
+      "doneTitle": "Unit deleted",
+      "done": "Unit {{number}} was deleted."
+    },
+    "floorplan": {
+      "title": "Floorplan",
+      "alt": "Unit floorplan",
+      "none": "No floorplan yet.",
+      "choose": "Choose image",
+      "replace": "Replace image",
+      "upload": "Upload floorplan",
+      "uploading": "Uploading…",
+      "uploadedTitle": "Floorplan uploaded",
+      "uploaded": "The floorplan is saved.",
+      "badType": "Use a JPG, PNG or WebP image.",
+      "tooLarge": "The image must be 10 MB or smaller."
+    },
+    "listingStatus": {
+      "active": "Active",
+      "pending": "Pending",
+      "sold": "Sold",
+      "rented": "Rented",
+      "draft": "Draft"
+    }
+  },
+  "manage": {
+    "tabs": {
+      "label": "Manage development",
+      "overview": "Overview",
+      "inventory": "Inventory",
+      "explorer": "Interactive explorer",
+      "listings": "Linked listings",
+      "settings": "Settings"
+    },
+    "overview": {
+      "status": "Status",
+      "publishedHint": "Buyers can find this residence.",
+      "draftHint": "Only your team can see this residence.",
+      "units": "Units",
+      "total": "Total"
+    },
+    "inventory": {
+      "quickAdd": "Add buildings, floors and units"
+    },
+    "listings": {
+      "attachTitle": "Attach a listing to unit {{number}}",
+      "search": "Search listings",
+      "searchPlaceholder": "Search your listings by title",
+      "results": "Your listings",
+      "noResults": "No listings found.",
+      "alreadyLinked": "Linked",
+      "checking": "Checking for conflicts…",
+      "attachedTo": "Attached to unit {{number}}.",
+      "detachTitle": "Detach listing?",
+      "detachMessage": "“{{title}}” will no longer be linked to unit {{number}}. The listing itself is not changed.",
+      "detachedFrom": "Removed from unit {{number}}.",
+      "detachAria": "Detach {{title}}",
+      "none": "No linked listing",
+      "summary": "{{linked}} of {{count}} units on this page have a linked listing."
+    },
+    "settings": {
+      "heading": "Explorer settings",
+      "allowInquiries": "Accept inquiries for units without a listing",
+      "allowInquiriesHint": "Buyers can contact you from the apartment drawer. Inquiries arrive in your inbox."
+    }
   }
 }

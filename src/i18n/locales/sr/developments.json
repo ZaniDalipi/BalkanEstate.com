@@ -262,7 +262,130 @@
     "matchCount_other": "{{count}} stanova"
   },
   "explorer": {
-    "hide": "Sakrij"
+    "hide": "Sakrij",
+    "apt": "Стан",
+    "comingSoon": "Ускоро",
+    "availableCount_one": "{{count}} доступан",
+    "availableCount_other": "{{count}} доступних",
+    "availableOfTotal": "{{available}} од {{total}} доступно",
+    "bedrooms_one": "{{count}} спаваћа соба",
+    "bedrooms_other": "{{count}} спаваћих соба",
+    "studio": "Гарсоњера",
+    "floor": "Спрат",
+    "heading": "Интерактивни преглед резиденције",
+    "regions": "Станови и зграде",
+    "breadcrumb": "Навигација прегледа",
+    "residence": "Резиденција",
+    "explore": "Истражи",
+    "legend": "Легенда доступности",
+    "views": "Погледи камере",
+    "prevView": "Претходни поглед",
+    "nextView": "Следећи поглед",
+    "zoomIn": "Увећај",
+    "zoomOut": "Умањи",
+    "resetZoom": "Поништи увећање",
+    "fullscreen": "Цео екран",
+    "exitFullscreen": "Изађи из целог екрана",
+    "filtersActive": "Филтери активни",
+    "closeFilters": "Затвори филтере",
+    "noViewsForTarget": "За ово још није објављен интерактивни поглед.",
+    "sections": "Делови странице",
+    "showMore": "Прикажи више ({{count}})",
+    "primaryListing": "Главни оглас",
+    "compareLimitTitle": "Ограничење поређења",
+    "compareLimit": "Можете поредити до 5 некретнина.",
+    "filters": {
+      "min": "минимум",
+      "max": "максимум",
+      "more": "Више филтера",
+      "less": "Мање филтера",
+      "baths": "Купатила",
+      "price": "Цена",
+      "availability": "Доступност",
+      "unitType": "Тип јединице",
+      "orientation": "Оријентација",
+      "features": "Карактеристике"
+    },
+    "flag": {
+      "terrace": "Тераса",
+      "balcony": "Балкон",
+      "duplex": "Дуплекс",
+      "penthouse": "Пентхаус",
+      "furnished": "Намештен"
+    },
+    "direction": {
+      "front": "Предњи поглед",
+      "back": "Задњи поглед",
+      "left": "Леви поглед",
+      "right": "Десни поглед",
+      "aerial": "Поглед из ваздуха",
+      "courtyard": "Поглед на двориште",
+      "custom": "Поглед"
+    },
+    "spec": {
+      "netArea": "Унутрашња површина",
+      "terrace": "Тераса",
+      "outdoor": "Спољна површина",
+      "balconies": "Балкони"
+    },
+    "drawer": {
+      "title": "Детаљи стана",
+      "close": "Затвори",
+      "loadError": "Овај стан није могуће учитати.",
+      "notAvailable": "Овај стан више није доступан.",
+      "openGallery": "Отвори фотографије",
+      "photo": "Фотографија",
+      "floorplan": "План спрата",
+      "inquire": "Пошаљи упит",
+      "scheduleViewing": "Закажи разгледање",
+      "save": "Сачувај",
+      "saved": "Сачувано",
+      "compare": "Упореди",
+      "compared": "У поређењу",
+      "openListing": "Отвори цео оглас"
+    },
+    "inquiry": {
+      "heading": "Питајте о овом стану",
+      "name": "Име",
+      "email": "Имејл",
+      "phone": "Телефон (опционо)",
+      "message": "Порука",
+      "submit": "Пошаљи упит",
+      "sending": "Слање…",
+      "success": "Хвала — ваш упит је послат. Инвеститор ће вам се ускоро јавити.",
+      "error": "Ваш упит није могуће послати. Покушајте поново.",
+      "defaultMessage": "Здраво, занима ме стан {{unit}} у {{development}}. Молим вас пошаљите ми више информација.",
+      "errors": {
+        "required": "Ово поље је обавезно.",
+        "invalid": "Проверите ову вредност.",
+        "tooShort": "Ово је прекратко.",
+        "tooLong": "Ово је предуго."
+      }
+    },
+    "unitType": {
+      "apartment": "Стан",
+      "studio": "Гарсоњера",
+      "duplex": "Дуплекс",
+      "penthouse": "Пентхаус",
+      "maisonette": "Мезонета",
+      "townhouse": "Кућа у низу",
+      "villa": "Вила",
+      "office": "Канцеларија",
+      "retail": "Продавница",
+      "commercial": "Пословни простор"
+    },
+    "orientation": {
+      "north": "Север",
+      "south": "Југ",
+      "east": "Исток",
+      "west": "Запад",
+      "northeast": "Североисток",
+      "northwest": "Северозапад",
+      "southeast": "Југоисток",
+      "southwest": "Југозапад"
+    },
+    "availableCount_few": "{{count}} доступна",
+    "bedrooms_few": "{{count}} спаваће собе"
   },
   "feature": {
     "big_terrace": "Sa velikom terasom",
@@ -277,5 +400,321 @@
     "sea_view": "Pogled na more",
     "two_sided": "Dvostran",
     "smart_home": "Pametan dom"
+  },
+  "editor": {
+    "actions": {
+      "publish": "Objavi",
+      "publishing": "Objavljivanje…",
+      "saving": "Čuvanje…",
+      "unpublish": "Povuci objavu"
+    },
+    "canvas": {
+      "label": "Platno za uređivanje zona"
+    },
+    "conflict": {
+      "message": "Neko drugi je sačuvao ovaj prikaz dok ste ga uređivali. Vaše izmene nisu sačuvane.",
+      "reload": "Učitaj najnovije (odbaci moje izmene)"
+    },
+    "hint": {
+      "polygon": "Kliknite da dodate tačke. Zatvorite klikom na prvu tačku, tasterom Enter ili dodirom na Završi. Esc otkazuje.",
+      "preview": "Pregled: ovako posetioci vide objavljeni prikaz. Isključite pregled da biste uređivali.",
+      "rect": "Povucite da nacrtate pravougaonik.",
+      "select": "Kliknite zonu da je izaberete. Skrolujte za zumiranje; držite Space i povucite (ili dva prsta) za pomeranje."
+    },
+    "image": {
+      "badType": "Koristite JPG, PNG, WebP ili AVIF sliku.",
+      "dimensions": "{{width}} × {{height}} px",
+      "hint": "JPG, PNG, WebP ili AVIF · do 10 MB",
+      "lowRes": "niska rezolucija; 1600 px ili više izgleda oštrije",
+      "required": "Prvo izaberite sliku.",
+      "tooLarge": "Slika je veća od 10 MB.",
+      "uploadFailed": "Otpremanje nije uspelo."
+    },
+    "link": {
+      "clear": "Ukloni vezu",
+      "loading": "Učitavanje…",
+      "noResults": "Nema rezultata.",
+      "search": "Pretraži…"
+    },
+    "notice": {
+      "blocked": "Ispravite označene zone pre objave.",
+      "blockedSave": "Svaka zona mora imati ispravan oblik i vezu pre čuvanja nacrta.",
+      "dismiss": "Zatvori",
+      "invalid": "Server je odbio neke zone. Označene su na listi.",
+      "published": "Prikaz je objavljen. Posetioci sada vide ove zone.",
+      "unpublished": "Objava prikaza je povučena. Posetioci ga više ne vide."
+    },
+    "region": {
+      "duplicate": "Dupliraj",
+      "shortcuts": "Povucite za pomeranje · povucite ručku za promenu oblika · dvoklik na tačku ivice dodaje tačku · Delete briše izabranu tačku ili zonu · strelice pomeraju (Shift ×10) · D duplira"
+    },
+    "regions": {
+      "backward": "Pomeri unazad",
+      "forward": "Pomeri napred",
+      "hide": "Sakrij u uređivaču",
+      "issues": "Problemi",
+      "show": "Prikaži u uređivaču",
+      "unnamed": "Nepovezana zona"
+    },
+    "status": {
+      "draft": "Nacrt",
+      "issueCount": "{{count}} zona(e) zahteva pažnju pre objave.",
+      "published": "Objavljeno",
+      "publishedAt": "Objavljeno {{date}}",
+      "unpublished": "Neobjavljene izmene",
+      "unsaved": "Nesačuvane izmene"
+    },
+    "toolbar": {
+      "cancel": "Otkaži",
+      "finish": "Završi",
+      "hideAll": "Sakrij sve zone",
+      "label": "Alati uređivača",
+      "labels": "Prikaži oznake",
+      "preview": "Pregled",
+      "redo": "Ponovi",
+      "snapGrid": "Poravnaj sa mrežom",
+      "snapVertices": "Poravnaj sa temenima",
+      "tools": "Alati za crtanje",
+      "undo": "Poništi"
+    },
+    "unsaved": {
+      "discard": "Odbaci izmene",
+      "keep": "Nastavi uređivanje",
+      "message": "Imate izmene zona koje nisu sačuvane. Ako nastavite, biće izgubljene.",
+      "title": "Odbaciti nesačuvane izmene?"
+    },
+    "views": {
+      "add": "Dodaj prikaz",
+      "aspectMessage": "Odnos stranica se razlikuje od stare slike, pa postojeće zone možda više ne odgovaraju. Obrisati sve zone ovog prikaza ili ih zadržati i ručno prilagoditi?",
+      "aspectTitle": "Nova slika ima drugačiji oblik",
+      "clearRegions": "Obriši zone",
+      "delete": "Obriši prikaz",
+      "deleteMessage": "Slika i sve njene zone trajno se uklanjaju. Posetioci više neće videti ovaj prikaz.",
+      "deleteTitle": "Obrisati ovaj prikaz?",
+      "direction": "Smer",
+      "empty": "Još nema prikaza. Otpremite vizualizaciju ili plan da započnete mapiranje zona.",
+      "failed": "Nešto nije u redu. Pokušajte ponovo.",
+      "imageInfo": "{{width}} × {{height}} px · ključ {{key}}",
+      "imageReplaced": "Slika je zamenjena.",
+      "keepRegions": "Zadrži zone",
+      "keptRegions": "Slika je zamenjena. Proverite da li se sve zone i dalje poklapaju.",
+      "key": "Ključ: {{key}}",
+      "label": "Prikazi",
+      "moveLeft": "Pomeri prikaz levo",
+      "moveRight": "Pomeri prikaz desno",
+      "name": "Naziv prikaza",
+      "namePlaceholder": "npr. Strana prema ulici",
+      "order": "Redosled",
+      "regionsCleared": "Slika je zamenjena i zone su obrisane.",
+      "saveSettings": "Sačuvaj",
+      "settings": "Podešavanja prikaza",
+      "uploading": "Otpremanje…"
+    },
+    "zoom": {
+      "fit": "Prilagodi ekranu",
+      "in": "Uvećaj",
+      "out": "Umanji"
+    },
+    "directions": {
+      "front": "Prednja strana",
+      "back": "Zadnja strana",
+      "left": "Leva strana",
+      "right": "Desna strana",
+      "aerial": "Iz vazduha",
+      "courtyard": "Dvorište",
+      "custom": "Prilagođeno"
+    },
+    "issues": {
+      "non_finite": "Neispravne koordinate",
+      "out_of_bounds": "Van slike",
+      "invalid_rect": "Neispravan pravougaonik",
+      "too_few_points": "Potrebne su najmanje 3 tačke",
+      "too_many_points": "Previše tačaka",
+      "duplicate_points": "Dve tačke se preklapaju",
+      "zero_area": "Premalo",
+      "self_intersecting": "Ivice se seku",
+      "missing_link": "Nedostaje veza",
+      "invalid_link_type": "Neispravan tip veze",
+      "link_not_found": "Povezana stavka više ne postoji",
+      "invalid_shape": "Neispravan oblik",
+      "too_many_hotspots": "Previše zona u ovom prikazu",
+      "invalid_id": "Neispravan ID zone",
+      "invalid_label": "Oznaka je predugačka"
+    }
+  },
+  "inventory": {
+    "search": "Претражи јединице",
+    "searchPlaceholder": "Претражи по броју јединице",
+    "exportCsv": "Извези CSV",
+    "exporting": "Извоз…",
+    "exportFailed": "Извоз није успео",
+    "loading": "Учитавање…",
+    "loadFailed": "Није могуће учитати јединице.",
+    "retry": "Покушај поново",
+    "noMatches": "Ниједна јединица не одговара овим филтерима.",
+    "emptyHint": "Додајте зграде, спратове и јединице изнад да изградите инвентар.",
+    "selectAll": "Изабери све јединице на овој страници",
+    "selectUnit": "Изабери јединицу {{number}}",
+    "editUnit": "Уреди јединицу {{number}}",
+    "sortBy": "Сортирај по",
+    "toggleDirection": "Промени смер сортирања",
+    "availability": {
+      "declared": "Пријављено",
+      "effective": "Купци виде",
+      "fromListing": "Купци ово виде због статуса повезаног огласа",
+      "fromUnit": "Купци виде сопствену доступност јединице"
+    },
+    "visibility": {
+      "public": "Јавно",
+      "hidden": "Скривено"
+    },
+    "col": {
+      "buildingFloor": "Зграда / спрат",
+      "bedsBaths": "Спаваће / купатила",
+      "floor": "Спрат",
+      "visibility": "Видљивост",
+      "updated": "Ажурирано",
+      "actions": "Радње"
+    },
+    "filters": {
+      "building": "Зграда",
+      "floor": "Спрат",
+      "availability": "Доступност",
+      "visibility": "Видљивост",
+      "allBuildings": "Све зграде",
+      "allFloors": "Сви спратови",
+      "anyAvailability": "Било која доступност",
+      "anyVisibility": "Било која видљивост",
+      "clear": "Очисти филтере"
+    },
+    "pagination": {
+      "label": "Странице инвентара",
+      "range": "{{from}}–{{to}} од {{total}}",
+      "perPage": "По страници",
+      "previous": "Претходна",
+      "next": "Следећа"
+    },
+    "bulk": {
+      "label": "Групне радње",
+      "selected": "Изабрано: {{count}}",
+      "setAvailability": "Постави доступност",
+      "setVisibility": "Постави видљивост",
+      "apply": "Примени",
+      "applyVisibility": "Примени видљивост",
+      "clear": "Поништи избор",
+      "confirmTitle": "Ажурирати јединице ({{count}})?",
+      "confirmMessage": "Постави {{change}} за изабране јединице ({{count}}).",
+      "successTitle": "Јединице ажуриране",
+      "successMessage": "Ажурирано јединица: {{count}}.",
+      "errorTitle": "Ажурирање није успело"
+    },
+    "errors": {
+      "forbidden": "Ваша улога не дозвољава ову измену."
+    },
+    "edit": {
+      "title": "Уреди јединицу {{number}}",
+      "identity": "Јединица",
+      "layout": "Распоред и величина",
+      "pricing": "Цена",
+      "details": "Карактеристике и опис",
+      "features": "Карактеристике",
+      "description": "Опис",
+      "livingRooms": "Дневни боравци",
+      "netArea": "Унутрашња површина",
+      "totalArea": "Укупна површина",
+      "externalArea": "Спољна површина",
+      "terraceArea": "Површина терасе",
+      "balconies": "Балкони",
+      "terraces": "Терасе",
+      "viewType": "Поглед",
+      "currency": "Валута",
+      "pricePerSqm": "Цена по м²",
+      "priceVisibility": "Цена приказана купцима",
+      "pricePublic": "Прикажи цену",
+      "priceLocked": "Ваша улога не може да мења цене.",
+      "forbiddenPrice": "Ваша улога не сме да мења цене. Поништите измене цене или се обратите власнику или менаџеру.",
+      "forbiddenAvailability": "Ваша улога не сме да мења доступност.",
+      "selectBuilding": "Изаберите зграду",
+      "selectFloor": "Изаберите спрат",
+      "save": "Сачувај измене",
+      "saving": "Чување…",
+      "savedTitle": "Јединица сачувана",
+      "saved": "Јединица {{number}} је ажурирана.",
+      "errors": {
+        "required": "Обавезно",
+        "nonNegative": "Унесите број 0 или већи",
+        "integer": "Унесите цео број",
+        "currency": "Користите трословну ознаку валуте, нпр. EUR",
+        "tooLong": "Овај текст је предугачак"
+      }
+    },
+    "delete": {
+      "title": "Обрисати јединицу {{number}}?",
+      "message": "Јединица се уклања из инвентара и прегледача. Повезани огласи се не бришу.",
+      "confirm": "Обриши јединицу",
+      "doneTitle": "Јединица обрисана",
+      "done": "Јединица {{number}} је обрисана."
+    },
+    "floorplan": {
+      "title": "Тлоцрт",
+      "alt": "Тлоцрт јединице",
+      "none": "Још нема тлоцрта.",
+      "choose": "Изабери слику",
+      "replace": "Замени слику",
+      "upload": "Отпреми тлоцрт",
+      "uploading": "Отпремање…",
+      "uploadedTitle": "Тлоцрт отпремљен",
+      "uploaded": "Тлоцрт је сачуван.",
+      "badType": "Користите JPG, PNG или WebP слику.",
+      "tooLarge": "Слика мора бити 10 MB или мања."
+    },
+    "listingStatus": {
+      "active": "Активан",
+      "pending": "На чекању",
+      "sold": "Продато",
+      "rented": "Изнајмљено",
+      "draft": "Нацрт"
+    }
+  },
+  "manage": {
+    "tabs": {
+      "label": "Управљање пројектом",
+      "overview": "Преглед",
+      "inventory": "Инвентар",
+      "explorer": "Интерактивни прегледач",
+      "listings": "Повезани огласи",
+      "settings": "Подешавања"
+    },
+    "overview": {
+      "status": "Статус",
+      "publishedHint": "Купци могу да пронађу ову резиденцију.",
+      "draftHint": "Само ваш тим може да види ову резиденцију.",
+      "units": "Јединице",
+      "total": "Укупно"
+    },
+    "inventory": {
+      "quickAdd": "Додај зграде, спратове и јединице"
+    },
+    "listings": {
+      "attachTitle": "Повежи оглас са јединицом {{number}}",
+      "search": "Претражи огласе",
+      "searchPlaceholder": "Претражите своје огласе по наслову",
+      "results": "Ваши огласи",
+      "noResults": "Нема пронађених огласа.",
+      "alreadyLinked": "Повезано",
+      "checking": "Провера сукоба…",
+      "attachedTo": "Повезано са јединицом {{number}}.",
+      "detachTitle": "Одвојити оглас?",
+      "detachMessage": "„{{title}}“ више неће бити повезан са јединицом {{number}}. Сам оглас се не мења.",
+      "detachedFrom": "Уклоњено из јединице {{number}}.",
+      "detachAria": "Одвоји {{title}}",
+      "none": "Нема повезаног огласа",
+      "summary": "{{linked}} од {{count}} јединица на овој страници има повезан оглас."
+    },
+    "settings": {
+      "heading": "Подешавања истраживача",
+      "allowInquiries": "Примај упите за јединице без огласа",
+      "allowInquiriesHint": "Купци вас могу контактирати из панела стана. Упити стижу у ваше сандуче."
+    }
   }
 }
