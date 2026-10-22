@@ -109,6 +109,9 @@ test.describe('Residence explorer (public)', () => {
 });
 
 test.describe('Residence explorer (owner)', () => {
+  // Both tests sign in as the same account; parallel logins rotate each
+  // other's session out, so run them one after another.
+  test.describe.configure({ mode: 'serial' });
   const email = process.env.E2E_DEV_EMAIL;
   const password = process.env.E2E_DEV_PASSWORD;
 
