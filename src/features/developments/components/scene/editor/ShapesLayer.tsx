@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import type { Hotspot } from '../../../types';
+import type { Hotspot, UnitAvailability } from '../../../types';
+import { AVAILABILITY_META, availabilityPatternId } from '../../../utils/availability';
 import { polygonCentroid } from '../../../utils/polygonGeometry';
 import { outlineOf } from '../../../hooks/usePolygonEditor';
 import { ISSUE_STROKE, PRIMARY, toSvgPoints, type RegionPaint } from './canvasUtils';
@@ -13,6 +14,8 @@ interface ShapesLayerProps {
   selectedId: string | null;
   issueIds: ReadonlySet<string>;
   paintOf: (h: Hotspot) => RegionPaint;
+  /** Effective availability of a unit-linked region; drives the colour-blind pattern overlay. */
+  stateOf?: (h: Hotspot) => UnitAvailability | undefined;
   labelOf: (h: Hotspot) => string;
   showLabels: boolean;
   /** Public look: no selection, issue or hidden styling; hover highlight only. */
@@ -31,6 +34,7 @@ export const ShapesLayer: React.FC<ShapesLayerProps> = ({
   selectedId,
   issueIds,
   paintOf,
+  stateOf,
   labelOf,
   showLabels,
   preview,
@@ -49,6 +53,8 @@ export const ShapesLayer: React.FC<ShapesLayerProps> = ({
         const hasIssue = !preview && issueIds.has(h.id);
         const paint = paintOf(h);
         const strong = isSelected || h.id === hoverId;
+        const state = stateOf?.(h);
+        const pattern = state && AVAILABILITY_META[state].pattern !== 'solid' ? availabilityPatternId(state) : null;
         if (isHidden) {
           return (
             <polygon
@@ -64,21 +70,30 @@ export const ShapesLayer: React.FC<ShapesLayerProps> = ({
           );
         }
         return (
-          <polygon
-            key={h.id}
-            data-hotspot-id={h.id}
-            points={toSvgPoints(outline, aspect)}
-            fill={strong ? paint.fillStrong : paint.fill}
-            stroke={isSelected ? PRIMARY : hasIssue ? ISSUE_STROKE : 'rgba(255,255,255,0.9)'}
-            strokeWidth={isSelected ? 2.5 : 1.5}
-            strokeDasharray={hasIssue && !isSelected ? '5 3' : undefined}
-            vectorEffect="non-scaling-stroke"
-            className={interactive ? 'cursor-move' : preview ? 'cursor-pointer' : undefined}
-            pointerEvents={interactive || preview ? 'auto' : 'none'}
-            onPointerEnter={() => setHoverId(h.id)}
-            onPointerLeave={() => setHoverId((cur) => (cur === h.id ? null : cur))}
-            onPointerDown={(e) => interactive && onShapePointerDown?.(e, h.id)}
-          />
+          <React.Fragment key={h.id}>
+            <polygon
+              data-hotspot-id={h.id}
+              points={toSvgPoints(outline, aspect)}
+              fill={strong ? paint.fillStrong : paint.fill}
+              stroke={isSelected ? PRIMARY : hasIssue ? ISSUE_STROKE : 'rgba(255,255,255,0.9)'}
+              strokeWidth={isSelected ? 2.5 : 1.5}
+              strokeDasharray={hasIssue && !isSelected ? '5 3' : undefined}
+              vectorEffect="non-scaling-stroke"
+              className={interactive ? 'cursor-move' : preview ? 'cursor-pointer' : undefined}
+              pointerEvents={interactive || preview ? 'auto' : 'none'}
+              onPointerEnter={() => setHoverId(h.id)}
+              onPointerLeave={() => setHoverId((cur) => (cur === h.id ? null : cur))}
+              onPointerDown={(e) => interactive && onShapePointerDown?.(e, h.id)}
+            />
+            {pattern && (
+              <polygon
+                points={toSvgPoints(outline, aspect)}
+                fill={`url(#${pattern})`}
+                data-pattern-for={h.id}
+                pointerEvents="none"
+              />
+            )}
+          </React.Fragment>
         );
       })}
 

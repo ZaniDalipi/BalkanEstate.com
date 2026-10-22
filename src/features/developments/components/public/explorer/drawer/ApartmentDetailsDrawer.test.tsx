@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ApartmentDetailsDrawer } from './ApartmentDetailsDrawer';
 import { useUnitDrawer } from '../../../../hooks/useUnitDrawer';
+import { usePseudoFullscreen } from '../usePseudoFullscreen';
 import type { PublicUnitDetail } from '../../../../types';
 
 vi.mock('react-i18next', async () => (await import('../__tests__/i18nMock')).default);
@@ -47,12 +48,28 @@ const detail = (over: Partial<PublicUnitDetail['unit']> = {}, allowUnitInquiries
 
 const Harness = () => {
   const d = useUnitDrawer();
+  const fs = usePseudoFullscreen<HTMLElement>();
   return (
     <>
+      <section ref={fs.stageRef} aria-label="stage" data-fullscreen={fs.isFullscreen ? 'on' : 'off'} style={{ zIndex: 4000 }}>
+        <button type="button" onClick={fs.toggle}>toggle-full</button>
+      </section>
       <button type="button" onClick={() => d.open('u1')}>open-unit</button>
       <ApartmentDetailsDrawer slug="res" unitId={d.unitId} onClose={d.close} />
     </>
   );
+};
+
+/** A platform modal as the inquiry / viewing / gallery modals render it: portalled, aria-modal, z ≥ 5000. */
+const openPlatformModal = () => {
+  const modal = document.createElement('div');
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.style.zIndex = '5000';
+  modal.innerHTML = '<button type="button">modal-close</button>';
+  document.body.appendChild(modal);
+  (modal.querySelector('button') as HTMLButtonElement).focus();
+  return modal;
 };
 
 const mount = (entry: string) => {
@@ -151,5 +168,34 @@ describe('ApartmentDetailsDrawer + useUnitDrawer', () => {
     mount('/en/developments/res?unit=u1');
     expect(await screen.findByText('This apartment is no longer available.')).toBeInTheDocument();
     expect(screen.queryByRole('form')).not.toBeInTheDocument();
+  });
+
+  it('Esc with a platform modal above closes neither the drawer nor full screen; later presses peel one layer each', async () => {
+    const router = mount('/en/developments/res');
+    const stage = screen.getByRole('region', { name: 'stage' });
+    fireEvent.click(screen.getByText('toggle-full'));
+    expect(stage.dataset.fullscreen).toBe('on');
+    fireEvent.click(screen.getByText('open-unit'));
+    await screen.findByRole('heading', { name: 'Apt A12' });
+
+    const modal = openPlatformModal();
+    fireEvent.keyDown(modal.querySelector('button') as HTMLElement, { key: 'Escape' });
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(router.state.location.search).toBe('?unit=u1');
+    expect(stage.dataset.fullscreen).toBe('on');
+
+    // The modal closes itself; the next Esc closes the drawer (history back), full screen stays.
+    modal.remove();
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    await waitFor(() => expect(router.state.location.search).toBe(''));
+    expect(stage.dataset.fullscreen).toBe('on');
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Apt A12' })).not.toBeInTheDocument());
+
+    // And the one after that exits full screen.
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    expect(stage.dataset.fullscreen).toBe('off');
   });
 });

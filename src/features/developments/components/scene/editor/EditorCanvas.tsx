@@ -2,15 +2,17 @@ import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Maximize, Minus, Plus } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import type { Hotspot, HotspotLinkType } from '../../../types';
+import type { Hotspot, HotspotLinkType, UnitAvailability } from '../../../types';
 import type { PolygonEditor } from '../../../hooks/usePolygonEditor';
 import { useEditorViewport } from '../../../hooks/useEditorViewport';
 import { ShapesLayer } from './ShapesLayer';
 import { VertexHandles } from './VertexHandles';
 import { DrawingLayer } from './DrawingLayer';
 import { DrawControls } from './DrawControls';
+import { GridLayer } from './GridLayer';
 import { useCanvasPointer } from './useCanvasPointer';
 import type { RegionPaint } from './canvasUtils';
+import { AvailabilityPatterns } from '../../public/explorer/AvailabilityPatterns';
 
 interface EditorCanvasProps {
   imageUrl: string;
@@ -19,6 +21,7 @@ interface EditorCanvasProps {
   editor: PolygonEditor;
   linkType: HotspotLinkType;
   paintOf: (h: Hotspot) => RegionPaint;
+  stateOf: (h: Hotspot) => UnitAvailability | undefined;
   labelOf: (h: Hotspot) => string;
   showLabels: boolean;
   preview: boolean;
@@ -39,6 +42,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   editor,
   linkType,
   paintOf,
+  stateOf,
   labelOf,
   showLabels,
   preview,
@@ -57,6 +61,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const selected = !preview && state.tool === 'select' ? state.hotspots.find((h) => h.id === state.selectedId) : undefined;
   const coarse = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
   const grid = !preview && state.snap.grid ? state.snap.gridStep : 0;
+  // Same pattern tiles as the public explorer, converted from image pixels to this viewBox.
+  const imgW = imageWidth > 0 ? imageWidth : 1600;
 
   return (
     <div
@@ -80,22 +86,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
           className={cn('absolute inset-0 h-full w-full', !preview && state.tool !== 'select' && 'cursor-crosshair')}
           {...pointer.svgHandlers}
         >
-          {grid > 0 && (
-            <>
-              <defs>
-                <pattern id="be-editor-grid" width={grid * aspect} height={grid} patternUnits="userSpaceOnUse">
-                  <path
-                    d={`M ${grid * aspect} 0 L 0 0 0 ${grid}`}
-                    fill="none"
-                    stroke="rgba(255,255,255,0.25)"
-                    strokeWidth={1}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </pattern>
-              </defs>
-              <rect width={aspect} height={1} fill="url(#be-editor-grid)" pointerEvents="none" />
-            </>
-          )}
+          <AvailabilityPatterns scale={imgW} userUnit={aspect / imgW} />
+          <GridLayer step={grid} aspect={aspect} />
           <ShapesLayer
             hotspots={state.hotspots}
             aspect={aspect}
@@ -104,6 +96,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             selectedId={state.selectedId}
             issueIds={issueIds}
             paintOf={paintOf}
+            stateOf={stateOf}
             labelOf={labelOf}
             showLabels={showLabels}
             preview={preview}

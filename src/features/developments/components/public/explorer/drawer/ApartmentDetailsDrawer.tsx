@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import type { PublicUnit } from '../../../../types';
 import { useFocusTrap } from './useFocusTrap';
+import { useEscapeLayer } from '../useEscapeLayer';
 import { DrawerUnitContent } from './DrawerUnitContent';
 
 interface ApartmentDetailsDrawerProps {
@@ -34,6 +35,10 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
   const ref = useRef<HTMLDivElement>(null);
   const [childModalOpen, setChildModalOpen] = useState(false);
   const trapKeys = useFocusTrap(ref, childModalOpen);
+  // Esc closes the drawer (history back) only when no platform modal is above
+  // it — and not again while the exit animation runs.
+  const present = useIsPresent();
+  useEscapeLayer(ref, onClose, present && !childModalOpen);
   const reduce = useReducedMotion();
 
   useEffect(() => {
@@ -46,7 +51,8 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
 
   const hidden = desktop ? { x: '100%' } : { y: '100%' };
   return (
-    <div className="fixed inset-0 z-[4500]">
+    // Inline z-index (not a class) so isTopmostLayer reads the same stacking everywhere.
+    <div className="fixed inset-0" style={{ zIndex: 4500 }}>
       <motion.div
         className="absolute inset-0 bg-slate-950/50"
         initial={{ opacity: 0 }}
@@ -65,15 +71,7 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
         animate={reduce ? { opacity: 1 } : { x: 0, y: 0 }}
         exit={reduce ? { opacity: 0 } : hidden}
         transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape' && !childModalOpen) {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-            return;
-          }
-          trapKeys(e);
-        }}
+        onKeyDown={trapKeys}
         className={
           desktop
             ? 'absolute inset-y-0 right-0 flex w-full max-w-[460px] flex-col bg-white shadow-2xl outline-none'
@@ -102,7 +100,8 @@ const Panel: React.FC<ApartmentDetailsDrawerProps & { desktop: boolean }> = ({ s
  * Apartment details: a right-hand drawer on desktop, a bottom sheet on
  * phones. Portalled to <body> at z 4500 — above the explorer (4000), below the
  * platform modals (≥ 5000) it opens (inquiry, viewing, gallery). Focus is
- * trapped while open and Esc closes it (unless a stacked modal owns Esc).
+ * trapped while open and Esc closes it unless a modal is stacked above
+ * (useEscapeLayer / isTopmostLayer), so Esc in a modal closes only the modal.
  */
 export const ApartmentDetailsDrawer: React.FC<ApartmentDetailsDrawerProps> = (props) => {
   const desktop = useIsDesktop();

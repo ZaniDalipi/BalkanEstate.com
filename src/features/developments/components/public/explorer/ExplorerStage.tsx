@@ -43,7 +43,7 @@ const pill =
  */
 export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const { t } = useTranslation('developments');
-  const fs = usePseudoFullscreen();
+  const fs = usePseudoFullscreen<HTMLElement>();
   const [showFilters, setShowFilters] = useState(false);
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
@@ -58,13 +58,15 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
 
   const stage = (
     <section
+      ref={fs.stageRef}
       aria-label={t('explorer.heading', 'Interactive residence explorer')}
       onKeyDown={onKeyDown}
+      style={full ? { zIndex: 4000 } : undefined}
       className={cn(
         'bg-slate-900',
         // Off full screen, desktop keeps the controls in bands above/below the
         // image so they never cover the top or ground-floor apartments.
-        full ? 'fixed inset-0 z-[4000] flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
+        full ? 'fixed inset-0 flex items-center justify-center overflow-hidden' : 'relative w-full sm:pb-32 sm:pt-28 lg:pb-[4.5rem]'
       )}
     >
       <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>

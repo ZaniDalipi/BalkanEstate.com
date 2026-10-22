@@ -193,4 +193,16 @@ describe('SceneEditor', () => {
     expect((screen.getByLabelText('Label (optional)') as HTMLInputElement).value).toBe('Mine');
     expect(screen.queryByText('Unsaved changes')).toBeNull();
   });
+
+  it('preview draws the colour-blind availability patterns over unit regions', () => {
+    const { container } = render(<SceneEditor developmentId="d1" scene={makeScene([square('free', 'u1'), square('gone', 'u2')])} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    // The shared AvailabilityPatterns defs, scaled to the editor's 0..aspect viewBox (aspect 2, image 2000 px).
+    const sold = container.querySelector('pattern#be-av-sold') as SVGPatternElement;
+    expect(sold).toBeTruthy();
+    expect(Number(sold.getAttribute('width'))).toBeCloseTo((2000 / 90) * (2 / 2000), 6);
+    // Sold (cross) gets a pattern overlay; available is solid, so none.
+    expect(container.querySelector('[data-pattern-for="gone"]')?.getAttribute('fill')).toBe('url(#be-av-sold)');
+    expect(container.querySelector('[data-pattern-for="free"]')).toBeNull();
+  });
 });

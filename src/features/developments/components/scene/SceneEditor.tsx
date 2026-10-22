@@ -39,7 +39,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
   const rootRef = useRef<HTMLDivElement>(null);
   const editor = usePolygonEditor(scene.draft?.hotspots ?? []);
   const sync = useSceneSync(developmentId, scene, editor);
-  const { options, availabilityOf, labelOf } = useLinkOptions(developmentId, scene);
+  const { options, availabilityOf, labelOf, unitPicker } = useLinkOptions(developmentId, scene);
   const [showLabels, setShowLabels] = useState(true);
   const [preview, setPreview] = useState(false);
   const linkType = DEFAULT_LINK_TYPE[scene.targetType];
@@ -50,6 +50,10 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
   useEffect(() => () => onDirtyChange?.(false), [onDirtyChange]);
 
   const paintOf = useCallback((h: Hotspot) => regionPaint(h, availabilityOf), [availabilityOf]);
+  const stateOf = useCallback(
+    (h: Hotspot) => (h.linkType === 'unit' && h.linkId ? availabilityOf(h.linkId) : undefined),
+    [availabilityOf]
+  );
   const { state } = editor;
   const selected = state.hotspots.find((h) => h.id === state.selectedId) ?? null;
   const issueCount = Object.keys(editor.issues).length;
@@ -78,6 +82,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
             editor={editor}
             linkType={linkType}
             paintOf={paintOf}
+            stateOf={stateOf}
             labelOf={labelOf}
             showLabels={showLabels}
             preview={preview}
@@ -106,6 +111,8 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
                 editor={editor}
                 hotspot={selected}
                 linkOptions={options}
+                unitPicker={unitPicker}
+                targetLabel={labelOf({ ...selected, label: '' })}
                 issues={sync.issues[selected.id] ?? []}
               />
             ) : (

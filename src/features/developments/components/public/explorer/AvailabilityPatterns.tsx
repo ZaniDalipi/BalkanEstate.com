@@ -26,11 +26,14 @@ export const motif = (p: AvailabilityPattern, s: number, w: number): React.React
  * One SVG <pattern> per availability state (ids from availabilityPatternId),
  * drawn over the colour fill so states stay distinguishable without colour —
  * stripes for reserved, a cross for sold, dots for coming soon, and so on.
- * `scale` is the image width, so the motif keeps a sensible size on any render.
+ * `scale` is the image width in pixels, so the motif keeps a sensible size on
+ * any render. `userUnit` is the SVG user units per image pixel: 1 for the
+ * public explorer (viewBox in image pixels); the region editor, whose viewBox
+ * is `0 0 aspect 1`, passes aspect / imageWidth so the stripes match.
  */
-export const AvailabilityPatterns: React.FC<{ scale: number }> = ({ scale }) => {
-  const s = Math.max(8, scale / 90);
-  const w = Math.max(1, s / 7);
+export const AvailabilityPatterns: React.FC<{ scale: number; userUnit?: number }> = ({ scale, userUnit = 1 }) => {
+  const s = Math.max(8, scale / 90) * userUnit;
+  const w = Math.max(1, s / userUnit / 7) * userUnit;
   return (
     <defs>
       {AVAILABILITY_ORDER.filter((st) => AVAILABILITY_META[st].pattern !== 'solid').map((st) => (

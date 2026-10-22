@@ -17,30 +17,52 @@ interface SearchableSelectProps {
   options: SelectOption[];
   value: string;
   onChange: (id: string) => void;
+  /** Controlled search text (e.g. when the caller also searches the server). */
+  query?: string;
+  onQueryChange?: (q: string) => void;
+  /** Name of the selected target when it is not among `options` (beyond the loaded page). */
+  currentLabel?: string;
+  /** How many matches exist in total (server-side); drives the "showing first N" hint. */
+  total?: number;
+  /** A server search is in flight. */
+  busy?: boolean;
 }
 
-const MAX_SHOWN = 80;
+export const MAX_SHOWN = 80;
 
 /** A filterable single-choice list — usable with hundreds of units. */
-export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, options, value, onChange }) => {
+export const SearchableSelect: React.FC<SearchableSelectProps> = ({
+  label,
+  options,
+  value,
+  onChange,
+  query,
+  onQueryChange,
+  currentLabel,
+  total,
+  busy,
+}) => {
   const { t } = useTranslation('developments');
-  const [q, setQ] = useState('');
+  const [localQ, setLocalQ] = useState('');
+  const q = query ?? localQ;
+  const setQ = onQueryChange ?? setLocalQ;
   const listId = useId();
-  const current = options.find((o) => o.id === value);
+  const currentName = options.find((o) => o.id === value)?.label ?? (value ? currentLabel || value : undefined);
 
-  const filtered = useMemo(() => {
+  const matches = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const list = needle
+    return needle
       ? options.filter((o) => o.label.toLowerCase().includes(needle) || o.hint?.toLowerCase().includes(needle))
       : options;
-    return list.slice(0, MAX_SHOWN);
   }, [options, q]);
+  const filtered = matches.slice(0, MAX_SHOWN);
+  const truncated = (total ?? matches.length) > filtered.length;
 
   return (
     <div className="space-y-2">
-      {current ? (
+      {currentName ? (
         <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 px-2 py-1 text-sm">
-          <span className="min-w-0 truncate text-slate-800">{current.label}</span>
+          <span className="min-w-0 truncate text-slate-800">{currentName}</span>
           <button
             type="button"
             onClick={() => onChange('')}
@@ -90,6 +112,15 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, optio
           );
         })}
       </ul>
+      {(busy || truncated) && (
+        <p className="text-[11px] text-slate-500" role="status">
+          {busy
+            ? t('editor.link.searching', 'Searching…')
+            : q.trim()
+              ? t('editor.link.refine', 'Showing first {{n}} matches — keep typing to narrow down', { n: filtered.length })
+              : t('editor.link.truncated', 'Showing first {{n}} — type to search', { n: filtered.length })}
+        </p>
+      )}
     </div>
   );
 };

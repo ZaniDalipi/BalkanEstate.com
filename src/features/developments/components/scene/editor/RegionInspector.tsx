@@ -6,6 +6,8 @@ import type { Hotspot, HotspotLinkType } from '../../../types';
 import type { PolygonEditor } from '../../../hooks/usePolygonEditor';
 import { ListingLinkPicker } from '../ListingLinkPicker';
 import { SearchableSelect, type SelectOption } from './SearchableSelect';
+import { UnitTargetPicker } from './UnitTargetPicker';
+import type { UnitPickerSource } from './useLinkOptions';
 import { issueText, type AnyIssueCode } from './issueText';
 
 export type LinkOptions = Record<'building' | 'floor' | 'unit' | 'entrance', SelectOption[]>;
@@ -15,6 +17,9 @@ interface RegionInspectorProps {
   editor: PolygonEditor;
   hotspot: Hotspot;
   linkOptions: LinkOptions;
+  unitPicker: UnitPickerSource;
+  /** Name of the current target (resolves units beyond the loaded page). */
+  targetLabel: string;
   issues: AnyIssueCode[];
 }
 
@@ -23,7 +28,15 @@ const fieldCls =
   'min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-[36px]';
 
 /** Link target, label and actions of the selected region. */
-export const RegionInspector: React.FC<RegionInspectorProps> = ({ developmentId, editor, hotspot, linkOptions, issues }) => {
+export const RegionInspector: React.FC<RegionInspectorProps> = ({
+  developmentId,
+  editor,
+  hotspot,
+  linkOptions,
+  unitPicker,
+  targetLabel,
+  issues,
+}) => {
   const { t } = useTranslation('developments');
   const { dispatch, nextId } = editor;
   const patch = (p: Partial<Pick<Hotspot, 'label' | 'linkType' | 'linkId'>>) => dispatch({ type: 'PATCH', id: hotspot.id, patch: p });
@@ -71,6 +84,16 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({ developmentId,
             value={hotspot.linkId}
             onPick={(id, title) => patch({ linkId: id, label: hotspot.label || title })}
             onClear={() => patch({ linkId: '' })}
+          />
+        ) : hotspot.linkType === 'unit' ? (
+          <UnitTargetPicker
+            developmentId={developmentId}
+            label={t('scene.linkTarget', 'Target')}
+            source={unitPicker}
+            baseOptions={linkOptions.unit}
+            value={hotspot.linkId}
+            currentLabel={targetLabel}
+            onChange={(id) => patch({ linkId: id })}
           />
         ) : (
           <SearchableSelect
