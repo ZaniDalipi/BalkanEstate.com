@@ -54,6 +54,7 @@ copies are tested against the same fixture
 
 The server **rejects** invalid shapes and never clamps them. It rejects:
 
+- more than 20,000 points across one view (checked first, keeping each save bounded)
 - non-finite numbers
 - points out of bounds
 - fewer than 3 or more than 200 points
@@ -147,7 +148,7 @@ included; anything else returns 404.
 | `POST /scenes` (multipart `image` + target + view fields) | `scene.edit` (+ `media.upload`, checked in the service) |
 | `PATCH /scenes/:id` (name, direction, order) | `scene.edit` |
 | `PATCH /scenes/:id/draft {hotspots, baseVersion}` | `scene.edit`. Returns 409 `version_conflict` and 400 `errors: HotspotIssue[]` when they apply. |
-| `POST /scenes/:id/publish`, `/unpublish` | `publish` |
+| `POST /scenes/:id/publish`, `/unpublish` | `publish` (rate limited) |
 | `DELETE /scenes/:id` | `scene.edit` |
 
 **Rate limiting.** Mutations use `mutationRateLimiter` and uploads use
@@ -235,7 +236,7 @@ not configured" error. Floorplans use the existing `development-scene` media kin
 
 | Suite | Command | Result |
 | --- | --- | --- |
-| Backend developments (real `mongod` via MongoMemoryServer system binary) | `cd backend && NODE_OPTIONS=--max-old-space-size=8192 MONGOMS_SYSTEM_BINARY=/usr/local/bin/mongod npx jest --runInBand --testPathPattern developments` | 18 suites, **173 passed** |
+| Backend developments (real `mongod` via MongoMemoryServer system binary) | `cd backend && NODE_OPTIONS=--max-old-space-size=8192 MONGOMS_SYSTEM_BINARY=/usr/local/bin/mongod npx jest --runInBand --testPathPattern developments` | 19 suites, **184 passed** |
 | Frontend developments + i18n keys | `npx vitest run src/features/developments src/tests/i18n-keys.test.ts` | 19 files, **149 passed** |
 | E2E (Playwright, real backend + Vite + seeded MongoDB) | `CHROME_PATH=… E2E_DEV_EMAIL=… E2E_DEV_PASSWORD=… npx playwright test e2e/residence-explorer.spec.ts` | **5 passed**, 5 skipped by design (each flow runs on either desktop or mobile) |
 | Backend typecheck | `cd backend && npx tsc --noEmit` | clean |
@@ -258,6 +259,23 @@ not configured" error. Floorplans use the existing `development-scene` media kin
 - version conflicts, including 5 concurrent saves → exactly one wins
 - publish re-validation and unpublish
 - the legacy scene endpoint
+
+`security-review-fixes.test.ts` pins the findings of an adversarial review of
+these endpoints, each fixed on this branch:
+
+- `/nearby` used to return owner ids and storage keys
+- public stats counted hidden units
+- follower price filters matched on-request prices
+- `request-attachment` revealed draft developments
+- creating a unit could set price/availability without `price.change` / `availability.change`
+- `agencyId` on create wasn't checked against the caller
+- a draft had no total vertex cap; publish had no rate limit
+- CSV cells could carry formulas after a `;` separator
+- negative `limit`/`skip` on the public list
+- `javascript:` websites were accepted
+- email template values expanded `$`-patterns
+
+The attach preview also now hides other people's listing details.
 
 **E2E** covers:
 

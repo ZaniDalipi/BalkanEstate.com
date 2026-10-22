@@ -79,12 +79,15 @@ export const previewConflicts = async (req: Request, res: Response): Promise<voi
       return;
     }
     const controlsListing = await callerControlsListing(currentUser(req), property);
-    const conflicts = detectAttachmentConflicts({
+    const all = detectAttachmentConflicts({
       property,
       unit,
       targetDevelopmentId: String(req.development!._id),
       controlsListing,
     });
+    // For a listing the caller doesn't control, report only that: its status or
+    // where else it is attached is the owner's business, not the caller's.
+    const conflicts = controlsListing ? all : all.filter((c) => c.code === 'listing_not_controlled_by_caller');
     res.json({ conflicts, canAttach: conflicts.every((c) => !c.blocking) });
   } catch (error) {
     sendServiceError(res, error, 'preview attachment conflicts');

@@ -12,7 +12,9 @@ const log = createLogger('DevelopmentAlertService');
  * be alerted about a unit with no bedroom count).
  */
 export const unitMatchesFilters = (
-  unit: Pick<IDevelopmentUnit, 'beds' | 'price' | 'totalArea' | 'netArea' | 'grossArea'>,
+  unit: Pick<IDevelopmentUnit, 'beds' | 'price' | 'totalArea' | 'netArea' | 'grossArea'> & {
+    priceVisibility?: string;
+  },
   filters: IFollowFilters | undefined
 ): boolean => {
   if (!filters) return true;
@@ -32,7 +34,9 @@ export const unitMatchesFilters = (
 
   return (
     within(unit.beds, filters.minBeds, filters.maxBeds) &&
-    within(unit.price, filters.minPrice, filters.maxPrice) &&
+    // An on-request price is confidential: price bands must not match on it,
+    // or which followers get alerted would reveal the price.
+    within(unit.priceVisibility === 'on_request' ? undefined : unit.price, filters.minPrice, filters.maxPrice) &&
     within(area, filters.minArea, filters.maxArea)
   );
 };

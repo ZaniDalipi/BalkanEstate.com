@@ -288,7 +288,7 @@ export const permissionForUnitField = (field: string): DevelopmentPermission => 
   return 'unit.manage';
 };
 
-const assertAllowed = (role: DevelopmentRole | undefined, fields: string[]): void => {
+export const assertAllowed = (role: DevelopmentRole | undefined, fields: string[]): void => {
   const needed = new Set(fields.map(permissionForUnitField));
   const denied = [...needed].filter((p) => !role || !roleHasPermission(role, p));
   if (denied.length > 0) {
@@ -602,9 +602,11 @@ export const csvCell = (value: unknown): string => {
   if (value === undefined || value === null) return '';
   if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '';
   let s = String(value);
-  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-  if (/[",\r\n]/.test(s)) s = `"${s.replace(/"/g, '""')}"`;
-  return s;
+  // Neutralise a formula at the start, after leading whitespace, or after a
+  // ; or , that a locale's list separator would turn into a new cell.
+  if (/^\s*[=+\-@]|^[\t\r]|[;,]\s*[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  // Always quote text so separators inside it never split the cell.
+  return `"${s.replace(/"/g, '""')}"`;
 };
 
 const CSV_HEADER = [

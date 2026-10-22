@@ -64,9 +64,9 @@ const parseCsv = (text: string): string[][] => {
 describe('csvCell', () => {
   it('neutralises formula prefixes and quotes special characters', () => {
     expect(csvCell('=HYPERLINK("x")')).toBe(`"'=HYPERLINK(""x"")"`);
-    expect(csvCell('+1')).toBe("'+1");
-    expect(csvCell('-2')).toBe("'-2");
-    expect(csvCell('@SUM(A1)')).toBe("'@SUM(A1)");
+    expect(csvCell('+1')).toBe(`"'+1"`);
+    expect(csvCell('-2')).toBe(`"'-2"`);
+    expect(csvCell('@SUM(A1)')).toBe(`"'@SUM(A1)"`);
     expect(csvCell('a,b')).toBe('"a,b"');
     expect(csvCell('line\nbreak')).toBe('"line\nbreak"');
     expect(csvCell(12.5)).toBe('12.5');

@@ -93,6 +93,12 @@ export const SCENE_VIEW_KEY_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/;
 export const DEFAULT_SCENE_VIEW_KEY = 'main';
 /** Upper bound on hotspots per view — enough for a tower of several hundred units. */
 export const MAX_HOTSPOTS_PER_SCENE = 2000;
+/**
+ * Upper bound on vertices across one view. Validation (duplicate and
+ * self-intersection checks) is quadratic per polygon, so this keeps a single
+ * save or publish to a bounded amount of CPU.
+ */
+export const MAX_POINTS_PER_SCENE = 20000;
 
 /**
  * Apartment feature flags — the "Apartment type" toggles buyers filter on

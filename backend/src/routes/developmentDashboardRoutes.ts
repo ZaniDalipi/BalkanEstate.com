@@ -279,6 +279,7 @@ router.patch(
 router.post(
   '/:developmentId/scenes/:sceneId/publish',
   protect,
+  mutationRateLimiter,
   developmentAuth,
   requireDevelopmentPermission('publish'),
   publishScene
@@ -286,6 +287,7 @@ router.post(
 router.post(
   '/:developmentId/scenes/:sceneId/unpublish',
   protect,
+  mutationRateLimiter,
   developmentAuth,
   requireDevelopmentPermission('publish'),
   unpublishScene

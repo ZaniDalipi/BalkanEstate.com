@@ -4,6 +4,8 @@ import DevelopmentBuilding from '../../models/DevelopmentBuilding';
 import DevelopmentUnit from '../../models/DevelopmentUnit';
 import DevelopmentMembership from '../../models/DevelopmentMembership';
 import { IUser } from '../../models/User';
+import Agency from '../../models/Agency';
+import { resolveId } from '../../utils/idObfuscation';
 import { slugify } from '../media/mediaNaming';
 import { createLogger } from '../../utils/logger';
 import {
@@ -85,17 +87,31 @@ export const createDevelopment = async (
       `constructionStatus must be one of: ${DEVELOPMENT_CONSTRUCTION_STATUSES.join(', ')}`
     );
   }
+  assertWebsite(input.website);
   if (!input.name?.trim()) throw new ValidationError('name is required');
   if (!input.country?.trim()) throw new ValidationError('country is required');
   if (!input.city?.trim()) throw new ValidationError('city is required');
 
-  const ownerType: 'user' | 'agency' = input.agencyId ? 'agency' : 'user';
+  // Agency ownership grants the agency's owner/admins full rights, so only
+  // they may create a development under that agency.
+  let agencyId: mongoose.Types.ObjectId | undefined;
+  if (input.agencyId) {
+    const raw = typeof input.agencyId === 'string' ? resolveId(input.agencyId) : null;
+    if (!raw || !mongoose.Types.ObjectId.isValid(raw)) throw new ValidationError('agencyId is invalid');
+    const agency = await Agency.findById(raw).select('ownerId admins').lean();
+    const uid = String(user._id);
+    const canUseAgency =
+      !!agency && (String(agency.ownerId) === uid || (agency.admins ?? []).some((a) => String(a) === uid));
+    if (!canUseAgency) throw new ForbiddenError('You can only create developments for an agency you own or administer');
+    agencyId = new mongoose.Types.ObjectId(raw);
+  }
+  const ownerType: 'user' | 'agency' = agencyId ? 'agency' : 'user';
   const slug = await generateUniqueDevelopmentSlug(input.name);
 
   const development = await Development.create({
     ownerId: user._id,
     ownerType,
-    agencyId: input.agencyId,
+    agencyId,
     name: input.name.trim(),
     slug,
     description: input.description,
@@ -198,6 +214,7 @@ export const updateDevelopment = async (
   for (const key of EDITABLE_FIELDS) {
     if (!(key in updates)) continue;
     const value = updates[key];
+    if (key === 'website') assertWebsite(value);
     if (key === 'category' && !isValidCategory(value)) {
       throw new ValidationError(`category must be one of: ${DEVELOPMENT_CATEGORIES.join(', ')}`);
     }
@@ -256,10 +273,12 @@ export const recomputeDevelopmentStats = async (
 ): Promise<IDevelopmentStats> => {
   const [buildings, units, available] = await Promise.all([
     DevelopmentBuilding.countDocuments({ developmentId, deletedAt: { $exists: false } }),
-    DevelopmentUnit.countDocuments({ developmentId, deletedAt: { $exists: false } }),
+    // Hidden units are never counted: these stats are shown to buyers.
+    DevelopmentUnit.countDocuments({ developmentId, deletedAt: { $exists: false }, visibility: { $ne: 'hidden' } }),
     DevelopmentUnit.countDocuments({
       developmentId,
       deletedAt: { $exists: false },
+      visibility: { $ne: 'hidden' },
       availability: 'available',
     }),
   ]);
@@ -275,6 +294,22 @@ interface IDevelopmentStats {
 }
 
 /** A client-input error that controllers map to HTTP 400. */
+/** The website is rendered as a link: only http(s) URLs are accepted. */
+function assertWebsite(value: unknown): void {
+  if (value === undefined || value === null || value === '') return;
+  if (typeof value !== 'string' || !/^https?:\/\/[^\s]+$/i.test(value.trim())) {
+    throw new ValidationError('website must be an http(s) URL');
+  }
+}
+
+export class ForbiddenError extends Error {
+  readonly statusCode = 403;
+  constructor(message: string) {
+    super(message);
+    this.name = 'ForbiddenError';
+  }
+}
+
 export class ValidationError extends Error {
   readonly statusCode = 400;
   constructor(message: string) {

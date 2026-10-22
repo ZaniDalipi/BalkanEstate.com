@@ -291,6 +291,13 @@ export const addFloor = async (req: Request, res: Response): Promise<void> => {
 
 export const addUnit = async (req: Request, res: Response): Promise<void> => {
   try {
+    // Same field-level rules as PATCH: a role without price.change /
+    // availability.change cannot set those fields by creating a unit either.
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const touched = Object.keys(body).filter(
+      (k) => body[k] !== undefined && body[k] !== null && body[k] !== '' && unitAdmin.permissionForUnitField(k) !== 'unit.manage'
+    );
+    unitAdmin.assertAllowed(req.developmentRole, touched);
     // createUnit resolves encoded building/floor ids and checks floor ∈ building ∈ development.
     const unit = await createUnit(req.development!._id as mongoose.Types.ObjectId, req.body ?? {});
     await DevelopmentAuditLog.create({
@@ -353,8 +360,10 @@ export const updateAvailability = async (req: Request, res: Response): Promise<v
 /** GET /api/developments — public, published discovery list. */
 export const listPublic = async (req: Request, res: Response): Promise<void> => {
   try {
-    const limit = Math.min(Number(req.query.limit) || 20, 100);
-    const skip = Number(req.query.skip) || 0;
+    const rawLimit = Math.floor(Number(req.query.limit));
+    const rawSkip = Math.floor(Number(req.query.skip));
+    const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 100) : 20;
+    const skip = Number.isFinite(rawSkip) && rawSkip > 0 ? rawSkip : 0;
     const query: Record<string, unknown> = {
       status: 'published',
       deletedAt: { $exists: false },

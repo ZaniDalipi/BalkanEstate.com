@@ -31,6 +31,7 @@ import {
   SCENE_VIEW_KEY_PATTERN,
   DEFAULT_SCENE_VIEW_KEY,
   MAX_HOTSPOTS_PER_SCENE,
+  MAX_POINTS_PER_SCENE,
   isSceneViewDirection,
   roleHasPermission,
   type DevelopmentRole,
@@ -396,6 +397,21 @@ export const validateHotspots = async (raw: unknown, ctx: ValidateContext): Prom
         field: 'hotspots',
         code: 'too_many_hotspots',
         message: `A view can hold at most ${MAX_HOTSPOTS_PER_SCENE} regions`,
+      },
+    ]);
+  }
+
+  const totalPoints = raw.reduce<number>((n, item) => {
+    const pts = item && typeof item === 'object' ? (item as { points?: unknown }).points : undefined;
+    return n + (Array.isArray(pts) ? pts.length : 0);
+  }, 0);
+  if (totalPoints > MAX_POINTS_PER_SCENE) {
+    throw new HotspotValidationError([
+      {
+        index: 0,
+        field: 'points',
+        code: 'too_many_hotspots',
+        message: `A view can hold at most ${MAX_POINTS_PER_SCENE} points in total`,
       },
     ]);
   }

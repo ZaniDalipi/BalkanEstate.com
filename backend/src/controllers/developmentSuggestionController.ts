@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { toPublicDevelopment } from '../services/developments/developmentPublicService';
 import { IUser } from '../models/User';
 import Development, { IDevelopment } from '../models/Development';
 import DevelopmentMembership from '../models/DevelopmentMembership';
@@ -81,7 +82,7 @@ export const nearbyDevelopments = async (req: Request, res: Response): Promise<v
 
     res.json({
       suggestions: ranked.map((r) => ({
-        development: r.dev,
+        development: toPublicDevelopment(r.dev),
         distanceM: Math.round(r.distanceM),
         matchScore: scoreForDistance(r.distanceM),
         canAttach: canAttachMap.get(String(r.dev._id)) ?? false,
@@ -159,7 +160,7 @@ export const attachListing = async (req: Request, res: Response): Promise<void> 
 export const requestAttachment = async (req: Request, res: Response): Promise<void> => {
   try {
     const slug = String(req.params.slug || '').toLowerCase();
-    const development = await Development.findOne({ slug, deletedAt: { $exists: false } }).select('_id');
+    const development = await Development.findOne({ slug, status: 'published', deletedAt: { $exists: false } }).select('_id');
     if (!development) {
       res.status(404).json({ message: 'Development not found' });
       return;
