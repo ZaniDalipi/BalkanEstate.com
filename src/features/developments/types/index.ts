@@ -555,7 +555,11 @@ export interface HotspotIssue {
     | 'missing_link'
     | 'link_not_found'
     | 'invalid_shape'
-    | 'too_many_hotspots';
+    | 'too_many_hotspots'
+    | 'invalid_id'
+    | 'invalid_label';
+  /** Which part of the hotspot failed (e.g. 'points', 'linkId', 'label'). */
+  field?: string;
   message: string;
 }
 

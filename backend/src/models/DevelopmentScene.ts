@@ -126,7 +126,7 @@ const DevelopmentSceneSchema: Schema = new Schema(
       lowercase: true,
       match: [SCENE_VIEW_KEY_PATTERN, 'viewKey must be a short lowercase slug'],
     },
-    viewName: { type: String, trim: true, maxlength: 60 },
+    viewName: { type: String, trim: true, maxlength: 80 },
     viewDirection: { type: String, enum: SCENE_VIEW_DIRECTIONS, default: 'front' },
     sortOrder: { type: Number, default: 0, min: 0, max: 999 },
     imageMediaId: {
