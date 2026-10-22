@@ -1,39 +1,38 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
-import { navigate, goBack } from '@/src/app/router/navigation';
+import { goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { Button } from '@/src/components/ui/button';
-import { useMyDevelopment, useDevelopmentUnits } from '../../hooks';
-import { usePublishDevelopment } from '../../hooks';
+import { useMyDevelopment } from '../../hooks/useDevelopment';
 import { StatusPill } from '../shared/Badges';
 import { LoadingState, ErrorState } from '../shared/States';
-import { CoverImageUpload } from '../shared/CoverImageUpload';
 import { SceneStudio } from '../scene/SceneStudio';
 import { QuickAddInventory } from './inventory/QuickAddInventory';
-import { UnitsTable } from './inventory/UnitsTable';
-import { AttachListingPanel } from './listings/AttachListingPanel';
-import type { DevelopmentUnit } from '../../types';
+import { InventoryTable } from './inventory/InventoryTable';
+import { roleCan } from './inventory/permissions';
+import { LinkedListingsPanel } from './listings/LinkedListingsPanel';
+import { ManageTabs, panelId, tabId, useTabParam, type ManageTab } from './ManageTabs';
+import { OverviewPanel } from './OverviewPanel';
+
+const TAB_IDS = ['overview', 'inventory', 'explorer', 'listings'] as const;
+type TabId = (typeof TAB_IDS)[number];
+const PREFIX = 'dev-manage';
 
 /**
- * Dashboard page for one development: overview + publish control, inventory
- * builder, units table, and the existing-listing attach panel. All server
- * state comes through hooks; mutations invalidate the development's detail key
- * so the whole page stays in sync.
+ * Dashboard page for one development, split into tabs (synced to `?tab=`):
+ * overview (status, publish, unit totals, cover), inventory (builder + table),
+ * the interactive explorer studio, and linked listings.
  */
 const DevelopmentManagePage: React.FC = () => {
   const { t } = useTranslation('developments');
   const { id } = useParams();
-  const { development, isLoading, error, refetch } = useMyDevelopment(id);
-  const { units, refetch: refetchUnits } = useDevelopmentUnits(id, { limit: 200 });
-  const { setStatus, isLoading: isPublishing } = usePublishDevelopment(id ?? '');
-
-  const [attachUnit, setAttachUnit] = useState<DevelopmentUnit | null>(null);
+  const { development, role, isLoading, error, refetch } = useMyDevelopment(id);
+  const [tab, setTab] = useTabParam<TabId>(TAB_IDS);
 
   if (isLoading) {
     return (
-      <main className="mx-auto w-full max-w-5xl px-4 py-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-8">
         <LoadingState rows={4} />
       </main>
     );
@@ -41,97 +40,86 @@ const DevelopmentManagePage: React.FC = () => {
 
   if (error || !development) {
     return (
-      <main className="mx-auto w-full max-w-5xl px-4 py-8">
-        <ErrorState message={t('errors.notFound')} onRetry={() => refetch()} retryLabel={t('errors.generic')} />
+      <main className="mx-auto w-full max-w-6xl px-4 py-8">
+        <ErrorState message={t('errors.notFound', 'Development not found.')} onRetry={() => refetch()} retryLabel={t('inventory.retry', 'Retry')} />
       </main>
     );
   }
 
-  const isPublished = development.status === 'published';
+  const tabs: ManageTab<TabId>[] = [
+    { id: 'overview', label: t('manage.tabs.overview', 'Overview') },
+    { id: 'inventory', label: t('manage.tabs.inventory', 'Inventory') },
+    { id: 'explorer', label: t('manage.tabs.explorer', 'Interactive explorer') },
+    { id: 'listings', label: t('manage.tabs.listings', 'Linked listings') },
+  ];
+
+  const panel = (which: TabId, content: React.ReactNode) => (
+    <div
+      key={which}
+      role="tabpanel"
+      id={panelId(PREFIX, which)}
+      aria-labelledby={tabId(PREFIX, which)}
+      hidden={tab !== which}
+      tabIndex={0}
+      className="pt-6 focus:outline-none"
+    >
+      {/* Only the active panel mounts its content (the explorer studio is heavy). */}
+      {tab === which && content}
+    </div>
+  );
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8">
       <button
         type="button"
         onClick={() => goBack(paths.developmentsDashboard())}
-        className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-600 hover:text-slate-900"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        {t('nav.dashboard')}
+        {t('nav.dashboard', 'Dashboard')}
       </button>
 
-      <header className="mb-6">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-foreground">{development.name}</h1>
+      <header className="mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900">{development.name}</h1>
           <StatusPill status={development.status} />
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-slate-600">
           {development.city}, {development.country} · {t(`category.${development.category}`)}
         </p>
-        {/* Actions on their own row so they clear the app's top-right floating bar. */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Button
-            variant={isPublished ? 'outline' : 'default'}
-            disabled={isPublishing}
-            onClick={() => setStatus(isPublished ? 'draft' : 'published')}
-          >
-            {isPublished ? t('detail.unpublish') : t('detail.publish')}
-          </Button>
-          {isPublished && (
-            <Button variant="ghost" onClick={() => navigate(paths.development(development.slug))}>
-              {t('public.viewDetails')}
-            </Button>
-          )}
-        </div>
       </header>
 
-      <section aria-labelledby="cover-heading" className="mb-8">
-        <h2 id="cover-heading" className="mb-3 text-lg font-semibold text-foreground">
-          {t('cover.heading')}
-        </h2>
-        <CoverImageUpload developmentId={development.id} coverImage={development.coverImage} />
-      </section>
+      <ManageTabs tabs={tabs} active={tab} onSelect={setTab} label={t('manage.tabs.label', 'Manage development')} idPrefix={PREFIX} />
 
-      <section aria-labelledby="inventory-heading" className="mb-8">
-        <h2 id="inventory-heading" className="mb-3 text-lg font-semibold text-foreground">
-          {t('detail.inventory')}
-        </h2>
-        <div className="rounded-2xl border border-border bg-white p-4">
-          <QuickAddInventory developmentId={development.id} />
+      {panel('overview', <OverviewPanel development={development} canPublish={roleCan(role, 'publish')} />)}
+      {panel(
+        'inventory',
+        <div className="space-y-6">
+          <section aria-labelledby="quick-add-heading" className="rounded-2xl border border-slate-200 bg-white p-4">
+            <h2 id="quick-add-heading" className="mb-3 text-base font-semibold text-slate-900">
+              {t('manage.inventory.quickAdd', 'Add buildings, floors and units')}
+            </h2>
+            <QuickAddInventory developmentId={development.id} />
+          </section>
+          <section aria-labelledby="units-heading">
+            <h2 id="units-heading" className="mb-3 text-base font-semibold text-slate-900">
+              {t('detail.units', 'Units')}
+            </h2>
+            <InventoryTable developmentId={development.id} role={role} slug={development.slug} />
+          </section>
         </div>
-      </section>
-
-      <section aria-labelledby="map-heading" className="mb-8">
-        <h2 id="map-heading" className="mb-1 text-lg font-semibold text-foreground">
-          {t('scene.heading')}
-        </h2>
-        <p className="mb-3 text-sm text-muted-foreground">{t('scene.subtitle')}</p>
-        <SceneStudio developmentId={development.id} />
-      </section>
-
-      <section aria-labelledby="units-heading" className="mb-8">
-        <h2 id="units-heading" className="mb-3 text-lg font-semibold text-foreground">
-          {t('detail.units')}
-        </h2>
-        <UnitsTable developmentId={development.id} units={units} onAttach={setAttachUnit} />
-      </section>
-
-      {attachUnit && (
-        <section aria-labelledby="attach-heading" className="mb-8">
-          <h2 id="attach-heading" className="sr-only">
-            {t('detail.listings')}
+      )}
+      {panel(
+        'explorer',
+        <section aria-labelledby="explorer-heading">
+          <h2 id="explorer-heading" className="mb-1 text-base font-semibold text-slate-900">
+            {t('scene.heading', 'Interactive map')}
           </h2>
-          <AttachListingPanel
-            developmentId={development.id}
-            unit={attachUnit}
-            onClose={() => setAttachUnit(null)}
-            onAttached={() => {
-              refetchUnits();
-              setAttachUnit(null);
-            }}
-          />
+          <p className="mb-3 text-sm text-slate-600">{t('scene.subtitle', 'Draw clickable regions on your images.')}</p>
+          <SceneStudio developmentId={development.id} />
         </section>
       )}
+      {panel('listings', <LinkedListingsPanel developmentId={development.id} role={role} />)}
     </main>
   );
 };

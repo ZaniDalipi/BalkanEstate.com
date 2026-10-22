@@ -1,0 +1,132 @@
+import React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor, userEvent } from '@/src/tests/test-utils';
+import { ConfirmationProvider } from '@/src/shared/hooks/useConfirmation';
+import { NotificationProvider } from '@/src/shared/hooks/useNotification';
+import type { DashboardUnit, DevelopmentBuilding, DevelopmentFloor } from '../../../types';
+
+vi.mock('../../../api/developmentsApi', () => ({
+  listUnits: vi.fn(),
+  bulkUpdateUnits: vi.fn(),
+  downloadUnitsCsv: vi.fn(),
+  updateUnit: vi.fn(),
+  deleteUnit: vi.fn(),
+  uploadUnitFloorplan: vi.fn(),
+}));
+
+import * as api from '../../../api/developmentsApi';
+import { UnitEditDialog } from './UnitEditDialog';
+
+const UNIT: DashboardUnit = {
+  id: 'u1',
+  developmentId: 'dev1',
+  buildingId: 'b1',
+  floorId: 'f1',
+  unitNumber: 'A1',
+  unitType: 'apartment',
+  beds: 2,
+  baths: 1,
+  netArea: 64.5,
+  price: 120000,
+  currency: 'EUR',
+  orientation: 'south',
+  availability: 'available',
+  visibility: 'public',
+  priceVisibility: 'public',
+  features: ['corner'],
+  effectiveAvailability: 'available',
+  availabilitySource: 'unit',
+  listingIds: [],
+  linkedListings: [],
+};
+const BUILDINGS = [
+  { id: 'b1', name: 'A' },
+  { id: 'b2', name: 'B' },
+] as DevelopmentBuilding[];
+const FLOORS = [
+  { id: 'f1', buildingId: 'b1', label: 'A-1', level: 1 },
+  { id: 'f2', buildingId: 'b2', label: 'B-1', level: 1 },
+  { id: 'f3', buildingId: 'b2', label: 'B-2', level: 2 },
+] as DevelopmentFloor[];
+
+const onClose = vi.fn();
+const renderDialog = (role?: string) =>
+  render(
+    <NotificationProvider>
+      <ConfirmationProvider>
+        <UnitEditDialog developmentId="dev1" unit={UNIT} role={role} buildings={BUILDINGS} floors={FLOORS} onClose={onClose} />
+      </ConfirmationProvider>
+    </NotificationProvider>
+  );
+
+const field = (label: string) => screen.getByLabelText(new RegExp(`^${label.replace('.', '\\.')}`)) as HTMLInputElement;
+
+describe('UnitEditDialog', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(api.updateUnit).mockResolvedValue({ unit: UNIT });
+  });
+
+  it('sends only the changed fields, with null for a cleared field', async () => {
+    renderDialog();
+    const number = field('unit.number');
+    await userEvent.clear(number);
+    await userEvent.type(number, 'A1b');
+    await userEvent.clear(field('unit.beds'));
+    await userEvent.clear(field('unit.orientation'));
+    await userEvent.click(screen.getByLabelText('feature.duplex'));
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+
+    await waitFor(() => expect(api.updateUnit).toHaveBeenCalledTimes(1));
+    expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', {
+      unitNumber: 'A1b',
+      beds: null,
+      orientation: null,
+      features: ['corner', 'duplex'],
+    });
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('filters floors by the chosen building and clears the floor on building change', async () => {
+    renderDialog();
+    await userEvent.selectOptions(field('inventory.filters.building'), 'b2');
+    const floor = field('inventory.filters.floor') as unknown as HTMLSelectElement;
+    expect(floor.value).toBe('');
+    const labels = Array.from(floor.options).map((o) => o.textContent);
+    expect(labels).toEqual(['inventory.edit.selectFloor', 'B-1', 'B-2']);
+  });
+
+  it('explains a 403 on price changes in place', async () => {
+    vi.mocked(api.updateUnit).mockRejectedValue(Object.assign(new Error('Forbidden'), { statusCode: 403 }));
+    renderDialog();
+    const price = field('unit.price');
+    await userEvent.clear(price);
+    await userEvent.type(price, '130000');
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+
+    await waitFor(() => expect(api.updateUnit).toHaveBeenCalled());
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.some((a) => a.textContent?.includes('inventory.edit.forbiddenPrice'))).toBe(true);
+    // The price field itself is flagged too.
+    expect(field('unit.price')).toHaveAttribute('aria-invalid', 'true');
+    expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { price: 130000 });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('disables price fields for a role without price.change', () => {
+    renderDialog('editor');
+    expect(field('unit.price')).toBeDisabled();
+    expect(field('inventory.edit.currency')).toBeDisabled();
+    expect(field('unit.number')).not.toBeDisabled();
+    expect(screen.getByText('inventory.edit.priceLocked')).toBeInTheDocument();
+  });
+
+  it('blocks saving invalid values without calling the API', async () => {
+    renderDialog();
+    await userEvent.clear(field('unit.number'));
+    await userEvent.type(field('unit.baths'), '.5');
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+    expect(api.updateUnit).not.toHaveBeenCalled();
+    expect(screen.getAllByText(/inventory\.edit\.errors\./).length).toBeGreaterThan(0);
+  });
+});

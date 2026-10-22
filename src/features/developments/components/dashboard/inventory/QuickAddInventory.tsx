@@ -49,7 +49,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
   return (
     <div className="space-y-6">
       {error && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {error}
         </div>
       )}
