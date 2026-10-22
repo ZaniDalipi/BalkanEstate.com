@@ -175,9 +175,11 @@ export const attachListingToUnit = async (
 ): Promise<AttachResult> => {
   const { user, developmentId, unitId, listingId, force } = params;
 
+  // The unit is looked up INSIDE the development in the route: a unit id from
+  // another development is simply "not found" here, never written to.
   const [property, unit] = await Promise.all([
     Property.findById(listingId),
-    DevelopmentUnit.findOne({ _id: unitId, deletedAt: { $exists: false } }),
+    DevelopmentUnit.findOne({ _id: unitId, developmentId, deletedAt: { $exists: false } }),
   ]);
   if (!property) throw new NotFoundError('Listing not found');
   if (!unit) throw new NotFoundError('Unit not found');
@@ -270,27 +272,36 @@ export const detachListingFromUnit = async (params: {
 }): Promise<IDevelopmentUnit> => {
   const { user, developmentId, unitId, listingId } = params;
 
+  // Scoped to the development in the route: a unit of another development is
+  // "not found" (never revealed, never written), and the listing must actually
+  // be attached to THIS unit — otherwise a member of development A could strip
+  // development B's refs from any listing by naming it here.
   const [property, unit] = await Promise.all([
     Property.findById(listingId),
-    DevelopmentUnit.findOne({ _id: unitId, deletedAt: { $exists: false } }),
+    DevelopmentUnit.findOne({ _id: unitId, developmentId, deletedAt: { $exists: false } }),
   ]);
-  if (!property) throw new NotFoundError('Listing not found');
   if (!unit) throw new NotFoundError('Unit not found');
-
-  if (String(unit.developmentId) !== String(developmentId)) {
-    throw new ValidationError('Unit does not belong to this development');
+  const onUnit = (unit.listingIds ?? []).some((id) => String(id) === String(listingId));
+  const pointsAtUnit = !!property && String(property.unitId ?? '') === String(unit._id);
+  if (!property || (!onUnit && !pointsAtUnit)) {
+    throw new NotFoundError('Listing is not attached to this unit');
   }
   // Authorization for detach is the development `listing.detach` permission,
   // already enforced by the route. Either controlling the listing or holding
   // that development permission is sufficient, so no extra check is needed here.
 
   await withOptionalTransaction(async (session) => {
-    property.developmentId = undefined;
-    property.buildingId = undefined;
-    property.entranceId = undefined;
-    property.floorId = undefined;
-    property.unitId = undefined;
-    await property.save({ session });
+    // Only clear the listing's own refs when they point at this unit; a stale
+    // entry on the unit side is cleaned up without touching a listing that has
+    // since moved elsewhere.
+    if (pointsAtUnit) {
+      property.developmentId = undefined;
+      property.buildingId = undefined;
+      property.entranceId = undefined;
+      property.floorId = undefined;
+      property.unitId = undefined;
+      await property.save({ session });
+    }
 
     await DevelopmentUnit.updateOne(
       { _id: unit._id },

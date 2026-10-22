@@ -63,7 +63,12 @@ export const previewConflicts = async (req: Request, res: Response): Promise<voi
     }
     const [property, unit] = await Promise.all([
       Property.findById(listingId),
-      DevelopmentUnit.findOne({ _id: unitId, deletedAt: { $exists: false } }),
+      // Scoped to this development: another development's unit is "not found".
+      DevelopmentUnit.findOne({
+        _id: unitId,
+        developmentId: req.development!._id,
+        deletedAt: { $exists: false },
+      }),
     ]);
     if (!property) {
       res.status(404).json({ message: 'Listing not found' });

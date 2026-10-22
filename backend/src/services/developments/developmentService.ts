@@ -30,6 +30,8 @@ export interface CreateDevelopmentInput {
   amenities?: string[];
   website?: string;
   contact?: { name?: string; email?: string; phone?: string };
+  /** Accept buyer inquiries about individual units (default true). */
+  allowUnitInquiries?: boolean;
   /** When creating on behalf of an agency the caller owns/admins. */
   agencyId?: string;
 }
@@ -111,6 +113,7 @@ export const createDevelopment = async (
     amenities: input.amenities ?? [],
     website: input.website,
     contact: input.contact,
+    allowUnitInquiries: typeof input.allowUnitInquiries === 'boolean' ? input.allowUnitInquiries : true,
     status: 'draft',
     stats: { buildings: 0, units: 0, available: 0 },
   });
@@ -185,6 +188,7 @@ const EDITABLE_FIELDS: (keyof CreateDevelopmentInput)[] = [
   'amenities',
   'website',
   'contact',
+  'allowUnitInquiries',
 ];
 
 export const updateDevelopment = async (
@@ -201,6 +205,11 @@ export const updateDevelopment = async (
       throw new ValidationError(
         `constructionStatus must be one of: ${DEVELOPMENT_CONSTRUCTION_STATUSES.join(', ')}`
       );
+    }
+    if (key === 'allowUnitInquiries') {
+      if (typeof value !== 'boolean') throw new ValidationError('allowUnitInquiries must be a boolean');
+      development.allowUnitInquiries = value;
+      continue;
     }
     if (key === 'expectedCompletionDate') {
       (development as unknown as Record<string, unknown>)[key] = value

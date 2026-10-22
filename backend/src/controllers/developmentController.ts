@@ -5,8 +5,6 @@ import Development from '../models/Development';
 import DevelopmentBuilding from '../models/DevelopmentBuilding';
 import DevelopmentEntrance from '../models/DevelopmentEntrance';
 import DevelopmentFloor from '../models/DevelopmentFloor';
-import DevelopmentUnit from '../models/DevelopmentUnit';
-import Property from '../models/Property';
 import DevelopmentAuditLog from '../models/DevelopmentAuditLog';
 import { createLogger } from '../utils/logger';
 import { getObjectIdParam } from '../utils/validateParams';
@@ -26,10 +24,17 @@ import {
   createBuilding,
   createFloor,
   createUnit,
-  listUnits,
   setUnitAvailability,
   isDuplicateKeyError,
 } from '../services/developments/developmentInventoryService';
+import * as unitAdmin from '../services/developments/unitAdminService';
+import {
+  getPublicDevelopmentDetail,
+  listPublicUnits as listPublicUnitsService,
+  getPublicUnitDetail,
+  toPublicDevelopment,
+} from '../services/developments/developmentPublicService';
+import { recordDevelopmentAudit } from '../services/developments/developmentAudit';
 
 const log = createLogger('DevelopmentController');
 
@@ -264,12 +269,20 @@ export const addBuilding = async (req: Request, res: Response): Promise<void> =>
 
 export const addFloor = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { buildingId } = req.body;
+    const { buildingId } = req.body ?? {};
     if (!buildingId) {
       res.status(400).json({ message: 'buildingId is required' });
       return;
     }
-    const floor = await createFloor(String(req.development!._id), buildingId, req.body);
+    // createFloor resolves the (encoded) building id inside this development.
+    const floor = await createFloor(req.development!._id as mongoose.Types.ObjectId, buildingId, req.body);
+    await recordDevelopmentAudit({
+      developmentId: req.development!._id as mongoose.Types.ObjectId,
+      action: 'floor.create',
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      targetType: 'floor',
+      targetId: floor._id as mongoose.Types.ObjectId,
+    });
     res.status(201).json({ floor });
   } catch (error) {
     sendServiceError(res, error, 'create floor');
@@ -278,7 +291,8 @@ export const addFloor = async (req: Request, res: Response): Promise<void> => {
 
 export const addUnit = async (req: Request, res: Response): Promise<void> => {
   try {
-    const unit = await createUnit(String(req.development!._id), req.body);
+    // createUnit resolves encoded building/floor ids and checks floor ∈ building ∈ development.
+    const unit = await createUnit(req.development!._id as mongoose.Types.ObjectId, req.body ?? {});
     await DevelopmentAuditLog.create({
       developmentId: req.development!._id,
       action: 'unit.create',
@@ -292,19 +306,14 @@ export const addUnit = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+/** GET /:developmentId/units — search / filter / sort / paginate → DashboardUnit[]. */
 export const getUnits = async (req: Request, res: Response): Promise<void> => {
   try {
-    const limit = Number(req.query.limit) || 50;
-    const skip = Number(req.query.skip) || 0;
-    const { items, total } = await listUnits(String(req.development!._id), {
-      buildingId: typeof req.query.buildingId === 'string' ? req.query.buildingId : undefined,
-      floorId: typeof req.query.floorId === 'string' ? req.query.floorId : undefined,
-      availability:
-        typeof req.query.availability === 'string' ? req.query.availability : undefined,
-      limit,
-      skip,
-    });
-    res.json({ units: items, total });
+    const result = await unitAdmin.listDashboardUnits(
+      req.development!._id as mongoose.Types.ObjectId,
+      req.query as unitAdmin.UnitListQuery
+    );
+    res.json(result);
   } catch (error) {
     sendServiceError(res, error, 'list units');
   }
@@ -358,180 +367,149 @@ export const listPublic = async (req: Request, res: Response): Promise<void> => 
       Development.find(query).sort({ publishedAt: -1 }).skip(skip).limit(limit),
       Development.countDocuments(query),
     ]);
-    res.json({ developments: items, total });
+    res.json({ developments: items.map(toPublicDevelopment), total });
   } catch (error) {
     sendServiceError(res, error, 'list public developments');
   }
 };
 
-/** GET /api/developments/:slug — public development with its buildings/floors. */
+/** GET /api/developments/:slug — public projection with per-building stats. */
 export const getPublicBySlug = async (req: Request, res: Response): Promise<void> => {
   try {
-    const slug = String(req.params.slug || '').toLowerCase();
-    const development = await Development.findOne({
-      slug,
-      status: 'published',
-      deletedAt: { $exists: false },
-    });
-    if (!development) {
-      res.status(404).json({ message: 'Development not found' });
-      return;
-    }
-    const [buildings, floors] = await Promise.all([
-      DevelopmentBuilding.find({
-        developmentId: development._id,
-        deletedAt: { $exists: false },
-      }).sort({ order: 1 }),
-      DevelopmentFloor.find({
-        developmentId: development._id,
-        deletedAt: { $exists: false },
-      }).sort({ order: 1 }),
-    ]);
-    res.json({ development, buildings, floors });
+    res.json(await getPublicDevelopmentDetail(req.params.slug));
   } catch (error) {
     sendServiceError(res, error, 'get public development');
   }
 };
 
-/**
- * GET /api/developments/:slug/units — the published development's units, each
- * enriched with its building name and floor label (so the buyer-facing browser
- * can group and filter without extra round-trips), plus a summary used for the
- * stats bar and price range.
- */
+/** GET /api/developments/:slug/units — visible units with effective availability + summary. */
 export const listPublicUnits = async (req: Request, res: Response): Promise<void> => {
   try {
-    const slug = String(req.params.slug || '').toLowerCase();
-    const development = await Development.findOne({
-      slug,
-      status: 'published',
-      deletedAt: { $exists: false },
-    })
-      .select('_id')
-      .lean();
-    if (!development) {
-      res.status(404).json({ message: 'Development not found' });
-      return;
-    }
-
-    const [units, buildings, floors] = await Promise.all([
-      DevelopmentUnit.find({ developmentId: development._id, deletedAt: { $exists: false } }).sort({
-        buildingId: 1,
-        unitNumber: 1,
-      }),
-      DevelopmentBuilding.find({ developmentId: development._id, deletedAt: { $exists: false } })
-        .select('_id name')
-        .lean(),
-      DevelopmentFloor.find({ developmentId: development._id, deletedAt: { $exists: false } })
-        .select('_id label level')
-        .lean(),
-    ]);
-
-    const buildingName = new Map(buildings.map((b) => [String(b._id), b.name]));
-    const floorLabel = new Map(floors.map((f) => [String(f._id), f.label]));
-    const floorLevel = new Map(floors.map((f) => [String(f._id), f.level]));
-
-    const enriched = units.map((u) => ({
-      ...u.toJSON(),
-      buildingName: buildingName.get(String(u.buildingId)) ?? null,
-      floorLabel: floorLabel.get(String(u.floorId)) ?? null,
-      floorLevel: floorLevel.get(String(u.floorId)) ?? null,
-    }));
-
-    const priced = units.filter((u) => typeof u.price === 'number' && (u.price as number) > 0);
-    const prices = priced.map((u) => u.price as number);
-    const summary = {
-      total: units.length,
-      available: units.filter((u) => u.availability === 'available').length,
-      priceMin: prices.length ? Math.min(...prices) : null,
-      priceMax: prices.length ? Math.max(...prices) : null,
-      currency: priced[0]?.currency ?? 'EUR',
-    };
-
-    res.json({ units: enriched, summary });
+    res.json(await listPublicUnitsService(req.params.slug));
   } catch (error) {
     sendServiceError(res, error, 'list public units');
   }
 };
 
-/**
- * GET /api/developments/:slug/units/:unitId — one unit of a published
- * development, with its building/floor context and the marketing listings
- * attached to it (basic fields + a small gallery), for the unit detail page.
- */
+/** GET /api/developments/:slug/units/:unitId — one visible unit with its public listings. */
 export const getPublicUnit = async (req: Request, res: Response): Promise<void> => {
   try {
-    const slug = String(req.params.slug || '').toLowerCase();
-    const development = await Development.findOne({
-      slug,
-      status: 'published',
-      deletedAt: { $exists: false },
-    }).lean();
-    if (!development) {
-      res.status(404).json({ message: 'Development not found' });
-      return;
-    }
-
-    const unitId = getObjectIdParam(req, res, 'unitId');
-    if (!unitId) return;
-
-    const unit = await DevelopmentUnit.findOne({
-      _id: unitId,
-      developmentId: development._id,
-      deletedAt: { $exists: false },
-    });
-    if (!unit) {
-      res.status(404).json({ message: 'Unit not found' });
-      return;
-    }
-
-    const [building, floor, listings] = await Promise.all([
-      DevelopmentBuilding.findById(unit.buildingId).select('name').lean(),
-      DevelopmentFloor.findById(unit.floorId).select('label level').lean(),
-      Property.find({ _id: { $in: unit.listingIds ?? [] }, status: { $ne: 'draft' } })
-        .select('title imageUrl images price listingType beds baths sqft createdByName createdByAgencyName')
-        .limit(10)
-        .lean(),
-    ]);
-
-    res.json({
-      unit: {
-        ...unit.toJSON(),
-        buildingName: building?.name ?? null,
-        floorLabel: floor?.label ?? null,
-        floorLevel: floor?.level ?? null,
-      },
-      development: {
-        name: development.name,
-        slug: development.slug,
-        city: development.city,
-        country: development.country,
-      },
-      listings: listings.map((l) => ({ ...l, id: String(l._id), _id: undefined })),
-    });
+    res.json(await getPublicUnitDetail(req.params.slug, req.params.unitId));
   } catch (error) {
     sendServiceError(res, error, 'get public unit');
   }
 };
 
-// --- Explorer contract stubs (implemented by the units/inventory slice) ----
-// Registered in the routers now so the route files never need concurrent edits.
+// ---------------------------------------------------------------------------
+// Dashboard: unit administration (field-level authz lives in unitAdminService)
+// ---------------------------------------------------------------------------
 
-const notImplemented = (res: Response): void => {
-  res.status(501).json({ message: 'Not implemented yet' });
-};
+const devId = (req: Request): mongoose.Types.ObjectId => req.development!._id as mongoose.Types.ObjectId;
 
 /** PATCH /:developmentId/units/:unitId — field-level authz (unit.manage / price.change / availability.change). */
-export const updateUnit = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+export const updateUnit = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const unit = await unitAdmin.updateUnit({
+      developmentId: devId(req),
+      role: req.developmentRole,
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      unitId: req.params.unitId,
+      payload: req.body,
+    });
+    res.json({ unit });
+  } catch (error) {
+    sendServiceError(res, error, 'update unit');
+  }
+};
+
 /** DELETE /:developmentId/units/:unitId — soft delete. */
-export const deleteUnit = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+export const deleteUnit = async (req: Request, res: Response): Promise<void> => {
+  try {
+    await unitAdmin.softDeleteUnit({
+      developmentId: devId(req),
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      unitId: req.params.unitId,
+    });
+    res.json({ success: true });
+  } catch (error) {
+    sendServiceError(res, error, 'delete unit');
+  }
+};
+
 /** POST /:developmentId/units/bulk — { unitIds, availability?, visibility? }. */
-export const bulkUpdateUnits = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+export const bulkUpdateUnits = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await unitAdmin.bulkUpdateUnits({
+      developmentId: devId(req),
+      role: req.developmentRole,
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      payload: req.body,
+    });
+    res.json(result);
+  } catch (error) {
+    sendServiceError(res, error, 'bulk update units');
+  }
+};
+
 /** GET /:developmentId/units/export.csv */
-export const exportUnitsCsv = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+export const exportUnitsCsv = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const csv = await unitAdmin.buildUnitsCsv(devId(req));
+    const base = String(req.development!.slug || 'development').replace(/[^a-z0-9-]/gi, '') || 'development';
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${base}-units.csv"`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).send(csv);
+  } catch (error) {
+    sendServiceError(res, error, 'export units csv');
+  }
+};
+
 /** POST /:developmentId/units/:unitId/floorplan (multipart field `floorplan`). */
-export const uploadUnitFloorplan = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+export const uploadUnitFloorplan = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: 'No file uploaded' });
+      return;
+    }
+    const unit = await unitAdmin.setUnitFloorplan({
+      development: req.development!,
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      unitId: req.params.unitId,
+      file: req.file.buffer,
+    });
+    res.json({ unit });
+  } catch (error) {
+    sendServiceError(res, error, 'upload unit floorplan');
+  }
+};
+
 /** PATCH /:developmentId/buildings/:buildingId */
-export const updateBuilding = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+export const updateBuilding = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const building = await unitAdmin.updateBuilding({
+      developmentId: devId(req),
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      buildingId: req.params.buildingId,
+      payload: req.body,
+    });
+    res.json({ building });
+  } catch (error) {
+    sendServiceError(res, error, 'update building');
+  }
+};
+
 /** PATCH /:developmentId/floors/:floorId */
-export const updateFloor = async (_req: Request, res: Response): Promise<void> => notImplemented(res);
+export const updateFloor = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const floor = await unitAdmin.updateFloor({
+      developmentId: devId(req),
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      floorId: req.params.floorId,
+      payload: req.body,
+    });
+    res.json({ floor });
+  } catch (error) {
+    sendServiceError(res, error, 'update floor');
+  }
+};

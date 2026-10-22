@@ -7,13 +7,20 @@ import DevelopmentFloor, { IDevelopmentFloor } from '../../models/DevelopmentFlo
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import { slugify } from '../media/mediaNaming';
 import { recomputeDevelopmentStats, ValidationError } from './developmentService';
+import { requireRefInDevelopment } from './developmentRefs';
 import {
   FLOOR_KINDS,
   UNIT_AVAILABILITY_STATES,
+  UNIT_VISIBILITIES,
+  PRICE_VISIBILITIES,
   isUnitAvailability,
   isUnitFeature,
+  isUnitVisibility,
+  isPriceVisibility,
   type FloorKind,
   type UnitAvailability,
+  type UnitVisibility,
+  type PriceVisibility,
 } from '../../config/developments';
 
 /** Keep only known feature flags, de-duplicated. */
@@ -94,26 +101,37 @@ export const createEntrance = async (
 
 export const createFloor = async (
   developmentId: Id,
-  buildingId: Id,
+  buildingId: unknown,
   input: {
     label: string;
     level: number;
     kind?: FloorKind;
-    entranceId?: Id;
+    entranceId?: unknown;
     order?: number;
   }
 ): Promise<IDevelopmentFloor> => {
   if (!input.label?.trim()) throw new ValidationError('floor label is required');
-  if (typeof input.level !== 'number' || Number.isNaN(input.level)) {
+  if (typeof input.level !== 'number' || !Number.isFinite(input.level)) {
     throw new ValidationError('floor level must be a number');
   }
   if (input.kind !== undefined && !(FLOOR_KINDS as readonly string[]).includes(input.kind)) {
     throw new ValidationError(`floor kind must be one of: ${FLOOR_KINDS.join(', ')}`);
   }
+  // The client speaks encoded ids; resolve them and prove the building (and
+  // entrance) live in THIS development before writing anything.
+  const building = await requireRefInDevelopment(DevelopmentBuilding, buildingId, developmentId, 'buildingId');
+  let entranceId: mongoose.Types.ObjectId | undefined;
+  if (input.entranceId !== undefined && input.entranceId !== null && input.entranceId !== '') {
+    const entrance = await requireRefInDevelopment(DevelopmentEntrance, input.entranceId, developmentId, 'entranceId');
+    if (String(entrance.buildingId) !== String(building._id)) {
+      throw new ValidationError('entranceId must belong to the building');
+    }
+    entranceId = entrance._id as mongoose.Types.ObjectId;
+  }
   return DevelopmentFloor.create({
     developmentId,
-    buildingId,
-    entranceId: input.entranceId,
+    buildingId: building._id,
+    entranceId,
     label: input.label.trim(),
     level: input.level,
     kind: input.kind ?? 'standard',
@@ -122,9 +140,9 @@ export const createFloor = async (
 };
 
 export interface CreateUnitInput {
-  buildingId: Id;
-  floorId: Id;
-  entranceId?: Id;
+  buildingId: unknown;
+  floorId: unknown;
+  entranceId?: unknown;
   unitNumber: string;
   unitType: string;
   totalArea?: number;
@@ -132,16 +150,50 @@ export interface CreateUnitInput {
   grossArea?: number;
   beds?: number;
   baths?: number;
+  livingRooms?: number;
+  externalArea?: number;
+  terraceArea?: number;
   balconies?: number;
   terraces?: number;
   orientation?: string;
   viewType?: string;
+  description?: string;
   features?: string[];
   price?: number;
   currency?: string;
   pricePerSqm?: number;
   availability?: UnitAvailability;
+  visibility?: UnitVisibility;
+  priceVisibility?: PriceVisibility;
 }
+
+/**
+ * Resolve a unit's building / floor / entrance placement from client ids and
+ * prove the chain floor ∈ building ∈ development (and entrance ∈ building).
+ */
+export const resolveUnitPlacement = async (
+  developmentId: Id,
+  raw: { buildingId: unknown; floorId: unknown; entranceId?: unknown }
+): Promise<{
+  building: IDevelopmentBuilding;
+  floor: IDevelopmentFloor;
+  entranceId?: mongoose.Types.ObjectId;
+}> => {
+  const building = await requireRefInDevelopment(DevelopmentBuilding, raw.buildingId, developmentId, 'buildingId');
+  const floor = await requireRefInDevelopment(DevelopmentFloor, raw.floorId, developmentId, 'floorId');
+  if (String(floor.buildingId) !== String(building._id)) {
+    throw new ValidationError('floorId must belong to the building');
+  }
+  let entranceId: mongoose.Types.ObjectId | undefined;
+  if (raw.entranceId !== undefined && raw.entranceId !== null && raw.entranceId !== '') {
+    const entrance = await requireRefInDevelopment(DevelopmentEntrance, raw.entranceId, developmentId, 'entranceId');
+    if (String(entrance.buildingId) !== String(building._id)) {
+      throw new ValidationError('entranceId must belong to the building');
+    }
+    entranceId = entrance._id as mongoose.Types.ObjectId;
+  }
+  return { building, floor, entranceId };
+};
 
 /**
  * Create a canonical physical unit. Uniqueness of the unit number (per entrance
@@ -163,13 +215,20 @@ export const createUnit = async (
       `availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`
     );
   }
+  if (input.visibility !== undefined && !isUnitVisibility(input.visibility)) {
+    throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`);
+  }
+  if (input.priceVisibility !== undefined && !isPriceVisibility(input.priceVisibility)) {
+    throw new ValidationError(`priceVisibility must be one of: ${PRICE_VISIBILITIES.join(', ')}`);
+  }
+  const placement = await resolveUnitPlacement(developmentId, input);
 
   try {
     const unit = await DevelopmentUnit.create({
       developmentId,
-      buildingId: input.buildingId,
-      floorId: input.floorId,
-      entranceId: input.entranceId,
+      buildingId: placement.building._id,
+      floorId: placement.floor._id,
+      entranceId: placement.entranceId,
       unitNumber: input.unitNumber.trim(),
       unitType: input.unitType.trim(),
       totalArea: input.totalArea,
@@ -177,15 +236,21 @@ export const createUnit = async (
       grossArea: input.grossArea,
       beds: input.beds,
       baths: input.baths,
+      livingRooms: input.livingRooms,
+      externalArea: input.externalArea,
+      terraceArea: input.terraceArea,
       balconies: input.balconies,
       terraces: input.terraces,
       orientation: input.orientation,
       viewType: input.viewType,
+      description: input.description,
       features: sanitizeFeatures(input.features),
       price: input.price,
       currency: input.currency,
       pricePerSqm: input.pricePerSqm,
       availability: input.availability ?? 'not_released',
+      visibility: input.visibility ?? 'public',
+      priceVisibility: input.priceVisibility ?? 'public',
     });
     await recomputeDevelopmentStats(developmentId);
     return unit;
@@ -193,7 +258,7 @@ export const createUnit = async (
     if (isDuplicateKeyError(error)) {
       throw new ValidationError(
         `A unit numbered "${input.unitNumber}" already exists in this ${
-          input.entranceId ? 'entrance' : 'building'
+          placement.entranceId ? 'entrance' : 'building'
         }`
       );
     }
@@ -224,6 +289,27 @@ export const listUnits = async (
 };
 
 /**
+ * The one place an availability transition's side effects live: recompute the
+ * development's available-count cache and alert followers on a real
+ * transition INTO 'available'. Every write path that changes availability —
+ * the dedicated endpoint, the general unit edit and bulk edits — calls this,
+ * so the semantics cannot drift between them.
+ */
+export const applyAvailabilityTransition = async (
+  developmentId: Id,
+  transitions: ReadonlyArray<{ prior: UnitAvailability | undefined; unit: IDevelopmentUnit }>
+): Promise<void> => {
+  await recomputeDevelopmentStats(developmentId);
+  const nowAvailable = transitions
+    .filter((t) => t.unit.availability === 'available' && t.prior !== 'available')
+    .map((t) => t.unit);
+  if (nowAvailable.length > 0) {
+    // Fire-and-forget: alerting never blocks or fails the availability change.
+    void notifyFollowersOnAvailable(String(developmentId), nowAvailable);
+  }
+};
+
+/**
  * Change a unit's availability atomically. Returns the updated unit, or null if
  * it no longer exists. Recomputes the development's available-count cache.
  */
@@ -237,51 +323,48 @@ export const setUnitAvailability = async (
       `availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`
     );
   }
-  // Read the prior state so we only alert followers on a real transition
-  // INTO 'available' (not when it was already available).
-  const prior = await DevelopmentUnit.findOne({
-    _id: unitId,
-    developmentId,
-    deletedAt: { $exists: false },
-  }).select('availability');
-
-  const unit = await DevelopmentUnit.findOneAndUpdate(
+  // The pre-update document (new: false) tells us the prior state, so we only
+  // alert followers on a real transition INTO 'available'.
+  const prior = await DevelopmentUnit.findOneAndUpdate(
     { _id: unitId, developmentId, deletedAt: { $exists: false } },
     { $set: { availability } },
-    { new: true }
+    { new: false }
   );
-  if (unit) {
-    await recomputeDevelopmentStats(developmentId);
-    if (availability === 'available' && prior?.availability !== 'available') {
-      // Fire-and-forget: alerting never blocks or fails the availability change.
-      void notifyFollowersOnAvailable(String(developmentId), unit);
-    }
-  }
+  if (!prior) return null;
+  const unit = await DevelopmentUnit.findById(prior._id);
+  if (!unit) return null;
+  await applyAvailabilityTransition(developmentId, [{ prior: prior.availability, unit }]);
   return unit;
 };
 
 /**
- * Resolve the development's name/slug and notify matching followers that a unit
- * is now available. Isolated so the alert import stays lazy and errors here
- * cannot affect the availability write.
+ * Resolve the development's name/slug once and notify matching followers that
+ * units are now available. Isolated so the alert import stays lazy and errors
+ * here cannot affect the availability write.
  */
 const notifyFollowersOnAvailable = async (
   developmentId: string,
-  unit: IDevelopmentUnit
+  units: IDevelopmentUnit[]
 ): Promise<void> => {
   try {
     const [{ notifyFollowersUnitAvailable }, Development] = await Promise.all([
       import('./developmentAlertService'),
       import('../../models/Development').then((m) => m.default),
     ]);
-    const dev = await Development.findById(developmentId).select('name slug').lean();
-    if (!dev) return;
-    await notifyFollowersUnitAvailable({
-      developmentId,
-      developmentName: dev.name,
-      developmentSlug: dev.slug,
-      unit,
-    });
+    const dev = await Development.findById(developmentId).select('name slug status').lean();
+    // Followers can only follow a published development; a draft has no audience.
+    if (!dev || dev.status !== 'published') return;
+    for (const unit of units) {
+      // Hidden units do not exist for buyers — never announce them.
+      if (unit.visibility === 'hidden') continue;
+      // eslint-disable-next-line no-await-in-loop
+      await notifyFollowersUnitAvailable({
+        developmentId,
+        developmentName: dev.name,
+        developmentSlug: dev.slug,
+        unit,
+      });
+    }
   } catch {
     /* already logged inside the alert service; never throw */
   }

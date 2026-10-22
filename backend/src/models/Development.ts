@@ -58,6 +58,11 @@ export interface IDevelopment extends Document {
   status: DevelopmentStatus;
   publishedAt?: Date;
   stats: IDevelopmentStats;
+  /**
+   * Whether buyers may send an inquiry about a specific unit from the public
+   * explorer (useful for units with no published listing). Defaults to on.
+   */
+  allowUnitInquiries: boolean;
   /** Soft delete — set instead of removing so links/audit stay resolvable. */
   deletedAt?: Date;
   createdAt: Date;
@@ -156,6 +161,7 @@ const DevelopmentSchema: Schema = new Schema(
       units: { type: Number, default: 0, min: 0 },
       available: { type: Number, default: 0, min: 0 },
     },
+    allowUnitInquiries: { type: Boolean, default: true },
     deletedAt: { type: Date, index: true },
   },
   {

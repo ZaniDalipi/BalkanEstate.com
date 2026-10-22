@@ -7,6 +7,7 @@ import DevelopmentFollow, {
 } from '../models/DevelopmentFollow';
 import { createLogger } from '../utils/logger';
 import { sendServiceError } from './developmentController';
+import { toPublicDevelopment } from '../services/developments/developmentPublicService';
 
 const log = createLogger('DevelopmentFollowController');
 const currentUser = (req: Request): IUser => req.user as IUser;
@@ -51,10 +52,18 @@ const sanitizeFilters = (
   return { ok: true, filters };
 };
 
-/** Load a development by slug, or send 404 and return null. */
+/**
+ * Load a PUBLISHED development by slug, or send 404 and return null. A draft
+ * or archived development does not exist for buyers, so it cannot be followed
+ * (nor its existence probed through the follow endpoints).
+ */
 const loadBySlug = async (req: Request, res: Response) => {
   const slug = String(req.params.slug || '').toLowerCase();
-  const development = await Development.findOne({ slug, deletedAt: { $exists: false } }).select('_id');
+  const development = await Development.findOne({
+    slug,
+    status: 'published',
+    deletedAt: { $exists: false },
+  }).select('_id');
   if (!development) {
     res.status(404).json({ message: 'Development not found' });
     return null;
@@ -124,12 +133,14 @@ export const listFollowing = async (req: Request, res: Response): Promise<void> 
       .sort({ createdAt: -1 })
       .lean();
     const ids = follows.map((f) => f.developmentId);
+    // Only published developments, in their public projection (no owner ids).
     const developments = await Development.find({
       _id: { $in: ids },
+      status: 'published',
       deletedAt: { $exists: false },
     });
     log.info(`User ${String(currentUser(req)._id)} follows ${developments.length} development(s)`);
-    res.json({ developments, follows });
+    res.json({ developments: developments.map(toPublicDevelopment), follows });
   } catch (error) {
     sendServiceError(res, error, 'list followed developments');
   }
