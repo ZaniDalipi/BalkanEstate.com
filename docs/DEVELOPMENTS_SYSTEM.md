@@ -1,5 +1,8 @@
 # Residences & Developments System — Architecture & Implementation Plan
 
+> The interactive residence / building / apartment explorer built on top of this
+> system is documented in [RESIDENCE_EXPLORER.md](./RESIDENCE_EXPLORER.md).
+
 > Status: **Phases 1–3 (design, data foundation, dev CRUD + attachment API) and Phase 4/5 (frontend slice: dashboard + public pages + attach UI) complete.**
 >
 > **Billing decision (confirmed by owner):** creating a development requires an
