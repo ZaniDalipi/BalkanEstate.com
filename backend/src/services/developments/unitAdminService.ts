@@ -155,6 +155,8 @@ export interface UnitListQuery {
   visibility?: unknown;
   /** 'true' → only units with at least one linked listing; 'false' → only units without. */
   hasListing?: unknown;
+  /** Comma-separated unit ids (encoded or raw, ≤200): fetch exactly these units. */
+  ids?: unknown;
   sort?: unknown;
   limit?: unknown;
   skip?: unknown;
@@ -193,6 +195,14 @@ export const listDashboardUnits = async (
     }
     // Legacy units predate the field; treat missing as public.
     match.visibility = q.visibility === 'public' ? { $ne: 'hidden' } : 'hidden';
+  }
+  if (present(q.ids)) {
+    if (typeof q.ids !== 'string') throw new ValidationError('ids must be a comma-separated string');
+    const parts = q.ids.split(',').map((x) => x.trim()).filter(Boolean);
+    if (parts.length > 200) throw new ValidationError('ids accepts at most 200 ids');
+    const ids = parts.map((x) => toObjectId(x));
+    if (ids.some((id) => !id)) throw new ValidationError('Invalid id in ids');
+    match._id = { $in: ids };
   }
   if (present(q.hasListing)) {
     if (q.hasListing !== 'true' && q.hasListing !== 'false') {

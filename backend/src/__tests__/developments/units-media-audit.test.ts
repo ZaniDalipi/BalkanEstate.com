@@ -118,6 +118,21 @@ describe('GET /units?hasListing', () => {
   });
 });
 
+describe('GET /units?ids', () => {
+  it('returns exactly the requested units of this development', async () => {
+    const t = await setupDevelopment();
+    const other = await setupDevelopment();
+    const b = await createUnit(t.devId, { buildingId: t.building._id, floorId: t.floor._id, unitNumber: 'B9', unitType: 'apartment' });
+    const ids = [t.enc(b._id), other.enc(other.unit._id)].join(',');
+    const res = await request(app).get(`${DASH}/${t.devEnc}/units?ids=${ids}`).set(auth(t.ownerToken));
+    expect(res.status).toBe(200);
+    // The other development's unit is simply not returned.
+    expect(res.body.units.map((u: { unitNumber: string }) => u.unitNumber)).toEqual(['B9']);
+    const bad = await request(app).get(`${DASH}/${t.devEnc}/units?ids=nope`).set(auth(t.ownerToken));
+    expect(bad.status).toBe(400);
+  });
+});
+
 describe('GET /audit', () => {
   it('lists the trail newest first with actor names, and is limited to team managers', async () => {
     const t = await setupDevelopment();

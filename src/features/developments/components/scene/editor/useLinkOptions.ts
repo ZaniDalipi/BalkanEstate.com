@@ -9,7 +9,7 @@
  * remembered for the session so their label and availability keep resolving
  * on the canvas and in the region list.
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDevelopmentStructure, useDevelopmentUnits } from '../../../hooks/useDevelopment';
 import type { DashboardUnit, Hotspot, Scene, UnitAvailability, UnitListQuery } from '../../../types';
@@ -72,6 +72,23 @@ export function useLinkOptions(developmentId: string, scene: Scene) {
   );
 
   const unitOptions = useMemo(() => (units as DashboardUnit[]).map(toOption), [units, toOption]);
+
+  // Units already linked by this view's regions but outside the first page:
+  // fetch them by id so their names and availability colours resolve.
+  const missingLinked = useMemo(() => {
+    const loaded = new Set(unitOptions.map((o) => o.id));
+    const linked = [...(scene.draft?.hotspots ?? []), ...(scene.published?.hotspots ?? [])]
+      .filter((h) => h.linkType === 'unit' && h.linkId && !loaded.has(h.linkId))
+      .map((h) => h.linkId);
+    return [...new Set(linked)].sort().slice(0, FIRST_PAGE);
+  }, [scene.draft?.hotspots, scene.published?.hotspots, unitOptions]);
+  const { units: linkedUnits } = useDevelopmentUnits(missingLinked.length > 0 ? developmentId : undefined, {
+    ids: missingLinked,
+    limit: FIRST_PAGE,
+  });
+  useEffect(() => {
+    if (linkedUnits.length > 0) remember(linkedUnits as DashboardUnit[]);
+  }, [linkedUnits, remember]);
 
   const options = useMemo<LinkOptions>(
     () => ({

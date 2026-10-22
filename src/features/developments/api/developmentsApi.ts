@@ -243,7 +243,9 @@ export const listUnits = async (
 ): Promise<Paginated<DashboardUnit>> => {
   const qs = new URLSearchParams();
   Object.entries(filters).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+    if (Array.isArray(v)) {
+      if (v.length > 0) qs.set(k, v.join(','));
+    } else if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
   });
   const query = qs.toString();
   const raw = await apiRequest<{ units: DashboardUnit[]; total: number }>(

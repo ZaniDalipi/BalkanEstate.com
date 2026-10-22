@@ -456,6 +456,8 @@ export interface UnitListQuery {
   visibility?: UnitVisibility;
   /** true → only units with a linked listing; false → only units without one. */
   hasListing?: boolean;
+  /** Fetch exactly these units (≤200), e.g. to label regions linked beyond the first page. */
+  ids?: string[];
   sort?: UnitSort;
   limit?: number;
   skip?: number;
