@@ -138,9 +138,12 @@ included; anything else returns 404.
 
 | Method & path | Permission |
 | --- | --- |
-| `GET /units?search&buildingId&floorId&availability&visibility&sort&limit≤200&skip` | member |
+| `GET /units?search&buildingId&floorId&availability&visibility&hasListing&ids&sort&limit≤200&skip` | member |
 | `PATCH /units/:unitId` | field-level: price fields → `price.change`, `availability` → `availability.change`, everything else → `unit.manage` |
 | `DELETE /units/:unitId` (soft) | `unit.manage` |
+| `POST /units/:unitId/gallery` (multipart `images`, ≤10 per upload, ≤30 per unit) | `media.upload` |
+| `DELETE /units/:unitId/gallery/:index`, `DELETE /units/:unitId/floorplan` | `unit.manage` |
+| `GET /audit?limit≤100&skip&action` (exact action or family prefix such as `price`) | `team.manage` |
 | `POST /units/bulk {unitIds≤500, availability?, visibility?}` | `availability.change` / `unit.manage` |
 | `GET /units/export.csv` | member |
 | `POST /units/:unitId/floorplan` (multipart `floorplan`) | `unit.manage` |
@@ -218,6 +221,16 @@ shown to buyers*.
 
 **Turn off inquiries for units without a listing:** **Settings** tab.
 
+**Add apartment photos or remove a floor plan:** Inventory → **Edit unit** →
+*Photos* / *Floorplan*. Changes save immediately.
+
+**See who changed what:** **Activity** tab (owners and managers), filterable by
+units, prices, explorer, listings and structure.
+
+| Activity | Unit photos |
+| --- | --- |
+| ![Activity](./images/residence-explorer/17-activity.png) | ![Photos](./images/residence-explorer/18-unit-photos.png) |
+
 ## 6. Storage configuration
 
 Images go through `backend/src/services/mediaService.ts` to Cloudflare R2. Set
@@ -236,9 +249,9 @@ not configured" error. Floorplans use the existing `development-scene` media kin
 
 | Suite | Command | Result |
 | --- | --- | --- |
-| Backend developments (real `mongod` via MongoMemoryServer system binary) | `cd backend && NODE_OPTIONS=--max-old-space-size=8192 MONGOMS_SYSTEM_BINARY=/usr/local/bin/mongod npx jest --runInBand --testPathPattern developments` | 19 suites, **184 passed** |
-| Frontend developments + i18n keys | `npx vitest run src/features/developments src/tests/i18n-keys.test.ts` | 19 files, **149 passed** |
-| E2E (Playwright, real backend + Vite + seeded MongoDB) | `CHROME_PATH=… E2E_DEV_EMAIL=… E2E_DEV_PASSWORD=… npx playwright test e2e/residence-explorer.spec.ts` | **5 passed**, 5 skipped by design (each flow runs on either desktop or mobile) |
+| Backend developments (real `mongod` via MongoMemoryServer system binary) | `cd backend && NODE_OPTIONS=--max-old-space-size=8192 MONGOMS_SYSTEM_BINARY=/usr/local/bin/mongod npx jest --runInBand --testPathPattern developments` | 20 suites, **193 passed** |
+| Frontend developments + i18n keys | `npx vitest run src/features/developments src/tests/i18n-keys.test.ts` | 24 files, **168 passed** |
+| E2E (Playwright, real backend + Vite + seeded MongoDB) | `CHROME_PATH=… E2E_DEV_EMAIL=… E2E_DEV_PASSWORD=… npx playwright test e2e/residence-explorer.spec.ts` | **6 passed**, 6 skipped by design (each flow runs on either desktop or mobile) |
 | Backend typecheck | `cd backend && npx tsc --noEmit` | clean |
 | Frontend typecheck | `npx tsc --noEmit -p .` | 0 errors in `src/features/developments`; the repo has unrelated existing errors elsewhere |
 | Production build | `npx vite build --mode production` | success |
@@ -290,30 +303,26 @@ The attach preview also now hides other people's listing details.
 ## 8. Known limitations
 
 **Data and storage**
-- When a Property is deleted, its id is not removed from `DevelopmentUnit.listingIds`.
-  Reads ignore missing listings, so nothing leaks or breaks. A clean fix is a
-  post-delete hook in `models/Property.ts`.
 - The jest suites run against a standalone `mongod`, so they exercise the
   no-transaction fallback of `withOptionalTransaction`. The transactional path is
   used on replica sets.
+- Hard-deleted listings are detached from units automatically (Property
+  `deleteOne` / `findOneAndDelete` / `deleteMany` hooks). Raw driver writes that
+  bypass Mongoose would skip this; reads still ignore missing listings.
 
 **Platform and security**
-- Platform `GET /api/properties/:id` was not audited for a draft guard. The
-  explorer itself never exposes draft listing ids.
+- Platform `GET /api/properties/:id` serves draft listings to anyone with the id.
+  This is outside the explorer (which never exposes draft listing ids); fixing it
+  needs the seller's edit flow to load drafts with authentication, so it is left
+  as a separate task.
 - The dashboard `GET /:developmentId` still returns the full document, including
   `ownerId`, to authorised members.
 
 **Editor and dashboard**
 - Hotspots linked to a unit that was later hidden are kept in the draft and
   filtered out of the public views, so hiding a unit never blocks the editor.
-- The editor's link picker loads at most 200 units per view target.
-- The editor preview shows availability fills but not the colour-blind patterns
-  the public explorer draws.
-- The Linked listings tab lists all units, paged. There is no server-side
-  "has listing" filter yet.
+- Server-side unit search matches the unit number only.
 
 **Public explorer**
-- Pressing Esc inside a platform modal opened from the drawer (inquiry, viewing,
-  gallery) does not also close the drawer.
 - Images are plain 2D renders. A Google Earth fly-in or 3D models are not part of
   this build.

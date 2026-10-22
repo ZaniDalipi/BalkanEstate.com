@@ -154,6 +154,15 @@ test.describe('Residence explorer (owner)', () => {
     expect(unit.price === undefined).toBe(next === 'on_request');
   });
 
+  test('activity tab lists recent changes with readable labels', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop dashboard');
+    await openManage(page);
+    await page.getByRole('tab', { name: 'Activity' }).click();
+    const panel = page.getByRole('tabpanel', { name: 'Activity' });
+    await expect(panel.getByText(/Updated unit|Changed price|Saved draft|Created/).first()).toBeVisible({ timeout: 15000 });
+    await expect(panel.getByText('Local Dev').first()).toBeVisible();
+  });
+
   test('editor: a drawn polygon is saved where it was drawn', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Pointer drawing');
     await openManage(page);
