@@ -185,7 +185,7 @@ export interface CreateDevelopmentPayload {
   agencyId?: string;
 }
 
-export type UpdateDevelopmentPayload = Partial<CreateDevelopmentPayload>;
+export type UpdateDevelopmentPayload = Partial<CreateDevelopmentPayload> & { allowUnitInquiries?: boolean };
 
 export interface CreateBuildingPayload {
   name: string;

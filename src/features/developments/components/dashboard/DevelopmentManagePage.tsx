@@ -14,15 +14,16 @@ import { roleCan } from './inventory/permissions';
 import { LinkedListingsPanel } from './listings/LinkedListingsPanel';
 import { ManageTabs, panelId, tabId, useTabParam, type ManageTab } from './ManageTabs';
 import { OverviewPanel } from './OverviewPanel';
+import { SettingsPanel } from './SettingsPanel';
 
-const TAB_IDS = ['overview', 'inventory', 'explorer', 'listings'] as const;
+const TAB_IDS = ['overview', 'inventory', 'explorer', 'listings', 'settings'] as const;
 type TabId = (typeof TAB_IDS)[number];
 const PREFIX = 'dev-manage';
 
 /**
  * Dashboard page for one development, split into tabs (synced to `?tab=`):
  * overview (status, publish, unit totals, cover), inventory (builder + table),
- * the interactive explorer studio, and linked listings.
+ * the interactive explorer studio, linked listings, and settings.
  */
 const DevelopmentManagePage: React.FC = () => {
   const { t } = useTranslation('developments');
@@ -51,6 +52,7 @@ const DevelopmentManagePage: React.FC = () => {
     { id: 'inventory', label: t('manage.tabs.inventory', 'Inventory') },
     { id: 'explorer', label: t('manage.tabs.explorer', 'Interactive explorer') },
     { id: 'listings', label: t('manage.tabs.listings', 'Linked listings') },
+    { id: 'settings', label: t('manage.tabs.settings', 'Settings') },
   ];
 
   const panel = (which: TabId, content: React.ReactNode) => (
@@ -120,6 +122,7 @@ const DevelopmentManagePage: React.FC = () => {
         </section>
       )}
       {panel('listings', <LinkedListingsPanel developmentId={development.id} role={role} />)}
+      {panel('settings', <SettingsPanel development={development} canEdit={roleCan(role, 'project.edit')} />)}
     </main>
   );
 };

@@ -4,14 +4,14 @@
  * disable controls a role cannot use. The server stays authoritative and
  * answers 403 regardless of what the UI allows.
  */
-export type InventoryPermission = 'unit.manage' | 'price.change' | 'availability.change' | 'listing.attach' | 'listing.detach' | 'publish';
+export type InventoryPermission = 'unit.manage' | 'price.change' | 'availability.change' | 'listing.attach' | 'listing.detach' | 'publish' | 'project.edit';
 
 const ROLE_PERMISSIONS: Record<string, readonly InventoryPermission[]> = {
-  owner: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish'],
-  manager: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish'],
+  owner: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish', 'project.edit'],
+  manager: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish', 'project.edit'],
   sales_manager: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach'],
   sales_agent: ['availability.change', 'listing.attach', 'listing.detach'],
-  editor: ['unit.manage'],
+  editor: ['unit.manage', 'project.edit'],
   viewer: [],
 };
 
