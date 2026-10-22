@@ -454,6 +454,8 @@ export interface UnitListQuery {
   floorId?: string;
   availability?: UnitAvailability;
   visibility?: UnitVisibility;
+  /** true → only units with a linked listing; false → only units without one. */
+  hasListing?: boolean;
   sort?: UnitSort;
   limit?: number;
   skip?: number;
@@ -582,4 +584,30 @@ export interface UnitInquiryPayload {
   email: string;
   phone?: string;
   message: string;
+}
+
+/** One row of a development's audit trail (GET /dashboard/developments/:id/audit). */
+export interface AuditEntry {
+  id: string;
+  /** e.g. 'unit.update', 'price.change' — see backend DevelopmentAuditAction. */
+  action: string;
+  actorId: string | null;
+  actorName: string | null;
+  targetType: string | null;
+  targetId: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface AuditLogQuery {
+  /** ≤ 100 (server default 25). */
+  limit?: number;
+  skip?: number;
+  /** An exact action ('unit.update') or a family prefix without a dot ('unit'). */
+  action?: string;
+}
+
+export interface AuditLogPage {
+  entries: AuditEntry[];
+  total: number;
 }

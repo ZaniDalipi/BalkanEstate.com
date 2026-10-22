@@ -32,6 +32,8 @@ export const developmentKeys = {
     [...developmentKeys.detail(id), 'units', { filters }] as const,
   structure: (id: string) => [...developmentKeys.detail(id), 'structure'] as const,
   scenes: (id: string) => [...developmentKeys.detail(id), 'scenes'] as const,
+  /** Activity tab: audit entries of one development, per action-family filter. */
+  audit: (id: string, filter?: string) => [...developmentKeys.detail(id), 'audit', { filter: filter ?? '' }] as const,
   attachableListings: (id: string, q: string) =>
     [...developmentKeys.detail(id), 'attachable-listings', q] as const,
 

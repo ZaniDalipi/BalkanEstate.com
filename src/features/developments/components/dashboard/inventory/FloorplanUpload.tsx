@@ -1,16 +1,22 @@
 import React, { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Upload } from 'lucide-react';
+import { Trash2, Upload } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
+import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
-import type { UnitImage } from '../../../types';
+import type { DashboardUnit, UnitImage } from '../../../types';
 
 interface FloorplanUploadProps {
   developmentId: string;
   unitId: string;
   current?: UnitImage;
+  /** No upload (`media.upload` missing). */
   disabled?: boolean;
+  /** May remove the current floorplan (`unit.manage`). */
+  canRemove?: boolean;
+  /** The unit as the server returned it after an upload or removal. */
+  onUnit?: (unit: DashboardUnit) => void;
 }
 
 export const FLOORPLAN_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -21,11 +27,12 @@ export const checkFloorplanFile = (file: File): 'type' | 'size' | null =>
   !FLOORPLAN_TYPES.includes(file.type) ? 'type' : file.size > FLOORPLAN_MAX_BYTES ? 'size' : null;
 
 /** Pick → validate → preview → upload a unit's floorplan image (uploads immediately, separate from Save). */
-export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled }) => {
+export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled, canRemove, onUnit }) => {
   const { t } = useTranslation('developments');
   const inputId = useId();
   const notify = useNotification();
-  const { uploadFloorplan, isUploadingFloorplan } = useUnitAdmin(developmentId);
+  const { confirm } = useConfirmation();
+  const { uploadFloorplan, isUploadingFloorplan, removeFloorplan, isRemovingFloorplan } = useUnitAdmin(developmentId);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,10 +64,30 @@ export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId,
   const onUpload = async () => {
     if (!file) return;
     try {
-      await uploadFloorplan({ unitId, file });
+      const res = await uploadFloorplan({ unitId, file });
+      if (res?.unit) onUnit?.(res.unit);
       setFile(null);
       setPreview(null);
       void notify.success(t('inventory.floorplan.uploadedTitle', 'Floorplan uploaded'), t('inventory.floorplan.uploaded', 'The floorplan is saved.'));
+    } catch (err) {
+      setError((err as { message?: string })?.message || t('errors.generic'));
+    }
+  };
+
+  const onRemove = async () => {
+    const ok = await confirm({
+      title: t('inventory.floorplan.removeTitle', 'Remove the floor plan?'),
+      message: t('inventory.floorplan.removeMessage', 'The floor plan image is removed from this unit.'),
+      confirmLabel: t('inventory.floorplan.remove', 'Remove floor plan'),
+      cancelLabel: t('wizard.cancel', 'Cancel'),
+      type: 'danger',
+    });
+    if (!ok) return;
+    setError(null);
+    try {
+      const res = await removeFloorplan(unitId);
+      if (res?.unit) onUnit?.(res.unit);
+      void notify.success(t('inventory.floorplan.removedTitle', 'Floor plan removed'), t('inventory.floorplan.removed', 'The unit no longer has a floor plan.'));
     } catch (err) {
       setError((err as { message?: string })?.message || t('errors.generic'));
     }
@@ -88,6 +115,12 @@ export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId,
         {file && (
           <Button type="button" onClick={onUpload} disabled={isUploadingFloorplan}>
             {isUploadingFloorplan ? t('inventory.floorplan.uploading', 'Uploading…') : t('inventory.floorplan.upload', 'Upload floorplan')}
+          </Button>
+        )}
+        {canRemove && current?.url && !file && (
+          <Button type="button" variant="ghost" onClick={onRemove} disabled={isRemovingFloorplan} className="text-red-700 hover:bg-red-50 hover:text-red-800">
+            <Trash2 className="mr-1 h-4 w-4" aria-hidden="true" />
+            {isRemovingFloorplan ? t('inventory.floorplan.removing', 'Removing…') : t('inventory.floorplan.remove', 'Remove floor plan')}
           </Button>
         )}
       </div>

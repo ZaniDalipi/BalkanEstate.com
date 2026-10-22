@@ -6,8 +6,8 @@ import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import type { DashboardUnit, DevelopmentBuilding, DevelopmentFloor, UpdateUnitPayload } from '../../../types';
-import { FloorplanUpload } from './FloorplanUpload';
 import { UnitEditSections } from './UnitEditBody';
+import { UnitMediaSections } from './UnitMediaSections';
 import { PRICE_FIELDS, editPermissions } from './permissions';
 import { diffUnitForm, unitToForm, validateUnitForm, type UnitFormErrors, type UnitFormState } from './unitForm';
 
@@ -113,7 +113,7 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
           </div>
         )}
         <UnitEditSections form={form} set={set} errors={errors} disabled={disabled} buildings={buildings} floors={floors} />
-        <FloorplanUpload developmentId={developmentId} unitId={unit.id} current={unit.floorplan} disabled={disabled.unit} />
+        <UnitMediaSections developmentId={developmentId} unit={unit} role={role} />
         <div className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-slate-200 bg-white pt-3">
           {perms.unit && (
             <Button type="button" variant="ghost" onClick={onDelete} disabled={isDeleting} className="text-red-700 hover:bg-red-50 hover:text-red-800">

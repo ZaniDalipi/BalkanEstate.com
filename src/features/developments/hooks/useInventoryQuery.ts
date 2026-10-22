@@ -37,7 +37,13 @@ export const sortDirection = (current: UnitSort, field: InventorySortField): 'as
  * and pagination. Any filter/sort/page-size change goes back to the first page.
  * The previous page stays on screen while the next one loads.
  */
-export function useInventoryQuery(developmentId: string | undefined, initialSort: UnitSort = 'unitNumber') {
+export function useInventoryQuery(
+  developmentId: string | undefined,
+  initialSort: UnitSort = 'unitNumber',
+  /** Fixed server filters (e.g. `{ hasListing: true }` for the linked-listings tab). */
+  scope: Pick<UnitListQuery, 'hasListing'> = {}
+) {
+  const { hasListing } = scope;
   const [filters, setFilters] = useState<InventoryFilters>(DEFAULT_FILTERS);
   const [sort, setSortState] = useState<UnitSort>(initialSort);
   const [limit, setLimitState] = useState<number>(INVENTORY_PAGE_SIZES[0]);
@@ -51,11 +57,12 @@ export function useInventoryQuery(developmentId: string | undefined, initialSort
       floorId: filters.floorId || undefined,
       availability: filters.availability || undefined,
       visibility: filters.visibility || undefined,
+      hasListing,
       sort,
       limit,
       skip,
     }),
-    [debouncedSearch, filters.buildingId, filters.floorId, filters.availability, filters.visibility, sort, limit, skip]
+    [debouncedSearch, filters.buildingId, filters.floorId, filters.availability, filters.visibility, hasListing, sort, limit, skip]
   );
 
   const result = useQuery({

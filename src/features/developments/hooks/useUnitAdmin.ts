@@ -4,9 +4,12 @@ import { developmentKeys } from '../api/developmentKeys';
 import {
   bulkUpdateUnits,
   deleteUnit,
+  deleteUnitFloorplan,
+  deleteUnitGalleryImage,
   downloadUnitsCsv,
   updateUnit,
   uploadUnitFloorplan,
+  uploadUnitGallery,
 } from '../api/developmentsApi';
 import type { BulkUnitUpdatePayload, UpdateUnitPayload } from '../types';
 
@@ -25,8 +28,8 @@ export function triggerDownload(blob: Blob, filename: string): void {
 }
 
 /**
- * Dashboard unit administration: edit, delete, bulk update, floorplan upload
- * and CSV export. Every write refreshes the inventory queries, the development
+ * Dashboard unit administration: edit, delete, bulk update, floorplan and
+ * gallery media, and CSV export. Every write refreshes the inventory queries, the development
  * detail (its stats) and the public cache (buyers see availability/price).
  */
 export function useUnitAdmin(developmentId: string) {
@@ -55,6 +58,18 @@ export function useUnitAdmin(developmentId: string) {
       uploadUnitFloorplan(developmentId, vars.unitId, vars.file),
     onSuccess: invalidate,
   });
+  const removeFloorplanM = useMutation({
+    mutationFn: (unitId: string) => deleteUnitFloorplan(developmentId, unitId),
+    onSuccess: invalidate,
+  });
+  const addGallery = useMutation({
+    mutationFn: (vars: { unitId: string; files: File[] }) => uploadUnitGallery(developmentId, vars.unitId, vars.files),
+    onSuccess: invalidate,
+  });
+  const removeGallery = useMutation({
+    mutationFn: (vars: { unitId: string; index: number }) => deleteUnitGalleryImage(developmentId, vars.unitId, vars.index),
+    onSuccess: invalidate,
+  });
   const exportCsv = useMutation({
     mutationFn: async (filename?: string) => {
       const blob = await downloadUnitsCsv(developmentId);
@@ -71,6 +86,12 @@ export function useUnitAdmin(developmentId: string) {
     isBulkUpdating: bulk.isPending,
     uploadFloorplan: floorplan.mutateAsync,
     isUploadingFloorplan: floorplan.isPending,
+    removeFloorplan: removeFloorplanM.mutateAsync,
+    isRemovingFloorplan: removeFloorplanM.isPending,
+    addGalleryImages: addGallery.mutateAsync,
+    isUploadingGallery: addGallery.isPending,
+    removeGalleryImage: removeGallery.mutateAsync,
+    isRemovingGalleryImage: removeGallery.isPending,
     exportCsv: exportCsv.mutateAsync,
     isExporting: exportCsv.isPending,
   };

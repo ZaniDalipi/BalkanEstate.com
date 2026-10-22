@@ -9,28 +9,32 @@ import { StatusPill } from '../shared/Badges';
 import { LoadingState, ErrorState } from '../shared/States';
 import { SceneStudio } from '../scene/SceneStudio';
 import { useConfirmDiscard } from '../scene/editor/useUnsavedGuard';
-import { QuickAddInventory } from './inventory/QuickAddInventory';
-import { InventoryTable } from './inventory/InventoryTable';
+import { ActivityPanel } from './activity/ActivityPanel';
+import { InventoryPanel } from './InventoryPanel';
 import { roleCan } from './inventory/permissions';
 import { LinkedListingsPanel } from './listings/LinkedListingsPanel';
 import { ManageTabs, panelId, tabId, useTabParam, type ManageTab } from './ManageTabs';
 import { OverviewPanel } from './OverviewPanel';
 import { SettingsPanel } from './SettingsPanel';
 
-const TAB_IDS = ['overview', 'inventory', 'explorer', 'listings', 'settings'] as const;
+const TAB_IDS = ['overview', 'inventory', 'explorer', 'listings', 'activity', 'settings'] as const;
 type TabId = (typeof TAB_IDS)[number];
 const PREFIX = 'dev-manage';
 
 /**
  * Dashboard page for one development, split into tabs (synced to `?tab=`):
  * overview (status, publish, unit totals, cover), inventory (builder + table),
- * the interactive explorer studio, linked listings, and settings.
+ * the interactive explorer studio, linked listings, activity (audit trail, only
+ * for roles with `team.manage`) and settings.
  */
 const DevelopmentManagePage: React.FC = () => {
   const { t } = useTranslation('developments');
   const { id } = useParams();
   const { development, role, isLoading, error, refetch } = useMyDevelopment(id);
-  const [tab, setTab] = useTabParam<TabId>(TAB_IDS);
+  const [requestedTab, setTab] = useTabParam<TabId>(TAB_IDS);
+  const showActivity = !!role && roleCan(role, 'team.manage');
+  // A shared `?tab=activity` link opened by a role without access falls back to the overview.
+  const tab: TabId = requestedTab === 'activity' && !showActivity ? 'overview' : requestedTab;
   // Leaving the explorer tab unmounts the editor, so ask before dropping unsaved region edits.
   const explorerDirty = useRef(false);
   const confirmDiscard = useConfirmDiscard();
@@ -65,6 +69,7 @@ const DevelopmentManagePage: React.FC = () => {
     { id: 'inventory', label: t('manage.tabs.inventory', 'Inventory') },
     { id: 'explorer', label: t('manage.tabs.explorer', 'Interactive explorer') },
     { id: 'listings', label: t('manage.tabs.listings', 'Linked listings') },
+    ...(showActivity ? [{ id: 'activity' as const, label: t('manage.tabs.activity', 'Activity') }] : []),
     { id: 'settings', label: t('manage.tabs.settings', 'Settings') },
   ];
 
@@ -107,23 +112,7 @@ const DevelopmentManagePage: React.FC = () => {
       <ManageTabs tabs={tabs} active={tab} onSelect={selectTab} label={t('manage.tabs.label', 'Manage development')} idPrefix={PREFIX} />
 
       {panel('overview', <OverviewPanel development={development} canPublish={roleCan(role, 'publish')} />)}
-      {panel(
-        'inventory',
-        <div className="space-y-6">
-          <section aria-labelledby="quick-add-heading" className="rounded-2xl border border-slate-200 bg-white p-4">
-            <h2 id="quick-add-heading" className="mb-3 text-base font-semibold text-slate-900">
-              {t('manage.inventory.quickAdd', 'Add buildings, floors and units')}
-            </h2>
-            <QuickAddInventory developmentId={development.id} />
-          </section>
-          <section aria-labelledby="units-heading">
-            <h2 id="units-heading" className="mb-3 text-base font-semibold text-slate-900">
-              {t('detail.units', 'Units')}
-            </h2>
-            <InventoryTable developmentId={development.id} role={role} slug={development.slug} />
-          </section>
-        </div>
-      )}
+      {panel('inventory', <InventoryPanel developmentId={development.id} role={role} slug={development.slug} />)}
       {panel(
         'explorer',
         <section aria-labelledby="explorer-heading">
@@ -135,6 +124,7 @@ const DevelopmentManagePage: React.FC = () => {
         </section>
       )}
       {panel('listings', <LinkedListingsPanel developmentId={development.id} role={role} />)}
+      {showActivity && panel('activity', <ActivityPanel developmentId={development.id} />)}
       {panel('settings', <SettingsPanel development={development} canEdit={roleCan(role, 'project.edit')} />)}
     </main>
   );

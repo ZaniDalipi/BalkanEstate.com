@@ -42,6 +42,9 @@ import type {
   SceneViewMetaPayload,
   PublicSceneView,
   UnitInquiryPayload,
+  DevelopmentRole,
+  AuditLogPage,
+  AuditLogQuery,
 } from '../types';
 
 const PUBLIC = '/developments';
@@ -143,8 +146,8 @@ export const listMyDevelopments = async (
   return { items: raw.developments ?? [], total: raw.total ?? 0 };
 };
 
-export const getMyDevelopment = (id: string): Promise<{ development: Development; role: string }> =>
-  apiRequest<{ development: Development; role: string }>(`${DASH}/${id}`, {
+export const getMyDevelopment = (id: string): Promise<{ development: Development; role: DevelopmentRole }> =>
+  apiRequest<{ development: Development; role: DevelopmentRole }>(`${DASH}/${id}`, {
     requiresAuth: true,
   });
 
@@ -288,6 +291,44 @@ export const uploadUnitFloorplan = (
   const formData = new FormData();
   formData.append('floorplan', file);
   return uploadRequest(`${DASH}/${developmentId}/units/${unitId}/floorplan`, formData);
+};
+
+export const deleteUnitFloorplan = (developmentId: string, unitId: string): Promise<{ unit: DashboardUnit }> =>
+  apiRequest(`${DASH}/${developmentId}/units/${unitId}/floorplan`, { method: 'DELETE', requiresAuth: true });
+
+/** Append 1–10 images to a unit's gallery (multipart field `images`; at most 30 per unit). */
+export const uploadUnitGallery = (
+  developmentId: string,
+  unitId: string,
+  files: File[]
+): Promise<{ unit: DashboardUnit }> => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('images', file));
+  return uploadRequest(`${DASH}/${developmentId}/units/${unitId}/gallery`, formData);
+};
+
+/** Remove the gallery image at `index` (its position in `unit.gallery`). */
+export const deleteUnitGalleryImage = (
+  developmentId: string,
+  unitId: string,
+  index: number
+): Promise<{ unit: DashboardUnit }> =>
+  apiRequest(`${DASH}/${developmentId}/units/${unitId}/gallery/${index}`, { method: 'DELETE', requiresAuth: true });
+
+/** The development's audit trail, newest first (owner/manager only — `team.manage`). */
+export const listDevelopmentAudit = async (
+  developmentId: string,
+  query: AuditLogQuery = {}
+): Promise<AuditLogPage> => {
+  const qs = new URLSearchParams();
+  Object.entries(query).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+  });
+  const q = qs.toString();
+  const raw = await apiRequest<Partial<AuditLogPage>>(`${DASH}/${developmentId}/audit${q ? `?${q}` : ''}`, {
+    requiresAuth: true,
+  });
+  return { entries: raw.entries ?? [], total: raw.total ?? 0 };
 };
 
 export const updateBuilding = (

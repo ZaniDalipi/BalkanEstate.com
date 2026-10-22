@@ -4,21 +4,36 @@
  * disable controls a role cannot use. The server stays authoritative and
  * answers 403 regardless of what the UI allows.
  */
-export type InventoryPermission = 'unit.manage' | 'price.change' | 'availability.change' | 'listing.attach' | 'listing.detach' | 'publish' | 'project.edit';
+import type { DevelopmentRole } from '../../../types';
 
-const ROLE_PERMISSIONS: Record<string, readonly InventoryPermission[]> = {
-  owner: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish', 'project.edit'],
-  manager: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish', 'project.edit'],
-  sales_manager: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach'],
+export type InventoryPermission =
+  | 'unit.manage'
+  | 'price.change'
+  | 'availability.change'
+  | 'listing.attach'
+  | 'listing.detach'
+  | 'publish'
+  | 'project.edit'
+  | 'media.upload'
+  | 'team.manage';
+
+const ALL: readonly InventoryPermission[] = [
+  'unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish', 'project.edit', 'media.upload', 'team.manage',
+];
+
+const ROLE_PERMISSIONS: Record<DevelopmentRole, readonly InventoryPermission[]> = {
+  owner: ALL,
+  manager: ALL,
+  sales_manager: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'media.upload'],
   sales_agent: ['availability.change', 'listing.attach', 'listing.detach'],
-  editor: ['unit.manage', 'project.edit'],
+  editor: ['unit.manage', 'project.edit', 'media.upload'],
   viewer: [],
 };
 
 /** Whether `role` may use `permission`. Unknown/missing role → allowed (server decides). */
 export const roleCan = (role: string | undefined, permission: InventoryPermission): boolean => {
   if (!role || !(role in ROLE_PERMISSIONS)) return true;
-  return ROLE_PERMISSIONS[role].includes(permission);
+  return ROLE_PERMISSIONS[role as DevelopmentRole].includes(permission);
 };
 
 /** Unit fields gated by `price.change`; `availability` by `availability.change`; the rest by `unit.manage`. */
