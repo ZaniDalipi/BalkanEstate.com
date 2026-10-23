@@ -26,6 +26,7 @@ import DevelopmentFollow from '../models/DevelopmentFollow';
 import Property from '../models/Property';
 import { encodeId } from '../utils/idObfuscation';
 import { scriptLogger as log } from '../utils/logger';
+import { resolveScriptMongoUri, redactMongoUri } from '../utils/scriptMongoUri';
 
 dotenv.config();
 
@@ -71,9 +72,10 @@ async function run(): Promise<void> {
   // `npm run seed:developments` just works.
   const email = process.env.DEV_SEED_EMAIL;
 
-  const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
+  // Same database as the running server (MONGODB_URI), never a different one.
+  const { uri: mongoUri, source: mongoSource } = resolveScriptMongoUri();
   await mongoose.connect(mongoUri);
-  log.info(`Connected to ${mongoUri}`);
+  log.info(`Connected to ${redactMongoUri(mongoUri)} (from ${mongoSource})`);
 
   try {
     let owner = email

@@ -28,6 +28,7 @@ import DevelopmentBuilding from '../models/DevelopmentBuilding';
 import DevelopmentUnit from '../models/DevelopmentUnit';
 import DevelopmentScene from '../models/DevelopmentScene';
 import { scriptLogger as log } from '../utils/logger';
+import { resolveScriptMongoUri, redactMongoUri } from '../utils/scriptMongoUri';
 
 dotenv.config();
 
@@ -52,9 +53,10 @@ const findDuplicates = async (
   ]);
 
 async function run(): Promise<void> {
-  const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/balkan-estate';
+  // Same database as the running server (MONGODB_URI), never a different one.
+  const { uri: mongoUri, source: mongoSource } = resolveScriptMongoUri();
   await mongoose.connect(mongoUri);
-  log.info(`Connected to ${mongoUri}${DRY_RUN ? ' (DRY RUN — no writes)' : ''}`);
+  log.info(`Connected to ${redactMongoUri(mongoUri)} (from ${mongoSource})${DRY_RUN ? ' (DRY RUN — no writes)' : ''}`);
 
   try {
     // 1. Backfill legacy scenes to the main view.

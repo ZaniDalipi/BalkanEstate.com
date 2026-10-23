@@ -83,7 +83,7 @@ this residence's apartments.
 | Park Residence, Floor 1 (plan) | one per apartment | Unit | apartment card |
 | Seaside Tower 2 | (no picture) | n/a | opens as a floor-by-floor list |
 
-Demo listings are titled `[Demo] …` and are replaced on every run. The
+Demo listings are titled `[Demo] …` and are replaced on every run. The seed (and `migrate:development-views`) connect with `MONGODB_URI`, the same variable as the server, falling back to `MONGO_URI` and then `mongodb://localhost:27017/balkan-estate`; the log line shows which one was used (password hidden). The
 Interactive explorer tab also has a **How it works** panel, and the region
 editor explains each link type under **Links to**.
 
