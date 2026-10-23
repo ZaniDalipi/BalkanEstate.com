@@ -257,7 +257,8 @@ test.describe('Residence explorer (owner)', () => {
     await openManage(page);
     await page.getByRole('tab', { name: 'Interactive explorer' }).click();
     await page.getByRole('button', { name: /^Polygon/ }).first().click();
-    const box = await page.getByLabel('Region editor canvas').boundingBox();
+    // Points are relative to the picture, which may be letterboxed inside the canvas.
+    const box = await page.getByLabel('Region editor canvas').locator('img').first().boundingBox();
     if (!box) throw new Error('editor canvas not rendered');
     const pts: Array<[number, number]> = [[0.3, 0.05], [0.5, 0.05], [0.5, 0.2], [0.3, 0.2]];
     for (const [x, y] of pts) await page.mouse.click(box.x + box.width * x, box.y + box.height * y);

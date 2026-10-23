@@ -257,6 +257,33 @@ The seed uses the most recent user; set `DEV_SEED_EMAIL=` to pick another. It
 creates 4 buildings and 118 units, a site plan view, and a front and back view for
 Seaside Tower 1.
 
+**A demo with real renders — Plaza Tirana:**
+
+```bash
+cd backend && npm run seed:plaza
+```
+
+It creates "Plaza Tirana (Demo)" from the renders in `public/demo/plaza/`:
+
+| Picture | Regions link to |
+| --- | --- |
+| Residence: *Square* and *From the east* aerials | Plaza Tower, Plaza Podium |
+| Plaza Tower: *Front* | each apartment (84; duplexes cover two floors, penthouses two columns) |
+| Plaza Tower: *Floors* | each floor (22 bands) |
+| Plaza Podium | no picture: the floor-by-floor list of 6 shops and 8 offices |
+
+Units are deterministic (same data every run): studios to 4-bedroom penthouses,
+with areas, orientation, view, features, prices per m², availability that sells
+lower floors first, a floor plan on the duplexes, and four `[Demo Plaza]`
+listings (three apartments for sale, one office for rent). The outlines live in
+`backend/src/scripts/demo/plazaGeometry.ts` (pixels of each render) and the units
+in `plazaUnits.ts`; both seeds share `demo/seedSupport.ts`. Pictures are served by
+the web app, so set `PUBLIC_WEB_URL` if it does not run on `http://localhost:3000`.
+
+| Residence picture | Plaza Tower front |
+| --- | --- |
+| ![Plaza residence](./images/residence-explorer/34-plaza-residence.jpg) | ![Plaza tower](./images/residence-explorer/35-plaza-tower.jpg) |
+
 **Add a building view:**
 
 1. Dashboard → residence → **Interactive explorer**.

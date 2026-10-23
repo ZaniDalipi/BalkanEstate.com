@@ -15,18 +15,17 @@
  */
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from '../models/User';
 import Development from '../models/Development';
 import DevelopmentBuilding from '../models/DevelopmentBuilding';
 import DevelopmentFloor from '../models/DevelopmentFloor';
 import DevelopmentUnit from '../models/DevelopmentUnit';
 import DevelopmentMembership from '../models/DevelopmentMembership';
 import DevelopmentScene from '../models/DevelopmentScene';
-import DevelopmentFollow from '../models/DevelopmentFollow';
 import Property from '../models/Property';
 import { encodeId } from '../utils/idObfuscation';
 import { scriptLogger as log } from '../utils/logger';
 import { resolveScriptMongoUri, redactMongoUri } from '../utils/scriptMongoUri';
+import { removeDemoDevelopment, resolveSeedOwner, round2 } from './demo/seedSupport';
 
 dotenv.config();
 
@@ -48,7 +47,6 @@ const FACADE_H = 900;
 
 const pick = <T>(arr: readonly T[], i: number): T => arr[i % arr.length];
 const rnd = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /** Choose a unit type so the apartment-type filter has real variety. */
 const unitTypeFor = (level: number, topFloor: number, posOnFloor: number, beds: number): string => {
@@ -67,74 +65,18 @@ interface SeededUnit {
 }
 
 async function run(): Promise<void> {
-  // DEV_SEED_EMAIL is optional. With it, the demo is owned by that user; without
-  // it, the seed owns the demo with the most recently created user, so a plain
-  // `npm run seed:developments` just works.
-  const email = process.env.DEV_SEED_EMAIL;
-
   // Same database as the running server (MONGODB_URI), never a different one.
   const { uri: mongoUri, source: mongoSource } = resolveScriptMongoUri();
   await mongoose.connect(mongoUri);
   log.info(`Connected to ${redactMongoUri(mongoUri)} (from ${mongoSource})`);
 
   try {
-    let owner = email
-      ? await User.findOne({ email: email.toLowerCase() })
-      : await User.findOne({}).sort({ createdAt: -1 });
-
-    if (!owner) {
-      if (email && process.env.DEV_SEED_CREATE === 'true') {
-        // Opt-in: create a minimal user so seeding is never blocked. This is a
-        // local demo convenience; sign-in still needs a password reset.
-        const created = new User({
-          email: email.toLowerCase(),
-          name: email.split('@')[0] || 'Demo Owner',
-          password: `Seed!${Math.random().toString(36).slice(2, 10)}A1`,
-          isVerified: true,
-        } as never);
-        await created.save();
-        owner = created;
-        log.info(`👤 Created a new user ${email} (DEV_SEED_CREATE=true).`);
-      } else if (email) {
-        // The named user doesn't exist — show which ones do.
-        const others = await User.find({}).sort({ createdAt: -1 }).limit(15).select('email').lean();
-        log.error(`❌ No user found with email ${email}.`);
-        if (others.length > 0) {
-          log.error('   Run it without an email to use the most recent user, or pick one:');
-          others.forEach((u) => log.error(`     • ${u.email}`));
-        } else {
-          log.error('   This database has no users yet. Sign up in the app first,');
-          log.error('   or create one: DEV_SEED_CREATE=true DEV_SEED_EMAIL=you@example.com npm run seed:developments');
-        }
-        process.exit(1);
-      } else {
-        log.error('❌ This database has no users yet — sign up in the app first, then re-run.');
-        process.exit(1);
-      }
-    }
-    if (!owner) throw new Error('Owner resolution failed');
+    // DEV_SEED_EMAIL picks the owner; otherwise the most recently created user.
+    const owner = await resolveSeedOwner('seed:developments');
     log.info(`Seeding demo owned by ${owner.email}`);
 
     // --- Clean any previous demo -----------------------------------------
-    const existing = await Development.findOne({ slug: SLUG });
-    if (existing) {
-      const devId = existing._id;
-      await Promise.all([
-        DevelopmentBuilding.deleteMany({ developmentId: devId }),
-        DevelopmentFloor.deleteMany({ developmentId: devId }),
-        DevelopmentUnit.deleteMany({ developmentId: devId }),
-        DevelopmentMembership.deleteMany({ developmentId: devId }),
-        DevelopmentScene.deleteMany({ developmentId: devId }),
-        DevelopmentFollow.deleteMany({ developmentId: devId }),
-        // Detach any listings previously wired into this demo.
-        Property.updateMany(
-          { developmentId: devId },
-          { $unset: { developmentId: '', buildingId: '', entranceId: '', floorId: '', unitId: '' } }
-        ),
-        Development.deleteOne({ _id: devId }),
-      ]);
-      log.info('Removed previous demo development.');
-    }
+    await removeDemoDevelopment(SLUG);
 
     // --- Development ------------------------------------------------------
     const development = await Development.create({
