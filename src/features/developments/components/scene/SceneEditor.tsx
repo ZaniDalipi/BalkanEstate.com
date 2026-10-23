@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/src/lib/utils';
 import type { Hotspot, HotspotLinkType, Scene, SceneTargetType } from '../../types';
 import { usePolygonEditor } from '../../hooks/usePolygonEditor';
 import { EditorCanvas } from './editor/EditorCanvas';
@@ -12,6 +13,7 @@ import { useLinkOptions } from './editor/useLinkOptions';
 import { useEditorShortcuts } from './editor/useEditorShortcuts';
 import { RouterLeaveGuard, useBeforeUnloadGuard } from './editor/useUnsavedGuard';
 import { regionPaint } from './editor/canvasUtils';
+import { useExpandedEditor } from './editor/useExpandedEditor';
 
 interface SceneEditorProps {
   developmentId: string;
@@ -43,6 +45,11 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
   const [showLabels, setShowLabels] = useState(true);
   const [preview, setPreview] = useState(false);
   const linkType = DEFAULT_LINK_TYPE[scene.targetType];
+  // Read at key time: Esc first cancels a drawing / clears the selection.
+  const busyRef = useRef(false);
+  busyRef.current = !!editor.state.drawing || !!editor.state.selectedId;
+  const isBusy = useCallback(() => busyRef.current, []);
+  const full = useExpandedEditor(isBusy);
 
   useEditorShortcuts({ editor, rootRef, linkType, enabled: !preview });
   useBeforeUnloadGuard(sync.dirty);
@@ -59,11 +66,16 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
   const issueCount = Object.keys(editor.issues).length;
 
   return (
-    <div ref={rootRef} className="space-y-3">
+    <div
+      ref={rootRef}
+      className={cn('space-y-3', full.expanded && 'fixed inset-0 z-[4000] overflow-y-auto bg-white p-3 sm:p-5')}
+      role={full.expanded ? 'dialog' : undefined}
+      aria-label={full.expanded ? t('editor.toolbar.fullscreen', 'Full-screen editor') : undefined}
+    >
       <RouterLeaveGuard dirty={sync.dirty} />
       <SceneStatusBar scene={scene} sync={sync} issueCount={issueCount} />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className={cn('grid gap-4', full.expanded ? 'lg:grid-cols-[minmax(0,1fr)_340px]' : '2xl:grid-cols-[minmax(0,1fr)_320px]')}>
         <div className="min-w-0 space-y-2">
           <EditorToolbar
             editor={editor}
@@ -74,6 +86,8 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
               setPreview((v) => !v);
               editor.dispatch({ type: 'DRAW_CANCEL' });
             }}
+            expanded={full.expanded}
+            onToggleExpanded={full.toggle}
           />
           <EditorCanvas
             imageUrl={scene.imageUrl}
@@ -86,6 +100,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
             labelOf={labelOf}
             showLabels={showLabels}
             preview={preview}
+            maxHeight={full.expanded ? 'calc(100dvh - 9.5rem)' : '78vh'}
           />
           <p className="text-xs text-slate-500">
             {preview

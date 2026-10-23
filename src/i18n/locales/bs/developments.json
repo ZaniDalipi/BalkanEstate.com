@@ -501,7 +501,9 @@
       "snapGrid": "Poravnaj s mrežom",
       "snapVertices": "Poravnaj s tjemenima",
       "tools": "Alati za crtanje",
-      "undo": "Poništi"
+      "undo": "Poništi",
+      "fullscreen": "Uređivač preko cijelog ekrana",
+      "exitFullscreen": "Izađi iz cijelog ekrana"
     },
     "unsaved": {
       "discard": "Odbaci izmjene",

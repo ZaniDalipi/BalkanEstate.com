@@ -207,11 +207,14 @@ test.describe('Residence explorer (owner)', () => {
     await page.getByRole('button', { name: 'Zoom in' }).click();
     await page.getByRole('button', { name: 'Zoom in' }).click();
     const start = await tx();
-    // Drag on empty picture (the sky above the seeded building regions).
+    // Drag on empty picture (sky to the right of the seeded regions, clear of
+    // the site header), with the canvas centred in the window.
+    await canvas.evaluate((el) => el.scrollIntoView({ block: 'center' }));
     const box = (await canvas.boundingBox())!;
-    await page.mouse.move(box.x + box.width * 0.9, box.y + 12);
+    const y = box.y + box.height * 0.12;
+    await page.mouse.move(box.x + box.width * 0.75, y);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width * 0.9 - 120, box.y + 12, { steps: 6 });
+    await page.mouse.move(box.x + box.width * 0.75 - 120, y, { steps: 6 });
     await page.mouse.up();
     const afterDrag = await tx();
     expect(afterDrag).toBeLessThan(start - 50);

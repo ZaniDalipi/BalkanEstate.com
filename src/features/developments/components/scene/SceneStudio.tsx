@@ -21,6 +21,8 @@ interface TargetOption {
   id: string;
   label: string;
   depth: number;
+  /** For floors: the key of their building. */
+  parentKey?: string;
 }
 
 const encode = (type: SceneTargetType, id: string) => `${type}:${id}`;
@@ -49,7 +51,7 @@ export const SceneStudio: React.FC<SceneStudioProps> = ({ developmentId, onDirty
     for (const b of buildings) {
       list.push({ key: encode('building', b.id), type: 'building', id: b.id, label: b.name, depth: 0 });
       for (const f of floors.filter((fl) => fl.buildingId === b.id)) {
-        list.push({ key: encode('floor', f.id), type: 'floor', id: f.id, label: f.label, depth: 1 });
+        list.push({ key: encode('floor', f.id), type: 'floor', id: f.id, label: f.label, depth: 1, parentKey: encode('building', b.id) });
       }
     }
     return list;
@@ -86,11 +88,12 @@ export const SceneStudio: React.FC<SceneStudioProps> = ({ developmentId, onDirty
   };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+    <div className="grid gap-4 lg:grid-cols-[196px_minmax(0,1fr)]">
       <aside className="rounded-2xl border border-slate-200 bg-white p-2">
         <p className="px-2 py-1 text-xs font-medium uppercase tracking-wide text-slate-500">{t('scene.targetPicker', 'What to map')}</p>
         <ul className="space-y-0.5">
-          {targets.map((tg) => {
+          {/* Floors are listed only under the building being worked on (or whose floor is open). */}
+          {targets.filter((tg) => !tg.parentKey || tg.parentKey === active.key || tg.parentKey === active.parentKey).map((tg) => {
             const isActive = tg.key === active.key;
             const isPublished = (viewsByTarget.get(tg.key) ?? []).some((v) => !!v.published);
             const Icon = tg.type === 'development' ? MapIcon : tg.type === 'building' ? Building2 : null;

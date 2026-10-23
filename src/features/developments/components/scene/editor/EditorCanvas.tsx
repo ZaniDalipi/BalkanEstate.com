@@ -25,6 +25,8 @@ interface EditorCanvasProps {
   labelOf: (h: Hotspot) => string;
   showLabels: boolean;
   preview: boolean;
+  /** CSS max-height of the canvas frame (larger in the full-screen editor). */
+  maxHeight?: string;
 }
 
 const zoomBtn =
@@ -46,6 +48,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   labelOf,
   showLabels,
   preview,
+  maxHeight = '78vh',
 }) => {
   const { t } = useTranslation('developments');
   const aspect = imageWidth > 0 && imageHeight > 0 ? imageWidth / imageHeight : 16 / 10;
@@ -83,7 +86,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         'relative w-full touch-none select-none overflow-hidden rounded-xl bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         vp.isPanning ? 'cursor-grabbing' : vp.spaceHeld || (vp.zoom > 1 + 1e-6 && (preview || state.tool === 'select')) ? 'cursor-grab' : ''
       )}
-      style={{ aspectRatio: `${aspect}`, maxHeight: '72vh' }}
+      style={{ aspectRatio: `${aspect}`, maxHeight }}
       role="application"
       tabIndex={0}
       aria-label={t('editor.canvas.label', 'Region editor canvas')}

@@ -1,6 +1,7 @@
 import React, { useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/src/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import { goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -90,7 +91,8 @@ const DevelopmentManagePage: React.FC = () => {
   );
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
+    // The region editor needs room: the explorer tab uses (almost) the full width.
+    <main className={cn('mx-auto w-full px-4 py-8', tab === 'explorer' ? 'max-w-[1800px] xl:px-8' : 'max-w-6xl')}>
       <button
         type="button"
         onClick={() => goBack(paths.developmentsDashboard())}

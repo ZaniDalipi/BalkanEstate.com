@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Maximize2,
+  Minimize2,
   Eye,
   EyeOff,
   Grid3x3,
@@ -21,6 +23,8 @@ interface EditorToolbarProps {
   onToggleLabels: () => void;
   preview: boolean;
   onTogglePreview: () => void;
+  expanded: boolean;
+  onToggleExpanded: () => void;
 }
 
 const btn =
@@ -35,6 +39,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   onToggleLabels,
   preview,
   onTogglePreview,
+  expanded,
+  onToggleExpanded,
 }) => {
   const { t } = useTranslation('developments');
   const { state, dispatch, canUndo, canRedo } = editor;
@@ -98,6 +104,16 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
       >
         <Eye className="h-4 w-4" aria-hidden="true" />
         {t('editor.toolbar.preview', 'Preview')}
+      </button>
+      <button
+        type="button"
+        onClick={onToggleExpanded}
+        aria-pressed={expanded}
+        title={expanded ? `${t('editor.toolbar.exitFullscreen', 'Exit full screen')} (Esc)` : t('editor.toolbar.fullscreen', 'Full-screen editor')}
+        className={cn(btn, expanded ? on : off)}
+      >
+        {expanded ? <Minimize2 className="h-4 w-4" aria-hidden="true" /> : <Maximize2 className="h-4 w-4" aria-hidden="true" />}
+        <span className="hidden sm:inline">{expanded ? t('editor.toolbar.exitFullscreen', 'Exit full screen') : t('editor.toolbar.fullscreen', 'Full-screen editor')}</span>
       </button>
     </div>
   );

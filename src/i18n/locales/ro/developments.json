@@ -501,7 +501,9 @@
       "snapGrid": "Aliniere la grilă",
       "snapVertices": "Aliniere la vârfuri",
       "tools": "Instrumente de desen",
-      "undo": "Anulează acțiunea"
+      "undo": "Anulează acțiunea",
+      "fullscreen": "Editor pe tot ecranul",
+      "exitFullscreen": "Ieșire din ecran complet"
     },
     "unsaved": {
       "discard": "Renunță la modificări",

@@ -499,7 +499,9 @@
       "snapGrid": "Ngjit te rrjeta",
       "snapVertices": "Ngjit te kulmet",
       "tools": "Mjetet e vizatimit",
-      "undo": "Zhbëj"
+      "undo": "Zhbëj",
+      "fullscreen": "Redaktues në ekran të plotë",
+      "exitFullscreen": "Dil nga ekrani i plotë"
     },
     "unsaved": {
       "discard": "Hidh ndryshimet",

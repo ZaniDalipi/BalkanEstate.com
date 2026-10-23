@@ -499,7 +499,9 @@
       "snapGrid": "Snap to grid",
       "snapVertices": "Snap to vertices",
       "tools": "Drawing tools",
-      "undo": "Undo"
+      "undo": "Undo",
+      "fullscreen": "Full-screen editor",
+      "exitFullscreen": "Exit full screen"
     },
     "unsaved": {
       "discard": "Discard changes",
