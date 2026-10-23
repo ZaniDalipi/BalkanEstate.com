@@ -142,7 +142,11 @@
     "nameTooLong": "Project name is too long.",
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
-    "categoryRequired": "Please choose a category."
+    "categoryRequired": "Please choose a category.",
+    "websiteInvalid": "Εισαγάγετε πλήρη διεύθυνση web που ξεκινά με http:// ή https://.",
+    "emailInvalid": "Εισαγάγετε έγκυρη διεύθυνση email.",
+    "latInvalid": "Το γεωγραφικό πλάτος πρέπει να είναι αριθμός μεταξύ -90 και 90.",
+    "lngInvalid": "Το γεωγραφικό μήκος πρέπει να είναι αριθμός μεταξύ -180 και 180."
   },
   "cover": {
     "heading": "Cover image",
@@ -771,7 +775,7 @@
       "inventory": "Απόθεμα",
       "explorer": "Διαδραστικός εξερευνητής",
       "listings": "Συνδεδεμένες αγγελίες",
-      "settings": "Ρυθμίσεις",
+      "settings": "Στοιχεία και ρυθμίσεις",
       "activity": "Δραστηριότητα"
     },
     "overview": {
@@ -874,5 +878,34 @@
       "building_delete": "Διαγραφή κτιρίου",
       "floor_delete": "Διαγραφή ορόφου"
     }
+  },
+  "details": {
+    "heading": "Στοιχεία κατοικίας",
+    "intro": "Τι βλέπουν οι αγοραστές για αυτή την κατοικία.",
+    "readOnly": "Μόνο οι ιδιοκτήτες και οι διαχειριστές μπορούν να αλλάξουν αυτά τα στοιχεία.",
+    "about": "Σχετικά με την κατοικία",
+    "completion": "Αναμενόμενη ολοκλήρωση",
+    "description": "Περιγραφή",
+    "location": "Τοποθεσία",
+    "municipality": "Δήμος / περιοχή",
+    "lat": "Γεωγραφικό πλάτος",
+    "lng": "Γεωγραφικό μήκος",
+    "coordinatesHelper": "Συμπληρώνονται από την πόλη. Προσαρμόστε τα για να τοποθετήσετε την καρφίτσα ακριβώς στον χάρτη.",
+    "amenities": "Παροχές",
+    "amenityPlaceholder": "π.χ. Υπόγειο πάρκινγκ",
+    "addAmenity": "Προσθήκη",
+    "removeAmenity": "Αφαίρεση {{name}}",
+    "amenitiesHelper": "Εμφανίζονται στη σελίδα της κατοικίας. Πατήστε Enter μετά από καθεμία.",
+    "amenitiesFull": "Μπορείτε να καταχωρίσετε έως {{max}} παροχές.",
+    "contact": "Επαφή πωλήσεων",
+    "contactHelper": "Ποιος απαντά σε ερωτήσεις πωλήσεων για αυτή την κατοικία. Όλα τα πεδία είναι προαιρετικά.",
+    "contactName": "Όνομα",
+    "contactEmail": "Email",
+    "contactPhone": "Τηλέφωνο",
+    "unsaved": "Έχετε μη αποθηκευμένες αλλαγές.",
+    "discard": "Απόρριψη",
+    "save": "Αποθήκευση στοιχείων",
+    "saving": "Αποθήκευση…",
+    "saved": "Τα στοιχεία της κατοικίας ενημερώθηκαν."
   }
 }

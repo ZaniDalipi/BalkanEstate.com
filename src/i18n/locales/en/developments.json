@@ -142,7 +142,11 @@
     "nameTooLong": "Project name is too long.",
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
-    "categoryRequired": "Please choose a category."
+    "categoryRequired": "Please choose a category.",
+    "websiteInvalid": "Enter a full web address starting with http:// or https://.",
+    "emailInvalid": "Enter a valid email address.",
+    "latInvalid": "Latitude must be a number between -90 and 90.",
+    "lngInvalid": "Longitude must be a number between -180 and 180."
   },
   "cover": {
     "heading": "Cover image",
@@ -771,7 +775,7 @@
       "inventory": "Inventory",
       "explorer": "Interactive explorer",
       "listings": "Linked listings",
-      "settings": "Settings",
+      "settings": "Details & settings",
       "activity": "Activity"
     },
     "overview": {
@@ -874,5 +878,34 @@
       "building_delete": "Deleted building",
       "floor_delete": "Deleted floor"
     }
+  },
+  "details": {
+    "heading": "Residence details",
+    "intro": "What buyers see about this residence.",
+    "readOnly": "Only owners and admins can change these details.",
+    "about": "About the residence",
+    "completion": "Expected completion",
+    "description": "Description",
+    "location": "Location",
+    "municipality": "Municipality / area",
+    "lat": "Latitude",
+    "lng": "Longitude",
+    "coordinatesHelper": "Filled in from the city. Fine-tune them to place the pin on the map exactly.",
+    "amenities": "Amenities",
+    "amenityPlaceholder": "e.g. Underground parking",
+    "addAmenity": "Add",
+    "removeAmenity": "Remove {{name}}",
+    "amenitiesHelper": "Shown on the residence page. Press Enter after each one.",
+    "amenitiesFull": "You can list up to {{max}} amenities.",
+    "contact": "Sales contact",
+    "contactHelper": "Who handles sales questions about this residence. All fields are optional.",
+    "contactName": "Name",
+    "contactEmail": "Email",
+    "contactPhone": "Phone",
+    "unsaved": "You have unsaved changes.",
+    "discard": "Discard",
+    "save": "Save details",
+    "saving": "Saving…",
+    "saved": "The residence details were updated."
   }
 }

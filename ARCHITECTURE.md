@@ -1124,6 +1124,22 @@ Key decisions:
 
 ---
 
+## Residences (Developments)
+
+New-build residences live in `src/features/developments` (API, hooks, types,
+validation and `components/{dashboard,public,scene,shared}`) with thin
+controllers and services under `backend/src/services/developments`. The full
+design — data model, endpoints, permission matrix, the interactive explorer and
+how-tos — is in [`docs/RESIDENCE_EXPLORER.md`](docs/RESIDENCE_EXPLORER.md).
+
+- Form pieces used by more than one form live once: `components/dashboard/details/`
+  holds `LocationFields` (+ `useLocationFields`), shared by *Create residence* and
+  *Residence details*, and `AmenitiesInput`.
+- Edit forms send only changed fields (`detailsDraft.changedFields`), so a save
+  never overwrites a teammate's change to a field the form didn't touch.
+- Validation returns i18n keys (`validation/developmentValidation.ts`); the server
+  repeats every check (`developmentService.normalizeAmenities/normalizeContact`).
+
 ## Internationalisation (i18n)
 
 **Library**: `react-i18next`

@@ -142,7 +142,11 @@
     "nameTooLong": "Project name is too long.",
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
-    "categoryRequired": "Please choose a category."
+    "categoryRequired": "Please choose a category.",
+    "websiteInvalid": "Унесите пуну веб адресу која почиње са http:// или https://.",
+    "emailInvalid": "Унесите исправну имејл адресу.",
+    "latInvalid": "Географска ширина мора бити број између -90 и 90.",
+    "lngInvalid": "Географска дужина мора бити број између -180 и 180."
   },
   "cover": {
     "heading": "Cover image",
@@ -777,7 +781,7 @@
       "inventory": "Инвентар",
       "explorer": "Интерактивни прегледач",
       "listings": "Повезани огласи",
-      "settings": "Подешавања",
+      "settings": "Детаљи и подешавања",
       "activity": "Активност"
     },
     "overview": {
@@ -880,5 +884,34 @@
       "building_delete": "Обрисана зграда",
       "floor_delete": "Обрисан спрат"
     }
+  },
+  "details": {
+    "heading": "Детаљи резиденције",
+    "intro": "Шта купци виде о овој резиденцији.",
+    "readOnly": "Само власници и администратори могу да мењају ове детаље.",
+    "about": "О резиденцији",
+    "completion": "Очекивани завршетак",
+    "description": "Опис",
+    "location": "Локација",
+    "municipality": "Општина / подручје",
+    "lat": "Географска ширина",
+    "lng": "Географска дужина",
+    "coordinatesHelper": "Попуњено према граду. Прецизирајте да тачно поставите ознаку на мапи.",
+    "amenities": "Садржаји",
+    "amenityPlaceholder": "нпр. Подземна гаража",
+    "addAmenity": "Додај",
+    "removeAmenity": "Уклони {{name}}",
+    "amenitiesHelper": "Приказују се на страници резиденције. Притисните Enter после сваког.",
+    "amenitiesFull": "Можете навести до {{max}} садржаја.",
+    "contact": "Контакт за продају",
+    "contactHelper": "Ко одговара на продајна питања о овој резиденцији. Сва поља су опциона.",
+    "contactName": "Име",
+    "contactEmail": "Имејл",
+    "contactPhone": "Телефон",
+    "unsaved": "Имате несачуване измене.",
+    "discard": "Одбаци",
+    "save": "Сачувај детаље",
+    "saving": "Чување…",
+    "saved": "Детаљи резиденције су ажурирани."
   }
 }

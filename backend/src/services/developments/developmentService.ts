@@ -130,9 +130,9 @@ export const createDevelopment = async (
     expectedCompletionDate: input.expectedCompletionDate
       ? new Date(input.expectedCompletionDate)
       : undefined,
-    amenities: input.amenities ?? [],
+    amenities: normalizeAmenities(input.amenities),
     website: input.website,
-    contact: input.contact,
+    contact: normalizeContact(input.contact),
     allowUnitInquiries: typeof input.allowUnitInquiries === 'boolean' ? input.allowUnitInquiries : true,
     status: 'draft',
     stats: { buildings: 0, units: 0, available: 0 },
@@ -233,12 +233,30 @@ export const updateDevelopment = async (
       continue;
     }
     if (key === 'expectedCompletionDate') {
-      (development as unknown as Record<string, unknown>)[key] = value
-        ? new Date(value as string)
-        : undefined;
+      const date = value ? new Date(value as string) : undefined;
+      if (date && Number.isNaN(date.getTime())) throw new ValidationError('expectedCompletionDate is not a valid date');
+      development.expectedCompletionDate = date;
       continue;
     }
-    (development as unknown as Record<string, unknown>)[key] = value;
+    if ((key === 'name' || key === 'country' || key === 'city') && !text(value)) {
+      throw new ValidationError(`${key} is required`);
+    }
+    if (key === 'amenities') {
+      development.amenities = normalizeAmenities(value);
+      continue;
+    }
+    if (key === 'contact') {
+      (development as unknown as Record<string, unknown>).contact = normalizeContact(value);
+      continue;
+    }
+    if (key === 'lat' || key === 'lng') {
+      const n = value === null || value === '' || value === undefined ? undefined : Number(value);
+      const max = key === 'lat' ? 90 : 180;
+      if (n !== undefined && (!Number.isFinite(n) || Math.abs(n) > max)) throw new ValidationError(`${key} is out of range`);
+      (development as unknown as Record<string, unknown>)[key] = n;
+      continue;
+    }
+    (development as unknown as Record<string, unknown>)[key] = typeof value === 'string' ? value.trim() : value;
   }
   await development.save();
   return development;
@@ -298,6 +316,38 @@ interface IDevelopmentStats {
 }
 
 /** A client-input error that controllers map to HTTP 400. */
+export const MAX_AMENITIES = 40;
+const AMENITY_MAX_LENGTH = 60;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Trimmed, de-duplicated amenity labels (≤ 40, each ≤ 60 chars). */
+export function normalizeAmenities(value: unknown): string[] {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) throw new ValidationError('amenities must be a list');
+  const out: string[] = [];
+  for (const v of value) {
+    const a = text(v);
+    if (!a) continue;
+    if (a.length > AMENITY_MAX_LENGTH) throw new ValidationError(`An amenity can be at most ${AMENITY_MAX_LENGTH} characters`);
+    if (!out.some((x) => x.toLowerCase() === a.toLowerCase())) out.push(a);
+  }
+  if (out.length > MAX_AMENITIES) throw new ValidationError(`At most ${MAX_AMENITIES} amenities`);
+  return out;
+}
+
+/** Sales contact shown to buyers: optional name, valid email, phone. */
+export function normalizeContact(value: unknown): { name?: string; email?: string; phone?: string } | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'object' || Array.isArray(value)) throw new ValidationError('contact must be an object');
+  const raw = value as Record<string, unknown>;
+  const name = text(raw.name).slice(0, 120) || undefined;
+  const email = text(raw.email) || undefined;
+  const phone = text(raw.phone).slice(0, 40) || undefined;
+  if (email && (email.length > 254 || !EMAIL_PATTERN.test(email))) throw new ValidationError('contact.email is not a valid email address');
+  if (!name && !email && !phone) return undefined;
+  return { ...(name ? { name } : {}), ...(email ? { email } : {}), ...(phone ? { phone } : {}) };
+}
+
 /** The website is rendered as a link: only http(s) URLs are accepted. */
 function assertWebsite(value: unknown): void {
   if (value === undefined || value === null || value === '') return;

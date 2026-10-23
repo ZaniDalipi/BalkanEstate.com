@@ -41,6 +41,8 @@ export function useUpdateDevelopment(id: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: developmentKeys.detail(id) });
       qc.invalidateQueries({ queryKey: developmentKeys.mine() });
+      // Name, location and amenities show on the public residence page too.
+      qc.invalidateQueries({ queryKey: developmentKeys.public() });
     },
   });
   return { update: mutation.mutateAsync, isLoading: mutation.isPending, error: mutation.error };

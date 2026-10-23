@@ -187,6 +187,34 @@ test.describe('Residence explorer (owner)', () => {
     expect(unit.price === undefined).toBe(next === 'on_request');
   });
 
+  test('details: location and amenities can be edited after creation', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop dashboard');
+    await openManage(page);
+    await page.getByRole('tab', { name: 'Details & settings' }).click();
+    const form = page.getByRole('region', { name: 'Residence details' });
+    const area = form.getByLabel('Municipality / area');
+    const next = (await area.inputValue()) === 'Aerodrom' ? 'Centar' : 'Aerodrom';
+    await area.fill(next);
+    await form.getByPlaceholder('e.g. Underground parking').fill('E2E amenity');
+    await form.getByPlaceholder('e.g. Underground parking').press('Enter');
+    const [patch] = await Promise.all([
+      page.waitForResponse((r) => /\/dashboard\/developments\/[^/]+$/.test(r.url()) && r.request().method() === 'PATCH'),
+      form.getByRole('button', { name: 'Save details' }).click(),
+    ]);
+    expect(patch.status()).toBe(200);
+    await page.screenshot({ path: 'test-results/residence-details.png', fullPage: false });
+    const pub = await (await page.request.get(`${API}/developments/${SLUG}`)).json();
+    const dev = pub.development ?? pub;
+    expect(dev.municipality).toBe(next);
+    expect(dev.amenities).toContain('E2E amenity');
+    // Leave the demo as it was (apart from the municipality toggle).
+    await page.getByRole('region', { name: 'Residence details' }).getByRole('button', { name: 'Remove E2E amenity' }).click();
+    await Promise.all([
+      page.waitForResponse((r) => r.request().method() === 'PATCH'),
+      page.getByRole('region', { name: 'Residence details' }).getByRole('button', { name: 'Save details' }).click(),
+    ]);
+  });
+
   test('activity tab lists recent changes with readable labels', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Desktop dashboard');
     await openManage(page);

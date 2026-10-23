@@ -61,3 +61,54 @@ export const validateCreateDevelopment = (
   if (!category.isValid) errors.category = category.errorKey;
   return errors;
 };
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const validateWebsite = (value: string): FieldResult => {
+  const v = (value ?? '').trim();
+  if (!v) return { isValid: true };
+  try {
+    const url = new URL(v);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? { isValid: true } : { isValid: false, errorKey: 'validation.websiteInvalid' };
+  } catch {
+    return { isValid: false, errorKey: 'validation.websiteInvalid' };
+  }
+};
+
+export const validateEmail = (value: string): FieldResult =>
+  !(value ?? '').trim() || EMAIL_PATTERN.test(value.trim()) ? { isValid: true } : { isValid: false, errorKey: 'validation.emailInvalid' };
+
+/** Empty is allowed (no coordinates); otherwise a number within ±max. */
+export const validateCoordinate = (value: string, max: 90 | 180): FieldResult => {
+  const v = (value ?? '').trim();
+  if (!v) return { isValid: true };
+  const n = Number(v);
+  return Number.isFinite(n) && Math.abs(n) <= max ? { isValid: true } : { isValid: false, errorKey: max === 90 ? 'validation.latInvalid' : 'validation.lngInvalid' };
+};
+
+/** The residence details form, as typed by the user (all text). */
+export interface DetailsFormValues {
+  name: string;
+  country: string;
+  city: string;
+  category: string;
+  website: string;
+  contactEmail: string;
+  lat: string;
+  lng: string;
+}
+
+export type DetailsErrors = Partial<Record<keyof DetailsFormValues, string>>;
+
+/** Validate the edit-details form; empty object means valid. */
+export const validateDevelopmentDetails = (v: DetailsFormValues): DetailsErrors => {
+  const errors: DetailsErrors = { ...validateCreateDevelopment({ name: v.name, country: v.country, city: v.city, category: v.category as never }) };
+  const checks: [keyof DetailsFormValues, FieldResult][] = [
+    ['website', validateWebsite(v.website)],
+    ['contactEmail', validateEmail(v.contactEmail)],
+    ['lat', validateCoordinate(v.lat, 90)],
+    ['lng', validateCoordinate(v.lng, 180)],
+  ];
+  for (const [key, result] of checks) if (!result.isValid) errors[key] = result.errorKey;
+  return errors;
+};

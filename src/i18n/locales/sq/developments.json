@@ -142,7 +142,11 @@
     "nameTooLong": "Project name is too long.",
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
-    "categoryRequired": "Please choose a category."
+    "categoryRequired": "Please choose a category.",
+    "websiteInvalid": "Shkruani një adresë të plotë uebi që fillon me http:// ose https://.",
+    "emailInvalid": "Shkruani një adresë email të vlefshme.",
+    "latInvalid": "Gjerësia duhet të jetë numër midis -90 dhe 90.",
+    "lngInvalid": "Gjatësia duhet të jetë numër midis -180 dhe 180."
   },
   "cover": {
     "heading": "Cover image",
@@ -771,7 +775,7 @@
       "inventory": "Inventari",
       "explorer": "Eksplorues interaktiv",
       "listings": "Shpalljet e lidhura",
-      "settings": "Cilësimet",
+      "settings": "Detajet dhe cilësimet",
       "activity": "Aktiviteti"
     },
     "overview": {
@@ -874,5 +878,34 @@
       "building_delete": "Fshiu ndërtesën",
       "floor_delete": "Fshiu katin"
     }
+  },
+  "details": {
+    "heading": "Detajet e rezidencës",
+    "intro": "Çfarë shohin blerësit për këtë rezidencë.",
+    "readOnly": "Vetëm pronarët dhe administratorët mund t'i ndryshojnë këto detaje.",
+    "about": "Rreth rezidencës",
+    "completion": "Përfundimi i pritshëm",
+    "description": "Përshkrimi",
+    "location": "Vendndodhja",
+    "municipality": "Komuna / zona",
+    "lat": "Gjerësia gjeografike",
+    "lng": "Gjatësia gjeografike",
+    "coordinatesHelper": "Plotësohen nga qyteti. Rregullojini për ta vendosur saktë pikën në hartë.",
+    "amenities": "Komoditetet",
+    "amenityPlaceholder": "p.sh. Parkim nëntokësor",
+    "addAmenity": "Shto",
+    "removeAmenity": "Hiq {{name}}",
+    "amenitiesHelper": "Shfaqen në faqen e rezidencës. Shtypni Enter pas secilit.",
+    "amenitiesFull": "Mund të listoni deri në {{max}} komoditete.",
+    "contact": "Kontakti i shitjeve",
+    "contactHelper": "Kush merret me pyetjet e shitjes për këtë rezidencë. Të gjitha fushat janë opsionale.",
+    "contactName": "Emri",
+    "contactEmail": "Email",
+    "contactPhone": "Telefoni",
+    "unsaved": "Keni ndryshime të paruajtura.",
+    "discard": "Anulo",
+    "save": "Ruaj detajet",
+    "saving": "Duke ruajtur…",
+    "saved": "Detajet e rezidencës u përditësuan."
   }
 }

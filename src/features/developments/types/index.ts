@@ -181,11 +181,21 @@ export interface CreateDevelopmentPayload {
   lng?: number;
   category: DevelopmentCategory;
   constructionStatus?: DevelopmentConstructionStatus;
+  /** ISO date (yyyy-mm-dd); an empty string clears it. */
+  expectedCompletionDate?: string;
+  amenities?: string[];
   website?: string;
   agencyId?: string;
 }
 
-export type UpdateDevelopmentPayload = Partial<CreateDevelopmentPayload> & { allowUnitInquiries?: boolean };
+export type UpdateDevelopmentPayload = Partial<Omit<CreateDevelopmentPayload, 'lat' | 'lng'>> & {
+  /** `null` clears the coordinates. */
+  lat?: number | null;
+  lng?: number | null;
+  /** `null` removes the sales contact. */
+  contact?: DevelopmentContact | null;
+  allowUnitInquiries?: boolean;
+};
 
 export interface CreateBuildingPayload {
   name: string;

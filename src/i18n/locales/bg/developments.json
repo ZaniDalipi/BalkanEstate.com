@@ -142,7 +142,11 @@
     "nameTooLong": "Project name is too long.",
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
-    "categoryRequired": "Please choose a category."
+    "categoryRequired": "Please choose a category.",
+    "websiteInvalid": "Въведете пълен уеб адрес, започващ с http:// или https://.",
+    "emailInvalid": "Въведете валиден имейл адрес.",
+    "latInvalid": "Географската ширина трябва да е число между -90 и 90.",
+    "lngInvalid": "Географската дължина трябва да е число между -180 и 180."
   },
   "cover": {
     "heading": "Cover image",
@@ -771,7 +775,7 @@
       "inventory": "Наличност",
       "explorer": "Интерактивен изглед",
       "listings": "Свързани обяви",
-      "settings": "Настройки",
+      "settings": "Детайли и настройки",
       "activity": "Активност"
     },
     "overview": {
@@ -874,5 +878,34 @@
       "building_delete": "Изтрита сграда",
       "floor_delete": "Изтрит етаж"
     }
+  },
+  "details": {
+    "heading": "Детайли за резиденцията",
+    "intro": "Какво виждат купувачите за тази резиденция.",
+    "readOnly": "Само собствениците и администраторите могат да променят тези детайли.",
+    "about": "За резиденцията",
+    "completion": "Очаквано завършване",
+    "description": "Описание",
+    "location": "Местоположение",
+    "municipality": "Община / район",
+    "lat": "Географска ширина",
+    "lng": "Географска дължина",
+    "coordinatesHelper": "Попълват се според града. Прецизирайте ги, за да поставите точно маркера на картата.",
+    "amenities": "Удобства",
+    "amenityPlaceholder": "напр. Подземен паркинг",
+    "addAmenity": "Добави",
+    "removeAmenity": "Премахни {{name}}",
+    "amenitiesHelper": "Показват се на страницата на резиденцията. Натиснете Enter след всяко.",
+    "amenitiesFull": "Можете да изброите до {{max}} удобства.",
+    "contact": "Контакт за продажби",
+    "contactHelper": "Кой отговаря на въпроси за продажби за тази резиденция. Всички полета са по избор.",
+    "contactName": "Име",
+    "contactEmail": "Имейл",
+    "contactPhone": "Телефон",
+    "unsaved": "Имате незапазени промени.",
+    "discard": "Отхвърли",
+    "save": "Запази детайлите",
+    "saving": "Запазване…",
+    "saved": "Детайлите за резиденцията са обновени."
   }
 }

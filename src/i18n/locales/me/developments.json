@@ -142,7 +142,11 @@
     "nameTooLong": "Project name is too long.",
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
-    "categoryRequired": "Please choose a category."
+    "categoryRequired": "Please choose a category.",
+    "websiteInvalid": "Unesite punu web adresu koja počinje sa http:// ili https://.",
+    "emailInvalid": "Unesite ispravnu email adresu.",
+    "latInvalid": "Geografska širina mora biti broj između -90 i 90.",
+    "lngInvalid": "Geografska dužina mora biti broj između -180 i 180."
   },
   "cover": {
     "heading": "Cover image",
@@ -777,7 +781,7 @@
       "inventory": "Inventar",
       "explorer": "Interaktivni preglednik",
       "listings": "Povezani oglasi",
-      "settings": "Podešavanja",
+      "settings": "Detalji i podešavanja",
       "activity": "Aktivnost"
     },
     "overview": {
@@ -880,5 +884,34 @@
       "building_delete": "Obrisana zgrada",
       "floor_delete": "Obrisan sprat"
     }
+  },
+  "details": {
+    "heading": "Detalji rezidencije",
+    "intro": "Šta kupci vide o ovoj rezidenciji.",
+    "readOnly": "Samo vlasnici i administratori mogu mijenjati ove detalje.",
+    "about": "O rezidenciji",
+    "completion": "Očekivani završetak",
+    "description": "Opis",
+    "location": "Lokacija",
+    "municipality": "Opština / područje",
+    "lat": "Geografska širina",
+    "lng": "Geografska dužina",
+    "coordinatesHelper": "Popunjeno prema gradu. Precizirajte da tačno postavite oznaku na mapi.",
+    "amenities": "Sadržaji",
+    "amenityPlaceholder": "npr. Podzemna garaža",
+    "addAmenity": "Dodaj",
+    "removeAmenity": "Ukloni {{name}}",
+    "amenitiesHelper": "Prikazuju se na stranici rezidencije. Pritisnite Enter nakon svakog.",
+    "amenitiesFull": "Možete navesti do {{max}} sadržaja.",
+    "contact": "Kontakt za prodaju",
+    "contactHelper": "Ko odgovara na prodajna pitanja o ovoj rezidenciji. Sva polja su opciona.",
+    "contactName": "Ime",
+    "contactEmail": "Email",
+    "contactPhone": "Telefon",
+    "unsaved": "Imate nesačuvane izmjene.",
+    "discard": "Odbaci",
+    "save": "Sačuvaj detalje",
+    "saving": "Čuvanje…",
+    "saved": "Detalji rezidencije su ažurirani."
   }
 }

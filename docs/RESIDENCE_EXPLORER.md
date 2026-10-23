@@ -288,7 +288,15 @@ is valid and linked.
 **Hide a unit or its price:** Inventory → **Edit unit** → *Visibility* or *Price
 shown to buyers*.
 
-**Turn off inquiries for units without a listing:** **Settings** tab.
+**Edit the residence (name, location, amenities, contact):** **Details &
+settings** tab → *Residence details*. Country and city use the same dropdowns as
+the create form; picking a city fills the coordinates, which you can then
+fine-tune. Only changed fields are sent, and the server re-validates them
+(website must be http(s); contact email must be valid; at most 40 amenities of
+60 characters each). Owners and admins (`project.edit`) can save; others see the
+form read-only.
+
+**Turn off inquiries for units without a listing:** **Details & settings** tab.
 
 **Add apartment photos or remove a floor plan:** Inventory → **Edit unit** →
 *Photos* / *Floorplan*. Changes save immediately.

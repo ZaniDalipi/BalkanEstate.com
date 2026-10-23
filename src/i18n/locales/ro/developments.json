@@ -142,7 +142,11 @@
     "nameTooLong": "Project name is too long.",
     "countryRequired": "Country is required.",
     "cityRequired": "City is required.",
-    "categoryRequired": "Please choose a category."
+    "categoryRequired": "Please choose a category.",
+    "websiteInvalid": "Introduceți o adresă web completă care începe cu http:// sau https://.",
+    "emailInvalid": "Introduceți o adresă de email validă.",
+    "latInvalid": "Latitudinea trebuie să fie un număr între -90 și 90.",
+    "lngInvalid": "Longitudinea trebuie să fie un număr între -180 și 180."
   },
   "cover": {
     "heading": "Cover image",
@@ -777,7 +781,7 @@
       "inventory": "Inventar",
       "explorer": "Explorator interactiv",
       "listings": "Anunțuri asociate",
-      "settings": "Setări",
+      "settings": "Detalii și setări",
       "activity": "Activitate"
     },
     "overview": {
@@ -880,5 +884,34 @@
       "building_delete": "Clădire ștearsă",
       "floor_delete": "Etaj șters"
     }
+  },
+  "details": {
+    "heading": "Detaliile rezidenței",
+    "intro": "Ce văd cumpărătorii despre această rezidență.",
+    "readOnly": "Doar proprietarii și administratorii pot modifica aceste detalii.",
+    "about": "Despre rezidență",
+    "completion": "Finalizare estimată",
+    "description": "Descriere",
+    "location": "Locație",
+    "municipality": "Comună / zonă",
+    "lat": "Latitudine",
+    "lng": "Longitudine",
+    "coordinatesHelper": "Completate după oraș. Ajustați-le pentru a plasa exact marcajul pe hartă.",
+    "amenities": "Facilități",
+    "amenityPlaceholder": "ex. Parcare subterană",
+    "addAmenity": "Adaugă",
+    "removeAmenity": "Elimină {{name}}",
+    "amenitiesHelper": "Apar pe pagina rezidenței. Apăsați Enter după fiecare.",
+    "amenitiesFull": "Puteți enumera până la {{max}} facilități.",
+    "contact": "Contact vânzări",
+    "contactHelper": "Cine răspunde la întrebările de vânzare despre această rezidență. Toate câmpurile sunt opționale.",
+    "contactName": "Nume",
+    "contactEmail": "Email",
+    "contactPhone": "Telefon",
+    "unsaved": "Aveți modificări nesalvate.",
+    "discard": "Renunță",
+    "save": "Salvează detaliile",
+    "saving": "Se salvează…",
+    "saved": "Detaliile rezidenței au fost actualizate."
   }
 }

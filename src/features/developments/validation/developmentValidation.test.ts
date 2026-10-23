@@ -3,6 +3,7 @@ import {
   validateCreateDevelopment,
   validateDevelopmentName,
   validateCategory,
+  validateDevelopmentDetails,
 } from './developmentValidation';
 
 describe('development create validation', () => {
@@ -43,5 +44,25 @@ describe('development create validation', () => {
       category: 'mixed_use',
     });
     expect(errors.name).toBe('validation.nameRequired');
+  });
+});
+
+describe('development details validation', () => {
+  const ok = { name: 'Plaza', country: 'Albania', city: 'Tirana', category: 'apartment_building', website: '', contactEmail: '', lat: '', lng: '' };
+
+  it('accepts empty optional fields', () => {
+    expect(validateDevelopmentDetails(ok)).toEqual({});
+  });
+
+  it('flags a bad website, email and out-of-range coordinates', () => {
+    expect(
+      validateDevelopmentDetails({ ...ok, website: 'javascript:alert(1)', contactEmail: 'nope', lat: '91', lng: 'abc' })
+    ).toEqual({
+      website: 'validation.websiteInvalid',
+      contactEmail: 'validation.emailInvalid',
+      lat: 'validation.latInvalid',
+      lng: 'validation.lngInvalid',
+    });
+    expect(validateDevelopmentDetails({ ...ok, website: 'https://plaza.al', lat: '-41.3', lng: '179.9' })).toEqual({});
   });
 });

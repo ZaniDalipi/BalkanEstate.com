@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate, goBack } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import { BALKAN_LOCATIONS, type CityData } from '@/utils/balkanLocations';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
 import { FormSelect } from '../shared/FormSelect';
+import { LocationFields } from './details/LocationFields';
+import type { LocationValue } from './details/useLocationFields';
 import { useCreateDevelopment } from '../../hooks';
 import {
   DEVELOPMENT_CATEGORIES,
@@ -23,22 +24,18 @@ const isSubscriptionError = (err: unknown): boolean => {
   return !!e && e.statusCode === 403 && !!e.details?.subscriptionRequired;
 };
 
-const EMPTY: CreateDevelopmentPayload = {
-  name: '',
-  country: '',
-  city: '',
-  address: '',
-  category: 'apartment_building',
-  constructionStatus: 'planned',
-};
+type BasicsForm = Omit<CreateDevelopmentPayload, keyof LocationValue>;
+
+const EMPTY: BasicsForm = { name: '', category: 'apartment_building', constructionStatus: 'planned' };
+const EMPTY_LOCATION: LocationValue = { country: '', city: '', municipality: '', address: '', lat: '', lng: '' };
+const toNumber = (v: string) => (v.trim() ? Number(v) : undefined);
 
 /**
  * Step 1 of the development wizard: basic information.
  *
- * Location uses the app's standard Balkan country/city catalog: a country
- * dropdown drives a dependent city dropdown, and picking a city auto-fills the
- * coordinates and a default address — the same pattern as the listing and
- * business-listing forms, so it is consistent and professional. Creating is
+ * Location uses the shared `LocationFields` (the same fields as the edit form
+ * in Settings): a country dropdown drives a dependent city dropdown, and
+ * picking a city auto-fills the coordinates and a default address. Creating is
  * gated on an active subscription plan server-side; a subscription error routes
  * the user to pricing.
  */
@@ -46,38 +43,14 @@ const CreateDevelopmentForm: React.FC = () => {
   const { t } = useTranslation('developments');
   const { create, isLoading } = useCreateDevelopment();
 
-  const [form, setForm] = useState<CreateDevelopmentPayload>(EMPTY);
-  const [cities, setCities] = useState<CityData[]>([]);
+  const [form, setForm] = useState<BasicsForm>(EMPTY);
+  const [location, setLocation] = useState<LocationValue>(EMPTY_LOCATION);
   const [errors, setErrors] = useState<CreateDevelopmentErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [needsPlan, setNeedsPlan] = useState(false);
 
-  const set = <K extends keyof CreateDevelopmentPayload>(key: K, value: CreateDevelopmentPayload[K]) => {
+  const set = <K extends keyof BasicsForm>(key: K, value: BasicsForm[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const countryOptions = useMemo(
-    () => BALKAN_LOCATIONS.map((c) => ({ value: c.name, label: c.name })),
-    []
-  );
-  const cityOptions = useMemo(() => cities.map((c) => ({ value: c.name, label: c.name })), [cities]);
-
-  const onCountryChange = (country: string) => {
-    const match = BALKAN_LOCATIONS.find((c) => c.name === country);
-    setCities(match?.cities ?? []);
-    // Reset dependent fields when the country changes.
-    setForm((prev) => ({ ...prev, country, city: '', lat: undefined, lng: undefined, address: '' }));
-  };
-
-  const onCityChange = (cityName: string) => {
-    const city = cities.find((c) => c.name === cityName);
-    setForm((prev) => ({
-      ...prev,
-      city: cityName,
-      lat: city?.lat,
-      lng: city?.lng,
-      address: city ? `${cityName}, ${prev.country}` : prev.address,
-    }));
   };
 
   const fieldError = (key: keyof CreateDevelopmentErrors): string | undefined =>
@@ -88,7 +61,7 @@ const CreateDevelopmentForm: React.FC = () => {
     setSubmitError(null);
     setNeedsPlan(false);
 
-    const validation = validateCreateDevelopment(form);
+    const validation = validateCreateDevelopment({ ...form, country: location.country, city: location.city });
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
 
@@ -96,9 +69,11 @@ const CreateDevelopmentForm: React.FC = () => {
       const { development } = await create({
         ...form,
         name: form.name.trim(),
-        country: form.country.trim(),
-        city: form.city.trim(),
-        address: form.address?.trim() || undefined,
+        country: location.country.trim(),
+        city: location.city.trim(),
+        address: location.address.trim() || undefined,
+        lat: toNumber(location.lat),
+        lng: toNumber(location.lng),
       });
       navigate(paths.developmentManage(development.id));
     } catch (err) {
@@ -128,33 +103,10 @@ const CreateDevelopmentForm: React.FC = () => {
           required
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormSelect
-            label={t('wizard.country')}
-            placeholder={t('wizard.selectCountry')}
-            options={countryOptions}
-            value={form.country}
-            onChange={(e) => onCountryChange(e.target.value)}
-            error={fieldError('country')}
-            required
-          />
-          <FormSelect
-            label={t('wizard.city')}
-            placeholder={form.country ? t('wizard.selectCity') : t('wizard.selectCountryFirst')}
-            options={cityOptions}
-            value={form.city}
-            onChange={(e) => onCityChange(e.target.value)}
-            error={fieldError('city')}
-            disabled={!form.country}
-            required
-          />
-        </div>
-
-        <Input
-          label={t('wizard.address')}
-          value={form.address ?? ''}
-          onChange={(e) => set('address', e.target.value)}
-          helperText={t('wizard.addressHelper')}
+        <LocationFields
+          value={location}
+          onChange={(patch) => setLocation((prev) => ({ ...prev, ...patch }))}
+          errors={{ country: fieldError('country'), city: fieldError('city') }}
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

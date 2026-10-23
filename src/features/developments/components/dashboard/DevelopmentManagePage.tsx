@@ -72,7 +72,7 @@ const DevelopmentManagePage: React.FC = () => {
     { id: 'explorer', label: t('manage.tabs.explorer', 'Interactive explorer') },
     { id: 'listings', label: t('manage.tabs.listings', 'Linked listings') },
     ...(showActivity ? [{ id: 'activity' as const, label: t('manage.tabs.activity', 'Activity') }] : []),
-    { id: 'settings', label: t('manage.tabs.settings', 'Settings') },
+    { id: 'settings', label: t('manage.tabs.settings', 'Details & settings') },
   ];
 
   const panel = (which: TabId, content: React.ReactNode) => (
