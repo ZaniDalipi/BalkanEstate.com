@@ -377,7 +377,14 @@
       "floors": "Floors",
       "priceFrom": "Prices from",
       "exploreBuilding": "Explore building",
-      "exploreFloor": "Explore floor"
+      "exploreFloor": "Explore floor",
+      "perMonth": "{{price}} / month",
+      "floorOf": "{{floor}} of {{total}}",
+      "baths": "Bathrooms",
+      "type": "Type",
+      "forSale": "For sale",
+      "forRent": "For rent",
+      "hasListing": "This apartment also has a listing with photos and details."
     },
     "showAvailability": "Show availability",
     "noUnitsInBuilding": "No apartments are listed for this building yet.",
@@ -557,6 +564,22 @@
       "too_many_hotspots": "Too many regions in this view",
       "invalid_id": "Invalid region id",
       "invalid_label": "Label is too long"
+    },
+    "linkHelp": {
+      "building": "Opens that building. Use on the residence picture: buyers click a building to see its own pictures (or its apartments floor by floor).",
+      "floor": "Opens that floor’s picture, e.g. a floor plan where each apartment is clickable.",
+      "unit": "An apartment from your Inventory. The card shows its number, floor, m², bedrooms, price and live status; clicking opens its details. Use this for apartments you sell in this residence.",
+      "listing": "A published BalkanEstate listing (e.g. a resale flat). The card shows the listing’s photo, price, m², floor and rooms; clicking opens the listing page. To show a listing on one of your apartments, link the region to the unit and attach the listing to that unit instead.",
+      "entrance": "Marks a building entrance. It shows a label but does not open anything."
+    },
+    "guide": {
+      "title": "How it works: residence picture, buildings, units and listings",
+      "show": "Show",
+      "step1": "Pick “Site plan (aerial)”, upload one picture of the whole residence and draw a region around each building → Links to: Building.",
+      "step2": "Pick a building, add one or more pictures of it (front, back…) and draw a region over each apartment → Links to: Unit.",
+      "step3": "Units are the apartments in your Inventory tab (number, floor, m², price, status). If an apartment is also advertised, attach its listing to the unit in Linked listings.",
+      "step4": "Save draft, then Publish. Buyers hover a region to see its card and click to open it.",
+      "demo": "Want an example? Run “npm run seed:developments” in the backend: it creates “East Gate Living (Demo)” with every kind of region."
     }
   },
   "inventory": {

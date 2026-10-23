@@ -190,8 +190,21 @@ describe('publish → public views', () => {
       z: 0,
     });
 
+    // A listing region carries a buyer-facing summary for the hover card.
+    const ll = frontView.hotspots.find((h: { id: string }) => h.id === 'll');
+    expect(ll.listing).toEqual({
+      price: 100000,
+      listingType: 'sale',
+      area: 70,
+      beds: 2,
+      baths: 1,
+      propertyType: 'apartment',
+      status: 'active',
+      imageUrl: 'https://example.com/i.jpg',
+    });
+
     const body = JSON.stringify(res.body);
-    for (const leak of ['draft-only', 'imagePublicId', 'secret/', 'uploadedBy', 'developmentId', 'draft"', String(ctx.visible._id)]) {
+    for (const leak of ['owner@example.com', 'sellerId', 'draft-only', 'imagePublicId', 'secret/', 'uploadedBy', 'developmentId', 'draft"', String(ctx.visible._id)]) {
       expect(body).not.toContain(leak);
     }
 

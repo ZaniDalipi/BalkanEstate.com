@@ -866,6 +866,23 @@ export const deleteScene = async (actor: SceneActor, sceneId: unknown): Promise<
 // Public views
 // ---------------------------------------------------------------------------
 
+/** Public facts about a listing a region links to (for the explorer's hover card). */
+export interface PublicListingSummary {
+  title?: string;
+  price?: number;
+  listingType?: 'sale' | 'rent';
+  rentPeriod?: string;
+  /** m² (net area when given, else the listing's main area). */
+  area?: number;
+  beds?: number;
+  baths?: number;
+  floorNumber?: number;
+  totalFloors?: number;
+  propertyType?: string;
+  status?: string;
+  imageUrl?: string;
+}
+
 export interface PublicHotspot {
   id: string;
   shape: HotspotShape;
@@ -874,7 +891,50 @@ export interface PublicHotspot {
   linkType: HotspotLinkType;
   linkId: string;
   z: number;
+  listing?: PublicListingSummary;
 }
+
+type ListingLean = {
+  _id: unknown;
+  title?: string;
+  price?: number;
+  listingType?: 'sale' | 'rent';
+  rentPeriod?: string;
+  netArea?: number;
+  sqft?: number;
+  beds?: number;
+  baths?: number;
+  floorNumber?: number;
+  totalFloors?: number;
+  propertyType?: string;
+  status?: string;
+  imageUrl?: string;
+  images?: Array<{ url?: string }>;
+};
+
+const LISTING_SUMMARY_FIELDS =
+  '_id title price listingType rentPeriod netArea sqft beds baths floorNumber totalFloors propertyType status imageUrl images';
+
+const positive = (n: unknown): number | undefined => (typeof n === 'number' && Number.isFinite(n) && n > 0 ? n : undefined);
+
+/** Only buyer-facing fields; no seller contact, ids or storage keys. */
+const toListingSummary = (l: ListingLean): PublicListingSummary => {
+  const s: PublicListingSummary = {
+    title: l.title || undefined,
+    price: positive(l.price),
+    listingType: l.listingType,
+    rentPeriod: l.listingType === 'rent' ? l.rentPeriod : undefined,
+    area: positive(l.netArea) ?? positive(l.sqft),
+    beds: typeof l.beds === 'number' ? l.beds : undefined,
+    baths: typeof l.baths === 'number' ? l.baths : undefined,
+    floorNumber: typeof l.floorNumber === 'number' ? l.floorNumber : undefined,
+    totalFloors: positive(l.totalFloors),
+    propertyType: l.propertyType,
+    status: l.status,
+    imageUrl: l.images?.find((i) => i?.url)?.url || l.imageUrl || undefined,
+  };
+  return Object.fromEntries(Object.entries(s).filter(([, v]) => v !== undefined)) as PublicListingSummary;
+};
 
 export interface PublicSceneView {
   viewKey: string;
@@ -954,13 +1014,16 @@ const filterPublicHotspots = async (developmentId: Id, scenes: LeanScene[]): Pro
   const byType = groupHexIds(items.map((x) => ({ linkType: x.h.linkType, hex: x.hex })));
 
   const visible = new Map<HotspotLinkType, Set<string>>();
+  const listingSummaries = new Map<string, PublicListingSummary>();
   await Promise.all(
     [...byType.entries()].map(async ([linkType, hexes]) => {
       let docs: Array<{ _id: unknown }>;
       if (linkType === 'listing') {
-        docs = await Property.find({ _id: { $in: toOids(hexes) }, status: { $ne: 'draft' } })
-          .select('_id')
-          .lean();
+        const listings = await Property.find({ _id: { $in: toOids(hexes) }, status: { $ne: 'draft' } })
+          .select(LISTING_SUMMARY_FIELDS)
+          .lean<ListingLean[]>();
+        for (const l of listings) listingSummaries.set(String(l._id), toListingSummary(l));
+        docs = listings;
       } else {
         const query: Record<string, unknown> = { _id: { $in: toOids(hexes) }, developmentId, deletedAt: null };
         if (linkType === 'unit') query.visibility = { $ne: 'hidden' };
@@ -981,6 +1044,9 @@ const filterPublicHotspots = async (developmentId: Id, scenes: LeanScene[]): Pro
         linkType: h.linkType,
         linkId: encodeId(hex as string),
         z: h.z ?? 0,
+        ...(h.linkType === 'listing' && listingSummaries.has(hex as string)
+          ? { listing: listingSummaries.get(hex as string) }
+          : {}),
       }))
   );
 };

@@ -8,6 +8,7 @@ import { useMyDevelopment } from '../../hooks/useDevelopment';
 import { StatusPill } from '../shared/Badges';
 import { LoadingState, ErrorState } from '../shared/States';
 import { SceneStudio } from '../scene/SceneStudio';
+import { LinkTypesGuide } from '../scene/editor/LinkTypesGuide';
 import { useConfirmDiscard } from '../scene/editor/useUnsavedGuard';
 import { ActivityPanel } from './activity/ActivityPanel';
 import { InventoryPanel } from './InventoryPanel';
@@ -120,6 +121,7 @@ const DevelopmentManagePage: React.FC = () => {
             {t('scene.heading', 'Interactive map')}
           </h2>
           <p className="mb-3 text-sm text-slate-600">{t('scene.subtitle', 'Draw clickable regions on your images.')}</p>
+          <LinkTypesGuide />
           <SceneStudio developmentId={development.id} onDirtyChange={onExplorerDirty} />
         </section>
       )}

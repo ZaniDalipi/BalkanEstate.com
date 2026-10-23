@@ -9,6 +9,7 @@ import { SearchableSelect, type SelectOption } from './SearchableSelect';
 import { UnitTargetPicker } from './UnitTargetPicker';
 import type { UnitPickerSource } from './useLinkOptions';
 import { issueText, type AnyIssueCode } from './issueText';
+import { linkTypeHelp } from './linkTypeHelp';
 
 export type LinkOptions = Record<'building' | 'floor' | 'unit' | 'entrance', SelectOption[]>;
 
@@ -74,6 +75,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             </option>
           ))}
         </select>
+        <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{linkTypeHelp(t, hotspot.linkType)}</p>
       </div>
 
       <div>

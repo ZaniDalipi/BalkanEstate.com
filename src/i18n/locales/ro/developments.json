@@ -396,7 +396,14 @@
       "floors": "Etaje",
       "priceFrom": "Prețuri de la",
       "exploreBuilding": "Explorează clădirea",
-      "exploreFloor": "Explorează etajul"
+      "exploreFloor": "Explorează etajul",
+      "perMonth": "{{price}} / lună",
+      "floorOf": "{{floor}} din {{total}}",
+      "baths": "Băi",
+      "type": "Tip",
+      "forSale": "De vânzare",
+      "forRent": "De închiriat",
+      "hasListing": "Acest apartament are și un anunț cu fotografii și detalii."
     },
     "showAvailability": "Arată disponibilitatea",
     "noUnitsInBuilding": "Încă nu sunt listate apartamente pentru această clădire.",
@@ -559,6 +566,22 @@
       "too_many_hotspots": "Prea multe zone în această vedere",
       "invalid_id": "ID de zonă nevalid",
       "invalid_label": "Eticheta este prea lungă"
+    },
+    "linkHelp": {
+      "building": "Deschide clădirea respectivă. Folosiți pe imaginea ansamblului: cumpărătorii dau clic pe o clădire pentru a-i vedea imaginile (sau apartamentele pe etaje).",
+      "floor": "Deschide imaginea acelui etaj, de ex. un plan în care fiecare apartament este clicabil.",
+      "unit": "Un apartament din Inventarul dvs. Cardul arată numărul, etajul, m², dormitoarele, prețul și starea curentă; clicul deschide detaliile. Folosiți pentru apartamentele pe care le vindeți în acest ansamblu.",
+      "listing": "Un anunț publicat pe BalkanEstate (de ex. un apartament la revânzare). Cardul arată fotografia, prețul, m², etajul și camerele; clicul deschide pagina anunțului. Pentru a afișa un anunț pe unul dintre apartamentele dvs., legați zona de unitate și atașați anunțul acelei unități.",
+      "entrance": "Marchează o intrare în clădire. Afișează o etichetă, dar nu deschide nimic."
+    },
+    "guide": {
+      "title": "Cum funcționează: imaginea ansamblului, clădiri, unități și anunțuri",
+      "show": "Arată",
+      "step1": "Alegeți „Plan de situație (aerian)”, încărcați o imagine a întregului ansamblu și desenați o zonă în jurul fiecărei clădiri → Legat de: Clădire.",
+      "step2": "Alegeți o clădire, adăugați una sau mai multe imagini ale ei (față, spate…) și desenați o zonă peste fiecare apartament → Legat de: Unitate.",
+      "step3": "Unitățile sunt apartamentele din fila Inventar (număr, etaj, m², preț, stare). Dacă un apartament este promovat și ca anunț, atașați anunțul unității în Anunțuri legate.",
+      "step4": "Salvați ciorna, apoi Publicați. Cumpărătorii trec cu mouse-ul peste o zonă pentru a vedea cardul și dau clic pentru a o deschide.",
+      "demo": "Vreți un exemplu? Rulați „npm run seed:developments” în backend: creează „East Gate Living (Demo)” cu fiecare tip de zonă."
     }
   },
   "inventory": {

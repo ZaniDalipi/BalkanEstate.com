@@ -54,6 +54,11 @@ export const UnitFacts: React.FC<{ unit: PublicUnit }> = ({ unit }) => {
         <AvailabilityBadge state={unit.availability} />
       </div>
       <FactRows facts={facts} />
+      {unit.hasListing && (
+        <p className="mt-3 rounded-lg bg-teal-50 px-2.5 py-1.5 text-xs font-medium text-teal-800">
+          {t('explorer.card.hasListing', 'This apartment also has a listing with photos and details.')}
+        </p>
+      )}
     </>
   );
 };

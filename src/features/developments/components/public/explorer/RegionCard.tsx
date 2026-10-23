@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight } from 'lucide-react';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
 import type { PublicUnit } from '../../../types';
 import { placeCard, type CardPlacement } from './placeCard';
@@ -13,6 +14,9 @@ export interface RegionCardProps {
   unit?: PublicUnit;
   title?: string;
   facts?: Fact[];
+  /** Photo shown above the title (listing regions). */
+  imageUrl?: string;
+  badge?: string;
   actionLabel?: string;
   onAction?: () => void;
   onPointerEnter: () => void;
@@ -25,7 +29,7 @@ export interface RegionCardProps {
  * interactive — the pointer can move onto it and press the button — and is
  * portalled to <body>, fixed, below the platform modals (z < 5000).
  */
-export const RegionCard: React.FC<RegionCardProps> = ({ anchor, unit, title, facts, actionLabel, onAction, onPointerEnter, onPointerLeave }) => {
+export const RegionCard: React.FC<RegionCardProps> = ({ anchor, unit, title, facts, imageUrl, badge, actionLabel, onAction, onPointerEnter, onPointerLeave }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<CardPlacement | null>(null);
 
@@ -50,7 +54,19 @@ export const RegionCard: React.FC<RegionCardProps> = ({ anchor, unit, title, fac
         <UnitFacts unit={unit} />
       ) : (
         <>
-          {title && <p className="mb-3 text-base font-bold text-slate-900">{title}</p>}
+          {imageUrl && (
+            <div className="-mx-4 -mt-4 mb-3 h-32 overflow-hidden rounded-t-xl bg-slate-100">
+              <img src={optimizeImageUrl(imageUrl, { width: 576 })} alt="" className="h-full w-full object-cover" loading="lazy" />
+            </div>
+          )}
+          {(title || badge) && (
+            <div className="mb-3 flex items-start justify-between gap-3">
+              {title && <p className="text-base font-bold leading-snug text-slate-900">{title}</p>}
+              {badge && (
+                <span className="shrink-0 rounded-full bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-800 ring-1 ring-teal-200">{badge}</span>
+              )}
+            </div>
+          )}
           {facts && facts.length > 0 && <FactRows facts={facts} />}
         </>
       )}

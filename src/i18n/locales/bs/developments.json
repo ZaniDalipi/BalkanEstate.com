@@ -396,7 +396,14 @@
       "floors": "Spratovi",
       "priceFrom": "Cijene od",
       "exploreBuilding": "Istraži zgradu",
-      "exploreFloor": "Istraži sprat"
+      "exploreFloor": "Istraži sprat",
+      "perMonth": "{{price}} / mjesečno",
+      "floorOf": "{{floor}} od {{total}}",
+      "baths": "Kupatila",
+      "type": "Tip",
+      "forSale": "Na prodaju",
+      "forRent": "Za iznajmljivanje",
+      "hasListing": "Ovaj stan ima i oglas sa fotografijama i detaljima."
     },
     "showAvailability": "Prikaži dostupnost",
     "noUnitsInBuilding": "Za ovu zgradu još nema navedenih stanova.",
@@ -559,6 +566,22 @@
       "too_many_hotspots": "Previše zona u ovom prikazu",
       "invalid_id": "Neispravan ID zone",
       "invalid_label": "Oznaka je predugačka"
+    },
+    "linkHelp": {
+      "building": "Otvara tu zgradu. Koristite na slici rezidencije: kupci kliknu na zgradu da vide njene slike (ili stanove po spratovima).",
+      "floor": "Otvara sliku tog sprata, npr. tlocrt na kojem je svaki stan klikabilan.",
+      "unit": "Stan iz vašeg Inventara. Kartica prikazuje broj, sprat, m², spavaće sobe, cijenu i trenutni status; klik otvara detalje. Koristite za stanove koje prodajete u ovoj rezidenciji.",
+      "listing": "Objavljeni oglas na BalkanEstate (npr. stan u preprodaji). Kartica prikazuje fotografiju, cijenu, m², sprat i sobe; klik otvara stranicu oglasa. Da prikažete oglas na jednom od svojih stanova, povežite područje sa jedinicom i priložite oglas toj jedinici.",
+      "entrance": "Označava ulaz u zgradu. Prikazuje oznaku, ali ništa ne otvara."
+    },
+    "guide": {
+      "title": "Kako radi: slika rezidencije, zgrade, jedinice i oglasi",
+      "show": "Prikaži",
+      "step1": "Odaberite “Situacioni plan (iz zraka)”, učitajte jednu sliku cijele rezidencije i nacrtajte područje oko svake zgrade → Povezuje se sa: Zgrada.",
+      "step2": "Odaberite zgradu, dodajte jednu ili više slika (prednja, zadnja…) i nacrtajte područje preko svakog stana → Povezuje se sa: Jedinica.",
+      "step3": "Jedinice su stanovi u kartici Inventar (broj, sprat, m², cijena, status). Ako se stan oglašava i kao oglas, priložite oglas jedinici u Povezanim oglasima.",
+      "step4": "Sačuvajte nacrt, zatim Objavite. Kupci pređu mišem preko područja da vide karticu i kliknu da ga otvore.",
+      "demo": "Želite primjer? Pokrenite “npm run seed:developments” u backendu: kreira “East Gate Living (Demo)” sa svim vrstama područja."
     }
   },
   "inventory": {

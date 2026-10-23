@@ -138,6 +138,8 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
           unit={card.unit}
           title={card.title}
           facts={card.facts}
+          imageUrl={card.imageUrl}
+          badge={card.badge}
           actionLabel={hovered.linkType !== 'entrance' ? card.actionLabel : undefined}
           onAction={hovered.linkType !== 'entrance' ? () => activate(hovered) : undefined}
           {...cardHandlers}

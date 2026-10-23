@@ -54,6 +54,43 @@ building images are local placeholder drawings.
 
 ---
 
+## 0. Concepts in one minute
+
+| Thing | What it is | Where you manage it |
+| --- | --- | --- |
+| **Residence** (development) | The whole project, e.g. "East Gate Living" | Dashboard → My Developments |
+| **Building** | One block of the residence | Inventory → Add buildings |
+| **Floor** | A level of a building | Inventory → Add floors |
+| **Unit** | One apartment of your inventory: number, floor, m², rooms, price, status | Inventory table / Edit unit |
+| **Listing** | A marketplace ad on BalkanEstate (photos, description, contact) | Your normal listings |
+| **View** (picture) | A picture of the residence, a building or a floor | Interactive explorer |
+| **Region** | A shape drawn on a picture that links to one of the above | Interactive explorer |
+
+A unit can have a listing **attached** (Linked listings tab): the apartment stays
+in your inventory with its live status, and buyers can also open the listing.
+Link a region to a **Listing** directly only for a listing that is not one of
+this residence's apartments.
+
+**Worked example (demo seed).** `cd backend && npm run seed:developments` (set
+`DEV_SEED_EMAIL=` to choose the owner) creates "East Gate Living (Demo)":
+
+| Where | Region | Links to | What a buyer sees |
+| --- | --- | --- | --- |
+| Residence picture | one per building (tags S1, S2, P, G) | Building | building card, then opens the building |
+| Residence picture | "Example: standalone listing" | Listing | listing card: photo, price, m², floor, rooms |
+| Seaside Tower 1 (front and back views) | one per apartment | Unit | apartment card; 3 apartments have a `[Demo]` listing attached |
+| Park Residence (front) | one band per floor | Floor | floor card, then opens the floor plan |
+| Park Residence, Floor 1 (plan) | one per apartment | Unit | apartment card |
+| Seaside Tower 2 | (no picture) | n/a | opens as a floor-by-floor list |
+
+Demo listings are titled `[Demo] …` and are replaced on every run. The
+Interactive explorer tab also has a **How it works** panel, and the region
+editor explains each link type under **Links to**.
+
+| Listing region card | Building → floors | In-editor guide |
+| --- | --- | --- |
+| ![Listing card](./images/residence-explorer/30-listing-card.png) | ![Floors](./images/residence-explorer/31-park-floors.png) | ![Guide](./images/residence-explorer/33-editor-guide.png) |
+
 ## 1. Architecture
 
 **Data.** A *view* is a `DevelopmentScene`: one camera perspective of a target,

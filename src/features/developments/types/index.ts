@@ -321,6 +321,25 @@ export interface Hotspot {
   linkType: HotspotLinkType;
   linkId: string;
   z: number;
+  /** Public views only: facts about the linked listing (linkType 'listing'). */
+  listing?: HotspotListingSummary;
+}
+
+/** What the public explorer knows about a listing a region links to. */
+export interface HotspotListingSummary {
+  title?: string;
+  price?: number;
+  listingType?: 'sale' | 'rent';
+  rentPeriod?: string;
+  /** m² */
+  area?: number;
+  beds?: number;
+  baths?: number;
+  floorNumber?: number;
+  totalFloors?: number;
+  propertyType?: string;
+  status?: string;
+  imageUrl?: string;
 }
 
 export interface SceneVersion {

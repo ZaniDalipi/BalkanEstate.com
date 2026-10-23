@@ -91,8 +91,22 @@ test.describe('Residence explorer (public)', () => {
     await page.goto(`/en/developments/${SLUG}`);
     const regions = page.getByRole('group', { name: REGIONS }).first();
     await expect(regions).toBeVisible({ timeout: 30000 });
+    // An available apartment of Seaside Tower 1 with no listing attached (the
+    // demo attaches listings to a few units; those show listing actions instead).
+    const units = (await (await page.request.get(`${API}/developments/${SLUG}/units`)).json()).units as Array<{
+      unitNumber: string;
+      buildingName?: string;
+      availability: string;
+      hasListing?: boolean;
+    }>;
+    const target = units.find((u) => u.buildingName === 'Seaside Tower 1' && u.availability === 'available' && !u.hasListing);
+    test.skip(!target, 'No available unit without a listing in the demo data');
     await regions.getByRole('button', { name: /Seaside Tower 1/ }).first().click();
-    await page.getByRole('group', { name: REGIONS }).getByRole('button', { name: /Available/ }).first().click();
+    await page
+      .getByRole('group', { name: REGIONS })
+      .getByRole('button', { name: new RegExp(`Apt ${target!.unitNumber} `) })
+      .first()
+      .click();
 
     const form = page.getByRole('form', { name: 'Ask about this apartment' });
     await expect(form).toBeVisible({ timeout: 10000 });

@@ -260,22 +260,92 @@ async function run(): Promise<void> {
       }
     }
 
-    // --- Attach a few of the owner's listings to units -------------------
+    // --- Demo listings ------------------------------------------------------
+    // Units are the apartments of the residence (Inventory). A *listing* is a
+    // marketplace ad. The demo shows both relationships:
+    //   a) listings ATTACHED TO UNITS: the unit's card/drawer use the listing;
+    //   b) one STANDALONE listing linked straight from a region on the picture.
+    // Demo listings are recognisable by their "[Demo]" title and are replaced on
+    // every run.
+    await Property.deleteMany({ sellerId: owner._id, title: /^\[Demo\] / });
+    const ownerName = (owner as unknown as { name?: string }).name || 'Demo owner';
+    const ownerEmail = (owner as unknown as { email?: string }).email || 'demo@example.com';
+    const demoListing = (over: Record<string, unknown>) =>
+      Property.create({
+        sellerId: owner._id,
+        createdByName: ownerName,
+        createdByEmail: ownerEmail,
+        createdAsRole: 'private_seller',
+        listingType: 'sale',
+        address: 'Bulevar Jane Sandanski',
+        city: 'Skopje',
+        country: 'North Macedonia',
+        lat: 41.9981,
+        lng: 21.4254,
+        yearBuilt: 2027,
+        propertyType: 'apartment',
+        status: 'active',
+        livingRooms: 1,
+        ...over,
+      });
+
+    let attachedCount = 0;
+    for (const target of attachableUnits.slice(0, 3)) {
+      const unitDoc = await DevelopmentUnit.findById(target.id);
+      if (!unitDoc) continue;
+      const listing = await demoListing({
+        title: `[Demo] Apartment ${unitDoc.unitNumber} (listing attached to a unit)`,
+        description:
+          'Demo listing attached to an apartment (unit) of East Gate Living. The unit keeps its inventory data; buyers can also open this listing from the apartment drawer.',
+        price: unitDoc.price ?? 150000,
+        beds: unitDoc.beds ?? 2,
+        baths: unitDoc.baths ?? 1,
+        sqft: unitDoc.totalArea ?? 70,
+        netArea: unitDoc.netArea,
+        floorNumber: target.level,
+        totalFloors: firstBuilding.floors,
+        imageUrl: `https://picsum.photos/seed/eastgate-listing-${unitDoc.unitNumber}/1200/800`,
+        developmentId: development._id,
+        buildingId: unitDoc.buildingId,
+        floorId: unitDoc.floorId,
+        unitId: unitDoc._id,
+      });
+      unitDoc.listingIds = [listing._id];
+      unitDoc.primaryListingId = listing._id;
+      await unitDoc.save();
+      attachedCount += 1;
+    }
+    const standaloneListing = await demoListing({
+      title: '[Demo] Penthouse with city view (standalone listing)',
+      description:
+        'Demo listing that is not an apartment of this residence inventory. It is linked directly from a region on the residence picture (Links to: Listing).',
+      price: 389000,
+      beds: 3,
+      baths: 2,
+      sqft: 142,
+      netArea: 128,
+      floorNumber: 9,
+      totalFloors: 9,
+      imageUrl: 'https://picsum.photos/seed/eastgate-standalone/1200/800',
+    });
+
+    // --- Attach a few of the owner's own listings to units ---------------
     // Demonstrates "place my listing on the facade": the unit gets a primary
     // listing, and the listing points back into the development hierarchy.
-    let attachedCount = 0;
     const ownerListings = await Property.find({
       sellerId: owner._id,
       status: { $in: ['active', 'pending'] },
       developmentId: { $exists: false },
+      title: { $not: /^\[Demo\] / },
     })
       .select('_id')
       .limit(attachableUnits.length)
       .lean();
 
-    for (let i = 0; i < ownerListings.length && i < attachableUnits.length; i += 1) {
+    const freeUnits = attachableUnits.slice(3);
+    for (let i = 0; i < ownerListings.length && i < freeUnits.length; i += 1) {
       const listing = ownerListings[i];
-      const target = attachableUnits[i];
+      const target = freeUnits[i];
       const unitDoc = await DevelopmentUnit.findById(target.id);
       if (!unitDoc) continue;
       await Property.updateOne(
@@ -314,6 +384,20 @@ async function run(): Promise<void> {
         z: idx,
       };
     });
+    // Example of "Links to: Listing": a region straight to a marketplace listing.
+    const listingRegion = {
+      id: 'h_listing_demo',
+      shape: 'rect' as const,
+      points: [
+        [0.03, 0.04],
+        [0.24, 0.2],
+      ],
+      label: 'Example: standalone listing',
+      linkType: 'listing' as const,
+      linkId: encodeId(String(standaloneListing._id)),
+      z: aerialHotspots.length,
+    };
+    const aerialAll = [...aerialHotspots, listingRegion];
     await DevelopmentScene.create({
       developmentId: development._id,
       targetType: 'development',
@@ -325,8 +409,8 @@ async function run(): Promise<void> {
       imageUrl: AERIAL_IMG,
       imageWidth: AERIAL_W,
       imageHeight: AERIAL_H,
-      draft: { hotspots: aerialHotspots, version: 1 },
-      published: { hotspots: aerialHotspots, version: 1, publishedAt: new Date() },
+      draft: { hotspots: aerialAll, version: 1 },
+      published: { hotspots: aerialAll, version: 1, publishedAt: new Date() },
       version: 1,
     });
 
@@ -386,6 +470,74 @@ async function run(): Promise<void> {
       });
     }
 
+    // 3) Park Residence: building → floor → apartment. Its facade has one band
+    //    per floor (Links to: Floor); Floor 1 has a floor-plan picture with one
+    //    region per apartment (Links to: Unit).
+    const park = buildingIdsForAerial[2];
+    const parkFloors = await DevelopmentFloor.find({ buildingId: park.id }).sort({ level: 1 }).lean();
+    const bandH = 0.8 / Math.max(1, parkFloors.length);
+    const floorBands = parkFloors.map((f, i) => {
+      const y1 = round2(0.92 - i * bandH);
+      const y0 = round2(y1 - bandH + 0.008);
+      return {
+        id: `h_f_${i}`,
+        shape: 'rect' as const,
+        points: [
+          [0.12, y0],
+          [0.88, y1],
+        ],
+        label: f.label,
+        linkType: 'floor' as const,
+        linkId: encodeId(String(f._id)),
+        z: i,
+      };
+    });
+    await DevelopmentScene.create({
+      developmentId: development._id,
+      targetType: 'building',
+      targetId: park.id,
+      viewKey: 'main',
+      viewName: 'Front',
+      viewDirection: 'front',
+      sortOrder: 0,
+      imageUrl: 'https://picsum.photos/seed/eastgate-park/1200/900',
+      imageWidth: FACADE_W,
+      imageHeight: FACADE_H,
+      draft: { hotspots: floorBands, version: 1 },
+      published: { hotspots: floorBands, version: 1, publishedAt: new Date() },
+      version: 1,
+    });
+    if (parkFloors[0]) {
+      const floorUnits = await DevelopmentUnit.find({ floorId: parkFloors[0]._id }).sort({ unitNumber: 1 }).lean();
+      const w = 0.84 / Math.max(1, floorUnits.length);
+      const planRegions = floorUnits.map((u, i) => ({
+        id: `h_p_${i}`,
+        shape: 'rect' as const,
+        points: [
+          [round2(0.08 + i * w + 0.01), 0.18],
+          [round2(0.08 + (i + 1) * w - 0.01), 0.82],
+        ],
+        linkType: 'unit' as const,
+        linkId: encodeId(String(u._id)),
+        z: i,
+      }));
+      await DevelopmentScene.create({
+        developmentId: development._id,
+        targetType: 'floor',
+        targetId: parkFloors[0]._id,
+        viewKey: 'main',
+        viewName: 'Floor plan',
+        viewDirection: 'aerial',
+        sortOrder: 0,
+        imageUrl: 'https://picsum.photos/seed/eastgate-park-plan/1200/800',
+        imageWidth: 1200,
+        imageHeight: 800,
+        draft: { hotspots: planRegions, version: 1 },
+        published: { hotspots: planRegions, version: 1, publishedAt: new Date() },
+        version: 1,
+      });
+    }
+
     await Development.updateOne(
       { _id: development._id },
       { $set: { stats: { buildings: buildingDefs.length, units: unitCount, available: availableCount } } }
@@ -394,13 +546,12 @@ async function run(): Promise<void> {
     const base = process.env.PUBLIC_WEB_URL || 'http://localhost:3000';
     log.info('✅ Demo development seeded:');
     log.info(`   Buildings: ${buildingDefs.length} · Units: ${unitCount} · Available: ${availableCount}`);
-    log.info(`   Listings attached to units: ${attachedCount}`);
+    log.info(`   Demo listings attached to units: ${attachedCount} · standalone listing region on the residence picture: 1`);
+    log.info('   Examples: residence picture → Building regions; Seaside Tower 1 → Unit regions (2 views);');
+    log.info('             Park Residence → Floor regions → Floor 1 plan → Unit regions; Seaside Tower 2 → no picture (floor-by-floor list).');
     log.info(`   Scenes: site aerial (${aerialHotspots.length} buildings) + ${buildingDefs[0].name} facade, 2 views (${facadeHotspots.length} units)`);
     log.info(`   Public page: ${base}/en/developments/${SLUG}`);
     log.info(`   Dashboard:   ${base}/en/dashboard/developments`);
-    if (attachedCount === 0) {
-      log.info('   (No owned listings were free to attach — create a couple of listings as this user to see them on the facade.)');
-    }
   } catch (error) {
     log.error('Seeding failed:', error);
     process.exitCode = 1;

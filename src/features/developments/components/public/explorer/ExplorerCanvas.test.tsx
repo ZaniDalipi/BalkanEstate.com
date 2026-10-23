@@ -87,6 +87,26 @@ describe('ExplorerCanvas', () => {
     expect(onActivate).toHaveBeenCalledWith(expect.objectContaining({ linkType: 'building', linkId: 'b9' }));
   });
 
+  it('listing card shows the listing photo, price, m², floor and rooms', () => {
+    const listingSpot: Hotspot = {
+      ...poly('h5', 'listing', 'l1'),
+      label: 'cool apartment',
+      listing: { price: 389000, listingType: 'sale', area: 142, beds: 3, baths: 2, floorNumber: 9, totalFloors: 12, propertyType: 'apartment', status: 'active', imageUrl: 'https://media.test/l1.jpg' },
+    };
+    const onActivate = renderCanvas({ view: { ...view, hotspots: [...view.hotspots, listingSpot] } });
+    fireEvent.focus(screen.getByRole('button', { name: /cool apartment/ }));
+    const card = screen.getByRole('tooltip');
+    expect(card).toHaveTextContent('cool apartment');
+    expect(card).toHaveTextContent('For sale');
+    expect(card).toHaveTextContent('Area');
+    expect(card).toHaveTextContent('142');
+    expect(card).toHaveTextContent('9 of 12');
+    expect(card).toHaveTextContent('Bathrooms');
+    expect(card.querySelector('img')).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /View listing/ }));
+    expect(onActivate).toHaveBeenCalledWith(expect.objectContaining({ linkType: 'listing', linkId: 'l1' }));
+  });
+
   it('building card shows availability and an explore action', () => {
     const onActivate = renderCanvas({
       buildingFacts: new Map([['b9', { units: 20, available: 14, floors: 6, priceFrom: 90000, currency: 'EUR' }]]),

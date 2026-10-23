@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { DevelopmentBuilding, Hotspot, PublicUnit } from '../../../types';
-import { formatPrice } from '../../../utils/format';
+import { formatArea, formatPrice } from '../../../utils/format';
 import type { Fact } from './RegionCardFacts';
 
 /** Per-building figures for the building card (computed once per explorer). */
@@ -17,6 +17,9 @@ export interface RegionCardContent {
   title?: string;
   facts?: Fact[];
   actionLabel?: string;
+  imageUrl?: string;
+  /** e.g. "For sale" / "Sold" */
+  badge?: string;
 }
 
 /** What the hover card shows for each kind of region. */
@@ -54,7 +57,40 @@ export function useRegionCard(
       return { title: h.label || t('scene.linkTypes.floor', 'Floor'), actionLabel: t('explorer.card.exploreFloor', 'Explore floor') };
     }
     if (h.linkType === 'listing') {
-      return { title: h.label || t('unit.viewListing', 'View listing'), actionLabel: t('unit.viewListing', 'View listing') };
+      const l = h.listing;
+      const facts: Fact[] = [];
+      if (l) {
+        if (l.price) {
+          const price = formatPrice(l.price);
+          facts.push({
+            label: t('explorer.card.price', 'Price'),
+            value: l.listingType === 'rent' ? t('explorer.card.perMonth', { price, defaultValue: '{{price}} / month' }) : price,
+          });
+        }
+        if (l.area) facts.push({ label: t('explorer.card.area', 'Area'), value: formatArea(l.area) });
+        if (typeof l.floorNumber === 'number') {
+          facts.push({
+            label: t('explorer.floor', 'Floor'),
+            value: l.totalFloors ? t('explorer.card.floorOf', { floor: l.floorNumber, total: l.totalFloors, defaultValue: '{{floor}} of {{total}}' }) : String(l.floorNumber),
+          });
+        }
+        if (typeof l.beds === 'number') facts.push({ label: t('explorer.card.rooms', 'Bedrooms'), value: l.beds === 0 ? t('explorer.studio', 'Studio') : String(l.beds) });
+        if (typeof l.baths === 'number') facts.push({ label: t('explorer.card.baths', 'Bathrooms'), value: String(l.baths) });
+        if (l.propertyType) facts.push({ label: t('explorer.card.type', 'Type'), value: t(`explorer.unitType.${l.propertyType}`, l.propertyType.replace(/_/g, ' ')) });
+      }
+      const badge =
+        l?.status === 'sold' ? t('availability.sold', 'Sold')
+        : l?.status === 'rented' ? t('availability.rented', 'Rented')
+        : l?.status === 'pending' ? t('availability.reserved', 'Reserved')
+        : l?.listingType === 'rent' ? t('explorer.card.forRent', 'For rent')
+        : l ? t('explorer.card.forSale', 'For sale') : undefined;
+      return {
+        title: h.label || l?.title || t('unit.viewListing', 'View listing'),
+        facts,
+        imageUrl: l?.imageUrl,
+        badge,
+        actionLabel: t('unit.viewListing', 'View listing'),
+      };
     }
     return { title: h.label };
   };

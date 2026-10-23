@@ -394,7 +394,14 @@
       "floors": "Kate",
       "priceFrom": "Çmimet nga",
       "exploreBuilding": "Eksploro ndërtesën",
-      "exploreFloor": "Eksploro katin"
+      "exploreFloor": "Eksploro katin",
+      "perMonth": "{{price}} / muaj",
+      "floorOf": "{{floor}} nga {{total}}",
+      "baths": "Banjo",
+      "type": "Lloji",
+      "forSale": "Në shitje",
+      "forRent": "Me qira",
+      "hasListing": "Ky apartament ka edhe një shpallje me foto dhe detaje."
     },
     "showAvailability": "Shfaq disponueshmërinë",
     "noUnitsInBuilding": "Ende nuk ka apartamente të listuara për këtë ndërtesë.",
@@ -557,6 +564,22 @@
       "too_many_hotspots": "Shumë zona në këtë pamje",
       "invalid_id": "ID e zonës e pavlefshme",
       "invalid_label": "Etiketa është shumë e gjatë"
+    },
+    "linkHelp": {
+      "building": "Hap atë ndërtesë. Përdoreni në foton e rezidencës: blerësit klikojnë një ndërtesë për të parë fotot e saj (ose apartamentet sipas katit).",
+      "floor": "Hap foton e atij kati, p.sh. një plan kati ku çdo apartament është i klikueshëm.",
+      "unit": "Një apartament nga Inventari juaj. Karta tregon numrin, katin, m², dhomat e gjumit, çmimin dhe statusin aktual; klikimi hap detajet. Përdoreni për apartamentet që shitni në këtë rezidencë.",
+      "listing": "Një shpallje e publikuar në BalkanEstate (p.sh. një banesë në rishitje). Karta tregon foton, çmimin, m², katin dhe dhomat; klikimi hap faqen e shpalljes. Për të shfaqur një shpallje në një nga apartamentet tuaja, lidheni zonën me njësinë dhe bashkëngjitni shpalljen te ajo njësi.",
+      "entrance": "Shënon një hyrje ndërtese. Shfaq një etiketë por nuk hap asgjë."
+    },
+    "guide": {
+      "title": "Si funksionon: fotoja e rezidencës, ndërtesat, njësitë dhe shpalljet",
+      "show": "Shfaq",
+      "step1": "Zgjidhni “Plani i vendit (nga ajri)”, ngarkoni një foto të gjithë rezidencës dhe vizatoni një zonë rreth çdo ndërtese → Lidhet me: Ndërtesë.",
+      "step2": "Zgjidhni një ndërtesë, shtoni një ose më shumë foto të saj (para, prapa…) dhe vizatoni një zonë mbi çdo apartament → Lidhet me: Njësi.",
+      "step3": "Njësitë janë apartamentet në skedën Inventari (numri, kati, m², çmimi, statusi). Nëse një apartament reklamohet edhe si shpallje, bashkëngjiteni shpalljen te njësia te Shpalljet e lidhura.",
+      "step4": "Ruani draftin, pastaj Publikoni. Blerësit kalojnë mbi një zonë për të parë kartën dhe klikojnë për ta hapur.",
+      "demo": "Doni një shembull? Ekzekutoni “npm run seed:developments” në backend: krijon “East Gate Living (Demo)” me çdo lloj zone."
     }
   },
   "inventory": {
