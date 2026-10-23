@@ -582,6 +582,27 @@
       "step3": "Njësitë janë apartamentet në skedën Inventari (numri, kati, m², çmimi, statusi). Nëse një apartament reklamohet edhe si shpallje, bashkëngjiteni shpalljen te njësia te Shpalljet e lidhura.",
       "step4": "Ruani draftin, pastaj Publikoni. Blerësit kalojnë mbi një zonë për të parë kartën dhe klikojnë për ta hapur.",
       "demo": "Doni një shembull? Ekzekutoni “npm run seed:developments” në backend: krijon “East Gate Living (Demo)” me çdo lloj zone."
+    },
+    "structure": {
+      "floors_one": "{{count}} kat",
+      "floors_other": "{{count}} kate",
+      "units_one": "{{count}} apartament",
+      "units_other": "{{count}} apartamente",
+      "views_one": "{{count}} foto",
+      "views_other": "{{count}} foto",
+      "alsoRemoves": "Kjo heq gjithashtu {{items}} dhe zonat që lidhen me to.",
+      "emptyBuilding": "Ndërtesa është bosh; nuk hiqet asgjë tjetër.",
+      "emptyFloor": "Kati është bosh; nuk hiqet asgjë tjetër.",
+      "listingsKept_one": "{{count}} shpallje e bashkëngjitur mbetet në treg; vetëm shkëputet.",
+      "listingsKept_other": "{{count}} shpallje të bashkëngjitura mbeten në treg; vetëm shkëputen.",
+      "deleteTitle": "Të fshihet “{{name}}”?",
+      "deleteBuilding": "Fshi ndërtesën",
+      "deleteFloor": "Fshi katin",
+      "deletedTitle": "U fshi",
+      "deleted": "“{{name}}” u fshi.",
+      "rename": "Riemërto",
+      "newName": "Emri i ri",
+      "saveName": "Ruaj emrin"
     }
   },
   "inventory": {
@@ -849,7 +870,9 @@
       "membership_grant": "Shtoi anëtar ekipi",
       "membership_revoke": "Hoqi anëtar ekipi",
       "claim_create": "Kërkoi lidhje",
-      "claim_review": "Shqyrtoi kërkesën për lidhje"
+      "claim_review": "Shqyrtoi kërkesën për lidhje",
+      "building_delete": "Fshiu ndërtesën",
+      "floor_delete": "Fshiu katin"
     }
   }
 }

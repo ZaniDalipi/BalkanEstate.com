@@ -8,6 +8,7 @@ import type { Scene, SceneTargetType } from '../../types';
 import { SceneEditor } from './SceneEditor';
 import { BuildingViewManager } from './editor/BuildingViewManager';
 import { useConfirmDiscard } from './editor/useUnsavedGuard';
+import { TargetActions } from './editor/TargetActions';
 
 interface SceneStudioProps {
   developmentId: string;
@@ -98,21 +99,40 @@ export const SceneStudio: React.FC<SceneStudioProps> = ({ developmentId, onDirty
             const isPublished = (viewsByTarget.get(tg.key) ?? []).some((v) => !!v.published);
             const Icon = tg.type === 'development' ? MapIcon : tg.type === 'building' ? Building2 : null;
             return (
-              <li key={tg.key}>
+              <li
+                key={tg.key}
+                className={cn('group flex items-center gap-0.5 rounded-lg pr-0.5', isActive ? 'bg-primary/10' : 'hover:bg-slate-50')}
+              >
                 <button
                   type="button"
                   onClick={() => !isActive && guarded(() => { setActiveKey(tg.key); setActiveSceneId(null); })}
                   aria-current={isActive ? 'true' : undefined}
                   className={cn(
-                    'flex min-h-[44px] w-full items-center gap-2 rounded-lg px-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:min-h-[36px]',
+                    'flex min-h-[44px] min-w-0 flex-1 items-center gap-2 rounded-lg px-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:min-h-[36px]',
                     tg.depth > 0 && 'pl-7',
-                    isActive ? 'bg-primary/10 font-medium text-slate-900' : 'text-slate-600 hover:bg-slate-50'
+                    isActive ? 'font-medium text-slate-900' : 'text-slate-600'
                   )}
                 >
                   {Icon ? <Icon className="h-4 w-4 shrink-0" aria-hidden="true" /> : <span className="w-4 shrink-0" />}
                   <span className="min-w-0 flex-1 truncate">{tg.label}</span>
                   {isPublished && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" aria-label={t('editor.status.published', 'Published')} />}
                 </button>
+                {tg.type !== 'development' && (
+                  <TargetActions
+                    developmentId={developmentId}
+                    kind={tg.type}
+                    id={tg.id}
+                    name={tg.label}
+                    // If what was deleted is open (or holds the open floor), go back to the site plan.
+                    onDeleted={() => {
+                      if (active.key === tg.key || active.parentKey === tg.key) {
+                        onDirtyChange(false);
+                        setActiveKey(encode('development', developmentId));
+                        setActiveSceneId(null);
+                      }
+                    }}
+                  />
+                )}
               </li>
             );
           })}

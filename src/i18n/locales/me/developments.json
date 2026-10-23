@@ -584,6 +584,31 @@
       "step3": "Jedinice su stanovi u kartici Inventar (broj, sprat, m², cijena, status). Ako se stan oglašava i kao oglas, priložite oglas jedinici u Povezanim oglasima.",
       "step4": "Sačuvajte nacrt, pa Objavite. Kupci pređu mišem preko oblasti da vide karticu i kliknu da je otvore.",
       "demo": "Želite primjer? Pokrenite “npm run seed:developments” u backendu: kreira “East Gate Living (Demo)” sa svim vrstama oblasti."
+    },
+    "structure": {
+      "floors_one": "{{count}} sprat",
+      "floors_few": "{{count}} sprata",
+      "floors_other": "{{count}} spratova",
+      "units_one": "{{count}} stan",
+      "units_few": "{{count}} stana",
+      "units_other": "{{count}} stanova",
+      "views_one": "{{count}} slika",
+      "views_few": "{{count}} slike",
+      "views_other": "{{count}} slika",
+      "alsoRemoves": "Ovim se uklanja i {{items}}, kao i oblasti koje upućuju na njih.",
+      "emptyBuilding": "Zgrada je prazna; ništa drugo se ne uklanja.",
+      "emptyFloor": "Sprat je prazan; ništa drugo se ne uklanja.",
+      "listingsKept_one": "{{count}} priloženi oglas ostaje na tržištu; samo se odvaja.",
+      "listingsKept_few": "{{count}} priložena oglasa ostaju na tržištu; samo se odvajaju.",
+      "listingsKept_other": "{{count}} priloženih oglasa ostaje na tržištu; samo se odvajaju.",
+      "deleteTitle": "Obrisati „{{name}}”?",
+      "deleteBuilding": "Obriši zgradu",
+      "deleteFloor": "Obriši sprat",
+      "deletedTitle": "Obrisano",
+      "deleted": "„{{name}}” je obrisano.",
+      "rename": "Preimenuj",
+      "newName": "Novi naziv",
+      "saveName": "Sačuvaj naziv"
     }
   },
   "inventory": {
@@ -851,7 +876,9 @@
       "membership_grant": "Dodao člana tima",
       "membership_revoke": "Uklonio člana tima",
       "claim_create": "Zatražio povezivanje",
-      "claim_review": "Pregledao zahtjev za povezivanje"
+      "claim_review": "Pregledao zahtjev za povezivanje",
+      "building_delete": "Obrisana zgrada",
+      "floor_delete": "Obrisan sprat"
     }
   }
 }

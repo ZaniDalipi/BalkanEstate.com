@@ -355,6 +355,40 @@ export const updateFloor = (
     requiresAuth: true,
   });
 
+/** What deleting a building/floor would remove (shown in the confirmation). */
+export interface StructureDeleteImpact {
+  name: string;
+  floors: number;
+  units: number;
+  views: number;
+  /** Attached listings: detached, never deleted. */
+  listings: number;
+}
+
+export type StructureKind = 'building' | 'floor';
+
+const structurePath = (developmentId: string, kind: StructureKind, id: string) =>
+  `${DASH}/${developmentId}/${kind === 'building' ? 'buildings' : 'floors'}/${id}`;
+
+export const getStructureDeleteImpact = async (
+  developmentId: string,
+  kind: StructureKind,
+  id: string
+): Promise<StructureDeleteImpact> =>
+  (
+    await apiRequest<{ impact: StructureDeleteImpact }>(`${structurePath(developmentId, kind, id)}/delete-impact`, {
+      requiresAuth: true,
+    })
+  ).impact;
+
+/** Soft-deletes a building (with its floors, units and pictures) or a floor (with its units and pictures). */
+export const deleteStructure = (
+  developmentId: string,
+  kind: StructureKind,
+  id: string
+): Promise<{ success: boolean; impact: StructureDeleteImpact }> =>
+  apiRequest(structurePath(developmentId, kind, id), { method: 'DELETE', requiresAuth: true });
+
 export const setUnitAvailability = (
   developmentId: string,
   unitId: string,

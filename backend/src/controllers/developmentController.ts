@@ -29,6 +29,7 @@ import {
 } from '../services/developments/developmentInventoryService';
 import * as unitAdmin from '../services/developments/unitAdminService';
 import { listAuditEntries } from '../services/developments/developmentAuditQuery';
+import { deleteStructure, previewStructureDelete, type StructureKind } from '../services/developments/structureDeleteService';
 import {
   getPublicDevelopmentDetail,
   listPublicUnits as listPublicUnitsService,
@@ -556,6 +557,35 @@ export const listAudit = async (req: Request, res: Response): Promise<void> => {
     sendServiceError(res, error, 'list audit entries');
   }
 };
+
+/** GET /:developmentId/{buildings|floors}/:id/delete-impact — what a delete would remove. */
+export const structureDeleteImpact =
+  (kind: StructureKind) =>
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const impact = await previewStructureDelete(devId(req), kind, kind === 'building' ? req.params.buildingId : req.params.floorId);
+      res.json({ impact });
+    } catch (error) {
+      sendServiceError(res, error, `preview ${kind} delete`);
+    }
+  };
+
+/** DELETE /:developmentId/{buildings|floors}/:id — cascading soft delete. */
+export const deleteStructureHandler =
+  (kind: StructureKind) =>
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const impact = await deleteStructure({
+        developmentId: devId(req),
+        actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+        kind,
+        id: kind === 'building' ? req.params.buildingId : req.params.floorId,
+      });
+      res.json({ success: true, impact });
+    } catch (error) {
+      sendServiceError(res, error, `delete ${kind}`);
+    }
+  };
 
 /** PATCH /:developmentId/buildings/:buildingId */
 export const updateBuilding = async (req: Request, res: Response): Promise<void> => {

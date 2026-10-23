@@ -584,6 +584,31 @@
       "step3": "Unitățile sunt apartamentele din fila Inventar (număr, etaj, m², preț, stare). Dacă un apartament este promovat și ca anunț, atașați anunțul unității în Anunțuri legate.",
       "step4": "Salvați ciorna, apoi Publicați. Cumpărătorii trec cu mouse-ul peste o zonă pentru a vedea cardul și dau clic pentru a o deschide.",
       "demo": "Vreți un exemplu? Rulați „npm run seed:developments” în backend: creează „East Gate Living (Demo)” cu fiecare tip de zonă."
+    },
+    "structure": {
+      "floors_one": "{{count}} etaj",
+      "floors_few": "{{count}} etaje",
+      "floors_other": "{{count}} de etaje",
+      "units_one": "{{count}} apartament",
+      "units_few": "{{count}} apartamente",
+      "units_other": "{{count}} de apartamente",
+      "views_one": "{{count}} imagine",
+      "views_few": "{{count}} imagini",
+      "views_other": "{{count}} de imagini",
+      "alsoRemoves": "Se elimină și {{items}}, precum și zonele care trimit la ele.",
+      "emptyBuilding": "Clădirea este goală; nu se elimină nimic altceva.",
+      "emptyFloor": "Etajul este gol; nu se elimină nimic altceva.",
+      "listingsKept_one": "{{count}} anunț atașat rămâne pe piață; doar se detașează.",
+      "listingsKept_few": "{{count}} anunțuri atașate rămân pe piață; doar se detașează.",
+      "listingsKept_other": "{{count}} de anunțuri atașate rămân pe piață; doar se detașează.",
+      "deleteTitle": "Ștergeți „{{name}}”?",
+      "deleteBuilding": "Șterge clădirea",
+      "deleteFloor": "Șterge etajul",
+      "deletedTitle": "Șters",
+      "deleted": "„{{name}}” a fost șters.",
+      "rename": "Redenumește",
+      "newName": "Nume nou",
+      "saveName": "Salvează numele"
     }
   },
   "inventory": {
@@ -851,7 +876,9 @@
       "membership_grant": "A adăugat un membru în echipă",
       "membership_revoke": "A eliminat un membru din echipă",
       "claim_create": "A solicitat atașarea",
-      "claim_review": "A analizat cererea de atașare"
+      "claim_review": "A analizat cererea de atașare",
+      "building_delete": "Clădire ștearsă",
+      "floor_delete": "Etaj șters"
     }
   }
 }

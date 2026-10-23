@@ -584,6 +584,31 @@
       "step3": "Jedinice su stanovi u kartici Inventar (broj, kat, m², cijena, status). Ako se stan oglašava i kao oglas, priložite oglas jedinici u Povezanim oglasima.",
       "step4": "Spremite nacrt, zatim Objavite. Kupci prijeđu mišem preko područja da vide karticu i kliknu da ga otvore.",
       "demo": "Želite primjer? Pokrenite “npm run seed:developments” u backendu: stvara “East Gate Living (Demo)” sa svim vrstama područja."
+    },
+    "structure": {
+      "floors_one": "{{count}} kat",
+      "floors_few": "{{count}} kata",
+      "floors_other": "{{count}} katova",
+      "units_one": "{{count}} stan",
+      "units_few": "{{count}} stana",
+      "units_other": "{{count}} stanova",
+      "views_one": "{{count}} slika",
+      "views_few": "{{count}} slike",
+      "views_other": "{{count}} slika",
+      "alsoRemoves": "Time se uklanja i {{items}} te područja koja na njih upućuju.",
+      "emptyBuilding": "Zgrada je prazna; ništa drugo se ne uklanja.",
+      "emptyFloor": "Kat je prazan; ništa drugo se ne uklanja.",
+      "listingsKept_one": "{{count}} priloženi oglas ostaje na tržištu; samo se odvaja.",
+      "listingsKept_few": "{{count}} priložena oglasa ostaju na tržištu; samo se odvajaju.",
+      "listingsKept_other": "{{count}} priloženih oglasa ostaje na tržištu; samo se odvajaju.",
+      "deleteTitle": "Izbrisati „{{name}}”?",
+      "deleteBuilding": "Izbriši zgradu",
+      "deleteFloor": "Izbriši kat",
+      "deletedTitle": "Izbrisano",
+      "deleted": "„{{name}}” je izbrisano.",
+      "rename": "Preimenuj",
+      "newName": "Novi naziv",
+      "saveName": "Spremi naziv"
     }
   },
   "inventory": {
@@ -851,7 +876,9 @@
       "membership_grant": "Dodao člana tima",
       "membership_revoke": "Uklonio člana tima",
       "claim_create": "Zatražio povezivanje",
-      "claim_review": "Pregledao zahtjev za povezivanje"
+      "claim_review": "Pregledao zahtjev za povezivanje",
+      "building_delete": "Izbrisana zgrada",
+      "floor_delete": "Izbrisan kat"
     }
   }
 }

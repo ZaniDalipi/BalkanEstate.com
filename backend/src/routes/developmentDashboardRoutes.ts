@@ -31,6 +31,8 @@ import {
   uploadUnitGallery,
   deleteUnitGalleryImage,
   listAudit,
+  structureDeleteImpact,
+  deleteStructureHandler,
   updateBuilding,
   updateFloor,
 } from '../controllers/developmentController';
@@ -168,6 +170,36 @@ router.patch(
   developmentAuth,
   requireDevelopmentPermission('floor.manage'),
   updateFloor
+);
+router.get(
+  '/:developmentId/buildings/:buildingId/delete-impact',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('building.manage'),
+  structureDeleteImpact('building')
+);
+router.delete(
+  '/:developmentId/buildings/:buildingId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('building.manage'),
+  deleteStructureHandler('building')
+);
+router.get(
+  '/:developmentId/floors/:floorId/delete-impact',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('floor.manage'),
+  structureDeleteImpact('floor')
+);
+router.delete(
+  '/:developmentId/floors/:floorId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('floor.manage'),
+  deleteStructureHandler('floor')
 );
 router.post(
   '/:developmentId/units',

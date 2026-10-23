@@ -582,6 +582,27 @@
       "step3": "Units are the apartments in your Inventory tab (number, floor, m², price, status). If an apartment is also advertised, attach its listing to the unit in Linked listings.",
       "step4": "Save draft, then Publish. Buyers hover a region to see its card and click to open it.",
       "demo": "Want an example? Run “npm run seed:developments” in the backend: it creates “East Gate Living (Demo)” with every kind of region."
+    },
+    "structure": {
+      "floors_one": "{{count}} floor",
+      "floors_other": "{{count}} floors",
+      "units_one": "{{count}} apartment",
+      "units_other": "{{count}} apartments",
+      "views_one": "{{count}} picture",
+      "views_other": "{{count}} pictures",
+      "alsoRemoves": "This also removes {{items}}, and the regions that point to them.",
+      "emptyBuilding": "The building is empty; nothing else is removed.",
+      "emptyFloor": "The floor is empty; nothing else is removed.",
+      "listingsKept_one": "{{count}} attached listing stays on the marketplace; it is only detached.",
+      "listingsKept_other": "{{count}} attached listings stay on the marketplace; they are only detached.",
+      "deleteTitle": "Delete “{{name}}”?",
+      "deleteBuilding": "Delete building",
+      "deleteFloor": "Delete floor",
+      "deletedTitle": "Deleted",
+      "deleted": "“{{name}}” was deleted.",
+      "rename": "Rename",
+      "newName": "New name",
+      "saveName": "Save name"
     }
   },
   "inventory": {
@@ -849,7 +870,9 @@
       "membership_grant": "Added team member",
       "membership_revoke": "Removed team member",
       "claim_create": "Requested attachment",
-      "claim_review": "Reviewed attachment request"
+      "claim_review": "Reviewed attachment request",
+      "building_delete": "Deleted building",
+      "floor_delete": "Deleted floor"
     }
   }
 }

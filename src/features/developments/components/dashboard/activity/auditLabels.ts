@@ -19,6 +19,8 @@ export const ACTION_LABELS: Record<string, string> = {
   'floor.update': 'Updated floor',
   'building.create': 'Added building',
   'building.update': 'Updated building',
+  'building.delete': 'Deleted building',
+  'floor.delete': 'Deleted floor',
   'scene.upload': 'Uploaded explorer image',
   'scene.update': 'Updated explorer view',
   'scene.draft': 'Saved explorer draft',
@@ -37,7 +39,6 @@ export const ACTION_LABELS: Record<string, string> = {
 
 export const actionKey = (action: string) => `activity.actions.${action.replace(/\./g, '_')}`;
 
-/** Human-readable label of an action; unknown actions show as recorded. */
 /**
  * Field → [i18n key, English default], reusing the unit editor's labels so the
  * Activity tab names fields the same way the form does.
@@ -69,6 +70,7 @@ const fieldLabel = (t: TFunction, field: string): string => {
   return entry ? String(t(entry[0], entry[1])) : field;
 };
 
+/** Human-readable label of an action; unknown actions show as recorded. */
 export const actionLabel = (t: TFunction, action: string): string =>
   action in ACTION_LABELS ? String(t(actionKey(action), ACTION_LABELS[action])) : action;
 
@@ -99,6 +101,15 @@ export function entryDetail(t: TFunction, entry: AuditEntry, locale = 'en'): str
       if (typeof m.availability !== 'string') return null;
       const to = String(t(`availability.${m.availability}`, m.availability));
       return typeof m.from === 'string' ? `${String(t(`availability.${m.from}`, m.from))} → ${to}` : to;
+    }
+    case 'building.delete':
+    case 'floor.delete': {
+      const parts = [
+        typeof m.name === 'string' ? m.name : null,
+        num(m.floors) ? String(t('editor.structure.floors', { count: num(m.floors), defaultValue: '{{count}} floors' })) : null,
+        num(m.units) ? String(t('editor.structure.units', { count: num(m.units), defaultValue: '{{count}} apartments' })) : null,
+      ].filter(Boolean);
+      return parts.length ? parts.join(' · ') : null;
     }
     case 'unit.delete':
       return typeof m.unitNumber === 'string' ? String(t('activity.detail.unitNumber', 'Unit {{number}}', { number: m.unitNumber })) : null;
