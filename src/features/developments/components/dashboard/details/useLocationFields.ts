@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { BALKAN_LOCATIONS } from '@/utils/balkanLocations';
 import type { SelectOption } from '../../shared/FormSelect';
+import { formatCoordinate } from '../../../utils/format';
 
 /** The location part of a development form, as text the inputs hold. */
 export interface LocationValue {
@@ -49,8 +50,8 @@ export const useLocationFields = (value: LocationValue, onChange: (patch: Partia
     const isDefault = !value.address.trim() || value.address === `${value.city}, ${value.country}`;
     onChange({
       city,
-      lat: String(match.lat),
-      lng: String(match.lng),
+      lat: formatCoordinate(match.lat),
+      lng: formatCoordinate(match.lng),
       ...(isDefault ? { address: `${city}, ${value.country}` } : {}),
     });
   };

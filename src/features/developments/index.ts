@@ -8,3 +8,4 @@ export { default as PublicDevelopmentPage } from './components/public/PublicDeve
 export { default as DevelopmentsDashboardPage } from './components/dashboard/DevelopmentsDashboardPage';
 export { default as CreateDevelopmentForm } from './components/dashboard/CreateDevelopmentForm';
 export { default as DevelopmentManagePage } from './components/dashboard/DevelopmentManagePage';
+export { ListingResidenceBadge } from './components/public/listing/ListingResidenceBadge';

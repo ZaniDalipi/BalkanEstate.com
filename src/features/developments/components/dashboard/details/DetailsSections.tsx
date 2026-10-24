@@ -1,7 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/src/shared/components/ui/Input';
+import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { TextArea } from './TextArea';
+import { TimelineField } from './TimelineField';
+import { dialCodeForCountry } from './dialCode';
 import { FormSelect } from '../../shared/FormSelect';
 import { DEVELOPMENT_CATEGORIES, DEVELOPMENT_CONSTRUCTION_STATUSES } from '../../../types';
 import type { DetailsErrors } from '../../../validation/developmentValidation';
@@ -62,11 +65,12 @@ export const AboutSection: React.FC<SectionProps> = ({ draft, set, errors, disab
           onChange={(e) => set({ constructionStatus: e.target.value })}
           disabled={disabled}
         />
-        <Input
-          type="date"
-          label={t('details.completion', 'Expected completion')}
-          value={draft.expectedCompletionDate}
-          onChange={(e) => set({ expectedCompletionDate: e.target.value })}
+        <TimelineField
+          constructionStatus={draft.constructionStatus}
+          expectedCompletionDate={draft.expectedCompletionDate}
+          yearBuilt={draft.yearBuilt}
+          onChange={set}
+          error={errors.yearBuilt}
           disabled={disabled}
         />
       </div>
@@ -92,12 +96,13 @@ export const AboutSection: React.FC<SectionProps> = ({ draft, set, errors, disab
 /** Who buyers reach about this residence. */
 export const ContactSection: React.FC<SectionProps> = ({ draft, set, errors, disabled }) => {
   const { t } = useTranslation('developments');
+  const phoneId = React.useId();
   return (
     <Fieldset legend={t('details.contact', 'Sales contact')}>
       <p className="text-sm text-slate-600">
         {t('details.contactHelper', 'Who handles sales questions about this residence. All fields are optional.')}
       </p>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           label={t('details.contactName', 'Name')}
           value={draft.contactName}
@@ -113,14 +118,19 @@ export const ContactSection: React.FC<SectionProps> = ({ draft, set, errors, dis
           error={errors.contactEmail}
           disabled={disabled}
         />
-        <Input
-          type="tel"
-          label={t('details.contactPhone', 'Phone')}
-          value={draft.contactPhone}
-          onChange={(e) => set({ contactPhone: e.target.value })}
-          maxLength={40}
-          disabled={disabled}
-        />
+        <div>
+          <label htmlFor={phoneId} className="mb-1.5 block text-sm font-medium text-gray-700">
+            {t('details.contactPhone', 'Phone')}
+          </label>
+          <PhoneInput
+            id={phoneId}
+            value={draft.contactPhone}
+            onChange={(contactPhone) => set({ contactPhone })}
+            defaultCountryCode={dialCodeForCountry(draft.country)}
+            error={errors.contactPhone}
+            disabled={disabled}
+          />
+        </div>
       </div>
     </Fieldset>
   );

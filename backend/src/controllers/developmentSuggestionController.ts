@@ -6,7 +6,9 @@ import DevelopmentMembership from '../models/DevelopmentMembership';
 import DevelopmentClaim from '../models/DevelopmentClaim';
 import Property from '../models/Property';
 import { isValidObjectId } from '../utils/validateParams';
-import { resolveId } from '../utils/idObfuscation';
+import { encodeId, resolveId } from '../utils/idObfuscation';
+import DevelopmentUnit from '../models/DevelopmentUnit';
+import DevelopmentBuilding from '../models/DevelopmentBuilding';
 import { createLogger } from '../utils/logger';
 import { roleHasPermission, type DevelopmentRole } from '../config/developments';
 import { sendServiceError } from './developmentController';
@@ -39,7 +41,7 @@ const scoreForDistance = (meters: number): number => {
 const MAX_NEARBY_METERS = 50_000; // 50 km
 
 /**
- * GET /api/developments/nearby?lat=&lng=&city=&country=&limit=
+ * GET /api/developments/nearby?lat=&lng=&city=&country=&limit=&listingId=
  * Published developments near a point, ranked by distance, with whether the
  * caller can attach to each (owner or a membership role that may attach).
  */
@@ -79,6 +81,7 @@ export const nearbyDevelopments = async (req: Request, res: Response): Promise<v
       currentUser(req),
       ranked.map((r) => r.dev)
     );
+    const attachment = await resolveListingAttachment(currentUser(req), req.query.listingId);
 
     res.json({
       suggestions: ranked.map((r) => ({
@@ -86,11 +89,43 @@ export const nearbyDevelopments = async (req: Request, res: Response): Promise<v
         distanceM: Math.round(r.distanceM),
         matchScore: scoreForDistance(r.distanceM),
         canAttach: canAttachMap.get(String(r.dev._id)) ?? false,
+        attachment: attachment && attachment.developmentId === String(r.dev._id) ? attachment.place : null,
       })),
     });
   } catch (error) {
     sendServiceError(res, error, 'nearby developments');
   }
+};
+
+interface ListingPlace {
+  /** Set when the listing sits on an apartment; absent when only the residence is linked. */
+  unitId?: string;
+  unitNumber?: string;
+  buildingName?: string;
+}
+
+/**
+ * Where the caller's own listing is attached today (residence and apartment),
+ * so the listing form shows the real state after a reload. Nothing for a
+ * listing the caller does not control.
+ */
+const resolveListingAttachment = async (
+  user: IUser,
+  rawListingId: unknown
+): Promise<{ developmentId: string; place: ListingPlace } | null> => {
+  const listingId = typeof rawListingId === 'string' && rawListingId ? resolveId(rawListingId) : null;
+  if (!listingId || !isValidObjectId(listingId)) return null;
+  const property = await Property.findById(listingId).select('sellerId createdByAgencyId developmentId unitId');
+  if (!property?.developmentId || !(await callerControlsListing(user, property))) return null;
+  const place: ListingPlace = {};
+  if (property.unitId) {
+    const unit = await DevelopmentUnit.findOne({ _id: property.unitId, deletedAt: null }).select('unitNumber buildingId').lean();
+    if (unit) {
+      const building = await DevelopmentBuilding.findById(unit.buildingId).select('name').lean();
+      Object.assign(place, { unitId: encodeId(String(unit._id)), unitNumber: unit.unitNumber, buildingName: building?.name });
+    }
+  }
+  return { developmentId: String(property.developmentId), place };
 };
 
 /** Map of developmentId → whether the user may attach listings to it. */

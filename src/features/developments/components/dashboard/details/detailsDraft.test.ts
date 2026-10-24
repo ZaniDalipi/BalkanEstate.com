@@ -39,4 +39,9 @@ describe('residence details draft', () => {
     });
     expect(changedFields({ ...toDraft(dev), contactEmail: '' }, dev)).toEqual({ contact: null });
   });
+
+  it('shows coordinates with 6 decimals and sends the build year as a number', () => {
+    expect(toDraft(dev)).toMatchObject({ lat: '41.327500', lng: '19.818700', yearBuilt: '' });
+    expect(changedFields({ ...toDraft(dev), constructionStatus: 'completed', yearBuilt: '2019' }, dev)).toEqual({ constructionStatus: 'completed', yearBuilt: 2019 });
+  });
 });

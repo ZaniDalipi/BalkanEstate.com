@@ -48,7 +48,7 @@ describe('development create validation', () => {
 });
 
 describe('development details validation', () => {
-  const ok = { name: 'Plaza', country: 'Albania', city: 'Tirana', category: 'apartment_building', website: '', contactEmail: '', lat: '', lng: '' };
+  const ok = { name: 'Plaza', country: 'Albania', city: 'Tirana', category: 'apartment_building', website: '', contactEmail: '', lat: '', lng: '', yearBuilt: '', contactPhone: '' };
 
   it('accepts empty optional fields', () => {
     expect(validateDevelopmentDetails(ok)).toEqual({});
@@ -64,5 +64,13 @@ describe('development details validation', () => {
       lng: 'validation.lngInvalid',
     });
     expect(validateDevelopmentDetails({ ...ok, website: 'https://plaza.al', lat: '-41.3', lng: '179.9' })).toEqual({});
+  });
+
+  it('checks the build year and the phone like the rest of the app', () => {
+    expect(validateDevelopmentDetails({ ...ok, yearBuilt: '2019', contactPhone: '+355692000000' })).toEqual({});
+    expect(validateDevelopmentDetails({ ...ok, yearBuilt: String(new Date().getFullYear() + 1), contactPhone: '+355 12' })).toEqual({
+      yearBuilt: 'validation.yearBuiltInvalid',
+      contactPhone: 'validation.phoneInvalid',
+    });
   });
 });

@@ -33,6 +33,8 @@ export interface CreateDevelopmentInput {
   category: DevelopmentCategory;
   constructionStatus?: DevelopmentConstructionStatus;
   expectedCompletionDate?: Date | string;
+  /** Year a completed residence was built (only kept while `completed`). */
+  yearBuilt?: number | string | null;
   amenities?: string[];
   website?: string;
   contact?: { name?: string; email?: string; phone?: string };
@@ -112,6 +114,10 @@ export const createDevelopment = async (
   const ownerType: 'user' | 'agency' = agencyId ? 'agency' : 'user';
   const slug = await generateUniqueDevelopmentSlug(input.name);
 
+  const timeline = timelineFor(input.constructionStatus ?? 'planned', {
+    expectedCompletionDate: input.expectedCompletionDate ? new Date(input.expectedCompletionDate) : undefined,
+    yearBuilt: normalizeYearBuilt(input.yearBuilt),
+  });
   const development = await Development.create({
     ownerId: user._id,
     ownerType,
@@ -127,9 +133,7 @@ export const createDevelopment = async (
     lng: input.lng,
     category: input.category,
     constructionStatus: input.constructionStatus ?? 'planned',
-    expectedCompletionDate: input.expectedCompletionDate
-      ? new Date(input.expectedCompletionDate)
-      : undefined,
+    ...timeline,
     amenities: normalizeAmenities(input.amenities),
     website: input.website,
     contact: normalizeContact(input.contact),
@@ -205,6 +209,7 @@ const EDITABLE_FIELDS: (keyof CreateDevelopmentInput)[] = [
   'category',
   'constructionStatus',
   'expectedCompletionDate',
+  'yearBuilt',
   'amenities',
   'website',
   'contact',
@@ -238,6 +243,10 @@ export const updateDevelopment = async (
       development.expectedCompletionDate = date;
       continue;
     }
+    if (key === 'yearBuilt') {
+      development.yearBuilt = normalizeYearBuilt(value);
+      continue;
+    }
     if ((key === 'name' || key === 'country' || key === 'city') && !text(value)) {
       throw new ValidationError(`${key} is required`);
     }
@@ -258,6 +267,9 @@ export const updateDevelopment = async (
     }
     (development as unknown as Record<string, unknown>)[key] = typeof value === 'string' ? value.trim() : value;
   }
+  const timeline = timelineFor(development.constructionStatus, development);
+  development.expectedCompletionDate = timeline.expectedCompletionDate;
+  development.yearBuilt = timeline.yearBuilt;
   await development.save();
   return development;
 };
@@ -316,6 +328,33 @@ interface IDevelopmentStats {
 }
 
 /** A client-input error that controllers map to HTTP 400. */
+export const MIN_YEAR_BUILT = 1800;
+
+/** A whole year between 1800 and this year; empty clears it. */
+export function normalizeYearBuilt(value: unknown): number | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  const year = Number(value);
+  const max = new Date().getFullYear();
+  if (!Number.isInteger(year) || year < MIN_YEAR_BUILT || year > max) {
+    throw new ValidationError(`yearBuilt must be a year between ${MIN_YEAR_BUILT} and ${max}`);
+  }
+  return year;
+}
+
+/**
+ * A finished residence has a year it was built and no expected completion;
+ * one still in progress has the opposite. Whichever does not apply is dropped,
+ * so the public page never shows "expected completion" for a built residence.
+ */
+export function timelineFor(
+  status: DevelopmentConstructionStatus,
+  values: { expectedCompletionDate?: Date; yearBuilt?: number }
+): { expectedCompletionDate?: Date; yearBuilt?: number } {
+  return status === 'completed'
+    ? { expectedCompletionDate: undefined, yearBuilt: values.yearBuilt }
+    : { expectedCompletionDate: values.expectedCompletionDate, yearBuilt: undefined };
+}
+
 export const MAX_AMENITIES = 40;
 const AMENITY_MAX_LENGTH = 60;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

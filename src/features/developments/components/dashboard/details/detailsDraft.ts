@@ -1,5 +1,6 @@
 import type { Development, UpdateDevelopmentPayload } from '../../../types';
 import type { DetailsFormValues } from '../../../validation/developmentValidation';
+import { formatCoordinate } from '../../../utils/format';
 
 /** Everything the "Residence details" form edits, as text the inputs hold. */
 export interface DetailsDraft extends DetailsFormValues {
@@ -9,7 +10,6 @@ export interface DetailsDraft extends DetailsFormValues {
   constructionStatus: string;
   expectedCompletionDate: string;
   contactName: string;
-  contactPhone: string;
   amenities: string[];
 }
 
@@ -22,11 +22,12 @@ export const toDraft = (d: Development): DetailsDraft => ({
   city: d.city,
   municipality: str(d.municipality),
   address: str(d.address),
-  lat: str(d.lat),
-  lng: str(d.lng),
+  lat: formatCoordinate(d.lat),
+  lng: formatCoordinate(d.lng),
   category: d.category,
   constructionStatus: d.constructionStatus,
   expectedCompletionDate: d.expectedCompletionDate ? d.expectedCompletionDate.slice(0, 10) : '',
+  yearBuilt: str(d.yearBuilt),
   website: str(d.website),
   contactName: str(d.contact?.name),
   contactEmail: str(d.contact?.email),
@@ -56,6 +57,7 @@ export const changedFields = (draft: DetailsDraft, d: Development): UpdateDevelo
     out.lat = toCoordinate(draft.lat);
     out.lng = toCoordinate(draft.lng);
   }
+  if (draft.yearBuilt.trim() !== before.yearBuilt) out.yearBuilt = draft.yearBuilt.trim() ? Number(draft.yearBuilt) : null;
   if (draft.amenities.join('\n') !== before.amenities.join('\n')) out.amenities = draft.amenities;
   const contact = {
     name: draft.contactName.trim(),

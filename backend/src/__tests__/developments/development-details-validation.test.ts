@@ -1,4 +1,4 @@
-import { normalizeAmenities, normalizeContact, MAX_AMENITIES } from '../../services/developments/developmentService';
+import { normalizeAmenities, normalizeContact, normalizeYearBuilt, timelineFor, MAX_AMENITIES } from '../../services/developments/developmentService';
 
 describe('development details validation', () => {
   it('trims, drops blanks and de-duplicates amenities case-insensitively', () => {
@@ -17,5 +17,19 @@ describe('development details validation', () => {
     expect(normalizeContact({ name: '', email: '', phone: '' })).toBeUndefined();
     expect(() => normalizeContact({ email: 'not-an-email' })).toThrow(/valid email/);
     expect(() => normalizeContact(['x'])).toThrow('contact must be an object');
+  });
+
+  it('accepts a past build year and rejects future or malformed ones', () => {
+    expect(normalizeYearBuilt('2019')).toBe(2019);
+    expect(normalizeYearBuilt('')).toBeUndefined();
+    expect(() => normalizeYearBuilt(new Date().getFullYear() + 1)).toThrow(/yearBuilt/);
+    expect(() => normalizeYearBuilt(2019.5)).toThrow(/yearBuilt/);
+    expect(() => normalizeYearBuilt(1700)).toThrow(/yearBuilt/);
+  });
+
+  it('keeps the build year only when completed, and the expected date only before that', () => {
+    const values = { expectedCompletionDate: new Date('2027-06-30'), yearBuilt: 2019 };
+    expect(timelineFor('completed', values)).toEqual({ expectedCompletionDate: undefined, yearBuilt: 2019 });
+    expect(timelineFor('under_construction', values)).toEqual({ expectedCompletionDate: values.expectedCompletionDate, yearBuilt: undefined });
   });
 });

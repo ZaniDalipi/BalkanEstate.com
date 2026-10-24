@@ -2,7 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Input } from '@/src/shared/components/ui/Input';
 import { FormSelect } from '../../shared/FormSelect';
+import { formatCoordinate } from '../../../utils/format';
+import { LocationPinMap } from './LocationPinMap';
 import { useLocationFields, type LocationValue } from './useLocationFields';
+
+/** Tidy a typed coordinate to the app's 6 decimals once the field is left. */
+const tidy = (v: string) => (v.trim() && Number.isFinite(Number(v)) ? formatCoordinate(Number(v)) : v);
 
 type LocationErrorKey = 'country' | 'city' | 'lat' | 'lng';
 
@@ -68,25 +73,28 @@ export const LocationFields: React.FC<LocationFieldsProps> = ({ value, onChange,
             label={t('details.lat', 'Latitude')}
             value={value.lat}
             onChange={(e) => onChange({ lat: e.target.value })}
+            onBlur={() => onChange({ lat: tidy(value.lat) })}
             error={errors.lat}
             inputMode="decimal"
-            placeholder="41.3275"
+            placeholder="41.327500"
             disabled={disabled}
           />
           <Input
             label={t('details.lng', 'Longitude')}
             value={value.lng}
             onChange={(e) => onChange({ lng: e.target.value })}
+            onBlur={() => onChange({ lng: tidy(value.lng) })}
             error={errors.lng}
             inputMode="decimal"
-            placeholder="19.8187"
+            placeholder="19.818700"
             disabled={disabled}
           />
           <p className="text-sm text-slate-600 sm:col-span-2">
-            {t('details.coordinatesHelper', 'Filled in from the city. Fine-tune them to place the pin on the map exactly.')}
+            {t('details.coordinatesHelper', 'Filled in from the city. Drag the pin on the map, or type them, to place the residence exactly.')}
           </p>
         </div>
       )}
+      {detailed && <LocationPinMap value={value} onChange={onChange} disabled={disabled} />}
     </div>
   );
 };

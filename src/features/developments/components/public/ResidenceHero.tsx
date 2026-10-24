@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MapPin, Globe, ArrowDown, CalendarClock } from 'lucide-react';
 import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
+import { residenceTimeline } from '../../utils/timeline';
 import type { Development } from '../../types';
 
 interface ResidenceHeroProps {
@@ -19,12 +20,11 @@ interface ResidenceHeroProps {
  */
 export const ResidenceHero: React.FC<ResidenceHeroProps> = ({ development, onViewUnits }) => {
   const { t, i18n } = useTranslation('developments');
-  const { coverImage, name, city, country, address, category, constructionStatus, website, expectedCompletionDate } =
-    development;
+  const { coverImage, name, city, country, address, category, constructionStatus, website } = development;
 
-  const completion = expectedCompletionDate
-    ? new Date(expectedCompletionDate).toLocaleDateString(i18n.language || 'en', { month: 'short', year: 'numeric' })
-    : null;
+  const timeline = residenceTimeline(development, i18n.language, 'short');
+  const completion =
+    timeline?.kind === 'built' ? t('detail.builtIn', { year: timeline.year, defaultValue: 'Built {{year}}' }) : timeline?.date ?? null;
 
   const Chip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">

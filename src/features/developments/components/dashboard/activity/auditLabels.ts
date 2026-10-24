@@ -1,5 +1,6 @@
 import type { TFunction } from 'i18next';
 import type { AuditEntry } from '../../../types';
+import { formatNumber } from '../../../utils/format';
 
 /**
  * English defaults for every audit action the backend records
@@ -78,9 +79,9 @@ const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 
 const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
 /** A short, simple detail line from an entry's metadata, or null when there is nothing simple to say. */
-export function entryDetail(t: TFunction, entry: AuditEntry, locale = 'en'): string | null {
+export function entryDetail(t: TFunction, entry: AuditEntry): string | null {
   const m = isObj(entry.metadata) ? entry.metadata : {};
-  const fmt = (n: number) => n.toLocaleString(locale);
+  const fmt = formatNumber;
   const gallery = isObj(m.gallery) ? m.gallery : null;
   if (gallery && num(gallery.added)) return String(t('activity.detail.photosAdded', 'Photos added: {{n}}', { n: num(gallery.added) }));
   if (gallery && num(gallery.removed)) return String(t('activity.detail.photoRemoved', 'Photo removed'));

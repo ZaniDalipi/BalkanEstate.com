@@ -48,6 +48,8 @@ export interface IDevelopment extends Document {
   category: DevelopmentCategory;
   constructionStatus: DevelopmentConstructionStatus;
   expectedCompletionDate?: Date;
+  /** Year a completed residence was built. */
+  yearBuilt?: number;
   amenities: string[];
   website?: string;
   contact?: IDevelopmentContact;
@@ -132,6 +134,7 @@ const DevelopmentSchema: Schema = new Schema(
       index: true,
     },
     expectedCompletionDate: { type: Date },
+    yearBuilt: { type: Number, min: 1800 },
     amenities: {
       type: [String],
       default: [],

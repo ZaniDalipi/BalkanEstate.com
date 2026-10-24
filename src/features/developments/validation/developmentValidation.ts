@@ -6,6 +6,7 @@
  * it — no English leaks into the UI layer (see CLAUDE.md → i18n, validation).
  * Validate at the form-submit boundary only.
  */
+import { validateFullPhone } from '@/src/shared/components/ui/PhoneInput';
 import { DEVELOPMENT_CATEGORIES, type CreateDevelopmentPayload } from '../types';
 
 export interface FieldResult {
@@ -86,6 +87,22 @@ export const validateCoordinate = (value: string, max: 90 | 180): FieldResult =>
   return Number.isFinite(n) && Math.abs(n) <= max ? { isValid: true } : { isValid: false, errorKey: max === 90 ? 'validation.latInvalid' : 'validation.lngInvalid' };
 };
 
+export const MIN_YEAR_BUILT = 1800;
+
+/** Empty is allowed; otherwise a whole year from 1800 up to this year. */
+export const validateYearBuilt = (value: string): FieldResult => {
+  const v = (value ?? '').trim();
+  if (!v) return { isValid: true };
+  const year = Number(v);
+  return Number.isInteger(year) && year >= MIN_YEAR_BUILT && year <= new Date().getFullYear()
+    ? { isValid: true }
+    : { isValid: false, errorKey: 'validation.yearBuiltInvalid' };
+};
+
+/** Empty is allowed; otherwise the app's phone rule (6–12 digits after the dial code). */
+export const validatePhone = (value: string): FieldResult =>
+  validateFullPhone(value ?? '', false) ? { isValid: false, errorKey: 'validation.phoneInvalid' } : { isValid: true };
+
 /** The residence details form, as typed by the user (all text). */
 export interface DetailsFormValues {
   name: string;
@@ -96,6 +113,8 @@ export interface DetailsFormValues {
   contactEmail: string;
   lat: string;
   lng: string;
+  yearBuilt: string;
+  contactPhone: string;
 }
 
 export type DetailsErrors = Partial<Record<keyof DetailsFormValues, string>>;
@@ -108,6 +127,8 @@ export const validateDevelopmentDetails = (v: DetailsFormValues): DetailsErrors 
     ['contactEmail', validateEmail(v.contactEmail)],
     ['lat', validateCoordinate(v.lat, 90)],
     ['lng', validateCoordinate(v.lng, 180)],
+    ['yearBuilt', validateYearBuilt(v.yearBuilt)],
+    ['contactPhone', validatePhone(v.contactPhone)],
   ];
   for (const [key, result] of checks) if (!result.isValid) errors[key] = result.errorKey;
   return errors;

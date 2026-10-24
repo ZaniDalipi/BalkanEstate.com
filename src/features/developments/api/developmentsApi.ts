@@ -30,6 +30,7 @@ import type {
   FollowPreferences,
   FollowFilters,
   NearbySuggestion,
+  ListingResidence,
   ControllableListing,
   DashboardUnit,
   UnitListQuery,
@@ -443,15 +444,22 @@ export const getNearbyDevelopments = (params: {
   country?: string;
   city?: string;
   limit?: number;
+  /** The listing being edited: its current attachment comes back per residence. */
+  listingId?: string;
 }): Promise<{ suggestions: NearbySuggestion[] }> => {
   const qs = new URLSearchParams({ lat: String(params.lat), lng: String(params.lng) });
   if (params.country) qs.set('country', params.country);
   if (params.city) qs.set('city', params.city);
   if (params.limit) qs.set('limit', String(params.limit));
+  if (params.listingId) qs.set('listingId', params.listingId);
   return apiRequest<{ suggestions: NearbySuggestion[] }>(`${PUBLIC}/nearby?${qs.toString()}`, {
     requiresAuth: true,
   });
 };
+
+/** The published residence (and apartment) a listing is attached to, or null. */
+export const getListingResidence = (listingId: string): Promise<{ residence: ListingResidence | null }> =>
+  apiRequest<{ residence: ListingResidence | null }>(`${PUBLIC}/for-listing/${encodeURIComponent(listingId)}`);
 
 export const attachListingToDevelopment = (
   developmentId: string,

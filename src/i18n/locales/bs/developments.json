@@ -81,7 +81,9 @@
     "published": "Published",
     "draft": "Draft",
     "completion": "Očekivani završetak",
-    "location": "Lokacija"
+    "location": "Lokacija",
+    "yearBuilt": "Godina izgradnje",
+    "builtIn": "Izgrađeno {{year}}."
   },
   "building": {
     "add": "Add building",
@@ -146,7 +148,9 @@
     "websiteInvalid": "Unesite punu web adresu koja počinje sa http:// ili https://.",
     "emailInvalid": "Unesite ispravnu email adresu.",
     "latInvalid": "Geografska širina mora biti broj između -90 i 90.",
-    "lngInvalid": "Geografska dužina mora biti broj između -180 i 180."
+    "lngInvalid": "Geografska dužina mora biti broj između -180 i 180.",
+    "yearBuiltInvalid": "Unesite godinu između 1800. i tekuće godine.",
+    "phoneInvalid": "Unesite ispravan broj telefona (6–12 cifara)."
   },
   "cover": {
     "heading": "Cover image",
@@ -253,7 +257,14 @@
     "saveFirst": "Prvo sačuvajte oglas, zatim ga povežite s rezidencijom.",
     "none": "Nema rezidencija u blizini ove lokacije.",
     "error": "Nije moguće učitati obližnje rezidencije.",
-    "viewResidence": "Pogledaj rezidenciju"
+    "viewResidence": "Pogledaj rezidenciju",
+    "onApartment": "Na stanu {{unit}} · {{building}}",
+    "residenceOnly": "Povezano s rezidencijom, još ne sa stanom",
+    "changeApartment": "Promijeni stan",
+    "chooseApartment": "Odaberi stan",
+    "linkResidenceOnly": "Poveži samo s rezidencijom",
+    "chooseHint": "Odaberite stan kako bi ga kupci pronašli na njemu u pregledniku rezidencije.",
+    "attachAnyway": "Ipak priloži"
   },
   "filters": {
     "heading": "Pronađite svoj dom",
@@ -896,7 +907,7 @@
     "municipality": "Općina / područje",
     "lat": "Geografska širina",
     "lng": "Geografska dužina",
-    "coordinatesHelper": "Popunjeno prema gradu. Precizirajte da tačno postavite oznaku na mapi.",
+    "coordinatesHelper": "Popunjeno prema gradu. Prevucite oznaku na mapi ili ih upišite da tačno postavite rezidenciju.",
     "amenities": "Sadržaji",
     "amenityPlaceholder": "npr. Podzemna garaža",
     "addAmenity": "Dodaj",
@@ -912,6 +923,15 @@
     "discard": "Odbaci",
     "save": "Sačuvaj detalje",
     "saving": "Čuvanje…",
-    "saved": "Detalji rezidencije su ažurirani."
+    "saved": "Detalji rezidencije su ažurirani.",
+    "yearBuilt": "Godina izgradnje",
+    "pinTitle": "Označite rezidenciju na mapi",
+    "pinNeedsCity": "Odaberite grad da postavite oznaku na mapi."
+  },
+  "listingResidence": {
+    "partOf": "Dio rezidencije {{name}}",
+    "apartment": "Stan {{number}}",
+    "viewApartment": "Pogledajte u rezidenciji",
+    "viewResidence": "Pogledaj rezidenciju"
   }
 }

@@ -6,6 +6,7 @@ import {
   getPublicBySlug,
   listPublicUnits,
   getPublicUnit,
+  getResidenceForListing,
 } from '../controllers/developmentController';
 import { getPublishedScene, listPublicViews } from '../controllers/developmentSceneController';
 import { sendUnitInquiry } from '../controllers/developmentInquiryController';
@@ -43,6 +44,7 @@ const unitInquiryRateLimiter = rateLimit({
 router.get('/', listPublic);
 router.get('/following', protect, listFollowing);
 router.get('/nearby', protect, nearbyDevelopments);
+router.get('/for-listing/:listingId', getResidenceForListing);
 
 router.get('/:slug/scene', getPublishedScene);
 router.get('/:slug/views', listPublicViews);

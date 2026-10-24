@@ -81,7 +81,9 @@
     "published": "Published",
     "draft": "Draft",
     "completion": "Expected completion",
-    "location": "Location"
+    "location": "Location",
+    "yearBuilt": "Year built",
+    "builtIn": "Built {{year}}"
   },
   "building": {
     "add": "Add building",
@@ -146,7 +148,9 @@
     "websiteInvalid": "Enter a full web address starting with http:// or https://.",
     "emailInvalid": "Enter a valid email address.",
     "latInvalid": "Latitude must be a number between -90 and 90.",
-    "lngInvalid": "Longitude must be a number between -180 and 180."
+    "lngInvalid": "Longitude must be a number between -180 and 180.",
+    "yearBuiltInvalid": "Enter a year between 1800 and this year.",
+    "phoneInvalid": "Enter a valid phone number (6–12 digits)."
   },
   "cover": {
     "heading": "Cover image",
@@ -423,7 +427,14 @@
     "saveFirst": "Save the listing first, then attach it to a residence.",
     "none": "No residences found near this location.",
     "error": "Could not load nearby residences.",
-    "viewResidence": "View residence"
+    "viewResidence": "View residence",
+    "onApartment": "On apartment {{unit}} · {{building}}",
+    "residenceOnly": "Linked to the residence, not to an apartment yet",
+    "changeApartment": "Change apartment",
+    "chooseApartment": "Choose apartment",
+    "linkResidenceOnly": "Link to the residence only",
+    "chooseHint": "Choose the apartment so buyers find this listing on it in the residence explorer.",
+    "attachAnyway": "Attach anyway"
   },
   "editor": {
     "actions": {
@@ -890,7 +901,7 @@
     "municipality": "Municipality / area",
     "lat": "Latitude",
     "lng": "Longitude",
-    "coordinatesHelper": "Filled in from the city. Fine-tune them to place the pin on the map exactly.",
+    "coordinatesHelper": "Filled in from the city. Drag the pin on the map, or type them, to place the residence exactly.",
     "amenities": "Amenities",
     "amenityPlaceholder": "e.g. Underground parking",
     "addAmenity": "Add",
@@ -906,6 +917,15 @@
     "discard": "Discard",
     "save": "Save details",
     "saving": "Saving…",
-    "saved": "The residence details were updated."
+    "saved": "The residence details were updated.",
+    "yearBuilt": "Year built",
+    "pinTitle": "Pin the residence on the map",
+    "pinNeedsCity": "Choose a city to place the pin on the map."
+  },
+  "listingResidence": {
+    "partOf": "Part of {{name}}",
+    "apartment": "Apartment {{number}}",
+    "viewApartment": "See it in the residence",
+    "viewResidence": "View residence"
   }
 }

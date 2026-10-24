@@ -317,11 +317,31 @@ shown to buyers*.
 
 **Edit the residence (name, location, amenities, contact):** **Details &
 settings** tab → *Residence details*. Country and city use the same dropdowns as
-the create form; picking a city fills the coordinates, which you can then
-fine-tune. Only changed fields are sent, and the server re-validates them
-(website must be http(s); contact email must be valid; at most 40 amenities of
-60 characters each). Owners and admins (`project.edit`) can save; others see the
-form read-only.
+the create form; picking a city fills the coordinates, and the map below them
+(the listing form's location picker) lets you drag or click the pin. Coordinates
+are shown with 6 decimals, prices as `136.000 €` and areas as `82 m²`, the same
+as on listing pages (`utils/format.ts`). The phone uses the app's phone input
+(dial code preselected from the country). Only changed fields are sent, and the
+server re-validates them (website must be http(s); contact email must be valid;
+at most 40 amenities of 60 characters each). Owners and admins (`project.edit`)
+can save; others see the form read-only.
+
+**Completed residences:** set the stage to *Completed* and the form asks for
+the **Year built** instead of an expected completion date. The server keeps
+only the one that fits the stage (`timelineFor`), and the public page shows
+"Year built 2019" / "Built 2019" instead of "Expected completion".
+
+**Attach a listing while creating or editing it:** after the listing is saved,
+the location step shows nearby residences. **Choose apartment** puts the listing
+on an apartment (it then shows on that apartment in the explorer); **Link to the
+residence only** links it without an apartment. The panel shows where the
+listing is attached today ("On apartment T1203 · Plaza Tower"), also after a
+reload. If you can't manage the residence, **Request access** asks its owner.
+
+**"Part of <residence>" on listing pages:** a listing attached to a published
+residence shows a banner linking to its apartment in the explorer
+(`GET /api/developments/for-listing/:listingId`; nothing for drafts, hidden
+apartments or unpublished residences).
 
 **Turn off inquiries for units without a listing:** **Details & settings** tab.
 

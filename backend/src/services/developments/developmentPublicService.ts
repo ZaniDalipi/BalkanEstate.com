@@ -294,3 +294,41 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
     })),
   };
 };
+
+export interface ListingResidence {
+  name: string;
+  slug: string;
+  city: string;
+  /** Present when the listing sits on a visible apartment. */
+  unit?: { id: string; unitNumber: string; buildingName?: string; floorLabel?: string };
+}
+
+/**
+ * "Part of <residence>" for a listing's detail page: the published residence
+ * the listing is attached to and, when visible, its apartment. Null for a
+ * draft listing, an unpublished or deleted residence, or no attachment.
+ */
+export const getListingResidence = async (rawListingId: unknown): Promise<ListingResidence | null> => {
+  const listingId = toObjectId(rawListingId);
+  if (!listingId) return null;
+  const listing = await Property.findById(listingId).select('status developmentId unitId').lean();
+  if (!listing?.developmentId || listing.status === 'draft') return null;
+  const development = await Development.findOne({ _id: listing.developmentId, status: 'published', deletedAt: LIVE })
+    .select('name slug city')
+    .lean();
+  if (!development) return null;
+  const residence: ListingResidence = { name: development.name, slug: development.slug, city: development.city };
+  if (listing.unitId) {
+    const unit = await DevelopmentUnit.findOne({ _id: listing.unitId, ...visibleUnitFilter(development._id as mongoose.Types.ObjectId) })
+      .select('unitNumber buildingId floorId')
+      .lean();
+    if (unit) {
+      const [building, floor] = await Promise.all([
+        DevelopmentBuilding.findById(unit.buildingId).select('name').lean(),
+        unit.floorId ? DevelopmentFloor.findById(unit.floorId).select('label').lean() : null,
+      ]);
+      residence.unit = { id: encodeId(String(unit._id)), unitNumber: unit.unitNumber, buildingName: building?.name, floorLabel: floor?.label };
+    }
+  }
+  return residence;
+};

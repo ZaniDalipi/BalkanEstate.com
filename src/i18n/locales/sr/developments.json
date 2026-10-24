@@ -81,7 +81,9 @@
     "published": "Published",
     "draft": "Draft",
     "completion": "Očekivani završetak",
-    "location": "Lokacija"
+    "location": "Lokacija",
+    "yearBuilt": "Година изградње",
+    "builtIn": "Изграђено {{year}}."
   },
   "building": {
     "add": "Add building",
@@ -146,7 +148,9 @@
     "websiteInvalid": "Унесите пуну веб адресу која почиње са http:// или https://.",
     "emailInvalid": "Унесите исправну имејл адресу.",
     "latInvalid": "Географска ширина мора бити број између -90 и 90.",
-    "lngInvalid": "Географска дужина мора бити број између -180 и 180."
+    "lngInvalid": "Географска дужина мора бити број између -180 и 180.",
+    "yearBuiltInvalid": "Унесите годину између 1800. и текуће године.",
+    "phoneInvalid": "Унесите исправан број телефона (6–12 цифара)."
   },
   "cover": {
     "heading": "Cover image",
@@ -253,7 +257,14 @@
     "saveFirst": "Prvo sačuvajte oglas, zatim ga povežite sa rezidencijom.",
     "none": "Nema rezidencija u blizini ove lokacije.",
     "error": "Nije moguće učitati obližnje rezidencije.",
-    "viewResidence": "Pogledaj rezidenciju"
+    "viewResidence": "Pogledaj rezidenciju",
+    "onApartment": "На стану {{unit}} · {{building}}",
+    "residenceOnly": "Повезано са резиденцијом, још не са станом",
+    "changeApartment": "Промени стан",
+    "chooseApartment": "Изабери стан",
+    "linkResidenceOnly": "Повежи само са резиденцијом",
+    "chooseHint": "Изаберите стан како би га купци пронашли на њему у прегледнику резиденције.",
+    "attachAnyway": "Ипак приложи"
   },
   "filters": {
     "heading": "Pronađite svoj dom",
@@ -896,7 +907,7 @@
     "municipality": "Општина / подручје",
     "lat": "Географска ширина",
     "lng": "Географска дужина",
-    "coordinatesHelper": "Попуњено према граду. Прецизирајте да тачно поставите ознаку на мапи.",
+    "coordinatesHelper": "Попуњено према граду. Превуците ознаку на мапи или их упишите да тачно поставите резиденцију.",
     "amenities": "Садржаји",
     "amenityPlaceholder": "нпр. Подземна гаража",
     "addAmenity": "Додај",
@@ -912,6 +923,15 @@
     "discard": "Одбаци",
     "save": "Сачувај детаље",
     "saving": "Чување…",
-    "saved": "Детаљи резиденције су ажурирани."
+    "saved": "Детаљи резиденције су ажурирани.",
+    "yearBuilt": "Година изградње",
+    "pinTitle": "Означите резиденцију на мапи",
+    "pinNeedsCity": "Изаберите град да поставите ознаку на мапи."
+  },
+  "listingResidence": {
+    "partOf": "Део резиденције {{name}}",
+    "apartment": "Стан {{number}}",
+    "viewApartment": "Погледајте у резиденцији",
+    "viewResidence": "Погледај резиденцију"
   }
 }

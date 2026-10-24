@@ -112,7 +112,7 @@ async function run(): Promise<void> {
         'Storage rooms',
       ],
       website: 'https://example.com/plaza',
-      contact: { name: 'Plaza Sales Office', email: 'sales@plaza-demo.example', phone: '+355 4 000 0000' },
+      contact: { name: 'Plaza Sales Office', email: 'sales@plaza-demo.example', phone: '+355692000000' },
       status: 'published',
       publishedAt: new Date(),
       stats: { buildings: 0, units: 0, available: 0 },

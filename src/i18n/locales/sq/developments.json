@@ -81,7 +81,9 @@
     "published": "Published",
     "draft": "Draft",
     "completion": "Përfundimi i pritur",
-    "location": "Vendndodhja"
+    "location": "Vendndodhja",
+    "yearBuilt": "Viti i ndërtimit",
+    "builtIn": "Ndërtuar më {{year}}"
   },
   "building": {
     "add": "Add building",
@@ -146,7 +148,9 @@
     "websiteInvalid": "Shkruani një adresë të plotë uebi që fillon me http:// ose https://.",
     "emailInvalid": "Shkruani një adresë email të vlefshme.",
     "latInvalid": "Gjerësia duhet të jetë numër midis -90 dhe 90.",
-    "lngInvalid": "Gjatësia duhet të jetë numër midis -180 dhe 180."
+    "lngInvalid": "Gjatësia duhet të jetë numër midis -180 dhe 180.",
+    "yearBuiltInvalid": "Shkruani një vit midis 1800 dhe vitit aktual.",
+    "phoneInvalid": "Shkruani një numër telefoni të vlefshëm (6–12 shifra)."
   },
   "cover": {
     "heading": "Cover image",
@@ -253,7 +257,14 @@
     "saveFirst": "Ruani fillimisht shpalljen, pastaj lidheni me një rezidencë.",
     "none": "Nuk u gjetën rezidenca pranë kësaj vendndodhjeje.",
     "error": "Nuk u ngarkuan dot rezidencat e afërta.",
-    "viewResidence": "Shiko rezidencën"
+    "viewResidence": "Shiko rezidencën",
+    "onApartment": "Në apartamentin {{unit}} · {{building}}",
+    "residenceOnly": "E lidhur me rezidencën, ende jo me një apartament",
+    "changeApartment": "Ndrysho apartamentin",
+    "chooseApartment": "Zgjidh apartamentin",
+    "linkResidenceOnly": "Lidhe vetëm me rezidencën",
+    "chooseHint": "Zgjidhni apartamentin që blerësit ta gjejnë këtë njoftim te ai në eksploruesin e rezidencës.",
+    "attachAnyway": "Bashkëngjite gjithsesi"
   },
   "filters": {
     "heading": "Gjeni shtëpinë tuaj",
@@ -890,7 +901,7 @@
     "municipality": "Komuna / zona",
     "lat": "Gjerësia gjeografike",
     "lng": "Gjatësia gjeografike",
-    "coordinatesHelper": "Plotësohen nga qyteti. Rregullojini për ta vendosur saktë pikën në hartë.",
+    "coordinatesHelper": "Plotësohen nga qyteti. Tërhiqni pikën në hartë ose shkruajini për ta vendosur saktë rezidencën.",
     "amenities": "Komoditetet",
     "amenityPlaceholder": "p.sh. Parkim nëntokësor",
     "addAmenity": "Shto",
@@ -906,6 +917,15 @@
     "discard": "Anulo",
     "save": "Ruaj detajet",
     "saving": "Duke ruajtur…",
-    "saved": "Detajet e rezidencës u përditësuan."
+    "saved": "Detajet e rezidencës u përditësuan.",
+    "yearBuilt": "Viti i ndërtimit",
+    "pinTitle": "Vendosni rezidencën në hartë",
+    "pinNeedsCity": "Zgjidhni një qytet për të vendosur pikën në hartë."
+  },
+  "listingResidence": {
+    "partOf": "Pjesë e {{name}}",
+    "apartment": "Apartamenti {{number}}",
+    "viewApartment": "Shiheni në rezidencë",
+    "viewResidence": "Shiko rezidencën"
   }
 }

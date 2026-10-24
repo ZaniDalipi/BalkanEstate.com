@@ -6,8 +6,8 @@ import { actionLabel, entryDetail } from './auditLabels';
 
 /** One audit entry: what happened, who did it, when, and a short detail. */
 export const ActivityEntryRow: React.FC<{ entry: AuditEntry }> = ({ entry }) => {
-  const { t, i18n } = useTranslation('developments');
-  const detail = entryDetail(t, entry, i18n?.language || 'en');
+  const { t } = useTranslation('developments');
+  const detail = entryDetail(t, entry);
   return (
     <li className="flex flex-col gap-1 p-3 sm:flex-row sm:items-start sm:gap-4">
       <div className="min-w-0 flex-1">

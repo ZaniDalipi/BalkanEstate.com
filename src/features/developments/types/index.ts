@@ -74,6 +74,8 @@ export interface Development {
   category: DevelopmentCategory;
   constructionStatus: DevelopmentConstructionStatus;
   expectedCompletionDate?: string;
+  /** Year a completed residence was built (only set while `completed`). */
+  yearBuilt?: number;
   amenities: string[];
   website?: string;
   contact?: DevelopmentContact;
@@ -183,6 +185,8 @@ export interface CreateDevelopmentPayload {
   constructionStatus?: DevelopmentConstructionStatus;
   /** ISO date (yyyy-mm-dd); an empty string clears it. */
   expectedCompletionDate?: string;
+  /** Year built, for a completed residence; `null` clears it. */
+  yearBuilt?: number | null;
   amenities?: string[];
   website?: string;
   agencyId?: string;
@@ -411,11 +415,25 @@ export interface DevelopmentFollow {
 
 // --- Listing-creation suggestions -----------------------------------------
 
+/** "Part of <residence>" on a listing's detail page. */
+export interface ListingResidence {
+  name: string;
+  slug: string;
+  city: string;
+  unit?: { id: string; unitNumber: string; buildingName?: string; floorLabel?: string };
+}
+
 export interface NearbySuggestion {
   development: Development;
   distanceM: number;
   matchScore: number;
   canAttach: boolean;
+  /**
+   * Where the listing asked about (`listingId`) is attached in this residence:
+   * `{}` = linked to the residence only, with `unitNumber` = on that apartment,
+   * `null`/absent = not attached here.
+   */
+  attachment?: { unitId?: string; unitNumber?: string; buildingName?: string } | null;
 }
 
 /** A listing the caller controls, for the scene editor's listing picker. */

@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Building2, CalendarClock, HardHat, MapPin, Layers } from 'lucide-react';
 import type { Development } from '../../types';
+import { residenceTimeline } from '../../utils/timeline';
 
 interface KeyFactsProps {
   development: Development;
@@ -32,12 +33,7 @@ const Fact: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactN
 export const KeyFacts: React.FC<KeyFactsProps> = ({ development, buildings }) => {
   const { t, i18n } = useTranslation('developments');
 
-  const completion = development.expectedCompletionDate
-    ? new Date(development.expectedCompletionDate).toLocaleDateString(i18n.language || 'en', {
-        month: 'long',
-        year: 'numeric',
-      })
-    : null;
+  const timeline = residenceTimeline(development, i18n.language);
 
   const location = [development.municipality, development.city, development.country].filter(Boolean).join(', ');
 
@@ -48,11 +44,11 @@ export const KeyFacts: React.FC<KeyFactsProps> = ({ development, buildings }) =>
         label={t('wizard.constructionStatus')}
         value={t(`construction.${development.constructionStatus}`)}
       />
-      {completion && (
+      {timeline && (
         <Fact
           icon={<CalendarClock className="h-4 w-4" aria-hidden="true" />}
-          label={t('detail.completion')}
-          value={completion}
+          label={timeline.kind === 'built' ? t('detail.yearBuilt', 'Year built') : t('detail.completion')}
+          value={timeline.kind === 'built' ? timeline.year : timeline.date}
         />
       )}
       <Fact

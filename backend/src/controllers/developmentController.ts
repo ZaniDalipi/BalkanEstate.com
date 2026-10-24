@@ -32,6 +32,7 @@ import { listAuditEntries } from '../services/developments/developmentAuditQuery
 import { deleteStructure, previewStructureDelete, type StructureKind } from '../services/developments/structureDeleteService';
 import {
   getPublicDevelopmentDetail,
+  getListingResidence,
   listPublicUnits as listPublicUnitsService,
   getPublicUnitDetail,
   toPublicDevelopment,
@@ -390,6 +391,15 @@ export const getPublicBySlug = async (req: Request, res: Response): Promise<void
     res.json(await getPublicDevelopmentDetail(req.params.slug));
   } catch (error) {
     sendServiceError(res, error, 'get public development');
+  }
+};
+
+/** GET /api/developments/for-listing/:listingId — the residence (and apartment) a listing belongs to, or null. */
+export const getResidenceForListing = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json({ residence: await getListingResidence(req.params.listingId) });
+  } catch (error) {
+    sendServiceError(res, error, 'get listing residence');
   }
 };
 

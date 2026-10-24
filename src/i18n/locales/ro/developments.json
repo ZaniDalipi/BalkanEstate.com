@@ -81,7 +81,9 @@
     "published": "Published",
     "draft": "Draft",
     "completion": "Finalizare estimată",
-    "location": "Locație"
+    "location": "Locație",
+    "yearBuilt": "Anul construcției",
+    "builtIn": "Construit în {{year}}"
   },
   "building": {
     "add": "Add building",
@@ -146,7 +148,9 @@
     "websiteInvalid": "Introduceți o adresă web completă care începe cu http:// sau https://.",
     "emailInvalid": "Introduceți o adresă de email validă.",
     "latInvalid": "Latitudinea trebuie să fie un număr între -90 și 90.",
-    "lngInvalid": "Longitudinea trebuie să fie un număr între -180 și 180."
+    "lngInvalid": "Longitudinea trebuie să fie un număr între -180 și 180.",
+    "yearBuiltInvalid": "Introduceți un an între 1800 și anul curent.",
+    "phoneInvalid": "Introduceți un număr de telefon valid (6–12 cifre)."
   },
   "cover": {
     "heading": "Cover image",
@@ -253,7 +257,14 @@
     "saveFirst": "Salvează mai întâi anunțul, apoi conectează-l la un ansamblu.",
     "none": "Nu s-au găsit ansambluri în apropierea acestei locații.",
     "error": "Nu s-au putut încărca ansamblurile din apropiere.",
-    "viewResidence": "Vezi ansamblul"
+    "viewResidence": "Vezi ansamblul",
+    "onApartment": "În apartamentul {{unit}} · {{building}}",
+    "residenceOnly": "Legat de rezidență, încă nu de un apartament",
+    "changeApartment": "Schimbă apartamentul",
+    "chooseApartment": "Alege apartamentul",
+    "linkResidenceOnly": "Leagă doar de rezidență",
+    "chooseHint": "Alegeți apartamentul ca cumpărătorii să găsească anunțul pe el în exploratorul rezidenței.",
+    "attachAnyway": "Atașează oricum"
   },
   "filters": {
     "heading": "Găsește-ți casa",
@@ -896,7 +907,7 @@
     "municipality": "Comună / zonă",
     "lat": "Latitudine",
     "lng": "Longitudine",
-    "coordinatesHelper": "Completate după oraș. Ajustați-le pentru a plasa exact marcajul pe hartă.",
+    "coordinatesHelper": "Completate după oraș. Trageți marcajul pe hartă sau introduceți-le pentru a plasa exact rezidența.",
     "amenities": "Facilități",
     "amenityPlaceholder": "ex. Parcare subterană",
     "addAmenity": "Adaugă",
@@ -912,6 +923,15 @@
     "discard": "Renunță",
     "save": "Salvează detaliile",
     "saving": "Se salvează…",
-    "saved": "Detaliile rezidenței au fost actualizate."
+    "saved": "Detaliile rezidenței au fost actualizate.",
+    "yearBuilt": "Anul construcției",
+    "pinTitle": "Fixați rezidența pe hartă",
+    "pinNeedsCity": "Alegeți un oraș pentru a plasa marcajul pe hartă."
+  },
+  "listingResidence": {
+    "partOf": "Parte din {{name}}",
+    "apartment": "Apartamentul {{number}}",
+    "viewApartment": "Vedeți-l în rezidență",
+    "viewResidence": "Vezi rezidența"
   }
 }
