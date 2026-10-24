@@ -343,6 +343,14 @@ residence shows a banner linking to its apartment in the explorer
 (`GET /api/developments/for-listing/:listingId`; nothing for drafts, hidden
 apartments or unpublished residences).
 
+**Add floors and units quickly:** Inventory → *Add buildings, floors and units*.
+The level starts at the next free one for the building and moves on after each
+add; leave the label empty and the floor is named for you ("Floor 4", "Ground
+floor" for 0, "Basement 1" for -1). Fill *To level* to add a whole range at once
+(existing levels are skipped). Unit numbers are suggested per floor ("401,
+402…", or continuing the floor's own pattern such as "T1205") and *How many*
+adds several in one go. The rules live in `utils/inventoryNaming.ts`.
+
 **Turn off inquiries for units without a listing:** **Details & settings** tab.
 
 **Add apartment photos or remove a floor plan:** Inventory → **Edit unit** →

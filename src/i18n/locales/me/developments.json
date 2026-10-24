@@ -94,7 +94,17 @@
     "add": "Add floor",
     "label": "Floor label",
     "level": "Level",
-    "none": "No floors yet."
+    "none": "No floors yet.",
+    "ground": "Prizemlje",
+    "named": "Sprat {{level}}",
+    "basement": "Podrum {{n}}",
+    "toLevel": "Do nivoa",
+    "optional": "opciono",
+    "pickBuilding": "Odaberite zgradu.",
+    "exists": "Taj sprat već postoji u ovoj zgradi.",
+    "rangeHint": "Dodaje od {{first}} do {{last}} — ukupno {{n}}. Postojeći spratovi se preskaču.",
+    "autoNameHint": "Zvaće se „{{name}}”.",
+    "addRange": "Dodaj spratove ({{n}})"
   },
   "unit": {
     "add": "Add unit",
@@ -113,7 +123,10 @@
     "viewDetails": "View details",
     "orientation": "Orientation",
     "requestInfo": "Request info",
-    "connectedListings": "Connected listings"
+    "connectedListings": "Connected listings",
+    "howMany": "Koliko",
+    "addMany": "Dodaj jedinice ({{n}})",
+    "numbersHint": "Dodaje {{numbers}}."
   },
   "attach": {
     "title": "Attach existing listing",

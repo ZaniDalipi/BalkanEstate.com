@@ -94,7 +94,17 @@
     "add": "Add floor",
     "label": "Floor label",
     "level": "Level",
-    "none": "No floors yet."
+    "none": "No floors yet.",
+    "ground": "Parter",
+    "named": "Etajul {{level}}",
+    "basement": "Subsol {{n}}",
+    "toLevel": "Până la nivelul",
+    "optional": "opțional",
+    "pickBuilding": "Alegeți o clădire.",
+    "exists": "Acest etaj există deja în această clădire.",
+    "rangeHint": "Adaugă de la {{first}} la {{last}} — {{n}} în total. Etajele existente sunt omise.",
+    "autoNameHint": "Se va numi „{{name}}”.",
+    "addRange": "Adaugă etaje ({{n}})"
   },
   "unit": {
     "add": "Add unit",
@@ -113,7 +123,10 @@
     "viewDetails": "View details",
     "orientation": "Orientation",
     "requestInfo": "Request info",
-    "connectedListings": "Connected listings"
+    "connectedListings": "Connected listings",
+    "howMany": "Câte",
+    "addMany": "Adaugă unități ({{n}})",
+    "numbersHint": "Adaugă {{numbers}}."
   },
   "attach": {
     "title": "Attach existing listing",

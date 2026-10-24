@@ -94,7 +94,17 @@
     "add": "Add floor",
     "label": "Floor label",
     "level": "Level",
-    "none": "No floors yet."
+    "none": "No floors yet.",
+    "ground": "Приземље",
+    "named": "Спрат {{level}}",
+    "basement": "Подрум {{n}}",
+    "toLevel": "До нивоа",
+    "optional": "опционо",
+    "pickBuilding": "Изаберите зграду.",
+    "exists": "Тај спрат већ постоји у овој згради.",
+    "rangeHint": "Додаје од {{first}} до {{last}} — укупно {{n}}. Постојећи спратови се прескачу.",
+    "autoNameHint": "Зваће се „{{name}}”.",
+    "addRange": "Додај спратове ({{n}})"
   },
   "unit": {
     "add": "Add unit",
@@ -113,7 +123,10 @@
     "viewDetails": "View details",
     "orientation": "Orientation",
     "requestInfo": "Request info",
-    "connectedListings": "Connected listings"
+    "connectedListings": "Connected listings",
+    "howMany": "Колико",
+    "addMany": "Додај јединице ({{n}})",
+    "numbersHint": "Додаје {{numbers}}."
   },
   "attach": {
     "title": "Attach existing listing",

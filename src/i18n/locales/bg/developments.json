@@ -94,7 +94,17 @@
     "add": "Add floor",
     "label": "Floor label",
     "level": "Level",
-    "none": "No floors yet."
+    "none": "No floors yet.",
+    "ground": "Партер",
+    "named": "Етаж {{level}}",
+    "basement": "Сутерен {{n}}",
+    "toLevel": "До ниво",
+    "optional": "по избор",
+    "pickBuilding": "Изберете сграда.",
+    "exists": "Този етаж вече съществува в тази сграда.",
+    "rangeHint": "Добавя от {{first}} до {{last}} — общо {{n}}. Съществуващите етажи се пропускат.",
+    "autoNameHint": "Ще се казва „{{name}}“.",
+    "addRange": "Добави етажи ({{n}})"
   },
   "unit": {
     "add": "Add unit",
@@ -113,7 +123,10 @@
     "viewDetails": "View details",
     "orientation": "Orientation",
     "requestInfo": "Request info",
-    "connectedListings": "Connected listings"
+    "connectedListings": "Connected listings",
+    "howMany": "Колко",
+    "addMany": "Добави обекти ({{n}})",
+    "numbersHint": "Добавя {{numbers}}."
   },
   "attach": {
     "title": "Attach existing listing",

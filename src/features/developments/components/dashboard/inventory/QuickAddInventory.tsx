@@ -2,47 +2,30 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
-import { cn } from '@/src/lib/utils';
 import { useInventoryMutations, useDevelopmentStructure } from '../../../hooks';
-import { UNIT_FEATURES } from '../../../types';
+import { AddFloorsForm } from './AddFloorsForm';
+import { AddUnitsForm } from './AddUnitsForm';
 
 /**
- * Compact inventory builder: add a building, a floor (within a building), and a
- * unit (within a building + floor). Deliberately minimal — a full guided wizard
- * can replace this later; the shape of the API calls stays the same.
+ * Inventory builder: add buildings, then floors (one or a range, named for
+ * you), then units (numbered for you, one or several at a time).
  */
 export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ developmentId }) => {
   const { t } = useTranslation('developments');
   const { buildings, floors } = useDevelopmentStructure(developmentId);
-  const { createBuilding, createFloor, createUnit, isCreatingBuilding, isCreatingFloor, isCreatingUnit } =
-    useInventoryMutations(developmentId);
-
+  const { createBuilding, createFloor, createUnit, isCreatingBuilding, isCreatingFloor, isCreatingUnit } = useInventoryMutations(developmentId);
   const [buildingName, setBuildingName] = useState('');
-  const [floorBuildingId, setFloorBuildingId] = useState('');
-  const [floorLabel, setFloorLabel] = useState('');
-  const [floorLevel, setFloorLevel] = useState('1');
-  const [unitBuildingId, setUnitBuildingId] = useState('');
-  const [unitFloorId, setUnitFloorId] = useState('');
-  const [unitNumber, setUnitNumber] = useState('');
-  const [unitType, setUnitType] = useState('apartment');
-  const [unitFeatures, setUnitFeatures] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const toggleFeature = (f: string) =>
-    setUnitFeatures((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
-
-  const selectClass =
-    'min-h-[40px] w-full rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring';
-  const floorsForUnitBuilding = floors.filter((f) => f.buildingId === unitBuildingId);
-
-  const run = async (fn: () => Promise<unknown>, reset: () => void) => {
+  const onAddBuilding = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!buildingName.trim()) return;
     setError(null);
     try {
-      await fn();
-      reset();
-    } catch (e) {
-      const msg = (e as { message?: string })?.message;
-      setError(msg || t('errors.generic'));
+      await createBuilding({ name: buildingName.trim() });
+      setBuildingName('');
+    } catch (err) {
+      setError((err as { message?: string })?.message || t('errors.generic'));
     }
   };
 
@@ -53,16 +36,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
           {error}
         </div>
       )}
-
-      {/* Building */}
-      <form
-        className="flex flex-col gap-2 sm:flex-row sm:items-end"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!buildingName.trim()) return;
-          run(() => createBuilding({ name: buildingName.trim() }), () => setBuildingName(''));
-        }}
-      >
+      <form className="flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={onAddBuilding}>
         <div className="flex-1">
           <Input label={t('building.name')} value={buildingName} onChange={(e) => setBuildingName(e.target.value)} />
         </div>
@@ -70,139 +44,11 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
           {t('building.add')}
         </Button>
       </form>
-
-      {/* Floor */}
       {buildings.length > 0 && (
-        <form
-          className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!floorBuildingId || !floorLabel.trim()) return;
-            run(
-              () =>
-                createFloor({
-                  buildingId: floorBuildingId,
-                  label: floorLabel.trim(),
-                  level: Number(floorLevel) || 0,
-                }),
-              () => {
-                setFloorLabel('');
-              }
-            );
-          }}
-        >
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">{t('detail.buildings')}</span>
-            <select className={selectClass} value={floorBuildingId} onChange={(e) => setFloorBuildingId(e.target.value)}>
-              <option value="">—</option>
-              {buildings.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </label>
-          <Input label={t('floor.label')} value={floorLabel} onChange={(e) => setFloorLabel(e.target.value)} />
-          <Input
-            label={t('floor.level')}
-            type="number"
-            value={floorLevel}
-            onChange={(e) => setFloorLevel(e.target.value)}
-            className="w-20"
-          />
-          <Button type="submit" variant="outline" disabled={isCreatingFloor || !floorBuildingId || !floorLabel.trim()}>
-            {t('floor.add')}
-          </Button>
-        </form>
+        <AddFloorsForm buildings={buildings} floors={floors} createFloor={createFloor} isCreating={isCreatingFloor} onError={setError} />
       )}
-
-      {/* Unit */}
       {buildings.length > 0 && floors.length > 0 && (
-        <form
-          className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:items-end"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!unitBuildingId || !unitFloorId || !unitNumber.trim()) return;
-            run(
-              () =>
-                createUnit({
-                  buildingId: unitBuildingId,
-                  floorId: unitFloorId,
-                  unitNumber: unitNumber.trim(),
-                  unitType: unitType.trim() || 'apartment',
-                  features: unitFeatures,
-                }),
-              () => {
-                setUnitNumber('');
-                setUnitFeatures([]);
-              }
-            );
-          }}
-        >
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">{t('detail.buildings')}</span>
-            <select
-              className={selectClass}
-              value={unitBuildingId}
-              onChange={(e) => {
-                setUnitBuildingId(e.target.value);
-                setUnitFloorId('');
-              }}
-            >
-              <option value="">—</option>
-              {buildings.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">{t('detail.floors')}</span>
-            <select
-              className={selectClass}
-              value={unitFloorId}
-              onChange={(e) => setUnitFloorId(e.target.value)}
-              disabled={!unitBuildingId}
-            >
-              <option value="">—</option>
-              {floorsForUnitBuilding.map((f) => (
-                <option key={f.id} value={f.id}>{f.label}</option>
-              ))}
-            </select>
-          </label>
-          <Input label={t('unit.number')} value={unitNumber} onChange={(e) => setUnitNumber(e.target.value)} />
-          <Input label={t('unit.type')} value={unitType} onChange={(e) => setUnitType(e.target.value)} />
-          <Button
-            type="submit"
-            variant="outline"
-            disabled={isCreatingUnit || !unitBuildingId || !unitFloorId || !unitNumber.trim()}
-          >
-            {t('unit.add')}
-          </Button>
-
-          {/* Apartment features — the "big terrace / duplex" toggles buyers filter on. */}
-          <div className="sm:col-span-2 lg:col-span-5">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">{t('filters.apartmentType')}</span>
-            <div className="flex flex-wrap gap-1.5">
-              {UNIT_FEATURES.map((f) => {
-                const on = unitFeatures.includes(f);
-                return (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => toggleFeature(f)}
-                    aria-pressed={on}
-                    className={cn(
-                      'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-                      on
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-input text-gray-600 hover:border-primary/50'
-                    )}
-                  >
-                    {t(`feature.${f}`, f.replace(/_/g, ' '))}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </form>
+        <AddUnitsForm developmentId={developmentId} buildings={buildings} floors={floors} createUnit={createUnit} isCreating={isCreatingUnit} onError={setError} />
       )}
     </div>
   );
