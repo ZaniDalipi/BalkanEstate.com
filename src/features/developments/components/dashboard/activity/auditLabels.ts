@@ -16,6 +16,7 @@ export const ACTION_LABELS: Record<string, string> = {
   'unit.update': 'Updated unit',
   'unit.delete': 'Deleted unit',
   'unit.bulk_update': 'Bulk-updated units',
+  'unit.import': 'Imported units from a spreadsheet',
   'floor.create': 'Added floor',
   'floor.update': 'Updated floor',
   'building.create': 'Added building',
@@ -118,6 +119,14 @@ export function entryDetail(t: TFunction, entry: AuditEntry): string | null {
       const n = num(m.modified) ?? (Array.isArray(m.unitIds) ? m.unitIds.length : null);
       return n === null ? null : String(t('activity.detail.unitsUpdated', 'Units updated: {{n}}', { n }));
     }
+    case 'unit.import':
+      return String(
+        t('activity.detail.imported', {
+          created: num(m.unitsCreated) ?? 0,
+          updated: num(m.unitsUpdated) ?? 0,
+          defaultValue: 'New: {{created}} · Updated: {{updated}}',
+        })
+      );
     case 'scene.draft':
       return num(m.hotspotCount) === null ? null : String(t('activity.detail.regions', 'Regions: {{n}}', { n: num(m.hotspotCount) }));
     default:

@@ -870,7 +870,8 @@
       "unitNumber": "Единица {{number}}",
       "unitsUpdated": "Ажурирани единици: {{n}}",
       "regions": "Зони: {{n}}",
-      "fields": "Променето: {{fields}}"
+      "fields": "Променето: {{fields}}",
+      "imported": "Нови: {{created}} · Ажурирани: {{updated}}"
     },
     "actions": {
       "listing_attach": "Поврза оглас",
@@ -900,7 +901,8 @@
       "claim_create": "Побара поврзување",
       "claim_review": "Го прегледа барањето за поврзување",
       "building_delete": "Избришана зграда",
-      "floor_delete": "Избришан кат"
+      "floor_delete": "Избришан кат",
+      "unit_import": "Увезени единици од табела"
     }
   },
   "details": {
@@ -940,5 +942,77 @@
     "apartment": "Стан {{number}}",
     "viewApartment": "Погледнете го во резиденцијата",
     "viewResidence": "Види ја резиденцијата"
+  },
+  "import": {
+    "open": "Увези од табела",
+    "title": "Увоз на единици од табела",
+    "drop": "Пуштете ја табелата тука или изберете датотека",
+    "dropHint": "CSV од Excel, Google Sheets или Numbers (File → Save as / Download → CSV). Колоните може да бидат по кој било редослед и јазик — ги препознаваме.",
+    "templateHint": "Почнувате од нула? Пополнете го нашиот шаблон — еден ред по стан.",
+    "template": "Преземи шаблон",
+    "error": {
+      "tooBig": "Датотеката е поголема од 5 MB.",
+      "empty": "Датотеката треба ред со заглавја и барем една единица.",
+      "unreadable": "Оваа датотека не може да се прочита како CSV."
+    },
+    "columns": "Колони",
+    "unnamed": "(без име)",
+    "columnFor": "Увези \"{{name}}\" како",
+    "example": "на пр. {{value}}",
+    "recognised": "Ги препознавме овие колони — сменете ги оние што се погрешни",
+    "needUnitNumber": "Кажете ни која колона го содржи бројот на единицата.",
+    "buildingForAll": "Зграда за сите редови",
+    "buildingHint": "Име на постојна зграда или нова што треба да се создаде.",
+    "updateExisting": "Ажурирај ги постојните единици (само колоните од оваа датотека)",
+    "fileSummary": "{{name}} · редови: {{n}}",
+    "otherFile": "Избери друга датотека",
+    "previewCaption": "Првите редови како ќе бидат увезени",
+    "moreRows": "…и уште {{n}}",
+    "stat": {
+      "new": "Нови единици",
+      "updated": "Ажурирани единици",
+      "buildings": "Нови згради",
+      "floors": "Нови катови"
+    },
+    "unchanged": "Веќе ажурирани: {{unchanged}} · Постојни единици оставени како што се: {{skipped}}",
+    "floorsFromNumbers": "Нема колона за кат: катовите се читаат од броевите на единиците (401 → кат 4).",
+    "problems": "Редови што ќе бидат прескокнати ({{n}})",
+    "row": "Ред {{row}}",
+    "problem": {
+      "noUnitNumber": "Нема број на единица",
+      "noBuilding": "Нема зграда",
+      "noFloor": "Катот не може да се одреди од \"{{value}}\"",
+      "badNumber": "{{field}}: \"{{value}}\" не е број",
+      "badAvailability": "Непозната достапност \"{{value}}\""
+    },
+    "done": "Увозот заврши",
+    "doneSummary": "Нови единици: {{created}} · Ажурирани: {{updated}} · Нови катови: {{floors}} · Нови згради: {{buildings}}",
+    "doneSkipped": "Прескокнати редови: {{n}}",
+    "close": "Готово",
+    "importing": "Се увезува…",
+    "confirm": "Увези ({{n}})",
+    "firstBuilding": "Зграда А",
+    "field": {
+      "unitNumber": "Број на единица",
+      "building": "Зграда",
+      "floor": "Кат",
+      "unitType": "Тип",
+      "beds": "Спални",
+      "baths": "Бањи",
+      "livingRooms": "Дневни соби",
+      "totalArea": "Површина (m²)",
+      "netArea": "Нето површина (m²)",
+      "terraceArea": "Тераса (m²)",
+      "balconies": "Балкони",
+      "price": "Цена",
+      "pricePerSqm": "Цена по m²",
+      "currency": "Валута",
+      "availability": "Достапност",
+      "orientation": "Ориентација",
+      "viewType": "Поглед",
+      "features": "Карактеристики",
+      "description": "Опис",
+      "ignore": "Не увезувај"
+    }
   }
 }

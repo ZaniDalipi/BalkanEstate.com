@@ -876,7 +876,8 @@
       "unitNumber": "Jedinica {{number}}",
       "unitsUpdated": "Ažurirano jedinica: {{n}}",
       "regions": "Regije: {{n}}",
-      "fields": "Promijenjeno: {{fields}}"
+      "fields": "Promijenjeno: {{fields}}",
+      "imported": "Nove: {{created}} · Ažurirane: {{updated}}"
     },
     "actions": {
       "listing_attach": "Povezao oglas",
@@ -906,7 +907,8 @@
       "claim_create": "Zatražio povezivanje",
       "claim_review": "Pregledao zahtjev za povezivanje",
       "building_delete": "Obrisana zgrada",
-      "floor_delete": "Obrisan sprat"
+      "floor_delete": "Obrisan sprat",
+      "unit_import": "Uvezene jedinice iz tabele"
     }
   },
   "details": {
@@ -946,5 +948,77 @@
     "apartment": "Stan {{number}}",
     "viewApartment": "Pogledajte u rezidenciji",
     "viewResidence": "Pogledaj rezidenciju"
+  },
+  "import": {
+    "open": "Uvezi iz tabele",
+    "title": "Uvoz jedinica iz tabele",
+    "drop": "Prevucite tabelu ovdje ili odaberite datoteku",
+    "dropHint": "CSV iz Excela, Google Sheets ili Numbers (File → Save as / Download → CSV). Kolone mogu biti bilo kojim redom i na bilo kojem jeziku — prepoznajemo ih.",
+    "templateHint": "Počinjete od nule? Popunite naš šablon — jedan red po stanu.",
+    "template": "Preuzmi šablon",
+    "error": {
+      "tooBig": "Datoteka je veća od 5 MB.",
+      "empty": "Datoteka treba red zaglavlja i barem jednu jedinicu.",
+      "unreadable": "Ova datoteka se ne može pročitati kao CSV."
+    },
+    "columns": "Kolone",
+    "unnamed": "(bez naziva)",
+    "columnFor": "Uvezi „{{name}}” kao",
+    "example": "npr. {{value}}",
+    "recognised": "Prepoznali smo ove kolone — promijenite one koje nisu tačne",
+    "needUnitNumber": "Recite nam koja kolona sadrži broj jedinice.",
+    "buildingForAll": "Zgrada za sve redove",
+    "buildingHint": "Naziv postojeće zgrade ili nove koju treba kreirati.",
+    "updateExisting": "Ažuriraj postojeće jedinice (samo kolone iz ove datoteke)",
+    "fileSummary": "{{name}} · redova: {{n}}",
+    "otherFile": "Odaberi drugu datoteku",
+    "previewCaption": "Prvi redovi onako kako će biti uvezeni",
+    "moreRows": "…i još {{n}}",
+    "stat": {
+      "new": "Nove jedinice",
+      "updated": "Ažurirane jedinice",
+      "buildings": "Nove zgrade",
+      "floors": "Novi spratovi"
+    },
+    "unchanged": "Već ažurno: {{unchanged}} · Postojeće jedinice ostavljene kakve jesu: {{skipped}}",
+    "floorsFromNumbers": "Nema kolone sprata: spratovi se čitaju iz brojeva jedinica (401 → sprat 4).",
+    "problems": "Redovi koji će biti preskočeni ({{n}})",
+    "row": "Red {{row}}",
+    "problem": {
+      "noUnitNumber": "Nema broja jedinice",
+      "noBuilding": "Nema zgrade",
+      "noFloor": "Sprat se ne može odrediti iz „{{value}}”",
+      "badNumber": "{{field}}: „{{value}}” nije broj",
+      "badAvailability": "Nepoznata dostupnost „{{value}}”"
+    },
+    "done": "Uvoz završen",
+    "doneSummary": "Nove jedinice: {{created}} · Ažurirane: {{updated}} · Novi spratovi: {{floors}} · Nove zgrade: {{buildings}}",
+    "doneSkipped": "Preskočeni redovi: {{n}}",
+    "close": "Gotovo",
+    "importing": "Uvoz…",
+    "confirm": "Uvezi ({{n}})",
+    "firstBuilding": "Zgrada A",
+    "field": {
+      "unitNumber": "Broj jedinice",
+      "building": "Zgrada",
+      "floor": "Sprat",
+      "unitType": "Tip",
+      "beds": "Spavaće sobe",
+      "baths": "Kupatila",
+      "livingRooms": "Dnevne sobe",
+      "totalArea": "Površina (m²)",
+      "netArea": "Neto površina (m²)",
+      "terraceArea": "Terasa (m²)",
+      "balconies": "Balkoni",
+      "price": "Cijena",
+      "pricePerSqm": "Cijena po m²",
+      "currency": "Valuta",
+      "availability": "Dostupnost",
+      "orientation": "Orijentacija",
+      "viewType": "Pogled",
+      "features": "Karakteristike",
+      "description": "Opis",
+      "ignore": "Ne uvoziti"
+    }
   }
 }

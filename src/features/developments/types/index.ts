@@ -415,6 +415,19 @@ export interface DevelopmentFollow {
 
 // --- Listing-creation suggestions -----------------------------------------
 
+/** What a spreadsheet import created/changed (or would, for a dry run). */
+export interface UnitImportSummary {
+  rows: number;
+  buildingsCreated: string[];
+  floorsCreated: number;
+  unitsCreated: number;
+  unitsUpdated: number;
+  unchanged: number;
+  skippedExisting: number;
+  errors: { row: number; message: string }[];
+  dryRun: boolean;
+}
+
 /** "Part of <residence>" on a listing's detail page. */
 export interface ListingResidence {
   name: string;

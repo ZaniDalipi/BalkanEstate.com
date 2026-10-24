@@ -870,7 +870,8 @@
       "unitNumber": "Unit {{number}}",
       "unitsUpdated": "Units updated: {{n}}",
       "regions": "Regions: {{n}}",
-      "fields": "Changed: {{fields}}"
+      "fields": "Changed: {{fields}}",
+      "imported": "New: {{created}} · Updated: {{updated}}"
     },
     "actions": {
       "listing_attach": "Attached a listing",
@@ -900,7 +901,8 @@
       "claim_create": "Requested attachment",
       "claim_review": "Reviewed attachment request",
       "building_delete": "Deleted building",
-      "floor_delete": "Deleted floor"
+      "floor_delete": "Deleted floor",
+      "unit_import": "Imported units from a spreadsheet"
     }
   },
   "details": {
@@ -940,5 +942,77 @@
     "apartment": "Apartment {{number}}",
     "viewApartment": "See it in the residence",
     "viewResidence": "View residence"
+  },
+  "import": {
+    "open": "Import from spreadsheet",
+    "title": "Import units from a spreadsheet",
+    "drop": "Drop your spreadsheet here, or choose a file",
+    "dropHint": "CSV from Excel, Google Sheets or Numbers (File → Save as / Download → CSV). Columns can be in any order and language — we recognise them.",
+    "templateHint": "Starting from scratch? Fill in our template — one row per apartment.",
+    "template": "Download template",
+    "error": {
+      "tooBig": "The file is larger than 5 MB.",
+      "empty": "The file needs a header row and at least one unit.",
+      "unreadable": "This file could not be read as CSV."
+    },
+    "columns": "Columns",
+    "unnamed": "(no name)",
+    "columnFor": "Import “{{name}}” as",
+    "example": "e.g. {{value}}",
+    "recognised": "We recognised these columns — change any that are wrong",
+    "needUnitNumber": "Tell us which column holds the unit number.",
+    "buildingForAll": "Building for all rows",
+    "buildingHint": "An existing building name, or a new one to create.",
+    "updateExisting": "Update units that already exist (only the columns in this file)",
+    "fileSummary": "{{name}} · {{n}} rows",
+    "otherFile": "Choose another file",
+    "previewCaption": "First rows as they will be imported",
+    "moreRows": "…and {{n}} more",
+    "stat": {
+      "new": "New units",
+      "updated": "Units updated",
+      "buildings": "New buildings",
+      "floors": "New floors"
+    },
+    "unchanged": "Already up to date: {{unchanged}} · Existing units left as they are: {{skipped}}",
+    "floorsFromNumbers": "No floor column: floors are read from the unit numbers (401 → floor 4).",
+    "problems": "Rows that will be skipped ({{n}})",
+    "row": "Row {{row}}",
+    "problem": {
+      "noUnitNumber": "No unit number",
+      "noBuilding": "No building",
+      "noFloor": "Can’t tell the floor from “{{value}}”",
+      "badNumber": "{{field}}: “{{value}}” is not a number",
+      "badAvailability": "Unknown availability “{{value}}”"
+    },
+    "done": "Import finished",
+    "doneSummary": "New units: {{created}} · Updated: {{updated}} · New floors: {{floors}} · New buildings: {{buildings}}",
+    "doneSkipped": "Rows skipped: {{n}}",
+    "close": "Done",
+    "importing": "Importing…",
+    "confirm": "Import ({{n}})",
+    "firstBuilding": "Building A",
+    "field": {
+      "unitNumber": "Unit number",
+      "building": "Building",
+      "floor": "Floor",
+      "unitType": "Type",
+      "beds": "Bedrooms",
+      "baths": "Bathrooms",
+      "livingRooms": "Living rooms",
+      "totalArea": "Area (m²)",
+      "netArea": "Net area (m²)",
+      "terraceArea": "Terrace (m²)",
+      "balconies": "Balconies",
+      "price": "Price",
+      "pricePerSqm": "Price per m²",
+      "currency": "Currency",
+      "availability": "Availability",
+      "orientation": "Orientation",
+      "viewType": "View",
+      "features": "Features",
+      "description": "Description",
+      "ignore": "Don’t import"
+    }
   }
 }

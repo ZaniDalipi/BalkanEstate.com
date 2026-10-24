@@ -28,7 +28,7 @@ const text = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
 
 
 /** Keep only known feature flags, de-duplicated. */
-const sanitizeFeatures = (input?: unknown): string[] => {
+export const sanitizeFeatures = (input?: unknown): string[] => {
   if (!Array.isArray(input)) return [];
   return Array.from(new Set(input.filter(isUnitFeature)));
 };

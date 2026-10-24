@@ -4,6 +4,7 @@
  * logic, no React. Responses are narrowed to the feature's types.
  */
 import { apiRequest, uploadRequest, blobRequest } from '@/src/shared/api';
+import type { ImportRowPayload } from '../utils/csvImport';
 import type {
   Development,
   DevelopmentBuilding,
@@ -31,6 +32,7 @@ import type {
   FollowFilters,
   NearbySuggestion,
   ListingResidence,
+  UnitImportSummary,
   ControllableListing,
   DashboardUnit,
   UnitListQuery,
@@ -456,6 +458,13 @@ export const getNearbyDevelopments = (params: {
     requiresAuth: true,
   });
 };
+
+/** Import units from spreadsheet rows; `dryRun` reports what would change without writing. */
+export const importUnits = (
+  developmentId: string,
+  body: { rows: ImportRowPayload[]; updateExisting: boolean; dryRun: boolean }
+): Promise<UnitImportSummary> =>
+  apiRequest<UnitImportSummary>(`${DASH}/${developmentId}/units/import`, { method: 'POST', body, requiresAuth: true });
 
 /** The published residence (and apartment) a listing is attached to, or null. */
 export const getListingResidence = (listingId: string): Promise<{ residence: ListingResidence | null }> =>

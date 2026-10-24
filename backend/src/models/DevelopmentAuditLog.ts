@@ -18,6 +18,7 @@ export type DevelopmentAuditAction =
   | 'unit.update'
   | 'unit.delete'
   | 'unit.bulk_update'
+  | 'unit.import'
   | 'floor.create'
   | 'floor.update'
   | 'floor.delete'

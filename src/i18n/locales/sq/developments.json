@@ -870,7 +870,8 @@
       "unitNumber": "Njësia {{number}}",
       "unitsUpdated": "Njësi të përditësuara: {{n}}",
       "regions": "Zona: {{n}}",
-      "fields": "Ndryshuar: {{fields}}"
+      "fields": "Ndryshuar: {{fields}}",
+      "imported": "Të reja: {{created}} · Të përditësuara: {{updated}}"
     },
     "actions": {
       "listing_attach": "Lidhi një shpallje",
@@ -900,7 +901,8 @@
       "claim_create": "Kërkoi lidhje",
       "claim_review": "Shqyrtoi kërkesën për lidhje",
       "building_delete": "Fshiu ndërtesën",
-      "floor_delete": "Fshiu katin"
+      "floor_delete": "Fshiu katin",
+      "unit_import": "Importoi njësi nga një tabelë"
     }
   },
   "details": {
@@ -940,5 +942,77 @@
     "apartment": "Apartamenti {{number}}",
     "viewApartment": "Shiheni në rezidencë",
     "viewResidence": "Shiko rezidencën"
+  },
+  "import": {
+    "open": "Importo nga tabela",
+    "title": "Importo njësitë nga një tabelë",
+    "drop": "Lëshoni tabelën këtu ose zgjidhni një skedar",
+    "dropHint": "CSV nga Excel, Google Sheets ose Numbers (File → Save as / Download → CSV). Kolonat mund të jenë në çdo renditje dhe gjuhë — ne i njohim.",
+    "templateHint": "Filloni nga zero? Plotësoni shabllonin tonë — një rresht për çdo apartament.",
+    "template": "Shkarko shabllonin",
+    "error": {
+      "tooBig": "Skedari është më i madh se 5 MB.",
+      "empty": "Skedari duhet të ketë një rresht titujsh dhe të paktën një njësi.",
+      "unreadable": "Ky skedar nuk mund të lexohej si CSV."
+    },
+    "columns": "Kolonat",
+    "unnamed": "(pa emër)",
+    "columnFor": "Importo “{{name}}” si",
+    "example": "p.sh. {{value}}",
+    "recognised": "I njohëm këto kolona — ndryshoni ato që janë gabim",
+    "needUnitNumber": "Na tregoni cila kolonë përmban numrin e njësisë.",
+    "buildingForAll": "Ndërtesa për të gjitha rreshtat",
+    "buildingHint": "Emri i një ndërtese ekzistuese ose një e re për t’u krijuar.",
+    "updateExisting": "Përditëso njësitë që ekzistojnë (vetëm kolonat në këtë skedar)",
+    "fileSummary": "{{name}} · {{n}} rreshta",
+    "otherFile": "Zgjidh një skedar tjetër",
+    "previewCaption": "Rreshtat e parë siç do të importohen",
+    "moreRows": "…dhe {{n}} të tjerë",
+    "stat": {
+      "new": "Njësi të reja",
+      "updated": "Njësi të përditësuara",
+      "buildings": "Ndërtesa të reja",
+      "floors": "Kate të reja"
+    },
+    "unchanged": "Tashmë të përditësuara: {{unchanged}} · Njësi ekzistuese të lëna siç janë: {{skipped}}",
+    "floorsFromNumbers": "Pa kolonë kati: katet lexohen nga numrat e njësive (401 → kati 4).",
+    "problems": "Rreshta që do të anashkalohen ({{n}})",
+    "row": "Rreshti {{row}}",
+    "problem": {
+      "noUnitNumber": "Mungon numri i njësisë",
+      "noBuilding": "Mungon ndërtesa",
+      "noFloor": "Kati nuk kuptohet nga “{{value}}”",
+      "badNumber": "{{field}}: “{{value}}” nuk është numër",
+      "badAvailability": "Disponueshmëri e panjohur “{{value}}”"
+    },
+    "done": "Importimi përfundoi",
+    "doneSummary": "Njësi të reja: {{created}} · Të përditësuara: {{updated}} · Kate të reja: {{floors}} · Ndërtesa të reja: {{buildings}}",
+    "doneSkipped": "Rreshta të anashkaluar: {{n}}",
+    "close": "Gati",
+    "importing": "Duke importuar…",
+    "confirm": "Importo ({{n}})",
+    "firstBuilding": "Ndërtesa A",
+    "field": {
+      "unitNumber": "Numri i njësisë",
+      "building": "Ndërtesa",
+      "floor": "Kati",
+      "unitType": "Lloji",
+      "beds": "Dhoma gjumi",
+      "baths": "Banjo",
+      "livingRooms": "Dhoma ndenjeje",
+      "totalArea": "Sipërfaqja (m²)",
+      "netArea": "Sipërfaqja neto (m²)",
+      "terraceArea": "Tarraca (m²)",
+      "balconies": "Ballkone",
+      "price": "Çmimi",
+      "pricePerSqm": "Çmimi për m²",
+      "currency": "Monedha",
+      "availability": "Disponueshmëria",
+      "orientation": "Orientimi",
+      "viewType": "Pamja",
+      "features": "Veçoritë",
+      "description": "Përshkrimi",
+      "ignore": "Mos e importo"
+    }
   }
 }

@@ -876,7 +876,8 @@
       "unitNumber": "Jedinica {{number}}",
       "unitsUpdated": "Ažurirano jedinica: {{n}}",
       "regions": "Regije: {{n}}",
-      "fields": "Promijenjeno: {{fields}}"
+      "fields": "Promijenjeno: {{fields}}",
+      "imported": "Nove: {{created}} · Ažurirane: {{updated}}"
     },
     "actions": {
       "listing_attach": "Povezao oglas",
@@ -906,7 +907,8 @@
       "claim_create": "Zatražio povezivanje",
       "claim_review": "Pregledao zahtjev za povezivanje",
       "building_delete": "Izbrisana zgrada",
-      "floor_delete": "Izbrisan kat"
+      "floor_delete": "Izbrisan kat",
+      "unit_import": "Uvezene jedinice iz tablice"
     }
   },
   "details": {
@@ -946,5 +948,77 @@
     "apartment": "Stan {{number}}",
     "viewApartment": "Pogledajte u rezidenciji",
     "viewResidence": "Pogledaj rezidenciju"
+  },
+  "import": {
+    "open": "Uvezi iz tablice",
+    "title": "Uvoz jedinica iz tablice",
+    "drop": "Povucite tablicu ovdje ili odaberite datoteku",
+    "dropHint": "CSV iz Excela, Google Sheets ili Numbers (File → Save as / Download → CSV). Stupci mogu biti bilo kojim redoslijedom i na bilo kojem jeziku — prepoznajemo ih.",
+    "templateHint": "Počinjete od nule? Ispunite naš predložak — jedan redak po stanu.",
+    "template": "Preuzmi predložak",
+    "error": {
+      "tooBig": "Datoteka je veća od 5 MB.",
+      "empty": "Datoteka treba redak zaglavlja i barem jednu jedinicu.",
+      "unreadable": "Ova se datoteka ne može pročitati kao CSV."
+    },
+    "columns": "Stupci",
+    "unnamed": "(bez naziva)",
+    "columnFor": "Uvezi „{{name}}” kao",
+    "example": "npr. {{value}}",
+    "recognised": "Prepoznali smo ove stupce — promijenite one koji nisu točni",
+    "needUnitNumber": "Recite nam koji stupac sadrži broj jedinice.",
+    "buildingForAll": "Zgrada za sve retke",
+    "buildingHint": "Naziv postojeće zgrade ili nove koju treba stvoriti.",
+    "updateExisting": "Ažuriraj postojeće jedinice (samo stupci iz ove datoteke)",
+    "fileSummary": "{{name}} · redaka: {{n}}",
+    "otherFile": "Odaberi drugu datoteku",
+    "previewCaption": "Prvi retci kako će biti uvezeni",
+    "moreRows": "…i još {{n}}",
+    "stat": {
+      "new": "Nove jedinice",
+      "updated": "Ažurirane jedinice",
+      "buildings": "Nove zgrade",
+      "floors": "Novi katovi"
+    },
+    "unchanged": "Već ažurno: {{unchanged}} · Postojeće jedinice ostavljene kakve jesu: {{skipped}}",
+    "floorsFromNumbers": "Nema stupca kata: katovi se čitaju iz brojeva jedinica (401 → kat 4).",
+    "problems": "Retci koji će biti preskočeni ({{n}})",
+    "row": "Redak {{row}}",
+    "problem": {
+      "noUnitNumber": "Nema broja jedinice",
+      "noBuilding": "Nema zgrade",
+      "noFloor": "Kat se ne može odrediti iz „{{value}}”",
+      "badNumber": "{{field}}: „{{value}}” nije broj",
+      "badAvailability": "Nepoznata dostupnost „{{value}}”"
+    },
+    "done": "Uvoz završen",
+    "doneSummary": "Nove jedinice: {{created}} · Ažurirane: {{updated}} · Novi katovi: {{floors}} · Nove zgrade: {{buildings}}",
+    "doneSkipped": "Preskočeni retci: {{n}}",
+    "close": "Gotovo",
+    "importing": "Uvoz…",
+    "confirm": "Uvezi ({{n}})",
+    "firstBuilding": "Zgrada A",
+    "field": {
+      "unitNumber": "Broj jedinice",
+      "building": "Zgrada",
+      "floor": "Kat",
+      "unitType": "Tip",
+      "beds": "Spavaće sobe",
+      "baths": "Kupaonice",
+      "livingRooms": "Dnevni boravci",
+      "totalArea": "Površina (m²)",
+      "netArea": "Neto površina (m²)",
+      "terraceArea": "Terasa (m²)",
+      "balconies": "Balkoni",
+      "price": "Cijena",
+      "pricePerSqm": "Cijena po m²",
+      "currency": "Valuta",
+      "availability": "Dostupnost",
+      "orientation": "Orijentacija",
+      "viewType": "Pogled",
+      "features": "Značajke",
+      "description": "Opis",
+      "ignore": "Ne uvoziti"
+    }
   }
 }

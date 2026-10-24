@@ -343,6 +343,24 @@ residence shows a banner linking to its apartment in the explorer
 (`GET /api/developments/for-listing/:listingId`; nothing for drafts, hidden
 apartments or unpublished residences).
 
+**Import a whole building from a spreadsheet:** Inventory → **Import from
+spreadsheet**. Save the sheet as CSV (any separator; Excel's `;` works) or start
+from **Download template** — one row per apartment. Columns can be in any order
+and in English, Albanian or BCMS ("Zgrada / Objekti", "Sprat / Kati", "Stan /
+Banesa", "Kvadratura / Sipërfaqja", "Cijena / Çmimi", "Status"…); you can change
+what each column is used for. Values are read as people write them: floors
+"Prizemlje", "Përdhese", "B1", "Kati 3"; numbers "45.000 €", "64,5"; availability
+"Slobodno", "e lirë", "Prodato"; types "Garsonjera", "Lokal"; features "Terasa,
+Parking". Without a floor column, floors come from unit numbers (401 → 4);
+without a building column, all rows go to the building you name. Before
+anything is written, the server's dry run shows new buildings, floors and units,
+updates, and every row that will be skipped and why. Missing buildings and
+floors are created; existing units are updated with only the columns the file
+has (or left alone, if you untick it). Same permissions as manual edits; at most
+2,000 rows per import; recorded in Activity. Our own **Export CSV** imports back
+unchanged. Code: `utils/csvImport/` (reading and mapping),
+`services/developments/unitImportService.ts` (`POST …/units/import`).
+
 **Add floors and units quickly:** Inventory → *Add buildings, floors and units*.
 The level starts at the next free one for the building and moves on after each
 add; leave the label empty and the floor is named for you ("Floor 4", "Ground

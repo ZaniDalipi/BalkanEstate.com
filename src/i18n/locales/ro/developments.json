@@ -876,7 +876,8 @@
       "unitNumber": "Unitatea {{number}}",
       "unitsUpdated": "Unități actualizate: {{n}}",
       "regions": "Zone: {{n}}",
-      "fields": "Modificat: {{fields}}"
+      "fields": "Modificat: {{fields}}",
+      "imported": "Noi: {{created}} · Actualizate: {{updated}}"
     },
     "actions": {
       "listing_attach": "A atașat un anunț",
@@ -906,7 +907,8 @@
       "claim_create": "A solicitat atașarea",
       "claim_review": "A analizat cererea de atașare",
       "building_delete": "Clădire ștearsă",
-      "floor_delete": "Etaj șters"
+      "floor_delete": "Etaj șters",
+      "unit_import": "Unități importate dintr-un tabel"
     }
   },
   "details": {
@@ -946,5 +948,77 @@
     "apartment": "Apartamentul {{number}}",
     "viewApartment": "Vedeți-l în rezidență",
     "viewResidence": "Vezi rezidența"
+  },
+  "import": {
+    "open": "Importă din tabel",
+    "title": "Importă unități dintr-un tabel",
+    "drop": "Trageți tabelul aici sau alegeți un fișier",
+    "dropHint": "CSV din Excel, Google Sheets sau Numbers (File → Save as / Download → CSV). Coloanele pot fi în orice ordine și limbă — le recunoaștem.",
+    "templateHint": "Începeți de la zero? Completați șablonul nostru — un rând pentru fiecare apartament.",
+    "template": "Descarcă șablonul",
+    "error": {
+      "tooBig": "Fișierul este mai mare de 5 MB.",
+      "empty": "Fișierul are nevoie de un rând de antet și de cel puțin o unitate.",
+      "unreadable": "Acest fișier nu a putut fi citit ca CSV."
+    },
+    "columns": "Coloane",
+    "unnamed": "(fără nume)",
+    "columnFor": "Importă „{{name}}” ca",
+    "example": "ex. {{value}}",
+    "recognised": "Am recunoscut aceste coloane — schimbați-le pe cele greșite",
+    "needUnitNumber": "Spuneți-ne ce coloană conține numărul unității.",
+    "buildingForAll": "Clădire pentru toate rândurile",
+    "buildingHint": "Numele unei clădiri existente sau al uneia noi de creat.",
+    "updateExisting": "Actualizează unitățile existente (doar coloanele din acest fișier)",
+    "fileSummary": "{{name}} · rânduri: {{n}}",
+    "otherFile": "Alege alt fișier",
+    "previewCaption": "Primele rânduri așa cum vor fi importate",
+    "moreRows": "…și încă {{n}}",
+    "stat": {
+      "new": "Unități noi",
+      "updated": "Unități actualizate",
+      "buildings": "Clădiri noi",
+      "floors": "Etaje noi"
+    },
+    "unchanged": "Deja la zi: {{unchanged}} · Unități existente lăsate neschimbate: {{skipped}}",
+    "floorsFromNumbers": "Nu există coloană de etaj: etajele se citesc din numerele unităților (401 → etajul 4).",
+    "problems": "Rânduri care vor fi omise ({{n}})",
+    "row": "Rândul {{row}}",
+    "problem": {
+      "noUnitNumber": "Lipsește numărul unității",
+      "noBuilding": "Lipsește clădirea",
+      "noFloor": "Etajul nu reiese din „{{value}}”",
+      "badNumber": "{{field}}: „{{value}}” nu este un număr",
+      "badAvailability": "Disponibilitate necunoscută „{{value}}”"
+    },
+    "done": "Import finalizat",
+    "doneSummary": "Unități noi: {{created}} · Actualizate: {{updated}} · Etaje noi: {{floors}} · Clădiri noi: {{buildings}}",
+    "doneSkipped": "Rânduri omise: {{n}}",
+    "close": "Gata",
+    "importing": "Se importă…",
+    "confirm": "Importă ({{n}})",
+    "firstBuilding": "Clădirea A",
+    "field": {
+      "unitNumber": "Numărul unității",
+      "building": "Clădire",
+      "floor": "Etaj",
+      "unitType": "Tip",
+      "beds": "Dormitoare",
+      "baths": "Băi",
+      "livingRooms": "Livinguri",
+      "totalArea": "Suprafață (m²)",
+      "netArea": "Suprafață netă (m²)",
+      "terraceArea": "Terasă (m²)",
+      "balconies": "Balcoane",
+      "price": "Preț",
+      "pricePerSqm": "Preț pe m²",
+      "currency": "Monedă",
+      "availability": "Disponibilitate",
+      "orientation": "Orientare",
+      "viewType": "Vedere",
+      "features": "Caracteristici",
+      "description": "Descriere",
+      "ignore": "Nu importa"
+    }
   }
 }

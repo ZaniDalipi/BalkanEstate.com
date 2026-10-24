@@ -28,6 +28,7 @@ import {
   isDuplicateKeyError,
 } from '../services/developments/developmentInventoryService';
 import * as unitAdmin from '../services/developments/unitAdminService';
+import { importUnits } from '../services/developments/unitImportService';
 import { listAuditEntries } from '../services/developments/developmentAuditQuery';
 import { deleteStructure, previewStructureDelete, type StructureKind } from '../services/developments/structureDeleteService';
 import {
@@ -469,6 +470,23 @@ export const bulkUpdateUnits = async (req: Request, res: Response): Promise<void
     res.json(result);
   } catch (error) {
     sendServiceError(res, error, 'bulk update units');
+  }
+};
+
+/** POST /:developmentId/units/import — rows from a spreadsheet; `dryRun` previews without writing. */
+export const importUnitsHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await importUnits({
+      developmentId: devId(req),
+      actorId: currentUser(req)._id as mongoose.Types.ObjectId,
+      role: req.developmentRole,
+      rows: req.body?.rows,
+      updateExisting: req.body?.updateExisting !== false,
+      dryRun: req.body?.dryRun === true,
+    });
+    res.json(result);
+  } catch (error) {
+    sendServiceError(res, error, 'import units');
   }
 };
 
