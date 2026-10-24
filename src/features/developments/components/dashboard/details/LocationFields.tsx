@@ -16,12 +16,12 @@ interface LocationFieldsProps {
   onChange: (patch: Partial<LocationValue>) => void;
   /** Translated error messages per field. */
   errors?: Partial<Record<LocationErrorKey, string>>;
-  /** Also show municipality and the exact map coordinates (the edit form). */
+  /** Also show municipality and the coordinate fields (the edit form). The map pin is always shown. */
   detailed?: boolean;
   disabled?: boolean;
 }
 
-/** Country, city, address — and optionally municipality and coordinates — shared by the create and edit forms. */
+/** Country, city, address and the map pin — plus municipality and coordinates when detailed — shared by the create and edit forms. */
 export const LocationFields: React.FC<LocationFieldsProps> = ({ value, onChange, errors = {}, detailed = false, disabled = false }) => {
   const { t } = useTranslation('developments');
   const { countryOptions, cityOptions, onCountryChange, onCityChange } = useLocationFields(value, onChange);
@@ -94,7 +94,7 @@ export const LocationFields: React.FC<LocationFieldsProps> = ({ value, onChange,
           </p>
         </div>
       )}
-      {detailed && <LocationPinMap value={value} onChange={onChange} disabled={disabled} />}
+      <LocationPinMap value={value} onChange={onChange} disabled={disabled} />
     </div>
   );
 };

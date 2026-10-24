@@ -35,7 +35,8 @@ const toNumber = (v: string) => (v.trim() ? Number(v) : undefined);
  *
  * Location uses the shared `LocationFields` (the same fields as the edit form
  * in Settings): a country dropdown drives a dependent city dropdown, and
- * picking a city auto-fills the coordinates and a default address. Creating is
+ * picking a city auto-fills the coordinates and a default address, and the map
+ * pin below lets the owner place the residence exactly before creating it. Creating is
  * gated on an active subscription plan server-side; a subscription error routes
  * the user to pricing.
  */
