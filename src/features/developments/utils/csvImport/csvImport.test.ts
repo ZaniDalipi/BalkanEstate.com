@@ -63,7 +63,7 @@ describe('buildImportRows', () => {
       floorLabel: 'Floor 1',
       unitNumber: 'A-101',
       features: ['corner', 'parking'],
-      fields: { beds: 2, baths: 1, totalArea: 64.5, price: 96000, unitType: 'apartment', availability: 'available', currency: 'EUR', orientation: 'South-east' },
+      fields: { beds: 2, baths: 1, totalArea: 64.5, price: 96000, unitType: 'apartment', availability: 'available', currency: 'EUR', orientation: 'southEast' },
     });
     expect(result.rows[0]).toMatchObject({ level: 0, floorLabel: 'Ground floor', fields: { unitType: 'retail' } });
   });
@@ -82,5 +82,30 @@ describe('buildImportRows', () => {
       { row: 5, code: 'noUnitNumber' },
       { row: 6, code: 'noFloor', value: 'X' },
     ]);
+  });
+});
+
+describe('fixed choices and euros', () => {
+  it('maps orientation and view words to the app values', async () => {
+    const { parseOrientation, parseView } = await import('./values');
+    expect(['South-east', 'SE', 'Jugoistok', 'Juglindje', 'Sjever', 'Perëndim', 'up'].map(parseOrientation)).toEqual(['southEast', 'southEast', 'southEast', 'southEast', 'north', 'west', null]);
+    expect(['Pogled na more', 'Pamje deti', 'Mal', 'Grad', 'volcano'].map(parseView)).toEqual(['sea', 'sea', 'mountain', 'city', null]);
+  });
+
+  it('reports unknown choices and non-euro prices instead of guessing', () => {
+    const table = parseCsv('Unit;Orientation;Price\nA1;up;100\nA2;South;80.000 lek\nA3;Jug;90.000 €');
+    const result = buildImportRows(table, guessColumns(table[0]), { defaultBuilding: 'B', floorNames: names });
+    expect(result.problems).toEqual([
+      { row: 2, code: 'noFloor', value: 'A1' },
+      { row: 3, code: 'noFloor', value: 'A2' },
+      { row: 4, code: 'noFloor', value: 'A3' },
+    ]);
+    const withFloors = parseCsv('Unit;Floor;Orientation;Price\nA1;1;up;100\nA2;1;South;80.000 lek\nA3;1;Jug;90.000 €');
+    const r2 = buildImportRows(withFloors, guessColumns(withFloors[0]), { defaultBuilding: 'B', floorNames: names });
+    expect(r2.problems).toEqual([
+      { row: 2, code: 'badChoice', field: 'orientation', value: 'up' },
+      { row: 3, code: 'notEuro', value: 'ALL' },
+    ]);
+    expect(r2.rows[0].fields).toMatchObject({ orientation: 'south', price: 90000, currency: 'EUR' });
   });
 });

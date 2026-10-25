@@ -400,7 +400,9 @@
       "villa": "Vila",
       "office": "Ured",
       "retail": "Trgovina",
-      "commercial": "Poslovni prostor"
+      "commercial": "Poslovni prostor",
+      "parking": "Parkiralište",
+      "storage": "Spremište"
     },
     "orientation": {
       "north": "Sjever",
@@ -742,8 +744,12 @@
         "nonNegative": "Unesite broj 0 ili veći",
         "integer": "Unesite cijeli broj",
         "currency": "Koristite troslovnu oznaku valute, npr. EUR",
-        "tooLong": "Ovaj tekst je predug"
-      }
+        "tooLong": "Ovaj tekst je predug",
+        "choice": "Odaberite jednu od opcija"
+      },
+      "notSet": "Nije postavljeno",
+      "euroOnly": "Sve cijene su u eurima (€).",
+      "linkFailed": "Jedinica je spremljena, ali oglas nije bilo moguće povezati: {{reason}}"
     },
     "delete": {
       "title": "Izbrisati jedinicu {{number}}?",
@@ -796,6 +802,15 @@
       "full": "Jedinica može imati najviše {{max}} fotografija. Može se dodati još {{remaining}}.",
       "addedTitle": "Fotografije dodane",
       "added": "Fotografija dodano u galeriju: {{n}}."
+    },
+    "prefill": {
+      "open": "Ispuni iz jednog od vaših oglasa",
+      "hint": "Odaberite oglas — njegovi se podaci kopiraju ovdje da ih ne tipkate dvaput.",
+      "loading": "Čitanje oglasa…",
+      "done": "Ispunjeno {{n}} polja iz „{{title}}”. Provjerite ih, a zatim spremite.",
+      "undo": "Poništi",
+      "rentSkipped": "Ovo je oglas za najam, pa mjesečna najamnina nije kopirana kao cijena.",
+      "link": "Poveži i ovaj oglas s jedinicom kad spremim"
     }
   },
   "manage": {
@@ -990,7 +1005,9 @@
       "noBuilding": "Nema zgrade",
       "noFloor": "Kat se ne može odrediti iz „{{value}}”",
       "badNumber": "{{field}}: „{{value}}” nije broj",
-      "badAvailability": "Nepoznata dostupnost „{{value}}”"
+      "badAvailability": "Nepoznata dostupnost „{{value}}”",
+      "badChoice": "{{field}}: „{{value}}” nije jedna od opcija",
+      "notEuro": "Cijene moraju biti u eurima (pronađeno {{value}})"
     },
     "done": "Uvoz završen",
     "doneSummary": "Nove jedinice: {{created}} · Ažurirane: {{updated}} · Novi katovi: {{floors}} · Nove zgrade: {{buildings}}",
@@ -1023,5 +1040,17 @@
     },
     "dropHintXlsx": "Excel (.xlsx) ili CSV — izravno iz Excela, Google Sheets ili Numbers. Stupci mogu biti bilo kojim redoslijedom i na bilo kojem jeziku; prepoznajemo ih.",
     "sheet": "Radni list"
+  },
+  "unitView": {
+    "sea": "More",
+    "mountain": "Planine",
+    "city": "Grad",
+    "park": "Park",
+    "garden": "Vrt",
+    "street": "Ulica",
+    "courtyard": "Dvorište",
+    "panoramic": "Panoramski",
+    "lake": "Jezero",
+    "river": "Rijeka"
   }
 }

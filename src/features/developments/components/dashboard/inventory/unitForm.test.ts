@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { diffUnitForm, unitToForm, validateUnitForm } from './unitForm';
+import { applyPrefill, diffUnitForm, unitToForm, validateUnitForm } from './unitForm';
 import { checkFloorplanFile } from './FloorplanUpload';
 import { editPermissions, permissionForField } from './permissions';
 import type { DevelopmentUnit } from '../../../types';
@@ -26,14 +26,16 @@ describe('unitForm', () => {
 
   it('treats numerically equal input as unchanged and parses changed numbers', () => {
     const f = unitToForm(UNIT);
-    expect(diffUnitForm(f, { ...f, netArea: '50.0', price: '1500' })).toEqual({ price: 1500 });
+    // A price change always carries the currency: residence prices are in euros.
+    expect(diffUnitForm(f, { ...f, netArea: '50.0', price: '1500' })).toEqual({ price: 1500, currency: 'EUR' });
   });
 
-  it('sends null for cleared optionals and upper-cases currency', () => {
+  it('sends null for cleared optionals and keeps prices in euros', () => {
     const f = unitToForm(UNIT);
-    expect(diffUnitForm(f, { ...f, price: '', currency: 'usd', description: '  hi ' })).toEqual({
+    expect(f.currency).toBe('EUR');
+    expect(diffUnitForm(f, { ...f, price: '', description: '  hi ' })).toEqual({
       price: null,
-      currency: 'USD',
+      currency: 'EUR',
       description: 'hi',
     });
   });
@@ -43,14 +45,34 @@ describe('unitForm', () => {
     expect(diffUnitForm(f, { ...f, features: ['b', 'a'] })).toEqual({});
   });
 
-  it('validates required, non-negative, integer and currency', () => {
+  it('validates required, non-negative, integer and the fixed choices', () => {
     const f = unitToForm(UNIT);
-    expect(validateUnitForm({ ...f, unitNumber: ' ', beds: '1.5', price: '-1', currency: 'EU' })).toEqual({
+    expect(validateUnitForm({ ...f, unitNumber: ' ', beds: '1.5', price: '-1', orientation: 'up', viewType: 'volcano' }, f)).toEqual({
       unitNumber: 'required',
       beds: 'integer',
       price: 'nonNegative',
-      currency: 'currency',
+      orientation: 'choice',
+      viewType: 'choice',
     });
+    // An older value already on the unit is not flagged until it is changed.
+    const legacy = unitToForm({ ...UNIT, orientation: 'S/SE' });
+    expect(validateUnitForm(legacy, legacy)).toEqual({});
+  });
+
+  it('fills the form from a listing and matches the floor by level', () => {
+    const f = unitToForm(UNIT);
+    const floors = [
+      { id: 'f1', buildingId: 'b1', level: 1 },
+      { id: 'f4', buildingId: 'b1', level: 4 },
+      { id: 'x4', buildingId: 'b2', level: 4 },
+    ] as never;
+    const { form, filled } = applyPrefill(
+      f,
+      { fields: { beds: 2, totalArea: 80, price: 1000, orientation: 'southEast', features: ['parking'] }, floorLevel: 4 },
+      floors
+    );
+    expect(form).toMatchObject({ beds: '2', totalArea: '80', price: '1000', orientation: 'southEast', features: ['parking'], floorId: 'f4' });
+    expect(filled).toEqual(['beds', 'totalArea', 'orientation', 'features', 'floorId']); // price was already 1000
   });
 });
 

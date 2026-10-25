@@ -27,7 +27,7 @@ export const ImportReview: React.FC<ImportReviewProps> = ({ prepared, preview, p
     t(`import.problem.${p.code}`, {
       field: p.field ? fieldLabel(t, p.field) : '',
       value: p.value ?? '',
-      defaultValue: { noUnitNumber: 'No unit number', noBuilding: 'No building', noFloor: 'Can’t tell the floor from “{{value}}”', badNumber: '{{field}}: “{{value}}” is not a number', badAvailability: 'Unknown availability “{{value}}”' }[p.code],
+      defaultValue: { noUnitNumber: 'No unit number', noBuilding: 'No building', noFloor: 'Can’t tell the floor from “{{value}}”', badNumber: '{{field}}: “{{value}}” is not a number', badAvailability: 'Unknown availability “{{value}}”', badChoice: '{{field}}: “{{value}}” is not one of the options', notEuro: 'Prices must be in euros (found {{value}})' }[p.code],
     });
   const problems = [...prepared.problems.map((p) => ({ row: p.row, text: problemText(p) })), ...(preview?.errors ?? []).map((e) => ({ row: e.row, text: e.message }))].sort((a, b) => a.row - b.row);
   const dash = isChecking ? '…' : '—';

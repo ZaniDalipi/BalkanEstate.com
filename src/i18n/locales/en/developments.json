@@ -376,7 +376,9 @@
       "villa": "Villa",
       "office": "Office",
       "retail": "Retail",
-      "commercial": "Commercial"
+      "commercial": "Commercial",
+      "parking": "Parking",
+      "storage": "Storage"
     },
     "orientation": {
       "north": "North",
@@ -736,8 +738,12 @@
         "nonNegative": "Enter a number of 0 or more",
         "integer": "Enter a whole number",
         "currency": "Use a 3-letter currency code, e.g. EUR",
-        "tooLong": "This text is too long"
-      }
+        "tooLong": "This text is too long",
+        "choice": "Choose one of the options"
+      },
+      "notSet": "Not set",
+      "euroOnly": "All prices are in euros (€).",
+      "linkFailed": "The unit was saved, but the listing could not be linked: {{reason}}"
     },
     "delete": {
       "title": "Delete unit {{number}}?",
@@ -790,6 +796,15 @@
       "full": "A unit can have at most {{max}} photos. {{remaining}} more can be added.",
       "addedTitle": "Photos added",
       "added": "Photos added to the gallery: {{n}}."
+    },
+    "prefill": {
+      "open": "Fill from one of your listings",
+      "hint": "Choose a listing — its details are copied here so you don’t type them twice.",
+      "loading": "Reading the listing…",
+      "done": "Filled {{n}} fields from “{{title}}”. Review them, then save.",
+      "undo": "Undo",
+      "rentSkipped": "This is a rental listing, so its monthly rent was not copied as the price.",
+      "link": "Also link this listing to the unit when I save"
     }
   },
   "manage": {
@@ -984,7 +999,9 @@
       "noBuilding": "No building",
       "noFloor": "Can’t tell the floor from “{{value}}”",
       "badNumber": "{{field}}: “{{value}}” is not a number",
-      "badAvailability": "Unknown availability “{{value}}”"
+      "badAvailability": "Unknown availability “{{value}}”",
+      "badChoice": "{{field}}: “{{value}}” is not one of the options",
+      "notEuro": "Prices must be in euros (found {{value}})"
     },
     "done": "Import finished",
     "doneSummary": "New units: {{created}} · Updated: {{updated}} · New floors: {{floors}} · New buildings: {{buildings}}",
@@ -1017,5 +1034,17 @@
     },
     "dropHintXlsx": "Excel (.xlsx) or CSV — straight from Excel, Google Sheets or Numbers. Columns can be in any order and language; we recognise them.",
     "sheet": "Worksheet"
+  },
+  "unitView": {
+    "sea": "Sea",
+    "mountain": "Mountains",
+    "city": "City",
+    "park": "Park",
+    "garden": "Garden",
+    "street": "Street",
+    "courtyard": "Courtyard",
+    "panoramic": "Panoramic",
+    "lake": "Lake",
+    "river": "River"
   }
 }

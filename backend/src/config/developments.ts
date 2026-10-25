@@ -125,6 +125,18 @@ export const isUnitFeature = (value: unknown): value is UnitFeature =>
   typeof value === 'string' && (UNIT_FEATURES as readonly string[]).includes(value);
 
 /**
+ * Fixed choices for a unit's outlook, shared with listings (Property uses the
+ * same orientation values) so the dashboard offers dropdowns and every write
+ * path — edit, create, import — accepts exactly these.
+ */
+export const UNIT_ORIENTATIONS = ['north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west', 'northWest'] as const;
+export const UNIT_VIEWS = ['sea', 'mountain', 'city', 'park', 'garden', 'street', 'courtyard', 'panoramic', 'lake', 'river'] as const;
+/** Unit types offered in the dashboard (other values written before stay valid). */
+export const UNIT_TYPES = ['apartment', 'studio', 'duplex', 'penthouse', 'townhouse', 'villa', 'office', 'retail', 'commercial', 'parking', 'storage'] as const;
+/** Every residence price is in euros. */
+export const UNIT_CURRENCY = 'EUR';
+
+/**
  * Floor kinds. Deliberately expressive because floor numbering differs across
  * the Balkans — do not assume floors start at 0 or share a naming convention.
  * The numeric `level` orders floors; the `kind` + `label` describe them.

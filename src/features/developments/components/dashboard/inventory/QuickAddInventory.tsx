@@ -10,7 +10,7 @@ import { AddUnitsForm } from './AddUnitsForm';
  * Inventory builder: add buildings, then floors (one or a range, named for
  * you), then units (numbered for you, one or several at a time).
  */
-export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ developmentId }) => {
+export const QuickAddInventory: React.FC<{ developmentId: string; role?: string }> = ({ developmentId, role }) => {
   const { t } = useTranslation('developments');
   const { buildings, floors } = useDevelopmentStructure(developmentId);
   const { createBuilding, createFloor, createUnit, isCreatingBuilding, isCreatingFloor, isCreatingUnit } = useInventoryMutations(developmentId);
@@ -48,7 +48,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string }> = ({ develop
         <AddFloorsForm buildings={buildings} floors={floors} createFloor={createFloor} isCreating={isCreatingFloor} onError={setError} />
       )}
       {buildings.length > 0 && floors.length > 0 && (
-        <AddUnitsForm developmentId={developmentId} buildings={buildings} floors={floors} createUnit={createUnit} isCreating={isCreatingUnit} onError={setError} />
+        <AddUnitsForm developmentId={developmentId} buildings={buildings} floors={floors} createUnit={createUnit} isCreating={isCreatingUnit} onError={setError} role={role} />
       )}
     </div>
   );

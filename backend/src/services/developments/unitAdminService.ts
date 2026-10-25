@@ -37,6 +37,7 @@ import { AuthorizationError, NotFoundError } from './developmentListingService';
 import { requireRefInDevelopment, toObjectId } from './developmentRefs';
 import { recordDevelopmentAudit, diffFields } from './developmentAudit';
 import { applyAvailabilityTransition, isDuplicateKeyError } from './developmentInventoryService';
+import { assertUnitValue } from './unitRules';
 import { resolveEffectiveAvailability, type AvailabilitySource } from './unitAvailability';
 
 const log = createLogger('UnitAdminService');
@@ -367,8 +368,10 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
         if (v.length > STRING_FIELDS[field]) {
           throw new ValidationError(`${field} must be at most ${STRING_FIELDS[field]} characters`);
         }
-        if (v) $set[field] = v;
-        else $unset[field] = '';
+        if (v) {
+          assertUnitValue(field, v);
+          $set[field] = field === 'currency' ? v.toUpperCase() : v;
+        } else $unset[field] = '';
       }
     } else if (field in REQUIRED_STRING_FIELDS) {
       if (typeof value !== 'string' || !value.trim()) throw new ValidationError(`${field} is required`);

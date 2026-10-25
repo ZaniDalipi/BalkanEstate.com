@@ -170,6 +170,35 @@ export const UNIT_FEATURES = [
 ] as const;
 export type UnitFeature = (typeof UNIT_FEATURES)[number];
 
+/** Fixed unit choices — mirror backend config/developments.ts (shared with listings). */
+export const UNIT_ORIENTATIONS = ['north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west', 'northWest'] as const;
+export const UNIT_VIEWS = ['sea', 'mountain', 'city', 'park', 'garden', 'street', 'courtyard', 'panoramic', 'lake', 'river'] as const;
+export const UNIT_TYPES = ['apartment', 'studio', 'duplex', 'penthouse', 'townhouse', 'villa', 'office', 'retail', 'commercial', 'parking', 'storage'] as const;
+/** Every residence price is in euros. */
+export const UNIT_CURRENCY = 'EUR';
+
+/** Unit fields read from one of the owner's listings ("Fill from a listing"). */
+export interface UnitPrefill {
+  listing: { id: string; title: string; imageUrl?: string; listingType: 'sale' | 'rent' };
+  fields: Partial<{
+    unitType: string;
+    beds: number;
+    baths: number;
+    livingRooms: number;
+    totalArea: number;
+    netArea: number;
+    balconies: number;
+    price: number;
+    pricePerSqm: number;
+    orientation: string;
+    viewType: string;
+    description: string;
+    features: UnitFeature[];
+  }>;
+  floorLevel?: number;
+  skipped: ('rentPrice' | 'negotiablePrice')[];
+}
+
 // --- Request/response payloads -------------------------------------------
 
 export interface CreateDevelopmentPayload {
@@ -230,8 +259,14 @@ export interface CreateUnitPayload {
   grossArea?: number;
   beds?: number;
   baths?: number;
+  livingRooms?: number;
+  balconies?: number;
+  orientation?: string;
+  viewType?: string;
+  description?: string;
   features?: string[];
   price?: number;
+  pricePerSqm?: number;
   currency?: string;
   availability?: UnitAvailability;
 }

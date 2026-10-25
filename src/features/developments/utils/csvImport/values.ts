@@ -124,3 +124,41 @@ export const parseCurrency = (raw: string): string | undefined => {
   const code = s.trim().toUpperCase();
   return /^[A-Z]{3}$/.test(code) ? code : undefined;
 };
+
+const ORIENTATIONS: [string, string[]][] = [
+  ['northEast', ['north east', 'northeast', 'ne', 'sjeveroistok', 'severoistok', 'veriulindje', 'verilindje', 'veri lindje', 'североисток', 'βορειοανατολικος', 'nord est']],
+  ['northWest', ['north west', 'northwest', 'nw', 'sjeverozapad', 'severozapad', 'veriperendim', 'veri perendim', 'северозапад', 'βορειοδυτικος', 'nord vest']],
+  ['southEast', ['south east', 'southeast', 'se', 'jugoistok', 'juglindje', 'jug lindje', 'југоисток', 'νοτιοανατολικος', 'sud est']],
+  ['southWest', ['south west', 'southwest', 'sw', 'jugozapad', 'jugperendim', 'jug perendim', 'југозапад', 'νοτιοδυτικος', 'sud vest']],
+  ['north', ['north', 'n', 'sjever', 'sever', 'veri', 'север', 'βορειος', 'nord']],
+  ['south', ['south', 's', 'jug', 'југ', 'νοτιος', 'sud']],
+  ['east', ['east', 'e', 'istok', 'lindje', 'исток', 'ανατολικος', 'est']],
+  ['west', ['west', 'w', 'zapad', 'perendim', 'запад', 'δυτικος', 'vest']],
+];
+
+/** "South-east", "SE", "Jugoistok", "Juglindje" → 'southEast'. */
+export const parseOrientation = (raw: string): string | null | undefined => {
+  const s = clean(raw);
+  if (!s) return undefined;
+  return ORIENTATIONS.find(([, words]) => words.some((w) => clean(w) === s))?.[0] ?? null;
+};
+
+const VIEWS: [string, string[]][] = [
+  ['sea', ['sea', 'sea view', 'more', 'pogled na more', 'det', 'deti', 'pamje deti', 'θαλασσα', 'mare']],
+  ['mountain', ['mountain', 'mountains', 'planina', 'mal', 'mali', 'pamje mali', 'βουνο', 'munte']],
+  ['city', ['city', 'grad', 'qytet', 'qyteti', 'πολη', 'oras']],
+  ['park', ['park', 'parku', 'parc', 'παρκο']],
+  ['garden', ['garden', 'basta', 'vrt', 'kopsht', 'κηπος', 'gradina']],
+  ['street', ['street', 'ulica', 'rruga', 'δρομος', 'strada']],
+  ['courtyard', ['courtyard', 'dvoriste', 'oborr', 'αυλη', 'curte']],
+  ['panoramic', ['panoramic', 'panorama', 'panoramski', 'panoramike', 'πανοραμικη']],
+  ['lake', ['lake', 'jezero', 'liqen', 'λιμνη', 'lac']],
+  ['river', ['river', 'rijeka', 'reka', 'lumi', 'ποταμι', 'rau']],
+];
+
+/** "Pogled na more", "Pamje deti", "Sea" → 'sea'. */
+export const parseView = (raw: string): string | null | undefined => {
+  const s = clean(raw);
+  if (!s) return undefined;
+  return VIEWS.find(([, words]) => words.some((w) => clean(w) === s))?.[0] ?? null;
+};

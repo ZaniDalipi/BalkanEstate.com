@@ -12,6 +12,9 @@ vi.mock('../../../api/developmentsApi', () => ({
   updateUnit: vi.fn(),
   deleteUnit: vi.fn(),
   uploadUnitFloorplan: vi.fn(),
+  getUnitPrefill: vi.fn(),
+  getAttachableListings: vi.fn(),
+  attachListing: vi.fn(),
 }));
 
 import * as api from '../../../api/developmentsApi';
@@ -73,7 +76,8 @@ describe('UnitEditDialog', () => {
     await userEvent.clear(number);
     await userEvent.type(number, 'A1b');
     await userEvent.clear(field('unit.beds'));
-    await userEvent.clear(field('unit.orientation'));
+    // Orientation is a dropdown now; "Not set" clears it.
+    await userEvent.selectOptions(field('unit.orientation'), '');
     await userEvent.click(screen.getByLabelText('feature.duplex'));
     await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
 
@@ -109,14 +113,18 @@ describe('UnitEditDialog', () => {
     expect(alerts.some((a) => a.textContent?.includes('inventory.edit.forbiddenPrice'))).toBe(true);
     // The price field itself is flagged too.
     expect(field('unit.price')).toHaveAttribute('aria-invalid', 'true');
-    expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { price: 130000 });
+    // Prices are always sent in euros.
+    expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { price: 130000, currency: 'EUR' });
     expect(onClose).not.toHaveBeenCalled();
   });
 
   it('disables price fields for a role without price.change', () => {
     renderDialog('editor');
     expect(field('unit.price')).toBeDisabled();
-    expect(field('inventory.edit.currency')).toBeDisabled();
+    expect(field('inventory.edit.pricePerSqm')).toBeDisabled();
+    // No currency field: every price is in euros.
+    expect(screen.queryByLabelText(/inventory\.edit\.currency/)).not.toBeInTheDocument();
+    expect(screen.getByText('inventory.edit.euroOnly')).toBeInTheDocument();
     expect(field('unit.number')).not.toBeDisabled();
     expect(screen.getByText('inventory.edit.priceLocked')).toBeInTheDocument();
   });
@@ -128,5 +136,36 @@ describe('UnitEditDialog', () => {
     await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
     expect(api.updateUnit).not.toHaveBeenCalled();
     expect(screen.getAllByText(/inventory\.edit\.errors\./).length).toBeGreaterThan(0);
+  });
+
+  it('offers fixed choices for type, orientation and view', () => {
+    renderDialog();
+    const options = (label: string) => Array.from((field(label) as unknown as HTMLSelectElement).options).map((o) => o.value);
+    expect(options('unit.type')).toEqual(expect.arrayContaining(['apartment', 'studio', 'penthouse', 'office']));
+    expect(options('unit.orientation')).toEqual(['', 'north', 'northEast', 'east', 'southEast', 'south', 'southWest', 'west', 'northWest']);
+    expect(options('inventory.edit.viewType')).toEqual(expect.arrayContaining(['', 'sea', 'mountain', 'city', 'courtyard']));
+  });
+
+  it('fills the form from a listing and links it on save', async () => {
+    vi.mocked(api.getUnitPrefill).mockResolvedValue({
+      listing: { id: 'l9', title: 'Sea view flat', listingType: 'sale' },
+      fields: { beds: 3, totalArea: 95, orientation: 'southEast', viewType: 'sea', features: ['sea_view'] },
+      skipped: [],
+    });
+    vi.mocked(api.getAttachableListings).mockResolvedValue({ listings: [{ id: 'l9', title: 'Sea view flat', price: 200000, listingType: 'sale', city: 'Budva' }] } as never);
+    vi.mocked(api.updateUnit).mockResolvedValue({} as never);
+    vi.mocked(api.attachListing).mockResolvedValue({} as never);
+    renderDialog();
+
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.prefill.open' }));
+    await userEvent.click(await screen.findByRole('button', { name: /Sea view flat/ }));
+    expect(await screen.findByText('inventory.prefill.done')).toBeInTheDocument();
+    expect(field('unit.beds')).toHaveValue(3);
+    expect((field('unit.orientation') as unknown as HTMLSelectElement).value).toBe('southEast');
+
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+    await waitFor(() => expect(api.attachListing).toHaveBeenCalledWith('dev1', 'u1', 'l9', false));
+    expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', expect.objectContaining({ beds: 3, totalArea: 95, orientation: 'southEast', viewType: 'sea' }));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 });

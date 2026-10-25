@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { assertUnitValue } from './unitRules';
 import DevelopmentBuilding, {
   IDevelopmentBuilding,
 } from '../../models/DevelopmentBuilding';
@@ -13,6 +14,7 @@ import {
   UNIT_AVAILABILITY_STATES,
   UNIT_VISIBILITIES,
   PRICE_VISIBILITIES,
+  UNIT_CURRENCY,
   isUnitAvailability,
   isUnitFeature,
   isUnitVisibility,
@@ -225,6 +227,10 @@ export const createUnit = async (
   if (input.priceVisibility !== undefined && !isPriceVisibility(input.priceVisibility)) {
     throw new ValidationError(`priceVisibility must be one of: ${PRICE_VISIBILITIES.join(', ')}`);
   }
+  for (const field of ['orientation', 'viewType', 'currency'] as const) {
+    const v = text(input[field]);
+    if (v) assertUnitValue(field, v);
+  }
   const placement = await resolveUnitPlacement(developmentId, input);
 
   try {
@@ -245,12 +251,12 @@ export const createUnit = async (
       terraceArea: input.terraceArea,
       balconies: input.balconies,
       terraces: input.terraces,
-      orientation: input.orientation,
-      viewType: input.viewType,
+      orientation: text(input.orientation) || undefined,
+      viewType: text(input.viewType) || undefined,
       description: input.description,
       features: sanitizeFeatures(input.features),
       price: input.price,
-      currency: input.currency,
+      currency: UNIT_CURRENCY,
       pricePerSqm: input.pricePerSqm,
       availability: input.availability ?? 'not_released',
       visibility: input.visibility ?? 'public',

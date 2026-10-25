@@ -23,7 +23,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ developmentId, s
           </h2>
           {roleCan(role, 'unit.manage') && <ImportUnitsButton developmentId={developmentId} />}
         </div>
-        <QuickAddInventory developmentId={developmentId} />
+        <QuickAddInventory developmentId={developmentId} role={role} />
       </section>
       <section aria-labelledby="units-heading">
         <h2 id="units-heading" className="mb-3 text-base font-semibold text-slate-900">

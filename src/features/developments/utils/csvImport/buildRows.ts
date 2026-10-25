@@ -6,7 +6,7 @@
  */
 import { floorLabelFor, type FloorNames } from '../inventoryNaming';
 import { IGNORE, type ColumnTarget, type ImportField } from './fields';
-import { levelFromUnitNumber, parseAvailability, parseCurrency, parseFeatures, parseLevel, parseNumber, parseUnitType } from './values';
+import { levelFromUnitNumber, parseAvailability, parseCurrency, parseFeatures, parseLevel, parseNumber, parseOrientation, parseUnitType, parseView } from './values';
 
 export interface ImportRowPayload {
   row: number;
@@ -18,7 +18,7 @@ export interface ImportRowPayload {
   fields: Record<string, number | string>;
 }
 
-export type ProblemCode = 'noUnitNumber' | 'noFloor' | 'badNumber' | 'badAvailability' | 'noBuilding';
+export type ProblemCode = 'noUnitNumber' | 'noFloor' | 'badNumber' | 'badAvailability' | 'noBuilding' | 'badChoice' | 'notEuro';
 export interface ImportProblem {
   row: number;
   code: ProblemCode;
@@ -36,7 +36,7 @@ export interface PreparedImport {
 }
 
 const NUMERIC: ImportField[] = ['beds', 'baths', 'livingRooms', 'totalArea', 'netArea', 'terraceArea', 'balconies', 'price', 'pricePerSqm'];
-const TEXT: ImportField[] = ['orientation', 'viewType', 'description'];
+const TEXT: ImportField[] = ['description'];
 
 export const buildImportRows = (
   table: string[][],
@@ -75,7 +75,14 @@ export const buildImportRows = (
     const availability = parseAvailability(at(cells, 'availability'));
     if (availability === null) return void problems.push({ row, code: 'badAvailability', value: at(cells, 'availability') });
     if (availability) fields.availability = availability;
+    for (const [field, parse] of [['orientation', parseOrientation], ['viewType', parseView]] as const) {
+      const v = parse(at(cells, field));
+      if (v === null) return void problems.push({ row, code: 'badChoice', field, value: at(cells, field) });
+      if (v) fields[field] = v;
+    }
+    // Residence prices are in euros; a price written in another currency is not guessed at.
     const currency = parseCurrency(at(cells, 'currency')) ?? (at(cells, 'price') ? parseCurrency(at(cells, 'price')) : undefined);
+    if (currency && currency !== 'EUR') return void problems.push({ row, code: 'notEuro', value: currency });
     if (currency) fields.currency = currency;
     const features = parseFeatures(at(cells, 'features'));
 

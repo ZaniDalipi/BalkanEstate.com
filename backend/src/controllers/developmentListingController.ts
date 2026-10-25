@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { getUnitPrefill } from '../services/developments/unitPrefillService';
 import { IUser } from '../models/User';
 import Property from '../models/Property';
 import Agency from '../models/Agency';
@@ -199,5 +200,17 @@ export const listControllableListings = async (req: Request, res: Response): Pro
     });
   } catch (error) {
     sendServiceError(res, error, 'list controllable listings');
+  }
+};
+
+/**
+ * GET /api/dashboard/developments/:developmentId/listings/:listingId/unit-prefill
+ * Unit fields read from one of the caller's own listings ("Fill from a listing").
+ */
+export const unitPrefillFromListing = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await getUnitPrefill(currentUser(req), req.params.listingId));
+  } catch (error) {
+    sendServiceError(res, error, 'unit prefill from listing');
   }
 };

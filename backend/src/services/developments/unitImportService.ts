@@ -17,6 +17,7 @@ import DevelopmentFloor from '../../models/DevelopmentFloor';
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import {
   UNIT_AVAILABILITY_STATES,
+  UNIT_CURRENCY,
   roleHasPermission,
   type DevelopmentPermission,
   type DevelopmentRole,
@@ -27,6 +28,7 @@ import { AuthorizationError } from './developmentListingService';
 import { recordDevelopmentAudit } from './developmentAudit';
 import { applyAvailabilityTransition, createBuilding, sanitizeFeatures } from './developmentInventoryService';
 import { permissionForUnitField } from './unitAdminService';
+import { choiceProblem, currencyProblem } from './unitRules';
 
 type Oid = mongoose.Types.ObjectId;
 
@@ -89,8 +91,15 @@ export const normalizeImportRow = (raw: unknown, index: number): ImportRow | { r
   if (fields.availability && !(UNIT_AVAILABILITY_STATES as readonly string[]).includes(fields.availability)) {
     return { row, message: `Unknown availability "${fields.availability}"` };
   }
-  if (fields.currency && !/^[A-Za-z]{3}$/.test(fields.currency)) return { row, message: 'Currency must be a 3-letter code such as EUR' };
-  if (fields.currency) fields.currency = fields.currency.toUpperCase();
+  if (fields.currency) {
+    const problem = currencyProblem(fields.currency);
+    if (problem) return { row, message: problem };
+    fields.currency = UNIT_CURRENCY;
+  }
+  for (const f of ['orientation', 'viewType'] as const) {
+    const problem = fields[f] ? choiceProblem(f, fields[f] as string) : null;
+    if (problem) return { row, message: problem };
+  }
   const floorLabel = str(r.floorLabel, 60) || undefined;
   const features = Array.isArray(r.features) ? sanitizeFeatures(r.features) : undefined;
   return { row, building, level, unitNumber, floorLabel, features, fields };
@@ -207,6 +216,7 @@ export const importUnits = async (params: {
       unitType: r.fields.unitType || 'apartment',
       ...r.fields,
       features: r.features ?? [],
+      currency: UNIT_CURRENCY,
       availability: (r.fields.availability as UnitAvailability) || 'not_released',
       visibility: 'public',
       priceVisibility: 'public',

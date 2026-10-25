@@ -400,7 +400,9 @@
       "villa": "Vilă",
       "office": "Birou",
       "retail": "Spațiu comercial",
-      "commercial": "Comercial"
+      "commercial": "Comercial",
+      "parking": "Parcare",
+      "storage": "Depozitare"
     },
     "orientation": {
       "north": "Nord",
@@ -742,8 +744,12 @@
         "nonNegative": "Introduceți un număr de 0 sau mai mare",
         "integer": "Introduceți un număr întreg",
         "currency": "Folosiți un cod de monedă din 3 litere, de ex. EUR",
-        "tooLong": "Acest text este prea lung"
-      }
+        "tooLong": "Acest text este prea lung",
+        "choice": "Alegeți una dintre opțiuni"
+      },
+      "notSet": "Nesetat",
+      "euroOnly": "Toate prețurile sunt în euro (€).",
+      "linkFailed": "Unitatea a fost salvată, dar anunțul nu a putut fi legat: {{reason}}"
     },
     "delete": {
       "title": "Ștergeți unitatea {{number}}?",
@@ -796,6 +802,15 @@
       "full": "O unitate poate avea cel mult {{max}} fotografii. Se mai pot adăuga {{remaining}}.",
       "addedTitle": "Fotografii adăugate",
       "added": "Fotografii adăugate în galerie: {{n}}."
+    },
+    "prefill": {
+      "open": "Completează dintr-unul dintre anunțurile dvs.",
+      "hint": "Alegeți un anunț — detaliile lui sunt copiate aici ca să nu le scrieți de două ori.",
+      "loading": "Se citește anunțul…",
+      "done": "Au fost completate {{n}} câmpuri din „{{title}}”. Verificați-le, apoi salvați.",
+      "undo": "Anulează",
+      "rentSkipped": "Acesta este un anunț de închiriere, așa că chiria lunară nu a fost copiată ca preț.",
+      "link": "Leagă și acest anunț de unitate când salvez"
     }
   },
   "manage": {
@@ -990,7 +1005,9 @@
       "noBuilding": "Lipsește clădirea",
       "noFloor": "Etajul nu reiese din „{{value}}”",
       "badNumber": "{{field}}: „{{value}}” nu este un număr",
-      "badAvailability": "Disponibilitate necunoscută „{{value}}”"
+      "badAvailability": "Disponibilitate necunoscută „{{value}}”",
+      "badChoice": "{{field}}: „{{value}}” nu este una dintre opțiuni",
+      "notEuro": "Prețurile trebuie să fie în euro (găsit {{value}})"
     },
     "done": "Import finalizat",
     "doneSummary": "Unități noi: {{created}} · Actualizate: {{updated}} · Etaje noi: {{floors}} · Clădiri noi: {{buildings}}",
@@ -1023,5 +1040,17 @@
     },
     "dropHintXlsx": "Excel (.xlsx) sau CSV — direct din Excel, Google Sheets sau Numbers. Coloanele pot fi în orice ordine și limbă; le recunoaștem.",
     "sheet": "Foaie de calcul"
+  },
+  "unitView": {
+    "sea": "Mare",
+    "mountain": "Munți",
+    "city": "Oraș",
+    "park": "Parc",
+    "garden": "Grădină",
+    "street": "Stradă",
+    "courtyard": "Curte",
+    "panoramic": "Panoramică",
+    "lake": "Lac",
+    "river": "Râu"
   }
 }

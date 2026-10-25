@@ -33,6 +33,7 @@ import type {
   NearbySuggestion,
   ListingResidence,
   UnitImportSummary,
+  UnitPrefill,
   ControllableListing,
   DashboardUnit,
   UnitListQuery,
@@ -501,6 +502,10 @@ export const getAttachableListings = (
     { requiresAuth: true }
   );
 };
+
+/** Unit fields read from one of the caller's own listings. */
+export const getUnitPrefill = (developmentId: string, listingId: string): Promise<UnitPrefill> =>
+  apiRequest<UnitPrefill>(`${DASH}/${developmentId}/listings/${encodeURIComponent(listingId)}/unit-prefill`, { requiresAuth: true });
 
 // --- Follow & alerts (signed-in buyers) -----------------------------------
 

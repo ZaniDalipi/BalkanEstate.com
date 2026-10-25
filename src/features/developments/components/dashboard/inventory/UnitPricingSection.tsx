@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { UNIT_FEATURES } from '../../../types';
-import { NumberField, SelectField, TextField, type UnitSectionProps } from './UnitFieldControls';
+import { NumberField, SelectField, type UnitSectionProps } from './UnitFieldControls';
 
 /** Price, currency, price per m² and whether the price is public. */
 export const UnitPricingSection: React.FC<UnitSectionProps> = (p) => {
@@ -12,6 +12,7 @@ export const UnitPricingSection: React.FC<UnitSectionProps> = (p) => {
   return (
     <fieldset className="rounded-xl border border-slate-200 p-3">
       <legend className="px-1 text-sm font-semibold text-slate-900">{t('inventory.edit.pricing', 'Pricing')}</legend>
+      <p className="mb-2 text-xs text-slate-600">{t('inventory.edit.euroOnly', 'All prices are in euros (€).')}</p>
       {d && (
         <p className="mb-2 flex items-center gap-1.5 text-xs text-slate-600">
           <Lock className="h-3.5 w-3.5" aria-hidden="true" />
@@ -19,9 +20,8 @@ export const UnitPricingSection: React.FC<UnitSectionProps> = (p) => {
         </p>
       )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <NumberField {...p} name="price" label={t('unit.price', 'Price')} step="1" disabled={d} />
-        <TextField {...p} name="currency" label={t('inventory.edit.currency', 'Currency')} disabled={d} maxLength={3} />
-        <NumberField {...p} name="pricePerSqm" label={t('inventory.edit.pricePerSqm', 'Price per m²')} step="0.01" disabled={d} />
+        <NumberField {...p} name="price" label={t('unit.price', 'Price')} suffix="€" step="1" disabled={d} />
+        <NumberField {...p} name="pricePerSqm" label={t('inventory.edit.pricePerSqm', 'Price per m²')} suffix="€" step="1" disabled={d} />
         <SelectField
           {...p}
           name="priceVisibility"

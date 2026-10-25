@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { AVAILABILITY_ORDER } from '../../../utils/availability';
 import type { DevelopmentBuilding, DevelopmentFloor } from '../../../types';
 import { NumberField, SelectField, TextField, type UnitSectionProps } from './UnitFieldControls';
+import { useUnitChoices } from './useUnitChoices';
 
-const UNIT_TYPE_SUGGESTIONS = ['apartment', 'studio', 'duplex', 'penthouse', 'townhouse', 'villa', 'office', 'retail', 'parking', 'storage'];
 
 const Fieldset: React.FC<{ legend: string; children: React.ReactNode }> = ({ legend, children }) => (
   <fieldset className="rounded-xl border border-slate-200 p-3">
@@ -21,6 +21,7 @@ interface IdentityProps extends UnitSectionProps {
 /** Unit number, type, location (floor list filtered by building), status and visibility. */
 export const UnitIdentitySection: React.FC<IdentityProps> = ({ buildings, floors, ...p }) => {
   const { t } = useTranslation('developments');
+  const choices = useUnitChoices();
   const floorOptions = floors
     .filter((f) => f.buildingId === p.form.buildingId)
     .sort((a, b) => a.level - b.level)
@@ -29,12 +30,7 @@ export const UnitIdentitySection: React.FC<IdentityProps> = ({ buildings, floors
   return (
     <Fieldset legend={t('inventory.edit.identity', 'Unit')}>
       <TextField {...p} name="unitNumber" label={t('unit.number', 'Unit number')} required disabled={p.disabled.unit} maxLength={40} />
-      <TextField {...p} name="unitType" label={t('unit.type', 'Type')} required disabled={p.disabled.unit} list="unit-type-suggestions" maxLength={40} />
-      <datalist id="unit-type-suggestions">
-        {UNIT_TYPE_SUGGESTIONS.map((s) => (
-          <option key={s} value={s} />
-        ))}
-      </datalist>
+      <SelectField {...p} name="unitType" label={t('unit.type', 'Type')} required disabled={p.disabled.unit} options={choices.types(p.form.unitType)} />
       <SelectField
         {...p}
         set={(key, value) => {
@@ -82,6 +78,7 @@ export const UnitIdentitySection: React.FC<IdentityProps> = ({ buildings, floors
 /** Rooms, areas and outlook. */
 export const UnitSizeSection: React.FC<UnitSectionProps> = (p) => {
   const { t } = useTranslation('developments');
+  const choices = useUnitChoices();
   const d = p.disabled.unit;
   return (
     <Fieldset legend={t('inventory.edit.layout', 'Layout & size')}>
@@ -94,8 +91,8 @@ export const UnitSizeSection: React.FC<UnitSectionProps> = (p) => {
       <NumberField {...p} name="terraceArea" label={t('inventory.edit.terraceArea', 'Terrace area')} suffix="m²" step="0.01" disabled={d} />
       <NumberField {...p} name="balconies" label={t('inventory.edit.balconies', 'Balconies')} disabled={d} />
       <NumberField {...p} name="terraces" label={t('inventory.edit.terraces', 'Terraces')} disabled={d} />
-      <TextField {...p} name="orientation" label={t('unit.orientation', 'Orientation')} disabled={d} maxLength={60} />
-      <TextField {...p} name="viewType" label={t('inventory.edit.viewType', 'View')} disabled={d} maxLength={60} />
+      <SelectField {...p} name="orientation" label={t('unit.orientation', 'Orientation')} disabled={d} options={choices.orientations(p.form.orientation)} placeholder={t('inventory.edit.notSet', 'Not set')} />
+      <SelectField {...p} name="viewType" label={t('inventory.edit.viewType', 'View')} disabled={d} options={choices.views(p.form.viewType)} placeholder={t('inventory.edit.notSet', 'Not set')} />
     </Fieldset>
   );
 };

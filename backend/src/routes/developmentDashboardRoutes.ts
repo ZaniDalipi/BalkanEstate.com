@@ -43,6 +43,7 @@ import {
   previewConflicts,
   bulkAttachListings,
   listControllableListings,
+  unitPrefillFromListing,
 } from '../controllers/developmentListingController';
 import {
   upsertSceneImage,
@@ -320,6 +321,14 @@ router.post(
   developmentAuth,
   requireDevelopmentPermission('listing.attach'),
   attachListing
+);
+// Unit fields copied from one of the caller's own listings (unit editor).
+router.get(
+  '/:developmentId/listings/:listingId/unit-prefill',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('unit.manage'),
+  unitPrefillFromListing
 );
 // The caller's controllable listings, for the scene editor's listing picker.
 router.get(

@@ -400,7 +400,9 @@
       "villa": "Vilë",
       "office": "Zyrë",
       "retail": "Dyqan",
-      "commercial": "Komerciale"
+      "commercial": "Komerciale",
+      "parking": "Parkim",
+      "storage": "Depo"
     },
     "orientation": {
       "north": "Veri",
@@ -736,8 +738,12 @@
         "nonNegative": "Shkruani një numër 0 ose më të madh",
         "integer": "Shkruani një numër të plotë",
         "currency": "Përdorni një kod monedhe me 3 shkronja, p.sh. EUR",
-        "tooLong": "Ky tekst është shumë i gjatë"
-      }
+        "tooLong": "Ky tekst është shumë i gjatë",
+        "choice": "Zgjidhni një nga opsionet"
+      },
+      "notSet": "E pacaktuar",
+      "euroOnly": "Të gjitha çmimet janë në euro (€).",
+      "linkFailed": "Njësia u ruajt, por njoftimi nuk mund të lidhej: {{reason}}"
     },
     "delete": {
       "title": "Të fshihet njësia {{number}}?",
@@ -790,6 +796,15 @@
       "full": "Një njësi mund të ketë deri në {{max}} foto. Mund të shtohen edhe {{remaining}}.",
       "addedTitle": "Fotot u shtuan",
       "added": "Foto të shtuara në galeri: {{n}}."
+    },
+    "prefill": {
+      "open": "Plotëso nga një prej njoftimeve tuaja",
+      "hint": "Zgjidhni një njoftim — të dhënat e tij kopjohen këtu që të mos i shkruani dy herë.",
+      "loading": "Duke lexuar njoftimin…",
+      "done": "U plotësuan {{n}} fusha nga “{{title}}”. Kontrollojini, pastaj ruani.",
+      "undo": "Zhbëj",
+      "rentSkipped": "Ky është njoftim me qira, prandaj qiraja mujore nuk u kopjua si çmim.",
+      "link": "Lidhe edhe këtë njoftim me njësinë kur të ruaj"
     }
   },
   "manage": {
@@ -984,7 +999,9 @@
       "noBuilding": "Mungon ndërtesa",
       "noFloor": "Kati nuk kuptohet nga “{{value}}”",
       "badNumber": "{{field}}: “{{value}}” nuk është numër",
-      "badAvailability": "Disponueshmëri e panjohur “{{value}}”"
+      "badAvailability": "Disponueshmëri e panjohur “{{value}}”",
+      "badChoice": "{{field}}: “{{value}}” nuk është një nga opsionet",
+      "notEuro": "Çmimet duhet të jenë në euro (u gjet {{value}})"
     },
     "done": "Importimi përfundoi",
     "doneSummary": "Njësi të reja: {{created}} · Të përditësuara: {{updated}} · Kate të reja: {{floors}} · Ndërtesa të reja: {{buildings}}",
@@ -1017,5 +1034,17 @@
     },
     "dropHintXlsx": "Excel (.xlsx) ose CSV — direkt nga Excel, Google Sheets ose Numbers. Kolonat mund të jenë në çdo renditje dhe gjuhë; ne i njohim.",
     "sheet": "Fleta"
+  },
+  "unitView": {
+    "sea": "Det",
+    "mountain": "Mal",
+    "city": "Qytet",
+    "park": "Park",
+    "garden": "Kopsht",
+    "street": "Rrugë",
+    "courtyard": "Oborr",
+    "panoramic": "Panoramike",
+    "lake": "Liqen",
+    "river": "Lumë"
   }
 }

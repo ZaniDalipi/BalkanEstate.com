@@ -312,6 +312,21 @@ aspect ratio, you'll be offered **Clear regions**.
 New regions start unlinked. Saving and publishing are blocked until every region
 is valid and linked.
 
+**Fill a unit from one of your listings:** Inventory → **Edit unit** (or the
+*Add units* form) → **Fill from one of your listings**. Pick a listing and its
+type, rooms, areas, price (sale listings only — a monthly rent is not copied),
+orientation, view, description and features fill the form, and its floor is
+chosen when the building has that level. Review, then save; **Undo** restores
+the form. Tick *Also link this listing to the unit* and it is attached on save
+(the same conflict checks as Linked listings). Only listings you control can be
+read (`GET …/listings/:listingId/unit-prefill`, `unitPrefillService.ts`).
+
+**Fixed choices and euros:** unit type, orientation (8 directions, the same as
+listings) and view are dropdowns; the server accepts only those orientation and
+view values (`unitRules.ts`, used by edit, create and import). All residence
+prices are in euros: there is no currency field, new and imported units are
+stored in EUR, and any other currency is rejected with a clear message.
+
 **Hide a unit or its price:** Inventory → **Edit unit** → *Visibility* or *Price
 shown to buyers*.
 
