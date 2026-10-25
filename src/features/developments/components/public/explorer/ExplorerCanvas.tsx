@@ -6,10 +6,13 @@ import type { DevelopmentBuilding, Hotspot, PublicSceneView, PublicUnit } from '
 import { usePanZoom } from '../../../hooks/usePanZoom';
 import { AvailabilityPatterns } from './AvailabilityPatterns';
 import { BuildingLabels } from './BuildingLabels';
+import { canvasSize } from './canvasSize';
+import { FocusPulse } from './FocusPulse';
 import { HotspotShape } from './HotspotShape';
 import { RegionCard } from './RegionCard';
 import { ZoomControls } from './ZoomControls';
 import type { RegionDisplayMode } from './regionPaint';
+import { useFlyFocus, type ExplorerFocus } from './useFlyFocus';
 import { useHotspotInteraction } from './useHotspotInteraction';
 import { useRegionCard, type BuildingFacts } from './useRegionCard';
 import { useUnitText } from './useUnitText';
@@ -26,6 +29,9 @@ export interface ExplorerCanvasProps {
   mode?: RegionDisplayMode;
   /** Fill the viewport (pseudo full-screen): fit the image inside it. */
   fullscreen?: boolean;
+  /** Region to glide to and highlight (the budget helper); `onFocusArrive` fires once there. */
+  focus?: ExplorerFocus;
+  onFocusArrive?: (h: Hotspot) => void;
   className?: string;
 }
 
@@ -45,6 +51,8 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   onActivate,
   mode = 'clean',
   fullscreen,
+  focus,
+  onFocusArrive,
   className,
 }) => {
   const { t } = useTranslation('developments');
@@ -57,21 +65,10 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
 
   const hotspots = useMemo(() => [...view.hotspots].sort((a, b) => (a.z ?? 0) - (b.z ?? 0)), [view.hotspots]);
   const hovered = hover ? hotspots.find((h) => h.id === hover.id) : undefined;
+  const focused = focus ? hotspots.find((h) => h.id === focus.hotspotId) : undefined;
+  useFlyFocus(focus, hotspots, pz.flyTo, onFocusArrive);
 
-  const describe = (h: Hotspot): string | undefined => {
-    if (h.linkType === 'unit') {
-      const u = unitsById.get(h.linkId);
-      return u ? txt.ariaLabel(u) : h.label;
-    }
-    if (h.linkType === 'building') return txt.buildingLabel(h, buildingsById?.get(h.linkId));
-    if (h.linkType === 'floor') return h.label || t('scene.linkTypes.floor', 'Floor');
-    if (h.linkType === 'listing') return h.label || t('unit.viewListing', 'View listing');
-    return h.label;
-  };
-
-  const sizeStyle: React.CSSProperties = fullscreen
-    ? { aspectRatio: `${W} / ${H}`, width: `min(100vw, calc(100dvh * ${W / H}))` }
-    : { aspectRatio: `${W} / ${H}`, width: `min(100%, calc(min(82dvh, 100dvh - 13rem) * ${W / H}))` };
+  const sizeStyle = canvasSize(W, H, fullscreen);
   const card = hovered ? cardFor(hovered) : undefined;
 
   return (
@@ -111,12 +108,13 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
                 matched={unit && matchedIds ? matchedIds.has(unit.id) : undefined}
                 mode={mode}
                 active={hover?.id === h.id}
-                label={describe(h)}
+                label={txt.hotspotLabel(h, unitsById, buildingsById)}
                 interactive={interactive}
                 {...bind(h)}
               />
             );
           })}
+          {focused && <FocusPulse hotspot={focused} width={W} height={H} />}
         </svg>
         <BuildingLabels
           hotspots={hotspots}

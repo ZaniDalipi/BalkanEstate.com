@@ -55,5 +55,20 @@ export function useUnitText() {
     [t]
   );
 
-  return { title, bedrooms, price, area, ariaLabel, buildingLabel, availability };
+  /** Accessible name for any region on the picture. */
+  const hotspotLabel = useCallback(
+    (h: Hotspot, unitsById: Map<string, PublicUnit>, buildingsById?: Map<string, DevelopmentBuilding>): string | undefined => {
+      if (h.linkType === 'unit') {
+        const u = unitsById.get(h.linkId);
+        return u ? ariaLabel(u) : h.label;
+      }
+      if (h.linkType === 'building') return buildingLabel(h, buildingsById?.get(h.linkId));
+      if (h.linkType === 'floor') return h.label || t('scene.linkTypes.floor', 'Floor');
+      if (h.linkType === 'listing') return h.label || t('unit.viewListing', 'View listing');
+      return h.label;
+    },
+    [ariaLabel, buildingLabel, t]
+  );
+
+  return { title, bedrooms, price, area, ariaLabel, buildingLabel, hotspotLabel, availability };
 }

@@ -437,7 +437,9 @@
     },
     "showAvailability": "Prikaži dostupnost",
     "noUnitsInBuilding": "Za ovu zgradu još nema navedenih stanova.",
-    "stackingPlan": "Stanovi po spratovima"
+    "stackingPlan": "Stanovi po spratovima",
+    "unmarkedNote": "Stanovi još nijesu označeni na ovoj slici — odaberite jedan sprat po sprat ispod.",
+    "noUnitsHere": "U ovoj zgradi još nema objavljenih stanova."
   },
   "feature": {
     "big_terrace": "Sa velikom terasom",
@@ -1061,5 +1063,33 @@
     "units_one": "{{count}} jedinica",
     "units_few": "{{count}} jedinice",
     "units_other": "{{count}} jedinica"
+  },
+  "budget": {
+    "open": "Vaš budžet",
+    "ask": "Koliki je vaš budžet?",
+    "title": "Pronađite dom u svom budžetu",
+    "label": "Vaš budžet",
+    "placeholder": "npr. 150.000",
+    "hint": "Upišite iznos kao 150.000, 150k ili 1,2m.",
+    "submit": "Prikaži opcije",
+    "resultsFor": "Stanovi za {{budget}}",
+    "stretch": "Malo iznad vašeg budžeta",
+    "noneFit": "Još nijedan stan u prodaji ne odgovara iznosu {{budget}}. Najpovoljniji stan ovdje:",
+    "noneOnSale": "Trenutno nema stanova u prodaji sa javnom cijenom.",
+    "bargainLocation": "{{pct}}% ispod prosjeka za {{place}} po m²",
+    "bargainResidence": "{{pct}}% ispod prosjeka ove rezidencije po m²",
+    "bargain": "Povoljno",
+    "show": "Odvedi me tamo",
+    "teaserBargain": "Povoljna ponuda: {{unit}} košta {{price}}, {{reason}}.",
+    "teaserFrom": "Stanovi ovdje počinju od {{price}}.",
+    "close": "Zatvori",
+    "dismiss": "Odbaci",
+    "perSqm": "{{price}}/m²",
+    "errors": {
+      "empty": "Unesite svoj budžet.",
+      "invalid": "Unesite iznos u eurima, npr. 150.000 ili 150k.",
+      "tooLow": "Unesite najmanje {{min}}.",
+      "tooHigh": "Unesite najviše {{max}}."
+    }
   }
 }

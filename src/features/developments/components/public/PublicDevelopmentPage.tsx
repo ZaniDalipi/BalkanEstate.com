@@ -84,6 +84,8 @@ const PublicDevelopmentPage: React.FC = () => {
         nav={nav}
         onNavChange={setNav}
         onOpenUnit={drawer.open}
+        city={development.city}
+        country={development.country}
         header={<ResidenceTitleBar development={development} summary={summary} onViewUnits={() => scrollToId('units')} />}
         fallback={
           <div className="mx-auto max-w-6xl px-4">

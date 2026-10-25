@@ -411,7 +411,9 @@
     },
     "showAvailability": "Show availability",
     "noUnitsInBuilding": "No apartments are listed for this building yet.",
-    "stackingPlan": "Apartments by floor"
+    "stackingPlan": "Apartments by floor",
+    "unmarkedNote": "Apartments aren’t marked on this picture yet — choose one floor by floor below.",
+    "noUnitsHere": "No apartments are published in this building yet."
   },
   "feature": {
     "big_terrace": "With big terrace",
@@ -1054,5 +1056,33 @@
   "choices": {
     "units_one": "{{count}} unit",
     "units_other": "{{count}} units"
+  },
+  "budget": {
+    "open": "Your budget",
+    "ask": "What’s your budget?",
+    "title": "Find a home in your budget",
+    "label": "Your budget",
+    "placeholder": "e.g. 150.000",
+    "hint": "Type an amount like 150.000, 150k or 1,2m.",
+    "submit": "Show options",
+    "resultsFor": "Homes for {{budget}}",
+    "stretch": "Just over your budget",
+    "noneFit": "Nothing on sale fits {{budget}} yet. The most affordable home here:",
+    "noneOnSale": "No homes with a public price are on sale right now.",
+    "bargainLocation": "{{pct}}% below the {{place}} average per m²",
+    "bargainResidence": "{{pct}}% below this residence’s average per m²",
+    "bargain": "Bargain",
+    "show": "Take me there",
+    "teaserBargain": "Bargain spotted: {{unit}} costs {{price}}, {{reason}}.",
+    "teaserFrom": "Homes here start at {{price}}.",
+    "close": "Close",
+    "dismiss": "Dismiss",
+    "perSqm": "{{price}}/m²",
+    "errors": {
+      "empty": "Enter your budget.",
+      "invalid": "Enter an amount in euros, like 150.000 or 150k.",
+      "tooLow": "Enter at least {{min}}.",
+      "tooHigh": "Enter at most {{max}}."
+    }
   }
 }

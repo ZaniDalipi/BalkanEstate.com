@@ -437,7 +437,9 @@
     },
     "showAvailability": "Arată disponibilitatea",
     "noUnitsInBuilding": "Încă nu sunt listate apartamente pentru această clădire.",
-    "stackingPlan": "Apartamente pe etaje"
+    "stackingPlan": "Apartamente pe etaje",
+    "unmarkedNote": "Apartamentele nu sunt încă marcate pe această imagine — alege unul etaj cu etaj mai jos.",
+    "noUnitsHere": "În această clădire nu sunt încă apartamente publicate."
   },
   "feature": {
     "big_terrace": "Cu terasă mare",
@@ -1061,5 +1063,33 @@
     "units_one": "{{count}} unitate",
     "units_few": "{{count}} unități",
     "units_other": "{{count}} de unități"
+  },
+  "budget": {
+    "open": "Bugetul tău",
+    "ask": "Care e bugetul tău?",
+    "title": "Găsește o locuință în bugetul tău",
+    "label": "Bugetul tău",
+    "placeholder": "ex. 150.000",
+    "hint": "Scrie o sumă precum 150.000, 150k sau 1,2m.",
+    "submit": "Arată opțiunile",
+    "resultsFor": "Locuințe pentru {{budget}}",
+    "stretch": "Puțin peste bugetul tău",
+    "noneFit": "Încă nicio locuință de vânzare nu se încadrează în {{budget}}. Cea mai accesibilă locuință de aici:",
+    "noneOnSale": "Momentan nu există locuințe de vânzare cu preț public.",
+    "bargainLocation": "Cu {{pct}}% sub media din {{place}} pe m²",
+    "bargainResidence": "Cu {{pct}}% sub media acestui ansamblu pe m²",
+    "bargain": "Chilipir",
+    "show": "Du-mă acolo",
+    "teaserBargain": "Chilipir: {{unit}} costă {{price}}, {{reason}}.",
+    "teaserFrom": "Locuințele de aici pornesc de la {{price}}.",
+    "close": "Închide",
+    "dismiss": "Ascunde",
+    "perSqm": "{{price}}/m²",
+    "errors": {
+      "empty": "Introdu bugetul tău.",
+      "invalid": "Introdu o sumă în euro, de ex. 150.000 sau 150k.",
+      "tooLow": "Introdu cel puțin {{min}}.",
+      "tooHigh": "Introdu cel mult {{max}}."
+    }
   }
 }

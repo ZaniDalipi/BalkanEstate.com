@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type React from 'react';
+import type { Bounds } from '../utils/polygonGeometry';
 
 export interface PanZoomTransform {
   scale: number;
@@ -23,6 +24,17 @@ interface Size {
 
 const IDENTITY: PanZoomTransform = { scale: 1, x: 0, y: 0 };
 const DOUBLE_TAP_MS = 300;
+/** Length of a programmatic {@link flyTo} glide. */
+export const FLY_MS = 900;
+
+/** The transform that centres `box` (normalised 0–1 image coordinates) and zooms until it fills about half the frame. */
+export const fitBox = (box: Bounds, size: Size, maxScale = 4): PanZoomTransform => {
+  const span = Math.max(0.02, box.maxX - box.minX, box.maxY - box.minY);
+  const scale = Math.min(maxScale, Math.max(1.5, 0.5 / span));
+  const cx = ((box.minX + box.maxX) / 2) * size.width;
+  const cy = ((box.minY + box.maxY) / 2) * size.height;
+  return { scale, x: size.width / 2 - cx * scale, y: size.height / 2 - cy * scale };
+};
 
 /** Keep the zoomed content covering the viewport: x ∈ [w − w·s, 0]. */
 export const clampTransform = (t: PanZoomTransform, size: Size, min = 1, max = 4): PanZoomTransform => {
@@ -65,6 +77,9 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
   const gesture = useRef<{ startX: number; startY: number; origin: PanZoomTransform; pinchDist?: number; moved: boolean } | null>(null);
   const dragged = useRef(false);
   const lastTap = useRef<{ time: number; x: number; y: number } | null>(null);
+  const [flying, setFlying] = useState(false);
+  const flyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(flyTimer.current), []);
 
   const size = (): Size => {
     const r = containerRef.current?.getBoundingClientRect();
@@ -154,6 +169,19 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
     lastTap.current = { time: now, x: e.clientX, y: e.clientY };
   };
 
+  /** Glide (CSS transition) to a region, e.g. the budget helper taking a buyer to an apartment. */
+  const flyTo = useCallback(
+    (box: Bounds) => {
+      const s = size();
+      if (!s.width || !s.height) return;
+      clearTimeout(flyTimer.current);
+      setFlying(true);
+      apply(fitBox(box, s, maxScale));
+      flyTimer.current = setTimeout(() => setFlying(false), FLY_MS);
+    },
+    [apply, maxScale]
+  );
+
   /** True (once) if the press that ended was a pan/pinch/double-tap rather than a tap. */
   const consumeDrag = useCallback(() => {
     const was = dragged.current;
@@ -191,6 +219,7 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
     zoomIn: () => zoomBy(1.5),
     zoomOut: () => zoomBy(1 / 1.5),
     reset: () => setTransform(IDENTITY),
+    flyTo,
     consumeDrag,
     handlers: {
       onPointerDown: onPointerDown as (e: React.PointerEvent) => void,
@@ -201,6 +230,7 @@ export function usePanZoom({ minScale = 1, maxScale = 4, dragThreshold = 6, whee
     contentStyle: {
       transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
       transformOrigin: '0 0',
+      transition: flying ? `transform ${FLY_MS}ms cubic-bezier(0.22, 0.8, 0.26, 1)` : undefined,
     } as React.CSSProperties,
   };
 }

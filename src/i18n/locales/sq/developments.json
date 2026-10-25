@@ -435,7 +435,9 @@
     },
     "showAvailability": "Shfaq disponueshmërinë",
     "noUnitsInBuilding": "Ende nuk ka apartamente të listuara për këtë ndërtesë.",
-    "stackingPlan": "Apartamentet sipas katit"
+    "stackingPlan": "Apartamentet sipas katit",
+    "unmarkedNote": "Apartamentet nuk janë shënuar ende në këtë foto — zgjidhni një kat pas kati më poshtë.",
+    "noUnitsHere": "Asnjë apartament nuk është publikuar ende në këtë ndërtesë."
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",
@@ -1054,5 +1056,33 @@
   "choices": {
     "units_one": "{{count}} njësi",
     "units_other": "{{count}} njësi"
+  },
+  "budget": {
+    "open": "Buxheti juaj",
+    "ask": "Sa është buxheti juaj?",
+    "title": "Gjeni një shtëpi sipas buxhetit",
+    "label": "Buxheti juaj",
+    "placeholder": "p.sh. 150.000",
+    "hint": "Shkruani një shumë si 150.000, 150k ose 1,2m.",
+    "submit": "Shfaq opsionet",
+    "resultsFor": "Shtëpi për {{budget}}",
+    "stretch": "Pak mbi buxhetin tuaj",
+    "noneFit": "Asnjë shtëpi në shitje nuk përshtatet me {{budget}} ende. Shtëpia më e përballueshme këtu:",
+    "noneOnSale": "Asnjë shtëpi me çmim publik nuk është në shitje tani.",
+    "bargainLocation": "{{pct}}% nën mesataren e {{place}} për m²",
+    "bargainResidence": "{{pct}}% nën mesataren e kësaj rezidence për m²",
+    "bargain": "Okazion",
+    "show": "Më çoni atje",
+    "teaserBargain": "Okazion: {{unit}} kushton {{price}}, {{reason}}.",
+    "teaserFrom": "Shtëpitë këtu fillojnë nga {{price}}.",
+    "close": "Mbyll",
+    "dismiss": "Hiq",
+    "perSqm": "{{price}}/m²",
+    "errors": {
+      "empty": "Shkruani buxhetin tuaj.",
+      "invalid": "Shkruani një shumë në euro, si 150.000 ose 150k.",
+      "tooLow": "Shkruani të paktën {{min}}.",
+      "tooHigh": "Shkruani jo më shumë se {{max}}."
+    }
   }
 }

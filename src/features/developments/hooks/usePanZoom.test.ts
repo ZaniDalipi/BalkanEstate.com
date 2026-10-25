@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { clampTransform, usePanZoom, zoomAt } from './usePanZoom';
+import { clampTransform, fitBox, usePanZoom, zoomAt } from './usePanZoom';
 
 const mouse = (x: number, y: number, extra = {}) =>
   ({ pointerId: 1, clientX: x, clientY: y, pointerType: 'mouse', button: 0, currentTarget: null, ...extra }) as never;
@@ -73,5 +73,20 @@ describe('pan/zoom math', () => {
   it('clampTransform keeps the content covering the frame', () => {
     expect(clampTransform({ scale: 2, x: 50, y: -999 }, { width: 400, height: 200 })).toEqual({ scale: 2, x: 0, y: -200 });
     expect(clampTransform({ scale: 9, x: 0, y: 0 }, { width: 400, height: 200 }).scale).toBe(4);
+  });
+});
+
+describe('fitBox', () => {
+  it('centres the region and zooms until it fills about half the frame', () => {
+    const t = fitBox({ minX: 0.4, minY: 0.4, maxX: 0.6, maxY: 0.6 }, { width: 1000, height: 500 });
+    expect(t.scale).toBeCloseTo(2.5);
+    // The region's centre (500, 250) lands in the middle of the frame.
+    expect(500 * t.scale + t.x).toBeCloseTo(500);
+    expect(250 * t.scale + t.y).toBeCloseTo(250);
+  });
+
+  it('never zooms less than 1.5× nor past the maximum', () => {
+    expect(fitBox({ minX: 0, minY: 0, maxX: 1, maxY: 1 }, { width: 100, height: 100 }).scale).toBe(1.5);
+    expect(fitBox({ minX: 0.5, minY: 0.5, maxX: 0.501, maxY: 0.501 }, { width: 100, height: 100 }, 4).scale).toBe(4);
   });
 });

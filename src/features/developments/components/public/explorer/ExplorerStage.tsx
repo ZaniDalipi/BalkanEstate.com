@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Maximize2, Minimize2, SlidersHorizontal, X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import type { DevelopmentBuilding, Hotspot, PublicSceneView, PublicUnit, UnitAvailability } from '../../../types';
 import { ExplorerCanvas } from './ExplorerCanvas';
 import { ViewSwitcher } from './ViewSwitcher';
-import { ExplorerBreadcrumb, type Crumb } from './ExplorerBreadcrumb';
+import type { Crumb } from './ExplorerBreadcrumb';
+import { FiltersOverlay } from './FiltersOverlay';
+import { StageTopBar } from './StageTopBar';
+import type { ExplorerFocus } from './useFlyFocus';
 import { BuildingChips } from './BuildingChips';
 import { ExplorerLegend } from './ExplorerLegend';
 import { usePseudoFullscreen } from './usePseudoFullscreen';
@@ -33,10 +36,12 @@ export interface ExplorerStageProps {
   /** The shared filter panel, shown over the stage on demand. */
   filters: React.ReactNode;
   activeFilters: boolean;
+  /** Extra buttons before the filters toggle (the budget helper); their popups anchor under the bar. */
+  actions?: React.ReactNode;
+  /** Region the explorer is gliding to; see ExplorerCanvas. */
+  focus?: ExplorerFocus;
+  onFocusArrive?: (h: Hotspot) => void;
 }
-
-const pill =
-  'inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-white/95 px-3 text-sm font-semibold text-slate-800 shadow-md hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
 /**
  * Full-bleed explorer layout (East Gate B2): the rendering edge to edge with
@@ -49,6 +54,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
   const fs = usePseudoFullscreen<HTMLElement>();
   const [showFilters, setShowFilters] = useState(false);
   const [mode, setMode] = useDisplayMode();
+  const reduced = useReducedMotion();
   const view = p.views[p.viewIndex];
   const full = fs.isFullscreen;
   const float = full ? 'absolute' : 'relative sm:absolute';
@@ -75,40 +81,39 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
     >
       <div className={full ? 'absolute inset-0 flex items-center justify-center' : 'relative sm:static'}>
         {view && (
-          <ExplorerCanvas
+          // Each picture fades in, so drilling into a building after the glide reads as one move.
+          <motion.div
             key={view.viewKey}
-            view={view}
-            unitsById={p.unitsById}
-            matchedIds={p.matchedIds}
-            buildingsById={p.buildingsById}
-            buildingFacts={p.buildingFacts}
-            mode={mode}
-            onActivate={p.onActivate}
-            fullscreen={full}
-          />
+            className="w-full"
+            initial={reduced ? false : { opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          >
+            <ExplorerCanvas
+              view={view}
+              unitsById={p.unitsById}
+              matchedIds={p.matchedIds}
+              buildingsById={p.buildingsById}
+              buildingFacts={p.buildingFacts}
+              mode={mode}
+              onActivate={p.onActivate}
+              fullscreen={full}
+              focus={p.focus}
+              onFocusArrive={p.onFocusArrive}
+            />
+          </motion.div>
         )}
 
-        <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
-          <div className="pointer-events-auto">
-            <ExplorerBreadcrumb crumbs={p.crumbs} onSelect={p.onCrumb} />
-          </div>
-          <div className="pointer-events-auto flex gap-2">
-            <button type="button" className={pill} onClick={() => setShowFilters((v) => !v)} aria-expanded={showFilters}>
-              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-              <span className="hidden sm:inline">{t('filters.heading', 'Find your home')}</span>
-              {p.activeFilters && <span className="h-2 w-2 rounded-full bg-primary" aria-label={t('explorer.filtersActive', 'Filters active')} />}
-            </button>
-            <button
-              type="button"
-              className={pill}
-              onClick={fs.toggle}
-              aria-pressed={full}
-              aria-label={full ? t('explorer.exitFullscreen', 'Exit full screen') : t('explorer.fullscreen', 'Full screen')}
-            >
-              {full ? <Minimize2 className="h-4 w-4" aria-hidden="true" /> : <Maximize2 className="h-4 w-4" aria-hidden="true" />}
-            </button>
-          </div>
-        </div>
+        <StageTopBar
+          crumbs={p.crumbs}
+          onCrumb={p.onCrumb}
+          actions={p.actions}
+          filtersOpen={showFilters}
+          onToggleFilters={() => setShowFilters((v) => !v)}
+          activeFilters={p.activeFilters}
+          fullscreen={full}
+          onToggleFullscreen={fs.toggle}
+        />
 
         <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 lg:left-auto lg:right-3 lg:translate-x-0">
           <ViewSwitcher views={p.views} index={p.viewIndex} onChange={p.onViewIndex} />
@@ -130,28 +135,9 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
       </div>
 
       {showFilters && (
-        <div
-          className={cn(
-            'z-20 overflow-y-auto',
-            full
-              ? 'absolute inset-x-2 top-3 max-h-[calc(100%-1.5rem)] sm:left-auto sm:right-3 sm:w-[420px]'
-              : 'relative px-2 pb-2 sm:absolute sm:right-3 sm:top-3 sm:max-h-[calc(100%-1.5rem)] sm:w-[420px] sm:p-0'
-          )}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="mb-1 flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowFilters(false)}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-slate-600 shadow-md hover:bg-white"
-              aria-label={t('explorer.closeFilters', 'Close filters')}
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </div>
+        <FiltersOverlay fullscreen={full} onClose={() => setShowFilters(false)}>
           {p.filters}
-        </div>
+        </FiltersOverlay>
       )}
     </section>
   );

@@ -148,6 +148,7 @@ The server **rejects** invalid shapes and never clamps them. It rejects:
 | --- | --- |
 | Public explorer | `components/public/explorer/` (stage, canvas, tooltip, legend, view switcher, building chips) |
 | Apartment drawer | `components/public/explorer/drawer/` |
+| Budget helper | `components/public/explorer/budget/` (button, teaser, panel, form, cards), `useFlyToUnit.ts` + `useFlyFocus.ts` (the guided trip), `utils/budgetMatch.ts`, `hooks/useLocationPrice.ts` |
 | Region editor | `components/scene/editor/` with `hooks/usePolygonEditor.ts` (reducer, undo/redo) and `hooks/useEditorViewport.ts` |
 | Dashboard | `components/dashboard/` (tabbed manage page, inventory table, unit edit dialog, linked listings, settings) |
 | URL / pan-zoom hooks | `hooks/usePanZoom.ts`, `hooks/useExplorerUrlState.ts`, `hooks/useUnitDrawer.ts` |
@@ -475,6 +476,29 @@ The attach preview also now hides other people's listing details.
 - the phone tap-preview → bottom sheet
 - inventory edit to price-on-request, checked against the public API
 - a polygon drawn in the editor saved at the drawn coordinates
+
+### Budget helper ("What's your budget?")
+
+A **Your budget** button sits on the explorer bar. A few seconds after the
+page opens, a one-time bubble (once per browser session) points out the
+biggest **bargain**, or says what homes start at. The panel asks for a budget
+(`150.000`, `150k` or `1,2m`; between 10.000 € and 50.000.000 €, with the
+reason shown when it's invalid). It suggests up to three homes on sale at or
+under it: bargains first, then the most home for the money. It adds one home
+at most 10% over budget when few fit, and the most affordable home when none
+fit.
+
+- **A bargain** is at least 8% below the reference price per m². The
+  reference is the city's average for-sale price (the Explore Cities figure,
+  `GET /api/cities/market-data/:city/:country`), and this residence's own
+  average when the city has no data and at least four homes are priced. Homes
+  with the price on request are never suggested.
+- **Take me there** glides the picture to the apartment if it is drawn
+  there, else to its floor, else to its building. It pulses, drills in and
+  repeats, then opens the apartment drawer. Pictures with nothing to glide to
+  are skipped, so the trip always ends at the apartment. Any click or crumb by
+  the buyer stops it. With reduced motion there is no glide or fade, just the
+  highlight.
 
 ## 8. Known limitations
 

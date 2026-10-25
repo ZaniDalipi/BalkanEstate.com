@@ -44,6 +44,26 @@ src/components/property/  # Shared property UI (used by multiple features)
 └── NeighborhoodInsights.tsx
 ```
 
+### Code Organisation: Small Files, One Job Each
+Inside a feature, every file has one concern, so it can be read, tested and
+changed on its own:
+
+| Kind | Holds | Example |
+|------|-------|---------|
+| `utils/*.ts` | pure logic, unit-tested without rendering | `budgetMatch.ts`: parse a budget, find bargains |
+| `hooks/use*.ts` | server data (TanStack Query), state, effects | `useLocationPrice`, `usePanZoom` |
+| `components/**/use*.ts` | one component group's state or flow | `useFlyToUnit`: the explorer's guided trip |
+| `components/**/*.tsx` | rendering only, ~150 lines at most | `BudgetPanel`, `BudgetPickCard`, `StageTopBar` |
+
+- When a component grows past ~150 lines, split it along a real seam: a bar,
+  an overlay or a card becomes a sub-component, and derived data or a
+  multi-step flow becomes a hook.
+- A group of more than two related files gets its own folder
+  (`explorer/budget/`, `inventory/import/`).
+- Reuse shared types, helpers and style constants instead of near-copies.
+
+The working rules (validation, translations, tests) are in [`CLAUDE.md`](CLAUDE.md).
+
 ### Routing
 The URL is the only record of which page is on screen. React Router renders
 the route that matches it; nothing else decides the page.
