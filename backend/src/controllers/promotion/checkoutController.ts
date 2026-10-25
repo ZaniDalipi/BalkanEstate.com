@@ -164,6 +164,19 @@ export const purchasePromotion = async (
       appliedCoupon = couponResult.coupon;
     }
 
+    // This endpoint takes no payment: only promotions that cost nothing after the
+    // agency allocation or a coupon can be created here. Anything still owing goes
+    // through POST /api/promotions/checkout.
+    if (finalPrice > 0) {
+      res.status(402).json({
+        message: 'This promotion has to be paid for through checkout',
+        code: 'PAYMENT_REQUIRED',
+        amount: finalPrice,
+        currency: 'EUR',
+      });
+      return;
+    }
+
     // Create promotion
     const startDate = new Date();
     const endDate = new Date();
