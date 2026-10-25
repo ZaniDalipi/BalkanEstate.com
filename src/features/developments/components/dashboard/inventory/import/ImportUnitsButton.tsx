@@ -20,6 +20,7 @@ export const ImportUnitsButton: React.FC<{ developmentId: string }> = ({ develop
         <ImportUnitsDialog
           developmentId={developmentId}
           defaultBuildingName={buildings.length === 1 ? buildings[0].name : buildings.length === 0 ? t('import.firstBuilding', 'Building A') : ''}
+          buildingNames={buildings.map((b) => b.name)}
           onClose={() => setOpen(false)}
         />
       )}

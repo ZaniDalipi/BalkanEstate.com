@@ -44,7 +44,7 @@ describe('value readers', () => {
   it('reads availability, type and features in local words', () => {
     expect(['e lirë', 'Slobodno', 'Prodato', 'shitur', 'Rezervisano', 'Not released'].map(parseAvailability)).toEqual(['available', 'available', 'sold', 'sold', 'reserved', 'not_released']);
     expect(parseAvailability('maybe')).toBeNull();
-    expect(['Garsonjera', 'Lokal', 'Banesë', 'Penthouse', 'Loft'].map(parseUnitType)).toEqual(['studio', 'retail', 'apartment', 'penthouse', 'loft']);
+    expect(['Garsonjera', 'Garsonjerë', 'Lokal', 'Banesë', 'Penthouse', 'Loft'].map(parseUnitType)).toEqual(['studio', 'studio', 'retail', 'apartment', 'penthouse', 'loft']);
     expect(parseFeatures('Terasa, Parking; Ugaoni | xyz')).toEqual(['big_terrace', 'parking', 'corner']);
   });
 });

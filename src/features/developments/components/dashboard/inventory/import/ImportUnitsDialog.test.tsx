@@ -50,3 +50,21 @@ describe('ImportUnitsDialog', () => {
     expect(api.importUnits).not.toHaveBeenCalled();
   });
 });
+
+describe('ImportUnitsDialog with Excel', () => {
+  it('opens the worksheet with units and uses its name as the building', async () => {
+    const { makeXlsx } = await import('../../../../utils/csvImport/__fixtures__/makeXlsx');
+    vi.mocked(api.importUnits).mockImplementation(async (_id, body) => summary({ dryRun: body.dryRun }));
+    const user = userEvent.setup();
+    render(<ImportUnitsDialog developmentId="d1" defaultBuildingName="" buildingNames={['Plaza Tower', 'Plaza Podium']} onClose={vi.fn()} />);
+    const bytes = makeXlsx([
+      { name: 'Info', rows: [['Price list'], ['October']] },
+      { name: 'plaza tower', rows: [['Kati', 'Banesa', 'Çmimi'], [25, 'T2501', 198000]] },
+    ]);
+    await user.upload(screen.getByLabelText(/import.drop/), new File([bytes], 'list.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    expect(await screen.findByLabelText('import.buildingForAll')).toHaveValue('Plaza Tower');
+    expect(screen.getByLabelText('import.sheet')).toHaveValue('1');
+    await waitFor(() => expect(api.importUnits).toHaveBeenCalled());
+    expect(vi.mocked(api.importUnits).mock.calls[0][1].rows[0]).toMatchObject({ building: 'Plaza Tower', level: 25, unitNumber: 'T2501', fields: { price: 198000 } });
+  });
+});

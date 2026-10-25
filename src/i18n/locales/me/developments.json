@@ -957,9 +957,10 @@
     "templateHint": "Počinjete od nule? Popunite naš šablon — jedan red po stanu.",
     "template": "Preuzmi šablon",
     "error": {
-      "tooBig": "Datoteka je veća od 5 MB.",
+      "tooBig": "Datoteka je veća od 10 MB.",
       "empty": "Datoteka treba red zaglavlja i barem jednu jedinicu.",
-      "unreadable": "Ova datoteka se ne može pročitati kao CSV."
+      "unreadable": "Ova datoteka se ne može pročitati. Sačuvajte je kao .xlsx ili .csv i pokušajte ponovo.",
+      "oldExcel": "Ovo je stara Excel datoteka (.xls). U Excelu odaberite File → Save as → Excel Workbook (.xlsx), pa uvezite nju."
     },
     "columns": "Kolone",
     "unnamed": "(bez naziva)",
@@ -1019,6 +1020,8 @@
       "features": "Karakteristike",
       "description": "Opis",
       "ignore": "Ne uvoziti"
-    }
+    },
+    "dropHintXlsx": "Excel (.xlsx) ili CSV — direktno iz Excela, Google Sheets ili Numbers. Kolone mogu biti bilo kojim redom i na bilo kojem jeziku; prepoznajemo ih.",
+    "sheet": "Radni list"
   }
 }

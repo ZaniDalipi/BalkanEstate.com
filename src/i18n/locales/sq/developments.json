@@ -951,9 +951,10 @@
     "templateHint": "Filloni nga zero? Plotësoni shabllonin tonë — një rresht për çdo apartament.",
     "template": "Shkarko shabllonin",
     "error": {
-      "tooBig": "Skedari është më i madh se 5 MB.",
+      "tooBig": "Skedari është më i madh se 10 MB.",
       "empty": "Skedari duhet të ketë një rresht titujsh dhe të paktën një njësi.",
-      "unreadable": "Ky skedar nuk mund të lexohej si CSV."
+      "unreadable": "Ky skedar nuk mund të lexohej. Ruajeni si .xlsx ose .csv dhe provoni përsëri.",
+      "oldExcel": "Ky është një skedar i vjetër Excel (.xls). Në Excel zgjidhni File → Save as → Excel Workbook (.xlsx), pastaj importoni atë."
     },
     "columns": "Kolonat",
     "unnamed": "(pa emër)",
@@ -1013,6 +1014,8 @@
       "features": "Veçoritë",
       "description": "Përshkrimi",
       "ignore": "Mos e importo"
-    }
+    },
+    "dropHintXlsx": "Excel (.xlsx) ose CSV — direkt nga Excel, Google Sheets ose Numbers. Kolonat mund të jenë në çdo renditje dhe gjuhë; ne i njohim.",
+    "sheet": "Fleta"
   }
 }

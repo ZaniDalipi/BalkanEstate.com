@@ -68,7 +68,7 @@ export const parseAvailability = (raw: string): string | null | undefined => {
 };
 
 const UNIT_TYPES: [string, string[]][] = [
-  ['studio', ['studio', 'garsonjera', 'garsoniera', 'garsonijera', 'гарсоњера', 'гарсониера']],
+  ['studio', ['studio', 'garsonjera', 'garsonjere', 'garsoniera', 'garsoniere', 'garsonijera', 'гарсоњера', 'гарсониера']],
   ['duplex', ['duplex', 'dupleks', 'dupleksi', 'maisonette']],
   ['penthouse', ['penthouse', 'penthaus', 'pentahaus', 'ph']],
   ['retail', ['retail', 'shop', 'store', 'lokal', 'poslovni prostor', 'dyqan', 'dyqani', 'lokali', 'magazin']],

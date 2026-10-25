@@ -951,9 +951,10 @@
     "templateHint": "Starting from scratch? Fill in our template — one row per apartment.",
     "template": "Download template",
     "error": {
-      "tooBig": "The file is larger than 5 MB.",
+      "tooBig": "The file is larger than 10 MB.",
       "empty": "The file needs a header row and at least one unit.",
-      "unreadable": "This file could not be read as CSV."
+      "unreadable": "This file could not be read. Save it as .xlsx or .csv and try again.",
+      "oldExcel": "This is an old Excel file (.xls). In Excel choose File → Save as → Excel Workbook (.xlsx), then import that."
     },
     "columns": "Columns",
     "unnamed": "(no name)",
@@ -1013,6 +1014,8 @@
       "features": "Features",
       "description": "Description",
       "ignore": "Don’t import"
-    }
+    },
+    "dropHintXlsx": "Excel (.xlsx) or CSV — straight from Excel, Google Sheets or Numbers. Columns can be in any order and language; we recognise them.",
+    "sheet": "Worksheet"
   }
 }

@@ -957,9 +957,10 @@
     "templateHint": "Počinjete od nule? Ispunite naš predložak — jedan redak po stanu.",
     "template": "Preuzmi predložak",
     "error": {
-      "tooBig": "Datoteka je veća od 5 MB.",
+      "tooBig": "Datoteka je veća od 10 MB.",
       "empty": "Datoteka treba redak zaglavlja i barem jednu jedinicu.",
-      "unreadable": "Ova se datoteka ne može pročitati kao CSV."
+      "unreadable": "Ova se datoteka ne može pročitati. Spremite je kao .xlsx ili .csv i pokušajte ponovno.",
+      "oldExcel": "Ovo je stara Excel datoteka (.xls). U Excelu odaberite File → Save as → Excel Workbook (.xlsx), a zatim uvezite nju."
     },
     "columns": "Stupci",
     "unnamed": "(bez naziva)",
@@ -1019,6 +1020,8 @@
       "features": "Značajke",
       "description": "Opis",
       "ignore": "Ne uvoziti"
-    }
+    },
+    "dropHintXlsx": "Excel (.xlsx) ili CSV — izravno iz Excela, Google Sheets ili Numbers. Stupci mogu biti bilo kojim redoslijedom i na bilo kojem jeziku; prepoznajemo ih.",
+    "sheet": "Radni list"
   }
 }

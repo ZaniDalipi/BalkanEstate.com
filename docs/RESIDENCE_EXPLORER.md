@@ -344,8 +344,11 @@ residence shows a banner linking to its apartment in the explorer
 apartments or unpublished residences).
 
 **Import a whole building from a spreadsheet:** Inventory → **Import from
-spreadsheet**. Save the sheet as CSV (any separator; Excel's `;` works) or start
-from **Download template** — one row per apartment. Columns can be in any order
+spreadsheet**. Drop an Excel workbook (.xlsx; pick the worksheet if it has
+several) or a CSV (any separator; Excel's `;` works), or start from **Download
+template** — one row per apartment. Old binary .xls files are explained (save
+as .xlsx). Excel is read in the browser by `read-excel-file`, loaded only when
+an .xlsx is chosen. Columns can be in any order
 and in English, Albanian or BCMS ("Zgrada / Objekti", "Sprat / Kati", "Stan /
 Banesa", "Kvadratura / Sipërfaqja", "Cijena / Çmimi", "Status"…); you can change
 what each column is used for. Values are read as people write them: floors

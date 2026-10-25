@@ -957,9 +957,10 @@
     "templateHint": "Începeți de la zero? Completați șablonul nostru — un rând pentru fiecare apartament.",
     "template": "Descarcă șablonul",
     "error": {
-      "tooBig": "Fișierul este mai mare de 5 MB.",
+      "tooBig": "Fișierul este mai mare de 10 MB.",
       "empty": "Fișierul are nevoie de un rând de antet și de cel puțin o unitate.",
-      "unreadable": "Acest fișier nu a putut fi citit ca CSV."
+      "unreadable": "Acest fișier nu a putut fi citit. Salvați-l ca .xlsx sau .csv și încercați din nou.",
+      "oldExcel": "Acesta este un fișier Excel vechi (.xls). În Excel alegeți File → Save as → Excel Workbook (.xlsx), apoi importați-l pe acela."
     },
     "columns": "Coloane",
     "unnamed": "(fără nume)",
@@ -1019,6 +1020,8 @@
       "features": "Caracteristici",
       "description": "Descriere",
       "ignore": "Nu importa"
-    }
+    },
+    "dropHintXlsx": "Excel (.xlsx) sau CSV — direct din Excel, Google Sheets sau Numbers. Coloanele pot fi în orice ordine și limbă; le recunoaștem.",
+    "sheet": "Foaie de calcul"
   }
 }

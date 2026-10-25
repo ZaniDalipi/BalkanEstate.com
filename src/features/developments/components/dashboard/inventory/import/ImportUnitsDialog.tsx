@@ -16,6 +16,8 @@ interface ImportUnitsDialogProps {
   developmentId: string;
   /** Used for sheets without a building column (e.g. the only building). */
   defaultBuildingName: string;
+  /** Existing building names, to match worksheet names against. */
+  buildingNames?: string[];
   onClose: () => void;
 }
 
@@ -26,9 +28,9 @@ const errorText = (e: unknown) => (e as { message?: string } | null)?.message ??
  * recognised (columns, a preview, the server's dry run and any problems) →
  * import. Nothing is written until "Import".
  */
-export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmentId, defaultBuildingName, onClose }) => {
+export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmentId, defaultBuildingName, buildingNames, onClose }) => {
   const { t } = useTranslation('developments');
-  const sheet = useCsvSheet(defaultBuildingName);
+  const sheet = useCsvSheet(defaultBuildingName, buildingNames);
   const rows = sheet.prepared?.rows ?? [];
   const { preview, run } = useUnitImport(developmentId, rows, sheet.updateExisting);
   const missing = missingRequired(sheet.columns);
@@ -56,6 +58,16 @@ export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmen
             </p>
             <button type="button" onClick={sheet.reset} className="text-sm font-medium text-primary hover:underline">{t('import.otherFile', 'Choose another file')}</button>
           </div>
+          {sheet.sheetNames.length > 1 && (
+            <label className="flex flex-wrap items-center gap-2 text-sm text-slate-800">
+              {t('import.sheet', 'Worksheet')}
+              <select value={sheet.sheetIndex} onChange={(e) => sheet.chooseSheet(Number(e.target.value))} className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm">
+                {sheet.sheetNames.map((name, i) => (
+                  <option key={`${name}-${i}`} value={i}>{name}</option>
+                ))}
+              </select>
+            </label>
+          )}
           <section aria-label={t('import.columns', 'Columns')} className="space-y-2">
             <h3 className="text-sm font-semibold text-slate-900">{t('import.recognised', 'We recognised these columns — change any that are wrong')}</h3>
             <ColumnMapping headers={sheet.headers} sample={sheet.sample} columns={sheet.columns} onChange={sheet.setColumn} />
