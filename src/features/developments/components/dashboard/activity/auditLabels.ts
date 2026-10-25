@@ -33,6 +33,8 @@ export const ACTION_LABELS: Record<string, string> = {
   'development.update': 'Updated development',
   'development.publish': 'Changed publication status',
   'development.delete': 'Deleted development',
+  'billing.purchase': 'Bought a Residence Pass or buildings',
+  'billing.grant': 'Residence Pass granted by BalkanEstate',
   'membership.grant': 'Added team member',
   'membership.revoke': 'Removed team member',
   'claim.create': 'Requested attachment',

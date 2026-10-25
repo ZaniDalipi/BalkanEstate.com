@@ -923,7 +923,9 @@
       "claim_review": "Shqyrtoi kërkesën për lidhje",
       "building_delete": "Fshiu ndërtesën",
       "floor_delete": "Fshiu katin",
-      "unit_import": "Importoi njësi nga një tabelë"
+      "unit_import": "Importoi njësi nga një tabelë",
+      "billing_purchase": "Bleu një Paketë Rezidence ose ndërtesa",
+      "billing_grant": "Paketa e Rezidencës u dhurua nga BalkanEstate"
     }
   },
   "details": {
@@ -1039,7 +1041,8 @@
       "ignore": "Mos e importo"
     },
     "dropHintXlsx": "Excel (.xlsx) ose CSV — direkt nga Excel, Google Sheets ose Numbers. Kolonat mund të jenë në çdo renditje dhe gjuhë; ne i njohim.",
-    "sheet": "Fleta"
+    "sheet": "Fleta",
+    "buildingLimit": "Ky skedar shton {{n}} ndërtesa të reja, por kjo rezidencë mund të ketë {{limit}} ({{allowed}} më shumë). Zhbllokoni më shumë ndërtesa te skeda Përmbledhje, ose përdorni emra ndërtesash ekzistuese."
   },
   "unitView": {
     "sea": "Det",
@@ -1084,5 +1087,96 @@
       "tooLow": "Shkruani të paktën {{min}}.",
       "tooHigh": "Shkruani jo më shumë se {{max}}."
     }
+  },
+  "billing": {
+    "heading": "Plani",
+    "state": {
+      "none": "Ende e papublikuar",
+      "trial": "Provë falas",
+      "active": "Paketa e Rezidencës",
+      "included": "Përfshirë në planin tuaj",
+      "expired": "Prova mbaroi"
+    },
+    "hint": {
+      "none": "Publikimi nis një provë falas {{days}}-ditore.",
+      "trial_one": "Publike edhe {{count}} ditë (deri më {{date}}). Blini paketën që të mbetet online.",
+      "trial_other": "Publike edhe {{count}} ditë (deri më {{date}}). Blini paketën që të mbetet online.",
+      "active": "Publike deri më {{date}}.",
+      "included": "E mbuluar nga plani juaj deri më {{date}}.",
+      "expired": "Blerësit nuk e shohin këtë rezidencë. Blini paketën që ta riktheni online.",
+      "noTrial": "Publikimi i kësaj rezidence kërkon Paketën e Rezidencës."
+    },
+    "refusal": {
+      "passRequired": "Prova falas ka mbaruar. Blini Paketën e Rezidencës për ta publikuar.",
+      "trialInProgress": "Një tjetër rezidencë e juaja është në provë falas. Blini paketën për ta publikuar këtë tani.",
+      "trialLimit": "Keni përdorur të gjitha provat falas. Blini paketën për ta publikuar.",
+      "buildingLimit": "Kjo rezidencë mund të ketë {{limit}} ndërtesa. Zhbllokoni më shumë për të shtuar një tjetër.",
+      "paymentSoonAmount": "Pagesa online vjen së shpejti. Mbeten {{amount}} për t’u paguar, ndaj shkruani një kod që i mbulon.",
+      "paymentSoon": "Pagesa online vjen së shpejti. Shkruani një kod për ta zhbllokuar tani.",
+      "couponInvalid": "Ky kod nuk vlen për rezidenca."
+    },
+    "code": {
+      "label": "Kodi i zhbllokimit",
+      "required": "Shkruani kodin tuaj. Pagesa online vjen së shpejti.",
+      "format": "Kodet kanë shkronja, numra, - dhe _ (3–64 karaktere)."
+    },
+    "quantity": {
+      "label": "Ndërtesa për të shtuar",
+      "range": "Zgjidhni nga 1 deri në {{max}} ndërtesa."
+    },
+    "perk": {
+      "months": "Publike për {{months}} muaj",
+      "buildings": "{{n}} ndërtesa të përfshira",
+      "renew": "Rinovimi i hershëm shtohet në datën e mbarimit",
+      "extra": "Më shumë ndërtesa deri sa të rinovohet paketa"
+    },
+    "summary": {
+      "each": "{{n}} × çmimi",
+      "discount": "Zbritje Premium ({{pct}}%)",
+      "total": "Gjithsej"
+    },
+    "done": {
+      "pass": "Paketa e Rezidencës është aktive",
+      "passMessage": "Rezidenca juaj është sërish publike.",
+      "extra": "Ndërtesat u zhbllokuan",
+      "extraMessage": "Tani mund të shtoni më shumë ndërtesa."
+    },
+    "buyPass": "Bli Paketën e Rezidencës",
+    "renew": "Rinovo paketën",
+    "unlockBuildings": "Zhblloko më shumë ndërtesa",
+    "unlock": "Zhblloko",
+    "working": "Duke zhbllokuar…",
+    "paymentsSoon": "Pagesa online vjen së shpejti. Nëse keni një kod zhbllokimi nga ne, shkruajeni më poshtë.",
+    "buildingsUsed": "Ndërtesa",
+    "usedOf": "{{used}} nga {{limit}}",
+    "askOwner": "Vetëm pronari i rezidencës mund ta blejë paketën.",
+    "askOwnerBuildings": "Kërkojini pronarit të rezidencës të zhbllokojë më shumë ndërtesa.",
+    "unlockOne": "Zhblloko 1 ndërtesë më shumë · {{price}}",
+    "limit": {
+      "needPass": "Kjo rezidencë i ka {{limit}} ndërtesat e saj. Ndërtesat shtesë i shtohen Paketës së Rezidencës.",
+      "reached": "Kjo rezidencë i ka të gjitha {{limit}} ndërtesat e saj."
+    },
+    "banner": {
+      "offline": "Kjo rezidencë është offline: prova falas mbaroi. Blerësit nuk e shohin derisa të blini Paketën e Rezidencës.",
+      "endingSoon_one": "Prova falas mbaron pas {{count}} dite. Blini Paketën e Rezidencës që kjo rezidencë të mbetet online.",
+      "endingSoon_other": "Prova falas mbaron pas {{count}} ditësh. Blini Paketën e Rezidencës që kjo rezidencë të mbetet online."
+    },
+    "publishedOffline": "E publikuar, por offline derisa të blihet Paketa e Rezidencës.",
+    "publishWithPass": "Bli paketën dhe publiko",
+    "publishTrial": "Publiko · falas për {{days}} ditë",
+    "createNote": "Krijimi është falas. Publikimi nis një provë falas 15-ditore; pas saj, Paketa e Rezidencës e mban online."
+  },
+  "pricingSection": {
+    "title": "Rezidenca",
+    "subtitle": "Për zhvillues dhe agjenci që shesin një projekt të ri.",
+    "step1": "Krijojeni falas",
+    "step1Text": "Ndërtesa, kate, apartamente dhe eksploruesi interaktiv.",
+    "step2": "Publikoni: {{days}} ditë falas",
+    "step2Text": "Blerësit e gjejnë menjëherë.",
+    "step3": "Paketa e Rezidencës · {{price}}",
+    "step3Text": "{{months}} muaj online, {{n}} ndërtesa të përfshira.",
+    "extra": "Ndërtesa shtesë: {{price}} secila, për pjesën e mbetur të periudhës së paketës.",
+    "premium": "Planet Premium përfshijnë rezidenca: Pro {{pro}}, Agjenci {{agency}}. Paketat e tjera kanë {{pct}}% zbritje.",
+    "cta": "Krijo një rezidencë"
   }
 }

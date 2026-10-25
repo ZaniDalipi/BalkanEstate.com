@@ -24,6 +24,7 @@ import BuyerPlansSection from './BuyerPlansSection';
 import ListingPromotionSection from './ListingPromotionSection';
 import AgencyFeatureSection from './AgencyFeatureSection';
 import SpecialOffersSection from './SpecialOffersSection';
+import { ResidencePricingSection } from '@/src/features/developments/components/public/pricing/ResidencePricingSection';
 
 const PricingPage: React.FC = () => {
   const {
@@ -363,6 +364,9 @@ const PricingPage: React.FC = () => {
               isPlanDisabled={isPlanDisabled}
             />
           )}
+
+          {/* Residences (pay per residence, after a free trial) */}
+          {(activeTab === 'seller' || activeTab === 'agency') && <ResidencePricingSection />}
 
           {/* Special Offers */}
           {specialOffers.length > 0 && activeTab === 'listing' && (

@@ -929,7 +929,9 @@
       "claim_review": "A analizat cererea de atașare",
       "building_delete": "Clădire ștearsă",
       "floor_delete": "Etaj șters",
-      "unit_import": "Unități importate dintr-un tabel"
+      "unit_import": "Unități importate dintr-un tabel",
+      "billing_purchase": "A cumpărat un abonament de ansamblu sau clădiri",
+      "billing_grant": "Abonament de ansamblu acordat de BalkanEstate"
     }
   },
   "details": {
@@ -1045,7 +1047,8 @@
       "ignore": "Nu importa"
     },
     "dropHintXlsx": "Excel (.xlsx) sau CSV — direct din Excel, Google Sheets sau Numbers. Coloanele pot fi în orice ordine și limbă; le recunoaștem.",
-    "sheet": "Foaie de calcul"
+    "sheet": "Foaie de calcul",
+    "buildingLimit": "Acest fișier adaugă {{n}} clădiri noi, dar ansamblul poate avea {{limit}} (încă {{allowed}}). Deblochează mai multe clădiri în fila Prezentare sau folosește nume de clădiri existente."
   },
   "unitView": {
     "sea": "Mare",
@@ -1091,5 +1094,98 @@
       "tooLow": "Introdu cel puțin {{min}}.",
       "tooHigh": "Introdu cel mult {{max}}."
     }
+  },
+  "billing": {
+    "heading": "Plan",
+    "state": {
+      "none": "Încă nepublicat",
+      "trial": "Probă gratuită",
+      "active": "Abonament ansamblu",
+      "included": "Inclus în planul tău",
+      "expired": "Proba s-a încheiat"
+    },
+    "hint": {
+      "none": "Publicarea pornește o probă gratuită de {{days}} zile.",
+      "trial_one": "Public încă {{count}} zi (până pe {{date}}). Cumpără un abonament ca să rămână online.",
+      "trial_few": "Public încă {{count}} zile (până pe {{date}}). Cumpără un abonament ca să rămână online.",
+      "trial_other": "Public încă {{count}} de zile (până pe {{date}}). Cumpără un abonament ca să rămână online.",
+      "active": "Public până pe {{date}}.",
+      "included": "Acoperit de planul tău până pe {{date}}.",
+      "expired": "Cumpărătorii nu văd acest ansamblu. Cumpără un abonament ca să-l readuci online.",
+      "noTrial": "Pentru publicarea acestui ansamblu este nevoie de un abonament de ansamblu."
+    },
+    "refusal": {
+      "passRequired": "Proba gratuită s-a încheiat. Cumpără un abonament de ansamblu ca să-l publici.",
+      "trialInProgress": "Alt ansamblu al tău este în proba gratuită. Cumpără un abonament ca să-l publici acum pe acesta.",
+      "trialLimit": "Ai folosit toate probele gratuite. Cumpără un abonament ca să publici.",
+      "buildingLimit": "Acest ansamblu poate avea {{limit}} clădiri. Deblochează mai multe ca să adaugi una nouă.",
+      "paymentSoonAmount": "Plata online vine în curând. Mai sunt de plată {{amount}}, așa că introdu un cod care le acoperă.",
+      "paymentSoon": "Plata online vine în curând. Introdu un cod ca să deblochezi acum.",
+      "couponInvalid": "Acest cod nu este valabil pentru ansambluri."
+    },
+    "code": {
+      "label": "Cod de deblocare",
+      "required": "Introdu codul. Plata online vine în curând.",
+      "format": "Codurile au litere, cifre, - și _ (3–64 caractere)."
+    },
+    "quantity": {
+      "label": "Clădiri de adăugat",
+      "range": "Alege între 1 și {{max}} clădiri."
+    },
+    "perk": {
+      "months": "Public timp de {{months}} luni",
+      "buildings": "{{n}} clădiri incluse",
+      "renew": "Reînnoirea din timp se adaugă la data de final",
+      "extra": "Mai multe clădiri până la reînnoirea abonamentului"
+    },
+    "summary": {
+      "each": "{{n}} × preț",
+      "discount": "Reducere Premium ({{pct}}%)",
+      "total": "Total"
+    },
+    "done": {
+      "pass": "Abonamentul de ansamblu este activ",
+      "passMessage": "Ansamblul tău este din nou public.",
+      "extra": "Clădiri deblocate",
+      "extraMessage": "Acum poți adăuga mai multe clădiri."
+    },
+    "buyPass": "Cumpără abonament de ansamblu",
+    "renew": "Reînnoiește abonamentul",
+    "unlockBuildings": "Deblochează mai multe clădiri",
+    "unlock": "Deblochează",
+    "working": "Se deblochează…",
+    "paymentsSoon": "Plata online vine în curând. Dacă ai un cod de deblocare de la noi, introdu-l mai jos.",
+    "buildingsUsed": "Clădiri",
+    "usedOf": "{{used}} din {{limit}}",
+    "askOwner": "Doar proprietarul ansamblului poate cumpăra un abonament.",
+    "askOwnerBuildings": "Roagă proprietarul ansamblului să deblocheze mai multe clădiri.",
+    "unlockOne": "Deblochează încă 1 clădire · {{price}}",
+    "limit": {
+      "needPass": "Acest ansamblu are cele {{limit}} clădiri ale sale. Clădirile în plus se adaugă la un abonament de ansamblu.",
+      "reached": "Acest ansamblu are toate cele {{limit}} clădiri."
+    },
+    "banner": {
+      "offline": "Acest ansamblu este offline: proba gratuită s-a încheiat. Cumpărătorii nu îl văd până nu cumperi un abonament de ansamblu.",
+      "endingSoon_one": "Proba gratuită se încheie peste {{count}} zi. Cumpără un abonament de ansamblu ca să rămână online.",
+      "endingSoon_few": "Proba gratuită se încheie peste {{count}} zile. Cumpără un abonament de ansamblu ca să rămână online.",
+      "endingSoon_other": "Proba gratuită se încheie peste {{count}} de zile. Cumpără un abonament de ansamblu ca să rămână online."
+    },
+    "publishedOffline": "Publicat, dar offline până se cumpără un abonament de ansamblu.",
+    "publishWithPass": "Cumpără abonament și publică",
+    "publishTrial": "Publică · gratuit {{days}} zile",
+    "createNote": "Crearea este gratuită. Publicarea pornește o probă gratuită de 15 zile; după ea, abonamentul de ansamblu îl ține online."
+  },
+  "pricingSection": {
+    "title": "Ansambluri",
+    "subtitle": "Pentru dezvoltatori și agenții care vând un proiect nou.",
+    "step1": "Creează-l gratuit",
+    "step1Text": "Clădiri, etaje, apartamente și exploratorul interactiv.",
+    "step2": "Publică: {{days}} zile gratuit",
+    "step2Text": "Cumpărătorii îl găsesc imediat.",
+    "step3": "Abonament de ansamblu · {{price}}",
+    "step3Text": "{{months}} luni online, {{n}} clădiri incluse.",
+    "extra": "Clădiri în plus: {{price}} fiecare, pentru restul perioadei abonamentului.",
+    "premium": "Planurile Premium includ ansambluri: Pro {{pro}}, Agenție {{agency}}. Abonamentele în plus au {{pct}}% reducere.",
+    "cta": "Creează un ansamblu"
   }
 }

@@ -929,7 +929,9 @@
       "claim_review": "Pregledao zahtjev za povezivanje",
       "building_delete": "Obrisana zgrada",
       "floor_delete": "Obrisan sprat",
-      "unit_import": "Uvezene jedinice iz tabele"
+      "unit_import": "Uvezene jedinice iz tabele",
+      "billing_purchase": "Kupljen paket rezidencije ili zgrade",
+      "billing_grant": "Paket rezidencije dodijelio BalkanEstate"
     }
   },
   "details": {
@@ -1045,7 +1047,8 @@
       "ignore": "Ne uvoziti"
     },
     "dropHintXlsx": "Excel (.xlsx) ili CSV — direktno iz Excela, Google Sheets ili Numbers. Kolone mogu biti bilo kojim redom i na bilo kojem jeziku; prepoznajemo ih.",
-    "sheet": "Radni list"
+    "sheet": "Radni list",
+    "buildingLimit": "Ova datoteka dodaje {{n}} novih zgrada, a ova rezidencija može imati {{limit}} (još {{allowed}}). Otključajte još zgrada na kartici Pregled ili koristite postojeće nazive zgrada."
   },
   "unitView": {
     "sea": "More",
@@ -1091,5 +1094,98 @@
       "tooLow": "Unesite najmanje {{min}}.",
       "tooHigh": "Unesite najviše {{max}}."
     }
+  },
+  "billing": {
+    "heading": "Plan",
+    "state": {
+      "none": "Još nije objavljeno",
+      "trial": "Besplatna proba",
+      "active": "Paket rezidencije",
+      "included": "Uključeno u vaš plan",
+      "expired": "Proba je završena"
+    },
+    "hint": {
+      "none": "Objavljivanje pokreće besplatnu probu od {{days}} dana.",
+      "trial_one": "Javno još {{count}} dan (do {{date}}). Kupite paket da ostane online.",
+      "trial_few": "Javno još {{count}} dana (do {{date}}). Kupite paket da ostane online.",
+      "trial_other": "Javno još {{count}} dana (do {{date}}). Kupite paket da ostane online.",
+      "active": "Javno do {{date}}.",
+      "included": "Pokriveno vašim planom do {{date}}.",
+      "expired": "Kupci ne vide ovu rezidenciju. Kupite paket da je vratite online.",
+      "noTrial": "Za objavu ove rezidencije potreban je paket rezidencije."
+    },
+    "refusal": {
+      "passRequired": "Besplatna proba je završena. Kupite paket rezidencije da biste je objavili.",
+      "trialInProgress": "Druga vaša rezidencija je na besplatnoj probi. Kupite paket da odmah objavite ovu.",
+      "trialLimit": "Iskoristili ste sve besplatne probe. Kupite paket da biste objavili.",
+      "buildingLimit": "Ova rezidencija može imati {{limit}} zgrada. Otključajte još da dodate novu.",
+      "paymentSoonAmount": "Online plaćanje stiže uskoro. Preostalo je {{amount}}, pa unesite kod koji to pokriva.",
+      "paymentSoon": "Online plaćanje stiže uskoro. Unesite kod da odmah otključate.",
+      "couponInvalid": "Ovaj kod ne važi za rezidencije."
+    },
+    "code": {
+      "label": "Kod za otključavanje",
+      "required": "Unesite svoj kod. Online plaćanje stiže uskoro.",
+      "format": "Kodovi imaju slova, brojeve, - i _ (3–64 znaka)."
+    },
+    "quantity": {
+      "label": "Zgrade za dodavanje",
+      "range": "Izaberite od 1 do {{max}} zgrada."
+    },
+    "perk": {
+      "months": "Javno {{months}} mjeseci",
+      "buildings": "{{n}} zgrada uključeno",
+      "renew": "Ranije produženje se dodaje na datum isteka",
+      "extra": "Više zgrada do obnove paketa"
+    },
+    "summary": {
+      "each": "{{n}} × cijena",
+      "discount": "Premium popust ({{pct}}%)",
+      "total": "Ukupno"
+    },
+    "done": {
+      "pass": "Paket rezidencije je aktivan",
+      "passMessage": "Vaša rezidencija je ponovo javna.",
+      "extra": "Zgrade su otključane",
+      "extraMessage": "Sada možete dodati još zgrada."
+    },
+    "buyPass": "Kupi paket rezidencije",
+    "renew": "Obnovi paket",
+    "unlockBuildings": "Otključaj još zgrada",
+    "unlock": "Otključaj",
+    "working": "Otključavanje…",
+    "paymentsSoon": "Online plaćanje stiže uskoro. Ako imate kod za otključavanje od nas, unesite ga ispod.",
+    "buildingsUsed": "Zgrade",
+    "usedOf": "{{used}} od {{limit}}",
+    "askOwner": "Samo vlasnik rezidencije može kupiti paket.",
+    "askOwnerBuildings": "Zamolite vlasnika rezidencije da otključa još zgrada.",
+    "unlockOne": "Otključaj još 1 zgradu · {{price}}",
+    "limit": {
+      "needPass": "Ova rezidencija ima svojih {{limit}} zgrada. Dodatne zgrade se dodaju na paket rezidencije.",
+      "reached": "Ova rezidencija ima svih {{limit}} svojih zgrada."
+    },
+    "banner": {
+      "offline": "Ova rezidencija je offline: besplatna proba je završena. Kupci je ne vide dok ne kupite paket rezidencije.",
+      "endingSoon_one": "Besplatna proba ističe za {{count}} dan. Kupite paket rezidencije da ova rezidencija ostane online.",
+      "endingSoon_few": "Besplatna proba ističe za {{count}} dana. Kupite paket rezidencije da ova rezidencija ostane online.",
+      "endingSoon_other": "Besplatna proba ističe za {{count}} dana. Kupite paket rezidencije da ova rezidencija ostane online."
+    },
+    "publishedOffline": "Objavljeno, ali offline dok se ne kupi paket rezidencije.",
+    "publishWithPass": "Kupi paket i objavi",
+    "publishTrial": "Objavi · besplatno {{days}} dana",
+    "createNote": "Postavljanje je besplatno. Objavljivanje pokreće besplatnu probu od 15 dana; nakon nje paket rezidencije je drži online."
+  },
+  "pricingSection": {
+    "title": "Rezidencije",
+    "subtitle": "Za investitore i agencije koje prodaju novogradnju.",
+    "step1": "Postavite besplatno",
+    "step1Text": "Zgrade, spratovi, stanovi i interaktivni pregled.",
+    "step2": "Objavite: {{days}} dana besplatno",
+    "step2Text": "Kupci je odmah pronalaze.",
+    "step3": "Paket rezidencije · {{price}}",
+    "step3Text": "{{months}} mjeseci online, {{n}} zgrada uključeno.",
+    "extra": "Dodatne zgrade: {{price}} po zgradi, do kraja perioda paketa.",
+    "premium": "Premium planovi uključuju rezidencije: Pro {{pro}}, Agencija {{agency}}. Dodatni paketi su {{pct}}% jeftiniji.",
+    "cta": "Kreiraj rezidenciju"
   }
 }

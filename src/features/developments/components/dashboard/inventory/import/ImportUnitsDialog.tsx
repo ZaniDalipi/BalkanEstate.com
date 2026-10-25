@@ -87,7 +87,7 @@ export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmen
           {run.error && <p role="alert" className="text-sm text-red-700">{errorText(run.error)}</p>}
           <div className="flex justify-end gap-2 border-t border-slate-200 pt-4">
             <Button type="button" variant="ghost" onClick={onClose}>{t('wizard.cancel', 'Cancel')}</Button>
-            <Button type="button" onClick={() => run.mutate()} disabled={rows.length === 0 || missing.length > 0 || !preview.data || preview.isFetching || run.isPending}>
+            <Button type="button" onClick={() => run.mutate()} disabled={rows.length === 0 || missing.length > 0 || !preview.data || !!preview.data.buildingLimit || preview.isFetching || run.isPending}>
               {run.isPending ? t('import.importing', 'Importing…') : t('import.confirm', { n: (preview.data?.unitsCreated ?? 0) + (preview.data?.unitsUpdated ?? 0), defaultValue: 'Import ({{n}})' })}
             </Button>
           </div>

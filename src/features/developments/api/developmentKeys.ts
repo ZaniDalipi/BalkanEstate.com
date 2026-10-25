@@ -21,6 +21,8 @@ export const developmentKeys = {
     [...developmentKeys.publicDetail(slug), 'views', targetType, targetId] as const,
   /** The residence a marketplace listing belongs to (listing detail page). */
   forListing: (listingId: string) => [...developmentKeys.public(), 'for-listing', listingId] as const,
+  /** What a residence costs (pricing page). */
+  pricing: () => [...developmentKeys.public(), 'pricing'] as const,
   follow: (slug: string) => [...developmentKeys.publicDetail(slug), 'follow'] as const,
 
   // Dashboard (authored)
@@ -35,6 +37,8 @@ export const developmentKeys = {
   units: (id: string, filters?: object) =>
     [...developmentKeys.detail(id), 'units', { filters }] as const,
   structure: (id: string) => [...developmentKeys.detail(id), 'structure'] as const,
+  /** Residence Pass state: trial countdown, building limit, prices. */
+  billing: (id: string) => [...developmentKeys.detail(id), 'billing'] as const,
   scenes: (id: string) => [...developmentKeys.detail(id), 'scenes'] as const,
   /** Activity tab: audit entries of one development, per action-family filter. */
   audit: (id: string, filter?: string) => [...developmentKeys.detail(id), 'audit', { filter: filter ?? '' }] as const,

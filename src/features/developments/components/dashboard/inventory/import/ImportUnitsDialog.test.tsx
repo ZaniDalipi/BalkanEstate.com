@@ -20,6 +20,15 @@ const csv = 'Stan;Sprat;Kvadratura;Cijena;Status\n101;1;45,5;45.000 €;Slobodno
 describe('ImportUnitsDialog', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('explains the building limit from the preview and does not offer to import', async () => {
+    vi.mocked(api.importUnits).mockResolvedValue(summary({ buildingsCreated: ['N1', 'N2'], buildingLimit: { limit: 5, current: 4, allowed: 1 } }));
+    const user = userEvent.setup();
+    render(<ImportUnitsDialog developmentId="d1" defaultBuildingName="Object A" onClose={vi.fn()} />);
+    await user.upload(screen.getByLabelText(/import.drop/), new File([csv], 'units.csv', { type: 'text/csv' }));
+    expect(await screen.findByText('import.buildingLimit')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'import.confirm' })).toBeDisabled();
+  });
+
   it('reads the file, previews with a dry run, then imports', async () => {
     vi.mocked(api.importUnits).mockImplementation(async (_id, body) => summary({ dryRun: body.dryRun }));
     const user = userEvent.setup();

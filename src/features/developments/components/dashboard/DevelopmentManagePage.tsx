@@ -12,6 +12,7 @@ import { SceneStudio } from '../scene/SceneStudio';
 import { LinkTypesGuide } from '../scene/editor/LinkTypesGuide';
 import { useConfirmDiscard } from '../scene/editor/useUnsavedGuard';
 import { ActivityPanel } from './activity/ActivityPanel';
+import { PlanBanner } from './billing/PlanBanner';
 import { InventoryPanel } from './InventoryPanel';
 import { roleCan } from './inventory/permissions';
 import { LinkedListingsPanel } from './listings/LinkedListingsPanel';
@@ -35,6 +36,8 @@ const DevelopmentManagePage: React.FC = () => {
   const { development, role, isLoading, error, refetch } = useMyDevelopment(id);
   const [requestedTab, setTab] = useTabParam<TabId>(TAB_IDS);
   const showActivity = !!role && roleCan(role, 'team.manage');
+  // Only the owner pays for the Residence Pass (the server checks this too).
+  const canBuy = role === 'owner';
   // A shared `?tab=activity` link opened by a role without access falls back to the overview.
   const tab: TabId = requestedTab === 'activity' && !showActivity ? 'overview' : requestedTab;
   // Leaving the explorer tab unmounts the editor, so ask before dropping unsaved region edits.
@@ -112,9 +115,11 @@ const DevelopmentManagePage: React.FC = () => {
         </p>
       </header>
 
+      <PlanBanner developmentId={development.id} status={development.status} canBuy={canBuy} />
+
       <ManageTabs tabs={tabs} active={tab} onSelect={selectTab} label={t('manage.tabs.label', 'Manage development')} idPrefix={PREFIX} />
 
-      {panel('overview', <OverviewPanel development={development} canPublish={roleCan(role, 'publish')} />)}
+      {panel('overview', <OverviewPanel development={development} canPublish={roleCan(role, 'publish')} canBuy={canBuy} />)}
       {panel('inventory', <InventoryPanel developmentId={development.id} role={role} slug={development.slug} />)}
       {panel(
         'explorer',

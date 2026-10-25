@@ -22,7 +22,7 @@ import type {
   UnitAvailability,
 } from '../types';
 
-/** Create a development (server gates this on an active subscription plan). */
+/** Create a development (free; the Residence Pass applies when it is published). */
 export function useCreateDevelopment() {
   const qc = useQueryClient();
   const mutation = useMutation({

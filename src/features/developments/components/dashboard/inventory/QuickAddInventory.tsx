@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
 import { useInventoryMutations, useDevelopmentStructure } from '../../../hooks';
+import { useResidenceBilling } from '../../../hooks/useResidenceBilling';
+import { billingRefusal } from '../../../utils/billingError';
+import { canAddBuilding } from '../../../utils/residencePlanView';
+import { UnlockBuildingNotice } from '../billing/UnlockBuildingNotice';
+import { useBillingText } from '../billing/useBillingText';
 import { AddFloorsForm } from './AddFloorsForm';
 import { AddUnitsForm } from './AddUnitsForm';
 
@@ -14,6 +19,9 @@ export const QuickAddInventory: React.FC<{ developmentId: string; role?: string 
   const { t } = useTranslation('developments');
   const { buildings, floors } = useDevelopmentStructure(developmentId);
   const { createBuilding, createFloor, createUnit, isCreatingBuilding, isCreatingFloor, isCreatingUnit } = useInventoryMutations(developmentId);
+  const { billing } = useResidenceBilling(developmentId);
+  const { refusalText } = useBillingText();
+  const atLimit = !!billing && !canAddBuilding(billing);
   const [buildingName, setBuildingName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +33,8 @@ export const QuickAddInventory: React.FC<{ developmentId: string; role?: string 
       await createBuilding({ name: buildingName.trim() });
       setBuildingName('');
     } catch (err) {
-      setError((err as { message?: string })?.message || t('errors.generic'));
+      const refusal = billingRefusal(err);
+      setError(refusal ? refusalText(refusal) : (err as { message?: string })?.message || t('errors.generic'));
     }
   };
 
@@ -36,6 +45,9 @@ export const QuickAddInventory: React.FC<{ developmentId: string; role?: string 
           {error}
         </div>
       )}
+      {atLimit && billing ? (
+        <UnlockBuildingNotice developmentId={developmentId} billing={billing} canBuy={role === 'owner'} />
+      ) : (
       <form className="flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={onAddBuilding}>
         <div className="flex-1">
           <Input label={t('building.name')} value={buildingName} onChange={(e) => setBuildingName(e.target.value)} />
@@ -44,6 +56,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string; role?: string 
           {t('building.add')}
         </Button>
       </form>
+      )}
       {buildings.length > 0 && (
         <AddFloorsForm developmentId={developmentId} buildings={buildings} floors={floors} createFloor={createFloor} isCreating={isCreatingFloor} onError={setError} />
       )}

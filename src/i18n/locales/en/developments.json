@@ -923,7 +923,9 @@
       "claim_review": "Reviewed attachment request",
       "building_delete": "Deleted building",
       "floor_delete": "Deleted floor",
-      "unit_import": "Imported units from a spreadsheet"
+      "unit_import": "Imported units from a spreadsheet",
+      "billing_purchase": "Bought a Residence Pass or buildings",
+      "billing_grant": "Residence Pass granted by BalkanEstate"
     }
   },
   "details": {
@@ -1039,7 +1041,8 @@
       "ignore": "Don’t import"
     },
     "dropHintXlsx": "Excel (.xlsx) or CSV — straight from Excel, Google Sheets or Numbers. Columns can be in any order and language; we recognise them.",
-    "sheet": "Worksheet"
+    "sheet": "Worksheet",
+    "buildingLimit": "This file adds {{n}} new buildings, but this residence can have {{limit}} ({{allowed}} more). Unlock more buildings on the Overview tab, or use existing building names."
   },
   "unitView": {
     "sea": "Sea",
@@ -1084,5 +1087,96 @@
       "tooLow": "Enter at least {{min}}.",
       "tooHigh": "Enter at most {{max}}."
     }
+  },
+  "billing": {
+    "heading": "Plan",
+    "state": {
+      "none": "Not published yet",
+      "trial": "Free trial",
+      "active": "Residence Pass",
+      "included": "Included in your plan",
+      "expired": "Trial ended"
+    },
+    "hint": {
+      "none": "Publishing starts a free {{days}}-day trial.",
+      "trial_one": "Public for {{count}} more day (until {{date}}). Buy a pass to keep it online.",
+      "trial_other": "Public for {{count}} more days (until {{date}}). Buy a pass to keep it online.",
+      "active": "Public until {{date}}.",
+      "included": "Covered by your plan until {{date}}.",
+      "expired": "Buyers can’t see this residence. Buy a pass to put it back online.",
+      "noTrial": "Publishing this residence needs a Residence Pass."
+    },
+    "refusal": {
+      "passRequired": "The free trial has ended. Buy a Residence Pass to publish.",
+      "trialInProgress": "Another of your residences is on its free trial. Buy a pass to publish this one now.",
+      "trialLimit": "You have used all your free trials. Buy a pass to publish.",
+      "buildingLimit": "This residence can have {{limit}} buildings. Unlock more to add another.",
+      "paymentSoonAmount": "Online payment is coming soon. {{amount}} is still due, so enter a code that covers it.",
+      "paymentSoon": "Online payment is coming soon. Enter a code to unlock it now.",
+      "couponInvalid": "This code is not valid for residences."
+    },
+    "code": {
+      "label": "Unlock code",
+      "required": "Enter your code. Online payment is coming soon.",
+      "format": "Codes use letters, numbers, - and _ (3–64 characters)."
+    },
+    "quantity": {
+      "label": "Buildings to add",
+      "range": "Choose from 1 to {{max}} buildings."
+    },
+    "perk": {
+      "months": "Public for {{months}} months",
+      "buildings": "{{n}} buildings included",
+      "renew": "Renewing early adds to the end date",
+      "extra": "More buildings until your pass renews"
+    },
+    "summary": {
+      "each": "{{n}} × price",
+      "discount": "Premium discount ({{pct}}%)",
+      "total": "Total"
+    },
+    "done": {
+      "pass": "Residence Pass active",
+      "passMessage": "Your residence is public again.",
+      "extra": "Buildings unlocked",
+      "extraMessage": "You can add more buildings now."
+    },
+    "buyPass": "Buy Residence Pass",
+    "renew": "Renew pass",
+    "unlockBuildings": "Unlock more buildings",
+    "unlock": "Unlock",
+    "working": "Unlocking…",
+    "paymentsSoon": "Online payment is coming soon. If you have an unlock code from us, enter it below.",
+    "buildingsUsed": "Buildings",
+    "usedOf": "{{used}} of {{limit}}",
+    "askOwner": "Only the residence owner can buy a pass.",
+    "askOwnerBuildings": "Ask the residence owner to unlock more buildings.",
+    "unlockOne": "Unlock 1 more building · {{price}}",
+    "limit": {
+      "needPass": "This residence has its {{limit}} buildings. More buildings are added to a Residence Pass.",
+      "reached": "This residence has all {{limit}} of its buildings."
+    },
+    "banner": {
+      "offline": "This residence is offline: its free trial ended. Buyers can’t see it until you buy a Residence Pass.",
+      "endingSoon_one": "The free trial ends in {{count}} day. Buy a Residence Pass to keep this residence online.",
+      "endingSoon_other": "The free trial ends in {{count}} days. Buy a Residence Pass to keep this residence online."
+    },
+    "publishedOffline": "Published, but offline until a Residence Pass is bought.",
+    "publishWithPass": "Buy pass and publish",
+    "publishTrial": "Publish · free for {{days}} days",
+    "createNote": "Free to set up. Publishing starts a free 15-day trial; after it, a Residence Pass keeps it online."
+  },
+  "pricingSection": {
+    "title": "Residences",
+    "subtitle": "For developers and agencies selling a new-build project.",
+    "step1": "Set it up for free",
+    "step1Text": "Buildings, floors, apartments and the interactive explorer.",
+    "step2": "Publish: {{days}} days free",
+    "step2Text": "Buyers can find it straight away.",
+    "step3": "Residence Pass · {{price}}",
+    "step3Text": "{{months}} months online, {{n}} buildings included.",
+    "extra": "More buildings: {{price}} each, for the rest of the pass period.",
+    "premium": "Premium plans include residences: Pro {{pro}}, Agency {{agency}}. More passes are {{pct}}% off.",
+    "cta": "Create a residence"
   }
 }

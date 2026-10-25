@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Building2, Layers, Plus, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Building2, Layers, Lock, Plus, RefreshCw } from 'lucide-react';
 import type { ImportProblem, PreparedImport } from '../../../../utils/csvImport';
 import type { UnitImportSummary } from '../../../../types';
 import { fieldLabel } from './fieldLabels';
@@ -47,6 +47,17 @@ export const ImportReview: React.FC<ImportReviewProps> = ({ prepared, preview, p
       )}
       {prepared.floorsFromUnitNumbers && (
         <p className="rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-900">{t('import.floorsFromNumbers', 'No floor column: floors are read from the unit numbers (401 → floor 4).')}</p>
+      )}
+      {preview?.buildingLimit && (
+        <p role="alert" className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          {t('import.buildingLimit', {
+            n: preview.buildingsCreated.length,
+            limit: preview.buildingLimit.limit,
+            allowed: preview.buildingLimit.allowed,
+            defaultValue: 'This file adds {{n}} new buildings, but this residence can have {{limit}} ({{allowed}} more). Unlock more buildings on the Overview tab, or use existing building names.',
+          })}
+        </p>
       )}
       {previewError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{previewError}</p>}
       {problems.length > 0 && (

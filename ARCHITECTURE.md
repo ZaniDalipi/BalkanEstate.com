@@ -1159,6 +1159,13 @@ how-tos — is in [`docs/RESIDENCE_EXPLORER.md`](docs/RESIDENCE_EXPLORER.md).
   never overwrites a teammate's change to a field the form didn't touch.
 - Validation returns i18n keys (`validation/developmentValidation.ts`); the server
   repeats every check (`developmentService.normalizeAmenities/normalizeContact`).
+- **Residence Pass:** creating is free, and the first publish starts a 15-day
+  public trial. After it, a pass (12 months, 5 buildings) or the owner's
+  premium plan keeps the residence public.
+  - The rules are pure functions in `billing/residencePlan.ts`.
+  - Every public query uses `publicResidenceFilter()`.
+  - The building limit is enforced in `createBuilding`.
+  - See *Residence Pass* in `docs/RESIDENCE_EXPLORER.md`.
 
 ## Internationalisation (i18n)
 

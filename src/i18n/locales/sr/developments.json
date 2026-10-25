@@ -438,8 +438,8 @@
     "showAvailability": "Прикажи доступност",
     "noUnitsInBuilding": "За ову зграду још нема наведених станова.",
     "stackingPlan": "Станови по спратовима",
-    "unmarkedNote": "Stanovi još nisu označeni na ovoj slici — izaberite jedan sprat po sprat ispod.",
-    "noUnitsHere": "U ovoj zgradi još nema objavljenih stanova."
+    "unmarkedNote": "Станови још нису означени на овој слици — изаберите један спрат по спрат испод.",
+    "noUnitsHere": "У овој згради још нема објављених станова."
   },
   "feature": {
     "big_terrace": "Sa velikom terasom",
@@ -929,7 +929,9 @@
       "claim_review": "Прегледао захтев за повезивање",
       "building_delete": "Обрисана зграда",
       "floor_delete": "Обрисан спрат",
-      "unit_import": "Увезене јединице из табеле"
+      "unit_import": "Увезене јединице из табеле",
+      "billing_purchase": "Купљен пакет резиденције или зграде",
+      "billing_grant": "Пакет резиденције доделио је BalkanEstate"
     }
   },
   "details": {
@@ -1045,7 +1047,8 @@
       "ignore": "Не увози"
     },
     "dropHintXlsx": "Excel (.xlsx) или CSV — директно из Excel-а, Google Sheets или Numbers. Колоне могу бити било којим редом и на било ком језику; препознајемо их.",
-    "sheet": "Радни лист"
+    "sheet": "Радни лист",
+    "buildingLimit": "Ова датотека додаје {{n}} нових зграда, а ова резиденција може да има {{limit}} (још {{allowed}}). Откључајте још зграда на картици Преглед или користите постојеће називе зграда."
   },
   "unitView": {
     "sea": "Море",
@@ -1065,31 +1068,124 @@
     "units_other": "{{count}} јединица"
   },
   "budget": {
-    "open": "Vaš budžet",
-    "ask": "Koliki je vaš budžet?",
-    "title": "Pronađite dom u svom budžetu",
-    "label": "Vaš budžet",
-    "placeholder": "npr. 150.000",
-    "hint": "Upišite iznos kao 150.000, 150k ili 1,2m.",
-    "submit": "Prikaži opcije",
-    "resultsFor": "Stanovi za {{budget}}",
-    "stretch": "Malo iznad vašeg budžeta",
-    "noneFit": "Još nijedan stan u prodaji ne odgovara iznosu {{budget}}. Najpovoljniji stan ovde:",
-    "noneOnSale": "Trenutno nema stanova u prodaji sa javnom cenom.",
-    "bargainLocation": "{{pct}}% ispod proseka za {{place}} po m²",
-    "bargainResidence": "{{pct}}% ispod proseka ove rezidencije po m²",
-    "bargain": "Povoljno",
-    "show": "Odvedi me tamo",
-    "teaserBargain": "Povoljna ponuda: {{unit}} košta {{price}}, {{reason}}.",
-    "teaserFrom": "Stanovi ovde počinju od {{price}}.",
-    "close": "Zatvori",
-    "dismiss": "Odbaci",
-    "perSqm": "{{price}}/m²",
+    "open": "Ваш буџет",
+    "ask": "Колики је ваш буџет?",
+    "title": "Пронађите дом у свом буџету",
+    "label": "Ваш буџет",
+    "placeholder": "нпр. 150.000",
+    "hint": "Упишите износ као 150.000, 150k или 1,2m.",
+    "submit": "Прикажи опције",
+    "resultsFor": "Станови за {{budget}}",
+    "stretch": "Мало изнад вашег буџета",
+    "noneFit": "Још ниједан стан у продаји не одговара износу {{budget}}. Најповољнији стан овде:",
+    "noneOnSale": "Тренутно нема станова у продаји са јавном ценом.",
+    "bargainLocation": "{{pct}}% испод просека за {{place}} по м²",
+    "bargainResidence": "{{pct}}% испод просека ове резиденције по м²",
+    "bargain": "Повољно",
+    "show": "Одведи ме тамо",
+    "teaserBargain": "Повољна понуда: {{unit}} кошта {{price}}, {{reason}}.",
+    "teaserFrom": "Станови овде почињу од {{price}}.",
+    "close": "Затвори",
+    "dismiss": "Одбаци",
+    "perSqm": "{{price}}/м²",
     "errors": {
-      "empty": "Unesite svoj budžet.",
-      "invalid": "Unesite iznos u evrima, npr. 150.000 ili 150k.",
-      "tooLow": "Unesite najmanje {{min}}.",
-      "tooHigh": "Unesite najviše {{max}}."
+      "empty": "Унесите свој буџет.",
+      "invalid": "Унесите износ у еврима, нпр. 150.000 или 150k.",
+      "tooLow": "Унесите најмање {{min}}.",
+      "tooHigh": "Унесите највише {{max}}."
     }
+  },
+  "billing": {
+    "heading": "План",
+    "state": {
+      "none": "Још није објављено",
+      "trial": "Бесплатна проба",
+      "active": "Пакет резиденције",
+      "included": "Укључено у ваш план",
+      "expired": "Проба је завршена"
+    },
+    "hint": {
+      "none": "Објављивање покреће бесплатну пробу од {{days}} дана.",
+      "trial_one": "Јавно још {{count}} дан (до {{date}}). Купите пакет да остане онлајн.",
+      "trial_few": "Јавно још {{count}} дана (до {{date}}). Купите пакет да остане онлајн.",
+      "trial_other": "Јавно још {{count}} дана (до {{date}}). Купите пакет да остане онлајн.",
+      "active": "Јавно до {{date}}.",
+      "included": "Покривено вашим планом до {{date}}.",
+      "expired": "Купци не виде ову резиденцију. Купите пакет да је вратите онлајн.",
+      "noTrial": "За објаву ове резиденције потребан је пакет резиденције."
+    },
+    "refusal": {
+      "passRequired": "Бесплатна проба је завршена. Купите пакет резиденције да бисте је објавили.",
+      "trialInProgress": "Друга ваша резиденција је на бесплатној проби. Купите пакет да одмах објавите ову.",
+      "trialLimit": "Искористили сте све бесплатне пробе. Купите пакет да бисте објавили.",
+      "buildingLimit": "Ова резиденција може имати {{limit}} зграда. Откључајте још да додате нову.",
+      "paymentSoonAmount": "Онлајн плаћање стиже ускоро. Преостало је {{amount}}, па унесите код који то покрива.",
+      "paymentSoon": "Онлајн плаћање стиже ускоро. Унесите код да одмах откључате.",
+      "couponInvalid": "Овај код не важи за резиденције."
+    },
+    "code": {
+      "label": "Код за откључавање",
+      "required": "Унесите свој код. Онлајн плаћање стиже ускоро.",
+      "format": "Кодови имају слова, бројеве, - и _ (3–64 знака)."
+    },
+    "quantity": {
+      "label": "Зграде за додавање",
+      "range": "Изаберите од 1 до {{max}} зграда."
+    },
+    "perk": {
+      "months": "Јавно {{months}} месеци",
+      "buildings": "{{n}} зграда укључено",
+      "renew": "Раније продужење се додаје на датум истека",
+      "extra": "Више зграда до обнове пакета"
+    },
+    "summary": {
+      "each": "{{n}} × цена",
+      "discount": "Premium попуст ({{pct}}%)",
+      "total": "Укупно"
+    },
+    "done": {
+      "pass": "Пакет резиденције је активан",
+      "passMessage": "Ваша резиденција је поново јавна.",
+      "extra": "Зграде су откључане",
+      "extraMessage": "Сада можете да додате још зграда."
+    },
+    "buyPass": "Купи пакет резиденције",
+    "renew": "Обнови пакет",
+    "unlockBuildings": "Откључај још зграда",
+    "unlock": "Откључај",
+    "working": "Откључавање…",
+    "paymentsSoon": "Онлајн плаћање стиже ускоро. Ако имате код за откључавање од нас, унесите га испод.",
+    "buildingsUsed": "Зграде",
+    "usedOf": "{{used}} од {{limit}}",
+    "askOwner": "Само власник резиденције може да купи пакет.",
+    "askOwnerBuildings": "Замолите власника резиденције да откључа још зграда.",
+    "unlockOne": "Откључај још 1 зграду · {{price}}",
+    "limit": {
+      "needPass": "Ова резиденција има својих {{limit}} зграда. Додатне зграде се додају на пакет резиденције.",
+      "reached": "Ова резиденција има свих {{limit}} својих зграда."
+    },
+    "banner": {
+      "offline": "Ова резиденција је офлајн: бесплатна проба је завршена. Купци је не виде док не купите пакет резиденције.",
+      "endingSoon_one": "Бесплатна проба истиче за {{count}} дан. Купите пакет резиденције да ова резиденција остане онлајн.",
+      "endingSoon_few": "Бесплатна проба истиче за {{count}} дана. Купите пакет резиденције да ова резиденција остане онлајн.",
+      "endingSoon_other": "Бесплатна проба истиче за {{count}} дана. Купите пакет резиденције да ова резиденција остане онлајн."
+    },
+    "publishedOffline": "Објављено, али офлајн док се не купи пакет резиденције.",
+    "publishWithPass": "Купи пакет и објави",
+    "publishTrial": "Објави · бесплатно {{days}} дана",
+    "createNote": "Постављање је бесплатно. Објављивање покреће бесплатну пробу од 15 дана; после ње пакет резиденције је држи онлајн."
+  },
+  "pricingSection": {
+    "title": "Резиденције",
+    "subtitle": "За инвеститоре и агенције које продају новоградњу.",
+    "step1": "Поставите бесплатно",
+    "step1Text": "Зграде, спратови, станови и интерактивни преглед.",
+    "step2": "Објавите: {{days}} дана бесплатно",
+    "step2Text": "Купци је одмах проналазе.",
+    "step3": "Пакет резиденције · {{price}}",
+    "step3Text": "{{months}} месеци онлајн, {{n}} зграда укључено.",
+    "extra": "Додатне зграде: {{price}} по згради, до краја периода пакета.",
+    "premium": "Premium планови укључују резиденције: Pro {{pro}}, Агенција {{agency}}. Додатни пакети су {{pct}}% јефтинији.",
+    "cta": "Креирај резиденцију"
   }
 }

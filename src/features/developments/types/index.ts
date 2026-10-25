@@ -463,6 +463,8 @@ export interface UnitFacets {
 export interface UnitImportSummary {
   rows: number;
   buildingsCreated: string[];
+  /** Set when the file adds more buildings than the residence's plan allows. */
+  buildingLimit?: { limit: number; current: number; allowed: number };
   floorsCreated: number;
   unitsCreated: number;
   unitsUpdated: number;
@@ -717,3 +719,4 @@ export interface AuditLogPage {
   entries: AuditEntry[];
   total: number;
 }
+export * from './billing';

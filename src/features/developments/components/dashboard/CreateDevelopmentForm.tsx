@@ -17,13 +17,6 @@ import {
 } from '../../types';
 import { validateCreateDevelopment, type CreateDevelopmentErrors } from '../../validation/developmentValidation';
 
-type ApiError = { statusCode?: number; details?: { subscriptionRequired?: boolean } };
-
-const isSubscriptionError = (err: unknown): boolean => {
-  const e = err as ApiError | null;
-  return !!e && e.statusCode === 403 && !!e.details?.subscriptionRequired;
-};
-
 type BasicsForm = Omit<CreateDevelopmentPayload, keyof LocationValue>;
 
 const EMPTY: BasicsForm = { name: '', category: 'apartment_building', constructionStatus: 'planned' };
@@ -36,9 +29,8 @@ const toNumber = (v: string) => (v.trim() ? Number(v) : undefined);
  * Location uses the shared `LocationFields` (the same fields as the edit form
  * in Settings): a country dropdown drives a dependent city dropdown, and
  * picking a city auto-fills the coordinates and a default address, and the map
- * pin below lets the owner place the residence exactly before creating it. Creating is
- * gated on an active subscription plan server-side; a subscription error routes
- * the user to pricing.
+ * pin below lets the owner place the residence exactly before creating it.
+ * Creating is free; the Residence Pass applies when it is published.
  */
 const CreateDevelopmentForm: React.FC = () => {
   const { t } = useTranslation('developments');
@@ -48,7 +40,6 @@ const CreateDevelopmentForm: React.FC = () => {
   const [location, setLocation] = useState<LocationValue>(EMPTY_LOCATION);
   const [errors, setErrors] = useState<CreateDevelopmentErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [needsPlan, setNeedsPlan] = useState(false);
 
   const set = <K extends keyof BasicsForm>(key: K, value: BasicsForm[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -60,7 +51,6 @@ const CreateDevelopmentForm: React.FC = () => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
-    setNeedsPlan(false);
 
     const validation = validateCreateDevelopment({ ...form, country: location.country, city: location.city });
     setErrors(validation);
@@ -78,12 +68,10 @@ const CreateDevelopmentForm: React.FC = () => {
       });
       navigate(paths.developmentManage(development.id));
     } catch (err) {
-      if (isSubscriptionError(err)) {
-        setNeedsPlan(true);
-        setSubmitError(t('errors.subscriptionRequired'));
-      } else {
-        setSubmitError(t('errors.createFailed'));
-      }
+      // Creating is free (the Residence Pass applies when publishing), so any
+      // refusal here is about the form itself.
+      const e = err as { statusCode?: number; message?: string } | null;
+      setSubmitError(e?.statusCode === 400 && e.message ? e.message : t('errors.createFailed'));
     }
   };
 
@@ -92,6 +80,9 @@ const CreateDevelopmentForm: React.FC = () => {
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">{t('wizard.title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t('wizard.basics')}</p>
+        <p className="mt-2 text-sm text-slate-600">
+          {t('billing.createNote', 'Free to set up. Publishing starts a free 15-day trial; after it, a Residence Pass keeps it online.')}
+        </p>
       </header>
 
       <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-white p-5 space-y-5" noValidate>
@@ -141,15 +132,6 @@ const CreateDevelopmentForm: React.FC = () => {
             className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
           >
             <p>{submitError}</p>
-            {needsPlan && (
-              <button
-                type="button"
-                onClick={() => navigate(paths.pricing())}
-                className="mt-2 font-semibold underline underline-offset-2"
-              >
-                {t('errors.viewPlans')}
-              </button>
-            )}
           </div>
         )}
 

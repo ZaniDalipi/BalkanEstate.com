@@ -22,6 +22,17 @@ export const formatPrice = (amount?: number | null, currency = 'EUR'): string =>
   }
 };
 
+/** An amount charged, with cents only when there are any: "149 €", "104,30 €". */
+export const formatCharge = (amount: number, currency = 'EUR'): string => {
+  const whole = Math.round(amount * 100) % 100 === 0;
+  return new Intl.NumberFormat(APP_NUMBER_LOCALE, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: whole ? 0 : 2,
+    maximumFractionDigits: whole ? 0 : 2,
+  }).format(amount);
+};
+
 /** A plain count or amount with the app's grouping, e.g. "1.250". */
 export const formatNumber = (value: number): string => value.toLocaleString(APP_NUMBER_LOCALE);
 

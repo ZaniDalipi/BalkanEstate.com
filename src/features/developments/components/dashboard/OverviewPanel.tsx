@@ -1,19 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/src/components/ui/button';
-import { navigate } from '@/src/app/router/navigation';
-import { paths } from '@/src/app/router/paths';
-import { useNotification } from '@/src/shared/hooks/useNotification';
-import { usePublishDevelopment } from '../../hooks/useDevelopmentMutations';
 import { useUnitCounts } from '../../hooks/useInventoryQuery';
+import { useResidenceBilling } from '../../hooks/useResidenceBilling';
 import { AVAILABILITY_META } from '../../utils/availability';
 import { CoverImageUpload } from '../shared/CoverImageUpload';
-import { StatusPill } from '../shared/Badges';
+import { ResidencePlanCard } from './billing/ResidencePlanCard';
+import { PublishSection } from './PublishSection';
 import type { Development, UnitAvailability } from '../../types';
 
 interface OverviewPanelProps {
   development: Development;
   canPublish: boolean;
+  /** Only the owner pays for the Residence Pass. */
+  canBuy: boolean;
 }
 
 const Stat: React.FC<{ label: string; value?: number; state?: UnitAvailability }> = ({ label, value, state }) => (
@@ -26,46 +25,16 @@ const Stat: React.FC<{ label: string; value?: number; state?: UnitAvailability }
   </div>
 );
 
-/** Status + publish control, unit totals and the cover image. */
-export const OverviewPanel: React.FC<OverviewPanelProps> = ({ development, canPublish }) => {
+/** Status + publish control, the Residence Pass plan, unit totals and the cover image. */
+export const OverviewPanel: React.FC<OverviewPanelProps> = ({ development, canPublish, canBuy }) => {
   const { t } = useTranslation('developments');
-  const notify = useNotification();
-  const { setStatus, isLoading: isPublishing } = usePublishDevelopment(development.id);
   const counts = useUnitCounts(development.id);
-  const isPublished = development.status === 'published';
-
-  const onToggle = () =>
-    setStatus(isPublished ? 'draft' : 'published').catch((err: { message?: string }) => {
-      void notify.error(t('errors.updateFailed', 'Could not save your changes.'), err?.message || t('errors.generic'));
-    });
+  const { billing } = useResidenceBilling(development.id);
 
   return (
     <div className="space-y-6">
-      <section aria-labelledby="overview-status" className="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 id="overview-status" className="text-base font-semibold text-slate-900">
-          {t('manage.overview.status', 'Status')}
-        </h2>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <StatusPill status={development.status} />
-          <span className="text-sm text-slate-600">
-            {isPublished
-              ? t('manage.overview.publishedHint', 'Buyers can find this residence.')
-              : t('manage.overview.draftHint', 'Only your team can see this residence.')}
-          </span>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {canPublish && (
-            <Button variant={isPublished ? 'outline' : 'default'} disabled={isPublishing} onClick={onToggle}>
-              {isPublished ? t('detail.unpublish', 'Unpublish') : t('detail.publish', 'Publish')}
-            </Button>
-          )}
-          {isPublished && (
-            <Button variant="ghost" onClick={() => navigate(paths.development(development.slug))}>
-              {t('public.viewDetails', 'View public page')}
-            </Button>
-          )}
-        </div>
-      </section>
+      <PublishSection development={development} billing={billing} canPublish={canPublish} canBuy={canBuy} />
+      {billing && <ResidencePlanCard developmentId={development.id} billing={billing} canBuy={canBuy} />}
 
       <section aria-labelledby="overview-stats">
         <h2 id="overview-stats" className="mb-3 text-base font-semibold text-slate-900">

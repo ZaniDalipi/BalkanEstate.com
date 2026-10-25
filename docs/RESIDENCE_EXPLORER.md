@@ -500,6 +500,61 @@ fit.
   the buyer stops it. With reduced motion there is no glide or fade, just the
   highlight.
 
+## 7b. Residence Pass (pay per residence)
+
+Creating and setting up a residence is free for any signed-in user. The first
+publish starts a **15-day free trial**: the residence is public straight away.
+When the trial ends it drops out of every public page (detail, list, nearby
+suggestions, follow alerts, the listing "part of residence" badge) until a
+**Residence Pass** is bought. Nothing is deleted. The owner keeps editing, and
+paying brings it back at once.
+
+| | |
+|---|---|
+| Trial | 15 days from the *first* publish; unpublishing does not restart it |
+| Residence Pass | 12 months public, 5 buildings included; renewing early adds to the end date |
+| Extra building | Per building, for the rest of the pass (or plan) period |
+| Premium plans | Pro includes 1 published residence, agency plans 3 (oldest publish first); more passes 30% off |
+| Abuse guard | One residence on trial at a time per owner, 3 trials ever (deleted residences count) |
+| Prices | `Product` documents `residence_pass_yearly` (€149) and `residence_extra_building_yearly` (€29), editable in the admin PricingManager |
+
+All numbers are in `backend/src/config/residenceBilling.ts`.
+
+**How it is built**
+
+- **Rules:** `services/developments/billing/residencePlan.ts`, as pure
+  functions. They cover state (`none | trial | active | included | expired`),
+  visibility, the publish/trial decision, pass stacking, the building limit,
+  prices and reminders.
+- **State:** `Development.billing` and `visibleUntil` are recomputed from the
+  `ResidencePurchase` ledger and the owner's plan (`residenceBillingService`).
+- **Public queries:** every one of them uses
+  `publicResidenceFilter()` (`status: published` and `visibleUntil > now`).
+- **Building limit:** checked in `createBuilding`. The CSV import checks it
+  before writing anything, and its dry run returns `buildingLimit` for the
+  preview.
+- **Endpoints:**
+  - `GET /api/dashboard/developments/:id/billing`
+  - `POST …/:id/billing/checkout` takes `{ kind: 'pass' | 'extra_building',
+    quantity, couponCode }` and is owner only.
+  - `POST …/:id/billing/grant` is platform admin only.
+  - The public `GET /api/developments/pricing`.
+  - Refusals are 402 with a `code`: `PASS_REQUIRED`, `TRIAL_IN_PROGRESS`,
+    `TRIAL_LIMIT`, `BUILDING_LIMIT`. `PAYMENT_NOT_CONFIGURED` is a 503 and
+    `COUPON_INVALID` a 400. Details are under `details`.
+- **Online payment is off for now.** A purchase completes with a
+  `DiscountCode` that covers the full price and lists a residence product in
+  `applicablePlans`; general subscription codes do not apply. An admin grant
+  also works. To switch real payment on, Paysera checkout calls `applyPurchase`
+  from the webhook for `productId` values starting with `residence_`.
+- **Daily job:** `runResidenceBillingJob` (cron 08:07) sends the day-10 and
+  day-14 reminders and the offline notice, in-app and by email, once each. It
+  also recomputes plan coverage. On startup, residences published before
+  billing existed start a fresh trial instead of disappearing.
+- **Dashboard:** `components/dashboard/billing/` holds the plan card, trial
+  banner, buy dialog and unlock-building notice. `PublishSection` handles the
+  publish button. The pricing page shows `ResidencePricingSection`.
+
 ## 8. Known limitations
 
 **Data and storage**
