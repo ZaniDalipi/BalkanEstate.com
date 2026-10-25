@@ -14,7 +14,6 @@ import type { IDevelopment } from '../../../models/Development';
 import {
   MAX_EXTRA_BUILDINGS_PER_PURCHASE,
   RESIDENCE_FALLBACK_PRICES,
-  RESIDENCE_PASS_MONTHS,
   RESIDENCE_PRODUCTS,
   RESIDENCE_PURCHASE_KINDS,
   type ResidencePurchaseKind,
@@ -23,8 +22,9 @@ import {
 import { ValidationError } from '../developmentService';
 import { BillingError } from './billingErrors';
 import { ownerPlan } from './ownerPlan';
-import { billingFacts, recomputeBilling } from './residenceBillingService';
-import { passPeriod, quote, residenceAccess, type PriceQuote } from './residencePlan';
+import { accessFor, recomputeBilling } from './residenceBillingService';
+import { residenceTerms } from './residenceTerms';
+import { passPeriod, quote, type PriceQuote } from './residencePlan';
 
 const productIdFor = (kind: ResidencePurchaseKind) =>
   kind === 'pass' ? RESIDENCE_PRODUCTS.pass : RESIDENCE_PRODUCTS.extraBuilding;
@@ -53,9 +53,10 @@ export function parseOrder(body: { kind?: unknown; quantity?: unknown }): { kind
 }
 
 /** End of the period extra buildings are bought for: the current pass or plan. */
-function extraPeriodEnd(dev: IDevelopment, now: Date): Date {
-  const access = residenceAccess(billingFacts(dev), now);
+async function extraPeriodEnd(dev: IDevelopment, now: Date): Promise<Date> {
+  const access = await accessFor(dev, now);
   if (access.state === 'active' && dev.billing.paidUntil) return dev.billing.paidUntil;
+  if (access.state === 'agency' && dev.billing.agencyUntil) return dev.billing.agencyUntil;
   if (access.state === 'included' && dev.billing.includedUntil) return dev.billing.includedUntil;
   throw new BillingError('PASS_REQUIRED', 'Extra buildings are added to a Residence Pass. Buy the pass first.');
 }
@@ -75,10 +76,11 @@ interface ApplyInput {
 }
 
 export async function applyPurchase(dev: IDevelopment, input: ApplyInput, now = new Date()): Promise<IResidencePurchase> {
+  const months = input.months ?? (await residenceTerms()).passMonths;
   const period =
     input.kind === 'pass'
-      ? passPeriod(dev.billing.paidUntil, now, (input.months ?? RESIDENCE_PASS_MONTHS) * input.quantity)
-      : { start: now, end: extraPeriodEnd(dev, now) };
+      ? passPeriod(dev.billing.paidUntil, now, months * input.quantity)
+      : { start: now, end: await extraPeriodEnd(dev, now) };
   const purchase = await ResidencePurchase.create({
     developmentId: dev._id,
     ownerId: dev.ownerId,
@@ -107,7 +109,7 @@ export async function checkout(
   now = new Date()
 ): Promise<IResidencePurchase> {
   const { kind, quantity } = parseOrder(body);
-  if (kind === 'extra_building') extraPeriodEnd(dev, now); // fail fast before touching the coupon
+  if (kind === 'extra_building') await extraPeriodEnd(dev, now); // fail fast before touching the coupon
   const price = await quoteFor(dev, kind, quantity);
   const code = typeof body.couponCode === 'string' ? body.couponCode.trim().toUpperCase() : '';
   if (!code) {

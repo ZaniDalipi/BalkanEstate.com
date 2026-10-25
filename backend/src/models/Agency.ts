@@ -134,6 +134,12 @@ export interface IAgency extends Document {
   // Agency admins (users who can manage the agency)
   admins?: mongoose.Types.ObjectId[];
 
+  /**
+   * Residences: when the subscription was first seen ended, so the agency's
+   * free residences get a fixed grace period. Cleared on renewal.
+   */
+  residenceEndedAt?: Date;
+
   // Legacy subscription fields (kept for backwards compatibility)
   subscriptionPlan?: string;
   subscriptionStatus?: string;
@@ -558,6 +564,7 @@ const AgencySchema: Schema = new Schema(
     },
 
     // Legacy subscription fields (kept for backwards compatibility)
+    residenceEndedAt: { type: Date },
     subscriptionPlan: {
       type: String,
       default: 'free',
@@ -760,6 +767,20 @@ AgencySchema.index({ score: -1, isFeatured: -1 });
 // Field-level encryption for PII fields
 AgencySchema.plugin(encryptionPlugin, {
   fields: ['phone', 'address'],
+});
+
+// Residences: when the subscription changes (renewal, expiry, admin action),
+// the agency's free residences follow at once. The daily residence job covers
+// changes made without save() (updateOne).
+AgencySchema.pre('save', function markSubscriptionChange(next) {
+  this.$locals.subscriptionChanged = !this.isNew && this.isModified('subscription');
+  next();
+});
+AgencySchema.post('save', function recomputeResidences(doc) {
+  if (!doc.$locals?.subscriptionChanged) return;
+  import('../services/developments/billing/residenceBillingService')
+    .then(({ recomputeAgencyResidences }) => recomputeAgencyResidences(String(doc._id)))
+    .catch(() => undefined); // best effort; the daily job corrects any miss
 });
 
 export default mongoose.model<IAgency>('Agency', AgencySchema);

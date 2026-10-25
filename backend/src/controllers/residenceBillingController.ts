@@ -9,12 +9,11 @@ import { checkout, grant, listPrice } from '../services/developments/billing/res
 import {
   INCLUDED_RESIDENCES_BY_TIER,
   PREMIUM_PASS_DISCOUNT,
-  RESIDENCE_INCLUDED_BUILDINGS,
-  RESIDENCE_PASS_MONTHS,
   RESIDENCE_TRIAL_DAYS,
 } from '../config/residenceBilling';
 import { recordDevelopmentAudit } from '../services/developments/developmentAudit';
 import Development from '../models/Development';
+import { residenceTerms } from '../services/developments/billing/residenceTerms';
 import { sendServiceError } from './developmentController';
 
 const actor = (req: Request): IUser => req.user as IUser;
@@ -65,15 +64,16 @@ export const grantBilling = async (req: Request, res: Response): Promise<void> =
 /** GET /api/developments/pricing — public: what a residence costs (for the pricing page). */
 export const publicResidencePricing = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const [pass, extraBuilding] = await Promise.all([listPrice('pass'), listPrice('extra_building')]);
+    const [pass, extraBuilding, terms] = await Promise.all([listPrice('pass'), listPrice('extra_building'), residenceTerms()]);
     res.json({
       currency: 'EUR',
       pass,
       extraBuilding,
       trialDays: RESIDENCE_TRIAL_DAYS,
-      passMonths: RESIDENCE_PASS_MONTHS,
-      includedBuildings: RESIDENCE_INCLUDED_BUILDINGS,
+      passMonths: terms.passMonths,
+      includedBuildings: terms.includedBuildings,
       includedByTier: INCLUDED_RESIDENCES_BY_TIER,
+      agencyResidencesPerYear: terms.residencesPerYear,
       premiumDiscountPct: Math.round(PREMIUM_PASS_DISCOUNT * 100),
     });
   } catch (error) {

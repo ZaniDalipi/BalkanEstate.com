@@ -68,6 +68,10 @@ export interface IProduct extends Document {
   agentCoupons?: number; // Number of agent coupons (5 for agency tier)
   teamMembersLimit?: number; // Number of team members allowed (for agency/enterprise plans)
 
+  // Residences (see config/residenceBilling.ts; these override its fallbacks)
+  includedBuildings?: number; // Residence Pass: buildings included per residence
+  residencesPerYear?: number; // Agency plan: free residences per subscription year
+
   // AI & Insights Limits
   aiMessagesLimit?: number; // AI chat messages limit per month (-1 = unlimited)
   aiInsightsLimit?: number; // Generate insights limit per month (-1 = unlimited)
@@ -249,6 +253,11 @@ const ProductSchema: Schema = new Schema(
       type: Number,
       default: 1, // 1 for solo, 5 for agency/enterprise
     },
+
+    // Residences: set on the residence pass / agency plan only (no default,
+    // so other products stay as they are)
+    includedBuildings: { type: Number, min: 1, max: 1000 },
+    residencesPerYear: { type: Number, min: 0, max: 100 },
 
     // AI & Insights Limits
     aiMessagesLimit: {

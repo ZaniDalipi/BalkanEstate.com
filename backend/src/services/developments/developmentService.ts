@@ -42,6 +42,8 @@ export interface CreateDevelopmentInput {
   allowUnitInquiries?: boolean;
   /** When creating on behalf of an agency the caller owns/admins. */
   agencyId?: string;
+  /** An agency owner/admin creating a residence of their own, not the agency's. */
+  personal?: boolean;
 }
 
 /**
@@ -110,6 +112,11 @@ export const createDevelopment = async (
       !!agency && (String(agency.ownerId) === uid || (agency.admins ?? []).some((a) => String(a) === uid));
     if (!canUseAgency) throw new ForbiddenError('You can only create developments for an agency you own or administer');
     agencyId = new mongoose.Types.ObjectId(raw);
+  } else if (input.personal !== true) {
+    // An agency's owner or admin creates residences for the agency (its yearly
+    // free residence applies), unless they ask for a personal one.
+    const own = await Agency.findOne({ $or: [{ ownerId: user._id }, { admins: user._id }] }).select('_id').lean();
+    if (own) agencyId = own._id as mongoose.Types.ObjectId;
   }
   const ownerType: 'user' | 'agency' = agencyId ? 'agency' : 'user';
   const slug = await generateUniqueDevelopmentSlug(input.name);

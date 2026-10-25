@@ -23,7 +23,13 @@ export interface BillingFacts {
   trialEndsAt?: Date | null;
   paidUntil?: Date | null;
   includedUntil?: Date | null;
+  /** Covered by the agency's yearly free residence until this date (grace included). */
+  agencyUntil?: Date | null;
   extraBuildings?: number;
+  /** Buildings a residence includes (admin-editable on the pass product). */
+  includedBuildings?: number;
+  /** Admin override of the building limit; wins over everything else. */
+  buildingLimitOverride?: number | null;
 }
 
 export interface ResidenceAccess {
@@ -47,18 +53,21 @@ export function residenceAccess(f: BillingFacts, now: Date): ResidenceAccess {
   let state: ResidenceAccessState = 'none';
   let ends: Date | null = null;
   if (isAfter(f.paidUntil, now)) [state, ends] = ['active', f.paidUntil];
+  else if (isAfter(f.agencyUntil, now)) [state, ends] = ['agency', f.agencyUntil];
   else if (isAfter(f.includedUntil, now)) [state, ends] = ['included', f.includedUntil];
   else if (isAfter(f.trialEndsAt, now)) [state, ends] = ['trial', f.trialEndsAt];
-  else if (f.trialStartedAt) state = 'expired';
+  else if (f.trialStartedAt || f.agencyUntil) state = 'expired'; // a trial or an agency's free period has ended
 
-  const visibleUntil = latest([f.paidUntil, f.includedUntil, f.trialEndsAt]);
-  const paidPeriod = state === 'active' || state === 'included';
+  const visibleUntil = latest([f.paidUntil, f.agencyUntil, f.includedUntil, f.trialEndsAt]);
+  const covered = state === 'active' || state === 'included' || state === 'agency';
+  const included = f.includedBuildings && f.includedBuildings >= 1 ? f.includedBuildings : RESIDENCE_INCLUDED_BUILDINGS;
+  const override = f.buildingLimitOverride && f.buildingLimitOverride >= 1 ? f.buildingLimitOverride : null;
   return {
     state,
     visibleUntil,
     publicNow: f.status === 'published' && isAfter(visibleUntil, now),
     daysLeft: ends ? Math.ceil((ends.getTime() - now.getTime()) / DAY_MS) : null,
-    buildingLimit: RESIDENCE_INCLUDED_BUILDINGS + (paidPeriod ? Math.max(0, f.extraBuildings ?? 0) : 0),
+    buildingLimit: override ?? included + (covered ? Math.max(0, f.extraBuildings ?? 0) : 0),
   };
 }
 
@@ -67,13 +76,15 @@ export type PublishDecision =
   | { ok: false; code: 'PASS_REQUIRED' | 'TRIAL_IN_PROGRESS' | 'TRIAL_LIMIT' };
 
 /**
- * Publishing is always allowed while a trial, pass or plan covers the
+ * Publishing is always allowed while a trial, pass, plan or agency covers the
  * residence. Otherwise the first publish starts its trial, unless the owner
  * already has one running or has used all their trials; after the trial,
  * publishing needs a pass.
  */
 export function publishDecision(access: ResidenceAccess, ownerTrials: { total: number; running: number }): PublishDecision {
-  if (access.state === 'trial' || access.state === 'active' || access.state === 'included') return { ok: true, startTrial: false };
+  if (access.state === 'trial' || access.state === 'active' || access.state === 'included' || access.state === 'agency') {
+    return { ok: true, startTrial: false };
+  }
   if (access.state === 'expired') return { ok: false, code: 'PASS_REQUIRED' };
   if (ownerTrials.total >= MAX_TRIALS_PER_OWNER) return { ok: false, code: 'TRIAL_LIMIT' };
   if (ownerTrials.running > 0) return { ok: false, code: 'TRIAL_IN_PROGRESS' };
@@ -153,8 +164,9 @@ export function includedResidenceIds(published: Array<{ id: string; publishedAt?
  */
 export function includedResidencesFor(tier?: string | null, plan?: string | null): number {
   if (tier && INCLUDED_RESIDENCES_BY_TIER[tier] !== undefined) return INCLUDED_RESIDENCES_BY_TIER[tier];
+  if (tier === 'agency_owner') return 0; // agencies: one free residence per subscription year instead
   const p = (plan ?? '').toLowerCase();
-  if (p.includes('agency_yearly') || p.includes('enterprise')) return INCLUDED_RESIDENCES_BY_TIER.agency_owner ?? 0;
+  if (p.includes('agency') || p.includes('enterprise')) return 0;
   if (p.includes('pro_')) return INCLUDED_RESIDENCES_BY_TIER.pro ?? 0;
   return 0;
 }

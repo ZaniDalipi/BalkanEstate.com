@@ -270,7 +270,10 @@ export const PRODUCTS = [
       'Unlimited generate insights for all agents',
       'Dedicated account manager',
       'Team dashboard & analytics',
+      '{residencesPerYear} free residence per year',
     ],
+    // Residences: free residences per subscription year (edit here or in the admin pricing screen)
+    residencesPerYear: 1,
     targetRole: 'seller' as const, // Show in "For Sellers" tab
     displayOrder: 4,
     badge: 'BEST FOR TEAMS',
@@ -411,7 +414,9 @@ export const PRODUCTS = [
     currency: 'EUR',
     billingPeriod: 'yearly' as const,
     durationDays: 365,
-    features: ['12 months public', '5 buildings included', 'Interactive explorer', 'Unit inquiries'],
+    features: ['{durationMonths} months public', '{includedBuildings} buildings included', 'Interactive explorer', 'Unit inquiries'],
+    // Buildings included per residence (edit here or in the admin pricing screen)
+    includedBuildings: 5,
     targetRole: 'all' as const,
     displayOrder: 50,
     highlighted: false,

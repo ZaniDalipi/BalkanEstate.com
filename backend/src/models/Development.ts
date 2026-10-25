@@ -44,6 +44,12 @@ export interface IDevelopmentBilling {
   includedUntil?: Date;
   /** Extra buildings bought for the current period, on top of the included ones. */
   extraBuildings: number;
+  /** Agency residences: the subscription year whose free residence this one used. */
+  agencyYearStart?: Date;
+  /** Agency residences: public until (subscription end + grace). */
+  agencyUntil?: Date;
+  /** Admin-set building limit; wins over the included and bought buildings. */
+  buildingLimit?: number;
   /** Reminder emails already sent, e.g. 'day10', 'day14', 'expired'. */
   remindersSent: string[];
 }
@@ -189,6 +195,9 @@ const DevelopmentSchema: Schema = new Schema(
       paidUntil: { type: Date },
       includedUntil: { type: Date },
       extraBuildings: { type: Number, default: 0, min: 0 },
+      agencyYearStart: { type: Date },
+      agencyUntil: { type: Date },
+      buildingLimit: { type: Number, min: 1, max: 1000 },
       remindersSent: { type: [String], default: [] },
     },
     visibleUntil: { type: Date },
@@ -225,6 +234,7 @@ DevelopmentSchema.index({ status: 1, publishedAt: -1 });
 DevelopmentSchema.index({ status: 1, visibleUntil: 1 });
 // Trial abuse guard counts an owner's trials (deleted residences included).
 DevelopmentSchema.index({ ownerId: 1, 'billing.trialStartedAt': 1 });
+DevelopmentSchema.index({ agencyId: 1, 'billing.agencyYearStart': 1 });
 
 // Encode every reference in JSON so the client compares like with like.
 encodeRefsOnJSON(DevelopmentSchema, ['ownerId', 'agencyId', 'coverMediaId']);

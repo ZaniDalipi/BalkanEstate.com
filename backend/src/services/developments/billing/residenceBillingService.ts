@@ -1,15 +1,18 @@
 /**
- * Residence Pass state: recompute a residence's billing from its purchases
- * and its owner's plan, gate publishing (start the free trial, or require a
- * pass), and enforce the building limit wherever buildings are created.
+ * Residence Pass state: recompute a residence's billing from its purchases,
+ * its owner's plan and its agency, gate publishing (claim the agency's free
+ * residence, start the free trial, or require a pass), and enforce the
+ * building limit wherever buildings are created.
  */
 import mongoose from 'mongoose';
 import Development, { type IDevelopment } from '../../../models/Development';
 import DevelopmentBuilding from '../../../models/DevelopmentBuilding';
 import ResidencePurchase from '../../../models/ResidencePurchase';
 import { setDevelopmentStatus } from '../developmentService';
+import { agencyCoverage, claimAgencySlot } from './agencyResidences';
 import { BillingError } from './billingErrors';
 import { includedUntilFor, ownerPlan } from './ownerPlan';
+import { residenceTerms } from './residenceTerms';
 import {
   canAddBuildings,
   publishDecision,
@@ -21,16 +24,33 @@ import {
 
 type Id = mongoose.Types.ObjectId | string;
 
-export const billingFacts = (dev: IDevelopment, includedUntil?: Date | null): BillingFacts => ({
+interface FactOptions {
+  /** Plan coverage to use instead of the stored one (e.g. "as if published"). */
+  includedUntil?: Date | null;
+  agencyUntil?: Date | null;
+  /** Buildings a residence includes (from the pass product). */
+  includedBuildings?: number;
+}
+
+export const billingFacts = (dev: IDevelopment, opts: FactOptions = {}): BillingFacts => ({
   status: dev.status,
   trialStartedAt: dev.billing?.trialStartedAt,
   trialEndsAt: dev.billing?.trialEndsAt,
   paidUntil: dev.billing?.paidUntil,
-  includedUntil: includedUntil === undefined ? dev.billing?.includedUntil : includedUntil,
+  includedUntil: opts.includedUntil === undefined ? dev.billing?.includedUntil : opts.includedUntil,
+  agencyUntil: opts.agencyUntil === undefined ? dev.billing?.agencyUntil : opts.agencyUntil,
   extraBuildings: dev.billing?.extraBuildings ?? 0,
+  includedBuildings: opts.includedBuildings,
+  buildingLimitOverride: dev.billing?.buildingLimit ?? null,
 });
 
-/** Rebuild `billing` and `visibleUntil` from the purchase ledger and the owner's plan. */
+/** The residence's access right now, with the admin-editable terms applied. */
+export async function accessFor(dev: IDevelopment, now = new Date()) {
+  const terms = await residenceTerms();
+  return residenceAccess(billingFacts(dev, { includedBuildings: terms.includedBuildings }), now);
+}
+
+/** Rebuild `billing` and `visibleUntil` from the purchases, the owner's plan and the agency. */
 export async function recomputeBilling(developmentId: Id, now = new Date()): Promise<IDevelopment | null> {
   const dev = await Development.findById(developmentId);
   if (!dev) return null;
@@ -39,11 +59,15 @@ export async function recomputeBilling(developmentId: Id, now = new Date()): Pro
   const extras = purchases
     .filter((p) => p.kind === 'extra_building' && p.periodEnd > now)
     .reduce((n, p) => n + p.quantity, 0);
-  const includedUntil = await includedUntilFor(dev, now);
+  const [includedUntil, agencyUntil] = await Promise.all([
+    includedUntilFor(dev, now),
+    dev.agencyId && dev.billing.agencyYearStart ? agencyCoverage(dev.agencyId, now) : Promise.resolve(null),
+  ]);
 
   dev.billing.paidUntil = passEnds.length ? new Date(Math.max(...passEnds)) : undefined;
   dev.billing.extraBuildings = extras;
   dev.billing.includedUntil = includedUntil;
+  dev.billing.agencyUntil = agencyUntil ?? undefined;
   dev.visibleUntil = residenceAccess(billingFacts(dev), now).visibleUntil ?? undefined;
   await dev.save();
   return dev;
@@ -58,9 +82,27 @@ export async function recomputeOwnerBilling(ownerId: Id, now = new Date()): Prom
   }
 }
 
-/** Trials the owner has used (deleted residences count) and has running now. */
-export async function ownerTrialCounts(ownerId: Id, excludeId: Id, now = new Date()) {
-  const base = { ownerId, _id: { $ne: excludeId }, 'billing.trialStartedAt': { $exists: true } };
+/** After an agency's subscription changes: its free residences follow (renewal, lapse, grace). */
+export async function recomputeAgencyResidences(agencyId: Id, now = new Date()): Promise<number> {
+  const devs = await Development.find({ agencyId, deletedAt: { $exists: false }, 'billing.agencyYearStart': { $exists: true } })
+    .select('_id')
+    .lean();
+  if (!devs.length) return 0;
+  await agencyCoverage(agencyId, now); // records or clears the end date once, before the loop
+  for (const d of devs) {
+    // eslint-disable-next-line no-await-in-loop
+    await recomputeBilling(d._id, now);
+  }
+  return devs.length;
+}
+
+/**
+ * Trials used (deleted residences count) and running now: per agency for an
+ * agency's residences, per owner otherwise.
+ */
+export async function ownerTrialCounts(scope: { ownerId: Id; agencyId?: Id | null }, excludeId: Id, now = new Date()) {
+  const who = scope.agencyId ? { agencyId: scope.agencyId } : { ownerId: scope.ownerId, agencyId: { $exists: false } };
+  const base = { ...who, _id: { $ne: excludeId }, 'billing.trialStartedAt': { $exists: true } };
   const [total, running] = await Promise.all([
     Development.countDocuments(base),
     Development.countDocuments({
@@ -80,9 +122,23 @@ const PUBLISH_MESSAGES = {
 } as const;
 
 /**
- * Publish or unpublish through the Residence Pass rules. The first publish
- * starts the free trial; once it has ended, publishing needs a pass or plan.
- * Unpublishing is always allowed.
+ * An agency residence's first publish takes one of the agency's free
+ * residences for this subscription year, when one is left.
+ */
+async function claimForAgency(dev: IDevelopment, now: Date): Promise<Date | null> {
+  if (!dev.agencyId || dev.billing.agencyYearStart) return null;
+  const { residencesPerYear } = await residenceTerms();
+  const yearStart = await claimAgencySlot(dev.agencyId, residencesPerYear, now);
+  if (!yearStart) return null;
+  dev.billing.agencyYearStart = yearStart;
+  return agencyCoverage(dev.agencyId, now);
+}
+
+/**
+ * Publish or unpublish through the Residence Pass rules. An agency residence
+ * first tries the agency's free residence; otherwise the first publish starts
+ * the free trial, and after it publishing needs a pass or plan. Unpublishing
+ * is always allowed.
  */
 export async function setResidenceStatus(
   dev: IDevelopment,
@@ -90,9 +146,13 @@ export async function setResidenceStatus(
   now = new Date()
 ): Promise<IDevelopment> {
   if (status === 'published' && dev.status !== 'published') {
-    const included = await includedUntilFor(dev, now, true);
-    const access = residenceAccess(billingFacts(dev, included ?? null), now);
-    const decision = publishDecision(access, await ownerTrialCounts(dev.ownerId, dev._id as Id, now));
+    const [included, claimedUntil, terms] = await Promise.all([includedUntilFor(dev, now, true), claimForAgency(dev, now), residenceTerms()]);
+    const agencyUntil = claimedUntil ?? dev.billing.agencyUntil ?? null;
+    const access = residenceAccess(
+      billingFacts(dev, { includedUntil: included ?? null, agencyUntil, includedBuildings: terms.includedBuildings }),
+      now
+    );
+    const decision = publishDecision(access, await ownerTrialCounts({ ownerId: dev.ownerId, agencyId: dev.agencyId }, dev._id as Id, now));
     if (decision.ok === false) throw new BillingError(decision.code, PUBLISH_MESSAGES[decision.code]);
     if (decision.startTrial) Object.assign(dev.billing, trialWindow(now));
   }
@@ -106,7 +166,7 @@ export async function buildingCapacity(developmentId: Id, adding = 1, now = new 
   const dev = await Development.findById(developmentId);
   if (!dev) return { ok: true };
   const current = await DevelopmentBuilding.countDocuments({ developmentId: dev._id, deletedAt: { $exists: false } });
-  return canAddBuildings(residenceAccess(billingFacts(dev), now).buildingLimit, current, adding);
+  return canAddBuildings((await accessFor(dev, now)).buildingLimit, current, adding);
 }
 
 /**

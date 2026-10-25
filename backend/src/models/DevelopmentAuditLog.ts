@@ -37,6 +37,7 @@ export type DevelopmentAuditAction =
   | 'development.delete'
   | 'billing.purchase'
   | 'billing.grant'
+  | 'billing.building_limit'
   | 'membership.grant'
   | 'membership.revoke'
   | 'claim.create'

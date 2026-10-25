@@ -139,12 +139,32 @@ describe('includedResidenceIds', () => {
 });
 
 describe('includedResidencesFor', () => {
-  it('Pro includes 1, agency plans 3, everything else none', () => {
+  it('Pro includes 1; agency plans use their yearly free residence instead', () => {
     expect(includedResidencesFor('pro')).toBe(1);
-    expect(includedResidencesFor('agency_owner')).toBe(3);
+    expect(includedResidencesFor('agency_owner')).toBe(0);
     expect(includedResidencesFor('free')).toBe(0);
     expect(includedResidencesFor(undefined, 'seller_pro_yearly')).toBe(1);
-    expect(includedResidencesFor(undefined, 'seller_enterprise_yearly')).toBe(3);
+    expect(includedResidencesFor(undefined, 'seller_enterprise_yearly')).toBe(0);
+    expect(includedResidencesFor(undefined, 'agency_yearly')).toBe(0);
     expect(includedResidencesFor(undefined, 'buyer_monthly')).toBe(0);
+  });
+});
+
+describe('agency coverage and building limits', () => {
+  it('an agency residence is covered like a pass, without a trial', () => {
+    const a = residenceAccess({ status: 'published', agencyUntil: days(40) }, now);
+    expect(a).toMatchObject({ state: 'agency', publicNow: true, daysLeft: 40, buildingLimit: 5 });
+    expect(publishDecision(residenceAccess({ status: 'draft', agencyUntil: days(40) }, now), { total: 3, running: 1 })).toEqual({ ok: true, startTrial: false });
+  });
+
+  it('after the agency grace ends it is offline, like an ended trial', () => {
+    expect(residenceAccess({ status: 'published', agencyUntil: days(-1) }, now)).toMatchObject({ state: 'expired', publicNow: false });
+  });
+
+  it('the included building count comes from the product, and an admin override wins', () => {
+    expect(residenceAccess({ status: 'draft', includedBuildings: 8 }, now).buildingLimit).toBe(8);
+    expect(residenceAccess({ status: 'published', paidUntil: days(9), extraBuildings: 2, includedBuildings: 8 }, now).buildingLimit).toBe(10);
+    expect(residenceAccess({ status: 'published', paidUntil: days(9), extraBuildings: 2, buildingLimitOverride: 12 }, now).buildingLimit).toBe(12);
+    expect(residenceAccess({ status: 'draft', buildingLimitOverride: 0 }, now).buildingLimit).toBe(5);
   });
 });
