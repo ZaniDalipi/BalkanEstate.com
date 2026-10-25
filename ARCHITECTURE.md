@@ -62,7 +62,7 @@ changed on its own:
   (`explorer/budget/`, `inventory/import/`).
 - Reuse shared types, helpers and style constants instead of near-copies.
 
-The working rules (validation, translations, tests) are in [`CLAUDE.md`](CLAUDE.md).
+The working rules (validation, translations, tests) are in [`Claude.md`](Claude.md).
 
 ### Routing
 The URL is the only record of which page is on screen. React Router renders
