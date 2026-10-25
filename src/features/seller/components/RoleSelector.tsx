@@ -83,7 +83,7 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentUser, selectedRole, 
             const isPro = isActiveSubscription && (proTiers.includes(tier) || (tier !== 'free' && tier !== 'buyer'));
 
             // Check if month boundary has passed
-            const isMonthBoundaryPassed = (lastResetDate: Date | undefined): boolean => {
+            const isMonthBoundaryPassed = (lastResetDate: Date | string | undefined): boolean => {
                 if (!lastResetDate) return true;
                 const now = new Date();
                 return (
@@ -429,13 +429,13 @@ const RoleCard: React.FC<RoleCardProps> = ({
                                 ) : remaining <= 2 ? (
                                     <p className="text-xs text-amber-600 font-medium mt-1">
                                         {subscription.isMonthlyReset
-                                            ? t('seller:roleSelector.monthlyRemaining', { count: remaining }, `${remaining} listing(s) remaining this month`)
+                                            ? t('seller:roleSelector.monthlyRemaining', { count: remaining, defaultValue: `${remaining} listing(s) remaining this month` })
                                             : t('seller:roleSelector.remainingListings', { count: remaining })}
                                     </p>
                                 ) : (
                                     <p className="text-xs text-emerald-600 font-medium mt-1">
                                         {subscription.isMonthlyReset
-                                            ? t('seller:roleSelector.monthlyAvailable', { count: remaining }, `${remaining} listing(s) available this month`)
+                                            ? t('seller:roleSelector.monthlyAvailable', { count: remaining, defaultValue: `${remaining} listing(s) available this month` })
                                             : t('seller:roleSelector.availableListings', { count: remaining })}
                                     </p>
                                 )}

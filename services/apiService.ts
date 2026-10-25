@@ -2281,13 +2281,7 @@ export const leaveAgency = async (): Promise<{
   message: string;
   subscriptionRevoked: boolean;
   user: { id: string; agencyId: null; agencyName: string };
-  subscription?: {
-    tier: string;
-    status: string;
-    listingsLimit: number;
-    savedSearchesLimit: number;
-    promotionCoupons: { monthly: number; available: number; used: number; rollover: number };
-  };
+  subscription?: User['subscription'];
 }> => {
   return await apiRequest('/agents/leave-agency', {
     method: 'POST',

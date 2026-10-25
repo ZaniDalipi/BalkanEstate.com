@@ -171,7 +171,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
       const vapidKey = await getVapidKey();
 
       // Get service worker registration
-      let registration: ServiceWorkerContainer['ready'];
+      let registration: ServiceWorkerRegistration;
       try {
         registration = await navigator.serviceWorker.ready;
       } catch (err) {
@@ -266,7 +266,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         throw new Error('Service Worker or Push API not supported');
       }
 
-      let registration: ServiceWorkerContainer['ready'];
+      let registration: ServiceWorkerRegistration;
       try {
         registration = await navigator.serviceWorker.ready;
       } catch (err) {

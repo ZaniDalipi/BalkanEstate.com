@@ -78,7 +78,7 @@ export const useUpgradeOptions = ({
       }
 
       return upgradeOptionsRaw
-        .map(({ key, plan, pricing }) => {
+        .map(({ key, plan, pricing }): UpgradeOption | null => {
           try {
             // Validate required fields
             if (!key || typeof key !== 'string') {

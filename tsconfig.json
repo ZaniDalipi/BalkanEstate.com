@@ -23,5 +23,6 @@
     "noEmit": true,
     "types": ["leaflet", "vite-plugin-pwa/client"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "vite-env.d.ts"]
+  "include": ["**/*.ts", "**/*.tsx", "vite-env.d.ts"],
+  "exclude": ["node_modules", "dist", "backend"]
 }

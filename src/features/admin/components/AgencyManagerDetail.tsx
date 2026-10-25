@@ -648,7 +648,7 @@ function AgencyListingLimitOverride({ agency }: { agency: Agency }) {
     setErr('');
     setResult('');
     try {
-      const res = await apiRequest(`/admin/agencies/${agency._id}/listing-limit`, {
+      const res = await apiRequest<{ message?: string }>(`/admin/agencies/${agency._id}/listing-limit`, {
         method: 'PATCH',
         body: { listingsLimit: val, reason: 'Admin manual override' },
         requiresAuth: true,

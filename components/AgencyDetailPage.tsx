@@ -93,6 +93,8 @@ interface Agent {
 // Extended Agency type to include optional id and rating for compatibility
 interface ExtendedAgency extends Agency {
   id?: string;
+  logoPublicId?: string;
+  coverImagePublicId?: string;
   rating?: number;
   promotionCoupons?: {
     monthly: number;
@@ -2479,7 +2481,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                                   <button
                                     onClick={() => {
                                       navigator.clipboard.writeText(coupon.code);
-                                      success(t('coupons.codeCopied', 'Code copied!'));
+                                      success(t('coupons.codeCopied', 'Code copied!'), coupon.code);
                                     }}
                                     className="p-1 text-slate-400 hover:text-violet-600 transition-colors"
                                     title={t('coupons.copyCode', 'Copy code')}

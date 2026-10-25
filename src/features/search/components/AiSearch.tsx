@@ -25,7 +25,6 @@ interface SpeechRecognitionInstance extends EventTarget {
     onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
     onend: (() => void) | null; onstart: (() => void) | null;
 }
-declare global { interface Window { SpeechRecognition: new () => SpeechRecognitionInstance; webkitSpeechRecognition: new () => SpeechRecognitionInstance; } }
 
 // --- Balkan language map for speech recognition ---
 const BALKAN_SPEECH_LANGS: Record<string, string> = {

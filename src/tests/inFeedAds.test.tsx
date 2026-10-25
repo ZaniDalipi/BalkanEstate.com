@@ -56,9 +56,9 @@ describe('interleaveInFeedAds', () => {
       node => React.isValidElement(node) && !String(node.key).includes('in-feed-ad'),
     );
     expect(keptCards).toHaveLength(30);
-    expect(keptCards.map(n => (React.isValidElement(n) ? n.props.children : null))).toEqual(
-      input.map(n => (React.isValidElement(n) ? n.props.children : null)),
-    );
+    const childrenOf = (n: React.ReactNode) =>
+      React.isValidElement<{ children?: React.ReactNode }>(n) ? n.props.children : null;
+    expect(keptCards.map(childrenOf)).toEqual(input.map(childrenOf));
   });
 
   it('gives each ad its own banner index so they are not all the same ad', () => {

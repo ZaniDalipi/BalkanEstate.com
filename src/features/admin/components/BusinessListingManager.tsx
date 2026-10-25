@@ -9,7 +9,7 @@ import type { BusinessListing } from '@/src/shared/types/businessListing.types';
 
 interface AdminBusinessListing extends BusinessListing {
   _id: string;
-  owner?: { name: string; email: string; avatarUrl?: string };
+  owner: BusinessListing['owner'] & { email?: string };
 }
 
 const BusinessListingManager: React.FC = () => {

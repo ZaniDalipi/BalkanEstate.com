@@ -14,6 +14,7 @@ export interface ListingSource {
   fieldMap: Record<string, string>;
   schedule?: string;
   rateLimitRpm?: number;
+  acceptedTermsAt?: string;
   lastRunAt?: string;
   lastSuccessAt?: string;
   lastErrorMessage?: string;

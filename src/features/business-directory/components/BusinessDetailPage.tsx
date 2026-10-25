@@ -1,7 +1,7 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { User } from 'lucide-react';
 import { useBusinessListing, useUpdateBusinessListing, useUploadBusinessBanner, useUploadBusinessLogo } from '../hooks';
 import { useAppContext } from '@/context/AppContext';
@@ -90,12 +90,12 @@ const SOCIAL_BRANDS: Record<string, { label: string; color: string; hoverColor: 
   tiktok: { label: 'TikTok', color: 'text-neutral-900', hoverColor: 'hover:bg-neutral-50', icon: 'tt' },
 };
 
-const fadeUpVariants = {
+const fadeUpVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
-const staggerContainerVariants = {
+const staggerContainerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,

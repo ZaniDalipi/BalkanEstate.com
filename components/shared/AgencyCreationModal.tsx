@@ -221,6 +221,7 @@ const AgencyCreationModal: React.FC<AgencyCreationModalProps> = ({
         email: source.email || '',
         website: source.website || '',
         licenseNumber: source.licenseNumber || '',
+        registrationNumber: source.registrationNumber || '',
         yearsInBusiness: source.yearsInBusiness?.toString() || '',
         languages: source.languages || [],
         facebookUrl: source.facebookUrl || '',

@@ -73,7 +73,7 @@ export function buildPreviewProperty(
     selectedCountry: string,
     selectedCity: string,
     selectedRole: UserRole,
-    currentUser: { id: string; name: string; phone?: string; avatarUrl?: string } | null,
+    currentUser: { id: string; name: string; phone?: string; avatarUrl?: string; avatarOptions?: string; gender?: 'male' | 'female' | 'other' } | null,
     propertyToEdit: Property | null,
 ): Property {
     const imageUrls = images.map((img, index) => {

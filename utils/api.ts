@@ -17,6 +17,9 @@ export interface Product {
   badge?: string;
   badgeColor?: string;
   highlighted: boolean;
+  listingsLimit?: number;
+  teamMembersLimit?: number;
+  promotionCoupons?: number;
   cardStyle?: {
     backgroundColor?: string;
     borderColor?: string;

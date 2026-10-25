@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import { useBusinessListings, useMyBusinessListings } from '../hooks';
 import BusinessCard from './BusinessCard';
@@ -57,7 +57,7 @@ const CategoryIcon: React.FC<{ category: string; className?: string }> = ({ cate
 );
 
 // Framer-motion variants
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -65,7 +65,7 @@ const containerVariants = {
   },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 24, scale: 0.97 },
   visible: {
     opacity: 1,
@@ -75,12 +75,12 @@ const cardVariants = {
   },
 };
 
-const fadeUpVariants = {
+const fadeUpVariants: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 28 } },
 };
 
-const scaleInVariants = {
+const scaleInVariants: Variants = {
   hidden: { opacity: 0, scale: 0.95 },
   visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 28 } },
 };

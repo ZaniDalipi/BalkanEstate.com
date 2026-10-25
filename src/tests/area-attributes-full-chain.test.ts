@@ -38,8 +38,9 @@ const commonFields = {
 
 /** Run one listing through form → API → database → API → page. */
 const walkTheChain = (formState: Record<string, unknown>) => {
-    const submitted = stripAttributesForType(formState.propertyType, { ...commonFields, ...formState });
-    const requestBody = transformToBackendProperty(submitted as unknown as Property);
+    // formState is loosely typed, so read the stripped result back as a listing.
+    const submitted = stripAttributesForType(formState.propertyType, { ...commonFields, ...formState }) as unknown as Partial<Property>;
+    const requestBody = transformToBackendProperty(submitted as Property);
 
     const sanitizedBody: Record<string, unknown> = {};
     for (const field of ALLOWED_PROPERTY_FIELDS) {

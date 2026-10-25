@@ -2,7 +2,7 @@
 // Handles all agency-related API calls
 
 import { apiRequest } from '@/src/shared/api';
-import type { Agency, AgencyFilters, Agent } from '@/src/shared/types';
+import type { Agency, AgencyFilters, Agent, User } from '@/src/shared/types';
 
 // --- Agency API ---
 
@@ -244,7 +244,13 @@ export const applyFeaturedCoupon = async (agencyId: string, couponCode: string):
 
 // --- Agent Self-Service ---
 
-export const leaveAgency = async (): Promise<{ message: string; user: { id: string; agencyId: null; agencyName: string } }> => {
+export const leaveAgency = async (): Promise<{
+  message: string;
+  user: { id: string; agencyId: null; agencyName: string };
+  // Set when leaving dropped the agent's agency-paid plan; subscription is then the free tier.
+  subscriptionRevoked?: boolean;
+  subscription?: User['subscription'];
+}> => {
   return apiRequest('/agents/leave-agency', {
     method: 'POST',
     requiresAuth: true,

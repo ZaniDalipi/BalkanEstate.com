@@ -848,7 +848,7 @@ const AgentsPage: React.FC = () => {
               <div className="flex flex-wrap gap-3 sm:gap-4">
                 {agencies.slice(0, 8).map((agency) => (
                   <AgencyBadge
-                    key={agency.id || agency._id}
+                    key={agency._id}
                     agencyName={agency.name}
                     agencyLogo={agency.logo}
                     type={agency.type as any || 'standard'}
@@ -860,7 +860,7 @@ const AgentsPage: React.FC = () => {
                     asLink={false}
                     onClick={async () => {
                       try {
-                        const agencyId = agency.id || agency._id;
+                        const agencyId = agency._id;
                         const data = await apiRequest<any>(`/agencies/${agencyId}`);
                         if (data) {
                           navigate(paths.agencyOf(data.agency), { state: { agency: data.agency } });

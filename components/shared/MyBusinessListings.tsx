@@ -71,10 +71,11 @@ const MyBusinessListings: React.FC = () => {
   }, [refetch, success, t]);
 
   const handleDelete = useCallback(async (listing: BusinessListing) => {
-    const confirmed = await confirm(
-      t('businessDirectory:delete.confirmTitle', 'Delete Listing'),
-      t('businessDirectory:delete.confirmMessage', { name: listing.name, defaultValue: 'Are you sure you want to delete "{{name}}"? This action cannot be undone.' }),
-    );
+    const confirmed = await confirm({
+      title: t('businessDirectory:delete.confirmTitle', 'Delete Listing'),
+      message: t('businessDirectory:delete.confirmMessage', { name: listing.name, defaultValue: 'Are you sure you want to delete "{{name}}"? This action cannot be undone.' }),
+      type: 'danger',
+    });
     if (!confirmed) return;
 
     try {

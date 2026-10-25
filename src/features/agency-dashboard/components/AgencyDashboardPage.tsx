@@ -41,7 +41,7 @@ const AgencyDashboardPage: React.FC = () => {
     if (!state.currentUser) return;
 
     const user = state.currentUser;
-    const userAgencyId = (user as Record<string, unknown>).agencyId as string | undefined;
+    const userAgencyId = user.agencyId;
 
     if (!userAgencyId) {
       setError(t('agencyDashboard:errors.noAgency', 'You are not associated with any agency.'));

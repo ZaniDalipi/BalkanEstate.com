@@ -34,6 +34,9 @@ export interface Property {
   parking?: number;
   description?: string;
   isPromoted?: boolean;
+  promotionTier?: 'standard' | 'featured' | 'highlight' | 'premium';
+  promotionStartDate?: string | Date;
+  promotionEndDate?: string | Date;
   views?: number;
   imageUrl?: string;
   images?: PropertyImage[];

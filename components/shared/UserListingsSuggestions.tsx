@@ -42,7 +42,7 @@ const UserListingsSuggestions: React.FC<UserListingsSuggestionsProps> = ({
         }
 
         // Otherwise show only user's own listings
-        if (p.seller?.id === userId || p.sellerId === userId) {
+        if (p.sellerId === userId) {
           return true;
         }
 

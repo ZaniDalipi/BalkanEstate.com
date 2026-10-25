@@ -14,7 +14,6 @@ const getSocket = (): Socket => {
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 5,
       transports: ['websocket', 'polling'],
-      credentials: 'include',
     });
   }
   return globalSocket;

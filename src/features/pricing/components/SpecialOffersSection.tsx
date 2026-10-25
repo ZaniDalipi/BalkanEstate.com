@@ -1,5 +1,6 @@
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useRef, useEffect } from 'react';
+import type { TFunction } from 'i18next';
 import { Animated } from '@/src/components/ui/Animations';
 import { CheckIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
@@ -10,7 +11,7 @@ import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 
 interface SpecialOffersSectionProps {
-  t: (key: string, defaultValue?: string, options?: Record<string, unknown>) => string;
+  t: TFunction<readonly ['pricing', 'common']>;
   dispatch: (action: Record<string, unknown>) => void;
   isAuthenticated: boolean;
   specialOffers: PromotionPlan[];

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 
 export interface CardItem {
   id: number | string;
@@ -29,7 +29,7 @@ interface AnimatedCardsStackProps {
   className?: string;
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   enter: {
     y: -60,
     opacity: 0,
