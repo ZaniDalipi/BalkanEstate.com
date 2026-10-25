@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export type ProductType = 'subscription' | 'consumable' | 'non_consumable';
 export type BillingPeriod = 'monthly' | 'yearly' | 'weekly' | 'quarterly' | 'one_time';
 export type TargetRole = 'buyer' | 'seller' | 'agent' | 'all';
-export type SubscriptionTier = 'free' | 'pro' | 'agency' | 'buyer';
+export type SubscriptionTier = 'free' | 'pro' | 'agency' | 'buyer' | 'residence';
 
 export interface IProduct extends Document {
   productId: string;
@@ -106,7 +106,7 @@ const ProductSchema: Schema = new Schema(
     },
     tier: {
       type: String,
-      enum: ['free', 'pro', 'agency', 'buyer'],
+      enum: ['free', 'pro', 'agency', 'buyer', 'residence'],
       index: true,
     },
 

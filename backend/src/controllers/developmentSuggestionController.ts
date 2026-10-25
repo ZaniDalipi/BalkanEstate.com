@@ -16,6 +16,7 @@ import {
   attachListingToDevelopmentLevel,
   callerControlsListing,
 } from '../services/developments/developmentListingService';
+import { publicResidenceFilter } from '../services/developments/billing/publicResidenceFilter';
 
 const log = createLogger('DevelopmentSuggestionController');
 const currentUser = (req: Request): IUser => req.user as IUser;
@@ -56,8 +57,7 @@ export const nearbyDevelopments = async (req: Request, res: Response): Promise<v
     const limit = Math.min(Math.max(Number(req.query.limit) || 5, 1), 20);
 
     const query: Record<string, unknown> = {
-      status: 'published',
-      deletedAt: { $exists: false },
+      ...publicResidenceFilter(),
       lat: { $exists: true, $ne: null },
       lng: { $exists: true, $ne: null },
     };
@@ -195,7 +195,7 @@ export const attachListing = async (req: Request, res: Response): Promise<void> 
 export const requestAttachment = async (req: Request, res: Response): Promise<void> => {
   try {
     const slug = String(req.params.slug || '').toLowerCase();
-    const development = await Development.findOne({ slug, status: 'published', deletedAt: { $exists: false } }).select('_id');
+    const development = await Development.findOne({ slug, ...publicResidenceFilter() }).select('_id');
     if (!development) {
       res.status(404).json({ message: 'Development not found' });
       return;

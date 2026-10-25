@@ -10,7 +10,8 @@ import mongoose from 'mongoose';
 import User from '../../../models/User';
 import Property from '../../../models/Property';
 import DevelopmentMembership from '../../../models/DevelopmentMembership';
-import { createDevelopment, setDevelopmentStatus } from '../../../services/developments/developmentService';
+import { createDevelopment } from '../../../services/developments/developmentService';
+import { setResidenceStatus } from '../../../services/developments/billing/residenceBillingService';
 import { createBuilding, createFloor, createUnit } from '../../../services/developments/developmentInventoryService';
 import { encodeId } from '../../../utils/idObfuscation';
 import { createMockUser } from '../../setup';
@@ -85,7 +86,8 @@ export const setupDevelopment = async (opts: { published?: boolean; name?: strin
     },
     owner as never
   );
-  if (opts.published) await setDevelopmentStatus(dev, 'published');
+  // Published the real way: the first publish starts the free trial.
+  if (opts.published) await setResidenceStatus(dev, 'published');
   const devId = dev._id as mongoose.Types.ObjectId;
   const building = await createBuilding(devId, { name: 'Block A' });
   const floor = await createFloor(devId, building._id, { label: 'Floor 1', level: 1 });

@@ -27,6 +27,7 @@ import { ValidationError } from './developmentService';
 import { AuthorizationError } from './developmentListingService';
 import { recordDevelopmentAudit } from './developmentAudit';
 import { applyAvailabilityTransition, createBuilding, sanitizeFeatures } from './developmentInventoryService';
+import { assertBuildingCapacity, buildingCapacity } from './billing/residenceBillingService';
 import { permissionForUnitField } from './unitAdminService';
 import { choiceProblem, currencyProblem } from './unitRules';
 
@@ -53,6 +54,8 @@ export interface ImportRow {
 export interface UnitImportSummary {
   rows: number;
   buildingsCreated: string[];
+  /** Set when the file adds more buildings than the residence's plan allows. */
+  buildingLimit?: { limit: number; current: number; allowed: number };
   floorsCreated: number;
   unitsCreated: number;
   unitsUpdated: number;
@@ -186,6 +189,15 @@ export const importUnits = async (params: {
   summary.floorsCreated = newFloors.size;
   summary.unitsCreated = creates.length;
   summary.unitsUpdated = updates.length;
+  // Residence Pass: check the building limit before anything is written, so a
+  // file never stops half-way; the preview shows the limit instead of failing.
+  if (newBuildings.length) {
+    const capacity = await buildingCapacity(developmentId, newBuildings.length);
+    if (capacity.ok === false) {
+      if (dryRun) summary.buildingLimit = { limit: capacity.limit, current: capacity.current, allowed: capacity.allowed };
+      else await assertBuildingCapacity(developmentId, newBuildings.length);
+    }
+  }
   if (dryRun) return summary;
 
   let order = buildings.reduce((m, b) => Math.max(m, b.order ?? 0), -1);

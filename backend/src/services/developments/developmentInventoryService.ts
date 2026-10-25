@@ -8,6 +8,7 @@ import DevelopmentFloor, { IDevelopmentFloor } from '../../models/DevelopmentFlo
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import { slugify } from '../media/mediaNaming';
 import { recomputeDevelopmentStats, ValidationError } from './developmentService';
+import { assertBuildingCapacity } from './billing/residenceBillingService';
 import { requireRefInDevelopment } from './developmentRefs';
 import {
   FLOOR_KINDS,
@@ -73,6 +74,8 @@ export const createBuilding = async (
   }
 ): Promise<IDevelopmentBuilding> => {
   if (!text(input.name)) throw new ValidationError('building name is required');
+  // Residence Pass: every building past the plan's limit has to be unlocked.
+  await assertBuildingCapacity(developmentId, 1);
   const slug = await uniqueBuildingSlug(developmentId, input.name);
   const building = await DevelopmentBuilding.create({
     developmentId,
@@ -361,9 +364,11 @@ const notifyFollowersOnAvailable = async (
       import('./developmentAlertService'),
       import('../../models/Development').then((m) => m.default),
     ]);
-    const dev = await Development.findById(developmentId).select('name slug status').lean();
-    // Followers can only follow a published development; a draft has no audience.
-    if (!dev || dev.status !== 'published') return;
+    const dev = await Development.findById(developmentId).select('name slug status deletedAt visibleUntil').lean();
+    // Followers only hear about residences buyers can actually see (published,
+    // and within its trial, pass or plan).
+    const { isPubliclyVisible } = await import('./billing/publicResidenceFilter');
+    if (!dev || !isPubliclyVisible(dev)) return;
     for (const unit of units) {
       // Hidden units do not exist for buyers — never announce them.
       if (unit.visibility === 'hidden') continue;

@@ -45,6 +45,7 @@ import { recordDevelopmentAudit, diffFields } from './developmentAudit';
 import { toObjectId, requireObjectId, requireRefInDevelopment } from './developmentRefs';
 import { ValidationError } from './developmentService';
 import { AuthorizationError, NotFoundError } from './developmentListingService';
+import { publicResidenceFilter } from './billing/publicResidenceFilter';
 
 const log = createLogger('DevelopmentSceneService');
 
@@ -970,8 +971,7 @@ type LeanScene = {
 const findPublishedDevelopment = async (slug: unknown): Promise<Id> => {
   const dev = await Development.findOne({
     slug: String(slug || '').toLowerCase(),
-    status: 'published',
-    deletedAt: null,
+    ...publicResidenceFilter(),
   })
     .select('_id')
     .lean();

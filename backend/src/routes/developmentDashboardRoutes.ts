@@ -1,13 +1,14 @@
 import express from 'express';
 import multer from 'multer';
 import { protect } from '../middleware/auth';
-import { requireActiveSubscription } from '../middleware/checkSubscription';
+import { checkAdminRole } from '../middleware/adminAuth';
 import { mutationRateLimiter, uploadRateLimiter } from '../middleware/security';
 import { withUploadErrors } from '../middleware/uploadErrors';
 import {
   developmentAuth,
   requireDevelopmentPermission,
 } from '../middleware/developmentAuth';
+import { checkoutBilling, getBilling, grantBilling } from '../controllers/residenceBillingController';
 import {
   create,
   listMine,
@@ -99,14 +100,15 @@ const uploadMany = multer({
 /**
  * Authored (dashboard) development routes.
  *
- * Creating a development requires an active subscription plan
- * (`requireActiveSubscription`). Every other route is resource-scoped: after
+ * Anyone signed in may create a residence: it is free to set up, and the
+ * Residence Pass rules apply when it is published (first publish starts a
+ * free trial). Every other route is resource-scoped: after
  * `developmentAuth` resolves the caller's role on the development, each
  * mutation is guarded by the specific permission from the shared matrix.
  */
 
 // Collection level
-router.post('/', protect, requireActiveSubscription, create);
+router.post('/', protect, create);
 router.get('/', protect, listMine);
 
 // Single development
@@ -134,6 +136,18 @@ router.post(
   requireDevelopmentPermission('publish'),
   publish
 );
+// Residence Pass: anyone with access reads the plan; only the owner (who
+// holds `ownership.transfer`) pays; platform admins can grant.
+router.get('/:developmentId/billing', protect, developmentAuth, getBilling);
+router.post(
+  '/:developmentId/billing/checkout',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('ownership.transfer'),
+  checkoutBilling
+);
+router.post('/:developmentId/billing/grant', protect, checkAdminRole, developmentAuth, grantBilling);
 // Deletion is owner-only; only `owner` holds `ownership.transfer`.
 router.delete(
   '/:developmentId',

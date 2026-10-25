@@ -17,7 +17,6 @@ import {
   createDevelopment,
   listDevelopmentsForUser,
   updateDevelopment,
-  setDevelopmentStatus,
   softDeleteDevelopment,
 } from '../services/developments/developmentService';
 import {
@@ -40,6 +39,8 @@ import {
   toPublicDevelopment,
 } from '../services/developments/developmentPublicService';
 import { recordDevelopmentAudit } from '../services/developments/developmentAudit';
+import { publicResidenceFilter } from '../services/developments/billing/publicResidenceFilter';
+import { recomputeOwnerBilling, setResidenceStatus } from '../services/developments/billing/residenceBillingService';
 
 const log = createLogger('DevelopmentController');
 
@@ -55,6 +56,7 @@ export const sendServiceError = (res: Response, error: unknown, context: string)
     errors?: unknown;
     code?: unknown;
     currentVersion?: unknown;
+    details?: unknown;
   } | null;
   if (e && typeof e.statusCode === 'number') {
     const body: Record<string, unknown> = { message: e.message };
@@ -62,6 +64,7 @@ export const sendServiceError = (res: Response, error: unknown, context: string)
     if (Array.isArray(e.errors)) body.errors = e.errors;
     if (typeof e.code === 'string') body.code = e.code;
     if (e.currentVersion !== undefined) body.currentVersion = e.currentVersion;
+    if (e.details && typeof e.details === 'object') body.details = e.details;
     res.status(e.statusCode).json(body);
     return;
   }
@@ -172,7 +175,8 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 export const publish = async (req: Request, res: Response): Promise<void> => {
   try {
     const status = req.body?.status === 'draft' ? 'draft' : 'published';
-    const development = await setDevelopmentStatus(req.development!, status);
+    // Residence Pass: the first publish starts the free trial; after it, a pass is needed.
+    const development = await setResidenceStatus(req.development!, status);
     await DevelopmentAuditLog.create({
       developmentId: development._id,
       action: 'development.publish',
@@ -189,6 +193,8 @@ export const publish = async (req: Request, res: Response): Promise<void> => {
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
     await softDeleteDevelopment(req.development!);
+    // A deleted residence frees its place among the ones the owner's plan includes.
+    await recomputeOwnerBilling(req.development!.ownerId);
     await DevelopmentAuditLog.create({
       developmentId: req.development!._id,
       action: 'development.delete',
@@ -369,10 +375,7 @@ export const listPublic = async (req: Request, res: Response): Promise<void> => 
     const rawSkip = Math.floor(Number(req.query.skip));
     const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 100) : 20;
     const skip = Number.isFinite(rawSkip) && rawSkip > 0 ? rawSkip : 0;
-    const query: Record<string, unknown> = {
-      status: 'published',
-      deletedAt: { $exists: false },
-    };
+    const query: Record<string, unknown> = { ...publicResidenceFilter() };
     if (typeof req.query.city === 'string') query.city = req.query.city;
     if (typeof req.query.country === 'string') query.country = req.query.country;
     if (typeof req.query.category === 'string') query.category = req.query.category;

@@ -8,6 +8,7 @@ import DevelopmentFollow, {
 import { createLogger } from '../utils/logger';
 import { sendServiceError } from './developmentController';
 import { toPublicDevelopment } from '../services/developments/developmentPublicService';
+import { publicResidenceFilter } from '../services/developments/billing/publicResidenceFilter';
 
 const log = createLogger('DevelopmentFollowController');
 const currentUser = (req: Request): IUser => req.user as IUser;
@@ -59,11 +60,7 @@ const sanitizeFilters = (
  */
 const loadBySlug = async (req: Request, res: Response) => {
   const slug = String(req.params.slug || '').toLowerCase();
-  const development = await Development.findOne({
-    slug,
-    status: 'published',
-    deletedAt: { $exists: false },
-  }).select('_id');
+  const development = await Development.findOne({ slug, ...publicResidenceFilter() }).select('_id');
   if (!development) {
     res.status(404).json({ message: 'Development not found' });
     return null;
@@ -134,11 +131,7 @@ export const listFollowing = async (req: Request, res: Response): Promise<void> 
       .lean();
     const ids = follows.map((f) => f.developmentId);
     // Only published developments, in their public projection (no owner ids).
-    const developments = await Development.find({
-      _id: { $in: ids },
-      status: 'published',
-      deletedAt: { $exists: false },
-    });
+    const developments = await Development.find({ _id: { $in: ids }, ...publicResidenceFilter() });
     log.info(`User ${String(currentUser(req)._id)} follows ${developments.length} development(s)`);
     res.json({ developments: developments.map(toPublicDevelopment), follows });
   } catch (error) {

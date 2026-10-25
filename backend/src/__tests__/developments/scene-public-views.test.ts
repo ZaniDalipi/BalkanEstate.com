@@ -84,6 +84,8 @@ const setup = async (status: 'draft' | 'published' = 'published') => {
     city: 'Budva',
     category: 'apartment_building',
     status,
+    // Residence Pass: a published residence is public only within its trial/pass.
+    ...(status === 'published' ? { visibleUntil: new Date(Date.now() + 86_400_000) } : {}),
   });
   const building = await DevelopmentBuilding.create({ developmentId: dev._id, name: 'B2', slug: `b2-${rnd()}` });
   const floor = await DevelopmentFloor.create({ developmentId: dev._id, buildingId: building._id, label: 'F1', level: 1 });

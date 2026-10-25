@@ -30,6 +30,24 @@ export interface IDevelopmentStats {
   available: number;
 }
 
+/**
+ * What the residence's public visibility rests on (Residence Pass). Recomputed
+ * from the ResidencePurchase ledger and the owner's plan by
+ * residenceBillingService — never edited directly.
+ */
+export interface IDevelopmentBilling {
+  trialStartedAt?: Date;
+  trialEndsAt?: Date;
+  /** End of the paid (pass/admin) period, stacked across renewals. */
+  paidUntil?: Date;
+  /** Covered by the owner's premium plan until this date. */
+  includedUntil?: Date;
+  /** Extra buildings bought for the current period, on top of the included ones. */
+  extraBuildings: number;
+  /** Reminder emails already sent, e.g. 'day10', 'day14', 'expired'. */
+  remindersSent: string[];
+}
+
 export interface IDevelopment extends Document {
   /** The account that owns the project — a user or an agency. */
   ownerId: mongoose.Types.ObjectId;
@@ -58,6 +76,12 @@ export interface IDevelopment extends Document {
   coverImage?: string;
   coverImagePublicId?: string;
   status: DevelopmentStatus;
+  billing: IDevelopmentBilling;
+  /**
+   * Public until this moment (trial, pass or premium). Denormalised from
+   * `billing` so every public query is a single indexed comparison.
+   */
+  visibleUntil?: Date;
   publishedAt?: Date;
   stats: IDevelopmentStats;
   /**
@@ -159,6 +183,15 @@ const DevelopmentSchema: Schema = new Schema(
       index: true,
     },
     publishedAt: { type: Date },
+    billing: {
+      trialStartedAt: { type: Date },
+      trialEndsAt: { type: Date },
+      paidUntil: { type: Date },
+      includedUntil: { type: Date },
+      extraBuildings: { type: Number, default: 0, min: 0 },
+      remindersSent: { type: [String], default: [] },
+    },
+    visibleUntil: { type: Date },
     stats: {
       buildings: { type: Number, default: 0, min: 0 },
       units: { type: Number, default: 0, min: 0 },
@@ -188,6 +221,10 @@ DevelopmentSchema.index({ agencyId: 1, status: 1 });
 DevelopmentSchema.index({ country: 1, city: 1, status: 1 });
 // Public discovery default sort
 DevelopmentSchema.index({ status: 1, publishedAt: -1 });
+// Public queries: published and still within its trial / pass / plan.
+DevelopmentSchema.index({ status: 1, visibleUntil: 1 });
+// Trial abuse guard counts an owner's trials (deleted residences included).
+DevelopmentSchema.index({ ownerId: 1, 'billing.trialStartedAt': 1 });
 
 // Encode every reference in JSON so the client compares like with like.
 encodeRefsOnJSON(DevelopmentSchema, ['ownerId', 'agencyId', 'coverMediaId']);

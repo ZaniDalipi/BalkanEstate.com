@@ -21,6 +21,7 @@ import { processExpiredRentals } from '../jobs/rentalExpiryJob';
 import { processListingIngest, processDeferredListingReplay } from '../jobs/listingIngestJob';
 import { runScoreFullRefresh } from '../jobs/scoreBackfillJob';
 import { runMonthlyCityMarketDigest } from '../jobs/cityMarketDigestJob';
+import { runResidenceBillingJob } from '../services/developments/billing/residenceBillingJob';
 
 // Helper to check if MongoDB is connected before running a job
 const isMongoConnected = (): boolean => {
@@ -58,8 +59,21 @@ let scoreRefreshTask: cron.ScheduledTask | null = null;
 let cityMarketDigestTask: cron.ScheduledTask | null = null;
 let tempImageCleanupTask: cron.ScheduledTask | null = null;
 let mediaRetentionTask: cron.ScheduledTask | null = null;
+let residenceBillingTask: cron.ScheduledTask | null = null;
 
 export const startCronJobs = () => {
+  // Residence Pass upkeep (trial reminders, offline notices, plan coverage) - daily at 08:07
+  residenceBillingTask = cron.schedule('7 8 * * *', async () => {
+    await withDbConnection('residence billing', async () => {
+      try {
+        const r = await runResidenceBillingJob();
+        cronLogger.info(`🏢 Residence billing: ${r.reminders} reminder(s), ${r.owners} owner(s) recomputed, ${r.backfilled} backfilled`);
+      } catch (error) {
+        cronLogger.error('Residence billing cron error:', error);
+      }
+    });
+  });
+
   // Check for subscriptions expiring in 1 day - runs daily at 10 AM
   checkExpiringTask = cron.schedule('0 10 * * *', async () => {
     await withDbConnection('expiring subscriptions check', async () => {
@@ -541,6 +555,7 @@ export const startCronJobs = () => {
 };
 
 export const stopCronJobs = () => {
+  if (residenceBillingTask) residenceBillingTask.stop();
   if (checkExpiringTask) checkExpiringTask.stop();
   if (updateExpiredTask) updateExpiredTask.stop();
   if (userSubscriptionTask) userSubscriptionTask.stop();

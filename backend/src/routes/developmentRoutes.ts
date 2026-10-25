@@ -20,6 +20,7 @@ import {
   nearbyDevelopments,
   requestAttachment,
 } from '../controllers/developmentSuggestionController';
+import { publicResidencePricing } from '../controllers/residenceBillingController';
 
 const router = express.Router();
 
@@ -38,10 +39,11 @@ const unitInquiryRateLimiter = rateLimit({
  * and never any private ownership/lead/team information. The follow endpoints
  * require a signed-in user (a buyer) and are scoped to that user.
  *
- * Route order matters: the static `/following` path is declared before the
- * `/:slug` catch-all so it is never swallowed by it.
+ * Route order matters: the static `/pricing` and `/following` paths are declared before the
+ * `/:slug` catch-all so they are never swallowed by it.
  */
 router.get('/', listPublic);
+router.get('/pricing', publicResidencePricing);
 router.get('/following', protect, listFollowing);
 router.get('/nearby', protect, nearbyDevelopments);
 router.get('/for-listing/:listingId', getResidenceForListing);

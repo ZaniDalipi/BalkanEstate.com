@@ -19,6 +19,7 @@ import { encodeId } from '../../utils/idObfuscation';
 import { NotFoundError } from './developmentListingService';
 import { toObjectId } from './developmentRefs';
 import { resolveEffectiveAvailability } from './unitAvailability';
+import { publicResidenceFilter } from './billing/publicResidenceFilter';
 
 const LIVE = { $exists: false } as const;
 
@@ -33,7 +34,7 @@ export const visibleUnitFilter = (developmentId: mongoose.Types.ObjectId) => ({
 export const loadPublishedDevelopment = async (rawSlug: unknown): Promise<IDevelopment> => {
   const slug = String(rawSlug ?? '').toLowerCase().trim();
   const development = slug
-    ? await Development.findOne({ slug, status: 'published', deletedAt: LIVE })
+    ? await Development.findOne({ slug, ...publicResidenceFilter() })
     : null;
   if (!development) throw new NotFoundError('Development not found');
   return development;
@@ -45,6 +46,9 @@ const DEVELOPMENT_PRIVATE_FIELDS = [
   'coverImagePublicId',
   'coverMediaId',
   'deletedAt',
+  // Residence Pass state is the owner's business, not the buyer's.
+  'billing',
+  'visibleUntil',
 ] as const;
 
 /** The development as buyers see it — no ownership, storage keys or media ids. */
@@ -313,7 +317,7 @@ export const getListingResidence = async (rawListingId: unknown): Promise<Listin
   if (!listingId) return null;
   const listing = await Property.findById(listingId).select('status developmentId unitId').lean();
   if (!listing?.developmentId || listing.status === 'draft') return null;
-  const development = await Development.findOne({ _id: listing.developmentId, status: 'published', deletedAt: LIVE })
+  const development = await Development.findOne({ _id: listing.developmentId, ...publicResidenceFilter() })
     .select('name slug city')
     .lean();
   if (!development) return null;

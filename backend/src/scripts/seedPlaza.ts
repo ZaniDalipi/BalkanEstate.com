@@ -47,6 +47,7 @@ import {
   modelFloorBand,
 } from './demo/plazaGeometry';
 import { podiumUnits, towerUnits, type PlazaUnitSpec } from './demo/plazaUnits';
+import { grant as grantResidence } from '../services/developments/billing/residencePurchaseService';
 
 dotenv.config();
 
@@ -119,6 +120,9 @@ async function run(): Promise<void> {
     });
     const developmentId = development._id as Oid;
     await DevelopmentMembership.create({ developmentId, userId: owner._id, role: 'owner', status: 'active' });
+
+    // Demo residences stay public: a 10-year Residence Pass, granted (not bought).
+    await grantResidence(development, owner._id, { months: 120, note: 'Demo residence' });
 
     const [tower, podium] = await DevelopmentBuilding.create([
       { developmentId, name: 'Plaza Tower', code: 'T', slug: 'plaza-tower', totalFloors: TOWER_TOP_LEVEL + 1, order: 0, description: 'Residential tower, floors 3–24, above the podium.' },

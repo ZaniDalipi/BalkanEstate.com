@@ -26,6 +26,7 @@ import { encodeId } from '../utils/idObfuscation';
 import { scriptLogger as log } from '../utils/logger';
 import { resolveScriptMongoUri, redactMongoUri } from '../utils/scriptMongoUri';
 import { removeDemoDevelopment, resolveSeedOwner, round2 } from './demo/seedSupport';
+import { grant as grantResidence } from '../services/developments/billing/residencePurchaseService';
 
 dotenv.config();
 
@@ -106,6 +107,9 @@ async function run(): Promise<void> {
       { $setOnInsert: { developmentId: development._id, userId: owner._id, role: 'owner', status: 'active' } },
       { upsert: true }
     );
+
+    // Demo residences stay public: a 10-year Residence Pass, granted (not bought).
+    await grantResidence(development, owner._id, { months: 120, note: 'Demo residence' });
 
     // --- Buildings → floors → units --------------------------------------
     // Taller, varied towers so the floor-range and type filters have range.
