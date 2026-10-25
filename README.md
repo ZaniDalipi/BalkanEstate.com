@@ -61,118 +61,27 @@ Property search in the Balkans is split up: one portal per country, a different 
 - **Admin console** for content, users, ad bookings and moderation
 - **Security**: in-memory access tokens, rotating httpOnly refresh cookies, CSRF double-submit, encrypted responses on sensitive endpoints, DOMPurify sanitisation
 
-## 🏗️ Architecture
+## 🧭 How it works
 
-```
-Browser
-  └── React SPA (Vite, PWA)
-        ├── React Router 7           the URL decides the page, under /:lang
-        ├── TanStack Query           server state
-        ├── Zustand                  filters & UI state
-        ├── react-i18next            10 languages
-        └── Feature slices  ──HTTP / WebSocket──►  Express API (Node.js, TypeScript)
-                                                     ├── MongoDB (Mongoose)
-                                                     ├── Socket.io (messaging)
-                                                     ├── Gemini (AI search & valuation)
-                                                     ├── Cloudflare R2 (media)
-                                                     ├── Resend (email)
-                                                     └── Paysera (payments)
+1. **Search** – type what you want in your own words, or browse the map and filters across all 10 countries.
+2. **Explore** – open a listing to see photos, video, floor plans, the neighbourhood and an AI price estimate.
+3. **Connect** – message the seller or agent instantly, or send an inquiry, right inside the app.
+4. **Decide** – compare favourites side by side, run the mortgage numbers and read the local buying guide.
 
-Cloudflare Pages Functions ── OG images, sitemaps, SEO for shared links
-```
+Sellers and agencies go the other way: publish a listing, promote it, and follow its views and leads from their dashboard.
 
-The frontend uses **feature-sliced design**: each feature in `src/features/<name>/` owns its `api`, `components`, `hooks` and `types`. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the details.
+## 👥 Who it's for
 
-## 📁 Project structure
-
-```
-.
-├── src/
-│   ├── app/            router, providers, stores, error boundaries
-│   ├── features/       ~40 feature slices (search, map, property-details, messaging, valuation, …)
-│   ├── components/     shared UI (property, map, search, seo, ui)
-│   ├── shared/         httpClient, query keys, validation, utilities
-│   └── i18n/           i18n setup
-├── backend/
-│   └── src/            Express routes, controllers, models, services, sockets, cron jobs
-├── functions/          Cloudflare Pages Functions (OG tags, sitemaps)
-├── public/             static assets, locales, icons, llms.txt
-├── e2e/                Playwright end-to-end tests
-├── docs/               guides, API docs, setup and integration notes
-└── docker-compose.yml  local MongoDB + backend
-```
-
-## 🚀 Getting started
-
-### Prerequisites
-- **Node.js 20+** and npm
-- **MongoDB 7** (local install, Atlas, or the bundled Docker Compose)
-
-### 1. Clone and install
-
-```bash
-git clone https://github.com/ZaniDalipi/BalkanEstate.com.git
-cd BalkanEstate.com
-npm install
-(cd backend && npm install)
-```
-
-### 2. Configure the environment
-
-```bash
-cp .env.example .env                    # frontend (only VITE_* vars, never secrets)
-cp backend/.env.example backend/.env    # backend: database, auth, media, email, AI keys
-```
-
-Without map API keys the app uses keyless OpenStreetMap tiles, so you can start with no keys at all.
-
-### 3. Run it
-
-```bash
-# Option A: MongoDB + backend in Docker
-docker compose up -d
-
-# Option B: run the backend yourself
-cd backend && npm run setup:db && npm run dev    # API on http://localhost:5001
-
-# Then the frontend
-npm run dev                                       # app on http://localhost:3000
-```
-
-Seed demo data with `cd backend && npm run seed:all`.
-
-## 🧪 Testing
-
-```bash
-npm test                 # Vitest unit tests (watch)
-npm run test:run         # Vitest, single run
-npm run test:coverage    # coverage report
-npm run test:e2e         # Playwright end-to-end tests
-npm run test:all         # everything
-
-cd backend && npm test   # Jest + in-memory MongoDB
-```
-
-More in [`TESTING.md`](TESTING.md).
-
-## 📦 Build and deploy
-
-```bash
-npm run build      # production build + prerendered pages in dist/
-npm run preview    # serve the build locally
-```
-
-Pushes to `main` run [GitHub Actions](.github/workflows/deploy.yml), which builds the app and deploys the frontend to **Cloudflare Pages**. The API is deployed separately (Railway or Render). Hosting options and costs are compared in [`docs/TECH_STACK_AND_HOSTING.md`](docs/TECH_STACK_AND_HOSTING.md).
-
-## 📚 Documentation
-
-| Doc | What's inside |
+| | |
 |---|---|
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | System design, routing, state management |
-| [`DOCUMENTATION.md`](DOCUMENTATION.md) | Full project documentation |
-| [`TESTING.md`](TESTING.md) | Test strategy and tooling |
-| [`backend/README.md`](backend/README.md) | API server setup and endpoints |
-| [`docs/`](docs/README.md) | Payments, subscriptions, media storage, translations, SEO and more |
+| 🏠 **Buyers** | Locals and foreigners looking for a home, a holiday apartment or an investment |
+| 🔑 **Renters** | Long-term rentals and villas across the coast and the cities |
+| 📈 **Sellers** | Private owners who want their listing seen across the whole region |
+| 🤝 **Agents & agencies** | Professionals who want a profile, a team page, leads and listing analytics |
+
+## 🛠️ Built with
+
+React · TypeScript · Tailwind CSS · Node.js · Express · MongoDB · Socket.io · Google Gemini · MapLibre & Leaflet · Cloudflare Pages & R2
 
 ---
 
