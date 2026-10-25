@@ -1,10 +1,13 @@
 name: CI
 
 on:
+  # Pushes to main run CI as the first step of the Deploy workflow (deploy.yml),
+  # so they aren't listed here.
   push:
-    branches: [main, develop]
+    branches: [develop]
   pull_request:
     branches: [main, develop]
+  workflow_call:
 
 env:
   NODE_VERSION: '20'

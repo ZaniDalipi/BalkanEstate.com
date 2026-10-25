@@ -1,0 +1,105 @@
+name: Deploy to Cloudflare Pages
+
+# Reusable: builds the frontend with the given GitHub environment's secrets and
+# publishes it (plus the functions/ link-preview handlers) to one Pages branch.
+#
+# Secrets are read from the job's environment first and fall back to the
+# repository-level secret of the same name, so staging can override e.g.
+# VITE_API_URL without touching production.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub environment (staging or production)
+        required: true
+        type: string
+      pages-branch:
+        description: Cloudflare Pages branch to publish to (main = production)
+        required: true
+        type: string
+      url:
+        description: Public URL shown on the environment
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  deploy:
+    name: Build & deploy (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ inputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_MEDIA_CDN_URL: ${{ secrets.VITE_MEDIA_CDN_URL }}
+          VITE_GA_ID: ${{ secrets.VITE_GA_ID }}
+          VITE_FB_PIXEL_ID: ${{ secrets.VITE_FB_PIXEL_ID }}
+          VITE_CLARITY_PROJECT_ID: ${{ secrets.VITE_CLARITY_PROJECT_ID }}
+          # Basemap provider. Keyless by default; set the VITE_CARTO_API_KEY
+          # secret to use CARTO's styles instead (see config/mapStyles.ts).
+          VITE_MAP_KEYLESS_PROVIDER: ${{ secrets.VITE_MAP_KEYLESS_PROVIDER || 'osm' }}
+          VITE_CARTO_API_KEY: ${{ secrets.VITE_CARTO_API_KEY }}
+          VITE_STADIA_API_KEY: ${{ secrets.VITE_STADIA_API_KEY }}
+          # AdSense fill for unbooked ad slots (src/features/promo/components/NetworkFill.tsx).
+          # Client defaults to this site's publisher id in code; slots have no
+          # default, so an ad unit's id must be set here for it to fill at all.
+          VITE_ADSENSE_CLIENT: ${{ secrets.VITE_ADSENSE_CLIENT }}
+          VITE_ADSENSE_SLOT: ${{ secrets.VITE_ADSENSE_SLOT }}
+          VITE_ADSENSE_SLOT_LEADERBOARD: ${{ secrets.VITE_ADSENSE_SLOT_LEADERBOARD }}
+          VITE_ADSENSE_SLOT_SIDEBAR: ${{ secrets.VITE_ADSENSE_SLOT_SIDEBAR }}
+          VITE_ADSENSE_SLOT_STICKY: ${{ secrets.VITE_ADSENSE_SLOT_STICKY }}
+
+      - name: Deploy to Cloudflare Pages
+        id: pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=balkanestateai --branch=${{ inputs.pages-branch }}
+
+      # Fail the run if the deployment doesn't actually serve the app.
+      - name: Smoke test
+        env:
+          DEPLOY_URL: ${{ steps.pages.outputs.deployment-url }}
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if curl -fsSL --max-time 20 "$DEPLOY_URL" | grep -q 'id="root"'; then
+              echo "✅ $DEPLOY_URL serves the app"
+              exit 0
+            fi
+            echo "Not ready yet (attempt $attempt), retrying in 10s..."
+            sleep 10
+          done
+          echo "❌ $DEPLOY_URL did not serve the app"
+          exit 1
+
+      - name: Deployment summary
+        run: |
+          {
+            echo "### Deployed to ${{ inputs.environment }}"
+            echo ""
+            echo "- This deployment: ${{ steps.pages.outputs.deployment-url }}"
+            echo "- ${{ inputs.environment }} URL: ${{ inputs.url }}"
+            echo "- Commit: ${{ github.sha }}"
+            echo ""
+            echo "Backend is deployed separately (Railway)."
+          } >> "$GITHUB_STEP_SUMMARY"

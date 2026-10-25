@@ -1,160 +1,57 @@
 name: Deploy
 
+# Every push to main goes:  CI  →  staging  →  (your approval)  →  production
+#
+# - CI (lint, type check, builds) must pass before anything is deployed.
+# - Staging is the Cloudflare Pages "staging" branch:
+#   https://staging.balkanestateai.pages.dev (not indexed by search engines).
+# - Production waits for a required reviewer on the "production" environment
+#   (repo Settings → Environments → production → Required reviewers).
+#   Without that rule it deploys straight after staging succeeds.
+#
+# "Run workflow" (manual) redeploys the selected branch through the same steps.
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Deployment environment'
-        required: true
-        default: 'staging'
-        type: choice
-        options:
-          - staging
-          - production
 
-env:
-  NODE_VERSION: '20'
+# One deploy at a time; a newer push waits rather than cancelling a deploy
+# that's halfway through.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
 
 jobs:
-  # =============================================================================
-  # Build
-  # =============================================================================
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+  staging:
+    name: Staging
+    needs: ci
+    uses: ./.github/workflows/deploy-pages.yml
+    with:
+      environment: staging
+      pages-branch: staging
+      url: https://staging.balkanestateai.pages.dev
+    secrets: inherit
 
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Install backend dependencies
-        working-directory: ./backend
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_MEDIA_CDN_URL: ${{ secrets.VITE_MEDIA_CDN_URL }}
-          VITE_GA_ID: ${{ secrets.VITE_GA_ID }}
-          VITE_FB_PIXEL_ID: ${{ secrets.VITE_FB_PIXEL_ID }}
-          VITE_CLARITY_PROJECT_ID: ${{ secrets.VITE_CLARITY_PROJECT_ID }}
-          # Basemap provider. Keyless by default; set the VITE_CARTO_API_KEY
-          # secret to use CARTO's styles instead (see config/mapStyles.ts).
-          VITE_MAP_KEYLESS_PROVIDER: ${{ secrets.VITE_MAP_KEYLESS_PROVIDER || 'osm' }}
-          VITE_CARTO_API_KEY: ${{ secrets.VITE_CARTO_API_KEY }}
-          VITE_STADIA_API_KEY: ${{ secrets.VITE_STADIA_API_KEY }}
-          # AdSense fill for unbooked ad slots (src/features/promo/components/NetworkFill.tsx).
-          # Client defaults to this site's publisher id in code; slots have no
-          # default, so an ad unit's id must be set here for it to fill at all.
-          VITE_ADSENSE_CLIENT: ${{ secrets.VITE_ADSENSE_CLIENT }}
-          VITE_ADSENSE_SLOT: ${{ secrets.VITE_ADSENSE_SLOT }}
-          VITE_ADSENSE_SLOT_LEADERBOARD: ${{ secrets.VITE_ADSENSE_SLOT_LEADERBOARD }}
-          VITE_ADSENSE_SLOT_SIDEBAR: ${{ secrets.VITE_ADSENSE_SLOT_SIDEBAR }}
-          VITE_ADSENSE_SLOT_STICKY: ${{ secrets.VITE_ADSENSE_SLOT_STICKY }}
-
-      - name: Build backend
-        working-directory: ./backend
-        run: npm run build
-
-      - name: Upload frontend artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: dist/
-
-      - name: Upload backend artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-dist
-          path: |
-            backend/dist/
-            backend/package.json
-            backend/package-lock.json
-
-  # =============================================================================
-  # Deploy Frontend to Cloudflare Pages (Preview/Staging)
-  # =============================================================================
-  deploy-staging:
-    name: Deploy to Cloudflare Pages (Preview)
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
-    environment:
-      name: staging
-      url: https://staging.balkanestateai.com
-    steps:
-      - name: Download frontend artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: dist/
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=balkanestateai --branch=preview
-
-      - name: Deployment Summary
-        run: |
-          echo "Staging Deployment Complete"
-          echo "=============================="
-          echo "Frontend: https://preview.balkanestateai.pages.dev"
-          echo "Note: Backend should be deployed separately to Railway/Render"
-
-  # =============================================================================
-  # Deploy Frontend to Cloudflare Pages (Production)
-  # =============================================================================
-  deploy-production:
-    name: Deploy to Cloudflare Pages (Production)
-    runs-on: ubuntu-latest
-    needs: [build, deploy-staging]
-    # Deploy to production automatically on every push to main, and also when the
-    # workflow is manually dispatched with environment=production.
-    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
-    environment:
-      name: production
+  production:
+    name: Production
+    needs: staging
+    uses: ./.github/workflows/deploy-pages.yml
+    with:
+      environment: production
+      pages-branch: main
       url: https://balkanestateai.com
-    steps:
-      - name: Download frontend artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: dist/
+    secrets: inherit
 
-      - name: Deploy to Cloudflare Pages (Production)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=balkanestateai --branch=main
-
-      - name: Deployment Summary
-        run: |
-          echo "Production Deployment Complete"
-          echo "================================="
-          echo "Frontend: https://balkanestateai.com"
-          echo "Note: Backend should be deployed separately to Railway/Render"
-
-  # =============================================================================
-  # Notify on Deployment
-  # =============================================================================
   notify:
     name: Notify
     runs-on: ubuntu-latest
-    needs: [deploy-staging]
+    needs: [staging, production]
     if: always()
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -163,9 +60,9 @@ jobs:
         if: env.SLACK_WEBHOOK_URL != ''
         uses: 8398a7/action-slack@v3
         with:
-          status: ${{ job.status }}
+          status: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
           text: |
-            Deployment to ${{ github.event.inputs.environment || 'staging' }}
+            Deploy: staging ${{ needs.staging.result }}, production ${{ needs.production.result }}
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
