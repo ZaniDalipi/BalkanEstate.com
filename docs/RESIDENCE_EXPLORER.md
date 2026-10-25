@@ -321,6 +321,14 @@ the form. Tick *Also link this listing to the unit* and it is attached on save
 (the same conflict checks as Linked listings). Only listings you control can be
 read (`GET …/listings/:listingId/unit-prefill`, `unitPrefillService.ts`).
 
+**Dropdowns show real data:** buildings read "Plaza Tower · 22 floors · 84
+units", floors "Floor 20 · 4 units" (only the chosen building's floors, in level
+order), and the status filters carry live counts ("Available (44)"). The counts
+come from one aggregation (`GET …/units/facets`, `unitFacetsService.ts`) and
+refresh after every unit change; option labels are built in one place
+(`useStructureOptions`). In *Add units*, **Fill from one of your listings** sits
+at the top and lists what will be copied before you click **Add unit**.
+
 **Fixed choices and euros:** unit type, orientation (8 directions, the same as
 listings) and view are dropdowns; the server accepts only those orientation and
 view values (`unitRules.ts`, used by edit, create and import). All residence

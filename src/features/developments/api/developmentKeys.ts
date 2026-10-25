@@ -30,6 +30,8 @@ export const developmentKeys = {
   detail: (id: string) => [...developmentKeys.all, 'detail', id] as const,
   /** Prefix of every inventory query of a development — invalidate this after a unit write. */
   unitsAll: (id: string) => [...developmentKeys.detail(id), 'units'] as const,
+  /** Unit counts per building/floor/status (refreshed with every unit write). */
+  unitFacets: (id: string) => [...developmentKeys.unitsAll(id), 'facets'] as const,
   units: (id: string, filters?: object) =>
     [...developmentKeys.detail(id), 'units', { filters }] as const,
   structure: (id: string) => [...developmentKeys.detail(id), 'structure'] as const,

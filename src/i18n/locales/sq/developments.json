@@ -804,7 +804,11 @@
       "done": "U plotësuan {{n}} fusha nga “{{title}}”. Kontrollojini, pastaj ruani.",
       "undo": "Zhbëj",
       "rentSkipped": "Ky është njoftim me qira, prandaj qiraja mujore nuk u kopjua si çmim.",
-      "link": "Lidhe edhe këtë njoftim me njësinë kur të ruaj"
+      "link": "Lidhe edhe këtë njoftim me njësinë kur të ruaj",
+      "copied": "Kopjuar nga njoftimi",
+      "withDescription": "Përshkrimi",
+      "doneCreate": "Nga “{{title}}” — këto të dhëna i shtohen njësisë së re kur klikoni Shto njësinë.",
+      "linkCreate": "Lidhe edhe këtë njoftim me njësinë e re"
     }
   },
   "manage": {
@@ -1046,5 +1050,9 @@
     "panoramic": "Panoramike",
     "lake": "Liqen",
     "river": "Lumë"
+  },
+  "choices": {
+    "units_one": "{{count}} njësi",
+    "units_other": "{{count}} njësi"
   }
 }

@@ -34,6 +34,7 @@ import type {
   ListingResidence,
   UnitImportSummary,
   UnitPrefill,
+  UnitFacets,
   ControllableListing,
   DashboardUnit,
   UnitListQuery,
@@ -502,6 +503,10 @@ export const getAttachableListings = (
     { requiresAuth: true }
   );
 };
+
+/** Live unit counts per building, floor, availability and visibility. */
+export const getUnitFacets = (developmentId: string): Promise<UnitFacets> =>
+  apiRequest<UnitFacets>(`${DASH}/${developmentId}/units/facets`, { requiresAuth: true });
 
 /** Unit fields read from one of the caller's own listings. */
 export const getUnitPrefill = (developmentId: string, listingId: string): Promise<UnitPrefill> =>

@@ -6,8 +6,10 @@ import type { CreateFloorPayload, DevelopmentBuilding, DevelopmentFloor } from '
 import { floorKindFor, floorLabelFor, levelsToAdd, nextFreeLevel } from '../../../utils/inventoryNaming';
 import { BuildingSelect } from './BuildingSelect';
 import { useFloorNames } from './useFloorNames';
+import { useStructureOptions } from './useStructureOptions';
 
 interface AddFloorsFormProps {
+  developmentId: string;
   buildings: DevelopmentBuilding[];
   floors: DevelopmentFloor[];
   createFloor: (payload: CreateFloorPayload) => Promise<unknown>;
@@ -20,9 +22,10 @@ interface AddFloorsFormProps {
  * moves on after each add; an empty label names the floor from its level
  * ("Floor 4", "Ground floor", "Basement 1"). Levels that exist are skipped.
  */
-export const AddFloorsForm: React.FC<AddFloorsFormProps> = ({ buildings, floors, createFloor, isCreating, onError }) => {
+export const AddFloorsForm: React.FC<AddFloorsFormProps> = ({ developmentId, buildings, floors, createFloor, isCreating, onError }) => {
   const { t } = useTranslation('developments');
   const names = useFloorNames();
+  const { buildingOptions } = useStructureOptions(developmentId, buildings, floors);
   const [chosenBuilding, setChosenBuilding] = useState('');
   const [fromText, setFromText] = useState<string | null>(null);
   const [toText, setToText] = useState('');
@@ -69,7 +72,7 @@ export const AddFloorsForm: React.FC<AddFloorsFormProps> = ({ buildings, floors,
   return (
     <form onSubmit={onSubmit} className="space-y-1.5">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1.4fr_0.6fr_0.6fr_1.4fr_auto] sm:items-end">
-        <BuildingSelect className="col-span-2 sm:col-span-1" buildings={buildings} value={buildingId} onChange={(id) => { setChosenBuilding(id); setFromText(null); }} />
+        <BuildingSelect className="col-span-2 sm:col-span-1" options={buildingOptions} value={buildingId} onChange={(id) => { setChosenBuilding(id); setFromText(null); }} />
         <Input label={t('floor.level')} type="number" value={from} onChange={(e) => setFromText(e.target.value)} />
         <Input label={t('floor.toLevel', 'To level')} type="number" placeholder={t('floor.optional', 'optional')} value={toText} onChange={(e) => setToText(e.target.value)} />
         <div className="col-span-2 sm:col-span-1">

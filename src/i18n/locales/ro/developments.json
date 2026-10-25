@@ -810,7 +810,11 @@
       "done": "Au fost completate {{n}} câmpuri din „{{title}}”. Verificați-le, apoi salvați.",
       "undo": "Anulează",
       "rentSkipped": "Acesta este un anunț de închiriere, așa că chiria lunară nu a fost copiată ca preț.",
-      "link": "Leagă și acest anunț de unitate când salvez"
+      "link": "Leagă și acest anunț de unitate când salvez",
+      "copied": "Copiat din anunț",
+      "withDescription": "Descriere",
+      "doneCreate": "Din „{{title}}” — aceste detalii se adaugă la noua unitate când apăsați Adaugă unitate.",
+      "linkCreate": "Leagă și acest anunț de noua unitate"
     }
   },
   "manage": {
@@ -1052,5 +1056,10 @@
     "panoramic": "Panoramică",
     "lake": "Lac",
     "river": "Râu"
+  },
+  "choices": {
+    "units_one": "{{count}} unitate",
+    "units_few": "{{count}} unități",
+    "units_other": "{{count}} de unități"
   }
 }

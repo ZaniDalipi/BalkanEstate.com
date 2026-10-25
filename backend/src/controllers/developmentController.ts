@@ -29,6 +29,7 @@ import {
 } from '../services/developments/developmentInventoryService';
 import * as unitAdmin from '../services/developments/unitAdminService';
 import { importUnits } from '../services/developments/unitImportService';
+import { getUnitFacets } from '../services/developments/unitFacetsService';
 import { listAuditEntries } from '../services/developments/developmentAuditQuery';
 import { deleteStructure, previewStructureDelete, type StructureKind } from '../services/developments/structureDeleteService';
 import {
@@ -487,6 +488,15 @@ export const importUnitsHandler = async (req: Request, res: Response): Promise<v
     res.json(result);
   } catch (error) {
     sendServiceError(res, error, 'import units');
+  }
+};
+
+/** GET /:developmentId/units/facets — unit counts per building, floor, availability and visibility. */
+export const unitFacets = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await getUnitFacets(devId(req)));
+  } catch (error) {
+    sendServiceError(res, error, 'unit facets');
   }
 };
 

@@ -4,6 +4,7 @@ import { AVAILABILITY_ORDER } from '../../../utils/availability';
 import type { DevelopmentBuilding, DevelopmentFloor } from '../../../types';
 import { NumberField, SelectField, TextField, type UnitSectionProps } from './UnitFieldControls';
 import { useUnitChoices } from './useUnitChoices';
+import { useStructureOptions } from './useStructureOptions';
 
 
 const Fieldset: React.FC<{ legend: string; children: React.ReactNode }> = ({ legend, children }) => (
@@ -14,18 +15,17 @@ const Fieldset: React.FC<{ legend: string; children: React.ReactNode }> = ({ leg
 );
 
 interface IdentityProps extends UnitSectionProps {
+  developmentId: string;
   buildings: DevelopmentBuilding[];
   floors: DevelopmentFloor[];
 }
 
 /** Unit number, type, location (floor list filtered by building), status and visibility. */
-export const UnitIdentitySection: React.FC<IdentityProps> = ({ buildings, floors, ...p }) => {
+export const UnitIdentitySection: React.FC<IdentityProps> = ({ developmentId, buildings, floors, ...p }) => {
   const { t } = useTranslation('developments');
   const choices = useUnitChoices();
-  const floorOptions = floors
-    .filter((f) => f.buildingId === p.form.buildingId)
-    .sort((a, b) => a.level - b.level)
-    .map((f) => ({ value: f.id, label: f.label }));
+  // Real data: buildings with floor/unit counts, the chosen building's floors with unit counts.
+  const structure = useStructureOptions(developmentId, buildings, floors);
 
   return (
     <Fieldset legend={t('inventory.edit.identity', 'Unit')}>
@@ -42,7 +42,7 @@ export const UnitIdentitySection: React.FC<IdentityProps> = ({ buildings, floors
         label={t('inventory.filters.building', 'Building')}
         required
         disabled={p.disabled.unit}
-        options={buildings.map((b) => ({ value: b.id, label: b.name }))}
+        options={structure.buildingOptions}
         placeholder={t('inventory.edit.selectBuilding', 'Select a building')}
       />
       <SelectField
@@ -51,7 +51,7 @@ export const UnitIdentitySection: React.FC<IdentityProps> = ({ buildings, floors
         label={t('inventory.filters.floor', 'Floor')}
         required
         disabled={p.disabled.unit || !p.form.buildingId}
-        options={floorOptions}
+        options={structure.floorOptions(p.form.buildingId)}
         placeholder={t('inventory.edit.selectFloor', 'Select a floor')}
       />
       <SelectField

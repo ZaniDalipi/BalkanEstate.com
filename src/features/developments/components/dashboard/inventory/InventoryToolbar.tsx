@@ -2,11 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Search, X } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
-import { AVAILABILITY_ORDER } from '../../../utils/availability';
 import type { InventoryFilters } from '../../../hooks/useInventoryQuery';
 import type { DevelopmentBuilding, DevelopmentFloor } from '../../../types';
+import { useStructureOptions } from './useStructureOptions';
 
 interface InventoryToolbarProps {
+  developmentId: string;
   filters: InventoryFilters;
   setFilter: <K extends keyof InventoryFilters>(key: K, value: InventoryFilters[K]) => void;
   resetFilters: () => void;
@@ -22,6 +23,7 @@ const selectClass =
 
 /** Search, filters and CSV export above the inventory table. */
 export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
+  developmentId,
   filters,
   setFilter,
   resetFilters,
@@ -32,7 +34,8 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
   isExporting,
 }) => {
   const { t } = useTranslation('developments');
-  const floorOptions = filters.buildingId ? floors.filter((f) => f.buildingId === filters.buildingId) : floors;
+  // Real data: counts per building/floor/status; floors follow the chosen building.
+  const options = useStructureOptions(developmentId, buildings, floors);
 
   return (
     <div className="space-y-3">
@@ -62,8 +65,8 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
           className={selectClass}
         >
           <option value="">{t('inventory.filters.allBuildings', 'All buildings')}</option>
-          {buildings.map((b) => (
-            <option key={b.id} value={b.id}>{b.name}</option>
+          {options.buildingOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
         <select
@@ -73,8 +76,8 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
           className={selectClass}
         >
           <option value="">{t('inventory.filters.allFloors', 'All floors')}</option>
-          {floorOptions.map((f) => (
-            <option key={f.id} value={f.id}>{f.label}</option>
+          {options.floorOptions(filters.buildingId).map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
         <select
@@ -84,8 +87,8 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
           className={selectClass}
         >
           <option value="">{t('inventory.filters.anyAvailability', 'Any availability')}</option>
-          {AVAILABILITY_ORDER.map((s) => (
-            <option key={s} value={s}>{t(`availability.${s}`)}</option>
+          {options.availabilityOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
         <select
@@ -95,8 +98,9 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
           className={selectClass}
         >
           <option value="">{t('inventory.filters.anyVisibility', 'Any visibility')}</option>
-          <option value="public">{t('inventory.visibility.public', 'Public')}</option>
-          <option value="hidden">{t('inventory.visibility.hidden', 'Hidden')}</option>
+          {options.visibilityOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
         </select>
         {hasFilters && (
           <Button type="button" variant="ghost" onClick={resetFilters} className="col-span-2 min-h-[44px] lg:col-span-1 sm:min-h-[40px]">

@@ -8,3 +8,4 @@ export * from './useDebouncedValue';
 export * from './useListingResidence';
 export * from './useUnitImport';
 export * from './useUnitPrefill';
+export * from './useUnitFacets';

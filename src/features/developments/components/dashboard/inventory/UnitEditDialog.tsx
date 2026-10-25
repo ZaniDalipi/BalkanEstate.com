@@ -79,7 +79,7 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
             onLinkChange={editor.setLink}
           />
         )}
-        <UnitEditSections form={editor.form} set={editor.set} errors={editor.errors} disabled={disabled} buildings={buildings} floors={floors} />
+        <UnitEditSections developmentId={developmentId} form={editor.form} set={editor.set} errors={editor.errors} disabled={disabled} buildings={buildings} floors={floors} />
         <UnitMediaSections developmentId={developmentId} unit={unit} role={role} />
         <div className="sticky bottom-0 flex flex-wrap items-center gap-2 border-t border-slate-200 bg-white pt-3">
           {perms.unit && (

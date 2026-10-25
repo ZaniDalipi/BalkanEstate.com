@@ -450,6 +450,15 @@ export interface DevelopmentFollow {
 
 // --- Listing-creation suggestions -----------------------------------------
 
+/** Live unit counts behind the dashboard dropdowns (ids encoded). */
+export interface UnitFacets {
+  total: number;
+  byBuilding: Record<string, number>;
+  byFloor: Record<string, number>;
+  byAvailability: Record<string, number>;
+  byVisibility: Record<string, number>;
+}
+
 /** What a spreadsheet import created/changed (or would, for a dry run). */
 export interface UnitImportSummary {
   rows: number;

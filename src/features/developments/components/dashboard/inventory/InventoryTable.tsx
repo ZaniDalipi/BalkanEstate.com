@@ -92,6 +92,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({ developmentId, r
   return (
     <div className="space-y-4">
       <InventoryToolbar
+        developmentId={developmentId}
         filters={inv.filters}
         setFilter={inv.setFilter}
         resetFilters={inv.resetFilters}

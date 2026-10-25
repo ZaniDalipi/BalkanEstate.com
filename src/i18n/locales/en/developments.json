@@ -804,7 +804,11 @@
       "done": "Filled {{n}} fields from “{{title}}”. Review them, then save.",
       "undo": "Undo",
       "rentSkipped": "This is a rental listing, so its monthly rent was not copied as the price.",
-      "link": "Also link this listing to the unit when I save"
+      "link": "Also link this listing to the unit when I save",
+      "copied": "Copied from the listing",
+      "withDescription": "Description",
+      "doneCreate": "From “{{title}}” — these details are added to the new unit when you click Add unit.",
+      "linkCreate": "Also link this listing to the new unit"
     }
   },
   "manage": {
@@ -1046,5 +1050,9 @@
     "panoramic": "Panoramic",
     "lake": "Lake",
     "river": "River"
+  },
+  "choices": {
+    "units_one": "{{count}} unit",
+    "units_other": "{{count}} units"
   }
 }

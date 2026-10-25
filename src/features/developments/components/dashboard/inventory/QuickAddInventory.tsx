@@ -45,7 +45,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string; role?: string 
         </Button>
       </form>
       {buildings.length > 0 && (
-        <AddFloorsForm buildings={buildings} floors={floors} createFloor={createFloor} isCreating={isCreatingFloor} onError={setError} />
+        <AddFloorsForm developmentId={developmentId} buildings={buildings} floors={floors} createFloor={createFloor} isCreating={isCreatingFloor} onError={setError} />
       )}
       {buildings.length > 0 && floors.length > 0 && (
         <AddUnitsForm developmentId={developmentId} buildings={buildings} floors={floors} createUnit={createUnit} isCreating={isCreatingUnit} onError={setError} role={role} />

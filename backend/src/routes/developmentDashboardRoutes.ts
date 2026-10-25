@@ -27,6 +27,7 @@ import {
   bulkUpdateUnits,
   exportUnitsCsv,
   importUnitsHandler,
+  unitFacets,
   uploadUnitFloorplan,
   deleteUnitFloorplan,
   uploadUnitGallery,
@@ -213,6 +214,7 @@ router.post(
 router.get('/:developmentId/units', protect, developmentAuth, getUnits);
 // Static unit paths before /units/:unitId so they are not captured as an id.
 router.get('/:developmentId/units/export.csv', protect, developmentAuth, exportUnitsCsv);
+router.get('/:developmentId/units/facets', protect, developmentAuth, unitFacets);
 // Spreadsheet import: permissions are checked per what the file creates/changes.
 router.post('/:developmentId/units/import', protect, mutationRateLimiter, developmentAuth, importUnitsHandler);
 // Bulk edits: the handler requires availability.change and/or unit.manage

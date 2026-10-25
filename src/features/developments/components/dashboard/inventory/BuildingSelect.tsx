@@ -1,9 +1,10 @@
 import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DevelopmentBuilding } from '../../../types';
+import type { SelectOption } from '../../shared/FormSelect';
 
 interface BuildingSelectProps {
-  buildings: DevelopmentBuilding[];
+  /** Building options (see useStructureOptions). */
+  options: SelectOption[];
   value: string;
   onChange: (id: string) => void;
   className?: string;
@@ -12,7 +13,7 @@ interface BuildingSelectProps {
 const SELECT = 'min-h-[40px] w-full rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
 /** Labelled building picker used by the quick-add forms. */
-export const BuildingSelect: React.FC<BuildingSelectProps> = ({ buildings, value, onChange, className }) => {
+export const BuildingSelect: React.FC<BuildingSelectProps> = ({ options, value, onChange, className }) => {
   const { t } = useTranslation('developments');
   const id = useId();
   return (
@@ -22,9 +23,9 @@ export const BuildingSelect: React.FC<BuildingSelectProps> = ({ buildings, value
       </label>
       <select id={id} className={SELECT} value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">—</option>
-        {buildings.map((b) => (
-          <option key={b.id} value={b.id}>
-            {b.name}
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
           </option>
         ))}
       </select>

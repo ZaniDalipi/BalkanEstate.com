@@ -810,7 +810,11 @@
       "done": "Popunjeno {{n}} polja iz „{{title}}”. Provjerite ih, pa sačuvajte.",
       "undo": "Poništi",
       "rentSkipped": "Ovo je oglas za najam, pa mjesečna kirija nije kopirana kao cijena.",
-      "link": "Poveži i ovaj oglas s jedinicom kad sačuvam"
+      "link": "Poveži i ovaj oglas s jedinicom kad sačuvam",
+      "copied": "Kopirano iz oglasa",
+      "withDescription": "Opis",
+      "doneCreate": "Iz „{{title}}” — ovi podaci se dodaju novoj jedinici kad kliknete Dodaj jedinicu.",
+      "linkCreate": "Poveži i ovaj oglas s novom jedinicom"
     }
   },
   "manage": {
@@ -1052,5 +1056,10 @@
     "panoramic": "Panoramski",
     "lake": "Jezero",
     "river": "Rijeka"
+  },
+  "choices": {
+    "units_one": "{{count}} jedinica",
+    "units_few": "{{count}} jedinice",
+    "units_other": "{{count}} jedinica"
   }
 }

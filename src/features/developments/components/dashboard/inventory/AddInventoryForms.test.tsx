@@ -26,7 +26,7 @@ describe('AddFloorsForm', () => {
   it('preselects the only building, suggests the next level and names the floor', async () => {
     const createFloor = vi.fn().mockResolvedValue({});
     const user = userEvent.setup();
-    render(<AddFloorsForm buildings={buildings} floors={[floor('f1', 1), floor('f2', 2), floor('f3', 3)]} createFloor={createFloor} isCreating={false} onError={vi.fn()} />);
+    render(<AddFloorsForm developmentId="d1" buildings={buildings} floors={[floor('f1', 1), floor('f2', 2), floor('f3', 3)]} createFloor={createFloor} isCreating={false} onError={vi.fn()} />);
     expect(screen.getByLabelText('floor.level')).toHaveValue(4);
     await user.click(screen.getByRole('button', { name: 'floor.add' }));
     await waitFor(() => expect(createFloor).toHaveBeenCalledWith({ buildingId: 'b1', level: 4, label: 'floor.named', kind: 'standard' }));
@@ -35,7 +35,7 @@ describe('AddFloorsForm', () => {
   it('adds a range of floors in one go, skipping existing levels', async () => {
     const createFloor = vi.fn().mockResolvedValue({});
     const user = userEvent.setup();
-    render(<AddFloorsForm buildings={buildings} floors={[floor('f2', 2)]} createFloor={createFloor} isCreating={false} onError={vi.fn()} />);
+    render(<AddFloorsForm developmentId="d1" buildings={buildings} floors={[floor('f2', 2)]} createFloor={createFloor} isCreating={false} onError={vi.fn()} />);
     await user.clear(screen.getByLabelText('floor.level'));
     await user.type(screen.getByLabelText('floor.level'), '0');
     await user.type(screen.getByLabelText('floor.toLevel'), '3');
