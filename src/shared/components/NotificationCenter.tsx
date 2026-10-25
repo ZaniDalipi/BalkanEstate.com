@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Bell, X, CheckCheck, Home, TrendingDown, MessageSquare, AlertCircle,
-  Building2, UserPlus, UserMinus, Ticket, Star, TrendingUp, Calendar,
-  CheckCircle, XCircle,
-} from 'lucide-react';
+import { Bell, X, CheckCheck } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { apiRequest } from '@/src/shared/api';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
 import { navigate } from '@/src/app/router/navigation';
 import { SoftIcon } from '@/src/shared/illustrations';
-import { paths } from '@/src/app/router/paths';
+import { NotificationIcon } from './notifications/NotificationIcon';
+import { notificationTarget } from './notifications/notificationTarget';
 
 interface NotificationData {
   propertyId?: string;
@@ -151,61 +148,15 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
-  // Handle notification click - mark as read and navigate
+  // Mark as read and go where the notification leads (see notificationTarget).
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       markAsRead(notification._id);
     }
-
-    const data = notification.data;
-    if (!data) return;
-
-    // Agency activity opens the agency's page
-    if (data.agencyId && (
-      notification.type === 'agency_join_request' ||
-      notification.type === 'agent_joined_agency' ||
-      notification.type === 'agent_left_agency' ||
-      notification.type === 'agency_join_welcome' ||
-      notification.type === 'agency_coupon_redeemed'
-    )) {
-      setIsOpen(false);
-      navigate(paths.agency(data.agencySlug || data.agencyId), { direction: 'up' });
-      return;
-    }
-
-    // Navigate to viewing requests tab for viewing-related notifications
-    if (
-      notification.type === 'new_viewing' ||
-      notification.type === 'viewing_approved' ||
-      notification.type === 'viewing_declined'
-    ) {
-      setIsOpen(false);
-      navigate(paths.account('viewings'), { direction: 'morph' });
-      return;
-    }
-
-    // Navigate to property detail
-    if (data.propertyId) {
-      setIsOpen(false);
-      navigate(paths.property(data.propertyId), { direction: 'up' });
-      return;
-    }
-
-    // Navigate to conversations
-    if (data.conversationId) {
-      setIsOpen(false);
-      navigate(paths.inbox(), { direction: 'morph' });
-      return;
-    }
-
-    // Universal fallback: the notification names an in-app page. Only a
-    // same-origin path is followed — the value comes from the server.
-    if (data.actionUrl && /^\/(?!\/)/.test(data.actionUrl)) {
-      setIsOpen(false);
-      const url: string = data.actionUrl;
-      const isDetail = url.startsWith('/property/') || url.startsWith('/agencies/');
-      navigate(url, { direction: isDetail ? 'up' : 'morph' });
-    }
+    const target = notificationTarget(notification);
+    if (!target) return;
+    setIsOpen(false);
+    navigate(target.path, { direction: target.direction });
   };
 
   // Fetch on mount and poll every 5 minutes
@@ -274,55 +225,7 @@ const NotificationCenter: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Get icon for notification type
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'new_listing':
-        return <Home className="w-4 h-4 text-green-500" />;
-      case 'price_drop':
-        return <TrendingDown className="w-4 h-4 text-blue-500" />;
-      case 'new_message':
-      case 'new_inquiry':
-        return <MessageSquare className="w-4 h-4 text-purple-500" />;
-      case 'listing_milestone':
-      case 'listing_trending':
-        return <TrendingUp className="w-4 h-4 text-orange-500" />;
-      case 'promotion_suggestion':
-      case 'promotion_success':
-        return <Star className="w-4 h-4 text-yellow-500" />;
-      case 'agency_join_request':
-        return <UserPlus className="w-4 h-4 text-blue-600" />;
-      case 'agent_joined_agency':
-      case 'agency_join_welcome':
-        return <UserPlus className="w-4 h-4 text-green-600" />;
-      case 'agent_left_agency':
-        return <UserMinus className="w-4 h-4 text-red-500" />;
-      case 'agency_coupon_redeemed':
-        return <Ticket className="w-4 h-4 text-indigo-500" />;
-      case 'new_viewing':
-        return <Calendar className="w-4 h-4 text-amber-500" />;
-      case 'viewing_approved':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'viewing_declined':
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'listing_limit_increased':
-        return <CheckCircle className="w-4 h-4 text-blue-500" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-gray-500" />;
-    }
-  };
-
-  // Check if notification is clickable (has a navigation target)
-  const isClickable = (notification: Notification): boolean => {
-    if (
-      notification.type === 'new_viewing' ||
-      notification.type === 'viewing_approved' ||
-      notification.type === 'viewing_declined'
-    ) return true;
-    const data = notification.data;
-    if (!data) return false;
-    return !!(data.agencyId || data.propertyId || data.conversationId);
-  };
+  const isClickable = (notification: Notification): boolean => notificationTarget(notification) !== null;
 
   // Format relative time
   const formatTime = (dateString: string) => {
@@ -409,7 +312,7 @@ const NotificationCenter: React.FC = () => {
                 >
                   <div className="flex gap-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      {getNotificationIcon(notification.type)}
+                      <NotificationIcon type={notification.type} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">

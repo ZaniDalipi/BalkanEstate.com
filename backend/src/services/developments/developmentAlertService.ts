@@ -1,5 +1,6 @@
 import DevelopmentFollow, { type IFollowFilters } from '../../models/DevelopmentFollow';
 import { IDevelopmentUnit } from '../../models/DevelopmentUnit';
+import Property from '../../models/Property';
 import { createNotificationWithPush } from '../engagementService';
 import { createLogger } from '../../utils/logger';
 import { encodeId } from '../../utils/idObfuscation';
@@ -43,6 +44,21 @@ export const unitMatchesFilters = (
 };
 
 /**
+ * Where an "available" notification leads: the unit's live listing when it has
+ * one, otherwise the residence page with the apartment open.
+ */
+export const unitActionUrl = async (
+  developmentSlug: string,
+  unit: Pick<IDevelopmentUnit, '_id' | 'primaryListingId'>
+): Promise<string> => {
+  if (unit.primaryListingId) {
+    const listing = await Property.findById(unit.primaryListingId).select('status').lean();
+    if (listing?.status === 'active') return `/property/${encodeId(String(unit.primaryListingId))}`;
+  }
+  return `/developments/${encodeURIComponent(developmentSlug)}?unit=${encodeURIComponent(encodeId(String(unit._id)))}`;
+};
+
+/**
  * Notify followers that a unit in a development became available. Respects each
  * follower's opt-in (newUnits / availabilityChanges) and filters. Best-effort:
  * never throws into the caller's request path.
@@ -66,6 +82,7 @@ export const notifyFollowersUnitAvailable = async (params: {
 
     if (recipients.length === 0) return;
 
+    const actionUrl = await unitActionUrl(params.developmentSlug, params.unit);
     await Promise.allSettled(
       recipients.map((f) =>
         createNotificationWithPush({
@@ -78,6 +95,7 @@ export const notifyFollowersUnitAvailable = async (params: {
           data: {
             developmentSlug: params.developmentSlug,
             unitId: encodeId(String(params.unit._id)),
+            actionUrl,
           },
         })
       )

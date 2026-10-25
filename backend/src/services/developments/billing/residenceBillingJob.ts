@@ -48,7 +48,8 @@ async function sendReminder(dev: InstanceType<typeof Development>, key: string, 
   const owner = await User.findById(dev.ownerId).select('email name');
   const { daysLeft } = residenceAccess(billingFacts(dev), now);
   const { title, message } = reminderText(key, dev.name, daysLeft);
-  const link = `${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/en/dashboard/developments/${encodeId(String(dev._id))}`;
+  const path = `/dashboard/developments/${encodeId(String(dev._id))}`;
+  const link = `${process.env.FRONTEND_URL || 'https://balkanestateai.com'}/en${path}`;
   await createNotificationWithPush({
     userId: dev.ownerId,
     type: key === 'expired' ? 'residence_offline' : 'residence_trial_reminder',
@@ -56,7 +57,7 @@ async function sendReminder(dev: InstanceType<typeof Development>, key: string, 
     message,
     icon: 'building',
     priority: key === 'expired' ? 'high' : 'normal',
-    data: { developmentId: encodeId(String(dev._id)), reminder: key },
+    data: { developmentId: encodeId(String(dev._id)), reminder: key, actionUrl: path },
   });
   if (owner?.email) {
     await emailService.sendEmail({
