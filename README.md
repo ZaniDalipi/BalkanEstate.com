@@ -55,11 +55,11 @@ Property search in the Balkans is split up: one portal per country, a different 
 - **Promotions and featured listings** with subscription plans, coupons and discount codes
 - **Inquiries inbox** and lead management
 
-### Platform
-- **Installable PWA** with offline support and layouts tuned for phones in portrait and landscape
-- **SEO built in**: prerendered pages, dynamic sitemaps, Open Graph images rendered at the edge, and `llms.txt`
-- **Admin console** for content, users, ad bookings and moderation
-- **Security**: in-memory access tokens, rotating httpOnly refresh cookies, CSRF double-submit, encrypted responses on sensitive endpoints, DOMPurify sanitisation
+### Everywhere
+- **Install it like an app** on your phone, with layouts that work upright or sideways
+- **Easy to find and share**: every listing has its own link with a rich preview on social media
+- **Moderated**: a team checks content, users and ads
+- **Safe by design**: accounts, messages and payments are protected
 
 ## 🧭 How it works
 
