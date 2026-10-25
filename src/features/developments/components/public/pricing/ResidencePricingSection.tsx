@@ -49,10 +49,13 @@ export const ResidencePricingSection: React.FC = () => {
           <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
           {t('pricingSection.premium', {
             pro: p.includedByTier.pro ?? 0,
-            agency: p.includedByTier.agency_owner ?? 0,
             pct: p.premiumDiscountPct,
-            defaultValue: 'Premium plans include residences: Pro {{pro}}, Agency {{agency}}. More passes are {{pct}}% off.',
+            defaultValue: 'Pro includes {{pro}} residence. More passes are {{pct}}% off.',
           })}
+        </li>
+        <li className="flex gap-2">
+          <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+          {t('pricingSection.agency', { n: p.agencyResidencesPerYear ?? 1, defaultValue: 'Agencies: {{n}} free residence every subscription year, public while subscribed.' })}
         </li>
       </ul>
       <button

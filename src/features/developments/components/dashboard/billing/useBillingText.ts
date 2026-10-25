@@ -19,6 +19,7 @@ export function useBillingText() {
         trial: t('billing.state.trial', 'Free trial'),
         active: t('billing.state.active', 'Residence Pass'),
         included: t('billing.state.included', 'Included in your plan'),
+        agency: t('billing.state.agency', 'Free with your agency plan'),
         expired: t('billing.state.expired', 'Trial ended'),
       })[b.state],
     [t]
@@ -30,6 +31,9 @@ export function useBillingText() {
       switch (b.state) {
         case 'none':
           // No trial left for this one (another is on trial, or all are used): don't promise it.
+          if (b.publish.allowed && b.publish.usesAgencyFree) {
+            return t('billing.hint.agencyFree', { left: b.agency?.left ?? 1, defaultValue: 'Publishing uses one of your agency’s free residences this year ({{left}} left).' });
+          }
           return b.publish.allowed
             ? t('billing.hint.none', { days: b.terms.trialDays, defaultValue: 'Publishing starts a free {{days}}-day trial.' })
             : t('billing.hint.noTrial', 'Publishing this residence needs a Residence Pass.');
@@ -43,6 +47,10 @@ export function useBillingText() {
           return t('billing.hint.active', { date: day(b.paidUntil), defaultValue: 'Public until {{date}}.' });
         case 'included':
           return t('billing.hint.included', { date: day(b.includedUntil), defaultValue: 'Covered by your plan until {{date}}.' });
+        case 'agency':
+          return b.agency && !b.agency.subscribed
+            ? t('billing.hint.agencyGrace', { date: day(b.agencyUntil ?? null), defaultValue: 'Your agency subscription has ended. Public until {{date}}; renew to keep it online.' })
+            : t('billing.hint.agency', 'Free while your agency subscription is active.');
         default:
           return t('billing.hint.expired', 'Buyers can’t see this residence. Buy a pass to put it back online.');
       }

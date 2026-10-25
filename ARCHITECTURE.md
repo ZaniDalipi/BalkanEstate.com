@@ -1164,7 +1164,13 @@ how-tos — is in [`docs/RESIDENCE_EXPLORER.md`](docs/RESIDENCE_EXPLORER.md).
   premium plan keeps the residence public.
   - The rules are pure functions in `billing/residencePlan.ts`.
   - Every public query uses `publicResidenceFilter()`.
-  - The building limit is enforced in `createBuilding`.
+  - The building limit is enforced in `createBuilding`; an admin can override it.
+  - Agencies get one free residence per subscription year, public while
+    subscribed plus a 15-day grace (`billing/agencyResidences.ts`).
+  - The numbers come from the `Product` documents (`residenceTerms()`), so the
+    admin pricing screen changes both the rules and the texts.
+  - Admin › Residences (`features/admin/components/residences/`) sets building
+    limits, gives passes and adds agency free residences.
   - See *Residence Pass* in `docs/RESIDENCE_EXPLORER.md`.
 
 ## Internationalisation (i18n)

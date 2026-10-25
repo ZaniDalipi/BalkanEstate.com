@@ -1102,7 +1102,8 @@
       "trial": "Probă gratuită",
       "active": "Abonament ansamblu",
       "included": "Inclus în planul tău",
-      "expired": "Proba s-a încheiat"
+      "expired": "Proba s-a încheiat",
+      "agency": "Gratuit cu planul agenției"
     },
     "hint": {
       "none": "Publicarea pornește o probă gratuită de {{days}} zile.",
@@ -1112,7 +1113,10 @@
       "active": "Public până pe {{date}}.",
       "included": "Acoperit de planul tău până pe {{date}}.",
       "expired": "Cumpărătorii nu văd acest ansamblu. Cumpără un abonament ca să-l readuci online.",
-      "noTrial": "Pentru publicarea acestui ansamblu este nevoie de un abonament de ansamblu."
+      "noTrial": "Pentru publicarea acestui ansamblu este nevoie de un abonament de ansamblu.",
+      "agency": "Gratuit cât timp abonamentul agenției este activ.",
+      "agencyGrace": "Abonamentul agenției s-a încheiat. Public până pe {{date}}; reînnoiește ca să rămână online.",
+      "agencyFree": "Publicarea folosește unul dintre ansamblurile gratuite ale agenției din acest an (mai sunt {{left}})."
     },
     "refusal": {
       "passRequired": "Proba gratuită s-a încheiat. Cumpără un abonament de ansamblu ca să-l publici.",
@@ -1168,12 +1172,16 @@
       "offline": "Acest ansamblu este offline: proba gratuită s-a încheiat. Cumpărătorii nu îl văd până nu cumperi un abonament de ansamblu.",
       "endingSoon_one": "Proba gratuită se încheie peste {{count}} zi. Cumpără un abonament de ansamblu ca să rămână online.",
       "endingSoon_few": "Proba gratuită se încheie peste {{count}} zile. Cumpără un abonament de ansamblu ca să rămână online.",
-      "endingSoon_other": "Proba gratuită se încheie peste {{count}} de zile. Cumpără un abonament de ansamblu ca să rămână online."
+      "endingSoon_other": "Proba gratuită se încheie peste {{count}} de zile. Cumpără un abonament de ansamblu ca să rămână online.",
+      "agencyGrace_one": "Abonamentul agenției s-a încheiat. Acest ansamblu iese offline peste {{count}} zi dacă nu reînnoiești.",
+      "agencyGrace_few": "Abonamentul agenției s-a încheiat. Acest ansamblu iese offline peste {{count}} zile dacă nu reînnoiești.",
+      "agencyGrace_other": "Abonamentul agenției s-a încheiat. Acest ansamblu iese offline peste {{count}} de zile dacă nu reînnoiești."
     },
     "publishedOffline": "Publicat, dar offline până se cumpără un abonament de ansamblu.",
     "publishWithPass": "Cumpără abonament și publică",
     "publishTrial": "Publică · gratuit {{days}} zile",
-    "createNote": "Crearea este gratuită. Publicarea pornește o probă gratuită de 15 zile; după ea, abonamentul de ansamblu îl ține online."
+    "createNote": "Crearea este gratuită. Publicarea pornește o probă gratuită de 15 zile; după ea, abonamentul de ansamblu îl ține online.",
+    "publishAgency": "Publică · gratuit cu planul agenției"
   },
   "pricingSection": {
     "title": "Ansambluri",
@@ -1185,7 +1193,8 @@
     "step3": "Abonament de ansamblu · {{price}}",
     "step3Text": "{{months}} luni online, {{n}} clădiri incluse.",
     "extra": "Clădiri în plus: {{price}} fiecare, pentru restul perioadei abonamentului.",
-    "premium": "Planurile Premium includ ansambluri: Pro {{pro}}, Agenție {{agency}}. Abonamentele în plus au {{pct}}% reducere.",
-    "cta": "Creează un ansamblu"
+    "premium": "Pro include {{pro}} ansamblu. Abonamentele în plus au {{pct}}% reducere.",
+    "cta": "Creează un ansamblu",
+    "agency": "Agenții: {{n}} ansamblu gratuit în fiecare an de abonament, public cât timp sunt abonate."
   }
 }

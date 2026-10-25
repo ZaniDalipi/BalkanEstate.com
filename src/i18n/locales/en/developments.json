@@ -1095,7 +1095,8 @@
       "trial": "Free trial",
       "active": "Residence Pass",
       "included": "Included in your plan",
-      "expired": "Trial ended"
+      "expired": "Trial ended",
+      "agency": "Free with your agency plan"
     },
     "hint": {
       "none": "Publishing starts a free {{days}}-day trial.",
@@ -1104,7 +1105,10 @@
       "active": "Public until {{date}}.",
       "included": "Covered by your plan until {{date}}.",
       "expired": "Buyers can’t see this residence. Buy a pass to put it back online.",
-      "noTrial": "Publishing this residence needs a Residence Pass."
+      "noTrial": "Publishing this residence needs a Residence Pass.",
+      "agency": "Free while your agency subscription is active.",
+      "agencyGrace": "Your agency subscription has ended. Public until {{date}}; renew to keep it online.",
+      "agencyFree": "Publishing uses one of your agency’s free residences this year ({{left}} left)."
     },
     "refusal": {
       "passRequired": "The free trial has ended. Buy a Residence Pass to publish.",
@@ -1159,12 +1163,15 @@
     "banner": {
       "offline": "This residence is offline: its free trial ended. Buyers can’t see it until you buy a Residence Pass.",
       "endingSoon_one": "The free trial ends in {{count}} day. Buy a Residence Pass to keep this residence online.",
-      "endingSoon_other": "The free trial ends in {{count}} days. Buy a Residence Pass to keep this residence online."
+      "endingSoon_other": "The free trial ends in {{count}} days. Buy a Residence Pass to keep this residence online.",
+      "agencyGrace_one": "Your agency subscription has ended. This residence goes offline in {{count}} day unless you renew.",
+      "agencyGrace_other": "Your agency subscription has ended. This residence goes offline in {{count}} days unless you renew."
     },
     "publishedOffline": "Published, but offline until a Residence Pass is bought.",
     "publishWithPass": "Buy pass and publish",
     "publishTrial": "Publish · free for {{days}} days",
-    "createNote": "Free to set up. Publishing starts a free 15-day trial; after it, a Residence Pass keeps it online."
+    "createNote": "Free to set up. Publishing starts a free 15-day trial; after it, a Residence Pass keeps it online.",
+    "publishAgency": "Publish · free with your agency plan"
   },
   "pricingSection": {
     "title": "Residences",
@@ -1176,7 +1183,8 @@
     "step3": "Residence Pass · {{price}}",
     "step3Text": "{{months}} months online, {{n}} buildings included.",
     "extra": "More buildings: {{price}} each, for the rest of the pass period.",
-    "premium": "Premium plans include residences: Pro {{pro}}, Agency {{agency}}. More passes are {{pct}}% off.",
-    "cta": "Create a residence"
+    "premium": "Pro includes {{pro}} residence. More passes are {{pct}}% off.",
+    "cta": "Create a residence",
+    "agency": "Agencies: {{n}} free residence every subscription year, public while subscribed."
   }
 }

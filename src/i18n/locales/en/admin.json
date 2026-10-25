@@ -53,7 +53,8 @@
     "promotionPlans": "Promotion Plans",
     "adBanners": "Ad Banners",
     "emailTemplates": "Email Templates",
-    "siteSettings": "Site Settings"
+    "siteSettings": "Site Settings",
+    "residences": "Residences"
   },
   "properties": {
     "title": "Property Manager",
@@ -651,7 +652,11 @@
       "stripeProductId": "Stripe Product ID",
       "stripeProductPlaceholder": "prod_...",
       "stripePriceId": "Stripe Price ID",
-      "stripePricePlaceholder": "price_..."
+      "stripePricePlaceholder": "price_...",
+      "includedBuildings": "Buildings included per residence",
+      "includedBuildingsDesc": "Every residence can have this many buildings; more are unlocked per residence. Use {includedBuildings} in the features.",
+      "residencesPerYear": "Free residences per subscription year",
+      "residencesPerYearDesc": "Agencies can publish this many residences for free each subscription year. Use {residencesPerYear} in the features."
     },
     "placeholders": {
       "title": "Available Placeholders",
@@ -2072,6 +2077,91 @@
       "development": "Development",
       "tourism": "Tourism",
       "lifestyle": "Lifestyle"
+    }
+  },
+  "residences": {
+    "title": "Residences",
+    "subtitle": "Plans, building limits and agencies’ free residences.",
+    "search": "Search residences",
+    "searchPlaceholder": "Name or city",
+    "filterLabel": "Plan",
+    "filter": {
+      "all": "All",
+      "public": "Public",
+      "offline": "Offline",
+      "trial": "On trial",
+      "pass": "With pass",
+      "agency": "Agency free",
+      "draft": "Drafts"
+    },
+    "state": {
+      "none": "Not published",
+      "trial": "Free trial",
+      "active": "Residence Pass",
+      "included": "Plan included",
+      "agency": "Agency free",
+      "expired": "Ended"
+    },
+    "col": {
+      "residence": "Residence",
+      "owner": "Owner / agency",
+      "plan": "Plan",
+      "publicUntil": "Public until",
+      "buildings": "Buildings",
+      "actions": "Actions"
+    },
+    "notPublic": "Not public",
+    "custom": "custom",
+    "empty": "No residences match.",
+    "loadError": "Could not load residences.",
+    "retry": "Try again",
+    "pages": "Pages",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "action": {
+      "buildings": "Building limit",
+      "grant": "Give pass",
+      "agency": "Agency residences"
+    },
+    "limit": {
+      "title": "Building limit · {{name}}",
+      "label": "Buildings this residence can have",
+      "help": "It has {{used}} now. Without a custom limit: {{included}} (plus any bought).",
+      "submit": "Save limit",
+      "reset": "Back to the standard limit",
+      "saved": "{{name}} can now have {{limit}} buildings."
+    },
+    "grant": {
+      "title": "Give a Residence Pass · {{name}}",
+      "label": "Months",
+      "help": "Free, added after any pass it already has.",
+      "submit": "Give pass",
+      "saved": "{{name}}: {{months}} months added."
+    },
+    "allowance": {
+      "title": "Free residences",
+      "usedOf": "{{used}} of {{allowed}} used",
+      "year": "This subscription year: {{from}} – {{to}} · {{perYear}} per year + {{extra}} added",
+      "add": "Add free residences",
+      "lapsed": "No active subscription. Its free residences stay public until {{date}}.",
+      "none": "No active subscription, so no free residences.",
+      "dialogTitle": "Add free residences · {{name}}",
+      "dialogLabel": "Extra residences for this subscription year",
+      "submit": "Add",
+      "modalTitle": "{{name}} · free residences",
+      "error": "Could not load the agency’s residences."
+    },
+    "note": "Note (optional)",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "failed": "Could not save. Please try again.",
+    "problem": {
+      "required": "Enter a number.",
+      "whole": "Use a whole number.",
+      "range": "Use a number from 1 to {{max}}.",
+      "belowUsed": "This residence already has {{used}} buildings."
     }
   }
 }

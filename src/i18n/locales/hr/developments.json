@@ -1102,7 +1102,8 @@
       "trial": "Besplatna proba",
       "active": "Paket rezidencije",
       "included": "Uključeno u vaš plan",
-      "expired": "Proba je završila"
+      "expired": "Proba je završila",
+      "agency": "Besplatno uz plan agencije"
     },
     "hint": {
       "none": "Objava pokreće besplatnu probu od {{days}} dana.",
@@ -1112,7 +1113,10 @@
       "active": "Javno do {{date}}.",
       "included": "Pokriveno vašim planom do {{date}}.",
       "expired": "Kupci ne vide ovu rezidenciju. Kupite paket da je vratite online.",
-      "noTrial": "Za objavu ove rezidencije potreban je paket rezidencije."
+      "noTrial": "Za objavu ove rezidencije potreban je paket rezidencije.",
+      "agency": "Besplatno dok je pretplata agencije aktivna.",
+      "agencyGrace": "Pretplata agencije je istekla. Javno do {{date}}; obnovite da ostane online.",
+      "agencyFree": "Objava koristi jednu od besplatnih rezidencija agencije ove godine (preostalo {{left}})."
     },
     "refusal": {
       "passRequired": "Besplatna proba je završila. Kupite paket rezidencije da biste je objavili.",
@@ -1168,12 +1172,16 @@
       "offline": "Ova rezidencija je offline: besplatna proba je završila. Kupci je ne vide dok ne kupite paket rezidencije.",
       "endingSoon_one": "Besplatna proba istječe za {{count}} dan. Kupite paket rezidencije da ova rezidencija ostane online.",
       "endingSoon_few": "Besplatna proba istječe za {{count}} dana. Kupite paket rezidencije da ova rezidencija ostane online.",
-      "endingSoon_other": "Besplatna proba istječe za {{count}} dana. Kupite paket rezidencije da ova rezidencija ostane online."
+      "endingSoon_other": "Besplatna proba istječe za {{count}} dana. Kupite paket rezidencije da ova rezidencija ostane online.",
+      "agencyGrace_one": "Pretplata agencije je istekla. Ova rezidencija ide offline za {{count}} dan ako ne obnovite.",
+      "agencyGrace_few": "Pretplata agencije je istekla. Ova rezidencija ide offline za {{count}} dana ako ne obnovite.",
+      "agencyGrace_other": "Pretplata agencije je istekla. Ova rezidencija ide offline za {{count}} dana ako ne obnovite."
     },
     "publishedOffline": "Objavljeno, ali offline dok se ne kupi paket rezidencije.",
     "publishWithPass": "Kupi paket i objavi",
     "publishTrial": "Objavi · besplatno {{days}} dana",
-    "createNote": "Postavljanje je besplatno. Objava pokreće besplatnu probu od 15 dana; nakon nje paket rezidencije drži je online."
+    "createNote": "Postavljanje je besplatno. Objava pokreće besplatnu probu od 15 dana; nakon nje paket rezidencije drži je online.",
+    "publishAgency": "Objavi · besplatno uz plan agencije"
   },
   "pricingSection": {
     "title": "Rezidencije",
@@ -1185,7 +1193,8 @@
     "step3": "Paket rezidencije · {{price}}",
     "step3Text": "{{months}} mjeseci online, {{n}} zgrada uključeno.",
     "extra": "Dodatne zgrade: {{price}} po zgradi, do kraja razdoblja paketa.",
-    "premium": "Premium planovi uključuju rezidencije: Pro {{pro}}, Agencija {{agency}}. Dodatni paketi su {{pct}}% jeftiniji.",
-    "cta": "Stvori rezidenciju"
+    "premium": "Pro uključuje {{pro}} rezidenciju. Dodatni paketi su {{pct}}% jeftiniji.",
+    "cta": "Stvori rezidenciju",
+    "agency": "Agencije: {{n}} besplatna rezidencija svake godine pretplate, javna dok traje pretplata."
   }
 }

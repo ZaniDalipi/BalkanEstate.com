@@ -513,17 +513,65 @@ paying brings it back at once.
 |---|---|
 | Trial | 15 days from the *first* publish; unpublishing does not restart it |
 | Residence Pass | 12 months public, 5 buildings included; renewing early adds to the end date |
+| Agencies | 1 free residence per subscription year, public while subscribed (see below) |
 | Extra building | Per building, for the rest of the pass (or plan) period |
-| Premium plans | Pro includes 1 published residence, agency plans 3 (oldest publish first); more passes 30% off |
+| Premium plans | Pro includes 1 published residence (oldest publish first); more passes 30% off |
 | Abuse guard | One residence on trial at a time per owner, 3 trials ever (deleted residences count) |
 | Prices | `Product` documents `residence_pass_yearly` (€149) and `residence_extra_building_yearly` (€29), editable in the admin PricingManager |
 
-All numbers are in `backend/src/config/residenceBilling.ts`.
+The numbers an admin changes live on the `Product` documents and are edited in
+Admin › Pricing: the pass length (`durationDays`), `includedBuildings` on
+`residence_pass_yearly`, and `residencesPerYear` on `agency_yearly`. They are read
+through `residenceTerms()` (cached 60 s, cleared when a product is saved), with
+fallbacks in `backend/src/config/residenceBilling.ts`. Feature texts use the
+placeholders `{durationMonths}`, `{includedBuildings}` and `{residencesPerYear}`,
+so one number changes both the rule and the text. On startup,
+`migrateResidenceProducts()` fills these fields on existing products and swaps the
+two seeded feature strings for placeholders.
+
+**Agencies**
+
+- The agency owner and agency admins create residences *for the agency*
+  (`ownerType: 'agency'`). Agents, and owners who pick `personal`, follow the
+  normal rules.
+- While the agency subscription is active, its first publish in each
+  subscription year is free (state `agency`, no trial). Years are counted from
+  `subscription.startDate`. The slot is claimed atomically in
+  `AgencyResidenceYear`, so two publishes at once can't both get it.
+- Every residence that ever took a free slot stays public while the agency is
+  subscribed. When the subscription ends (or an admin cancels it), they stay
+  public for 15 more days, counted from `Agency.residenceEndedAt`, and then go
+  offline until it renews. The agency gets a notice for the grace period and one
+  when they go offline.
+- More residences in the same year follow the normal trial and pass. Trials are
+  counted per agency.
+- Agency subscription changes trigger `recomputeAgencyResidences` from the
+  `Agency` save hook; the daily job does the same.
+
+**Admin › Residences** (`/admin/residences`, `features/admin/components/residences/`)
+
+- Lists every residence with its plan, public-until date and buildings
+  used/limit. Search and filter by plan. Cards on phones and tablets, a table on
+  very wide screens.
+- **Building limit:** `PATCH /api/admin/residences/:id/building-limit` with
+  `{ limit }` (1–200, never below what it has; `null` goes back to the standard
+  limit). This overrides the included + bought buildings.
+- **Give pass:** `POST /api/admin/residences/:id/grant` with `{ months, note }`.
+- **Agency free residences:** `GET|POST /api/admin/agencies/:agencyId/residence-allowance`
+  shows this year's used/allowed and adds extras (`{ extra, note }`, 1–20). It is
+  also shown on the agency's admin page.
+- Every action is written to the audit log.
+
+**Notifications** carry `data.actionUrl`. A "new home available" alert opens the
+unit's listing when it has an active one, otherwise the residence with the unit
+open (`?unit=`). Trial, offline and agency notices open the residence's manage
+page. `notificationTarget()` on the frontend also opens notifications stored
+before this change, from `developmentSlug`/`unitId`/`developmentId`.
 
 **How it is built**
 
 - **Rules:** `services/developments/billing/residencePlan.ts`, as pure
-  functions. They cover state (`none | trial | active | included | expired`),
+  functions. They cover state (`none | trial | active | included | agency | expired`),
   visibility, the publish/trial decision, pass stacking, the building limit,
   prices and reminders.
 - **State:** `Development.billing` and `visibleUntil` are recomputed from the

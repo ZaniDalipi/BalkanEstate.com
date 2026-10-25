@@ -53,7 +53,8 @@
     "promotionPlans": "Planuri de promovare",
     "adBanners": "Bannere publicitare",
     "emailTemplates": "Șabloane de email",
-    "siteSettings": "Setările site-ului"
+    "siteSettings": "Setările site-ului",
+    "residences": "Ansambluri"
   },
   "properties": {
     "title": "Manager proprietăți",
@@ -651,7 +652,11 @@
       "stripeProductId": "ID Produs Stripe",
       "stripeProductPlaceholder": "prod_...",
       "stripePriceId": "ID Preț Stripe",
-      "stripePricePlaceholder": "price_..."
+      "stripePricePlaceholder": "price_...",
+      "includedBuildings": "Clădiri incluse per ansamblu",
+      "includedBuildingsDesc": "Fiecare ansamblu poate avea atâtea clădiri; mai multe se deblochează per ansamblu. Folosește {includedBuildings} în caracteristici.",
+      "residencesPerYear": "Ansambluri gratuite pe an de abonament",
+      "residencesPerYearDesc": "Agențiile pot publica gratuit atâtea ansambluri în fiecare an de abonament. Folosește {residencesPerYear} în caracteristici."
     },
     "placeholders": {
       "title": "Placeholdere Disponibile",
@@ -2048,6 +2053,91 @@
       "development": "Dezvoltare",
       "tourism": "Turism",
       "lifestyle": "Stil de viață"
+    }
+  },
+  "residences": {
+    "title": "Ansambluri",
+    "subtitle": "Planuri, limite de clădiri și ansambluri gratuite ale agențiilor.",
+    "search": "Caută ansambluri",
+    "searchPlaceholder": "Nume sau oraș",
+    "filterLabel": "Plan",
+    "filter": {
+      "all": "Toate",
+      "public": "Publice",
+      "offline": "Offline",
+      "trial": "În probă",
+      "pass": "Cu abonament",
+      "agency": "Gratuite de la agenție",
+      "draft": "Ciorne"
+    },
+    "state": {
+      "none": "Nepublicat",
+      "trial": "Probă gratuită",
+      "active": "Abonament de ansamblu",
+      "included": "Inclus în plan",
+      "agency": "Gratuit de la agenție",
+      "expired": "Încheiat"
+    },
+    "col": {
+      "residence": "Ansamblu",
+      "owner": "Proprietar / agenție",
+      "plan": "Plan",
+      "publicUntil": "Public până pe",
+      "buildings": "Clădiri",
+      "actions": "Acțiuni"
+    },
+    "notPublic": "Nepublic",
+    "custom": "personalizat",
+    "empty": "Niciun ansamblu nu corespunde.",
+    "loadError": "Ansamblurile nu s-au încărcat.",
+    "retry": "Încearcă din nou",
+    "pages": "Pagini",
+    "prev": "Anterioara",
+    "next": "Următoarea",
+    "pageOf": "Pagina {{page}} din {{pages}}",
+    "action": {
+      "buildings": "Limită de clădiri",
+      "grant": "Acordă abonament",
+      "agency": "Ansamblurile agenției"
+    },
+    "limit": {
+      "title": "Limită de clădiri · {{name}}",
+      "label": "Clădiri pe care le poate avea acest ansamblu",
+      "help": "Are acum {{used}}. Fără limită personalizată: {{included}} (plus cele cumpărate).",
+      "submit": "Salvează limita",
+      "reset": "Înapoi la limita standard",
+      "saved": "{{name}} poate avea acum {{limit}} clădiri."
+    },
+    "grant": {
+      "title": "Acordă un abonament de ansamblu · {{name}}",
+      "label": "Luni",
+      "help": "Gratuit, adăugat după abonamentul pe care îl are deja.",
+      "submit": "Acordă abonament",
+      "saved": "{{name}}: s-au adăugat {{months}} luni."
+    },
+    "allowance": {
+      "title": "Ansambluri gratuite",
+      "usedOf": "{{used}} din {{allowed}} folosite",
+      "year": "Acest an de abonament: {{from}} – {{to}} · {{perYear}} pe an + {{extra}} adăugate",
+      "add": "Adaugă ansambluri gratuite",
+      "lapsed": "Fără abonament activ. Ansamblurile sale gratuite rămân publice până pe {{date}}.",
+      "none": "Fără abonament activ, deci fără ansambluri gratuite.",
+      "dialogTitle": "Adaugă ansambluri gratuite · {{name}}",
+      "dialogLabel": "Ansambluri în plus pentru acest an de abonament",
+      "submit": "Adaugă",
+      "modalTitle": "{{name}} · ansambluri gratuite",
+      "error": "Ansamblurile agenției nu s-au încărcat."
+    },
+    "note": "Notă (opțional)",
+    "cancel": "Anulează",
+    "saving": "Se salvează…",
+    "saved": "Salvat",
+    "failed": "Nu s-a salvat. Încearcă din nou.",
+    "problem": {
+      "required": "Introdu un număr.",
+      "whole": "Folosește un număr întreg.",
+      "range": "Folosește un număr de la 1 la {{max}}.",
+      "belowUsed": "Acest ansamblu are deja {{used}} clădiri."
     }
   }
 }

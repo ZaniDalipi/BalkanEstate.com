@@ -31,6 +31,15 @@ export const PublishSection: React.FC<PublishSectionProps> = ({ development, bil
   const isPublished = development.status === 'published';
   const blocked = !isPublished && billing?.publish.allowed === false ? billing.publish.reason : null;
   const startsTrial = !isPublished && billing?.publish.allowed === true && billing.publish.startsTrial;
+  const agencyFree = !isPublished && billing?.publish.allowed === true && !!billing.publish.usesAgencyFree;
+
+  const buttonLabel = (): string => {
+    if (isPublished) return t('detail.unpublish', 'Unpublish');
+    if (blocked) return t('billing.publishWithPass', 'Buy pass and publish');
+    if (agencyFree) return t('billing.publishAgency', 'Publish · free with your agency plan');
+    if (startsTrial) return t('billing.publishTrial', { days: billing?.terms.trialDays ?? 15, defaultValue: 'Publish · free for {{days}} days' });
+    return t('detail.publish', 'Publish');
+  };
 
   const onToggle = () => {
     if (blocked && canBuy) return setBuying(true);
@@ -61,13 +70,7 @@ export const PublishSection: React.FC<PublishSectionProps> = ({ development, bil
       <div className="mt-3 flex flex-wrap gap-2">
         {canPublish && (
           <Button variant={isPublished ? 'outline' : 'default'} disabled={isLoading || (!!blocked && !canBuy)} onClick={onToggle}>
-            {isPublished
-              ? t('detail.unpublish', 'Unpublish')
-              : blocked
-                ? t('billing.publishWithPass', 'Buy pass and publish')
-                : startsTrial
-                  ? t('billing.publishTrial', { days: billing?.terms.trialDays ?? 15, defaultValue: 'Publish · free for {{days}} days' })
-                  : t('detail.publish', 'Publish')}
+            {buttonLabel()}
           </Button>
         )}
         {isPublished && (

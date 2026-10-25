@@ -1095,7 +1095,8 @@
       "trial": "Provë falas",
       "active": "Paketa e Rezidencës",
       "included": "Përfshirë në planin tuaj",
-      "expired": "Prova mbaroi"
+      "expired": "Prova mbaroi",
+      "agency": "Falas me planin e agjencisë"
     },
     "hint": {
       "none": "Publikimi nis një provë falas {{days}}-ditore.",
@@ -1104,7 +1105,10 @@
       "active": "Publike deri më {{date}}.",
       "included": "E mbuluar nga plani juaj deri më {{date}}.",
       "expired": "Blerësit nuk e shohin këtë rezidencë. Blini paketën që ta riktheni online.",
-      "noTrial": "Publikimi i kësaj rezidence kërkon Paketën e Rezidencës."
+      "noTrial": "Publikimi i kësaj rezidence kërkon Paketën e Rezidencës.",
+      "agency": "Falas sa kohë që abonimi i agjencisë është aktiv.",
+      "agencyGrace": "Abonimi i agjencisë ka mbaruar. Publike deri më {{date}}; rinovoni që të mbetet online.",
+      "agencyFree": "Publikimi përdor një nga rezidencat falas të agjencisë këtë vit ({{left}} të mbetura)."
     },
     "refusal": {
       "passRequired": "Prova falas ka mbaruar. Blini Paketën e Rezidencës për ta publikuar.",
@@ -1159,12 +1163,15 @@
     "banner": {
       "offline": "Kjo rezidencë është offline: prova falas mbaroi. Blerësit nuk e shohin derisa të blini Paketën e Rezidencës.",
       "endingSoon_one": "Prova falas mbaron pas {{count}} dite. Blini Paketën e Rezidencës që kjo rezidencë të mbetet online.",
-      "endingSoon_other": "Prova falas mbaron pas {{count}} ditësh. Blini Paketën e Rezidencës që kjo rezidencë të mbetet online."
+      "endingSoon_other": "Prova falas mbaron pas {{count}} ditësh. Blini Paketën e Rezidencës që kjo rezidencë të mbetet online.",
+      "agencyGrace_one": "Abonimi i agjencisë ka mbaruar. Kjo rezidencë del offline pas {{count}} dite nëse nuk rinovoni.",
+      "agencyGrace_other": "Abonimi i agjencisë ka mbaruar. Kjo rezidencë del offline pas {{count}} ditësh nëse nuk rinovoni."
     },
     "publishedOffline": "E publikuar, por offline derisa të blihet Paketa e Rezidencës.",
     "publishWithPass": "Bli paketën dhe publiko",
     "publishTrial": "Publiko · falas për {{days}} ditë",
-    "createNote": "Krijimi është falas. Publikimi nis një provë falas 15-ditore; pas saj, Paketa e Rezidencës e mban online."
+    "createNote": "Krijimi është falas. Publikimi nis një provë falas 15-ditore; pas saj, Paketa e Rezidencës e mban online.",
+    "publishAgency": "Publiko · falas me planin e agjencisë"
   },
   "pricingSection": {
     "title": "Rezidenca",
@@ -1176,7 +1183,8 @@
     "step3": "Paketa e Rezidencës · {{price}}",
     "step3Text": "{{months}} muaj online, {{n}} ndërtesa të përfshira.",
     "extra": "Ndërtesa shtesë: {{price}} secila, për pjesën e mbetur të periudhës së paketës.",
-    "premium": "Planet Premium përfshijnë rezidenca: Pro {{pro}}, Agjenci {{agency}}. Paketat e tjera kanë {{pct}}% zbritje.",
-    "cta": "Krijo një rezidencë"
+    "premium": "Pro përfshin {{pro}} rezidencë. Paketat e tjera kanë {{pct}}% zbritje.",
+    "cta": "Krijo një rezidencë",
+    "agency": "Agjencitë: {{n}} rezidencë falas çdo vit abonimi, publike sa kohë janë të abonuara."
   }
 }

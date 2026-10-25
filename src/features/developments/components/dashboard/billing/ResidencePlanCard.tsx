@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BadgeCheck, Clock, Gift, PauseCircle, Sparkles } from 'lucide-react';
+import { BadgeCheck, Building2, Clock, Gift, PauseCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { cn } from '@/src/lib/utils';
 import type { ResidenceAccessState, ResidenceBilling } from '../../../types';
@@ -20,6 +20,7 @@ const STATE_STYLE: Record<ResidenceAccessState, { icon: React.ElementType; class
   trial: { icon: Clock, className: 'bg-amber-50 text-amber-800' },
   active: { icon: BadgeCheck, className: 'bg-emerald-50 text-emerald-800' },
   included: { icon: Gift, className: 'bg-sky-50 text-sky-800' },
+  agency: { icon: Building2, className: 'bg-teal-50 text-teal-800' },
   expired: { icon: PauseCircle, className: 'bg-red-50 text-red-800' },
 };
 
@@ -45,7 +46,7 @@ export const ResidencePlanCard: React.FC<ResidencePlanCardProps> = ({ developmen
           </p>
           <p className="mt-2 text-sm text-slate-600">{stateHint(billing)}</p>
         </div>
-        {canBuy && billing.state !== 'included' && (
+        {canBuy && billing.state !== 'included' && billing.state !== 'agency' && (
           <Button className="min-h-[44px]" onClick={() => setBuying(true)} variant={billing.state === 'expired' ? 'default' : 'outline'}>
             {renew ? t('billing.renew', 'Renew pass') : t('billing.buyPass', 'Buy Residence Pass')}
             <span className="ml-1.5 text-xs opacity-80">{formatCharge(billing.prices.pass.unitPrice)}</span>
@@ -61,7 +62,7 @@ export const ResidencePlanCard: React.FC<ResidencePlanCardProps> = ({ developmen
           <div className={cn('h-full rounded-full', used >= limit ? 'bg-amber-500' : 'bg-primary')} style={{ width: `${Math.min(100, (used / Math.max(1, limit)) * 100)}%` }} />
         </div>
       </div>
-      {!canBuy && billing.state !== 'included' && billing.state !== 'active' && (
+      {!canBuy && billing.state !== 'included' && billing.state !== 'active' && billing.state !== 'agency' && (
         <p className="mt-3 text-sm text-slate-500">{t('billing.askOwner', 'Only the residence owner can buy a pass.')}</p>
       )}
       {buying && <BuyResidenceDialog developmentId={developmentId} kind="pass" billing={billing} onClose={() => setBuying(false)} />}

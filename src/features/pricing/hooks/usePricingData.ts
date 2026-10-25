@@ -29,6 +29,8 @@ export interface Product {
   // Agency-specific
   agentCoupons?: number;
   teamMembersLimit?: number;
+  includedBuildings?: number;
+  residencesPerYear?: number;
   // AI & Insights
   savedSearchesLimit?: number;
   aiMessagesLimit?: number;

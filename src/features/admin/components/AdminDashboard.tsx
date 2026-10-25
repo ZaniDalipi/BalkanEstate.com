@@ -14,6 +14,7 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import InteractionHeatmap from './InteractionHeatmap';
 import PropertyManager from './PropertyManager';
 import AgencyManager from './AgencyManager';
+import { ResidenceManager } from './residences/ResidenceManager';
 import PricingManager from './PricingManager';
 import InquiryManager from './InquiryManager';
 import AgentRequestManager from './AgentRequestManager';
@@ -48,6 +49,7 @@ const urlToAdminView: Record<AdminSection, AdminView> = {
   'promotion-plans': 'promotionPlans',
   'properties': 'properties',
   'agencies': 'agencies',
+  'residences': 'residences',
   'pricing': 'pricing',
   'activity': 'activity',
   'settings': 'settings',
@@ -75,6 +77,7 @@ const adminViewToUrl: Record<AdminView, string> = {
   'promotionPlans': 'promotion-plans',
   'properties': 'properties',
   'agencies': 'agencies',
+  'residences': 'residences',
   'pricing': 'pricing',
   'activity': 'activity',
   'settings': 'settings',
@@ -237,6 +240,8 @@ const AdminDashboard: React.FC = () => {
         return <PropertyManager />;
       case 'agencies':
         return <AgencyManager />;
+      case 'residences':
+        return <ResidenceManager />;
       case 'settings':
         return <SystemSettings />;
       case 'howItWorks':

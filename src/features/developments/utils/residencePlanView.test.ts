@@ -40,4 +40,11 @@ describe('residencePlanView', () => {
     expect(planBanner(billing({ state: 'expired', publicNow: false, daysLeft: null }), 'draft')).toBeNull();
     expect(planBanner(billing({ state: 'active', daysLeft: 3 }), 'published')).toBeNull();
   });
+
+  it('agency residences: extras need no pass, and a lapsed agency sees its grace', () => {
+    expect(extrasNeedPass(billing({ state: 'agency' }))).toBe(false);
+    const agency = { name: 'Best', subscribed: true, left: 0, allowed: 1, yearEnd: null };
+    expect(planBanner(billing({ state: 'agency', agency }), 'published')).toBeNull();
+    expect(planBanner(billing({ state: 'agency', agency: { ...agency, subscribed: false } }), 'published')).toBe('agencyGrace');
+  });
 });

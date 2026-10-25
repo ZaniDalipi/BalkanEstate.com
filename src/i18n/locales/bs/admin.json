@@ -53,7 +53,8 @@
     "promotionPlans": "Planovi promocije",
     "adBanners": "Reklamni baneri",
     "emailTemplates": "Šabloni e-mailova",
-    "siteSettings": "Postavke stranice"
+    "siteSettings": "Postavke stranice",
+    "residences": "Rezidencije"
   },
   "properties": {
     "title": "Upravljanje Nekretninama",
@@ -651,7 +652,11 @@
       "stripeProductId": "Stripe ID Proizvoda",
       "stripeProductPlaceholder": "prod_...",
       "stripePriceId": "Stripe ID Cijene",
-      "stripePricePlaceholder": "price_..."
+      "stripePricePlaceholder": "price_...",
+      "includedBuildings": "Zgrada uključeno po rezidenciji",
+      "includedBuildingsDesc": "Svaka rezidencija može imati ovoliko zgrada; više se otključava po rezidenciji. Koristite {includedBuildings} u opisu.",
+      "residencesPerYear": "Besplatne rezidencije po godini pretplate",
+      "residencesPerYearDesc": "Agencije mogu besplatno objaviti ovoliko rezidencija svake godine pretplate. Koristite {residencesPerYear} u opisu."
     },
     "placeholders": {
       "title": "Dostupni Placeholderi",
@@ -2056,6 +2061,91 @@
       "development": "Gradnja",
       "tourism": "Turizam",
       "lifestyle": "Životni stil"
+    }
+  },
+  "residences": {
+    "title": "Rezidencije",
+    "subtitle": "Planovi, limiti zgrada i besplatne rezidencije agencija.",
+    "search": "Pretraži rezidencije",
+    "searchPlaceholder": "Naziv ili grad",
+    "filterLabel": "Plan",
+    "filter": {
+      "all": "Sve",
+      "public": "Javne",
+      "offline": "Offline",
+      "trial": "Na probi",
+      "pass": "S paketom",
+      "agency": "Besplatno od agencije",
+      "draft": "Nacrti"
+    },
+    "state": {
+      "none": "Nije objavljeno",
+      "trial": "Besplatna proba",
+      "active": "Paket rezidencije",
+      "included": "Uključeno u plan",
+      "agency": "Besplatno od agencije",
+      "expired": "Završeno"
+    },
+    "col": {
+      "residence": "Rezidencija",
+      "owner": "Vlasnik / agencija",
+      "plan": "Plan",
+      "publicUntil": "Javno do",
+      "buildings": "Zgrade",
+      "actions": "Radnje"
+    },
+    "notPublic": "Nije javno",
+    "custom": "prilagođeno",
+    "empty": "Nema rezidencija koje odgovaraju.",
+    "loadError": "Rezidencije se nisu učitale.",
+    "retry": "Pokušaj ponovo",
+    "pages": "Stranice",
+    "prev": "Prethodna",
+    "next": "Sljedeća",
+    "pageOf": "Stranica {{page}} od {{pages}}",
+    "action": {
+      "buildings": "Limit zgrada",
+      "grant": "Dodijeli paket",
+      "agency": "Rezidencije agencije"
+    },
+    "limit": {
+      "title": "Limit zgrada · {{name}}",
+      "label": "Broj zgrada koje ova rezidencija može imati",
+      "help": "Sada ima {{used}}. Bez prilagođenog limita: {{included}} (plus kupljene).",
+      "submit": "Sačuvaj limit",
+      "reset": "Vrati standardni limit",
+      "saved": "{{name}} sada može imati {{limit}} zgrada."
+    },
+    "grant": {
+      "title": "Dodijeli paket rezidencije · {{name}}",
+      "label": "Mjeseci",
+      "help": "Besplatno, dodaje se nakon paketa koji već ima.",
+      "submit": "Dodijeli paket",
+      "saved": "{{name}}: dodano {{months}} mjeseci."
+    },
+    "allowance": {
+      "title": "Besplatne rezidencije",
+      "usedOf": "{{used}} od {{allowed}} iskorišteno",
+      "year": "Ova godina pretplate: {{from}} – {{to}} · {{perYear}} godišnje + {{extra}} dodano",
+      "add": "Dodaj besplatne rezidencije",
+      "lapsed": "Nema aktivne pretplate. Njene besplatne rezidencije ostaju javne do {{date}}.",
+      "none": "Nema aktivne pretplate, pa ni besplatnih rezidencija.",
+      "dialogTitle": "Dodaj besplatne rezidencije · {{name}}",
+      "dialogLabel": "Dodatne rezidencije za ovu godinu pretplate",
+      "submit": "Dodaj",
+      "modalTitle": "{{name}} · besplatne rezidencije",
+      "error": "Rezidencije agencije se nisu učitale."
+    },
+    "note": "Napomena (neobavezno)",
+    "cancel": "Otkaži",
+    "saving": "Čuvanje…",
+    "saved": "Sačuvano",
+    "failed": "Nije sačuvano. Pokušajte ponovo.",
+    "problem": {
+      "required": "Unesite broj.",
+      "whole": "Koristite cijeli broj.",
+      "range": "Koristite broj od 1 do {{max}}.",
+      "belowUsed": "Ova rezidencija već ima {{used}} zgrada."
     }
   }
 }

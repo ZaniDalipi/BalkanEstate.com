@@ -31,9 +31,11 @@ export const PlanBanner: React.FC<PlanBannerProps> = ({ developmentId, status, c
       <p className="min-w-0 flex-1">
         {offline
           ? t('billing.banner.offline', 'This residence is offline: its free trial ended. Buyers can’t see it until you buy a Residence Pass.')
-          : t('billing.banner.endingSoon', { count: billing.daysLeft ?? 0, defaultValue: 'The free trial ends in {{count}} days. Buy a Residence Pass to keep this residence online.' })}
+          : kind === 'agencyGrace'
+            ? t('billing.banner.agencyGrace', { count: billing.daysLeft ?? 0, defaultValue: 'Your agency subscription has ended. This residence goes offline in {{count}} days unless you renew.' })
+            : t('billing.banner.endingSoon', { count: billing.daysLeft ?? 0, defaultValue: 'The free trial ends in {{count}} days. Buy a Residence Pass to keep this residence online.' })}
       </p>
-      {canBuy && (
+      {canBuy && kind !== 'agencyGrace' && (
         <Button className="min-h-[44px]" onClick={() => setBuying(true)}>
           {t('billing.buyPass', 'Buy Residence Pass')}
         </Button>
