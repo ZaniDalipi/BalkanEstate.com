@@ -2,7 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
-import { navigate, goBack } from '@/src/app/router/navigation';
+import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { usePublicDevelopment, usePublicDevelopmentUnits } from '../../hooks';
 import { useExplorerUrlState } from '../../hooks/useExplorerUrlState';
@@ -68,7 +68,7 @@ const PublicDevelopmentPage: React.FC = () => {
   return (
     <main className="w-full bg-white pb-12">
       <div className="mx-auto max-w-6xl px-4 pt-4">
-        <button type="button" onClick={() => goBack(paths.developments())} className="mb-2 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900">
+        <button type="button" onClick={() => navigate(paths.developments(), { direction: 'back' })} className="mb-2 inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           {t('public.backToList', 'Back to developments')}
         </button>

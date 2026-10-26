@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { navigate, replaceQueryString } from '@/src/app/router/navigation';
+import { navigate, onRouteChange, replaceQueryString } from '@/src/app/router/navigation';
 import { useDebouncedValue } from './useDebouncedValue';
 import { UNIT_AVAILABILITY_STATES, type UnitAvailability } from '../types';
 import { EMPTY_CRITERIA, UNIT_FLAGS, type UnitCriteria, type UnitFlag } from '../utils/unitFilters';
@@ -132,6 +132,22 @@ export function useExplorerUrlState(delayMs = 300) {
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
+
+  // A link or `navigate()` elsewhere (the phone's Back stepping up a level, a
+  // notification) can change the building/floor in the URL; follow it.
+  useEffect(
+    () =>
+      onRouteChange(() => {
+        const urlNav = parseExplorerSearch(currentSearch()).nav;
+        const prev = current.current.nav;
+        // Only a different building/floor counts: the camera view reaches the URL
+        // 300 ms late, so a navigation in that window would carry an old one.
+        if (urlNav.building !== prev.building || urlNav.floor !== prev.floor) {
+          setState((s) => ({ ...s, nav: urlNav }));
+        }
+      }),
+    []
+  );
 
   const setCriteria = useCallback(
     (criteria: UnitCriteria) => setState((s) => ({ ...s, criteria })),

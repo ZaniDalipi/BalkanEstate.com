@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { HelmetProvider } from 'react-helmet-async';
 import { MotionConfig } from 'framer-motion';
 import { MobileHomeBell } from './src/app/components/MobileHomeBell';
+import { residenceUpPath } from './src/features/developments/utils/residenceUpPath';
 import { MobileTopBarActions } from './src/app/components/MobileTopBarActions';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
@@ -347,6 +348,12 @@ const MainLayout: React.FC = () => {
     // to, like the platform's own back button. Opened straight onto a detail
     // page (a shared link, a fresh install) there is nothing behind it, so fall
     // back to its parent list, animated as a step back.
+    // A residence steps up one level (apartment → building → residence → list).
+    const residenceUp = residenceUpPath(window.location.pathname, window.location.search);
+    if (residenceUp) {
+      goBack(residenceUp, { replace: true });
+      return;
+    }
     const parent = isAgencyDetail
       ? paths.agencies()
       : isAgentDetail
