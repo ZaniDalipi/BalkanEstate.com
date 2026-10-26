@@ -1188,5 +1188,12 @@
     "premium": "Pro includes {{pro}} residence. More passes are {{pct}}% off.",
     "cta": "Create a residence",
     "agency": "Agencies: {{n}} free residence every subscription year, public while subscribed."
+  },
+  "share": {
+    "button": "Share",
+    "title": "Share this residence",
+    "previewAlt": "{{name}} with its buildings marked, as it shows when shared",
+    "hint": "Posted on social media, the link shows this picture.",
+    "text": "{{name}} – new homes in {{place}}"
   }
 }

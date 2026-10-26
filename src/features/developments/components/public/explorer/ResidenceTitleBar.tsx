@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, MapPin } from 'lucide-react';
 import type { Development, UnitsSummary } from '../../../types';
+import { ShareResidenceButton } from '../share/ShareResidenceButton';
 
 interface ResidenceTitleBarProps {
   development: Development;
@@ -21,7 +22,7 @@ export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ developmen
           {[development.address, development.city, development.country].filter(Boolean).join(', ')}
         </p>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {summary && (
           <span className="text-sm text-slate-600">
             {t('explorer.availableOfTotal', {
@@ -39,6 +40,11 @@ export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ developmen
           {t('hero.viewUnits', 'View available units')}
           <ArrowDown className="h-4 w-4" aria-hidden="true" />
         </button>
+        <ShareResidenceButton
+          slug={development.slug}
+          name={development.name}
+          place={[development.city, development.country].filter(Boolean).join(', ')}
+        />
       </div>
     </div>
   );

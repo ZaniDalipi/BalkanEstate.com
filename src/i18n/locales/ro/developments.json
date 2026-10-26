@@ -1198,5 +1198,12 @@
     "premium": "Pro include {{pro}} ansamblu. Abonamentele în plus au {{pct}}% reducere.",
     "cta": "Creează un ansamblu",
     "agency": "Agenții: {{n}} ansamblu gratuit în fiecare an de abonament, public cât timp sunt abonate."
+  },
+  "share": {
+    "button": "Distribuie",
+    "title": "Distribuie acest ansamblu",
+    "previewAlt": "{{name}} cu clădirile marcate, așa cum apare când e distribuit",
+    "hint": "Postat pe rețelele sociale, linkul arată această imagine.",
+    "text": "{{name}} – locuințe noi în {{place}}"
   }
 }

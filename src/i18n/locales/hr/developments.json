@@ -1198,5 +1198,12 @@
     "premium": "Pro uključuje {{pro}} rezidenciju. Dodatni paketi su {{pct}}% jeftiniji.",
     "cta": "Stvori rezidenciju",
     "agency": "Agencije: {{n}} besplatna rezidencija svake godine pretplate, javna dok traje pretplata."
+  },
+  "share": {
+    "button": "Podijeli",
+    "title": "Podijeli ovu rezidenciju",
+    "previewAlt": "{{name}} s označenim zgradama, kako izgleda kad se podijeli",
+    "hint": "Kad se objavi na društvenim mrežama, poveznica prikazuje ovu sliku.",
+    "text": "{{name}} – novi stanovi u {{place}}"
   }
 }

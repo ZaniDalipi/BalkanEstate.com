@@ -603,6 +603,45 @@ before this change, from `developmentSlug`/`unitId`/`developmentId`.
   banner, buy dialog and unlock-building notice. `PublishSection` handles the
   publish button. The pricing page shows `ResidencePricingSection`.
 
+## 7c. Sharing, Back and sign-in
+
+**Share link and preview card**
+
+- The residence page's **Share** button shares `/<lang>/developments/<slug>`. On a
+  phone it opens the system share sheet; elsewhere a window shows the preview
+  card with WhatsApp, Facebook, LinkedIn, X, Telegram, email and copy-link.
+- The preview card is `GET /api/og/residence/:slug/image.jpg?lang=` (1200×630
+  JPEG). It is the residence's main published explorer view (else its cover)
+  with every building outlined and labelled with its availability, plus the
+  name, place, "N of M homes available" and the starting price. The layout is
+  pure (`services/developments/share/shareCardLayout.ts`), the wording is in
+  all 10 languages (`shareCardText.ts`), and the photo comes through the image
+  proxy (SSRF-guarded). It is cached in memory and refreshed at least hourly.
+- Link previews: on Cloudflare Pages, `functions/[lang]/developments/[slug].ts`
+  (and the unprefixed one) give crawlers the title, summary and this card. In
+  deployments where nginx serves the SPA, `GET /api/og/residence/:slug` does the
+  same for bots and redirects people to the page.
+
+**Back**
+
+- Moving between residence, building and floor pushes history entries, and
+  opening an apartment pushes one too, so the browser Back button steps out one
+  level at a time.
+- Opened from a shared link there is nothing behind the page. The phone top
+  bar's Back then steps *up* instead (`residenceUpPath`): apartment → floor →
+  building → residence → residences list. The explorer follows router
+  navigations (`onRouteChange`), not only the browser's Back button.
+- "Back to residences" always goes to the list.
+
+**Follow while signed out**
+
+"Sign in to follow" opens the sign-in window over the residence and remembers
+the page and the request (`src/shared/auth/authReturn.ts`, 30 minutes,
+same-site paths only). After email or Google/Apple sign-in the user is back on
+the same residence (same building/floor), and the follow is completed once the
+follow status has loaded, so an existing follow is never overwritten. Closing
+the window without signing in drops both.
+
 ## 8. Known limitations
 
 **Data and storage**

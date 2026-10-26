@@ -8,6 +8,7 @@
 
 import express from 'express';
 import { ogShareHandler } from '../controllers/ogController';
+import { residenceShareHandler, residenceShareImageHandler } from '../controllers/residenceOgController';
 
 const router = express.Router();
 
@@ -18,5 +19,12 @@ const router = express.Router();
  * Regular browsers   → 302 redirect to the real /en/property/:slug page
  */
 router.get('/property/:slug', ogShareHandler);
+
+/**
+ * GET /api/og/residence/:slug/image.jpg — the residence's share card (1200×630).
+ * GET /api/og/residence/:slug — the residence link to share (bots: preview; people: the page).
+ */
+router.get('/residence/:slug/image.jpg', residenceShareImageHandler);
+router.get('/residence/:slug', residenceShareHandler);
 
 export default router;
