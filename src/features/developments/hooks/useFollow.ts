@@ -39,6 +39,8 @@ export function useFollow(slug: string | undefined, enabled: boolean) {
     following: query.data?.following ?? false,
     follow: query.data?.follow,
     isLoading: query.isLoading,
+    /** True once the server has answered whether the user follows it. */
+    isKnown: query.data !== undefined,
     save: save.mutateAsync,
     isSaving: save.isPending,
     saveError: save.error,

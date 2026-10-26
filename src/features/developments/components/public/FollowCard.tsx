@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bell, BellOff, Check } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
-import { navigate } from '@/src/app/router/navigation';
-import { paths } from '@/src/app/router/paths';
 import { Button } from '@/src/components/ui/button';
-import { useFollow } from '../../hooks';
+import { useFollow, useFollowAfterSignIn } from '../../hooks';
 import type { FollowFilters, FollowPreferences } from '../../types';
 
 interface FollowCardProps {
@@ -43,7 +41,7 @@ export const FollowCard: React.FC<FollowCardProps> = ({ slug, developmentName })
   const { state } = useAppContext();
   const isAuthed = !!state.isAuthenticated;
 
-  const { following, follow, save, isSaving, unfollow, isUnfollowing } = useFollow(slug, isAuthed);
+  const { following, follow, isKnown, save, isSaving, unfollow, isUnfollowing } = useFollow(slug, isAuthed);
 
   const [prefs, setPrefs] = useState<FollowPreferences>(DEFAULT_PREFS);
   const [filters, setFilters] = useState<FollowFilters>({});
@@ -83,6 +81,7 @@ export const FollowCard: React.FC<FollowCardProps> = ({ slug, developmentName })
   };
 
   const onFollow = () => onSave(DEFAULT_PREFS);
+  const signInToFollow = useFollowAfterSignIn(slug, { isAuthed, isKnown, following }, onFollow);
 
   const setFilter = (key: keyof FollowFilters, value: string) =>
     setFilters((prev) => ({ ...prev, [key]: num(value) }));
@@ -96,7 +95,7 @@ export const FollowCard: React.FC<FollowCardProps> = ({ slug, developmentName })
           <h3 className="text-base font-semibold text-foreground">{t('follow.title', { name: developmentName })}</h3>
         </div>
         <p className="mb-4 text-sm text-muted-foreground">{t('follow.signedOutHint')}</p>
-        <Button onClick={() => navigate(paths.login())}>{t('follow.signIn')}</Button>
+        <Button onClick={signInToFollow}>{t('follow.signIn')}</Button>
       </div>
     );
   }
