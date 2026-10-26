@@ -65,7 +65,16 @@ export const BudgetAssistant: React.FC<BudgetAssistantProps> = ({ units, city, c
           )}
           {!open && teaser.visible && (
             <motion.div key="teaser" {...pop}>
-              <BudgetTeaser pick={featured} reference={reference} onOpen={openPanel} onDismiss={teaser.dismiss} />
+              <BudgetTeaser
+                pick={featured}
+                reference={reference}
+                onOpen={openPanel}
+                onShow={(id) => {
+                  teaser.dismiss();
+                  onShow(id);
+                }}
+                onDismiss={teaser.dismiss}
+              />
             </motion.div>
           )}
         </AnimatePresence>

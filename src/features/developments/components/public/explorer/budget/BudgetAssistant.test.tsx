@@ -11,10 +11,10 @@ vi.mock('@/src/features/cities/api/cityApi', () => ({ getCityMarketData: () => P
 const unit = (id: string, over: Partial<PublicUnit>): PublicUnit =>
   ({ id, unitNumber: id, unitType: 'apartment', availability: 'available', buildingId: 'b', floorId: 'f', listingIds: [], ...over }) as PublicUnit;
 
-const renderIt = (units: PublicUnit[]) =>
+const renderIt = (units: PublicUnit[], onShow = vi.fn()) =>
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <BudgetAssistant units={units} onShow={vi.fn()} buttonClassName="" />
+      <BudgetAssistant units={units} onShow={onShow} buttonClassName="" />
     </QueryClientProvider>
   );
 
@@ -62,5 +62,20 @@ describe('BudgetAssistant', () => {
     act(() => vi.advanceTimersByTime(4000));
     // Average 1.750/m²; A1 at 1.000/m² is 43% below.
     expect(screen.getByRole('status')).toHaveTextContent('Bargain spotted: Apt A1 costs 100.000 €, 43% below this residence’s average per m².');
+  });
+
+  it('the bargain apartment in the bubble is a button that takes the buyer there', () => {
+    const units = [
+      unit('A1', { price: 100_000, totalArea: 100 }),
+      unit('A2', { price: 200_000, totalArea: 100 }),
+      unit('A3', { price: 200_000, totalArea: 100 }),
+      unit('A4', { price: 200_000, totalArea: 100 }),
+    ];
+    const onShow = vi.fn();
+    renderIt(units, onShow);
+    act(() => vi.advanceTimersByTime(4000));
+    fireEvent.click(screen.getByRole('button', { name: 'Take me there: Apt A1' }));
+    expect(onShow).toHaveBeenCalledWith('A1');
+    expect(storage.setItem).toHaveBeenCalledWith('be:budgetTeaserDismissed', '1');
   });
 });

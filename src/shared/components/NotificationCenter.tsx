@@ -225,6 +225,19 @@ const NotificationCenter: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Esc closes the open list.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) {
+        event.preventDefault();
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen]);
+
   const isClickable = (notification: Notification): boolean => notificationTarget(notification) !== null;
 
   // Format relative time
@@ -252,7 +265,8 @@ const NotificationCenter: React.FC = () => {
       {/* Bell Icon */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-neutral-600 hover:text-primary hover:bg-neutral-100 rounded-full transition-colors"
+        aria-expanded={isOpen}
+        className="relative flex min-h-[44px] min-w-[44px] items-center justify-center text-neutral-600 hover:text-primary hover:bg-neutral-100 rounded-full transition-colors"
         aria-label={t('common:notifications', 'Notifications')}
       >
         <SoftIcon name="bell" className="w-6 h-6" />
@@ -265,7 +279,7 @@ const NotificationCenter: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto top-16 sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-[999] max-h-[75vh] sm:max-h-[70vh] flex flex-col overflow-hidden">
+        <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto top-[calc(env(safe-area-inset-top)+3.25rem)] sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-[999] max-h-[75vh] sm:max-h-[70vh] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/20 bg-white/50">
             <h3 className="font-semibold text-gray-900">
@@ -283,7 +297,8 @@ const NotificationCenter: React.FC = () => {
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-white/50 rounded-lg transition-colors"
+                aria-label={t('common:close', 'Close')}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center -mr-2 hover:bg-white/50 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4 text-gray-500" />
               </button>

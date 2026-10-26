@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider } from 'react-helmet-async';
 import { MotionConfig } from 'framer-motion';
+import { MobileTopBarActions } from './src/app/components/MobileTopBarActions';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
@@ -478,13 +479,13 @@ const MainLayout: React.FC = () => {
                   paddingRight: 'env(safe-area-inset-right, 0px)',
                 }}
               >
-                <div className="grid grid-cols-[auto_1fr_auto] items-center h-11 px-1">
+                <div className="grid grid-cols-[minmax(88px,auto)_minmax(0,1fr)_minmax(88px,auto)] items-center h-11 px-1">
                   {/* Left: Hamburger menu for main tabs, Back button for detail pages */}
                   {isMainTabView ? (
                     <button
                       type="button"
                       onClick={() => setIsSidebarOpen(true)}
-                      className="flex items-center justify-center min-w-[44px] min-h-[44px] text-neutral-700 active:opacity-70 transition-opacity pl-2"
+                      className="justify-self-start flex items-center justify-center min-w-[44px] min-h-[44px] text-neutral-700 active:opacity-70 transition-opacity pl-2"
                       aria-label={t('common:aria.openMenu', 'Open menu')}
                     >
                       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -495,7 +496,7 @@ const MainLayout: React.FC = () => {
                     <button
                       type="button"
                       onClick={handlePWABack}
-                      className="flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
+                      className="justify-self-start flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
                       aria-label={t('common:aria.goBack')}
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -508,17 +509,8 @@ const MainLayout: React.FC = () => {
                   {/* Center: Page title */}
                   <span className="text-sm font-semibold text-neutral-800 truncate text-center">{pageTitle}</span>
 
-                  {/* Right: Home button - quick shortcut to search from deep navigation */}
-                  <button
-                    type="button"
-                    onClick={() => navigate(paths.home())}
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"
-                    aria-label={t('common:aria.goHome', 'Go to home')}
-                  >
-                    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                  </button>
+                  {/* Right: notifications (signed in) and a home shortcut */}
+                  <MobileTopBarActions isAuthenticated={state.isAuthenticated} />
                 </div>
               </div>
             )}
