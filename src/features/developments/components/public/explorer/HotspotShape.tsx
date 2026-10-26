@@ -59,6 +59,7 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
       tabIndex={interactive ? 0 : undefined}
       aria-label={label}
       data-hotspot-id={hotspot.id}
+      data-unit-id={hotspot.linkType === 'unit' ? hotspot.linkId : undefined}
       data-state={state}
       data-dimmed={matched === false ? 'true' : 'false'}
       data-active={active ? 'true' : 'false'}

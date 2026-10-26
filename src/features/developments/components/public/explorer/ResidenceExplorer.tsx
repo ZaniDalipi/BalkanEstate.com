@@ -25,6 +25,8 @@ export interface ResidenceExplorerProps {
   nav: ExplorerNav;
   onNavChange: (n: ExplorerNav) => void;
   onOpenUnit: (unitId: string) => void;
+  /** The apartment open in the details sheet (from `?unit=`). */
+  openUnitId?: string | null;
   /** Where the residence is: the budget helper compares prices with this city's average. */
   city?: string;
   country?: string;
@@ -95,6 +97,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
       units={p.units.filter((u) => (floorId ? u.floorId === floorId : u.buildingId === target.buildingId))}
       matchedIds={matchedIds}
       onOpenUnit={p.onOpenUnit}
+      openUnitId={p.openUnitId}
       back={back}
       note={note}
     />

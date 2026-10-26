@@ -11,6 +11,8 @@ interface StackingPlanProps {
   /** Units matching active filters; undefined = no filters. */
   matchedIds?: Set<string>;
   onOpenUnit: (unitId: string) => void;
+  /** The apartment open in the details sheet, picked out with a ring. */
+  openUnitId?: string | null;
 }
 
 /**
@@ -19,7 +21,7 @@ interface StackingPlanProps {
  * picture can still be opened. Each apartment is a button tinted by its
  * availability; filtered-out apartments fade.
  */
-export const StackingPlan: React.FC<StackingPlanProps> = ({ floors, units, matchedIds, onOpenUnit }) => {
+export const StackingPlan: React.FC<StackingPlanProps> = ({ floors, units, matchedIds, onOpenUnit, openUnitId }) => {
   const { t } = useTranslation('developments');
   const txt = useUnitText();
   const rows = useMemo(() => {
@@ -54,11 +56,14 @@ export const StackingPlan: React.FC<StackingPlanProps> = ({ floors, units, match
                   key={u.id}
                   type="button"
                   onClick={() => onOpenUnit(u.id)}
+                  data-unit-id={u.id}
+                  aria-current={u.id === openUnitId ? 'true' : undefined}
                   aria-label={txt.ariaLabel(u)}
                   title={[txt.ariaLabel(u), txt.area(u), txt.price(u)].filter(Boolean).join(' · ')}
                   className={cn(
                     'min-h-[44px] min-w-[72px] rounded-lg border-l-4 px-3 py-1.5 text-left text-white transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
-                    faded && 'opacity-30'
+                    faded && 'opacity-30',
+                    u.id === openUnitId && 'ring-2 ring-teal-300 ring-offset-2 ring-offset-slate-900'
                   )}
                   style={{ borderLeftColor: meta.color, backgroundColor: rgba(meta.color, 0.22) }}
                 >

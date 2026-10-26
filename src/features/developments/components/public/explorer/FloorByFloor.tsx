@@ -10,6 +10,7 @@ interface FloorByFloorProps {
   units: PublicUnit[];
   matchedIds?: Set<string>;
   onOpenUnit: (unitId: string) => void;
+  openUnitId?: string | null;
   /** "← Residence" when the building has no picture (the stage isn't shown). */
   back?: { label: string; onClick: () => void };
   /** Shown above the list when the picture has no regions yet. */
@@ -21,7 +22,7 @@ interface FloorByFloorProps {
  * explorable: on its own when it has no picture, and under the picture while
  * its floors/apartments are not marked on it yet.
  */
-export const FloorByFloor: React.FC<FloorByFloorProps> = ({ title, floors, units, matchedIds, onOpenUnit, back, note }) => {
+export const FloorByFloor: React.FC<FloorByFloorProps> = ({ title, floors, units, matchedIds, onOpenUnit, openUnitId, back, note }) => {
   const { t } = useTranslation('developments');
   return (
     <section className="bg-slate-900 px-4 py-6 sm:px-8" aria-label={title}>
@@ -42,7 +43,7 @@ export const FloorByFloor: React.FC<FloorByFloorProps> = ({ title, floors, units
           )}
         </div>
         {units.length > 0 ? (
-          <StackingPlan floors={floors} units={units} matchedIds={matchedIds} onOpenUnit={onOpenUnit} />
+          <StackingPlan floors={floors} units={units} matchedIds={matchedIds} onOpenUnit={onOpenUnit} openUnitId={openUnitId} />
         ) : (
           <p className="text-sm text-slate-400">{t('explorer.noUnitsHere', 'No apartments are published in this building yet.')}</p>
         )}

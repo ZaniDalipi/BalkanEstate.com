@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
@@ -35,6 +35,7 @@ const PublicDevelopmentPage: React.FC = () => {
   const { slug } = useParams();
   const { development, buildings, floors, isLoading, error } = usePublicDevelopment(slug);
   const { units, summary } = usePublicDevelopmentUnits(slug);
+  const explorerRef = useRef<HTMLDivElement>(null);
   const { criteria, setCriteria, nav, setNav } = useExplorerUrlState();
   const drawer = useUnitDrawer();
   const matchedUnits = useMemo(() => filterUnits(units, criteria), [units, criteria]);
@@ -73,26 +74,29 @@ const PublicDevelopmentPage: React.FC = () => {
         </button>
       </div>
 
-      <ResidenceExplorer
-        slug={development.slug}
-        residenceName={development.name}
-        buildings={buildings}
-        floors={floors}
-        units={units}
-        criteria={criteria}
-        onCriteriaChange={setCriteria}
-        nav={nav}
-        onNavChange={setNav}
-        onOpenUnit={drawer.open}
-        city={development.city}
-        country={development.country}
-        header={<ResidenceTitleBar development={development} summary={summary} onViewUnits={() => scrollToId('units')} />}
-        fallback={
-          <div className="mx-auto max-w-6xl px-4">
-            <ResidenceHero development={development} onViewUnits={() => scrollToId('units')} />
-          </div>
-        }
-      />
+      <div ref={explorerRef}>
+        <ResidenceExplorer
+          slug={development.slug}
+          residenceName={development.name}
+          buildings={buildings}
+          floors={floors}
+          units={units}
+          criteria={criteria}
+          onCriteriaChange={setCriteria}
+          nav={nav}
+          onNavChange={setNav}
+          onOpenUnit={drawer.open}
+          openUnitId={drawer.unitId}
+          city={development.city}
+          country={development.country}
+          header={<ResidenceTitleBar development={development} summary={summary} onViewUnits={() => scrollToId('units')} />}
+          fallback={
+            <div className="mx-auto max-w-6xl px-4">
+              <ResidenceHero development={development} onViewUnits={() => scrollToId('units')} />
+            </div>
+          }
+        />
+      </div>
 
       <div className="mx-auto max-w-6xl px-4">
         <div className="relative z-10 mt-6 px-0 sm:px-8">
@@ -142,6 +146,7 @@ const PublicDevelopmentPage: React.FC = () => {
         unitId={drawer.unitId}
         onClose={drawer.close}
         preview={units.find((u) => u.id === drawer.unitId)}
+        revealRef={explorerRef}
       />
     </main>
   );

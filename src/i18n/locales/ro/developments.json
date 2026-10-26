@@ -370,7 +370,9 @@
       "saved": "Salvat",
       "compare": "Compară",
       "compared": "În comparație",
-      "openListing": "Deschide anunțul complet"
+      "openListing": "Deschide anunțul complet",
+      "expand": "Arată toate detaliile",
+      "collapse": "Arată clădirea"
     },
     "inquiry": {
       "heading": "Întreabă despre acest apartament",

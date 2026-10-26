@@ -90,6 +90,19 @@ beforeEach(() => {
 });
 
 describe('ApartmentDetailsDrawer + useUnitDrawer', () => {
+  it('on phones opens at half height; the handle switches to full and back', async () => {
+    mount('/en/developments/res?unit=u1');
+    await screen.findByRole('heading', { name: 'Apt A12' });
+    const sheet = screen.getByRole('dialog');
+    expect(sheet.style.height).toBe('55dvh');
+    fireEvent.click(screen.getByRole('button', { name: 'Show all details' }));
+    expect(sheet.style.height).toBe('90dvh');
+    const handle = screen.getByRole('button', { name: 'Show the building' });
+    expect(handle).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(handle);
+    expect(sheet.style.height).toBe('55dvh');
+  });
+
   it('opens from ?unit= and closing removes the param (replace)', async () => {
     const router = mount('/en/developments/res?unit=u1&beds=2');
     expect(await screen.findByRole('heading', { name: 'Apt A12' })).toBeInTheDocument();

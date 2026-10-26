@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
 import { HelmetProvider } from 'react-helmet-async';
 import { MotionConfig } from 'framer-motion';
+import { MobileHomeBell } from './src/app/components/MobileHomeBell';
 import { MobileTopBarActions } from './src/app/components/MobileTopBarActions';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
@@ -463,6 +464,7 @@ const MainLayout: React.FC = () => {
             </svg>
           </button>
         )}
+        {isMobile && isHomeView && state.isAuthenticated && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !isBusinessDetail && <MobileHomeBell />}
 
         <div className={`relative transition-[filter] duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isBlurredBehindModal ? 'blur-sm' : ''} ${isOverlayVisible ? 'pointer-events-none' : ''}`}>
             <Suspense fallback={null}>

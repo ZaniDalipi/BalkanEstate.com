@@ -29,4 +29,10 @@ describe('StackingPlan', () => {
     fireEvent.click(screen.getByRole('button', { name: /Apt 2-1/ }));
     expect(onOpen).toHaveBeenCalledWith('c');
   });
+
+  it('picks out the apartment that is open in the details sheet', () => {
+    render(<StackingPlan floors={[floor('f1', 1)]} units={[unit('a', 'f1', '1-1'), unit('b', 'f1', '1-2')]} onOpenUnit={vi.fn()} openUnitId="b" />);
+    expect(screen.getByRole('button', { name: /Apt 1-2/ })).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByRole('button', { name: /Apt 1-1/ })).not.toHaveAttribute('aria-current');
+  });
 });

@@ -370,7 +370,9 @@
       "saved": "Spremljeno",
       "compare": "Usporedi",
       "compared": "U usporedbi",
-      "openListing": "Otvori cijeli oglas"
+      "openListing": "Otvori cijeli oglas",
+      "expand": "Prikaži sve detalje",
+      "collapse": "Prikaži zgradu"
     },
     "inquiry": {
       "heading": "Pitajte o ovom stanu",

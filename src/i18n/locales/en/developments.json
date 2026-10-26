@@ -346,7 +346,9 @@
       "saved": "Saved",
       "compare": "Compare",
       "compared": "In comparison",
-      "openListing": "Open full listing"
+      "openListing": "Open full listing",
+      "expand": "Show all details",
+      "collapse": "Show the building"
     },
     "inquiry": {
       "heading": "Ask about this apartment",

@@ -370,7 +370,9 @@
       "saved": "U ruajt",
       "compare": "Krahaso",
       "compared": "Në krahasim",
-      "openListing": "Hap njoftimin e plotë"
+      "openListing": "Hap njoftimin e plotë",
+      "expand": "Shfaq të gjitha detajet",
+      "collapse": "Shfaq ndërtesën"
     },
     "inquiry": {
       "heading": "Pyet për këtë apartament",
