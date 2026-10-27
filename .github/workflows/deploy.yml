@@ -116,6 +116,13 @@ jobs:
       name: staging
       url: https://staging.balkanestateai.com
     steps:
+      # The repo is needed next to dist/: `wrangler pages deploy` only uploads the
+      # Pages Functions (link previews for blog, listings, agents, residences) when
+      # it finds ./functions. Without this step the site went out static-only and
+      # shared links showed the generic card.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download frontend artifacts
         uses: actions/download-artifact@v4
         with:
@@ -150,6 +157,13 @@ jobs:
       name: production
       url: https://balkanestateai.com
     steps:
+      # The repo is needed next to dist/: `wrangler pages deploy` only uploads the
+      # Pages Functions (link previews for blog, listings, agents, residences) when
+      # it finds ./functions. Without this step the site went out static-only and
+      # shared links showed the generic card.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download frontend artifacts
         uses: actions/download-artifact@v4
         with:

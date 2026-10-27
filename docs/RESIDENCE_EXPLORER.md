@@ -681,6 +681,11 @@ derived.
   (and the unprefixed one) give crawlers the title, summary and this card. In
   deployments where nginx serves the SPA, `GET /api/og/residence/:slug` does the
   same for bots and redirects people to the page.
+- The functions only reach production if the deploy job has the repo checked out
+  next to `dist/` (`wrangler pages deploy` uploads `./functions` when it finds it);
+  `deployWorkflow.test.ts` guards that. Facebook and LinkedIn keep the first card
+  they saw for a link, so after a fix re-scrape it: Facebook Sharing Debugger →
+  "Scrape again", LinkedIn Post Inspector → "Inspect".
 
 **Back**
 
