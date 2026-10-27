@@ -68,6 +68,11 @@ export const CRAWLER_USER_AGENTS = [
   // Link previews
   'facebookexternalhit',
   'Facebot',
+  // Meta's newer fetchers: meta-externalfetcher fetches a link a person shares
+  // (the Facebook/Instagram/Threads composer preview), meta-externalagent
+  // crawls. Without them the preview falls back to the generic site card.
+  'meta-externalfetcher',
+  'meta-externalagent',
   'Twitterbot',
   'LinkedInBot',
   'WhatsApp',

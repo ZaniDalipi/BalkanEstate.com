@@ -75,6 +75,12 @@ describe('crawler detection', () => {
     expect(isCrawler('Mediapartners-Google')).toBe(true);
     expect(isCrawler('Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/126 Safari/537.36')).toBe(false);
   });
+
+  it('serves rendered pages to every Meta link-preview fetcher', () => {
+    expect(isCrawler('facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)')).toBe(true);
+    expect(isCrawler('meta-externalfetcher/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)')).toBe(true);
+    expect(isCrawler('meta-externalagent/1.1 (+https://developers.facebook.com/docs/sharing/webmasters/crawler)')).toBe(true);
+  });
 });
 
 describe('page shell', () => {

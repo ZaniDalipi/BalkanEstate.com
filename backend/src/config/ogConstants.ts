@@ -20,6 +20,8 @@ export const BOT_UA_PATTERNS = [
   // Meta / Facebook
   'facebookexternalhit',
   'facebot',
+  'meta-externalfetcher',
+  'meta-externalagent',
   // X / Twitter
   'twitterbot',
   // LinkedIn
