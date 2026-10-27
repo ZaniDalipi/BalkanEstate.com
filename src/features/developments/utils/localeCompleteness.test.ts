@@ -37,4 +37,12 @@ describe('developments locale files', () => {
     const latin = Object.entries(load('sr')).filter(([, v]) => !/[Ѐ-ӿ]/.test(v) && /[A-Za-zČĆŠŽĐčćšžđ]{4,}/.test(v.replace(/\{\{\w+\}\}|https?|JPG|PNG|WebP|AVIF|EUR|CSV|PDF|XLSX/g, '')) && !SAME_AS_ENGLISH.has(v));
     expect(latin.map(([k]) => k)).toEqual([]);
   });
+
+  it('the sidebar entries for residences are translated in every language', () => {
+    const read = (lang: string, ns: string) => JSON.parse(readFileSync(join(ROOT, 'src/i18n/locales', lang, `${ns}.json`), 'utf8'));
+    for (const lang of LANGS) {
+      expect(read(lang, 'nav').developments, `${lang} nav.developments`).not.toBe('Residences');
+      expect(read(lang, 'agencyDashboard').sidebar.residences, `${lang} agencyDashboard.sidebar.residences`).not.toBe('Residences');
+    }
+  });
 });
