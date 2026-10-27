@@ -13,7 +13,7 @@
  * utils/polygonGeometry). Rects store two opposite corners.
  */
 import { useCallback, useMemo, useReducer, useRef } from 'react';
-import type { Hotspot, HotspotLinkType, HotspotShape } from '../types';
+import { MAX_HOTSPOTS_PER_SCENE, type Hotspot, type HotspotLinkType, type HotspotShape } from '../types';
 import { repeatPoints, type RepeatDirection } from '../utils/regionRepeat';
 import {
   DUPLICATE_EPSILON,
@@ -76,6 +76,8 @@ export type PolygonEditorAction =
   | { type: 'DELETE_SHAPE'; id: string }
   | { type: 'DUPLICATE'; id: string; newId: string }
   /** Copy a region along a direction, one copy per id in `ids` (as many as fit); the copies have no link yet. */
+  /** Add finished regions (copied from another view): one history step, first one selected. */
+  | { type: 'ADD_MANY'; hotspots: Hotspot[] }
   | { type: 'REPEAT'; id: string; ids: string[]; direction: RepeatDirection; stepPct: number }
   | { type: 'PATCH'; id: string; patch: Partial<Pick<Hotspot, 'label' | 'linkType' | 'linkId'>> }
   | { type: 'REORDER'; id: string; direction: 'forward' | 'backward' }
@@ -303,6 +305,13 @@ export function polygonEditorReducer(s: PolygonEditorState, a: PolygonEditorActi
         z: maxZ(s.hotspots) + 1,
       };
       return { ...commit(s, [...s.hotspots, copy]), selectedId: a.newId, selectedVertex: null };
+    }
+    case 'ADD_MANY': {
+      if (a.hotspots.length === 0 || s.hotspots.length + a.hotspots.length > MAX_HOTSPOTS_PER_SCENE) return s;
+      const z0 = maxZ(s.hotspots) + 1;
+      // Keep the stacking order they had in the other view.
+      const copies = [...a.hotspots].sort((x, y) => (x.z ?? 0) - (y.z ?? 0)).map((h, i) => ({ ...h, z: z0 + i }));
+      return { ...commit(s, [...s.hotspots, ...copies]), selectedId: copies[0].id, selectedVertex: null };
     }
     case 'REPEAT': {
       const h = s.hotspots.find((x) => x.id === a.id);

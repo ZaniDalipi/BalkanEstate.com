@@ -288,6 +288,39 @@ test.describe('Residence explorer (owner)', () => {
     await expect(regions).toHaveCount(before + 1);
   });
 
+  test('editor: the regions of one view are carried over to another view of the same building, and Undo removes them', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Pointer-heavy editor');
+    await openManage(page);
+    await page.getByRole('tab', { name: 'Interactive explorer' }).click();
+    await page.getByRole('button', { name: /Seaside T/ }).first().click();
+    await page.getByRole('tab', { name: 'Back' }).click();
+    const regions = page.getByRole('list', { name: 'Regions' }).getByRole('listitem');
+    await expect(page.getByLabel('Region editor canvas')).toBeVisible({ timeout: 15000 });
+    const before = await regions.count();
+
+    await page.getByText('Copy from another view').click();
+    const source = page.getByLabel('Copy the regions of');
+    await expect(source.locator('option')).toHaveCount(1); // only the other view of this building
+    const count = Number((await source.locator('option').first().innerText()).match(/\((\d+) regions\)/)?.[1]);
+    expect(count).toBeGreaterThan(0);
+
+    // A wrong size says why, next to the field, and copies nothing.
+    await page.getByLabel('Size (%)').fill('5');
+    await page.getByRole('button', { name: 'Copy regions' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Enter a size from 10 to 300' })).toBeVisible();
+    await expect(regions).toHaveCount(before);
+
+    await page.getByLabel('Size (%)').fill('100');
+    await page.getByLabel('Mirror left ↔ right').check();
+    await page.getByRole('button', { name: 'Copy regions' }).click();
+    await expect(page.getByRole('status').filter({ hasText: `Regions copied: ${count}` })).toBeVisible();
+    await expect(regions).toHaveCount(before + count);
+
+    // One Undo removes every copied region.
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(regions).toHaveCount(before);
+  });
+
   test('editor: a drawn polygon is saved where it was drawn', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Pointer drawing');
     await openManage(page);

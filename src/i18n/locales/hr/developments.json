@@ -663,6 +663,26 @@
       "create": "Izradi kopije",
       "done": "Izrađeno kopija: {{made}}. Sada povežite svaku s njezinim stanom.",
       "donePartial": "Izrađeno kopija: {{made}} od {{wanted}}; ostale bi izašle iz slike. Sada povežite svaku s njezinim stanom."
+    },
+    "copyFrom": {
+      "title": "Kopiraj iz drugog prikaza",
+      "hint": "Prenosi zone druge slike ove zgrade na ovu, da ih ne crtate ponovno. Slike prikazuju različite strane, pa kopije poslije pomaknite i prilagodite veličinu. Poništavanje ih uklanja sve odjednom.",
+      "empty": "Nijedan drugi prikaz ove zgrade još nema spremljene zone. Najprije nacrtajte i spremite zone na jednom prikazu, pa se vratite ovamo iz drugog.",
+      "source": "Kopiraj zone prikaza",
+      "sourceOption": "{{name}} ({{n}} zona)",
+      "keepLinks": "Zadrži na što zone vode",
+      "mirror": "Zrcali lijevo ↔ desno",
+      "options": "Oba prikaza prikazuju istu zgradu, pa veze i dalje odgovaraju. Zrcaljenje je za suprotnu stranu simetrične zgrade. Isključite veze kako biste svaku kopiju povezali ponovno.",
+      "size": "Veličina (%)",
+      "moveX": "Desno (%)",
+      "moveY": "Dolje (%)",
+      "sizeInvalid": "Unesite veličinu od {{min}} do {{max}} %.",
+      "moveInvalid": "Unesite broj od -{{max}} do {{max}}. Minus pomiče ulijevo ili gore.",
+      "outside": "Kopirane zone izašle bi iz slike. Smanjite ih ili ih vratite natrag.",
+      "tooMany": "Ovaj prikaz imao bi više od {{max}} zona.",
+      "nothing": "Odabrani prikaz nema zona za kopiranje.",
+      "create": "Kopiraj zone",
+      "done": "Kopirano zona: {{made}}. Pomaknite ih i prilagodite veličinu gdje treba."
     }
   },
   "inventory": {

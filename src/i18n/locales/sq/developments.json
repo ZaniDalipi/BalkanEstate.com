@@ -657,6 +657,26 @@
       "create": "Krijo kopjet",
       "done": "Kopje të krijuara: {{made}}. Tani lidhni secilën me banesën e vet.",
       "donePartial": "Kopje të krijuara: {{made}} nga {{wanted}}; pjesa tjetër do të dilte jashtë fotos. Tani lidhni secilën me banesën e vet."
+    },
+    "copyFrom": {
+      "title": "Kopjo nga një pamje tjetër",
+      "hint": "Sjell zonat e një fotoje tjetër të kësaj ndërtese në këtë, që të mos i vizatoni sërish. Fotot tregojnë anë të ndryshme, ndaj lëvizini dhe ndryshojini përmasat e kopjeve më pas. Zhbërja i heq të gjitha njëherësh.",
+      "empty": "Asnjë pamje tjetër e kësaj ndërtese nuk ka ende zona të ruajtura. Vizatoni dhe ruani fillimisht zona në një pamje, pastaj kthehuni këtu nga një tjetër.",
+      "source": "Kopjo zonat e",
+      "sourceOption": "{{name}} ({{n}} zona)",
+      "keepLinks": "Ruaj çfarë lidhin zonat",
+      "mirror": "Pasqyro majtas ↔ djathtas",
+      "options": "Të dyja pamjet tregojnë të njëjtën ndërtesë, ndaj lidhjet përshtaten ende. Pasqyrimi është për anën e kundërt të një ndërtese simetrike. Çaktivizojini lidhjet për të lidhur çdo kopje sërish.",
+      "size": "Madhësia (%)",
+      "moveX": "Djathtas (%)",
+      "moveY": "Poshtë (%)",
+      "sizeInvalid": "Shkruani një madhësi nga {{min}} deri në {{max}} %.",
+      "moveInvalid": "Shkruani një numër nga -{{max}} deri në {{max}}. Minus lëviz majtas ose lart.",
+      "outside": "Zonat e kopjuara do të dilnin jashtë fotos. Bëjini më të vogla ose lëvizini mbrapsht.",
+      "tooMany": "Kjo pamje do të kishte më shumë se {{max}} zona.",
+      "nothing": "Pamja e zgjedhur nuk ka zona për t’u kopjuar.",
+      "create": "Kopjo zonat",
+      "done": "Zona të kopjuara: {{made}}. Lëvizini dhe ndryshojini përmasat sipas nevojës."
     }
   },
   "inventory": {

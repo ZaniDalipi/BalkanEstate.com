@@ -663,6 +663,26 @@
       "create": "Creează copiile",
       "done": "Copii create: {{made}}. Acum legați fiecare de apartamentul ei.",
       "donePartial": "Copii create: {{made}} din {{wanted}}; restul ar ieși din imagine. Acum legați fiecare de apartamentul ei."
+    },
+    "copyFrom": {
+      "title": "Copiază dintr-o altă vedere",
+      "hint": "Aduce zonele unei alte imagini a acestei clădiri în aceasta, ca să nu le mai desenați. Imaginile arată laturi diferite, așa că mutați și redimensionați copiile după aceea. Anularea le elimină pe toate deodată.",
+      "empty": "Nicio altă vedere a acestei clădiri nu are încă zone salvate. Desenați și salvați mai întâi zone într-o vedere, apoi reveniți aici din alta.",
+      "source": "Copiază zonele din",
+      "sourceOption": "{{name}} ({{n}} zone)",
+      "keepLinks": "Păstrează ce leagă zonele",
+      "mirror": "Oglindește stânga ↔ dreapta",
+      "options": "Ambele vederi arată aceeași clădire, deci legăturile se potrivesc în continuare. Oglindirea este pentru latura opusă a unei clădiri simetrice. Dezactivați legăturile ca să legați fiecare copie din nou.",
+      "size": "Dimensiune (%)",
+      "moveX": "Dreapta (%)",
+      "moveY": "Jos (%)",
+      "sizeInvalid": "Introduceți o dimensiune de la {{min}} la {{max}} %.",
+      "moveInvalid": "Introduceți un număr de la -{{max}} la {{max}}. Minus mută spre stânga sau în sus.",
+      "outside": "Zonele copiate ar ieși din imagine. Faceți-le mai mici sau mutați-le înapoi.",
+      "tooMany": "Această vedere ar avea mai mult de {{max}} zone.",
+      "nothing": "Vederea aleasă nu are zone de copiat.",
+      "create": "Copiază zonele",
+      "done": "Zone copiate: {{made}}. Mutați-le și redimensionați-le unde e nevoie."
     }
   },
   "inventory": {

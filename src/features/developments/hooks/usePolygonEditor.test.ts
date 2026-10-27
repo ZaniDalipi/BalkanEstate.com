@@ -9,7 +9,7 @@ import {
   type PolygonEditorAction,
   type PolygonEditorState,
 } from './usePolygonEditor';
-import type { Hotspot } from '../types';
+import { MAX_HOTSPOTS_PER_SCENE, type Hotspot } from '../types';
 import type { Point } from '../utils/polygonGeometry';
 
 const square = (id: string, x = 0.1, y = 0.1, s = 0.2, linkId = 'u1'): Hotspot => ({
@@ -304,5 +304,26 @@ describe('polygonEditorReducer — REPEAT', () => {
   it('ignores a region that does not exist', () => {
     const base = loaded(rectAt('a', 0.1));
     expect(reduce(base, { type: 'REPEAT', id: 'zzz', ids: ids(2), direction: 'down', stepPct: 12 })).toBe(base);
+  });
+});
+
+describe('polygonEditorReducer — ADD_MANY', () => {
+  const copy = (id: string, z: number): Hotspot => ({ ...square(id), z });
+
+  it('adds the copies as one undo step, keeps their stacking order and selects the first', () => {
+    const base = loaded(square('a'));
+    const s = reduce(base, { type: 'ADD_MANY', hotspots: [copy('n2', 5), copy('n1', 2)] });
+    expect(s.hotspots.map((h) => h.id)).toEqual(['a', 'n1', 'n2']);
+    expect(s.hotspots.map((h) => h.z)).toEqual([0, 1, 2]);
+    expect(s.selectedId).toBe('n1');
+    expect(s.past).toHaveLength(1);
+    expect(reduce(s, { type: 'UNDO' }).hotspots.map((h) => h.id)).toEqual(['a']);
+  });
+
+  it('does nothing for no regions, or when the view would pass its limit', () => {
+    const base = loaded(square('a'));
+    expect(reduce(base, { type: 'ADD_MANY', hotspots: [] })).toBe(base);
+    const many = Array.from({ length: MAX_HOTSPOTS_PER_SCENE }, (_, i) => copy(`m${i}`, i));
+    expect(reduce(base, { type: 'ADD_MANY', hotspots: many })).toBe(base);
   });
 });

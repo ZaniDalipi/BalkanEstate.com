@@ -657,6 +657,26 @@
       "create": "Create copies",
       "done": "Copies created: {{made}}. Now link each one to its apartment.",
       "donePartial": "Copies created: {{made}} of {{wanted}}; the rest would leave the picture. Now link each one to its apartment."
+    },
+    "copyFrom": {
+      "title": "Copy from another view",
+      "hint": "Brings the regions of another picture of this building into this one, so you do not draw them again. The pictures show different sides, so move and resize the copies afterwards. Undo removes them all at once.",
+      "empty": "No other view of this building has saved regions yet. Draw and save regions on one view first, then come back here from another.",
+      "source": "Copy the regions of",
+      "sourceOption": "{{name}} ({{n}} regions)",
+      "keepLinks": "Keep what the regions link to",
+      "mirror": "Mirror left ↔ right",
+      "options": "Both views show the same building, so the links still fit. Mirror is for the opposite side of a symmetrical building. Switch links off to link every copy again.",
+      "size": "Size (%)",
+      "moveX": "Right (%)",
+      "moveY": "Down (%)",
+      "sizeInvalid": "Enter a size from {{min}} to {{max}} %.",
+      "moveInvalid": "Enter a number from -{{max}} to {{max}}. A minus moves left or up.",
+      "outside": "The copied regions would leave the picture. Make them smaller or move them back.",
+      "tooMany": "This view would have more than {{max}} regions.",
+      "nothing": "The chosen view has no regions to copy.",
+      "create": "Copy regions",
+      "done": "Regions copied: {{made}}. Move and resize them where needed."
     }
   },
   "inventory": {

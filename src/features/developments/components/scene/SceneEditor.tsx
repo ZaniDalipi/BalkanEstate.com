@@ -8,6 +8,7 @@ import { EditorToolbar } from './editor/EditorToolbar';
 import { RegionList } from './editor/RegionList';
 import { RegionInspector } from './editor/RegionInspector';
 import { RepeatRegion } from './editor/RepeatRegion';
+import { CopyFromView } from './editor/CopyFromView';
 import { SceneStatusBar } from './editor/SceneStatusBar';
 import { useSceneSync } from './editor/useSceneSync';
 import { useLinkOptions } from './editor/useLinkOptions';
@@ -139,6 +140,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
               <p className="text-xs text-slate-500">{t('scene.selectHint', 'Select a region to edit its link.')}</p>
             )}
           </div>
+          {!preview && <CopyFromView developmentId={developmentId} scene={scene} editor={editor} />}
         </aside>
       </div>
     </div>

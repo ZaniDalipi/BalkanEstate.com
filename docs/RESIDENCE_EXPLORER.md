@@ -653,6 +653,25 @@ The suggested distance is the region's own size plus a little for the slab.
 - All copies are one Undo step. The geometry is `utils/regionRepeat.ts`, the
   action is `REPEAT` in `usePolygonEditor`, the panel is `RepeatRegion.tsx`.
 
+## 7b-5. Carrying a structure to another view of the building
+
+A building can have several pictures (front, back, left, right, aerial,
+courtyard, custom). **Copy from another view** (map editor, below the regions)
+brings the *saved* regions of another view of the same building into the one
+being edited:
+
+- *Copy the regions of*: only other views of this building that have saved
+  regions are offered, with a thumbnail of the picture.
+- *Keep what the regions link to* (on by default): both pictures show the same
+  building, so apartment and floor links still fit. Off, every copy is linked again.
+- *Mirror left ↔ right* is for the opposite side of a symmetrical building.
+- *Size* (10–300 %, about the centre of the whole group) and *Right* / *Down*
+  (−100…100 %) fit the copy onto the other picture. A copy that would leave the
+  picture is refused, not squashed against the edge.
+- All copied regions are one Undo step. The pictures have different
+  perspectives, so the copy is a head start to move and resize, not exact.
+  Geometry: `utils/regionTransfer.ts`; action `ADD_MANY`; panel `CopyFromView.tsx`.
+
 ## 7b-3. Errors in the reader's language
 
 - **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.
