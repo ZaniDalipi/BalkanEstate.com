@@ -68,6 +68,8 @@ export interface IDevelopmentUnit extends Document {
   tour360Url?: string;
   parkingRefs: string[];
   storageRefs: string[];
+  /** Parking spots / storage rooms (units of their own) this unit is sold with. */
+  linkedUnitIds: mongoose.Types.ObjectId[];
   /** Every authorized marketing listing that references this physical unit. */
   listingIds: mongoose.Types.ObjectId[];
   /** The authoritative listing for availability/price, if any. */
@@ -150,6 +152,7 @@ const DevelopmentUnitSchema: Schema = new Schema(
     tour360Url: { type: String, trim: true },
     parkingRefs: { type: [String], default: [] },
     storageRefs: { type: [String], default: [] },
+    linkedUnitIds: [{ type: Schema.Types.ObjectId, ref: 'DevelopmentUnit' }],
     listingIds: [{ type: Schema.Types.ObjectId, ref: 'Property', index: true }],
     primaryListingId: { type: Schema.Types.ObjectId, ref: 'Property' },
     deletedAt: { type: Date, index: true },
@@ -194,8 +197,19 @@ DevelopmentUnitSchema.index(
   }
 );
 
+// A parking spot or storage room comes with one live unit at most (unique across
+// documents for each array element; empty lists and deleted units are left out).
+DevelopmentUnitSchema.index(
+  { linkedUnitIds: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { 'linkedUnitIds.0': { $exists: true }, deletedAt: null },
+    name: 'linked_unit_once',
+  }
+);
+
 // Encode every reference in JSON so the client compares like with like.
-encodeRefsOnJSON(DevelopmentUnitSchema, ['developmentId', 'buildingId', 'entranceId', 'floorId', 'floorplanMediaId', 'mediaIds', 'listingIds', 'primaryListingId']);
+encodeRefsOnJSON(DevelopmentUnitSchema, ['developmentId', 'buildingId', 'entranceId', 'floorId', 'floorplanMediaId', 'mediaIds', 'listingIds', 'primaryListingId', 'linkedUnitIds']);
 
 export default mongoose.model<IDevelopmentUnit>(
   'DevelopmentUnit',

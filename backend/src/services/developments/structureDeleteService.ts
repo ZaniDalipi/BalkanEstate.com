@@ -125,7 +125,11 @@ export const deleteStructure = async (params: {
       await DevelopmentEntrance.updateMany({ _id: { $in: scope.entranceIds }, developmentId }, { $set: { deletedAt: now } }, opts);
     }
     await DevelopmentFloor.updateMany({ _id: { $in: scope.floorIds }, developmentId }, { $set: { deletedAt: now } }, opts);
-    await DevelopmentUnit.updateMany({ _id: { $in: scope.unitIds }, developmentId }, { $set: { deletedAt: now } }, opts);
+    await DevelopmentUnit.updateMany({ _id: { $in: scope.unitIds }, developmentId }, { $set: { deletedAt: now, linkedUnitIds: [] } }, opts);
+    // Apartments elsewhere drop the parking spots / storage rooms removed here.
+    if (scope.unitIds.length) {
+      await DevelopmentUnit.updateMany({ developmentId, linkedUnitIds: { $in: scope.unitIds } }, { $pull: { linkedUnitIds: { $in: scope.unitIds } } }, opts);
+    }
     await DevelopmentScene.updateMany({ _id: { $in: scope.sceneIds }, developmentId }, { $set: { deletedAt: now } }, opts);
     // Listings stay on the marketplace; they just stop pointing at removed places.
     const detach = { $unset: { unitId: '', floorId: '', buildingId: '', entranceId: '' } };

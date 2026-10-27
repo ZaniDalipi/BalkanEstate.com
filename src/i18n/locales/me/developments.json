@@ -1205,5 +1205,22 @@
     "previewAlt": "{{name}} sa označenim zgradama, kako izgleda kad se podijeli",
     "hint": "Kad se objavi na društvenim mrežama, link prikazuje ovu sliku.",
     "text": "{{name}} – novi stanovi u {{place}}"
+  },
+  "companions": {
+    "comesWith": "Dolazi uz",
+    "soldWith": "Prodaje se uz",
+    "viewDetails": "Pogledaj detalje",
+    "comesWithHeading": "Dolazi uz",
+    "soldWithHeading": "Prodaje se zajedno sa",
+    "editor": {
+      "title": "Dolazi uz",
+      "hint": "Parking mjesta i ostave koji se prodaju uz ovu jedinicu. Kupci ih vide istaknute zajedno na slici.",
+      "soldWith": "Prodaje se zajedno sa {{units}}. Promijenite to na toj jedinici.",
+      "extraHint": "Parking mjesta i ostave dodaju se stanu iz samog stana.",
+      "loadError": "Parking mjesta se nisu učitala.",
+      "retry": "Pokušaj ponovo",
+      "none": "Još nema parking mjesta ni ostava. Dodajte ih kao jedinice tipa Parking ili Ostava, pa ih izaberite ovdje.",
+      "taken": "Dolazi uz {{unit}}"
+    }
   }
 }

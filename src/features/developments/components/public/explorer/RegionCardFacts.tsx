@@ -4,6 +4,8 @@ import { optimizeImageUrl } from '@/config/mediaConfig';
 import type { PublicUnit } from '../../../types';
 import { AvailabilityBadge } from '../../shared/Badges';
 import { useUnitText } from './useUnitText';
+import { isExtraUnit } from '../../../utils/unitCompanions';
+import { CompanionNote } from './CompanionNote';
 
 export interface Fact {
   label: string;
@@ -26,11 +28,14 @@ export const FactRows: React.FC<{ facts: Fact[] }> = ({ facts }) => (
 );
 
 /** Card body for an apartment: floor-plan preview, key facts, price and status. */
-export const UnitFacts: React.FC<{ unit: PublicUnit }> = ({ unit }) => {
+export const UnitFacts: React.FC<{ unit: PublicUnit; companions?: { comesWith: PublicUnit[]; soldWith: PublicUnit[] } }> = ({ unit, companions }) => {
   const { t } = useTranslation('developments');
   const txt = useUnitText();
   const facts: Fact[] = [
-    { label: t('explorer.card.apartment', 'Apartment'), value: unit.unitNumber },
+    {
+      label: isExtraUnit(unit.unitType) ? t(`explorer.unitType.${unit.unitType}`, unit.unitType.charAt(0).toUpperCase() + unit.unitType.slice(1)) : t('explorer.card.apartment', 'Apartment'),
+      value: unit.unitNumber,
+    },
     unit.floorLabel ? { label: t('explorer.floor', 'Floor'), value: String(unit.floorLevel ?? unit.floorLabel) } : null,
     txt.area(unit) ? { label: t('explorer.card.area', 'Area'), value: txt.area(unit) } : null,
     typeof unit.beds === 'number' ? { label: t('explorer.card.rooms', 'Bedrooms'), value: unit.beds === 0 ? t('explorer.studio', 'Studio') : String(unit.beds) } : null,
@@ -54,6 +59,7 @@ export const UnitFacts: React.FC<{ unit: PublicUnit }> = ({ unit }) => {
         <AvailabilityBadge state={unit.availability} />
       </div>
       <FactRows facts={facts} />
+      {companions && <CompanionNote {...companions} />}
       {unit.hasListing && (
         <p className="mt-3 rounded-lg bg-teal-50 px-2.5 py-1.5 text-xs font-medium text-teal-800">
           {t('explorer.card.hasListing', 'This apartment also has a listing with photos and details.')}

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { DevelopmentBuilding, Hotspot, PublicUnit } from '../../../types';
 import { formatArea, formatPrice } from '../../../utils/format';
 import type { Fact } from './RegionCardFacts';
+import { companionsOf, isExtraUnit } from '../../../utils/unitCompanions';
 
 /** Per-building figures for the building card (computed once per explorer). */
 export interface BuildingFacts {
@@ -14,6 +15,8 @@ export interface BuildingFacts {
 
 export interface RegionCardContent {
   unit?: PublicUnit;
+  /** Units sold together with `unit` (its parking spot, or its apartment). */
+  companions?: { comesWith: PublicUnit[]; soldWith: PublicUnit[] };
   title?: string;
   facts?: Fact[];
   actionLabel?: string;
@@ -33,7 +36,12 @@ export function useRegionCard(
   return (h: Hotspot): RegionCardContent => {
     if (h.linkType === 'unit') {
       const unit = unitsById.get(h.linkId);
-      return { unit, title: unit ? undefined : h.label, actionLabel: t('explorer.card.viewApartment', 'View apartment') };
+      return {
+        unit,
+        companions: unit ? companionsOf(unit, unitsById) : undefined,
+        title: unit ? undefined : h.label,
+        actionLabel: unit && isExtraUnit(unit.unitType) ? t('companions.viewDetails', 'View details') : t('explorer.card.viewApartment', 'View apartment'),
+      };
     }
     if (h.linkType === 'building') {
       const b = buildingsById?.get(h.linkId);

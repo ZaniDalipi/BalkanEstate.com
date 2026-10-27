@@ -90,6 +90,23 @@ beforeEach(() => {
 });
 
 describe('ApartmentDetailsDrawer + useUnitDrawer', () => {
+  it('lists the parking spot an apartment comes with; tapping it opens the spot’s own details', async () => {
+    h.detail = {
+      ...detail(),
+      companions: [
+        {
+          relation: 'comes_with',
+          unit: { id: 'p1', developmentId: 'd', buildingId: 'b', floorId: 'f', unitNumber: 'P1-01', unitType: 'parking', availability: 'available', listingIds: [], price: 15000, currency: 'EUR', buildingName: 'Podium' },
+        },
+      ],
+    } as PublicUnitDetail;
+    const router = mount('/en/developments/res?unit=u1');
+    const spot = await screen.findByRole('button', { name: /Parking P1-01/ });
+    expect(screen.getByRole('region', { name: 'Comes with' })).toContainElement(spot);
+    fireEvent.click(spot);
+    await waitFor(() => expect(router.state.location.search).toBe('?unit=p1'));
+  });
+
   it('on phones opens at half height; the handle switches to full and back', async () => {
     mount('/en/developments/res?unit=u1');
     await screen.findByRole('heading', { name: 'Apt A12' });

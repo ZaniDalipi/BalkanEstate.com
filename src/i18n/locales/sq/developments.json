@@ -1195,5 +1195,22 @@
     "previewAlt": "{{name}} me ndërtesat e shënuara, siç shfaqet kur ndahet",
     "hint": "Kur postohet në rrjetet sociale, lidhja shfaq këtë foto.",
     "text": "{{name}} – banesa të reja në {{place}}"
+  },
+  "companions": {
+    "comesWith": "Vjen me",
+    "soldWith": "Shitet me",
+    "viewDetails": "Shiko detajet",
+    "comesWithHeading": "Vjen me",
+    "soldWithHeading": "Shitet bashkë me",
+    "editor": {
+      "title": "Vjen me",
+      "hint": "Vendet e parkimit dhe depot që shiten me këtë njësi. Blerësit i shohin të ndriçuara bashkë në foto.",
+      "soldWith": "Shitet bashkë me {{units}}. Ndryshojeni te ajo njësi.",
+      "extraHint": "Vendet e parkimit dhe depot i shtohen një banese nga vetë banesa.",
+      "loadError": "Vendet e parkimit nuk u ngarkuan.",
+      "retry": "Provo sërish",
+      "none": "Ende pa vende parkimi apo depo. Shtojini si njësi me llojin Parkim ose Depo, pastaj zgjidhini këtu.",
+      "taken": "Vjen me {{unit}}"
+    }
   }
 }

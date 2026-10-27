@@ -22,6 +22,8 @@ export interface RegionPaintInput {
   /** Effective availability for unit regions. */
   state?: UnitAvailability;
   active: boolean;
+  /** Sold together with the hovered unit (its parking spot, or its apartment). */
+  linked?: boolean;
   /** true/false when filters are active (unit regions only); undefined otherwise. */
   matched?: boolean;
 }
@@ -33,14 +35,21 @@ export interface RegionPaint {
   strokeScale: number;
   /** Draw the availability pattern on top (non-colour cue). */
   pattern: boolean;
+  /** Dashed outline: lit up because it is sold with the hovered unit. */
+  dashed?: boolean;
 }
 
 /** Transparent but still hit-testable (pointer events need a painted fill). */
 const INVISIBLE = 'rgba(255,255,255,0.001)';
 
-export const regionPaint = ({ mode, state, active, matched }: RegionPaintInput): RegionPaint => {
+export const regionPaint = ({ mode, state, active, linked, matched }: RegionPaintInput): RegionPaint => {
   const color = state ? AVAILABILITY_META[state].color : HIGHLIGHT;
   const patterned = !!state && AVAILABILITY_META[state].pattern !== 'solid';
+
+  // Lit up with the hovered unit, whatever the filters say: it comes with it.
+  if (linked && !active) {
+    return { fill: rgba(color, 0.42), stroke: 'rgba(255,255,255,0.95)', strokeScale: 1.6, pattern: patterned, dashed: true };
+  }
 
   if (matched === false) {
     // Filtered out: barely there, but hover still reveals it.

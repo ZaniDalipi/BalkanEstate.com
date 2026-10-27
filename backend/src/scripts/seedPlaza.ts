@@ -43,8 +43,10 @@ import {
   RESIDENCE_AERIAL_EAST,
   TOWER_FIRST_LEVEL,
   TOWER_TOP_LEVEL,
+  PARKING_BAY_CENTRES,
   frontCell,
   modelFloorBand,
+  parkingBay,
 } from './demo/plazaGeometry';
 import { podiumUnits, towerUnits, type PlazaUnitSpec } from './demo/plazaUnits';
 import { grant as grantResidence } from '../services/developments/billing/residencePurchaseService';
@@ -193,6 +195,34 @@ async function run(): Promise<void> {
       if (spec.availability === 'available') available += 1;
     }
 
+    // --- Parking: four street bays, each sold with a tower apartment -------
+    // Units of their own (price, area, details) linked to the apartment, so
+    // hovering the apartment on the front picture lights its bay up too.
+    const parkingFloor = await DevelopmentFloor.create({ developmentId, buildingId: podiumId, label: 'Parking −1', level: -1, kind: 'basement', order: -1 });
+    const withParking = towerSeeded
+      .filter(({ spec }) => spec.availability === 'available' && spec.unitType === 'apartment' && spec.level >= 8 && spec.level <= 12)
+      .slice(0, PARKING_BAY_CENTRES.length);
+    const parkingSeeded: { id: Oid; unitNumber: string }[] = [];
+    for (const [i, apartment] of withParking.entries()) {
+      const unitNumber = `P-${String(i + 1).padStart(2, '0')}`;
+      const spot = await DevelopmentUnit.create({
+        developmentId,
+        buildingId: podiumId,
+        floorId: parkingFloor._id,
+        unitNumber,
+        unitType: 'parking',
+        totalArea: 12.5,
+        price: 15000,
+        currency: 'EUR',
+        availability: 'available',
+        description: `Parking bay ${unitNumber}, sold together with apartment ${apartment.spec.unitNumber}. EV charging ready.`,
+      });
+      await DevelopmentUnit.updateOne({ _id: apartment.id }, { $set: { linkedUnitIds: [spot._id] } });
+      parkingSeeded.push({ id: spot._id as Oid, unitNumber });
+      units += 1;
+      available += 1;
+    }
+
     // --- Listings: three apartments and one office on the marketplace -------
     const listing = (over: Record<string, unknown>) =>
       Property.create({
@@ -271,6 +301,9 @@ async function run(): Promise<void> {
       [spec.level, ...spec.alsoOnLevels].map((level) => region('towerFront', `u_${spec.unitNumber}_${level}`, frontCell(level, spec.pos, spec.span), 'unit', id, level))
     );
     frontRegions.push(region('towerFront', 'podium', FRONT_PODIUM, 'building', podiumId, 0, 'Plaza Podium'));
+    parkingSeeded.forEach(({ id, unitNumber }, i) =>
+      frontRegions.push(region('towerFront', `parking_${i + 1}`, parkingBay(PARKING_BAY_CENTRES[i]), 'unit', id, 2, `Parking ${unitNumber}`))
+    );
     await createPublishedView({ developmentId, targetType: 'building', targetId: towerId, viewKey: 'main', viewName: 'Front', viewDirection: 'front', sortOrder: 0, ...image('towerFront'), regions: frontRegions });
 
     const bandRegions = [...floorIdByLevel.entries()].map(([level, floorId]) => region('towerModel', `f_${level}`, modelFloorBand(level), 'floor', floorId, level, `Floor ${level}`));
@@ -284,6 +317,7 @@ async function run(): Promise<void> {
     log.info('   Residence: 2 aerial pictures → Plaza Tower / Plaza Podium');
     log.info(`   Plaza Tower: Front (${frontRegions.length - 1} apartment regions) · Floors (${bandRegions.length} floor bands); duplexes have a floor plan`);
     log.info('   Plaza Podium: no picture → floor-by-floor list of shops and offices');
+    log.info(`   Parking: ${parkingSeeded.length} street bays on the Front picture, each sold with a tower apartment`);
     log.info(`   Public page: ${base}/en/developments/${SLUG}`);
   } catch (error) {
     log.error('Seeding failed:', error);

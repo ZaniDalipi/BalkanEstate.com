@@ -16,6 +16,7 @@ import { useFlyFocus, type ExplorerFocus } from './useFlyFocus';
 import { useHotspotInteraction } from './useHotspotInteraction';
 import { useRegionCard, type BuildingFacts } from './useRegionCard';
 import { useUnitText } from './useUnitText';
+import { linkedHotspotIds } from '../../../utils/unitCompanions';
 
 export interface ExplorerCanvasProps {
   view: Pick<PublicSceneView, 'imageUrl' | 'imageWidth' | 'imageHeight' | 'hotspots' | 'viewName'>;
@@ -66,6 +67,8 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   const hotspots = useMemo(() => [...view.hotspots].sort((a, b) => (a.z ?? 0) - (b.z ?? 0)), [view.hotspots]);
   const hovered = hover ? hotspots.find((h) => h.id === hover.id) : undefined;
   const focused = focus ? hotspots.find((h) => h.id === focus.hotspotId) : undefined;
+  // Its parking spot / storage room (or its apartment) light up with the hovered unit.
+  const linkedIds = useMemo(() => linkedHotspotIds(hovered, hotspots, unitsById), [hovered, hotspots, unitsById]);
   useFlyFocus(focus, hotspots, pz.flyTo, onFocusArrive);
 
   const sizeStyle = canvasSize(W, H, fullscreen);
@@ -108,6 +111,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
                 matched={unit && matchedIds ? matchedIds.has(unit.id) : undefined}
                 mode={mode}
                 active={hover?.id === h.id}
+                linked={linkedIds.has(h.id)}
                 label={txt.hotspotLabel(h, unitsById, buildingsById)}
                 interactive={interactive}
                 {...bind(h)}
@@ -134,6 +138,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
         <RegionCard
           anchor={hover.rect}
           unit={card.unit}
+          companions={card.companions}
           title={card.title}
           facts={card.facts}
           imageUrl={card.imageUrl}

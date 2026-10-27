@@ -71,6 +71,7 @@ export function usePublicUnit(slug: string | undefined, unitId: string | undefin
     unit: query.data?.unit,
     development: query.data?.development,
     listings: query.data?.listings ?? [],
+    companions: query.data?.companions ?? [],
     isLoading: query.isLoading,
     error: query.error,
   };

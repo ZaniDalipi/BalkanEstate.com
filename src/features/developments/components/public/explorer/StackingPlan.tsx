@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/src/lib/utils';
 import type { DevelopmentFloor, PublicUnit } from '../../../types';
 import { AVAILABILITY_META, rgba } from '../../../utils/availability';
 import { useUnitText } from './useUnitText';
+import { bundleIds } from '../../../utils/unitCompanions';
 
 interface StackingPlanProps {
   floors: DevelopmentFloor[];
@@ -24,6 +25,10 @@ interface StackingPlanProps {
 export const StackingPlan: React.FC<StackingPlanProps> = ({ floors, units, matchedIds, onOpenUnit, openUnitId }) => {
   const { t } = useTranslation('developments');
   const txt = useUnitText();
+  // Hovering (or focusing) an apartment lights up its parking spot / storage room, and back.
+  const [hovered, setHovered] = useState<string | null>(null);
+  const unitsById = useMemo(() => new Map(units.map((u) => [u.id, u])), [units]);
+  const linked = useMemo(() => (hovered ? bundleIds(hovered, unitsById) : new Set<string>()), [hovered, unitsById]);
   const rows = useMemo(() => {
     const byFloor = new Map<string, PublicUnit[]>();
     for (const u of units) byFloor.set(u.floorId, [...(byFloor.get(u.floorId) ?? []), u]);
@@ -57,13 +62,19 @@ export const StackingPlan: React.FC<StackingPlanProps> = ({ floors, units, match
                   type="button"
                   onClick={() => onOpenUnit(u.id)}
                   data-unit-id={u.id}
+                  data-linked={linked.has(u.id) ? 'true' : undefined}
+                  onPointerEnter={() => setHovered(u.id)}
+                  onPointerLeave={() => setHovered((cur) => (cur === u.id ? null : cur))}
+                  onFocus={() => setHovered(u.id)}
+                  onBlur={() => setHovered((cur) => (cur === u.id ? null : cur))}
                   aria-current={u.id === openUnitId ? 'true' : undefined}
                   aria-label={txt.ariaLabel(u)}
                   title={[txt.ariaLabel(u), txt.area(u), txt.price(u)].filter(Boolean).join(' · ')}
                   className={cn(
                     'min-h-[44px] min-w-[72px] rounded-lg border-l-4 px-3 py-1.5 text-left text-white transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
                     faded && 'opacity-30',
-                    u.id === openUnitId && 'ring-2 ring-teal-300 ring-offset-2 ring-offset-slate-900'
+                    u.id === openUnitId && 'ring-2 ring-teal-300 ring-offset-2 ring-offset-slate-900',
+                    linked.has(u.id) && '-translate-y-0.5 opacity-100 outline-dashed outline-2 outline-offset-2 outline-teal-300'
                   )}
                   style={{ borderLeftColor: meta.color, backgroundColor: rgba(meta.color, 0.22) }}
                 >

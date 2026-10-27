@@ -1205,5 +1205,22 @@
     "previewAlt": "{{name}} s označenim zgradama, kako izgleda kad se podijeli",
     "hint": "Kad se objavi na društvenim mrežama, poveznica prikazuje ovu sliku.",
     "text": "{{name}} – novi stanovi u {{place}}"
+  },
+  "companions": {
+    "comesWith": "Dolazi uz",
+    "soldWith": "Prodaje se uz",
+    "viewDetails": "Pogledaj detalje",
+    "comesWithHeading": "Dolazi uz",
+    "soldWithHeading": "Prodaje se zajedno s",
+    "editor": {
+      "title": "Dolazi uz",
+      "hint": "Parkirna mjesta i spremišta koja se prodaju uz ovu jedinicu. Kupci ih vide istaknute zajedno na slici.",
+      "soldWith": "Prodaje se zajedno s {{units}}. Promijenite to na toj jedinici.",
+      "extraHint": "Parkirna mjesta i spremišta dodaju se stanu iz samog stana.",
+      "loadError": "Parkirna mjesta nisu se učitala.",
+      "retry": "Pokušaj ponovno",
+      "none": "Još nema parkirnih mjesta ni spremišta. Dodajte ih kao jedinice vrste Parking ili Spremište, pa ih odaberite ovdje.",
+      "taken": "Dolazi uz {{unit}}"
+    }
   }
 }

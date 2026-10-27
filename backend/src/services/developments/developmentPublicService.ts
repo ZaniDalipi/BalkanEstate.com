@@ -17,6 +17,7 @@ import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit'
 import Property from '../../models/Property';
 import { encodeId } from '../../utils/idObfuscation';
 import { NotFoundError } from './developmentListingService';
+import { linkMaps } from './unitLinks';
 import { toObjectId } from './developmentRefs';
 import { resolveEffectiveAvailability } from './unitAvailability';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
@@ -95,6 +96,8 @@ interface UnitContext {
   listings: Map<string, ListingLite>;
   buildingName: Map<string, string>;
   floorById: Map<string, { label: string; level: number }>;
+  /** Units sold together, among the units being shown (see unitLinks). */
+  links?: ReturnType<typeof linkMaps>;
 }
 
 /** Project one visible unit for the public. */
@@ -126,6 +129,10 @@ export const toPublicUnit = (
   json.hasListing = publicIds.length > 0;
   json.availability = effective.availability;
   json.availabilitySource = effective.source;
+  // Only links between visible units: a hidden spot's id never leaves the server.
+  const id = String(unit._id);
+  json.linkedUnitIds = (ctx.links?.comesWith.get(id) ?? []).map(encodeId);
+  json.soldWithUnitIds = (ctx.links?.soldWith.get(id) ?? []).map(encodeId);
 
   const onRequest = unit.priceVisibility === 'on_request';
   json.priceOnRequest = onRequest;
@@ -216,7 +223,7 @@ export const listPublicUnits = async (slug: unknown) => {
       .sort({ buildingId: 1, unitNumber: 1 }),
   ]);
   const listings = await loadListingStatuses(units);
-  const ctx: UnitContext = { listings, buildingName: maps.buildingName, floorById: maps.floorById };
+  const ctx: UnitContext = { listings, buildingName: maps.buildingName, floorById: maps.floorById, links: linkMaps(units) };
   const projected = units.map((u) => toPublicUnit(u, ctx));
 
   // Price range over publicly priced units only.
@@ -246,7 +253,12 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
   const unit = await DevelopmentUnit.findOne({ _id: unitId, ...visibleUnitFilter(developmentId) });
   if (!unit) throw new NotFoundError('Unit not found');
 
-  const [maps, listingDocs] = await Promise.all([
+  // Visible units sold together with this one, either way round.
+  const related = await DevelopmentUnit.find({
+    ...visibleUnitFilter(developmentId),
+    $or: [{ _id: { $in: unit.linkedUnitIds ?? [] } }, { linkedUnitIds: unit._id }],
+  });
+  const [maps, listingDocs, relatedListings] = await Promise.all([
     loadStructureMaps(developmentId),
     (unit.listingIds ?? []).length
       ? Property.find({ _id: { $in: unit.listingIds }, status: { $ne: 'draft' } })
@@ -254,11 +266,15 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
           .limit(20)
           .lean()
       : Promise.resolve([]),
+    loadListingStatuses(related),
   ]);
   const listings = new Map(
     listingDocs.map((l) => [String(l._id), { _id: l._id as mongoose.Types.ObjectId, status: l.status }])
   );
-  const ctx: UnitContext = { listings, buildingName: maps.buildingName, floorById: maps.floorById };
+  const links = linkMaps([unit, ...related]);
+  const ctx: UnitContext = { listings, buildingName: maps.buildingName, floorById: maps.floorById, links };
+  const relatedCtx: UnitContext = { ...ctx, listings: relatedListings };
+  const comesWith = new Set(links.comesWith.get(String(unit._id)) ?? []);
 
   // Primary first, then the order they were attached.
   const order = (unit.listingIds ?? []).map(String);
@@ -271,6 +287,11 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
 
   return {
     unit: toPublicUnit(unit, ctx, { detail: true }),
+    /** Parking spots / storage rooms it comes with, and the units it is sold with. */
+    companions: related.map((u) => ({
+      relation: comesWith.has(String(u._id)) ? 'comes_with' : 'sold_with',
+      unit: toPublicUnit(u, relatedCtx),
+    })),
     development: {
       name: development.name,
       slug: development.slug,

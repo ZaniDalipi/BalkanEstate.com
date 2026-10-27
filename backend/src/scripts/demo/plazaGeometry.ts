@@ -72,3 +72,22 @@ export const modelFloorBand = (level: number): Point[] => {
   const bottom = EDGES.map((e) => along(e, b)).reverse();
   return [...top, ...bottom];
 };
+
+/**
+ * Parking bays along the street on the left of the tower picture (the lane
+ * nearest the tower, running up to the right): four car-sized parallelograms,
+ * each sold with a tower apartment in the demo.
+ */
+const ROAD = { along: [0.68, -0.73] as const, across: [0.73, 0.68] as const };
+const bay = (cx: number, cy: number): Point => [cx, cy];
+export const PARKING_BAY_CENTRES: Point[] = [bay(75, 1065), bay(112, 1035), bay(150, 1005), bay(186, 976)];
+export const parkingBay = ([cx, cy]: Point, halfLength = 15, halfWidth = 8): Point[] => {
+  const [ax, ay] = [ROAD.along[0] * halfLength, ROAD.along[1] * halfLength];
+  const [bx, by] = [ROAD.across[0] * halfWidth, ROAD.across[1] * halfWidth];
+  return [
+    [cx - ax - bx, cy - ay - by],
+    [cx + ax - bx, cy + ay - by],
+    [cx + ax + bx, cy + ay + by],
+    [cx - ax + bx, cy - ay + by],
+  ];
+};

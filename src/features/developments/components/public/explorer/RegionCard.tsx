@@ -12,6 +12,8 @@ export interface RegionCardProps {
   anchor: AnchorRect;
   /** Apartment card; otherwise a titled card with `facts` (building, floor, listing). */
   unit?: PublicUnit;
+  /** For an apartment card: the units sold together with it. */
+  companions?: { comesWith: PublicUnit[]; soldWith: PublicUnit[] };
   title?: string;
   facts?: Fact[];
   /** Photo shown above the title (listing regions). */
@@ -29,7 +31,7 @@ export interface RegionCardProps {
  * interactive — the pointer can move onto it and press the button — and is
  * portalled to <body>, fixed, below the platform modals (z < 5000).
  */
-export const RegionCard: React.FC<RegionCardProps> = ({ anchor, unit, title, facts, imageUrl, badge, actionLabel, onAction, onPointerEnter, onPointerLeave }) => {
+export const RegionCard: React.FC<RegionCardProps> = ({ anchor, unit, companions, title, facts, imageUrl, badge, actionLabel, onAction, onPointerEnter, onPointerLeave }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<CardPlacement | null>(null);
 
@@ -51,7 +53,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({ anchor, unit, title, fac
       style={{ left: pos?.left ?? anchor.left, top: pos?.top ?? anchor.top, visibility: pos ? 'visible' : 'hidden' }}
     >
       {unit ? (
-        <UnitFacts unit={unit} />
+        <UnitFacts unit={unit} companions={companions} />
       ) : (
         <>
           {imageUrl && (

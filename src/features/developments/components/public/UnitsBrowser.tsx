@@ -3,11 +3,14 @@ import { useTranslation } from 'react-i18next';
 import type { PublicUnit } from '../../types';
 import { AVAILABILITY_ORDER } from '../../utils/availability';
 import { UnitCard } from './UnitCard';
+import { companionsOf } from '../../utils/unitCompanions';
 import { EmptyState } from '../shared/States';
 
 interface UnitsBrowserProps {
   /** Units already narrowed by the shared explorer filters. */
   units: PublicUnit[];
+  /** Every unit of the residence, so a card can name its extras even when filters hide them. */
+  allUnits?: PublicUnit[];
   slug: string;
   onOpenUnit?: (unitId: string) => void;
   /** Whether filters are narrowing `units` (changes the empty-state copy). */
@@ -22,7 +25,8 @@ const PAGE = 24;
  * the grid and the facade always agree). Adds a building picker for
  * multi-building residences; pursuable units sort first.
  */
-export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units, slug, onOpenUnit, filtered }) => {
+export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units, allUnits, slug, onOpenUnit, filtered }) => {
+  const unitsById = useMemo(() => new Map((allUnits ?? units).map((u) => [u.id, u])), [allUnits, units]);
   const { t } = useTranslation('developments');
   const [building, setBuilding] = useState('all');
   const [limit, setLimit] = useState(PAGE);
@@ -68,7 +72,7 @@ export const UnitsBrowser: React.FC<UnitsBrowserProps> = ({ units, slug, onOpenU
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {shown.slice(0, limit).map((u) => (
-              <UnitCard key={u.id} unit={u} slug={slug} onOpen={onOpenUnit} />
+              <UnitCard key={u.id} unit={u} slug={slug} onOpen={onOpenUnit} companions={companionsOf(u, unitsById)} />
             ))}
           </div>
           {shown.length > limit && (

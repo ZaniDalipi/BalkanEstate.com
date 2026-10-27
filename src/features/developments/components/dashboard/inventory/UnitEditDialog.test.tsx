@@ -100,6 +100,27 @@ describe('UnitEditDialog', () => {
     expect(labels).toEqual(['inventory.edit.selectFloor', 'B-1', 'B-2']);
   });
 
+  it('picks the parking spot an apartment comes with; a spot taken by another unit cannot be picked', async () => {
+    const spot = (id: string, unitNumber: string, soldWith: DashboardUnit['soldWith'] = []) =>
+      ({ ...UNIT, id, unitNumber, unitType: 'parking', soldWith }) as DashboardUnit;
+    vi.mocked(api.listUnits).mockImplementation(async (_dev, filters) =>
+      filters?.unitType ? { items: [spot('p1', 'P1', [{ id: 'u9', unitNumber: 'A9' }]), spot('p2', 'P2')], total: 2 } : { items: [], total: 0 }
+    );
+    vi.mocked(api.updateUnit).mockRejectedValueOnce(
+      Object.assign(new Error('P2 already comes with A7'), { statusCode: 409, details: { field: 'linkedUnitIds' } })
+    );
+    renderDialog();
+    const taken = await screen.findByRole('checkbox', { name: /P1/ });
+    expect(taken).toBeDisabled();
+    await userEvent.click(screen.getByRole('checkbox', { name: /P2/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+
+    await waitFor(() => expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { linkedUnitIds: ['p2'] }));
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.filter((a) => a.textContent?.includes('P2 already comes with A7')).length).toBeGreaterThan(0);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it('explains a 403 on price changes in place', async () => {
     vi.mocked(api.updateUnit).mockRejectedValue(Object.assign(new Error('Forbidden'), { statusCode: 403 }));
     renderDialog();

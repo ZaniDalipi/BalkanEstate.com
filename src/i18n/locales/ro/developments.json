@@ -1205,5 +1205,22 @@
     "previewAlt": "{{name}} cu clădirile marcate, așa cum apare când e distribuit",
     "hint": "Postat pe rețelele sociale, linkul arată această imagine.",
     "text": "{{name}} – locuințe noi în {{place}}"
+  },
+  "companions": {
+    "comesWith": "Include",
+    "soldWith": "Se vinde cu",
+    "viewDetails": "Vezi detalii",
+    "comesWithHeading": "Include",
+    "soldWithHeading": "Se vinde împreună cu",
+    "editor": {
+      "title": "Include",
+      "hint": "Locuri de parcare și boxe vândute cu această unitate. Cumpărătorii le văd evidențiate împreună în imagine.",
+      "soldWith": "Se vinde împreună cu {{units}}. Schimbați asta la acea unitate.",
+      "extraHint": "Locurile de parcare și boxele se adaugă unui apartament din apartamentul respectiv.",
+      "loadError": "Locurile de parcare nu s-au încărcat.",
+      "retry": "Încearcă din nou",
+      "none": "Încă nu există locuri de parcare sau boxe. Adăugați-le ca unități de tip Parcare sau Boxă, apoi alegeți-le aici.",
+      "taken": "Cu {{unit}}"
+    }
   }
 }

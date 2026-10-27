@@ -3,18 +3,25 @@ import { useTranslation } from 'react-i18next';
 import type { DevelopmentBuilding, Hotspot, PublicUnit } from '../../../types';
 import { formatArea, formatPrice } from '../../../utils/format';
 import { unitArea } from '../../../utils/unitFilters';
+import { isExtraUnit } from '../../../utils/unitCompanions';
 import { useAvailabilityLabel } from '../../shared/Badges';
 
 /**
  * Shared wording for a unit across the explorer (polygon aria-label, tooltip,
  * drawer heading) so screen readers and sighted users get the same facts.
  */
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export function useUnitText() {
   const { t } = useTranslation('developments');
   const availability = useAvailabilityLabel();
 
+  // "Apt 12", but "Parking P1" / "Storage S1" for the extras sold with apartments.
   const title = useCallback(
-    (u: Pick<PublicUnit, 'unitNumber'>) => `${t('explorer.apt', 'Apt')} ${u.unitNumber}`,
+    (u: Pick<PublicUnit, 'unitNumber'> & { unitType?: string }) =>
+      isExtraUnit(u.unitType)
+        ? `${t(`explorer.unitType.${u.unitType}`, capitalize(String(u.unitType)))} ${u.unitNumber}`
+        : `${t('explorer.apt', 'Apt')} ${u.unitNumber}`,
     [t]
   );
   const bedrooms = useCallback(

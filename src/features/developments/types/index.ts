@@ -148,6 +148,8 @@ export interface DevelopmentUnit {
   floorplan?: UnitImage;
   gallery?: UnitImage[];
   listingIds: string[];
+  /** Parking spots / storage rooms (units of their own) this unit is sold with. */
+  linkedUnitIds?: string[];
   primaryListingId?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -316,6 +318,14 @@ export interface PublicUnit extends DevelopmentUnit {
   priceOnRequest?: boolean;
   /** Whether a published listing is attached (`primaryListingId` is then set). */
   hasListing?: boolean;
+  /** For a parking spot / storage room: the units it is sold with. */
+  soldWithUnitIds?: string[];
+}
+
+/** A unit sold together with the one shown: what it comes with, or what it is sold with. */
+export interface UnitCompanion {
+  relation: 'comes_with' | 'sold_with';
+  unit: PublicUnit;
 }
 
 export interface UnitsSummary {
@@ -353,6 +363,7 @@ export interface PublicUnitDetail {
     allowUnitInquiries?: boolean;
   };
   listings: LinkedListing[];
+  companions?: UnitCompanion[];
 }
 
 // --- Interactive scenes (visual map / floor-plan editor) ------------------
@@ -542,6 +553,8 @@ export interface DashboardUnit extends DevelopmentUnit {
   floorLabel?: string | null;
   floorLevel?: number | null;
   linkedListings: Array<{ id: string; title: string; status: string }>;
+  /** For a parking spot / storage room: the units it comes with. */
+  soldWith?: Array<{ id: string; unitNumber: string }>;
 }
 
 export type UnitSort =
@@ -564,6 +577,8 @@ export interface UnitListQuery {
   hasListing?: boolean;
   /** Fetch exactly these units (≤200), e.g. to label regions linked beyond the first page. */
   ids?: string[];
+  /** Only these unit types (e.g. the parking spots and storage rooms an apartment can come with). */
+  unitType?: string[];
   sort?: UnitSort;
   limit?: number;
   skip?: number;
@@ -592,6 +607,8 @@ export interface UpdateUnitPayload {
   orientation?: string | null;
   viewType?: string | null;
   features?: string[];
+  /** Parking spots / storage rooms it comes with; null clears them. */
+  linkedUnitIds?: string[] | null;
   description?: string | null;
   visibility?: UnitVisibility;
   priceVisibility?: PriceVisibility;

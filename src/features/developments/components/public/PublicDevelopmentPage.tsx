@@ -135,7 +135,7 @@ const PublicDevelopmentPage: React.FC = () => {
           {units.length > 0 && (
             <UnitFilters units={units} criteria={criteria} onChange={setCriteria} matchCount={matchedUnits.length} className="mb-5" />
           )}
-          <UnitsBrowser units={matchedUnits} slug={development.slug} onOpenUnit={drawer.open} filtered={hasActiveCriteria(criteria)} />
+          <UnitsBrowser units={matchedUnits} allUnits={units} slug={development.slug} onOpenUnit={drawer.open} filtered={hasActiveCriteria(criteria)} />
         </section>
 
         <ResidenceLocation development={development} />

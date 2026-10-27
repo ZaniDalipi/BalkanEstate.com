@@ -14,6 +14,8 @@ export interface HotspotShapeProps {
   matched?: boolean;
   mode: RegionDisplayMode;
   active: boolean;
+  /** Sold together with the hovered unit: lit up with a dashed outline. */
+  linked?: boolean;
   /** Accessible name; when absent the shape is decorative-only (not focusable). */
   label?: string;
   interactive: boolean;
@@ -42,6 +44,7 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
   matched,
   mode,
   active,
+  linked,
   label,
   interactive,
   onActivateKey,
@@ -50,7 +53,7 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
   const pts = toPolygon(hotspot.shape, hotspot.points as Point[])
     .map(([x, y]) => `${x * width},${y * height}`)
     .join(' ');
-  const paint = regionPaint({ mode, state, active, matched });
+  const paint = regionPaint({ mode, state, active, linked, matched });
   const strokeW = Math.max(1.2, width / 900) * paint.strokeScale;
 
   return (
@@ -63,6 +66,7 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
       data-state={state}
       data-dimmed={matched === false ? 'true' : 'false'}
       data-active={active ? 'true' : 'false'}
+      data-linked={linked ? 'true' : undefined}
       className={interactive ? 'cursor-pointer outline-none' : undefined}
       onKeyDown={(e) => {
         if (interactive && (e.key === 'Enter' || e.key === ' ')) {
@@ -78,6 +82,7 @@ export const HotspotShape: React.FC<HotspotShapeProps> = ({
         stroke={paint.stroke}
         strokeWidth={strokeW}
         strokeLinejoin="round"
+        strokeDasharray={paint.dashed ? `${strokeW * 3} ${strokeW * 2}` : undefined}
         pointerEvents="all"
         style={{ transition: 'fill 120ms ease, stroke 120ms ease' }}
       />

@@ -603,6 +603,35 @@ before this change, from `developmentSlug`/`unitId`/`developmentId`.
   banner, buy dialog and unlock-building notice. `PublishSection` handles the
   publish button. The pricing page shows `ResidencePricingSection`.
 
+## 7b-2. Units sold together (parking spots, storage rooms)
+
+A parking spot or storage room is a unit of its own (`unitType: 'parking' |
+'storage'`), with its own region on a picture, price, area, availability and
+details. An apartment lists the ones it **comes with** in
+`DevelopmentUnit.linkedUnitIds`; the other direction ("sold with Apt A12") is
+derived.
+
+- **Rules** (`services/developments/unitLinks.ts`): only parking and storage
+  units can be added; same residence; not itself; at most 10; a parking spot
+  can't come with anything; a spot comes with one unit at most. The last rule
+  is also a unique index (`linked_unit_once`), so two editors saving at once
+  can't both take a spot (409). Errors carry `details.field` for the editor.
+  Deleting a unit (or its floor/building) removes it from every apartment and
+  clears its own links.
+- **Dashboard**: the unit editor's "Comes with" section lists the residence's
+  parking spots and storage rooms (`GET …/units?unitType=parking,storage`);
+  a spot that comes with another unit (`soldWith`) is shown but locked.
+- **Public**: every unit carries `linkedUnitIds` and `soldWithUnitIds` (only
+  between visible units); the unit detail has `companions`.
+- **Explorer**: hovering or tapping an apartment lights up its parking spot /
+  storage room on the same picture with a dashed outline, and the other way
+  round (`linkedHotspotIds`). The hover card says "Comes with Parking P-01" or
+  "Sold with Apt T804", the details panel lists them (each opens its own
+  details), and so do the unit cards and the floor-by-floor tiles.
+- **Demo**: Plaza Tirana has four street parking bays on the tower's Front
+  picture (Plaza Podium · Parking −1), each sold with a tower apartment
+  (T804, T901, T1001, T1002).
+
 ## 7c. Sharing, Back and sign-in
 
 **Share link and preview card**

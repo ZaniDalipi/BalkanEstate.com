@@ -138,4 +138,33 @@ describe('ExplorerCanvas', () => {
     expect(tip).toHaveTextContent('Price on request');
     expect(screen.getByRole('button', { name: /View apartment/ })).toBeInTheDocument();
   });
+
+  it('hovering an apartment lights up its parking spot, the card says so, and the other way round', () => {
+    const bundle = [
+      unit({ id: 'a1', unitNumber: 'T503', beds: 2, linkedUnitIds: ['p1'] }),
+      unit({ id: 'p1', unitNumber: 'P1-01', unitType: 'parking', soldWithUnitIds: ['a1'] }),
+      unit({ id: 'a2', unitNumber: 'T504', beds: 1 }),
+    ];
+    render(
+      <ExplorerCanvas
+        view={{ ...view, hotspots: [poly('ha', 'unit', 'a1'), poly('hp', 'unit', 'p1'), poly('hb', 'unit', 'a2')] }}
+        unitsById={new Map(bundle.map((u) => [u.id, u]))}
+        onActivate={vi.fn()}
+      />
+    );
+    const region = (id: string) => document.querySelector(`[data-hotspot-id="${id}"]`) as Element;
+    expect(region('hp')).not.toHaveAttribute('data-linked');
+
+    fireEvent.pointerEnter(region('ha'), { pointerType: 'mouse' });
+    expect(region('hp')).toHaveAttribute('data-linked', 'true');
+    expect(region('hp').querySelector('polygon')).toHaveAttribute('stroke-dasharray');
+    expect(region('hb')).not.toHaveAttribute('data-linked');
+    expect(document.body).toHaveTextContent('Comes with Parking P1-01');
+    fireEvent.pointerLeave(region('ha'));
+
+    fireEvent.pointerEnter(region('hp'), { pointerType: 'mouse' });
+    expect(region('ha')).toHaveAttribute('data-linked', 'true');
+    expect(document.body).toHaveTextContent('Sold with Apt T503');
+    expect(screen.getByRole('button', { name: 'View details' })).toBeInTheDocument();
+  });
 });

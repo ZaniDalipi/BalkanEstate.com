@@ -39,6 +39,7 @@ import { recordDevelopmentAudit, diffFields } from './developmentAudit';
 import { applyAvailabilityTransition, isDuplicateKeyError } from './developmentInventoryService';
 import { assertUnitValue } from './unitRules';
 import { resolveEffectiveAvailability, type AvailabilitySource } from './unitAvailability';
+import { assertTypeChangeKeepsLinks, resolveLinkedUnits, unlinkEverywhere, UnitLinkConflictError } from './unitLinks';
 
 const log = createLogger('UnitAdminService');
 
@@ -66,6 +67,8 @@ export interface DashboardUnitJSON extends Record<string, unknown> {
   floorLabel: string | null;
   floorLevel: number | null;
   linkedListings: Array<{ id: string; title: string; status: string }>;
+  /** For a parking spot / storage room: the units it comes with (so the editor can show it is taken). */
+  soldWith: Array<{ id: string; unitNumber: string }>;
 }
 
 /**
@@ -89,12 +92,15 @@ export const toDashboardUnits = async (
   const buildingIds = Array.from(new Set(units.map((u) => String(u.buildingId))));
   const floorIds = Array.from(new Set(units.map((u) => String(u.floorId))));
 
-  const [listings, buildings, floors] = await Promise.all([
+  const [listings, buildings, floors, owners] = await Promise.all([
     listingIds.length
       ? Property.find({ _id: { $in: listingIds } }).select('title status').lean()
       : Promise.resolve([]),
     DevelopmentBuilding.find({ _id: { $in: buildingIds }, developmentId }).select('name').lean(),
     DevelopmentFloor.find({ _id: { $in: floorIds }, developmentId }).select('label level').lean(),
+    DevelopmentUnit.find({ developmentId, deletedAt: LIVE, linkedUnitIds: { $in: units.map((u) => u._id) } })
+      .select('unitNumber linkedUnitIds')
+      .lean(),
   ]);
   const listingById = new Map(listings.map((l) => [String(l._id), l]));
   const buildingName = new Map(buildings.map((b) => [String(b._id), b.name]));
@@ -125,6 +131,9 @@ export const toDashboardUnits = async (
         title: l.title ?? '',
         status: String(l.status ?? ''),
       })),
+      soldWith: owners
+        .filter((o) => (o.linkedUnitIds ?? []).some((id) => String(id) === String(u._id)))
+        .map((o) => ({ id: encodeId(String(o._id)), unitNumber: o.unitNumber })),
     };
   });
 };
@@ -154,6 +163,8 @@ export interface UnitListQuery {
   floorId?: unknown;
   availability?: unknown;
   visibility?: unknown;
+  /** Comma-separated unit types (e.g. "parking,storage"). */
+  unitType?: unknown;
   /** 'true' → only units with at least one linked listing; 'false' → only units without. */
   hasListing?: unknown;
   /** Comma-separated unit ids (encoded or raw, ≤200): fetch exactly these units. */
@@ -204,6 +215,11 @@ export const listDashboardUnits = async (
     const ids = parts.map((x) => toObjectId(x));
     if (ids.some((id) => !id)) throw new ValidationError('Invalid id in ids');
     match._id = { $in: ids };
+  }
+  if (present(q.unitType)) {
+    if (typeof q.unitType !== 'string') throw new ValidationError('unitType must be a comma-separated string');
+    const types = q.unitType.split(',').map((x) => x.trim()).filter(Boolean).slice(0, 20);
+    if (types.length) match.unitType = { $in: types };
   }
   if (present(q.hasListing)) {
     if (q.hasListing !== 'true' && q.hasListing !== 'false') {
@@ -308,6 +324,7 @@ const UPDATABLE_FIELDS = [
   'visibility',
   'priceVisibility',
   'availability',
+  'linkedUnitIds',
 ] as const;
 
 /** The permission a touched field requires. */
@@ -402,6 +419,15 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
     }
   }
 
+  // What it comes with (parking spots, storage rooms), and a type change that would break a link.
+  const nextType = String($set.unitType ?? unit.unitType);
+  if (touched.includes('linkedUnitIds')) {
+    $set.linkedUnitIds = await resolveLinkedUnits(developmentId, unit, body.linkedUnitIds, nextType);
+  }
+  if (touched.includes('unitType') && nextType !== unit.unitType) {
+    await assertTypeChangeKeepsLinks(developmentId, unit, nextType, $set.linkedUnitIds as unknown[] | undefined);
+  }
+
   // Placement: building and floor are resolved inside this development, and the
   // resulting floor must belong to the resulting building.
   if (touched.includes('buildingId') || touched.includes('floorId')) {
@@ -436,6 +462,9 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
       { new: true, runValidators: true }
     );
   } catch (error) {
+    if (isDuplicateKeyError(error) && String((error as Error).message).includes('linked_unit_once')) {
+      throw new UnitLinkConflictError('One of these spots was just added to another unit. Reload and try again.');
+    }
     if (isDuplicateKeyError(error)) {
       throw new UnitConflictError(`A unit numbered "${String($set.unitNumber ?? unit.unitNumber)}" already exists here`);
     }
@@ -513,9 +542,10 @@ export const softDeleteUnit = async (params: {
   const unit = await requireRefInDevelopment(DevelopmentUnit, params.unitId, developmentId, 'unitId');
   let detached = 0;
   await withOptionalTransaction(async (session) => {
+    // A deleted unit keeps no links, so its spots can come with another unit.
     await DevelopmentUnit.updateOne(
       { _id: unit._id, developmentId },
-      { $set: { deletedAt: new Date() } },
+      { $set: { deletedAt: new Date(), linkedUnitIds: [] } },
       { session }
     );
     const res = await Property.updateMany(
@@ -536,6 +566,8 @@ export const softDeleteUnit = async (params: {
       session
     );
   });
+  // No apartment keeps a deleted parking spot or storage room.
+  await unlinkEverywhere(developmentId, unit._id);
   await recomputeDevelopmentStats(developmentId);
 };
 

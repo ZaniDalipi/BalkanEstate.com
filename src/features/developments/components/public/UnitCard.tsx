@@ -6,6 +6,7 @@ import { paths } from '@/src/app/router/paths';
 import { cn } from '@/src/lib/utils';
 import type { PublicUnit } from '../../types';
 import { AvailabilityBadge } from '../shared/Badges';
+import { CompanionNote } from './explorer/CompanionNote';
 import { formatPrice, formatArea } from '../../utils/format';
 import { unitArea } from '../../utils/unitFilters';
 import { isPursuable } from '../../utils/availability';
@@ -15,6 +16,8 @@ interface UnitCardProps {
   slug: string;
   /** Open the unit in place (details drawer); defaults to the unit page. */
   onOpen?: (unitId: string) => void;
+  /** Units sold together with it (its parking spot / storage room, or its apartment). */
+  companions?: { comesWith: PublicUnit[]; soldWith: PublicUnit[] };
 }
 
 const Spec: React.FC<{ icon: React.ReactNode; value: React.ReactNode }> = ({ icon, value }) => (
@@ -29,7 +32,7 @@ const Spec: React.FC<{ icon: React.ReactNode; value: React.ReactNode }> = ({ ico
  * availability. Area is unitArea() — the same field the area filter uses.
  * Units that can no longer be pursued are dimmed so the grid reads at a glance.
  */
-export const UnitCard: React.FC<UnitCardProps> = ({ unit, slug, onOpen }) => {
+export const UnitCard: React.FC<UnitCardProps> = ({ unit, slug, onOpen, companions }) => {
   const { t } = useTranslation('developments');
   const area = unitArea(unit);
   const price = !unit.priceOnRequest && unit.price ? unit.price : undefined;
@@ -69,6 +72,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, slug, onOpen }) => {
         {area ? <Spec icon={<Maximize className="h-4 w-4" aria-hidden="true" />} value={formatArea(area)} /> : null}
         {unit.orientation && <Spec icon={<Compass className="h-4 w-4" aria-hidden="true" />} value={unit.orientation} />}
       </div>
+
+      {companions && <CompanionNote {...companions} />}
 
       <div className="mt-auto flex items-end justify-between gap-2 pt-1">
         <div>

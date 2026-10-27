@@ -9,6 +9,8 @@ import { useUnitText } from '../useUnitText';
 import { UnitMedia } from './UnitMedia';
 import { UnitSpecs } from './UnitSpecs';
 import { UnitActions } from './UnitActions';
+import { DrawerCompanions } from './DrawerCompanions';
+import { useUnitDrawer } from '../../../../hooks/useUnitDrawer';
 
 interface DrawerUnitContentProps {
   slug: string;
@@ -21,7 +23,8 @@ interface DrawerUnitContentProps {
 export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unitId, preview, onChildModalChange }) => {
   const { t } = useTranslation('developments');
   const txt = useUnitText();
-  const { unit: full, development, listings, isLoading, error } = usePublicUnit(slug, unitId);
+  const { unit: full, development, listings, companions, isLoading, error } = usePublicUnit(slug, unitId);
+  const drawer = useUnitDrawer();
   const unit = full ?? preview;
 
   if (!unit) {
@@ -65,6 +68,8 @@ export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unit
         </header>
 
         <UnitSpecs unit={unit} />
+
+        <DrawerCompanions companions={companions} onOpen={drawer.open} />
 
         {unit.description && <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">{unit.description}</p>}
 

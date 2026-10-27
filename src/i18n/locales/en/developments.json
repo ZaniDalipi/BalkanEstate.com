@@ -1195,5 +1195,22 @@
     "previewAlt": "{{name}} with its buildings marked, as it shows when shared",
     "hint": "Posted on social media, the link shows this picture.",
     "text": "{{name}} – new homes in {{place}}"
+  },
+  "companions": {
+    "comesWith": "Comes with",
+    "soldWith": "Sold with",
+    "viewDetails": "View details",
+    "comesWithHeading": "Comes with",
+    "soldWithHeading": "Sold together with",
+    "editor": {
+      "title": "Comes with",
+      "hint": "Parking spots and storage rooms sold with this unit. Buyers see them light up together on the picture.",
+      "soldWith": "Sold together with {{units}}. Change it on that unit.",
+      "extraHint": "Parking spots and storage rooms are added to an apartment from the apartment.",
+      "loadError": "Could not load the parking spots.",
+      "retry": "Try again",
+      "none": "No parking spots or storage rooms yet. Add them as units with the type Parking or Storage, then pick them here.",
+      "taken": "Comes with {{unit}}"
+    }
   }
 }
