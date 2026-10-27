@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/icons/BalkanEstateAILogo.svg" alt="BalkanEstateAI logo" width="96" />
+<img src="public/icons/apple-touch-icon.png" alt="BalkanEstateAI logo" width="96" />
 
 # BalkanEstateAI
 
