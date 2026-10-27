@@ -638,6 +638,25 @@
       "newName": "Emri i ri",
       "saveName": "Ruaj emrin",
       "actionsFor": "Veprime për {{name}}"
+    },
+    "repeat": {
+      "title": "Përsërite në katet e tjera",
+      "hint": "Kopjon këtë zonë herë pas here në largësi të barabartë, p.sh. një banesë në çdo kat. Kopjet nuk kanë ende banesë: lidhi ato një nga një më pas.",
+      "direction": "Drejtimi",
+      "down": "Poshtë",
+      "up": "Lart",
+      "right": "Djathtas",
+      "left": "Majtas",
+      "count": "Numri i kopjeve",
+      "countInvalid": "Shkruani një numër të plotë nga 1 deri në {{max}}.",
+      "stepHeight": "Largësia mes kopjeve (% e lartësisë së fotos)",
+      "stepWidth": "Largësia mes kopjeve (% e gjerësisë së fotos)",
+      "stepInvalid": "Shkruani një largësi nga {{min}} deri në {{max}}.",
+      "stepHelp": "Filloni me largësinë e sugjeruar dhe kontrolloni rezultatin. Zhbërja (Ctrl+Z) i heq të gjitha kopjet njëherësh.",
+      "noRoom": "Asnjë kopje nuk futet brenda fotos. Përdorni një largësi më të vogël ose një drejtim tjetër.",
+      "create": "Krijo kopjet",
+      "done": "Kopje të krijuara: {{made}}. Tani lidhni secilën me banesën e vet.",
+      "donePartial": "Kopje të krijuara: {{made}} nga {{wanted}}; pjesa tjetër do të dilte jashtë fotos. Tani lidhni secilën me banesën e vet."
     }
   },
   "inventory": {

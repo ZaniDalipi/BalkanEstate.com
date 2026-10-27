@@ -638,6 +638,25 @@
       "newName": "New name",
       "saveName": "Save name",
       "actionsFor": "Actions for {{name}}"
+    },
+    "repeat": {
+      "title": "Repeat on other floors",
+      "hint": "Copies this region again and again at an even distance, for example one apartment on every floor. The copies have no apartment yet: link each one afterwards.",
+      "direction": "Direction",
+      "down": "Down",
+      "up": "Up",
+      "right": "Right",
+      "left": "Left",
+      "count": "Number of copies",
+      "countInvalid": "Enter a whole number from 1 to {{max}}.",
+      "stepHeight": "Distance between copies (% of picture height)",
+      "stepWidth": "Distance between copies (% of picture width)",
+      "stepInvalid": "Enter a distance from {{min}} to {{max}}.",
+      "stepHelp": "Start with the suggested distance and check the result. Undo (Ctrl+Z) removes all the copies at once.",
+      "noRoom": "No copy fits inside the picture. Use a smaller distance or another direction.",
+      "create": "Create copies",
+      "done": "Copies created: {{made}}. Now link each one to its apartment.",
+      "donePartial": "Copies created: {{made}} of {{wanted}}; the rest would leave the picture. Now link each one to its apartment."
     }
   },
   "inventory": {

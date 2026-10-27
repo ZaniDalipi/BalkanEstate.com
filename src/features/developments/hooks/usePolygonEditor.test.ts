@@ -268,3 +268,41 @@ describe('polygonEditorReducer — shapes', () => {
     expect(outlineOf({ shape: 'rect', points: [[0, 0], [1, 1]] })).toHaveLength(4);
   });
 });
+
+describe('polygonEditorReducer — REPEAT', () => {
+  const rectAt = (id: string, y: number): Hotspot => ({ ...square(id), shape: 'rect', points: [[0.1, y], [0.25, y + 0.09]], label: 'A1' });
+  const ids = (n: number) => Array.from({ length: n }, (_, i) => `c${i + 1}`);
+
+  it('copies a region down the facade as one undo step, unlinked, first copy selected', () => {
+    const base = loaded(rectAt('a', 0.1));
+    const s = reduce(base, { type: 'REPEAT', id: 'a', ids: ids(3), direction: 'down', stepPct: 12 });
+    expect(s.hotspots.map((h) => h.id)).toEqual(['a', 'c1', 'c2', 'c3']);
+    expect(s.hotspots[1].points[0][1]).toBeCloseTo(0.22);
+    expect(s.hotspots[3].points[0][1]).toBeCloseTo(0.46);
+    // The original keeps its link and label; the copies keep the kind of link only.
+    expect(s.hotspots[0]).toMatchObject({ linkId: 'u1', label: 'A1' });
+    for (const c of s.hotspots.slice(1)) expect(c).toMatchObject({ shape: 'rect', linkType: 'unit', linkId: '', label: undefined });
+    expect(s.selectedId).toBe('c1');
+    expect(s.past).toHaveLength(1);
+    const undone = reduce(s, { type: 'UNDO' });
+    expect(undone.hotspots.map((h) => h.id)).toEqual(['a']);
+  });
+
+  it('puts every copy above the last one, so overlapping ones stay selectable in order', () => {
+    const s = reduce(loaded(rectAt('a', 0.1)), { type: 'REPEAT', id: 'a', ids: ids(2), direction: 'down', stepPct: 12 });
+    expect(s.hotspots.map((h) => h.z)).toEqual([0, 1, 2]);
+  });
+
+  it('makes only the copies that fit, and none when the first would leave the picture', () => {
+    const s = reduce(loaded(rectAt('a', 0.1)), { type: 'REPEAT', id: 'a', ids: ids(10), direction: 'down', stepPct: 30 });
+    expect(s.hotspots).toHaveLength(3);
+    const none = reduce(loaded(rectAt('a', 0.9)), { type: 'REPEAT', id: 'a', ids: ids(3), direction: 'down', stepPct: 12 });
+    expect(none.hotspots).toHaveLength(1);
+    expect(none.past).toHaveLength(0);
+  });
+
+  it('ignores a region that does not exist', () => {
+    const base = loaded(rectAt('a', 0.1));
+    expect(reduce(base, { type: 'REPEAT', id: 'zzz', ids: ids(2), direction: 'down', stepPct: 12 })).toBe(base);
+  });
+});

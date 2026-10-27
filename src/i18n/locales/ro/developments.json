@@ -644,6 +644,25 @@
       "newName": "Nume nou",
       "saveName": "Salvează numele",
       "actionsFor": "Acțiuni pentru {{name}}"
+    },
+    "repeat": {
+      "title": "Repetă pe alte etaje",
+      "hint": "Copiază această zonă iar și iar, la distanță egală, de exemplu un apartament pe fiecare etaj. Copiile nu au încă un apartament: legați-le pe fiecare după aceea.",
+      "direction": "Direcția",
+      "down": "În jos",
+      "up": "În sus",
+      "right": "La dreapta",
+      "left": "La stânga",
+      "count": "Numărul de copii",
+      "countInvalid": "Introduceți un număr întreg de la 1 la {{max}}.",
+      "stepHeight": "Distanța dintre copii (% din înălțimea imaginii)",
+      "stepWidth": "Distanța dintre copii (% din lățimea imaginii)",
+      "stepInvalid": "Introduceți o distanță de la {{min}} la {{max}}.",
+      "stepHelp": "Începeți cu distanța sugerată și verificați rezultatul. Anularea (Ctrl+Z) elimină toate copiile deodată.",
+      "noRoom": "Nicio copie nu încape în imagine. Folosiți o distanță mai mică sau altă direcție.",
+      "create": "Creează copiile",
+      "done": "Copii create: {{made}}. Acum legați fiecare de apartamentul ei.",
+      "donePartial": "Copii create: {{made}} din {{wanted}}; restul ar ieși din imagine. Acum legați fiecare de apartamentul ei."
     }
   },
   "inventory": {

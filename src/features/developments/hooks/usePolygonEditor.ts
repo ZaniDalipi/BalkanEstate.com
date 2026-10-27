@@ -14,6 +14,7 @@
  */
 import { useCallback, useMemo, useReducer, useRef } from 'react';
 import type { Hotspot, HotspotLinkType, HotspotShape } from '../types';
+import { repeatPoints, type RepeatDirection } from '../utils/regionRepeat';
 import {
   DUPLICATE_EPSILON,
   MIN_POLYGON_POINTS,
@@ -74,6 +75,8 @@ export type PolygonEditorAction =
   | { type: 'DELETE_SELECTED' }
   | { type: 'DELETE_SHAPE'; id: string }
   | { type: 'DUPLICATE'; id: string; newId: string }
+  /** Copy a region along a direction, one copy per id in `ids` (as many as fit); the copies have no link yet. */
+  | { type: 'REPEAT'; id: string; ids: string[]; direction: RepeatDirection; stepPct: number }
   | { type: 'PATCH'; id: string; patch: Partial<Pick<Hotspot, 'label' | 'linkType' | 'linkId'>> }
   | { type: 'REORDER'; id: string; direction: 'forward' | 'backward' }
   | { type: 'TOGGLE_HIDDEN'; id: string }
@@ -300,6 +303,23 @@ export function polygonEditorReducer(s: PolygonEditorState, a: PolygonEditorActi
         z: maxZ(s.hotspots) + 1,
       };
       return { ...commit(s, [...s.hotspots, copy]), selectedId: a.newId, selectedVertex: null };
+    }
+    case 'REPEAT': {
+      const h = s.hotspots.find((x) => x.id === a.id);
+      if (!h) return s;
+      const placed = repeatPoints(h.points as Point[], a.direction, a.stepPct, a.ids.length);
+      if (placed.length === 0) return s;
+      const z0 = maxZ(s.hotspots) + 1;
+      const copies: Hotspot[] = placed.map((points, i) => ({
+        ...h,
+        id: a.ids[i],
+        // Each floor is its own apartment: the copy keeps the kind of link but not the target or the label.
+        linkId: '',
+        label: undefined,
+        points,
+        z: z0 + i,
+      }));
+      return { ...commit(s, [...s.hotspots, ...copies]), selectedId: copies[0].id, selectedVertex: null };
     }
     case 'PATCH': {
       if (!s.hotspots.some((h) => h.id === a.id)) return s;

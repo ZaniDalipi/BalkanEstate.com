@@ -639,6 +639,20 @@ derived.
   picture (Plaza Podium · Parking −1), each sold with a tower apartment
   (T804, T901, T1001, T1002).
 
+## 7b-4. Repeating a region across a facade
+
+In the map editor, **Repeat on other floors** (under the selected region) copies
+one outline down, up or along a row: *Direction*, *Number of copies* (1–40) and
+the *Distance between copies* as a percentage of the picture's height or width.
+The suggested distance is the region's own size plus a little for the slab.
+
+- The copies keep the shape and the kind of link but not the apartment or the
+  label, so each one is linked afterwards (the editor flags them "Missing link").
+- Copies that would leave the picture are not made (nothing is squashed against
+  the edge); the panel says how many were.
+- All copies are one Undo step. The geometry is `utils/regionRepeat.ts`, the
+  action is `REPEAT` in `usePolygonEditor`, the panel is `RepeatRegion.tsx`.
+
 ## 7b-3. Errors in the reader's language
 
 - **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.

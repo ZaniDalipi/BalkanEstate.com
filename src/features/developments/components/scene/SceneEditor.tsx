@@ -7,6 +7,7 @@ import { EditorCanvas } from './editor/EditorCanvas';
 import { EditorToolbar } from './editor/EditorToolbar';
 import { RegionList } from './editor/RegionList';
 import { RegionInspector } from './editor/RegionInspector';
+import { RepeatRegion } from './editor/RepeatRegion';
 import { SceneStatusBar } from './editor/SceneStatusBar';
 import { useSceneSync } from './editor/useSceneSync';
 import { useLinkOptions } from './editor/useLinkOptions';
@@ -120,16 +121,20 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
           <RegionList editor={editor} issues={sync.issues} labelOf={labelOf} />
           <div className="border-t border-slate-200 pt-3">
             {selected && !preview ? (
-              <RegionInspector
-                key={selected.id}
-                developmentId={developmentId}
-                editor={editor}
-                hotspot={selected}
-                linkOptions={options}
-                unitPicker={unitPicker}
-                targetLabel={labelOf({ ...selected, label: '' })}
-                issues={sync.issues[selected.id] ?? []}
-              />
+              <div className="space-y-3">
+                <RegionInspector
+                  key={selected.id}
+                  developmentId={developmentId}
+                  editor={editor}
+                  hotspot={selected}
+                  linkOptions={options}
+                  unitPicker={unitPicker}
+                  targetLabel={labelOf({ ...selected, label: '' })}
+                  issues={sync.issues[selected.id] ?? []}
+                />
+                {/* Outside the keyed inspector: creating copies selects the first one, and the panel must keep its result. */}
+                <RepeatRegion editor={editor} hotspot={selected} />
+              </div>
             ) : (
               <p className="text-xs text-slate-500">{t('scene.selectHint', 'Select a region to edit its link.')}</p>
             )}

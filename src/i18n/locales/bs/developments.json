@@ -644,6 +644,25 @@
       "newName": "Novi naziv",
       "saveName": "Sačuvaj naziv",
       "actionsFor": "Radnje za {{name}}"
+    },
+    "repeat": {
+      "title": "Ponovi na drugim spratovima",
+      "hint": "Kopira ovu zonu iznova na jednakoj udaljenosti, npr. jedan stan na svakom spratu. Kopije još nemaju stan: poslije povežite svaku posebno.",
+      "direction": "Smjer",
+      "down": "Dolje",
+      "up": "Gore",
+      "right": "Desno",
+      "left": "Lijevo",
+      "count": "Broj kopija",
+      "countInvalid": "Unesite cijeli broj od 1 do {{max}}.",
+      "stepHeight": "Razmak između kopija (% visine slike)",
+      "stepWidth": "Razmak između kopija (% širine slike)",
+      "stepInvalid": "Unesite razmak od {{min}} do {{max}}.",
+      "stepHelp": "Počnite s predloženim razmakom i provjerite rezultat. Poništavanje (Ctrl+Z) uklanja sve kopije odjednom.",
+      "noRoom": "Nijedna kopija ne staje u sliku. Koristite manji razmak ili drugi smjer.",
+      "create": "Napravi kopije",
+      "done": "Napravljeno kopija: {{made}}. Sada povežite svaku sa njenim stanom.",
+      "donePartial": "Napravljeno kopija: {{made}} od {{wanted}}; ostale bi izašle iz slike. Sada povežite svaku sa njenim stanom."
     }
   },
   "inventory": {

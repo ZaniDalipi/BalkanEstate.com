@@ -252,6 +252,42 @@ test.describe('Residence explorer (owner)', () => {
     await expect.poll(tx).toBeGreaterThan(afterDrag + 100);
   });
 
+  test('editor: one drawn region is repeated down the facade, unlinked, and Undo removes all copies', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Pointer drawing');
+    await openManage(page);
+    await page.getByRole('tab', { name: 'Interactive explorer' }).click();
+    const regions = page.getByRole('list', { name: 'Regions' }).getByRole('listitem');
+    await expect(page.getByLabel('Region editor canvas')).toBeVisible({ timeout: 15000 });
+    const before = await regions.count();
+    // Draw one apartment-sized rectangle in the sky above the seeded regions.
+    await page.getByRole('button', { name: /^Rectangle/ }).first().click();
+    const box = await page.getByLabel('Region editor canvas').locator('img').first().boundingBox();
+    if (!box) throw new Error('editor canvas not rendered');
+    await page.mouse.move(box.x + box.width * 0.05, box.y + box.height * 0.02);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.15, box.y + box.height * 0.08, { steps: 5 });
+    await page.mouse.up();
+    await expect(regions).toHaveCount(before + 1);
+
+    await page.getByText('Repeat on other floors').click();
+    await page.getByLabel('Number of copies').fill('3');
+    await page.getByRole('button', { name: 'Create copies' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Copies created: 3' })).toBeVisible();
+    await expect(regions).toHaveCount(before + 4);
+    // The first copy is selected and is not linked to an apartment yet.
+    await expect(page.getByRole('status').filter({ hasText: 'Missing link' })).toBeVisible();
+
+    // A wrong value says why, next to the field, and changes nothing.
+    await page.getByLabel('Number of copies').fill('0');
+    await page.getByRole('button', { name: 'Create copies' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'whole number from 1 to 40' })).toBeVisible();
+    await expect(regions).toHaveCount(before + 4);
+
+    // One Undo removes all three copies.
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(regions).toHaveCount(before + 1);
+  });
+
   test('editor: a drawn polygon is saved where it was drawn', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Pointer drawing');
     await openManage(page);
