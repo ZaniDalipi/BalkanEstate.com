@@ -7,6 +7,7 @@ import { Agency } from '@/types';
 import { AgencyEditForm } from './useAgencyManager';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
+import { AgencyAllowanceCard } from './residences/AgencyAllowanceCard';
 
 const MapLocationPicker = lazy(() => import('@/src/features/seller/components/MapLocationPicker'));
 
@@ -207,6 +208,10 @@ const AgencyManagerDetail: React.FC<AgencyManagerDetailProps> = ({
                   </div>
                   {/* Listing Limit Override */}
                   <AgencyListingLimitOverride agency={viewingAgency} />
+                  {/* Residences: free residences this subscription year */}
+                  <div className="mt-4">
+                    <AgencyAllowanceCard agencyId={viewingAgency._id} />
+                  </div>
                 </div>
               </div>
 

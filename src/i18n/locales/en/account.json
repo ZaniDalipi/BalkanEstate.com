@@ -4,6 +4,7 @@
   "mustBeLoggedIn": "You must be logged in to view this page.",
   "tabs": {
     "myListings": "My Listings",
+    "residences": "Residences",
     "promotions": "My Promotions",
     "performance": "Performance",
     "subscription": "Subscription",

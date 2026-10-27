@@ -423,6 +423,7 @@ const GeminiDescriptionGenerator: React.FC<{
                         getZoomLevel={getZoomLevel}
                         cityData={cityData}
                         fieldErrors={fieldErrors}
+                        listingId={propertyToEdit?.id}
                     />
 
                     <ListingPropertyFeatures

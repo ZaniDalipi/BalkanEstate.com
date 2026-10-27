@@ -17,7 +17,9 @@ const router = express.Router();
 router.post('/agencies/:agencyId/featured-subscription', protect, createFeaturedSubscription);
 router.get('/agencies/:agencyId/featured-subscription', getFeaturedSubscription);
 router.delete('/agencies/:agencyId/featured-subscription', protect, cancelFeaturedSubscription);
-router.post('/agencies/:agencyId/featured-subscription/confirm-payment', protect, confirmPayment);
+// No payment provider confirms this yet, so only an admin may mark it paid
+// (otherwise any signed-in user could feature any agency for free).
+router.post('/agencies/:agencyId/featured-subscription/confirm-payment', protect, checkAdminRole, confirmPayment);
 router.post('/agencies/:agencyId/featured-subscription/apply-coupon', protect, applyCoupon);
 
 // Admin routes

@@ -130,6 +130,13 @@ import {
 import multer from 'multer';
 import { isAllowedPhotoUrl, allowedPhotoHostsHint } from '../config/imageHosts';
 import Article from '../models/Article';
+import {
+  addAgencyExtraAdmin,
+  getAgencyAllowanceAdmin,
+  grantResidenceAdmin,
+  listResidencesAdmin,
+  setBuildingLimitAdmin,
+} from '../controllers/adminResidenceController';
 
 const router = express.Router();
 
@@ -157,7 +164,14 @@ router.get('/agencies/:agencyId/subscription', logAdminAction('VIEW_AGENCY_SUBSC
 router.post('/agencies/:agencyId/subscription/activate', logAdminAction('ACTIVATE_AGENCY_SUBSCRIPTION'), activateAgencySubscription);
 router.post('/agencies/:agencyId/subscription/deactivate', logAdminAction('DEACTIVATE_AGENCY_SUBSCRIPTION'), deactivateAgencySubscription);
 router.patch('/agencies/:agencyId/listing-limit', logAdminAction('ADJUST_AGENCY_LISTING_LIMIT'), adjustAgencyListingLimit);
+router.get('/agencies/:agencyId/residence-allowance', logAdminAction('VIEW_AGENCY_RESIDENCES'), getAgencyAllowanceAdmin);
+router.post('/agencies/:agencyId/residence-allowance', logAdminAction('ADD_AGENCY_RESIDENCES'), addAgencyExtraAdmin);
 router.get('/agencies/:id', logAdminAction('VIEW_AGENCY_DETAIL'), getAgencyDetailAdmin);
+
+// ===== Residences (no payment provider yet: limits and passes are set here) =====
+router.get('/residences', logAdminAction('VIEW_RESIDENCES'), listResidencesAdmin);
+router.patch('/residences/:id/building-limit', logAdminAction('SET_RESIDENCE_BUILDING_LIMIT'), setBuildingLimitAdmin);
+router.post('/residences/:id/grant', logAdminAction('GRANT_RESIDENCE_PASS'), grantResidenceAdmin);
 router.patch('/agencies/:id', logAdminAction('UPDATE_AGENCY'), updateAgency);
 router.delete('/agencies/:id', logAdminAction('DELETE_AGENCY'), deleteAgency);
 

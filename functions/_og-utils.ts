@@ -155,7 +155,7 @@ const API_TIMEOUT_MS = 4000;
 
 type ApiResult<T> = { status: 'ok'; data: T } | { status: 'not-found' } | { status: 'error' };
 
-async function fetchApi<T>(url: string): Promise<ApiResult<T>> {
+export async function fetchApi<T>(url: string): Promise<ApiResult<T>> {
   try {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
@@ -175,7 +175,7 @@ async function fetchApi<T>(url: string): Promise<ApiResult<T>> {
 }
 
 /** The plain SPA, untouched — what humans get, and the fallback on any error. */
-function passThrough(context: PagesContext): Promise<Response> {
+export function passThrough(context: PagesContext): Promise<Response> {
   return context.env.ASSETS.fetch(context.request);
 }
 
@@ -183,7 +183,7 @@ function passThrough(context: PagesContext): Promise<Response> {
  * Minimal shell for unit tests and for the unlikely case the deployed
  * index.html cannot be read. Same markers as index.html.
  */
-const FALLBACK_SHELL = `<!DOCTYPE html>
+export const FALLBACK_SHELL = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -215,7 +215,7 @@ export interface RenderedPage {
   status?: number;
 }
 
-async function respond(context: PagesContext, page: RenderedPage): Promise<Response> {
+export async function respond(context: PagesContext, page: RenderedPage): Promise<Response> {
   const shell = (await loadShell(context)) ?? FALLBACK_SHELL;
   return new Response(renderPage(shell, page), {
     status: page.status ?? 200,
@@ -239,7 +239,7 @@ function link(lang: string, path: string, text: string, rel?: string): string {
 }
 
 /** Paragraphs from user-written text: blank lines split paragraphs, tags removed. */
-function paragraphs(text: string | undefined, maxChars = 6000): string {
+export function paragraphs(text: string | undefined, maxChars = 6000): string {
   const clean = String(text ?? '').replace(/\r/g, '').slice(0, maxChars);
   return clean
     .split(/\n\s*\n/)
@@ -249,7 +249,7 @@ function paragraphs(text: string | undefined, maxChars = 6000): string {
     .join('\n');
 }
 
-function breadcrumb(lang: string, items: Array<{ name: string; path?: string }>): { html: string; jsonLd: object } {
+export function breadcrumb(lang: string, items: Array<{ name: string; path?: string }>): { html: string; jsonLd: object } {
   const all = [{ name: LANG_NAMES[lang] || 'Home', path: '/' }, ...items];
   const html = `<nav aria-label="Breadcrumb"><ol>${all
     .map((c) => `<li>${c.path ? link(lang, c.path, c.name) : escapeHtml(c.name)}</li>`)
@@ -268,7 +268,7 @@ function breadcrumb(lang: string, items: Array<{ name: string; path?: string }>)
 }
 
 /** Site-wide navigation for the bottom of every server-rendered page. */
-function siteLinks(lang: string): string {
+export function siteLinks(lang: string): string {
   return `<nav aria-label="${SITE_NAME}"><ul>
       <li>${link(lang, '/search', 'Property for sale')}</li>
       <li>${link(lang, '/rentals', 'Property for rent')}</li>
@@ -281,7 +281,7 @@ function siteLinks(lang: string): string {
     </ul></nav>`;
 }
 
-function notFoundPage(lang: string, what: string, backPath: string, backText: string): RenderedPage {
+export function notFoundPage(lang: string, what: string, backPath: string, backText: string): RenderedPage {
   const title = `${what} not found | ${SITE_NAME}`;
   return {
     lang,

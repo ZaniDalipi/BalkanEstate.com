@@ -7,6 +7,7 @@ import {
   UserGroupIcon,
   HomeIcon,
   BuildingOfficeIcon,
+  HomeModernIcon,
   SparklesIcon,
   CurrencyEuroIcon,
   EnvelopeIcon,
@@ -152,6 +153,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: t('admin:sidebar.agencies'),
           icon: <BuildingOfficeIcon className="w-5 h-5" />,
           badge: stats?.totalAgencies
+        },
+        {
+          id: 'residences',
+          label: t('admin:sidebar.residences', 'Residences'),
+          icon: <HomeModernIcon className="w-5 h-5" />,
         },
         {
           id: 'howItWorks',

@@ -14,6 +14,7 @@ const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 const MyListingFeeds = lazy(() => import('../../src/features/listing-sources/components/MyListingFeeds'));
 const ImportReviewQueue = lazy(() => import('../../src/features/listing-sources/components/review/ImportReviewQueue'));
+const DevelopmentsDashboardPage = lazy(() => import('../../src/features/developments/components/dashboard/DevelopmentsDashboardPage'));
 import { User, UserRole, Agency } from '../../types';
 import { XMarkIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
@@ -62,12 +63,15 @@ const BALKAN_COUNTRIES = [
   { code: 'SI', name: 'Slovenia' },
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds' | 'importReview' | 'notifications';
+type AccountTab = 'listings' | 'developments' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds' | 'importReview' | 'notifications';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
     'listings': 'listings',
     'my-listings': 'listings',
+    'developments': 'developments',
+    'residences': 'developments',
+    'my-developments': 'developments',
     'promotions': 'promotions',
     'my-promotions': 'promotions',
     'performance': 'performance',
@@ -99,6 +103,7 @@ const tabRouteMap: Record<string, AccountTab> = {
 // Map account tabs to URL slugs
 const tabToRouteMap: Record<AccountTab, string> = {
     'listings': 'listings',
+    'developments': 'developments',
     'promotions': 'promotions',
     'performance': 'performance',
     'subscription': 'subscription',
@@ -2187,7 +2192,7 @@ const MyAccountPage: React.FC = () => {
     // Redirect users without seller tabs to profile if they land on a seller-only tab
     useEffect(() => {
         if (!state.currentUser) return;
-        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds' || activeTab === 'importReview')) {
+        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'developments' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds' || activeTab === 'importReview')) {
             setActiveTab('profile', { replace: true });
         }
     }, [hasSellerTabs, activeTab, setActiveTab, state.currentUser]);
@@ -2261,6 +2266,12 @@ const MyAccountPage: React.FC = () => {
         switch (activeTab) {
             case 'listings':
                 return hasSellerTabs ? <MyListings sellerId={state.currentUser!.id} /> : null;
+            case 'developments':
+                return hasSellerTabs ? (
+                    <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                        <DevelopmentsDashboardPage embedded />
+                    </Suspense>
+                ) : null;
             case 'promotions':
                 return hasSellerTabs ? <MyPromotions /> : null;
             case 'profile':
@@ -2354,6 +2365,7 @@ const MyAccountPage: React.FC = () => {
                                 {hasSellerTabs && (
                                     <>
                                         <TabButton label={t('account:tabs.myListings', 'My Listings')} icon={<SoftIcon name="home" className="w-7 h-7" />} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
+                                        <TabButton label={t('account:tabs.residences', 'Residences')} icon={<SoftIcon name="building" className="w-7 h-7" />} isActive={activeTab === 'developments'} onClick={() => setActiveTab('developments')} tabKey="developments" />
                                         <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SoftIcon name="sparkles" className="w-7 h-7" />} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
                                         <TabButton label={t('account:tabs.performance')} icon={<SoftIcon name="chart" className="w-7 h-7" />} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
                                         <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<SoftIcon name="calendar" className="w-7 h-7" />} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />

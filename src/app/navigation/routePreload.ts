@@ -46,6 +46,7 @@ const viewImporters: Partial<Record<AppView, () => Promise<unknown>>> = {
   agents: () => import('@/features/agents/components/AgentsPage'),
   agencies: () => import('@/components/AgenciesListPage'),
   'business-directory': () => import('@/features/business-directory/components/BusinessDirectoryPage'),
+  developments: () => import('@/features/developments/components/public/PublicDevelopmentsPage'),
   'how-it-works': () => import('@/components/shared/HowItWorksPage'),
   blog: () => import('@/features/blog/components/BlogPage'),
   admin: () => import('@/features/admin/components/AdminDashboard'),

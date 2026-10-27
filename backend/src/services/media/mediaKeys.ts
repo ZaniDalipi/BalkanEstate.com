@@ -26,6 +26,8 @@ export interface MediaKeyContext {
   propertyRef?: string;
   agencyId?: string;
   agencyName?: string;
+  developmentId?: string;
+  developmentName?: string;
   businessListingId?: string;
   businessName?: string;
   credentialId?: string;
@@ -77,6 +79,10 @@ export const mediaFolder = (kind: MediaAssetKind, ctx: MediaKeyContext): string 
       return `agencies/${namedSegment(ctx.agencyName, ctx.agencyId || ctx.userId)}/logo`;
     case 'agency-cover':
       return `agencies/${namedSegment(ctx.agencyName, ctx.agencyId || ctx.userId)}/cover`;
+    case 'development-cover':
+      return `developments/${namedSegment(ctx.developmentName, ctx.developmentId || ctx.userId)}/cover`;
+    case 'development-scene':
+      return `developments/${namedSegment(ctx.developmentName, ctx.developmentId || ctx.userId)}/scenes`;
     case 'business-logo':
       return `businesses/${namedSegment(ctx.businessName, ctx.businessListingId || ctx.userId)}/logo`;
     case 'business-banner':

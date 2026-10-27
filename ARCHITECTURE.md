@@ -44,6 +44,26 @@ src/components/property/  # Shared property UI (used by multiple features)
 └── NeighborhoodInsights.tsx
 ```
 
+### Code Organisation: Small Files, One Job Each
+Inside a feature, every file has one concern, so it can be read, tested and
+changed on its own:
+
+| Kind | Holds | Example |
+|------|-------|---------|
+| `utils/*.ts` | pure logic, unit-tested without rendering | `budgetMatch.ts`: parse a budget, find bargains |
+| `hooks/use*.ts` | server data (TanStack Query), state, effects | `useLocationPrice`, `usePanZoom` |
+| `components/**/use*.ts` | one component group's state or flow | `useFlyToUnit`: the explorer's guided trip |
+| `components/**/*.tsx` | rendering only, ~150 lines at most | `BudgetPanel`, `BudgetPickCard`, `StageTopBar` |
+
+- When a component grows past ~150 lines, split it along a real seam: a bar,
+  an overlay or a card becomes a sub-component, and derived data or a
+  multi-step flow becomes a hook.
+- A group of more than two related files gets its own folder
+  (`explorer/budget/`, `inventory/import/`).
+- Reuse shared types, helpers and style constants instead of near-copies.
+
+The working rules (validation, translations, tests) are in [`CLAUDE.md`](CLAUDE.md).
+
 ### Routing
 The URL is the only record of which page is on screen. React Router renders
 the route that matches it; nothing else decides the page.
@@ -1123,6 +1143,51 @@ Key decisions:
   (see *Lifecycle* below); the listing and its price stay.
 
 ---
+
+## Residences (Developments)
+
+New-build residences live in `src/features/developments` (API, hooks, types,
+validation and `components/{dashboard,public,scene,shared}`) with thin
+controllers and services under `backend/src/services/developments`. The full
+design — data model, endpoints, permission matrix, the interactive explorer and
+how-tos — is in [`docs/RESIDENCE_EXPLORER.md`](docs/RESIDENCE_EXPLORER.md).
+
+- Form pieces used by more than one form live once: `components/dashboard/details/`
+  holds `LocationFields` (+ `useLocationFields`), shared by *Create residence* and
+  *Residence details*, and `AmenitiesInput`.
+- Edit forms send only changed fields (`detailsDraft.changedFields`), so a save
+  never overwrites a teammate's change to a field the form didn't touch.
+- Validation returns i18n keys (`validation/developmentValidation.ts`); the server
+  repeats every check (`developmentService.normalizeAmenities/normalizeContact`).
+- **Server refusals carry a code, never shown as English.** Every 4xx from the
+  residence API is `{ message, code, details: { field?, params? } }`: services
+  throw `ValidationError(message, { code, field, params })` (and the same for the
+  not-found / forbidden errors, `errorMeta.ts`). `message` is for logs only.
+  - The client reads it with `utils/apiError.readApiError` (httpClient puts the
+    body in `err.details`, so the field is at `err.details.details.field`) and
+    shows it with `hooks/useApiErrorText`: the code's text from
+    `developments:apiErrors.<CODE>` with its params, or a text for the HTTP
+    status (`apiErrors.status.*`, "offline" when the request got no answer).
+  - A `field` that is a form field puts the text next to that field
+    (`role="alert"`, `aria-describedby`); otherwise it is the form-level message.
+  - `apiErrorText.test.ts` scans the backend for codes and fails when one has
+    no English text or any of the 10 locales lacks its key.
+  - Residence notifications store English plus `data.textKey`/`textParams`;
+    the bell shows `developments:notices.<key>` (`shared/utils/notificationText`).
+    Emails are still sent in English (no stored user language).
+- **Residence Pass:** creating is free, and the first publish starts a 15-day
+  public trial. After it, a pass (12 months, 5 buildings) or the owner's
+  premium plan keeps the residence public.
+  - The rules are pure functions in `billing/residencePlan.ts`.
+  - Every public query uses `publicResidenceFilter()`.
+  - The building limit is enforced in `createBuilding`; an admin can override it.
+  - Agencies get one free residence per subscription year, public while
+    subscribed plus a 15-day grace (`billing/agencyResidences.ts`).
+  - The numbers come from the `Product` documents (`residenceTerms()`), so the
+    admin pricing screen changes both the rules and the texts.
+  - Admin › Residences (`features/admin/components/residences/`) sets building
+    limits, gives passes and adds agency free residences.
+  - See *Residence Pass* in `docs/RESIDENCE_EXPLORER.md`.
 
 ## Internationalisation (i18n)
 

@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Bell, X, CheckCheck, Home, TrendingDown, MessageSquare, AlertCircle,
-  Building2, UserPlus, UserMinus, Ticket, Star, TrendingUp, Calendar,
-  CheckCircle, XCircle,
-} from 'lucide-react';
+import { Bell, X, CheckCheck } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { apiRequest } from '@/src/shared/api';
 import { socketService } from '@/services/socketService';
 import { notificationService } from '@/services/notificationService';
 import { navigate } from '@/src/app/router/navigation';
 import { SoftIcon } from '@/src/shared/illustrations';
-import { paths } from '@/src/app/router/paths';
+import { NotificationIcon } from './notifications/NotificationIcon';
+import { notificationTarget } from './notifications/notificationTarget';
+import { notificationText } from '@/src/shared/utils/notificationText';
 
 interface NotificationData {
   propertyId?: string;
@@ -24,6 +22,9 @@ interface NotificationData {
   agencyName?: string;
   actionUrl?: string;
   actionLabel?: string;
+  /** Shown in the reader's language when set (see notificationText). */
+  textKey?: string;
+  textParams?: Record<string, string | number>;
   [key: string]: any;
 }
 
@@ -38,7 +39,10 @@ interface Notification {
 }
 
 const NotificationCenter: React.FC = () => {
-  const { t } = useTranslation(['common']);
+  const { t, i18n } = useTranslation(['common', 'developments']);
+  // The socket listener lives for the whole session: read the current language through a ref.
+  const translate = useRef({ t, lang: i18n.language });
+  translate.current = { t, lang: i18n.language };
   const { state, checkAuthStatus } = useAppContext();
   const { isAuthenticated } = state;
 
@@ -151,61 +155,15 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
-  // Handle notification click - mark as read and navigate
+  // Mark as read and go where the notification leads (see notificationTarget).
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       markAsRead(notification._id);
     }
-
-    const data = notification.data;
-    if (!data) return;
-
-    // Agency activity opens the agency's page
-    if (data.agencyId && (
-      notification.type === 'agency_join_request' ||
-      notification.type === 'agent_joined_agency' ||
-      notification.type === 'agent_left_agency' ||
-      notification.type === 'agency_join_welcome' ||
-      notification.type === 'agency_coupon_redeemed'
-    )) {
-      setIsOpen(false);
-      navigate(paths.agency(data.agencySlug || data.agencyId), { direction: 'up' });
-      return;
-    }
-
-    // Navigate to viewing requests tab for viewing-related notifications
-    if (
-      notification.type === 'new_viewing' ||
-      notification.type === 'viewing_approved' ||
-      notification.type === 'viewing_declined'
-    ) {
-      setIsOpen(false);
-      navigate(paths.account('viewings'), { direction: 'morph' });
-      return;
-    }
-
-    // Navigate to property detail
-    if (data.propertyId) {
-      setIsOpen(false);
-      navigate(paths.property(data.propertyId), { direction: 'up' });
-      return;
-    }
-
-    // Navigate to conversations
-    if (data.conversationId) {
-      setIsOpen(false);
-      navigate(paths.inbox(), { direction: 'morph' });
-      return;
-    }
-
-    // Universal fallback: the notification names an in-app page. Only a
-    // same-origin path is followed — the value comes from the server.
-    if (data.actionUrl && /^\/(?!\/)/.test(data.actionUrl)) {
-      setIsOpen(false);
-      const url: string = data.actionUrl;
-      const isDetail = url.startsWith('/property/') || url.startsWith('/agencies/');
-      navigate(url, { direction: isDetail ? 'up' : 'morph' });
-    }
+    const target = notificationTarget(notification);
+    if (!target) return;
+    setIsOpen(false);
+    navigate(target.path, { direction: target.direction });
   };
 
   // Fetch on mount and poll every 5 minutes
@@ -244,8 +202,9 @@ const NotificationCenter: React.FC = () => {
 
       // Browser notification — always show if permission granted and tab is not focused
       if (Notification.permission === 'granted' && document.hidden) {
-        notificationService.showNotification(data.title, {
-          body: data.message,
+        const text = notificationText(data, translate.current.t, translate.current.lang);
+        notificationService.showNotification(text.title, {
+          body: text.message,
           tag: `notif-${data._id}`,
           requireInteraction: false,
         });
@@ -274,55 +233,20 @@ const NotificationCenter: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Get icon for notification type
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'new_listing':
-        return <Home className="w-4 h-4 text-green-500" />;
-      case 'price_drop':
-        return <TrendingDown className="w-4 h-4 text-blue-500" />;
-      case 'new_message':
-      case 'new_inquiry':
-        return <MessageSquare className="w-4 h-4 text-purple-500" />;
-      case 'listing_milestone':
-      case 'listing_trending':
-        return <TrendingUp className="w-4 h-4 text-orange-500" />;
-      case 'promotion_suggestion':
-      case 'promotion_success':
-        return <Star className="w-4 h-4 text-yellow-500" />;
-      case 'agency_join_request':
-        return <UserPlus className="w-4 h-4 text-blue-600" />;
-      case 'agent_joined_agency':
-      case 'agency_join_welcome':
-        return <UserPlus className="w-4 h-4 text-green-600" />;
-      case 'agent_left_agency':
-        return <UserMinus className="w-4 h-4 text-red-500" />;
-      case 'agency_coupon_redeemed':
-        return <Ticket className="w-4 h-4 text-indigo-500" />;
-      case 'new_viewing':
-        return <Calendar className="w-4 h-4 text-amber-500" />;
-      case 'viewing_approved':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'viewing_declined':
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'listing_limit_increased':
-        return <CheckCircle className="w-4 h-4 text-blue-500" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-gray-500" />;
-    }
-  };
+  // Esc closes the open list.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) {
+        event.preventDefault();
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen]);
 
-  // Check if notification is clickable (has a navigation target)
-  const isClickable = (notification: Notification): boolean => {
-    if (
-      notification.type === 'new_viewing' ||
-      notification.type === 'viewing_approved' ||
-      notification.type === 'viewing_declined'
-    ) return true;
-    const data = notification.data;
-    if (!data) return false;
-    return !!(data.agencyId || data.propertyId || data.conversationId);
-  };
+  const isClickable = (notification: Notification): boolean => notificationTarget(notification) !== null;
 
   // Format relative time
   const formatTime = (dateString: string) => {
@@ -349,7 +273,8 @@ const NotificationCenter: React.FC = () => {
       {/* Bell Icon */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-neutral-600 hover:text-primary hover:bg-neutral-100 rounded-full transition-colors"
+        aria-expanded={isOpen}
+        className="relative flex min-h-[44px] min-w-[44px] items-center justify-center text-neutral-600 hover:text-primary hover:bg-neutral-100 rounded-full transition-colors"
         aria-label={t('common:notifications', 'Notifications')}
       >
         <SoftIcon name="bell" className="w-6 h-6" />
@@ -362,7 +287,7 @@ const NotificationCenter: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto top-16 sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-[999] max-h-[75vh] sm:max-h-[70vh] flex flex-col overflow-hidden">
+        <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto top-[calc(env(safe-area-inset-top)+3.75rem)] sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/10 border border-white/30 z-[999] max-h-[75vh] sm:max-h-[70vh] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/20 bg-white/50">
             <h3 className="font-semibold text-gray-900">
@@ -380,7 +305,8 @@ const NotificationCenter: React.FC = () => {
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-white/50 rounded-lg transition-colors"
+                aria-label={t('common:close', 'Close')}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center -mr-2 hover:bg-white/50 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4 text-gray-500" />
               </button>
@@ -399,7 +325,9 @@ const NotificationCenter: React.FC = () => {
                 <p className="text-sm">{t('common:noNotifications', 'No notifications yet')}</p>
               </div>
             ) : (
-              notifications.map(notification => (
+              notifications.map(notification => {
+                const text = notificationText(notification, t, i18n.language);
+                return (
                 <div
                   key={notification._id}
                   className={`px-4 py-3 border-b border-white/10 hover:bg-white/40 cursor-pointer transition-colors ${
@@ -409,19 +337,19 @@ const NotificationCenter: React.FC = () => {
                 >
                   <div className="flex gap-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      {getNotificationIcon(notification.type)}
+                      <NotificationIcon type={notification.type} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <p className={`text-sm ${!notification.isRead ? 'font-semibold' : ''} text-gray-900 line-clamp-1`}>
-                          {notification.title}
+                          {text.title}
                         </p>
                         {!notification.isRead && (
                           <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-1.5"></span>
                         )}
                       </div>
                       <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
-                        {notification.message}
+                        {text.message}
                       </p>
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-xs text-gray-400">
@@ -436,7 +364,8 @@ const NotificationCenter: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 

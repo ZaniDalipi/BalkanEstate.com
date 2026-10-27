@@ -195,6 +195,25 @@ export const initializeDatabase = async (): Promise<void> => {
       dbLogger.error('❌ Error syncing product pricing:', error);
     }
 
+    // Residence numbers on products (included buildings, agency residences per year).
+    try {
+      const { migrateResidenceProducts } = await import('../services/developments/billing/residenceProductMigration');
+      const updated = await migrateResidenceProducts();
+      if (updated) dbLogger.info(`🏢 Residence numbers added to ${updated} product(s)`);
+    } catch (error) {
+      dbLogger.error('❌ Error updating residence products:', error);
+    }
+
+    // Residence Pass: residences published before billing existed start their
+    // free trial now, instead of dropping out of public pages on deploy.
+    try {
+      const { backfillPublishedResidences } = await import('../services/developments/billing/residenceBillingJob');
+      const started = await backfillPublishedResidences();
+      if (started) dbLogger.info(`🏢 Started the free trial for ${started} already-published residence(s)`);
+    } catch (error) {
+      dbLogger.error('❌ Error backfilling residence billing:', error);
+    }
+
     // Initialize email configurations - seed missing configs on every startup
     try {
       const { defaultEmailConfigs } = await import('../seeds/emailConfigSeed');

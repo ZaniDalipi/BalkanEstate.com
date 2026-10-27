@@ -64,6 +64,12 @@ const BuyingGuidesPage = lazy(() => import('@/src/features/guides/components/Buy
 const NotFoundPage = lazy(() => import('@/src/components/ui/not-found-2').then(m => ({ default: m.NotFound })));
 const AboutPage = lazy(() => import('@/src/features/legal/components/AboutPage'));
 const BlogPage = lazy(() => import('@/src/features/blog/components/BlogPage'));
+const PublicDevelopmentsPage = lazy(() => import('@/src/features/developments/components/public/PublicDevelopmentsPage'));
+const PublicDevelopmentPage = lazy(() => import('@/src/features/developments/components/public/PublicDevelopmentPage'));
+const UnitDetailPage = lazy(() => import('@/src/features/developments/components/public/UnitDetailPage'));
+const DevelopmentsDashboardPage = lazy(() => import('@/src/features/developments/components/dashboard/DevelopmentsDashboardPage'));
+const CreateDevelopmentForm = lazy(() => import('@/src/features/developments/components/dashboard/CreateDevelopmentForm'));
+const DevelopmentManagePage = lazy(() => import('@/src/features/developments/components/dashboard/DevelopmentManagePage'));
 const CreateAgencyPage = lazy(() => import('@/src/features/agencies/components/CreateAgencyPage'));
 const AgencyPaymentPage = lazy(() => import('@/src/features/agencies/components/AgencyPaymentPage'));
 const PaymentSuccess = lazy(() => import('@/src/features/payments/components/PaymentSuccess'));
@@ -124,6 +130,11 @@ const pageRoutes: AppRoute[] = [
     <BusinessDirectoryRoute />,
   ),
 
+  // Residences / Developments (public, read-only)
+  page('developments', { view: 'developments' }, guarded(<PublicDevelopmentsPage />)),
+  page('developments/:slug/units/:unitId', { view: 'developments', pageParams: ['slug', 'unitId'] }, guarded(<UnitDetailPage />)),
+  page('developments/:slug', { view: 'developments', pageParams: ['slug'] }, guarded(<PublicDevelopmentPage />)),
+
   // The user's own space
   page('saved-searches', { view: 'saved-searches', ...noindex }, <SavedSearchesPage />),
   page('saved-properties', { view: 'saved-properties', ...noindex }, <SavedPropertiesPage />),
@@ -143,6 +154,11 @@ const pageRoutes: AppRoute[] = [
     { view: 'agency-dashboard', ...noindex },
     <SignedInRoute>{guarded(<AgencyDashboardPage />)}</SignedInRoute>,
   ),
+  // Developments dashboard (authored). `new` before `:id` so it is not captured.
+  page('dashboard/developments', { view: 'development-dashboard', ...noindex }, <SignedInRoute>{guarded(<DevelopmentsDashboardPage />)}</SignedInRoute>),
+  page('dashboard/developments/new', { view: 'development-dashboard', ...noindex }, <SignedInRoute>{guarded(<CreateDevelopmentForm />)}</SignedInRoute>),
+  page('dashboard/developments/:id', { view: 'development-dashboard', ...noindex, pageParams: ['id'] }, <SignedInRoute>{guarded(<DevelopmentManagePage />)}</SignedInRoute>),
+
   page('create-agency', { view: 'createAgency' }, <CreateAgencyPage />),
   page('create-agency/payment', { view: 'createAgencyPayment' }, <AgencyPaymentPage />),
   page('create-agency/confirm', { view: 'createAgencyConfirm' }, <AgencyPaymentPage />),

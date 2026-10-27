@@ -3,6 +3,7 @@ import Product from '../models/Product';
 import { protect, restrictTo } from '../middleware/auth';
 import { apiLogger } from '../utils/logger';
 import { resolveId } from '../utils/idObfuscation';
+import { clearResidenceTermsCache } from '../services/developments/billing/residenceTerms';
 
 const router = express.Router();
 
@@ -77,6 +78,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
         aiInsightsLimit: product.aiInsightsLimit,
         imageDescriptionLimit: product.imageDescriptionLimit,
         teamMembersLimit: product.teamMembersLimit,
+        includedBuildings: product.includedBuildings,
+        residencesPerYear: product.residencesPerYear,
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,
@@ -188,6 +191,8 @@ router.put('/admin/:id', protect, restrictTo('admin', 'super_admin'), async (req
     }
 
     apiLogger.info(`✅ Product updated successfully: ${product.productId}`);
+    // Residence rules read their numbers from products; use the new ones at once.
+    clearResidenceTermsCache();
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
@@ -383,6 +388,8 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
         aiInsightsLimit: product.aiInsightsLimit,
         imageDescriptionLimit: product.imageDescriptionLimit,
         teamMembersLimit: product.teamMembersLimit,
+        includedBuildings: product.includedBuildings,
+        residencesPerYear: product.residencesPerYear,
         store: {
           google: product.googlePlayProductId,
           apple: product.appStoreProductId,

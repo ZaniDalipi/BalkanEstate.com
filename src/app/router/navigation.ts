@@ -71,15 +71,32 @@ export function navigate(to: string, options: NavigateOptions = {}): void {
  * Step back to wherever the user came from, like the browser's own back
  * button. Opened straight onto this page (a shared link, a fresh install) there
  * is nothing in-app to return to, so `fallback` is shown instead, animated as a
- * step back.
+ * step back. `replace` swaps the current entry for the fallback, for "up one
+ * level" fallbacks the browser's Back should not return from.
  */
-export function goBack(fallback: string): void {
+export function goBack(fallback: string, options: { replace?: boolean } = {}): void {
   if (canNavigateBack() && router) {
     setNavigationDirection('back');
     void router.navigate(-1);
     return;
   }
-  navigate(fallback, { direction: 'back' });
+  navigate(fallback, { direction: 'back', replace: options.replace });
+}
+
+/**
+ * Call `listener` after every change of page or query made through the router
+ * (links, `navigate`, Back/Forward). For pages that mirror router URLs into
+ * their own state. Returns the unsubscribe function; a no-op before the
+ * router exists (e.g. in unit tests).
+ */
+export function onRouteChange(listener: () => void): () => void {
+  if (!router) return () => undefined;
+  let last = router.state.location.key;
+  return router.subscribe((state) => {
+    if (state.location.key === last) return;
+    last = state.location.key;
+    listener();
+  });
 }
 
 /**

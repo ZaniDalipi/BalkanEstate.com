@@ -15,6 +15,7 @@ import {
   ConstructionStatus,
   normalizeConstructionFields,
 } from '../utils/constructionStatus';
+import { registerListingDevelopmentCleanup } from './hooks/listingDevelopmentCleanup';
 
 /**
  * Where on the floor plan a photo was taken, and which way the camera faced.
@@ -233,6 +234,16 @@ export interface IProperty extends Document {
   sourceUrl?: string;
   sourceFetchedAt?: Date;
   sourceMetadata?: Record<string, unknown>;
+  // Developments / Residences linkage (all optional). A listing with none of
+  // these is a normal standalone listing — the feature never forces a listing
+  // into a development. When set, they point at the canonical records in the
+  // development_* collections; `unitId` is the physical unit this listing
+  // markets (several listings may share one unit).
+  developmentId?: mongoose.Types.ObjectId;
+  buildingId?: mongoose.Types.ObjectId;
+  entranceId?: mongoose.Types.ObjectId;
+  floorId?: mongoose.Types.ObjectId;
+  unitId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -795,6 +806,31 @@ const PropertySchema: Schema = new Schema(
     sourceMetadata: {
       type: Schema.Types.Mixed,
     },
+    // Developments / Residences linkage (all optional, additive). Absent on
+    // every existing listing; setting them links a listing to a development
+    // unit without otherwise changing the listing.
+    developmentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Development',
+      index: true,
+    },
+    buildingId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentBuilding',
+    },
+    entranceId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentEntrance',
+    },
+    floorId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentFloor',
+    },
+    unitId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentUnit',
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -901,8 +937,30 @@ PropertySchema.pre('validate', function (next) {
   next();
 });
 
+/**
+ * Keep the development linkage internally consistent. The refs are all
+ * optional, so a standalone listing (none set) is untouched. But a deeper ref
+ * cannot float free of its root: a building/entrance/floor/unit reference only
+ * means something inside a development, so requiring `developmentId` whenever
+ * any of them is present stops half-linked listings from being stored.
+ */
+PropertySchema.pre('validate', function (next) {
+  const doc = this as unknown as IProperty;
+  const hasDeeperRef =
+    !!doc.buildingId || !!doc.entranceId || !!doc.floorId || !!doc.unitId;
+  if (hasDeeperRef && !doc.developmentId) {
+    this.invalidate(
+      'developmentId',
+      'developmentId is required when a building, entrance, floor or unit is linked'
+    );
+  }
+  next();
+});
+
 // Compound index for location-based queries
 PropertySchema.index({ lat: 1, lng: 1 });
+// Developments: all listings in a development, filtered by status
+PropertySchema.index({ developmentId: 1, status: 1 });
 // Index for price range queries
 PropertySchema.index({ price: 1, status: 1 });
 // Index for property type and city queries
@@ -954,5 +1012,8 @@ PropertySchema.index(
     name: 'source_listing_unique',
   }
 );
+
+// Residence units must not keep references to deleted listings.
+registerListingDevelopmentCleanup(PropertySchema);
 
 export default mongoose.model<IProperty>('Property', PropertySchema);

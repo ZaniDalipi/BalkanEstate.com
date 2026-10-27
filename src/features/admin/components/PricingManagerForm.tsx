@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ShieldCheckIcon, XMarkIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@/constants';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { Product } from '../api/adminApi';
+import { ResidenceLimitsFields } from './ResidenceLimitsFields';
 import { availablePlaceholders, replacePlaceholders, hasPlaceholders } from '@/src/shared/utils/featurePlaceholders';
 
 interface PricingManagerFormProps {
@@ -184,6 +185,8 @@ const PricingManagerForm: React.FC<PricingManagerFormProps> = ({
           {/* Limits */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <h4 className="font-semibold text-green-900 mb-3">{t('admin:pricing.form.limitsSection', 'Limits & Quotas')}</h4>
+
+            <ResidenceLimitsFields product={editingProduct} onNumber={handleNumberChange} />
 
             {/* Listings Limit - Most important for sellers/agents */}
             <div className="bg-white border-2 border-green-300 rounded-lg p-4 mb-4">

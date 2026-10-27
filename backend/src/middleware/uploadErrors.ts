@@ -10,6 +10,12 @@ interface UploadErrorContext {
   maxFileSizeBytes?: number;
 }
 
+/** The limits a client needs to explain an upload refusal in its own words. */
+const uploadParams = ({ maxFiles, maxFileSizeBytes }: UploadErrorContext): Record<string, number> => ({
+  ...(maxFiles ? { maxFiles } : {}),
+  ...(maxFileSizeBytes ? { maxMb: Math.round((maxFileSizeBytes / (1024 * 1024)) * 10) / 10 } : {}),
+});
+
 const mb = (bytes: number): string => `${Math.round((bytes / (1024 * 1024)) * 10) / 10} MB`;
 
 /**
@@ -76,14 +82,16 @@ export const withUploadErrors = (
 
       if (err instanceof MulterError) {
         const { status, message } = describeUploadError(err, context);
-        res.status(status).json({ message, code: err.code });
+        res.status(status).json({ message, code: err.code, details: { params: uploadParams(context) } });
         return;
       }
 
       // fileFilter rejections are plain Errors with a user-facing message
-      // (e.g. "Not an image!"); anything else is unexpected, so pass it on.
+      // (e.g. "Not an image!") and, where set, a code; anything else is
+      // unexpected, so pass it on.
       if (err instanceof Error && err.message) {
-        res.status(400).json({ message: err.message });
+        const code = (err as { code?: unknown }).code;
+        res.status(400).json({ message: err.message, ...(typeof code === 'string' ? { code } : {}) });
         return;
       }
 

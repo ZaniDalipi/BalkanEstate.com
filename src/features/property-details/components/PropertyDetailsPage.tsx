@@ -53,6 +53,7 @@ import { buildGalleryImages, groupGalleryImagesByTag } from '@/shared/property/g
 import { paths, withQuery } from '@/src/app/router/paths';
 import { AppLink } from '@/src/app/router/AppLink';
 import { navigate, goBack } from '@/src/app/router/navigation';
+import { ListingResidenceBadge } from '@/src/features/developments/components/public/listing/ListingResidenceBadge';
 
 /**
  * PropertyDetailsPage Component
@@ -1079,6 +1080,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 <ExternalSourceBadge source={property.source} sourceUrl={property.sourceUrl} variant="link" />
               </div>
             )}
+
+            {/* "Part of <residence>": links to the apartment in the residence explorer */}
+            <ListingResidenceBadge listingId={property.id} className="mx-4 lg:mx-0" />
 
             {/* Mobile Only: Property Info (description) shown early */}
             <div data-section="details" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>

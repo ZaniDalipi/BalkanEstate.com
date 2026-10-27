@@ -10,6 +10,8 @@ import {
 import type { AgencyDashboardSection } from '@/types';
 import type { OverviewData } from '../types';
 import { SoftIcon } from '@/src/shared/illustrations';
+import { navigate } from '@/src/app/router/navigation';
+import { paths } from '@/src/app/router/paths';
 
 interface AgencyDashboardSidebarProps {
   activeSection: AgencyDashboardSection;
@@ -211,6 +213,20 @@ const AgencyDashboardSidebar: React.FC<AgencyDashboardSidebarProps> = ({
       </nav>
 
       <div className="border-t border-gray-800 p-3 space-y-1">
+        <button
+          onClick={() => navigate(paths.developmentsDashboard())}
+          title={collapsed ? t('agencyDashboard:sidebar.residences', 'Residences') : undefined}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-indigo-300 hover:bg-indigo-900/30 hover:text-indigo-200 transition-colors ${
+            collapsed ? 'justify-center' : ''
+          }`}
+        >
+          <SoftIcon name="building" className="w-6 h-6" />
+          {!collapsed && (
+            <span className="text-sm font-medium">
+              {t('agencyDashboard:sidebar.residences', 'Residences')}
+            </span>
+          )}
+        </button>
         {onBrowseProperties && (
           <button
             onClick={onBrowseProperties}

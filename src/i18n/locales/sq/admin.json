@@ -53,7 +53,8 @@
     "promotionPlans": "Planet e promovimit",
     "adBanners": "Banerët reklamues",
     "emailTemplates": "Shabllonet e email-it",
-    "siteSettings": "Cilësimet e faqes"
+    "siteSettings": "Cilësimet e faqes",
+    "residences": "Rezidencat"
   },
   "properties": {
     "title": "Menaxheri i Pronave",
@@ -651,7 +652,11 @@
       "stripeProductId": "ID e Produktit Stripe",
       "stripeProductPlaceholder": "prod_...",
       "stripePriceId": "ID e Çmimit Stripe",
-      "stripePricePlaceholder": "price_..."
+      "stripePricePlaceholder": "price_...",
+      "includedBuildings": "Ndërtesa të përfshira për rezidencë",
+      "includedBuildingsDesc": "Çdo rezidencë mund të ketë kaq ndërtesa; më shumë zhbllokohen për rezidencë. Përdorni {includedBuildings} te veçoritë.",
+      "residencesPerYear": "Rezidenca falas për vit abonimi",
+      "residencesPerYearDesc": "Agjencitë mund të publikojnë falas kaq rezidenca çdo vit abonimi. Përdorni {residencesPerYear} te veçoritë."
     },
     "placeholders": {
       "title": "Placeholderët e Disponueshëm",
@@ -2063,6 +2068,91 @@
       "development": "Zhvillim",
       "tourism": "Turizëm",
       "lifestyle": "Stil jetese"
+    }
+  },
+  "residences": {
+    "title": "Rezidencat",
+    "subtitle": "Planet, kufijtë e ndërtesave dhe rezidencat falas të agjencive.",
+    "search": "Kërko rezidenca",
+    "searchPlaceholder": "Emri ose qyteti",
+    "filterLabel": "Plani",
+    "filter": {
+      "all": "Të gjitha",
+      "public": "Publike",
+      "offline": "Offline",
+      "trial": "Në provë",
+      "pass": "Me paketë",
+      "agency": "Falas nga agjencia",
+      "draft": "Drafte"
+    },
+    "state": {
+      "none": "E papublikuar",
+      "trial": "Provë falas",
+      "active": "Paketa e Rezidencës",
+      "included": "Përfshirë në plan",
+      "agency": "Falas nga agjencia",
+      "expired": "Mbaroi"
+    },
+    "col": {
+      "residence": "Rezidenca",
+      "owner": "Pronari / agjencia",
+      "plan": "Plani",
+      "publicUntil": "Publike deri më",
+      "buildings": "Ndërtesa",
+      "actions": "Veprime"
+    },
+    "notPublic": "Jo publike",
+    "custom": "i personalizuar",
+    "empty": "Asnjë rezidencë nuk përputhet.",
+    "loadError": "Rezidencat nuk u ngarkuan.",
+    "retry": "Provo sërish",
+    "pages": "Faqet",
+    "prev": "Para",
+    "next": "Pas",
+    "pageOf": "Faqja {{page}} nga {{pages}}",
+    "action": {
+      "buildings": "Kufiri i ndërtesave",
+      "grant": "Jep paketë",
+      "agency": "Rezidencat e agjencisë"
+    },
+    "limit": {
+      "title": "Kufiri i ndërtesave · {{name}}",
+      "label": "Ndërtesa që mund të ketë kjo rezidencë",
+      "help": "Tani ka {{used}}. Pa kufi të personalizuar: {{included}} (plus të blerat).",
+      "submit": "Ruaj kufirin",
+      "reset": "Kthehu te kufiri standard",
+      "saved": "{{name}} tani mund të ketë {{limit}} ndërtesa."
+    },
+    "grant": {
+      "title": "Jep një Paketë Rezidence · {{name}}",
+      "label": "Muaj",
+      "help": "Falas, shtohet pas paketës që ka tashmë.",
+      "submit": "Jep paketë",
+      "saved": "{{name}}: u shtuan {{months}} muaj."
+    },
+    "allowance": {
+      "title": "Rezidenca falas",
+      "usedOf": "{{used}} nga {{allowed}} të përdorura",
+      "year": "Ky vit abonimi: {{from}} – {{to}} · {{perYear}} në vit + {{extra}} të shtuara",
+      "add": "Shto rezidenca falas",
+      "lapsed": "Pa abonim aktiv. Rezidencat e saj falas mbeten publike deri më {{date}}.",
+      "none": "Pa abonim aktiv, pra pa rezidenca falas.",
+      "dialogTitle": "Shto rezidenca falas · {{name}}",
+      "dialogLabel": "Rezidenca shtesë për këtë vit abonimi",
+      "submit": "Shto",
+      "modalTitle": "{{name}} · rezidenca falas",
+      "error": "Rezidencat e agjencisë nuk u ngarkuan."
+    },
+    "note": "Shënim (opsional)",
+    "cancel": "Anulo",
+    "saving": "Duke ruajtur…",
+    "saved": "U ruajt",
+    "failed": "Nuk u ruajt. Provoni sërish.",
+    "problem": {
+      "required": "Shkruani një numër.",
+      "whole": "Përdorni një numër të plotë.",
+      "range": "Përdorni një numër nga 1 deri në {{max}}.",
+      "belowUsed": "Kjo rezidencë ka tashmë {{used}} ndërtesa."
     }
   }
 }

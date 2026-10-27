@@ -31,6 +31,10 @@ export interface ProductValues {
   savedSearchesLimit?: number;
   maxActiveSubscriptions?: number;
 
+  // Residences
+  includedBuildings?: number; // Residence Pass: buildings included per residence
+  residencesPerYear?: number; // Agency plan: free residences per subscription year
+
   // Pricing
   price?: number;
   durationDays?: number;
@@ -53,6 +57,9 @@ export const availablePlaceholders = [
   { key: '{savedSearchesLimit}', label: 'Saved Searches', description: 'Saved searches limit (-1 = unlimited)', example: '10' },
   { key: '{price}', label: 'Price', description: 'Product price', example: '29' },
   { key: '{durationDays}', label: 'Duration Days', description: 'Subscription duration in days', example: '30' },
+  { key: '{durationMonths}', label: 'Duration Months', description: 'Duration in whole months (from the days)', example: '12' },
+  { key: '{includedBuildings}', label: 'Included Buildings', description: 'Residence Pass: buildings included per residence', example: '5' },
+  { key: '{residencesPerYear}', label: 'Residences / Year', description: 'Agency plan: free residences per subscription year', example: '1' },
 ];
 
 /**
@@ -63,6 +70,12 @@ function formatValue(value: number | undefined | null, defaultValue: string = '0
   if (value === undefined || value === null || Number.isNaN(value)) return defaultValue;
   if (value === -1) return 'Unlimited';
   return value.toString();
+}
+
+/** Whole months from a duration in days (365 → 12), as the residence rules count them. */
+export function durationMonths(days: number | undefined | null): number | undefined {
+  if (!days || days <= 0) return undefined;
+  return Math.max(1, Math.round(days / 30.4));
 }
 
 /**
@@ -92,6 +105,9 @@ export function replacePlaceholders(feature: string, product: ProductValues): st
   result = result.replace(/\{maxActiveSubscriptions\}/g, formatValue(product.maxActiveSubscriptions));
   result = result.replace(/\{price\}/g, formatValue(product.price));
   result = result.replace(/\{durationDays\}/g, formatValue(product.durationDays));
+  result = result.replace(/\{durationMonths\}/g, formatValue(durationMonths(product.durationDays)));
+  result = result.replace(/\{includedBuildings\}/g, formatValue(product.includedBuildings));
+  result = result.replace(/\{residencesPerYear\}/g, formatValue(product.residencesPerYear));
 
   return result;
 }

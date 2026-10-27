@@ -1,0 +1,30 @@
+{
+  "description": "Hotspot geometry validation cases. Run by BOTH src/features/developments/utils/polygonGeometry.test.ts and backend/src/__tests__/developments/hotspot-geometry.test.ts so the client editor and the server agree on what is a valid hotspot. A case may give `generate` instead of `points`: {kind:'regular', n} builds an n-gon inscribed in a circle of radius 0.4 around (0.5,0.5).",
+  "cases": [
+    { "name": "valid square polygon", "shape": "polygon", "points": [[0.1, 0.1], [0.4, 0.1], [0.4, 0.4], [0.1, 0.4]], "expected": { "isValid": true } },
+    { "name": "valid triangle", "shape": "polygon", "points": [[0.2, 0.2], [0.6, 0.2], [0.4, 0.5]], "expected": { "isValid": true } },
+    { "name": "valid concave L-shape", "shape": "polygon", "points": [[0.1, 0.1], [0.5, 0.1], [0.5, 0.2], [0.2, 0.2], [0.2, 0.5], [0.1, 0.5]], "expected": { "isValid": true } },
+    { "name": "valid rect (two corners)", "shape": "rect", "points": [[0.1, 0.2], [0.3, 0.45]], "expected": { "isValid": true } },
+    { "name": "valid rect with reversed corners", "shape": "rect", "points": [[0.3, 0.45], [0.1, 0.2]], "expected": { "isValid": true } },
+    { "name": "valid polygon touching the image edges", "shape": "polygon", "points": [[0, 0], [1, 0], [1, 1], [0, 1]], "expected": { "isValid": true } },
+    { "name": "max-size polygon is allowed", "shape": "polygon", "generate": { "kind": "regular", "n": 200 }, "expected": { "isValid": true } },
+
+    { "name": "rect with three points", "shape": "rect", "points": [[0.1, 0.1], [0.3, 0.3], [0.2, 0.4]], "expected": { "isValid": false, "error": "invalid_rect" } },
+    { "name": "rect with no width", "shape": "rect", "points": [[0.2, 0.1], [0.2, 0.5]], "expected": { "isValid": false, "error": "zero_area" } },
+    { "name": "polygon with two points", "shape": "polygon", "points": [[0.1, 0.1], [0.4, 0.4]], "expected": { "isValid": false, "error": "too_few_points" } },
+    { "name": "polygon over the vertex limit", "shape": "polygon", "generate": { "kind": "regular", "n": 201 }, "expected": { "isValid": false, "error": "too_many_points" } },
+    { "name": "point beyond the right edge", "shape": "polygon", "points": [[0.1, 0.1], [1.2, 0.1], [0.4, 0.4]], "expected": { "isValid": false, "error": "out_of_bounds" } },
+    { "name": "negative coordinate", "shape": "polygon", "points": [[-0.01, 0.1], [0.4, 0.1], [0.4, 0.4]], "expected": { "isValid": false, "error": "out_of_bounds" } },
+    { "name": "pixel coordinates instead of normalised", "shape": "rect", "points": [[120, 40], [300, 500]], "expected": { "isValid": false, "error": "out_of_bounds" } },
+    { "name": "null coordinate", "shape": "polygon", "points": [[0.1, null], [0.4, 0.1], [0.4, 0.4]], "expected": { "isValid": false, "error": "non_finite" } },
+    { "name": "string coordinate", "shape": "polygon", "points": [[0.1, "0.2"], [0.4, 0.1], [0.4, 0.4]], "expected": { "isValid": false, "error": "non_finite" } },
+    { "name": "point with three components", "shape": "polygon", "points": [[0.1, 0.1, 0.1], [0.4, 0.1], [0.4, 0.4]], "expected": { "isValid": false, "error": "non_finite" } },
+    { "name": "points is not an array", "shape": "polygon", "points": "0.1,0.1 0.4,0.1 0.4,0.4", "expected": { "isValid": false, "error": "non_finite" } },
+    { "name": "double-click close leaves a repeated last vertex", "shape": "polygon", "points": [[0.1, 0.1], [0.4, 0.1], [0.4, 0.4], [0.4, 0.4]], "expected": { "isValid": false, "error": "duplicate_points" } },
+    { "name": "non-consecutive repeated vertex", "shape": "polygon", "points": [[0.1, 0.1], [0.4, 0.1], [0.25, 0.3], [0.4, 0.4], [0.1, 0.4], [0.25, 0.3]], "expected": { "isValid": false, "error": "duplicate_points" } },
+    { "name": "collinear vertices enclose no area", "shape": "polygon", "points": [[0.1, 0.1], [0.2, 0.2], [0.3, 0.3]], "expected": { "isValid": false, "error": "zero_area" } },
+    { "name": "speck smaller than the minimum area", "shape": "polygon", "points": [[0.5, 0.5], [0.501, 0.5], [0.501, 0.501], [0.5, 0.501]], "expected": { "isValid": false, "error": "zero_area" } },
+    { "name": "bow-tie crosses itself", "shape": "polygon", "points": [[0.1, 0.1], [0.4, 0.4], [0.4, 0.1], [0.1, 0.4]], "expected": { "isValid": false, "error": "self_intersecting" } },
+    { "name": "vertex touching a non-adjacent edge", "shape": "polygon", "points": [[0.1, 0.1], [0.5, 0.1], [0.5, 0.4], [0.3, 0.1], [0.1, 0.4]], "expected": { "isValid": false, "error": "self_intersecting" } }
+  ]
+}
