@@ -66,9 +66,10 @@ export const CoverImageUpload: React.FC<CoverImageUploadProps> = ({
         }}
         aria-label={t('cover.upload')}
         className={cn(
-          'group relative flex h-44 w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed transition-colors sm:h-56',
+          'group relative flex w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed transition-colors',
           dragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50',
-          coverImage ? 'border-solid' : ''
+          // With a picture the box follows a 16:9 frame (capped in height) and shows all of it; empty, it stays a compact drop zone.
+          coverImage ? 'aspect-video max-h-[28rem] border-solid bg-slate-100' : 'h-44 sm:h-56'
         )}
       >
         {coverImage ? (
@@ -76,7 +77,7 @@ export const CoverImageUpload: React.FC<CoverImageUploadProps> = ({
             <img
               src={optimizeImageUrl(coverImage, { width: 1280 })}
               alt=""
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
             <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-sm font-medium text-white opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
               {t('cover.change')}
