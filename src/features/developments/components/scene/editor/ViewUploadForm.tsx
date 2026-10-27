@@ -6,6 +6,7 @@ import { SCENE_VIEW_DIRECTIONS, type Scene, type SceneTargetType, type SceneView
 import { useSceneMutations } from '../../../hooks/useScenes';
 import { ACCEPTED_IMAGE_TYPES, uniqueViewKey } from './imageFile';
 import { useImagePick } from './useImagePick';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface ViewUploadFormProps {
   developmentId: string;
@@ -22,6 +23,7 @@ export const fieldCls =
 /** Add a camera view: image + name (→ view key) + direction + order. */
 export const ViewUploadForm: React.FC<ViewUploadFormProps> = ({ developmentId, targetType, targetId, existing, onCreated, onCancel }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const ids = useId();
   const { uploadImage, isUploading } = useSceneMutations(developmentId);
   const image = useImagePick();
@@ -48,7 +50,7 @@ export const ViewUploadForm: React.FC<ViewUploadFormProps> = ({ developmentId, t
       });
       onCreated(res.scene);
     } catch (err) {
-      image.setError((err as Error).message || t('editor.image.uploadFailed', 'Upload failed.'));
+      image.setError(apiText.text(err));
     }
   };
 

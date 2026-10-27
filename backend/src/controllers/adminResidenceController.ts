@@ -44,9 +44,9 @@ export const grantResidenceAdmin = async (req: Request, res: Response): Promise<
   try {
     const id = getObjectIdParam(req, res, 'id');
     if (!id) return;
-    const dev = await Development.findById(id);
+    const dev = await Development.findOne({ _id: id, deletedAt: { $exists: false } });
     if (!dev) {
-      res.status(404).json({ message: 'Residence not found' });
+      res.status(404).json({ message: 'Residence not found', code: 'RESIDENCE_NOT_FOUND' });
       return;
     }
     const purchases = await grant(dev, admin(req)._id, req.body ?? {});
@@ -69,7 +69,7 @@ export const getAgencyAllowanceAdmin = async (req: Request, res: Response): Prom
     if (!agencyId) return;
     const allowance = await agencyAllowance(agencyId, (await residenceTerms()).residencesPerYear, new Date());
     if (!allowance) {
-      res.status(404).json({ message: 'Agency not found' });
+      res.status(404).json({ message: 'Agency not found', code: 'AGENCY_NOT_FOUND' });
       return;
     }
     res.json({ allowance });
@@ -85,7 +85,11 @@ export const addAgencyExtraAdmin = async (req: Request, res: Response): Promise<
     if (!agencyId) return;
     const extra = Number(req.body?.extra);
     if (!Number.isInteger(extra) || extra < 1 || extra > MAX_EXTRA_RESIDENCES) {
-      res.status(400).json({ message: `extra must be a whole number from 1 to ${MAX_EXTRA_RESIDENCES}` });
+      res.status(400).json({
+        message: `extra must be a whole number from 1 to ${MAX_EXTRA_RESIDENCES}`,
+        code: 'FIELD_RANGE',
+        details: { field: 'extra', params: { min: 1, max: MAX_EXTRA_RESIDENCES } },
+      });
       return;
     }
     const note = typeof req.body?.note === 'string' ? req.body.note.slice(0, 500) : undefined;

@@ -299,7 +299,8 @@ export interface PreviewResult {
 
 export interface BulkAttachResult {
   attached: string[];
-  failed: { listingId: string; unitId: string; reason: string }[];
+  /** `reason` is English for logs; `code` is translated (developments:apiErrors). */
+  failed: { listingId: string; unitId: string; reason: string; code?: string }[];
 }
 
 export interface Paginated<T> {
@@ -481,7 +482,8 @@ export interface UnitImportSummary {
   unitsUpdated: number;
   unchanged: number;
   skippedExisting: number;
-  errors: { row: number; message: string }[];
+  /** Rows that can't be imported; `code` (+ `field`, `params`) is translated, `message` is English for logs. */
+  errors: { row: number; message: string; code?: string; field?: string; params?: Record<string, string | number> }[];
   dryRun: boolean;
 }
 

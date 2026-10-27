@@ -6,6 +6,7 @@ import { useConfirmation } from '@/src/shared/hooks/useConfirmation';
 import { useNotification } from '@/src/shared/hooks/useNotification';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import type { DashboardUnit, UnitImage } from '../../../types';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface FloorplanUploadProps {
   developmentId: string;
@@ -29,6 +30,7 @@ export const checkFloorplanFile = (file: File): 'type' | 'size' | null =>
 /** Pick → validate → preview → upload a unit's floorplan image (uploads immediately, separate from Save). */
 export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId, unitId, current, disabled, canRemove, onUnit }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const inputId = useId();
   const notify = useNotification();
   const { confirm } = useConfirmation();
@@ -70,7 +72,7 @@ export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId,
       setPreview(null);
       void notify.success(t('inventory.floorplan.uploadedTitle', 'Floorplan uploaded'), t('inventory.floorplan.uploaded', 'The floorplan is saved.'));
     } catch (err) {
-      setError((err as { message?: string })?.message || t('errors.generic'));
+      setError(apiText.text(err));
     }
   };
 
@@ -89,7 +91,7 @@ export const FloorplanUpload: React.FC<FloorplanUploadProps> = ({ developmentId,
       if (res?.unit) onUnit?.(res.unit);
       void notify.success(t('inventory.floorplan.removedTitle', 'Floor plan removed'), t('inventory.floorplan.removed', 'The unit no longer has a floor plan.'));
     } catch (err) {
-      setError((err as { message?: string })?.message || t('errors.generic'));
+      setError(apiText.text(err));
     }
   };
 

@@ -94,7 +94,7 @@ export const developmentAuth = async (
 ): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ message: 'Not authorized' });
+      res.status(401).json({ message: 'Not authorized', code: 'NOT_SIGNED_IN' });
       return;
     }
 
@@ -106,7 +106,7 @@ export const developmentAuth = async (
       deletedAt: { $exists: false },
     });
     if (!development) {
-      res.status(404).json({ message: 'Development not found' });
+      res.status(404).json({ message: 'Development not found', code: 'RESIDENCE_NOT_FOUND' });
       return;
     }
 
@@ -119,6 +119,7 @@ export const developmentAuth = async (
       );
       res.status(403).json({
         message: 'You do not have permission to access this development',
+        code: 'NOT_TEAM_MEMBER',
       });
       return;
     }
@@ -143,6 +144,8 @@ export const requireDevelopmentPermission = (permission: DevelopmentPermission) 
     if (!role || !roleHasPermission(role, permission)) {
       res.status(403).json({
         message: 'You do not have permission to perform this action',
+        code: 'FORBIDDEN',
+        details: { params: { permission } },
       });
       return;
     }

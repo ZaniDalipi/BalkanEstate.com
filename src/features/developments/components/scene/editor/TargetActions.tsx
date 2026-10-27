@@ -6,6 +6,7 @@ import { useNotification } from '@/src/shared/hooks/useNotification';
 import { cn } from '@/src/lib/utils';
 import type { StructureDeleteImpact, StructureKind } from '../../../api/developmentsApi';
 import { useStructureActions } from '../../../hooks/useStructureActions';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface TargetActionsProps {
   developmentId: string;
@@ -53,6 +54,7 @@ export const TargetActions: React.FC<TargetActionsProps> = ({ developmentId, kin
   const { confirm } = useConfirmation();
   const notify = useNotification();
   const actions = useStructureActions(developmentId);
+  const apiText = useApiErrorText();
   const impactMessage = useImpactMessage();
   const [mode, setMode] = useState<'closed' | 'menu' | 'rename'>('closed');
   const [draft, setDraft] = useState(name);
@@ -74,7 +76,7 @@ export const TargetActions: React.FC<TargetActionsProps> = ({ developmentId, kin
   }, [mode]);
 
   const fail = (err: unknown) =>
-    void notify.error(t('errors.updateFailed', 'Could not save your changes.'), (err as { message?: string })?.message || t('errors.generic', 'Something went wrong.'));
+    void notify.error(t('errors.updateFailed', 'Could not save your changes.'), apiText.text(err));
 
   const onRename = async (e: React.FormEvent) => {
     e.preventDefault();

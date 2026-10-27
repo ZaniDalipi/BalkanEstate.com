@@ -37,7 +37,7 @@ export const loadPublishedDevelopment = async (rawSlug: unknown): Promise<IDevel
   const development = slug
     ? await Development.findOne({ slug, ...publicResidenceFilter() })
     : null;
-  if (!development) throw new NotFoundError('Development not found');
+  if (!development) throw new NotFoundError('Development not found', { code: 'RESIDENCE_NOT_FOUND' });
   return development;
 };
 
@@ -249,9 +249,9 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
   const development = await loadPublishedDevelopment(slug);
   const developmentId = development._id as mongoose.Types.ObjectId;
   const unitId = toObjectId(rawUnitId);
-  if (!unitId) throw new NotFoundError('Unit not found');
+  if (!unitId) throw new NotFoundError('Unit not found', { code: 'UNIT_NOT_FOUND' });
   const unit = await DevelopmentUnit.findOne({ _id: unitId, ...visibleUnitFilter(developmentId) });
-  if (!unit) throw new NotFoundError('Unit not found');
+  if (!unit) throw new NotFoundError('Unit not found', { code: 'UNIT_NOT_FOUND' });
 
   // Visible units sold together with this one, either way round.
   const related = await DevelopmentUnit.find({

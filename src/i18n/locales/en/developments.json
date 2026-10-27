@@ -636,7 +636,8 @@
       "deleted": "“{{name}}” was deleted.",
       "rename": "Rename",
       "newName": "New name",
-      "saveName": "Save name"
+      "saveName": "Save name",
+      "actionsFor": "Actions for {{name}}"
     }
   },
   "inventory": {
@@ -1119,7 +1120,18 @@
       "buildingLimit": "This residence can have {{limit}} buildings. Unlock more to add another.",
       "paymentSoonAmount": "Online payment is coming soon. {{amount}} is still due, so enter a code that covers it.",
       "paymentSoon": "Online payment is coming soon. Enter a code to unlock it now.",
-      "couponInvalid": "This code is not valid for residences."
+      "couponInvalid": "This code is not valid for residences.",
+      "coupon": {
+        "unknown": "There is no such code. Check the spelling.",
+        "inactive": "This code is no longer active.",
+        "notYetValid": "This code can’t be used yet.",
+        "expired": "This code has expired.",
+        "usedUp": "This code has been used up.",
+        "alreadyUsed": "You have already used this code.",
+        "minimum": "This code needs a purchase of at least {{min}}.",
+        "otherPlan": "This code is for another plan, not for residences.",
+        "notResidence": "This code is not valid for residences."
+      }
     },
     "code": {
       "label": "Unlock code",
@@ -1222,6 +1234,114 @@
     "bulk": {
       "label": "{{status}} (with their parking and storage)",
       "includeLinked": "Also update their parking spots and storage rooms"
+    }
+  },
+  "apiErrors": {
+    "FIELD_REQUIRED": "This field is required.",
+    "FIELD_INVALID": "This value isn’t accepted. Check it or pick one from the list.",
+    "FIELD_NOT_NUMBER": "Enter a number of 0 or more.",
+    "FIELD_TOO_LONG": "Too long: {{max}} characters at most.",
+    "FIELD_RANGE": "Enter a number from {{min}} to {{max}}.",
+    "TOO_MANY_ITEMS": "At most {{max}} entries.",
+    "EMAIL_INVALID": "Enter a valid email address, like name@example.com.",
+    "URL_INVALID": "Enter a full web address starting with https://.",
+    "CURRENCY_EUR_ONLY": "Prices are in euros (EUR).",
+    "FLOOR_NOT_IN_BUILDING": "This floor belongs to another building. Pick a floor of the chosen building.",
+    "ENTRANCE_NOT_IN_BUILDING": "This entrance belongs to another building.",
+    "REF_NOT_FOUND": "This no longer exists. Reload the page and try again.",
+    "UNIT_NOT_FOUND": "This unit no longer exists. Reload the page.",
+    "BUILDING_NOT_FOUND": "This building no longer exists. Reload the page.",
+    "FLOOR_NOT_FOUND": "This floor no longer exists. Reload the page.",
+    "IMAGE_NOT_FOUND": "This picture was already removed. Reload the page.",
+    "LISTING_NOT_FOUND": "This listing no longer exists.",
+    "RESIDENCE_NOT_FOUND": "This residence no longer exists. Reload the page.",
+    "AGENCY_NOT_FOUND": "This agency no longer exists. Reload the page.",
+    "VIEW_NOT_FOUND": "This view no longer exists. Reload the page.",
+    "UNIT_NUMBER_TAKEN": "Unit {{number}} already exists here. Use another number.",
+    "DUPLICATE": "This already exists.",
+    "NO_CHANGES": "Nothing to save: no field was changed.",
+    "FORBIDDEN_FIELDS": "Your role is not allowed to change some of these fields.",
+    "FORBIDDEN": "Your role is not allowed to make this change.",
+    "NOT_TEAM_MEMBER": "You are not on this residence’s team. Ask its owner to add you.",
+    "NOT_SIGNED_IN": "Your session has ended. Sign in again.",
+    "AGENCY_NOT_YOURS": "Only the agency’s owner or admins can create residences for it.",
+    "IMPORT_EMPTY": "The file has no rows to import.",
+    "IMPORT_TOO_MANY": "At most {{max}} rows per import. Split the file.",
+    "IMPORT_NO_BUILDING": "No building.",
+    "IMPORT_NO_UNIT_NUMBER": "No unit number.",
+    "IMPORT_BAD_FLOOR": "The floor must be a whole number from {{min}} to {{max}}.",
+    "IMPORT_BAD_NUMBER": "{{field}}: “{{value}}” is not a number of 0 or more.",
+    "IMPORT_BAD_AVAILABILITY": "Unknown availability “{{value}}”.",
+    "IMPORT_BAD_CHOICE": "{{field}}: “{{value}}” is not one of the options.",
+    "IMPORT_DUPLICATE_ROW": "Unit {{unit}} appears twice in {{building}}.",
+    "BULK_EMPTY": "Select at least one unit.",
+    "BULK_TOO_MANY": "Select at most {{max}} units at a time.",
+    "NO_IMAGES": "Choose a picture to upload.",
+    "IMAGE_TYPE": "Only JPG, PNG, WebP or AVIF pictures can be uploaded.",
+    "LIMIT_FILE_SIZE": "The picture is too large: {{maxMb}} MB at most.",
+    "LIMIT_FILE_COUNT": "Too many pictures: {{maxFiles}} at a time at most.",
+    "LIMIT_UNEXPECTED_FILE": "Too many pictures: {{maxFiles}} at a time at most.",
+    "GALLERY_FULL": "A unit can have at most {{max}} pictures. Remove some first.",
+    "STORAGE_NOT_CONFIGURED": "Picture uploads are not available right now. Try again later.",
+    "LISTING_NOT_YOURS": "You can only use your own listings.",
+    "LISTING_CLOSED": "This listing is closed (sold or rented), so it can’t be linked.",
+    "LISTING_NOT_ATTACHED": "This listing is not linked to this unit.",
+    "ATTACH_CONFLICT": "This listing’s details don’t match the unit. Review them and try again.",
+    "LINKS_NOT_LIST": "One of the chosen spots no longer exists. Reload and try again.",
+    "LINKS_INVALID_ID": "One of the chosen spots no longer exists. Reload and try again.",
+    "LINKS_NOT_FOUND": "One of the chosen spots no longer exists. Reload and try again.",
+    "LINKS_TOO_MANY": "A unit can come with at most {{max}} parking spots or storage rooms.",
+    "LINKS_EXTRA_CANNOT_HAVE": "A parking spot or storage room can’t come with other units.",
+    "LINKS_SELF": "A unit can’t come with itself.",
+    "LINKS_NOT_EXTRA": "Only parking spots and storage rooms can be added; {{unit}} is not one.",
+    "LINKS_TAKEN": "{{unit}} already comes with {{owner}}. Remove it there first.",
+    "LINKS_TAKEN_RACE": "One of these spots was just added to another unit. Reload and try again.",
+    "TYPE_EXTRA_HAS_LINKS": "This unit comes with parking or storage, so it can’t become one. Remove them first.",
+    "TYPE_SOLD_WITH": "This spot is sold with {{owner}}. Remove it there before changing its type.",
+    "ALSO_LINKED_NOT_LIST": "Tick the spots again: only spots this unit comes with can change with it.",
+    "ALSO_LINKED_NOT_LINKED": "Tick the spots again: only spots this unit comes with can change with it.",
+    "ALSO_LINKED_NEEDS_STATUS": "Spots can only follow a change of this unit’s status.",
+    "LIMIT_BELOW_USED": "This residence already has {{used}} buildings, so the limit can’t be lower.",
+    "GRANT_EMPTY": "Give at least 1 month.",
+    "AGENCY_NOT_SUBSCRIBED": "This agency has no active subscription, so it has no free residences to add to.",
+    "status": {
+      "badRequest": "Something in the form isn’t valid. Check it and try again.",
+      "forbidden": "Your role is not allowed to make this change.",
+      "notFound": "This no longer exists. Reload the page.",
+      "conflict": "Someone changed this at the same time. Reload and try again.",
+      "tooLarge": "The upload is too large.",
+      "tooMany": "Too many attempts. Wait a minute and try again.",
+      "server": "Something went wrong on our side. Try again in a moment.",
+      "offline": "No connection. Check your internet and try again."
+    },
+    "conflict": {
+      "listing_not_controlled_by_caller": "You don’t manage this listing, so you can’t link it.",
+      "listing_archived_or_sold": "This listing is sold or rented, so it can’t be linked.",
+      "unit_in_other_development": "This unit belongs to another residence.",
+      "already_attached_to_this_unit": "This listing is already linked to this unit.",
+      "listing_already_attached_elsewhere": "This listing is linked to another unit. Linking it here moves it."
+    }
+  },
+  "notices": {
+    "trialEndsSoon": {
+      "title": "{{name}}: free trial ends soon",
+      "message": "Days left before {{name}} goes offline: {{days}}. Buy a Residence Pass to keep it public."
+    },
+    "trialEnded": {
+      "title": "{{name}} is offline",
+      "message": "The free trial of {{name}} has ended. Buy a Residence Pass to put it back online."
+    },
+    "agencyGrace": {
+      "title": "{{name}}: renew your agency plan",
+      "message": "Your agency subscription has ended. {{name}} stays public until {{date}}; renew to keep it online."
+    },
+    "agencyOffline": {
+      "title": "{{name}} is offline",
+      "message": "Your agency subscription has ended, so {{name}} is offline. Renew to put it back online."
+    },
+    "unitAvailable": {
+      "title": "New home available at {{residence}}",
+      "message": "Unit {{unit}} is now available."
     }
   }
 }

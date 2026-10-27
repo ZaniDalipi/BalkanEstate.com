@@ -81,14 +81,34 @@ describe('ResidenceManager', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
-  it('keeps the dialog open with the server’s reason when saving fails', async () => {
+  it('keeps the dialog open with the server’s reason, translated, when saving fails', async () => {
     api.listAdminResidences.mockResolvedValue(list([residence()]));
-    api.grantResidencePass.mockRejectedValue(new Error('Residence not found'));
+    api.grantResidencePass.mockRejectedValue(
+      Object.assign(new Error('Residence not found'), { statusCode: 404, code: 'RESIDENCE_NOT_FOUND', details: { message: 'Residence not found', code: 'RESIDENCE_NOT_FOUND' } })
+    );
     renderIt();
     fireEvent.click((await firstCard()).getByRole('button', { name: 'Give pass' }));
     const dialog = await screen.findByRole('dialog');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Give pass' }));
-    expect(await within(dialog).findByRole('alert')).toHaveTextContent('Residence not found');
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent('This residence no longer exists. Reload the page.');
     expect(api.grantResidencePass).toHaveBeenCalledWith('r1', { months: 12, note: undefined });
+  });
+
+  it('shows a refusal of the number under the number field', async () => {
+    api.listAdminResidences.mockResolvedValue(list([residence()]));
+    api.grantResidencePass.mockRejectedValue(
+      Object.assign(new Error('months must be…'), {
+        statusCode: 400,
+        code: 'FIELD_RANGE',
+        details: { code: 'FIELD_RANGE', details: { field: 'months', params: { min: 1, max: 120 } } },
+      })
+    );
+    renderIt();
+    fireEvent.click((await firstCard()).getByRole('button', { name: 'Give pass' }));
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Give pass' }));
+    const alert = await within(dialog).findByRole('alert');
+    expect(alert).toHaveTextContent('Enter a number from 1 to 120.');
+    expect(within(dialog).getByRole('spinbutton')).toHaveAttribute('aria-describedby', alert.id);
   });
 });

@@ -19,5 +19,7 @@ export const currencyProblem = (value: string): string | null =>
 /** Throw a ValidationError when `field` holds a value it may not. */
 export const assertUnitValue = (field: string, value: string): void => {
   const problem = field === 'currency' ? currencyProblem(value) : field in CHOICES ? choiceProblem(field as ChoiceField, value) : null;
-  if (problem) throw new ValidationError(problem);
+  if (problem) {
+    throw new ValidationError(problem, field === 'currency' ? { code: 'CURRENCY_EUR_ONLY', field } : { code: 'FIELD_INVALID', field });
+  }
 };

@@ -7,6 +7,7 @@ import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import { AVAILABILITY_ORDER } from '../../../utils/availability';
 import type { BulkUnitUpdatePayload, UnitAvailability, UnitVisibility } from '../../../types';
 import type { EditPermissions } from './permissions';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface InventoryBulkBarProps {
   developmentId: string;
@@ -23,6 +24,7 @@ const selectClass =
 /** Sticky action bar for the selected rows: bulk availability / visibility. */
 export const InventoryBulkBar: React.FC<InventoryBulkBarProps> = ({ developmentId, selectedIds, withExtras = 0, permissions, onClear }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const { confirm } = useConfirmation();
   const notify = useNotification();
   const { bulkUpdate, isBulkUpdating } = useUnitAdmin(developmentId);
@@ -52,11 +54,7 @@ export const InventoryBulkBar: React.FC<InventoryBulkBarProps> = ({ developmentI
         t('inventory.bulk.successMessage', '{{count}} units updated.', { count: updated })
       );
     } catch (err) {
-      const e = err as { statusCode?: number; message?: string };
-      void notify.error(
-        t('inventory.bulk.errorTitle', 'Update failed'),
-        e?.statusCode === 403 ? t('inventory.errors.forbidden', 'Your role is not allowed to make this change.') : e?.message || t('errors.generic')
-      );
+      void notify.error(t('inventory.bulk.errorTitle', 'Update failed'), apiText.text(err));
     }
   };
 

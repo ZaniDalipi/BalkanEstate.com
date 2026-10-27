@@ -1,6 +1,7 @@
 import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/src/shared/components/ui/Modal';
+import { useApiErrorText } from '@/src/features/developments/hooks/useApiErrorText';
 
 interface NumberDialogProps {
   title: string;
@@ -20,11 +21,12 @@ interface NumberDialogProps {
 
 /**
  * A small admin dialog asking for one number (and an optional note):
- * validated on submit and as you fix it, server errors shown above the
- * buttons. Full-screen on phones (Modal), 44px targets.
+ * validated on submit and as you fix it; a server refusal of the number is
+ * shown under it, any other above the buttons (translated by its code). Full-screen on phones (Modal), 44px targets.
  */
 export const NumberDialog: React.FC<NumberDialogProps> = (p) => {
   const { t } = useTranslation(['admin']);
+  const apiText = useApiErrorText();
   const id = useId();
   const [raw, setRaw] = useState(p.initial ?? '');
   const [note, setNote] = useState('');
@@ -39,7 +41,10 @@ export const NumberDialog: React.FC<NumberDialogProps> = (p) => {
       await action();
       p.onClose();
     } catch (err) {
-      setFormError((err as { message?: string })?.message || t('admin:residences.failed', 'Could not save. Please try again.'));
+      // The dialog has one number: a refusal naming any field but the note belongs under it.
+      const { text, field } = apiText.describe(err);
+      if (field && field !== 'note') setFieldError(text);
+      else setFormError(text);
     } finally {
       setBusy(false);
     }

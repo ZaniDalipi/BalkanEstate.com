@@ -4,6 +4,7 @@ import { CheckCircle2, Copy, Loader2, Undo2 } from 'lucide-react';
 import { useUnitPrefill } from '../../../hooks/useUnitPrefill';
 import type { UnitPrefill } from '../../../types';
 import { ListingLinkPicker } from '../../scene/ListingLinkPicker';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 /** What was filled, from which listing — enough to describe it. */
 export interface FilledFrom {
@@ -35,6 +36,7 @@ interface FillFromListingProps {
  */
 export const FillFromListing: React.FC<FillFromListingProps> = ({ developmentId, source, canLink, disabled, onFill, onUndo, onLinkChange, mode = 'edit' }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const [open, setOpen] = useState(false);
   const prefill = useUnitPrefill(developmentId);
 
@@ -103,7 +105,7 @@ export const FillFromListing: React.FC<FillFromListingProps> = ({ developmentId,
           )}
           {prefill.error && (
             <p role="alert" className="text-sm text-red-700">
-              {(prefill.error as { message?: string }).message || t('errors.generic')}
+              {apiText.text(prefill.error)}
             </p>
           )}
           <button type="button" onClick={() => setOpen(false)} className="text-sm text-slate-600 hover:underline">{t('wizard.cancel', 'Cancel')}</button>

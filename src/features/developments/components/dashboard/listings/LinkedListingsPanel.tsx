@@ -15,6 +15,7 @@ import type { DashboardUnit } from '../../../types';
 import { AttachListingDialog } from './AttachListingDialog';
 import { LinkedUnitRow } from './LinkedUnitRow';
 import { UnitPickerDialog } from './UnitPickerDialog';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface LinkedListingsPanelProps {
   developmentId: string;
@@ -29,6 +30,7 @@ const LINKED_ONLY = { hasListing: true } as const;
  */
 export const LinkedListingsPanel: React.FC<LinkedListingsPanelProps> = ({ developmentId, role }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const qc = useQueryClient();
   const { confirm } = useConfirmation();
   const notify = useNotification();
@@ -56,7 +58,7 @@ export const LinkedListingsPanel: React.FC<LinkedListingsPanelProps> = ({ develo
       qc.invalidateQueries({ queryKey: developmentKeys.public() });
       void notify.success(t('attach.detached', 'Listing detached.'), t('manage.listings.detachedFrom', 'Removed from unit {{number}}.', { number: unit.unitNumber }));
     } catch (err) {
-      void notify.error(t('errors.updateFailed', 'Could not save your changes.'), (err as { message?: string })?.message || t('errors.generic'));
+      void notify.error(t('errors.updateFailed', 'Could not save your changes.'), apiText.text(err));
     }
   };
 

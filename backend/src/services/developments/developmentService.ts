@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { applyErrorMeta, type ErrorDetails, type ErrorMeta } from './errorMeta';
 import Development, { IDevelopment } from '../../models/Development';
 import DevelopmentBuilding from '../../models/DevelopmentBuilding';
 import DevelopmentUnit from '../../models/DevelopmentUnit';
@@ -85,32 +86,33 @@ export const createDevelopment = async (
   user: IUser
 ): Promise<IDevelopment> => {
   if (!isValidCategory(input.category)) {
-    throw new ValidationError(`category must be one of: ${DEVELOPMENT_CATEGORIES.join(', ')}`);
+    throw new ValidationError(`category must be one of: ${DEVELOPMENT_CATEGORIES.join(', ')}`, { code: 'FIELD_INVALID', field: 'category' });
   }
   if (
     input.constructionStatus !== undefined &&
     !isValidConstructionStatus(input.constructionStatus)
   ) {
-    throw new ValidationError(
-      `constructionStatus must be one of: ${DEVELOPMENT_CONSTRUCTION_STATUSES.join(', ')}`
-    );
+    throw new ValidationError(`constructionStatus must be one of: ${DEVELOPMENT_CONSTRUCTION_STATUSES.join(', ')}`, {
+      code: 'FIELD_INVALID',
+      field: 'constructionStatus',
+    });
   }
   assertWebsite(input.website);
-  if (!text(input.name)) throw new ValidationError('name is required');
-  if (!text(input.country)) throw new ValidationError('country is required');
-  if (!text(input.city)) throw new ValidationError('city is required');
+  if (!text(input.name)) throw new ValidationError('name is required', { code: 'FIELD_REQUIRED', field: 'name' });
+  if (!text(input.country)) throw new ValidationError('country is required', { code: 'FIELD_REQUIRED', field: 'country' });
+  if (!text(input.city)) throw new ValidationError('city is required', { code: 'FIELD_REQUIRED', field: 'city' });
 
   // Agency ownership grants the agency's owner/admins full rights, so only
   // they may create a development under that agency.
   let agencyId: mongoose.Types.ObjectId | undefined;
   if (input.agencyId) {
     const raw = typeof input.agencyId === 'string' ? resolveId(input.agencyId) : null;
-    if (!raw || !mongoose.Types.ObjectId.isValid(raw)) throw new ValidationError('agencyId is invalid');
+    if (!raw || !mongoose.Types.ObjectId.isValid(raw)) throw new ValidationError('agencyId is invalid', { code: 'FIELD_INVALID', field: 'agencyId' });
     const agency = await Agency.findById(raw).select('ownerId admins').lean();
     const uid = String(user._id);
     const canUseAgency =
       !!agency && (String(agency.ownerId) === uid || (agency.admins ?? []).some((a) => String(a) === uid));
-    if (!canUseAgency) throw new ForbiddenError('You can only create developments for an agency you own or administer');
+    if (!canUseAgency) throw new ForbiddenError('You can only create developments for an agency you own or administer', { code: 'AGENCY_NOT_YOURS' });
     agencyId = new mongoose.Types.ObjectId(raw);
   } else if (input.personal !== true) {
     // An agency's owner or admin creates residences for the agency (its yearly
@@ -232,21 +234,22 @@ export const updateDevelopment = async (
     const value = updates[key];
     if (key === 'website') assertWebsite(value);
     if (key === 'category' && !isValidCategory(value)) {
-      throw new ValidationError(`category must be one of: ${DEVELOPMENT_CATEGORIES.join(', ')}`);
+      throw new ValidationError(`category must be one of: ${DEVELOPMENT_CATEGORIES.join(', ')}`, { code: 'FIELD_INVALID', field: 'category' });
     }
     if (key === 'constructionStatus' && value !== undefined && !isValidConstructionStatus(value)) {
-      throw new ValidationError(
-        `constructionStatus must be one of: ${DEVELOPMENT_CONSTRUCTION_STATUSES.join(', ')}`
-      );
+      throw new ValidationError(`constructionStatus must be one of: ${DEVELOPMENT_CONSTRUCTION_STATUSES.join(', ')}`, {
+        code: 'FIELD_INVALID',
+        field: 'constructionStatus',
+      });
     }
     if (key === 'allowUnitInquiries') {
-      if (typeof value !== 'boolean') throw new ValidationError('allowUnitInquiries must be a boolean');
+      if (typeof value !== 'boolean') throw new ValidationError('allowUnitInquiries must be a boolean', { code: 'FIELD_INVALID', field: 'allowUnitInquiries' });
       development.allowUnitInquiries = value;
       continue;
     }
     if (key === 'expectedCompletionDate') {
       const date = value ? new Date(value as string) : undefined;
-      if (date && Number.isNaN(date.getTime())) throw new ValidationError('expectedCompletionDate is not a valid date');
+      if (date && Number.isNaN(date.getTime())) throw new ValidationError('expectedCompletionDate is not a valid date', { code: 'FIELD_INVALID', field: 'expectedCompletionDate' });
       development.expectedCompletionDate = date;
       continue;
     }
@@ -255,7 +258,7 @@ export const updateDevelopment = async (
       continue;
     }
     if ((key === 'name' || key === 'country' || key === 'city') && !text(value)) {
-      throw new ValidationError(`${key} is required`);
+      throw new ValidationError(`${key} is required`, { code: 'FIELD_REQUIRED', field: key });
     }
     if (key === 'amenities') {
       development.amenities = normalizeAmenities(value);
@@ -268,7 +271,7 @@ export const updateDevelopment = async (
     if (key === 'lat' || key === 'lng') {
       const n = value === null || value === '' || value === undefined ? undefined : Number(value);
       const max = key === 'lat' ? 90 : 180;
-      if (n !== undefined && (!Number.isFinite(n) || Math.abs(n) > max)) throw new ValidationError(`${key} is out of range`);
+      if (n !== undefined && (!Number.isFinite(n) || Math.abs(n) > max)) throw new ValidationError(`${key} is out of range`, { code: 'FIELD_RANGE', field: key, params: { min: -max, max } });
       (development as unknown as Record<string, unknown>)[key] = n;
       continue;
     }
@@ -343,7 +346,11 @@ export function normalizeYearBuilt(value: unknown): number | undefined {
   const year = Number(value);
   const max = new Date().getFullYear();
   if (!Number.isInteger(year) || year < MIN_YEAR_BUILT || year > max) {
-    throw new ValidationError(`yearBuilt must be a year between ${MIN_YEAR_BUILT} and ${max}`);
+    throw new ValidationError(`yearBuilt must be a year between ${MIN_YEAR_BUILT} and ${max}`, {
+      code: 'FIELD_RANGE',
+      field: 'yearBuilt',
+      params: { min: MIN_YEAR_BUILT, max },
+    });
   }
   return year;
 }
@@ -369,27 +376,31 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Trimmed, de-duplicated amenity labels (≤ 40, each ≤ 60 chars). */
 export function normalizeAmenities(value: unknown): string[] {
   if (value === undefined || value === null) return [];
-  if (!Array.isArray(value)) throw new ValidationError('amenities must be a list');
+  if (!Array.isArray(value)) throw new ValidationError('amenities must be a list', { code: 'FIELD_INVALID', field: 'amenities' });
   const out: string[] = [];
   for (const v of value) {
     const a = text(v);
     if (!a) continue;
-    if (a.length > AMENITY_MAX_LENGTH) throw new ValidationError(`An amenity can be at most ${AMENITY_MAX_LENGTH} characters`);
+    if (a.length > AMENITY_MAX_LENGTH) throw new ValidationError(`An amenity can be at most ${AMENITY_MAX_LENGTH} characters`, {
+        code: 'FIELD_TOO_LONG',
+        field: 'amenities',
+        params: { max: AMENITY_MAX_LENGTH },
+      });
     if (!out.some((x) => x.toLowerCase() === a.toLowerCase())) out.push(a);
   }
-  if (out.length > MAX_AMENITIES) throw new ValidationError(`At most ${MAX_AMENITIES} amenities`);
+  if (out.length > MAX_AMENITIES) throw new ValidationError(`At most ${MAX_AMENITIES} amenities`, { code: 'TOO_MANY_ITEMS', field: 'amenities', params: { max: MAX_AMENITIES } });
   return out;
 }
 
 /** Sales contact shown to buyers: optional name, valid email, phone. */
 export function normalizeContact(value: unknown): { name?: string; email?: string; phone?: string } | undefined {
   if (value === undefined || value === null) return undefined;
-  if (typeof value !== 'object' || Array.isArray(value)) throw new ValidationError('contact must be an object');
+  if (typeof value !== 'object' || Array.isArray(value)) throw new ValidationError('contact must be an object', { code: 'FIELD_INVALID', field: 'contact' });
   const raw = value as Record<string, unknown>;
   const name = text(raw.name).slice(0, 120) || undefined;
   const email = text(raw.email) || undefined;
   const phone = text(raw.phone).slice(0, 40) || undefined;
-  if (email && (email.length > 254 || !EMAIL_PATTERN.test(email))) throw new ValidationError('contact.email is not a valid email address');
+  if (email && (email.length > 254 || !EMAIL_PATTERN.test(email))) throw new ValidationError('contact.email is not a valid email address', { code: 'EMAIL_INVALID', field: 'contact.email' });
   if (!name && !email && !phone) return undefined;
   return { ...(name ? { name } : {}), ...(email ? { email } : {}), ...(phone ? { phone } : {}) };
 }
@@ -398,22 +409,28 @@ export function normalizeContact(value: unknown): { name?: string; email?: strin
 function assertWebsite(value: unknown): void {
   if (value === undefined || value === null || value === '') return;
   if (typeof value !== 'string' || !/^https?:\/\/[^\s]+$/i.test(value.trim())) {
-    throw new ValidationError('website must be an http(s) URL');
+    throw new ValidationError('website must be an http(s) URL', { code: 'URL_INVALID', field: 'website' });
   }
 }
 
 export class ForbiddenError extends Error {
   readonly statusCode = 403;
-  constructor(message: string) {
+  code?: string;
+  details?: ErrorDetails;
+  constructor(message: string, meta?: ErrorMeta) {
     super(message);
     this.name = 'ForbiddenError';
+    applyErrorMeta(this, meta);
   }
 }
 
 export class ValidationError extends Error {
   readonly statusCode = 400;
-  constructor(message: string) {
+  code?: string;
+  details?: ErrorDetails;
+  constructor(message: string, meta?: ErrorMeta) {
     super(message);
     this.name = 'ValidationError';
+    applyErrorMeta(this, meta);
   }
 }

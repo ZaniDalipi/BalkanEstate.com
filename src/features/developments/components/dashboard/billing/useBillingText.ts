@@ -4,6 +4,19 @@ import type { ResidenceBilling } from '../../../types';
 import type { BillingRefusal } from '../../../utils/billingError';
 import { formatCharge } from '../../../utils/format';
 
+/** Why a code was refused (`details.reason` of COUPON_INVALID). */
+export const COUPON_REASON_TEXT: Record<string, string> = {
+  unknown: 'There is no such code. Check the spelling.',
+  inactive: 'This code is no longer active.',
+  notYetValid: 'This code can’t be used yet.',
+  expired: 'This code has expired.',
+  usedUp: 'This code has been used up.',
+  alreadyUsed: 'You have already used this code.',
+  minimum: 'This code needs a purchase of at least {{min}}.',
+  otherPlan: 'This code is for another plan, not for residences.',
+  notResidence: 'This code is not valid for residences.',
+};
+
 /** Wording for the Residence Pass: state names, the countdown line and refusals. */
 export function useBillingText() {
   const { t, i18n } = useTranslation('developments');
@@ -73,8 +86,12 @@ export function useBillingText() {
           return r.amount
             ? t('billing.refusal.paymentSoonAmount', { amount: formatCharge(r.amount), defaultValue: 'Online payment is coming soon. {{amount}} is still due, so enter a code that covers it.' })
             : t('billing.refusal.paymentSoon', 'Online payment is coming soon. Enter a code to unlock it now.');
+        case 'COUPON_INVALID':
+          return r.reason && COUPON_REASON_TEXT[r.reason]
+            ? t(`billing.refusal.coupon.${r.reason}`, { min: r.min !== undefined ? formatCharge(r.min) : '', defaultValue: COUPON_REASON_TEXT[r.reason] })
+            : t('billing.refusal.couponInvalid', 'This code is not valid for residences.');
         default:
-          return r.message || t('billing.refusal.couponInvalid', 'This code is not valid for residences.');
+          return t('billing.refusal.couponInvalid', 'This code is not valid for residences.');
       }
     },
     [t]

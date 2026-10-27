@@ -14,6 +14,7 @@ import { usePrefillDescription } from './usePrefillDescription';
 import { FillFromListing } from './FillFromListing';
 import { UnitFeatureToggles } from './UnitFeatureToggles';
 import { roleCan } from './permissions';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface AddUnitsFormProps {
   developmentId: string;
@@ -35,6 +36,7 @@ const fromListing = ({ features: _f, unitType: _t, ...rest }: UnitPrefill['field
  */
 export const AddUnitsForm: React.FC<AddUnitsFormProps> = ({ developmentId, buildings, floors, createUnit, isCreating, onError, role }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const [chosenBuilding, setChosenBuilding] = useState('');
   const [floorId, setFloorId] = useState('');
   const [numberText, setNumberText] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export const AddUnitsForm: React.FC<AddUnitsFormProps> = ({ developmentId, build
       setFeatures([]);
       setPrefill(null);
     } catch (err) {
-      onError((err as { message?: string })?.message || t('errors.generic'));
+      onError(apiText.text(err));
     } finally {
       setBusy(false);
     }

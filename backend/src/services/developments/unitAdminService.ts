@@ -38,6 +38,7 @@ import { requireRefInDevelopment, toObjectId } from './developmentRefs';
 import { recordDevelopmentAudit, diffFields } from './developmentAudit';
 import { applyAvailabilityTransition, isDuplicateKeyError } from './developmentInventoryService';
 import { assertUnitValue } from './unitRules';
+import { applyErrorMeta, type ErrorDetails } from './errorMeta';
 import { resolveEffectiveAvailability, type AvailabilitySource } from './unitAvailability';
 import { assertTypeChangeKeepsLinks, resolveLinkedUnits, unlinkEverywhere, UnitLinkConflictError } from './unitLinks';
 import { applyToLinkedUnits, linkedIdsOf, parseAlsoLinked } from './linkedAvailability';
@@ -46,12 +47,15 @@ const log = createLogger('UnitAdminService');
 
 type Id = mongoose.Types.ObjectId | string;
 
-/** A 409 for a unit-number clash, with a message the editor can show. */
+/** A 409 for a unit-number clash; the editor shows it next to the unit number. */
 class UnitConflictError extends Error {
   readonly statusCode = 409;
-  constructor(message: string) {
+  code?: string;
+  details?: ErrorDetails;
+  constructor(message: string, unitNumber: string) {
     super(message);
     this.name = 'UnitConflictError';
+    applyErrorMeta(this, { code: 'UNIT_NUMBER_TAKEN', field: 'unitNumber', params: { number: unitNumber } });
   }
 }
 
@@ -188,55 +192,55 @@ export const listDashboardUnits = async (
 
   if (present(q.buildingId)) {
     const id = toObjectId(q.buildingId);
-    if (!id) throw new ValidationError('Invalid buildingId');
+    if (!id) throw new ValidationError('Invalid buildingId', { code: 'FIELD_INVALID', field: 'buildingId' });
     match.buildingId = id;
   }
   if (present(q.floorId)) {
     const id = toObjectId(q.floorId);
-    if (!id) throw new ValidationError('Invalid floorId');
+    if (!id) throw new ValidationError('Invalid floorId', { code: 'FIELD_INVALID', field: 'floorId' });
     match.floorId = id;
   }
   if (present(q.availability)) {
     if (!isUnitAvailability(q.availability)) {
-      throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`);
+      throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`, { code: 'FIELD_INVALID', field: 'availability' });
     }
     match.availability = q.availability;
   }
   if (present(q.visibility)) {
     if (!isUnitVisibility(q.visibility)) {
-      throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`);
+      throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`, { code: 'FIELD_INVALID', field: 'visibility' });
     }
     // Legacy units predate the field; treat missing as public.
     match.visibility = q.visibility === 'public' ? { $ne: 'hidden' } : 'hidden';
   }
   if (present(q.ids)) {
-    if (typeof q.ids !== 'string') throw new ValidationError('ids must be a comma-separated string');
+    if (typeof q.ids !== 'string') throw new ValidationError('ids must be a comma-separated string', { code: 'FIELD_INVALID', field: 'ids' });
     const parts = q.ids.split(',').map((x) => x.trim()).filter(Boolean);
-    if (parts.length > 200) throw new ValidationError('ids accepts at most 200 ids');
+    if (parts.length > 200) throw new ValidationError('ids accepts at most 200 ids', { code: 'BULK_TOO_MANY', field: 'ids', params: { max: 200 } });
     const ids = parts.map((x) => toObjectId(x));
-    if (ids.some((id) => !id)) throw new ValidationError('Invalid id in ids');
+    if (ids.some((id) => !id)) throw new ValidationError('Invalid id in ids', { code: 'FIELD_INVALID', field: 'ids' });
     match._id = { $in: ids };
   }
   if (present(q.unitType)) {
-    if (typeof q.unitType !== 'string') throw new ValidationError('unitType must be a comma-separated string');
+    if (typeof q.unitType !== 'string') throw new ValidationError('unitType must be a comma-separated string', { code: 'FIELD_INVALID', field: 'unitType' });
     const types = q.unitType.split(',').map((x) => x.trim()).filter(Boolean).slice(0, 20);
     if (types.length) match.unitType = { $in: types };
   }
   if (present(q.hasListing)) {
     if (q.hasListing !== 'true' && q.hasListing !== 'false') {
-      throw new ValidationError('hasListing must be true or false');
+      throw new ValidationError('hasListing must be true or false', { code: 'FIELD_INVALID', field: 'hasListing' });
     }
     match['listingIds.0'] = { $exists: q.hasListing === 'true' };
   }
   if (present(q.search)) {
-    if (typeof q.search !== 'string') throw new ValidationError('search must be a string');
+    if (typeof q.search !== 'string') throw new ValidationError('search must be a string', { code: 'FIELD_INVALID', field: 'search' });
     const term = q.search.trim().slice(0, 100);
     if (term) match.unitNumber = { $regex: escapeRegex(term), $options: 'i' };
   }
 
   const sort: UnitSort = present(q.sort) ? (q.sort as UnitSort) : 'unitNumber';
   if (!(UNIT_SORTS as readonly string[]).includes(String(sort))) {
-    throw new ValidationError(`sort must be one of: ${UNIT_SORTS.join(', ')}`);
+    throw new ValidationError(`sort must be one of: ${UNIT_SORTS.join(', ')}`, { code: 'FIELD_INVALID', field: 'sort' });
   }
   const rawLimit = Number(q.limit);
   const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(Math.floor(rawLimit), 200) : 50;
@@ -339,9 +343,10 @@ export const assertAllowed = (role: DevelopmentRole | undefined, fields: string[
   const needed = new Set(fields.map(permissionForUnitField));
   const denied = [...needed].filter((p) => !role || !roleHasPermission(role, p));
   if (denied.length > 0) {
-    throw new AuthorizationError(
-      `You do not have permission to change these fields (requires ${denied.join(', ')})`
-    );
+    throw new AuthorizationError(`You do not have permission to change these fields (requires ${denied.join(', ')})`, {
+      code: 'FORBIDDEN_FIELDS',
+      params: { permissions: denied.join(', ') },
+    });
   }
 };
 
@@ -356,11 +361,11 @@ export interface UpdateUnitParams {
 export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUnitJSON> => {
   const { developmentId, role, actorId } = params;
   if (!params.payload || typeof params.payload !== 'object' || Array.isArray(params.payload)) {
-    throw new ValidationError('Request body must be an object');
+    throw new ValidationError('Request body must be an object', { code: 'FIELD_INVALID' });
   }
   const body = params.payload as Record<string, unknown>;
   const touched = (UPDATABLE_FIELDS as readonly string[]).filter((f) => body[f] !== undefined);
-  if (touched.length === 0) throw new ValidationError('No updatable fields supplied');
+  if (touched.length === 0) throw new ValidationError('No updatable fields supplied', { code: 'NO_CHANGES' });
 
   // Authorization first: a caller lacking a permission learns nothing more.
   assertAllowed(role, touched);
@@ -376,15 +381,19 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
     if ((NUMBER_FIELDS as readonly string[]).includes(field)) {
       if (value === null) $unset[field] = '';
       else if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
-        throw new ValidationError(`${field} must be a non-negative number or null`);
+        throw new ValidationError(`${field} must be a non-negative number or null`, { code: 'FIELD_NOT_NUMBER', field });
       } else $set[field] = value;
     } else if (field in STRING_FIELDS) {
       if (value === null) $unset[field] = '';
-      else if (typeof value !== 'string') throw new ValidationError(`${field} must be a string or null`);
+      else if (typeof value !== 'string') throw new ValidationError(`${field} must be a string or null`, { code: 'FIELD_INVALID', field });
       else {
         const v = value.trim();
         if (v.length > STRING_FIELDS[field]) {
-          throw new ValidationError(`${field} must be at most ${STRING_FIELDS[field]} characters`);
+          throw new ValidationError(`${field} must be at most ${STRING_FIELDS[field]} characters`, {
+            code: 'FIELD_TOO_LONG',
+            field,
+            params: { max: STRING_FIELDS[field] },
+          });
         }
         if (v) {
           assertUnitValue(field, v);
@@ -392,29 +401,39 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
         } else $unset[field] = '';
       }
     } else if (field in REQUIRED_STRING_FIELDS) {
-      if (typeof value !== 'string' || !value.trim()) throw new ValidationError(`${field} is required`);
+      if (typeof value !== 'string' || !value.trim()) throw new ValidationError(`${field} is required`, { code: 'FIELD_REQUIRED', field });
       if (value.trim().length > REQUIRED_STRING_FIELDS[field]) {
-        throw new ValidationError(`${field} must be at most ${REQUIRED_STRING_FIELDS[field]} characters`);
+        throw new ValidationError(`${field} must be at most ${REQUIRED_STRING_FIELDS[field]} characters`, {
+          code: 'FIELD_TOO_LONG',
+          field,
+          params: { max: REQUIRED_STRING_FIELDS[field] },
+        });
       }
       $set[field] = value.trim();
     } else if (field === 'features') {
       if (value === null) $set.features = [];
       else if (!Array.isArray(value) || !value.every(isUnitFeature)) {
-        throw new ValidationError(`features must be a list of: ${UNIT_FEATURES.join(', ')}`);
+        throw new ValidationError(`features must be a list of: ${UNIT_FEATURES.join(', ')}`, { code: 'FIELD_INVALID', field: 'features' });
       } else $set.features = Array.from(new Set(value));
     } else if (field === 'visibility') {
       if (!isUnitVisibility(value)) {
-        throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`);
+        throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`, { code: 'FIELD_INVALID', field: 'visibility' });
       }
       $set.visibility = value;
     } else if (field === 'priceVisibility') {
       if (!isPriceVisibility(value)) {
-        throw new ValidationError(`priceVisibility must be one of: ${PRICE_VISIBILITIES.join(', ')}`);
+        throw new ValidationError(`priceVisibility must be one of: ${PRICE_VISIBILITIES.join(', ')}`, {
+          code: 'FIELD_INVALID',
+          field: 'priceVisibility',
+        });
       }
       $set.priceVisibility = value;
     } else if (field === 'availability') {
       if (!isUnitAvailability(value)) {
-        throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`);
+        throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`, {
+          code: 'FIELD_INVALID',
+          field: 'availability',
+        });
       }
       $set.availability = value;
     }
@@ -439,7 +458,10 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
   // resulting floor must belong to the resulting building.
   if (touched.includes('buildingId') || touched.includes('floorId')) {
     if (body.buildingId === null || body.floorId === null) {
-      throw new ValidationError('buildingId and floorId cannot be cleared');
+      throw new ValidationError('buildingId and floorId cannot be cleared', {
+        code: 'FIELD_REQUIRED',
+        field: body.floorId === null ? 'floorId' : 'buildingId',
+      });
     }
     const building = touched.includes('buildingId')
       ? await requireRefInDevelopment(DevelopmentBuilding, body.buildingId, developmentId, 'buildingId')
@@ -449,7 +471,7 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
       : await DevelopmentFloor.findOne({ _id: unit.floorId, developmentId });
     const buildingId = building ? building._id : unit.buildingId;
     if (!floor || String(floor.buildingId) !== String(buildingId)) {
-      throw new ValidationError('floorId must belong to the building');
+      throw new ValidationError('floorId must belong to the building', { code: 'FLOOR_NOT_IN_BUILDING', field: 'floorId' });
     }
     $set.buildingId = buildingId;
     $set.floorId = floor._id;
@@ -470,14 +492,15 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
     );
   } catch (error) {
     if (isDuplicateKeyError(error) && String((error as Error).message).includes('linked_unit_once')) {
-      throw new UnitLinkConflictError('One of these spots was just added to another unit. Reload and try again.');
+      throw new UnitLinkConflictError('One of these spots was just added to another unit. Reload and try again.', 'LINKS_TAKEN_RACE');
     }
     if (isDuplicateKeyError(error)) {
-      throw new UnitConflictError(`A unit numbered "${String($set.unitNumber ?? unit.unitNumber)}" already exists here`);
+      const number = String($set.unitNumber ?? unit.unitNumber);
+      throw new UnitConflictError(`A unit numbered "${number}" already exists here`, number);
     }
     throw error;
   }
-  if (!updated) throw new NotFoundError('unitId not found in this development');
+  if (!updated) throw new NotFoundError('unitId not found in this development', { code: 'UNIT_NOT_FOUND' });
 
   const after = updated.toObject() as unknown as Record<string, unknown>;
   const changes = diffFields(before, after, touched.concat(touched.includes('buildingId') || touched.includes('floorId') ? ['entranceId'] : []));
@@ -597,31 +620,31 @@ export const bulkUpdateUnits = async (params: {
   const body = (params.payload ?? {}) as Record<string, unknown>;
   const { unitIds, availability, visibility, includeLinked } = body;
   if (includeLinked !== undefined && typeof includeLinked !== 'boolean') {
-    throw new ValidationError('includeLinked must be true or false');
+    throw new ValidationError('includeLinked must be true or false', { code: 'FIELD_INVALID', field: 'includeLinked' });
   }
 
   const touched: string[] = [];
   if (availability !== undefined) touched.push('availability');
   if (visibility !== undefined) touched.push('visibility');
-  if (touched.length === 0) throw new ValidationError('Supply availability and/or visibility');
+  if (touched.length === 0) throw new ValidationError('Supply availability and/or visibility', { code: 'NO_CHANGES' });
   assertAllowed(role, touched);
 
   if (!Array.isArray(unitIds) || unitIds.length === 0) {
-    throw new ValidationError('unitIds must be a non-empty array');
+    throw new ValidationError('unitIds must be a non-empty array', { code: 'BULK_EMPTY' });
   }
   if (unitIds.length > MAX_BULK_UNITS) {
-    throw new ValidationError(`A bulk update is limited to ${MAX_BULK_UNITS} units`);
+    throw new ValidationError(`A bulk update is limited to ${MAX_BULK_UNITS} units`, { code: 'BULK_TOO_MANY', params: { max: MAX_BULK_UNITS } });
   }
   const ids = unitIds.map((raw) => {
     const id = toObjectId(raw);
-    if (!id) throw new ValidationError('Every unitId must be a valid id');
+    if (!id) throw new ValidationError('Every unitId must be a valid id', { code: 'FIELD_INVALID', field: 'unitIds' });
     return id;
   });
   if (availability !== undefined && !isUnitAvailability(availability)) {
-    throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`);
+    throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`, { code: 'FIELD_INVALID', field: 'availability' });
   }
   if (visibility !== undefined && !isUnitVisibility(visibility)) {
-    throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`);
+    throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`, { code: 'FIELD_INVALID', field: 'visibility' });
   }
 
   // The seller asked for the parking spots / storage rooms of the selected units to follow.
@@ -750,7 +773,8 @@ export const buildUnitsCsv = async (developmentId: mongoose.Types.ObjectId): Pro
 // ---------------------------------------------------------------------------
 
 export class StorageNotConfiguredError extends Error {
-  readonly statusCode = 500;
+  readonly statusCode = 503;
+  readonly code = 'STORAGE_NOT_CONFIGURED';
   constructor() {
     super('Image upload service not configured');
     this.name = 'StorageNotConfiguredError';
@@ -793,7 +817,7 @@ export const setUnitFloorplan = async (params: {
     },
     { new: true, runValidators: true }
   );
-  if (!updated) throw new NotFoundError('unitId not found in this development');
+  if (!updated) throw new NotFoundError('unitId not found in this development', { code: 'UNIT_NOT_FOUND' });
 
   // Remove the replaced image only after the new one is saved.
   if (oldPublicId && oldPublicId !== result.publicId) {
@@ -827,8 +851,10 @@ const optString = (
   $unset: Record<string, ''>
 ): void => {
   if (value === null) $unset[field] = '';
-  else if (typeof value !== 'string') throw new ValidationError(`${field} must be a string or null`);
-  else if (value.trim().length > max) throw new ValidationError(`${field} must be at most ${max} characters`);
+  else if (typeof value !== 'string') throw new ValidationError(`${field} must be a string or null`, { code: 'FIELD_INVALID', field });
+  else if (value.trim().length > max) {
+    throw new ValidationError(`${field} must be at most ${max} characters`, { code: 'FIELD_TOO_LONG', field, params: { max } });
+  }
   else if (value.trim()) $set[field] = value.trim();
   else $unset[field] = '';
 };
@@ -841,12 +867,12 @@ const optCount = (
 ): void => {
   if (value === null) $unset[field] = '';
   else if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
-    throw new ValidationError(`${field} must be a non-negative integer or null`);
+    throw new ValidationError(`${field} must be a non-negative integer or null`, { code: 'FIELD_NOT_NUMBER', field });
   } else $set[field] = value;
 };
 
 const finiteNumber = (value: unknown, field: string): number => {
-  if (typeof value !== 'number' || !Number.isFinite(value)) throw new ValidationError(`${field} must be a number`);
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new ValidationError(`${field} must be a number`, { code: 'FIELD_NOT_NUMBER', field });
   return value;
 };
 
@@ -867,9 +893,9 @@ export const addUnitGalleryImages = async (params: {
   const { development, actorId, files } = params;
   const developmentId = development._id as mongoose.Types.ObjectId;
   const unit = await requireRefInDevelopment(DevelopmentUnit, params.unitId, developmentId, 'unitId');
-  if (files.length === 0) throw new ValidationError('No images uploaded');
+  if (files.length === 0) throw new ValidationError('No images uploaded', { code: 'NO_IMAGES' });
   if ((unit.gallery?.length ?? 0) + files.length > MAX_UNIT_GALLERY) {
-    throw new ValidationError(`A unit gallery holds at most ${MAX_UNIT_GALLERY} images`);
+    throw new ValidationError(`A unit gallery holds at most ${MAX_UNIT_GALLERY} images`, { code: 'GALLERY_FULL', params: { max: MAX_UNIT_GALLERY } });
   }
   if (!isMediaStorageConfigured()) throw new StorageNotConfiguredError();
 
@@ -899,7 +925,7 @@ export const addUnitGalleryImages = async (params: {
       { $push: { gallery: { $each: uploaded } } },
       { new: true, runValidators: true }
     );
-    if (!updated) throw new ValidationError(`A unit gallery holds at most ${MAX_UNIT_GALLERY} images`);
+    if (!updated) throw new ValidationError(`A unit gallery holds at most ${MAX_UNIT_GALLERY} images`, { code: 'GALLERY_FULL', params: { max: MAX_UNIT_GALLERY } });
     await recordDevelopmentAudit({
       developmentId,
       action: 'unit.update',
@@ -930,7 +956,7 @@ export const removeUnitGalleryImage = async (params: {
   const index = Number(params.index);
   const gallery = unit.gallery ?? [];
   if (!Number.isInteger(index) || index < 0 || index >= gallery.length) {
-    throw new NotFoundError('Gallery image not found');
+    throw new NotFoundError('Gallery image not found', { code: 'IMAGE_NOT_FOUND' });
   }
   const target = gallery[index];
   // Pull by URL (gallery entries have no _id); URLs are unique per upload.
@@ -939,7 +965,7 @@ export const removeUnitGalleryImage = async (params: {
     { $pull: { gallery: { url: target.url } } },
     { new: true }
   );
-  if (!updated) throw new NotFoundError('unitId not found in this development');
+  if (!updated) throw new NotFoundError('unitId not found in this development', { code: 'UNIT_NOT_FOUND' });
   if (target.publicId) {
     try {
       await deleteImage(target.publicId);
@@ -974,7 +1000,7 @@ export const removeUnitFloorplan = async (params: {
     { $unset: { floorplan: 1 } },
     { new: true }
   );
-  if (!updated) throw new NotFoundError('unitId not found in this development');
+  if (!updated) throw new NotFoundError('unitId not found in this development', { code: 'UNIT_NOT_FOUND' });
   if (old.publicId) {
     try {
       await deleteImage(old.publicId);
@@ -1002,7 +1028,7 @@ export const updateBuilding = async (params: {
   const { developmentId, actorId } = params;
   const body = (params.payload ?? {}) as Record<string, unknown>;
   const touched = BUILDING_FIELDS.filter((f) => body[f] !== undefined);
-  if (touched.length === 0) throw new ValidationError('No updatable fields supplied');
+  if (touched.length === 0) throw new ValidationError('No updatable fields supplied', { code: 'NO_CHANGES' });
   const building = await requireRefInDevelopment(DevelopmentBuilding, params.buildingId, developmentId, 'buildingId');
   const before = building.toObject() as unknown as Record<string, unknown>;
 
@@ -1011,8 +1037,10 @@ export const updateBuilding = async (params: {
   for (const f of touched) {
     const v = body[f];
     if (f === 'name') {
-      if (typeof v !== 'string' || !v.trim()) throw new ValidationError('building name is required');
-      if (v.trim().length > 200) throw new ValidationError('name must be at most 200 characters');
+      if (typeof v !== 'string' || !v.trim()) throw new ValidationError('building name is required', { code: 'FIELD_REQUIRED', field: 'name' });
+      if (v.trim().length > 200) {
+        throw new ValidationError('name must be at most 200 characters', { code: 'FIELD_TOO_LONG', field: 'name', params: { max: 200 } });
+      }
       $set.name = v.trim();
     } else if (f === 'code') optString(v, f, 50, $set, $unset);
     else if (f === 'description') optString(v, f, 5000, $set, $unset);
@@ -1027,7 +1055,7 @@ export const updateBuilding = async (params: {
     update,
     { new: true, runValidators: true }
   );
-  if (!updated) throw new NotFoundError('buildingId not found in this development');
+  if (!updated) throw new NotFoundError('buildingId not found in this development', { code: 'BUILDING_NOT_FOUND' });
 
   const changes = diffFields(before, updated.toObject() as unknown as Record<string, unknown>, touched);
   if (Object.keys(changes).length > 0) {
@@ -1054,7 +1082,7 @@ export const updateFloor = async (params: {
   const { developmentId, actorId } = params;
   const body = (params.payload ?? {}) as Record<string, unknown>;
   const touched = FLOOR_FIELDS.filter((f) => body[f] !== undefined);
-  if (touched.length === 0) throw new ValidationError('No updatable fields supplied');
+  if (touched.length === 0) throw new ValidationError('No updatable fields supplied', { code: 'NO_CHANGES' });
   const floor = await requireRefInDevelopment(DevelopmentFloor, params.floorId, developmentId, 'floorId');
   const before = floor.toObject() as unknown as Record<string, unknown>;
 
@@ -1062,14 +1090,16 @@ export const updateFloor = async (params: {
   for (const f of touched) {
     const v = body[f];
     if (f === 'label') {
-      if (typeof v !== 'string' || !v.trim()) throw new ValidationError('floor label is required');
-      if (v.trim().length > 60) throw new ValidationError('label must be at most 60 characters');
+      if (typeof v !== 'string' || !v.trim()) throw new ValidationError('floor label is required', { code: 'FIELD_REQUIRED', field: 'label' });
+      if (v.trim().length > 60) {
+        throw new ValidationError('label must be at most 60 characters', { code: 'FIELD_TOO_LONG', field: 'label', params: { max: 60 } });
+      }
       $set.label = v.trim();
     } else if (f === 'level') $set.level = finiteNumber(v, 'level');
     else if (f === 'order') $set.order = finiteNumber(v, 'order');
     else if (f === 'kind') {
       if (typeof v !== 'string' || !(FLOOR_KINDS as readonly string[]).includes(v)) {
-        throw new ValidationError(`floor kind must be one of: ${FLOOR_KINDS.join(', ')}`);
+        throw new ValidationError(`floor kind must be one of: ${FLOOR_KINDS.join(', ')}`, { code: 'FIELD_INVALID', field: 'kind' });
       }
       $set.kind = v;
     }
@@ -1079,7 +1109,7 @@ export const updateFloor = async (params: {
     { $set },
     { new: true, runValidators: true }
   );
-  if (!updated) throw new NotFoundError('floorId not found in this development');
+  if (!updated) throw new NotFoundError('floorId not found in this development', { code: 'FLOOR_NOT_FOUND' });
 
   const changes = diffFields(before, updated.toObject() as unknown as Record<string, unknown>, touched);
   if (Object.keys(changes).length > 0) {

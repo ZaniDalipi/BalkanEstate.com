@@ -27,8 +27,8 @@ describe('units import', () => {
     expect(preview.status).toBe(200);
     expect(preview.body).toMatchObject({ dryRun: true, buildingsCreated: ['Tower B'], floorsCreated: 1, unitsCreated: 2, unitsUpdated: 1 });
     expect(preview.body.errors).toEqual([
-      { row: 5, message: 'Unit b001 appears twice in Tower B' },
-      { row: 6, message: 'Unknown availability "free"' },
+      { row: 5, message: 'Unit b001 appears twice in Tower B', code: 'IMPORT_DUPLICATE_ROW', field: 'unitNumber', params: { unit: 'b001', building: 'Tower B' } },
+      { row: 6, message: 'Unknown availability "free"', code: 'IMPORT_BAD_AVAILABILITY', field: 'availability', params: { value: 'free' } },
     ]);
     expect(await DevelopmentBuilding.countDocuments({ developmentId: t.devId })).toBe(1);
 

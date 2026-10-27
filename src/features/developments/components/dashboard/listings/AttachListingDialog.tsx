@@ -14,6 +14,7 @@ import { useAttachableListings } from '../../../hooks/useScenes';
 import { formatPrice } from '../../../utils/format';
 import type { AttachmentConflict, DashboardUnit } from '../../../types';
 import { ConflictList } from './ConflictList';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface AttachListingDialogProps {
   developmentId: string;
@@ -28,6 +29,7 @@ interface AttachListingDialogProps {
  */
 export const AttachListingDialog: React.FC<AttachListingDialogProps> = ({ developmentId, unit, onClose }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const qc = useQueryClient();
   const notify = useNotification();
   const [q, setQ] = useState('');
@@ -61,8 +63,8 @@ export const AttachListingDialog: React.FC<AttachListingDialogProps> = ({ develo
       void notify.success(t('attach.success', 'Listing attached.'), t('manage.listings.attachedTo', 'Attached to unit {{number}}.', { number: unit.unitNumber }));
       onClose();
     } catch (err) {
-      const e = err as { message?: string; details?: { conflicts?: AttachmentConflict[] } };
-      setError(e?.details?.conflicts?.[0]?.message || e?.message || t('attach.blocked', 'This attachment is blocked and cannot proceed.'));
+      const first = (err as { details?: { conflicts?: AttachmentConflict[] } })?.details?.conflicts?.[0];
+      setError(first ? apiText.conflict(first) : apiText.text(err));
     }
   };
 

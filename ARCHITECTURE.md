@@ -1159,6 +1159,22 @@ how-tos — is in [`docs/RESIDENCE_EXPLORER.md`](docs/RESIDENCE_EXPLORER.md).
   never overwrites a teammate's change to a field the form didn't touch.
 - Validation returns i18n keys (`validation/developmentValidation.ts`); the server
   repeats every check (`developmentService.normalizeAmenities/normalizeContact`).
+- **Server refusals carry a code, never shown as English.** Every 4xx from the
+  residence API is `{ message, code, details: { field?, params? } }`: services
+  throw `ValidationError(message, { code, field, params })` (and the same for the
+  not-found / forbidden errors, `errorMeta.ts`). `message` is for logs only.
+  - The client reads it with `utils/apiError.readApiError` (httpClient puts the
+    body in `err.details`, so the field is at `err.details.details.field`) and
+    shows it with `hooks/useApiErrorText`: the code's text from
+    `developments:apiErrors.<CODE>` with its params, or a text for the HTTP
+    status (`apiErrors.status.*`, "offline" when the request got no answer).
+  - A `field` that is a form field puts the text next to that field
+    (`role="alert"`, `aria-describedby`); otherwise it is the form-level message.
+  - `apiErrorText.test.ts` scans the backend for codes and fails when one has
+    no English text or any of the 10 locales lacks its key.
+  - Residence notifications store English plus `data.textKey`/`textParams`;
+    the bell shows `developments:notices.<key>` (`shared/utils/notificationText`).
+    Emails are still sent in English (no stored user language).
 - **Residence Pass:** creating is free, and the first publish starts a 15-day
   public trial. After it, a pass (12 months, 5 buildings) or the owner's
   premium plan keeps the residence public.

@@ -83,8 +83,8 @@ export async function listResidences(params: { search?: unknown; filter?: unknow
 
 /** Set (or clear, with null) a residence's building limit; never below the buildings it has. */
 export async function setBuildingLimit(developmentId: string, raw: unknown): Promise<{ limit: number | null; used: number }> {
-  const dev = await Development.findById(developmentId);
-  if (!dev) throw Object.assign(new Error('Residence not found'), { statusCode: 404 });
+  const dev = await Development.findOne({ _id: developmentId, deletedAt: { $exists: false } });
+  if (!dev) throw Object.assign(new Error('Residence not found'), { statusCode: 404, code: 'RESIDENCE_NOT_FOUND' });
   const used = await DevelopmentBuilding.countDocuments({ developmentId: dev._id, deletedAt: { $exists: false } });
   if (raw === null) {
     dev.set('billing.buildingLimit', undefined);
@@ -93,9 +93,19 @@ export async function setBuildingLimit(developmentId: string, raw: unknown): Pro
   }
   const limit = Number(raw);
   if (!Number.isInteger(limit) || limit < 1 || limit > MAX_BUILDING_LIMIT) {
-    throw new ValidationError(`limit must be a whole number from 1 to ${MAX_BUILDING_LIMIT}`);
+    throw new ValidationError(`limit must be a whole number from 1 to ${MAX_BUILDING_LIMIT}`, {
+      code: 'FIELD_RANGE',
+      field: 'limit',
+      params: { min: 1, max: MAX_BUILDING_LIMIT },
+    });
   }
-  if (limit < used) throw new ValidationError(`This residence already has ${used} buildings; the limit can't be lower`);
+  if (limit < used) {
+    throw new ValidationError(`This residence already has ${used} buildings; the limit can't be lower`, {
+      code: 'LIMIT_BELOW_USED',
+      field: 'limit',
+      params: { used },
+    });
+  }
   dev.set('billing.buildingLimit', limit);
   await dev.save();
   return { limit, used };

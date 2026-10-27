@@ -1,7 +1,9 @@
 /** Admin controls for residences: list, building limit, grants, agency extras. */
+import Development from '../../models/Development';
 import express from 'express';
 import request from 'supertest';
 import Agency from '../../models/Agency';
+import DevelopmentBuilding from '../../models/DevelopmentBuilding';
 import { makeUser, setupDevelopment, tokenFor } from './helpers/explorerHarness';
 
 const app = express();
@@ -68,5 +70,38 @@ describe('admin residences', () => {
     const refused = await request(app).post(url).set(auth(token)).send({ extra: 1 });
     expect(refused.status).toBe(409);
     expect(refused.body.code).toBe('AGENCY_NOT_SUBSCRIBED');
+  });
+
+  it('every refusal carries a code and the field it belongs to', async () => {
+    const t = await setupDevelopment({ published: true });
+    const token = await adminToken();
+    const limit = (value: unknown) => request(app).patch(`/api/admin/residences/${t.devEnc}/building-limit`).set(auth(token)).send({ limit: value });
+    expect((await limit(0)).body).toMatchObject({ code: 'FIELD_RANGE', details: { field: 'limit', params: { min: 1, max: 200 } } });
+    await DevelopmentBuilding.create({ developmentId: t.devId, name: 'Block B', slug: `b-${Date.now()}` });
+    expect((await limit(1)).body).toMatchObject({ code: 'LIMIT_BELOW_USED', details: { field: 'limit', params: { used: 2 } } });
+    // A deleted residence is as good as gone for the admin actions too.
+    const gone = await setupDevelopment({ published: true });
+    await Development.updateOne({ _id: gone.devId }, { $set: { deletedAt: new Date() } });
+    expect((await request(app).patch(`/api/admin/residences/${gone.devEnc}/building-limit`).set(auth(token)).send({ limit: 5 })).body.code).toBe('RESIDENCE_NOT_FOUND');
+    expect((await request(app).post(`/api/admin/residences/${gone.devEnc}/grant`).set(auth(token)).send({ months: 1 })).body.code).toBe('RESIDENCE_NOT_FOUND');
+    const ghost = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+    expect((await request(app).patch(`/api/admin/residences/${ghost}/building-limit`).set(auth(token)).send({ limit: 5 })).body.code).toBe('RESIDENCE_NOT_FOUND');
+
+    const grant = (body: Record<string, unknown>, id = t.devEnc) => request(app).post(`/api/admin/residences/${id}/grant`).set(auth(token)).send(body);
+    expect((await grant({ months: 121 })).body).toMatchObject({ code: 'FIELD_RANGE', details: { field: 'months' } });
+    expect((await grant({ months: 0 })).body).toMatchObject({ code: 'GRANT_EMPTY', details: { field: 'months' } });
+    expect((await grant({ months: 1 }, ghost)).body.code).toBe('RESIDENCE_NOT_FOUND');
+
+    const agency = await Agency.create({
+      name: 'Coded Agency', slug: `coded-${Date.now()}`, email: `coded-${Date.now()}@test.com`, phone: '+38269000000', city: 'Budva', country: 'Montenegro',
+      ownerId: (await makeUser())._id, subscription: { status: 'expired', startDate: new Date(Date.now() - 400 * DAY), expiresAt: new Date(Date.now() - DAY) },
+    });
+    const extra = (body: Record<string, unknown>, id = String(agency._id)) =>
+      request(app).post(`/api/admin/agencies/${id}/residence-allowance`).set(auth(token)).send(body);
+    expect((await extra({ extra: 21 })).body).toMatchObject({ code: 'FIELD_RANGE', details: { field: 'extra', params: { min: 1, max: 20 } } });
+    const lapsed = await extra({ extra: 1 });
+    expect(lapsed.status).toBe(409);
+    expect(lapsed.body.code).toBe('AGENCY_NOT_SUBSCRIBED');
+    expect((await request(app).get(`/api/admin/agencies/${ghost}/residence-allowance`).set(auth(token))).body.code).toBe('AGENCY_NOT_FOUND');
   });
 });

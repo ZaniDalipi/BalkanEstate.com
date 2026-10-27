@@ -5,6 +5,7 @@ import type { ResidencePurchaseKind } from '../../../types';
 import { billingRefusal } from '../../../utils/billingError';
 import { codeProblem, MAX_EXTRA_BUILDINGS, quantityProblem } from '../../../validation/billingValidation';
 import { useBillingText } from './useBillingText';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 /**
  * The buy dialog's form: unlock code and building count, validated before
@@ -12,6 +13,7 @@ import { useBillingText } from './useBillingText';
  */
 export function useCheckout(developmentId: string, kind: ResidencePurchaseKind, onDone: () => void) {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const { refusalText } = useBillingText();
   const { buy, isLoading } = useBuyResidence(developmentId);
   const [code, setCode] = useState('');
@@ -42,7 +44,7 @@ export function useCheckout(developmentId: string, kind: ResidencePurchaseKind, 
     } catch (err) {
       const refusal = billingRefusal(err);
       if (refusal?.code === 'COUPON_INVALID') setCodeError(refusalText(refusal));
-      else setFormError(refusal ? refusalText(refusal) : (err as { message?: string })?.message || t('errors.generic', 'Something went wrong.'));
+      else setFormError(refusal ? refusalText(refusal) : apiText.text(err));
     }
   };
 

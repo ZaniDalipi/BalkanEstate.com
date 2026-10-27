@@ -42,13 +42,17 @@ describe('SuggestionRow', () => {
 
   it('offers "Attach anyway" for a non-blocking conflict and retries with force', async () => {
     vi.mocked(api.attachListing)
-      .mockRejectedValueOnce({ message: 'conflict', details: { conflicts: [{ code: 'x', message: 'Already has a listing', blocking: false }] } })
+      .mockRejectedValueOnce({
+        message: 'conflict',
+        statusCode: 409,
+        details: { conflicts: [{ code: 'listing_already_attached_elsewhere', message: 'This listing is already attached to another unit.', blocking: false }] },
+      })
       .mockResolvedValueOnce({} as never);
     const user = userEvent.setup();
     render(<SuggestionRow suggestion={suggestion()} listingId="l1" />);
     await user.click(screen.getByRole('button', { name: 'suggest.chooseApartment' }));
     await user.click(screen.getByRole('button', { name: 'pick T1203' }));
-    expect(await screen.findByText('Already has a listing')).toBeInTheDocument();
+    expect(await screen.findByText('developments:apiErrors.conflict.listing_already_attached_elsewhere')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'suggest.attachAnyway' }));
     await waitFor(() => expect(api.attachListing).toHaveBeenLastCalledWith('d1', 'u7', 'l1', true));
   });

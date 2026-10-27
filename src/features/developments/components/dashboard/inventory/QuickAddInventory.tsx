@@ -10,6 +10,7 @@ import { UnlockBuildingNotice } from '../billing/UnlockBuildingNotice';
 import { useBillingText } from '../billing/useBillingText';
 import { AddFloorsForm } from './AddFloorsForm';
 import { AddUnitsForm } from './AddUnitsForm';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 /**
  * Inventory builder: add buildings, then floors (one or a range, named for
@@ -17,6 +18,7 @@ import { AddUnitsForm } from './AddUnitsForm';
  */
 export const QuickAddInventory: React.FC<{ developmentId: string; role?: string }> = ({ developmentId, role }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const { buildings, floors } = useDevelopmentStructure(developmentId);
   const { createBuilding, createFloor, createUnit, isCreatingBuilding, isCreatingFloor, isCreatingUnit } = useInventoryMutations(developmentId);
   const { billing } = useResidenceBilling(developmentId);
@@ -34,7 +36,7 @@ export const QuickAddInventory: React.FC<{ developmentId: string; role?: string 
       setBuildingName('');
     } catch (err) {
       const refusal = billingRefusal(err);
-      setError(refusal ? refusalText(refusal) : (err as { message?: string })?.message || t('errors.generic'));
+      setError(refusal ? refusalText(refusal) : apiText.text(err));
     }
   };
 

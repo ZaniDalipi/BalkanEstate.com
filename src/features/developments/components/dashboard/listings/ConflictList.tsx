@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AttachmentConflict } from '../../../types';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface ConflictListProps {
   conflicts: AttachmentConflict[] | null;
@@ -12,6 +13,7 @@ interface ConflictListProps {
 /** Result of the attach preview: conflicts (blocking in red) and the explicit override tick. */
 export const ConflictList: React.FC<ConflictListProps> = ({ conflicts, isLoading, force, onForce }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   if (isLoading) return <p className="text-sm text-slate-500">{t('manage.listings.checking', 'Checking for conflicts…')}</p>;
   if (!conflicts) return null;
   if (conflicts.length === 0) {
@@ -24,7 +26,7 @@ export const ConflictList: React.FC<ConflictListProps> = ({ conflicts, isLoading
       <ul className="mt-1 space-y-1">
         {conflicts.map((c) => (
           <li key={c.code} className={c.blocking ? 'text-sm text-red-700' : 'text-sm text-amber-700'}>
-            • {c.message}
+            • {apiText.conflict(c)}
           </li>
         ))}
       </ul>

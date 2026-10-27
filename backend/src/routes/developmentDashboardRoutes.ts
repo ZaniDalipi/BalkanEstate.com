@@ -84,7 +84,7 @@ const upload = multer({
   limits: { fileSize: MAX_IMAGE_BYTES, files: 1 }, // 10 MB, one file
   fileFilter: (_req, file, cb) => {
     if (ACCEPTED_IMAGE_TYPES.has(file.mimetype)) cb(null, true);
-    else cb(new Error('Only JPG, PNG, WebP or AVIF images are accepted'));
+    else cb(Object.assign(new Error('Only JPG, PNG, WebP or AVIF images are accepted'), { code: 'IMAGE_TYPE' }));
   },
 });
 // Same rules, several files at once (unit gallery).
@@ -93,7 +93,7 @@ const uploadMany = multer({
   limits: { fileSize: MAX_IMAGE_BYTES, files: 10 },
   fileFilter: (_req, file, cb) => {
     if (ACCEPTED_IMAGE_TYPES.has(file.mimetype)) cb(null, true);
-    else cb(new Error('Only JPG, PNG, WebP or AVIF images are accepted'));
+    else cb(Object.assign(new Error('Only JPG, PNG, WebP or AVIF images are accepted'), { code: 'IMAGE_TYPE' }));
   },
 });
 

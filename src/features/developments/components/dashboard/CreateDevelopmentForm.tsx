@@ -16,6 +16,7 @@ import {
   type DevelopmentConstructionStatus,
 } from '../../types';
 import { validateCreateDevelopment, type CreateDevelopmentErrors } from '../../validation/developmentValidation';
+import { useApiErrorText } from '../../hooks/useApiErrorText';
 
 type BasicsForm = Omit<CreateDevelopmentPayload, keyof LocationValue>;
 
@@ -34,6 +35,7 @@ const toNumber = (v: string) => (v.trim() ? Number(v) : undefined);
  */
 const CreateDevelopmentForm: React.FC = () => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const { create, isLoading } = useCreateDevelopment();
 
   const [form, setForm] = useState<BasicsForm>(EMPTY);
@@ -70,8 +72,8 @@ const CreateDevelopmentForm: React.FC = () => {
     } catch (err) {
       // Creating is free (the Residence Pass applies when publishing), so any
       // refusal here is about the form itself.
-      const e = err as { statusCode?: number; message?: string } | null;
-      setSubmitError(e?.statusCode === 400 && e.message ? e.message : t('errors.createFailed'));
+      const { text, status } = apiText.describe(err);
+      setSubmitError(status === 400 || status === undefined ? text : t('errors.createFailed'));
     }
   };
 

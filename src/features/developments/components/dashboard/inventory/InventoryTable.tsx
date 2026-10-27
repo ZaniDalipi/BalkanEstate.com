@@ -14,6 +14,7 @@ import { InventoryPagination } from './InventoryPagination';
 import { InventoryToolbar } from './InventoryToolbar';
 import { UnitEditDialog } from './UnitEditDialog';
 import { editPermissions } from './permissions';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface InventoryTableProps {
   developmentId: string;
@@ -30,6 +31,7 @@ interface InventoryTableProps {
  */
 export const InventoryTable: React.FC<InventoryTableProps> = ({ developmentId, role, slug }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const notify = useNotification();
   const inv = useInventoryQuery(developmentId);
@@ -56,8 +58,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({ developmentId, r
     });
 
   const onExport = () =>
-    exportCsv(slug ? `${slug}-units.csv` : undefined).catch((err: { message?: string }) => {
-      void notify.error(t('inventory.exportFailed', 'Export failed'), err?.message || t('errors.generic'));
+    exportCsv(slug ? `${slug}-units.csv` : undefined).catch((err: unknown) => {
+      void notify.error(t('inventory.exportFailed', 'Export failed'), apiText.text(err));
     });
 
   const viewProps = {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSuggestionActions } from '../../../hooks';
 import type { AttachmentConflict, DashboardUnit, NearbySuggestion } from '../../../types';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 type ApiError = { message?: string; details?: { conflicts?: AttachmentConflict[] } };
 
@@ -12,6 +13,7 @@ type ApiError = { message?: string; details?: { conflicts?: AttachmentConflict[]
  */
 export const useSuggestionRow = (suggestion: NearbySuggestion, listingId?: string) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const actions = useSuggestionActions();
   const [picking, setPicking] = useState(false);
   const [requested, setRequested] = useState(false);
@@ -22,7 +24,7 @@ export const useSuggestionRow = (suggestion: NearbySuggestion, listingId?: strin
   const fail = (err: unknown, unit?: DashboardUnit) => {
     const e = err as ApiError;
     const conflicts = e?.details?.conflicts ?? [];
-    setError(conflicts[0]?.message || e?.message || t('errors.generic'));
+    setError(conflicts[0] ? apiText.conflict(conflicts[0]) : apiText.text(err));
     setRetry(unit && conflicts.length > 0 && conflicts.every((c) => !c.blocking) ? unit : null);
   };
 

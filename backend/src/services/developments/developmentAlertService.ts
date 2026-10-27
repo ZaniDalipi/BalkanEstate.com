@@ -96,6 +96,8 @@ export const notifyFollowersUnitAvailable = async (params: {
             developmentSlug: params.developmentSlug,
             unitId: encodeId(String(params.unit._id)),
             actionUrl,
+            textKey: 'unitAvailable',
+            textParams: { residence: params.developmentName, unit: params.unit.unitNumber },
           },
         })
       )

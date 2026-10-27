@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { applyErrorMeta, type ErrorDetails, type ErrorMeta } from './errorMeta';
 import Property, { IProperty } from '../../models/Property';
 import Agency from '../../models/Agency';
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
@@ -33,6 +34,7 @@ export interface AttachmentConflict {
 
 export class ConflictError extends Error {
   readonly statusCode = 409;
+  readonly code = 'ATTACH_CONFLICT';
   constructor(public readonly conflicts: AttachmentConflict[]) {
     super('Attachment has unresolved conflicts');
     this.name = 'ConflictError';
@@ -41,17 +43,23 @@ export class ConflictError extends Error {
 
 export class AuthorizationError extends Error {
   readonly statusCode = 403;
-  constructor(message: string) {
+  code?: string;
+  details?: ErrorDetails;
+  constructor(message: string, meta?: ErrorMeta) {
     super(message);
     this.name = 'AuthorizationError';
+    applyErrorMeta(this, meta);
   }
 }
 
 export class NotFoundError extends Error {
   readonly statusCode = 404;
-  constructor(message: string) {
+  code?: string;
+  details?: ErrorDetails;
+  constructor(message: string, meta?: ErrorMeta) {
     super(message);
     this.name = 'NotFoundError';
+    applyErrorMeta(this, meta);
   }
 }
 
@@ -181,8 +189,8 @@ export const attachListingToUnit = async (
     Property.findById(listingId),
     DevelopmentUnit.findOne({ _id: unitId, developmentId, deletedAt: { $exists: false } }),
   ]);
-  if (!property) throw new NotFoundError('Listing not found');
-  if (!unit) throw new NotFoundError('Unit not found');
+  if (!property) throw new NotFoundError('Listing not found', { code: 'LISTING_NOT_FOUND' });
+  if (!unit) throw new NotFoundError('Unit not found', { code: 'UNIT_NOT_FOUND' });
 
   const controlsListing = await callerControlsListing(user, property);
   const conflicts = detectAttachmentConflicts({
@@ -280,11 +288,11 @@ export const detachListingFromUnit = async (params: {
     Property.findById(listingId),
     DevelopmentUnit.findOne({ _id: unitId, developmentId, deletedAt: { $exists: false } }),
   ]);
-  if (!unit) throw new NotFoundError('Unit not found');
+  if (!unit) throw new NotFoundError('Unit not found', { code: 'UNIT_NOT_FOUND' });
   const onUnit = (unit.listingIds ?? []).some((id) => String(id) === String(listingId));
   const pointsAtUnit = !!property && String(property.unitId ?? '') === String(unit._id);
   if (!property || (!onUnit && !pointsAtUnit)) {
-    throw new NotFoundError('Listing is not attached to this unit');
+    throw new NotFoundError('Listing is not attached to this unit', { code: 'LISTING_NOT_ATTACHED' });
   }
   // Authorization for detach is the development `listing.detach` permission,
   // already enforced by the route. Either controlling the listing or holding
@@ -369,12 +377,15 @@ export const attachListingToDevelopmentLevel = async (params: {
 }): Promise<IProperty> => {
   const { user, developmentId, listingId } = params;
   const property = await Property.findById(listingId);
-  if (!property) throw new NotFoundError('Listing not found');
+  if (!property) throw new NotFoundError('Listing not found', { code: 'LISTING_NOT_FOUND' });
   if (!(await callerControlsListing(user, property))) {
-    throw new AuthorizationError('You do not control this listing.');
+    throw new AuthorizationError('You do not control this listing.', { code: 'LISTING_NOT_YOURS' });
   }
   if (property.status === 'sold' || property.status === 'rented') {
-    throw new ValidationError(`This listing is ${property.status} and cannot be attached.`);
+    throw new ValidationError(`This listing is ${property.status} and cannot be attached.`, {
+      code: 'LISTING_CLOSED',
+      params: { status: String(property.status) },
+    });
   }
 
   // Idempotent no-op if already associated with exactly this development and no unit.
@@ -429,7 +440,8 @@ export interface BulkAttachItem {
 
 export interface BulkAttachResult {
   attached: string[];
-  failed: { listingId: string; unitId: string; reason: string }[];
+  /** `reason` is English for logs; `code` is what a client translates. */
+  failed: { listingId: string; unitId: string; reason: string; code?: string }[];
 }
 
 /**
@@ -462,6 +474,7 @@ export const bulkAttach = async (params: {
         listingId: item.listingId,
         unitId: item.unitId,
         reason: error instanceof Error ? error.message : String(error),
+        ...(typeof (error as { code?: unknown })?.code === 'string' ? { code: (error as { code: string }).code } : {}),
       });
     }
   }

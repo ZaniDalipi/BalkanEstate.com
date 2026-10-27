@@ -10,6 +10,7 @@ import { billingRefusal } from '../../utils/billingError';
 import { StatusPill } from '../shared/Badges';
 import { BuyResidenceDialog } from './billing/BuyResidenceDialog';
 import { useBillingText } from './billing/useBillingText';
+import { useApiErrorText } from '../../hooks/useApiErrorText';
 
 interface PublishSectionProps {
   development: Development;
@@ -24,6 +25,7 @@ interface PublishSectionProps {
  */
 export const PublishSection: React.FC<PublishSectionProps> = ({ development, billing, canPublish, canBuy }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const notify = useNotification();
   const { refusalText } = useBillingText();
   const { setStatus, isLoading } = usePublishDevelopment(development.id);
@@ -46,7 +48,7 @@ export const PublishSection: React.FC<PublishSectionProps> = ({ development, bil
     setStatus(isPublished ? 'draft' : 'published').catch((err: unknown) => {
       const refusal = billingRefusal(err);
       if (refusal && canBuy && refusal.code !== 'BUILDING_LIMIT') setBuying(true);
-      const message = refusal ? refusalText(refusal) : (err as { message?: string })?.message || t('errors.generic');
+      const message = refusal ? refusalText(refusal) : apiText.text(err);
       void notify.error(t('errors.updateFailed', 'Could not save your changes.'), message);
     });
   };

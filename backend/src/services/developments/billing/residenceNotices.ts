@@ -38,6 +38,15 @@ const TYPE: Record<string, 'residence_trial_reminder' | 'residence_offline' | 'r
   agencyOffline: 'residence_offline',
 };
 
+/** The client's text for each notice (developments:notices.<key>.title / .message). */
+const NOTICE_TEXT_KEY: Record<ResidenceNoticeKey, string> = {
+  day10: 'trialEndsSoon',
+  day14: 'trialEndsSoon',
+  expired: 'trialEnded',
+  agencyGrace: 'agencyGrace',
+  agencyOffline: 'agencyOffline',
+};
+
 export async function sendResidenceNotice(
   dev: InstanceType<typeof Development>,
   key: ResidenceNoticeKey,
@@ -56,7 +65,14 @@ export async function sendResidenceNotice(
       message,
       icon: 'building',
       priority: key === 'expired' || key === 'agencyOffline' ? 'high' : 'normal',
-      data: { developmentId: encodeId(String(dev._id)), reminder: key, actionUrl: path },
+      // textKey + textParams let the bell show it in the reader's language; title/message stay as the English fallback.
+      data: {
+        developmentId: encodeId(String(dev._id)),
+        reminder: key,
+        actionUrl: path,
+        textKey: NOTICE_TEXT_KEY[key],
+        textParams: { name: dev.name, days: opts.daysLeft ?? 0, date: day(opts.until) },
+      },
     });
     // eslint-disable-next-line no-await-in-loop
     const user = await User.findById(userId).select('email');

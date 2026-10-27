@@ -142,9 +142,10 @@ const parseViewKey = (raw: unknown): string => {
   if (isBlank(raw)) return DEFAULT_SCENE_VIEW_KEY;
   const key = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
   if (!SCENE_VIEW_KEY_PATTERN.test(key)) {
-    throw new ValidationError(
-      'viewKey must be 1–40 lowercase letters, digits or hyphens, starting with a letter or digit'
-    );
+    throw new ValidationError('viewKey must be 1–40 lowercase letters, digits or hyphens, starting with a letter or digit', {
+      code: 'FIELD_INVALID',
+      field: 'viewKey',
+    });
   }
   return key;
 };
@@ -153,10 +154,10 @@ const parseViewKey = (raw: unknown): string => {
 const parseViewName = (raw: unknown): string | null | undefined => {
   if (raw === undefined) return undefined;
   if (raw === null) return null;
-  if (typeof raw !== 'string') throw new ValidationError('viewName must be a string');
+  if (typeof raw !== 'string') throw new ValidationError('viewName must be a string', { code: 'FIELD_INVALID', field: 'viewName' });
   const name = raw.trim();
   if (name.length > MAX_VIEW_NAME_LENGTH) {
-    throw new ValidationError(`viewName must be at most ${MAX_VIEW_NAME_LENGTH} characters`);
+    throw new ValidationError(`viewName must be at most ${MAX_VIEW_NAME_LENGTH} characters`, { code: 'FIELD_TOO_LONG', field: 'viewName', params: { max: MAX_VIEW_NAME_LENGTH } });
   }
   return name || null;
 };
@@ -164,7 +165,7 @@ const parseViewName = (raw: unknown): string | null | undefined => {
 const parseViewDirection = (raw: unknown): SceneViewDirection | undefined => {
   if (isBlank(raw)) return undefined;
   if (!isSceneViewDirection(raw)) {
-    throw new ValidationError(`viewDirection must be one of: ${SCENE_VIEW_DIRECTIONS.join(', ')}`);
+    throw new ValidationError(`viewDirection must be one of: ${SCENE_VIEW_DIRECTIONS.join(', ')}`, { code: 'FIELD_INVALID', field: 'viewDirection' });
   }
   return raw;
 };
@@ -174,7 +175,7 @@ const parseSortOrder = (raw: unknown): number | undefined => {
   if (isBlank(raw)) return undefined;
   const n = typeof raw === 'string' && /^\s*\d+\s*$/.test(raw) ? Number(raw) : raw;
   if (typeof n !== 'number' || !Number.isInteger(n) || n < 0 || n > MAX_SORT_ORDER) {
-    throw new ValidationError(`sortOrder must be an integer between 0 and ${MAX_SORT_ORDER}`);
+    throw new ValidationError(`sortOrder must be an integer between 0 and ${MAX_SORT_ORDER}`, { code: 'FIELD_RANGE', field: 'sortOrder', params: { min: 0, max: MAX_SORT_ORDER } });
   }
   return n;
 };
@@ -196,7 +197,7 @@ const liveSceneFilter = (developmentId: Id, sceneId: unknown) => ({
 
 const loadScene = async (developmentId: Id, sceneId: unknown) => {
   const scene = await DevelopmentScene.findOne(liveSceneFilter(developmentId, sceneId));
-  if (!scene) throw new NotFoundError('Scene not found');
+  if (!scene) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
   return scene;
 };
 
@@ -215,12 +216,12 @@ const resolveTargetInDevelopment = async (
   rawTargetId: unknown
 ): Promise<{ targetType: SceneTargetType; targetId: Id }> => {
   if (!isSceneTarget(targetType)) {
-    throw new ValidationError(`targetType must be one of: ${SCENE_TARGET_TYPES.join(', ')}`);
+    throw new ValidationError(`targetType must be one of: ${SCENE_TARGET_TYPES.join(', ')}`, { code: 'FIELD_INVALID', field: 'targetType' });
   }
   if (targetType === 'development') {
     if (!isBlank(rawTargetId)) {
       const id = requireObjectId(rawTargetId, 'targetId');
-      if (!id.equals(developmentId)) throw new NotFoundError('targetId not found in this development');
+      if (!id.equals(developmentId)) throw new NotFoundError('targetId not found in this development', { code: 'REF_NOT_FOUND', field: 'targetId' });
     }
     return { targetType, targetId: developmentId };
   }
@@ -390,7 +391,7 @@ const resolveAllowedLinks = async (
  * HotspotValidationError listing every issue.
  */
 export const validateHotspots = async (raw: unknown, ctx: ValidateContext): Promise<IHotspot[]> => {
-  if (!Array.isArray(raw)) throw new ValidationError('hotspots must be an array');
+  if (!Array.isArray(raw)) throw new ValidationError('hotspots must be an array', { code: 'FIELD_INVALID', field: 'hotspots' });
   if (raw.length > MAX_HOTSPOTS_PER_SCENE) {
     throw new HotspotValidationError([
       {
@@ -544,9 +545,9 @@ export const upsertSceneImage = async (
 ): Promise<{ scene: IDevelopmentScene; aspectChanged: boolean; created: boolean }> => {
   // The route enforces scene.edit; uploading media is its own permission.
   if (actor.role && !roleHasPermission(actor.role, 'media.upload')) {
-    throw new AuthorizationError('You do not have permission to upload media for this development');
+    throw new AuthorizationError('You do not have permission to upload media for this development', { code: 'FORBIDDEN' });
   }
-  if (!input.file) throw new ValidationError('No file uploaded');
+  if (!input.file) throw new ValidationError('No file uploaded', { code: 'NO_IMAGES' });
   const body = input.body ?? {};
   const viewKey = parseViewKey(body.viewKey);
   const viewName = parseViewName(body.viewName);
@@ -609,7 +610,7 @@ export const upsertSceneImage = async (
         new: true,
         runValidators: true,
       });
-      if (!scene) throw new NotFoundError('Scene not found');
+      if (!scene) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
       if (oldPublicId && oldPublicId !== uploaded.publicId) {
         try {
           await deleteImage(oldPublicId);
@@ -682,7 +683,7 @@ export const updateSceneMeta = async (
   const sortOrder = parseSortOrder(body?.sortOrder);
 
   const before = await DevelopmentScene.findOne(filter);
-  if (!before) throw new NotFoundError('Scene not found');
+  if (!before) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
 
   const set: Record<string, unknown> = {};
   const unset: Record<string, 1> = {};
@@ -697,7 +698,7 @@ export const updateSceneMeta = async (
     { ...(Object.keys(set).length ? { $set: set } : {}), ...(Object.keys(unset).length ? { $unset: unset } : {}) },
     { new: true, runValidators: true }
   );
-  if (!scene) throw new NotFoundError('Scene not found');
+  if (!scene) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
 
   const fields = ['viewName', 'viewDirection', 'sortOrder'] as const;
   const pick = (s: IDevelopmentScene) => ({ viewName: s.viewName, viewDirection: s.viewDirection, sortOrder: s.sortOrder });
@@ -724,12 +725,12 @@ export const saveDraft = async (
   const filter = liveSceneFilter(actor.developmentId, sceneId);
   const rawBase = body?.baseVersion;
   if (!isBlank(rawBase) && (typeof rawBase !== 'number' || !Number.isInteger(rawBase) || rawBase < 0)) {
-    throw new ValidationError('baseVersion must be a non-negative integer');
+    throw new ValidationError('baseVersion must be a non-negative integer', { code: 'FIELD_INVALID', field: 'baseVersion' });
   }
-  if (!Array.isArray(body?.hotspots)) throw new ValidationError('hotspots must be an array');
+  if (!Array.isArray(body?.hotspots)) throw new ValidationError('hotspots must be an array', { code: 'FIELD_INVALID', field: 'hotspots' });
 
   const scene = await DevelopmentScene.findOne(filter);
-  if (!scene) throw new NotFoundError('Scene not found');
+  if (!scene) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
   const currentVersion = scene.draft?.version ?? 0;
   const expected = isBlank(rawBase) ? currentVersion : (rawBase as number);
   if (expected !== currentVersion) throw new SceneVersionConflictError(currentVersion);
@@ -753,7 +754,7 @@ export const saveDraft = async (
   );
   if (!updated) {
     const latest = await DevelopmentScene.findOne(filter).select('draft.version').lean();
-    if (!latest) throw new NotFoundError('Scene not found');
+    if (!latest) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
     throw new SceneVersionConflictError(latest.draft?.version ?? 0);
   }
 
@@ -772,7 +773,7 @@ export const saveDraft = async (
 export const publishScene = async (actor: SceneActor, sceneId: unknown): Promise<IDevelopmentScene> => {
   const filter = liveSceneFilter(actor.developmentId, sceneId);
   const scene = await DevelopmentScene.findOne(filter);
-  if (!scene) throw new NotFoundError('Scene not found');
+  if (!scene) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
 
   const draftVersion = scene.draft?.version ?? 0;
   const plain = (scene.toObject().draft?.hotspots ?? []) as unknown[];
@@ -796,7 +797,7 @@ export const publishScene = async (actor: SceneActor, sceneId: unknown): Promise
   );
   if (!updated) {
     const latest = await DevelopmentScene.findOne(filter).select('draft.version').lean();
-    if (!latest) throw new NotFoundError('Scene not found');
+    if (!latest) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
     throw new SceneVersionConflictError(latest.draft?.version ?? 0);
   }
 
@@ -823,7 +824,7 @@ export const unpublishScene = async (actor: SceneActor, sceneId: unknown): Promi
     { $unset: { published: 1 }, $inc: { version: 1 } },
     { new: true }
   );
-  if (!updated) throw new NotFoundError('Scene not found');
+  if (!updated) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
   await recordDevelopmentAudit({
     developmentId: actor.developmentId,
     action: 'scene.unpublish',
@@ -845,7 +846,7 @@ export const deleteScene = async (actor: SceneActor, sceneId: unknown): Promise<
     { $set: { deletedAt: new Date() } },
     { new: true }
   );
-  if (!scene) throw new NotFoundError('Scene not found');
+  if (!scene) throw new NotFoundError('Scene not found', { code: 'VIEW_NOT_FOUND' });
   if (scene.imagePublicId) {
     try {
       await deleteImage(scene.imagePublicId);
@@ -975,7 +976,7 @@ const findPublishedDevelopment = async (slug: unknown): Promise<Id> => {
   })
     .select('_id')
     .lean();
-  if (!dev) throw new NotFoundError('Development not found');
+  if (!dev) throw new NotFoundError('Development not found', { code: 'RESIDENCE_NOT_FOUND' });
   return dev._id as Id;
 };
 
@@ -991,13 +992,13 @@ const resolvePublicTarget = async (
   strict: boolean
 ): Promise<{ targetType: SceneTargetType; targetId: Id } | null> => {
   const targetType = isBlank(rawType) ? 'development' : rawType;
-  if (!isSceneTarget(targetType)) throw new ValidationError('invalid targetType');
+  if (!isSceneTarget(targetType)) throw new ValidationError('invalid targetType', { code: 'FIELD_INVALID', field: 'targetType' });
   if (targetType === 'development') return { targetType, targetId: developmentId };
   const targetId = requireObjectId(rawTargetId, 'targetId');
   if (!strict) return { targetType, targetId };
   const model = (targetType === 'building' ? DevelopmentBuilding : DevelopmentFloor) as mongoose.Model<any>;
   const exists = await model.exists({ _id: targetId, developmentId, deletedAt: null });
-  if (!exists) throw new NotFoundError('View target not found');
+  if (!exists) throw new NotFoundError('View target not found', { code: 'REF_NOT_FOUND', field: 'targetId' });
   return { targetType, targetId };
 };
 

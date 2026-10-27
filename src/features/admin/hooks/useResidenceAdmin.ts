@@ -43,5 +43,5 @@ export function useAgencyResidenceAllowance(agencyId: string | undefined) {
       qc.invalidateQueries({ queryKey: adminKeys.residencesAll() });
     },
   });
-  return { allowance: query.data, isLoading: query.isLoading, error: query.error, add: add.mutateAsync, isAdding: add.isPending };
+  return { allowance: query.data, isLoading: query.isLoading, error: query.error, retry: query.refetch, add: add.mutateAsync, isAdding: add.isPending };
 }

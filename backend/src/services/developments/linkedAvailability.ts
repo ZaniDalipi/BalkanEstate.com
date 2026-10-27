@@ -23,15 +23,19 @@ export function parseAlsoLinked(
   changesAvailability: boolean
 ): mongoose.Types.ObjectId[] {
   if (raw === undefined || raw === null) return [];
-  if (!Array.isArray(raw)) throw new UnitLinkError('alsoLinkedUnitIds must be a list of unit ids');
+  if (!Array.isArray(raw)) throw new UnitLinkError('alsoLinkedUnitIds must be a list of unit ids', 'ALSO_LINKED_NOT_LIST', 'alsoLinkedUnitIds');
   if (raw.length === 0) return [];
   if (!changesAvailability) {
-    throw new UnitLinkError('Parking spots and storage rooms can only follow a change of status');
+    throw new UnitLinkError('Parking spots and storage rooms can only follow a change of status', 'ALSO_LINKED_NEEDS_STATUS', 'alsoLinkedUnitIds');
   }
   const allowed = new Set(comesWith.map(String));
   const ids = raw.map((x) => toObjectId(x));
   if (ids.some((id) => !id || !allowed.has(String(id)))) {
-    throw new UnitLinkError('Only the parking spots and storage rooms this unit comes with can be updated with it');
+    throw new UnitLinkError(
+      'Only the parking spots and storage rooms this unit comes with can be updated with it',
+      'ALSO_LINKED_NOT_LINKED',
+      'alsoLinkedUnitIds'
+    );
   }
   return [...new Map(ids.map((id) => [String(id), id as mongoose.Types.ObjectId])).values()];
 }

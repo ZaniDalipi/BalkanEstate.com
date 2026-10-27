@@ -28,3 +28,9 @@ const DEFAULTS: Record<ColumnTarget, string> = {
 export const fieldLabel = (t: TFunction, target: ColumnTarget): string => String(t(`import.field.${target}`, DEFAULTS[target]));
 
 export const FIELD_LABEL_DEFAULTS = DEFAULTS;
+
+/** The label of a field the server names in a row error ('level' is the floor column); '' when it has none. */
+export const serverFieldLabel = (t: TFunction, field: string | undefined): string => {
+  const target = field === 'level' ? 'floor' : field;
+  return target && target in DEFAULTS ? fieldLabel(t, target as ColumnTarget) : '';
+};

@@ -91,6 +91,36 @@ describe('UnitEditDialog', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
+  it('shows a server refusal next to the field it names, in the reader’s language', async () => {
+    vi.mocked(api.updateUnit).mockRejectedValueOnce(
+      Object.assign(new Error('Unit number A2 is already used in this building'), {
+        statusCode: 409,
+        code: 'UNIT_NUMBER_TAKEN',
+        details: { message: 'Unit number A2 is already used in this building', code: 'UNIT_NUMBER_TAKEN', details: { field: 'unitNumber', params: { number: 'A2' } } },
+      })
+    );
+    renderDialog();
+    const number = field('unit.number');
+    await userEvent.clear(number);
+    await userEvent.type(number, 'A2');
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+
+    await waitFor(() => expect(number).toHaveAttribute('aria-invalid', 'true'));
+    const describedBy = number.getAttribute('aria-describedby') ?? '';
+    expect(describedBy.split(' ').some((id) => document.getElementById(id)?.textContent === 'developments:apiErrors.UNIT_NUMBER_TAKEN')).toBe(true);
+    expect(screen.queryByText(/already used/)).not.toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('a lost connection says so instead of a raw error', async () => {
+    vi.mocked(api.updateUnit).mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    renderDialog();
+    await userEvent.type(field('unit.number'), 'x');
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+    expect(await screen.findByText('developments:apiErrors.status.offline')).toBeInTheDocument();
+    expect(screen.queryByText('Failed to fetch')).not.toBeInTheDocument();
+  });
+
   it('filters floors by the chosen building and clears the floor on building change', async () => {
     renderDialog();
     await userEvent.selectOptions(field('inventory.filters.building'), 'b2');
@@ -106,8 +136,13 @@ describe('UnitEditDialog', () => {
     vi.mocked(api.listUnits).mockImplementation(async (_dev, filters) =>
       filters?.unitType ? { items: [spot('p1', 'P1', [{ id: 'u9', unitNumber: 'A9' }]), spot('p2', 'P2')], total: 2 } : { items: [], total: 0 }
     );
+    // The shape httpClient throws: the body's code on the error, the whole body (with its details) in `details`.
     vi.mocked(api.updateUnit).mockRejectedValueOnce(
-      Object.assign(new Error('P2 already comes with A7'), { statusCode: 409, details: { field: 'linkedUnitIds' } })
+      Object.assign(new Error('P2 already comes with A7'), {
+        statusCode: 409,
+        code: 'LINKS_TAKEN',
+        details: { message: 'P2 already comes with A7', code: 'LINKS_TAKEN', details: { field: 'linkedUnitIds', params: { unit: 'P2', owner: 'A7' } } },
+      })
     );
     renderDialog();
     const taken = await screen.findByRole('checkbox', { name: /P1/ });
@@ -116,8 +151,12 @@ describe('UnitEditDialog', () => {
     await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
 
     await waitFor(() => expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { linkedUnitIds: ['p2'] }));
+    // Translated (never the server's English), next to the "comes with" field and above the buttons.
     const alerts = await screen.findAllByRole('alert');
-    expect(alerts.filter((a) => a.textContent?.includes('P2 already comes with A7')).length).toBeGreaterThan(0);
+    expect(alerts.filter((a) => a.textContent === 'developments:apiErrors.LINKS_TAKEN')).toHaveLength(2);
+    const onField = alerts.find((a) => a.closest('fieldset'));
+    expect(onField?.closest('fieldset')).toHaveAttribute('aria-describedby', onField?.id);
+    expect(screen.queryByText('P2 already comes with A7')).not.toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });
 

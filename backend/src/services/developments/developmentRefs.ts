@@ -26,7 +26,7 @@ export const toObjectId = (raw: unknown): mongoose.Types.ObjectId | null => {
 /** Like toObjectId, but a malformed id is a 400 naming the field. */
 export const requireObjectId = (raw: unknown, field: string): mongoose.Types.ObjectId => {
   const id = toObjectId(raw);
-  if (!id) throw new ValidationError(`A valid ${field} is required`);
+  if (!id) throw new ValidationError(`A valid ${field} is required`, { code: 'FIELD_INVALID', field });
   return id;
 };
 
@@ -43,6 +43,6 @@ export const requireRefInDevelopment = async <T>(
 ): Promise<mongoose.HydratedDocument<T>> => {
   const id = requireObjectId(raw, field);
   const doc = await model.findOne({ _id: id, developmentId, deletedAt: null } as mongoose.FilterQuery<T>);
-  if (!doc) throw new NotFoundError(`${field} not found in this development`);
+  if (!doc) throw new NotFoundError(`${field} not found in this development`, { code: 'REF_NOT_FOUND', field });
   return doc;
 };

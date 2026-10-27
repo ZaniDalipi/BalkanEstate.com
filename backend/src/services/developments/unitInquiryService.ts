@@ -79,9 +79,9 @@ export const sendUnitInquiry = async (params: {
   const development = await loadPublishedDevelopment(params.slug);
   const developmentId = development._id as mongoose.Types.ObjectId;
   const unitId = toObjectId(params.unitId);
-  if (!unitId) throw new NotFoundError('Unit not found');
+  if (!unitId) throw new NotFoundError('Unit not found', { code: 'UNIT_NOT_FOUND' });
   const unit = await DevelopmentUnit.findOne({ _id: unitId, ...visibleUnitFilter(developmentId) });
-  if (!unit) throw new NotFoundError('Unit not found');
+  if (!unit) throw new NotFoundError('Unit not found', { code: 'UNIT_NOT_FOUND' });
   if (development.allowUnitInquiries === false) throw new InquiriesDisabledError();
 
   const input = validateUnitInquiry(params.payload);

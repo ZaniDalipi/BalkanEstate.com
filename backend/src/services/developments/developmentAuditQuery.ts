@@ -35,7 +35,7 @@ export const listAuditEntries = async (
   const match: Record<string, unknown> = { developmentId };
   if (q.action !== undefined && q.action !== '') {
     if (typeof q.action !== 'string' || q.action.length > 60 || !ACTION_PATTERN.test(q.action)) {
-      throw new ValidationError('Invalid action filter');
+      throw new ValidationError('Invalid action filter', { code: 'FIELD_INVALID', field: 'action' });
     }
     // A prefix ("unit") matches its whole family ("unit.update", "unit.delete"…).
     match.action = q.action.includes('.') ? q.action : { $regex: `^${q.action}\\.` };

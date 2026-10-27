@@ -62,7 +62,7 @@ const loadBySlug = async (req: Request, res: Response) => {
   const slug = String(req.params.slug || '').toLowerCase();
   const development = await Development.findOne({ slug, ...publicResidenceFilter() }).select('_id');
   if (!development) {
-    res.status(404).json({ message: 'Development not found' });
+    res.status(404).json({ message: 'Development not found', code: 'RESIDENCE_NOT_FOUND' });
     return null;
   }
   return development;
@@ -77,7 +77,7 @@ export const follow = async (req: Request, res: Response): Promise<void> => {
     const preferences = sanitizePreferences(req.body?.preferences);
     const filtersResult = sanitizeFilters(req.body?.filters);
     if (!filtersResult.ok) {
-      res.status(400).json({ message: filtersResult.error });
+      res.status(400).json({ message: filtersResult.error, code: 'FIELD_INVALID', details: { field: 'filters' } });
       return;
     }
 

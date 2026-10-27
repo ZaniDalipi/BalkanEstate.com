@@ -4,6 +4,7 @@ import { Button } from '@/src/components/ui/button';
 import { SCENE_VIEW_DIRECTIONS, type Scene, type SceneViewDirection } from '../../../types';
 import { useSceneMutations } from '../../../hooks/useScenes';
 import { fieldCls } from './ViewUploadForm';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface ViewSettingsFormProps {
   developmentId: string;
@@ -14,6 +15,7 @@ interface ViewSettingsFormProps {
 /** Rename a view, change its direction or its position (sortOrder). */
 export const ViewSettingsForm: React.FC<ViewSettingsFormProps> = ({ developmentId, scene, onDone }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const ids = useId();
   const { updateView, isUpdatingView } = useSceneMutations(developmentId);
   const [name, setName] = useState(scene.viewName ?? '');
@@ -28,7 +30,7 @@ export const ViewSettingsForm: React.FC<ViewSettingsFormProps> = ({ developmentI
       await updateView({ sceneId: scene.id, patch: { viewName: name.trim(), viewDirection: direction, sortOrder } });
       onDone();
     } catch (err) {
-      setError((err as Error).message);
+      setError(apiText.text(err));
     }
   };
 

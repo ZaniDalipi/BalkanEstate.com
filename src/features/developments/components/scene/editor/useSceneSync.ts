@@ -14,6 +14,7 @@ import { useSceneMutations, useScenes } from '../../../hooks/useScenes';
 import type { Hotspot, HotspotIssue, Scene } from '../../../types';
 import type { PolygonEditor } from '../../../hooks/usePolygonEditor';
 import type { AnyIssueCode } from './issueText';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 export type SyncNotice =
   | { kind: 'saved' | 'published' | 'unpublished' | 'blocked' | 'blockedSave' | 'invalid' }
@@ -37,6 +38,7 @@ const sameHotspots = (a: Hotspot[], b: Hotspot[]) => a === b || JSON.stringify(a
 export function useSceneSync(developmentId: string, scene: Scene, editor: PolygonEditor) {
   const { saveDraft, isSaving, publish, isPublishing, unpublish, isUnpublishing } = useSceneMutations(developmentId);
   const { refetch } = useScenes(developmentId);
+  const apiText = useApiErrorText();
   const { state, dispatch, issues: localIssues } = editor;
 
   const [baseline, setBaseline] = useState<Hotspot[]>(scene.draft?.hotspots ?? []);
@@ -107,7 +109,7 @@ export function useSceneSync(developmentId: string, scene: Scene, editor: Polygo
       if (first) dispatch({ type: 'SELECT', id: first });
       return;
     }
-    setNotice({ kind: 'error', message: err.details?.message || err.message || 'Request failed' });
+    setNotice({ kind: 'error', message: apiText.text(err) });
   };
 
   /** Select the first region with a local issue; true when there is one. */

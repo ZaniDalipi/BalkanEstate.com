@@ -75,9 +75,13 @@ describe('BuyResidenceDialog', () => {
     render(<BuyResidenceDialog developmentId="d1" kind="pass" billing={billing()} onClose={vi.fn()} />);
     await user.type(screen.getByLabelText('billing.code.label'), 'BADCODE');
 
-    vi.mocked(api.checkoutResidence).mockRejectedValueOnce(Object.assign(new Error('This code has expired'), { code: 'COUPON_INVALID', statusCode: 400, details: { code: 'COUPON_INVALID' } }));
+    // The server's English reason is never shown: its reason key is translated.
+    vi.mocked(api.checkoutResidence).mockRejectedValueOnce(
+      Object.assign(new Error('Code has expired'), { code: 'COUPON_INVALID', statusCode: 400, details: { code: 'COUPON_INVALID', details: { reason: 'expired' } } })
+    );
     await user.click(screen.getByRole('button', { name: 'billing.unlock' }));
-    expect(await screen.findByText('This code has expired')).toBeInTheDocument();
+    expect(await screen.findByText('billing.refusal.coupon.expired')).toBeInTheDocument();
+    expect(screen.queryByText('Code has expired')).not.toBeInTheDocument();
 
     vi.mocked(api.checkoutResidence).mockRejectedValueOnce(refusal('PAYMENT_NOT_CONFIGURED', { amount: 74.5 }));
     await user.click(screen.getByRole('button', { name: 'billing.unlock' }));

@@ -11,6 +11,7 @@
 import mongoose from 'mongoose';
 import DevelopmentUnit from '../../models/DevelopmentUnit';
 import { ValidationError } from './developmentService';
+import { applyErrorMeta, type ErrorDetails, type ErrorParams } from './errorMeta';
 import { toObjectId } from './developmentRefs';
 
 export const LINKABLE_UNIT_TYPES = ['parking', 'storage'] as const;
@@ -19,22 +20,24 @@ export const MAX_LINKED_UNITS = 10;
 const LIVE = { $exists: false } as const;
 const isLinkable = (type: unknown) => (LINKABLE_UNIT_TYPES as readonly string[]).includes(String(type));
 
-/** A rule broken by the "comes with" list (400), shown next to that field (or the type). */
+type LinkField = 'linkedUnitIds' | 'unitType' | 'alsoLinkedUnitIds';
+
+/** A rule broken by the "comes with" list (400), with a code the client translates, shown next to `field`. */
 export class UnitLinkError extends ValidationError {
-  readonly details: { field: string };
-  constructor(message: string, field: 'linkedUnitIds' | 'unitType' = 'linkedUnitIds') {
-    super(message);
-    this.details = { field };
+  constructor(message: string, code: string, field: LinkField = 'linkedUnitIds', params?: ErrorParams) {
+    super(message, { code, field, params });
   }
 }
 
 /** A "this spot already comes with another apartment" clash (409). */
 export class UnitLinkConflictError extends Error {
   readonly statusCode = 409;
-  readonly details = { field: 'linkedUnitIds' };
-  constructor(message: string) {
+  code?: string;
+  details?: ErrorDetails;
+  constructor(message: string, code: string, params?: ErrorParams) {
     super(message);
     this.name = 'UnitLinkConflictError';
+    applyErrorMeta(this, { code, field: 'linkedUnitIds', params });
   }
 }
 
@@ -49,28 +52,33 @@ export async function resolveLinkedUnits(
   unitType = unit.unitType
 ): Promise<mongoose.Types.ObjectId[]> {
   if (raw === null) return [];
-  if (!Array.isArray(raw)) throw new UnitLinkError('linkedUnitIds must be a list of unit ids');
+  if (!Array.isArray(raw)) throw new UnitLinkError('linkedUnitIds must be a list of unit ids', 'LINKS_NOT_LIST');
   const ids = raw.map((x) => toObjectId(x));
-  if (ids.some((id) => !id)) throw new UnitLinkError('linkedUnitIds contains an invalid id');
+  if (ids.some((id) => !id)) throw new UnitLinkError('linkedUnitIds contains an invalid id', 'LINKS_INVALID_ID');
   const unique = [...new Map(ids.map((id) => [String(id), id as mongoose.Types.ObjectId])).values()];
   if (unique.length === 0) return [];
   if (unique.length > MAX_LINKED_UNITS) {
-    throw new UnitLinkError(`A unit can come with at most ${MAX_LINKED_UNITS} parking spots or storage rooms`);
+    throw new UnitLinkError(`A unit can come with at most ${MAX_LINKED_UNITS} parking spots or storage rooms`, 'LINKS_TOO_MANY', 'linkedUnitIds', { max: MAX_LINKED_UNITS });
   }
   if (isLinkable(unitType)) {
-    throw new UnitLinkError('A parking spot or storage room cannot come with other units');
+    throw new UnitLinkError('A parking spot or storage room cannot come with other units', 'LINKS_EXTRA_CANNOT_HAVE');
   }
   if (unique.some((id) => String(id) === String(unit._id))) {
-    throw new UnitLinkError('A unit cannot come with itself');
+    throw new UnitLinkError('A unit cannot come with itself', 'LINKS_SELF');
   }
 
   const found = await DevelopmentUnit.find({ _id: { $in: unique }, developmentId, deletedAt: LIVE })
     .select('unitNumber unitType')
     .lean();
-  if (found.length !== unique.length) throw new UnitLinkError('linkedUnitIds: a unit was not found in this residence');
+  if (found.length !== unique.length) throw new UnitLinkError('linkedUnitIds: a unit was not found in this residence', 'LINKS_NOT_FOUND');
   const wrong = found.find((u) => !isLinkable(u.unitType));
   if (wrong) {
-    throw new UnitLinkError(`Only parking spots and storage rooms can be added (${wrong.unitNumber} is a ${wrong.unitType})`);
+    throw new UnitLinkError(
+      `Only parking spots and storage rooms can be added (${wrong.unitNumber} is a ${wrong.unitType})`,
+      'LINKS_NOT_EXTRA',
+      'linkedUnitIds',
+      { unit: wrong.unitNumber, type: wrong.unitType }
+    );
   }
 
   const taken = await DevelopmentUnit.findOne({
@@ -83,7 +91,10 @@ export async function resolveLinkedUnits(
     .lean();
   if (taken) {
     const clash = found.find((u) => (taken.linkedUnitIds ?? []).some((id) => String(id) === String(u._id)));
-    throw new UnitLinkConflictError(`${clash?.unitNumber ?? 'This spot'} already comes with ${taken.unitNumber}`);
+    throw new UnitLinkConflictError(`${clash?.unitNumber ?? 'This spot'} already comes with ${taken.unitNumber}`, 'LINKS_TAKEN', {
+      unit: clash?.unitNumber ?? '',
+      owner: taken.unitNumber,
+    });
   }
   return unique;
 }
@@ -100,14 +111,19 @@ export async function assertTypeChangeKeepsLinks(
 ): Promise<void> {
   const links = nextLinked ?? unit.linkedUnitIds ?? [];
   if (isLinkable(nextType) && links.length > 0) {
-    throw new UnitLinkError('A parking spot or storage room cannot come with other units', 'unitType');
+    throw new UnitLinkError('A parking spot or storage room cannot come with other units', 'TYPE_EXTRA_HAS_LINKS', 'unitType');
   }
   if (!isLinkable(nextType)) {
     const owner = await DevelopmentUnit.findOne({ developmentId, deletedAt: LIVE, linkedUnitIds: unit._id })
       .select('unitNumber')
       .lean();
     if (owner) {
-      throw new UnitLinkError(`This unit comes with ${owner.unitNumber}; remove it there before changing its type`, 'unitType');
+      throw new UnitLinkError(
+        `This unit is sold with ${owner.unitNumber}; remove it there before changing its type`,
+        'TYPE_SOLD_WITH',
+        'unitType',
+        { owner: owner.unitNumber }
+      );
     }
   }
 }

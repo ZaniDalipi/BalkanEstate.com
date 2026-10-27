@@ -13,6 +13,7 @@ import { useSceneMutations } from '../../../hooks/useScenes';
 import type { Scene } from '../../../types';
 import { checkImageFile } from './imageFile';
 import { useConfirmDiscard } from './useUnsavedGuard';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface Options {
   developmentId: string;
@@ -24,6 +25,7 @@ interface Options {
 
 export function useViewActions({ developmentId, views, dirty, onRegionsReset }: Options) {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const { confirm } = useConfirmation();
   const confirmDiscard = useConfirmDiscard();
   const { uploadImage, updateView, remove, isUploading, isRemoving, isUpdatingView } = useSceneMutations(developmentId);
@@ -36,7 +38,7 @@ export function useViewActions({ developmentId, views, dirty, onRegionsReset }: 
     try {
       await fn();
     } catch (err) {
-      setError((err as Error).message || t('editor.views.failed', 'Something went wrong. Please try again.'));
+      setError(apiText.text(err));
     }
   };
 

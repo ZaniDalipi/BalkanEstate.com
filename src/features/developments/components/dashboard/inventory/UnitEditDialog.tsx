@@ -11,6 +11,7 @@ import { UnitEditSections } from './UnitEditBody';
 import { UnitMediaSections } from './UnitMediaSections';
 import { roleCan } from './permissions';
 import { useUnitEditor } from './useUnitEditor';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface UnitEditDialogProps {
   developmentId: string;
@@ -28,6 +29,7 @@ interface UnitEditDialogProps {
  */
 export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, unit, role, buildings, floors, onClose }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const { confirm } = useConfirmation();
   const notify = useNotification();
   const { deleteUnit, isDeleting } = useUnitAdmin(developmentId);
@@ -55,8 +57,7 @@ export const UnitEditDialog: React.FC<UnitEditDialogProps> = ({ developmentId, u
       void notify.success(t('inventory.delete.doneTitle', 'Unit deleted'), t('inventory.delete.done', 'Unit {{number}} was deleted.', { number: unit.unitNumber }));
       onClose();
     } catch (err) {
-      const apiErr = err as { statusCode?: number; message?: string };
-      editor.setFormError(apiErr?.statusCode === 403 ? t('inventory.errors.forbidden', 'Your role is not allowed to make this change.') : apiErr?.message || t('errors.generic'));
+      editor.setFormError(apiText.text(err));
     }
   };
 

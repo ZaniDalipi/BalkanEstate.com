@@ -71,19 +71,17 @@ export const sendServiceError = (res: Response, error: unknown, context: string)
   // Schema rule broken by client input (min/max/enum/maxlength): a 400 with
   // the offending fields, not a 500.
   if (error instanceof mongoose.Error.ValidationError) {
-    res.status(400).json({
-      message: 'Validation failed',
-      errors: Object.values(error.errors).map((err) => ({ field: err.path, message: err.message })),
-    });
+    const errors = Object.values(error.errors).map((err) => ({ field: err.path, message: err.message }));
+    res.status(400).json({ message: 'Validation failed', code: 'FIELD_INVALID', details: { field: errors[0]?.field }, errors });
     return;
   }
   // A malformed id or wrong type in the input.
   if (error instanceof mongoose.Error.CastError) {
-    res.status(400).json({ message: `Invalid ${error.path}` });
+    res.status(400).json({ message: `Invalid ${error.path}`, code: 'FIELD_INVALID', details: { field: error.path } });
     return;
   }
   if (isDuplicateKeyError(error)) {
-    res.status(409).json({ message: 'A record with these details already exists' });
+    res.status(409).json({ message: 'A record with these details already exists', code: 'DUPLICATE' });
     return;
   }
   log.error(`${context} failed:`, error);
@@ -100,7 +98,7 @@ const currentUser = (req: Request): IUser => req.user as IUser;
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ message: 'Not authorized' });
+      res.status(401).json({ message: 'Not authorized', code: 'NOT_SIGNED_IN' });
       return;
     }
     const development = await createDevelopment(req.body, currentUser(req));
@@ -114,7 +112,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
 export const listMine = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ message: 'Not authorized' });
+      res.status(401).json({ message: 'Not authorized', code: 'NOT_SIGNED_IN' });
       return;
     }
     const limit = Number(req.query.limit) || 20;
@@ -214,11 +212,11 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
 export const uploadCover = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.file) {
-      res.status(400).json({ message: 'No file uploaded' });
+      res.status(400).json({ message: 'No file uploaded', code: 'NO_IMAGES' });
       return;
     }
     if (!isMediaStorageConfigured()) {
-      res.status(500).json({ message: 'Image upload service not configured' });
+      res.status(503).json({ message: 'Image upload service not configured', code: 'STORAGE_NOT_CONFIGURED' });
       return;
     }
     const development = req.development!;
@@ -282,7 +280,7 @@ export const addFloor = async (req: Request, res: Response): Promise<void> => {
   try {
     const { buildingId } = req.body ?? {};
     if (!buildingId) {
-      res.status(400).json({ message: 'buildingId is required' });
+      res.status(400).json({ message: 'buildingId is required', code: 'FIELD_REQUIRED', details: { field: 'buildingId' } });
       return;
     }
     // createFloor resolves the (encoded) building id inside this development.
@@ -347,7 +345,7 @@ export const updateAvailability = async (req: Request, res: Response): Promise<v
       req.body?.availability
     );
     if (!unit) {
-      res.status(404).json({ message: 'Unit not found' });
+      res.status(404).json({ message: 'Unit not found', code: 'UNIT_NOT_FOUND' });
       return;
     }
     await DevelopmentAuditLog.create({
@@ -521,7 +519,7 @@ export const exportUnitsCsv = async (req: Request, res: Response): Promise<void>
 export const uploadUnitFloorplan = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.file) {
-      res.status(400).json({ message: 'No file uploaded' });
+      res.status(400).json({ message: 'No file uploaded', code: 'NO_IMAGES' });
       return;
     }
     const unit = await unitAdmin.setUnitFloorplan({
@@ -555,7 +553,7 @@ export const uploadUnitGallery = async (req: Request, res: Response): Promise<vo
   try {
     const files = Array.isArray(req.files) ? req.files : [];
     if (files.length === 0) {
-      res.status(400).json({ message: 'No files uploaded' });
+      res.status(400).json({ message: 'No files uploaded', code: 'NO_IMAGES' });
       return;
     }
     const unit = await unitAdmin.addUnitGalleryImages({

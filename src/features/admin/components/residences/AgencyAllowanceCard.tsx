@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useApiErrorText } from '@/src/features/developments/hooks/useApiErrorText';
 import { useAgencyResidenceAllowance } from '../../hooks/useResidenceAdmin';
 import { NumberDialog } from './NumberDialog';
 import { MAX_EXTRA_RESIDENCES, rangeProblem } from './residenceAdminValidation';
@@ -17,11 +18,22 @@ interface AgencyAllowanceCardProps {
 export const AgencyAllowanceCard: React.FC<AgencyAllowanceCardProps> = ({ agencyId }) => {
   const { t } = useTranslation(['admin']);
   const { day, problemText } = useResidenceAdminText();
-  const { allowance: a, isLoading, error, add } = useAgencyResidenceAllowance(agencyId);
+  const { allowance: a, isLoading, error, retry, add } = useAgencyResidenceAllowance(agencyId);
+  const apiText = useApiErrorText();
   const [adding, setAdding] = useState(false);
 
   if (isLoading) return <div className="h-28 animate-pulse rounded-xl bg-gray-100" aria-busy="true" />;
-  if (error || !a) return <p className="text-sm text-red-700">{t('admin:residences.allowance.error', 'Could not load the agency’s residences.')}</p>;
+  if (error || !a) {
+    return (
+      <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        <p>{t('admin:residences.allowance.error', 'Could not load the agency’s residences.')}</p>
+        {error && <p className="mt-1">{apiText.text(error)}</p>}
+        <button type="button" onClick={() => void retry()} className="min-h-[44px] font-semibold underline">
+          {t('admin:residences.retry', 'Try again')}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <section aria-labelledby={`allowance-${agencyId}`} className="rounded-xl border border-teal-200 bg-teal-50/50 p-4">

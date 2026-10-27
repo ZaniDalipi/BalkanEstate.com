@@ -136,6 +136,7 @@ describe('buying a pass', () => {
       .send({ kind: 'pass', couponCode: 'RES100' });
     expect(again.status).toBe(400);
     expect(again.body.code).toBe('COUPON_INVALID');
+    expect(['alreadyUsed', 'usedUp']).toContain(again.body.details.reason);
   });
 
   it('general subscription codes do not unlock residences', async () => {
@@ -147,6 +148,13 @@ describe('buying a pass', () => {
       .send({ kind: 'pass', couponCode: 'ANYPLAN' });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe('COUPON_INVALID');
+    expect(res.body.details.reason).toBe('notResidence');
+    const unknown = await request(app)
+      .post(`${DASH}/${t.devEnc}/billing/checkout`)
+      .set(auth(t.ownerToken))
+      .send({ kind: 'pass', couponCode: 'NO-SUCH-CODE' });
+    expect(unknown.status).toBe(400);
+    expect(unknown.body).toMatchObject({ code: 'COUPON_INVALID', details: { reason: 'unknown' } });
   });
 
   it('only the owner can buy; team members cannot', async () => {

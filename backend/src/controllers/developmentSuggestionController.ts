@@ -51,7 +51,7 @@ export const nearbyDevelopments = async (req: Request, res: Response): Promise<v
     const lat = Number(req.query.lat);
     const lng = Number(req.query.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      res.status(400).json({ message: 'Valid lat and lng are required' });
+      res.status(400).json({ message: 'Valid lat and lng are required', code: 'FIELD_INVALID', details: { field: 'lat' } });
       return;
     }
     const limit = Math.min(Math.max(Number(req.query.limit) || 5, 1), 20);
@@ -173,7 +173,7 @@ export const attachListing = async (req: Request, res: Response): Promise<void> 
   try {
     const listingId = resolveId(String(req.body?.listingId || ''));
     if (!listingId || !isValidObjectId(listingId)) {
-      res.status(400).json({ message: 'A valid listingId is required' });
+      res.status(400).json({ message: 'A valid listingId is required', code: 'FIELD_REQUIRED', details: { field: 'listingId' } });
       return;
     }
     const property = await attachListingToDevelopmentLevel({
@@ -197,7 +197,7 @@ export const requestAttachment = async (req: Request, res: Response): Promise<vo
     const slug = String(req.params.slug || '').toLowerCase();
     const development = await Development.findOne({ slug, ...publicResidenceFilter() }).select('_id');
     if (!development) {
-      res.status(404).json({ message: 'Development not found' });
+      res.status(404).json({ message: 'Development not found', code: 'RESIDENCE_NOT_FOUND' });
       return;
     }
 
@@ -208,7 +208,7 @@ export const requestAttachment = async (req: Request, res: Response): Promise<vo
     if (listingId && isValidObjectId(listingId)) {
       const property = await Property.findById(listingId).select('sellerId createdByAgencyId');
       if (property && !(await callerControlsListing(currentUser(req), property))) {
-        res.status(403).json({ message: 'You do not control the referenced listing.' });
+        res.status(403).json({ message: 'You do not control the referenced listing.', code: 'LISTING_NOT_YOURS' });
         return;
       }
     }

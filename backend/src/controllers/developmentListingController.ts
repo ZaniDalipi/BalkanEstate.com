@@ -36,7 +36,7 @@ export const attach = async (req: Request, res: Response): Promise<void> => {
     if (!unitId) return;
     const listingId = resolveBodyId(req.body?.listingId);
     if (!listingId) {
-      res.status(400).json({ message: 'A valid listingId is required' });
+      res.status(400).json({ message: 'A valid listingId is required', code: 'FIELD_REQUIRED', details: { field: 'listingId' } });
       return;
     }
     const result = await attachListingToUnit({
@@ -59,7 +59,7 @@ export const previewConflicts = async (req: Request, res: Response): Promise<voi
     if (!unitId) return;
     const listingId = resolveBodyId(req.body?.listingId);
     if (!listingId) {
-      res.status(400).json({ message: 'A valid listingId is required' });
+      res.status(400).json({ message: 'A valid listingId is required', code: 'FIELD_REQUIRED', details: { field: 'listingId' } });
       return;
     }
     const [property, unit] = await Promise.all([
@@ -72,11 +72,11 @@ export const previewConflicts = async (req: Request, res: Response): Promise<voi
       }),
     ]);
     if (!property) {
-      res.status(404).json({ message: 'Listing not found' });
+      res.status(404).json({ message: 'Listing not found', code: 'LISTING_NOT_FOUND' });
       return;
     }
     if (!unit) {
-      res.status(404).json({ message: 'Unit not found' });
+      res.status(404).json({ message: 'Unit not found', code: 'UNIT_NOT_FOUND' });
       return;
     }
     const controlsListing = await callerControlsListing(currentUser(req), property);
@@ -119,11 +119,11 @@ export const bulkAttachListings = async (req: Request, res: Response): Promise<v
   try {
     const items = req.body?.items;
     if (!Array.isArray(items) || items.length === 0) {
-      res.status(400).json({ message: 'items must be a non-empty array' });
+      res.status(400).json({ message: 'items must be a non-empty array', code: 'BULK_EMPTY' });
       return;
     }
     if (items.length > 200) {
-      res.status(400).json({ message: 'A bulk attach is limited to 200 items' });
+      res.status(400).json({ message: 'A bulk attach is limited to 200 items', code: 'BULK_TOO_MANY', details: { params: { max: 200 } } });
       return;
     }
     const normalized: BulkAttachItem[] = [];
@@ -131,7 +131,7 @@ export const bulkAttachListings = async (req: Request, res: Response): Promise<v
       const listingId = resolveBodyId(item?.listingId);
       const unitId = resolveBodyId(item?.unitId);
       if (!listingId || !unitId) {
-        res.status(400).json({ message: 'Each item needs a valid listingId and unitId' });
+        res.status(400).json({ message: 'Each item needs a valid listingId and unitId', code: 'FIELD_INVALID', details: { field: 'items' } });
         return;
       }
       normalized.push({ listingId, unitId });

@@ -73,7 +73,7 @@ export const createBuilding = async (
     order?: number;
   }
 ): Promise<IDevelopmentBuilding> => {
-  if (!text(input.name)) throw new ValidationError('building name is required');
+  if (!text(input.name)) throw new ValidationError('building name is required', { code: 'FIELD_REQUIRED', field: 'name' });
   // Residence Pass: every building past the plan's limit has to be unlocked.
   await assertBuildingCapacity(developmentId, 1);
   const slug = await uniqueBuildingSlug(developmentId, input.name);
@@ -98,7 +98,7 @@ export const createEntrance = async (
   buildingId: Id,
   input: { name: string; code?: string; order?: number }
 ) => {
-  if (!text(input.name)) throw new ValidationError('entrance name is required');
+  if (!text(input.name)) throw new ValidationError('entrance name is required', { code: 'FIELD_REQUIRED', field: 'name' });
   return DevelopmentEntrance.create({
     developmentId,
     buildingId,
@@ -119,12 +119,12 @@ export const createFloor = async (
     order?: number;
   }
 ): Promise<IDevelopmentFloor> => {
-  if (!text(input.label)) throw new ValidationError('floor label is required');
+  if (!text(input.label)) throw new ValidationError('floor label is required', { code: 'FIELD_REQUIRED', field: 'label' });
   if (typeof input.level !== 'number' || !Number.isFinite(input.level)) {
-    throw new ValidationError('floor level must be a number');
+    throw new ValidationError('floor level must be a number', { code: 'FIELD_NOT_NUMBER', field: 'level' });
   }
   if (input.kind !== undefined && !(FLOOR_KINDS as readonly string[]).includes(input.kind)) {
-    throw new ValidationError(`floor kind must be one of: ${FLOOR_KINDS.join(', ')}`);
+    throw new ValidationError(`floor kind must be one of: ${FLOOR_KINDS.join(', ')}`, { code: 'FIELD_INVALID', field: 'kind' });
   }
   // The client speaks encoded ids; resolve them and prove the building (and
   // entrance) live in THIS development before writing anything.
@@ -133,7 +133,7 @@ export const createFloor = async (
   if (input.entranceId !== undefined && input.entranceId !== null && input.entranceId !== '') {
     const entrance = await requireRefInDevelopment(DevelopmentEntrance, input.entranceId, developmentId, 'entranceId');
     if (String(entrance.buildingId) !== String(building._id)) {
-      throw new ValidationError('entranceId must belong to the building');
+      throw new ValidationError('entranceId must belong to the building', { code: 'ENTRANCE_NOT_IN_BUILDING', field: 'entranceId' });
     }
     entranceId = entrance._id as mongoose.Types.ObjectId;
   }
@@ -191,13 +191,13 @@ export const resolveUnitPlacement = async (
   const building = await requireRefInDevelopment(DevelopmentBuilding, raw.buildingId, developmentId, 'buildingId');
   const floor = await requireRefInDevelopment(DevelopmentFloor, raw.floorId, developmentId, 'floorId');
   if (String(floor.buildingId) !== String(building._id)) {
-    throw new ValidationError('floorId must belong to the building');
+    throw new ValidationError('floorId must belong to the building', { code: 'FLOOR_NOT_IN_BUILDING', field: 'floorId' });
   }
   let entranceId: mongoose.Types.ObjectId | undefined;
   if (raw.entranceId !== undefined && raw.entranceId !== null && raw.entranceId !== '') {
     const entrance = await requireRefInDevelopment(DevelopmentEntrance, raw.entranceId, developmentId, 'entranceId');
     if (String(entrance.buildingId) !== String(building._id)) {
-      throw new ValidationError('entranceId must belong to the building');
+      throw new ValidationError('entranceId must belong to the building', { code: 'ENTRANCE_NOT_IN_BUILDING', field: 'entranceId' });
     }
     entranceId = entrance._id as mongoose.Types.ObjectId;
   }
@@ -214,21 +214,25 @@ export const createUnit = async (
   developmentId: Id,
   input: CreateUnitInput
 ): Promise<IDevelopmentUnit> => {
-  if (!text(input.unitNumber)) throw new ValidationError('unitNumber is required');
-  if (!text(input.unitType)) throw new ValidationError('unitType is required');
+  if (!text(input.unitNumber)) throw new ValidationError('unitNumber is required', { code: 'FIELD_REQUIRED', field: 'unitNumber' });
+  if (!text(input.unitType)) throw new ValidationError('unitType is required', { code: 'FIELD_REQUIRED', field: 'unitType' });
   if (
     input.availability !== undefined &&
     !isUnitAvailability(input.availability)
   ) {
-    throw new ValidationError(
-      `availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`
-    );
+    throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`, {
+      code: 'FIELD_INVALID',
+      field: 'availability',
+    });
   }
   if (input.visibility !== undefined && !isUnitVisibility(input.visibility)) {
-    throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`);
+    throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`, { code: 'FIELD_INVALID', field: 'visibility' });
   }
   if (input.priceVisibility !== undefined && !isPriceVisibility(input.priceVisibility)) {
-    throw new ValidationError(`priceVisibility must be one of: ${PRICE_VISIBILITIES.join(', ')}`);
+    throw new ValidationError(`priceVisibility must be one of: ${PRICE_VISIBILITIES.join(', ')}`, {
+      code: 'FIELD_INVALID',
+      field: 'priceVisibility',
+    });
   }
   for (const field of ['orientation', 'viewType', 'currency'] as const) {
     const v = text(input[field]);
@@ -270,9 +274,8 @@ export const createUnit = async (
   } catch (error) {
     if (isDuplicateKeyError(error)) {
       throw new ValidationError(
-        `A unit numbered "${input.unitNumber}" already exists in this ${
-          placement.entranceId ? 'entrance' : 'building'
-        }`
+        `A unit numbered "${input.unitNumber}" already exists in this ${placement.entranceId ? 'entrance' : 'building'}`,
+        { code: 'UNIT_NUMBER_TAKEN', field: 'unitNumber', params: { number: text(input.unitNumber) } }
       );
     }
     throw error;
@@ -332,9 +335,10 @@ export const setUnitAvailability = async (
   availability: UnitAvailability
 ): Promise<IDevelopmentUnit | null> => {
   if (!isUnitAvailability(availability)) {
-    throw new ValidationError(
-      `availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`
-    );
+    throw new ValidationError(`availability must be one of: ${UNIT_AVAILABILITY_STATES.join(', ')}`, {
+      code: 'FIELD_INVALID',
+      field: 'availability',
+    });
   }
   // The pre-update document (new: false) tells us the prior state, so we only
   // alert followers on a real transition INTO 'available'.

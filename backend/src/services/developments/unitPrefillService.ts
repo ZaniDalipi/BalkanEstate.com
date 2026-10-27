@@ -79,10 +79,10 @@ export const listingToUnitFields = (p: Partial<IProperty>): Pick<UnitPrefill, 'f
 
 export const getUnitPrefill = async (user: IUser, rawListingId: unknown): Promise<UnitPrefill> => {
   const listingId = toObjectId(rawListingId);
-  if (!listingId) throw new ValidationError('A valid listing is required');
+  if (!listingId) throw new ValidationError('A valid listing is required', { code: 'LISTING_NOT_FOUND' });
   const property = await Property.findById(listingId).lean<IProperty & { _id: mongoose.Types.ObjectId }>();
-  if (!property) throw new NotFoundError('Listing not found');
-  if (!(await callerControlsListing(user, property))) throw new AuthorizationError('You can only copy from your own listings.');
+  if (!property) throw new NotFoundError('Listing not found', { code: 'LISTING_NOT_FOUND' });
+  if (!(await callerControlsListing(user, property))) throw new AuthorizationError('You can only copy from your own listings.', { code: 'LISTING_NOT_YOURS' });
   return {
     listing: {
       id: encodeId(String(property._id)),

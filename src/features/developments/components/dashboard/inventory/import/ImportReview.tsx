@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Building2, Layers, Lock, Plus, RefreshCw } from 'lucide-react';
 import type { ImportProblem, PreparedImport } from '../../../../utils/csvImport';
 import type { UnitImportSummary } from '../../../../types';
-import { fieldLabel } from './fieldLabels';
+import { fieldLabel, serverFieldLabel } from './fieldLabels';
+import { useApiErrorText } from '../../../../hooks/useApiErrorText';
 
 interface ImportReviewProps {
   prepared: PreparedImport;
@@ -23,13 +24,14 @@ const Stat: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactN
 /** What the import will do (from the server's dry run), a preview of the rows, and every problem found. */
 export const ImportReview: React.FC<ImportReviewProps> = ({ prepared, preview, previewError, isChecking }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const problemText = (p: ImportProblem) =>
     t(`import.problem.${p.code}`, {
       field: p.field ? fieldLabel(t, p.field) : '',
       value: p.value ?? '',
       defaultValue: { noUnitNumber: 'No unit number', noBuilding: 'No building', noFloor: 'Can’t tell the floor from “{{value}}”', badNumber: '{{field}}: “{{value}}” is not a number', badAvailability: 'Unknown availability “{{value}}”', badChoice: '{{field}}: “{{value}}” is not one of the options', notEuro: 'Prices must be in euros (found {{value}})' }[p.code],
     });
-  const problems = [...prepared.problems.map((p) => ({ row: p.row, text: problemText(p) })), ...(preview?.errors ?? []).map((e) => ({ row: e.row, text: e.message }))].sort((a, b) => a.row - b.row);
+  const problems = [...prepared.problems.map((p) => ({ row: p.row, text: problemText(p) })), ...(preview?.errors ?? []).map((e) => ({ row: e.row, text: apiText.forCode(e.code, { ...e.params, field: serverFieldLabel(t, e.field) }) }))].sort((a, b) => a.row - b.row);
   const dash = isChecking ? '…' : '—';
 
   return (

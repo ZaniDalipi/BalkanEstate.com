@@ -1,9 +1,10 @@
 /** Residence notifications carry a link, so clicking one opens something useful. */
 import Notification from '../../models/Notification';
 import Development from '../../models/Development';
-import { unitActionUrl } from '../../services/developments/developmentAlertService';
+import DevelopmentFollow from '../../models/DevelopmentFollow';
+import { notifyFollowersUnitAvailable, unitActionUrl } from '../../services/developments/developmentAlertService';
 import { runResidenceBillingJob } from '../../services/developments/billing/residenceBillingJob';
-import { encodeId, linkListing, makeListing, setupDevelopment } from './helpers/explorerHarness';
+import { encodeId, linkListing, makeListing, makeUser, setupDevelopment } from './helpers/explorerHarness';
 
 describe('notification links', () => {
   it('an available unit links to its live listing when it has one', async () => {
@@ -33,5 +34,18 @@ describe('notification links', () => {
     await runResidenceBillingJob();
     const n = await Notification.findOne({ userId: t.owner._id, type: 'residence_trial_reminder' }).lean();
     expect(n?.data?.actionUrl).toBe(`/dashboard/developments/${t.devEnc}`);
+    // The bell translates it from these; title/message stay as the English fallback.
+    expect(n?.data?.textKey).toBe('trialEndsSoon');
+    expect(n?.data?.textParams).toMatchObject({ name: dev!.name, days: expect.any(Number) });
+    expect(n?.data?.textParams.days).toBeGreaterThan(0);
+  });
+
+  it('a new-home alert carries its text key and values', async () => {
+    const t = await setupDevelopment({ published: true });
+    const buyer = await makeUser();
+    await DevelopmentFollow.create({ developmentId: t.devId, userId: buyer._id });
+    await notifyFollowersUnitAvailable({ developmentId: String(t.devId), developmentName: t.dev.name, developmentSlug: t.dev.slug, unit: t.unit as never });
+    const n = await Notification.findOne({ userId: buyer._id, type: 'development_unit_available' }).lean();
+    expect(n?.data).toMatchObject({ textKey: 'unitAvailable', textParams: { residence: t.dev.name, unit: t.unit.unitNumber } });
   });
 });

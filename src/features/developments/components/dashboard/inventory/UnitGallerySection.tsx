@@ -8,6 +8,7 @@ import { cn } from '@/src/lib/utils';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import type { DashboardUnit, UnitImage } from '../../../types';
 import { GALLERY_MAX_TOTAL, GALLERY_TYPES, checkGalleryFiles, type GalleryFileProblem } from './galleryFiles';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface UnitGallerySectionProps {
   developmentId: string;
@@ -27,6 +28,7 @@ interface UnitGallerySectionProps {
  */
 export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developmentId, unitId, gallery, canUpload, canRemove, onUnit }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const inputId = useId();
   const { confirm } = useConfirmation();
   const notify = useNotification();
@@ -55,7 +57,7 @@ export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developm
       onUnit(unit);
       void notify.success(t('inventory.gallery.addedTitle', 'Photos added'), t('inventory.gallery.added', 'Photos added to the gallery: {{n}}.', { n: files.length }));
     } catch (err) {
-      setError((err as { message?: string })?.message || t('errors.generic', 'Something went wrong.'));
+      setError(apiText.text(err));
     }
   };
 
@@ -73,7 +75,7 @@ export const UnitGallerySection: React.FC<UnitGallerySectionProps> = ({ developm
       const { unit } = await removeGalleryImage({ unitId, index });
       onUnit(unit);
     } catch (err) {
-      setError((err as { message?: string })?.message || t('errors.generic', 'Something went wrong.'));
+      setError(apiText.text(err));
     }
   };
 

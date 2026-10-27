@@ -21,6 +21,7 @@ import {
 } from '../../../config/residenceBilling';
 import { ValidationError } from '../developmentService';
 import { BillingError } from './billingErrors';
+import { couponReason } from './couponReason';
 import { ownerPlan } from './ownerPlan';
 import { accessFor, recomputeBilling } from './residenceBillingService';
 import { residenceTerms } from './residenceTerms';
@@ -44,10 +45,14 @@ export async function quoteFor(dev: IDevelopment, kind: ResidencePurchaseKind, q
 /** The order's validated kind and quantity (a pass is always bought one at a time). */
 export function parseOrder(body: { kind?: unknown; quantity?: unknown }): { kind: ResidencePurchaseKind; quantity: number } {
   const kind = body.kind as ResidencePurchaseKind;
-  if (!RESIDENCE_PURCHASE_KINDS.includes(kind)) throw new ValidationError('kind must be "pass" or "extra_building"');
+  if (!RESIDENCE_PURCHASE_KINDS.includes(kind)) throw new ValidationError('kind must be "pass" or "extra_building"', { code: 'FIELD_INVALID', field: 'kind' });
   const quantity = kind === 'pass' ? 1 : Number(body.quantity ?? 1);
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_EXTRA_BUILDINGS_PER_PURCHASE) {
-    throw new ValidationError(`quantity must be a whole number from 1 to ${MAX_EXTRA_BUILDINGS_PER_PURCHASE}`);
+    throw new ValidationError(`quantity must be a whole number from 1 to ${MAX_EXTRA_BUILDINGS_PER_PURCHASE}`, {
+      code: 'FIELD_RANGE',
+      field: 'quantity',
+      params: { min: 1, max: MAX_EXTRA_BUILDINGS_PER_PURCHASE },
+    });
   }
   return { kind, quantity };
 }
@@ -120,7 +125,7 @@ export async function checkout(
   const valid = discount?.isValid(String(actorId), productId, price.amount);
   // Residence codes must name a residence product: general subscription codes don't apply.
   if (!discount || !valid?.valid || !discount.applicablePlans?.includes(productId)) {
-    throw new BillingError('COUPON_INVALID', valid?.reason ?? 'This code is not valid for residences.', undefined, 400);
+    throw new BillingError('COUPON_INVALID', valid?.reason ?? 'This code is not valid for residences.', discount ? couponReason(valid?.valid ? undefined : valid?.reason, discount.minPurchaseAmount) : { reason: 'unknown' }, 400);
   }
   const remaining = Math.round((price.amount - discount.calculateDiscount(price.amount)) * 100) / 100;
   if (remaining > 0) {
@@ -132,7 +137,7 @@ export async function checkout(
     { _id: discount._id, usedBy: { $ne: actor }, $expr: { $lt: ['$usedCount', '$usageLimit'] } },
     { $inc: { usedCount: 1 }, $push: { usedBy: actor } }
   );
-  if (!claimed) throw new BillingError('COUPON_INVALID', 'This code has already been used.', undefined, 400);
+  if (!claimed) throw new BillingError('COUPON_INVALID', 'This code has already been used.', { reason: 'usedUp' }, 400);
   try {
     return await applyPurchase(dev, { kind, quantity, provider: 'coupon', actorId, amount: 0, listPrice: price.listPrice, couponCode: code }, now);
   } catch (error) {
@@ -150,11 +155,17 @@ export async function grant(
 ): Promise<IResidencePurchase[]> {
   const months = body.months === undefined ? 0 : Number(body.months);
   const extra = body.extraBuildings === undefined ? 0 : Number(body.extraBuildings);
-  if (!Number.isInteger(months) || months < 0 || months > 120) throw new ValidationError('months must be a whole number from 0 to 120');
-  if (!Number.isInteger(extra) || extra < 0 || extra > MAX_EXTRA_BUILDINGS_PER_PURCHASE) {
-    throw new ValidationError(`extraBuildings must be a whole number from 0 to ${MAX_EXTRA_BUILDINGS_PER_PURCHASE}`);
+  if (!Number.isInteger(months) || months < 0 || months > 120) {
+    throw new ValidationError('months must be a whole number from 0 to 120', { code: 'FIELD_RANGE', field: 'months', params: { min: 1, max: 120 } });
   }
-  if (months === 0 && extra === 0) throw new ValidationError('grant at least one month or one building');
+  if (!Number.isInteger(extra) || extra < 0 || extra > MAX_EXTRA_BUILDINGS_PER_PURCHASE) {
+    throw new ValidationError(`extraBuildings must be a whole number from 0 to ${MAX_EXTRA_BUILDINGS_PER_PURCHASE}`, {
+      code: 'FIELD_RANGE',
+      field: 'extraBuildings',
+      params: { min: 0, max: MAX_EXTRA_BUILDINGS_PER_PURCHASE },
+    });
+  }
+  if (months === 0 && extra === 0) throw new ValidationError('grant at least one month or one building', { code: 'GRANT_EMPTY', field: 'months' });
   const note = typeof body.note === 'string' ? body.note.slice(0, 500) : undefined;
   const out: IResidencePurchase[] = [];
   let current = dev;

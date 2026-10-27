@@ -7,6 +7,7 @@ import { floorKindFor, floorLabelFor, levelsToAdd, nextFreeLevel } from '../../.
 import { BuildingSelect } from './BuildingSelect';
 import { useFloorNames } from './useFloorNames';
 import { useStructureOptions } from './useStructureOptions';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface AddFloorsFormProps {
   developmentId: string;
@@ -24,6 +25,7 @@ interface AddFloorsFormProps {
  */
 export const AddFloorsForm: React.FC<AddFloorsFormProps> = ({ developmentId, buildings, floors, createFloor, isCreating, onError }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const names = useFloorNames();
   const { buildingOptions } = useStructureOptions(developmentId, buildings, floors);
   const [chosenBuilding, setChosenBuilding] = useState('');
@@ -55,7 +57,7 @@ export const AddFloorsForm: React.FC<AddFloorsFormProps> = ({ developmentId, bui
       setToText('');
       setLabel('');
     } catch (err) {
-      onError((err as { message?: string })?.message || t('errors.generic'));
+      onError(apiText.text(err));
     } finally {
       setBusy(false);
     }

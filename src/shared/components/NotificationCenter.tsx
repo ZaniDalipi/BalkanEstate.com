@@ -9,6 +9,7 @@ import { navigate } from '@/src/app/router/navigation';
 import { SoftIcon } from '@/src/shared/illustrations';
 import { NotificationIcon } from './notifications/NotificationIcon';
 import { notificationTarget } from './notifications/notificationTarget';
+import { notificationText } from '@/src/shared/utils/notificationText';
 
 interface NotificationData {
   propertyId?: string;
@@ -21,6 +22,9 @@ interface NotificationData {
   agencyName?: string;
   actionUrl?: string;
   actionLabel?: string;
+  /** Shown in the reader's language when set (see notificationText). */
+  textKey?: string;
+  textParams?: Record<string, string | number>;
   [key: string]: any;
 }
 
@@ -35,7 +39,10 @@ interface Notification {
 }
 
 const NotificationCenter: React.FC = () => {
-  const { t } = useTranslation(['common']);
+  const { t, i18n } = useTranslation(['common', 'developments']);
+  // The socket listener lives for the whole session: read the current language through a ref.
+  const translate = useRef({ t, lang: i18n.language });
+  translate.current = { t, lang: i18n.language };
   const { state, checkAuthStatus } = useAppContext();
   const { isAuthenticated } = state;
 
@@ -195,8 +202,9 @@ const NotificationCenter: React.FC = () => {
 
       // Browser notification — always show if permission granted and tab is not focused
       if (Notification.permission === 'granted' && document.hidden) {
-        notificationService.showNotification(data.title, {
-          body: data.message,
+        const text = notificationText(data, translate.current.t, translate.current.lang);
+        notificationService.showNotification(text.title, {
+          body: text.message,
           tag: `notif-${data._id}`,
           requireInteraction: false,
         });
@@ -317,7 +325,9 @@ const NotificationCenter: React.FC = () => {
                 <p className="text-sm">{t('common:noNotifications', 'No notifications yet')}</p>
               </div>
             ) : (
-              notifications.map(notification => (
+              notifications.map(notification => {
+                const text = notificationText(notification, t, i18n.language);
+                return (
                 <div
                   key={notification._id}
                   className={`px-4 py-3 border-b border-white/10 hover:bg-white/40 cursor-pointer transition-colors ${
@@ -332,14 +342,14 @@ const NotificationCenter: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <p className={`text-sm ${!notification.isRead ? 'font-semibold' : ''} text-gray-900 line-clamp-1`}>
-                          {notification.title}
+                          {text.title}
                         </p>
                         {!notification.isRead && (
                           <span className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-1.5"></span>
                         )}
                       </div>
                       <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
-                        {notification.message}
+                        {text.message}
                       </p>
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-xs text-gray-400">
@@ -354,7 +364,8 @@ const NotificationCenter: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 

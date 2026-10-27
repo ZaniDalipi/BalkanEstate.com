@@ -6,7 +6,7 @@ import type { DashboardUnit } from '../../../types';
 import { useExtraUnits } from '../../../hooks/useExtraUnits';
 import type { UnitSectionProps } from './UnitFieldControls';
 
-interface LinkedStatusChoiceProps extends Pick<UnitSectionProps, 'form' | 'set' | 'disabled'> {
+interface LinkedStatusChoiceProps extends Pick<UnitSectionProps, 'form' | 'set' | 'disabled' | 'errors'> {
   developmentId: string;
   unit: DashboardUnit;
 }
@@ -16,7 +16,7 @@ interface LinkedStatusChoiceProps extends Pick<UnitSectionProps, 'form' | 'set' 
  * spot by spot, whether the parking spots / storage rooms it comes with change
  * too. Nothing is ticked by default: a spot sold separately stays as it is.
  */
-export const LinkedStatusChoice: React.FC<LinkedStatusChoiceProps> = ({ developmentId, unit, form, set, disabled }) => {
+export const LinkedStatusChoice: React.FC<LinkedStatusChoiceProps> = ({ developmentId, unit, form, set, disabled, errors }) => {
   const { t } = useTranslation('developments');
   const changed = form.availability !== unit.availability;
   const linked = form.linkedUnitIds;
@@ -25,11 +25,12 @@ export const LinkedStatusChoice: React.FC<LinkedStatusChoiceProps> = ({ developm
 
   const status = t(`availability.${form.availability}`);
   const spots = linked.map((id) => extras.find((x) => x.id === id) ?? { id, unitNumber: '…', unitType: 'parking', availability: undefined });
+  const errorId = `also-linked-error-${unit.id}`;
   const toggle = (id: string) =>
     set('alsoLinkedUnitIds', form.alsoLinkedUnitIds.includes(id) ? form.alsoLinkedUnitIds.filter((x) => x !== id) : [...form.alsoLinkedUnitIds, id]);
 
   return (
-    <fieldset className="rounded-xl border border-dashed border-teal-400 bg-teal-50/40 p-3">
+    <fieldset className="rounded-xl border border-dashed border-teal-400 bg-teal-50/40 p-3" aria-describedby={errors.alsoLinkedUnitIds ? errorId : undefined}>
       <legend className="flex items-center gap-1.5 px-1 text-sm font-semibold text-slate-900">
         <Link2 className="h-4 w-4 text-teal-600" aria-hidden="true" />
         {t('companions.status.title', 'Its parking and storage')}
@@ -65,6 +66,11 @@ export const LinkedStatusChoice: React.FC<LinkedStatusChoiceProps> = ({ developm
           );
         })}
       </div>
+      {errors.alsoLinkedUnitIds && (
+        <p id={errorId} role="alert" className="mt-2 text-sm text-red-600">
+          {errors.alsoLinkedUnitIds}
+        </p>
+      )}
     </fieldset>
   );
 };

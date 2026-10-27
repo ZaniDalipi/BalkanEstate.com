@@ -46,28 +46,35 @@ describe('linking units from the dashboard', () => {
   it('refuses what cannot be sold with an apartment', async () => {
     const t = await setup();
     const other = await setupDevelopment();
-    const cases: Array<[unknown, number, RegExp]> = [
-      [[t.enc(t.a2._id)], 400, /Only parking spots and storage rooms/],
-      [[t.enc(t.unit._id)], 400, /cannot come with itself|Only parking/],
-      [[t.enc(other.unit._id)], 400, /not found in this residence/],
-      ['P1', 400, /list of unit ids/],
-      [['not-an-id'], 400, /invalid id/],
+    const many = Array.from({ length: 11 }, () => t.enc(t.p1._id));
+    const cases: Array<[unknown, string]> = [
+      [[t.enc(t.a2._id)], 'LINKS_NOT_EXTRA'],
+      [[t.enc(t.unit._id)], 'LINKS_SELF'],
+      [[t.enc(other.unit._id)], 'LINKS_NOT_FOUND'],
+      ['P1', 'LINKS_NOT_LIST'],
+      [['not-an-id'], 'LINKS_INVALID_ID'],
     ];
-    for (const [linkedUnitIds, status, message] of cases) {
+    for (const [linkedUnitIds, code] of cases) {
       const res = await t.patch(t.unit._id, { linkedUnitIds });
-      expect(res.status).toBe(status);
-      expect(JSON.stringify(res.body)).toMatch(message);
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({ code, details: { field: 'linkedUnitIds' } });
     }
+    // Duplicates collapse to one, so eleven copies of one spot are fine; eleven different ones are not.
+    expect((await t.patch(t.unit._id, { linkedUnitIds: many })).status).toBe(200);
   });
 
   it('a parking spot cannot come with anything, and stays a parking spot while linked', async () => {
     const t = await setup();
-    expect((await t.patch(t.p1._id, { linkedUnitIds: [t.enc(t.p2._id)] })).status).toBe(400);
+    const spotWithSpot = await t.patch(t.p1._id, { linkedUnitIds: [t.enc(t.p2._id)] });
+    expect(spotWithSpot.status).toBe(400);
+    expect(spotWithSpot.body.code).toBe('LINKS_EXTRA_CANNOT_HAVE');
     await t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.p1._id)] });
     const res = await t.patch(t.p1._id, { unitType: 'apartment' });
     expect(res.status).toBe(400);
-    expect(res.body.message).toMatch(/comes with A1/);
-    expect((await t.patch(t.unit._id, { unitType: 'parking' })).status).toBe(400);
+    expect(res.body).toMatchObject({ code: 'TYPE_SOLD_WITH', details: { field: 'unitType', params: { owner: 'A1' } } });
+    const toParking = await t.patch(t.unit._id, { unitType: 'parking' });
+    expect(toParking.status).toBe(400);
+    expect(toParking.body).toMatchObject({ code: 'TYPE_EXTRA_HAS_LINKS', details: { field: 'unitType' } });
   });
 
   it('a spot comes with one apartment only, even when two save at once', async () => {
@@ -75,7 +82,7 @@ describe('linking units from the dashboard', () => {
     await t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.p1._id)] });
     const taken = await t.patch(t.a2._id, { linkedUnitIds: [t.enc(t.p1._id)] });
     expect(taken.status).toBe(409);
-    expect(taken.body.message).toMatch(/P1 already comes with A1/);
+    expect(taken.body).toMatchObject({ code: 'LINKS_TAKEN', details: { field: 'linkedUnitIds', params: { unit: 'P1', owner: 'A1' } } });
 
     const [x, y] = await Promise.all([
       t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.p2._id)] }),
@@ -108,9 +115,9 @@ describe('the dashboard list for the editor', () => {
     expect(byNumber.get('P2')).toEqual([]);
 
     const bad = await t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.a2._id)] });
-    expect(bad.body.details).toEqual({ field: 'linkedUnitIds' });
+    expect(bad.body).toMatchObject({ code: 'LINKS_NOT_EXTRA', details: { field: 'linkedUnitIds', params: { unit: 'A2', type: 'apartment' } } });
     const taken = await t.patch(t.a2._id, { linkedUnitIds: [t.enc(t.p1._id)] });
-    expect(taken.body.details).toEqual({ field: 'linkedUnitIds' });
+    expect(taken.body).toMatchObject({ code: 'LINKS_TAKEN', details: { field: 'linkedUnitIds' } });
   });
 });
 
@@ -138,10 +145,13 @@ describe('selling the apartment: the seller decides about its parking', () => {
     await t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.p1._id)] });
     const other = await t.patch(t.unit._id, { availability: 'sold', alsoLinkedUnitIds: [t.enc(t.p2._id)] });
     expect(other.status).toBe(400);
-    expect(other.body.details).toEqual({ field: 'linkedUnitIds' });
+    expect(other.body).toMatchObject({ code: 'ALSO_LINKED_NOT_LINKED', details: { field: 'alsoLinkedUnitIds' } });
     expect(await statusOf(t.unit._id)).toBe('available'); // nothing written
     const noChange = await t.patch(t.unit._id, { description: 'x', alsoLinkedUnitIds: [t.enc(t.p1._id)] });
     expect(noChange.status).toBe(400);
+    expect(noChange.body.code).toBe('ALSO_LINKED_NEEDS_STATUS');
+    const notList = await t.patch(t.unit._id, { availability: 'sold', alsoLinkedUnitIds: 'P1' });
+    expect(notList.body.code).toBe('ALSO_LINKED_NOT_LIST');
   });
 
   it('bulk: their parking follows only when asked', async () => {

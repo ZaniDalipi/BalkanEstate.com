@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNotification } from '@/src/shared/hooks/useNotification';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 import { useUnitAdmin } from '../../../hooks/useUnitAdmin';
 import { useListingAttachment } from '../../../hooks/useDevelopmentMutations';
 import type { DashboardUnit, DevelopmentFloor, UnitPrefill, UpdateUnitPayload } from '../../../types';
@@ -8,7 +9,8 @@ import type { FilledFrom } from './FillFromListing';
 import { PRICE_FIELDS, editPermissions } from './permissions';
 import { applyPrefill, diffUnitForm, unitToForm, validateUnitForm, type UnitFormErrors, type UnitFormState } from './unitForm';
 
-type ApiError = { statusCode?: number; message?: string; details?: { field?: string } };
+/** Server field names that are fields of this form; anything else is shown as a form-level message only. */
+const isFormField = (field: string | undefined, form: UnitFormState): field is keyof UnitFormState => !!field && field in form;
 
 /** The listing the form was filled from, and whether to link it on save. */
 export interface PrefillSource extends FilledFrom {
@@ -25,6 +27,7 @@ export interface PrefillSource extends FilledFrom {
 export const useUnitEditor = (developmentId: string, unit: DashboardUnit, role: string | undefined, floors: DevelopmentFloor[]) => {
   const { t } = useTranslation('developments');
   const notify = useNotification();
+  const apiText = useApiErrorText();
   const { updateUnit, isUpdating } = useUnitAdmin(developmentId);
   const { attach, isAttaching } = useListingAttachment(developmentId);
   const original = useMemo(() => unitToForm(unit), [unit]);
@@ -81,12 +84,12 @@ export const useUnitEditor = (developmentId: string, unit: DashboardUnit, role: 
       try {
         await updateUnit({ unitId: unit.id, patch: changes });
       } catch (err) {
-        const apiErr = err as ApiError;
-        if (apiErr?.statusCode === 403) setFormError(explainForbidden(changes));
+        const { text, field, code, status } = apiText.describe(err);
+        // A 403 without a more precise code: say which of the changed fields the role may not touch.
+        if (status === 403 && (!code || code === 'FORBIDDEN' || code === 'FORBIDDEN_FIELDS')) setFormError(explainForbidden(changes));
         else {
-          const field = apiErr?.details?.field as keyof UnitFormState | undefined;
-          if (field) setErrors({ [field]: apiErr.message });
-          setFormError(apiErr?.message || t('errors.updateFailed', 'Could not save your changes.'));
+          if (isFormField(field, form)) setErrors({ [field]: text });
+          setFormError(text);
         }
         return false;
       }
@@ -97,7 +100,7 @@ export const useUnitEditor = (developmentId: string, unit: DashboardUnit, role: 
       } catch (err) {
         setFormError(
           t('inventory.edit.linkFailed', {
-            reason: (err as ApiError)?.message || t('errors.generic'),
+            reason: apiText.text(err),
             defaultValue: 'The unit was saved, but the listing could not be linked: {{reason}}',
           })
         );

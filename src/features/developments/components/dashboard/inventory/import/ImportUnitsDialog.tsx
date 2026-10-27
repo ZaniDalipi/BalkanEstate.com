@@ -11,6 +11,7 @@ import { ImportFilePicker } from './ImportFilePicker';
 import { ImportReview } from './ImportReview';
 import { RowsPreview } from './RowsPreview';
 import { useCsvSheet } from './useCsvSheet';
+import { useApiErrorText } from '../../../../hooks/useApiErrorText';
 
 interface ImportUnitsDialogProps {
   developmentId: string;
@@ -21,8 +22,6 @@ interface ImportUnitsDialogProps {
   onClose: () => void;
 }
 
-const errorText = (e: unknown) => (e as { message?: string } | null)?.message ?? null;
-
 /**
  * Import apartments from a spreadsheet: choose a file → check what we
  * recognised (columns, a preview, the server's dry run and any problems) →
@@ -30,6 +29,8 @@ const errorText = (e: unknown) => (e as { message?: string } | null)?.message ??
  */
 export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmentId, defaultBuildingName, buildingNames, onClose }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
+  const errorText = (e: unknown) => (e ? apiText.text(e) : null);
   const sheet = useCsvSheet(defaultBuildingName, buildingNames);
   const rows = sheet.prepared?.rows ?? [];
   const { preview, run } = useUnitImport(developmentId, rows, sheet.updateExisting);

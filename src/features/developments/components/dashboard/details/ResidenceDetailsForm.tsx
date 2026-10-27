@@ -9,6 +9,7 @@ import { AmenitiesInput } from './AmenitiesInput';
 import { AboutSection, ContactSection, Fieldset } from './DetailsSections';
 import { LocationFields } from './LocationFields';
 import { changedFields, toDraft, type DetailsDraft } from './detailsDraft';
+import { useApiErrorText } from '../../../hooks/useApiErrorText';
 
 interface ResidenceDetailsFormProps {
   development: Development;
@@ -24,6 +25,7 @@ interface ResidenceDetailsFormProps {
  */
 export const ResidenceDetailsForm: React.FC<ResidenceDetailsFormProps> = ({ development, canEdit }) => {
   const { t } = useTranslation('developments');
+  const apiText = useApiErrorText();
   const notify = useNotification();
   const { update, isLoading } = useUpdateDevelopment(development.id);
   const [baseline, setBaseline] = useState<Development>(development);
@@ -53,7 +55,7 @@ export const ResidenceDetailsForm: React.FC<ResidenceDetailsFormProps> = ({ deve
     } catch (err) {
       void notify.error(
         t('errors.updateFailed', 'Could not save your changes.'),
-        (err as { message?: string })?.message || t('errors.generic', 'Something went wrong.'),
+        apiText.text(err),
       );
     }
   };

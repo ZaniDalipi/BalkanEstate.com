@@ -639,6 +639,30 @@ derived.
   picture (Plaza Podium · Parking −1), each sold with a tower apartment
   (T804, T901, T1001, T1002).
 
+## 7b-3. Errors in the reader's language
+
+- **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.
+  The English `message` is never shown.
+  - Codes are listed, with their English text, in
+    `src/features/developments/utils/apiErrorText.ts`.
+  - Coupon refusals add `details.reason`: `unknown`, `inactive`, `notYetValid`,
+    `expired`, `usedUp`, `alreadyUsed`, `minimum` (+ `min`), `otherPlan` or
+    `notResidence`.
+  - Import rows carry `code`, `field` and `params` the same way.
+- **Where it shows:**
+  - The unit editor puts the text next to the named field. For example,
+    `UNIT_NUMBER_TAKEN` goes on Unit number, `LINKS_TAKEN` on "Comes with", and
+    `ALSO_LINKED_*` on the "Its parking and storage" choice. The same text also
+    shows above the buttons.
+  - Admin number dialogs put it under the number.
+  - Everything else (uploads, bulk, import, scene editor, attach, publish,
+    checkout) shows it as the form or toast message.
+- **No code:** the text comes from the HTTP status (400, 403, 404, 409, 413,
+  429, 5xx), or "No connection" when fetch failed.
+- **Notifications:** trial reminders, offline / agency notices and "New home
+  available" are translated in the bell from `data.textKey`. Older
+  notifications keep their stored English. Emails are English.
+
 ## 7c. Sharing, Back and sign-in
 
 **Share link and preview card**
@@ -695,6 +719,9 @@ the window without signing in drops both.
   as a separate task.
 - The dashboard `GET /:developmentId` still returns the full document, including
   `ownerId`, to authorised members.
+- Residence emails (trial reminders, offline and agency notices) are sent in
+  English: users have no stored language yet. The in-app notifications are
+  translated.
 
 **Editor and dashboard**
 - Hotspots linked to a unit that was later hidden are kept in the draft and
