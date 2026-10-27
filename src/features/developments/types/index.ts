@@ -609,6 +609,8 @@ export interface UpdateUnitPayload {
   features?: string[];
   /** Parking spots / storage rooms it comes with; null clears them. */
   linkedUnitIds?: string[] | null;
+  /** With a change of availability: which of them take the same new status (the seller's choice). */
+  alsoLinkedUnitIds?: string[];
   description?: string | null;
   visibility?: UnitVisibility;
   priceVisibility?: PriceVisibility;
@@ -622,6 +624,8 @@ export interface BulkUnitUpdatePayload {
   unitIds: string[];
   availability?: UnitAvailability;
   visibility?: UnitVisibility;
+  /** Also give the selected units' parking spots / storage rooms the new availability. */
+  includeLinked?: boolean;
 }
 
 export interface UpdateBuildingPayload {

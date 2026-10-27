@@ -40,6 +40,7 @@ import { applyAvailabilityTransition, isDuplicateKeyError } from './developmentI
 import { assertUnitValue } from './unitRules';
 import { resolveEffectiveAvailability, type AvailabilitySource } from './unitAvailability';
 import { assertTypeChangeKeepsLinks, resolveLinkedUnits, unlinkEverywhere, UnitLinkConflictError } from './unitLinks';
+import { applyToLinkedUnits, linkedIdsOf, parseAlsoLinked } from './linkedAvailability';
 
 const log = createLogger('UnitAdminService');
 
@@ -427,6 +428,12 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
   if (touched.includes('unitType') && nextType !== unit.unitType) {
     await assertTypeChangeKeepsLinks(developmentId, unit, nextType, $set.linkedUnitIds as unknown[] | undefined);
   }
+  // The seller's choice: which of its parking spots / storage rooms take the new status too.
+  const alsoLinked = parseAlsoLinked(
+    body.alsoLinkedUnitIds,
+    ($set.linkedUnitIds as unknown[] | undefined) ?? unit.linkedUnitIds ?? [],
+    touched.includes('availability')
+  );
 
   // Placement: building and floor are resolved inside this development, and the
   // resulting floor must belong to the resulting building.
@@ -509,6 +516,9 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
       { prior: before.availability as UnitAvailability, unit: updated },
     ]);
   }
+  if (alsoLinked.length && touched.includes('availability')) {
+    await applyToLinkedUnits(developmentId, alsoLinked, updated.availability, actorId, updated.unitNumber);
+  }
 
   return toDashboardUnit(developmentId, updated);
 };
@@ -585,7 +595,10 @@ export const bulkUpdateUnits = async (params: {
 }): Promise<{ updated: number }> => {
   const { developmentId, role, actorId } = params;
   const body = (params.payload ?? {}) as Record<string, unknown>;
-  const { unitIds, availability, visibility } = body;
+  const { unitIds, availability, visibility, includeLinked } = body;
+  if (includeLinked !== undefined && typeof includeLinked !== 'boolean') {
+    throw new ValidationError('includeLinked must be true or false');
+  }
 
   const touched: string[] = [];
   if (availability !== undefined) touched.push('availability');
@@ -611,6 +624,16 @@ export const bulkUpdateUnits = async (params: {
     throw new ValidationError(`visibility must be one of: ${UNIT_VISIBILITIES.join(', ')}`);
   }
 
+  // The seller asked for the parking spots / storage rooms of the selected units to follow.
+  if (includeLinked === true && availability !== undefined) {
+    const known = new Set(ids.map(String));
+    for (const id of await linkedIdsOf(developmentId, ids)) {
+      if (!known.has(String(id))) {
+        known.add(String(id));
+        ids.push(id as mongoose.Types.ObjectId);
+      }
+    }
+  }
   const scope = { _id: { $in: ids }, developmentId, deletedAt: LIVE };
   // Remember which units were not yet available, to alert only on a real
   // transition (same semantics as the single-unit path).

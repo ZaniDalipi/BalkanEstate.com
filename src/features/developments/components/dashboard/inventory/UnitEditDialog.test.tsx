@@ -121,6 +121,30 @@ describe('UnitEditDialog', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('selling the apartment: the seller ticks which parking spots are sold with it', async () => {
+    const withParking = { ...UNIT, linkedUnitIds: ['p1', 'p2'] } as DashboardUnit;
+    const spot = (id: string, unitNumber: string) => ({ ...UNIT, id, unitNumber, unitType: 'parking', soldWith: [{ id: 'u1', unitNumber: 'A1' }] }) as DashboardUnit;
+    vi.mocked(api.listUnits).mockImplementation(async (_dev, filters) =>
+      filters?.unitType ? { items: [spot('p1', 'P1'), spot('p2', 'P2')], total: 2 } : { items: [], total: 0 }
+    );
+    render(
+      <NotificationProvider>
+        <ConfirmationProvider>
+          <UnitEditDialog developmentId="dev1" unit={withParking} buildings={BUILDINGS} floors={FLOORS} onClose={onClose} />
+        </ConfirmationProvider>
+      </NotificationProvider>
+    );
+    // Nothing to decide until the status changes.
+    expect(screen.queryByRole('checkbox', { name: /companions.status.alsoMark/ })).not.toBeInTheDocument();
+    await userEvent.selectOptions(field('unit.availability') as unknown as HTMLSelectElement, 'sold');
+    const boxes = await screen.findAllByRole('checkbox', { name: /companions.status.alsoMark/ });
+    expect(boxes).toHaveLength(2);
+    boxes.forEach((b) => expect(b).not.toBeChecked());
+    await userEvent.click(boxes[0]);
+    await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+    await waitFor(() => expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { availability: 'sold', alsoLinkedUnitIds: ['p1'] }));
+  });
+
   it('explains a 403 on price changes in place', async () => {
     vi.mocked(api.updateUnit).mockRejectedValue(Object.assign(new Error('Forbidden'), { statusCode: 403 }));
     renderDialog();

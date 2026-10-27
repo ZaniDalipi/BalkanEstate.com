@@ -108,7 +108,13 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({ developmentId, r
       {inv.total > 0 && (
         <InventoryPagination total={inv.total} limit={inv.limit} skip={inv.skip} onLimit={inv.setLimit} onSkip={inv.setSkip} isFetching={inv.isFetching} />
       )}
-      <InventoryBulkBar developmentId={developmentId} selectedIds={[...selected]} permissions={permissions} onClear={() => setSelected(new Set())} />
+      <InventoryBulkBar
+        developmentId={developmentId}
+        selectedIds={[...selected]}
+        withExtras={inv.units.filter((u) => selected.has(u.id) && (u.linkedUnitIds?.length ?? 0) > 0).length}
+        permissions={permissions}
+        onClear={() => setSelected(new Set())}
+      />
       {editing && (
         <UnitEditDialog
           key={editing.id}

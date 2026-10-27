@@ -628,6 +628,13 @@ derived.
   round (`linkedHotspotIds`). The hover card says "Comes with Parking P-01" or
   "Sold with Apt T804", the details panel lists them (each opens its own
   details), and so do the unit cards and the floor-by-floor tiles.
+- **Selling**: changing an apartment's status never changes its parking spots
+  by itself. The unit editor then lists each spot it comes with ("Also mark
+  Parking P-01 as Sold", unticked) and sends the ticked ones as
+  `alsoLinkedUnitIds`; the server gives them the same status with the usual
+  audit, stats and follower alerts (`linkedAvailability.ts`). The bulk bar has
+  one "Also update their parking spots and storage rooms" box
+  (`includeLinked`).
 - **Demo**: Plaza Tirana has four street parking bays on the tower's Front
   picture (Plaza Podium · Parking −1), each sold with a tower apartment
   (T804, T901, T1001, T1002).

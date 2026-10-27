@@ -1221,6 +1221,17 @@
       "retry": "Încearcă din nou",
       "none": "Încă nu există locuri de parcare sau boxe. Adăugați-le ca unități de tip Parcare sau Boxă, apoi alegeți-le aici.",
       "taken": "Cu {{unit}}"
+    },
+    "status": {
+      "title": "Parcarea și boxa",
+      "question": "Această unitate include locurile de mai jos. Bifați-le pe cele care sunt {{status}} împreună cu ea.",
+      "alsoMark": "Marchează și {{unit}} ca {{status}}",
+      "already": "Deja",
+      "now": "Acum {{status}}"
+    },
+    "bulk": {
+      "label": "{{status}} (cu parcarea și boxa lor)",
+      "includeLinked": "Actualizează și locurile lor de parcare și boxele"
     }
   }
 }

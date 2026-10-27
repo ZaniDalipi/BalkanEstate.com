@@ -5,6 +5,7 @@
  */
 import request from 'supertest';
 import DevelopmentUnit from '../../models/DevelopmentUnit';
+import DevelopmentAuditLog from '../../models/DevelopmentAuditLog';
 import { createUnit } from '../../services/developments/developmentInventoryService';
 import { setResidenceStatus } from '../../services/developments/billing/residenceBillingService';
 import { buildApp, setupDevelopment } from './helpers/explorerHarness';
@@ -110,6 +111,51 @@ describe('the dashboard list for the editor', () => {
     expect(bad.body.details).toEqual({ field: 'linkedUnitIds' });
     const taken = await t.patch(t.a2._id, { linkedUnitIds: [t.enc(t.p1._id)] });
     expect(taken.body.details).toEqual({ field: 'linkedUnitIds' });
+  });
+});
+
+describe('selling the apartment: the seller decides about its parking', () => {
+  const statusOf = async (id: unknown) => (await DevelopmentUnit.findById(id))!.availability;
+
+  it('only the spots the seller picks take the new status', async () => {
+    const t = await setup();
+    await t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.p1._id), t.enc(t.p2._id)] });
+
+    expect((await t.patch(t.unit._id, { availability: 'reserved' })).status).toBe(200);
+    expect(await statusOf(t.p1._id)).toBe('available');
+
+    const res = await t.patch(t.unit._id, { availability: 'sold', alsoLinkedUnitIds: [t.enc(t.p1._id)] });
+    expect(res.status).toBe(200);
+    expect(await statusOf(t.unit._id)).toBe('sold');
+    expect(await statusOf(t.p1._id)).toBe('sold');
+    expect(await statusOf(t.p2._id)).toBe('available');
+    const audit = await DevelopmentAuditLog.findOne({ targetId: t.p1._id, action: 'availability.change' }).lean();
+    expect(audit?.metadata).toMatchObject({ availability: 'sold', from: 'available', with: 'A1' });
+  });
+
+  it('refuses spots it does not come with, and spots without a change of status', async () => {
+    const t = await setup();
+    await t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.p1._id)] });
+    const other = await t.patch(t.unit._id, { availability: 'sold', alsoLinkedUnitIds: [t.enc(t.p2._id)] });
+    expect(other.status).toBe(400);
+    expect(other.body.details).toEqual({ field: 'linkedUnitIds' });
+    expect(await statusOf(t.unit._id)).toBe('available'); // nothing written
+    const noChange = await t.patch(t.unit._id, { description: 'x', alsoLinkedUnitIds: [t.enc(t.p1._id)] });
+    expect(noChange.status).toBe(400);
+  });
+
+  it('bulk: their parking follows only when asked', async () => {
+    const t = await setup();
+    await t.patch(t.unit._id, { linkedUnitIds: [t.enc(t.p1._id)] });
+    const bulk = (body: Record<string, unknown>) =>
+      request(app).post(`${DASH}/${t.devEnc}/units/bulk`).set(auth(t.ownerToken)).send({ unitIds: [t.enc(t.unit._id)], ...body });
+    expect((await bulk({ availability: 'reserved' })).status).toBe(200);
+    expect(await statusOf(t.p1._id)).toBe('available');
+    const res = await bulk({ availability: 'sold', includeLinked: true });
+    expect(res.status).toBe(200);
+    expect(res.body.updated).toBe(2);
+    expect(await statusOf(t.p1._id)).toBe('sold');
+    expect((await bulk({ availability: 'sold', includeLinked: 'yes' })).status).toBe(400);
   });
 });
 

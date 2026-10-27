@@ -1221,6 +1221,17 @@
       "retry": "Pokušaj ponovno",
       "none": "Još nema parkirnih mjesta ni spremišta. Dodajte ih kao jedinice vrste Parking ili Spremište, pa ih odaberite ovdje.",
       "taken": "Dolazi uz {{unit}}"
+    },
+    "status": {
+      "title": "Njezino parkirno mjesto i spremište",
+      "question": "Ova jedinica dolazi uz mjesta ispod. Označite ona koja su {{status}} zajedno s njom.",
+      "alsoMark": "Označi i {{unit}} kao {{status}}",
+      "already": "Već",
+      "now": "Sada {{status}}"
+    },
+    "bulk": {
+      "label": "{{status}} (s njihovim parkirnim mjestom i spremištem)",
+      "includeLinked": "Ažuriraj i njihova parkirna mjesta i spremišta"
     }
   }
 }

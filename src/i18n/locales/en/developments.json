@@ -1211,6 +1211,17 @@
       "retry": "Try again",
       "none": "No parking spots or storage rooms yet. Add them as units with the type Parking or Storage, then pick them here.",
       "taken": "Comes with {{unit}}"
+    },
+    "status": {
+      "title": "Its parking and storage",
+      "question": "This unit comes with the spots below. Tick the ones that are {{status}} with it.",
+      "alsoMark": "Also mark {{unit}} as {{status}}",
+      "already": "Already",
+      "now": "Now {{status}}"
+    },
+    "bulk": {
+      "label": "{{status}} (with their parking and storage)",
+      "includeLinked": "Also update their parking spots and storage rooms"
     }
   }
 }

@@ -34,6 +34,8 @@ export type UnitFormState = Record<NumericField | NullableTextField, string> & {
   features: string[];
   /** Parking spots / storage rooms (unit ids) it comes with. */
   linkedUnitIds: string[];
+  /** Of those, the ones the seller picked to take the new availability too (sent only with a status change). */
+  alsoLinkedUnitIds: string[];
   /** Always EUR in the form; sent with any price change so prices are stored in euros. */
   currency: typeof UNIT_CURRENCY;
 };
@@ -67,6 +69,7 @@ export const unitToForm = (u: DevelopmentUnit): UnitFormState => ({
   priceVisibility: u.priceVisibility ?? 'public',
   features: [...(u.features ?? [])],
   linkedUnitIds: [...(u.linkedUnitIds ?? [])],
+  alsoLinkedUnitIds: [],
 });
 
 const inList = (list: readonly string[], value: string) => list.includes(value);
@@ -121,6 +124,9 @@ export const diffUnitForm = (original: UnitFormState, current: UnitFormState): U
   if ('price' in p || 'pricePerSqm' in p) p.currency = UNIT_CURRENCY;
   if (!sameSet(original.features, current.features)) patch.features = [...current.features];
   if (!sameSet(original.linkedUnitIds, current.linkedUnitIds)) patch.linkedUnitIds = [...current.linkedUnitIds];
+  // Only spots it still comes with, and only when its own status changes.
+  const also = current.alsoLinkedUnitIds.filter((id) => current.linkedUnitIds.includes(id));
+  if (patch.availability !== undefined && also.length) patch.alsoLinkedUnitIds = also;
   return patch;
 };
 

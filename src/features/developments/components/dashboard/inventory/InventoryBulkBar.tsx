@@ -11,6 +11,8 @@ import type { EditPermissions } from './permissions';
 interface InventoryBulkBarProps {
   developmentId: string;
   selectedIds: string[];
+  /** How many selected units come with a parking spot / storage room. */
+  withExtras?: number;
   permissions: EditPermissions;
   onClear: () => void;
 }
@@ -19,13 +21,15 @@ const selectClass =
   'min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-[36px]';
 
 /** Sticky action bar for the selected rows: bulk availability / visibility. */
-export const InventoryBulkBar: React.FC<InventoryBulkBarProps> = ({ developmentId, selectedIds, permissions, onClear }) => {
+export const InventoryBulkBar: React.FC<InventoryBulkBarProps> = ({ developmentId, selectedIds, withExtras = 0, permissions, onClear }) => {
   const { t } = useTranslation('developments');
   const { confirm } = useConfirmation();
   const notify = useNotification();
   const { bulkUpdate, isBulkUpdating } = useUnitAdmin(developmentId);
   const [availability, setAvailability] = useState<UnitAvailability | ''>('');
   const [visibility, setVisibility] = useState<UnitVisibility | ''>('');
+  // The seller decides: their parking spots / storage rooms only follow when ticked.
+  const [includeLinked, setIncludeLinked] = useState(false);
   const count = selectedIds.length;
 
   const run = async (change: Omit<BulkUnitUpdatePayload, 'unitIds'>, label: string) => {
@@ -42,6 +46,7 @@ export const InventoryBulkBar: React.FC<InventoryBulkBarProps> = ({ developmentI
       onClear();
       setAvailability('');
       setVisibility('');
+      setIncludeLinked(false);
       void notify.success(
         t('inventory.bulk.successTitle', 'Units updated'),
         t('inventory.bulk.successMessage', '{{count}} units updated.', { count: updated })
@@ -75,9 +80,28 @@ export const InventoryBulkBar: React.FC<InventoryBulkBarProps> = ({ developmentI
               <option key={s} value={s}>{t(`availability.${s}`)}</option>
             ))}
           </select>
-          <Button type="button" size="sm" disabled={!availability || isBulkUpdating} onClick={() => availability && run({ availability }, t(`availability.${availability}`))}>
+          <Button
+            type="button"
+            size="sm"
+            disabled={!availability || isBulkUpdating}
+            onClick={() =>
+              availability &&
+              run(
+                { availability, ...(includeLinked && withExtras > 0 ? { includeLinked: true } : {}) },
+                includeLinked && withExtras > 0
+                  ? t('companions.bulk.label', { status: t(`availability.${availability}`), defaultValue: '{{status}} (with their parking and storage)' })
+                  : t(`availability.${availability}`)
+              )
+            }
+          >
             {t('inventory.bulk.apply', 'Apply')}
           </Button>
+          {availability && withExtras > 0 && (
+            <label className="flex min-h-[44px] cursor-pointer items-center gap-2 px-1 text-sm text-slate-700">
+              <input type="checkbox" checked={includeLinked} onChange={(e) => setIncludeLinked(e.target.checked)} className="h-4 w-4" />
+              {t('companions.bulk.includeLinked', 'Also update their parking spots and storage rooms')}
+            </label>
+          )}
         </div>
       )}
       {permissions.unit && (

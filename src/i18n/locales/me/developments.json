@@ -1221,6 +1221,17 @@
       "retry": "Pokušaj ponovo",
       "none": "Još nema parking mjesta ni ostava. Dodajte ih kao jedinice tipa Parking ili Ostava, pa ih izaberite ovdje.",
       "taken": "Dolazi uz {{unit}}"
+    },
+    "status": {
+      "title": "Njen parking i ostava",
+      "question": "Ova jedinica dolazi uz mjesta ispod. Označite ona koja su {{status}} zajedno sa njom.",
+      "alsoMark": "Označi i {{unit}} kao {{status}}",
+      "already": "Već",
+      "now": "Sada {{status}}"
+    },
+    "bulk": {
+      "label": "{{status}} (sa njihovim parkingom i ostavom)",
+      "includeLinked": "Ažuriraj i njihova parking mjesta i ostave"
     }
   }
 }

@@ -1211,6 +1211,17 @@
       "retry": "Provo sërish",
       "none": "Ende pa vende parkimi apo depo. Shtojini si njësi me llojin Parkim ose Depo, pastaj zgjidhini këtu.",
       "taken": "Vjen me {{unit}}"
+    },
+    "status": {
+      "title": "Parkimi dhe depoja e saj",
+      "question": "Kjo njësi vjen me vendet më poshtë. Shënoni ato që janë {{status}} bashkë me të.",
+      "alsoMark": "Shëno edhe {{unit}} si {{status}}",
+      "already": "Tashmë",
+      "now": "Tani {{status}}"
+    },
+    "bulk": {
+      "label": "{{status}} (me parkimin dhe depon e tyre)",
+      "includeLinked": "Përditëso edhe vendet e parkimit dhe depot e tyre"
     }
   }
 }

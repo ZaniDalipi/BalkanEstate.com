@@ -98,4 +98,13 @@ describe('checkFloorplanFile', () => {
     Object.defineProperty(big, 'size', { value: 11 * 1024 * 1024 });
     expect(checkFloorplanFile(big)).toBe('size');
   });
+
+  it('sends the parking spots picked to follow the status only with a status change', () => {
+    const base = { ...unitToForm({ id: 'u', unitNumber: 'A1', unitType: 'apartment', availability: 'available', linkedUnitIds: ['p1', 'p2'] } as never) };
+    expect(diffUnitForm(base, { ...base, alsoLinkedUnitIds: ['p1'] })).toEqual({});
+    expect(diffUnitForm(base, { ...base, availability: 'sold', alsoLinkedUnitIds: ['p1'] })).toEqual({ availability: 'sold', alsoLinkedUnitIds: ['p1'] });
+    expect(diffUnitForm(base, { ...base, availability: 'sold' })).toEqual({ availability: 'sold' });
+    // A spot removed in the same edit is not sent.
+    expect(diffUnitForm(base, { ...base, availability: 'sold', linkedUnitIds: ['p2'], alsoLinkedUnitIds: ['p1'] })).toEqual({ availability: 'sold', linkedUnitIds: ['p2'] });
+  });
 });
