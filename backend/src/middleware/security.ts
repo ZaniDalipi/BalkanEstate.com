@@ -419,6 +419,17 @@ export const paymentRateLimiter = rateLimit({
 });
 
 /**
+ * Key for the AI limiter: the user when known, otherwise the client IP.
+ * The limiter is mounted before the routes' `protect`, so most requests reach
+ * it without a user; a constant fallback key would put every visitor in one
+ * shared bucket that a single client could drain for everyone.
+ */
+export const aiRateLimitKey = (req: Request): string => {
+  const userId = (req as any).user?.id || (req as any).user?._id;
+  return userId ? `ai_user_${userId}` : `ai_ip_${ipKeyGenerator(req.ip || 'unknown')}`;
+};
+
+/**
  * Rate limiter for AI endpoints (neighborhood insights, valuations, etc.)
  * Protects against AI quota abuse while allowing reasonable usage
  * More permissive than payment but stricter than general
@@ -434,17 +445,8 @@ export const aiRateLimiter = rateLimit({
   standardHeaders: !isProduction, // Hide rate limit config from production responses
   legacyHeaders: false,
   skip: () => isDevelopment, // Skip rate limiting in development
-  keyGenerator: (req: Request) => {
-    // Rate limit by user ID if authenticated, otherwise by IP
-    const userId = (req as any).user?.id;
-    if (userId) {
-      return `ai_user_${userId}`;
-    }
-    // Use default key generator behavior for IP-based limiting
-    return 'unknown';
-  },
-  // Disable IPv6 validation since we use user ID primarily
-  validate: { xForwardedForHeader: false },
+  keyGenerator: (req: Request) => aiRateLimitKey(req),
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
 });
 
 /**

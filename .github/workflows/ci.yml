@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Read-only token: no job writes to the repo, so a compromised step or
+# action can't push code or tamper with releases.
+permissions:
+  contents: read
+
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
 
 jobs:
   # =============================================================================

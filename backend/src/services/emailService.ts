@@ -6,6 +6,9 @@ import { getPromoTemplate, BRAND_COLORS } from '../templates/emailTemplates';
 import { emailLogger } from '../utils/logger';
 import { getActiveEmailConfig, renderEmailWithSiteSettings, buildCouponCodesHtml, getSiteSettingsForEmail } from '../utils/emailTemplateRenderer';
 
+// nodemailer 10 ships its own types and no longer exports a Transporter type.
+type MailTransporter = ReturnType<typeof nodemailer.createTransport>;
+
 // =============================================================================
 // Security Utilities
 // =============================================================================
@@ -258,7 +261,7 @@ const DEFAULT_EMAIL_ADDRESSES: Record<EmailCategory, string> = {
 const EMAIL_SEND_INTERVAL_MS = parseInt(process.env.EMAIL_SEND_INTERVAL_MS ?? '300000', 10);
 
 class EmailService {
-  private transporter: nodemailer.Transporter | null = null;
+  private transporter: MailTransporter | null = null;
   private resend: Resend | null = null;
   private provider: EmailProvider = 'none';
   private fromEmails: Record<EmailCategory, string>;

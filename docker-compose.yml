@@ -11,7 +11,8 @@ services:
     container_name: balkanestate-mongodb
     restart: unless-stopped
     ports:
-      - '27017:27017'
+      # Localhost only: Docker's published ports bypass ufw/iptables rules.
+      - '127.0.0.1:27017:27017'
     volumes:
       - mongodb_data:/data/db
     environment:
@@ -30,7 +31,7 @@ services:
     container_name: balkanestate-backend
     restart: unless-stopped
     ports:
-      - '5001:5001'
+      - '127.0.0.1:5001:5001'
     depends_on:
       mongodb:
         condition: service_healthy
@@ -50,11 +51,11 @@ services:
 
   # Frontend (development server)
   frontend:
-    image: node:20-alpine
+    image: node:22-alpine
     container_name: balkanestate-frontend
     working_dir: /app
     ports:
-      - '5173:5173'
+      - '127.0.0.1:5173:5173'
     depends_on:
       - backend
     environment:
@@ -71,7 +72,7 @@ services:
   #   container_name: balkanestate-redis
   #   restart: unless-stopped
   #   ports:
-  #     - '6379:6379'
+  #     - '127.0.0.1:6379:6379'
   #   volumes:
   #     - redis_data:/data
 

@@ -6,7 +6,7 @@
  * hour is part of the cache key so availability is never more than an hour old.
  */
 import crypto from 'crypto';
-import sharp from 'sharp';
+import sharp, { type Sharp } from 'sharp';
 import { getPublicDevelopmentDetail, listPublicUnits } from '../developmentPublicService';
 import { getPublishedScene } from '../developmentSceneService';
 import { getProxiedImage } from '../../imageProxy/imageProxyService';
@@ -90,7 +90,7 @@ async function loadPhoto(url: string): Promise<Buffer | null> {
 
 async function render(facts: ResidenceShareFacts, lang: SupportedLangCode): Promise<Buffer> {
   const photo = facts.photoUrl ? await loadPhoto(facts.photoUrl) : null;
-  let base: sharp.Sharp;
+  let base: Sharp;
   let size: { width: number; height: number } | undefined;
   if (photo) {
     const { data, info } = await sharp(photo, { limitInputPixels: 40_000_000 }).rotate().toBuffer({ resolveWithObject: true });

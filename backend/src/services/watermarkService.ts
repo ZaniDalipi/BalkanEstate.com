@@ -1,4 +1,4 @@
-import sharp from 'sharp';
+import sharp, { type OverlayOptions } from 'sharp';
 import path from 'path';
 import fs from 'fs';
 import { mediaLogger } from '../utils/logger';
@@ -119,7 +119,7 @@ export const applyWatermark = async (
     const padding = Math.round(logoSize * 0.25); // Padding from edges
     const opacity = 0.5;
 
-    const compositeInputs: sharp.OverlayOptions[] = [];
+    const compositeInputs: OverlayOptions[] = [];
 
     // 1. BalkanEstate logo - bottom-right
     try {

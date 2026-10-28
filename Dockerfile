@@ -11,7 +11,7 @@
 # =============================================================================
 
 # ── Stage 1: Build frontend ──────────────────────────────────────────────────
-FROM node:20-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 
 WORKDIR /app
 
@@ -26,7 +26,7 @@ COPY . .
 RUN npm run build
 
 # ── Stage 2: Build backend ───────────────────────────────────────────────────
-FROM node:20-alpine AS backend-builder
+FROM node:22-alpine AS backend-builder
 
 WORKDIR /app/backend
 
@@ -41,7 +41,7 @@ COPY backend/ .
 RUN npm run build
 
 # ── Stage 3: Production image ─────────────────────────────────────────────────
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
 
@@ -55,7 +55,7 @@ RUN apk add --no-cache fontconfig ttf-dejavu
 
 # Install backend production dependencies
 COPY backend/package*.json ./
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy compiled backend
 COPY --from=backend-builder /app/backend/dist ./dist
