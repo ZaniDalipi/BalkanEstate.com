@@ -672,6 +672,25 @@ being edited:
   perspectives, so the copy is a head start to move and resize, not exact.
   Geometry: `utils/regionTransfer.ts`; action `ADD_MANY`; panel `CopyFromView.tsx`.
 
+## 7b-6. The phone apartment sheet
+
+On phones the apartment details are a bottom sheet that follows the finger, like
+the Zillow sheet:
+
+- It slides up to **half height** (the building stays in view above it).
+- **Drag the handle** (or swipe the details) and the sheet moves with the finger;
+  the picture behind dims and clears in step. On release it settles on **full**,
+  **half** or **closed** with a spring; a quick flick counts, a long pull down
+  from half closes it (and drops `?unit=`).
+- At half height the details do not scroll, so a swipe up on them grows the
+  sheet; at full height they scroll, and only a pull *down* from their very top
+  takes the sheet down. A sideways swipe (the photo gallery) never moves it.
+- Tapping the handle still toggles half / full, and Esc / the close button work
+  as before. With "reduce motion" the sheet jumps instead of sliding.
+- The sheet is always as tall as "full" and is moved with a transform
+  (`useSheetMotion`); the rules (snap points, flick, who owns the gesture) are
+  pure functions in `utils/sheetSnap.ts`. Desktop keeps the side drawer.
+
 ## 7b-3. Errors in the reader's language
 
 - **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.

@@ -107,17 +107,94 @@ describe('ApartmentDetailsDrawer + useUnitDrawer', () => {
     await waitFor(() => expect(router.state.location.search).toBe('?unit=p1'));
   });
 
-  it('on phones opens at half height; the handle switches to full and back', async () => {
+  it('on phones the sheet is full-size and slides; the handle switches between half and full', async () => {
     mount('/en/developments/res?unit=u1');
     await screen.findByRole('heading', { name: 'Apt A12' });
     const sheet = screen.getByRole('dialog');
-    expect(sheet.style.height).toBe('55dvh');
+    // Always as tall as "full" (90% of the screen); how far it is pulled down says how much shows.
+    expect(sheet.style.height).toBe(`${Math.round(window.innerHeight * 0.9)}px`);
+    expect(screen.getByRole('button', { name: 'Show all details' })).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(screen.getByRole('button', { name: 'Show all details' }));
-    expect(sheet.style.height).toBe('90dvh');
     const handle = screen.getByRole('button', { name: 'Show the building' });
     expect(handle).toHaveAttribute('aria-expanded', 'true');
     fireEvent.click(handle);
-    expect(sheet.style.height).toBe('55dvh');
+    expect(screen.getByRole('button', { name: 'Show all details' })).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  describe('dragging the phone sheet', () => {
+    const touch = (el: Element, type: 'touchStart' | 'touchMove' | 'touchEnd', y: number, x = 100) =>
+      fireEvent[type](el, { touches: type === 'touchEnd' ? [] : [{ clientX: x, clientY: y }] });
+    /** The finger takes real time between moves (jsdom stamps events itself), so the release speed is realistic. */
+    const pause = () => act(async () => { await new Promise((r) => setTimeout(r, 16)); });
+    /** A finger lands after the sheet has finished sliding open. */
+    const opened = () => act(async () => { await new Promise((r) => setTimeout(r, 900)); });
+    const drag = async (el: Element, from: number, to: number) => {
+      touch(el, 'touchStart', from);
+      for (let i = 1; i <= 5; i += 1) {
+        await pause();
+        touch(el, 'touchMove', from + ((to - from) * i) / 5);
+      }
+      touch(el, 'touchEnd', to);
+    };
+
+    it('drag the handle up and it grows to full; drag it back down and it returns to half', async () => {
+      mount('/en/developments/res?unit=u1');
+      await screen.findByRole('heading', { name: 'Apt A12' });
+      await opened();
+      await drag(screen.getByRole('button', { name: 'Show all details' }), 500, 200);
+      expect(screen.getByRole('button', { name: 'Show the building' })).toHaveAttribute('aria-expanded', 'true');
+      await opened();
+      await drag(screen.getByRole('button', { name: 'Show the building' }), 200, 330);
+      expect(screen.getByRole('button', { name: 'Show all details' })).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('a long pull down from half closes it (and removes ?unit=)', async () => {
+      const router = mount('/en/developments/res?unit=u1');
+      await screen.findByRole('heading', { name: 'Apt A12' });
+      await opened();
+      await drag(screen.getByRole('button', { name: 'Show all details' }), 300, 760);
+      await waitFor(() => expect(router.state.location.search).toBe(''));
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    });
+
+    it('a short pull down from half does not close it', async () => {
+      const router = mount('/en/developments/res?unit=u1');
+      await screen.findByRole('heading', { name: 'Apt A12' });
+      await opened();
+      await drag(screen.getByRole('button', { name: 'Show all details' }), 300, 340);
+      expect(router.state.location.search).toBe('?unit=u1');
+      expect(screen.getByRole('button', { name: 'Show all details' })).toBeInTheDocument();
+    });
+
+    it('swiping up on the details at half height grows the sheet (they do not scroll yet)', async () => {
+      mount('/en/developments/res?unit=u1');
+      const heading = await screen.findByRole('heading', { name: 'Apt A12' });
+      await opened();
+      await drag(heading, 600, 250);
+      expect(screen.getByRole('button', { name: 'Show the building' })).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('at full height the details scroll: a swipe up on them leaves the sheet alone', async () => {
+      mount('/en/developments/res?unit=u1');
+      const heading = await screen.findByRole('heading', { name: 'Apt A12' });
+      await opened();
+      fireEvent.click(screen.getByRole('button', { name: 'Show all details' }));
+      await drag(heading, 600, 250);
+      expect(screen.getByRole('button', { name: 'Show the building' })).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('a sideways swipe (the photo gallery) does not move the sheet', async () => {
+      mount('/en/developments/res?unit=u1');
+      const heading = await screen.findByRole('heading', { name: 'Apt A12' });
+      await opened();
+      touch(heading, 'touchStart', 500, 300);
+      await pause();
+      touch(heading, 'touchMove', 505, 200);
+      await pause();
+      touch(heading, 'touchMove', 505, 100);
+      touch(heading, 'touchEnd', 505, 100);
+      expect(screen.getByRole('button', { name: 'Show all details' })).toHaveAttribute('aria-expanded', 'false');
+    });
   });
 
   it('opens from ?unit= and closing removes the param (replace)', async () => {

@@ -141,6 +141,62 @@ test.describe('Residence explorer (public)', () => {
   });
 });
 
+test.describe('Residence explorer — phone sheet', () => {
+  // A real finger: touch events through the browser's input protocol, not synthetic clicks.
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+  test('the apartment sheet follows the finger, settles on half / full, and slides away when pulled down', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Uses the Chromium input protocol');
+    await prepare(page);
+    const units = (await (await page.request.get(`${API}/developments/${SLUG}/units`)).json()) as { units: Array<{ id: string }> };
+    await page.goto(`/en/developments/${SLUG}?unit=${encodeURIComponent(units.units[0].id)}`);
+    const sheet = page.getByRole('dialog', { name: 'Apartment details' });
+    await expect(sheet).toBeVisible({ timeout: 20000 });
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', y: number) =>
+      cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: 195, y }] });
+    const top = async () => Math.round((await sheet.boundingBox())!.y);
+    const swipe = async (from: number, to: number, hold = false) => {
+      await touch('touchStart', from);
+      for (let i = 1; i <= 10; i += 1) {
+        await touch('touchMove', from + ((to - from) * i) / 10);
+        await page.waitForTimeout(20);
+      }
+      if (!hold) await touch('touchEnd', to);
+    };
+    const handle = (name: RegExp) => page.getByRole('button', { name });
+
+    // Opens at half height, the building showing above it.
+    await expect.poll(top).toBeGreaterThan(300);
+    const halfTop = await top();
+    expect(halfTop).toBeLessThan(450);
+
+    // While the finger is still down, the sheet is where the finger dragged it.
+    const y0 = (await handle(/Show all details/).boundingBox())!.y + 20;
+    await swipe(y0, y0 - 200, true);
+    const dragging = await top();
+    expect(dragging).toBeLessThan(halfTop - 100);
+    expect(dragging).toBeGreaterThan(120);
+    await touch('touchEnd', y0 - 200);
+
+    // Let go high: it settles at full height.
+    await expect(handle(/Show the building/)).toBeVisible();
+    await expect.poll(top).toBeLessThan(120);
+
+    // Pull it down a little: back to half.
+    const y1 = (await handle(/Show the building/).boundingBox())!.y + 20;
+    await swipe(y1, y1 + 220);
+    await expect(handle(/Show all details/)).toBeVisible();
+    await expect.poll(top).toBeGreaterThan(300);
+
+    // A long pull down closes it, and ?unit= goes with it.
+    const y2 = (await handle(/Show all details/).boundingBox())!.y + 20;
+    await swipe(y2, y2 + 420);
+    await expect(sheet).toBeHidden({ timeout: 5000 });
+    expect(page.url()).not.toContain('unit=');
+  });
+});
+
 test.describe('Residence explorer (owner)', () => {
   // Both tests sign in as the same account; parallel logins rotate each
   // other's session out, so run them one after another.
