@@ -252,10 +252,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 have nothing to clip to and the word would disappear.
                 No min-width guess here any more either — the Typewriter
                 reserves the width of its longest word, measured in the real
-                font, so the line cannot reflow as it types. */}
-            <span className="inline-block align-bottom">
+                font, so the line cannot reflow as it types.
+                On phones the word gets its own line, centred in that reserved
+                width: the longest word ("Вашиот Дом од Соништата") does not fit
+                beside the title there, so the line overflowed and read as
+                pushed to the left. */}
+            <span className="block sm:inline-block align-bottom">
               <Typewriter
                 className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600"
+                alignClassName="text-center sm:text-left"
                 words={typewriterWords}
                 speed={80}
                 delayBetweenWords={2000}
