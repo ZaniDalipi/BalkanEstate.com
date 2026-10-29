@@ -241,7 +241,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="relative z-10 max-w-6xl mx-auto px-4 hero-top-pad pb-16 sm:pb-28 landscape:pb-10 hero-stagger">
         {/* Title */}
         <h1
-          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl landscape:text-3xl font-bold text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto hero-fade-up"
+          className="text-center text-2xl sm:text-4xl md:text-5xl lg:text-6xl landscape:text-3xl font-bold text-slate-900 tracking-tight leading-tight max-w-5xl mx-auto hero-fade-up"
           style={{ minHeight: '2.6em' }}
         >
           <span className="block">
@@ -253,14 +253,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 No min-width guess here any more either — the Typewriter
                 reserves the width of its longest word, measured in the real
                 font, so the line cannot reflow as it types.
-                On phones the word gets its own line, centred in that reserved
-                width: the longest word ("Вашиот Дом од Соништата") does not fit
-                beside the title there, so the line overflowed and read as
-                pushed to the left. */}
-            <span className="block sm:inline-block align-bottom">
+                The word always gets its own line, centred in that reserved
+                width. Whether the longest word fits beside the title depends
+                on the language and the screen ("Вашиот Дом од Соништата" fit
+                at almost no width), and when it didn't the word dropped to a
+                line of its own anyway, left-aligned, so the heading looked
+                lopsided. One layout for every size keeps it centred. */}
+            <span className="block">
               <Typewriter
                 className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600"
-                alignClassName="text-center sm:text-left"
+                alignClassName="text-center"
                 words={typewriterWords}
                 speed={80}
                 delayBetweenWords={2000}
