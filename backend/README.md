@@ -39,12 +39,21 @@ Backend API server for the Balkan Estate real estate application built with Node
    npm install
    ```
 
-3. **Set up environment variables**:
+3. **Set up environment variables (sandbox, recommended)**:
    ```bash
-   cp .env.example .env
+   npm run setup:sandbox
    ```
+   This writes `.env.development` from `.env.sandbox.example`: the app's own
+   secrets (JWT, encryption, VAPID) are generated fresh on your machine, and
+   every third-party key is empty, so payments, email sending, uploads and AI
+   are off. No real secret is needed: production values live only in Railway.
+   It never overwrites an existing `.env.development` unless you pass
+   `-- --force`, which keeps the old file as a backup.
 
-4. **Configure `.env` file**:
+   To try a third-party feature locally, add that service's **test** key
+   (e.g. `sk_test_…` for Stripe) to `.env.development`, never a live key.
+
+4. **Or configure a `.env` file by hand**:
    ```env
    PORT=5001
    NODE_ENV=development
