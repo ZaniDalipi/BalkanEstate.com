@@ -25,6 +25,7 @@ export interface FilterOptions {
   features: ChipOption<string>[];
   flags: ChipOption<UnitFlag>[];
   orientations: ChipOption<string>[];
+  entrances: ChipOption<string>[];
   availability: ChipOption<(typeof AVAILABILITY_ORDER)[number]>[];
   /** Slider step for the price range (a round number ~1% of the spread). */
   priceStep: number;
@@ -57,6 +58,7 @@ export function useFilterOptions(units: PublicUnit[]): FilterOptions {
         .map((f) => ({ value: f, label: t(`feature.${f}`, f.replace(/_/g, ' ')) })),
       flags: bounds.flags.map((f) => ({ value: f, label: t(`explorer.flag.${f}`, FLAG_DEFAULTS[f]) })),
       orientations: bounds.orientations.map((o) => ({ value: o, label: t(`explorer.orientation.${o.toLowerCase()}`, o) })),
+      entrances: bounds.entrances.map((e) => ({ value: e.id, label: e.name })),
       availability: AVAILABILITY_ORDER.filter((s) => present.has(s)).map((s) => ({
         value: s,
         label: availabilityLabel(s),

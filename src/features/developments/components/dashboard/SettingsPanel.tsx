@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useUpdateDevelopment } from '../../hooks/useDevelopmentMutations';
 import type { Development } from '../../types';
 import { ResidenceDetailsForm } from './details/ResidenceDetailsForm';
+import { BuilderSection } from './builder/BuilderSection';
 
 interface SettingsPanelProps {
   development: Development;
@@ -18,6 +19,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ development, canEd
   return (
     <div className="space-y-4">
       <ResidenceDetailsForm development={development} canEdit={canEdit} />
+      <BuilderSection development={development} canEdit={canEdit} />
       <section aria-labelledby="settings-heading" className="rounded-2xl border border-slate-200 bg-white p-4">
         <h2 id="settings-heading" className="mb-3 text-base font-semibold text-slate-900">
           {t('manage.settings.heading', 'Explorer settings')}

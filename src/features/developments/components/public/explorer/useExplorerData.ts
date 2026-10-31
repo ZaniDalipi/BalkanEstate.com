@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { DevelopmentBuilding, PublicUnit, SceneTargetType } from '../../../types';
+import type { DevelopmentBuilding, DevelopmentEntrance, PublicUnit, SceneTargetType } from '../../../types';
 import { countByAvailability } from '../../../utils/availability';
 import { filterUnits, hasActiveCriteria, type UnitCriteria } from '../../../utils/unitFilters';
 import { computeBuildingFacts } from './useRegionCard';
@@ -7,6 +7,7 @@ import { computeBuildingFacts } from './useRegionCard';
 interface Args {
   units: PublicUnit[];
   buildings: DevelopmentBuilding[];
+  entrances?: DevelopmentEntrance[];
   criteria: UnitCriteria;
   /** What is on screen, for the legend counts. */
   type: SceneTargetType;
@@ -15,9 +16,12 @@ interface Args {
 }
 
 /** Lookups, filter matches and legend counts the explorer derives from the residence's data. */
-export function useExplorerData({ units, buildings, criteria, type, buildingId, floorId }: Args) {
+const NONE: DevelopmentEntrance[] = [];
+
+export function useExplorerData({ units, buildings, entrances = NONE, criteria, type, buildingId, floorId }: Args) {
   const unitsById = useMemo(() => new Map(units.map((u) => [u.id, u])), [units]);
   const buildingsById = useMemo(() => new Map(buildings.map((b) => [b.id, b])), [buildings]);
+  const entrancesById = useMemo(() => new Map(entrances.map((e) => [e.id, e])), [entrances]);
   const buildingFacts = useMemo(() => computeBuildingFacts(units), [units]);
   const matched = useMemo(() => filterUnits(units, criteria), [units, criteria]);
   const matchedIds = useMemo(
@@ -33,5 +37,5 @@ export function useExplorerData({ units, buildings, criteria, type, buildingId, 
     return countByAvailability(filterUnits(scoped, { ...criteria, availability: [] }));
   }, [units, criteria, type, buildingId, floorId]);
 
-  return { unitsById, buildingsById, buildingFacts, matched, matchedIds, legend };
+  return { unitsById, buildingsById, entrancesById, buildingFacts, matched, matchedIds, legend };
 }

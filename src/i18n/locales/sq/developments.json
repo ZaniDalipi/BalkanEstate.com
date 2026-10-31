@@ -67,7 +67,11 @@
     "selectCountry": "Zgjidhni një shtet",
     "selectCity": "Zgjidhni një qytet",
     "selectCountryFirst": "Zgjidhni fillimisht shtetin",
-    "addressHelper": "Adresa e rrugës (opsionale) — plotësohet automatikisht nga qyteti."
+    "addressHelper": "Adresa e rrugës (opsionale) — plotësohet automatikisht nga qyteti.",
+    "importHeading": "Banesat nga një tabelë (opsionale)",
+    "importHint": "I keni ndërtesat dhe banesat në Excel ose CSV? Shtoni skedarin tani — menjëherë pas krijimit e hapim importin me të, që të kontrolloni çdo kolonë para se të ruhet diçka.",
+    "importChoose": "Zgjidh tabelën",
+    "importRemove": "Hiq {{name}}"
   },
   "detail": {
     "overview": "Përmbledhje",
@@ -439,7 +443,18 @@
     "noUnitsInBuilding": "Ende nuk ka apartamente të listuara për këtë ndërtesë.",
     "stackingPlan": "Apartamentet sipas katit",
     "unmarkedNote": "Apartamentet nuk janë shënuar ende në këtë foto — zgjidhni një kat pas kati më poshtë.",
-    "noUnitsHere": "Asnjë apartament nuk është publikuar ende në këtë ndërtesë."
+    "noUnitsHere": "Asnjë apartament nuk është publikuar ende në këtë ndërtesë.",
+    "tour": {
+      "badgeTitle": "Ka tur virtual 360°",
+      "open": "Hap turin 360°",
+      "newTab": "(hapet në një skedë të re)",
+      "fromListing": "Nga njoftimi i kësaj banese.",
+      "label": "Tur 360°",
+      "onListing": "Te njoftimi",
+      "homes": "Banesa: {{n}}",
+      "chip": "360° ×{{n}}",
+      "chipLong": "Banesa me tur 360°: {{n}}"
+    }
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",
@@ -606,7 +621,8 @@
       "floor": "Hap foton e atij kati, p.sh. një plan kati ku çdo apartament është i klikueshëm.",
       "unit": "Një apartament nga Inventari juaj. Karta tregon numrin, katin, m², dhomat e gjumit, çmimin dhe statusin aktual; klikimi hap detajet. Përdoreni për apartamentet që shitni në këtë rezidencë.",
       "listing": "Një shpallje e publikuar në BalkanEstate (p.sh. një banesë në rishitje). Karta tregon foton, çmimin, m², katin dhe dhomat; klikimi hap faqen e shpalljes. Për të shfaqur një shpallje në një nga apartamentet tuaja, lidheni zonën me njësinë dhe bashkëngjitni shpalljen te ajo njësi.",
-      "entrance": "Shënon një hyrje ndërtese. Shfaq një etiketë por nuk hap asgjë."
+      "entrance": "Shënon një hyrje ndërtese. Shfaq një etiketë por nuk hap asgjë.",
+      "entranceDoor": "Shënon një derë me një kunj në ngjyrën e llojit të saj. Blerësit shohin llojin, qasjen pa shkallë dhe sa banesa shërben, dhe mund t’i shfaqin ato."
     },
     "guide": {
       "title": "Si funksionon: fotoja e rezidencës, ndërtesat, njësitë dhe shpalljet",
@@ -783,7 +799,8 @@
         "integer": "Shkruani një numër të plotë",
         "currency": "Përdorni një kod monedhe me 3 shkronja, p.sh. EUR",
         "tooLong": "Ky tekst është shumë i gjatë",
-        "choice": "Zgjidhni një nga opsionet"
+        "choice": "Zgjidhni një nga opsionet",
+        "url": "Shkruani një adresë të plotë uebi që fillon me https://"
       },
       "notSet": "E pacaktuar",
       "euroOnly": "Të gjitha çmimet janë në euro (€).",
@@ -853,6 +870,13 @@
       "withDescription": "Përshkrimi",
       "doneCreate": "Nga “{{title}}” — këto të dhëna i shtohen njësisë së re kur klikoni Shto njësinë.",
       "linkCreate": "Lidhe edhe këtë njoftim me njësinë e re"
+    },
+    "tour": {
+      "title": "Tur virtual 360°",
+      "label": "Lidhja e turit",
+      "test": "Hap",
+      "fromListing": "Blerësit shohin turin 360° të njoftimit të lidhur. Shtoni një lidhje këtu për të treguar një tur tjetër për këtë njësi.",
+      "help": "Ngjitni lidhjen e ndarjes së turit (Matterport, Kuula, Z360 ose një shikues tjetër 360°). Blerësit shohin një shenjë 360° në këtë njësi dhe mund ta hapin turin."
     }
   },
   "manage": {
@@ -1019,7 +1043,8 @@
       "tooBig": "Skedari është më i madh se 10 MB.",
       "empty": "Skedari duhet të ketë një rresht titujsh dhe të paktën një njësi.",
       "unreadable": "Ky skedar nuk mund të lexohej. Ruajeni si .xlsx ose .csv dhe provoni përsëri.",
-      "oldExcel": "Ky është një skedar i vjetër Excel (.xls). Në Excel zgjidhni File → Save as → Excel Workbook (.xlsx), pastaj importoni atë."
+      "oldExcel": "Ky është një skedar i vjetër Excel (.xls). Në Excel zgjidhni File → Save as → Excel Workbook (.xlsx), pastaj importoni atë.",
+      "wrongType": "Zgjidhni një skedar Excel (.xlsx) ose CSV."
     },
     "columns": "Kolonat",
     "unnamed": "(pa emër)",
@@ -1038,7 +1063,8 @@
       "new": "Njësi të reja",
       "updated": "Njësi të përditësuara",
       "buildings": "Ndërtesa të reja",
-      "floors": "Kate të reja"
+      "floors": "Kate të reja",
+      "entrances": "Hyrje të reja"
     },
     "unchanged": "Tashmë të përditësuara: {{unchanged}} · Njësi ekzistuese të lëna siç janë: {{skipped}}",
     "floorsFromNumbers": "Pa kolonë kati: katet lexohen nga numrat e njësive (401 → kati 4).",
@@ -1080,11 +1106,16 @@
       "viewType": "Pamja",
       "features": "Veçoritë",
       "description": "Përshkrimi",
-      "ignore": "Mos e importo"
+      "ignore": "Mos e importo",
+      "entrance": "Hyrja"
     },
     "dropHintXlsx": "Excel (.xlsx) ose CSV — direkt nga Excel, Google Sheets ose Numbers. Kolonat mund të jenë në çdo renditje dhe gjuhë; ne i njohim.",
     "sheet": "Fleta",
-    "buildingLimit": "Ky skedar shton {{n}} ndërtesa të reja, por kjo rezidencë mund të ketë {{limit}} ({{allowed}} më shumë). Zhbllokoni më shumë ndërtesa te skeda Përmbledhje, ose përdorni emra ndërtesash ekzistuese."
+    "buildingLimit": "Ky skedar shton {{n}} ndërtesa të reja, por kjo rezidencë mund të ketë {{limit}} ({{allowed}} më shumë). Zhbllokoni më shumë ndërtesa te skeda Përmbledhje, ose përdorni emra ndërtesash ekzistuese.",
+    "doneEntrances": "Hyrje të reja: {{n}}",
+    "titleFor": "Importo njësi në {{building}}",
+    "openFor": "Importo njësi në {{building}}",
+    "openShort": "Importo"
   },
   "unitView": {
     "sea": "Det",
@@ -1359,7 +1390,11 @@
       "unit_in_other_development": "Kjo njësi i përket një rezidence tjetër.",
       "already_attached_to_this_unit": "Ky njoftim është tashmë i lidhur me këtë njësi.",
       "listing_already_attached_elsewhere": "Ky njoftim është i lidhur me një njësi tjetër. Nëse e lidhni këtu, zhvendoset."
-    }
+    },
+    "PHONE_INVALID": "Shkruani një numër telefoni të vlefshëm, si +389 2 123 4567.",
+    "SOCIAL_HOST": "Kjo duhet të jetë një lidhje në {{network}}.",
+    "ENTRANCE_NAME_TAKEN": "Kjo ndërtesë ka tashmë një hyrje me emrin “{{name}}”.",
+    "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1382,5 +1417,82 @@
       "title": "Shtëpi e re në dispozicion te {{residence}}",
       "message": "Njësia {{unit}} tani është në dispozicion."
     }
+  },
+  "builder": {
+    "heading": "Ndërtuesi",
+    "intro": "Kompania që ndërton këtë rezidencë. Blerësit e shohin në krye të faqes së rezidencës, me banerin, logon dhe kontaktet.",
+    "name": "Emri i kompanisë",
+    "tagline": "Slogani",
+    "taglinePlaceholder": "p.sh. Ndërtojmë shtëpi në Shkup që nga 2004",
+    "about": "Rreth kompanisë",
+    "foundedYear": "Themeluar (viti)",
+    "completedProjects": "Projekte të përfunduara",
+    "licenseNumber": "Nr. i licencës / regjistrimit",
+    "website": "Faqja e internetit",
+    "email": "Email",
+    "phone": "Telefoni",
+    "address": "Adresa e zyrës",
+    "socials": "Rrjetet sociale",
+    "logo": "Logo",
+    "banner": "Baneri",
+    "logoHint": "Katror, të paktën 400 × 400 px.",
+    "bannerHint": "I gjerë, të paktën 1600 × 600 px.",
+    "choose": "Zgjidh foton",
+    "replace": "Zëvendëso",
+    "remove": "Hiq",
+    "uploading": "Po ngarkohet…",
+    "saved": "Ndërtuesi u ruajt.",
+    "save": "Ruaj ndërtuesin"
+  },
+  "builderPublic": {
+    "builtBy": "Ndërtuar nga",
+    "label": "Ndërtuesi",
+    "founded": "Themeluar",
+    "foundedValue": "{{year}} · {{years}} vjet",
+    "projects": "Projekte të përfunduara",
+    "license": "Licenca",
+    "office": "Zyra",
+    "email": "Email"
+  },
+  "entrance": {
+    "label": "Hyrja",
+    "filter": "Hyrja",
+    "kind": {
+      "main": "Hyrja kryesore",
+      "side": "Hyrje anësore",
+      "garage": "Hyrja e parkimit",
+      "service": "Hyrje shërbimi"
+    },
+    "sectionTitle": "Ndërtesat dhe hyrjet",
+    "sectionHint": "Emërtoni çdo derë që përdorin blerësit — hyrjen kryesore, derën anësore, parkimin. Pastaj shënojeni në fotot tuaja te Eksploruesi interaktiv.",
+    "none": "Një derë për gjithë ndërtesën? Atëherë nuk ju duhen hyrje. Shtojini kur banesat arrihen nga dyer ose shkallë të ndryshme.",
+    "add": "Shto hyrje",
+    "addTitle": "Shto një hyrje te {{building}}",
+    "editTitle": "Ndrysho {{name}}",
+    "name": "Emri",
+    "namePlaceholder": "p.sh. Hyrja A",
+    "code": "Kodi i shkurtër",
+    "kindLabel": "Lloji",
+    "accessible": "Hyrje pa shkallë (karrige me rrota, karrocë)",
+    "note": "Shënim për blerësit",
+    "notePlaceholder": "p.sh. Nga rruga kryesore · portier 8:00–20:00",
+    "saving": "Po ruhet…",
+    "save": "Ruaj hyrjen",
+    "stepFree": "Pa shkallë",
+    "edit": "Ndrysho {{name}}",
+    "delete": "Fshi {{name}}",
+    "deleteTitle": "Të fshihet “{{name}}”?",
+    "deleteMessage": "Zonat që e shënojnë këtë hyrje në fotot tuaja fshihen gjithashtu. Banesat duhet të kalohen më parë në një hyrje tjetër.",
+    "deleteConfirm": "Fshi hyrjen",
+    "noneChosen": "Asnjë hyrje e veçantë",
+    "homesAvailable_one": "{{count}} banesë e lirë",
+    "homesAvailable_other": "{{count}} banesa të lira",
+    "homes": "Banesat",
+    "access": "Qasja",
+    "noteShort": "Shënim",
+    "showHomes": "Shfaq banesat e saj",
+    "needBuilding": "Shtoni më parë një ndërtesë; hyrjet i përkasin një ndërtese.",
+    "inBuilding": "Hyrje e ndërtesës",
+    "newHere": "Hyrje e re"
   }
 }

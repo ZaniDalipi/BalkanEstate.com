@@ -2,7 +2,7 @@ import React, { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { buildTemplateCsv } from '../../../../utils/csvImport';
+import { downloadTemplate } from './downloadTemplate';
 import type { SheetError } from './useCsvSheet';
 
 interface ImportFilePickerProps {
@@ -10,18 +10,11 @@ interface ImportFilePickerProps {
   error: SheetError | null;
 }
 
-const ERROR_DEFAULTS: Record<SheetError, string> = {
+const SHEET_ERROR_DEFAULTS: Record<SheetError, string> = {
   tooBig: 'The file is larger than 10 MB.',
   empty: 'The file needs a header row and at least one unit.',
   unreadable: 'This file could not be read. Save it as .xlsx or .csv and try again.',
   oldExcel: 'This is an old Excel file (.xls). In Excel choose File → Save as → Excel Workbook (.xlsx), then import that.',
-};
-
-const downloadTemplate = () => {
-  const url = URL.createObjectURL(new Blob(['﻿', buildTemplateCsv()], { type: 'text/csv;charset=utf-8' }));
-  const a = Object.assign(document.createElement('a'), { href: url, download: 'units-template.csv' });
-  a.click();
-  URL.revokeObjectURL(url);
 };
 
 /** Drop or choose an Excel (.xlsx) or CSV file; offers a template to fill in. */
@@ -58,7 +51,7 @@ export const ImportFilePicker: React.FC<ImportFilePickerProps> = ({ onFile, erro
       </label>
       {error && (
         <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-          {t(`import.error.${error}`, { defaultValue: ERROR_DEFAULTS[error] })}
+          {t(`import.error.${error}`, { defaultValue: SHEET_ERROR_DEFAULTS[error] })}
         </p>
       )}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">

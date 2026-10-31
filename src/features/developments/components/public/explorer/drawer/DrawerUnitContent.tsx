@@ -11,6 +11,8 @@ import { UnitSpecs } from './UnitSpecs';
 import { UnitActions } from './UnitActions';
 import { DrawerCompanions } from './DrawerCompanions';
 import { useUnitDrawer } from '../../../../hooks/useUnitDrawer';
+import { TourBadge } from '../../../shared/TourBadge';
+import { TourButton } from './TourButton';
 
 interface DrawerUnitContentProps {
   slug: string;
@@ -53,6 +55,7 @@ export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unit
           <div className="flex flex-wrap items-center gap-2 pr-12">
             <h2 className="text-2xl font-bold text-slate-900">{txt.title(unit)}</h2>
             <AvailabilityBadge state={unit.availability} />
+            {unit.virtualTourUrl && <TourBadge />}
           </div>
           <p className="mt-1 text-sm text-slate-500">
             {[unit.buildingName, unit.floorLabel || null, unit.unitType ? t(`explorer.unitType.${unit.unitType}`, unit.unitType.replace(/_/g, ' ')) : null]
@@ -66,6 +69,8 @@ export const DrawerUnitContent: React.FC<DrawerUnitContentProps> = ({ slug, unit
             ) : null}
           </div>
         </header>
+
+        <TourButton unit={unit} />
 
         <UnitSpecs unit={unit} />
 

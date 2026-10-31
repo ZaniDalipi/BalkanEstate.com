@@ -6,6 +6,7 @@ import { AvailabilityBadge } from '../../shared/Badges';
 import { useUnitText } from './useUnitText';
 import { isExtraUnit } from '../../../utils/unitCompanions';
 import { CompanionNote } from './CompanionNote';
+import { TourBadge } from '../../shared/TourBadge';
 
 export interface Fact {
   label: string;
@@ -37,6 +38,7 @@ export const UnitFacts: React.FC<{ unit: PublicUnit; companions?: { comesWith: P
       value: unit.unitNumber,
     },
     unit.floorLabel ? { label: t('explorer.floor', 'Floor'), value: String(unit.floorLevel ?? unit.floorLabel) } : null,
+    unit.entranceName ? { label: t('entrance.label', 'Entrance'), value: unit.entranceName } : null,
     txt.area(unit) ? { label: t('explorer.card.area', 'Area'), value: txt.area(unit) } : null,
     typeof unit.beds === 'number' ? { label: t('explorer.card.rooms', 'Bedrooms'), value: unit.beds === 0 ? t('explorer.studio', 'Studio') : String(unit.beds) } : null,
     { label: t('explorer.card.price', 'Price'), value: txt.price(unit) },
@@ -56,7 +58,10 @@ export const UnitFacts: React.FC<{ unit: PublicUnit; companions?: { comesWith: P
       )}
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="text-base font-bold text-slate-900">{txt.title(unit)}</p>
-        <AvailabilityBadge state={unit.availability} />
+        <span className="flex shrink-0 items-center gap-1.5">
+          {unit.virtualTourUrl && <TourBadge />}
+          <AvailabilityBadge state={unit.availability} />
+        </span>
       </div>
       <FactRows facts={facts} />
       {companions && <CompanionNote {...companions} />}

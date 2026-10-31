@@ -67,7 +67,11 @@
     "selectCountry": "Select a country",
     "selectCity": "Select a city",
     "selectCountryFirst": "Select a country first",
-    "addressHelper": "Street address (optional) — auto-filled from the city."
+    "addressHelper": "Street address (optional) — auto-filled from the city.",
+    "importHeading": "Apartments from a spreadsheet (optional)",
+    "importHint": "Already have your buildings and apartments in Excel or CSV? Add the file now — right after creating, we open the import with it so you can check every column before anything is saved.",
+    "importChoose": "Choose spreadsheet",
+    "importRemove": "Remove {{name}}"
   },
   "detail": {
     "overview": "Overview",
@@ -415,7 +419,18 @@
     "noUnitsInBuilding": "No apartments are listed for this building yet.",
     "stackingPlan": "Apartments by floor",
     "unmarkedNote": "Apartments aren’t marked on this picture yet — choose one floor by floor below.",
-    "noUnitsHere": "No apartments are published in this building yet."
+    "noUnitsHere": "No apartments are published in this building yet.",
+    "tour": {
+      "badgeTitle": "Has a 360° virtual tour",
+      "open": "Open the 360° tour",
+      "newTab": "(opens in a new tab)",
+      "fromListing": "From this apartment’s listing.",
+      "label": "360° tour",
+      "onListing": "On the listing",
+      "homes": "Homes: {{n}}",
+      "chip": "360° ×{{n}}",
+      "chipLong": "Homes with a 360° tour: {{n}}"
+    }
   },
   "feature": {
     "big_terrace": "With big terrace",
@@ -606,7 +621,8 @@
       "floor": "Opens that floor’s picture, e.g. a floor plan where each apartment is clickable.",
       "unit": "An apartment from your Inventory. The card shows its number, floor, m², bedrooms, price and live status; clicking opens its details. Use this for apartments you sell in this residence.",
       "listing": "A published BalkanEstate listing (e.g. a resale flat). The card shows the listing’s photo, price, m², floor and rooms; clicking opens the listing page. To show a listing on one of your apartments, link the region to the unit and attach the listing to that unit instead.",
-      "entrance": "Marks a building entrance. It shows a label but does not open anything."
+      "entrance": "Marks a building entrance. It shows a label but does not open anything.",
+      "entranceDoor": "Marks a door with a pin in its kind’s colour. Buyers see the kind, step-free access and how many homes it serves, and can show those homes."
     },
     "guide": {
       "title": "How it works: residence picture, buildings, units and listings",
@@ -783,7 +799,8 @@
         "integer": "Enter a whole number",
         "currency": "Use a 3-letter currency code, e.g. EUR",
         "tooLong": "This text is too long",
-        "choice": "Choose one of the options"
+        "choice": "Choose one of the options",
+        "url": "Enter a full web address starting with https://"
       },
       "notSet": "Not set",
       "euroOnly": "All prices are in euros (€).",
@@ -853,6 +870,13 @@
       "withDescription": "Description",
       "doneCreate": "From “{{title}}” — these details are added to the new unit when you click Add unit.",
       "linkCreate": "Also link this listing to the new unit"
+    },
+    "tour": {
+      "title": "360° virtual tour",
+      "label": "Tour link",
+      "test": "Open",
+      "fromListing": "Buyers see the 360° tour of the linked listing. Add a link here to show a different tour for this unit.",
+      "help": "Paste the share link of the tour (Matterport, Kuula, Z360 or another 360° viewer). Buyers see a 360° badge on this unit and can open the tour."
     }
   },
   "manage": {
@@ -1019,7 +1043,8 @@
       "tooBig": "The file is larger than 10 MB.",
       "empty": "The file needs a header row and at least one unit.",
       "unreadable": "This file could not be read. Save it as .xlsx or .csv and try again.",
-      "oldExcel": "This is an old Excel file (.xls). In Excel choose File → Save as → Excel Workbook (.xlsx), then import that."
+      "oldExcel": "This is an old Excel file (.xls). In Excel choose File → Save as → Excel Workbook (.xlsx), then import that.",
+      "wrongType": "Choose an Excel (.xlsx) or CSV file."
     },
     "columns": "Columns",
     "unnamed": "(no name)",
@@ -1038,7 +1063,8 @@
       "new": "New units",
       "updated": "Units updated",
       "buildings": "New buildings",
-      "floors": "New floors"
+      "floors": "New floors",
+      "entrances": "New entrances"
     },
     "unchanged": "Already up to date: {{unchanged}} · Existing units left as they are: {{skipped}}",
     "floorsFromNumbers": "No floor column: floors are read from the unit numbers (401 → floor 4).",
@@ -1080,11 +1106,16 @@
       "viewType": "View",
       "features": "Features",
       "description": "Description",
-      "ignore": "Don’t import"
+      "ignore": "Don’t import",
+      "entrance": "Entrance"
     },
     "dropHintXlsx": "Excel (.xlsx) or CSV — straight from Excel, Google Sheets or Numbers. Columns can be in any order and language; we recognise them.",
     "sheet": "Worksheet",
-    "buildingLimit": "This file adds {{n}} new buildings, but this residence can have {{limit}} ({{allowed}} more). Unlock more buildings on the Overview tab, or use existing building names."
+    "buildingLimit": "This file adds {{n}} new buildings, but this residence can have {{limit}} ({{allowed}} more). Unlock more buildings on the Overview tab, or use existing building names.",
+    "doneEntrances": "New entrances: {{n}}",
+    "titleFor": "Import units into {{building}}",
+    "openFor": "Import units into {{building}}",
+    "openShort": "Import"
   },
   "unitView": {
     "sea": "Sea",
@@ -1359,7 +1390,11 @@
       "unit_in_other_development": "This unit belongs to another residence.",
       "already_attached_to_this_unit": "This listing is already linked to this unit.",
       "listing_already_attached_elsewhere": "This listing is linked to another unit. Linking it here moves it."
-    }
+    },
+    "PHONE_INVALID": "Enter a valid phone number, like +389 2 123 4567.",
+    "SOCIAL_HOST": "This must be a link to {{network}}.",
+    "ENTRANCE_NAME_TAKEN": "This building already has an entrance called “{{name}}”.",
+    "ENTRANCE_IN_USE": "{{count}} units still use this entrance. Move them to another entrance first."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1382,5 +1417,82 @@
       "title": "New home available at {{residence}}",
       "message": "Unit {{unit}} is now available."
     }
+  },
+  "builder": {
+    "heading": "The builder",
+    "intro": "The company building this residence. Buyers see it at the top of the residence page, with its banner, logo and contacts.",
+    "name": "Company name",
+    "tagline": "Tagline",
+    "taglinePlaceholder": "e.g. Building homes in Skopje since 2004",
+    "about": "About the company",
+    "foundedYear": "Founded (year)",
+    "completedProjects": "Completed projects",
+    "licenseNumber": "Licence / registration no.",
+    "website": "Website",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Office address",
+    "socials": "Social media",
+    "logo": "Logo",
+    "banner": "Banner",
+    "logoHint": "Square, at least 400 × 400 px.",
+    "bannerHint": "Wide, at least 1600 × 600 px.",
+    "choose": "Choose picture",
+    "replace": "Replace",
+    "remove": "Remove",
+    "uploading": "Uploading…",
+    "saved": "The builder was saved.",
+    "save": "Save builder"
+  },
+  "builderPublic": {
+    "builtBy": "Built by",
+    "label": "The builder",
+    "founded": "Founded",
+    "foundedValue": "{{year}} · {{years}} years",
+    "projects": "Completed projects",
+    "license": "Licence",
+    "office": "Office",
+    "email": "Email"
+  },
+  "entrance": {
+    "label": "Entrance",
+    "filter": "Entrance",
+    "kind": {
+      "main": "Main entrance",
+      "side": "Side entrance",
+      "garage": "Car park entrance",
+      "service": "Service entrance"
+    },
+    "sectionTitle": "Buildings & entrances",
+    "sectionHint": "Name each door buyers use — main entrance, side door, car park. Then mark it on your pictures in the Interactive explorer.",
+    "none": "One door for the whole building? Then you need no entrances. Add them when apartments are reached through different doors or staircases.",
+    "add": "Add entrance",
+    "addTitle": "Add an entrance to {{building}}",
+    "editTitle": "Edit {{name}}",
+    "name": "Name",
+    "namePlaceholder": "e.g. Entrance A",
+    "code": "Short code",
+    "kindLabel": "Kind",
+    "accessible": "Step-free access (wheelchair, pram)",
+    "note": "Note for buyers",
+    "notePlaceholder": "e.g. From the main street · concierge 8:00–20:00",
+    "saving": "Saving…",
+    "save": "Save entrance",
+    "stepFree": "Step-free",
+    "edit": "Edit {{name}}",
+    "delete": "Delete {{name}}",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteMessage": "Regions marking this entrance on your pictures are removed too. Apartments must be moved to another entrance first.",
+    "deleteConfirm": "Delete entrance",
+    "noneChosen": "No particular entrance",
+    "homesAvailable_one": "{{count}} home available",
+    "homesAvailable_other": "{{count}} homes available",
+    "homes": "Homes",
+    "access": "Access",
+    "noteShort": "Note",
+    "showHomes": "Show its homes",
+    "needBuilding": "Add a building first; entrances belong to a building.",
+    "inBuilding": "Entrance of building",
+    "newHere": "New entrance"
   }
 }

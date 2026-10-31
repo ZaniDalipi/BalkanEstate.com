@@ -7,6 +7,7 @@
 export const IMPORT_FIELDS = [
   'unitNumber',
   'building',
+  'entrance',
   'floor',
   'unitType',
   'beds',
@@ -38,7 +39,8 @@ export const FIELD_SYNONYMS: [ColumnTarget, string[]][] = [
   ['terraceArea', ['terrace area', 'terrace', 'terasa', 'tarraca', 'balcony area', 'povrsina terase']],
   ['livingRooms', ['living rooms', 'living room', 'dnevni boravak', 'dnevna soba', 'dhoma ndenje', 'salon']],
   ['unitNumber', ['unit number', 'unit no', 'unit', 'apartment number', 'apartment no', 'apartment', 'apt', 'flat', 'no', 'nr', 'number', 'broj stana', 'stan', 'oznaka', 'sifra', 'banesa', 'numri i baneses', 'numri', 'njesia', 'apartamenti', 'id']],
-  ['building', ['building', 'block', 'blok', 'tower', 'object', 'objekt', 'objekat', 'zgrada', 'lamela', 'ulaz', 'ndertesa', 'kulla', 'objekti', 'blloku']],
+  ['building', ['building', 'block', 'blok', 'tower', 'object', 'objekt', 'objekat', 'zgrada', 'lamela', 'ndertesa', 'kulla', 'objekti', 'blloku']],
+  ['entrance', ['entrance', 'entry', 'staircase', 'stairwell', 'stair', 'ulaz', 'stubiste', 'hyrja', 'hyrje', 'shkalla', 'vhod', 'eisodos', 'intrare', 'scara']],
   ['floor', ['floor', 'level', 'storey', 'story', 'kat', 'sprat', 'etaz', 'etaza', 'etazh', 'etazhi', 'kati', 'niveli', 'nivo']],
   ['unitType', ['unit type', 'type', 'tip', 'tip stana', 'lloji', 'vrsta', 'kind', 'category']],
   ['beds', ['bedrooms', 'beds', 'bedroom', 'rooms', 'sobe', 'spavace sobe', 'broj soba', 'dhoma gjumi', 'dhoma', 'odaje']],

@@ -79,6 +79,8 @@ export interface Development {
   amenities: string[];
   website?: string;
   contact?: DevelopmentContact;
+  /** Present once the owner has named the builder. */
+  builder?: DevelopmentBuilder;
   coverImage?: string;
   /** Whether buyers may send an inquiry about a unit that has no linked listing. */
   allowUnitInquiries?: boolean;
@@ -99,8 +101,36 @@ export interface DevelopmentBuilding {
   totalFloors?: number;
   basementLevels?: number;
   order: number;
-  /** Public availability summary (visible units only). */
+  /** Public availability summary (visible units only); `withTour` counts units with a 360° tour. */
+  stats?: { units: number; available: number; withTour?: number };
+}
+
+/** What kind of door an entrance is (same list as the server). */
+export const ENTRANCE_KINDS = ['main', 'side', 'garage', 'service'] as const;
+export type EntranceKind = (typeof ENTRANCE_KINDS)[number];
+
+/** A building's entrance: on the dashboard and, with `stats`, for buyers. */
+export interface DevelopmentEntrance {
+  id: string;
+  buildingId: string;
+  name: string;
+  code?: string;
+  kind: EntranceKind;
+  /** Step-free access. */
+  accessible: boolean;
+  note?: string;
+  order: number;
+  /** Public only: the visible homes it serves, and how many are available. */
   stats?: { units: number; available: number };
+}
+
+/** Fields the owner sends when adding or changing an entrance. */
+export interface EntrancePayload {
+  name?: string;
+  code?: string | null;
+  kind?: EntranceKind;
+  accessible?: boolean;
+  note?: string | null;
 }
 
 export interface DevelopmentFloor {
@@ -137,6 +167,11 @@ export interface DevelopmentUnit {
   viewType?: string;
   features?: string[];
   description?: string;
+  /**
+   * Link to a 360° virtual tour. In the dashboard: the unit's own link. In public
+   * responses: the tour buyers see (its own, else its linked listing's; see `tourSource`).
+   */
+  virtualTourUrl?: string;
   price?: number;
   currency?: string;
   pricePerSqm?: number;
@@ -223,12 +258,39 @@ export interface CreateDevelopmentPayload {
   agencyId?: string;
 }
 
+export const BUILDER_SOCIAL_NETWORKS = ['facebook', 'instagram', 'linkedin', 'youtube'] as const;
+export type BuilderSocialNetwork = (typeof BUILDER_SOCIAL_NETWORKS)[number];
+/** Each network's brand name, the same in every language. */
+export const BUILDER_SOCIAL_LABELS: Record<BuilderSocialNetwork, string> = { facebook: 'Facebook', instagram: 'Instagram', linkedin: 'LinkedIn', youtube: 'YouTube' };
+
+/** The company building the residence, shown to buyers on the residence page. */
+export interface DevelopmentBuilder {
+  name: string;
+  tagline?: string;
+  about?: string;
+  foundedYear?: number;
+  completedProjects?: number;
+  licenseNumber?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  socials?: Partial<Record<BuilderSocialNetwork, string>>;
+  logo?: { url: string };
+  banner?: { url: string };
+}
+
+/** What the builder form sends: its text fields (logo and banner upload separately). */
+export type BuilderPayload = Omit<DevelopmentBuilder, 'logo' | 'banner'>;
+
 export type UpdateDevelopmentPayload = Partial<Omit<CreateDevelopmentPayload, 'lat' | 'lng'>> & {
   /** `null` clears the coordinates. */
   lat?: number | null;
   lng?: number | null;
   /** `null` removes the sales contact. */
   contact?: DevelopmentContact | null;
+  /** `null` removes the builder's text (the logo and banner are removed separately). */
+  builder?: BuilderPayload | null;
   allowUnitInquiries?: boolean;
 };
 
@@ -311,6 +373,8 @@ export interface Paginated<T> {
 /** A unit as exposed to the public, enriched with its building/floor labels. */
 export interface PublicUnit extends DevelopmentUnit {
   buildingName?: string | null;
+  /** Its entrance's name, when the building has entrances. */
+  entranceName?: string | null;
   floorLabel?: string | null;
   floorLevel?: number | null;
   /** `availability` here is EFFECTIVE (unit ∧ linked listings); this says which decided it. */
@@ -319,6 +383,8 @@ export interface PublicUnit extends DevelopmentUnit {
   priceOnRequest?: boolean;
   /** Whether a published listing is attached (`primaryListingId` is then set). */
   hasListing?: boolean;
+  /** Where `virtualTourUrl` comes from: the unit itself or its linked listing. */
+  tourSource?: 'unit' | 'listing';
   /** For a parking spot / storage room: the units it is sold with. */
   soldWithUnitIds?: string[];
 }
@@ -401,6 +467,8 @@ export interface HotspotListingSummary {
   propertyType?: string;
   status?: string;
   imageUrl?: string;
+  /** The listing has a 360° virtual tour. */
+  hasTour?: boolean;
 }
 
 export interface SceneVersion {
@@ -475,6 +543,8 @@ export interface UnitFacets {
 export interface UnitImportSummary {
   rows: number;
   buildingsCreated: string[];
+  /** "Building · Entrance" for each entrance the file adds (absent from older servers). */
+  entrancesCreated?: string[];
   /** Set when the file adds more buildings than the residence's plan allows. */
   buildingLimit?: { limit: number; current: number; allowed: number };
   floorsCreated: number;
@@ -554,7 +624,8 @@ export interface DashboardUnit extends DevelopmentUnit {
   buildingName?: string | null;
   floorLabel?: string | null;
   floorLevel?: number | null;
-  linkedListings: Array<{ id: string; title: string; status: string }>;
+  /** `hasTour`: the listing has a 360° tour (shown on the unit when it has none of its own). */
+  linkedListings: Array<{ id: string; title: string; status: string; hasTour?: boolean }>;
   /** For a parking spot / storage room: the units it comes with. */
   soldWith?: Array<{ id: string; unitNumber: string }>;
 }
@@ -596,6 +667,8 @@ export interface UpdateUnitPayload {
   unitType?: string;
   buildingId?: string;
   floorId?: string;
+  /** One of its building's entrances; null takes it out of any. */
+  entranceId?: string | null;
   beds?: number | null;
   baths?: number | null;
   livingRooms?: number | null;
@@ -614,6 +687,7 @@ export interface UpdateUnitPayload {
   /** With a change of availability: which of them take the same new status (the seller's choice). */
   alsoLinkedUnitIds?: string[];
   description?: string | null;
+  virtualTourUrl?: string | null;
   visibility?: UnitVisibility;
   priceVisibility?: PriceVisibility;
   price?: number | null;

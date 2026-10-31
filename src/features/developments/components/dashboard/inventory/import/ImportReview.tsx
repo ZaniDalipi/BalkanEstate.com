@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Building2, Layers, Lock, Plus, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Building2, Layers, Lock, Plus, RefreshCw, DoorOpen } from 'lucide-react';
 import type { ImportProblem, PreparedImport } from '../../../../utils/csvImport';
 import type { UnitImportSummary } from '../../../../types';
 import { fieldLabel, serverFieldLabel } from './fieldLabels';
@@ -41,6 +41,9 @@ export const ImportReview: React.FC<ImportReviewProps> = ({ prepared, preview, p
         <Stat icon={<RefreshCw className="h-4 w-4" aria-hidden="true" />} label={t('import.stat.updated', 'Units updated')} value={preview ? preview.unitsUpdated : dash} />
         <Stat icon={<Building2 className="h-4 w-4" aria-hidden="true" />} label={t('import.stat.buildings', 'New buildings')} value={preview ? preview.buildingsCreated.join(', ') || '0' : dash} />
         <Stat icon={<Layers className="h-4 w-4" aria-hidden="true" />} label={t('import.stat.floors', 'New floors')} value={preview ? preview.floorsCreated : dash} />
+        {prepared.entrances.length > 0 && (
+          <Stat icon={<DoorOpen className="h-4 w-4" aria-hidden="true" />} label={t('import.stat.entrances', 'New entrances')} value={preview ? (preview.entrancesCreated ?? []).join(', ') || '0' : dash} />
+        )}
       </div>
       {preview && (preview.unchanged > 0 || preview.skippedExisting > 0) && (
         <p className="text-sm text-slate-600">

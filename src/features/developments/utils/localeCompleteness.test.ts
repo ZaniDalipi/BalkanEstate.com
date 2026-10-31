@@ -12,7 +12,7 @@ const load = (lang: string) => Object.fromEntries(flat(JSON.parse(readFileSync(j
 const placeholders = (s: string) => (s.match(/\{\{\w+\}\}/g) ?? []).sort();
 
 /** Words that are the same in these languages (loanwords, abbreviations, units). */
-const SAME_AS_ENGLISH = new Set(['Apt', 'Draft', 'Duplex', 'Email', 'Max', 'Min', 'Park', 'Parking', 'Penthouse', 'Plan', 'Public', 'Status', 'Studio', 'Total', 'minimum', '{{price}}/m²', '{{width}} × {{height}} px']);
+const SAME_AS_ENGLISH = new Set(['Logo', 'Banner', 'Apt', 'Draft', 'Duplex', 'Email', 'Max', 'Min', 'Park', 'Parking', 'Penthouse', 'Plan', 'Public', 'Status', 'Studio', 'Total', 'minimum', '{{price}}/m²', '{{width}} × {{height}} px']);
 
 describe('developments locale files', () => {
   const english = load('en');

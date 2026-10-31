@@ -2,20 +2,18 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { optimizeImageUrl, imageSrcSet } from '@/config/mediaConfig';
 import { cn } from '@/src/lib/utils';
-import type { DevelopmentBuilding, Hotspot, PublicSceneView, PublicUnit } from '../../../types';
+import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicSceneView, PublicUnit } from '../../../types';
 import { usePanZoom } from '../../../hooks/usePanZoom';
-import { AvailabilityPatterns } from './AvailabilityPatterns';
 import { BuildingLabels } from './BuildingLabels';
 import { canvasSize } from './canvasSize';
-import { FocusPulse } from './FocusPulse';
-import { HotspotShape } from './HotspotShape';
+import { EntranceMarkers } from './EntranceMarkers';
+import { RegionLayer } from './RegionLayer';
 import { RegionCard } from './RegionCard';
 import { ZoomControls } from './ZoomControls';
 import type { RegionDisplayMode } from './regionPaint';
 import { useFlyFocus, type ExplorerFocus } from './useFlyFocus';
 import { useHotspotInteraction } from './useHotspotInteraction';
 import { useRegionCard, type BuildingFacts } from './useRegionCard';
-import { useUnitText } from './useUnitText';
 import { linkedHotspotIds } from '../../../utils/unitCompanions';
 
 export interface ExplorerCanvasProps {
@@ -24,6 +22,7 @@ export interface ExplorerCanvasProps {
   /** Units matching the active filters; undefined = no filters. */
   matchedIds?: Set<string>;
   buildingsById?: Map<string, DevelopmentBuilding>;
+  entrancesById?: Map<string, DevelopmentEntrance>;
   buildingFacts?: Map<string, BuildingFacts>;
   onActivate: (h: Hotspot) => void;
   /** 'clean' (default): regions appear on hover; 'availability': always coloured. */
@@ -48,6 +47,7 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   unitsById,
   matchedIds,
   buildingsById,
+  entrancesById,
   buildingFacts,
   onActivate,
   mode = 'clean',
@@ -57,10 +57,9 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
   className,
 }) => {
   const { t } = useTranslation('developments');
-  const txt = useUnitText();
   const pz = usePanZoom({ wheelAlwaysZooms: fullscreen });
   const { hover, bind, activate, dismiss, cardHandlers, showFor, scheduleClose } = useHotspotInteraction(pz.consumeDrag, onActivate);
-  const cardFor = useRegionCard(unitsById, buildingsById, buildingFacts);
+  const cardFor = useRegionCard(unitsById, buildingsById, buildingFacts, entrancesById);
   const W = view.imageWidth || 1600;
   const H = view.imageHeight || 900;
 
@@ -96,30 +95,28 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
           }}
           className="pointer-events-none absolute inset-0 h-full w-full object-fill"
         />
-        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full" role="group" aria-label={t('explorer.regions', 'Apartments and buildings')}>
-          <AvailabilityPatterns scale={W} />
-          {hotspots.map((h) => {
-            const unit = h.linkType === 'unit' ? unitsById.get(h.linkId) : undefined;
-            const interactive = h.linkType !== 'entrance' && (h.linkType !== 'unit' || !!unit);
-            return (
-              <HotspotShape
-                key={h.id}
-                hotspot={h}
-                width={W}
-                height={H}
-                state={unit?.availability}
-                matched={unit && matchedIds ? matchedIds.has(unit.id) : undefined}
-                mode={mode}
-                active={hover?.id === h.id}
-                linked={linkedIds.has(h.id)}
-                label={txt.hotspotLabel(h, unitsById, buildingsById)}
-                interactive={interactive}
-                {...bind(h)}
-              />
-            );
-          })}
-          {focused && <FocusPulse hotspot={focused} width={W} height={H} />}
-        </svg>
+        <RegionLayer
+          width={W}
+          height={H}
+          hotspots={hotspots}
+          unitsById={unitsById}
+          buildingsById={buildingsById}
+          entrancesById={entrancesById}
+          matchedIds={matchedIds}
+          mode={mode}
+          activeId={hover?.id}
+          linkedIds={linkedIds}
+          focused={focused}
+          bind={bind}
+        />
+        <EntranceMarkers
+          hotspots={hotspots}
+          entrancesById={entrancesById}
+          activeId={hover?.id}
+          onHover={showFor}
+          onLeave={(h) => scheduleClose(h.id)}
+          onSelect={activate}
+        />
         <BuildingLabels
           hotspots={hotspots}
           buildingsById={buildingsById}
@@ -143,8 +140,8 @@ export const ExplorerCanvas: React.FC<ExplorerCanvasProps> = ({
           facts={card.facts}
           imageUrl={card.imageUrl}
           badge={card.badge}
-          actionLabel={hovered.linkType !== 'entrance' ? card.actionLabel : undefined}
-          onAction={hovered.linkType !== 'entrance' ? () => activate(hovered) : undefined}
+          actionLabel={card.actionLabel}
+          onAction={card.actionLabel ? () => activate(hovered) : undefined}
           {...cardHandlers}
         />
       )}

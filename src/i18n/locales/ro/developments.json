@@ -67,7 +67,11 @@
     "selectCountry": "Alegeți o țară",
     "selectCity": "Alegeți un oraș",
     "selectCountryFirst": "Alegeți mai întâi țara",
-    "addressHelper": "Adresa străzii (opțional) — se completează automat din oraș."
+    "addressHelper": "Adresa străzii (opțional) — se completează automat din oraș.",
+    "importHeading": "Apartamente dintr-un tabel (opțional)",
+    "importHint": "Aveți deja clădirile și apartamentele în Excel sau CSV? Adăugați fișierul acum — imediat după creare deschidem importul cu el, ca să verificați fiecare coloană înainte să se salveze ceva.",
+    "importChoose": "Alege tabelul",
+    "importRemove": "Elimină {{name}}"
   },
   "detail": {
     "overview": "Prezentare",
@@ -441,7 +445,18 @@
     "noUnitsInBuilding": "Încă nu sunt listate apartamente pentru această clădire.",
     "stackingPlan": "Apartamente pe etaje",
     "unmarkedNote": "Apartamentele nu sunt încă marcate pe această imagine — alege unul etaj cu etaj mai jos.",
-    "noUnitsHere": "În această clădire nu sunt încă apartamente publicate."
+    "noUnitsHere": "În această clădire nu sunt încă apartamente publicate.",
+    "tour": {
+      "badgeTitle": "Are tur virtual 360°",
+      "open": "Deschide turul 360°",
+      "newTab": "(se deschide într-o filă nouă)",
+      "fromListing": "Din anunțul acestui apartament.",
+      "label": "Tur 360°",
+      "onListing": "În anunț",
+      "homes": "Locuințe: {{n}}",
+      "chip": "360° ×{{n}}",
+      "chipLong": "Locuințe cu tur 360°: {{n}}"
+    }
   },
   "feature": {
     "big_terrace": "Cu terasă mare",
@@ -608,7 +623,8 @@
       "floor": "Deschide imaginea acelui etaj, de ex. un plan în care fiecare apartament este clicabil.",
       "unit": "Un apartament din Inventarul dvs. Cardul arată numărul, etajul, m², dormitoarele, prețul și starea curentă; clicul deschide detaliile. Folosiți pentru apartamentele pe care le vindeți în acest ansamblu.",
       "listing": "Un anunț publicat pe BalkanEstate (de ex. un apartament la revânzare). Cardul arată fotografia, prețul, m², etajul și camerele; clicul deschide pagina anunțului. Pentru a afișa un anunț pe unul dintre apartamentele dvs., legați zona de unitate și atașați anunțul acelei unități.",
-      "entrance": "Marchează o intrare în clădire. Afișează o etichetă, dar nu deschide nimic."
+      "entrance": "Marchează o intrare în clădire. Afișează o etichetă, dar nu deschide nimic.",
+      "entranceDoor": "Marchează o ușă cu un reper în culoarea tipului ei. Cumpărătorii văd tipul, accesul fără trepte și câte locuințe deservește, și le pot afișa."
     },
     "guide": {
       "title": "Cum funcționează: imaginea ansamblului, clădiri, unități și anunțuri",
@@ -789,7 +805,8 @@
         "integer": "Introduceți un număr întreg",
         "currency": "Folosiți un cod de monedă din 3 litere, de ex. EUR",
         "tooLong": "Acest text este prea lung",
-        "choice": "Alegeți una dintre opțiuni"
+        "choice": "Alegeți una dintre opțiuni",
+        "url": "Introduceți o adresă web completă care începe cu https://"
       },
       "notSet": "Nesetat",
       "euroOnly": "Toate prețurile sunt în euro (€).",
@@ -859,6 +876,13 @@
       "withDescription": "Descriere",
       "doneCreate": "Din „{{title}}” — aceste detalii se adaugă la noua unitate când apăsați Adaugă unitate.",
       "linkCreate": "Leagă și acest anunț de noua unitate"
+    },
+    "tour": {
+      "title": "Tur virtual 360°",
+      "label": "Linkul turului",
+      "test": "Deschide",
+      "fromListing": "Cumpărătorii văd turul 360° al anunțului legat. Adăugați un link aici ca să arătați alt tur pentru această unitate.",
+      "help": "Lipiți linkul de partajare al turului (Matterport, Kuula, Z360 sau alt vizualizator 360°). Cumpărătorii văd un semn 360° pe această unitate și pot deschide turul."
     }
   },
   "manage": {
@@ -1025,7 +1049,8 @@
       "tooBig": "Fișierul este mai mare de 10 MB.",
       "empty": "Fișierul are nevoie de un rând de antet și de cel puțin o unitate.",
       "unreadable": "Acest fișier nu a putut fi citit. Salvați-l ca .xlsx sau .csv și încercați din nou.",
-      "oldExcel": "Acesta este un fișier Excel vechi (.xls). În Excel alegeți File → Save as → Excel Workbook (.xlsx), apoi importați-l pe acela."
+      "oldExcel": "Acesta este un fișier Excel vechi (.xls). În Excel alegeți File → Save as → Excel Workbook (.xlsx), apoi importați-l pe acela.",
+      "wrongType": "Alegeți un fișier Excel (.xlsx) sau CSV."
     },
     "columns": "Coloane",
     "unnamed": "(fără nume)",
@@ -1044,7 +1069,8 @@
       "new": "Unități noi",
       "updated": "Unități actualizate",
       "buildings": "Clădiri noi",
-      "floors": "Etaje noi"
+      "floors": "Etaje noi",
+      "entrances": "Intrări noi"
     },
     "unchanged": "Deja la zi: {{unchanged}} · Unități existente lăsate neschimbate: {{skipped}}",
     "floorsFromNumbers": "Nu există coloană de etaj: etajele se citesc din numerele unităților (401 → etajul 4).",
@@ -1086,11 +1112,16 @@
       "viewType": "Vedere",
       "features": "Caracteristici",
       "description": "Descriere",
-      "ignore": "Nu importa"
+      "ignore": "Nu importa",
+      "entrance": "Intrare"
     },
     "dropHintXlsx": "Excel (.xlsx) sau CSV — direct din Excel, Google Sheets sau Numbers. Coloanele pot fi în orice ordine și limbă; le recunoaștem.",
     "sheet": "Foaie de calcul",
-    "buildingLimit": "Acest fișier adaugă {{n}} clădiri noi, dar ansamblul poate avea {{limit}} (încă {{allowed}}). Deblochează mai multe clădiri în fila Prezentare sau folosește nume de clădiri existente."
+    "buildingLimit": "Acest fișier adaugă {{n}} clădiri noi, dar ansamblul poate avea {{limit}} (încă {{allowed}}). Deblochează mai multe clădiri în fila Prezentare sau folosește nume de clădiri existente.",
+    "doneEntrances": "Intrări noi: {{n}}",
+    "titleFor": "Importă unități în {{building}}",
+    "openFor": "Importă unități în {{building}}",
+    "openShort": "Importă"
   },
   "unitView": {
     "sea": "Mare",
@@ -1369,7 +1400,11 @@
       "unit_in_other_development": "Această unitate aparține altui ansamblu.",
       "already_attached_to_this_unit": "Acest anunț este deja legat de această unitate.",
       "listing_already_attached_elsewhere": "Acest anunț este legat de altă unitate. Dacă îl legați aici, va fi mutat."
-    }
+    },
+    "PHONE_INVALID": "Introduceți un număr de telefon valid, de ex. +389 2 123 4567.",
+    "SOCIAL_HOST": "Acesta trebuie să fie un link către {{network}}.",
+    "ENTRANCE_NAME_TAKEN": "Această clădire are deja o intrare numită „{{name}}”.",
+    "ENTRANCE_IN_USE": "{{count}} unități folosesc încă această intrare. Mutați-le mai întâi la altă intrare."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1392,5 +1427,83 @@
       "title": "Locuință nouă disponibilă în {{residence}}",
       "message": "Unitatea {{unit}} este acum disponibilă."
     }
+  },
+  "builder": {
+    "heading": "Constructorul",
+    "intro": "Compania care construiește acest ansamblu. Cumpărătorii o văd în partea de sus a paginii ansamblului, cu bannerul, logoul și datele de contact.",
+    "name": "Numele companiei",
+    "tagline": "Slogan",
+    "taglinePlaceholder": "ex. Construim locuințe în Skopje din 2004",
+    "about": "Despre companie",
+    "foundedYear": "Fondată (anul)",
+    "completedProjects": "Proiecte finalizate",
+    "licenseNumber": "Nr. licență / înregistrare",
+    "website": "Site web",
+    "email": "Email",
+    "phone": "Telefon",
+    "address": "Adresa biroului",
+    "socials": "Rețele sociale",
+    "logo": "Logo",
+    "banner": "Banner",
+    "logoHint": "Pătrat, cel puțin 400 × 400 px.",
+    "bannerHint": "Lat, cel puțin 1600 × 600 px.",
+    "choose": "Alege imaginea",
+    "replace": "Înlocuiește",
+    "remove": "Elimină",
+    "uploading": "Se încarcă…",
+    "saved": "Constructorul a fost salvat.",
+    "save": "Salvează constructorul"
+  },
+  "builderPublic": {
+    "builtBy": "Construit de",
+    "label": "Constructorul",
+    "founded": "Fondată",
+    "foundedValue": "{{year}} · ani: {{years}}",
+    "projects": "Proiecte finalizate",
+    "license": "Licență",
+    "office": "Birou",
+    "email": "Email"
+  },
+  "entrance": {
+    "label": "Intrare",
+    "filter": "Intrare",
+    "kind": {
+      "main": "Intrare principală",
+      "side": "Intrare laterală",
+      "garage": "Intrare în parcare",
+      "service": "Intrare de serviciu"
+    },
+    "sectionTitle": "Clădiri și intrări",
+    "sectionHint": "Denumiți fiecare ușă pe care o folosesc cumpărătorii — intrarea principală, ușa laterală, parcarea. Apoi marcați-o pe imaginile dvs. în Exploratorul interactiv.",
+    "none": "O singură ușă pentru toată clădirea? Atunci nu aveți nevoie de intrări. Adăugați-le când la apartamente se ajunge prin uși sau scări diferite.",
+    "add": "Adaugă intrare",
+    "addTitle": "Adaugă o intrare la {{building}}",
+    "editTitle": "Editează {{name}}",
+    "name": "Nume",
+    "namePlaceholder": "ex. Intrarea A",
+    "code": "Cod scurt",
+    "kindLabel": "Tip",
+    "accessible": "Acces fără trepte (scaun cu rotile, cărucior)",
+    "note": "Notă pentru cumpărători",
+    "notePlaceholder": "ex. Din strada principală · portar 8:00–20:00",
+    "saving": "Se salvează…",
+    "save": "Salvează intrarea",
+    "stepFree": "Fără trepte",
+    "edit": "Editează {{name}}",
+    "delete": "Șterge {{name}}",
+    "deleteTitle": "Ștergeți „{{name}}”?",
+    "deleteMessage": "Zonele care marchează această intrare pe imaginile dvs. sunt șterse și ele. Apartamentele trebuie mutate mai întâi la altă intrare.",
+    "deleteConfirm": "Șterge intrarea",
+    "noneChosen": "Fără o intrare anume",
+    "homesAvailable_one": "{{count}} locuință disponibilă",
+    "homesAvailable_other": "{{count}} de locuințe disponibile",
+    "homes": "Locuințe",
+    "access": "Acces",
+    "noteShort": "Notă",
+    "showHomes": "Arată locuințele ei",
+    "needBuilding": "Adăugați mai întâi o clădire; intrările aparțin unei clădiri.",
+    "inBuilding": "Intrare a clădirii",
+    "newHere": "Intrare nouă",
+    "homesAvailable_few": "{{count}} locuințe disponibile"
   }
 }

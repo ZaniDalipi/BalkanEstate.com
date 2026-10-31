@@ -9,6 +9,7 @@ import {
   requireDevelopmentPermission,
 } from '../middleware/developmentAuth';
 import { checkoutBilling, getBilling, grantBilling } from '../controllers/residenceBillingController';
+import { addEntrance, editEntrance, removeEntrance } from '../controllers/developmentEntranceController';
 import {
   create,
   listMine,
@@ -58,6 +59,7 @@ import {
   unpublishScene,
 } from '../controllers/developmentSceneController';
 import { attachListing } from '../controllers/developmentSuggestionController';
+import { deleteBuilderImage, uploadBuilderImage } from '../controllers/developmentBuilderController';
 
 const router = express.Router();
 
@@ -122,6 +124,16 @@ router.post(
   singleImage('cover'),
   uploadCover
 );
+// The builder's logo / banner (the text fields go through PATCH /:developmentId).
+router.post(
+  '/:developmentId/builder/:kind',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('media.upload'),
+  singleImage('image'),
+  uploadBuilderImage
+);
+router.delete('/:developmentId/builder/:kind', protect, developmentAuth, requireDevelopmentPermission('media.upload'), deleteBuilderImage);
 router.patch(
   '/:developmentId',
   protect,
@@ -187,6 +199,31 @@ router.patch(
   developmentAuth,
   requireDevelopmentPermission('floor.manage'),
   updateFloor
+);
+// Entrances of a building (managed with the building).
+router.post(
+  '/:developmentId/buildings/:buildingId/entrances',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('building.manage'),
+  addEntrance
+);
+router.patch(
+  '/:developmentId/entrances/:entranceId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('building.manage'),
+  editEntrance
+);
+router.delete(
+  '/:developmentId/entrances/:entranceId',
+  protect,
+  mutationRateLimiter,
+  developmentAuth,
+  requireDevelopmentPermission('building.manage'),
+  removeEntrance
 );
 router.get(
   '/:developmentId/buildings/:buildingId/delete-impact',

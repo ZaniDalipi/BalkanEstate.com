@@ -17,6 +17,7 @@ const full: UnitCriteria = {
   availability: ['available', 'reserved'],
   orientations: ['south'],
   flags: ['terrace', 'balcony'],
+  entrances: ['e1'],
   minArea: 40,
   maxArea: 95,
   minLevel: -1,
@@ -86,5 +87,14 @@ describe('useExplorerUrlState', () => {
     // …switching camera view inside it is not.
     act(() => result.current.setNav({ building: 'b2', view: 'back' }));
     expect(navigateMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('entrance in the link', () => {
+  it('round-trips the chosen entrances as ?ent=', () => {
+    const criteria: UnitCriteria = { ...EMPTY_CRITERIA, entrances: ['e1', 'e2'] };
+    const search = buildExplorerSearch({ criteria, nav: {} });
+    expect(search).toBe('ent=e1%2Ce2');
+    expect(parseExplorerSearch(`?${search}`).criteria.entrances).toEqual(['e1', 'e2']);
   });
 });

@@ -8,6 +8,8 @@ import type { ImportRowPayload } from '../utils/csvImport';
 import type {
   Development,
   DevelopmentBuilding,
+  DevelopmentEntrance,
+  EntrancePayload,
   DevelopmentFloor,
   DevelopmentUnit,
   CreateDevelopmentPayload,
@@ -83,6 +85,8 @@ export interface PublicDevelopmentDetail {
   development: Development;
   buildings: DevelopmentBuilding[];
   floors: DevelopmentFloor[];
+  /** Entrances with the homes they serve (absent from older servers). */
+  entrances?: DevelopmentEntrance[];
 }
 
 export const getPublicDevelopment = (slug: string): Promise<PublicDevelopmentDetail> =>
@@ -158,9 +162,18 @@ export const getMyDevelopment = (id: string): Promise<{ development: Development
 
 export interface DevelopmentStructure {
   buildings: DevelopmentBuilding[];
-  entrances: { id: string; buildingId: string; name: string }[];
+  entrances: DevelopmentEntrance[];
   floors: DevelopmentFloor[];
 }
+
+export const createEntrance = (id: string, buildingId: string, payload: EntrancePayload): Promise<{ entrance: DevelopmentEntrance }> =>
+  apiRequest<{ entrance: DevelopmentEntrance }>(`${DASH}/${id}/buildings/${buildingId}/entrances`, { method: 'POST', body: payload, requiresAuth: true });
+
+export const updateEntrance = (id: string, entranceId: string, payload: EntrancePayload): Promise<{ entrance: DevelopmentEntrance }> =>
+  apiRequest<{ entrance: DevelopmentEntrance }>(`${DASH}/${id}/entrances/${entranceId}`, { method: 'PATCH', body: payload, requiresAuth: true });
+
+export const deleteEntrance = (id: string, entranceId: string): Promise<{ success: true; regionsRemoved: number }> =>
+  apiRequest<{ success: true; regionsRemoved: number }>(`${DASH}/${id}/entrances/${entranceId}`, { method: 'DELETE', requiresAuth: true });
 
 export const getDevelopmentStructure = (id: string): Promise<DevelopmentStructure> =>
   apiRequest<DevelopmentStructure>(`${DASH}/${id}/structure`, { requiresAuth: true });
@@ -176,6 +189,16 @@ export const uploadDevelopmentCover = (
     formData
   );
 };
+
+/** Upload (or replace) the builder's logo or banner. */
+export const uploadBuilderImage = (id: string, kind: 'logo' | 'banner', file: File): Promise<{ url: string; development: Development }> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  return uploadRequest<{ url: string; development: Development }>(`${DASH}/${id}/builder/${kind}`, formData);
+};
+
+export const deleteBuilderImage = (id: string, kind: 'logo' | 'banner'): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/builder/${kind}`, { method: 'DELETE', requiresAuth: true });
 
 export const createDevelopment = (payload: CreateDevelopmentPayload): Promise<{ development: Development }> =>
   apiRequest<{ development: Development }>(DASH, {

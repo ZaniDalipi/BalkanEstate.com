@@ -44,7 +44,9 @@ export const UnitFilters: React.FC<UnitFiltersProps> = ({
   const max = t('explorer.filters.max', 'maximum');
   const currency = units.find((u) => u.currency)?.currency ?? 'EUR';
 
-  const hasPrimary = o.beds.length > 0 || b.areaMin != null || b.levelMin != null || o.flags.length > 0;
+  // Entrances: offered once the homes use two or more (or one is already chosen, e.g. from the picture).
+  const showEntrances = o.entrances.length > 1 || (criteria.entrances ?? []).length > 0;
+  const hasPrimary = o.beds.length > 0 || b.areaMin != null || b.levelMin != null || o.flags.length > 0 || showEntrances;
   const hasMore = o.baths.length > 0 || b.priceMin != null || o.availability.length > 1 || o.types.length > 1 || o.orientations.length > 0 || o.features.length > 0;
   if (!hasPrimary && !hasMore) return null;
 
@@ -77,6 +79,9 @@ export const UnitFilters: React.FC<UnitFiltersProps> = ({
         <RangeFilter label={t('filters.area', 'Area')} unit="m²" boundMin={b.areaMin} boundMax={b.areaMax} valueMin={criteria.minArea} valueMax={criteria.maxArea} minLabel={min} maxLabel={max} onChange={(lo, hi) => onChange({ ...criteria, minArea: lo, maxArea: hi })} />
         <RangeFilter label={t('filters.floors', 'Floors')} boundMin={b.levelMin} boundMax={b.levelMax} valueMin={criteria.minLevel} valueMax={criteria.maxLevel} minLabel={min} maxLabel={max} onChange={(lo, hi) => onChange({ ...criteria, minLevel: lo, maxLevel: hi })} />
         <ChipGroup label={t('filters.apartmentType', 'Apartment type')} options={o.flags} selected={criteria.flags ?? []} onToggle={(v) => onChange(toggleIn(criteria, 'flags', v))} />
+        {showEntrances && (
+          <ChipGroup label={t('entrance.filter', 'Entrance')} options={o.entrances} selected={criteria.entrances ?? []} onToggle={(v) => onChange(toggleIn(criteria, 'entrances', v))} />
+        )}
       </div>
 
       {hasMore && (

@@ -76,6 +76,23 @@ export const validateWebsite = (value: string): FieldResult => {
   }
 };
 
+/**
+ * A 360° tour link is opened in a new tab: only a plain http(s) address on a real
+ * web site, no user name or password in it, at most 2000 characters. Same rule
+ * as the server (services/developments/unitTour). Empty is allowed.
+ */
+export const isUsableTourUrl = (value: string): boolean => {
+  const v = (value ?? '').trim();
+  if (!v) return true;
+  if (v.length > 2000) return false;
+  try {
+    const url = new URL(v);
+    return (url.protocol === 'https:' || url.protocol === 'http:') && !url.username && !url.password && url.hostname.includes('.');
+  } catch {
+    return false;
+  }
+};
+
 export const validateEmail = (value: string): FieldResult =>
   !(value ?? '').trim() || EMAIL_PATTERN.test(value.trim()) ? { isValid: true } : { isValid: false, errorKey: 'validation.emailInvalid' };
 

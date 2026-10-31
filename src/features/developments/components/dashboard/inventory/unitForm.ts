@@ -13,10 +13,11 @@ import type {
   UnitVisibility,
   UpdateUnitPayload,
 } from '../../../types';
+import { isUsableTourUrl } from '../../../validation/developmentValidation';
 
 export const INT_FIELDS = ['beds', 'baths', 'livingRooms', 'balconies', 'terraces'] as const;
 export const DECIMAL_FIELDS = ['netArea', 'totalArea', 'externalArea', 'terraceArea', 'price', 'pricePerSqm'] as const;
-export const NULLABLE_TEXT_FIELDS = ['orientation', 'viewType', 'description'] as const;
+export const NULLABLE_TEXT_FIELDS = ['orientation', 'viewType', 'description', 'virtualTourUrl'] as const;
 
 type IntField = (typeof INT_FIELDS)[number];
 type DecimalField = (typeof DECIMAL_FIELDS)[number];
@@ -28,6 +29,8 @@ export type UnitFormState = Record<NumericField | NullableTextField, string> & {
   unitType: string;
   buildingId: string;
   floorId: string;
+  /** '' when it uses no particular entrance. */
+  entranceId: string;
   availability: UnitAvailability;
   visibility: UnitVisibility;
   priceVisibility: PriceVisibility;
@@ -49,6 +52,7 @@ export const unitToForm = (u: DevelopmentUnit): UnitFormState => ({
   unitType: u.unitType ?? '',
   buildingId: u.buildingId ?? '',
   floorId: u.floorId ?? '',
+  entranceId: u.entranceId ?? '',
   beds: str(u.beds),
   baths: str(u.baths),
   livingRooms: str(u.livingRooms),
@@ -63,6 +67,7 @@ export const unitToForm = (u: DevelopmentUnit): UnitFormState => ({
   orientation: u.orientation ?? '',
   viewType: u.viewType ?? '',
   description: u.description ?? '',
+  virtualTourUrl: u.virtualTourUrl ?? '',
   currency: UNIT_CURRENCY,
   availability: u.availability,
   visibility: u.visibility ?? 'public',
@@ -95,6 +100,7 @@ export const validateUnitForm = (f: UnitFormState, original?: UnitFormState): Un
   if (f.orientation && f.orientation !== original?.orientation && !inList(UNIT_ORIENTATIONS, f.orientation)) errors.orientation = 'choice';
   if (f.viewType && f.viewType !== original?.viewType && !inList(UNIT_VIEWS, f.viewType)) errors.viewType = 'choice';
   if (f.description.length > 5000) errors.description = 'tooLong';
+  if (!isUsableTourUrl(f.virtualTourUrl)) errors.virtualTourUrl = 'url';
   return errors;
 };
 
@@ -110,6 +116,7 @@ export const diffUnitForm = (original: UnitFormState, current: UnitFormState): U
   for (const k of ['buildingId', 'floorId', 'availability', 'visibility', 'priceVisibility'] as const) {
     if (current[k] !== original[k]) p[k] = current[k];
   }
+  if (current.entranceId !== original.entranceId) p.entranceId = current.entranceId || null;
   for (const k of [...INT_FIELDS, ...DECIMAL_FIELDS]) {
     const a = original[k].trim();
     const b = current[k].trim();

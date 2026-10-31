@@ -253,8 +253,15 @@ export const uploadRequest = async <T>(
   }
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Upload failed');
+    // Same shape as apiRequest's errors, so callers can read the code, field and status.
+    // A proxy may answer a too-large upload with HTML, so a body that isn't JSON is fine.
+    const isJson = response.headers.get('content-type')?.includes('application/json');
+    const errorData: { message?: string; code?: string } = isJson ? await response.json().catch(() => ({})) : {};
+    throw Object.assign(new Error(errorData.message || response.statusText || 'Upload failed'), {
+      code: errorData.code || null,
+      statusCode: response.status,
+      details: errorData,
+    });
   }
 
   return response.json();

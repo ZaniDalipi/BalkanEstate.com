@@ -8,7 +8,7 @@ import {
   getDevelopmentStructure,
   listUnits,
 } from '../api/developmentsApi';
-import type { UnitListQuery } from '../types';
+import type { DevelopmentEntrance, UnitListQuery } from '../types';
 
 /** A single development the caller can author (dashboard). */
 export function useMyDevelopment(id: string | undefined) {
@@ -26,6 +26,8 @@ export function useMyDevelopment(id: string | undefined) {
   };
 }
 
+const NO_ENTRANCES: DevelopmentEntrance[] = [];
+
 /** A single published development by slug (public). */
 export function usePublicDevelopment(slug: string | undefined) {
   const query = useQuery({
@@ -38,6 +40,7 @@ export function usePublicDevelopment(slug: string | undefined) {
     development: query.data?.development,
     buildings: query.data?.buildings ?? [],
     floors: query.data?.floors ?? [],
+    entrances: query.data?.entrances ?? NO_ENTRANCES,
     isLoading: query.isLoading,
     error: query.error,
   };

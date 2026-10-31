@@ -10,6 +10,7 @@ import { UnitTargetPicker } from './UnitTargetPicker';
 import type { UnitPickerSource } from './useLinkOptions';
 import { issueText, type AnyIssueCode } from './issueText';
 import { linkTypeHelp } from './linkTypeHelp';
+import { NewEntranceButton } from './NewEntranceButton';
 
 export type LinkOptions = Record<'building' | 'floor' | 'unit' | 'entrance', SelectOption[]>;
 
@@ -22,6 +23,8 @@ interface RegionInspectorProps {
   /** Name of the current target (resolves units beyond the loaded page). */
   targetLabel: string;
   issues: AnyIssueCode[];
+  /** The building this picture shows, if any (new entrances go there). */
+  buildingId?: string;
 }
 
 const LINK_TYPES: HotspotLinkType[] = ['unit', 'floor', 'building', 'entrance', 'listing'];
@@ -37,12 +40,11 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   unitPicker,
   targetLabel,
   issues,
+  buildingId,
 }) => {
   const { t } = useTranslation('developments');
   const { dispatch, nextId } = editor;
   const patch = (p: Partial<Pick<Hotspot, 'label' | 'linkType' | 'linkId'>>) => dispatch({ type: 'PATCH', id: hotspot.id, patch: p });
-  // Entrances are only offered when the structure actually has some (or the region already uses one).
-  const types = LINK_TYPES.filter((lt) => lt !== 'entrance' || linkOptions.entrance.length > 0 || hotspot.linkType === 'entrance');
   const linkTypeId = `lt-${hotspot.id}`;
   const labelId = `lb-${hotspot.id}`;
 
@@ -69,7 +71,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           onChange={(e) => patch({ linkType: e.target.value as HotspotLinkType, linkId: '' })}
           className={fieldCls}
         >
-          {types.map((lt) => (
+          {LINK_TYPES.map((lt) => (
             <option key={lt} value={lt}>
               {t(`scene.linkTypes.${lt}`, lt)}
             </option>
@@ -104,6 +106,11 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             value={hotspot.linkId}
             onChange={(id) => patch({ linkId: id })}
           />
+        )}
+        {hotspot.linkType === 'entrance' && (
+          <div className="mt-2">
+            <NewEntranceButton developmentId={developmentId} buildingId={buildingId} onCreated={(e) => patch({ linkId: e.id, label: hotspot.label || e.name })} />
+          </div>
         )}
       </div>
 

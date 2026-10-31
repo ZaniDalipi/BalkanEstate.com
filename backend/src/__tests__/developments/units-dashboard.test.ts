@@ -77,7 +77,7 @@ describe('GET /units (dashboard list)', () => {
     expect(u.availability).toBe('available');
     expect(u.effectiveAvailability).toBe('reserved');
     expect(u.availabilitySource).toBe('listing');
-    expect(u.linkedListings).toEqual([{ id: encodeId(String(listing._id)), title: 'Pending flat', status: 'pending' }]);
+    expect(u.linkedListings).toEqual([{ id: encodeId(String(listing._id)), title: 'Pending flat', status: 'pending', hasTour: false }]);
     expect(u.id).toBe(encodeId(String(t.unit._id)));
   });
 });

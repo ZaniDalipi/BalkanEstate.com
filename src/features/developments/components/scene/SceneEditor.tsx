@@ -132,6 +132,7 @@ export const SceneEditor: React.FC<SceneEditorProps> = ({ developmentId, scene, 
                   unitPicker={unitPicker}
                   targetLabel={labelOf({ ...selected, label: '' })}
                   issues={sync.issues[selected.id] ?? []}
+                  buildingId={scene.targetType === 'building' ? scene.targetId : undefined}
                 />
                 {/* Outside the keyed inspector: creating copies selects the first one, and the panel must keep its result. */}
                 <RepeatRegion editor={editor} hotspot={selected} />

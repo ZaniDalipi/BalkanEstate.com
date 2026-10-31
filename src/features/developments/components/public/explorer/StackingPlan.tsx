@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Rotate3d } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import type { DevelopmentFloor, PublicUnit } from '../../../types';
 import { AVAILABILITY_META, rgba } from '../../../utils/availability';
@@ -68,7 +69,7 @@ export const StackingPlan: React.FC<StackingPlanProps> = ({ floors, units, match
                   onFocus={() => setHovered(u.id)}
                   onBlur={() => setHovered((cur) => (cur === u.id ? null : cur))}
                   aria-current={u.id === openUnitId ? 'true' : undefined}
-                  aria-label={txt.ariaLabel(u)}
+                  aria-label={u.virtualTourUrl ? `${txt.ariaLabel(u)}, ${t('explorer.tour.badgeTitle', 'Has a 360° virtual tour')}` : txt.ariaLabel(u)}
                   title={[txt.ariaLabel(u), txt.area(u), txt.price(u)].filter(Boolean).join(' · ')}
                   className={cn(
                     'min-h-[44px] min-w-[72px] rounded-lg border-l-4 px-3 py-1.5 text-left text-white transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
@@ -78,7 +79,10 @@ export const StackingPlan: React.FC<StackingPlanProps> = ({ floors, units, match
                   )}
                   style={{ borderLeftColor: meta.color, backgroundColor: rgba(meta.color, 0.22) }}
                 >
-                  <span className="block text-sm font-bold leading-tight">{u.unitNumber}</span>
+                  <span className="flex items-center gap-1 text-sm font-bold leading-tight">
+                    {u.unitNumber}
+                    {u.virtualTourUrl && <Rotate3d className="h-3.5 w-3.5 text-indigo-200" aria-hidden="true" />}
+                  </span>
                   <span className="block text-[11px] leading-tight text-white/75">
                     {[typeof u.beds === 'number' ? txt.bedrooms(u.beds) : null, txt.area(u)].filter(Boolean).join(' · ')}
                   </span>

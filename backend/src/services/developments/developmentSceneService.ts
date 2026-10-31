@@ -46,6 +46,7 @@ import { toObjectId, requireObjectId, requireRefInDevelopment } from './developm
 import { ValidationError } from './developmentService';
 import { AuthorizationError, NotFoundError } from './developmentListingService';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
+import { effectiveTour } from './unitTour';
 
 const log = createLogger('DevelopmentSceneService');
 
@@ -883,6 +884,8 @@ export interface PublicListingSummary {
   propertyType?: string;
   status?: string;
   imageUrl?: string;
+  /** The listing has a 360° virtual tour. */
+  hasTour?: boolean;
 }
 
 export interface PublicHotspot {
@@ -912,15 +915,16 @@ type ListingLean = {
   status?: string;
   imageUrl?: string;
   images?: Array<{ url?: string }>;
+  virtualTour360Url?: string;
 };
 
 const LISTING_SUMMARY_FIELDS =
-  '_id title price listingType rentPeriod netArea sqft beds baths floorNumber totalFloors propertyType status imageUrl images';
+  '_id title price listingType rentPeriod netArea sqft beds baths floorNumber totalFloors propertyType status imageUrl images virtualTour360Url';
 
 const positive = (n: unknown): number | undefined => (typeof n === 'number' && Number.isFinite(n) && n > 0 ? n : undefined);
 
 /** Only buyer-facing fields; no seller contact, ids or storage keys. */
-const toListingSummary = (l: ListingLean): PublicListingSummary => {
+export const toListingSummary = (l: ListingLean): PublicListingSummary => {
   const s: PublicListingSummary = {
     title: l.title || undefined,
     price: positive(l.price),
@@ -934,6 +938,8 @@ const toListingSummary = (l: ListingLean): PublicListingSummary => {
     propertyType: l.propertyType,
     status: l.status,
     imageUrl: l.images?.find((i) => i?.url)?.url || l.imageUrl || undefined,
+    // A flag only: the hover card shows a 360° badge; the tour itself opens from the listing page.
+    hasTour: effectiveTour(undefined, [{ id: '', virtualTour360Url: l.virtualTour360Url }]) ? true : undefined,
   };
   return Object.fromEntries(Object.entries(s).filter(([, v]) => v !== undefined)) as PublicListingSummary;
 };
