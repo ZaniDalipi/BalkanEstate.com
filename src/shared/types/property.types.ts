@@ -355,6 +355,16 @@ export interface Filters {
   maxDaysListed: number | null;
   /** Unset in filters saved before it existed; read as 'available'. */
   saleStatus?: SaleStatusFilter;
+  /** Unset in filters saved before it existed; read as 'any'. */
+  constructionStatus?: 'any' | ConstructionStatus;
+  /** Minimum number of kitchens. Unset in filters saved before it existed. */
+  minKitchens?: number | null;
+  /** Leave out listings whose distance is unknown when a distance filter is set. Set by AI search. */
+  requireKnownDistances?: boolean;
+  /** Direction the property faces. Unset in filters saved before it existed; read as 'any'. */
+  orientation?: Orientation;
+  /** Most bedrooms; equal to `beds` for an exact count. Set by AI search; cleared when bedrooms are picked by hand. */
+  maxBeds?: number | null;
 }
 
 export const initialFilters: Filters = {

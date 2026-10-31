@@ -77,7 +77,10 @@
     "last7Days": "Τελευταίες 7 ημέρες",
     "last30Days": "Τελευταίες 30 ημέρες",
     "priceReduced": "Μειωμένη τιμή",
-    "priceIncreased": "Αυξημένη τιμή"
+    "priceIncreased": "Αυξημένη τιμή",
+    "constructionStatus": "Κατασκευή",
+    "kitchens": "Κουζίνες",
+    "orientation": "Προσανατολισμός"
   },
   "options": {
     "any": "Οποιοδήποτε",
@@ -648,5 +651,19 @@
     "climateRiskLayer": {
       "veryHigh": "Πολύ υψηλός"
     }
+  },
+  "constructionOptions": {
+    "ready": "Έτοιμο προς κατοίκηση",
+    "underConstruction": "Υπό κατασκευή"
+  },
+  "orientationOptions": {
+    "north": "Βόρειος",
+    "south": "Νότιος",
+    "east": "Ανατολικός",
+    "west": "Δυτικός",
+    "northEast": "Βορειοανατολικός",
+    "northWest": "Βορειοδυτικός",
+    "southEast": "Νοτιοανατολικός",
+    "southWest": "Νοτιοδυτικός"
   }
 }

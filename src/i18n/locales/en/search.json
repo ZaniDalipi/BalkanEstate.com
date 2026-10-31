@@ -93,7 +93,10 @@
     "last7Days": "Last 7 days",
     "last30Days": "Last 30 days",
     "priceReduced": "Price Reduced",
-    "priceIncreased": "Price Increased"
+    "priceIncreased": "Price Increased",
+    "constructionStatus": "Construction",
+    "kitchens": "Kitchens",
+    "orientation": "Orientation"
   },
   "options": {
     "any": "Any",
@@ -658,5 +661,19 @@
     "climateRiskLayer": {
       "veryHigh": "Very High"
     }
+  },
+  "constructionOptions": {
+    "ready": "Ready to move in",
+    "underConstruction": "Under construction"
+  },
+  "orientationOptions": {
+    "north": "North",
+    "south": "South",
+    "east": "East",
+    "west": "West",
+    "northEast": "North-east",
+    "northWest": "North-west",
+    "southEast": "South-east",
+    "southWest": "South-west"
   }
 }

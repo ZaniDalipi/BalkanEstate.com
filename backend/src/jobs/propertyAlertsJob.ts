@@ -11,6 +11,7 @@
 import Property, { IProperty } from '../models/Property';
 import SavedSearch, { IFilters } from '../models/SavedSearch';
 import { cronLogger } from '../utils/logger';
+import { normalizeConstructionStatus } from '../utils/constructionStatus';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
@@ -84,8 +85,14 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   // parking — reads as zero here, so a search asking for two bedrooms skips it
   // rather than matching on a missing field.
   if (filters.beds && (property.beds ?? 0) < filters.beds) return false;
+  if (filters.maxBeds != null && (property.beds ?? 0) > filters.maxBeds) return false;
   if (filters.baths && (property.baths ?? 0) < filters.baths) return false;
   if (filters.livingRooms && (property.livingRooms ?? 0) < filters.livingRooms) return false;
+  if (filters.minKitchens && (property.kitchens ?? 0) < filters.minKitchens) return false;
+
+  // Construction status. A listing without the field is a finished one.
+  if (filters.constructionStatus && filters.constructionStatus !== 'any'
+    && normalizeConstructionStatus(property.constructionStatus) !== filters.constructionStatus) return false;
 
   // Square footage
   if (filters.minSqft && property.sqft < filters.minSqft) return false;
@@ -124,11 +131,17 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   if (filters.minFloorNumber && property.floorNumber && property.floorNumber < filters.minFloorNumber) return false;
   if (filters.maxFloorNumber && property.floorNumber && property.floorNumber > filters.maxFloorNumber) return false;
 
-  // Distance filters
-  if (filters.maxDistanceToCenter && property.distanceToCenter && property.distanceToCenter > filters.maxDistanceToCenter) return false;
-  if (filters.maxDistanceToSea && property.distanceToSea && property.distanceToSea > filters.maxDistanceToSea) return false;
-  if (filters.maxDistanceToSchool && property.distanceToSchool && property.distanceToSchool > filters.maxDistanceToSchool) return false;
-  if (filters.maxDistanceToHospital && property.distanceToHospital && property.distanceToHospital > filters.maxDistanceToHospital) return false;
+  // Distance filters. An unknown distance passes, unless the search asks for
+  // known distances only (an AI search does).
+  const withinDistance = (value: number | null | undefined, max: number | null | undefined): boolean => {
+    if (!max) return true;
+    if (value == null || !Number.isFinite(value)) return filters.requireKnownDistances !== true;
+    return value <= max;
+  };
+  if (!withinDistance(property.distanceToCenter, filters.maxDistanceToCenter)) return false;
+  if (!withinDistance(property.distanceToSea, filters.maxDistanceToSea)) return false;
+  if (!withinDistance(property.distanceToSchool, filters.maxDistanceToSchool)) return false;
+  if (!withinDistance(property.distanceToHospital, filters.maxDistanceToHospital)) return false;
 
   // Text query (search in address, city, description)
   if (filters.query && filters.query.trim()) {

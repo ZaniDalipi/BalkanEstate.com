@@ -77,7 +77,10 @@
     "last7Days": "7 ditët e fundit",
     "last30Days": "30 ditët e fundit",
     "priceReduced": "Çmim i ulur",
-    "priceIncreased": "Çmim i rritur"
+    "priceIncreased": "Çmim i rritur",
+    "constructionStatus": "Ndërtimi",
+    "kitchens": "Kuzhina",
+    "orientation": "Orientimi"
   },
   "options": {
     "any": "Çdo",
@@ -648,5 +651,19 @@
     "climateRiskLayer": {
       "veryHigh": "Shumë i lartë"
     }
+  },
+  "constructionOptions": {
+    "ready": "Gati për banim",
+    "underConstruction": "Në ndërtim"
+  },
+  "orientationOptions": {
+    "north": "Veri",
+    "south": "Jug",
+    "east": "Lindje",
+    "west": "Perëndim",
+    "northEast": "Verilindje",
+    "northWest": "Veriperëndim",
+    "southEast": "Juglindje",
+    "southWest": "Jugperëndim"
   }
 }
