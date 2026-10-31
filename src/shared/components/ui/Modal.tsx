@@ -189,7 +189,8 @@ const Modal: React.FC<ModalProps> = ({
             {title}
           </h2>
         )}
-        <div className="overflow-x-hidden">{children}</div>
+        {/* A little room at the sides so focus rings on full-width fields are not clipped. */}
+        <div className="-mx-1.5 overflow-x-hidden px-1.5">{children}</div>
       </div>
     </div>
   );
