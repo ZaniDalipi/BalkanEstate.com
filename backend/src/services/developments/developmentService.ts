@@ -15,6 +15,7 @@ import {
   type DevelopmentCategory,
   type DevelopmentConstructionStatus,
 } from '../../config/developments';
+import { normalizeBuilderText } from './builderProfile';
 
 /** A trimmed string, or '' for anything that isn't a string (so bad input is a 400, not a crash). */
 const text = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
@@ -39,6 +40,8 @@ export interface CreateDevelopmentInput {
   amenities?: string[];
   website?: string;
   contact?: { name?: string; email?: string; phone?: string };
+  /** The company building it; validated by builderProfile.normalizeBuilderText. */
+  builder?: unknown;
   /** Accept buyer inquiries about individual units (default true). */
   allowUnitInquiries?: boolean;
   /** When creating on behalf of an agency the caller owns/admins. */
@@ -222,6 +225,7 @@ const EDITABLE_FIELDS: (keyof CreateDevelopmentInput)[] = [
   'amenities',
   'website',
   'contact',
+  'builder',
   'allowUnitInquiries',
 ];
 
@@ -262,6 +266,17 @@ export const updateDevelopment = async (
     }
     if (key === 'amenities') {
       development.amenities = normalizeAmenities(value);
+      continue;
+    }
+    if (key === 'builder') {
+      // Text fields only: the logo and banner have their own upload endpoints and are kept.
+      const fields = normalizeBuilderText(value);
+      const kept: Record<string, { url: string; publicId?: string }> = {};
+      for (const kind of ['logo', 'banner'] as const) {
+        const img = development.builder?.[kind];
+        if (img?.url) kept[kind] = { url: img.url, ...(img.publicId ? { publicId: img.publicId } : {}) };
+      }
+      development.set('builder', fields || Object.keys(kept).length ? { ...(fields ?? {}), ...kept } : undefined);
       continue;
     }
     if (key === 'contact') {

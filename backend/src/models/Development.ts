@@ -24,6 +24,36 @@ export interface IDevelopmentContact {
   phone?: string;
 }
 
+/** A stored image: public URL plus the storage key (never sent to the public). */
+export interface IDevelopmentImage {
+  url: string;
+  publicId?: string;
+}
+
+export const BUILDER_SOCIAL_NETWORKS = ['facebook', 'instagram', 'linkedin', 'youtube'] as const;
+export type BuilderSocialNetwork = (typeof BUILDER_SOCIAL_NETWORKS)[number];
+
+/**
+ * The company building the residence, shown to buyers on the residence page.
+ * Text fields are validated in services/developments/builderProfile; the logo
+ * and banner are uploaded separately.
+ */
+export interface IDevelopmentBuilder {
+  name?: string;
+  tagline?: string;
+  about?: string;
+  foundedYear?: number;
+  completedProjects?: number;
+  licenseNumber?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  socials?: Partial<Record<BuilderSocialNetwork, string>>;
+  logo?: IDevelopmentImage;
+  banner?: IDevelopmentImage;
+}
+
 export interface IDevelopmentStats {
   buildings: number;
   units: number;
@@ -77,6 +107,7 @@ export interface IDevelopment extends Document {
   amenities: string[];
   website?: string;
   contact?: IDevelopmentContact;
+  builder?: IDevelopmentBuilder;
   coverMediaId?: mongoose.Types.ObjectId;
   /** Cover image URL + storage key (mirrors the Agency cover pattern). */
   coverImage?: string;
@@ -174,6 +205,26 @@ const DevelopmentSchema: Schema = new Schema(
       name: { type: String, trim: true },
       email: { type: String, trim: true },
       phone: { type: String, trim: true },
+    },
+    builder: {
+      name: { type: String, trim: true, maxlength: 120 },
+      tagline: { type: String, trim: true, maxlength: 160 },
+      about: { type: String, trim: true, maxlength: 3000 },
+      foundedYear: { type: Number },
+      completedProjects: { type: Number, min: 0 },
+      licenseNumber: { type: String, trim: true, maxlength: 60 },
+      website: { type: String, trim: true, maxlength: 300 },
+      email: { type: String, trim: true, maxlength: 254 },
+      phone: { type: String, trim: true, maxlength: 40 },
+      address: { type: String, trim: true, maxlength: 200 },
+      socials: {
+        facebook: { type: String, trim: true, maxlength: 300 },
+        instagram: { type: String, trim: true, maxlength: 300 },
+        linkedin: { type: String, trim: true, maxlength: 300 },
+        youtube: { type: String, trim: true, maxlength: 300 },
+      },
+      logo: { url: { type: String }, publicId: { type: String } },
+      banner: { url: { type: String }, publicId: { type: String } },
     },
     coverMediaId: {
       type: Schema.Types.ObjectId,

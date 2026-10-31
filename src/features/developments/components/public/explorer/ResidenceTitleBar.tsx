@@ -3,15 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { ArrowDown, MapPin } from 'lucide-react';
 import type { Development, UnitsSummary } from '../../../types';
 import { ShareResidenceButton } from '../share/ShareResidenceButton';
+import { BuilderByline } from '../builder/BuilderByline';
 
 interface ResidenceTitleBarProps {
   development: Development;
   summary?: UnitsSummary;
   onViewUnits: () => void;
+  /** Jump to the builder section (shown when the residence names its builder). */
+  onViewBuilder?: () => void;
 }
 
 /** Compact name / location / availability strip above the full-bleed explorer. */
-export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ development, summary, onViewUnits }) => {
+export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ development, summary, onViewUnits, onViewBuilder }) => {
   const { t } = useTranslation('developments');
   return (
     <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-3 px-4 pb-4 pt-2">
@@ -21,6 +24,7 @@ export const ResidenceTitleBar: React.FC<ResidenceTitleBarProps> = ({ developmen
           <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
           {[development.address, development.city, development.country].filter(Boolean).join(', ')}
         </p>
+        {onViewBuilder && <BuilderByline builder={development.builder} onOpen={onViewBuilder} />}
       </div>
       <div className="flex flex-wrap items-center gap-3">
         {summary && (

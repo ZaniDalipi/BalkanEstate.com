@@ -79,6 +79,8 @@ export interface Development {
   amenities: string[];
   website?: string;
   contact?: DevelopmentContact;
+  /** Present once the owner has named the builder. */
+  builder?: DevelopmentBuilder;
   coverImage?: string;
   /** Whether buyers may send an inquiry about a unit that has no linked listing. */
   allowUnitInquiries?: boolean;
@@ -228,12 +230,39 @@ export interface CreateDevelopmentPayload {
   agencyId?: string;
 }
 
+export const BUILDER_SOCIAL_NETWORKS = ['facebook', 'instagram', 'linkedin', 'youtube'] as const;
+export type BuilderSocialNetwork = (typeof BUILDER_SOCIAL_NETWORKS)[number];
+/** Each network's brand name, the same in every language. */
+export const BUILDER_SOCIAL_LABELS: Record<BuilderSocialNetwork, string> = { facebook: 'Facebook', instagram: 'Instagram', linkedin: 'LinkedIn', youtube: 'YouTube' };
+
+/** The company building the residence, shown to buyers on the residence page. */
+export interface DevelopmentBuilder {
+  name: string;
+  tagline?: string;
+  about?: string;
+  foundedYear?: number;
+  completedProjects?: number;
+  licenseNumber?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  socials?: Partial<Record<BuilderSocialNetwork, string>>;
+  logo?: { url: string };
+  banner?: { url: string };
+}
+
+/** What the builder form sends: its text fields (logo and banner upload separately). */
+export type BuilderPayload = Omit<DevelopmentBuilder, 'logo' | 'banner'>;
+
 export type UpdateDevelopmentPayload = Partial<Omit<CreateDevelopmentPayload, 'lat' | 'lng'>> & {
   /** `null` clears the coordinates. */
   lat?: number | null;
   lng?: number | null;
   /** `null` removes the sales contact. */
   contact?: DevelopmentContact | null;
+  /** `null` removes the builder's text (the logo and banner are removed separately). */
+  builder?: BuilderPayload | null;
   allowUnitInquiries?: boolean;
 };
 

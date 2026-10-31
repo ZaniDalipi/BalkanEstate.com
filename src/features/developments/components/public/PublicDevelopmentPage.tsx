@@ -20,6 +20,7 @@ import { ResidenceExplorer } from './explorer/ResidenceExplorer';
 import { ResidenceTitleBar } from './explorer/ResidenceTitleBar';
 import { ResidenceSections } from './explorer/ResidenceSections';
 import { ApartmentDetailsDrawer } from './explorer/drawer/ApartmentDetailsDrawer';
+import { BuilderShowcase } from './builder/BuilderShowcase';
 
 const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -41,6 +42,7 @@ const PublicDevelopmentPage: React.FC = () => {
   const matchedUnits = useMemo(() => filterUnits(units, criteria), [units, criteria]);
 
   const sections = [
+    ...(development?.builder?.name ? [{ id: 'builder', label: t('builderPublic.label', 'The builder') }] : []),
     { id: 'overview', label: t('detail.overview', 'Overview') },
     { id: 'units', label: t('units.heading', 'Available homes') },
     { id: 'location', label: t('detail.location', 'Location') },
@@ -89,7 +91,7 @@ const PublicDevelopmentPage: React.FC = () => {
           openUnitId={drawer.unitId}
           city={development.city}
           country={development.country}
-          header={<ResidenceTitleBar development={development} summary={summary} onViewUnits={() => scrollToId('units')} />}
+          header={<ResidenceTitleBar development={development} summary={summary} onViewUnits={() => scrollToId('units')} onViewBuilder={() => scrollToId('builder')} />}
           fallback={
             <div className="mx-auto max-w-6xl px-4">
               <ResidenceHero development={development} onViewUnits={() => scrollToId('units')} />
@@ -121,6 +123,8 @@ const PublicDevelopmentPage: React.FC = () => {
             <AvailabilityBar units={units} />
           </div>
         )}
+
+        <BuilderShowcase builder={development.builder} />
 
         <ResidenceSections development={development} buildings={buildings} floors={floors} />
 

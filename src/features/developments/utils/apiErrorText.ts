@@ -15,6 +15,8 @@ export const API_ERROR_TEXT: Record<string, string> = {
   TOO_MANY_ITEMS: 'At most {{max}} entries.',
   EMAIL_INVALID: 'Enter a valid email address, like name@example.com.',
   URL_INVALID: 'Enter a full web address starting with https://.',
+  PHONE_INVALID: 'Enter a valid phone number, like +389 2 123 4567.',
+  SOCIAL_HOST: 'This must be a link to {{network}}.',
   CURRENCY_EUR_ONLY: 'Prices are in euros (EUR).',
   FLOOR_NOT_IN_BUILDING: 'This floor belongs to another building. Pick a floor of the chosen building.',
   ENTRANCE_NOT_IN_BUILDING: 'This entrance belongs to another building.',

@@ -1388,7 +1388,9 @@
       "unit_in_other_development": "Această unitate aparține altui ansamblu.",
       "already_attached_to_this_unit": "Acest anunț este deja legat de această unitate.",
       "listing_already_attached_elsewhere": "Acest anunț este legat de altă unitate. Dacă îl legați aici, va fi mutat."
-    }
+    },
+    "PHONE_INVALID": "Introduceți un număr de telefon valid, de ex. +389 2 123 4567.",
+    "SOCIAL_HOST": "Acesta trebuie să fie un link către {{network}}."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1411,5 +1413,41 @@
       "title": "Locuință nouă disponibilă în {{residence}}",
       "message": "Unitatea {{unit}} este acum disponibilă."
     }
+  },
+  "builder": {
+    "heading": "Constructorul",
+    "intro": "Compania care construiește acest ansamblu. Cumpărătorii o văd în partea de sus a paginii ansamblului, cu bannerul, logoul și datele de contact.",
+    "name": "Numele companiei",
+    "tagline": "Slogan",
+    "taglinePlaceholder": "ex. Construim locuințe în Skopje din 2004",
+    "about": "Despre companie",
+    "foundedYear": "Fondată (anul)",
+    "completedProjects": "Proiecte finalizate",
+    "licenseNumber": "Nr. licență / înregistrare",
+    "website": "Site web",
+    "email": "Email",
+    "phone": "Telefon",
+    "address": "Adresa biroului",
+    "socials": "Rețele sociale",
+    "logo": "Logo",
+    "banner": "Banner",
+    "logoHint": "Pătrat, cel puțin 400 × 400 px.",
+    "bannerHint": "Lat, cel puțin 1600 × 600 px.",
+    "choose": "Alege imaginea",
+    "replace": "Înlocuiește",
+    "remove": "Elimină",
+    "uploading": "Se încarcă…",
+    "saved": "Constructorul a fost salvat.",
+    "save": "Salvează constructorul"
+  },
+  "builderPublic": {
+    "builtBy": "Construit de",
+    "label": "Constructorul",
+    "founded": "Fondată",
+    "foundedValue": "{{year}} · ani: {{years}}",
+    "projects": "Proiecte finalizate",
+    "license": "Licență",
+    "office": "Birou",
+    "email": "Email"
   }
 }

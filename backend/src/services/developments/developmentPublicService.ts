@@ -58,7 +58,24 @@ export const toPublicDevelopment = (development: IDevelopment): Record<string, u
   const json = development.toJSON() as Record<string, unknown>;
   for (const f of DEVELOPMENT_PRIVATE_FIELDS) delete json[f];
   json.allowUnitInquiries = development.allowUnitInquiries !== false;
+  json.builder = publicBuilder(development.builder);
+  if (!json.builder) delete json.builder;
   return json;
+};
+
+/** The builder as buyers see it: only once it has a name, and without storage keys. */
+const publicBuilder = (b: IDevelopment['builder']): Record<string, unknown> | undefined => {
+  if (!b?.name) return undefined;
+  const plain = JSON.parse(JSON.stringify(b)) as Record<string, unknown>;
+  for (const kind of ['logo', 'banner'] as const) {
+    const img = b[kind];
+    if (img?.url) plain[kind] = { url: img.url };
+    else delete plain[kind];
+  }
+  delete plain._id;
+  const socials = plain.socials as Record<string, unknown> | undefined;
+  if (!socials || Object.values(socials).every((v) => !v)) delete plain.socials;
+  return plain;
 };
 
 type ListingLite = { _id: mongoose.Types.ObjectId; status?: string; virtualTour360Url?: string };

@@ -1388,7 +1388,9 @@
       "unit_in_other_development": "Ova jedinica pripada drugoj rezidenciji.",
       "already_attached_to_this_unit": "Ovaj je oglas već povezan s ovom jedinicom.",
       "listing_already_attached_elsewhere": "Ovaj je oglas povezan s drugom jedinicom. Ako ga povežete ovdje, premjestit će se."
-    }
+    },
+    "PHONE_INVALID": "Unesite ispravan broj telefona, npr. +389 2 123 4567.",
+    "SOCIAL_HOST": "Ovo mora biti poveznica na {{network}}."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1411,5 +1413,41 @@
       "title": "Novi dom dostupan u {{residence}}",
       "message": "Jedinica {{unit}} sada je dostupna."
     }
+  },
+  "builder": {
+    "heading": "Investitor",
+    "intro": "Tvrtka koja gradi ovu rezidenciju. Kupci je vide na vrhu stranice rezidencije, s bannerom, logotipom i kontaktima.",
+    "name": "Naziv tvrtke",
+    "tagline": "Slogan",
+    "taglinePlaceholder": "npr. Gradimo domove u Skoplju od 2004.",
+    "about": "O tvrtki",
+    "foundedYear": "Osnovana (godina)",
+    "completedProjects": "Završeni projekti",
+    "licenseNumber": "Br. licence / registracije",
+    "website": "Web-stranica",
+    "email": "E-pošta",
+    "phone": "Telefon",
+    "address": "Adresa ureda",
+    "socials": "Društvene mreže",
+    "logo": "Logotip",
+    "banner": "Banner",
+    "logoHint": "Kvadratni, najmanje 400 × 400 px.",
+    "bannerHint": "Široki, najmanje 1600 × 600 px.",
+    "choose": "Odaberi sliku",
+    "replace": "Zamijeni",
+    "remove": "Ukloni",
+    "uploading": "Prijenos…",
+    "saved": "Investitor je spremljen.",
+    "save": "Spremi investitora"
+  },
+  "builderPublic": {
+    "builtBy": "Gradi",
+    "label": "Investitor",
+    "founded": "Osnovana",
+    "foundedValue": "{{year}} · godina: {{years}}",
+    "projects": "Završeni projekti",
+    "license": "Licenca",
+    "office": "Ured",
+    "email": "E-pošta"
   }
 }

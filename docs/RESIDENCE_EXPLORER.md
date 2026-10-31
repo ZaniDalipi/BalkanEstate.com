@@ -714,6 +714,58 @@ the Zillow sheet:
 - Public responses carry `virtualTourUrl` (the effective one) and `tourSource`
   (`unit` | `listing`).
 
+## 7b-8. The builder
+
+The company building the residence, shown to buyers as a professional profile.
+
+- **Where it is edited:** *Details & settings → The builder*
+  (`components/dashboard/builder/`). Owners and editors can change it; viewers
+  see it read-only.
+- **Fields** (`Development.builder`), checked the same way on both sides
+  (`validation/builderValidation.ts` ⇄ `services/developments/builderProfile.ts`):
+
+  | Field | Rule |
+  |-------|------|
+  | name | required once anything else is filled in · ≤120 |
+  | tagline | ≤160 |
+  | about | ≤3000 |
+  | foundedYear | 1800 – this year |
+  | completedProjects | 0 – 10000 |
+  | licenseNumber | ≤60 |
+  | website | http(s) only · ≤300 |
+  | email | ≤254 |
+  | phone | digits, spaces, `+ ( ) . -` · 6–15 digits |
+  | address | ≤200 |
+  | socials.facebook / instagram / linkedin / youtube | a link on that network's site · ≤300 |
+
+  Clearing every field removes the builder (`builder: null`).
+- **Errors:** `FIELD_REQUIRED`, `FIELD_TOO_LONG {max}`, `FIELD_RANGE {min,max}`,
+  `FIELD_INVALID`, `URL_INVALID`, `EMAIL_INVALID`, `PHONE_INVALID` and
+  `SOCIAL_HOST {network}`. Each comes with `field: "builder.<name>"`, and the
+  form shows it under that field (`role="alert"`).
+- **Logo and banner:**
+  - `POST /api/dashboard/developments/:id/builder/logo|banner` (`image` field,
+    JPG/PNG/WebP/AVIF, ≤10 MB) and `DELETE …/builder/logo|banner`.
+  - Each upload is stored in R2 as `development-builder-logo` (600×600) or
+    `development-builder-banner` (1920×720), and the old file is deleted.
+  - Without storage the server answers 503 `STORAGE_NOT_CONFIGURED`, and the form
+    explains that uploads are not available.
+  - Saving the text again keeps the images.
+- **Buyers see:**
+  - **under the title:** a *Built by [logo] Name* line that jumps to the section;
+  - **the `#builder` section** (also in the section nav):
+    - the banner, or a dark gradient when there is none, with the logo;
+    - name and tagline;
+    - founded year with years active, completed projects, licence and office;
+    - the company's description;
+    - website, call, email and social links (only safe http(s) links,
+      opened with `rel="noopener noreferrer"`).
+- **Public projection:** `publicBuilder()` returns nothing without a name, and
+  strips storage ids, `_id` and empty socials.
+- **Tests:** `__tests__/developments/builder-profile.test.ts`,
+  `builderValidation.test.ts`, `builderLinks.test.ts`,
+  `BuilderSection.test.tsx` and `BuilderShowcase.test.tsx`.
+
 ## 7b-3. Errors in the reader's language
 
 - **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.

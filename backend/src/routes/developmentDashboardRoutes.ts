@@ -58,6 +58,7 @@ import {
   unpublishScene,
 } from '../controllers/developmentSceneController';
 import { attachListing } from '../controllers/developmentSuggestionController';
+import { deleteBuilderImage, uploadBuilderImage } from '../controllers/developmentBuilderController';
 
 const router = express.Router();
 
@@ -122,6 +123,16 @@ router.post(
   singleImage('cover'),
   uploadCover
 );
+// The builder's logo / banner (the text fields go through PATCH /:developmentId).
+router.post(
+  '/:developmentId/builder/:kind',
+  protect,
+  developmentAuth,
+  requireDevelopmentPermission('media.upload'),
+  singleImage('image'),
+  uploadBuilderImage
+);
+router.delete('/:developmentId/builder/:kind', protect, developmentAuth, requireDevelopmentPermission('media.upload'), deleteBuilderImage);
 router.patch(
   '/:developmentId',
   protect,

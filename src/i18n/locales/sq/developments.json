@@ -1378,7 +1378,9 @@
       "unit_in_other_development": "Kjo njësi i përket një rezidence tjetër.",
       "already_attached_to_this_unit": "Ky njoftim është tashmë i lidhur me këtë njësi.",
       "listing_already_attached_elsewhere": "Ky njoftim është i lidhur me një njësi tjetër. Nëse e lidhni këtu, zhvendoset."
-    }
+    },
+    "PHONE_INVALID": "Shkruani një numër telefoni të vlefshëm, si +389 2 123 4567.",
+    "SOCIAL_HOST": "Kjo duhet të jetë një lidhje në {{network}}."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1401,5 +1403,41 @@
       "title": "Shtëpi e re në dispozicion te {{residence}}",
       "message": "Njësia {{unit}} tani është në dispozicion."
     }
+  },
+  "builder": {
+    "heading": "Ndërtuesi",
+    "intro": "Kompania që ndërton këtë rezidencë. Blerësit e shohin në krye të faqes së rezidencës, me banerin, logon dhe kontaktet.",
+    "name": "Emri i kompanisë",
+    "tagline": "Slogani",
+    "taglinePlaceholder": "p.sh. Ndërtojmë shtëpi në Shkup që nga 2004",
+    "about": "Rreth kompanisë",
+    "foundedYear": "Themeluar (viti)",
+    "completedProjects": "Projekte të përfunduara",
+    "licenseNumber": "Nr. i licencës / regjistrimit",
+    "website": "Faqja e internetit",
+    "email": "Email",
+    "phone": "Telefoni",
+    "address": "Adresa e zyrës",
+    "socials": "Rrjetet sociale",
+    "logo": "Logo",
+    "banner": "Baneri",
+    "logoHint": "Katror, të paktën 400 × 400 px.",
+    "bannerHint": "I gjerë, të paktën 1600 × 600 px.",
+    "choose": "Zgjidh foton",
+    "replace": "Zëvendëso",
+    "remove": "Hiq",
+    "uploading": "Po ngarkohet…",
+    "saved": "Ndërtuesi u ruajt.",
+    "save": "Ruaj ndërtuesin"
+  },
+  "builderPublic": {
+    "builtBy": "Ndërtuar nga",
+    "label": "Ndërtuesi",
+    "founded": "Themeluar",
+    "foundedValue": "{{year}} · {{years}} vjet",
+    "projects": "Projekte të përfunduara",
+    "license": "Licenca",
+    "office": "Zyra",
+    "email": "Email"
   }
 }

@@ -177,6 +177,16 @@ export const uploadDevelopmentCover = (
   );
 };
 
+/** Upload (or replace) the builder's logo or banner. */
+export const uploadBuilderImage = (id: string, kind: 'logo' | 'banner', file: File): Promise<{ url: string; development: Development }> => {
+  const formData = new FormData();
+  formData.append('image', file);
+  return uploadRequest<{ url: string; development: Development }>(`${DASH}/${id}/builder/${kind}`, formData);
+};
+
+export const deleteBuilderImage = (id: string, kind: 'logo' | 'banner'): Promise<{ development: Development }> =>
+  apiRequest<{ development: Development }>(`${DASH}/${id}/builder/${kind}`, { method: 'DELETE', requiresAuth: true });
+
 export const createDevelopment = (payload: CreateDevelopmentPayload): Promise<{ development: Development }> =>
   apiRequest<{ development: Development }>(DASH, {
     method: 'POST',

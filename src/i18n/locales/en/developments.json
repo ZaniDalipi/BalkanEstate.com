@@ -1378,7 +1378,9 @@
       "unit_in_other_development": "This unit belongs to another residence.",
       "already_attached_to_this_unit": "This listing is already linked to this unit.",
       "listing_already_attached_elsewhere": "This listing is linked to another unit. Linking it here moves it."
-    }
+    },
+    "PHONE_INVALID": "Enter a valid phone number, like +389 2 123 4567.",
+    "SOCIAL_HOST": "This must be a link to {{network}}."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1401,5 +1403,41 @@
       "title": "New home available at {{residence}}",
       "message": "Unit {{unit}} is now available."
     }
+  },
+  "builder": {
+    "heading": "The builder",
+    "intro": "The company building this residence. Buyers see it at the top of the residence page, with its banner, logo and contacts.",
+    "name": "Company name",
+    "tagline": "Tagline",
+    "taglinePlaceholder": "e.g. Building homes in Skopje since 2004",
+    "about": "About the company",
+    "foundedYear": "Founded (year)",
+    "completedProjects": "Completed projects",
+    "licenseNumber": "Licence / registration no.",
+    "website": "Website",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Office address",
+    "socials": "Social media",
+    "logo": "Logo",
+    "banner": "Banner",
+    "logoHint": "Square, at least 400 × 400 px.",
+    "bannerHint": "Wide, at least 1600 × 600 px.",
+    "choose": "Choose picture",
+    "replace": "Replace",
+    "remove": "Remove",
+    "uploading": "Uploading…",
+    "saved": "The builder was saved.",
+    "save": "Save builder"
+  },
+  "builderPublic": {
+    "builtBy": "Built by",
+    "label": "The builder",
+    "founded": "Founded",
+    "foundedValue": "{{year}} · {{years}} years",
+    "projects": "Completed projects",
+    "license": "Licence",
+    "office": "Office",
+    "email": "Email"
   }
 }
