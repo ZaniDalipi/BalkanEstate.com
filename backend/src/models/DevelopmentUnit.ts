@@ -61,6 +61,8 @@ export interface IDevelopmentUnit extends Document {
   /** `on_request` keeps the unit public but strips its price from public responses. */
   priceVisibility: PriceVisibility;
   description?: string;
+  /** Link to a 360° virtual tour (Matterport, Kuula, Z360, …); see services/developments/unitTour. */
+  virtualTourUrl?: string;
   floorplan?: IUnitImage;
   gallery: IUnitImage[];
   floorplanMediaId?: mongoose.Types.ObjectId;
@@ -138,6 +140,7 @@ const DevelopmentUnitSchema: Schema = new Schema(
     visibility: { type: String, enum: UNIT_VISIBILITIES, default: 'public' },
     priceVisibility: { type: String, enum: PRICE_VISIBILITIES, default: 'public' },
     description: { type: String, trim: true, maxlength: 4000 },
+    virtualTourUrl: { type: String, trim: true, maxlength: 2000 },
     floorplan: { type: UnitImageSchema, default: undefined },
     gallery: {
       type: [UnitImageSchema],

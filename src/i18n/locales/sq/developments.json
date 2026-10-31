@@ -439,7 +439,18 @@
     "noUnitsInBuilding": "Ende nuk ka apartamente të listuara për këtë ndërtesë.",
     "stackingPlan": "Apartamentet sipas katit",
     "unmarkedNote": "Apartamentet nuk janë shënuar ende në këtë foto — zgjidhni një kat pas kati më poshtë.",
-    "noUnitsHere": "Asnjë apartament nuk është publikuar ende në këtë ndërtesë."
+    "noUnitsHere": "Asnjë apartament nuk është publikuar ende në këtë ndërtesë.",
+    "tour": {
+      "badgeTitle": "Ka tur virtual 360°",
+      "open": "Hap turin 360°",
+      "newTab": "(hapet në një skedë të re)",
+      "fromListing": "Nga njoftimi i kësaj banese.",
+      "label": "Tur 360°",
+      "onListing": "Te njoftimi",
+      "homes": "Banesa: {{n}}",
+      "chip": "360° ×{{n}}",
+      "chipLong": "Banesa me tur 360°: {{n}}"
+    }
   },
   "feature": {
     "big_terrace": "Me tarracë të madhe",
@@ -783,7 +794,8 @@
         "integer": "Shkruani një numër të plotë",
         "currency": "Përdorni një kod monedhe me 3 shkronja, p.sh. EUR",
         "tooLong": "Ky tekst është shumë i gjatë",
-        "choice": "Zgjidhni një nga opsionet"
+        "choice": "Zgjidhni një nga opsionet",
+        "url": "Shkruani një adresë të plotë uebi që fillon me https://"
       },
       "notSet": "E pacaktuar",
       "euroOnly": "Të gjitha çmimet janë në euro (€).",
@@ -853,6 +865,13 @@
       "withDescription": "Përshkrimi",
       "doneCreate": "Nga “{{title}}” — këto të dhëna i shtohen njësisë së re kur klikoni Shto njësinë.",
       "linkCreate": "Lidhe edhe këtë njoftim me njësinë e re"
+    },
+    "tour": {
+      "title": "Tur virtual 360°",
+      "label": "Lidhja e turit",
+      "test": "Hap",
+      "fromListing": "Blerësit shohin turin 360° të njoftimit të lidhur. Shtoni një lidhje këtu për të treguar një tur tjetër për këtë njësi.",
+      "help": "Ngjitni lidhjen e ndarjes së turit (Matterport, Kuula, Z360 ose një shikues tjetër 360°). Blerësit shohin një shenjë 360° në këtë njësi dhe mund ta hapin turin."
     }
   },
   "manage": {

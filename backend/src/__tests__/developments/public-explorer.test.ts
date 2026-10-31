@@ -70,7 +70,7 @@ describe('GET /:slug', () => {
     expect(allStrings(res.body)).not.toContain(encodeId(String(t.owner._id)));
     expect(res.body.development.allowUnitInquiries).toBe(true);
     // A1 → reserved via pending listing, R1 available, H1 hidden (not counted).
-    expect(res.body.buildings[0].stats).toEqual({ units: 2, available: 1 });
+    expect(res.body.buildings[0].stats).toEqual({ units: 2, available: 1, withTour: 0 });
     expect(res.body.floors).toHaveLength(2);
   });
 

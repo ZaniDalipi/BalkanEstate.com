@@ -441,7 +441,18 @@
     "noUnitsInBuilding": "Za ovu zgradu još nema navedenih stanova.",
     "stackingPlan": "Stanovi po spratovima",
     "unmarkedNote": "Stanovi još nijesu označeni na ovoj slici — odaberite jedan sprat po sprat ispod.",
-    "noUnitsHere": "U ovoj zgradi još nema objavljenih stanova."
+    "noUnitsHere": "U ovoj zgradi još nema objavljenih stanova.",
+    "tour": {
+      "badgeTitle": "Ima virtuelnu turu 360°",
+      "open": "Otvori 360° turu",
+      "newTab": "(otvara se u novoj kartici)",
+      "fromListing": "Iz oglasa ovog stana.",
+      "label": "360° tura",
+      "onListing": "Na oglasu",
+      "homes": "Stanova: {{n}}",
+      "chip": "360° ×{{n}}",
+      "chipLong": "Stanova sa 360° turom: {{n}}"
+    }
   },
   "feature": {
     "big_terrace": "Sa velikom terasom",
@@ -789,7 +800,8 @@
         "integer": "Unesite cijeli broj",
         "currency": "Koristite troslovnu oznaku valute, npr. EUR",
         "tooLong": "Ovaj tekst je predug",
-        "choice": "Odaberite jednu od opcija"
+        "choice": "Odaberite jednu od opcija",
+        "url": "Unesite punu web adresu koja počinje sa https://"
       },
       "notSet": "Nije postavljeno",
       "euroOnly": "Sve cijene su u eurima (€).",
@@ -859,6 +871,13 @@
       "withDescription": "Opis",
       "doneCreate": "Iz „{{title}}” — ovi podaci se dodaju novoj jedinici kad kliknete Dodaj jedinicu.",
       "linkCreate": "Poveži i ovaj oglas sa novom jedinicom"
+    },
+    "tour": {
+      "title": "Virtuelna tura 360°",
+      "label": "Link ture",
+      "test": "Otvori",
+      "fromListing": "Kupci vide 360° turu povezanog oglasa. Dodajte link ovdje da prikažete drugu turu za ovu jedinicu.",
+      "help": "Zalijepite link za dijeljenje ture (Matterport, Kuula, Z360 ili drugi 360° preglednik). Kupci vide oznaku 360° na ovoj jedinici i mogu otvoriti turu."
     }
   },
   "manage": {

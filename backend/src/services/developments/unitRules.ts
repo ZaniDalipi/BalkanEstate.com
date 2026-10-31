@@ -5,6 +5,7 @@
  */
 import { UNIT_CURRENCY, UNIT_ORIENTATIONS, UNIT_VIEWS } from '../../config/developments';
 import { ValidationError } from './developmentService';
+import { tourUrlProblem } from './unitTour';
 
 const CHOICES = { orientation: UNIT_ORIENTATIONS, viewType: UNIT_VIEWS } as const;
 export type ChoiceField = keyof typeof CHOICES;
@@ -18,6 +19,11 @@ export const currencyProblem = (value: string): string | null =>
 
 /** Throw a ValidationError when `field` holds a value it may not. */
 export const assertUnitValue = (field: string, value: string): void => {
+  if (field === 'virtualTourUrl') {
+    const bad = tourUrlProblem(value);
+    if (bad) throw new ValidationError(bad, { code: 'URL_INVALID', field });
+    return;
+  }
   const problem = field === 'currency' ? currencyProblem(value) : field in CHOICES ? choiceProblem(field as ChoiceField, value) : null;
   if (problem) {
     throw new ValidationError(problem, field === 'currency' ? { code: 'CURRENCY_EUR_ONLY', field } : { code: 'FIELD_INVALID', field });

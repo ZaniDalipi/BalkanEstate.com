@@ -109,7 +109,7 @@ describe('ExplorerCanvas', () => {
 
   it('building card shows availability and an explore action', () => {
     const onActivate = renderCanvas({
-      buildingFacts: new Map([['b9', { units: 20, available: 14, floors: 6, priceFrom: 90000, currency: 'EUR' }]]),
+      buildingFacts: new Map([['b9', { units: 20, available: 14, floors: 6, withTour: 0, priceFrom: 90000, currency: 'EUR' }]]),
     });
     fireEvent.focus(screen.getByRole('button', { name: /B2/ }));
     const card = screen.getByRole('tooltip');

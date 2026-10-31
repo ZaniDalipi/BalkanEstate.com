@@ -13,10 +13,11 @@ import type {
   UnitVisibility,
   UpdateUnitPayload,
 } from '../../../types';
+import { isUsableTourUrl } from '../../../validation/developmentValidation';
 
 export const INT_FIELDS = ['beds', 'baths', 'livingRooms', 'balconies', 'terraces'] as const;
 export const DECIMAL_FIELDS = ['netArea', 'totalArea', 'externalArea', 'terraceArea', 'price', 'pricePerSqm'] as const;
-export const NULLABLE_TEXT_FIELDS = ['orientation', 'viewType', 'description'] as const;
+export const NULLABLE_TEXT_FIELDS = ['orientation', 'viewType', 'description', 'virtualTourUrl'] as const;
 
 type IntField = (typeof INT_FIELDS)[number];
 type DecimalField = (typeof DECIMAL_FIELDS)[number];
@@ -63,6 +64,7 @@ export const unitToForm = (u: DevelopmentUnit): UnitFormState => ({
   orientation: u.orientation ?? '',
   viewType: u.viewType ?? '',
   description: u.description ?? '',
+  virtualTourUrl: u.virtualTourUrl ?? '',
   currency: UNIT_CURRENCY,
   availability: u.availability,
   visibility: u.visibility ?? 'public',
@@ -95,6 +97,7 @@ export const validateUnitForm = (f: UnitFormState, original?: UnitFormState): Un
   if (f.orientation && f.orientation !== original?.orientation && !inList(UNIT_ORIENTATIONS, f.orientation)) errors.orientation = 'choice';
   if (f.viewType && f.viewType !== original?.viewType && !inList(UNIT_VIEWS, f.viewType)) errors.viewType = 'choice';
   if (f.description.length > 5000) errors.description = 'tooLong';
+  if (!isUsableTourUrl(f.virtualTourUrl)) errors.virtualTourUrl = 'url';
   return errors;
 };
 

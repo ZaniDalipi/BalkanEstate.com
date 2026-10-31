@@ -21,6 +21,7 @@ import { linkMaps } from './unitLinks';
 import { toObjectId } from './developmentRefs';
 import { resolveEffectiveAvailability } from './unitAvailability';
 import { publicResidenceFilter } from './billing/publicResidenceFilter';
+import { effectiveTour } from './unitTour';
 
 const LIVE = { $exists: false } as const;
 
@@ -60,7 +61,7 @@ export const toPublicDevelopment = (development: IDevelopment): Record<string, u
   return json;
 };
 
-type ListingLite = { _id: mongoose.Types.ObjectId; status?: string };
+type ListingLite = { _id: mongoose.Types.ObjectId; status?: string; virtualTour360Url?: string };
 
 /** One batched status lookup for every listing attached to the given units. */
 const loadListingStatuses = async (units: IDevelopmentUnit[]): Promise<Map<string, ListingLite>> => {
@@ -68,7 +69,7 @@ const loadListingStatuses = async (units: IDevelopmentUnit[]): Promise<Map<strin
     (id) => new mongoose.Types.ObjectId(id)
   );
   if (ids.length === 0) return new Map();
-  const rows = (await Property.find({ _id: { $in: ids } }).select('status').lean()) as ListingLite[];
+  const rows = (await Property.find({ _id: { $in: ids } }).select('status virtualTour360Url').lean()) as ListingLite[];
   return new Map(rows.map((r) => [String(r._id), r]));
 };
 
@@ -127,6 +128,16 @@ export const toPublicUnit = (
   if (primary) json.primaryListingId = encodeId(primary);
   else delete json.primaryListingId;
   json.hasListing = publicIds.length > 0;
+  // Its own 360° tour, else the tour of its public listing (the primary one first).
+  const tour = effectiveTour(
+    unit.virtualTourUrl,
+    attached.map((l) => ({ id: String(l._id), virtualTour360Url: l.virtualTour360Url })),
+    primary
+  );
+  if (tour) {
+    json.virtualTourUrl = tour.url;
+    json.tourSource = tour.source;
+  } else delete json.virtualTourUrl;
   json.availability = effective.availability;
   json.availabilitySource = effective.source;
   // Only links between visible units: a hidden spot's id never leaves the server.
@@ -178,18 +189,23 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
   const [{ buildings, floors }, units] = await Promise.all([
     loadStructureMaps(developmentId),
     DevelopmentUnit.find(visibleUnitFilter(developmentId)).select(
-      'buildingId availability listingIds'
+      'buildingId availability listingIds primaryListingId virtualTourUrl'
     ),
   ]);
   const listings = await loadListingStatuses(units);
 
-  const stats = new Map<string, { units: number; available: number }>();
+  const stats = new Map<string, { units: number; available: number; withTour: number }>();
   for (const u of units) {
     const key = String(u.buildingId);
-    const s = stats.get(key) ?? { units: 0, available: 0 };
+    const s = stats.get(key) ?? { units: 0, available: 0, withTour: 0 };
     s.units += 1;
     const statuses = (u.listingIds ?? []).map((id) => listings.get(String(id))?.status);
     if (resolveEffectiveAvailability(u.availability, statuses).availability === 'available') s.available += 1;
+    const publicListings = (u.listingIds ?? [])
+      .map((id) => listings.get(String(id)))
+      .filter((l): l is ListingLite => !!l && l.status !== 'draft')
+      .map((l) => ({ id: String(l._id), virtualTour360Url: l.virtualTour360Url }));
+    if (effectiveTour(u.virtualTourUrl, publicListings, u.primaryListingId ? String(u.primaryListingId) : undefined)) s.withTour += 1;
     stats.set(key, s);
   }
 
@@ -200,7 +216,7 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
       delete json.coverMediaId;
       delete json.facadeMediaId;
       delete json.deletedAt;
-      json.stats = stats.get(String(b._id)) ?? { units: 0, available: 0 };
+      json.stats = stats.get(String(b._id)) ?? { units: 0, available: 0, withTour: 0 };
       return json;
     }),
     floors: floors.map((f) => {
@@ -242,7 +258,7 @@ export const listPublicUnits = async (slug: unknown) => {
 };
 
 const LISTING_PUBLIC_SELECT =
-  'title imageUrl images price listingType beds baths sqft createdByName createdByAgencyName status isNegotiable';
+  'title imageUrl images price listingType beds baths sqft createdByName createdByAgencyName status isNegotiable virtualTour360Url';
 
 /** GET /:slug/units/:unitId → { unit, development, listings } */
 export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => {
@@ -269,7 +285,7 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
     loadListingStatuses(related),
   ]);
   const listings = new Map(
-    listingDocs.map((l) => [String(l._id), { _id: l._id as mongoose.Types.ObjectId, status: l.status }])
+    listingDocs.map((l) => [String(l._id), { _id: l._id as mongoose.Types.ObjectId, status: l.status, virtualTour360Url: l.virtualTour360Url }])
   );
   const links = linkMaps([unit, ...related]);
   const ctx: UnitContext = { listings, buildingName: maps.buildingName, floorById: maps.floorById, links };

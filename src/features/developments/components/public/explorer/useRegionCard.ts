@@ -9,6 +9,8 @@ export interface BuildingFacts {
   units: number;
   available: number;
   floors: number;
+  /** Homes with a 360° virtual tour. */
+  withTour: number;
   priceFrom?: number;
   currency?: string;
 }
@@ -33,6 +35,8 @@ export function useRegionCard(
 ) {
   const { t } = useTranslation('developments');
 
+  const tourFact = (n: number): Fact => ({ label: t('explorer.tour.label', '360° tour'), value: t('explorer.tour.homes', { n, defaultValue: 'Homes: {{n}}' }) });
+
   return (h: Hotspot): RegionCardContent => {
     if (h.linkType === 'unit') {
       const unit = unitsById.get(h.linkId);
@@ -54,6 +58,7 @@ export function useRegionCard(
         });
         if (f.floors > 0) facts.push({ label: t('explorer.card.floors', 'Floors'), value: String(f.floors) });
         if (f.priceFrom) facts.push({ label: t('explorer.card.priceFrom', 'Prices from'), value: formatPrice(f.priceFrom, f.currency) });
+        if (f.withTour > 0) facts.push(tourFact(f.withTour));
       }
       return {
         title: b?.name || h.label || t('scene.linkTypes.building', 'Building'),
@@ -62,7 +67,13 @@ export function useRegionCard(
       };
     }
     if (h.linkType === 'floor') {
-      return { title: h.label || t('scene.linkTypes.floor', 'Floor'), actionLabel: t('explorer.card.exploreFloor', 'Explore floor') };
+      // Opening a floor: say up front how many of its homes can be toured in 360°.
+      const withTour = [...unitsById.values()].filter((u) => u.floorId === h.linkId && u.virtualTourUrl).length;
+      return {
+        title: h.label || t('scene.linkTypes.floor', 'Floor'),
+        facts: withTour > 0 ? [tourFact(withTour)] : undefined,
+        actionLabel: t('explorer.card.exploreFloor', 'Explore floor'),
+      };
     }
     if (h.linkType === 'listing') {
       const l = h.listing;
@@ -85,6 +96,7 @@ export function useRegionCard(
         if (typeof l.beds === 'number') facts.push({ label: t('explorer.card.rooms', 'Bedrooms'), value: l.beds === 0 ? t('explorer.studio', 'Studio') : String(l.beds) });
         if (typeof l.baths === 'number') facts.push({ label: t('explorer.card.baths', 'Bathrooms'), value: String(l.baths) });
         if (l.propertyType) facts.push({ label: t('explorer.card.type', 'Type'), value: t(`explorer.unitType.${l.propertyType}`, l.propertyType.replace(/_/g, ' ')) });
+        if (l.hasTour) facts.push({ label: t('explorer.tour.label', '360° tour'), value: t('explorer.tour.onListing', 'On the listing') });
       }
       const badge =
         l?.status === 'sold' ? t('availability.sold', 'Sold')
@@ -104,13 +116,14 @@ export function useRegionCard(
   };
 }
 
-/** Units, availability, floors and lowest public price per building. */
+/** Units, availability, floors, 360° tours and lowest public price per building. */
 export const computeBuildingFacts = (units: PublicUnit[]): Map<string, BuildingFacts> => {
   const m = new Map<string, BuildingFacts & { floorIds: Set<string> }>();
   for (const u of units) {
-    const f = m.get(u.buildingId) ?? { units: 0, available: 0, floors: 0, floorIds: new Set<string>() };
+    const f = m.get(u.buildingId) ?? { units: 0, available: 0, floors: 0, withTour: 0, floorIds: new Set<string>() };
     f.units += 1;
     if (u.availability === 'available') f.available += 1;
+    if (u.virtualTourUrl) f.withTour += 1;
     f.floorIds.add(u.floorId);
     if (!u.priceOnRequest && typeof u.price === 'number' && u.price > 0 && (f.priceFrom === undefined || u.price < f.priceFrom)) {
       f.priceFrom = u.price;

@@ -691,6 +691,29 @@ the Zillow sheet:
   (`useSheetMotion`); the rules (snap points, flick, who owns the gesture) are
   pure functions in `utils/sheetSnap.ts`. Desktop keeps the side drawer.
 
+## 7b-7. 360° virtual tours
+
+- **Own tour:** the unit editor has a *360° virtual tour* link (Matterport, Kuula,
+  Z360, …). Only plain http(s) links are accepted, on both sides
+  (`isUsableTourUrl` / `services/developments/unitTour.tourUrlProblem`):
+  no `javascript:`/`data:`, no user name or password, at most 2000 characters.
+  A refusal shows under the field (`URL_INVALID`).
+- **From the listing:** a unit without its own tour shows the tour of its public
+  listing (`virtualTour360Url`; the primary listing first, never a draft). The
+  editor says so ("Buyers see the 360° tour of the linked listing").
+- **Buyers see it:**
+  - a *360°* badge on the apartment's hover card and in its sheet, and on its
+    cell in the floor-by-floor plan;
+  - the building chip ("36 available · 360° ×2") and the building's hover card
+    count the homes with a tour (`stats.withTour`);
+  - a floor's hover card says how many of its homes have one;
+  - a region linked straight to a listing says "360° tour: on the listing"
+    (`listing.hasTour`, a flag only);
+  - the sheet's **Open the 360° tour** button opens it in a new tab
+    (`rel="noopener noreferrer"`), noting when it comes from the listing.
+- Public responses carry `virtualTourUrl` (the effective one) and `tourSource`
+  (`unit` | `listing`).
+
 ## 7b-3. Errors in the reader's language
 
 - **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.

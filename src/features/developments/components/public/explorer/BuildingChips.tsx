@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Rotate3d } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import type { DevelopmentBuilding } from '../../../types';
 
@@ -36,8 +37,15 @@ export const BuildingChips: React.FC<BuildingChipsProps> = ({ buildings, activeI
           >
             <span className="max-w-[12rem] truncate text-sm font-semibold leading-tight">{b.name}</span>
             {b.stats && (
-              <span className={cn('text-[11px] leading-tight', on ? 'text-white/85' : 'text-slate-500')}>
+              <span className={cn('flex items-center gap-1 text-[11px] leading-tight', on ? 'text-white/85' : 'text-slate-500')}>
                 {t('explorer.availableCount', { count: b.stats.available, defaultValue: '{{count}} available' })}
+                {(b.stats.withTour ?? 0) > 0 && (
+                  <span className={cn('inline-flex items-center gap-0.5 font-semibold', on ? 'text-white' : 'text-indigo-700')}>
+                    · <Rotate3d className="h-3 w-3" aria-hidden="true" />
+                    {t('explorer.tour.chip', { n: b.stats.withTour, defaultValue: '360° ×{{n}}' })}
+                    <span className="sr-only">{t('explorer.tour.chipLong', { n: b.stats.withTour, defaultValue: 'Homes with a 360° tour: {{n}}' })}</span>
+                  </span>
+                )}
               </span>
             )}
           </button>

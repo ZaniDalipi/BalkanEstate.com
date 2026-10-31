@@ -99,8 +99,8 @@ export interface DevelopmentBuilding {
   totalFloors?: number;
   basementLevels?: number;
   order: number;
-  /** Public availability summary (visible units only). */
-  stats?: { units: number; available: number };
+  /** Public availability summary (visible units only); `withTour` counts units with a 360° tour. */
+  stats?: { units: number; available: number; withTour?: number };
 }
 
 export interface DevelopmentFloor {
@@ -137,6 +137,11 @@ export interface DevelopmentUnit {
   viewType?: string;
   features?: string[];
   description?: string;
+  /**
+   * Link to a 360° virtual tour. In the dashboard: the unit's own link. In public
+   * responses: the tour buyers see (its own, else its linked listing's; see `tourSource`).
+   */
+  virtualTourUrl?: string;
   price?: number;
   currency?: string;
   pricePerSqm?: number;
@@ -319,6 +324,8 @@ export interface PublicUnit extends DevelopmentUnit {
   priceOnRequest?: boolean;
   /** Whether a published listing is attached (`primaryListingId` is then set). */
   hasListing?: boolean;
+  /** Where `virtualTourUrl` comes from: the unit itself or its linked listing. */
+  tourSource?: 'unit' | 'listing';
   /** For a parking spot / storage room: the units it is sold with. */
   soldWithUnitIds?: string[];
 }
@@ -401,6 +408,8 @@ export interface HotspotListingSummary {
   propertyType?: string;
   status?: string;
   imageUrl?: string;
+  /** The listing has a 360° virtual tour. */
+  hasTour?: boolean;
 }
 
 export interface SceneVersion {
@@ -554,7 +563,8 @@ export interface DashboardUnit extends DevelopmentUnit {
   buildingName?: string | null;
   floorLabel?: string | null;
   floorLevel?: number | null;
-  linkedListings: Array<{ id: string; title: string; status: string }>;
+  /** `hasTour`: the listing has a 360° tour (shown on the unit when it has none of its own). */
+  linkedListings: Array<{ id: string; title: string; status: string; hasTour?: boolean }>;
   /** For a parking spot / storage room: the units it comes with. */
   soldWith?: Array<{ id: string; unitNumber: string }>;
 }
@@ -614,6 +624,7 @@ export interface UpdateUnitPayload {
   /** With a change of availability: which of them take the same new status (the seller's choice). */
   alsoLinkedUnitIds?: string[];
   description?: string | null;
+  virtualTourUrl?: string | null;
   visibility?: UnitVisibility;
   priceVisibility?: PriceVisibility;
   price?: number | null;

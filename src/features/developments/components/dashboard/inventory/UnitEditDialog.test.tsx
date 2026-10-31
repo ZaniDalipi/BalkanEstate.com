@@ -53,11 +53,11 @@ const FLOORS = [
 ] as DevelopmentFloor[];
 
 const onClose = vi.fn();
-const renderDialog = (role?: string) =>
+const renderDialog = (role?: string, unit: DashboardUnit = UNIT) =>
   render(
     <NotificationProvider>
       <ConfirmationProvider>
-        <UnitEditDialog developmentId="dev1" unit={UNIT} role={role} buildings={BUILDINGS} floors={FLOORS} onClose={onClose} />
+        <UnitEditDialog developmentId="dev1" unit={unit} role={role} buildings={BUILDINGS} floors={FLOORS} onClose={onClose} />
       </ConfirmationProvider>
     </NotificationProvider>
   );
@@ -251,5 +251,41 @@ describe('UnitEditDialog', () => {
     await waitFor(() => expect(api.attachListing).toHaveBeenCalledWith('dev1', 'u1', 'l9', false));
     expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', expect.objectContaining({ beds: 3, totalArea: 95, orientation: 'southEast', viewType: 'sea' }));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  describe('360° tour link', () => {
+    const tourInput = () => screen.getByLabelText('inventory.tour.label') as HTMLInputElement;
+
+    it('saves a tour link for the unit', async () => {
+      renderDialog();
+      await userEvent.type(tourInput(), 'https://my.matterport.com/show/?m=abc');
+      await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+      await waitFor(() => expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { virtualTourUrl: 'https://my.matterport.com/show/?m=abc' }));
+    });
+
+    it('refuses something that is not a web address, next to the field, without saving', async () => {
+      renderDialog();
+      await userEvent.type(tourInput(), 'javascript:alert(1)');
+      await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+      await waitFor(() => expect(tourInput()).toHaveAttribute('aria-invalid', 'true'));
+      const message = document.getElementById(tourInput().getAttribute('aria-describedby') ?? '');
+      expect(message).toHaveAttribute('role', 'alert');
+      expect(message).toHaveTextContent('inventory.edit.errors.url');
+      expect(api.updateUnit).not.toHaveBeenCalled();
+    });
+
+    it('says when buyers see the linked listing’s tour instead', () => {
+      renderDialog(undefined, { ...UNIT, linkedListings: [{ id: 'l1', title: 'Flat', status: 'active', hasTour: true }] });
+      expect(screen.getByText('inventory.tour.fromListing')).toBeInTheDocument();
+      expect(screen.queryByText('inventory.tour.help')).toBeNull();
+    });
+
+    it('offers to open an existing link, and clearing it sends null', async () => {
+      renderDialog(undefined, { ...UNIT, virtualTourUrl: 'https://kuula.co/share/x' });
+      expect(screen.getByRole('link', { name: /inventory.tour.test/ })).toHaveAttribute('href', 'https://kuula.co/share/x');
+      await userEvent.clear(tourInput());
+      await userEvent.click(screen.getByRole('button', { name: 'inventory.edit.save' }));
+      await waitFor(() => expect(api.updateUnit).toHaveBeenCalledWith('dev1', 'u1', { virtualTourUrl: null }));
+    });
   });
 });

@@ -5,6 +5,7 @@ import { UnitIdentitySection, UnitSizeSection } from './UnitEditSections';
 import { UnitDetailsSection, UnitPricingSection } from './UnitPricingSection';
 import { UnitCompanionsSection } from './UnitCompanionsSection';
 import { LinkedStatusChoice } from './LinkedStatusChoice';
+import { UnitTourField } from './UnitTourField';
 
 interface UnitEditSectionsProps extends UnitSectionProps {
   developmentId: string;
@@ -21,6 +22,7 @@ export const UnitEditSections: React.FC<UnitEditSectionsProps> = ({ developmentI
     <UnitSizeSection {...section} />
     <UnitPricingSection {...section} />
     <UnitDetailsSection {...section} />
+    <UnitTourField {...section} unit={unit} />
     <UnitCompanionsSection {...section} developmentId={developmentId} unit={unit} />
   </>
 );

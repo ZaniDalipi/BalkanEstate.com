@@ -42,6 +42,7 @@ import { applyErrorMeta, type ErrorDetails } from './errorMeta';
 import { resolveEffectiveAvailability, type AvailabilitySource } from './unitAvailability';
 import { assertTypeChangeKeepsLinks, resolveLinkedUnits, unlinkEverywhere, UnitLinkConflictError } from './unitLinks';
 import { applyToLinkedUnits, linkedIdsOf, parseAlsoLinked } from './linkedAvailability';
+import { tourUrlProblem } from './unitTour';
 
 const log = createLogger('UnitAdminService');
 
@@ -71,7 +72,7 @@ export interface DashboardUnitJSON extends Record<string, unknown> {
   buildingName: string | null;
   floorLabel: string | null;
   floorLevel: number | null;
-  linkedListings: Array<{ id: string; title: string; status: string }>;
+  linkedListings: Array<{ id: string; title: string; status: string; hasTour: boolean }>;
   /** For a parking spot / storage room: the units it comes with (so the editor can show it is taken). */
   soldWith: Array<{ id: string; unitNumber: string }>;
 }
@@ -99,7 +100,7 @@ export const toDashboardUnits = async (
 
   const [listings, buildings, floors, owners] = await Promise.all([
     listingIds.length
-      ? Property.find({ _id: { $in: listingIds } }).select('title status').lean()
+      ? Property.find({ _id: { $in: listingIds } }).select('title status virtualTour360Url').lean()
       : Promise.resolve([]),
     DevelopmentBuilding.find({ _id: { $in: buildingIds }, developmentId }).select('name').lean(),
     DevelopmentFloor.find({ _id: { $in: floorIds }, developmentId }).select('label level').lean(),
@@ -135,6 +136,8 @@ export const toDashboardUnits = async (
         id: encodeId(String(l._id)),
         title: l.title ?? '',
         status: String(l.status ?? ''),
+        // The editor says when the unit shows its listing's tour instead of its own.
+        hasTour: typeof l.virtualTour360Url === 'string' && !!l.virtualTour360Url && !tourUrlProblem(l.virtualTour360Url),
       })),
       soldWith: owners
         .filter((o) => (o.linkedUnitIds ?? []).some((id) => String(id) === String(u._id)))
@@ -313,6 +316,7 @@ const STRING_FIELDS: Record<string, number> = {
   viewType: 60,
   description: 4000,
   currency: 8,
+  virtualTourUrl: 2000,
 };
 const REQUIRED_STRING_FIELDS: Record<string, number> = { unitNumber: 50, unitType: 60 };
 const UPDATABLE_FIELDS = [
@@ -324,6 +328,7 @@ const UPDATABLE_FIELDS = [
   'orientation',
   'viewType',
   'description',
+  'virtualTourUrl',
   'currency',
   'features',
   'visibility',

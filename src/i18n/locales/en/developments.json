@@ -415,7 +415,18 @@
     "noUnitsInBuilding": "No apartments are listed for this building yet.",
     "stackingPlan": "Apartments by floor",
     "unmarkedNote": "Apartments aren’t marked on this picture yet — choose one floor by floor below.",
-    "noUnitsHere": "No apartments are published in this building yet."
+    "noUnitsHere": "No apartments are published in this building yet.",
+    "tour": {
+      "badgeTitle": "Has a 360° virtual tour",
+      "open": "Open the 360° tour",
+      "newTab": "(opens in a new tab)",
+      "fromListing": "From this apartment’s listing.",
+      "label": "360° tour",
+      "onListing": "On the listing",
+      "homes": "Homes: {{n}}",
+      "chip": "360° ×{{n}}",
+      "chipLong": "Homes with a 360° tour: {{n}}"
+    }
   },
   "feature": {
     "big_terrace": "With big terrace",
@@ -783,7 +794,8 @@
         "integer": "Enter a whole number",
         "currency": "Use a 3-letter currency code, e.g. EUR",
         "tooLong": "This text is too long",
-        "choice": "Choose one of the options"
+        "choice": "Choose one of the options",
+        "url": "Enter a full web address starting with https://"
       },
       "notSet": "Not set",
       "euroOnly": "All prices are in euros (€).",
@@ -853,6 +865,13 @@
       "withDescription": "Description",
       "doneCreate": "From “{{title}}” — these details are added to the new unit when you click Add unit.",
       "linkCreate": "Also link this listing to the new unit"
+    },
+    "tour": {
+      "title": "360° virtual tour",
+      "label": "Tour link",
+      "test": "Open",
+      "fromListing": "Buyers see the 360° tour of the linked listing. Add a link here to show a different tour for this unit.",
+      "help": "Paste the share link of the tour (Matterport, Kuula, Z360 or another 360° viewer). Buyers see a 360° badge on this unit and can open the tour."
     }
   },
   "manage": {
