@@ -10,6 +10,8 @@ import { formatPrice } from '@/utils/currency';
 import { optimizeImageUrl } from '@/config/mediaConfig';
 import { useAppContext } from '@/context/AppContext';
 import AiMessageLimitModal from './AiMessageLimitModal';
+import { filterProperties } from '@/utils/propertyUtils';
+import { aiQueryToFilters } from '../ai/aiQueryToFilters';
 import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { navigate, localizePath } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -584,29 +586,6 @@ const EmptyState: React.FC<{ onSelect: (text: string) => void; onMicClick: () =>
 };
 
 // ============================================================================
-// HELPERS
-// ============================================================================
-// Strip diacritics so "Tirana" matches "Tiranë", "Durrës" matches "Durres", etc.
-const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-function filterPropertiesByQuery(properties: Property[], query: AiSearchQuery): Property[] {
-    return properties.filter(p => {
-        if (query.country && !normalize(p.country || '').includes(normalize(query.country))) return false;
-        if (query.location && !normalize(p.city || '').includes(normalize(query.location)) && !normalize(p.address || '').includes(normalize(query.location))) return false;
-        if (query.minPrice && p.price < query.minPrice) return false;
-        if (query.maxPrice && p.price > query.maxPrice) return false;
-        if (query.beds && p.beds < query.beds) return false;
-        if (query.baths && p.baths < query.baths) return false;
-        if (query.livingRooms && p.livingRooms < query.livingRooms) return false;
-        if (query.minSqft && p.sqft < query.minSqft) return false;
-        if (query.maxSqft && p.sqft > query.maxSqft) return false;
-        if (query.propertyType && query.propertyType !== 'commercial' && p.propertyType !== query.propertyType) return false;
-        if (query.sellerType && p.seller?.type !== query.sellerType) return false;
-        return true;
-    });
-}
-
-// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobile, history, onHistoryChange }) => {
@@ -647,10 +626,9 @@ const AiSearch: React.FC<AiSearchProps> = ({ properties, onApplyFilters, isMobil
 
     const matchedProperties = useMemo(() => {
         if (!finalQuery) return [];
-        const filtered = filterPropertiesByQuery(properties, finalQuery);
-        // Use filtered results if any match; otherwise show currently loaded
-        // properties (the auto-apply above refreshes them for the right area).
-        return (filtered.length > 0 ? filtered : properties).slice(0, 15);
+        // Only listings that meet every criterion — never a near miss. The
+        // auto-apply above reloads the area, so matches arrive as it does.
+        return filterProperties(properties, aiQueryToFilters(finalQuery)).slice(0, 15);
     }, [finalQuery, properties]);
 
     // Auto-show swipe cards when properties are found

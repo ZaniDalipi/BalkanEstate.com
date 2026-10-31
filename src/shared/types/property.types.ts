@@ -355,6 +355,10 @@ export interface Filters {
   maxDaysListed: number | null;
   /** Unset in filters saved before it existed; read as 'available'. */
   saleStatus?: SaleStatusFilter;
+  /** Unset in filters saved before it existed; read as 'any'. */
+  constructionStatus?: 'any' | ConstructionStatus;
+  /** Minimum number of kitchens. Unset in filters saved before it existed. */
+  minKitchens?: number | null;
 }
 
 export const initialFilters: Filters = {

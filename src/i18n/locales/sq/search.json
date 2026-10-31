@@ -77,7 +77,9 @@
     "last7Days": "7 ditët e fundit",
     "last30Days": "30 ditët e fundit",
     "priceReduced": "Çmim i ulur",
-    "priceIncreased": "Çmim i rritur"
+    "priceIncreased": "Çmim i rritur",
+    "constructionStatus": "Ndërtimi",
+    "kitchens": "Kuzhina"
   },
   "options": {
     "any": "Çdo",
@@ -648,5 +650,9 @@
     "climateRiskLayer": {
       "veryHigh": "Shumë i lartë"
     }
+  },
+  "constructionOptions": {
+    "ready": "Gati për banim",
+    "underConstruction": "Në ndërtim"
   }
 }

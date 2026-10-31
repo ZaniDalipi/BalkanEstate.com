@@ -437,6 +437,33 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             </div>
                         </div>
 
+                        {/* Construction status */}
+                        <div>
+                            <FilterLabel icon="wrench">{t('search:filters.constructionStatus', 'Construction')}</FilterLabel>
+                            <select
+                                value={filters.constructionStatus ?? 'any'}
+                                onChange={(e) => onFilterChange('constructionStatus', e.target.value as NonNullable<Filters['constructionStatus']>)}
+                                className={inputBaseClasses}
+                            >
+                                <option value="any">{t('search:options.any')}</option>
+                                <option value="ready">{t('search:constructionOptions.ready', 'Ready to move in')}</option>
+                                <option value="under-construction">{t('search:constructionOptions.underConstruction', 'Under construction')}</option>
+                            </select>
+                        </div>
+
+                        {/* Kitchens */}
+                        <FilterButtonGroup
+                            label={t('search:filters.kitchens', 'Kitchens')}
+                            icon="kitchen"
+                            options={[
+                                {value: null, label: t('search:options.any')},
+                                {value: 1, label: '1+'},
+                                {value: 2, label: '2+'},
+                            ]}
+                            selectedValue={filters.minKitchens ?? null}
+                            onChange={(value) => onFilterChange('minKitchens', value)}
+                        />
+
                         {/* Parking */}
                         <FilterButtonGroup
                             label={t('search:filters.parkingSpaces')}

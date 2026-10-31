@@ -77,7 +77,9 @@
     "last7Days": "Последните 7 дена",
     "last30Days": "Последните 30 дена",
     "priceReduced": "Намалена цена",
-    "priceIncreased": "Зголемена цена"
+    "priceIncreased": "Зголемена цена",
+    "constructionStatus": "Градба",
+    "kitchens": "Кујни"
   },
   "options": {
     "any": "Било кој",
@@ -648,5 +650,9 @@
     "climateRiskLayer": {
       "veryHigh": "Многу висок"
     }
+  },
+  "constructionOptions": {
+    "ready": "Подготвено за вселување",
+    "underConstruction": "Во изградба"
   }
 }

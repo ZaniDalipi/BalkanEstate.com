@@ -1,6 +1,7 @@
 import { Property, Filters } from '../types';
 import { BALKAN_COUNTRIES } from '../constants/countries';
 import { createPropertyMatcher, rankProperties } from '../src/shared/search';
+import { normalizeConstructionStatus } from '../src/shared/property/construction';
 
 /**
  * `base` plus every listing of `extra` it does not already hold. Used to fold
@@ -62,6 +63,11 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const bedsMatch = filters.beds ? p.beds >= filters.beds : true;
         const bathsMatch = filters.baths ? p.baths >= filters.baths : true;
         const livingRoomsMatch = filters.livingRooms ? p.livingRooms >= filters.livingRooms : true;
+        const kitchensMatch = filters.minKitchens ? (p.kitchens ?? 0) >= filters.minKitchens : true;
+        const constructionStatus = filters.constructionStatus ?? 'any';
+        const constructionMatch = constructionStatus !== 'any'
+            ? normalizeConstructionStatus(p.constructionStatus) === constructionStatus
+            : true;
         const minSqftMatch = filters.minSqft ? p.sqft >= filters.minSqft : true;
         const maxSqftMatch = filters.maxSqft ? p.sqft <= filters.maxSqft : true;
         const sellerTypeMatch = filters.sellerType !== 'any' ? p.seller.type === filters.sellerType : true;
@@ -131,7 +137,8 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         // Amenities filter - check if property has all required amenities (bidirectional substring matching)
         const amenitiesMatch = filters.amenities && filters.amenities.length > 0 ?
             filters.amenities.every(amenity => {
-                const propertyAmenities = p.amenities || [];
+                // A listing may state it under amenities or special features.
+                const propertyAmenities = [...(p.amenities || []), ...(p.specialFeatures || [])];
                 const searchTerm = (amenity || '').toLowerCase().trim();
                 if (!searchTerm) return true;
                 return propertyAmenities.some(pAmenity => {
@@ -152,6 +159,8 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
                bedsMatch &&
                bathsMatch &&
                livingRoomsMatch &&
+               kitchensMatch &&
+               constructionMatch &&
                sellerTypeMatch &&
                propertyTypeMatch &&
                minSqftMatch &&

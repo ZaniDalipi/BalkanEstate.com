@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import { apiLogger } from '../utils/logger';
+import { AI_SEARCH_QUERY_SCHEMA, AI_SEARCH_RULES, sanitizeAiSearchQuery } from './aiSearchQuery';
 import { PROPERTY_IMAGE_TAGS, type PropertyImageTag } from '../config/propertyImageTags';
 
 // Target long-edge (px) for the high-quality downloadable restyle image.
@@ -795,6 +796,9 @@ export const getAiChatResponse = async (
     baths: p.baths,
     livingRooms: p.livingRooms,
     sqft: p.sqft,
+    propertyType: p.propertyType,
+    floorNumber: p.floorNumber,
+    amenities: p.amenities,
     specialFeatures: p.specialFeatures,
   }));
 
@@ -836,10 +840,11 @@ export const getAiChatResponse = async (
             - After showing results, the user may say "show me cheaper ones", "what about 2 bedrooms?", "try Belgrade instead" — handle these as refinements by updating searchQuery and setting isFinalQuery: true again.
             - ALWAYS keep the conversation going. Never end with a dead-end response.
         8.  **Respond in JSON.**
+        ${AI_SEARCH_RULES}
 
         **JSON Output:**
         - \`responseMessage\`: Your friendly message in the user's language. Always end with an invitation to continue.
-        - \`searchQuery\`: Object with: location, country, minPrice, maxPrice, beds, baths, livingRooms, minSqft, maxSqft, propertyType, sellerType, features. Set to null if no useful info yet.
+        - \`searchQuery\`: Object with every criterion the user gave (see the schema: location, country, listingType, price and area ranges, rooms, kitchens, propertyType, sellerType, year built, constructionStatus, parking, floor range, furnishing, heatingType, condition, viewType, energyRating, yes/no features, distances, amenities). Set to null if no useful info yet.
         - \`isFinalQuery\`: true = search ready (have at least location or country), false = still need basic info.
 
         **Example Interactions:**
@@ -879,6 +884,20 @@ export const getAiChatResponse = async (
           "isFinalQuery": true
         }
 
+        User: "Apartment in Tirana, exactly 76 m2, 1 bedroom, under 200k, under construction, one kitchen, electric floor heating, floor 15, A+ energy, panoramic view, less than 0.5 km from a school"
+        {
+          "responseMessage": "Here are apartments in Tirana of exactly 76 m² with 1+ bedroom and 1+ kitchen, under €200,000, under construction, on floor 15, with electric floor heating, A+ energy rating, a panoramic view and a school within 0.5 km. Want me to adjust anything?",
+          "searchQuery": { "location": "Tirana", "country": "Albania", "propertyType": "apartment", "minSqft": 76, "maxSqft": 76, "beds": 1, "kitchens": 1, "maxPrice": 200000, "constructionStatus": "under-construction", "heatingType": "electric", "minFloorNumber": 15, "maxFloorNumber": 15, "energyRating": "A+", "maxDistanceToSchool": 0.5, "amenities": ["floor heating", "panoramic view"] },
+          "isFinalQuery": true
+        }
+
+        User: "flat in Belgrade between 50 and 70 m2 with a balcony and parking, 100-150k"
+        {
+          "responseMessage": "Here are apartments in Belgrade between 50 and 70 m², priced €100,000–€150,000, with a balcony and at least one parking space. Anything else?",
+          "searchQuery": { "location": "Belgrade", "country": "Serbia", "propertyType": "apartment", "minSqft": 50, "maxSqft": 70, "minPrice": 100000, "maxPrice": 150000, "hasBalcony": true, "minParking": 1 },
+          "isFinalQuery": true
+        }
+
         User: "show me what you got"
         {
           "responseMessage": "Here's everything I have — take a look! Let me know if you want to filter by location, price, or anything else.",
@@ -904,34 +923,7 @@ export const getAiChatResponse = async (
     type: Type.OBJECT,
     properties: {
       responseMessage: { type: Type.STRING, description: 'Your friendly, natural language message to the user.' },
-      searchQuery: {
-        type: Type.OBJECT,
-        nullable: true,
-        properties: {
-          location: { type: Type.STRING, description: 'The city or area to search in.' },
-          country: { type: Type.STRING, description: 'The country name (Albania, Serbia, Croatia, etc.).' },
-          minPrice: { type: Type.NUMBER },
-          maxPrice: { type: Type.NUMBER },
-          beds: { type: Type.INTEGER },
-          baths: { type: Type.INTEGER },
-          livingRooms: { type: Type.INTEGER },
-          minSqft: { type: Type.NUMBER, description: 'The minimum size in square meters.' },
-          maxSqft: { type: Type.NUMBER, description: 'The maximum size in square meters.' },
-          propertyType: {
-            type: Type.STRING,
-            nullable: true,
-            enum: ['house', 'apartment', 'villa', 'luxury-villa', 'commercial', 'parking', 'land'],
-            description: 'ONLY set if user explicitly mentions property type (house, apartment, etc). Must be null if not mentioned.'
-          },
-          sellerType: {
-            type: Type.STRING,
-            nullable: true,
-            enum: ['agent', 'private'],
-            description: 'ONLY set if user explicitly says "private seller", "from owner", "agent", etc. Must be null if not mentioned.'
-          },
-          features: { type: Type.ARRAY, items: { type: Type.STRING } },
-        },
-      },
+      searchQuery: AI_SEARCH_QUERY_SCHEMA,
       isFinalQuery: { type: Type.BOOLEAN, description: 'True if the searchQuery is ready to be executed.' },
     },
     required: ['responseMessage', 'searchQuery', 'isFinalQuery'],
@@ -956,15 +948,10 @@ export const getAiChatResponse = async (
     const jsonText = result.text.trim();
     const parsedResult = JSON.parse(jsonText);
 
-    // Strip null/undefined values from searchQuery so the frontend
-    // doesn't treat them as explicitly set filters
-    if (parsedResult.searchQuery) {
-      for (const key of Object.keys(parsedResult.searchQuery)) {
-        if (parsedResult.searchQuery[key] === null || parsedResult.searchQuery[key] === undefined) {
-          delete parsedResult.searchQuery[key];
-        }
-      }
-    }
+    // Keep only well-formed, known criteria: nulls and malformed values would
+    // otherwise reach the client as filters the user never asked for.
+    parsedResult.searchQuery = sanitizeAiSearchQuery(parsedResult.searchQuery);
+    if (parsedResult.isFinalQuery && !parsedResult.searchQuery) parsedResult.searchQuery = {};
 
     return parsedResult as AiChatResponse;
   } catch (_e) {

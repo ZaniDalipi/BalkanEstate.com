@@ -8,6 +8,7 @@ import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { outOfAreaFallback, type OutOfAreaKind } from '../outOfArea';
 import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
+import { aiQueryToFilters, countryKeyFromAi } from '../ai/aiQueryToFilters';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
@@ -860,70 +861,10 @@ export function useSearchPage() {
     }, []);
 
     const handleApplyAiFilters = useCallback(async (aiQuery: AiSearchQuery) => {
-        // Map for normalizing country names to our key format
-        const countryNameToKey: Record<string, string> = {
-            'albania': 'albania',
-            'bosnia': 'bosnia-herzegovina',
-            'bosnia and herzegovina': 'bosnia-herzegovina',
-            'bulgaria': 'bulgaria',
-            'croatia': 'croatia',
-            'greece': 'greece',
-            'kosovo': 'kosovo',
-            'montenegro': 'montenegro',
-            'north macedonia': 'north-macedonia',
-            'macedonia': 'north-macedonia',
-            'romania': 'romania',
-            'serbia': 'serbia',
-        };
-
-        // Check if a string is a country name
-        const isCountryName = (str?: string): boolean => {
-            if (!str) return false;
-            return str.toLowerCase() in countryNameToKey;
-        };
-
-        // Get normalized country key from name
-        const normalizeCountryFromAi = (country?: string): string => {
-            if (!country) return 'any';
-            return countryNameToKey[country.toLowerCase()] || 'any';
-        };
-
-        // Determine the country key - from explicit country field or from location if it's a country name
-        const countryFromLocation = aiQuery.location && isCountryName(aiQuery.location)
-            ? normalizeCountryFromAi(aiQuery.location)
-            : null;
-        const countryKey = normalizeCountryFromAi(aiQuery.country) !== 'any'
-            ? normalizeCountryFromAi(aiQuery.country)
-            : countryFromLocation || 'any';
-
-        // Only put city/area in query, not country names
-        const locationIsCountry = aiQuery.location && isCountryName(aiQuery.location);
-        const queryValue = locationIsCountry ? '' : (aiQuery.location || '');
-
-        // Only include fields that were explicitly provided by the AI
-        // Don't override defaults with AI-generated values the user didn't request
-        const newFilters: Partial<Filters> = {
-            query: queryValue,
-            country: countryKey,
-            minPrice: aiQuery.minPrice || null,
-            maxPrice: aiQuery.maxPrice || null,
-            beds: aiQuery.beds || null,
-            baths: aiQuery.baths || null,
-            livingRooms: aiQuery.livingRooms || null,
-            minSqft: aiQuery.minSqft || null,
-            maxSqft: aiQuery.maxSqft || null,
-        };
-
-        // Only set propertyType if AI explicitly provided it
-        if (aiQuery.propertyType) {
-            newFilters.propertyType = aiQuery.propertyType === 'commercial' ? 'other' : aiQuery.propertyType;
-        }
-
-        // Only set sellerType if AI explicitly provided it (user asked for agent/private)
-        if (aiQuery.sellerType) {
-            newFilters.sellerType = aiQuery.sellerType;
-        }
-        const updatedFilters = { ...initialFilters, ...newFilters };
+        // Every criterion the AI understood becomes a filter; see aiQueryToFilters.
+        const updatedFilters = aiQueryToFilters(aiQuery);
+        const countryKey = updatedFilters.country;
+        const locationIsCountry = countryKeyFromAi(aiQuery.location) !== null;
 
         updateSearchPageState({ filters: updatedFilters, activeFilters: updatedFilters, searchMode: 'manual', isAiChatModalOpen: false });
         updateSearchPageState({ isFiltersOpen: false });

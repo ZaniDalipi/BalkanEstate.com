@@ -38,6 +38,10 @@ export interface IFilters {
   maxDistanceToSchool: number | null;
   maxDistanceToHospital: number | null;
   amenities: string[];
+  /** Absent on searches saved before it existed; read as 'any'. */
+  constructionStatus?: 'any' | 'ready' | 'under-construction';
+  /** Absent on searches saved before it existed. */
+  minKitchens?: number | null;
 }
 
 export interface ISavedSearch extends Document {

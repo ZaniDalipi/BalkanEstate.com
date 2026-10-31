@@ -580,6 +580,10 @@ export interface Filters {
     maxDistanceToHospital: number | null; // in km
     amenities: string[]; // Array of amenity tags to filter by
     saleStatus?: SaleStatusFilter; // Unset in filters saved before it existed; read as 'available'
+    /** Unset in filters saved before it existed; read as 'any'. */
+    constructionStatus?: 'any' | ConstructionStatus;
+    /** Minimum number of kitchens. Unset in filters saved before it existed. */
+    minKitchens?: number | null;
 }
 
 export const initialFilters: Filters = {
@@ -647,18 +651,57 @@ export interface ChatMessage {
     text: string;
 }
 
+/**
+ * What the AI assistant understood from the conversation. Every field a
+ * listing can be searched by has a slot here, so nothing the user asked for is
+ * dropped on the way to the filters. Ranges are min/max pairs: an exact value
+ * ("76 m²", "floor 15") is sent with min and max equal. Turned into `Filters`
+ * by `aiQueryToFilters`.
+ */
 export interface AiSearchQuery {
     location?: string;
     country?: string;
+    listingType?: ListingType;
     minPrice?: number;
     maxPrice?: number;
     beds?: number;
     baths?: number;
     livingRooms?: number;
+    kitchens?: number;
     minSqft?: number;
     maxSqft?: number;
+    minPricePerSqm?: number;
+    maxPricePerSqm?: number;
     propertyType?: 'house' | 'apartment' | 'villa' | 'luxury-villa' | 'commercial' | 'parking' | 'land';
     sellerType?: 'agent' | 'private';
+    minYearBuilt?: number;
+    maxYearBuilt?: number;
+    constructionStatus?: ConstructionStatus;
+    minParking?: number;
+    minFloorNumber?: number;
+    maxFloorNumber?: number;
+    furnishing?: Exclude<FurnishingStatus, 'any'>;
+    heatingType?: Exclude<HeatingType, 'any'>;
+    condition?: Exclude<PropertyCondition, 'any'>;
+    viewType?: Exclude<ViewType, 'any'>;
+    energyRating?: Exclude<EnergyRating, 'any'>;
+    hasBalcony?: boolean;
+    hasGarden?: boolean;
+    hasElevator?: boolean;
+    hasSecurity?: boolean;
+    hasAirConditioning?: boolean;
+    hasPool?: boolean;
+    petsAllowed?: boolean;
+    has360Tour?: boolean;
+    hasDiscount?: boolean;
+    maxDaysListed?: number;
+    maxDistanceToCenter?: number;
+    maxDistanceToSea?: number;
+    maxDistanceToSchool?: number;
+    maxDistanceToHospital?: number;
+    /** Anything else the listing must have ("floor heating", "panoramic view"). */
+    amenities?: string[];
+    /** Older name for `amenities`; still read so a cached reply keeps working. */
     features?: string[];
 }
 

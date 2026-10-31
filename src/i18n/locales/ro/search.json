@@ -77,7 +77,9 @@
     "last7Days": "Ultimele 7 zile",
     "last30Days": "Ultimele 30 de zile",
     "priceReduced": "Preț redus",
-    "priceIncreased": "Preț crescut"
+    "priceIncreased": "Preț crescut",
+    "constructionStatus": "Construcție",
+    "kitchens": "Bucătării"
   },
   "options": {
     "any": "Oricare",
@@ -648,5 +650,9 @@
     "climateRiskLayer": {
       "veryHigh": "Foarte ridicat"
     }
+  },
+  "constructionOptions": {
+    "ready": "Gata de mutare",
+    "underConstruction": "În construcție"
   }
 }

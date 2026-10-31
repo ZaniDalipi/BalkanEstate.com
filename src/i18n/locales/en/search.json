@@ -93,7 +93,9 @@
     "last7Days": "Last 7 days",
     "last30Days": "Last 30 days",
     "priceReduced": "Price Reduced",
-    "priceIncreased": "Price Increased"
+    "priceIncreased": "Price Increased",
+    "constructionStatus": "Construction",
+    "kitchens": "Kitchens"
   },
   "options": {
     "any": "Any",
@@ -658,5 +660,9 @@
     "climateRiskLayer": {
       "veryHigh": "Very High"
     }
+  },
+  "constructionOptions": {
+    "ready": "Ready to move in",
+    "underConstruction": "Under construction"
   }
 }

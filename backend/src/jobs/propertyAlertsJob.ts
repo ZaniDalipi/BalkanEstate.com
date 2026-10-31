@@ -11,6 +11,7 @@
 import Property, { IProperty } from '../models/Property';
 import SavedSearch, { IFilters } from '../models/SavedSearch';
 import { cronLogger } from '../utils/logger';
+import { normalizeConstructionStatus } from '../utils/constructionStatus';
 import Favorite from '../models/Favorite';
 import PropertyAlert from '../models/PropertyAlert';
 import PriceHistory from '../models/PriceHistory';
@@ -86,6 +87,11 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   if (filters.beds && (property.beds ?? 0) < filters.beds) return false;
   if (filters.baths && (property.baths ?? 0) < filters.baths) return false;
   if (filters.livingRooms && (property.livingRooms ?? 0) < filters.livingRooms) return false;
+  if (filters.minKitchens && (property.kitchens ?? 0) < filters.minKitchens) return false;
+
+  // Construction status. A listing without the field is a finished one.
+  if (filters.constructionStatus && filters.constructionStatus !== 'any'
+    && normalizeConstructionStatus(property.constructionStatus) !== filters.constructionStatus) return false;
 
   // Square footage
   if (filters.minSqft && property.sqft < filters.minSqft) return false;
