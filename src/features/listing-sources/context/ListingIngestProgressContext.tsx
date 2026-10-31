@@ -211,7 +211,7 @@ export const ListingIngestProgressProvider: React.FC<{ children: React.ReactNode
   }, [socket]);
 
   const startPreview = useCallback(
-    async (sourceId: string, sourceName: string, limit = 100): Promise<void> => {
+    async (sourceId: string, sourceName: string, limit?: number): Promise<void> => {
       setFetchingPreviews((prev) => {
         const next = new Map(prev);
         next.set(sourceId, { sourceId, sourceName, startedAt: Date.now() });

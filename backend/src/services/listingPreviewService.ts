@@ -2,6 +2,7 @@ import Property from '../models/Property';
 import { getAdapter } from './listingAdapters';
 import type { IListingSource } from '../models/ListingSource';
 import type { RawListing } from './listingAdapters/types';
+import { extractMappedFields, parsePriceAmount } from './listingNormalizerService';
 
 export interface PreviewListing {
   rawId: string;
@@ -102,22 +103,25 @@ const isLikelyListingHtml = (html: string, hasTitle: boolean): boolean => {
   return false;
 };
 
-const extractPreviewItem = (raw: RawListing): Omit<PreviewListing, 'isNew'> => {
+const firstImage = (mapped: Record<string, unknown>): string | undefined => {
+  const imgs = mapped.images;
+  if (Array.isArray(imgs) && imgs.length) {
+    const first = imgs[0];
+    return str(typeof first === 'object' && first ? (first as Record<string, unknown>).url : first);
+  }
+  return str(mapped.imageUrl ?? mapped.image);
+};
+
+/**
+ * Preview card for one raw listing, built with the same field mapping the
+ * real import uses (field map → detail page → attribute-by-attribute pass),
+ * so what the user approves is what gets imported.
+ */
+const extractPreviewItem = (raw: RawListing, source: IListingSource): Omit<PreviewListing, 'isNew'> => {
   const r = raw.raw;
-  const loc = r.location as Record<string, unknown> | undefined;
+  const mapped = extractMappedFields(raw, source);
 
-  const title = str(r.title ?? r.name ?? r.naslov ?? r.naziv);
-  const price = num(r.price ?? r.Price ?? r.asking_price ?? r.priceEur ?? r.price_eur);
-  const city = str(r.city ?? r.grad ?? loc?.city ?? (typeof r.location === 'string' ? r.location : undefined));
-  const country = str(r.country ?? r.zemlja ?? r.drzava);
-  const propertyType = str(r.propertyType ?? r.property_type ?? r.type ?? r.tip);
-  const beds = num(r.beds ?? r.bedrooms ?? r.sobe);
-  const baths = num(r.baths ?? r.bathrooms ?? r.kupatila);
-  const sqft = num(r.sqft ?? r.sqm ?? r.m2 ?? r.area ?? r.surface);
-  const imgs = Array.isArray(r.images) ? (r.images as unknown[]) : [];
-
-  let imageUrl = str(r.imageUrl ?? r.image_url ?? r.image ?? r.photo ?? r.thumbnail ?? imgs[0]);
-
+  let imageUrl = firstImage(mapped);
   // For HTML-scraped items the raw fields may be absent; fall back to the
   // OpenGraph image tag embedded in the fetched detail page HTML.
   if (!imageUrl && typeof r.detailHtml === 'string') {
@@ -125,7 +129,19 @@ const extractPreviewItem = (raw: RawListing): Omit<PreviewListing, 'isNew'> => {
     if (m) imageUrl = str(m[1] ?? m[2]);
   }
 
-  return { rawId: raw.id, title, price, city, country, propertyType, beds, baths, sqft, imageUrl, sourceUrl: raw.url };
+  return {
+    rawId: raw.id,
+    title: str(mapped.title),
+    price: parsePriceAmount(mapped.price),
+    city: str(mapped.city),
+    country: str(mapped.country),
+    propertyType: str(mapped.propertyType),
+    beds: num(parseFloat(String(mapped.beds ?? ''))),
+    baths: num(parseFloat(String(mapped.baths ?? ''))),
+    sqft: num(parseFloat(String(mapped.sqft ?? '').replace(',', '.'))),
+    imageUrl,
+    sourceUrl: raw.url ?? str(mapped.sourceUrl),
+  };
 };
 
 export const previewSource = async (
@@ -158,7 +174,7 @@ export const previewSource = async (
   }
 
   const items: PreviewListing[] = raws.map((raw) => ({
-    ...extractPreviewItem(raw),
+    ...extractPreviewItem(raw, source),
     isNew: !existingIds.has(raw.id),
   }));
 

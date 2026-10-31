@@ -5,6 +5,7 @@ import type { IProperty, IPropertyImage } from '../models/Property';
 import type { RawListing } from './listingAdapters';
 import { geocodeAddress } from './geocodingService';
 import { uploadFromUrl } from './mediaService';
+import { fillFromRecordAttributes } from './listingAttributes/recordAttributes';
 import { enrichFromDetailHtml } from './listingHtmlEnricher';
 import { CITY_SLUG_MAP, COUNTRY_SLUG_MAP } from './locationLookup';
 import User from '../models/User';
@@ -454,6 +455,38 @@ const applyFieldMap = (raw: RawListing, source: IListingSource): Record<string, 
   return out;
 };
 
+/**
+ * Every canonical field we can read from one raw listing, before parsing:
+ * the source's field map first, then the detail page (JSON-LD, OpenGraph,
+ * label/value blocks), then an attribute-by-attribute pass over the raw
+ * record. Pure — no network, no database — so the preview can share it.
+ */
+export const extractMappedFields = (raw: RawListing, source: IListingSource): Record<string, unknown> => {
+  const mapped = applyFieldMap(raw, source);
+
+  // Adapters that fetch a per-listing HTML detail page (e.g. HtmlScrapeAdapter
+  // with followDetails=true) attach the raw HTML at raw.raw.detailHtml. Pull
+  // every structured-data signal we can find from it (JSON-LD, OpenGraph,
+  // microdata, image galleries) without overwriting fields the index card
+  // already supplied — those are typically more accurate.
+  const detailHtml = (raw.raw as Record<string, unknown> | undefined)?.detailHtml;
+  if (typeof detailHtml === 'string' && detailHtml.length > 0) {
+    enrichFromDetailHtml(detailHtml, raw.url ?? source.baseUrl ?? '', mapped);
+  }
+
+  // Attribute-by-attribute pass over the whole raw record: any key the field
+  // map didn't cover (bathrooms, living rooms, floor, heating…) is recognised
+  // by name in every supported language and filled in when still empty.
+  fillFromRecordAttributes(raw.raw, mapped);
+
+  // Don't carry the raw HTML blob into sourceMetadata — it's huge and adds nothing.
+  if ('detailHtml' in mapped) delete mapped.detailHtml;
+  return mapped;
+};
+
+/** Numeric price of a raw price value ("150.000 €", 150000, "EUR 1,2M"), or undefined. */
+export const parsePriceAmount = (input: unknown): number | undefined => parsePrice(input)?.price;
+
 interface NormalizeOptions {
   rehostImages?: boolean;
 }
@@ -725,20 +758,7 @@ export const normalize = async (
   source: IListingSource,
   opts: NormalizeOptions = {}
 ): Promise<Partial<IProperty>> => {
-  const mapped = applyFieldMap(raw, source);
-
-  // Adapters that fetch a per-listing HTML detail page (e.g. HtmlScrapeAdapter
-  // with followDetails=true) attach the raw HTML at raw.raw.detailHtml. Pull
-  // every structured-data signal we can find from it (JSON-LD, OpenGraph,
-  // microdata, image galleries) without overwriting fields the index card
-  // already supplied — those are typically more accurate.
-  const detailHtml = (raw.raw as Record<string, unknown> | undefined)?.detailHtml;
-  if (typeof detailHtml === 'string' && detailHtml.length > 0) {
-    enrichFromDetailHtml(detailHtml, raw.url ?? source.baseUrl ?? '', mapped);
-  }
-
-  // Don't carry the raw HTML blob into sourceMetadata — it's huge and adds nothing.
-  if ('detailHtml' in mapped) delete mapped.detailHtml;
+  const mapped = extractMappedFields(raw, source);
 
   let parsedPrice = parsePrice(mapped.price);
   // Reject implausible prices from the field map (e.g. price field actually

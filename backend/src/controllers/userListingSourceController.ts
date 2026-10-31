@@ -12,6 +12,7 @@ import {
   detectFeedForUrlWithAuth,
 } from '../services/listingDetectorService';
 import { resolveId } from '../utils/idObfuscation';
+import { FEED_PREVIEW_MAX, FEED_SYNC_MAX, parseListingLimit } from '../utils/listingFetchLimit';
 import type { RawListing } from '../services/listingAdapters/types';
 
 /**
@@ -243,18 +244,12 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
 
   // Validate query params at the API boundary
   const fullRefresh = req.query.fullRefresh === 'true';
-  let limit = 50;
-  if (req.query.limit !== undefined) {
-    const parsed = Number(req.query.limit);
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      res.status(400).json({
-        message: 'limit must be a positive integer between 1 and 200',
-        code: 'INVALID_LIMIT',
-      });
-      return;
-    }
-    limit = Math.max(1, Math.min(200, Math.floor(parsed)));
+  const parsedLimit = parseListingLimit(req.query.limit, FEED_SYNC_MAX);
+  if (parsedLimit.ok === false) {
+    res.status(400).json({ message: parsedLimit.error, code: 'INVALID_LIMIT' });
+    return;
   }
+  const limit = parsedLimit.value;
 
   try {
     const stats = await runSource(source, { fullRefresh, limit });
@@ -272,7 +267,7 @@ export const runNow = async (req: Request, res: Response): Promise<void> => {
  * POST /api/listing-sources/:id/preview
  * Fetch listings from the adapter without saving anything. Returns a previewId
  * and array of display items so the user can review/select before importing.
- * Limited to 100 items by default to keep the review modal manageable.
+ * Fetches the whole feed (every page) by default, up to FEED_PREVIEW_MAX.
  */
 export const preview = async (req: Request, res: Response): Promise<void> => {
   const userId = requireUserId(req, res);
@@ -293,18 +288,12 @@ export const preview = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  let limit = 50;
-  if (req.query.limit !== undefined) {
-    const parsed = Number(req.query.limit);
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      res.status(400).json({
-        message: 'limit must be a positive integer between 1 and 200',
-        code: 'INVALID_LIMIT',
-      });
-      return;
-    }
-    limit = Math.max(1, Math.min(200, Math.floor(parsed)));
+  const parsedLimit = parseListingLimit(req.query.limit, FEED_PREVIEW_MAX);
+  if (parsedLimit.ok === false) {
+    res.status(400).json({ message: parsedLimit.error, code: 'INVALID_LIMIT' });
+    return;
   }
+  const limit = parsedLimit.value;
 
   try {
     const result = await previewSource(source, limit);
