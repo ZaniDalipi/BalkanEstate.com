@@ -4,10 +4,15 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { languages, getCurrentLanguage, type LanguageCode } from '../i18n';
 import { changeLanguage } from '../app/router/navigation';
 import { NavPicture } from '@/src/shared/illustrations';
+import { useAnchoredMenuPosition } from './useAnchoredMenuPosition';
+
+/** Width of the sidebar menu, `w-56`. */
+const SIDEBAR_MENU_WIDTH = 224;
 
 interface LanguageSwitcherProps {
   variant?: 'dropdown' | 'compact' | 'full' | 'sidebar';
@@ -21,13 +26,16 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const sidebarMenuPosition = useAnchoredMenuPosition(dropdownRef, isOpen && variant === 'sidebar', SIDEBAR_MENU_WIDTH);
 
   const currentLang = languages.find(l => l.code === getCurrentLanguage()) || languages[0];
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target) && !menuRef.current?.contains(target)) {
         setIsOpen(false);
       }
     };
@@ -122,8 +130,15 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.flag} {currentLang.nativeName}</span>
         </button>
 
-        {isOpen && (
-          <div className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-neutral-200 py-2 z-[100] max-h-[70vh] overflow-y-auto">
+        {/* Portalled to the body and placed against the button: the sidebar
+            is overflow-hidden so it can slide between its rail and full
+            width, and a menu inside it was cut off at the rail's edge. */}
+        {isOpen && sidebarMenuPosition && createPortal(
+          <div
+            ref={menuRef}
+            className="fixed w-56 bg-white rounded-lg shadow-xl border border-neutral-200 py-2 z-[1400] max-h-[70vh] overflow-y-auto"
+            style={{ left: sidebarMenuPosition.left, bottom: sidebarMenuPosition.bottom }}
+          >
             <div className="px-3 py-1.5 text-xs font-semibold text-neutral-500 uppercase tracking-wide border-b border-neutral-100 mb-1">
               {t('selectLanguage')}
             </div>
@@ -147,7 +162,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                 )}
               </button>
             ))}
-          </div>
+          </div>,
+          document.body,
         )}
       </div>
     );
