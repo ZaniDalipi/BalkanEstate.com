@@ -163,5 +163,16 @@
     "perMonth": "/mjesec",
     "perYear": "/godina",
     "invalidValue": "Nevažeća vrijednost"
+  },
+  "ui": {
+    "rentVsBuyCalculator": {
+      "after8YearsItS": "Nakon 8 godina, jeftinije je",
+      "buy": "kupiti",
+      "estimatedSavings0": "Procijenjene uštede: $0",
+      "totalCostToRent": "Ukupan trošak zakupa",
+      "netCostToOwn": "Neto trošak vlasništva",
+      "yearlyCostComparison": "Godišnje poređenje troškova",
+      "year1": "Godina 1"
+    }
   }
 }

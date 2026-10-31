@@ -222,5 +222,6 @@
     "cardLabel": "Луксозни вили в {{place}}, {{country}}",
     "seeAll": "Виж всички",
     "photoWikimedia": "© Wikimedia Commons"
-  }
+  },
+  "showingInArea": "Нито една вила не отговаря на „{{query}}“ — показваме наличното в този район"
 }

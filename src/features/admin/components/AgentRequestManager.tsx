@@ -4,14 +4,8 @@ import {
   MagnifyingGlassIcon,
   EyeIcon,
   XMarkIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  UserGroupIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { apiRequest } from '@/src/shared/api';
 
 interface AgentRequest {
@@ -95,7 +89,7 @@ const AgentRequestManager: React.FC = () => {
       setRequests(data.agentRequests || []);
       setTotalPages(data.pagination?.pages || 1);
     } catch (err) {
-      setError('Failed to load agent requests');
+      setError(t('admin:ui.agentRequestManager.failedToLoadAgentRequests', 'Failed to load agent requests'));
     } finally {
       setIsLoading(false);
     }
@@ -194,9 +188,7 @@ const AgentRequestManager: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <UserGroupIcon className="w-6 h-6 text-blue-600" />
-              </div>
+              <SoftIcon name="users" className="w-12 h-12 flex-shrink-0" />
               <div>
                 <p className="text-sm text-gray-500">{t('agentConnections.totalRequests')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
@@ -206,9 +198,7 @@ const AgentRequestManager: React.FC = () => {
 
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <CheckCircleIcon className="w-6 h-6 text-green-600" />
-              </div>
+              <SoftIcon name="check" className="w-12 h-12 flex-shrink-0" />
               <div>
                 <p className="text-sm text-gray-500">{t('agentConnections.successRate')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.successRate}%</p>
@@ -218,9 +208,7 @@ const AgentRequestManager: React.FC = () => {
 
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <EnvelopeIcon className="w-6 h-6 text-purple-600" />
-              </div>
+              <SoftIcon name="envelope" className="w-12 h-12 flex-shrink-0" />
               <div>
                 <p className="text-sm text-gray-500">{t('agentConnections.emailsSent')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalEmailsSent}</p>
@@ -230,9 +218,7 @@ const AgentRequestManager: React.FC = () => {
 
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <ClockIcon className="w-6 h-6 text-yellow-600" />
-              </div>
+              <SoftIcon name="clock" className="w-12 h-12 flex-shrink-0" />
               <div>
                 <p className="text-sm text-gray-500">{t('filters.pending')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.byStatus?.pending || 0}</p>
@@ -340,7 +326,7 @@ const AgentRequestManager: React.FC = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        <MapPinIcon className="w-4 h-4 text-gray-400" />
+                        <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
                         <span className="text-gray-700">{request.location}</span>
                       </div>
                     </td>
@@ -367,7 +353,7 @@ const AgentRequestManager: React.FC = () => {
                       <button
                         onClick={() => openDetailModal(request)}
                         className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-blue-600"
-                        title="View Details"
+                        title={t('admin:ui.agentRequestManager.viewDetails', 'View Details')}
                       >
                         <EyeIcon className="w-5 h-5" />
                       </button>
@@ -423,19 +409,19 @@ const AgentRequestManager: React.FC = () => {
                 <h3 className="font-semibold text-gray-900 mb-3">{t('agentConnections.clientInfo')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
-                    <EnvelopeIcon className="w-4 h-4 text-gray-400" />
+                    <SoftIcon name="envelope" className="w-5 h-5 flex-shrink-0" />
                     <a href={`mailto:${selectedRequest.email}`} className="text-blue-600 hover:underline">
                       {selectedRequest.email}
                     </a>
                   </div>
                   <div className="flex items-center gap-2">
-                    <PhoneIcon className="w-4 h-4 text-gray-400" />
+                    <SoftIcon name="phone" className="w-5 h-5 flex-shrink-0" />
                     <a href={`tel:${selectedRequest.phone}`} className="text-blue-600 hover:underline">
                       {selectedRequest.phone}
                     </a>
                   </div>
                   <div className="flex items-center gap-2 md:col-span-2">
-                    <MapPinIcon className="w-4 h-4 text-gray-400" />
+                    <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
                     <span>{selectedRequest.location}</span>
                   </div>
                 </div>

@@ -17,7 +17,8 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import L from 'leaflet';
-import { MarkerClusterer, SuperClusterAlgorithm } from '@googlemaps/markerclusterer';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { SmoothMarkerClusterer, ViewportClusterAlgorithm } from '../utils/smoothClusterer';
 import { getCadastreLayerForLocation, CADASTRE_MIN_ZOOM } from '@/config/cadastreLayers';
 import { SaveMeasurementUseCase, GetMeasurementsUseCase } from '@/src/domain/usecases/measurement';
 import { measurementRepository } from '@/src/data/repositories/MeasurementRepository';
@@ -39,6 +40,7 @@ import {
   createUserLocationMarkerElement,
   userLocationScaleForZoom,
 } from '../utils/userLocationMarker';
+import { readMapView, saveMapView, clearOpenedProperty, rememberOpenedProperty } from '../mapViewMemory';
 import {
   createClusterActivation,
   createClusterRenderer,
@@ -66,6 +68,7 @@ import {
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import { CLOSED_MARKER_COLOR, closedMarkerLabel, isClosedListing } from '@/src/shared/map/closedListing';
+import { softIconHtml } from '@/src/shared/illustrations';
 
 // Inject CSS for marker entrance fly-in animation (Google Maps variant)
 if (typeof window !== 'undefined') {
@@ -277,16 +280,23 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     return validateCoordinates(lat, lng).isValid ? userLocation : null;
   }, [userLocation]);
 
+  // Coming back to this history entry (e.g. back from a listing): the view the
+  // user left, read once — the map must not chase their GPS fix afterwards.
+  const [restoredView] = useState(readMapView);
+
   // Initial center from user location
   const initialCenter = useMemo(() => {
+    if (restoredView) {
+      return { lat: restoredView.lat, lng: restoredView.lng };
+    }
     if (validUserLocation) {
       return { lat: validUserLocation[0], lng: validUserLocation[1] };
     }
     return DEFAULT_CENTER;
-  }, [validUserLocation]);
+  }, [restoredView, validUserLocation]);
 
   // Initial zoom
-  const initialZoom = validUserLocation ? 13 : DEFAULT_ZOOM;
+  const initialZoom = restoredView ? restoredView.zoom : validUserLocation ? 13 : DEFAULT_ZOOM;
 
   // Fetch measurement count on mount and when authentication changes
   useEffect(() => {
@@ -573,13 +583,20 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
       maxZoom: MAP_MAX_ZOOM,
     });
 
-    const clusterer = new MarkerClusterer({
+    // Animates clusters splitting and merging as the zoom changes, instead of
+    // swapping the whole layer on every idle — see smoothClusterer.ts.
+    const clusterer = new SmoothMarkerClusterer({
       map: mapInstance,
       onClusterClick: (event, cluster, map) =>
         clusterActivationRef.current?.onClusterClick(event, cluster, map),
-      algorithm: new SuperClusterAlgorithm({
+      // Only the bubbles and pins on screen (plus a margin) are built. The
+      // whole-region algorithm put every listing in the Balkans on the map as
+      // its own styled element once zoomed in — thousands of layers, which is
+      // what got the page killed on iPhones.
+      algorithm: new ViewportClusterAlgorithm({
         radius: 60,
         maxZoom: 15,
+        viewportPadding: 120,
       }),
       renderer: createClusterRenderer({
         getAriaLabel: (count) =>
@@ -684,6 +701,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     if (bounds && mapCenter && currentZoom !== undefined) {
       setZoom(currentZoom);
       setCenter({ lat: mapCenter.lat(), lng: mapCenter.lng() });
+      saveMapView(mapCenter.lat(), mapCenter.lng(), currentZoom);
 
       const ne = bounds.getNorthEast();
       const sw = bounds.getSouthWest();
@@ -1429,8 +1447,13 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
   }, [flyToTarget, map, onFlyComplete]);
 
   // Fit map to drawnBounds when they exist (for saved searches)
+  const skipRestoredDrawnFitRef = useRef(!!restoredView);
   useEffect(() => {
-    if (!map || !drawnBounds) return;
+    if (!map) return;
+    // Returning to a saved view: the drawn area is already framed as the user left it.
+    const skipFit = skipRestoredDrawnFitRef.current;
+    skipRestoredDrawnFitRef.current = false;
+    if (!drawnBounds || skipFit) return;
 
     // Only fit bounds if there's no flyToTarget (which handles positioning)
     // and if drawnBounds changed
@@ -1450,12 +1473,28 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
     }
   }, [map, drawnBounds]);
 
+  // Back from a listing opened here: put it in focus again — its popup open,
+  // panned into view only if the restored view doesn't already show it.
+  const pendingFocusIdRef = useRef(restoredView?.openedPropertyId ?? null);
+  useEffect(() => {
+    const id = pendingFocusIdRef.current;
+    if (!id || !map || !markersReady) return;
+    const property = validProperties.find((p) => p.id === id);
+    if (!property) return;
+    pendingFocusIdRef.current = null;
+    clearOpenedProperty();
+    setSelectedProperty(property);
+    const position = { lat: property.lat, lng: property.lng };
+    if (!map.getBounds()?.contains(position)) map.panTo(position);
+  }, [map, markersReady, validProperties]);
+
   // Handle view details click.
   //
   // The popup already holds the full property, so it rides along with the
   // navigation the way every property card's does: the detail page renders it
   // immediately (and offline) instead of re-fetching it first.
   const handleViewDetails = useCallback((property: Property) => {
+    rememberOpenedProperty(property.id);
     navigate(paths.property(property.id), { state: { property } });
     setSelectedProperty(null);
   }, []);
@@ -1711,7 +1750,7 @@ export function useGoogleMap(props: GoogleMapComponentProps) {
           const html = `
             <div style="font-family:system-ui,-apple-system,sans-serif;font-size:13px;min-width:200px;">
               <div style="font-weight:700;font-size:15px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #e5720e;color:#333;">
-                📋 Cadastre Parcel
+                ${softIconHtml('clipboard', 18, 'vertical-align:-4px;margin-right:4px;')}Cadastre Parcel
               </div>
               ${allRows.length > 0 ? `<table style="border-collapse:collapse;">${allRows.join('')}</table>` : '<div style="color:#888;">No details available for this location</div>'}
               <div style="margin-top:8px;font-size:11px;color:#999;">${cadastreConfig.attribution}</div>

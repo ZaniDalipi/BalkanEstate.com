@@ -17,6 +17,12 @@ on:
 env:
   NODE_VERSION: '20'
 
+# One deploy per branch at a time. A newer push cancels the run still in
+# progress, so an older build can never finish last and replace a newer one.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # =============================================================================
   # Build
@@ -41,10 +47,27 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
+      # Without the Google Maps key the build silently falls back to the
+      # Leaflet map, which looks like an old version of the site. Stop here
+      # instead of shipping that.
+      - name: Check required build secrets
+        env:
+          VITE_GOOGLE_MAPS_KEY: ${{ secrets.VITE_GOOGLE_MAPS_KEY }}
+        run: |
+          if [ -z "$VITE_GOOGLE_MAPS_KEY" ]; then
+            echo "::error::The VITE_GOOGLE_MAPS_KEY repository secret is not set, so the build would ship the Leaflet fallback map. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
       - name: Build frontend
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_GOOGLE_MAPS_KEY: ${{ secrets.VITE_GOOGLE_MAPS_KEY }}
+          VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.VITE_GOOGLE_MAPS_MAP_ID }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          VITE_RELEASE_VERSION: ${{ github.sha }}
+          VITE_MEDIA_CDN_URL: ${{ secrets.VITE_MEDIA_CDN_URL }}
           VITE_GA_ID: ${{ secrets.VITE_GA_ID }}
           VITE_FB_PIXEL_ID: ${{ secrets.VITE_FB_PIXEL_ID }}
           VITE_CLARITY_PROJECT_ID: ${{ secrets.VITE_CLARITY_PROJECT_ID }}
@@ -93,6 +116,13 @@ jobs:
       name: staging
       url: https://staging.balkanestateai.com
     steps:
+      # The repo is needed next to dist/: `wrangler pages deploy` only uploads the
+      # Pages Functions (link previews for blog, listings, agents, residences) when
+      # it finds ./functions. Without this step the site went out static-only and
+      # shared links showed the generic card.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download frontend artifacts
         uses: actions/download-artifact@v4
         with:
@@ -127,6 +157,13 @@ jobs:
       name: production
       url: https://balkanestateai.com
     steps:
+      # The repo is needed next to dist/: `wrangler pages deploy` only uploads the
+      # Pages Functions (link previews for blog, listings, agents, residences) when
+      # it finds ./functions. Without this step the site went out static-only and
+      # shared links showed the generic card.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download frontend artifacts
         uses: actions/download-artifact@v4
         with:

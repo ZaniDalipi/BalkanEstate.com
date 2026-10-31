@@ -808,7 +808,7 @@
         }
       },
       "highlight": {
-        "title": "Highlight",
+        "title": "Evidențiere",
         "price": "€10",
         "duration": "7 zile",
         "features": {
@@ -861,6 +861,27 @@
     "q5": {
       "question": "Cum funcționează creditele de promovare?",
       "answer": "Creditele de promovare îți permit să crești vizibilitatea anunțurilor pentru a apărea mai sus în rezultatele de căutare. Utilizatorii Pro primesc 3 credite/lună, agențiile primesc 15 pentru a împărți între echipa lor."
+    }
+  },
+  "guide": {
+    "stepByStep": "Ghid pas cu pas",
+    "progress": "Progres",
+    "tips": "Sfaturi",
+    "completed": "Ghid finalizat!",
+    "completedMessage": "Excelent! Ai finalizat toți pașii."
+  },
+  "video": {
+    "tutorial": "Tutorial video"
+  },
+  "feature": {
+    "highlight": "Funcție evidențiată"
+  },
+  "ui": {
+    "howItWorksPage": {
+      "aiSearch": "Căutare AI",
+      "findMeA": "Găsește-mi un...",
+      "features": "Funcții",
+      "forever": "pentru totdeauna"
     }
   }
 }

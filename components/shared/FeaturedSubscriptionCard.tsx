@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getFeaturedSubscription } from '../../services/apiService';
-import { SparklesIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '../../constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { API_URL } from '../../src/shared/api/config';
 import { useTranslation } from 'react-i18next';
 
@@ -97,12 +97,12 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
     switch (status) {
       case 'active':
       case 'trial':
-        return <CheckCircleIcon className="w-5 h-5" />;
+        return <SoftIcon name="check" className="w-5 h-5 flex-shrink-0" />;
       case 'expired':
       case 'canceled':
-        return <XCircleIcon className="w-5 h-5" />;
+        return <SoftIcon name="xmark" className="w-5 h-5 flex-shrink-0" />;
       default:
-        return <ClockIcon className="w-5 h-5" />;
+        return <SoftIcon name="clock" className="w-5 h-5 flex-shrink-0" />;
     }
   };
 
@@ -159,12 +159,10 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
           <style>{shimmerStyles}</style>
           <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl shadow-md p-6 border-2 border-purple-200">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-primary rounded-xl flex items-center justify-center flex-shrink-0">
-                <SparklesIcon className="w-6 h-6 text-white" />
-              </div>
+              <SoftIcon name="sparkles" className="w-12 h-12 flex-shrink-0" />
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-neutral-800 mb-2">
-                  {t('agencies:featured.subscription.currentlyFeatured', 'Agency Currently Featured ✨')}
+                  {t('agencies:featured.subscription.currentlyFeatured', 'Agency Currently Featured')}
                 </h3>
                 <p className="text-sm text-neutral-600 mb-3">
                   {t('agencies:featured.subscription.receivingVisibility', 'Your agency is currently featured and receiving enhanced visibility.')}
@@ -199,9 +197,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
         <style>{shimmerStyles}</style>
         <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl shadow-md p-6 border-2 border-dashed border-purple-300">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-primary rounded-xl flex items-center justify-center flex-shrink-0">
-            <SparklesIcon className="w-6 h-6 text-white" />
-          </div>
+          <SoftIcon name="sparkles" className="w-12 h-12 flex-shrink-0" />
           <div className="flex-1">
             <h3 className="text-lg font-bold text-neutral-800 mb-2">
               {t('agencies:featured.subscription.featureYourAgency', 'Feature Your Agency')}
@@ -236,15 +232,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
       >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-              isActive
-                ? 'bg-gradient-to-br from-purple-500 to-primary'
-                : 'bg-gray-300'
-            }`}
-          >
-            <SparklesIcon className="w-6 h-6 text-white" />
-          </div>
+          <SoftIcon name="sparkles" className={`w-12 h-12 flex-shrink-0 ${isActive ? '' : 'grayscale opacity-60'}`} />
           <div>
             <h3 className="text-lg font-bold text-neutral-800">{t('agencies:featured.subscription.featuredAgency', 'Featured Agency')}</h3>
             <div
@@ -274,7 +262,8 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="font-semibold text-neutral-700">
-                {subscription.isTrial ? t('agencies:featured.subscription.freeTrialProgress', '🎉 Free Trial Progress') : t('agencies:featured.subscription.subscriptionPeriod', '📅 Subscription Period')}
+                <SoftIcon name={subscription.isTrial ? 'party' : 'calendar'} className="inline-block w-5 h-5 mr-1 align-[-4px]" />
+                {subscription.isTrial ? t('agencies:featured.subscription.freeTrialProgress', 'Free Trial Progress') : t('agencies:featured.subscription.subscriptionPeriod', 'Subscription Period')}
               </span>
               <span className={`font-bold ${daysRemaining <= 3 ? 'text-red-600 animate-pulse' : daysRemaining <= 7 ? 'text-yellow-600' : 'text-green-600'}`}>
                 {t('agencies:featured.subscription.daysLeft', '{{count}} days left', { count: daysRemaining })}
@@ -311,7 +300,8 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
         {subscription.isTrial && (
           <div className="bg-blue-100 border border-blue-200 rounded-lg p-3">
             <p className="text-sm font-semibold text-blue-800">
-              {t('agencies:featured.subscription.freeTrialActive', '🎉 Free Trial Active')}
+              <SoftIcon name="party" className="inline-block w-5 h-5 mr-1 align-[-4px]" />
+              {t('agencies:featured.subscription.freeTrialActive', 'Free Trial Active')}
             </p>
             <p className="text-xs text-blue-600 mt-1">
               {t('agencies:featured.subscription.trialEndsOn', 'Your free trial ends on {{date}}', { date: formatDate(subscription.currentPeriodEnd) })}
@@ -364,7 +354,8 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
         {subscription.cancelAtPeriodEnd && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <p className="text-sm text-yellow-800">
-              {t('agencies:featured.subscription.cancelAtPeriodEnd', '⚠️ Subscription will be canceled at the end of the current period')}
+              <SoftIcon name="warning" className="inline-block w-5 h-5 mr-1 align-[-4px]" />
+              {t('agencies:featured.subscription.cancelAtPeriodEnd', 'Subscription will be canceled at the end of the current period')}
             </p>
           </div>
         )}
@@ -376,7 +367,8 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-neutral-800">
-                    {t('agencies:featured.subscription.renewStatus', '🔄 Renew Your Featured Status')}
+                    <SoftIcon name="refresh" className="inline-block w-5 h-5 mr-1 align-[-4px]" />
+                    {t('agencies:featured.subscription.renewStatus', 'Renew Your Featured Status')}
                   </p>
                   <p className="text-xs text-neutral-600 mt-1">
                     {t('agencies:featured.subscription.continueVisibility', 'Continue enjoying enhanced visibility and top placement in search results.')}
@@ -386,7 +378,7 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
                   onClick={onUpgrade}
                   className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-purple-600 to-primary text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
                 >
-                  <SparklesIcon className="w-4 h-4" />
+                  <SoftIcon name="sparkles" className="w-5 h-5 flex-shrink-0" />
                   {t('agencies:featured.subscription.renewNow', 'Renew Now')}
                 </button>
               </div>
@@ -395,7 +387,8 @@ const FeaturedSubscriptionCard: React.FC<FeaturedSubscriptionCardProps> = React.
             {/* Pro Tip for expired subscriptions */}
             <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
               <p className="text-sm text-amber-800">
-                {t('agencies:featured.subscription.proTip', '💡 Pro Tip: Featured agencies get up to 5x more visibility and appear at the top of search results!')}
+                <SoftIcon name="lightbulb" className="inline-block w-5 h-5 mr-1 align-[-4px]" />
+                {t('agencies:featured.subscription.proTip', 'Pro Tip: Featured agencies get up to 5x more visibility and appear at the top of search results!')}
               </p>
             </div>
           </div>

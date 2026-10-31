@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  UsersIcon,
-  HomeIcon,
-  BuildingOfficeIcon,
-  UserGroupIcon,
-  TicketIcon,
   ChartBarIcon,
-  EnvelopeIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  ShieldCheckIcon,
 } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { API_URL } from '@/src/shared/api/config';
 import { tokenService } from '@/src/shared/api/tokenService';
 import UserAvatar from '@/components/shared/UserAvatar';
@@ -80,13 +71,13 @@ const AnalyticsDashboard: React.FC = () => {
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch stats');
+      if (!response.ok) throw new Error(t('admin:ui.analyticsDashboard.failedToFetchStats', 'Failed to fetch stats'));
 
       const data = await response.json();
       setStats(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load statistics');
+      setError(t('admin:ui.analyticsDashboard.failedToLoadStatistics', 'Failed to load statistics'));
       // Error removed
     } finally {
       setIsLoading(false);
@@ -102,7 +93,7 @@ const AnalyticsDashboard: React.FC = () => {
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch');
+      if (!response.ok) throw new Error(t('admin:ui.analyticsDashboard.failedToFetch', 'Failed to fetch'));
 
       const data = await response.json();
       setPendingLicenseAgents(data.users || []);
@@ -125,7 +116,7 @@ const AnalyticsDashboard: React.FC = () => {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8">
         <div className="text-center text-red-600">
-          <ExclamationTriangleIcon className="w-12 h-12 mx-auto mb-4" />
+          <SoftIcon name="warning" className="w-12 h-12 mx-auto mb-4" />
           <p className="font-semibold">{t('analyticsDashboard.errorLoadingDashboard')}</p>
           <p className="text-sm mt-2">{error}</p>
           <button
@@ -143,36 +134,24 @@ const AnalyticsDashboard: React.FC = () => {
     {
       title: t('dashboard.totalUsers'),
       value: stats?.overview.totalUsers || 0,
-      icon: <UsersIcon className="w-6 h-6" />,
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
+      icon: 'users' as SoftIconName,
       trend: stats?.trends?.users,
     },
     {
       title: t('dashboard.totalProperties'),
       value: stats?.overview.totalProperties || 0,
-      icon: <HomeIcon className="w-6 h-6" />,
-      color: 'bg-green-500',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
+      icon: 'home' as SoftIconName,
       trend: stats?.trends?.properties,
     },
     {
       title: t('analyticsDashboard.totalAgents'),
       value: stats?.overview.totalAgents || 0,
-      icon: <UserGroupIcon className="w-6 h-6" />,
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-600',
+      icon: 'user' as SoftIconName,
     },
     {
       title: t('sidebar.agencies'),
       value: stats?.overview.totalAgencies || 0,
-      icon: <BuildingOfficeIcon className="w-6 h-6" />,
-      color: 'bg-amber-500',
-      bgColor: 'bg-amber-50',
-      textColor: 'text-amber-600',
+      icon: 'building' as SoftIconName,
     },
   ];
 
@@ -180,7 +159,7 @@ const AnalyticsDashboard: React.FC = () => {
     {
       title: t('analyticsDashboard.newInquiries'),
       value: stats?.overview.newInquiries || 0,
-      icon: <EnvelopeIcon className="w-5 h-5" />,
+      icon: <SoftIcon name="envelope" className="w-6 h-6 flex-shrink-0" />,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
       isAlert: (stats?.overview.newInquiries || 0) > 0,
@@ -188,7 +167,7 @@ const AnalyticsDashboard: React.FC = () => {
     {
       title: t('analyticsDashboard.unverifiedUsers'),
       value: stats?.overview.unverifiedUsers || 0,
-      icon: <ShieldCheckIcon className="w-5 h-5" />,
+      icon: <SoftIcon name="shield" className="w-6 h-6 flex-shrink-0" />,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
       isAlert: (stats?.overview.unverifiedUsers || 0) > 0,
@@ -196,7 +175,7 @@ const AnalyticsDashboard: React.FC = () => {
     {
       title: t('analyticsDashboard.activeDiscounts'),
       value: stats?.overview.activeDiscountCodes || 0,
-      icon: <TicketIcon className="w-5 h-5" />,
+      icon: <SoftIcon name="ticket" className="w-6 h-6 flex-shrink-0" />,
       color: 'text-pink-600',
       bgColor: 'bg-pink-50',
     },
@@ -205,25 +184,14 @@ const AnalyticsDashboard: React.FC = () => {
   // Recent activity from API (no mock fallback in production)
   const recentActivity = stats?.recentActivity || [];
 
-  const getActivityIcon = (type: string) => {
+  const getActivityIcon = (type: string): SoftIconName => {
     switch (type) {
-      case 'user': return <UsersIcon className="w-4 h-4" />;
-      case 'property': return <HomeIcon className="w-4 h-4" />;
-      case 'inquiry': return <EnvelopeIcon className="w-4 h-4" />;
-      case 'verification': return <CheckCircleIcon className="w-4 h-4" />;
-      case 'discount': return <TicketIcon className="w-4 h-4" />;
-      default: return <ClockIcon className="w-4 h-4" />;
-    }
-  };
-
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'user': return 'bg-blue-100 text-blue-600';
-      case 'property': return 'bg-green-100 text-green-600';
-      case 'inquiry': return 'bg-red-100 text-red-600';
-      case 'verification': return 'bg-purple-100 text-purple-600';
-      case 'discount': return 'bg-pink-100 text-pink-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case 'user': return 'user';
+      case 'property': return 'home';
+      case 'inquiry': return 'envelope';
+      case 'verification': return 'docCheck';
+      case 'discount': return 'ticket';
+      default: return 'clock';
     }
   };
 
@@ -258,9 +226,7 @@ const AnalyticsDashboard: React.FC = () => {
             className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`${stat.bgColor} ${stat.textColor} p-3 rounded-xl`}>
-                {stat.icon}
-              </div>
+              <SoftIcon name={stat.icon} className="w-12 h-12" />
               {stat.trend !== undefined && (
                 <div className={`flex items-center gap-1 text-sm ${stat.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {stat.trend >= 0 ? (
@@ -292,7 +258,7 @@ const AnalyticsDashboard: React.FC = () => {
                 className={`flex items-center justify-between p-4 rounded-xl ${stat.bgColor} ${stat.isAlert ? 'ring-2 ring-offset-2 ring-red-200' : ''}`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={stat.color}>{stat.icon}</span>
+                  {stat.icon}
                   <span className="font-medium text-gray-900">{stat.title}</span>
                 </div>
                 <span className={`text-2xl font-bold ${stat.color}`}>
@@ -318,9 +284,7 @@ const AnalyticsDashboard: React.FC = () => {
                   key={index}
                   className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <div className={`p-2 rounded-lg ${getActivityColor(activity.type)}`}>
-                    {getActivityIcon(activity.type)}
-                  </div>
+                  <SoftIcon name={getActivityIcon(activity.type)} className="w-8 h-8 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
                       {activity.message}
@@ -336,7 +300,7 @@ const AnalyticsDashboard: React.FC = () => {
               ))
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <ClockIcon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <SoftIcon name="clock" className="w-8 h-8 mx-auto mb-2" />
                 <p className="text-sm">{t('analyticsDashboard.noRecentActivity')}</p>
               </div>
             )}
@@ -352,9 +316,7 @@ const AnalyticsDashboard: React.FC = () => {
             onClick={fetchStats}
             className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all text-left group"
           >
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-              <ChartBarIcon className="w-5 h-5" />
-            </div>
+            <SoftIcon name="chart" className="w-9 h-9 flex-shrink-0" />
             <div>
               <div className="font-semibold text-gray-900">{t('analyticsDashboard.refreshData')}</div>
               <div className="text-xs text-gray-500">{t('analyticsDashboard.updateStatistics')}</div>
@@ -364,9 +326,7 @@ const AnalyticsDashboard: React.FC = () => {
           <button
             className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl hover:border-green-400 hover:bg-green-50 transition-all text-left group"
           >
-            <div className="p-2 bg-green-100 text-green-600 rounded-lg group-hover:bg-green-600 group-hover:text-white transition-colors">
-              <HomeIcon className="w-5 h-5" />
-            </div>
+            <SoftIcon name="home" className="w-9 h-9 flex-shrink-0" />
             <div>
               <div className="font-semibold text-gray-900">{t('analyticsDashboard.reviewProperties')}</div>
               <div className="text-xs text-gray-500">{t('analyticsDashboard.pendingApprovalDesc')}</div>
@@ -376,9 +336,7 @@ const AnalyticsDashboard: React.FC = () => {
           <button
             className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl hover:border-purple-400 hover:bg-purple-50 transition-all text-left group"
           >
-            <div className="p-2 bg-purple-100 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
-              <UsersIcon className="w-5 h-5" />
-            </div>
+            <SoftIcon name="users" className="w-9 h-9 flex-shrink-0" />
             <div>
               <div className="font-semibold text-gray-900">{t('analyticsDashboard.verifyUsers')}</div>
               <div className="text-xs text-gray-500">{t('analyticsDashboard.pendingVerificationDesc')}</div>
@@ -388,9 +346,7 @@ const AnalyticsDashboard: React.FC = () => {
           <button
             className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl hover:border-pink-400 hover:bg-pink-50 transition-all text-left group"
           >
-            <div className="p-2 bg-pink-100 text-pink-600 rounded-lg group-hover:bg-pink-600 group-hover:text-white transition-colors">
-              <TicketIcon className="w-5 h-5" />
-            </div>
+            <SoftIcon name="ticket" className="w-9 h-9 flex-shrink-0" />
             <div>
               <div className="font-semibold text-gray-900">{t('analyticsDashboard.createDiscount')}</div>
               <div className="text-xs text-gray-500">{t('analyticsDashboard.newPromoCode')}</div>
@@ -408,11 +364,11 @@ const AnalyticsDashboard: React.FC = () => {
               {t('analyticsDashboard.agentsAwaitingReview', '{{count}} agents awaiting license review', { count: pendingLicenseAgents.length })}
             </p>
           </div>
-          <ShieldCheckIcon className="w-6 h-6 text-purple-500" />
+          <SoftIcon name="shield" className="w-7 h-7 flex-shrink-0" />
         </div>
         {pendingLicenseError ? (
           <div className="text-center py-6 text-red-500">
-            <ExclamationTriangleIcon className="w-8 h-8 mx-auto mb-2" />
+            <SoftIcon name="warning" className="w-8 h-8 mx-auto mb-2" />
             <p className="text-sm">{pendingLicenseError}</p>
             <button
               onClick={fetchPendingLicenses}
@@ -453,7 +409,7 @@ const AnalyticsDashboard: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-6 text-gray-400">
-            <ShieldCheckIcon className="w-8 h-8 mx-auto mb-2" />
+            <SoftIcon name="shield" className="w-8 h-8 mx-auto mb-2" />
             <p className="text-sm">{t('analyticsDashboard.noPendingLicenses', 'No pending license verifications')}</p>
           </div>
         )}

@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { generatePropertySlug } from '@/utils/slug';
 import { navigate } from '@/src/app/router/navigation';
 
+import { useTranslation } from 'react-i18next';
 interface BreadcrumbItem {
   label: string;
   href: string;
@@ -26,6 +27,7 @@ interface BreadcrumbsProps {
  * ]} />
  */
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' }) => {
+  const { t } = useTranslation();
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
 
   // Generate JSON-LD structured data for breadcrumbs
@@ -53,7 +55,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' 
         </script>
       </Helmet>
 
-      <nav aria-label="Breadcrumb" className={`flex items-center text-sm ${className}`}>
+      <nav aria-label={t('common:ui.breadcrumbs.breadcrumb', 'Breadcrumb')} className={`flex items-center text-sm ${className}`}>
         <ol className="flex items-center flex-wrap gap-1" itemScope itemType="https://schema.org/BreadcrumbList">
           {items.map((item, index) => {
             const isLast = index === items.length - 1;

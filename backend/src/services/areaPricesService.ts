@@ -160,6 +160,17 @@ export const normalizePrice = (price: number, rentPeriod: string | undefined, ba
 export const valueOf = (price: number, sqft: number | undefined, basis: Basis): number | null =>
   basis.metric === 'price' ? (price > 0 ? roundMoney(price) : null) : pricePerSqm(price, sqft);
 
+/**
+ * A usable Date, or null. One listing with a malformed date (imported data,
+ * a hand-edited record) must not throw on toISOString() and take the whole
+ * neighbourhood's prices down with it.
+ */
+export const toDate = (value: unknown): Date | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const d = value instanceof Date ? value : new Date(value as string | number);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
 /** "2026-Q3" for a date. */
 export const quarterOf = (date: Date): string =>
   `${date.getUTCFullYear()}-Q${Math.floor(date.getUTCMonth() / 3) + 1}`;
@@ -186,16 +197,19 @@ export const lastQuarters = (count: number, now: Date = new Date()): string[] =>
  */
 export const closedEvents = (l: AreaListing, basis: Basis): PriceEvent[] => {
   if (basis.listingType === 'sale') {
-    return l.status === 'sold' && l.soldAt ? [{ at: new Date(l.soldAt), price: l.price }] : [];
+    const soldAt = l.status === 'sold' ? toDate(l.soldAt) : null;
+    return soldAt ? [{ at: soldAt, price: l.price }] : [];
   }
   const events: PriceEvent[] = [];
   for (const entry of l.rentalHistory ?? []) {
-    if (!entry.startDate || !(entry.monthlyRent && entry.monthlyRent > 0)) continue;
+    const startDate = toDate(entry.startDate);
+    if (!startDate || !(entry.monthlyRent && entry.monthlyRent > 0)) continue;
     const price = basis.rentUnit === 'night' ? entry.monthlyRent / NIGHTS_PER_MONTH : entry.monthlyRent;
-    events.push({ at: new Date(entry.startDate), price: roundMoney(price) });
+    events.push({ at: startDate, price: roundMoney(price) });
   }
-  if (l.status === 'rented' && l.rentedAt) {
-    events.push({ at: new Date(l.rentedAt), price: normalizePrice(l.price, l.rentPeriod, basis) });
+  const rentedAt = l.status === 'rented' ? toDate(l.rentedAt) : null;
+  if (rentedAt) {
+    events.push({ at: rentedAt, price: normalizePrice(l.price, l.rentPeriod, basis) });
   }
   return events;
 };
@@ -204,6 +218,7 @@ export const closedEvents = (l: AreaListing, basis: Basis): PriceEvent[] => {
 export const toNeighbour = (l: AreaListing, centerLat: number, centerLng: number, basis: Basis): Neighbour => {
   const price = normalizePrice(l.price, l.rentPeriod, basis);
   const latest = closedEvents(l, basis).sort((a, b) => b.at.getTime() - a.at.getTime())[0];
+  const listedAt = toDate(l.createdAt);
   return {
     id: String(l._id),
     title: l.title,
@@ -220,7 +235,7 @@ export const toNeighbour = (l: AreaListing, centerLat: number, centerLng: number
     lng: l.lng,
     distanceM: Math.round(distanceMeters(centerLat, centerLng, l.lat, l.lng)),
     imageUrl: l.imageUrl,
-    listedAt: l.createdAt ? new Date(l.createdAt).toISOString() : undefined,
+    listedAt: listedAt ? listedAt.toISOString() : undefined,
     closedAt: latest ? latest.at.toISOString() : undefined,
     closedPrice: latest?.price,
     closedValue: latest ? valueOf(latest.price, l.sqft, basis) : undefined,
@@ -245,7 +260,8 @@ export const buildTrend = (listings: AreaListing[], basis: Basis, now: Date = ne
   };
 
   for (const l of listings) {
-    if (l.createdAt) push(asking, new Date(l.createdAt), valueOf(normalizePrice(l.price, l.rentPeriod, basis), l.sqft, basis));
+    const listedAt = toDate(l.createdAt);
+    if (listedAt) push(asking, listedAt, valueOf(normalizePrice(l.price, l.rentPeriod, basis), l.sqft, basis));
     for (const e of closedEvents(l, basis)) push(closed, e.at, valueOf(e.price, l.sqft, basis));
   }
 

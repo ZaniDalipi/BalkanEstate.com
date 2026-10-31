@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XMarkIcon, ChartBarIcon, ClockIcon, EyeIcon, InquiriesIcon, HeartIcon } from '@/constants';
+import { XMarkIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import * as api from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
 
@@ -38,11 +39,11 @@ interface PromotionHistoryModalProps {
 }
 
 // Tier configuration
-const TIER_CONFIG: Record<string, { color: string; bg: string; icon: string; gradient: string }> = {
-  premium: { color: 'text-amber-700', bg: 'bg-amber-100', icon: '👑', gradient: 'from-amber-500 to-yellow-400' },
-  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', icon: '💎', gradient: 'from-sky-500 to-cyan-400' },
-  featured: { color: 'text-violet-600', bg: 'bg-violet-50', icon: '⭐', gradient: 'from-violet-600 to-purple-500' },
-  standard: { color: 'text-gray-700', bg: 'bg-gray-100', icon: '✨', gradient: 'from-gray-500 to-gray-400' },
+const TIER_CONFIG: Record<string, { color: string; bg: string; icon: SoftIconName; gradient: string }> = {
+  premium: { color: 'text-amber-700', bg: 'bg-amber-100', icon: 'crown', gradient: 'from-amber-500 to-yellow-400' },
+  highlight: { color: 'text-sky-700', bg: 'bg-sky-100', icon: 'diamond', gradient: 'from-sky-500 to-cyan-400' },
+  featured: { color: 'text-violet-600', bg: 'bg-violet-50', icon: 'star', gradient: 'from-violet-600 to-purple-500' },
+  standard: { color: 'text-gray-700', bg: 'bg-gray-100', icon: 'sparkles', gradient: 'from-gray-500 to-gray-400' },
 };
 
 const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
@@ -104,8 +105,8 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
           <div className="bg-gradient-to-r from-primary to-primary-dark p-6 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-xl">
-                  <ChartBarIcon className="w-6 h-6" />
+                <div className="bg-white/95 p-1.5 rounded-xl">
+                  <SoftIcon name="chart" className="w-7 h-7" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">{t('seller:promotionHistory.title', 'Promotion History')}</h2>
@@ -189,12 +190,12 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-2">
                               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${tierConfig.bg} ${tierConfig.color} text-sm font-semibold`}>
-                                <span>{tierConfig.icon}</span>
+                                <SoftIcon name={tierConfig.icon} className="w-5 h-5" />
                                 <span>{item.tierInfo?.name || item.tier}</span>
                               </span>
                               {item.hasUrgentBadge && (
-                                <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full">
-                                  🔥 {t('seller:promotionHistory.urgentBadge', 'Urgent')}
+                                <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full">
+                                  <SoftIcon name="flame" className="w-4 h-4" /> {t('seller:promotionHistory.urgentBadge', 'Urgent')}
                                 </span>
                               )}
                               {item.isActive && (
@@ -219,7 +220,7 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
                           {/* Dates */}
                           <div className="flex items-center gap-4 text-sm text-neutral-600 mb-3">
                             <div className="flex items-center gap-1">
-                              <ClockIcon className="w-4 h-4" />
+                              <SoftIcon name="clock" className="w-5 h-5" />
                               <span>{new Date(item.startDate).toLocaleDateString()}</span>
                               <span className="text-neutral-400">→</span>
                               <span>{new Date(item.endDate).toLocaleDateString()}</span>
@@ -234,15 +235,15 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
                           {/* Performance */}
                           <div className="flex items-center gap-4 text-sm">
                             <div className="flex items-center gap-1 text-blue-600">
-                              <EyeIcon className="w-4 h-4" />
+                              <SoftIcon name="eye" className="w-5 h-5" />
                               <span>{t('seller:promotionHistory.viewsLabel', '{{count}} views', { count: item.performance.views })}</span>
                             </div>
                             <div className="flex items-center gap-1 text-green-600">
-                              <InquiriesIcon className="w-4 h-4" />
+                              <SoftIcon name="chat" className="w-5 h-5" />
                               <span>{t('seller:promotionHistory.inquiriesLabel', '{{count}} inquiries', { count: item.performance.inquiries })}</span>
                             </div>
                             <div className="flex items-center gap-1 text-amber-600">
-                              <HeartIcon className="w-4 h-4" />
+                              <SoftIcon name="heart" className="w-5 h-5" />
                               <span>{t('seller:promotionHistory.savesLabel', '{{count}} saves', { count: item.performance.saves })}</span>
                             </div>
                           </div>
@@ -250,7 +251,7 @@ const PromotionHistoryModal: React.FC<PromotionHistoryModalProps> = ({
                           {/* Auto-extend indicator */}
                           {item.autoExtend && (
                             <div className="mt-2 flex items-center gap-1 text-xs text-indigo-600">
-                              <span>🔄</span>
+                              <SoftIcon name="refresh" className="w-4 h-4" />
                               <span>{t('seller:promotionHistory.autoExtendEnabled', 'Auto-extend enabled')}</span>
                             </div>
                           )}

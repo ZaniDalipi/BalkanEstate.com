@@ -12,7 +12,7 @@ import {
 const t = (_key: string, fallback?: string) => fallback ?? _key;
 
 const submittable = (overrides: Record<string, unknown>) => ({
-    listingData: { ...initialListingData, title: 'T', description: 'D', price: 1000, lat: 41.3, lng: 19.8, ...overrides } as never,
+    listingData: { ...initialListingData, title: 'T', description: 'A complete description of the property, long enough to publish.', price: 1000, lat: 41.3, lng: 19.8, ...overrides } as never,
     imageCount: 1,
     selectedCountry: 'Albania',
     selectedCity: 'Tirana',

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import cloudinary from '../config/cloudinary';
+import { deleteImages } from './mediaService';
 import News from '../models/News';
 import CityShowcase from '../models/CityShowcase';
 import { pickNewsCover, type GalleryCity } from './news/newsCover';
@@ -110,7 +110,7 @@ async function extractOgImage(url: string): Promise<string | null> {
 
 /**
  * Active City Gallery photos, loaded once per fetch run. News covers reuse
- * them (they're already on Cloudinary) instead of uploading anything new.
+ * them (they're already in storage) instead of uploading anything new.
  * A failure just means covers fall back to the article's own image.
  */
 async function loadGalleryCities(): Promise<GalleryCity[]> {
@@ -354,7 +354,7 @@ export async function fetchAndStoreNews(): Promise<number> {
 
 /**
  * Delete news articles older than the specified number of months.
- * Also cleans up their Cloudinary covers.
+ * Also cleans up their stored covers.
  */
 export async function cleanupOldNews(monthsOld = 3): Promise<number> {
   const cutoffDate = new Date();
@@ -366,17 +366,14 @@ export async function cleanupOldNews(monthsOld = 3): Promise<number> {
 
   if (oldArticles.length === 0) return 0;
 
-  // Delete Cloudinary images
+  // Delete stored images
   const publicIds = oldArticles
     .map(a => a.coverImagePublicId)
     .filter(Boolean) as string[];
 
   if (publicIds.length > 0) {
-    try {
-      await cloudinary.api.delete_resources(publicIds);
-    } catch (err) {
-      logger.error(`Failed to delete old news covers from Cloudinary: ${err}`);
-    }
+    // deleteImages never throws.
+    await deleteImages(publicIds);
   }
 
   const { deletedCount } = await News.deleteMany({

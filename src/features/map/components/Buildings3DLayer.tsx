@@ -5,6 +5,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { softIconHtml } from '@/src/shared/illustrations';
 
 interface Buildings3DLayerProps {
   enabled: boolean;
@@ -193,11 +194,11 @@ const Buildings3DLayer: React.FC<Buildings3DLayerProps> = ({
       <div style="min-width: 150px; font-family: system-ui, -apple-system, sans-serif;">
         ${nameInfo}
         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-          <span style="font-size: 16px;">🏢</span>
+          ${softIconHtml('building', 18)}
           <span style="font-weight: 500; color: #374151;">${typeInfo}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px; color: #6b7280; font-size: 13px;">
-          <span>📏</span>
+          ${softIconHtml('ruler', 16)}
           <span>Height: ${heightInfo}</span>
         </div>
       </div>

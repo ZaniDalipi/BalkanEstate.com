@@ -7,21 +7,21 @@
     "media": "Πολυμέσα",
     "pricing": "Τιμολόγηση",
     "review": "Επισκόπηση",
-    "init": "Get Started",
-    "loading": "Analyzing...",
-    "form": "Property Details",
-    "floorplan": "Floor Plan",
-    "payment": "Payment",
-    "success": "Published!"
+    "init": "Ξεκινήστε",
+    "loading": "Ανάλυση...",
+    "form": "Λεπτομέρειες ακινήτου",
+    "floorplan": "Κάτοψη",
+    "payment": "Πληρωμή",
+    "success": "Δημοσιεύτηκε!"
   },
   "modes": {
     "sale": "Προς Πώληση",
     "rent": "Προς Ενοικίαση",
     "both": "Πώληση & Ενοικίαση",
-    "ai": "AI-Powered",
-    "aiDescription": "Upload photos and let AI generate your listing",
-    "manual": "Manual Entry",
-    "manualDescription": "Fill in all property details yourself"
+    "ai": "Με τη βοήθεια AI",
+    "aiDescription": "Ανεβάστε φωτογραφίες και αφήστε την AI να δημιουργήσει την αγγελία σας",
+    "manual": "Χειροκίνητη καταχώριση",
+    "manualDescription": "Συμπληρώστε μόνοι σας όλα τα στοιχεία του ακινήτου"
   },
   "imageUpload": {
     "title": "Εικόνες Ακινήτου",
@@ -35,12 +35,12 @@
     "remove": "Αφαίρεση",
     "uploading": "Μεταφόρτωση...",
     "maxImages": "Μέγιστο {{count}} εικόνες",
-    "subtitle": "Drag and drop images or click to browse",
-    "hint": "Upload at least 3 photos for best results",
-    "orClick": "or click to browse",
-    "supportedFormats": "Supported formats: JPG, PNG, WebP",
-    "compressing": "Compressing images...",
-    "uploadProgress": "Upload Progress"
+    "subtitle": "Σύρετε και αφήστε εικόνες ή κάντε κλικ για περιήγηση",
+    "hint": "Ανεβάστε τουλάχιστον 3 φωτογραφίες για καλύτερα αποτελέσματα",
+    "orClick": "ή κάντε κλικ για περιήγηση",
+    "supportedFormats": "Υποστηριζόμενες μορφές: JPG, PNG, WebP",
+    "compressing": "Συμπίεση εικόνων...",
+    "uploadProgress": "Πρόοδος μεταφόρτωσης"
   },
   "imageTags": {
     "title": "Ετικέτα Εικόνας",
@@ -54,7 +54,7 @@
     "pool": "Πισίνα",
     "view": "Θέα",
     "other": "Άλλο",
-    "selectTag": "Select Tag"
+    "selectTag": "Επιλογή ετικέτας"
   },
   "propertyDetails": {
     "title": "Λεπτομέρειες Ακινήτου",
@@ -72,17 +72,17 @@
       "commercial": "Εμπορικό",
       "office": "Γραφείο"
     },
-    "basicInfo": "Basic Information",
-    "propertyTitlePlaceholder": "Enter a descriptive title for your property",
-    "streetAddress": "Street Address",
-    "streetAddressPlaceholder": "Enter the street address",
-    "price": "Price",
-    "pricePlaceholder": "Enter the asking price",
+    "basicInfo": "Βασικές πληροφορίες",
+    "propertyTitlePlaceholder": "Εισαγάγετε έναν περιγραφικό τίτλο για το ακίνητο",
+    "streetAddress": "Διεύθυνση",
+    "streetAddressPlaceholder": "Εισαγάγετε τη διεύθυνση",
+    "price": "Τιμή",
+    "pricePlaceholder": "Εισαγάγετε τη ζητούμενη τιμή",
     "propertyTypes": {
-      "house": "House",
-      "apartment": "Apartment",
-      "villa": "Villa",
-      "other": "Other"
+      "house": "Μονοκατοικία",
+      "apartment": "Διαμέρισμα",
+      "villa": "Βίλα",
+      "other": "Άλλο"
     }
   },
   "location": {
@@ -97,11 +97,11 @@
     "country": "Χώρα",
     "mapPin": "Τοποθετήστε Πινέζα στο Χάρτη",
     "mapInstructions": "Κάντε κλικ στο χάρτη για να ορίσετε την ακριβή τοποθεσία",
-    "selectCountry": "Select Country",
-    "selectCity": "Select City",
-    "searchAddress": "Search for address",
-    "dragPin": "Drag the pin to set exact location",
-    "coordinates": "Coordinates"
+    "selectCountry": "Επιλέξτε χώρα",
+    "selectCity": "Επιλέξτε πόλη",
+    "searchAddress": "Αναζήτηση διεύθυνσης",
+    "dragPin": "Σύρετε την καρφίτσα για να ορίσετε την ακριβή τοποθεσία",
+    "coordinates": "Συντεταγμένες"
   },
   "roomDetails": {
     "title": "Δωμάτια & Διάταξη",
@@ -111,8 +111,8 @@
     "floor": "Όροφος",
     "totalFloors": "Συνολικοί Όροφοι",
     "parkingSpaces": "Θέσεις Στάθμευσης",
-    "livingRooms": "Living Rooms",
-    "floorNumber": "Floor Number"
+    "livingRooms": "Σαλόνια",
+    "floorNumber": "Όροφος"
   },
   "sizeAndAge": {
     "title": "Μέγεθος & Ηλικία",
@@ -122,8 +122,8 @@
     "sqm": "τ.μ.",
     "yearBuilt": "Έτος Κατασκευής",
     "renovated": "Ανακαινισμένο",
-    "sqMeters": "Square Meters",
-    "parkingSpots": "Parking Spots"
+    "sqMeters": "Τετραγωνικά μέτρα",
+    "parkingSpots": "Θέσεις στάθμευσης"
   },
   "amenities": {
     "title": "Παροχές",
@@ -139,17 +139,17 @@
     "security": "Σύστημα Ασφαλείας",
     "storage": "Αποθήκη",
     "furnished": "Επιπλωμένο",
-    "hasBalcony": "Balcony",
-    "hasGarden": "Garden",
-    "hasElevator": "Elevator",
-    "hasSecurity": "Security",
-    "hasAirConditioning": "Air Conditioning",
-    "hasPool": "Pool",
-    "petsAllowed": "Pets Allowed",
+    "hasBalcony": "Μπαλκόνι",
+    "hasGarden": "Κήπος",
+    "hasElevator": "Ανελκυστήρας",
+    "hasSecurity": "Ασφάλεια",
+    "hasAirConditioning": "Κλιματισμός",
+    "hasPool": "Πισίνα",
+    "petsAllowed": "Επιτρέπονται κατοικίδια",
     "states": {
-      "no": "No",
-      "any": "Any",
-      "yes": "Yes"
+      "no": "Όχι",
+      "any": "Οποιοδήποτε",
+      "yes": "Ναι"
     }
   },
   "advancedFeatures": {
@@ -160,46 +160,46 @@
     "flooringType": "Τύπος Δαπέδου",
     "orientation": "Προσανατολισμός",
     "view": "Θέα",
-    "furnishing": "Furnishing Status",
+    "furnishing": "Επίπλωση",
     "furnishingOptions": {
-      "any": "Any",
-      "unfurnished": "Unfurnished",
-      "partlyFurnished": "Partly Furnished",
-      "fullyFurnished": "Fully Furnished"
+      "any": "Οποιαδήποτε",
+      "unfurnished": "Χωρίς επίπλωση",
+      "partlyFurnished": "Μερικώς επιπλωμένο",
+      "fullyFurnished": "Πλήρως επιπλωμένο"
     },
     "heatingOptions": {
-      "any": "Any",
-      "central": "Central Heating",
-      "electric": "Electric",
-      "gas": "Gas",
-      "wood": "Wood",
-      "solar": "Solar",
-      "geothermal": "Geothermal",
-      "none": "None"
+      "any": "Οποιαδήποτε",
+      "central": "Κεντρική θέρμανση",
+      "electric": "Ηλεκτρική",
+      "gas": "Φυσικό αέριο",
+      "wood": "Ξύλα",
+      "solar": "Ηλιακή",
+      "geothermal": "Γεωθερμική",
+      "none": "Καμία"
     },
-    "condition": "Property Condition",
+    "condition": "Κατάσταση ακινήτου",
     "conditionOptions": {
-      "any": "Any",
-      "new": "New",
-      "excellent": "Excellent",
-      "good": "Good",
-      "fair": "Fair",
-      "needsRenovation": "Needs Renovation"
+      "any": "Οποιαδήποτε",
+      "new": "Νέο",
+      "excellent": "Άριστη",
+      "good": "Καλή",
+      "fair": "Μέτρια",
+      "needsRenovation": "Χρειάζεται ανακαίνιση"
     },
-    "viewType": "View Type",
+    "viewType": "Τύπος θέας",
     "viewOptions": {
-      "any": "Any",
-      "sea": "Sea View",
-      "mountain": "Mountain View",
-      "city": "City View",
-      "garden": "Garden View",
-      "park": "Park View",
-      "lake": "Lake View",
-      "river": "River View",
-      "none": "No Special View"
+      "any": "Οποιαδήποτε",
+      "sea": "Θέα στη θάλασσα",
+      "mountain": "Θέα στο βουνό",
+      "city": "Θέα στην πόλη",
+      "garden": "Θέα στον κήπο",
+      "park": "Θέα στο πάρκο",
+      "lake": "Θέα στη λίμνη",
+      "river": "Θέα στο ποτάμι",
+      "none": "Χωρίς ιδιαίτερη θέα"
     },
     "energyOptions": {
-      "any": "Any",
+      "any": "Οποιαδήποτε",
       "aPlus": "A+",
       "a": "A",
       "b": "B",
@@ -215,37 +215,37 @@
     "placeholder": "Περιγράψτε το ακίνητό σας με λεπτομέρεια...",
     "minLength": "Ελάχιστο 100 χαρακτήρες",
     "charCount": "{{count}} χαρακτήρες",
-    "descriptionLabel": "Property Description",
-    "descriptionPlaceholder": "Describe your property in detail...",
-    "specialFeatures": "Special Features",
-    "specialFeaturesPlaceholder": "Add special features...",
-    "materials": "Building Materials",
-    "materialsPlaceholder": "Add materials...",
-    "additionalAmenities": "Additional Amenities",
-    "additionalAmenitiesPlaceholder": "Add amenities...",
-    "addTagHint": "Press Enter or comma to add"
+    "descriptionLabel": "Περιγραφή ακινήτου",
+    "descriptionPlaceholder": "Περιγράψτε αναλυτικά το ακίνητό σας...",
+    "specialFeatures": "Ιδιαίτερα χαρακτηριστικά",
+    "specialFeaturesPlaceholder": "Προσθέστε ιδιαίτερα χαρακτηριστικά...",
+    "materials": "Υλικά κατασκευής",
+    "materialsPlaceholder": "Προσθέστε υλικά...",
+    "additionalAmenities": "Επιπλέον παροχές",
+    "additionalAmenitiesPlaceholder": "Προσθέστε παροχές...",
+    "addTagHint": "Πατήστε Enter ή κόμμα για προσθήκη"
   },
   "virtualTour": {
     "title": "Εικονική Περιήγηση",
     "url": "URL Εικονικής Περιήγησης",
     "urlPlaceholder": "Εισάγετε σύνδεσμο εικονικής περιήγησης",
     "preview": "Προεπισκόπηση",
-    "tourUrl": "Video Tour URL",
-    "tourUrlPlaceholder": "Enter YouTube or Vimeo URL",
-    "virtualTour360": "360° Virtual Tour URL",
-    "virtualTour360Placeholder": "Enter Z360, Matterport, Kuula, or other 360 tour URL",
-    "z360Hint": "Create tours at z360-virtual-tour.vercel.app",
-    "openZ360": "Open Z360",
-    "tourPreview": "360° Tour Preview",
-    "openInNewTab": "Open in new tab"
+    "tourUrl": "URL βίντεο περιήγησης",
+    "tourUrlPlaceholder": "Εισαγάγετε URL YouTube ή Vimeo",
+    "virtualTour360": "URL εικονικής περιήγησης 360°",
+    "virtualTour360Placeholder": "Εισαγάγετε URL περιήγησης 360° (Z360, Matterport, Kuula ή άλλο)",
+    "z360Hint": "Δημιουργήστε περιηγήσεις στο z360-virtual-tour.vercel.app",
+    "openZ360": "Άνοιγμα Z360",
+    "tourPreview": "Προεπισκόπηση περιήγησης 360°",
+    "openInNewTab": "Άνοιγμα σε νέα καρτέλα"
   },
   "floorplan": {
     "title": "Κάτοψη",
     "upload": "Μεταφόρτωση Κάτοψης",
     "formats": "PDF, JPG, ή PNG",
-    "uploadFloorplan": "Upload Floor Plan",
-    "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan",
+    "uploadFloorplan": "Ανέβασμα κάτοψης",
+    "optional": "Προαιρετικό - προσθέστε εικόνα κάτοψης",
+    "skip": "Παράλειψη κάτοψης",
     "invalidFormat": "Μη έγκυρη μορφή αρχείου",
     "invalidFormatMessage": "Ανεβάστε μια έγκυρη εικόνα (JPEG, PNG, WebP, GIF, HEIC ή SVG).",
     "fileTooLarge": "Το αρχείο είναι πολύ μεγάλο",
@@ -256,26 +256,26 @@
     "title": "Γλώσσα Καταχώρισης",
     "primary": "Κύρια Γλώσσα",
     "additional": "Πρόσθετες Γλώσσες",
-    "selectLanguage": "Select Language",
+    "selectLanguage": "Επιλογή γλώσσας",
     "languages": {
-      "english": "English",
-      "albanian": "Albanian",
-      "macedonian": "Macedonian",
-      "serbian": "Serbian",
-      "bosnian": "Bosnian",
-      "croatian": "Croatian",
-      "montenegrin": "Montenegrin",
-      "greek": "Greek",
-      "bulgarian": "Bulgarian",
-      "romanian": "Romanian"
+      "english": "Αγγλικά",
+      "albanian": "Αλβανικά",
+      "macedonian": "Μακεδονικά",
+      "serbian": "Σερβικά",
+      "bosnian": "Βοσνιακά",
+      "croatian": "Κροατικά",
+      "montenegrin": "Μαυροβουνιακά",
+      "greek": "Ελληνικά",
+      "bulgarian": "Βουλγαρικά",
+      "romanian": "Ρουμανικά"
     }
   },
   "role": {
     "title": "Καταχωρείτε ως",
     "owner": "Ιδιοκτήτης Ακινήτου",
     "agent": "Κτηματομεσίτης",
-    "selectRole": "Select your role for this listing",
-    "privateSeller": "Private Seller"
+    "selectRole": "Επιλέξτε τον ρόλο σας για αυτή την αγγελία",
+    "privateSeller": "Ιδιώτης πωλητής"
   },
   "promotion": {
     "title": "Προώθηση Καταχώρισης",
@@ -285,8 +285,8 @@
     "highlightedDesc": "Ξεχωρίστε με έντονο περίγραμμα",
     "premium": "Premium Τοποθέτηση",
     "premiumDesc": "Μέγιστη ορατότητα σε όλες τις ενότητες",
-    "wantToPromote": "I want to promote my listing",
-    "selectPromotion": "Select Promotion Type"
+    "wantToPromote": "Θέλω να προωθήσω την αγγελία μου",
+    "selectPromotion": "Επιλέξτε τύπο προώθησης"
   },
   "actions": {
     "saveDraft": "Αποθήκευση Προσχεδίου",
@@ -295,11 +295,11 @@
     "next": "Επόμενο",
     "previous": "Προηγούμενο",
     "cancel": "Ακύρωση",
-    "generateWithAi": "Generate with AI",
-    "analyzing": "Analyzing images...",
-    "update": "Update Listing",
-    "publishing": "Publishing...",
-    "goBack": "Go Back"
+    "generateWithAi": "Δημιουργία με AI",
+    "analyzing": "Ανάλυση εικόνων...",
+    "update": "Ενημέρωση αγγελίας",
+    "publishing": "Δημοσίευση...",
+    "goBack": "Πίσω"
   },
   "validation": {
     "titleRequired": "Ο τίτλος απαιτείται",
@@ -318,12 +318,12 @@
     "apartmentElevator": "Για διαμερίσματα, παρακαλώ προσδιορίστε αν υπάρχει ανελκυστήρας (Ναι ή Όχι).",
     "floorExceedsTotal": "Ο αριθμός ορόφου δεν μπορεί να υπερβαίνει τον συνολικό αριθμό ορόφων.",
     "completionYearInvalid": "Εισαγάγετε έγκυρο έτος ολοκλήρωσης ή αφήστε το κενό.",
-    "required": "This field is required",
-    "minImages": "Please upload at least {{count}} images",
-    "selectCountry": "Please select a country",
-    "selectCity": "Please select a city",
-    "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price",
+    "required": "Αυτό το πεδίο είναι υποχρεωτικό",
+    "minImages": "Ανεβάστε τουλάχιστον {{count}} εικόνες",
+    "selectCountry": "Επιλέξτε χώρα",
+    "selectCity": "Επιλέξτε πόλη",
+    "setLocation": "Ορίστε την τοποθεσία του ακινήτου στον χάρτη",
+    "invalidPrice": "Εισαγάγετε έγκυρη τιμή",
     "fixHighlighted": "Συμπληρώστε τα πεδία που επισημαίνονται με κόκκινο:",
     "apartmentTotalFloors": "Για διαμερίσματα, εισαγάγετε τον συνολικό αριθμό ορόφων (1 ή περισσότερους).",
     "attributesInvalid": "Ελέγξτε τα στοιχεία για αυτόν τον τύπο ακινήτου.",
@@ -373,7 +373,7 @@
     "failedToCreateMessage": "Η δημιουργία καταχώρησης απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
     "removeImagesFirst": "Παρακαλώ αφαιρέστε κάποιες εικόνες πριν προσθέσετε περισσότερες.",
     "onlyMoreImages": "Μπορούν να προστεθούν μόνο {{count}} ακόμη εικόνες.",
-    "publishFailed": "Failed to publish listing. Please try again."
+    "publishFailed": "Η δημοσίευση της αγγελίας απέτυχε. Δοκιμάστε ξανά."
   },
-  "editTitle": "Edit Listing"
+  "editTitle": "Επεξεργασία αγγελίας"
 }

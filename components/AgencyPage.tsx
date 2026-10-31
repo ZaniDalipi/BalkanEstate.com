@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agency, Property } from '../types';
@@ -68,7 +68,7 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
       {/* Cover Image */}
       {agency.coverImage && (
         <div className="w-full h-64 bg-gradient-to-r from-primary to-primary-dark">
-          <img src={optimizeCloudinaryUrl(agency.coverImage, { width: 1280 }) || agency.coverImage} alt={agency.name} className="w-full h-full object-cover" />
+          <img src={optimizeImageUrl(agency.coverImage, { width: 1280 }) || agency.coverImage} alt={agency.name} className="w-full h-full object-cover" />
         </div>
       )}
 
@@ -78,7 +78,7 @@ const AgencyPage: React.FC<AgencyPageProps> = ({ agencyId }) => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Logo */}
             {agency.logo && (
-              <img src={optimizeCloudinaryUrl(agency.logo, { width: 240 }) || agency.logo} alt={agency.name} className="w-24 h-24 rounded-full border-4 border-white shadow-lg" />
+              <img src={optimizeImageUrl(agency.logo, { width: 240 }) || agency.logo} alt={agency.name} className="w-24 h-24 rounded-full border-4 border-white shadow-lg" />
             )}
 
             <div className="flex-1 text-center md:text-left">

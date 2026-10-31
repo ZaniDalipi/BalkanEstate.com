@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import HighlightedPropertyCard from './HighlightedPropertyCard';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface HighlightedPropertiesSectionProps {
   properties: Property[];
@@ -74,7 +75,7 @@ const HighlightedPropertiesSection: React.FC<HighlightedPropertiesSectionProps> 
       {/* Section Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">✨</span>
+          <SoftIcon name="sparkles" className="w-8 h-8" />
           <h2 className="text-xl md:text-2xl font-bold text-neutral-800">
             {t('property:sections.highlighted', 'Featured Properties')}
           </h2>

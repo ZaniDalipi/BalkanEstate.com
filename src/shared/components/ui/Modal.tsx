@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { XMarkIcon } from '../../constants';
 
+import { useTranslation } from 'react-i18next';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,6 +29,7 @@ const Modal: React.FC<ModalProps> = ({
   fullScreenBreakpoint = 'sm',
   'aria-describedby': ariaDescribedBy,
 }) => {
+  const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = title ? `modal-title-${Math.random().toString(36).substr(2, 9)}` : undefined;
@@ -166,7 +168,7 @@ const Modal: React.FC<ModalProps> = ({
           ref={closeButtonRef}
           onClick={onClose}
           className={bp.closeBtn}
-          aria-label="Close modal"
+          aria-label={t('common:ui.modal.closeModal', 'Close modal')}
           style={
             // lg/always use position:fixed for the close button — must account for notch
             (fullScreenBreakpoint === 'lg' || fullScreenBreakpoint === 'always')

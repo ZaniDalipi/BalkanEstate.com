@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, memo, createContext, useContext } from 'react';
 
+import { useTranslation } from 'react-i18next';
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
@@ -453,6 +454,7 @@ export const LoadingSpinner = memo(function LoadingSpinner({
   className = '',
   color = 'primary',
 }: LoadingSpinnerProps) {
+  const { t } = useTranslation();
   const sizeClasses: Record<string, string> = {
     sm: 'w-4 h-4 border-2',
     md: 'w-8 h-8 border-2',
@@ -464,7 +466,7 @@ export const LoadingSpinner = memo(function LoadingSpinner({
     <div
       className={`${sizeClasses[size]} rounded-full border-${color}/20 border-t-${color} animate-spin ${className}`}
       role="status"
-      aria-label="Loading"
+      aria-label={t('common:ui.animations.loading', 'Loading')}
     >
       <span className="sr-only">Loading...</span>
     </div>

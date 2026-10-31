@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
-import { SearchIcon, XMarkIcon, BellIcon, BuildingLibraryIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon, AdjustmentsHorizontalIcon } from '@/constants';
+import { SearchIcon, XMarkIcon, BellIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
 import AiSearch from './AiSearch';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import type { OutOfAreaKind } from '../outOfArea';
@@ -14,6 +14,8 @@ import UniversalSearchBox from '../universal/UniversalSearchBox';
 import type { Suggestion } from '../universal/types';
 import { PROPERTY_TYPE_OPTIONS } from '@/shared/constants/propertyTypes';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
+import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/src/shared/illustrations';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 
 interface PropertyListProps {
   properties: Property[];
@@ -94,19 +96,38 @@ const FilterButton: React.FC<{
   </button>
 );
 
+/**
+ * A filter's heading, with its 3D icon in front. `listingType` shows the same
+ * Rent / Buy pictures as the sidebar.
+ */
+type FilterIcon = SoftIconName | 'listingType';
+const FilterLabel: React.FC<{ icon?: FilterIcon; className?: string; children: React.ReactNode }> = ({ icon, className, children }) => (
+  <label className={`flex items-center gap-1.5 text-xs font-medium text-neutral-700 ${className ?? 'mb-1'}`}>
+    {icon === 'listingType' ? (
+      <span className="flex -space-x-1.5 flex-shrink-0">
+        <ListingTypePicture type="rent" className="w-5 h-5" />
+        <ListingTypePicture type="sale" className="w-5 h-5" />
+      </span>
+    ) : icon && <SoftIcon name={icon} className="w-5 h-5 flex-shrink-0" />}
+    {children}
+  </label>
+);
+
 const FilterButtonGroup = <T extends string | number | null>({
   label,
+  icon,
   options,
   selectedValue,
   onChange
 }: {
   label: string;
+  icon?: FilterIcon;
   options: { value: T; label: string }[];
   selectedValue: T;
   onChange: (value: T) => void;
 }) => (
   <div>
-    <label className="block text-xs font-medium text-neutral-700 mb-1">{label}</label>
+    <FilterLabel icon={icon}>{label}</FilterLabel>
     <div className="flex items-center space-x-1 bg-neutral-100 p-1 rounded-full border border-neutral-200">
       {options.map(({ value, label: optionLabel }) => (
         <FilterButton
@@ -123,12 +144,13 @@ const FilterButtonGroup = <T extends string | number | null>({
 
 const ToggleSwitch: React.FC<{
   label: string;
+  icon?: SoftIconName;
   value: boolean | null;
   onChange: (value: boolean | null) => void;
   t: (key: string) => string;
-}> = ({ label, value, onChange, t }) => (
+}> = ({ label, icon, value, onChange, t }) => (
   <div className="flex items-center justify-between">
-    <label className="text-xs font-medium text-neutral-700">{label}</label>
+    <FilterLabel icon={icon} className="">{label}</FilterLabel>
     <div className="flex items-center gap-1">
       <button
         onClick={() => onChange(false)}
@@ -176,7 +198,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             {/* Search by Address */}
             <div className="relative">
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:searchLocation')}</label>
+                <FilterLabel icon="pin">{t('search:searchLocation')}</FilterLabel>
                 <UniversalSearchBox
                     value={filters.query}
                     onValueChange={(value) => onFilterChange('query', value)}
@@ -189,7 +211,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
             </div>
 
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.priceRange')}</label>
+                <FilterLabel icon="cash">{t('search:filters.priceRange')}</FilterLabel>
                 <div className="flex items-center gap-2">
                     <div className="relative w-1/2">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">€</span>
@@ -218,7 +240,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
             </div>
 
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.areaRange')}</label>
+                <FilterLabel icon="area">{t('search:filters.areaRange')}</FilterLabel>
                 <div className="flex items-center gap-2">
                     <div className="relative w-1/2">
                         <input
@@ -248,7 +270,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             {/* Price per m² Range */}
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.pricePerSqm', 'Price per m²')}</label>
+                <FilterLabel icon="ruler">{t('search:filters.pricePerSqm', 'Price per m²')}</FilterLabel>
                 <div className="flex items-center gap-2">
                     <div className="relative w-1/2">
                         <input
@@ -278,7 +300,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             {/* Days on Market */}
             <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.daysOnMarket', 'Listed within')}</label>
+                <FilterLabel icon="calendar">{t('search:filters.daysOnMarket', 'Listed within')}</FilterLabel>
                 <select
                     value={filters.maxDaysListed !== null ? filters.maxDaysListed : ''}
                     onChange={(e) => onFilterChange('maxDaysListed', e.target.value ? parseInt(e.target.value) : null)}
@@ -341,7 +363,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
             <div className="border-t border-neutral-200 pt-4">
                 <button type="button" onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="w-full flex justify-between items-center text-left">
-                    <h3 className="text-sm font-semibold text-neutral-800">{t('search:filters.advancedFilters')}</h3>
+                    <h3 className="flex items-center gap-1.5 text-sm font-semibold text-neutral-800"><SoftIcon name="sliders" className="w-6 h-6" />{t('search:filters.advancedFilters')}</h3>
                     {isAdvancedOpen ? <ChevronUpIcon className="w-5 h-5 text-neutral-500" /> : <ChevronDownIcon className="w-5 h-5 text-neutral-500" />}
                 </button>
 
@@ -350,18 +372,21 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <FilterButtonGroup
                                 label={t('search:filters.bedrooms')}
+                                icon="bed"
                                 options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, {value: 3, label: '3+'}, {value: 4, label: '4+'}, ]}
                                 selectedValue={filters.beds}
                                 onChange={(value) => onFilterChange('beds', value)}
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.bathrooms')}
+                                icon="bath"
                                 options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, {value: 3, label: '3+'}, ]}
                                 selectedValue={filters.baths}
                                 onChange={(value) => onFilterChange('baths', value)}
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.livingRooms')}
+                                icon="sofa"
                                 options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, ]}
                                 selectedValue={filters.livingRooms}
                                 onChange={(value) => onFilterChange('livingRooms', value)}
@@ -370,12 +395,14 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <FilterButtonGroup
                                 label={t('search:filters.listingType')}
+                                icon="listingType"
                                 options={[ {value: 'any', label: t('search:listingTypes.any')}, {value: 'agent', label: t('search:listingTypes.agent')}, {value: 'private', label: t('search:listingTypes.private')}, ]}
                                 selectedValue={filters.sellerType}
                                 onChange={(value) => onFilterChange('sellerType', (value as SellerType) || 'any')}
                             />
                             <FilterButtonGroup
                                 label={t('search:filters.propertyType')}
+                                icon="home"
                                 options={[
                                     { value: 'any', label: t('search:propertyTypes.any') },
                                     ...PROPERTY_TYPE_OPTIONS.map(option => ({
@@ -390,7 +417,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Year Built */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.yearBuilt')}</label>
+                            <FilterLabel icon="calendar">{t('search:filters.yearBuilt')}</FilterLabel>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
@@ -413,6 +440,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                         {/* Parking */}
                         <FilterButtonGroup
                             label={t('search:filters.parkingSpaces')}
+                            icon="car"
                             options={[
                                 {value: null, label: t('search:options.any')},
                                 {value: 1, label: '1+'},
@@ -425,7 +453,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Furnishing Status */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.furnishing')}</label>
+                            <FilterLabel icon="sofa">{t('search:filters.furnishing')}</FilterLabel>
                             <select
                                 value={filters.furnishing}
                                 onChange={(e) => onFilterChange('furnishing', e.target.value as FurnishingStatus)}
@@ -440,7 +468,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Heating Type */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.heating')}</label>
+                            <FilterLabel icon="flame">{t('search:filters.heating')}</FilterLabel>
                             <select
                                 value={filters.heatingType}
                                 onChange={(e) => onFilterChange('heatingType', e.target.value as HeatingType)}
@@ -460,7 +488,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Property Condition */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.condition')}</label>
+                            <FilterLabel icon="wrench">{t('search:filters.condition')}</FilterLabel>
                             <select
                                 value={filters.condition}
                                 onChange={(e) => onFilterChange('condition', e.target.value as PropertyCondition)}
@@ -477,7 +505,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* View Type */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.viewType')}</label>
+                            <FilterLabel icon="mountain">{t('search:filters.viewType')}</FilterLabel>
                             <select
                                 value={filters.viewType}
                                 onChange={(e) => onFilterChange('viewType', e.target.value as ViewType)}
@@ -495,7 +523,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Energy Rating */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.energyRating')}</label>
+                            <FilterLabel icon="bolt">{t('search:filters.energyRating')}</FilterLabel>
                             <select
                                 value={filters.energyRating}
                                 onChange={(e) => onFilterChange('energyRating', e.target.value as EnergyRating)}
@@ -515,7 +543,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Floor Number Range (for apartments) */}
                         <div>
-                            <label className="block text-xs font-medium text-neutral-700 mb-1">{t('search:filters.floorNumber')}</label>
+                            <FilterLabel icon="building">{t('search:filters.floorNumber')}</FilterLabel>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
@@ -537,51 +565,59 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Amenities Toggle Switches */}
                         <div className="space-y-2 p-3 bg-neutral-50 rounded-lg">
-                            <h4 className="text-xs font-semibold text-neutral-800 mb-2">{t('search:amenities.title')}</h4>
+                            <h4 className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-2"><SoftIcon name="sparkles" className="w-5 h-5" />{t('search:amenities.title')}</h4>
                             <ToggleSwitch
                                 label={t('search:amenities.balcony')}
+                                icon="balcony"
                                 value={filters.hasBalcony}
                                 onChange={(value) => onFilterChange('hasBalcony', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.garden')}
+                                icon="leaf"
                                 value={filters.hasGarden}
                                 onChange={(value) => onFilterChange('hasGarden', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.elevator')}
+                                icon="elevator"
                                 value={filters.hasElevator}
                                 onChange={(value) => onFilterChange('hasElevator', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.security')}
+                                icon="shield"
                                 value={filters.hasSecurity}
                                 onChange={(value) => onFilterChange('hasSecurity', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.airConditioning')}
+                                icon="snowflake"
                                 value={filters.hasAirConditioning}
                                 onChange={(value) => onFilterChange('hasAirConditioning', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.pool')}
+                                icon="pool"
                                 value={filters.hasPool}
                                 onChange={(value) => onFilterChange('hasPool', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.petsAllowed')}
+                                icon="paw"
                                 value={filters.petsAllowed}
                                 onChange={(value) => onFilterChange('petsAllowed', value)}
                                 t={t}
                             />
                             <ToggleSwitch
                                 label={t('search:amenities.has360Tour')}
+                                icon="tour360"
                                 value={filters.has360Tour}
                                 onChange={(value) => onFilterChange('has360Tour', value)}
                                 t={t}
@@ -590,10 +626,10 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Distance Filters */}
                         <div className="space-y-2 p-3 bg-neutral-50 rounded-lg">
-                            <h4 className="text-xs font-semibold text-neutral-800 mb-2">{t('search:distance.title')}</h4>
+                            <h4 className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-2"><SoftIcon name="pin" className="w-5 h-5" />{t('search:distance.title')}</h4>
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toCenter')}</label>
+                                    <FilterLabel icon="city">{t('search:distance.toCenter')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -604,7 +640,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toSea')}</label>
+                                    <FilterLabel icon="sea">{t('search:distance.toSea')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -615,7 +651,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toSchool')}</label>
+                                    <FilterLabel icon="landmark">{t('search:distance.toSchool')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -626,7 +662,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-neutral-600 mb-1">{t('search:distance.toHospital')}</label>
+                                    <FilterLabel icon="shield">{t('search:distance.toHospital')}</FilterLabel>
                                     <input
                                         type="number"
                                         placeholder={t('search:distance.maxKm')}
@@ -641,7 +677,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
 
                         {/* Amenities Filter */}
                         <div className="space-y-2 p-3 bg-neutral-50 rounded-lg">
-                            <h4 className="text-xs font-semibold text-neutral-800 mb-2">{t('search:amenities.title')}</h4>
+                            <h4 className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 mb-2"><SoftIcon name="sparkles" className="w-5 h-5" />{t('search:amenities.title')}</h4>
                             <div>
                                 <input
                                     type="text"
@@ -772,6 +808,28 @@ const PropertyList = memo<PropertyListProps>((props) => {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(true);
 
+    // Once the user is done filtering and starts scrolling down through the
+    // results, fold the filter panel away so the list gets the room. The panel's
+    // max-height/opacity transition handles the animation.
+    const lastListScrollTop = useRef(0);
+    // A phone held sideways has ~400px for the whole column: the search
+    // controls alone would fill it. There they fold away while the results
+    // scroll down and come back on the way up, so the list gets the screen.
+    const isShortLandscape = useShortLandscape();
+    const [areControlsTucked, setAreControlsTucked] = useState(false);
+    const handleListScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const top = e.currentTarget.scrollTop;
+        const delta = top - lastListScrollTop.current;
+        lastListScrollTop.current = top;
+        if (!isFiltersCollapsed && delta > 0 && top > 24) {
+            setIsFiltersCollapsed(true);
+        }
+        // Fold on the first real move down so the results get the screen at once.
+        if (top <= 8 || delta < -6) setAreControlsTucked(false);
+        else if (delta > 2) setAreControlsTucked(true);
+    };
+    const tuckControls = isShortLandscape && areControlsTucked && searchMode === 'manual';
+
     // Count active basic filters (shown in collapse toggle badge)
     const activeBasicFilterCount = [
         filters.query,
@@ -870,14 +928,17 @@ const PropertyList = memo<PropertyListProps>((props) => {
         return (
             <div className="flex flex-col h-full bg-transparent">
                 {/* TOP CONTROLS SECTION */}
-                <div className={`${searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
-                    <div className="p-4 pb-2 flex-shrink-0">
-                        <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
-                            <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
+                {/* On a phone held sideways the manual-search controls become one
+                    toolbar row — mode switch, Filters, Search, Reset, Save — with the
+                    filter panel opening as a full-width row underneath (flex order). */}
+                <div className={`${tuckControls ? 'hidden' : searchMode === 'ai' ? 'flex flex-col' : 'flex-shrink-0 landscape:flex landscape:flex-wrap landscape:items-center landscape:gap-x-1.5 landscape:gap-y-1 landscape:px-2 landscape:py-1'} border-b border-neutral-200`} style={searchMode === 'ai' ? { flex: '1 1 50%', minHeight: 0 } : undefined}>
+                    <div className={`p-4 pb-2 flex-shrink-0 ${searchMode === 'manual' ? 'landscape:order-1 landscape:p-0' : 'landscape:px-3 landscape:pt-2 landscape:pb-1'}`}>
+                        <div className="bg-neutral-100 p-1 landscape:p-0.5 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto landscape:mx-0">
+                            <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 landscape:w-auto px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full text-sm landscape:text-[0.6875rem] whitespace-nowrap font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                             {isAuthenticated ? (
-                                <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
+                                <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 landscape:w-auto px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full text-sm landscape:text-[0.6875rem] whitespace-nowrap font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                             ) : (
-                                <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title="Sign in to access AI search">
+                                <button onClick={() => onOpenAuthModal?.()} className="w-1/2 landscape:w-auto px-4 py-2 landscape:px-2.5 landscape:py-1 rounded-full text-sm landscape:text-[0.6875rem] whitespace-nowrap font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}>
                                      {t('search:ai.title')}
                                 </button>
                             )}
@@ -885,24 +946,24 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     </div>
 
                     {searchMode === 'manual' && (
-                        <div className="px-4 pt-2 pb-1 flex-shrink-0">
+                        <div className="px-4 pt-2 pb-1 flex-shrink-0 landscape:order-2 landscape:flex-1 landscape:min-w-[6.5rem] landscape:p-0">
                             <button
                                 type="button"
                                 onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
+                                className="w-full flex items-center justify-between px-3 py-2 landscape:px-2 landscape:py-1 rounded-lg bg-neutral-50 border border-neutral-200 hover:bg-neutral-100 transition-colors"
                                 aria-expanded={!isFiltersCollapsed}
                                 aria-controls="desktop-filter-panel"
                             >
                                 <div className="flex items-center gap-2">
-                                    <AdjustmentsHorizontalIcon className="w-4 h-4 text-neutral-600" />
-                                    <span className="text-sm font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
+                                    <SoftIcon name="sliders" className="w-5 h-5 landscape:w-4 landscape:h-4" />
+                                    <span className="text-sm landscape:text-[0.6875rem] font-semibold text-neutral-700">{t('search:filters.filters', 'Filters')}</span>
                                     {isFiltersCollapsed && activeBasicFilterCount > 0 && (
                                         <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full">
                                             {activeBasicFilterCount}
                                         </span>
                                     )}
                                 </div>
-                                <ChevronDownIcon className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${isFiltersCollapsed ? '' : 'rotate-180'}`} />
+                                <ChevronDownIcon className={`w-4 h-4 text-neutral-500 transition-transform duration-[600ms] ${isFiltersCollapsed ? '' : 'rotate-180'}`} />
                             </button>
                         </div>
                     )}
@@ -910,13 +971,13 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     {searchMode === 'manual' ? (
                         <div
                             id="desktop-filter-panel"
-                            className="relative z-[60] overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                            className="relative z-[60] overflow-hidden transition-[max-height,opacity] duration-[600ms] ease-in-out landscape:order-4 landscape:basis-full"
                             style={isFiltersCollapsed
                                 ? { maxHeight: 0, opacity: 0 }
                                 : { maxHeight: '50vh', opacity: 1 }
                             }
                         >
-                            <div className="px-4 pb-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
+                            <div className="px-4 pb-4 landscape:px-1 landscape:pb-2 overflow-y-auto" style={{ maxHeight: '50vh' }}>
                                 <FilterControls {...props} />
                             </div>
                         </div>
@@ -936,11 +997,11 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
                     {/* Action buttons - always visible outside collapsible panel */}
                     {searchMode === 'manual' && (
-                        <div className="px-4 py-2 flex-shrink-0 space-y-2">
+                        <div className="px-4 py-2 flex-shrink-0 space-y-2 landscape:space-y-0 landscape:order-3 landscape:p-0 landscape:flex landscape:items-center landscape:gap-1.5">
                             <button
                                 onClick={onSearchClick}
                                 disabled={isSearchingLocation}
-                                className="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
+                                className="w-full landscape:w-auto py-2.5 landscape:py-1 px-4 landscape:px-3 landscape:text-[0.6875rem] whitespace-nowrap bg-primary text-white font-bold rounded-lg shadow-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2"
                             >
                                 {isSearchingLocation ? (
                                     <>
@@ -951,10 +1012,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     t('search:searchButton')
                                 )}
                             </button>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 landscape:gap-1.5">
                                 <button
                                     onClick={onResetFilters}
-                                    className="flex-1 py-2 px-4 border border-neutral-300 text-neutral-600 rounded-lg text-sm font-bold bg-white hover:bg-neutral-100 transition-colors"
+                                    className="flex-1 landscape:flex-none py-2 px-4 landscape:py-1 landscape:px-2.5 border border-neutral-300 text-neutral-600 rounded-lg text-sm landscape:text-[0.6875rem] whitespace-nowrap font-bold bg-white hover:bg-neutral-100 transition-colors"
                                     aria-label={t('search:filters.resetFilters')}
                                 >
                                     {t('search:filters.resetFilters')}
@@ -962,7 +1023,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 <button
                                     onClick={onSaveSearch}
                                     disabled={isSaving}
-                                    className="flex-1 py-2 px-4 border border-primary text-primary rounded-lg text-sm font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
+                                    className="flex-1 landscape:flex-none py-2 px-4 landscape:py-1 landscape:px-2.5 border border-primary text-primary rounded-lg text-sm landscape:text-[0.6875rem] whitespace-nowrap font-bold bg-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 transition-colors"
                                 >
                                     {isSaving ? (
                                         <>
@@ -986,10 +1047,10 @@ const PropertyList = memo<PropertyListProps>((props) => {
                     {/* data-scroll-container: results scroll in here rather than
                         in the document, so this is the element navigation has to
                         reset on a push and restore on a back. */}
-                    <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container>
-                        <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
+                    <div className="h-full overflow-y-auto overflow-x-hidden" data-scroll-container onScroll={handleListScroll}>
+                        <div className="px-4 py-2.5 landscape:px-3 landscape:py-1 border-b border-neutral-200 flex items-center justify-between gap-2 sticky top-0 bg-white z-[100]">
                             <div className="min-w-0">
-                                <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                                <p className="text-xs text-neutral-500 font-semibold whitespace-nowrap">{t('search:resultsFound', { count: properties.length })}</p>
                                 {!outOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} />}
                             </div>
                             <div className="relative z-[101]">
@@ -999,7 +1060,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     value={filters.sortBy}
                                     onChange={(e) => onSortChange(e.target.value)}
                                     aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                    className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
+                                    className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs landscape:text-sm !py-1.5 landscape:!py-0.5`}
                                 >
                                     {filters.query.trim() && (
                                         <option value="relevance">{t('search:sort.relevance')}</option>
@@ -1033,7 +1094,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 />
                             )}
                             {(isLoadingProperties || isSearchFiltering) ? (
-                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
+                                <div className="grid grid-cols-1 xl:grid-cols-2 landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4">
                                     {Array.from({ length: 6 }).map((_, index) => (
                                         <PropertyCardSkeleton key={index} index={index} />
                                     ))}
@@ -1041,7 +1102,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                             ) : properties.length > 0 ? (
                                 <>
                                     {outOfArea !== 'promoted' && <HighlightedPropertiesSection properties={properties} />}
-                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 property-grid-transition">
+                                    <div className="grid grid-cols-1 xl:grid-cols-2 landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 property-grid-transition">
                                         {interleaveInFeedAds(
                                             properties.slice(0, visibleCount).map((prop, index) => (
                                                 <AnimatedPropertyCard
@@ -1058,7 +1119,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     {visibleCount < properties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 mt-4">
+                                                <div className="grid grid-cols-1 xl:grid-cols-2 landscape:grid-cols-2 gap-6 xl:gap-8 landscape:gap-4 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, properties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}
@@ -1079,7 +1140,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-50/20 pointer-events-none" />
                                     <div className="relative z-10">
-                                        <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                                        <SoftIcon name="landmark" className="w-14 h-14 mx-auto mb-4 opacity-70" />
                                         <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
                                         <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
                                         <button
@@ -1106,15 +1167,17 @@ const PropertyList = memo<PropertyListProps>((props) => {
     
     // Mobile Layout
     return (
-        <div className="flex flex-col bg-white h-full" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' }}>
+        // The 70px clears the phone's floating search bar over the results. Inside
+        // the filter sheet (no list) there is no such bar, only the sheet's own header.
+        <div className="flex flex-col bg-white h-full" style={showList ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 70px)' } : undefined}>
             {showFilters && (
-                 <div className="p-4 flex-shrink-0">
+                 <div className="p-4 landscape:px-3 landscape:py-1.5 flex-shrink-0">
                     <div className="bg-neutral-100 p-1 rounded-full flex items-center space-x-1 border border-neutral-200 shadow-sm max-w-sm mx-auto">
-                        <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
+                        <button onClick={() => onSearchModeChange('manual')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'manual' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}>{t('search:title')}</button>
                         {isAuthenticated ? (
-                            <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
+                            <button onClick={() => onSearchModeChange('ai')} className={`w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${searchMode === 'ai' ? 'bg-white text-primary shadow' : 'text-neutral-600 hover:bg-neutral-200'}`}> {t('search:ai.title')}</button>
                         ) : (
-                            <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title="Sign in to access AI search"> {t('search:ai.title')}</button>
+                            <button onClick={() => onOpenAuthModal?.()} className="w-1/2 px-4 py-2 landscape:py-1 rounded-full text-sm landscape:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-neutral-600 hover:bg-neutral-200" title={t('search:ui.propertyList.signInToAccessAi', 'Sign in to access AI search')}> {t('search:ai.title')}</button>
                         )}
                     </div>
                 </div>
@@ -1140,9 +1203,9 @@ const PropertyList = memo<PropertyListProps>((props) => {
 
                     {showList && (
                         <div className="flex-grow min-h-0 overflow-y-auto relative z-0" data-scroll-container>
-                            <div className="p-4 border-b border-neutral-200 flex items-center justify-between sticky top-0 bg-white z-[100]">
+                            <div className="px-4 py-2.5 border-b border-neutral-200 flex items-center justify-between gap-2 sticky top-0 bg-white z-[100]">
                                 <div className="min-w-0">
-                                    <p className="text-xs text-neutral-500 font-semibold">{t('search:resultsFound', { count: properties.length })}</p>
+                                    <p className="text-xs text-neutral-500 font-semibold whitespace-nowrap">{t('search:resultsFound', { count: properties.length })}</p>
                                     {!outOfArea && <SearchScopeNote query={filters.query} isTextRelaxed={isTextRelaxed} />}
                                 </div>
                                 <div className="relative z-[101]">
@@ -1151,7 +1214,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                         name="sortBy"
                                         value={filters.sortBy}
                                         onChange={(e) => onSortChange(e.target.value)}
-                                        className={`${inputBaseClasses} appearance-none pr-8 text-xs !py-1.5`}
+                                        className={`${inputBaseClasses} max-w-[9.5rem] truncate appearance-none pr-8 text-xs !py-1.5`}
                                     >
                                         {filters.query.trim() && (
                                             <option value="relevance">{t('search:sort.relevance')}</option>
@@ -1222,7 +1285,7 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     </>
                                 ) : (
                                     <div
-                                        className="text-center py-16 px-6 rounded-2xl relative overflow-hidden"
+                                        className="text-center py-8 px-5 rounded-2xl relative overflow-hidden"
                                         style={{
                                             background: 'rgba(255, 255, 255, 0.7)',
                                             backdropFilter: 'blur(20px)',
@@ -1232,12 +1295,12 @@ const PropertyList = memo<PropertyListProps>((props) => {
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-50/20 pointer-events-none" />
                                         <div className="relative z-10">
-                                            <BuildingLibraryIcon className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                                            <h3 className="text-xl font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
-                                            <p className="text-neutral-500 mt-2 mb-6">{t('search:results.tryDifferent')}</p>
+                                            <SoftIcon name="landmark" className="w-10 h-10 mx-auto mb-2 opacity-70" />
+                                            <h3 className="text-base font-semibold text-neutral-800">{t('search:results.noResults')}</h3>
+                                            <p className="text-sm text-neutral-500 mt-1 mb-4">{t('search:results.tryDifferent')}</p>
                                             <button
                                                 onClick={onResetFilters}
-                                                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark active:bg-primary-dark transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 touch-manipulation"
+                                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark active:bg-primary-dark transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 touch-manipulation"
                                             >
                                                 <XCircleIcon className="w-5 h-5" />
                                                 {t('search:filters.resetFilters', 'Reset Filters')}

@@ -9,10 +9,10 @@ import { ImageProxyCache } from './imageProxyCache';
 /**
  * Resizing image proxy for external (feed) photos.
  *
- * Feed images are never stored on Cloudinary. The browser asks
+ * Feed images are never stored in storage. The browser asks
  *   GET /api/image-proxy?url=<source>&w=<width>
  * and gets a WebP resized on this server, so the cost is our CPU once per
- * (url, width) and then cache hits — zero Cloudinary credits.
+ * (url, width) and then cache hits — zero storage costs.
  *
  * Cache layers: in-memory LRU → disk → CDN/browser (long Cache-Control).
  * Concurrent requests for the same image share one fetch.

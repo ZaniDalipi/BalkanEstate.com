@@ -9,6 +9,7 @@ import 'leaflet/dist/leaflet.css';
 import { useCinematicFlythrough, type FlythroughPhase } from '../hooks/useCinematicFlythrough';
 import { useShadowTimelapse, type TimePeriod } from '../hooks/useShadowTimelapse';
 import { MAP_TILE_LAYERS } from '@/config/mapStyles';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 /**
  * 3D tilt configurations for different animation phases
@@ -73,14 +74,14 @@ const PERIOD_GRADIENTS: Record<TimePeriod, string> = {
 /**
  * Time period icons
  */
-const PERIOD_ICONS: Record<TimePeriod, string> = {
-  night: '🌙',
-  dawn: '🌅',
-  morning: '🌤️',
-  noon: '☀️',
-  afternoon: '🌤️',
-  sunset: '🌇',
-  dusk: '🌆',
+const PERIOD_ICONS: Record<TimePeriod, SoftIconName> = {
+  night: 'moon',
+  dawn: 'sunrise',
+  morning: 'partlySunny',
+  noon: 'sun',
+  afternoon: 'partlySunny',
+  sunset: 'sunset',
+  dusk: 'dusk',
 };
 
 /**
@@ -130,7 +131,7 @@ const ShadowTimelapsePanel: React.FC<{
             <div className="text-white">
               <div className="text-xl font-bold">{formattedTime}</div>
               <div className="text-sm opacity-90">
-                {PERIOD_ICONS[timePeriod]} {t(`property:shadowTimelapse.periods.${timePeriod}`, timePeriod)}
+                <SoftIcon name={PERIOD_ICONS[timePeriod]} className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t(`property:shadowTimelapse.periods.${timePeriod}`, timePeriod)}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -210,9 +211,9 @@ const ShadowTimelapsePanel: React.FC<{
               ))}
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={goToSunrise} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.sunrise', 'Sunrise')}>🌅</button>
-              <button onClick={goToNoon} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.noon', 'Noon')}>☀️</button>
-              <button onClick={goToSunset} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.sunset', 'Sunset')}>🌇</button>
+              <button onClick={goToSunrise} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.sunrise', 'Sunrise')}><SoftIcon name="sunrise" className="w-5 h-5" /></button>
+              <button onClick={goToNoon} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.noon', 'Noon')}><SoftIcon name="sun" className="w-5 h-5" /></button>
+              <button onClick={goToSunset} className="p-1.5 rounded hover:bg-neutral-100 text-sm" title={t('property:map3d.sunset', 'Sunset')}><SoftIcon name="sunset" className="w-5 h-5" /></button>
               <button onClick={reset} className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500" title={t('property:map3d.reset', 'Reset')}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -223,7 +224,7 @@ const ShadowTimelapsePanel: React.FC<{
 
           {/* Tip */}
           <div className="text-[10px] text-neutral-500 text-center">
-            💡 {t('property:shadowTimelapse.tip', 'Watch how shadows move to understand sunlight exposure')}
+            <SoftIcon name="lightbulb" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('property:shadowTimelapse.tip', 'Watch how shadows move to understand sunlight exposure')}
           </div>
         </div>
       </div>
@@ -365,7 +366,7 @@ const FlythroughControls: React.FC<{
               onClick={onToggleShadowTimelapse}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all"
             >
-              <span className="text-sm">☀️</span>
+              <SoftIcon name="sun" className="w-4 h-4" />
               {t('property:shadowTimelapse.title', 'Shadow Time-Lapse')}
             </button>
           )}
@@ -400,7 +401,7 @@ const FlythroughControls: React.FC<{
               onClick={onToggleShadowTimelapse}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-full shadow-md hover:shadow-lg transition-all"
             >
-              <span className="text-sm">☀️</span>
+              <SoftIcon name="sun" className="w-4 h-4" />
               {t('property:shadowTimelapse.title', 'Shadow Time-Lapse')}
             </button>
           )}
@@ -536,10 +537,7 @@ const CinematicPropertyMap: React.FC<CinematicPropertyMapProps> = ({
         style={{ height }}
       >
         <div className="text-center text-neutral-500">
-          <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
+          <SoftIcon name="pin" className="w-12 h-12 mx-auto mb-2 opacity-70" />
           <p className="font-medium">{t('property:cinematicMap.errors.noLocation', 'Location data unavailable')}</p>
         </div>
       </div>

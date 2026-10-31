@@ -200,6 +200,10 @@ export const adminKeys = {
   featured: (params?: { status?: string; page?: number; limit?: number }) =>
     featuredKeys.adminList(params),
   promotionPlans: () => promotionPlanKeys.adminList(),
+  /** Residences admin: list per filters, and an agency's free residences. */
+  residences: (params?: { search?: string; filter?: string; page?: number }) => ['admin', 'residences', params ?? {}] as const,
+  residencesAll: () => ['admin', 'residences'] as const,
+  agencyResidenceAllowance: (agencyId: string) => ['admin', 'agencyResidenceAllowance', agencyId] as const,
 };
 
 // ============================================================================

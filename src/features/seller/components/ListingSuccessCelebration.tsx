@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EyeIcon, BellIcon, ChatBubbleLeftRightIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import { useReducedMotion } from '@/src/hooks/useMediaQuery';
 import { SUCCESS_REDIRECT_MS } from './ListingFormHelpers';
 
@@ -107,10 +107,10 @@ const ListingSuccessCelebration: React.FC<ListingSuccessCelebrationProps> = ({ i
         ? t('newListing:success.updatedSubtitle', 'Your property page has been refreshed.')
         : t('newListing:success.publishedSubtitle', 'Your property is now on BalkanEstate.');
 
-    const chips = [
-        { key: 'visible', Icon: EyeIcon, label: t('newListing:success.chips.visible', 'Visible in search') },
-        { key: 'alerts', Icon: BellIcon, label: t('newListing:success.chips.alerts', 'Buyer alerts sent') },
-        { key: 'messages', Icon: ChatBubbleLeftRightIcon, label: t('newListing:success.chips.messages', 'Ready for messages') },
+    const chips: { key: string; icon: SoftIconName; label: string }[] = [
+        { key: 'visible', icon: 'eye', label: t('newListing:success.chips.visible', 'Visible in search') },
+        { key: 'alerts', icon: 'bell', label: t('newListing:success.chips.alerts', 'Buyer alerts sent') },
+        { key: 'messages', icon: 'chat', label: t('newListing:success.chips.messages', 'Ready for messages') },
     ];
 
     return (
@@ -192,7 +192,7 @@ const ListingSuccessCelebration: React.FC<ListingSuccessCelebrationProps> = ({ i
                         className="celebration-rise inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 border border-neutral-200 text-[13px] font-medium text-neutral-600"
                         style={{ ['--rise-delay' as string]: `${0.16 + i * 0.08}s` }}
                     >
-                        <chip.Icon className="w-3.5 h-3.5 text-neutral-400" />
+                        <SoftIcon name={chip.icon} className="w-5 h-5" />
                         {chip.label}
                     </span>
                 ))}

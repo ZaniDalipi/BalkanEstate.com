@@ -2,16 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Bars3Icon,
-  HomeIcon,
-  UsersIcon,
-  EnvelopeIcon,
-  ChartBarIcon,
   ArrowLeftIcon,
-  MagnifyingGlassIcon,
 } from '@/constants';
 import { useAppContext } from '@/context/AppContext';
 import UserAvatar from '@/components/shared/UserAvatar';
 import type { OverviewData } from '../types';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface AgencyDashboardHeaderProps {
   overview: OverviewData | null;
@@ -41,26 +37,26 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
     {
       label: t('agencyDashboard:header.listings', 'Listings'),
       value: overview?.activeListings ?? 0,
-      icon: <HomeIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="home" className="w-5 h-5" />,
       color: 'text-green-600',
     },
     {
       label: t('agencyDashboard:header.agents', 'Agents'),
       value: overview?.totalAgents ?? 0,
-      icon: <UsersIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="users" className="w-5 h-5" />,
       color: 'text-blue-600',
     },
     {
       label: t('agencyDashboard:header.inquiries', 'Inquiries'),
       value: overview?.inquiriesThisMonth ?? 0,
-      icon: <EnvelopeIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="envelope" className="w-5 h-5" />,
       color: 'text-red-600',
       isAlert: (overview?.inquiriesThisMonth ?? 0) > 0,
     },
     {
       label: t('agencyDashboard:header.views', 'Views'),
       value: overview?.totalViews ?? 0,
-      icon: <ChartBarIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="chart" className="w-5 h-5" />,
       color: 'text-purple-600',
     },
   ];
@@ -100,7 +96,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
                 className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors font-medium shadow-sm"
                 aria-label={t('agencyDashboard:header.browseProperties', 'Browse Properties')}
               >
-                <MagnifyingGlassIcon className="w-4 h-4" />
+                <SoftIcon name="search" className="w-5 h-5" />
                 <span className="hidden sm:inline">
                   {t('agencyDashboard:header.browseProperties', 'Browse Properties')}
                 </span>
@@ -123,7 +119,7 @@ const AgencyDashboardHeader: React.FC<AgencyDashboardHeaderProps> = ({
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               aria-label={t('agencyDashboard:header.backToSite', 'Back to Site')}
             >
-              <HomeIcon className="w-4 h-4" />
+              <SoftIcon name="home" className="w-5 h-5" />
               <span className="hidden sm:inline">
                 {t('agencyDashboard:header.backToSite', 'Back to Site')}
               </span>

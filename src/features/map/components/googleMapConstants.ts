@@ -3,6 +3,8 @@
  * Extracted from GoogleMapComponent.tsx for modularity.
  */
 
+import type { SoftIconName } from '@/src/shared/illustrations';
+
 // Map style options
 export type MapStyleType = 'clean' | 'color' | 'street' | 'satellite' | 'hybrid';
 
@@ -27,6 +29,14 @@ export const PROMOTION_TIER_COLORS: Record<string, string> = {
   highlight: '#0EA5E9',
   featured: '#7C3AED',
   standard: '#9ca3af',
+};
+
+// Promotion tier soft icons (badge on map popups)
+export const PROMOTION_TIER_ICONS: Record<string, SoftIconName> = {
+  premium: 'crown',
+  highlight: 'diamond',
+  featured: 'star',
+  standard: 'sparkles',
 };
 
 // Map container styles

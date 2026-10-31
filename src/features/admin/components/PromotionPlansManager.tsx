@@ -12,11 +12,9 @@ import { useTranslation } from 'react-i18next';
 import {
   PlusIcon,
   ArrowPathIcon,
-  SparklesIcon,
-  BuildingOfficeIcon,
   CheckIcon,
-  BoltIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { usePromotionPlansManager } from './usePromotionPlansManager';
 import { PlanCard, EditPlanModal } from './PromotionPlansManagerForm';
 
@@ -75,7 +73,7 @@ const PromotionPlansManager: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold flex items-center gap-3">
-              <SparklesIcon className="w-7 h-7" />
+              <SoftIcon name="sparkles" className="w-8 h-8 flex-shrink-0" />
               {t('admin:promotionPlans.title', 'Promotion Plans')}
             </h2>
             <p className="text-purple-200 mt-1">{t('admin:promotionPlans.subtitle', 'Manage listing promotion and agency feature pricing')}</p>
@@ -86,7 +84,7 @@ const PromotionPlansManager: React.FC = () => {
               <span
                 className={`w-2 h-2 rounded-full ${isRefetching ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}
               />
-              {isRefetching ? 'Syncing...' : 'Live'}
+              {isRefetching ? 'Syncing...' : t('admin:ui.promotionPlansManager.live', 'Live')}
             </div>
 
             {plans.length === 0 && (
@@ -113,7 +111,7 @@ const PromotionPlansManager: React.FC = () => {
       {/* Messages */}
       {(error || mutationError) && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center justify-between">
-          <span>{(error as Error)?.message || (mutationError as Error)?.message || 'An error occurred'}</span>
+          <span>{(error as Error)?.message || (mutationError as Error)?.message || t('admin:ui.promotionPlansManager.anErrorOccurred', 'An error occurred')}</span>
           <button className="p-1 hover:bg-red-100 rounded">&times;</button>
         </div>
       )}
@@ -135,7 +133,7 @@ const PromotionPlansManager: React.FC = () => {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <SparklesIcon className="w-5 h-5" />
+            <SoftIcon name="sparkles" className="w-6 h-6 flex-shrink-0" />
             {t('admin:promotionPlans.listingPromotions', 'Listing Promotions')}
             <span className={`ml-1 px-2 py-0.5 text-xs rounded-full ${activeTab === 'listing' ? 'bg-white/20' : 'bg-gray-200'}`}>
               {plans.filter(p => p.category === 'listing' && !p.isSpecialOffer).length}
@@ -149,7 +147,7 @@ const PromotionPlansManager: React.FC = () => {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <BuildingOfficeIcon className="w-5 h-5" />
+            <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
             {t('admin:promotionPlans.agencyFeatures', 'Agency Features')}
             <span className={`ml-1 px-2 py-0.5 text-xs rounded-full ${activeTab === 'agency' ? 'bg-white/20' : 'bg-gray-200'}`}>
               {plans.filter(p => p.category === 'agency' && !p.isSpecialOffer).length}
@@ -163,7 +161,7 @@ const PromotionPlansManager: React.FC = () => {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <BoltIcon className="w-5 h-5" />
+            <SoftIcon name="bolt" className="w-6 h-6 flex-shrink-0" />
             {t('admin:promotionPlans.specialOffers', 'Special Offers')}
             <span className={`ml-1 px-2 py-0.5 text-xs rounded-full ${activeTab === 'special-offers' ? 'bg-white/20' : 'bg-gray-200'}`}>
               {plans.filter(p => p.isSpecialOffer).length}
@@ -205,9 +203,10 @@ const PromotionPlansManager: React.FC = () => {
         ))}
         {filteredPlans.length === 0 && (
           <div className="col-span-full bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              {activeTab === 'special-offers' ? <BoltIcon className="w-8 h-8 text-gray-400" /> : activeTab === 'listing' ? <SparklesIcon className="w-8 h-8 text-gray-400" /> : <BuildingOfficeIcon className="w-8 h-8 text-gray-400" />}
-            </div>
+            <SoftIcon
+              name={activeTab === 'special-offers' ? 'bolt' : activeTab === 'listing' ? 'sparkles' : 'building'}
+              className="w-16 h-16 mx-auto mb-4"
+            />
             <p className="text-gray-500 text-lg mb-4">
               {activeTab === 'special-offers'
                 ? t('admin:promotionPlans.noSpecialOffers', 'No special offers yet')

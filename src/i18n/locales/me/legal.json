@@ -96,7 +96,9 @@
       "stripe": "Obrada plaćanja. Naš procesor plaćanja obrađuje Vaše informacije o plaćanju sigurno. Ne pohranjujemo Vaše potpune podatke kreditne kartice.",
       "analytics": "Web analitika za razumijevanje ponašanja korisnika i poboljšanje naših usluga. Koristimo anonimizaciju IP adrese.",
       "cloudflare": "Sigurnosne i performansne usluge uključujući DDoS zaštitu i dostavu sadržaja.",
-      "aws": "Cloud hosting i usluge pohrane. Podaci se pohranjuju u EU data centrima."
+      "aws": "Cloud hosting i usluge pohrane. Podaci se pohranjuju u EU data centrima.",
+      "paymentTitle": "Procesor plaćanja",
+      "provider": "Naš procesor plaćanja u naše ime obrađuje sve transakcije, usklađenost sa PDV-om/porezima, fakturisanje i povraćaje. Vaši podaci o plaćanju obrađuju se bezbjedno i ne čuvamo pune podatke vaše kartice."
     },
     "transfers": {
       "title": "Međunarodni Transferi Podataka",
@@ -164,6 +166,12 @@
         "title": "Obrada plaćanja",
         "text": "Kada izvršite kupovinu, obavljate transakciju sa našim pružaocem usluga plaćanja Paysera, koji upravlja obradom plaćanja, fakturisanjem, usklađenošću sa PDV-om/porezima i povratima.",
         "buyerTerms": "Kupovinom takođe prihvatate Uslove za korišćenje usluge Paysera."
+      },
+      "provider": {
+        "title": "Obrada plaćanja",
+        "morStatement": "Naš proces naručivanja sprovodi naš pružalac platnih usluga. On je Merchant of Record za sve naše porudžbine i obrađuje upite kupaca u vezi sa plaćanjima i povraćajima.",
+        "text": "Kada kupujete, transakciju obavljate sa našim pružaocem platnih usluga, koji obrađuje plaćanje, fakturisanje, usklađenost sa PDV-om/porezima i povraćaje.",
+        "buyerTerms": "Kupovinom prihvatate i uslove korišćenja pružaoca plaćanja."
       }
     },
     "prohibited": {
@@ -347,6 +355,126 @@
     "contact": {
       "title": "Kontaktirajte Nas",
       "text": "Ako imate pitanja o našem korištenju kolačića, molimo kontaktirajte nas:"
+    }
+  },
+  "refund": {
+    "title": "Politika povraćaja novca",
+    "lastUpdated": "Posljednje ažuriranje",
+    "intro": {
+      "title": "Naša posvećenost",
+      "text": "U BalkanEstate AI želimo da budete potpuno zadovoljni svojom pretplatom. Ako niste zadovoljni našim uslugama, nudimo povraćaj novca u zavisnosti od vrste pretplate. Ova politika opisuje uslove za podnošenje zahtjeva za povraćaj."
+    },
+    "guarantee": {
+      "title": "Rokovi za povraćaj",
+      "text": "Ako iz bilo kog razloga niste zadovoljni pretplatom, možete zatražiti puni povraćaj u odgovarajućem roku. Ova garancija važi za:",
+      "newSub": "Nove kupljene pretplate",
+      "upgrade": "Nadogradnje plana (povraćaj plaćene razlike)",
+      "firstTime": "Pretplatnici prvi put"
+    },
+    "eligibility": {
+      "title": "Pravo na povraćaj",
+      "text": "Imate pravo na povraćaj ako:",
+      "withinPeriod": "Zahtjev je podnesen u roku od 7 dana (mjesečno) ili 30 dana (godišnje) od kupovine",
+      "firstPurchase": "Ovo je vaša prva pretplata na BalkanEstate AI",
+      "notAbused": "Ranije niste koristili politiku povraćaja",
+      "goodFaith": "Koristili ste uslugu u dobroj vjeri"
+    },
+    "nonRefundable": {
+      "title": "Slučajevi bez povraćaja",
+      "text": "Povraćaj nije moguć u sljedećim slučajevima:",
+      "afterPeriod": "Zahtjevi podneseni nakon roka za povraćaj (7 dana za mjesečne, 30 dana za godišnje)",
+      "renewal": "Automatska obnavljanja pretplate (otkažite prije datuma obnove)",
+      "abuse": "Nalozi ugašeni zbog kršenja Uslova korišćenja",
+      "repeat": "Ponovljeni zahtjevi za povraćaj (jedan povraćaj po korisniku)",
+      "partial": "Djelimično korišćenje nakon isteka roka za povraćaj"
+    },
+    "howTo": {
+      "title": "Kako zatražiti povraćaj",
+      "text": "Da biste zatražili povraćaj, slijedite ove korake:",
+      "step1": {
+        "title": "Pošaljite e-mail",
+        "text": "Pišite nam na refunds@balkanestateai.com sa naslovom „Refund Request“"
+      },
+      "step2": {
+        "title": "Navedite svoje podatke",
+        "text": "Navedite e-mail naloga, plan pretplate, datum kupovine i razlog povraćaja (opciono)"
+      },
+      "step3": {
+        "title": "Sačekajte potvrdu",
+        "text": "Razmotrićemo zahtjev i odgovoriti u roku od 2-3 radna dana"
+      },
+      "step4": {
+        "title": "Primite povraćaj",
+        "text": "Nakon odobrenja, povraćaj se obrađuje u roku od 5-10 radnih dana na izvorni način plaćanja"
+      }
+    },
+    "contact": {
+      "title": "Zatražite povraćaj sada",
+      "text": "Spremni da zatražite povraćaj? Kontaktirajte naš tim podrške:",
+      "response": "Obično odgovaramo u roku od 24-48 sati radnim danima."
+    },
+    "processing": {
+      "title": "Obrada povraćaja",
+      "text": "Povraćaje obrađuje naš pružalac plaćanja. Evo šta možete očekivati:",
+      "review": "Vrijeme pregleda",
+      "process": "Vrijeme obrade",
+      "bank": "Obrada u banci",
+      "note": "Napomena: Vrijeme povraćaja može varirati u zavisnosti od načina plaćanja i finansijske institucije."
+    },
+    "provider": {
+      "title": "Obrada plaćanja",
+      "text": "Sva plaćanja i povraćaje obrađuje naš pružalac plaćanja, koji u naše ime vodi računa o obradi, poreskoj usklađenosti i isplati povraćaja. Povraćaj će se pojaviti na vašem izvodu od našeg pružaoca plaćanja. Za pitanja u vezi sa plaćanjem preporučujemo da prvo kontaktirate nas radi najbržeg rješenja."
+    },
+    "cancellation": {
+      "title": "Otkazivanje naspram povraćaja",
+      "text": "Obratite pažnju na razliku između otkazivanja i povraćaja:",
+      "cancel": "Otkazivanje",
+      "cancelDesc": "Zaustavlja buduća naplaćivanja. Pristup zadržavate do kraja tekućeg obračunskog perioda. Povraćaj se ne vrši.",
+      "refund": "Povraćaj",
+      "refundDesc": "Vraća vašu uplatu. Pretplata se odmah prekida i pristup se ukida po obradi povraćaja."
+    },
+    "prorated": {
+      "title": "Proporcionalni povraćaji za godišnje planove",
+      "text": "Za godišnje planove, ako zatražite povraćaj nakon 30-dnevnog garantnog perioda ali u prvih 90 dana, možemo po sopstvenoj procjeni ponuditi proporcionalni povraćaj umanjen za naknadu obrade. Kontaktirajte naš tim radi vaše konkretne situacije."
+    },
+    "disputes": {
+      "title": "Sporovi i osporene transakcije",
+      "text": "Podstičemo vas da nas kontaktirate direktno prije nego što pokrenete spor kod banke ili izdavaoca kartice. Osporavanja su skupa i oduzimaju vrijeme objema stranama. Posvećeni smo brzom i pravednom rješavanju problema. Ako pokrenete osporavanje bez prethodnog kontakta sa nama, vaš nalog može biti suspendovan do okončanja istrage."
+    },
+    "contactUs": {
+      "title": "Kontaktirajte nas",
+      "text": "Ako imate pitanja o našoj politici povraćaja ili vam je potrebna pomoć, kontaktirajte nas:"
+    }
+  },
+  "ui": {
+    "cookiePolicyPage": {
+      "email": "E-mail:",
+      "phone": "Telefon:"
+    },
+    "refundPolicyPage": {
+      "monthlySubscriptions": "Mjesečne pretplate",
+      "n7Days": "7 dana",
+      "fullRefundWithin7Days": "Puni povraćaj u roku od 7 dana od kupovine",
+      "yearlySubscriptions": "Godišnje pretplate",
+      "n30Days": "30 dana",
+      "fullRefundWithin30Days": "Puni povraćaj u roku od 30 dana od kupovine",
+      "email": "E-mail:",
+      "phone": "Telefon:",
+      "n23BusinessDays": "2-3 radna dana",
+      "n510BusinessDays": "5-10 radnih dana",
+      "variesByBankUpTo": "Zavisi od banke (do 10 dana)",
+      "refunds": "Povraćaji:",
+      "support": "Podrška:"
+    },
+    "privacyPolicyPage": {
+      "privacyPolicy": "Politika privatnosti →",
+      "emailDpoBalkanestateaiCom": "E-mail: dpo@balkanestateai.com",
+      "email": "E-mail:",
+      "phone": "Telefon:"
+    },
+    "termsOfServicePage": {
+      "email": "E-mail:",
+      "phone": "Telefon:"
     }
   }
 }

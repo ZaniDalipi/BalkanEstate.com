@@ -8,6 +8,7 @@ import ListingFeedForm from './ListingFeedForm';
 import ListingFeedRow from './ListingFeedRow';
 import ListingSourcesAlphaTerms from './ListingSourcesAlphaTerms';
 import ImportReviewBanner from './review/ImportReviewBanner';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 type View = 'list' | 'add' | 'edit';
 
@@ -130,7 +131,7 @@ const MyListingFeeds: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900">{t('listingFeeds:title')}</h2>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold uppercase tracking-wider">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              Alpha
+              {t('listingFeeds:ui.myListingFeeds.alpha', 'Alpha')}
             </span>
           </div>
           <p className="text-sm text-gray-600">{t('listingFeeds:description')}</p>
@@ -154,9 +155,7 @@ const MyListingFeeds: React.FC = () => {
 
       {/* Alpha data-quality notice */}
       <div className="mb-4 flex gap-3 items-start bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
+        <SoftIcon name="info" className="w-5 h-5 flex-shrink-0" />
         <span>
           <strong>{t('listingFeeds:alphaNoticeTitle', 'Alpha feature — review all imported data.')}</strong>{' '}
           {t('listingFeeds:alphaNoticeBody',

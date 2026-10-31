@@ -862,5 +862,26 @@
       "question": "How do promotion credits work?",
       "answer": "Promotion credits let you boost your listings to appear higher in search results. Pro users get 3 credits/month, agencies get 15 to share among their team."
     }
+  },
+  "guide": {
+    "stepByStep": "Step-by-Step Guide",
+    "progress": "Progress",
+    "tips": "Tips",
+    "completed": "Guide Completed!",
+    "completedMessage": "Great job! You've completed all the steps."
+  },
+  "video": {
+    "tutorial": "Video Tutorial"
+  },
+  "feature": {
+    "highlight": "Feature Highlight"
+  },
+  "ui": {
+    "howItWorksPage": {
+      "aiSearch": "AI Search",
+      "findMeA": "Find me a...",
+      "features": "Features",
+      "forever": "forever"
+    }
   }
 }

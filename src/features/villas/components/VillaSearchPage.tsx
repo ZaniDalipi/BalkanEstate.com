@@ -1,13 +1,17 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import OutOfAreaBanner from '@/src/components/search/OutOfAreaBanner';
 import MapComponent from '@/src/features/map/components/MapComponent';
 import { useDeferredMount } from '@/src/shared/hooks/useDeferredMount';
+import { useSettledHidden } from '@/src/shared/hooks/useSettledHidden';
 import PropertyCardSkeleton from '@/src/features/property-details/components/PropertyCardSkeleton';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { interleaveInFeedAds } from '@/features/promo';
 import VillaFilters from './VillaFilters';
+import CollapsibleFilterPanel from '@/src/shared/components/CollapsibleFilterPanel';
+import { useScrollDirection } from '@/src/shared/hooks/useScrollDirection';
+import { useShortLandscape } from '@/src/hooks/useMediaQuery';
 import VillaListingModeToggle from './VillaListingModeToggle';
 import ListingStatusToggle from '@/src/components/shared/ListingStatusToggle';
 import LuxuryVillaCard from './LuxuryVillaCard';
@@ -16,6 +20,7 @@ import Toast from '@/components/shared/Toast';
 import { useVillaSearch } from '../hooks/useVillaSearch';
 import { MapIcon, AdjustmentsHorizontalIcon, XMarkIcon, Bars3Icon, Squares2x2Icon } from '@/constants';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
+import { Button } from '@/components/ui/liquid-glass-button';
 import { LiquidGlassSwitch } from '@/src/components/ui/LiquidGlassSwitch';
 import { SEO } from '@/src/components/seo';
 import Footer from '@/components/shared/Footer';
@@ -23,6 +28,7 @@ import { Property } from '@/types';
 import { VILLA_DESTINATIONS } from '@/src/features/home/data/villaDestinations';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon, NavPicture } from '@/src/shared/illustrations';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -298,10 +304,10 @@ const useCountUp = (target: number): number => {
 const TrustStrip: React.FC = () => {
     const { t } = useTranslation(['villas']);
     const items = [
-        { icon: '🏛️', title: t('villas:trust.handpicked', 'Handpicked Estates'), desc: t('villas:trust.handpickedDesc', 'Every villa personally vetted for exceptional quality') },
-        { icon: '🎩', title: t('villas:trust.concierge', 'Dedicated Concierge'),  desc: t('villas:trust.conciergeDesc', 'White-glove support from inquiry to checkout')  },
-        { icon: '💎', title: t('villas:trust.bestPrice', 'Best-Price Promise'),  desc: t('villas:trust.bestPriceDesc', 'No hidden fees — ever. Book with total confidence')  },
-        { icon: '🔒', title: t('villas:trust.privacy', 'Complete Privacy'),    desc: t('villas:trust.privacyDesc', 'Your stay, your retreat — absolute discretion guaranteed')    },
+        { icon: 'landmark' as const, title: t('villas:trust.handpicked', 'Handpicked Estates'), desc: t('villas:trust.handpickedDesc', 'Every villa personally vetted for exceptional quality') },
+        { icon: 'concierge' as const, title: t('villas:trust.concierge', 'Dedicated Concierge'),  desc: t('villas:trust.conciergeDesc', 'White-glove support from inquiry to checkout')  },
+        { icon: 'diamond' as const, title: t('villas:trust.bestPrice', 'Best-Price Promise'),  desc: t('villas:trust.bestPriceDesc', 'No hidden fees — ever. Book with total confidence')  },
+        { icon: 'lock' as const, title: t('villas:trust.privacy', 'Complete Privacy'),    desc: t('villas:trust.privacyDesc', 'Your stay, your retreat — absolute discretion guaranteed')    },
     ];
     return (
         // Wraps into a 2x2 grid on a phone rather than scrolling sideways.
@@ -313,7 +319,7 @@ const TrustStrip: React.FC = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-black/[0.05]">
                 {items.map((item, i) => (
                     <div key={i} className="flex items-start gap-2.5 px-3 py-3 sm:px-4">
-                        <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
+                        <SoftIcon name={item.icon} className="w-7 h-7 flex-shrink-0" />
                         <div className="min-w-0">
                             <p className="text-[11px] font-semibold text-neutral-700 leading-tight">{item.title}</p>
                             <p className="text-[10px] text-neutral-400 leading-snug mt-0.5">{item.desc}</p>
@@ -499,6 +505,17 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     } = useVillaSearch();
 
     const [isFiltersOpen, setIsFiltersOpen] = React.useState(false);
+    // Desktop filter panel starts folded and folds itself away again once the
+    // visitor scrolls down through the results.
+    const [isDesktopFiltersCollapsed, setIsDesktopFiltersCollapsed] = useState(true);
+    const { onScroll: handleListScroll, isScrollingDown: isListScrollingDown } = useScrollDirection();
+    // Phone held sideways: the header and filters alone fill the ~400px column,
+    // so they fold away while the results scroll down (back on the way up).
+    const isShortLandscape = useShortLandscape();
+    const tuckListChrome = isShortLandscape && isListScrollingDown;
+    useEffect(() => {
+        if (isListScrollingDown) setIsDesktopFiltersCollapsed(true);
+    }, [isListScrollingDown]);
 
     /* Entrance animation: animate cards when villa data first loads */
     const [animateCards, setAnimateCards] = useState(true);
@@ -584,6 +601,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
         // Reset also clears the market toggle, so it has to count here —
         // otherwise "For Sale" hid the Reset button that would undo it.
         if (listingMode !== 'any') count++;
+        // On touch the status toggle sits in the filter sheet, so a
+        // non-default choice has to show on the filter button's badge.
+        if (filters.saleStatus && filters.saleStatus !== 'available') count++;
         const amenities = (filters.amenities as string[] | undefined) ?? [];
         count += amenities.length;
         return count;
@@ -616,6 +636,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
     // it are a screenful of DOM nobody is looking at, built in that same commit.
     const isListOnScreen = !showViewToggle || mobileView === 'list';
     const mountList = useDeferredMount(!isListOnScreen);
+    // Once the list has slid away behind the map, stop rendering it at all.
+    const listSettledHidden = useSettledHidden(!isListOnScreen);
 
     const mapProps = {
         // The same set the list is drawn from, so a search never lists
@@ -646,12 +668,24 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
     const hasActiveFilters = activeFilterCount > 0;
 
+    const statusOptionLabels = {
+        available: t('villas:filters.statusAvailable', 'Available'),
+        closed:
+            listingMode === 'rent' ? t('villas:filters.statusRented', 'Rented')
+            : listingMode === 'sale' ? t('villas:filters.statusSold', 'Sold')
+            : t('villas:filters.statusSoldOrRented', 'Sold & rented'),
+        all: t('villas:filters.statusBoth', 'Both'),
+    };
+
     return (
         <div className="relative flex h-full w-full flex-col lg:flex-row">
             <SEO
                 title={t('villas:seo.title', 'Luxury Villas for Rent in the Balkans | BalkanEstate')}
                 description={t('villas:seo.description', 'Discover exclusive luxury villas for rent in the Balkans. Mountain retreats, lakeside estates, and coastal villas in Croatia, Montenegro, Albania, and more.')}
-                canonical={`${window.location.origin}/villas${window.location.search}`}
+                canonical={`${window.location.origin}/villas`}
+                // Filtered views are internal search results: endless
+                // combinations, often empty. Only the unfiltered page is indexed.
+                noindex={window.location.search.length > 1}
                 type="website"
             />
 
@@ -664,7 +698,9 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                 {/* Left Panel: Search + Filters + Property List */}
                 <div
-                    className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] lg:flex-shrink-0 lg:border-r lg:border-gray-200 ${showViewToggle && mobileView === 'list' ? 'translate-x-0' : showViewToggle ? '-translate-x-full' : ''} lg:translate-x-0 transition-transform duration-300`}
+                    className={`absolute inset-0 z-10 h-full w-full flex flex-col lg:relative lg:w-[45%] xl:w-[55%] search-list-panel lg:flex-shrink-0 lg:border-r lg:border-gray-200 landscape:absolute landscape:w-full landscape:border-r-0`}
+                    data-shown={!showViewToggle || mobileView === 'list'}
+                    data-settled={listSettledHidden}
                     style={{ background: '#F8F9FC' }}
                 >
                     {/* Spacer matching the floating mobile/tablet header, so
@@ -682,7 +718,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         context, so the dropdown's own z-index is confined to
                         it: at z-20 the whole subtree painted under the bar, and
                         the bar cut a white stripe through the suggestions. */}
-                    <div className="hidden lg:block sticky top-0 z-[110]">
+                    <div className={`hidden ${tuckListChrome || isTablet ? '' : 'lg:block'} sticky top-0 z-[110]`}>
 
                         {/* Tier 1: Soft liquid-glass brand bar — frosted white, hairline edge */}
                         <div
@@ -691,7 +727,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         >
                             {/* Left: brand + stats */}
                             <div className="flex items-center gap-2.5 min-w-0">
-                                <span className="text-lg flex-shrink-0">🏛️</span>
+                                <NavPicture name="villas" className="w-7 h-7 flex-shrink-0" />
                                 <span className="text-neutral-900 font-semibold text-base tracking-[-0.01em] flex-shrink-0">
                                     {t('villas:title', 'Luxury Villas')}
                                 </span>
@@ -740,15 +776,41 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
                         {/* Tier 3: VillaFilters compact chip row — ~52px */}
                         <div style={{ background: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                            <VillaFilters
-                                filters={filters}
-                                onFilterChange={handleFilterChange}
-                                onSearch={handleSearch}
-                                onReset={handleResetFilters}
-                                onSaveSearch={handleSaveSearchArea}
-                                isSaving={isSaving}
-                                compact
-                            />
+                            <CollapsibleFilterPanel
+                                id="villa-desktop-filter-panel"
+                                collapsed={isDesktopFiltersCollapsed}
+                                onToggle={() => setIsDesktopFiltersCollapsed(c => !c)}
+                                activeCount={activeFilterCount}
+                            >
+                                <VillaFilters
+                                    filters={filters}
+                                    onFilterChange={handleFilterChange}
+                                    onSearch={handleSearch}
+                                    onReset={handleResetFilters}
+                                    onSaveSearch={handleSaveSearchArea}
+                                    isSaving={isSaving}
+                                    compact
+                                    hideActions
+                                />
+                            </CollapsibleFilterPanel>
+                            {/* Actions stay outside the folding panel so search is always one click away */}
+                            <div className="flex items-center justify-end gap-2 px-4 pb-2">
+                                {hasActiveFilters && (
+                                    <button onClick={handleResetFilters} className="text-[11px] text-gray-400 hover:text-gray-600 py-1.5 transition-colors whitespace-nowrap">
+                                        {t('villas:filters.reset', 'Reset')}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={handleSaveSearchArea}
+                                    disabled={isSaving}
+                                    className="text-[11px] text-primary hover:text-primary-dark py-1.5 px-2 border border-primary/30 rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+                                >
+                                    {isSaving ? t('search:saving', 'Saving...') : t('search:saveSearch', 'Save Search')}
+                                </button>
+                                <Button variant="cool" size="sm" onClick={() => handleSearch()} className="text-xs font-semibold whitespace-nowrap rounded-xl">
+                                    {t('search:searchButton', 'Search')}
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
@@ -757,7 +819,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         the bottom and is ~56px tall, so 112px of padding left
                         the last card — and the empty state's own button —
                         sitting underneath it. */}
-                    <div className="flex-1 overflow-y-auto pb-44 lg:pb-3 glass-scrollbar" data-scroll-container>
+                    <div className="flex-1 overflow-y-auto pb-44 lg:pb-3 glass-scrollbar" data-scroll-container onScroll={handleListScroll}>
 
                         {/* Results bar */}
                         <div className="sticky top-0 bg-white border-b border-gray-100 z-[100]">
@@ -773,7 +835,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {/* The live region is this short count, not
                                         the whole list — announcing every card on
                                         each filter change is unusable. */}
-                                    <p className="text-xs font-semibold text-gray-700 flex-shrink-0" role="status" aria-live="polite" aria-atomic="true">
+                                    <p className="text-xs font-semibold text-gray-700 flex-shrink-0 whitespace-nowrap" role="status" aria-live="polite" aria-atomic="true">
                                         {listProperties.length}{' '}
                                         <span className="text-gray-400 font-normal">
                                             {t('villas:exclusiveVillas', 'exclusive villas')}
@@ -784,7 +846,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     )}
                                     {filters.query && (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-villa-gold-bright)]/10 text-[var(--color-primary)] text-[11px] font-medium max-w-[140px]">
-                                            <MapIcon className="w-3 h-3 flex-shrink-0" />
+                                            <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                                             <span className="truncate">{filters.query}</span>
                                             <button
                                                 onClick={() => handleFilterChange('query', '')}
@@ -830,7 +892,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             value={filters.sortBy || 'newest'}
                                             onChange={(e) => handleSortChange(e.target.value)}
                                             aria-label={t('search:filters.sortBy', 'Sort properties by')}
-                                            className="block text-xs bg-white border border-gray-200 rounded-xl text-gray-700 px-3 py-1.5 pr-7 focus:outline-none focus:border-[var(--color-primary)]/40 focus:ring-1 focus:ring-[var(--color-primary)]/20 transition-all appearance-none"
+                                            className="block max-w-[9.5rem] truncate text-xs bg-white border border-gray-200 rounded-xl text-gray-700 px-3 py-1.5 pr-7 focus:outline-none focus:border-[var(--color-primary)]/40 focus:ring-1 focus:ring-[var(--color-primary)]/20 transition-all appearance-none"
                                         >
                                             <option value="newest">{t('search:sort.newest')}</option>
                                             <option value="oldest">{t('search:sort.oldest')}</option>
@@ -848,13 +910,14 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     </div>
                                 </div>
 
-                                {/* Market toggle — its own full-width row on
-                                    touch, inline on desktop. */}
-                                <div className="w-full lg:w-auto lg:order-none">
+                                {/* Market and status toggles — desktop only.
+                                    On phones and tablets they live in the
+                                    filter sheet: two full-width rows here
+                                    pushed the first card half off screen. */}
+                                <div className="hidden lg:block">
                                     <VillaListingModeToggle
                                         mode={listingMode}
                                         onChange={handleListingModeChange}
-                                        className="w-full lg:w-auto"
                                     />
                                 </div>
 
@@ -865,43 +928,38 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     onChange={(value) => handleFilterChange('saleStatus', value)}
                                     label={t('villas:filters.status', 'Show')}
                                     showLabel={false}
-                                    className="w-full lg:w-auto"
-                                    optionLabels={{
-                                        available: t('villas:filters.statusAvailable', 'Available'),
-                                        closed:
-                                            listingMode === 'rent' ? t('villas:filters.statusRented', 'Rented')
-                                            : listingMode === 'sale' ? t('villas:filters.statusSold', 'Sold')
-                                            : t('villas:filters.statusSoldOrRented', 'Sold & rented'),
-                                        all: t('villas:filters.statusBoth', 'Both'),
-                                    }}
+                                    className="hidden lg:block"
+                                    optionLabels={statusOptionLabels}
                                 />
                             </div>
-                            {/* Nothing in the searched area: say so, then
-                                introduce what is listed from elsewhere. */}
-                            {outOfArea ? (
-                                <div className="px-4 pb-2">
-                                    <OutOfAreaBanner
-                                        kind={outOfArea}
-                                        query={filters.query}
-                                        isQueryUnmatched={isQueryUnmatched}
-                                        location={fallbackLocation}
-                                        onResetFilters={handleResetFilters}
-                                    />
-                                </div>
-                            ) : isTextRelaxed && (
-                                /* The typed text matched nothing and the map
-                                   view is answering — say so instead of passing
-                                   the results off as exact matches. */
-                                <div className="px-4 pb-2 -mt-1">
-                                    <p className="text-[11px] text-gray-400">
-                                        {t('villas:showingInArea', {
-                                            query: filters.query,
-                                            defaultValue: 'No villa matches “{{query}}” — showing what is available in this area',
-                                        })}
-                                    </p>
-                                </div>
-                            )}
                         </div>
+
+                        {/* Nothing in the searched area: say so, then
+                            introduce what is listed from elsewhere. Kept out
+                            of the sticky bar so it scrolls away with the list. */}
+                        {outOfArea ? (
+                            <div className="px-3 pt-2 bg-gray-50">
+                                <OutOfAreaBanner
+                                    kind={outOfArea}
+                                    query={filters.query}
+                                    isQueryUnmatched={isQueryUnmatched}
+                                    location={fallbackLocation}
+                                    onResetFilters={handleResetFilters}
+                                />
+                            </div>
+                        ) : isTextRelaxed && (
+                            /* The typed text matched nothing and the map
+                               view is answering — say so instead of passing
+                               the results off as exact matches. */
+                            <div className="px-4 pt-2 bg-gray-50">
+                                <p className="text-[11px] text-gray-400">
+                                    {t('villas:showingInArea', {
+                                        query: filters.query,
+                                        defaultValue: 'No villa matches “{{query}}” — showing what is available in this area',
+                                    })}
+                                </p>
+                            </div>
+                        )}
 
                         {/* Card grid / loading / empty states */}
                         <div className="p-3 pt-0 bg-gray-50">
@@ -918,7 +976,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-5 landscape:gap-3">
                                         {[...Array(6)].map((_, i) => <PropertyCardSkeleton key={i} index={i} />)}
                                     </div>
                                 </>
@@ -942,7 +1000,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     <TrustStrip />
                                     <div className="flex justify-center py-8 px-3">
                                         <div className="bg-white rounded-2xl shadow-sm p-8 text-center max-w-md w-full border border-[var(--color-villa-gold-bright)]/10">
-                                            <div className="text-5xl mb-3">🏛️</div>
+                                            <SoftIcon name="landmark" className="w-14 h-14 mx-auto mb-3" />
                                             <h3 className="text-gray-800 font-bold text-lg mb-1">
                                                 {t('villas:noProperties', 'No luxury villas found')}
                                             </h3>
@@ -971,7 +1029,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     />
                                     <TrustStrip />
                                     <HighlightedPropertiesSection properties={listProperties} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                         {interleaveInFeedAds(
                                             listProperties.slice(0, visibleCount).map((property, index) => (
                                                 <AnimatedVillaCard
@@ -988,7 +1046,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     {visibleCount < listProperties.length && (
                                         <div ref={loadMoreRef}>
                                             {isLoadingMore && (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 landscape:grid-cols-3 gap-5 landscape:gap-3 mt-4">
                                                     {Array.from({ length: Math.min(ITEMS_PER_PAGE, listProperties.length - visibleCount) }).map((_, i) => (
                                                         <PropertyCardSkeleton key={i} index={i} />
                                                     ))}
@@ -1006,8 +1064,11 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                 </div>
 
                 {/* Right Panel: Map */}
-                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden">
-                    <div className="absolute inset-0 overflow-hidden">
+                <div className="h-full w-full lg:w-[55%] xl:w-[45%] lg:flex-shrink-0 relative z-0 overflow-hidden landscape:w-full">
+                    <div
+                        className="search-map-stage absolute inset-0 overflow-hidden"
+                        data-shown={!showViewToggle || mobileView === 'map'}
+                    >
                         {mountMap && <MapComponent {...mapProps} />}
                     </div>
                     {/* Pin colour key — gold = for rent, emerald = for sale */}
@@ -1057,7 +1118,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     // top and a pill below the bar.
                                     paddingTop: 'var(--floating-search-top-pad)',
                                     paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 8px)',
-                                    paddingRight: 'calc(env(safe-area-inset-right, 0px) + 8px)',
+                                    // Stop short of the floating header (Subscribe / New / account) on md+.
+                                    paddingRight: 'max(calc(env(safe-area-inset-right, 0px) + 8px), var(--floating-header-w, 0px))',
                                 }}
                             >
                                 <div className="pointer-events-auto w-full space-y-1.5">
@@ -1068,7 +1130,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                     >
                                         <button
                                             onClick={onToggleSidebar}
-                                            className="min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50"
+                                            className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0 rounded-full hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secondary/50"
                                             aria-label={t('common:aria.openMenu')}
                                         >
                                             <Bars3Icon className="w-6 h-6 text-neutral-800" />
@@ -1106,7 +1168,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             >
                                                 <div className="w-8 h-8 rounded-full overflow-hidden">
                                                     {state.currentUser.avatarUrl ? (
-                                                        <img src={optimizeCloudinaryUrl(state.currentUser.avatarUrl, { width: 64 }) || state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
+                                                        <img src={optimizeImageUrl(state.currentUser.avatarUrl, { width: 64 }) || state.currentUser.avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" aria-hidden="true" />
                                                     ) : (
                                                         <DefaultAvatar gender={state.currentUser.gender} seed={state.currentUser.id || state.currentUser.name} avatarOptions={state.currentUser.avatarOptions} />
                                                     )}
@@ -1130,7 +1192,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[11px] font-semibold backdrop-blur-sm shadow-sm"
                                             style={{ background: 'var(--color-primary)' }}
                                         >
-                                            <span>🏛️</span>
+                                            <NavPicture name="villas" className="w-5 h-5" />
                                             <span>{t('villas:title', 'Luxury Villas')}</span>
                                             {activeFilterCount > 0 && (
                                                 <span
@@ -1169,7 +1231,8 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
 
             {/* Mobile Filters Modal */}
             {(isMobile || isTablet) && isFiltersOpen && (
-                <div className="fixed inset-0 z-30 flex flex-col">
+                <div className="fixed inset-0 z-[1100] flex flex-col">
+                    {/* z-[1100]: a full-screen sheet, so above the sidebar rail (50) and the floating header (1001); below the menu drawer (1300) and dialogs (5000+). */}
                     <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
                     <div className="relative w-full h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
                         <div
@@ -1178,7 +1241,7 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                         >
                             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-lg">🏛️</span>
+                                    <NavPicture name="villas" className="w-7 h-7" />
                                     <h2 className="text-base font-bold text-gray-900">
                                         {t('villas:filters.title', 'Villa Filters')}
                                     </h2>
@@ -1200,6 +1263,22 @@ const VillaSearchPage: React.FC<VillaSearchPageProps> = ({ onToggleSidebar }) =>
                                 </button>
                             </div>
                             <div className="overflow-y-auto glass-scrollbar flex-1">
+                                {/* Market and status — shown inline in the
+                                    results bar on desktop, folded in here on
+                                    touch so the list gets the screen. */}
+                                <div className="px-4 pt-4 space-y-3">
+                                    <VillaListingModeToggle
+                                        mode={listingMode}
+                                        onChange={handleListingModeChange}
+                                        className="w-full"
+                                    />
+                                    <ListingStatusToggle
+                                        value={filters.saleStatus}
+                                        onChange={(value) => handleFilterChange('saleStatus', value)}
+                                        label={t('villas:filters.status', 'Show')}
+                                        optionLabels={statusOptionLabels}
+                                    />
+                                </div>
                                 <VillaFilters
                                     filters={filters}
                                     onFilterChange={handleFilterChange}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClockIcon, HomeIcon, EnvelopeIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { DashboardAgent } from '../../types';
 import UserAvatar from '@/components/shared/UserAvatar';
 
@@ -15,13 +15,13 @@ const AgentPerformanceCard: React.FC<AgentPerformanceCardProps> = ({ agent }) =>
     {
       label: t('agencyDashboard:agents.perf.activeListings', 'Active Listings'),
       value: agent.activeListings,
-      icon: <HomeIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="home" className="w-7 h-7 flex-shrink-0" />,
       color: 'text-green-600 bg-green-50',
     },
     {
       label: t('agencyDashboard:agents.perf.inquiriesHandled', 'Inquiries Handled'),
       value: agent.inquiriesHandled,
-      icon: <EnvelopeIcon className="w-4 h-4" />,
+      icon: <SoftIcon name="envelope" className="w-7 h-7 flex-shrink-0" />,
       color: 'text-amber-600 bg-amber-50',
     },
   ];
@@ -60,7 +60,7 @@ const AgentPerformanceCard: React.FC<AgentPerformanceCardProps> = ({ agent }) =>
         <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium ${
           'bg-blue-50 text-blue-700'
         }`}>
-          <ClockIcon className="w-4 h-4" />
+          <SoftIcon name="clock" className="w-5 h-5 flex-shrink-0" />
           <span>{agent.avgResponseTime}</span>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   albania: '🇦🇱',
@@ -62,11 +63,7 @@ const RentalRulesByCountry: React.FC<RentalRulesByCountryProps> = ({ country }) 
       <div className="relative">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-white/80 to-amber-50/60 backdrop-blur-sm border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-center">
-            <svg className="w-5 h-5 text-amber-600/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
+          <SoftIcon name="scales" className="w-10 h-10 flex-shrink-0" />
           <div>
             <h3 className="text-base sm:text-lg font-bold text-neutral-900 flex items-center gap-2">
               <span>{flag}</span>

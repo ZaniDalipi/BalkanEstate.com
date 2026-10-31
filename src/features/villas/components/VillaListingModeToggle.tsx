@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { VillaListingMode } from '../hooks/useVillaSearch';
+import { ListingTypePicture } from '@/src/shared/illustrations';
 
 interface VillaListingModeToggleProps {
   mode: VillaListingMode;
@@ -51,6 +52,7 @@ const VillaListingModeToggle: React.FC<VillaListingModeToggleProps> = memo(({ mo
                 : 'text-neutral-500 hover:text-neutral-800'
             }`}
           >
+            {opt.value !== 'any' && <ListingTypePicture type={opt.value} className="inline-block w-4 h-4 mr-1 align-[-3px]" />}
             {t(opt.labelKey, opt.fallback)}
           </button>
         );

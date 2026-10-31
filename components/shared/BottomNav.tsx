@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { AppView } from '../../types';
-import { SearchIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, PencilIcon } from '../../constants';
+import { NavPicture, type NavPictureName } from '@/src/shared/illustrations';
 import UserAvatar from './UserAvatar';
 import { usePWAEnvironment } from '@/src/app/hooks/usePWAEnvironment';
 import { navigate, localizePath } from '@/src/app/router/navigation';
@@ -41,11 +41,11 @@ const BottomNav: React.FC = () => {
     };
 
     const navItems = [
-        { view: 'search' as AppView, label: t('nav:search'), icon: SearchIcon },
-        { view: 'saved-properties' as AppView, label: t('nav:saved'), icon: HeartIcon },
-        { view: 'create-listing' as AppView, label: t('nav:sell'), icon: PencilIcon, isSpecial: true },
-        { view: 'inbox' as AppView, label: t('nav:inbox'), icon: EnvelopeIcon, badge: totalUnreadCount },
-        { view: 'account' as AppView, label: t('nav:account'), icon: UserCircleIcon },
+        { view: 'search' as AppView, label: t('nav:search'), picture: 'buy' as NavPictureName },
+        { view: 'saved-properties' as AppView, label: t('nav:saved'), picture: 'saved' as NavPictureName },
+        { view: 'create-listing' as AppView, label: t('nav:sell'), picture: 'new-listing' as NavPictureName, isSpecial: true },
+        { view: 'inbox' as AppView, label: t('nav:inbox'), picture: 'inbox' as NavPictureName, badge: totalUnreadCount },
+        { view: 'account' as AppView, label: t('nav:account'), picture: 'account' as NavPictureName },
     ];
 
     // In landscape on short screens, labels are hidden to preserve vertical space
@@ -63,7 +63,6 @@ const BottomNav: React.FC = () => {
         >
             <div className={`flex items-center justify-around px-1.5 ${isLandscape ? 'py-0.5' : 'py-1.5'}`}>
                 {navItems.map(item => {
-                    const Icon = item.icon;
                     const isActive = activeView === item.view;
                     const isSpecial = item.isSpecial;
 
@@ -75,8 +74,8 @@ const BottomNav: React.FC = () => {
                                 className="flex flex-col items-center justify-center flex-1 py-1.5 relative"
                                 aria-label={t('nav:createNewListing', 'Create a new listing')}
                             >
-                                <div className={`bg-secondary rounded-full flex items-center justify-center shadow-lg ${isLandscape ? 'w-8 h-8 -mt-2' : 'w-10 h-10 -mt-5'}`}>
-                                    <Icon className="w-5 h-5 text-white" aria-hidden="true" />
+                                <div className={`bg-white ring-2 ring-secondary rounded-full flex items-center justify-center shadow-lg ${isLandscape ? 'w-9 h-9 -mt-2' : 'w-12 h-12 -mt-5'}`}>
+                                    <NavPicture name={item.picture} className={isLandscape ? 'w-6 h-6' : 'w-8 h-8'} />
                                 </div>
                                 {!isLandscape && (
                                     <span className="text-xs font-medium text-neutral-600 mt-1">{item.label}</span>
@@ -113,9 +112,9 @@ const BottomNav: React.FC = () => {
                                         />
                                     </div>
                                 ) : (
-                                    <Icon
-                                        className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-neutral-600'}`}
-                                        aria-hidden="true"
+                                    <NavPicture
+                                        name={item.picture}
+                                        className={`w-7 h-7 transition-transform ${isActive ? 'scale-110' : ''}`}
                                     />
                                 )}
                                 {item.badge !== undefined && item.badge > 0 && (

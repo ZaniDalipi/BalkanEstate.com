@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CONTACT_CONFIG } from '@/src/shared/config/contact';
 import LegalFooter from './LegalFooter';
+import { SEO } from '@/src/components/seo';
 import { navigate } from '@/src/app/router/navigation';
 import { paths, pathForView } from '@/src/app/router/paths';
 import type { AppView } from '@/types';
@@ -28,6 +29,10 @@ const TermsOfServicePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <SEO
+        title={t('legal:terms.seoTitle', 'Terms of Service')}
+        description={t('legal:terms.seoDescription', 'The terms that apply to using BalkanEstateAI, publishing property listings and paid plans for agents and agencies.')}
+      />
       <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
           {/* Header */}
@@ -39,7 +44,7 @@ const TermsOfServicePage: React.FC = () => {
                 <ArrowLeftIcon className="w-5 h-5" />
                 <span className="font-medium">{t('common:back', 'Back')}</span>
               </button>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 landscape:text-2xl">
                 {t('legal:terms.title', 'Terms of Service')}
               </h1>
               <p className="text-gray-600">
@@ -350,8 +355,8 @@ const TermsOfServicePage: React.FC = () => {
             </p>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <p className="text-gray-700"><strong>{CONTACT_CONFIG.company.name}</strong></p>
-              <p className="text-gray-700">Email: {CONTACT_CONFIG.email.legal}</p>
-              <p className="text-gray-700">Phone: {CONTACT_CONFIG.phone.primary}</p>
+              <p className="text-gray-700">{t('legal:ui.termsOfServicePage.email', 'Email:')} {CONTACT_CONFIG.email.legal}</p>
+              <p className="text-gray-700">{t('legal:ui.termsOfServicePage.phone', 'Phone:')} {CONTACT_CONFIG.phone.primary}</p>
             </div>
           </section>
             </div>

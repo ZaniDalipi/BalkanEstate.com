@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -14,8 +14,9 @@ const ViewingRequestsTab = lazy(() => import('./ViewingRequestsTab'));
 const MyBusinessListings = lazy(() => import('./MyBusinessListings'));
 const MyListingFeeds = lazy(() => import('../../src/features/listing-sources/components/MyListingFeeds'));
 const ImportReviewQueue = lazy(() => import('../../src/features/listing-sources/components/review/ImportReviewQueue'));
+const DevelopmentsDashboardPage = lazy(() => import('../../src/features/developments/components/dashboard/DevelopmentsDashboardPage'));
 import { User, UserRole, Agency } from '../../types';
-import { BuildingOfficeIcon, BuildingStorefrontIcon, ChartBarIcon, UserCircleIcon, ArrowLeftOnRectangleIcon, XMarkIcon, MapPinIcon, CreditCardIcon, ShieldCheckIcon, SparklesIcon, CalendarIcon, HomeIcon, ClockIcon, ExclamationTriangleIcon, CheckCircleIcon, GlobeAltIcon, BellIcon, DocumentCheckIcon } from '../../constants';
+import { XMarkIcon } from '../../constants';
 import DefaultAvatar from './DefaultAvatar';
 import AvatarCustomizer, { type AvatarOptions, parseAvatarOptions, getDefaultAvatarOptions } from './AvatarCustomizer';
 import AgentLicenseModal from './AgentLicenseModal';
@@ -38,6 +39,7 @@ import { apiLogger } from '../../src/shared/utils/logger';
 import { tokenService } from '../../src/shared/api/tokenService';
 import NotificationSettingsSection from '../../src/features/notifications/components/NotificationSettingsSection';
 import { usePendingImportCount } from '../../src/features/listing-sources/hooks/useImportReview';
+import { SoftIcon, NavPicture, type SoftIconName } from '@/src/shared/illustrations';
 
 // Common languages spoken in the Balkan region
 const BALKAN_LANGUAGES = [
@@ -61,12 +63,15 @@ const BALKAN_COUNTRIES = [
   { code: 'SI', name: 'Slovenia' },
 ];
 
-type AccountTab = 'listings' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds' | 'importReview' | 'notifications';
+type AccountTab = 'listings' | 'developments' | 'performance' | 'profile' | 'subscription' | 'security' | 'promotions' | 'measurements' | 'viewings' | 'businesses' | 'feeds' | 'importReview' | 'notifications';
 
 // Map URL slugs to account tabs
 const tabRouteMap: Record<string, AccountTab> = {
     'listings': 'listings',
     'my-listings': 'listings',
+    'developments': 'developments',
+    'residences': 'developments',
+    'my-developments': 'developments',
     'promotions': 'promotions',
     'my-promotions': 'promotions',
     'performance': 'performance',
@@ -98,6 +103,7 @@ const tabRouteMap: Record<string, AccountTab> = {
 // Map account tabs to URL slugs
 const tabToRouteMap: Record<AccountTab, string> = {
     'listings': 'listings',
+    'developments': 'developments',
     'promotions': 'promotions',
     'performance': 'performance',
     'subscription': 'subscription',
@@ -149,37 +155,37 @@ const TabButton: React.FC<{
     );
 };
 
-const ROLE_HINTS: Record<UserRole, { icon: string; titleKey: string; descKey: string; features: string[]; color: string }> = {
+const ROLE_HINTS: Record<UserRole, { icon: SoftIconName; titleKey: string; descKey: string; features: string[]; color: string }> = {
     [UserRole.BUYER]: {
-        icon: '🔍',
+        icon: 'search',
         titleKey: 'roles.hints.buyer.title',
         descKey: 'roles.hints.buyer.description',
         features: ['roles.hints.buyer.f1', 'roles.hints.buyer.f2', 'roles.hints.buyer.f3'],
         color: 'blue',
     },
     [UserRole.PRIVATE_SELLER]: {
-        icon: '🏠',
+        icon: 'home',
         titleKey: 'roles.hints.privateSeller.title',
         descKey: 'roles.hints.privateSeller.description',
         features: ['roles.hints.privateSeller.f1', 'roles.hints.privateSeller.f2', 'roles.hints.privateSeller.f3'],
         color: 'emerald',
     },
     [UserRole.AGENT]: {
-        icon: '🏢',
+        icon: 'building',
         titleKey: 'roles.hints.agent.title',
         descKey: 'roles.hints.agent.description',
         features: ['roles.hints.agent.f1', 'roles.hints.agent.f2', 'roles.hints.agent.f3'],
         color: 'indigo',
     },
     [UserRole.ADMIN]: {
-        icon: '⚙️',
+        icon: 'gear',
         titleKey: 'roles.hints.admin.title',
         descKey: 'roles.hints.admin.description',
         features: [],
         color: 'gray',
     },
     [UserRole.SUPER_ADMIN]: {
-        icon: '🛡️',
+        icon: 'shield',
         titleKey: 'roles.hints.superAdmin.title',
         descKey: 'roles.hints.superAdmin.description',
         features: [],
@@ -225,10 +231,10 @@ const RoleSelector: React.FC<{
     const { t } = useTranslation(['account']);
     const [pendingRole, setPendingRole] = useState<UserRole | null>(null);
 
-    const roles: { id: UserRole; labelKey: string; icon: string }[] = [
-        { id: UserRole.BUYER, labelKey: 'roles.buyer', icon: '🔍' },
-        { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller', icon: '🏠' },
-        { id: UserRole.AGENT, labelKey: 'roles.agent', icon: '🏢' },
+    const roles: { id: UserRole; labelKey: string; icon: SoftIconName }[] = [
+        { id: UserRole.BUYER, labelKey: 'roles.buyer', icon: 'search' },
+        { id: UserRole.PRIVATE_SELLER, labelKey: 'roles.privateSeller', icon: 'home' },
+        { id: UserRole.AGENT, labelKey: 'roles.agent', icon: 'building' },
     ];
 
     const isAgencyMember = !!agencyId;
@@ -308,7 +314,7 @@ const RoleSelector: React.FC<{
                                 }
                             `}
                         >
-                            <span className="text-base leading-none hidden xs:inline sm:inline">{role.icon}</span>
+                            <SoftIcon name={role.icon} className="w-5 h-5 hidden xs:inline sm:inline" />
                             <span className="truncate">{t(role.labelKey)}</span>
                         </button>
                     );
@@ -345,7 +351,7 @@ const RoleSelector: React.FC<{
             {hintRole && hint && hintConfig && !(hintRole === UserRole.PRIVATE_SELLER && isAgencyMember) && (
                 <div className={`rounded-2xl border p-4 backdrop-blur-sm transition-all duration-200 animate-in fade-in slide-in-from-top-2 ${colorMap[hintConfig.color]}`}>
                     <div className="flex items-start gap-3">
-                        <span className="text-2xl flex-shrink-0 mt-0.5">{hintConfig.icon}</span>
+                        <SoftIcon name={hintConfig.icon} className="w-9 h-9 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                             <p className="font-bold text-sm leading-tight">{hint.title}</p>
                             <p className="text-xs mt-0.5 opacity-80">{hint.description}</p>
@@ -437,9 +443,7 @@ const LoginHistorySection: React.FC = () => {
     return (
         <div className="bg-blue-50/60 backdrop-blur-sm border border-blue-200/50 rounded-2xl p-4">
             <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <SoftIcon name="docCheck" className="w-6 h-6 flex-shrink-0" />
                 <div className="flex-1">
                     <h4 className="font-semibold text-blue-800 text-sm mb-2">{t('security.recentLoginActivity')}</h4>
                     {loginHistory.length === 0 ? (
@@ -589,12 +593,7 @@ const ChangePasswordSection: React.FC = () => {
         const isErr = type === 'error';
         return (
             <div className={`mb-4 p-3 ${isErr ? 'bg-red-50/60 border-red-200/50' : 'bg-green-50/60 border-green-200/50'} backdrop-blur-sm border rounded-xl flex items-start gap-2`}>
-                <svg className={`w-5 h-5 ${isErr ? 'text-red-600' : 'text-green-600'} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {isErr
-                        ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    }
-                </svg>
+                <SoftIcon name={isErr ? 'warning' : 'check'} className="w-6 h-6 flex-shrink-0" />
                 <p className={`${isErr ? 'text-red-800' : 'text-green-800'} text-sm`}>{message}</p>
             </div>
         );
@@ -724,7 +723,7 @@ const DeleteAgencySection: React.FC = () => {
     return (
         <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4">
             <div className="flex items-start gap-3">
-                <BuildingOfficeIcon className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <SoftIcon name="building" className="w-6 h-6 flex-shrink-0" />
                 <div className="flex-1">
                     <h4 className="font-semibold text-red-800 text-sm">{t('security.deleteAgency', 'Delete Agency')}</h4>
                     <p className="text-sm text-red-700 mt-1">
@@ -814,9 +813,7 @@ const DeleteAccountSection: React.FC = () => {
     return (
         <div className="bg-red-50/60 backdrop-blur-sm border border-red-200/50 rounded-2xl p-6">
             <div className="flex items-start gap-3 mb-4">
-                <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                <SoftIcon name="trash" className="w-6 h-6 flex-shrink-0" />
                 <div>
                     <h4 className="font-semibold text-red-800 text-sm">{t('security.deleteAccount', 'Delete Account')}</h4>
                     <p className="text-sm text-red-700 mt-1">
@@ -847,9 +844,7 @@ const DeleteAccountSection: React.FC = () => {
 
             {error && (
                 <div className="mb-4 p-3 bg-red-100/60 border border-red-300/50 rounded-xl flex items-start gap-2">
-                    <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <SoftIcon name="warning" className="w-5 h-5 flex-shrink-0" />
                     <p className="text-sm text-red-700">{error}</p>
                 </div>
             )}
@@ -902,9 +897,7 @@ const SecuritySettings: React.FC<{ logoutAllDevices: () => Promise<void> }> = ({
             {/* Logout from All Devices */}
             <div className="bg-yellow-50/60 backdrop-blur-sm border border-yellow-200/50 rounded-2xl p-4">
                 <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+                    <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
                     <div className="flex-1">
                         <h4 className="font-semibold text-yellow-800 text-sm">{t('security.logoutAllDevices')}</h4>
                         <p className="text-sm text-yellow-700 mt-1">
@@ -1411,7 +1404,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                 lat: user.lat ?? 0,
                 lng: user.lng ?? 0,
             });
-            setError('Failed to save changes. Please try again.');
+            setError(t('account:ui.myAccountPage.failedToSaveChangesPlease', 'Failed to save changes. Please try again.'));
         } finally {
             setIsSaving(false);
         }
@@ -1458,7 +1451,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             setIsSaved(true);
             setInvitationCode('');
             setError('');
-            await success('Joined Agency', `Successfully joined ${data.agency.name}!`);
+            await success(t('account:ui.myAccountPage.joinedAgency', 'Joined Agency'), `Successfully joined ${data.agency.name}!`);
             setTimeout(() => setIsSaved(false), 2000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to join agency');
@@ -1650,7 +1643,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                 <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_6px_24px_rgba(0,0,0,0.18),inset_0_-2px_6px_rgba(0,0,0,0.08)]">
                                     <img
                                         src={avatarPreview || formData.avatarUrl}
-                                        alt="Avatar"
+                                        alt={t('account:ui.myAccountPage.avatar', 'Avatar')}
                                         className="w-full h-full object-cover"
                                         referrerPolicy="no-referrer"
                                     />
@@ -1677,9 +1670,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             onClick={() => setIsAvatarCustomizerOpen(true)}
                             className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary/80 backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary transition-all border border-primary/30"
                         >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                            </svg>
+                            <SoftIcon name="pencil" className="w-5 h-5" />
                             {t('profile.customizeAvatar', 'Customize Avatar')}
                         </button>
                         <p className="text-xs text-neutral-500 mt-2.5">
@@ -1723,7 +1714,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
             </fieldset>
 
             <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <legend className="sr-only">Personal Information</legend>
+                <legend className="sr-only">{t('account:ui.myAccountPage.personalInformation', 'Personal Information')}</legend>
                 <div className="relative">
                     <input type="text" id="name" value={formData.name} onChange={handleInputChange} className={floatingInputClasses} placeholder=" " />
                     <label htmlFor="name" className={floatingLabelClasses}>{t('profile.fullName')}</label>
@@ -1800,7 +1791,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                     onClick={handleAgencyClick}
                                     className="mt-2 text-sm text-primary hover:text-primary-dark font-semibold flex items-center gap-1 bg-white/30 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/40 hover:bg-white/50 transition-all"
                                 >
-                                    <BuildingOfficeIcon className="w-4 h-4" />
+                                    <SoftIcon name="building" className="w-5 h-5" />
                                     {t('agent.viewAgencyDetails')}
                                 </button>
                             )}
@@ -1820,7 +1811,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                         <div className="relative md:col-span-2">
                             {formData.licenseNumber && formData.licenseVerified ? (
                                 <div className="flex items-center gap-3 p-4 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-xl">
-                                    <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
                                     <div className="flex-1">
                                         <p className="text-sm font-semibold text-green-800">
                                             {t('agent.licenseVerified', 'License Verified')}
@@ -1831,7 +1822,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             ) : formData.licenseNumber && !formData.licenseVerified ? (
                                 <div className="flex items-center justify-between p-4 bg-amber-50/80 backdrop-blur-sm border border-amber-200/50 rounded-xl">
                                     <div className="flex items-center gap-3">
-                                        <ClockIcon className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                                        <SoftIcon name="clock" className="w-6 h-6 flex-shrink-0" />
                                         <div>
                                             <p className="text-sm font-semibold text-amber-800">
                                                 {t('agent.licensePending', 'License Pending Review')}
@@ -1845,7 +1836,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                 </div>
                             ) : licenseSuccess ? (
                                 <div className="flex items-center gap-3 p-4 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-xl">
-                                    <ShieldCheckIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                    <SoftIcon name="shield" className="w-6 h-6 flex-shrink-0" />
                                     <div>
                                         <p className="text-sm font-semibold text-green-800">
                                             {t('agent.licenseSubmitted', 'License Submitted')}
@@ -1858,9 +1849,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                             ) : !showLicenseForm ? (
                                 <div className="flex items-center justify-between p-4 bg-blue-50/80 backdrop-blur-sm border border-blue-200/50 rounded-xl">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-100/80 flex items-center justify-center flex-shrink-0">
-                                            <ShieldCheckIcon className="w-5 h-5 text-blue-600" />
-                                        </div>
+                                        <SoftIcon name="shield" className="w-10 h-10 flex-shrink-0" />
                                         <div>
                                             <p className="text-sm font-semibold text-blue-800">
                                                 {t('agent.noLicenseYet', 'No License on File')}
@@ -1905,7 +1894,7 @@ const ProfileSettings: React.FC<{ user: User; onLogout: () => void }> = ({ user,
                                             >
                                                 <option value="">{t('agent.selectCountry', 'Select country...')}</option>
                                                 {BALKAN_COUNTRIES.map((c) => (
-                                                    <option key={c.code} value={c.code}>{c.name}</option>
+                                                    <option key={c.code} value={c.code}>{t(`common:countryByCode.${c.code}`, c.name)}</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -2203,7 +2192,7 @@ const MyAccountPage: React.FC = () => {
     // Redirect users without seller tabs to profile if they land on a seller-only tab
     useEffect(() => {
         if (!state.currentUser) return;
-        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds' || activeTab === 'importReview')) {
+        if (!hasSellerTabs && (activeTab === 'listings' || activeTab === 'developments' || activeTab === 'performance' || activeTab === 'subscription' || activeTab === 'promotions' || activeTab === 'viewings' || activeTab === 'feeds' || activeTab === 'importReview')) {
             setActiveTab('profile', { replace: true });
         }
     }, [hasSellerTabs, activeTab, setActiveTab, state.currentUser]);
@@ -2226,9 +2215,7 @@ const MyAccountPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50/60 to-indigo-50/40 flex items-center justify-center px-4">
                 <div className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl p-10 max-w-sm w-full text-center space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                        <BellIcon className="w-7 h-7 text-primary" />
-                    </div>
+                    <SoftIcon name="bell" className="w-14 h-14 mx-auto" />
                     <div>
                         <h2 className="text-xl font-bold text-neutral-800">{t('account:mustBeLoggedIn', 'Sign in to continue')}</h2>
                         <p className="text-sm text-neutral-500 mt-1">{t('account:loginToManagePrefs', 'Log in to manage your email and notification preferences.')}</p>
@@ -2279,6 +2266,12 @@ const MyAccountPage: React.FC = () => {
         switch (activeTab) {
             case 'listings':
                 return hasSellerTabs ? <MyListings sellerId={state.currentUser!.id} /> : null;
+            case 'developments':
+                return hasSellerTabs ? (
+                    <Suspense fallback={<div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                        <DevelopmentsDashboardPage embedded />
+                    </Suspense>
+                ) : null;
             case 'promotions':
                 return hasSellerTabs ? <MyPromotions /> : null;
             case 'profile':
@@ -2326,7 +2319,7 @@ const MyAccountPage: React.FC = () => {
                                         <div className="relative w-full h-full">
                                             <div className="absolute inset-1 rounded-full bg-gradient-to-b from-neutral-300/50 to-neutral-400/30 blur-lg translate-y-1 scale-95" />
                                             <div className="relative w-full h-full rounded-full overflow-hidden border-[3px] border-white/70 shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
-                                                <img src={optimizeCloudinaryUrl(state.currentUser.avatarUrl, { width: 320 }) || state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                                <img src={optimizeImageUrl(state.currentUser.avatarUrl, { width: 320 }) || state.currentUser.avatarUrl} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/25 via-transparent to-transparent pointer-events-none" />
                                             </div>
                                         </div>
@@ -2348,14 +2341,14 @@ const MyAccountPage: React.FC = () => {
                                         <button
                                             onClick={handleAgencyClick}
                                             className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-primary/10 backdrop-blur-sm rounded-xl border border-primary/20 hover:bg-primary/20 transition-all cursor-pointer"
-                                            title="View agency details"
+                                            title={t('account:ui.myAccountPage.viewAgencyDetails', 'View agency details')}
                                         >
-                                            <BuildingOfficeIcon className="w-4 h-4 text-primary" />
+                                            <SoftIcon name="building" className="w-5 h-5" />
                                             <span className="text-xs font-semibold text-primary">{state.currentUser.agencyName}</span>
                                         </button>
                                     ) : (
                                         <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-white/30 backdrop-blur-sm rounded-xl border border-white/40">
-                                            <BuildingOfficeIcon className="w-4 h-4 text-gray-500" />
+                                            <SoftIcon name="building" className="w-5 h-5" />
                                             <span className="text-xs font-semibold text-gray-600">{t('account:agent.independentAgent', 'Independent Agent')}</span>
                                         </div>
                                     )
@@ -2371,22 +2364,23 @@ const MyAccountPage: React.FC = () => {
                             <nav className="space-y-2">
                                 {hasSellerTabs && (
                                     <>
-                                        <TabButton label={t('account:tabs.myListings', 'My Listings')} icon={<HomeIcon className="w-6 h-6"/>} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
-                                        <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SparklesIcon className="w-6 h-6"/>} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
-                                        <TabButton label={t('account:tabs.performance')} icon={<ChartBarIcon className="w-6 h-6"/>} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
-                                        <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<CalendarIcon className="w-6 h-6"/>} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
-                                        <TabButton label={t('account:tabs.feeds', 'External Feeds')} icon={<GlobeAltIcon className="w-6 h-6"/>} isActive={activeTab === 'feeds'} onClick={() => setActiveTab('feeds')} tabKey="feeds" />
-                                        <TabButton label={t('account:tabs.importReview', 'Imported Drafts')} icon={<DocumentCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'importReview'} onClick={() => setActiveTab('importReview')} tabKey="importReview" badgeCount={pendingImportCount?.total} />
+                                        <TabButton label={t('account:tabs.myListings', 'My Listings')} icon={<SoftIcon name="home" className="w-7 h-7" />} isActive={activeTab === 'listings'} onClick={() => setActiveTab('listings')} tabKey="listings" />
+                                        <TabButton label={t('account:tabs.residences', 'Residences')} icon={<SoftIcon name="building" className="w-7 h-7" />} isActive={activeTab === 'developments'} onClick={() => setActiveTab('developments')} tabKey="developments" />
+                                        <TabButton label={t('account:tabs.promotions', 'My Promotions')} icon={<SoftIcon name="sparkles" className="w-7 h-7" />} isActive={activeTab === 'promotions'} onClick={() => setActiveTab('promotions')} tabKey="promotions" />
+                                        <TabButton label={t('account:tabs.performance')} icon={<SoftIcon name="chart" className="w-7 h-7" />} isActive={activeTab === 'performance'} onClick={() => setActiveTab('performance')} tabKey="performance" />
+                                        <TabButton label={t('account:tabs.viewings', 'Viewing Requests')} icon={<SoftIcon name="calendar" className="w-7 h-7" />} isActive={activeTab === 'viewings'} onClick={() => setActiveTab('viewings')} tabKey="viewings" hasUnread={unreadViewingCount > 0} />
+                                        <TabButton label={t('account:tabs.feeds', 'External Feeds')} icon={<SoftIcon name="globe" className="w-7 h-7" />} isActive={activeTab === 'feeds'} onClick={() => setActiveTab('feeds')} tabKey="feeds" />
+                                        <TabButton label={t('account:tabs.importReview', 'Imported Drafts')} icon={<SoftIcon name="docCheck" className="w-7 h-7" />} isActive={activeTab === 'importReview'} onClick={() => setActiveTab('importReview')} tabKey="importReview" badgeCount={pendingImportCount?.total} />
                                     </>
                                 )}
-                                <TabButton label={t('account:tabs.myBusinesses', 'My Businesses')} icon={<BuildingStorefrontIcon className="w-6 h-6"/>} isActive={activeTab === 'businesses'} onClick={() => setActiveTab('businesses')} tabKey="businesses" />
-                                <TabButton label={t('account:tabs.profileSettings')} icon={<UserCircleIcon className="w-6 h-6"/>} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
-                                <TabButton label={t('account:tabs.subscription', 'Subscription')} icon={<CreditCardIcon className="w-6 h-6"/>} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
-                                <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<MapPinIcon className="w-6 h-6"/>} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />
-                                <TabButton label={t('account:tabs.security')} icon={<ShieldCheckIcon className="w-6 h-6"/>} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
-                                <TabButton label={t('account:tabs.notifications', 'Notifications')} icon={<BellIcon className="w-6 h-6"/>} isActive={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} tabKey="notifications" />
+                                <TabButton label={t('account:tabs.myBusinesses', 'My Businesses')} icon={<SoftIcon name="store" className="w-7 h-7" />} isActive={activeTab === 'businesses'} onClick={() => setActiveTab('businesses')} tabKey="businesses" />
+                                <TabButton label={t('account:tabs.profileSettings')} icon={<SoftIcon name="user" className="w-7 h-7" />} isActive={activeTab === 'profile'} onClick={() => setActiveTab('profile')} tabKey="profile" />
+                                <TabButton label={t('account:tabs.subscription', 'Subscription')} icon={<SoftIcon name="card" className="w-7 h-7" />} isActive={activeTab === 'subscription'} onClick={() => setActiveTab('subscription')} tabKey="subscription" />
+                                <TabButton label={t('account:tabs.measurements', 'Measurements')} icon={<SoftIcon name="pin" className="w-7 h-7" />} isActive={activeTab === 'measurements'} onClick={() => setActiveTab('measurements')} tabKey="measurements" />
+                                <TabButton label={t('account:tabs.security')} icon={<SoftIcon name="shield" className="w-7 h-7" />} isActive={activeTab === 'security'} onClick={() => setActiveTab('security')} tabKey="security" />
+                                <TabButton label={t('account:tabs.notifications', 'Notifications')} icon={<SoftIcon name="bell" className="w-7 h-7" />} isActive={activeTab === 'notifications'} onClick={() => setActiveTab('notifications')} tabKey="notifications" />
                                 <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all w-full text-left text-red-500 hover:bg-red-50/40 hover:border-red-200/40 border border-transparent backdrop-blur-sm mt-4">
-                                    <ArrowLeftOnRectangleIcon className="w-6 h-6" />
+                                    <NavPicture name="logout" className="w-7 h-7" />
                                     <span>{t('account:logout')}</span>
                                 </button>
                             </nav>

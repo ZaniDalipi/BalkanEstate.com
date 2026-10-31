@@ -15,6 +15,7 @@ import {
   ConstructionStatus,
   normalizeConstructionFields,
 } from '../utils/constructionStatus';
+import { registerListingDevelopmentCleanup } from './hooks/listingDevelopmentCleanup';
 
 /**
  * Where on the floor plan a photo was taken, and which way the camera faced.
@@ -41,7 +42,7 @@ export const MAX_FLOORPLANS = 10;
 
 export interface IPropertyImage {
   url: string;
-  publicId?: string; // Cloudinary public_id for image management and deletion (optional for backwards compatibility)
+  publicId?: string; // storage key for image management and deletion (optional for backwards compatibility)
   tag: PropertyImageTag;
   floorplanSpot?: IFloorplanSpot;
 }
@@ -142,7 +143,7 @@ export interface IProperty extends Document {
   villaApprovalReviewedAt?: Date;
   villaApprovalReason?: string;
   soldAt?: Date;
-  /** Set when the retention job cleared this listing's media from Cloudinary. */
+  /** Set when the retention job cleared this listing's media from storage. */
   mediaPurgedAt?: Date;
   price: number;
   isNegotiable?: boolean; // When true, price is "By Negotiation" (price field can be 0)
@@ -184,12 +185,12 @@ export interface IProperty extends Document {
   videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, etc.)
   // Generated video fields (auto-generated property showcase video)
   generatedVideoUrl?: string; // URL for the auto-generated property video
-  generatedVideoPublicId?: string; // Cloudinary public_id for the generated video
+  generatedVideoPublicId?: string; // storage key for the generated video
   generatedVideoFormat?: 'vertical' | 'horizontal' | 'square'; // Video format
   generatedVideoDuration?: number; // Duration in seconds
   hasGeneratedVideo: boolean; // Flag indicating if generated video is available
   imageUrl: string;
-  imagePublicId?: string; // Cloudinary public_id for main image
+  imagePublicId?: string; // storage key for main image
   images: IPropertyImage[];
   lat: number;
   lng: number;
@@ -199,7 +200,7 @@ export interface IProperty extends Document {
   floorplanUrl?: string;
   /** Every floor's plan, in order. floorplanUrl mirrors the first. */
   floorplans?: IFloorplanLevel[];
-  floorplanPublicId?: string; // Cloudinary public_id for floorplan
+  floorplanPublicId?: string; // storage key for floorplan
   lastRenewed: Date;
   views: number;
   saves: number;
@@ -263,8 +264,16 @@ export interface IProperty extends Document {
   sourceUrl?: string;
   sourceFetchedAt?: Date;
   sourceMetadata?: Record<string, unknown>;
-  /** Present only on listings created by an agency property feed. */
-  feedSync?: IPropertyFeedSync;
+  // Developments / Residences linkage (all optional). A listing with none of
+  // these is a normal standalone listing — the feature never forces a listing
+  // into a development. When set, they point at the canonical records in the
+  // development_* collections; `unitId` is the physical unit this listing
+  // markets (several listings may share one unit).
+  developmentId?: mongoose.Types.ObjectId;
+  buildingId?: mongoose.Types.ObjectId;
+  entranceId?: mongoose.Types.ObjectId;
+  floorId?: mongoose.Types.ObjectId;
+  unitId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -827,30 +836,30 @@ const PropertySchema: Schema = new Schema(
     sourceMetadata: {
       type: Schema.Types.Mixed,
     },
-    feedSync: {
-      type: new Schema(
-        {
-          agencyId: { type: Schema.Types.ObjectId, ref: 'Agency', required: true },
-          feedId: { type: Schema.Types.ObjectId, ref: 'AgencyFeed', required: true },
-          externalId: { type: String, required: true },
-          sourceHash: { type: String, required: true },
-          managedHashes: { type: Schema.Types.Mixed, default: {} },
-          lockedFields: { type: [String], default: [] },
-          missingDetails: { type: [String], default: [] },
-          addressPrivate: { type: Boolean, default: false },
-          sourceUpdatedAt: { type: Date },
-          firstImportedAt: { type: Date, required: true },
-          lastSeenAt: { type: Date, required: true },
-          lastSyncedAt: { type: Date, required: true },
-          lastRunId: { type: Schema.Types.ObjectId, ref: 'AgencyFeedRun' },
-          deactivatedAt: { type: Date },
-          deactivationReason: { type: String, enum: ['removed_from_feed', 'marked_removed'] },
-          statusBeforeDeactivation: { type: String, enum: ['active', 'pending', 'sold', 'rented', 'draft'] },
-          failedImageUrls: { type: [String], default: [] },
-        },
-        { _id: false, minimize: false }
-      ),
-      default: undefined,
+    // Developments / Residences linkage (all optional, additive). Absent on
+    // every existing listing; setting them links a listing to a development
+    // unit without otherwise changing the listing.
+    developmentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Development',
+      index: true,
+    },
+    buildingId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentBuilding',
+    },
+    entranceId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentEntrance',
+    },
+    floorId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentFloor',
+    },
+    unitId: {
+      type: Schema.Types.ObjectId,
+      ref: 'DevelopmentUnit',
+      index: true,
     },
   },
   {
@@ -958,8 +967,30 @@ PropertySchema.pre('validate', function (next) {
   next();
 });
 
+/**
+ * Keep the development linkage internally consistent. The refs are all
+ * optional, so a standalone listing (none set) is untouched. But a deeper ref
+ * cannot float free of its root: a building/entrance/floor/unit reference only
+ * means something inside a development, so requiring `developmentId` whenever
+ * any of them is present stops half-linked listings from being stored.
+ */
+PropertySchema.pre('validate', function (next) {
+  const doc = this as unknown as IProperty;
+  const hasDeeperRef =
+    !!doc.buildingId || !!doc.entranceId || !!doc.floorId || !!doc.unitId;
+  if (hasDeeperRef && !doc.developmentId) {
+    this.invalidate(
+      'developmentId',
+      'developmentId is required when a building, entrance, floor or unit is linked'
+    );
+  }
+  next();
+});
+
 // Compound index for location-based queries
 PropertySchema.index({ lat: 1, lng: 1 });
+// Developments: all listings in a development, filtered by status
+PropertySchema.index({ developmentId: 1, status: 1 });
 // Index for price range queries
 PropertySchema.index({ price: 1, status: 1 });
 // Index for property type and city queries
@@ -1012,15 +1043,7 @@ PropertySchema.index(
   }
 );
 
-// An agency-feed listing is identified by (agency, feed, external ID); a
-// repeated or retried import can never create a second copy.
-PropertySchema.index(
-  { 'feedSync.agencyId': 1, 'feedSync.feedId': 1, 'feedSync.externalId': 1 },
-  {
-    unique: true,
-    partialFilterExpression: { 'feedSync.feedId': { $exists: true } },
-    name: 'agency_feed_listing_unique',
-  }
-);
+// Residence units must not keep references to deleted listings.
+registerListingDevelopmentCleanup(PropertySchema);
 
 export default mongoose.model<IProperty>('Property', PropertySchema);

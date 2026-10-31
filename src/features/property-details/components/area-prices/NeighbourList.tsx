@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
 import type { AreaNeighbour } from '../../api/areaPricesApi';
@@ -84,7 +84,7 @@ interface NeighbourRowProps {
 }
 
 export const NeighbourRow: React.FC<NeighbourRowProps> = ({ n, asClosed, format, highlighted, onHighlight }) => {
-  const image = n.imageUrl ? optimizeCloudinaryUrl(n.imageUrl, { width: 160, height: 120, crop: 'fill' }) : undefined;
+  const image = n.imageUrl ? optimizeImageUrl(n.imageUrl, { width: 160, height: 120, crop: 'fill' }) : undefined;
   const price = asClosed ? n.closedPrice ?? n.price : n.price;
   const perSqm = asClosed ? n.closedValue : n.pricePerSqm;
   const status = asClosed

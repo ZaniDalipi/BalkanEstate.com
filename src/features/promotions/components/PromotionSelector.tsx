@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RocketLaunchIcon, EyeIconSolid, ChatBubbleLeftRightIconSolid, BoltIconSolid, StarIconSolid, FireIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { usePromotionSelector, extensionTierStyles } from './usePromotionSelector';
 import type { PromotionSelectorProps, PromotionTier } from './usePromotionSelector';
 import PromotionTierCard from './PromotionTierCard';
@@ -84,13 +84,11 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
           {/* Urgent Badge Mode Header */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-semibold mb-4 shadow-lg">
-            <FireIcon className="w-4 h-4" />
+            <SoftIcon name="flame" className="w-5 h-5" />
             <span>{t('common:promotions.addUrgentBadge')}</span>
           </div>
 
-          <div className="inline-block p-3 bg-gradient-to-br from-red-400 to-orange-500 rounded-2xl mb-4 shadow-xl">
-            <FireIcon className="w-8 h-8 text-white" />
-          </div>
+          <SoftIcon name="flame" className="inline-block w-14 h-14 mb-4" />
 
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold text-gray-900 mb-3`}>
             {alreadyHasUrgent ? t('common:promotions.upgradePromotion') : t('common:promotions.addUrgentBadge')}
@@ -118,15 +116,11 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
         <div className={`text-center ${inModal ? 'mb-6' : 'mb-10'}`}>
           {/* Tier Badge */}
           <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${extStyle.headerGradient} text-white text-sm font-semibold mb-4 shadow-lg`}>
-            <StarIconSolid className="w-4 h-4" />
+            <SoftIcon name="star" className="w-5 h-5" />
             <span>{extStyle.tierName} {t('common:promotions.promotion')}</span>
           </div>
 
-          <div className={`inline-block p-3 ${extStyle.iconBg} rounded-2xl mb-4 shadow-xl`}>
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+          <SoftIcon name="clock" className="inline-block w-14 h-14 mb-4" />
 
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold text-gray-900 mb-3`}>
             {t('common:promotions.extendPromotion')}
@@ -159,9 +153,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
         </div>
       ) : (
         <div className={`text-center ${inModal ? 'mb-3 sm:mb-6' : 'mb-10'}`}>
-          <div className={`inline-flex items-center justify-center ${inModal ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-16 h-16'} bg-gradient-to-br from-primary to-primary-dark rounded-full mb-2 sm:mb-3 shadow-lg`}>
-            <RocketLaunchIcon className={`${inModal ? 'w-5 h-5 sm:w-6 sm:h-6' : 'w-8 h-8'} text-white`} />
-          </div>
+          <SoftIcon name="rocket" className={`inline-block ${inModal ? 'w-10 h-10 sm:w-12 sm:h-12' : 'w-16 h-16'} mb-2 sm:mb-3`} />
           <h2 className={`${inModal ? 'text-xl md:text-2xl' : 'text-3xl md:text-4xl'} font-bold bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 bg-clip-text text-transparent mb-2`}>
             {t('common:promotions.promoteYourListing')}
           </h2>
@@ -176,9 +168,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
         <div className="bg-amber-50 border border-amber-200 text-amber-800 px-5 py-4 rounded-xl mb-6 text-sm">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">
-              <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+              <SoftIcon name="warning" className="w-6 h-6" />
             </div>
             <div className="flex-1">
               <p className="font-semibold mb-1">{t('common:promotions.promotionExpired')}</p>
@@ -196,18 +186,14 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
 
       {successMessage && (
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+          <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
           {successMessage}
         </div>
       )}
 
       {error && !isPromotionExpired && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
           {error}
         </div>
       )}
@@ -217,9 +203,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-5 py-4 rounded-xl mb-6">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">
-              <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <SoftIcon name="info" className="w-7 h-7" />
             </div>
             <div className="flex-1">
               <p className="font-semibold text-blue-900 mb-1">{t('common:promotions.paymentComingSoon')}</p>
@@ -262,23 +246,17 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
       } rounded-2xl ${inModal ? 'px-4 py-3 sm:px-6 sm:py-5 mb-4 sm:mb-6' : 'px-8 py-7 mb-10'} shadow-sm`}>
         <div className={`flex justify-center ${inModal ? 'gap-8' : 'gap-12 md:gap-16'}`}>
           <div className="flex flex-col items-center text-center">
-            <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-amber-400 to-orange-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <EyeIconSolid className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
-            </div>
+            <SoftIcon name="eye" className={inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} />
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.higherVisibility')}</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.topOfSearchResults')}</p>}
           </div>
           <div className="flex flex-col items-center text-center">
-            <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-blue-400 to-indigo-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <ChatBubbleLeftRightIconSolid className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
-            </div>
+            <SoftIcon name="chat" className={inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} />
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.moreInquiries')}</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.seriousBuyerContacts')}</p>}
           </div>
           <div className="flex flex-col items-center text-center">
-            <div className={`${inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} ${isExtension ? extStyle.iconBg : 'bg-gradient-to-br from-emerald-400 to-teal-500'} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <BoltIconSolid className={`${inModal ? 'w-5 h-5' : 'w-7 h-7'} text-white`} />
-            </div>
+            <SoftIcon name="bolt" className={inModal ? 'w-12 h-12 mb-2' : 'w-14 h-14 mb-3'} />
             <h3 className={`font-semibold text-gray-900 ${inModal ? 'text-xs' : 'text-sm'}`}>{t('common:promotions.sellFaster')}</h3>
             {!inModal && <p className="text-xs text-gray-500 mt-0.5">{t('common:promotions.fasterResults')}</p>}
           </div>
@@ -304,7 +282,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                       {tiersData.urgentModifier.name}
                     </span>
                     <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse inline-flex items-center gap-1">
-                      <FireIcon className="w-3 h-3" /> {t('common:promotions.urgent')}
+                      <SoftIcon name="flame" className="w-4 h-4" /> {t('common:promotions.urgent')}
                     </span>
                     <span className="text-base font-bold text-red-600">
                       €{tiersData.urgentModifier.price}
@@ -322,9 +300,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                <span className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-lg flex items-center justify-center">
-                  <StarIconSolid className="w-4 h-4 text-white" />
-                </span>
+                <SoftIcon name="star" className="w-8 h-8 flex-shrink-0" />
                 {t('common:promotions.upgradeYourPlan')}
               </h3>
               <label className="flex items-center gap-2 cursor-pointer">
@@ -428,7 +404,7 @@ const PromotionSelector: React.FC<PromotionSelectorProps> = (props) => {
                       {tiersData.urgentModifier.name}
                     </span>
                     <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full animate-pulse inline-flex items-center gap-1">
-                      <FireIcon className="w-3 h-3" /> {t('common:promotions.urgent')}
+                      <SoftIcon name="flame" className="w-4 h-4" /> {t('common:promotions.urgent')}
                     </span>
                     <span className="text-sm font-bold text-red-600">
                       +€{tiersData.urgentModifier.price}

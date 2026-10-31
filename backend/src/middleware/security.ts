@@ -4,6 +4,7 @@
  */
 
 import helmet from 'helmet';
+import { missingR2Vars } from '../config/r2';
 import hpp from 'hpp';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response, NextFunction, Application } from 'express';
@@ -35,9 +36,6 @@ export const validateEnvironment = (): void => {
     'FIELD_ENCRYPTION_KEY',
     'PASSWORD_PEPPER',
     'FINGERPRINT_SECRET',
-    'CLOUDINARY_CLOUD_NAME',
-    'CLOUDINARY_API_KEY',
-    'CLOUDINARY_API_SECRET',
     'RESEND_API_KEY',
     'GEMINI_API_KEY',
     'FRONTEND_URL',
@@ -59,6 +57,13 @@ export const validateEnvironment = (): void => {
       missing.push(varName);
     }
   });
+
+  // Image storage (Cloudflare R2) — production can't take uploads without it.
+  if (isProduction) {
+    missing.push(...missingR2Vars());
+  } else if (missingR2Vars().length > 0) {
+    apiLogger.warn(`[ENV WARNING] Image uploads are disabled — missing ${missingR2Vars().join(', ')}`);
+  }
 
   // Validate MONGODB_URI format
   const mongoUri = process.env.MONGODB_URI;
@@ -173,6 +178,8 @@ export const helmetConfig = helmet({
         'https://mt1.google.com', // Google raster tiles
         'https://unpkg.com',
         'https://api.mapbox.com', // MapLibre
+        'https://www.googletagmanager.com', // Google Analytics fallback pixel
+        'https://*.google-analytics.com',
       ],
       connectSrc: [
         "'self'",
@@ -180,7 +187,11 @@ export const helmetConfig = helmet({
         'https://www.balkanestateai.com',
         'wss://api.balkanestateai.com',
         'https://nominatim.openstreetmap.org',
+        // Google Analytics 4 sends hits to regional hosts (region1.…) as well
         'https://www.google-analytics.com',
+        'https://*.google-analytics.com',
+        'https://*.analytics.google.com',
+        'https://www.googletagmanager.com',
         'https://connect.facebook.net',
         'https://*.sentry.io', // Error tracking
         // Development URLs
@@ -194,7 +205,7 @@ export const helmetConfig = helmet({
         "'self'",
       ],
       objectSrc: ["'none'"],
-      mediaSrc: ["'self'", 'https://res.cloudinary.com', 'blob:'],
+      mediaSrc: ["'self'", ...ALLOWED_PHOTO_HOSTS.map(host => `https://${host}`), 'blob:'],
       workerSrc: ["'self'", 'blob:'],
       childSrc: ["'self'", 'blob:'],
       formAction: ["'self'"],
@@ -585,6 +596,10 @@ export const xssSanitizer = (req: Request, _res: Response, next: NextFunction): 
     'url', 'imageUrl', 'previewUrl', 'floorplanUrl', 'tourUrl',
     'virtualTour360Url', 'avatarUrl', 'publicId', 'images',
     'text', 'message', 'description', 'title', 'name', 'content', 'excerpt', // User-facing text fields - React handles XSS escaping
+    // Residence explorer plain-text fields, rendered only as React text (never
+    // as HTML). Escaping them stored "Owner's view" as "Owner&#x27;s view",
+    // which React then displayed literally.
+    'label', 'viewName', 'unitNumber', 'unitType', 'orientation', 'viewType', 'note',
     'bodyTemplate', 'footerHtml', 'headerHtml', 'subject', 'preheaderText', 'headerGradient' // Email template fields - contain intentional HTML edited by admins
   ]);
 

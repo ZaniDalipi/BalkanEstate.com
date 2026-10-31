@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LockClosedIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface PremiumUpgradeBannerProps {
   onUpgradeClick: () => void;
@@ -20,8 +20,8 @@ const PremiumUpgradeBanner: React.FC<PremiumUpgradeBannerProps> = ({ onUpgradeCl
 
       <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
         {/* Icon */}
-        <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm w-fit">
-          <LockClosedIcon className="h-6 w-6" />
+        <div className="p-1.5 bg-white/95 rounded-xl w-fit">
+          <SoftIcon name="lock" className="h-9 w-9" />
         </div>
 
         {/* Content */}

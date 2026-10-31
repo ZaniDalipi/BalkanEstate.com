@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckBadgeIcon, TrophyIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface Achievement {
   id: string;
@@ -17,12 +17,12 @@ interface AchievementsPanelProps {
   agencyId: string;
 }
 
-const typeIcons: Record<string, string> = {
-  award: 'bg-amber-100 text-amber-700',
-  certification: 'bg-green-100 text-green-700',
-  milestone: 'bg-blue-100 text-blue-700',
-  recognition: 'bg-purple-100 text-purple-700',
-  membership: 'bg-indigo-100 text-indigo-700',
+const typeIcons: Record<string, SoftIconName> = {
+  award: 'trophy',
+  certification: 'docCheck',
+  milestone: 'target',
+  recognition: 'medal1',
+  membership: 'users',
 };
 
 const AchievementsPanel: React.FC<AchievementsPanelProps> = ({ achievements }) => {
@@ -30,13 +30,14 @@ const AchievementsPanel: React.FC<AchievementsPanelProps> = ({ achievements }) =
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <SoftIcon name="trophy" className="w-7 h-7 flex-shrink-0" />
         {t('agencyDashboard:profile.achievements', 'Achievements & Certifications')}
       </h3>
 
       {achievements.length === 0 ? (
         <div className="text-center py-8">
-          <TrophyIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <SoftIcon name="trophy" className="w-14 h-14 mx-auto mb-3" />
           <p className="text-sm text-gray-500">
             {t('agencyDashboard:profile.noAchievements', 'No achievements yet.')}
           </p>
@@ -48,16 +49,14 @@ const AchievementsPanel: React.FC<AchievementsPanelProps> = ({ achievements }) =
               key={achievement.id}
               className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
             >
-              <div className={`p-2 rounded-lg ${typeIcons[achievement.type] || 'bg-gray-100 text-gray-700'}`}>
-                <TrophyIcon className="w-4 h-4" />
-              </div>
+              <SoftIcon name={typeIcons[achievement.type] || 'trophy'} className="w-9 h-9 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {achievement.title}
                   </p>
                   {achievement.isVerified && (
-                    <CheckBadgeIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <SoftIcon name="check" className="w-4 h-4 flex-shrink-0" />
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">

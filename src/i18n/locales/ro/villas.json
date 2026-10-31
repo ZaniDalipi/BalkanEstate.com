@@ -222,5 +222,6 @@
     "cardLabel": "Vile de lux în {{place}}, {{country}}",
     "seeAll": "Vezi toate",
     "photoWikimedia": "© Wikimedia Commons"
-  }
+  },
+  "showingInArea": "Nicio vilă nu corespunde cu „{{query}}” — afișăm ce este disponibil în această zonă"
 }

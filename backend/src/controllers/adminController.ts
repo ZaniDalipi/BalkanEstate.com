@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { deleteAgencyMedia, deleteListingMedia, deleteUserPersonalMedia } from '../services/cloudinaryService';
+import { deleteAgencyMedia, deleteListingMedia, deleteUserPersonalMedia } from '../services/mediaService';
 import User from '../models/User';
 import Agent from '../models/Agent';
 import Agency from '../models/Agency';

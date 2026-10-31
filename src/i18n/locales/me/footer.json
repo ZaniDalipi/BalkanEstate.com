@@ -21,7 +21,12 @@
     "messages": "Poruke",
     "myAccount": "Moj Račun",
     "howItWorks": "Kako Funkcionira",
-    "blog": "Blog"
+    "blog": "Blog",
+    "about": "O nama",
+    "contactUs": "Kontakt",
+    "advertise": "Oglašavajte se kod nas",
+    "buyingGuides": "Vodiči za kupovinu",
+    "mortgageCalculator": "Kalkulator kredita"
   },
   "countries": {
     "AL": "Albanija",
@@ -87,5 +92,13 @@
     "becomePartner": "Postanite partner",
     "affiliates": "Affiliate",
     "developers": "Za programere"
-  }
+  },
+  "ui": {
+    "footer": {
+      "findUsOnProductHunt": "Pronađite nas na Product Hunt",
+      "z360VirtualToursProfessional360": "Z360 Virtual Tours - Profesionalne 360° ture nekretnina",
+      "z360VirtualTours360Property": "Z360 Virtual Tours - 360° ture nekretnina"
+    }
+  },
+  "exploreCitiesIn": "Istražite gradove u {{country}}"
 }

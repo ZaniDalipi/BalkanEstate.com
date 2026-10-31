@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface HowItWorksSectionProps {
   onLearnMore: () => void;
@@ -11,11 +12,7 @@ const STEPS = [
     number: '01',
     titleKey: 'step1Title',
     descKey: 'step1Desc',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-      </svg>
-    ),
+    icon: 'search',
     gradient: 'bg-gradient-to-br from-blue-500 to-blue-600',
     iconBg: 'bg-blue-50',
     accentColor: '#3b82f6',
@@ -25,11 +22,7 @@ const STEPS = [
     number: '02',
     titleKey: 'step2Title',
     descKey: 'step2Desc',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-      </svg>
-    ),
+    icon: 'chat',
     gradient: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
     iconBg: 'bg-emerald-50',
     accentColor: '#10b981',
@@ -39,11 +32,7 @@ const STEPS = [
     number: '03',
     titleKey: 'step3Title',
     descKey: 'step3Desc',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-      </svg>
-    ),
+    icon: 'key',
     gradient: 'bg-gradient-to-br from-violet-500 to-violet-600',
     iconBg: 'bg-violet-50',
     accentColor: '#8b5cf6',
@@ -93,9 +82,7 @@ const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onLearnMore }) =>
                 </span>
 
                 {/* Icon */}
-                <div className={`mt-4 w-12 h-12 rounded-xl ${step.gradient} flex items-center justify-center text-white shadow-md`}>
-                  {step.icon}
-                </div>
+                <SoftIcon name={step.icon} className="mt-4 w-12 h-12" />
 
                 {/* Title */}
                 <h3 className="mt-4 text-lg font-bold text-slate-900">

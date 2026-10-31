@@ -12,6 +12,7 @@ import ArticlePage from './ArticlePage';
 import { AdSlot } from '@/src/features/promo';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation('blog');
@@ -107,14 +108,14 @@ const BlogPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-12 sm:py-16 md:py-24 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+      <section className="py-12 sm:py-16 md:py-24 landscape:py-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 landscape:text-3xl">
               {t('title', 'Balkan Real Estate Blog')}
             </h1>
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-8">
@@ -139,13 +140,13 @@ const BlogPage: React.FC = () => {
       </section>
 
       {/* Ad — horizontal leaderboard below the hero */}
-      <AdSlot page="blog" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-6" />
+      <AdSlot page="blog" placement="in-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-6" showPlaceholder />
 
       {/* Active filter chips */}
       {(selectedCategory || selectedCountry || selectedTag || searchQuery) && (
         <div className="bg-slate-50 border-b border-neutral-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-500 font-medium">Active filters:</span>
+            <span className="text-xs text-slate-500 font-medium">{t('blog:ui.blogPage.activeFilters', 'Active filters:')}</span>
             {searchQuery && (
               <FilterChip label={`"${searchQuery}"`} onRemove={() => { setSearchQuery(''); setPage(1); }} />
             )}
@@ -162,7 +163,7 @@ const BlogPage: React.FC = () => {
               onClick={() => { setSelectedCategory(undefined); setSelectedCountry(undefined); setSelectedTag(undefined); setSearchQuery(''); setPage(1); }}
               className="text-xs text-slate-400 hover:text-slate-700 underline ml-1"
             >
-              Clear all
+              {t('blog:ui.blogPage.clearAll', 'Clear all')}
             </button>
           </div>
         </div>
@@ -210,11 +211,9 @@ const BlogPage: React.FC = () => {
                 </div>
               ) : articles.length === 0 ? (
                 <div className="text-center py-16 text-slate-400">
-                  <svg className="w-12 h-12 mx-auto mb-4 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                  <SoftIcon name="clipboard" className="w-14 h-14 mx-auto mb-4 opacity-70" />
                   <p className="text-sm sm:text-base font-medium">{t('noArticles', 'No articles found')}</p>
-                  <p className="text-xs text-slate-300 mt-1">Try adjusting your filters</p>
+                  <p className="text-xs text-slate-300 mt-1">{t('blog:ui.blogPage.tryAdjustingYourFilters', 'Try adjusting your filters')}</p>
                 </div>
               ) : (
                 <>

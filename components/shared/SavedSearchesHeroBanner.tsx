@@ -1,15 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import {
   MagnifyingGlassPlusIcon,
-  DocumentTextIcon,
-  HeartIcon,
-  ClockIcon,
-  SparklesIcon,
   MapPinIcon,
-  BellIcon,
-  FunnelIcon,
-  LockClosedIcon
+  BellIcon
 } from '@/constants';
 
 type SortOption = 'createdAt' | 'name' | 'lastAccessed';
@@ -39,10 +34,10 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
 }) => {
   const { t } = useTranslation(['saved']);
 
-  const sortOptions: { key: SortOption; label: string; icon: React.ReactNode }[] = [
-    { key: 'createdAt', label: t('sort.newest', 'Newest'), icon: <SparklesIcon className="w-4 h-4" /> },
-    { key: 'name', label: t('sort.name', 'Name'), icon: <DocumentTextIcon className="w-4 h-4" /> },
-    { key: 'lastAccessed', label: t('sort.lastActive', 'Recently Used'), icon: <ClockIcon className="w-4 h-4" /> },
+  const sortOptions: { key: SortOption; label: string; icon: SoftIconName }[] = [
+    { key: 'createdAt', label: t('sort.newest', 'Newest'), icon: 'sparkles' },
+    { key: 'name', label: t('sort.name', 'Name'), icon: 'clipboard' },
+    { key: 'lastAccessed', label: t('sort.lastActive', 'Recently Used'), icon: 'clock' },
   ];
 
   return (
@@ -81,22 +76,22 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 landscape:py-6">
         <div className="max-w-7xl mx-auto">
           {/* Badge */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-              <BellIcon className="w-4 h-4 text-cyan-400" />
+              <SoftIcon name="bell" className="w-5 h-5" />
               <span className="text-white/90 font-semibold text-sm uppercase tracking-wider">
                 {t('hero.badge', 'Smart Property Alerts')}
               </span>
-              <BellIcon className="w-4 h-4 text-cyan-400" />
+              <SoftIcon name="bell" className="w-5 h-5" />
             </div>
           </div>
 
           {/* Main heading */}
           <div className="text-center mb-8 sm:mb-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight landscape:text-3xl">
               {t('hero.title', 'Your Saved')}
               <span className="block mt-2 bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">
                 {t('hero.titleHighlight', 'Property Searches')}
@@ -112,8 +107,8 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                  <HeartIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                  <SoftIcon name="heart" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">{totalSearches}</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -140,15 +135,15 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
                   ? 'border-green-400/40 hover:bg-green-500/20'
                   : 'border-white/20 hover:bg-white/15'
               }`}>
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 rounded-xl flex items-center justify-center shadow-lg relative ${
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg relative ${
                   emailAlertsEnabled && isPro
-                    ? 'bg-green-500 shadow-green-500/30'
-                    : 'bg-teal-500 shadow-teal-500/30'
+                    ? 'shadow-green-500/30'
+                    : 'shadow-teal-500/30'
                 }`}>
-                  <BellIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <SoftIcon name="bell" className="w-8 h-8 sm:w-9 sm:h-9" />
                   {!isPro && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center shadow-lg">
-                      <LockClosedIcon className="w-3 h-3 text-white" />
+                    <div className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-lg">
+                      <SoftIcon name="lock" className="w-5 h-5" />
                     </div>
                   )}
                 </div>
@@ -171,8 +166,8 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  <MapPinIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <SoftIcon name="pin" className="w-8 h-8 sm:w-9 sm:h-9" />
                 </div>
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-1">11</div>
                 <div className="text-[10px] sm:text-xs lg:text-sm text-white/60 font-medium uppercase tracking-wide">
@@ -188,7 +183,7 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
               <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-white/20 shadow-2xl">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-2 text-white/70">
-                    <FunnelIcon className="w-5 h-5" />
+                    <SoftIcon name="filter" className="w-6 h-6" />
                     <span className="text-sm font-medium">{t('sortBy', 'Sort by')}:</span>
                   </div>
 
@@ -203,7 +198,7 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
                             : 'bg-white/10 text-white/80 hover:bg-white/20 border border-white/20'
                         }`}
                       >
-                        {option.icon}
+                        <SoftIcon name={option.icon} className="w-5 h-5" />
                         {option.label}
                       </button>
                     ))}
@@ -226,17 +221,17 @@ const SavedSearchesHeroBanner: React.FC<SavedSearchesHeroBannerProps> = ({
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 mt-8 text-white/50 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
-              <BellIcon className="w-4 h-4 text-cyan-400" />
+              <SoftIcon name="bell" className="w-5 h-5" />
               <span>{t('badges.instantAlerts', 'Instant Alerts')}</span>
             </div>
             <span className="hidden sm:inline">•</span>
             <div className="flex items-center gap-2">
-              <MapPinIcon className="w-4 h-4 text-teal-400" />
+              <SoftIcon name="pin" className="w-5 h-5" />
               <span>{t('badges.customAreas', 'Custom Areas')}</span>
             </div>
             <span className="hidden sm:inline">•</span>
             <div className="flex items-center gap-2">
-              <SparklesIcon className="w-4 h-4 text-emerald-400" />
+              <SoftIcon name="sparkles" className="w-5 h-5" />
               <span>{t('badges.smartMatching', 'Smart Matching')}</span>
             </div>
           </div>

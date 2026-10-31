@@ -1,10 +1,10 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useEffect, useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '@/context/AppContext';
 import { LogoIcon, SearchIcon, HomeIcon } from '@/constants';
-import { ONBOARDING_IMAGES } from '@/config/cloudinaryConfig';
+import { ONBOARDING_IMAGES } from '@/config/mediaConfig';
 import { getAgencies } from '@/services/apiService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
@@ -135,8 +135,8 @@ const Onboarding: React.FC = () => {
               </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 tracking-tight mb-3">
-              Balkan<span className="text-primary">Estate</span><span className="text-neutral-400 font-medium">.AI</span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-neutral-900 tracking-tight mb-3 landscape:text-3xl">
+              Balkan<span className="text-primary">Estate</span><span className="text-neutral-400 font-medium">{t('seller:ui.onboarding.ai', '.AI')}</span>
             </h1>
 
             <p className="text-base sm:text-lg text-neutral-500 max-w-md mx-auto font-light">
@@ -281,7 +281,7 @@ const Onboarding: React.FC = () => {
               }`}
             >
               <p className="text-center text-neutral-400 text-xs uppercase tracking-widest mb-5 font-medium">
-                Trusted by leading agencies across the Balkans
+                {t('seller:ui.onboarding.trustedByLeadingAgenciesAcross', 'Trusted by leading agencies across the Balkans')}
               </p>
               <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4">
                 {agencies.map((agency) => (
@@ -294,7 +294,7 @@ const Onboarding: React.FC = () => {
                   >
                     {agency.logo ? (
                       <img
-                        src={optimizeCloudinaryUrl(agency.logo, { width: 64 }) || agency.logo}
+                        src={optimizeImageUrl(agency.logo, { width: 64 }) || agency.logo}
                         alt={agency.name}
                         loading="lazy"
                         decoding="async"
@@ -323,7 +323,7 @@ const Onboarding: React.FC = () => {
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}
           >
-            11 countries &bull; 50+ cities &bull; AI-powered search &bull; Thousands of properties
+            {t('seller:ui.onboarding.n11Countries50CitiesAi', '11 countries • 50+ cities • AI-powered search • Thousands of properties')}
           </p>
         </div>
       </div>

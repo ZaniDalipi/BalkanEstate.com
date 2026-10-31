@@ -222,5 +222,6 @@
     "cardLabel": "Luksuzne vile u {{place}}, {{country}}",
     "seeAll": "Vidi sve",
     "photoWikimedia": "© Wikimedia Commons"
-  }
+  },
+  "showingInArea": "Nijedna vila ne odgovara upitu „{{query}}“ — prikazujemo šta je dostupno u ovom području"
 }

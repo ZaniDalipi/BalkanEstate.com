@@ -67,8 +67,7 @@ initPerfMode();
 import { initPressFeedback } from './src/shared/interaction/pressFeedback';
 initPressFeedback();
 
-// A Cloudinary preset that fails to load retries with the original image
-// (always allowed under strict transformations) — see cdnImageFallback.ts.
+// A stored size that fails to load retries with the JPEG original — see cdnImageFallback.ts.
 import { installCdnImageFallback } from './src/shared/utils/cdnImageFallback';
 installCdnImageFallback();
 
@@ -82,7 +81,7 @@ import { recoverFromStaleChunk } from './src/utils/chunkRecovery';
  * downloading until the curated list naming them has arrived. That request is
  * otherwise only issued once the whole app has mounted — i18n, auth, router and
  * all — so the browser sits idle through the boot with an open, preconnected
- * Cloudinary connection and nothing to ask it for. Firing the fetch here runs it
+ * image connection and nothing to ask it for. Firing the fetch here runs it
  * alongside the boot instead of after it, and the section usually finds the list
  * already cached: it renders panels rather than a skeleton, and the images are
  * requested that much sooner.

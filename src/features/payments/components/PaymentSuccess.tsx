@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
-import { CheckCircleIcon, ArrowLeftIcon, LogoIcon, BuildingOfficeIcon, TicketIcon, ClipboardDocumentIcon } from '@/constants';
+import { ArrowLeftIcon, LogoIcon, ClipboardDocumentIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { verifyPayment as verifyPaymentApi, getSubscriptionStatus, type VerifyPaymentResponse } from '../api/paymentApi';
 import { PaymentProvider } from '@/config/paymentConfig';
 import { createAgency } from '@/features/agencies/api/agencyApi';
@@ -252,7 +253,7 @@ const PaymentSuccess: React.FC = () => {
           type: 'SHOW_ALERT',
           payload: {
             type: 'success',
-            title: 'Agency Created!',
+            title: t('payment:ui.paymentSuccess.agencyCreated', 'Agency Created!'),
             message: `Your agency "${agencyData.name}" has been created successfully.`,
           },
         });
@@ -265,8 +266,8 @@ const PaymentSuccess: React.FC = () => {
         type: 'SHOW_ALERT',
         payload: {
           type: 'warning',
-          title: 'Agency Setup Pending',
-          message: 'Payment successful! Please complete your agency setup from your account page.',
+          title: t('payment:ui.paymentSuccess.agencySetupPending', 'Agency Setup Pending'),
+          message: t('payment:ui.paymentSuccess.paymentSuccessfulPleaseCompleteYour', 'Payment successful! Please complete your agency setup from your account page.'),
         },
       });
     } finally {
@@ -313,11 +314,11 @@ const PaymentSuccess: React.FC = () => {
             </h1>
           </div>
           <h2 className="text-2xl font-bold text-neutral-800 mb-2">
-            {creatingAgency ? 'Creating Your Agency...' : t('success.verifying')}
+            {creatingAgency ? t('payment:ui.paymentSuccess.creatingYourAgency', 'Creating Your Agency...') : t('success.verifying')}
           </h2>
           <p className="text-neutral-600">
             {creatingAgency
-              ? 'Setting up your agency profile and generating team invitation codes...'
+              ? t('payment:ui.paymentSuccess.settingUpYourAgencyProfile', 'Setting up your agency profile and generating team invitation codes...')
               : t('success.verifyingDescription')}
           </p>
           {/* Simple loading dots */}
@@ -335,9 +336,7 @@ const PaymentSuccess: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-4xl">❌</span>
-          </div>
+          <SoftIcon name="xmark" className="w-16 h-16 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-neutral-800 mb-2">{t('success.verificationFailed')}</h2>
           <p className="text-neutral-600 mb-6">{error}</p>
           <button
@@ -359,12 +358,10 @@ const PaymentSuccess: React.FC = () => {
         <div className="text-center">
           {/* Success Icon with Animation */}
           <div className="relative mb-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
-              <CheckCircleIcon className="w-16 h-16 text-white" />
-            </div>
+            <SoftIcon name="check" className="w-24 h-24 mx-auto animate-bounce" />
             {/* Confetti Effect */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-6xl animate-ping opacity-20">🎉</div>
+              <SoftIcon name="party" className="w-16 h-16 animate-ping opacity-20" />
             </div>
           </div>
 
@@ -402,9 +399,9 @@ const PaymentSuccess: React.FC = () => {
                 )}
                 {paymentDetails.provider && (
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Provider:</span>
+                    <span className="text-neutral-600">{t('payment:ui.paymentSuccess.provider', 'Provider:')}</span>
                     <span className="font-medium text-neutral-800 capitalize">
-                      {paymentDetails.provider === 'web' ? 'Online Payment' : 'Payment Provider'}
+                      {paymentDetails.provider === 'web' ? t('payment:ui.paymentSuccess.onlinePayment', 'Online Payment') : t('payment:ui.paymentSuccess.paymentProvider', 'Payment Provider')}
                     </span>
                   </div>
                 )}
@@ -429,7 +426,7 @@ const PaymentSuccess: React.FC = () => {
                 {(sessionId || orderId) && (
                   <div className="flex justify-between mt-4 pt-4 border-t border-neutral-300">
                     <span className="text-neutral-500 text-xs">
-                      {sessionId ? t('success.sessionId') : 'Order ID'}:
+                      {sessionId ? t('success.sessionId') : t('payment:ui.paymentSuccess.orderId', 'Order ID')}:
                     </span>
                     <span className="font-mono text-xs text-neutral-400 truncate ml-2 max-w-[200px]">
                       {sessionId || orderId}
@@ -444,26 +441,24 @@ const PaymentSuccess: React.FC = () => {
           {agencyCreated && (
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-5 mb-6 text-left">
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-amber-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <BuildingOfficeIcon className="w-7 h-7 text-amber-700" />
-                </div>
+                <SoftIcon name="building" className="w-12 h-12 flex-shrink-0" />
                 <div className="flex-1">
-                  <h3 className="font-bold text-amber-900 mb-1">Agency Created Successfully!</h3>
+                  <h3 className="font-bold text-amber-900 mb-1">{t('payment:ui.paymentSuccess.agencyCreatedSuccessfully', 'Agency Created Successfully!')}</h3>
                   <p className="text-sm text-amber-700 mb-3">
-                    Your agency <span className="font-semibold">{agencyResult?.agency?.name || 'has been set up'}</span> is ready to go!
+                    {t('payment:ui.paymentSuccess.yourAgency', 'Your agency')} <span className="font-semibold">{agencyResult?.agency?.name || t('payment:ui.paymentSuccess.hasBeenSetUp', 'has been set up')}</span> {t('payment:ui.paymentSuccess.isReadyToGo', 'is ready to go!')}
                   </p>
                   <ul className="text-sm text-amber-700 space-y-1 mb-4">
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500">✓</span>
-                      <span>Invite team members with your unique codes</span>
+                      <span>{t('payment:ui.paymentSuccess.inviteTeamMembersWithYour', 'Invite team members with your unique codes')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500">✓</span>
-                      <span>Customize your agency profile page</span>
+                      <span>{t('payment:ui.paymentSuccess.customizeYourAgencyProfilePage', 'Customize your agency profile page')}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500">✓</span>
-                      <span>Start listing properties under your agency</span>
+                      <span>{t('payment:ui.paymentSuccess.startListingPropertiesUnderYour', 'Start listing properties under your agency')}</span>
                     </li>
                   </ul>
                   {agencyResult?.agency && (
@@ -471,8 +466,8 @@ const PaymentSuccess: React.FC = () => {
                       onClick={handleViewAgency}
                       className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                     >
-                      <BuildingOfficeIcon className="w-5 h-5" />
-                      View Your Agency
+                      <SoftIcon name="building" className="w-6 h-6" />
+                      {t('payment:ui.paymentSuccess.viewYourAgency', 'View Your Agency')}
                     </button>
                   )}
                 </div>
@@ -484,13 +479,11 @@ const PaymentSuccess: React.FC = () => {
           {agencyCreated && agentCoupons.length > 0 && (
             <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-xl p-5 mb-6 text-left">
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-purple-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <TicketIcon className="w-7 h-7 text-purple-700" />
-                </div>
+                <SoftIcon name="ticket" className="w-12 h-12 flex-shrink-0" />
                 <div className="flex-1">
-                  <h3 className="font-bold text-purple-900 mb-1">Team Invitation Codes</h3>
+                  <h3 className="font-bold text-purple-900 mb-1">{t('payment:ui.paymentSuccess.teamInvitationCodes', 'Team Invitation Codes')}</h3>
                   <p className="text-sm text-purple-700 mb-3">
-                    Share these codes with your team members. Each code grants Pro Agent status when they register.
+                    {t('payment:ui.paymentSuccess.shareTheseCodesWithYour', 'Share these codes with your team members. Each code grants Pro Agent status when they register.')}
                   </p>
                   <div className="space-y-2">
                     {agentCoupons.map((coupon, index) => (
@@ -508,7 +501,7 @@ const PaymentSuccess: React.FC = () => {
                               ? 'bg-green-100 text-green-600'
                               : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
                           }`}
-                          title={copiedCouponIndex === index ? 'Copied!' : 'Copy code'}
+                          title={copiedCouponIndex === index ? t('payment:ui.paymentSuccess.copied', 'Copied!') : t('payment:ui.paymentSuccess.copyCode', 'Copy code')}
                         >
                           <ClipboardDocumentIcon className="w-4 h-4" />
                         </button>
@@ -516,7 +509,7 @@ const PaymentSuccess: React.FC = () => {
                     ))}
                   </div>
                   <p className="text-xs text-purple-600 mt-3 flex items-center gap-1">
-                    <span>These codes have also been sent to your email</span>
+                    <span>{t('payment:ui.paymentSuccess.theseCodesHaveAlsoBeen', 'These codes have also been sent to your email')}</span>
                   </p>
                 </div>
               </div>

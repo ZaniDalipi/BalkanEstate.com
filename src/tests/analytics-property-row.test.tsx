@@ -12,7 +12,7 @@ const property = {
   price: 190000,
   city: 'Tirana',
   country: 'Albania',
-  imageUrl: 'https://res.cloudinary.com/dh8tbq8wy/image/upload/v1/properties/a.jpg',
+  imageUrl: 'https://media.test/properties/a/original.jpg',
   periodViews: 82,
   periodUniqueViews: 60,
   totalViews: 196,
@@ -43,7 +43,7 @@ describe('analytics PropertyRow', () => {
     const { container } = render(<PropertyRow property={property} rank={1} maxViews={82} />);
 
     const img = container.querySelector('img');
-    expect(img?.getAttribute('src')).toContain('res.cloudinary.com');
+    expect(img?.getAttribute('src')).toContain('media.test');
     expect(screen.getByText('Tirana, Albania')).toBeTruthy();
     expect(screen.getByText('analytics:properties.sold')).toBeTruthy();
     expect(screen.getByText('82')).toBeTruthy();
@@ -59,7 +59,8 @@ describe('analytics PropertyRow', () => {
         maxViews={10}
       />
     );
-    expect(container.querySelector('img')).toBeNull();
+    // No listing photo: only decorative (aria-hidden) soft icons may render.
+    expect(container.querySelector('img:not([aria-hidden="true"])')).toBeNull();
     expect(screen.getByText('7')).toBeTruthy();
     expect(container.querySelector('svg polyline')).toBeNull();
   });

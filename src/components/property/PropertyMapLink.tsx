@@ -5,6 +5,7 @@ import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'rea
 import { useTranslation } from 'react-i18next';
 import { Property } from '../../../types';
 import { resolveMapDestination } from '@/shared/map/mapDestination';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Lazy load the 3D map component for better initial page load
 const loadMap3D = () => import('@/features/map/components/Map3DBuildings');
@@ -65,7 +66,9 @@ interface PropertyMapLinkProps {
 const MapPlaceholder: React.FC<{ heightClassName: string; busy?: boolean }> = ({
   heightClassName,
   busy = false,
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <div
     className={`bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center ${heightClassName} ${busy ? 'animate-pulse' : ''}`}
   >
@@ -78,11 +81,12 @@ const MapPlaceholder: React.FC<{ heightClassName: string; busy?: boolean }> = ({
             style={{ animationDuration: '1s' }}
           />
         </div>
-        <p className="text-neutral-500 text-sm font-medium">Loading map...</p>
+        <p className="text-neutral-500 text-sm font-medium">{t('property:ui.propertyMapLink.loadingMap', 'Loading map...')}</p>
       </div>
     )}
   </div>
 );
+};
 
 /**
  * Mount the 3D map only once it is close to the viewport.
@@ -195,27 +199,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
       {/* Header */}
       <div className="px-3 py-2.5 sm:p-4 border-b border-neutral-100 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="flex items-center gap-3">
-          <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-            <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </div>
+          <SoftIcon name="pin" className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0" />
           <div>
             <h3 className="text-base sm:text-lg font-bold text-neutral-800">
               {t('cinematicMap.title', 'Property Location')}
@@ -255,25 +239,7 @@ export const PropertyMapLink: React.FC<PropertyMapLinkProps> = ({
       {!hasValidCoordinates && (
         <div className={`${heightClassName} bg-neutral-100 flex items-center justify-center`}>
           <div className="text-center text-neutral-500">
-            <svg
-              className="w-12 h-12 mx-auto mb-2 opacity-50"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
+            <SoftIcon name="pin" className="w-12 h-12 mx-auto mb-2 opacity-60" />
             <p className="font-medium">
               {t('cinematicMap.errors.noLocation', 'Location data unavailable')}
             </p>

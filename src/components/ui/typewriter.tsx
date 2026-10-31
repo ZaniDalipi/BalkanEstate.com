@@ -8,6 +8,13 @@ interface TypewriterProps {
   cursor?: boolean
   cursorChar?: string
   className?: string
+  /**
+   * Where the live text sits inside the space reserved for the longest word.
+   * Left keeps it flush against the text before it; centre suits a word on a
+   * line of its own, which would otherwise look pushed to one side whenever a
+   * shorter word is showing.
+   */
+  alignClassName?: string
 }
 
 export function Typewriter({
@@ -17,6 +24,7 @@ export function Typewriter({
   cursor = true,
   cursorChar = "|",
   className,
+  alignClassName = "text-left",
 }: TypewriterProps) {
   // Show the first word immediately to avoid blank text during LCP
   const [displayText, setDisplayText] = useState(words[0] || "")
@@ -88,6 +96,11 @@ export function Typewriter({
    * real glyphs in the real font, so it stays correct in any translation —
    * unlike a `min-width` in `ch`, which only approximates a proportional font
    * and would need re-guessing per locale.
+   *
+   * The words may wrap (`pre-wrap`, capped at the container's width): a long
+   * translation in a large heading on a narrow screen is wider than the
+   * screen, and unwrapped it ran off the edge. Wrapped, the reserved cell
+   * simply grows a line taller, and the live text wraps the same way.
    */
   /*
    * `className` lands on the span holding the live text, not on the wrapper.
@@ -100,18 +113,18 @@ export function Typewriter({
    * makes that technique work.
    */
   return (
-    <span className="relative inline-grid">
+    <span className="relative inline-grid max-w-full">
       {words.map((word, i) => (
         <span
           key={`${word}-${i}`}
           aria-hidden
-          className="invisible col-start-1 row-start-1 whitespace-pre"
+          className="invisible col-start-1 row-start-1 whitespace-pre-wrap"
         >
           {word}
           {cursor ? cursorChar : ""}
         </span>
       ))}
-      <span className={`col-start-1 row-start-1 whitespace-pre text-left ${className ?? ""}`}>
+      <span className={`col-start-1 row-start-1 whitespace-pre-wrap ${alignClassName} ${className ?? ""}`}>
         {displayText}
         {cursor && (
           <span

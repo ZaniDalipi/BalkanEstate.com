@@ -35,14 +35,43 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   facebookPixelId,
   hotjarId,
 }) => {
+  // Load gtag.js once. It is set up here rather than as an inline <script>:
+  // the production CSP only runs inline scripts carrying the server's nonce,
+  // which a tag added in the browser never has.
+  useEffect(() => {
+    if (!googleAnalyticsId || document.getElementById('gtag-js')) return;
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function gtag() {
+      // gtag.js only reads the `arguments` object, not a plain array.
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer.push(arguments);
+    };
+    window.gtag('js', new Date());
+    // Page views are sent below on each navigation, so turn off the automatic
+    // one here to avoid counting the first page twice.
+    window.gtag('config', googleAnalyticsId, {
+      send_page_view: false,
+      cookie_flags: 'SameSite=None;Secure',
+    });
+
+    const script = document.createElement('script');
+    script.id = 'gtag-js';
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`;
+    document.head.appendChild(script);
+  }, [googleAnalyticsId]);
+
   // Track a page view on every navigation (and on the first render).
   const { pathname } = useLocation();
   useEffect(() => {
     // Google Analytics page view
     if (googleAnalyticsId && window.gtag) {
-      window.gtag('config', googleAnalyticsId, {
+      window.gtag('event', 'page_view', {
         page_path: pathname,
+        page_location: window.location.href,
         page_title: document.title,
+        send_to: googleAnalyticsId,
       });
     }
 
@@ -54,25 +83,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({
 
   return (
     <Helmet>
-      {/* Google Analytics 4 */}
-      {googleAnalyticsId && (
-        <>
-          <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} />
-          <script>
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${googleAnalyticsId}', {
-                page_path: window.location.pathname,
-                anonymize_ip: true,
-                cookie_flags: 'SameSite=None;Secure'
-              });
-            `}
-          </script>
-        </>
-      )}
-
       {/* Facebook Pixel */}
       {facebookPixelId && (
         <script>

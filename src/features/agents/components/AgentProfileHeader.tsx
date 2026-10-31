@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { User } from 'lucide-react';
@@ -6,17 +6,13 @@ import { Agent, Agency } from '@/types';
 import {
     ArrowLeftIcon,
     BuildingOfficeIcon,
-    MapPinIcon,
-    CheckBadgeIcon,
     ChevronRightIcon,
     HeartIcon,
     ShareIcon,
-    FireIcon,
     StarIcon,
     PencilIcon,
-    UsersIcon,
-    HomeIcon,
 } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import NotificationCenter from '@/shared/components/NotificationCenter';
 import { AgentStats } from './useAgentProfile';
@@ -99,7 +95,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                 >
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
                         {currentUser.avatarUrl ? (
-                            <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                            <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 64 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" aria-hidden="true" />
                         ) : (
                             <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
                         )}
@@ -204,8 +200,8 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg shadow-black/10">
-                                                <BuildingOfficeIcon className="w-5 h-5 text-white/90" />
+                                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/95 border border-white/20 flex items-center justify-center shadow-lg shadow-black/10">
+                                                <SoftIcon name="building" className="w-7 h-7 sm:w-8 sm:h-8" />
                                             </div>
                                         )}
                                     </div>
@@ -363,8 +359,8 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                 )}
                             </div>
                             {/* Verified Badge */}
-                            <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-green-500 text-white p-1.5 sm:p-2 rounded-full shadow-lg border-2 border-white">
-                                <CheckBadgeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-white p-0.5 sm:p-1 rounded-full shadow-lg border-2 border-white">
+                                <SoftIcon name="shield" className="w-7 h-7 sm:w-8 sm:h-8" />
                             </div>
                         </div>
 
@@ -374,13 +370,13 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                 <button
                                     onClick={handleNameClick}
                                     className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-200 text-left hover:underline"
-                                    title="View profile"
+                                    title={t('agents:ui.agentProfileHeader.viewProfile', 'View profile')}
                                 >
                                     <h1 className="inline">{agent.name}</h1>
                                 </button>
                                 {stats.rating >= 4.5 && (
                                     <span className="inline-flex items-center gap-1 sm:gap-1.5 bg-orange-100 text-orange-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold">
-                                        <FireIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                                        <SoftIcon name="flame" className="w-4 h-4 sm:w-5 sm:h-5" />
                                         {t('profilePage.badges.topAgent')}
                                     </span>
                                 )}
@@ -392,7 +388,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                     onClick={onAgencyClick}
                                     className="inline-flex items-center gap-1.5 sm:gap-2 text-gray-600 hover:text-gray-900 mb-2 sm:mb-3 transition-colors text-sm sm:text-base"
                                 >
-                                    <BuildingOfficeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    <SoftIcon name="building" className="w-5 h-5 sm:w-6 sm:h-6" />
                                     <span className="font-medium">{agent.agencyName}</span>
                                     <ChevronRightIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                 </button>
@@ -401,7 +397,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                             {/* Location */}
                             {(agent.city || agent.country) && (
                                 <div className="flex items-center justify-center lg:justify-start gap-1.5 sm:gap-2 mb-3 sm:mb-4 lg:mb-6 text-gray-600">
-                                    <MapPinIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                                    <SoftIcon name="pin" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                                     <span className="text-sm sm:text-base lg:text-lg">{[agent.city, agent.country].filter(Boolean).join(', ')}</span>
                                 </div>
                             )}
@@ -448,17 +444,17 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         <div className="absolute inset-0 bg-black/10"></div>
                                         <div className="relative z-10">
                                             <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
-                                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                                                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
                                                     {agencyData.logo ? (
                                                         <img
-                                                            src={optimizeCloudinaryUrl(agencyData.logo, { width: 128 }) || agencyData.logo}
+                                                            src={optimizeImageUrl(agencyData.logo, { width: 128 }) || agencyData.logo}
                                                             alt={agencyData.name}
                                                             loading="lazy"
                                                             decoding="async"
-                                                            className="w-8 h-8 sm:w-12 sm:h-12 object-cover rounded-md sm:rounded-lg"
+                                                            className="w-8 h-8 sm:w-12 sm:h-12 object-contain rounded-md sm:rounded-lg"
                                                         />
                                                     ) : (
-                                                        <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+                                                        <SoftIcon name="building" className="w-8 h-8 sm:w-11 sm:h-11" />
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -474,14 +470,14 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
                                             <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
                                                 <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                                                    <UsersIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
+                                                    <SoftIcon name="users" className="w-5 h-5 sm:w-6 sm:h-6" />
                                                     <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.agents')}</span>
                                                 </div>
                                                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalAgents || 0}</p>
                                             </div>
                                             <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-gray-200 shadow-sm">
                                                 <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                                                    <HomeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
+                                                    <SoftIcon name="home" className="w-5 h-5 sm:w-6 sm:h-6" />
                                                     <span className="text-[10px] sm:text-xs text-gray-600 font-medium">{t('profilePage.agencyCard.properties')}</span>
                                                 </div>
                                                 <p className="text-xl sm:text-2xl font-bold text-gray-900">{agencyData.totalProperties || 0}</p>
@@ -491,7 +487,7 @@ const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
                                         {/* Location */}
                                         {agencyData.city && (
                                             <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 text-gray-600 bg-white rounded-lg p-2 sm:p-3 border border-gray-200">
-                                                <MapPinIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-gray-500" />
+                                                <SoftIcon name="pin" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                                                 <span className="text-xs sm:text-sm truncate">{agencyData.city}, {agencyData.country}</span>
                                             </div>
                                         )}

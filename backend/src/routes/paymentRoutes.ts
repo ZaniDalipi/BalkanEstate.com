@@ -3,7 +3,6 @@ import {
   createUnifiedPayment,
   getPaymentProviders,
   getSupportedCountries,
-  processPayment,
   getSubscriptionStatus,
   cancelSubscription,
   applyFreeSubscription,
@@ -80,10 +79,8 @@ router.post('/paysera/webhook', handlePayseraWebhook);
 /** Verify Paysera payment by order ID */
 router.get('/paysera/verify/:orderId', protect, verifyPayseraPayment);
 
-// ============================================================
-// LEGACY ENDPOINTS (backward compatibility)
-// ============================================================
-
-router.post('/process', protect, processPayment);
+// The legacy mock endpoint POST /process (any signed-in user got an active
+// subscription without paying) was removed; subscriptions are activated only by
+// a verified payment confirmation or a 100% coupon (/apply-free-subscription).
 
 export default router;

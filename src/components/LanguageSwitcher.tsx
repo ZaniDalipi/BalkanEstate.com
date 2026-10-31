@@ -7,6 +7,7 @@ import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languages, getCurrentLanguage, type LanguageCode } from '../i18n';
 import { changeLanguage } from '../app/router/navigation';
+import { NavPicture } from '@/src/shared/illustrations';
 
 interface LanguageSwitcherProps {
   variant?: 'dropdown' | 'compact' | 'full' | 'sidebar';
@@ -117,8 +118,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           aria-label={t('aria.changeLanguage')}
           aria-expanded={isOpen}
         >
-          <span className="text-xl flex-shrink-0">{currentLang.flag}</span>
-          <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.nativeName}</span>
+          <NavPicture name="language" className="nav-dock-icon w-7 h-7 -m-1 max-w-none flex-shrink-0" />
+          <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{currentLang.flag} {currentLang.nativeName}</span>
         </button>
 
         {isOpen && (

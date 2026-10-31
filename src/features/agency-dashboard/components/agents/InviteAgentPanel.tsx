@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClipboardDocumentIcon, UsersIcon, TicketIcon, CheckBadgeIcon } from '@/constants';
+import { ClipboardDocumentIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAgency } from '@/src/features/agencies/hooks/useAgency';
 
 interface InviteAgentPanelProps {
@@ -71,9 +72,7 @@ const InviteAgentPanel: React.FC<InviteAgentPanelProps> = ({ agencyId }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-5">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
-          <UsersIcon className="w-5 h-5 text-indigo-600" />
-        </div>
+        <SoftIcon name="users" className="w-10 h-10 flex-shrink-0" />
         <div>
           <h3 className="font-semibold text-gray-900">
             {t('agencyDashboard:agents.invite.title', 'Invite Agents')}
@@ -167,9 +166,9 @@ const InviteAgentPanel: React.FC<InviteAgentPanelProps> = ({ agencyId }) => {
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       {coupon.status === 'used' ? (
-                        <CheckBadgeIcon className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                        <SoftIcon name="check" className="w-4 h-4 flex-shrink-0" />
                       ) : (
-                        <TicketIcon className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                        <SoftIcon name="ticket" className="w-4 h-4 flex-shrink-0" />
                       )}
                       <span className="font-mono text-[11px] text-gray-700 truncate">{coupon.code}</span>
                       {coupon.status === 'available' && (

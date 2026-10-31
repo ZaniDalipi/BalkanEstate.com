@@ -10,7 +10,7 @@ import {
  * GET /api/image-proxy?url=<encoded-url>&w=<width>
  *
  * Serves external (feed) photos resized to WebP from our own server, so they
- * cost nothing on Cloudinary. See services/imageProxy for the pipeline.
+ * cost nothing in storage. See services/imageProxy for the pipeline.
  */
 export const proxyExternalImage = async (req: Request, res: Response): Promise<void> => {
   const validation = validateProxyRequest({ url: req.query.url, w: req.query.w });

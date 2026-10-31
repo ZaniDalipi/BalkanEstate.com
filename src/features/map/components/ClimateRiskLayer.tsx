@@ -17,6 +17,7 @@ import { useRainViewer } from '../hooks/useRainViewer';
 import { useOpenMeteoGrid, type MapBounds } from '../hooks/useOpenMeteoGrid';
 import { useMapServices, weatherTileProxyUrl, FIRMS_WMS_PROXY_BASE } from '../hooks/useMapServices';
 
+import i18n from '@/src/i18n';
 export type ClimateRiskType = 'none' | 'flood' | 'fire' | 'wind' | 'air' | 'heat';
 
 interface ClimateRiskLayerProps {
@@ -57,7 +58,7 @@ const getLegendConfigs = (services: { owm: boolean; firms: boolean }): Record<Ex
       { color: '#008000', label: 'Low' },
       { color: '#ffff00', label: 'Moderate' },
       { color: '#ff8c00', label: 'High' },
-      { color: '#ff0000', label: 'Very High' },
+      { color: '#ff0000', label: i18n.t('search:ui.climateRiskLayer.veryHigh', 'Very High') },
       { color: '#800000', label: 'Extreme' },
     ],
   },

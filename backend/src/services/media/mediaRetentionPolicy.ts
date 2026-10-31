@@ -1,5 +1,5 @@
 /**
- * How long listing media is kept in Cloudinary after a listing ends.
+ * How long listing media is kept in R2 after a listing ends.
  *
  * Deleted listings keep a single archive thumbnail; sold listings keep their
  * full gallery (they still show as "sold"). After the periods below, the

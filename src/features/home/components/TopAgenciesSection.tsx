@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { getTopAgencies } from '@/src/features/agencies/api/agencyApi';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import type { Agency } from '@/src/shared/types';
 import { calcAgencyScore, getAgencyAchievementBadge, AGENCY_SCORING_METRIC_DEFS, AGENCY_MAX_SCORE } from '@/src/features/agencies/utils/agencyScoring';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 const MEDAL_COLORS = {
   0: { bg: '#FFD700', text: '#92710A', glow: 'rgba(255, 215, 0, 0.4)', gradient: 'linear-gradient(135deg, #FFD700, #FFC107)' },
@@ -79,7 +80,7 @@ const AgencyPodiumCard: React.FC<{
           filter: 'drop-shadow(0 4px 10px rgba(255,180,0,0.7))',
           animation: isVisible ? 'tas-agency-bounce 2.4s ease-in-out infinite' : 'none',
           pointerEvents: 'none',
-        }}>👑</div>
+        }}><SoftIcon name="crown" className="w-9 h-9" /></div>
       )}
 
       {/* Agency Card */}
@@ -111,7 +112,7 @@ const AgencyPodiumCard: React.FC<{
           style={{
             height: isChamp ? '80px' : '64px',
             background: agency.coverImage
-              ? `url(${optimizeCloudinaryUrl(agency.coverImage, { width: 560, quality: 'auto', crop: 'fill' })}) center/cover`
+              ? `url(${optimizeImageUrl(agency.coverImage, { width: 560, quality: 'auto', crop: 'fill' })}) center/cover`
               : 'linear-gradient(135deg, #0f172a, #1e293b)',
             position: 'relative',
           }}
@@ -167,7 +168,7 @@ const AgencyPodiumCard: React.FC<{
         >
           {agency.logo ? (
             <img
-              src={optimizeCloudinaryUrl(agency.logo, { width: 128, quality: 'auto', crop: 'fill' })}
+              src={optimizeImageUrl(agency.logo, { width: 128, quality: 'auto', crop: 'fill' })}
               alt={agencyName}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               loading="eager"
@@ -274,7 +275,7 @@ const AgencyPodiumCard: React.FC<{
               border: `1px solid ${badge.color}28`,
               borderRadius: '999px', padding: '2px 8px',
             }}>
-              {badge.label}
+              <SoftIcon name={badge.icon} className="inline-block w-3.5 h-3.5 mr-1 align-[-2px]" />{badge.label}
             </div>
           )}
         </div>
@@ -388,7 +389,7 @@ const TopAgenciesSection: React.FC = () => {
             marginBottom: '0.75rem',
           }}
         >
-          <span style={{ fontSize: '14px' }}>🏢</span>
+          <SoftIcon name="building" className="w-5 h-5" />
           <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#0252CD', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             {t('topAgencies.badge', 'Agencies of the Month')}
           </span>

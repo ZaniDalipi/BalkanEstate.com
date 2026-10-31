@@ -1,7 +1,7 @@
 import React, { useState, useCallback, memo, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
-import { MapPinIcon, BedIcon, BathIcon, SqftIcon, LivingRoomIcon, BuildingOfficeIcon, StarIconSolid, FireIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAppContext } from '@/context/AppContext';
 import { generatePropertySlug } from '@/utils/slug';
 import { formatPrice } from '@/utils/currency';
@@ -10,6 +10,7 @@ import { shouldOpenInNewTab } from '@/shared/utils/pwa';
 import { typeHasAttribute } from '@/shared/property/typeAttributes';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import { navigate, localizePath } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
 
 // Chevron Icons
@@ -73,6 +74,9 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
       : [property.imageUrl];
   }, [property.images, property.imageUrl]);
 
+  // Total photos on the listing (the carousel itself only cycles the first 5)
+  const totalImageCount = Math.max(property.images?.length || 0, displayImages.length);
+
   // Preload every slide up front. This card auto-advances through all images
   // (and lets the user jump via dots), and non-first layers render with
   // loading="lazy", so warming the cache here guarantees each switch is instant
@@ -91,9 +95,35 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
     });
   }, [displayImages, IMAGE_WIDTHS]);
 
+  // Only the slide on screen, the one fading out and the next one are
+  // mounted. Mounting all five (×5 cards) decoded ~25 large photos at once,
+  // which is enough to get the page killed on an iPhone.
+  const previousIndexRef = useRef(0);
+  const [previousIndex, setPreviousIndex] = useState(0);
+  useEffect(() => {
+    setPreviousIndex(previousIndexRef.current);
+    previousIndexRef.current = currentImageIndex;
+  }, [currentImageIndex]);
+  const mountedSlides = useMemo(
+    () => new Set([currentImageIndex, previousIndex, (currentImageIndex + 1) % displayImages.length]),
+    [currentImageIndex, previousIndex, displayImages.length]
+  );
+
+  // Pause autoplay while the card is off screen — e.g. the list has slid away
+  // behind the map on a phone — so it isn't swapping photos nobody can see.
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isOnScreen, setIsOnScreen] = useState(true);
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(([entry]) => setIsOnScreen(entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Auto-advance carousel every 3 seconds when not hovered
   useEffect(() => {
-    if (!isAutoPlaying || displayImages.length <= 1) return;
+    if (!isAutoPlaying || !isOnScreen || displayImages.length <= 1) return;
 
     const interval = setInterval(() => {
       if (!isHovered) {
@@ -102,7 +132,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, isHovered, displayImages.length]);
+  }, [isAutoPlaying, isOnScreen, isHovered, displayImages.length]);
 
   const handlePrevImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -185,6 +215,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
   return (
     <div
+      ref={cardRef}
       className={`group bg-white rounded-2xl overflow-hidden shadow-md ${tierStyles.border} ${tierStyles.glow} transition-all duration-300 cursor-pointer flex flex-col md:flex-row w-full ${
         isHovered ? 'shadow-xl scale-[1.005]' : ''
       }`}
@@ -199,7 +230,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {displayImages.map((imgUrl, index) => (
+        {displayImages.map((imgUrl, index) => !mountedSlides.has(index) ? null : (
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-500 ${
@@ -238,40 +269,40 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           </>
         )}
 
-        {/* iOS-style Page Dots */}
+        {/* Image indicator — max 3 dots + count (matches PropertyCard) */}
         {displayImages.length > 1 && (
-          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-[5px] z-10">
-            {displayImages.map((_, index) => (
+          <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center z-20 pointer-events-none gap-1">
+            {displayImages.slice(0, 3).map((_, index) => (
               <button
                 key={index}
+                className="pointer-events-auto min-w-[28px] min-h-[28px] flex items-center justify-center focus:outline-none focus-visible:ring-1 focus-visible:ring-white"
                 onClick={(e) => handleDotClick(e, index)}
-                className={`rounded-full transition-all duration-300 ${
-                  index === currentImageIndex
-                    ? 'bg-white w-[7px] h-[7px]'
-                    : 'bg-white/45 w-[6px] h-[6px] active:bg-white/70'
-                }`}
-              />
+                aria-label={`Image ${index + 1} of ${totalImageCount}`}
+                aria-current={index === currentImageIndex ? 'true' : undefined}
+              >
+                <span className={`block rounded-full transition-all duration-200 ${
+                  index === currentImageIndex ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/60'
+                }`} />
+              </button>
             ))}
-          </div>
-        )}
-
-        {/* iOS-style Image Counter Pill */}
-        {displayImages.length > 1 && (
-          <div className="absolute bottom-2.5 right-2.5 bg-black/40 backdrop-blur-md text-white/90 text-[10px] font-medium px-1.5 py-[2px] rounded-full z-10 tabular-nums">
-            {currentImageIndex + 1}/{displayImages.length}
+            {totalImageCount > 3 && (
+              <span className="pointer-events-none bg-black/40 backdrop-blur-sm text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full">
+                +{totalImageCount - 3}
+              </span>
+            )}
           </div>
         )}
 
         {/* Promotion Badge - compact iOS pill */}
         <div className={`absolute top-2.5 left-2.5 ${tierStyles.badge} text-white text-[10px] font-semibold px-2 py-[3px] rounded-full flex items-center gap-1 z-10`}>
-          <StarIconSolid className="w-2.5 h-2.5" />
+          <SoftIcon name={promotionTier === 'premium' ? 'crown' : promotionTier === 'highlight' ? 'diamond' : promotionTier === 'featured' ? 'star' : 'sparkles'} className="w-4 h-4" />
           {tierStyles.label}
         </div>
 
         {/* Urgent Badge - iOS compact */}
         {property.hasUrgentBadge && (
           <div className="absolute top-2.5 right-11 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-[3px] rounded-full animate-pulse flex items-center gap-1 z-10">
-            <FireIcon className="w-2.5 h-2.5" /> {t('property:status.urgent').toUpperCase()}
+            <SoftIcon name="flame" className="w-4 h-4" /> {t('property:status.urgent').toUpperCase()}
           </div>
         )}
 
@@ -297,9 +328,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
           <div>
             {property.isNegotiable ? (
               <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs md:text-sm font-semibold px-2 py-1 rounded-full border border-amber-200">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+                <SoftIcon name="chat" className="w-4 h-4 md:w-5 md:h-5" />
                 {t('property:byNegotiation', 'By Negotiation')}
               </span>
             ) : (
@@ -317,7 +346,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
                 ) : (
                   property.sqft > 0 && property.propertyType !== 'land' && (
                     <p className="text-[11px] text-neutral-400 font-medium">
-                      {formatPrice(Math.round(property.price / property.sqft), property.country)} per m²
+                      {formatPrice(Math.round(property.price / property.sqft), property.country)} {t('property:ui.highlightedPropertyCard.perM', 'per m²')}
                     </p>
                   )
                 )}
@@ -338,7 +367,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
 
         {/* Location */}
         <div className="flex items-center gap-1.5 mb-2.5 text-neutral-600">
-          <MapPinIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+          <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
           <span className="text-xs truncate">{property.address}</span>
         </div>
 
@@ -348,19 +377,19 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
         <div className="flex items-center gap-4 mb-2.5 text-neutral-600">
           {typeHasAttribute(property.propertyType, 'beds') && (
             <div className="flex items-center gap-1">
-              <BedIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="bed" className="w-5 h-5" />
               <span className="text-sm font-semibold">{property.beds ?? 0}</span>
             </div>
           )}
           {typeHasAttribute(property.propertyType, 'baths') && (
             <div className="flex items-center gap-1">
-              <BathIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="bath" className="w-5 h-5" />
               <span className="text-sm font-semibold">{property.baths ?? 0}</span>
             </div>
           )}
           {typeHasAttribute(property.propertyType, 'livingRooms') && (
             <div className="flex items-center gap-1">
-              <LivingRoomIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="sofa" className="w-5 h-5" />
               <span className="text-sm font-semibold">{property.livingRooms ?? 0}</span>
             </div>
           )}
@@ -371,7 +400,7 @@ const HighlightedCardInner = memo<HighlightedCardInnerProps>(({
               measurement nobody gave. */}
           {property.sqft > 0 && (
             <div className="flex items-center gap-1">
-              <SqftIcon className="w-4 h-4 text-primary" />
+              <SoftIcon name="area" className="w-5 h-5" />
               <span className="text-sm font-bold text-primary">{property.sqft} {t('common:sqm')}</span>
             </div>
           )}
@@ -425,6 +454,7 @@ HighlightedCardInner.displayName = 'HighlightedCardInner';
  * extracts primitive values, and passes them to the memoized inner component.
  */
 const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ property, showToast }) => {
+  const { t } = useTranslation();
   const { state, dispatch, toggleSavedHome } = useAppContext();
 
   const isFavorited = state.savedHomes.some(p => p.id === property.id);
@@ -443,6 +473,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       window.open(localizePath(path), '_blank', 'noopener,noreferrer');
     } else {
       // The card's copy lets the detail page render at once; it refreshes itself.
+      rememberOpenedProperty(property.id);
       navigate(path, { state: { property } });
     }
   }, [property]);
@@ -455,7 +486,7 @@ const HighlightedPropertyCard: React.FC<HighlightedPropertyCardProps> = ({ prope
       try {
         await toggleSavedHomeRef.current(property);
       } catch (error) {
-        showToast?.('Failed to save property. Please try again.', 'error');
+        showToast?.(t('property:ui.highlightedPropertyCard.failedToSavePropertyPlease', 'Failed to save property. Please try again.'), 'error');
       }
     }
   }, [dispatch, property, showToast]);

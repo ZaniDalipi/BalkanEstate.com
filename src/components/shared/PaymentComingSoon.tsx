@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface PaymentComingSoonProps {
   title?: string;
@@ -54,7 +55,7 @@ const PaymentComingSoon: React.FC<PaymentComingSoonProps> = ({
               <div className="p-3">
                 <div className="flex justify-between items-start mb-2 sm:mb-3">
                   <div className="w-7 h-4 sm:w-9 sm:h-5 bg-amber-400 rounded-sm"></div>
-                  <span className="text-white/40 text-xs">⚡</span>
+                  <SoftIcon name="bolt" className="w-4 h-4 opacity-70" />
                 </div>
                 <div className="flex gap-1 sm:gap-1.5 mb-2">
                   <div className="h-1 w-5 sm:w-7 bg-white/30 rounded"></div>
@@ -92,9 +93,7 @@ const PaymentComingSoon: React.FC<PaymentComingSoonProps> = ({
             onClick={onActivateCoupon}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold rounded-lg hover:from-primary-dark hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-            </svg>
+            <SoftIcon name="ticket" className="w-5 h-5" />
             {t('common:comingSoon.activateCoupon', 'Activate with Coupon')}
           </button>
         </div>
@@ -110,9 +109,7 @@ const PaymentComingSoon: React.FC<PaymentComingSoonProps> = ({
             href={`mailto:${contactEmail}?subject=Subscription%20Request%20-%20BalkanEstate`}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all shadow-md hover:shadow-lg"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+            <SoftIcon name="envelope" className="w-6 h-6" />
             {contactEmail}
           </a>
           <p className="text-xs text-gray-400 mt-3">

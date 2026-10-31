@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import AdBanner, { AD_PLACEMENTS, AD_PAGES, AdPage, AdPlacement } from '../models/AdBanner';
 import { IUser } from '../models/User';
-import { uploadImage, deleteImage } from '../services/cloudinaryService';
+import { uploadImage, deleteImage } from '../services/mediaService';
 import { getObjectIdParam } from '../utils/validateParams';
 import { encodeId } from '../utils/idObfuscation';
 
@@ -209,7 +209,7 @@ export const deleteAdBanner = async (req: Request, res: Response): Promise<void>
 };
 
 /**
- * @desc    Admin: upload a banner image to Cloudinary
+ * @desc    Admin: upload a banner image to R2
  * @route   POST /api/admin/ad-banners/upload-image
  * @access  Admin
  */

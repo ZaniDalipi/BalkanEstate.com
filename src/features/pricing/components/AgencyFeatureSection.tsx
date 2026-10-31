@@ -1,11 +1,8 @@
 import React from 'react';
 import { Animated } from '@/src/components/ui/Animations';
-import {
-  BuildingOfficeIcon,
-  CheckIcon,
-  SparklesIcon,
-  ExclamationTriangleIcon,
-} from '@/constants';
+import { CheckIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { planIconName } from '../utils/planIcon';
 import { type PromotionPlan, type Product } from '../hooks/usePricingData';
 import EnterprisePlanCard from './EnterprisePlanCard';
 
@@ -36,7 +33,6 @@ interface ColorPreset {
   gradient: string;
   border: string;
   borderHighlighted: string;
-  iconBg: string;
   price: string;
   checkBg: string;
   checkText: string;
@@ -54,7 +50,6 @@ const COLOR_PRESETS: Record<string, ColorPreset> = {
     gradient: 'from-amber-50 to-orange-50',
     border: 'border-amber-200',
     borderHighlighted: 'border-amber-300',
-    iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500',
     price: 'text-amber-600',
     checkBg: 'bg-amber-200',
     checkText: 'text-amber-700',
@@ -70,7 +65,6 @@ const COLOR_PRESETS: Record<string, ColorPreset> = {
     gradient: 'from-purple-50 to-purple-100/50',
     border: 'border-purple-200',
     borderHighlighted: 'border-purple-300',
-    iconBg: 'bg-purple-500',
     price: 'text-purple-600',
     checkBg: 'bg-purple-200',
     checkText: 'text-purple-700',
@@ -86,7 +80,6 @@ const COLOR_PRESETS: Record<string, ColorPreset> = {
     gradient: 'from-cyan-50 to-cyan-100/50',
     border: 'border-cyan-200',
     borderHighlighted: 'border-cyan-300',
-    iconBg: 'bg-gradient-to-br from-cyan-400 to-blue-500',
     price: 'text-cyan-600',
     checkBg: 'bg-cyan-200',
     checkText: 'text-cyan-700',
@@ -102,7 +95,6 @@ const COLOR_PRESETS: Record<string, ColorPreset> = {
     gradient: 'from-green-50 to-emerald-50',
     border: 'border-green-200',
     borderHighlighted: 'border-green-300',
-    iconBg: 'bg-gradient-to-br from-green-400 to-emerald-500',
     price: 'text-green-600',
     checkBg: 'bg-green-200',
     checkText: 'text-green-700',
@@ -153,9 +145,7 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
       {(!currentUserAgencyId) && (
         <div className="mb-6 bg-blue-50 rounded-2xl p-6 border border-blue-200 max-w-2xl mx-auto">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <ExclamationTriangleIcon className="w-5 h-5 text-white" />
-            </div>
+            <SoftIcon name="info" className="w-10 h-10 flex-shrink-0" />
             <div>
               <h4 className="font-bold text-gray-900">{t('pricing:agency.needAgency', 'Don\'t have an agency yet?')}</h4>
               <p className="text-sm text-gray-600 mt-1">
@@ -190,9 +180,7 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
 
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <BuildingOfficeIcon className="w-8 h-8 text-amber-600" />
-        </div>
+        <SoftIcon name="building" className="w-16 h-16 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-gray-900">{t('pricing:agency.title', 'Agency Features')}</h3>
         <p className="mt-2 text-gray-600">{t('pricing:agency.subtitle', 'Get your agency featured everywhere on the platform')}</p>
       </div>
@@ -248,7 +236,7 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
                 {plan.badge && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <span className={`inline-flex items-center gap-1.5 bg-gradient-to-r ${colors.badge} text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg`}>
-                      <SparklesIcon className="w-3.5 h-3.5" />
+                      <SoftIcon name="sparkles" className="w-4 h-4" />
                       {plan.badge.toUpperCase()}
                     </span>
                   </div>
@@ -257,9 +245,7 @@ const AgencyFeatureSection: React.FC<AgencyFeatureSectionProps> = ({
                 <div className="flex flex-col gap-6 pt-4 flex-grow">
                   {/* Info section */}
                   <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 ${colors.iconBg} rounded-2xl flex items-center justify-center`}>
-                      <span className="text-3xl">{plan.icon || '🏢'}</span>
-                    </div>
+                    <SoftIcon name={planIconName(plan.icon, 'building')} className="w-14 h-14 flex-shrink-0" />
                     <div>
                       <h4 className="text-2xl font-bold text-gray-900">{plan.name}</h4>
                       {plan.description && (

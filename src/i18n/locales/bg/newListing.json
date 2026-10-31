@@ -7,21 +7,21 @@
     "media": "Медия",
     "pricing": "Цена",
     "review": "Преглед",
-    "init": "Get Started",
-    "loading": "Analyzing...",
-    "form": "Property Details",
-    "floorplan": "Floor Plan",
-    "payment": "Payment",
-    "success": "Published!"
+    "init": "Начало",
+    "loading": "Анализиране...",
+    "form": "Детайли за имота",
+    "floorplan": "Разпределение",
+    "payment": "Плащане",
+    "success": "Публикувано!"
   },
   "modes": {
     "sale": "За Продажба",
     "rent": "Под Наем",
     "both": "Продажба и Наем",
-    "ai": "AI-Powered",
-    "aiDescription": "Upload photos and let AI generate your listing",
-    "manual": "Manual Entry",
-    "manualDescription": "Fill in all property details yourself"
+    "ai": "С помощта на AI",
+    "aiDescription": "Качете снимки и оставете AI да създаде обявата ви",
+    "manual": "Ръчно въвеждане",
+    "manualDescription": "Попълнете сами всички данни за имота"
   },
   "imageUpload": {
     "title": "Снимки на Имота",
@@ -35,12 +35,12 @@
     "remove": "Премахни",
     "uploading": "Качване...",
     "maxImages": "Максимум {{count}} снимки",
-    "subtitle": "Drag and drop images or click to browse",
-    "hint": "Upload at least 3 photos for best results",
-    "orClick": "or click to browse",
-    "supportedFormats": "Supported formats: JPG, PNG, WebP",
-    "compressing": "Compressing images...",
-    "uploadProgress": "Upload Progress"
+    "subtitle": "Плъзнете и пуснете снимки или щракнете, за да изберете",
+    "hint": "Качете поне 3 снимки за най-добри резултати",
+    "orClick": "или щракнете, за да изберете",
+    "supportedFormats": "Поддържани формати: JPG, PNG, WebP",
+    "compressing": "Компресиране на снимките...",
+    "uploadProgress": "Напредък на качването"
   },
   "imageTags": {
     "title": "Етикет на Снимката",
@@ -54,7 +54,7 @@
     "pool": "Басейн",
     "view": "Гледка",
     "other": "Друго",
-    "selectTag": "Select Tag"
+    "selectTag": "Изберете етикет"
   },
   "propertyDetails": {
     "title": "Детайли на Имота",
@@ -72,17 +72,17 @@
       "commercial": "Търговски Обект",
       "office": "Офис"
     },
-    "basicInfo": "Basic Information",
-    "propertyTitlePlaceholder": "Enter a descriptive title for your property",
-    "streetAddress": "Street Address",
-    "streetAddressPlaceholder": "Enter the street address",
-    "price": "Price",
-    "pricePlaceholder": "Enter the asking price",
+    "basicInfo": "Основна информация",
+    "propertyTitlePlaceholder": "Въведете описателно заглавие на имота",
+    "streetAddress": "Улица и номер",
+    "streetAddressPlaceholder": "Въведете адреса",
+    "price": "Цена",
+    "pricePlaceholder": "Въведете исканата цена",
     "propertyTypes": {
-      "house": "House",
-      "apartment": "Apartment",
-      "villa": "Villa",
-      "other": "Other"
+      "house": "Къща",
+      "apartment": "Апартамент",
+      "villa": "Вила",
+      "other": "Друго"
     }
   },
   "location": {
@@ -97,11 +97,11 @@
     "country": "Държава",
     "mapPin": "Поставете Пин на Картата",
     "mapInstructions": "Кликнете върху картата, за да зададете точната локация",
-    "selectCountry": "Select Country",
-    "selectCity": "Select City",
-    "searchAddress": "Search for address",
-    "dragPin": "Drag the pin to set exact location",
-    "coordinates": "Coordinates"
+    "selectCountry": "Изберете държава",
+    "selectCity": "Изберете град",
+    "searchAddress": "Търсене на адрес",
+    "dragPin": "Плъзнете маркера, за да зададете точното местоположение",
+    "coordinates": "Координати"
   },
   "roomDetails": {
     "title": "Стаи и Разпределение",
@@ -111,8 +111,8 @@
     "floor": "Етаж",
     "totalFloors": "Общо Етажи",
     "parkingSpaces": "Паркоместа",
-    "livingRooms": "Living Rooms",
-    "floorNumber": "Floor Number"
+    "livingRooms": "Дневни",
+    "floorNumber": "Етаж"
   },
   "sizeAndAge": {
     "title": "Размер и Възраст",
@@ -122,8 +122,8 @@
     "sqm": "кв.м.",
     "yearBuilt": "Година на Строеж",
     "renovated": "Ремонтиран",
-    "sqMeters": "Square Meters",
-    "parkingSpots": "Parking Spots"
+    "sqMeters": "Квадратни метри",
+    "parkingSpots": "Паркоместа"
   },
   "amenities": {
     "title": "Удобства",
@@ -139,17 +139,17 @@
     "security": "Охранителна Система",
     "storage": "Мазе",
     "furnished": "Обзаведен",
-    "hasBalcony": "Balcony",
-    "hasGarden": "Garden",
-    "hasElevator": "Elevator",
-    "hasSecurity": "Security",
-    "hasAirConditioning": "Air Conditioning",
-    "hasPool": "Pool",
-    "petsAllowed": "Pets Allowed",
+    "hasBalcony": "Балкон",
+    "hasGarden": "Градина",
+    "hasElevator": "Асансьор",
+    "hasSecurity": "Охрана",
+    "hasAirConditioning": "Климатик",
+    "hasPool": "Басейн",
+    "petsAllowed": "Разрешени домашни любимци",
     "states": {
-      "no": "No",
-      "any": "Any",
-      "yes": "Yes"
+      "no": "Не",
+      "any": "Без значение",
+      "yes": "Да"
     }
   },
   "advancedFeatures": {
@@ -160,46 +160,46 @@
     "flooringType": "Тип Подова Настилка",
     "orientation": "Изложение",
     "view": "Гледка",
-    "furnishing": "Furnishing Status",
+    "furnishing": "Обзавеждане",
     "furnishingOptions": {
-      "any": "Any",
-      "unfurnished": "Unfurnished",
-      "partlyFurnished": "Partly Furnished",
-      "fullyFurnished": "Fully Furnished"
+      "any": "Без значение",
+      "unfurnished": "Необзаведен",
+      "partlyFurnished": "Частично обзаведен",
+      "fullyFurnished": "Напълно обзаведен"
     },
     "heatingOptions": {
-      "any": "Any",
-      "central": "Central Heating",
-      "electric": "Electric",
-      "gas": "Gas",
-      "wood": "Wood",
-      "solar": "Solar",
-      "geothermal": "Geothermal",
-      "none": "None"
+      "any": "Без значение",
+      "central": "Централно отопление",
+      "electric": "Електрическо",
+      "gas": "Газ",
+      "wood": "Дърва",
+      "solar": "Слънчево",
+      "geothermal": "Геотермално",
+      "none": "Без отопление"
     },
-    "condition": "Property Condition",
+    "condition": "Състояние на имота",
     "conditionOptions": {
-      "any": "Any",
-      "new": "New",
-      "excellent": "Excellent",
-      "good": "Good",
-      "fair": "Fair",
-      "needsRenovation": "Needs Renovation"
+      "any": "Без значение",
+      "new": "Ново",
+      "excellent": "Отлично",
+      "good": "Добро",
+      "fair": "Задоволително",
+      "needsRenovation": "Нуждае се от ремонт"
     },
-    "viewType": "View Type",
+    "viewType": "Вид изглед",
     "viewOptions": {
-      "any": "Any",
-      "sea": "Sea View",
-      "mountain": "Mountain View",
-      "city": "City View",
-      "garden": "Garden View",
-      "park": "Park View",
-      "lake": "Lake View",
-      "river": "River View",
-      "none": "No Special View"
+      "any": "Без значение",
+      "sea": "Изглед към морето",
+      "mountain": "Изглед към планината",
+      "city": "Изглед към града",
+      "garden": "Изглед към градината",
+      "park": "Изглед към парка",
+      "lake": "Изглед към езерото",
+      "river": "Изглед към реката",
+      "none": "Без специален изглед"
     },
     "energyOptions": {
-      "any": "Any",
+      "any": "Без значение",
       "aPlus": "A+",
       "a": "A",
       "b": "B",
@@ -215,37 +215,37 @@
     "placeholder": "Опишете подробно вашия имот...",
     "minLength": "Минимум 100 символа",
     "charCount": "{{count}} символа",
-    "descriptionLabel": "Property Description",
-    "descriptionPlaceholder": "Describe your property in detail...",
-    "specialFeatures": "Special Features",
-    "specialFeaturesPlaceholder": "Add special features...",
-    "materials": "Building Materials",
-    "materialsPlaceholder": "Add materials...",
-    "additionalAmenities": "Additional Amenities",
-    "additionalAmenitiesPlaceholder": "Add amenities...",
-    "addTagHint": "Press Enter or comma to add"
+    "descriptionLabel": "Описание на имота",
+    "descriptionPlaceholder": "Опишете подробно своя имот...",
+    "specialFeatures": "Специални характеристики",
+    "specialFeaturesPlaceholder": "Добавете специални характеристики...",
+    "materials": "Строителни материали",
+    "materialsPlaceholder": "Добавете материали...",
+    "additionalAmenities": "Допълнителни удобства",
+    "additionalAmenitiesPlaceholder": "Добавете удобства...",
+    "addTagHint": "Натиснете Enter или запетая, за да добавите"
   },
   "virtualTour": {
     "title": "Виртуална Обиколка",
     "url": "URL на Виртуалната Обиколка",
     "urlPlaceholder": "Въведете линк към виртуалната обиколка",
     "preview": "Преглед",
-    "tourUrl": "Video Tour URL",
-    "tourUrlPlaceholder": "Enter YouTube or Vimeo URL",
-    "virtualTour360": "360° Virtual Tour URL",
-    "virtualTour360Placeholder": "Enter Z360, Matterport, Kuula, or other 360 tour URL",
-    "z360Hint": "Create tours at z360-virtual-tour.vercel.app",
-    "openZ360": "Open Z360",
-    "tourPreview": "360° Tour Preview",
-    "openInNewTab": "Open in new tab"
+    "tourUrl": "URL на видео обиколка",
+    "tourUrlPlaceholder": "Въведете URL от YouTube или Vimeo",
+    "virtualTour360": "URL на 360° виртуална обиколка",
+    "virtualTour360Placeholder": "Въведете URL на 360° обиколка от Z360, Matterport, Kuula или друга",
+    "z360Hint": "Създайте обиколки на z360-virtual-tour.vercel.app",
+    "openZ360": "Отвори Z360",
+    "tourPreview": "Преглед на 360° обиколка",
+    "openInNewTab": "Отвори в нов раздел"
   },
   "floorplan": {
     "title": "Етажен План",
     "upload": "Качи Етажен План",
     "formats": "PDF, JPG, или PNG",
-    "uploadFloorplan": "Upload Floor Plan",
-    "optional": "Optional - Add a floor plan image",
-    "skip": "Skip Floor Plan",
+    "uploadFloorplan": "Качи разпределение",
+    "optional": "По избор - добавете изображение на разпределението",
+    "skip": "Пропусни разпределението",
     "invalidFormat": "Невалиден формат на файла",
     "invalidFormatMessage": "Моля, качете валидно изображение (JPEG, PNG, WebP, GIF, HEIC или SVG).",
     "fileTooLarge": "Файлът е твърде голям",
@@ -256,26 +256,26 @@
     "title": "Език на Обявата",
     "primary": "Основен Език",
     "additional": "Допълнителни Езици",
-    "selectLanguage": "Select Language",
+    "selectLanguage": "Изберете език",
     "languages": {
-      "english": "English",
-      "albanian": "Albanian",
-      "macedonian": "Macedonian",
-      "serbian": "Serbian",
-      "bosnian": "Bosnian",
-      "croatian": "Croatian",
-      "montenegrin": "Montenegrin",
-      "greek": "Greek",
-      "bulgarian": "Bulgarian",
-      "romanian": "Romanian"
+      "english": "Английски",
+      "albanian": "Албански",
+      "macedonian": "Македонски",
+      "serbian": "Сръбски",
+      "bosnian": "Босненски",
+      "croatian": "Хърватски",
+      "montenegrin": "Черногорски",
+      "greek": "Гръцки",
+      "bulgarian": "Български",
+      "romanian": "Румънски"
     }
   },
   "role": {
     "title": "Публикувате като",
     "owner": "Собственик на Имота",
     "agent": "Агент по Недвижими Имоти",
-    "selectRole": "Select your role for this listing",
-    "privateSeller": "Private Seller"
+    "selectRole": "Изберете ролята си за тази обява",
+    "privateSeller": "Частен продавач"
   },
   "promotion": {
     "title": "Промоция на Обявата",
@@ -285,8 +285,8 @@
     "highlightedDesc": "Отличете се с подчертана рамка",
     "premium": "Премиум Позициониране",
     "premiumDesc": "Максимална видимост във всички секции",
-    "wantToPromote": "I want to promote my listing",
-    "selectPromotion": "Select Promotion Type"
+    "wantToPromote": "Искам да промотирам обявата си",
+    "selectPromotion": "Изберете вид промоция"
   },
   "actions": {
     "saveDraft": "Запази Чернова",
@@ -295,11 +295,11 @@
     "next": "Напред",
     "previous": "Назад",
     "cancel": "Отказ",
-    "generateWithAi": "Generate with AI",
-    "analyzing": "Analyzing images...",
-    "update": "Update Listing",
-    "publishing": "Publishing...",
-    "goBack": "Go Back"
+    "generateWithAi": "Генерирай с AI",
+    "analyzing": "Анализиране на снимките...",
+    "update": "Обнови обявата",
+    "publishing": "Публикуване...",
+    "goBack": "Назад"
   },
   "validation": {
     "titleRequired": "Заглавието е задължително",
@@ -318,12 +318,12 @@
     "apartmentElevator": "За апартаменти, моля посочете дали има асансьор (Да или Не).",
     "floorExceedsTotal": "Номерът на етажа не може да надвишава общия брой етажи.",
     "completionYearInvalid": "Моля, въведете валидна година на завършване или оставете полето празно.",
-    "required": "This field is required",
-    "minImages": "Please upload at least {{count}} images",
-    "selectCountry": "Please select a country",
-    "selectCity": "Please select a city",
-    "setLocation": "Please set the property location on the map",
-    "invalidPrice": "Please enter a valid price",
+    "required": "Това поле е задължително",
+    "minImages": "Моля, качете поне {{count}} снимки",
+    "selectCountry": "Моля, изберете държава",
+    "selectCity": "Моля, изберете град",
+    "setLocation": "Моля, задайте местоположението на имота на картата",
+    "invalidPrice": "Моля, въведете валидна цена",
     "fixHighlighted": "Моля, попълнете полетата, маркирани в червено:",
     "apartmentTotalFloors": "За апартаменти въведете общия брой етажи (1 или повече).",
     "attributesInvalid": "Моля, проверете данните за този вид имот.",
@@ -373,7 +373,7 @@
     "failedToCreateMessage": "Неуспешно създаване на обява. Моля, опитайте отново.",
     "removeImagesFirst": "Моля, премахнете някои изображения преди да добавите още.",
     "onlyMoreImages": "Могат да бъдат добавени само още {{count}} изображения.",
-    "publishFailed": "Failed to publish listing. Please try again."
+    "publishFailed": "Неуспешно публикуване на обявата. Моля, опитайте отново."
   },
-  "editTitle": "Edit Listing"
+  "editTitle": "Редактиране на обява"
 }

@@ -2,9 +2,10 @@ import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FloorplanSpot } from '@/types';
 import FloorPlanPhotoPlacer from './FloorPlanPhotoPlacer';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { XMarkIcon } from '@/constants';
-import { ImageData, FloorPlanDraft, ALL_VALID_TAGS, UploadIcon, InfoIcon, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
+import { ImageData, FloorPlanDraft, ALL_VALID_TAGS, ImageTagSelector, FieldError, RequiredMark, fieldAnchorId } from './ListingFormHelpers';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface ListingImageUploadProps {
     /** Validation message shown when no photo has been added yet. */
@@ -60,7 +61,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                 <div className={`p-4 glass-fieldset overflow-visible ${imagesError ? '!border-red-500' : ''}`}>
                      <label htmlFor="image-upload-manual" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer glass-fieldset transition-colors mb-4 ${imagesError ? 'border-red-500 bg-red-50/60 hover:bg-red-50' : 'border-gray-200 hover:bg-gray-50'}`}>
                         <div className="flex flex-col items-center justify-center">
-                            <UploadIcon className={`w-8 h-8 mb-2 ${imagesError ? 'text-red-400' : 'text-gray-300'}`} />
+                            <SoftIcon name="camera" className="w-10 h-10 mb-2" />
                             <p className={`text-sm ${imagesError ? 'text-red-600' : 'text-gray-400'}`}>{images.length > 0 ? t('seller:createListing.upload.uploadMore') : t('seller:createListing.upload.uploadProperty')}</p>
                         </div>
                         <input id="image-upload-manual" type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} aria-invalid={!!imagesError} aria-required="true" />
@@ -75,7 +76,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                     {images.length > 0 && (
                         <div>
                             <div className="flex items-center gap-2 glass-fieldset border-blue-200 text-blue-600 text-sm p-3 mb-4">
-                                <InfoIcon className="w-8 h-8 flex-shrink-0"/>
+                                <SoftIcon name="info" className="w-7 h-7 flex-shrink-0" />
                                 <p>{t('seller:createListing.imageManagement.dragToReorder')}</p>
                             </div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 overflow-visible">
@@ -127,7 +128,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-3">
                         {floorplans.map((floor, index) => (
                             <div key={floor.previewUrl} className="relative rounded-xl border border-gray-200 bg-white overflow-hidden">
-                                <img src={optimizeCloudinaryUrl(floor.previewUrl, { width: 400, quality: 'auto' }) || floor.previewUrl} alt="" className="w-full h-28 object-contain bg-gray-50" />
+                                <img src={optimizeImageUrl(floor.previewUrl, { width: 400, quality: 'auto' }) || floor.previewUrl} alt="" className="w-full h-28 object-contain bg-gray-50" />
                                 <button
                                     type="button"
                                     aria-label={t('seller:createListing.floors.remove', 'Remove floor plan')}
@@ -160,7 +161,7 @@ const ListingImageUpload: React.FC<ListingImageUploadProps> = memo(({
                 )}
 
                 <label htmlFor="floorplan-upload" className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-200 border-dashed rounded-xl cursor-pointer glass-fieldset hover:bg-gray-50 transition-colors">
-                    <div className="flex flex-col items-center justify-center"><UploadIcon className="w-7 h-7 mb-1 text-gray-300" /><p className="text-sm text-gray-400">{floorplans.length > 0 ? t('seller:createListing.floors.add', 'Add another floor plan') : t('seller:createListing.upload.uploadFloorplan')}</p></div>
+                    <div className="flex flex-col items-center justify-center"><SoftIcon name="mapGrid" className="w-9 h-9 mb-1" /><p className="text-sm text-gray-400">{floorplans.length > 0 ? t('seller:createListing.floors.add', 'Add another floor plan') : t('seller:createListing.upload.uploadFloorplan')}</p></div>
                     <input id="floorplan-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleFloorplanImageChange} />
                 </label>
 

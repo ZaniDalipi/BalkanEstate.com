@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 
@@ -78,15 +78,29 @@ interface SEOProps {
     city?: string;
     country?: string;
   }>;
+  /**
+   * Emit hreflang alternates (default true). Turn off for content that exists
+   * in one language only, together with a canonical naming that language.
+   */
+  alternates?: boolean;
+  /** Extra JSON-LD objects for this page (Article, CollectionPage, …). */
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
 const SITE_NAME = 'BalkanEstateAI';
-const DEFAULT_DESCRIPTION = 'Find property for sale across 10 Balkan countries. Browse apartments in Tirana, villas in Montenegro, houses in Belgrade, real estate in North Macedonia, and more. AI-powered search, 10 languages. The only pan-Balkan property platform.';
+const DEFAULT_DESCRIPTION = 'Search property for sale and rent in ten Balkan countries — Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece, Kosovo, Montenegro, North Macedonia, Romania and Serbia — with maps, floor plans, virtual tours and buying guides.';
 const DEFAULT_IMAGE = '/og-image.jpg';
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://balkanestateai.com';
+/**
+ * Canonical and hreflang URLs always name the production site, so a preview
+ * deployment or a localhost session never tells a crawler that it is the
+ * original.
+ */
+const SITE_ORIGIN = 'https://balkanestateai.com';
 
 // All supported languages for hreflang tags
 const HREFLANG_LANGUAGES = ['en', 'sq', 'sr', 'bg', 'hr', 'bs', 'mk', 'me', 'ro', 'el'] as const;
+const LANG_PREFIX = new RegExp(`^/(${HREFLANG_LANGUAGES.join('|')})(?=/|$)`);
 
 // Map language codes to og:locale format
 const OG_LOCALE_MAP: Record<string, string> = {
@@ -95,20 +109,45 @@ const OG_LOCALE_MAP: Record<string, string> = {
   ro: 'ro_RO', el: 'el_GR',
 };
 
-/**
- * Get the current page path without language prefix,
- * so we can generate hreflang alternates for all languages.
- */
-function getPathWithoutLang(): string {
-  if (typeof window === 'undefined') return '/';
-  const path = window.location.pathname;
-  const match = path.match(/^\/(en|sq|sr|bg|hr|bs|mk|me|ro|el)(\/|$)/);
-  if (match) {
-    const rest = path.slice(match[0].length);
-    return rest.startsWith('/') ? rest : '/' + (rest || '');
-  }
-  return path;
+/** An app path with its language prefix and trailing slash removed ("/" for home). */
+export function stripLanguage(pathname: string): string {
+  const rest = pathname.replace(LANG_PREFIX, '').replace(/\/+$/, '');
+  return rest.startsWith('/') ? rest : `/${rest}`;
 }
+
+/**
+ * The canonical URL for a page: production origin, language prefix, no query
+ * string unless the caller passed one on purpose, no trailing slash.
+ *
+ * Every page is served under /{lang}/…; an unprefixed URL is only a redirect,
+ * so a canonical without the prefix (which some pages used to pass) would
+ * point search engines at a redirect instead of the page.
+ */
+export function canonicalFor(href: string | undefined, lang: string): string {
+  const fallback = typeof window !== 'undefined' ? window.location.pathname : '/';
+  let pathname = fallback;
+  let search = '';
+  if (href) {
+    try {
+      const url = new URL(href, SITE_ORIGIN);
+      // A canonical on someone else's site is the caller's explicit choice.
+      if (url.origin !== SITE_ORIGIN && url.origin !== BASE_URL) return url.href;
+      pathname = url.pathname;
+      search = url.search;
+    } catch {
+      /* keep the current path */
+    }
+  }
+  const prefix = pathname.match(LANG_PREFIX)?.[1] ?? lang;
+  const path = stripLanguage(pathname);
+  return `${SITE_ORIGIN}/${prefix}${path === '/' ? '' : path}${search}`;
+}
+
+/**
+ * Set by the page outlet from the route's `noindex` handle. A page's own SEO
+ * cannot switch a private route (account, inbox, checkout) back to indexable.
+ */
+export const RouteNoindexContext = createContext(false);
 
 export const SEO: React.FC<SEOProps> = ({
   title,
@@ -116,19 +155,26 @@ export const SEO: React.FC<SEOProps> = ({
   canonical,
   image = DEFAULT_IMAGE,
   type = 'website',
-  noindex = false,
+  noindex: pageNoindex = false,
   property,
   agency,
   agent,
   searchResults,
+  jsonLd,
+  alternates = true,
 }) => {
   const { i18n } = useTranslation();
+  const routeNoindex = useContext(RouteNoindexContext);
+  const noindex = pageNoindex || routeNoindex;
   const currentLang = (i18n.language || 'en').split('-')[0];
   const ogLocale = OG_LOCALE_MAP[currentLang] || 'en_US';
 
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
-  const fullImage = image.startsWith('http') ? image : `${BASE_URL}${image}`;
-  const canonicalUrl = canonical || (typeof window !== 'undefined' ? window.location.href.split('#')[0].split('?')[0] : BASE_URL);
+  const fullImage = image.startsWith('http') ? image : `${SITE_ORIGIN}${image}`;
+  const canonicalUrl = canonicalFor(canonical, currentLang);
+  const alternatePath = stripLanguage(new URL(canonicalUrl).pathname);
+  const alternateHref = (lang: string) => `${SITE_ORIGIN}/${lang}${alternatePath === '/' ? '' : alternatePath}`;
+  const extraJsonLd = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
   return (
     <Helmet>
@@ -137,7 +183,7 @@ export const SEO: React.FC<SEOProps> = ({
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
       {noindex ? (
-        <meta name="robots" content="noindex, nofollow" />
+        <meta name="robots" content="noindex, follow" />
       ) : (
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
       )}
@@ -163,20 +209,19 @@ export const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:image" content={fullImage} />
       <meta name="twitter:image:alt" content={title || 'BalkanEstateAI - Property for sale in the Balkans'} />
 
-      {/* Geo Meta Tags for Balkans */}
-      <meta name="geo.region" content="RS" />
-      <meta name="geo.placename" content="Balkans" />
-
-      {/* Dynamic hreflang tags for all 10 supported languages */}
-      {HREFLANG_LANGUAGES.map(lang => (
-        <link
-          key={lang}
-          rel="alternate"
-          hrefLang={lang}
-          href={`${BASE_URL}/${lang}${getPathWithoutLang() === '/' ? '' : getPathWithoutLang()}`}
-        />
+      {/* hreflang: the same page in each language, x-default = English.
+          Skipped on noindex pages — alternates of a page that is not indexed
+          only send crawlers to more pages that are not indexed. */}
+      {!noindex && alternates && HREFLANG_LANGUAGES.map(lang => (
+        // "me" is the URL prefix for Montenegrin; the hreflang value must be a
+        // language tag, so it is sr-ME (Serbian as used in Montenegro).
+        <link key={lang} rel="alternate" hrefLang={lang === 'me' ? 'sr-ME' : lang} href={alternateHref(lang)} />
       ))}
-      <link rel="alternate" hrefLang="x-default" href={`${BASE_URL}${getPathWithoutLang()}`} />
+      {!noindex && alternates && <link rel="alternate" hrefLang="x-default" href={alternateHref('en')} />}
+
+      {extraJsonLd.map((data, i) => (
+        <script key={`jsonld-${i}`} type="application/ld+json">{JSON.stringify(data)}</script>
+      ))}
 
       {/* Open Graph product price tags for property pages */}
       {property?.price && (
@@ -282,11 +327,6 @@ function generatePropertySchema(
         validFrom: property.datePosted
           ? new Date(typeof property.datePosted === 'number' ? property.datePosted : property.datePosted).toISOString()
           : new Date().toISOString(),
-        seller: {
-          '@type': 'Organization',
-          name: 'BalkanEstateAI',
-          url: 'https://balkanestateai.com'
-        },
         // If price was reduced, include original price for price drop rich results
         ...(property.originalPrice && property.originalPrice > property.price && {
           priceSpecification: {

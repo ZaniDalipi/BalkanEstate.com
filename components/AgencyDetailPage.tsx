@@ -1,11 +1,11 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { User } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { BuildingOfficeIcon, PhoneIcon, EnvelopeIcon, MapPinIcon, StarIcon, ArrowLeftIcon, UserCircleIcon, BellIcon, TrophyIcon, ChartBarIcon, HomeIcon, UsersIcon, XMarkIcon, ShieldCheckIcon, PencilIcon, SparklesIcon, UserGroupIcon, CalendarIcon, AcademicCapIcon, GlobeAltIcon, ChevronRightIcon } from '../constants';
+import { ArrowLeftIcon, XMarkIcon, ShieldCheckIcon, PencilIcon, ChevronRightIcon } from '../constants';
 import NotificationCenter from '../src/shared/components/NotificationCenter';
 import { convertToUploadableImage, isHeicFile } from '../src/shared/utils/imageConversion';
 import PropertyCard from '../src/features/property-details/components/PropertyCard';
@@ -42,13 +42,7 @@ import { SocialShare } from '../src/components/marketing/SocialShare';
 import { goBack, navigate } from '@/src/app/router/navigation';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 import { paths } from '@/src/app/router/paths';
-
-// Map icon SVG for section headers
-const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-  </svg>
-);
+import { ListingTypePicture, SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 // Map invalidator component
 const MapInvalidator: React.FC = () => {
@@ -663,7 +657,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         // Redeem agent coupon for Pro subscription
         const token = tokenService.getAccessToken()?.trim();
         if (!token) {
-          throw new Error('You are not logged in. Please log in and try again.');
+          throw new Error(t('agencies:ui.agencyDetailPage.youAreNotLoggedIn', 'You are not logged in. Please log in and try again.'));
         }
         await _ensureCsrf();
         const response = await fetch(`${API_URL}/agencies/coupons/redeem`, {
@@ -681,20 +675,20 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         try {
           data = await response.json();
         } catch {
-          throw new Error('Unexpected response from server. Please try again.');
+          throw new Error(t('agencies:ui.agencyDetailPage.unexpectedResponseFromServerPlease', 'Unexpected response from server. Please try again.'));
         }
 
         if (!response.ok) {
           switch (data?.code) {
             case 'INVALID_COUPON':
             case 'INVALID_COUPON_FORMAT':
-              throw new Error('Invalid coupon code. Please check and try again.');
+              throw new Error(t('agencies:ui.agencyDetailPage.invalidCouponCodePleaseCheck', 'Invalid coupon code. Please check and try again.'));
             case 'COUPON_ALREADY_USED':
-              throw new Error('This coupon has already been used.');
+              throw new Error(t('agencies:ui.agencyDetailPage.thisCouponHasAlreadyBeen', 'This coupon has already been used.'));
             case 'COUPON_EXPIRED':
-              throw new Error('This coupon has expired.');
+              throw new Error(t('agencies:ui.agencyDetailPage.thisCouponHasExpired', 'This coupon has expired.'));
             case 'AGENCY_SUBSCRIPTION_INACTIVE':
-              throw new Error('The agency subscription is no longer active.');
+              throw new Error(t('agencies:ui.agencyDetailPage.theAgencySubscriptionIsNo', 'The agency subscription is no longer active.'));
             default:
               throw new Error(data?.message || 'Failed to redeem coupon.');
           }
@@ -744,7 +738,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         }
 
         setIsInvitationCodeModalOpen(false);
-        await success('Coupon Redeemed!', `You've joined ${data.agency?.name || agency.name} with a Pro subscription!`);
+        await success(t('agencies:ui.agencyDetailPage.couponRedeemed', 'Coupon Redeemed!'), t('agencies:ui.agencyDetailPage.joinedWithPro', { name: data.agency?.name || agency.name, defaultValue: "You've joined {{name}} with a Pro subscription!" }));
 
         // Silently refetch agency data so the new agent appears in the list immediately
         await fetchAgencyData(true);
@@ -759,7 +753,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         // If code is valid, send join request with the code
         await createJoinRequest(agency._id, `Joining with invitation code: ${trimmedCode}`);
         setIsInvitationCodeModalOpen(false);
-        await success(t('messages.requestSent', 'Request Sent'), 'Join request sent successfully! The agency admin will review your request.');
+        await success(t('messages.requestSent', 'Request Sent'), t('agencies:ui.agencyDetailPage.joinRequestSentSuccessfullyThe', 'Join request sent successfully! The agency admin will review your request.'));
       }
     } catch (error) {
       throw error; // Let the modal handle the error display
@@ -949,19 +943,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     }
 
     if (editForm.name.trim().length < 2) {
-      await error(t('messages.errorTitle', 'Error'), 'Agency name must be at least 2 characters');
+      await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.agencyNameMustBeAt', 'Agency name must be at least 2 characters'));
       return;
     }
 
     if (editForm.description && editForm.description.length > 5000) {
-      await error(t('messages.errorTitle', 'Error'), 'Description must be under 5,000 characters');
+      await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.descriptionMustBeUnder5', 'Description must be under 5,000 characters'));
       return;
     }
 
     if (editForm.email && editForm.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(editForm.email.trim())) {
-        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid email address');
+        await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.pleaseEnterAValidEmail', 'Please enter a valid email address'));
         return;
       }
     }
@@ -969,7 +963,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     if (editForm.phone && editForm.phone.trim()) {
       const phoneClean = editForm.phone.replace(/[\s\-().]/g, '');
       if (phoneClean.length < 6 || !/^\+?\d+$/.test(phoneClean)) {
-        await error(t('messages.errorTitle', 'Error'), 'Please enter a valid phone number');
+        await error(t('messages.errorTitle', 'Error'), t('agencies:ui.agencyDetailPage.pleaseEnterAValidPhone', 'Please enter a valid phone number'));
         return;
       }
     }
@@ -1151,7 +1145,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       }
 
       const data = await response.json();
-      // Apply server URL (Cloudinary optimized) to replace the local preview
+      // Apply server URL (media CDN) to replace the local preview
       setAgencyData(prev => ({
         ...prev,
         logo: data.logo || data.agency?.logo || prev.logo,
@@ -1222,7 +1216,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       const fileInput = document.getElementById('cover-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      // Apply server URL (Cloudinary optimized) to replace the local preview
+      // Apply server URL (media CDN) to replace the local preview
       setAgencyData(prev => ({
         ...prev,
         coverImage: data.coverImage || data.agency?.coverImage || prev.coverImage,
@@ -1234,7 +1228,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
       setAgencyData(prev => ({ ...prev, coverImage: agencyData.coverImage }));
       const msg = err instanceof Error ? err.message : t('messages.uploadFailed', 'Upload failed');
       setUploadError(msg);
-      await error('Upload Failed', msg);
+      await error(t('agencies:ui.agencyDetailPage.uploadFailed', 'Upload Failed'), msg);
     } finally {
       URL.revokeObjectURL(previewUrl);
       setIsUploadingCover(false);
@@ -1342,7 +1336,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || t('messages.updateFailed', 'Failed to update gradient'));
+        throw new Error(errorData?.message || t('messages.gradientUpdateFailed', 'Failed to update gradient'));
       }
 
       const data = await response.json();
@@ -1351,7 +1345,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     } catch (err) {
       // Revert on failure
       setAgencyData(prev => ({ ...prev, ...previousData } as any));
-      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.updateFailed', 'Failed to update gradient'));
+      await error(t('messages.errorTitle', 'Error'), err instanceof Error ? err.message : t('messages.gradientUpdateFailed', 'Failed to update gradient'));
     }
   };
 
@@ -1382,13 +1376,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         },
         body: JSON.stringify(body),
       });
-      if (!response.ok) throw new Error('Failed to save position');
+      if (!response.ok) throw new Error(t('agencies:ui.agencyDetailPage.failedToSavePosition', 'Failed to save position'));
     } catch (err) {
       // Revert position on failure
       setAgencyData(prev => ({ ...prev, [posKey]: previousPos }));
       if (type === 'cover') setCoverPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
       else setLogoPos({ x: previousPos?.x ?? 50, y: previousPos?.y ?? 50 });
-      await error('Error', 'Failed to save image position');
+      await error('Error', t('agencies:ui.agencyDetailPage.failedToSaveImagePosition', 'Failed to save image position'));
     }
   };
 
@@ -1440,7 +1434,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
     else setIsRepositioningLogo(false);
     // Save in background — no await so UI doesn't block
     saveImagePosition(type, pos).then(() => {
-      success('Position Saved', `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
+      success(t('agencies:ui.agencyDetailPage.positionSaved', 'Position Saved'), `${type === 'cover' ? 'Cover' : 'Logo'} position updated successfully`);
     });
   };
 
@@ -1455,10 +1449,10 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
   };
 
   const getRankBadge = (index: number) => {
-    if (index === 0) return { emoji: '🏆', color: 'from-amber-400 to-amber-600', text: '#1' };
-    if (index === 1) return { emoji: '🥈', color: 'from-slate-300 to-slate-500', text: '#2' };
-    if (index === 2) return { emoji: '🥉', color: 'from-orange-400 to-orange-600', text: '#3' };
-    return { emoji: '', color: 'from-primary to-blue-600', text: `#${index + 1}` };
+    if (index === 0) return { icon: 'trophy' as SoftIconName, color: 'from-amber-400 to-amber-600', text: '#1' };
+    if (index === 1) return { icon: 'medal2' as SoftIconName, color: 'from-slate-300 to-slate-500', text: '#2' };
+    if (index === 2) return { icon: 'medal3' as SoftIconName, color: 'from-orange-400 to-orange-600', text: '#3' };
+    return { icon: null as SoftIconName | null, color: 'from-primary to-blue-600', text: `#${index + 1}` };
   };
 
   const handleSubscriptionSuccess = () => {
@@ -1540,9 +1534,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {coverDragActive && isAdmin && (
           <div className="absolute inset-0 z-[60] bg-primary/30 backdrop-blur-sm border-4 border-dashed border-white/70 flex items-center justify-center pointer-events-none">
             <div className="bg-white/95 backdrop-blur-xl px-8 py-5 rounded-2xl shadow-2xl text-center">
-              <svg className="w-10 h-10 mx-auto mb-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+              <SoftIcon name="photo" className="w-12 h-12 mx-auto mb-2" />
               <p className="text-sm font-semibold text-slate-800">{t('banner.dropCoverImage', 'Drop to upload cover image')}</p>
               <p className="text-xs text-slate-500 mt-1">{t('banner.maxSize', 'Max 5MB, images only')}</p>
             </div>
@@ -1561,7 +1553,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {agencyData.coverImage ? (
           <>
             <img
-              src={optimizeCloudinaryUrl(agencyData.coverImage, { width: 1600 }) || agencyData.coverImage}
+              src={optimizeImageUrl(agencyData.coverImage, { width: 1600 }) || agencyData.coverImage}
               alt={`${agencyData.name} - Real Estate Agency${agencyData.city ? ` in ${agencyData.city}` : ''}${agencyData.country ? `, ${agencyData.country}` : ''}`}
               className={`absolute inset-0 w-full h-full object-cover ${isRepositioningCover ? 'cursor-grab active:cursor-grabbing z-30 select-none' : ''}`}
               style={{
@@ -1579,7 +1571,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {isRepositioningCover && (
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-40 pointer-events-none">
                 <div className="bg-black/70 text-white px-6 py-3 rounded-xl text-sm font-medium backdrop-blur-sm pointer-events-none select-none">
-                  Drag to reposition cover image
+                  {t('agencies:ui.agencyDetailPage.dragToRepositionCoverImage', 'Drag to reposition cover image')}
                 </div>
               </div>
             )}
@@ -1589,13 +1581,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   onClick={() => handleFinishRepositioning('cover')}
                   className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl shadow-lg hover:bg-primary/90 transition-colors"
                 >
-                  Save Position
+                  {t('agencies:ui.agencyDetailPage.savePosition', 'Save Position')}
                 </button>
                 <button
                   onClick={() => handleCancelRepositioning('cover')}
                   className="px-4 py-2 bg-white/90 text-slate-700 text-sm font-medium rounded-xl shadow-lg hover:bg-white transition-colors"
                 >
-                  Cancel
+                  {t('agencies:ui.agencyDetailPage.cancel', 'Cancel')}
                 </button>
               </div>
             )}
@@ -1662,9 +1654,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         onClick={() => { setShowGradientPicker(!showGradientPicker); }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                       >
-                        <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                        </svg>
+                        <SoftIcon name="sparkles" className="w-5 h-5 flex-shrink-0" />
                         {t('banner.gradients')}
                       </button>
 
@@ -1690,9 +1680,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           </>
                         ) : (
                           <>
-                            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                            <SoftIcon name="photo" className="w-5 h-5 flex-shrink-0" />
                             {t('banner.uploadImage')}
                           </>
                         )}
@@ -1720,10 +1708,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           </>
                         ) : (
                           <>
-                            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
+                            <SoftIcon name="camera" className="w-5 h-5 flex-shrink-0" />
                             {t('banner.changeLogo')}
                           </>
                         )}
@@ -1738,7 +1723,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                           </svg>
-                          Reposition Cover
+                          {t('agencies:ui.agencyDetailPage.repositionCover', 'Reposition Cover')}
                         </button>
                       )}
 
@@ -1751,7 +1736,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                           </svg>
-                          Reposition Logo
+                          {t('agencies:ui.agencyDetailPage.repositionLogo', 'Reposition Logo')}
                         </button>
                       )}
 
@@ -1778,7 +1763,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                   <span className="text-white font-medium text-xs drop-shadow-lg">
-                                    {preset.name}
+                                    {t(`agencyDetails:gradients.${preset.id}`, preset.name)}
                                   </span>
                                 </div>
                                 {((agencyData as any).coverGradient === preset.gradient || (agencyData as any).coverGradient === preset.id) && (
@@ -1843,7 +1828,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         </div>
 
         {/* Agency Identity - Centered Content (relative so hero grows with content) */}
-        <div className={`relative z-10 flex flex-col items-center justify-center min-h-[28rem] md:min-h-[32rem] px-4 pt-24 pb-20 ${isRepositioningCover ? 'pointer-events-none opacity-30' : ''}`}>
+        <div className={`relative z-10 flex flex-col items-center justify-center min-h-[28rem] md:min-h-[32rem] landscape:min-h-[20rem] px-4 pt-24 pb-20 landscape:pt-16 landscape:pb-10 ${isRepositioningCover ? 'pointer-events-none opacity-30' : ''}`}>
           {/* Logo Container */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -1860,9 +1845,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {/* Logo drag-and-drop overlay */}
               {logoDragActive && isOwner && (
                 <div className="absolute inset-0 z-30 bg-primary/40 backdrop-blur-sm flex items-center justify-center pointer-events-none rounded-2xl">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <SoftIcon name="photo" className="w-10 h-10" />
                 </div>
               )}
               {/* Logo upload spinner */}
@@ -1874,7 +1857,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {agencyData.logo ? (
                 <>
                   <img
-                    src={optimizeCloudinaryUrl(agencyData.logo, { width: 240 }) || agencyData.logo}
+                    src={optimizeImageUrl(agencyData.logo, { width: 240 }) || agencyData.logo}
                     alt={`${agencyData.name} logo - Real Estate Agency`}
                     className={`w-full h-full object-cover ${isRepositioningLogo ? 'cursor-grab active:cursor-grabbing z-20 select-none' : ''}`}
                     style={{
@@ -1894,13 +1877,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         onClick={() => handleFinishRepositioning('logo')}
                         className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg shadow-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
                       >
-                        Save
+                        {t('agencies:ui.agencyDetailPage.save', 'Save')}
                       </button>
                       <button
                         onClick={() => handleCancelRepositioning('logo')}
                         className="px-3 py-1.5 bg-white/90 text-slate-700 text-xs font-medium rounded-lg shadow-lg hover:bg-white transition-colors whitespace-nowrap"
                       >
-                        Cancel
+                        {t('agencies:ui.agencyDetailPage.cancel', 'Cancel')}
                       </button>
                     </div>
                   )}
@@ -1916,7 +1899,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       <input id="logo-upload-drop" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                     </label>
                   ) : (
-                    <BuildingOfficeIcon className="w-14 h-14 text-white" />
+                    <SoftIcon name="building" className="w-16 h-16" />
                   )}
                 </div>
               )}
@@ -1925,7 +1908,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {/* Featured Badge - top right, above logo */}
             {agencyData.isFeatured && (
               <div className="absolute -top-7 -right-2 z-[60] bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-xl flex items-center gap-1 whitespace-nowrap">
-                <StarIcon className="w-3 h-3 fill-current" />
+                <SoftIcon name="star" className="w-4 h-4 flex-shrink-0" />
                 {t('common.featured')}
               </div>
             )}
@@ -1933,13 +1916,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           </div>
 
           {/* Agency Name */}
-          <h1 className="mt-8 text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center tracking-tight">
+          <h1 className="mt-8 text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center tracking-tight landscape:text-2xl">
             {agencyData.name}
           </h1>
 
           {/* Location Badge */}
           <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-            <MapPinIcon className="w-4 h-4 text-white/80" />
+            <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
             <span className="text-white/90 font-medium text-sm">{agencyData.city}, {agencyData.country}</span>
           </div>
 
@@ -2021,7 +2004,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="w-px h-8 bg-white/20"></div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1">
-                <StarIcon className="w-5 h-5 text-amber-400 fill-current" />
+                <SoftIcon name="star" className="w-7 h-7 flex-shrink-0" />
                 <p className="text-2xl md:text-3xl font-bold text-white">{agencyData.rating?.toFixed(1) || 'N/A'}</p>
               </div>
               <p className="text-xs md:text-sm text-white/60 font-medium uppercase tracking-wider">{t('agencyDetails:stats.rating')}</p>
@@ -2035,9 +2018,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {/* Upload Error Message */}
         {uploadError && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-3">
-            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <SoftIcon name="warning" className="w-6 h-6 flex-shrink-0" />
             <p className="text-sm font-medium">{uploadError}</p>
           </div>
         )}
@@ -2047,9 +2028,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100 overflow-hidden relative">
             <div className="relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                  <ChartBarIcon className="w-5 h-5 text-white" />
-                </div>
+                <SoftIcon name="chart" className="w-10 h-10 flex-shrink-0" />
                 <h2 className="text-xl font-bold text-slate-900">{t('salesPerformance.title')}</h2>
               </div>
 
@@ -2096,15 +2075,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             }}
           >
             <div className="relative flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-7 h-7 text-primary" />
-              </div>
+              <SoftIcon name="building" className="w-14 h-14 flex-shrink-0" />
               <div>
                 <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">{t('agencyDetails:about.title', { agencyName: agencyData.name })}</h2>
                 {agencyData.yearsInBusiness && (
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 rounded-full text-primary text-xs font-medium">
-                      <SparklesIcon className="w-3.5 h-3.5" />
+                      <SoftIcon name="sparkles" className="w-4 h-4 flex-shrink-0" />
                       {t('agencyDetails:about.yearsOfExcellence', '{{years}}+ Years of Excellence', { years: agencyData.yearsInBusiness })}
                     </span>
                   </div>
@@ -2166,9 +2143,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 className="text-center p-4 rounded-xl border border-slate-200/60"
                 style={{ background: 'rgba(59, 130, 246, 0.05)' }}
               >
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/15 flex items-center justify-center">
-                  <HomeIcon className="w-5 h-5 text-primary" />
-                </div>
+                <SoftIcon name="home" className="w-10 h-10 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-slate-900">{agencyProperties?.length || 0}</div>
                 <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.totalListings')}</div>
               </div>
@@ -2176,9 +2151,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 className="text-center p-4 rounded-xl border border-slate-200/60"
                 style={{ background: 'rgba(16, 185, 129, 0.05)' }}
               >
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                  <UserGroupIcon className="w-5 h-5 text-emerald-600" />
-                </div>
+                <SoftIcon name="users" className="w-10 h-10 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-slate-900">{agents?.length || 0}</div>
                 <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.totalAgents')}</div>
               </div>
@@ -2186,19 +2159,15 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 className="text-center p-4 rounded-xl border border-slate-200/60"
                 style={{ background: 'rgba(139, 92, 246, 0.05)' }}
               >
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-violet-500/15 flex items-center justify-center">
-                  <CalendarIcon className="w-5 h-5 text-violet-600" />
-                </div>
+                <SoftIcon name="calendar" className="w-10 h-10 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-slate-900">{agencyData.yearsInBusiness ? `${agencyData.yearsInBusiness}+` : '—'}</div>
-                <div className="text-xs text-slate-500 font-medium">Years</div>
+                <div className="text-xs text-slate-500 font-medium">{t('agencies:ui.agencyDetailPage.years', 'Years')}</div>
               </div>
               <div
                 className="text-center p-4 rounded-xl border border-slate-200/60"
                 style={{ background: 'rgba(245, 158, 11, 0.05)' }}
               >
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-amber-500/15 flex items-center justify-center">
-                  <StarIcon className="w-5 h-5 text-amber-500" />
-                </div>
+                <SoftIcon name="star" className="w-10 h-10 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-slate-900">{agencyData.rating && agencyData.rating > 0 ? agencyData.rating.toFixed(1) : '—'}</div>
                 <div className="text-xs text-slate-500 font-medium">{t('agencyDetails:stats.rating')}</div>
               </div>
@@ -2210,25 +2179,19 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {/* Contact Card */}
                 <div className="bg-slate-50/80 rounded-xl p-5 border border-slate-200/60">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                      <PhoneIcon className="w-4 h-4 text-white" />
-                    </div>
+                    <SoftIcon name="phone" className="w-8 h-8 flex-shrink-0" />
                     <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.getInTouch', 'Get in Touch')}</h3>
                   </div>
                   <div className="space-y-3">
                     <a href={`tel:${agencyData.phone}`} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-300">
-                        <PhoneIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-                      </div>
+                      <SoftIcon name="phone" className="w-10 h-10 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                       <div>
                         <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.call', 'Phone')}</div>
                         <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.phone}</span>
                       </div>
                     </a>
                     <a href={`mailto:${agencyData.email}`} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-300">
-                        <EnvelopeIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-                      </div>
+                      <SoftIcon name="envelope" className="w-10 h-10 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                       <div>
                         <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.email')}</div>
                         <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{agencyData.email}</span>
@@ -2236,9 +2199,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     </a>
                     {agencyData.address && (
                       <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-100">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <MapPinIcon className="w-5 h-5 text-primary" />
-                        </div>
+                        <SoftIcon name="pin" className="w-10 h-10 flex-shrink-0" />
                         <div>
                           <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:about.address', 'Address')}</div>
                           <span className="font-medium text-slate-700 text-sm leading-snug">{agencyData.address}</span>
@@ -2249,9 +2210,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     {/* Website */}
                     {agencyData.website && (
                       <a href={agencyData.website.startsWith('http') ? agencyData.website : `https://${agencyData.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all group">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 group-hover:bg-primary group-hover:scale-110 flex items-center justify-center transition-all duration-300">
-                          <GlobeAltIcon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
-                        </div>
+                        <SoftIcon name="globe" className="w-10 h-10 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                         <div className="min-w-0 flex-1">
                           <div className="text-xs text-slate-400 font-medium">{t('agencyDetails:labels.website')}</div>
                           <span className="font-semibold text-slate-700 group-hover:text-primary transition-colors text-sm truncate block">{agencyData.website}</span>
@@ -2265,11 +2224,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {(agencyData.facebookUrl || agencyData.instagramUrl || agencyData.linkedinUrl || agencyData.twitterUrl) && (
                   <div className="bg-slate-50/80 rounded-xl p-5 border border-slate-200/60">
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                      </div>
+                      <SoftIcon name="link" className="w-8 h-8 flex-shrink-0" />
                       <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.followUs', 'Follow Us')}</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -2310,7 +2265,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                             </svg>
                           </div>
-                          <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">X / Twitter</span>
+                          <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">{t('agencies:ui.agencyDetailPage.xTwitter', 'X / Twitter')}</span>
                         </a>
                       )}
                     </div>
@@ -2321,7 +2276,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {agencyData.serviceAreas && agencyData.serviceAreas.length > 0 && (
                   <div className="bg-gradient-to-br from-emerald-50/50 to-white rounded-xl p-5 border border-emerald-100">
                     <div className="flex items-center gap-2 mb-3">
-                      <MapPinIcon className="w-5 h-5 text-emerald-600" />
+                      <SoftIcon name="pin" className="w-6 h-6 flex-shrink-0" />
                       <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.serviceAreas')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -2338,11 +2293,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {(isAdmin || isPlatformAdmin) && (
                   <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-5 border border-slate-200">
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                      </div>
+                      <SoftIcon name="chart" className="w-8 h-8 flex-shrink-0" />
                       <h3 className="text-sm font-bold text-slate-900">{t('adminStats.title', 'Agency Stats')}</h3>
                       <span className="ml-auto text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">{t('adminStats.adminOnly', 'Admin only')}</span>
                     </div>
@@ -2371,7 +2322,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                         <span className="text-slate-500">{t('adminStats.featuredStatus', 'Featured Status')}</span>
                         {(agencyData as any).isFeatured ? (
                           <span className="font-semibold text-amber-600 flex items-center gap-1">
-                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                            <SoftIcon name="star" className="w-4 h-4 flex-shrink-0" />
                             {t('adminStats.featured', 'Featured')}
                           </span>
                         ) : (
@@ -2403,7 +2354,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {agencyData.specialties && agencyData.specialties.length > 0 && (
                   <div className="bg-gradient-to-br from-primary/5 to-white rounded-xl p-5 border border-primary/10">
                     <div className="flex items-center gap-2 mb-3">
-                      <SparklesIcon className="w-5 h-5 text-primary" />
+                      <SoftIcon name="sparkles" className="w-6 h-6 flex-shrink-0" />
                       <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.specialties')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -2420,7 +2371,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {agencyData.specializations && agencyData.specializations.length > 0 && (
                   <div className="bg-gradient-to-br from-violet-50/50 to-white rounded-xl p-5 border border-violet-100">
                     <div className="flex items-center gap-2 mb-3">
-                      <AcademicCapIcon className="w-5 h-5 text-violet-600" />
+                      <SoftIcon name="gradCap" className="w-6 h-6 flex-shrink-0" />
                       <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.specializations')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -2437,7 +2388,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {agencyData.languages && agencyData.languages.length > 0 && (
                   <div className="bg-gradient-to-br from-sky-50/50 to-white rounded-xl p-5 border border-sky-100">
                     <div className="flex items-center gap-2 mb-3">
-                      <GlobeAltIcon className="w-5 h-5 text-sky-600" />
+                      <SoftIcon name="globe" className="w-6 h-6 flex-shrink-0" />
                       <h3 className="text-sm font-bold text-slate-900">{t('agencyDetails:about.languagesSpoken')}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -2457,11 +2408,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               <div className="mt-6">
                 <div className="p-5 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-xl">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                      </svg>
-                    </div>
+                    <SoftIcon name="tag" className="w-9 h-9 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold text-slate-900">{t('coupons.promotionTitle', 'Promotion Coupons')}</h4>
                       <p className="text-xs text-slate-500">{t('coupons.promotionSubtitle', 'Monthly listing promotion allocation')}</p>
@@ -2571,11 +2518,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                 {agencyData.agentCoupons && agencyData.agentCoupons.coupons && agencyData.agentCoupons.coupons.length > 0 && (
                   <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                        </svg>
-                      </div>
+                      <SoftIcon name="ticket" className="w-9 h-9 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold text-slate-900">{t('coupons.agentCodesTitle', 'Agent Registration Codes')}</h4>
                         <p className="text-xs text-slate-500">
@@ -2662,7 +2605,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {(isAdmin || isPlatformAdmin) && (
                 <div className="mb-5 p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
                   <div className="flex items-center gap-3 mb-2">
-                    <ShieldCheckIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <SoftIcon name="shield" className="w-6 h-6 flex-shrink-0" />
                     <h4 className="font-semibold text-slate-900 text-sm">{t('invitationCode.title', 'Invitation Code')}</h4>
                     <span className="text-xs text-slate-400">{t('invitationCode.description', 'Share with agents to join your agency')}</span>
                   </div>
@@ -2701,7 +2644,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               },
                               body: JSON.stringify({ generateInvitationCode: true }),
                             });
-                            if (!response.ok) throw new Error('Failed to generate code');
+                            if (!response.ok) throw new Error(t('agencies:ui.agencyDetailPage.failedToGenerateCode', 'Failed to generate code'));
                             const data = await response.json();
                             if (data.agency?.invitationCode) {
                               setAgencyData(prev => ({ ...prev, invitationCode: data.agency.invitationCode }));
@@ -2731,7 +2674,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     }}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-600/25"
                   >
-                    <ChartBarIcon className="w-4 h-4" />
+                    <SoftIcon name="chart" className="w-5 h-5 flex-shrink-0" />
                     {t('actions.goToDashboard', 'Go to Dashboard')}
                   </button>
                   <button
@@ -2748,7 +2691,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     }}
                     className="relative inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
                   >
-                    <BellIcon className="w-4 h-4" />
+                    <SoftIcon name="bell" className="w-5 h-5 flex-shrink-0" />
                     {t('actions.manageJoinRequests', 'Manage Join Requests')}
                     {pendingJoinRequestCount > 0 && (
                       <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
@@ -2766,7 +2709,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   }}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-600/25"
                 >
-                  <ChartBarIcon className="w-4 h-4" />
+                  <SoftIcon name="chart" className="w-5 h-5 flex-shrink-0" />
                   {t('actions.goToDashboard', 'Go to Dashboard')}
                 </button>
               )}
@@ -2776,9 +2719,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                   onClick={handleRequestToJoin}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-600/25"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                  </svg>
+                  <SoftIcon name="users" className="w-5 h-5 flex-shrink-0" />
                   {t('actions.requestToJoin', 'Request to Join Agency')}
                 </button>
               )}
@@ -2786,7 +2727,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               {/* Show upgrade prompt for agents without Pro subscription who want to use invitation codes */}
               {canRequestToJoin && !hasProSubscription && (
                 <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 text-xs font-medium rounded-lg border border-amber-200">
-                  <SparklesIcon className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                  <SoftIcon name="sparkles" className="w-4 h-4 flex-shrink-0" />
                   <span>{t('actions.proRequiredForInviteCode', 'Pro subscription required for invitation codes. Use a coupon code to join.')}</span>
                   <button
                     type="button"
@@ -2814,9 +2755,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             <div className="relative">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-                    <StarIcon className="w-5 h-5 text-white fill-current" />
-                  </div>
+                  <SoftIcon name="star" className="w-10 h-10 flex-shrink-0" />
                   <div>
                     <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:featuredSubscription.title')}</h2>
                     <p className="text-xs text-slate-500">{t('agencyDetails:featuredSubscription.subtitle')}</p>
@@ -2843,9 +2782,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <UserGroupIcon className="w-5 h-5 text-white" />
-              </div>
+              <SoftIcon name="users" className="w-10 h-10 flex-shrink-0" />
               <div>
                 <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:teamMembers.title')}</h2>
                 <p className="text-xs text-slate-500">{t('agencyDetails:teamMembers.rankedByPerformance', '{{count}} agents \u2022 Ranked by performance', { count: agents.length })}</p>
@@ -2855,7 +2792,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
               onClick={() => setShowAllMembers(!showAllMembers)}
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
             >
-              <TrophyIcon className="w-4 h-4 text-amber-500" />
+              <SoftIcon name="trophy" className="w-5 h-5 flex-shrink-0" />
               {showAllMembers ? t('agencyDetails:teamMembers.showTopPerformers') : t('agencyDetails:teamMembers.showAllMembers')}
             </button>
           </div>
@@ -2895,13 +2832,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           </div>
                           {/* Rank badge on avatar */}
                           <div className={`absolute -top-2 -left-2 px-2 py-0.5 bg-gradient-to-r ${rank.color} text-white text-[10px] font-bold rounded-lg shadow-md flex items-center gap-1`}>
-                            {rank.emoji && <span>{rank.emoji}</span>}
+                            {rank.icon && <SoftIcon name={rank.icon} className="w-4 h-4 flex-shrink-0" />}
                             <span>{rank.text}</span>
                           </div>
                           {/* Rating badge */}
                           {agent.stats?.rating != null && agent.stats.rating >= 4.0 && (
                             <div className="absolute -bottom-1.5 -right-1.5 bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[10px] font-bold shadow flex items-center gap-0.5">
-                              <StarIcon className="w-2.5 h-2.5 fill-current" />
+                              <SoftIcon name="star" className="w-3.5 h-3.5 flex-shrink-0" />
                               {agent.stats.rating.toFixed(1)}
                             </div>
                           )}
@@ -2913,13 +2850,13 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                             <h3 className="text-base font-bold text-slate-900 group-hover:text-primary transition-colors truncate">{agent.name}</h3>
                             {isAgentOwner && (
                               <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
-                                <ShieldCheckIcon className="w-2.5 h-2.5" />
+                                <SoftIcon name="crown" className="w-3.5 h-3.5 flex-shrink-0" />
                                 {t('agencyDetails:teamMembers.owner')}
                               </span>
                             )}
                             {isAgentAdmin && !isAgentOwner && (
                               <span className="px-2 py-0.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[10px] font-bold rounded-md flex items-center gap-0.5">
-                                <ShieldCheckIcon className="w-2.5 h-2.5" />
+                                <SoftIcon name="shield" className="w-3.5 h-3.5 flex-shrink-0" />
                                 {t('agencyDetails:teamMembers.admin')}
                               </span>
                             )}
@@ -2928,7 +2865,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           {/* Location */}
                           {(agent.city || agent.country) && (
                             <div className="flex items-center gap-1 text-slate-500 mb-1">
-                              <MapPinIcon className="w-3 h-3 text-primary/60" />
+                              <SoftIcon name="pin" className="w-4 h-4 flex-shrink-0" />
                               <span className="text-xs">
                                 {[agent.city, agent.country].filter(Boolean).join(', ')}
                               </span>
@@ -2972,7 +2909,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                             onClick={(e) => e.stopPropagation()}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-xs text-slate-600 hover:bg-primary hover:text-white transition-all"
                           >
-                            <PhoneIcon className="w-3.5 h-3.5" />
+                            <SoftIcon name="phone" className="w-4 h-4 flex-shrink-0" />
                             {agent.phone}
                           </a>
                         )}
@@ -2990,7 +2927,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                                   ? 'text-slate-500 bg-slate-100 hover:bg-slate-200'
                                   : 'text-sky-600 bg-sky-50 hover:bg-sky-100'
                               }`}
-                              title={isAgentAdmin ? 'Remove admin rights' : 'Make admin'}
+                              title={isAgentAdmin ? t('agencies:ui.agencyDetailPage.removeAdminRights', 'Remove admin rights') : t('agencies:ui.agencyDetailPage.makeAdmin', 'Make admin')}
                             >
                               <ShieldCheckIcon className="w-3 h-3" />
                               {isAgentAdmin ? t('agencyDetails:teamMembers.removeAdmin') : t('agencyDetails:teamMembers.makeAdmin')}
@@ -3003,7 +2940,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               }}
                               disabled={removingAgentId === agentId}
                               className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                              title="Remove agent from agency"
+                              title={t('agencies:ui.agencyDetailPage.removeAgentFromAgency', 'Remove agent from agency')}
                             >
                               {removingAgentId === agentId ? (
                                 <>
@@ -3030,7 +2967,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                               }}
                               disabled={isLeavingAgency}
                               className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-wait"
-                              title="Leave this agency"
+                              title={t('agencies:ui.agencyDetailPage.leaveThisAgency', 'Leave this agency')}
                             >
                               {isLeavingAgency ? (
                                 <>
@@ -3055,9 +2992,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             </div>
           ) : (
             <div className="bg-white p-12 rounded-2xl border border-slate-100 text-center shadow-sm">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <UsersIcon className="w-8 h-8 text-slate-300" />
-              </div>
+              <SoftIcon name="users" className="w-16 h-16 mx-auto mb-4" />
               <p className="text-slate-500 font-medium">{t('agencyDetails:teamMembers.noAgentsFound')}</p>
               <p className="text-sm text-slate-400 mt-1">{t('agencyDetails:teamMembers.noAgentsHelpText', 'Team members will appear here once they join')}</p>
             </div>
@@ -3068,9 +3003,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {agencyProperties.length > 0 && agencyProperties.some(p => p.lat && p.lng) && (
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <MapIcon className="w-5 h-5 text-white" />
-              </div>
+              <SoftIcon name="mapGrid" className="w-10 h-10 flex-shrink-0" />
               <div>
                 <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.map', 'Properties Map')}</h2>
                 <p className="text-xs text-slate-500">
@@ -3118,7 +3051,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       >
                         {property.imageUrl && (
                           <div className="w-full h-[130px] rounded-lg overflow-hidden mb-2">
-                            <img src={optimizeCloudinaryUrl(property.imageUrl, { width: 480 }) || property.imageUrl} alt={`Property for sale in ${property.city}, ${property.country} - ${property.address}`} className="w-full h-full object-cover" loading="lazy" />
+                            <img src={optimizeImageUrl(property.imageUrl, { width: 480 }) || property.imageUrl} alt={`Property for sale in ${property.city}, ${property.country} - ${property.address}`} className="w-full h-full object-cover" loading="lazy" />
                           </div>
                         )}
                         <p className="font-semibold text-sm mb-1 text-slate-900 line-clamp-2">{property.address}</p>
@@ -3164,9 +3097,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
         {agencyData.lat != null && agencyData.lng != null && !isNaN(agencyData.lat) && !isNaN(agencyData.lng) && !(agencyData.lat === 0 && agencyData.lng === 0) && (
           <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 border border-slate-100">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-500/25">
-                <MapPinIcon className="w-5 h-5 text-white" />
-              </div>
+              <SoftIcon name="pin" className="w-10 h-10 flex-shrink-0" />
               <div>
                 <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.serviceAreaLocation', 'Service Area Location')}</h2>
                 <p className="text-xs text-slate-500">{agencyData.city}, {agencyData.country}</p>
@@ -3203,7 +3134,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                     <div className="text-center min-w-[200px]">
                       {agencyData.logo && (
                         <div className="w-16 h-16 rounded-full mx-auto mb-3 overflow-hidden border-2 border-slate-300 flex-shrink-0">
-                          <img src={optimizeCloudinaryUrl(agencyData.logo, { width: 128 }) || agencyData.logo} alt={agencyData.name} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={optimizeImageUrl(agencyData.logo, { width: 128 }) || agencyData.logo} alt={agencyData.name} className="w-full h-full object-cover" loading="lazy" />
                         </div>
                       )}
                       <h3 className="font-bold text-slate-900">{agencyData.name}</h3>
@@ -3222,9 +3153,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
           {/* Section Header with Tabs */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
-                <HomeIcon className="w-5 h-5 text-white" />
-              </div>
+              <SoftIcon name="home" className="w-10 h-10 flex-shrink-0" />
               <div>
                 <h2 className="text-xl font-bold text-slate-900">{t('agencyDetails:properties.portfolio', 'Property Portfolio')}</h2>
                 <p className="text-xs text-slate-500">{t('agencyDetails:properties.totalProperties', '{{count}} total properties', { count: agencyProperties.length })}</p>
@@ -3311,7 +3240,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'sale' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                     }`}
                   >
-                    {t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: saleCount })}
+                    <ListingTypePicture type="sale" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('agencyDetails:properties.forSaleCount', 'For Sale ({{count}})', { count: saleCount })}
                   </button>
                   <button
                     onClick={() => setPropertyTypeView('rent')}
@@ -3319,7 +3248,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       propertyTypeView === 'rent' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                     }`}
                   >
-                    {t('agencyDetails:properties.forRentCount', 'For Rent ({{count}})', { count: rentCount })}
+                    <ListingTypePicture type="rent" className="inline-block w-4 h-4 mr-1 align-[-3px]" />{t('agencyDetails:properties.forRentCount', 'For Rent ({{count}})', { count: rentCount })}
                   </button>
                 </div>
               );
@@ -3349,9 +3278,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             }
             return (
               <div className="py-16 text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <HomeIcon className="w-8 h-8 text-slate-300" />
-                </div>
+                <SoftIcon name="home" className="w-16 h-16 mx-auto mb-4" />
                 <p className="text-slate-500 font-medium">
                   {propertyView === 'active' ? t('agencyDetails:properties.noActiveListings') : t('agencyDetails:properties.noSoldProperties')}
                 </p>
@@ -3400,9 +3327,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
             {/* Modal Header */}
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/25">
-                  <PencilIcon className="w-5 h-5 text-white" />
-                </div>
+                <SoftIcon name="pencil" className="w-10 h-10 flex-shrink-0" />
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">{t('agencyDetails:editModal.title')}</h3>
                   <p className="text-xs text-slate-500">{t('agencyDetails:editModal.subtitle', 'Update your agency information')}</p>
@@ -3452,7 +3377,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       editForm.description.length > 4800 ? 'border-amber-300' : 'border-slate-200'
                     }`}
                     rows={4}
-                    placeholder="Tell clients about your agency..."
+                    placeholder={t('agencies:ui.agencyDetailPage.tellClientsAboutYourAgency', 'Tell clients about your agency...')}
                   />
                   <div className="flex justify-between mt-1">
                     <p className="text-xs text-slate-400">{t('agencyDetails:editModal.descriptionHint', 'Use line breaks to separate paragraphs')}</p>
@@ -3660,7 +3585,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       specialties: e.target.value.split(',').map(s => s.trim())
                     })}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
-                    placeholder="Residential, Commercial, Luxury Properties"
+                    placeholder={t('agencies:ui.agencyDetailPage.residentialCommercialLuxuryProperties', 'Residential, Commercial, Luxury Properties')}
                   />
                 </div>
                 <div>
@@ -3675,7 +3600,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       certifications: e.target.value.split(',').map(s => s.trim())
                     })}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
-                    placeholder="Licensed Real Estate Agency, ISO Certified"
+                    placeholder={t('agencies:ui.agencyDetailPage.licensedRealEstateAgencyIso', 'Licensed Real Estate Agency, ISO Certified')}
                   />
                 </div>
                 <div>
@@ -3690,7 +3615,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                       languages: e.target.value.split(',').map(s => s.trim())
                     })}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-sm"
-                    placeholder="English, Serbian, Croatian, Albanian"
+                    placeholder={t('agencies:ui.agencyDetailPage.englishSerbianCroatianAlbanian', 'English, Serbian, Croatian, Albanian')}
                   />
                   <p className="text-xs text-slate-400 mt-1.5">{t('agencyDetails:editModal.languagesHint')}</p>
                 </div>
@@ -3716,7 +3641,7 @@ const AgencyDetailPage: React.FC<AgencyDetailPageProps> = ({ agency }) => {
                           businessHours: { ...editForm.businessHours, [day]: e.target.value }
                         })}
                         className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-xs"
-                        placeholder="9AM - 6PM"
+                        placeholder={t('agencies:ui.agencyDetailPage.n9am6pm', '9AM - 6PM')}
                       />
                     </div>
                   ))}

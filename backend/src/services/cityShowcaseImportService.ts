@@ -1,4 +1,7 @@
-import cloudinary from '../config/cloudinary';
+import { isR2Enabled } from '../config/r2';
+import MediaAsset from '../models/MediaAsset';
+import { CITY_CONVENTION_FOLDER } from '../config/mediaVariants';
+import { storedUrlFor } from './media/r2MediaStore';
 import CityMarketData from '../models/CityMarketData';
 import CityShowcase from '../models/CityShowcase';
 import { apiLogger } from '../utils/logger';
@@ -33,7 +36,7 @@ export interface ImportResult {
   missingPhoto: string[];
 }
 
-/** Matches `seedCityImages.ts`, which named the Cloudinary assets this way. */
+/** Matches `seedCityImages.ts`, which names the curated city photos this way. */
 function normalizeName(value: string): string {
   return value.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
@@ -86,11 +89,21 @@ export function isUsablePhotoUrl(url: unknown): url is string {
 }
 
 /**
+ * The curated library photo in R2 (`cities/convention/city-{country}-{city}`,
+ * written by seedCityImages or the Cloudinary migration), or null.
+ */
+async function findCuratedCityPhoto(publicId: string): Promise<string | null> {
+  if (!isR2Enabled()) return null;
+  const asset = await MediaAsset.findOne({ key: `${CITY_CONVENTION_FOLDER}/${publicId}` }).select('key bucket').lean();
+  return asset ? storedUrlFor(asset.key, asset.bucket) : null;
+}
+
+/**
  * Finds a photo for one city, or `null` if there is none.
  *
- * The seeded Cloudinary city library (`city-{country}-{city}`) is checked
- * first, ahead of `row.imageUrl`, even though the library needs a network
- * round trip and the row field doesn't. That library is built by
+ * The seeded city library (`cities/convention/city-{country}-{city}`) is checked
+ * first, ahead of `row.imageUrl`, even though the library needs a database
+ * lookup and the row field doesn't. That library is built by
  * `seedCityImages.ts`, which is deliberately picky — it prefers Commons
  * photos titled skyline/aerial/panorama/view and uploads the full-resolution
  * original. `row.imageUrl` is instead written automatically by
@@ -100,23 +113,20 @@ export function isUsablePhotoUrl(url: unknown): url is string {
  * gallery photos. Checking the library first means a city the good pipeline
  * has already covered is never displaced by the automatic one.
  *
- * The Cloudinary lookup can 404 — the id is derived from the name, so most
+ * The library lookup can miss — the id is derived from the name, so most
  * databases will have cities the seed script never ran for — and that is not
  * an error, just a reason to fall back to the row's own field.
  */
 export async function resolveCityPhoto(row: ImportableCity): Promise<string | null> {
   const publicId = `city-${normalizeName(row.country)}-${normalizeName(row.city)}`;
-  try {
-    const resource = await cloudinary.api.resource(publicId);
-    if (isUsablePhotoUrl(resource?.secure_url)) return resource.secure_url;
-  } catch {
-    // Not in the library — fall through to the row's own field.
-  }
+
+  const curated = await findCuratedCityPhoto(publicId);
+  if (curated && isUsablePhotoUrl(curated)) return curated;
 
   return isUsablePhotoUrl(row.imageUrl) ? row.imageUrl.trim() : null;
 }
 
-/** Resolves photos a few at a time so an import cannot hammer Cloudinary. */
+/** Resolves photos a few at a time so an import cannot hammer the database. */
 const PHOTO_LOOKUP_CONCURRENCY = 5;
 
 /** Ceiling on one import run, so a runaway collection cannot stall a request. */

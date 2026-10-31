@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 export interface Map3DTourViewerProps {
   show360Tour: boolean;
@@ -40,7 +41,7 @@ const Map3DTourViewer: React.FC<Map3DTourViewerProps> = ({
 
           {/* Tour indicator badge */}
           <div className="absolute top-4 left-4 z-60 flex items-center gap-2 px-4 py-2 bg-green-500/90 backdrop-blur-sm text-white font-bold rounded-lg shadow-lg">
-            <span>{floorNumber ? '\u{1F3E2}' : '\u{1F6AA}'}</span>
+            <SoftIcon name={floorNumber ? 'building' : 'tour360'} className="w-6 h-6" />
             <span>
               {floorNumber
                 ? t('property:virtualTour.floor', 'Floor {{floor}}', { floor: floorNumber })
@@ -68,7 +69,7 @@ const Map3DTourViewer: React.FC<Map3DTourViewerProps> = ({
       {isEnteringBuilding && (
         <div className="absolute inset-0 z-40 bg-gradient-to-b from-transparent via-black/30 to-black/60 pointer-events-none flex items-center justify-center">
           <div className="text-center animate-pulse">
-            <div className="text-4xl mb-2">{'\u{1F6AA}'}</div>
+            <SoftIcon name="key" className="w-12 h-12 mx-auto mb-2" />
             <p className="text-white font-bold text-lg">{t('property:virtualTour.entering', 'Entering building...')}</p>
           </div>
         </div>

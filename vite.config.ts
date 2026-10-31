@@ -13,6 +13,9 @@ export default defineConfig(({ mode }) => {
     const apiTarget = env.VITE_API_URL || 'http://localhost:5001';
     const wsTarget = env.VITE_WS_URL || 'ws://localhost:5001';
     const isProduction = mode === 'production';
+    // Same default as config/mediaConfig.ts when the variable isn't set where the build runs.
+    const mediaCdnOrigin = ((env.VITE_MEDIA_CDN_URL || '').trim() || (isProduction ? 'https://media.balkanestateai.com' : ''))
+      .replace(/^["']|["']$/g, '').replace(/\/+$/, '').replace(/^(?!https?:\/\/)/i, 'https://');
 
     // Only log in development
     if (mode === 'development') {
@@ -224,11 +227,24 @@ export default defineConfig(({ mode }) => {
                   }
                 }
               },
+              // Images uploaded before R2, still served by Cloudinary.
               {
                 urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
                 handler: 'StaleWhileRevalidate',
                 options: {
                   cacheName: 'cloudinary-images-cache',
+                  expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                  // Only proper CORS responses (not opaque): the annotation canvas needs them.
+                  cacheableResponse: { statuses: [200] },
+                },
+              },
+              // Our R2 photos (VITE_MEDIA_CDN_URL). Not CacheFirst: curated city
+              // photos are re-seeded in place under the same URL.
+              ...(mediaCdnOrigin ? [{
+                urlPattern: new RegExp('^' + mediaCdnOrigin.replace(/[.*+?^$()|[\]{}\\/]/g, '\\$&') + '/', 'i'),
+                handler: 'StaleWhileRevalidate' as const,
+                options: {
+                  cacheName: 'media-images-cache',
                   expiration: {
                     maxEntries: 100,
                     maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
@@ -239,7 +255,7 @@ export default defineConfig(({ mode }) => {
                     statuses: [200]
                   }
                 }
-              },
+              }] : []),
               {
                 urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
                 handler: 'CacheFirst',

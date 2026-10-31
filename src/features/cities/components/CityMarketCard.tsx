@@ -2,11 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import type { CityMarketData } from '@/services/apiService';
 import { formatPrice } from '@/utils/currency';
-import {
-  MapPinIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, ChartBarIcon,
-  CalendarIcon, HomeIcon, FireIcon, StarIcon, BuildingOfficeIcon,
-} from '@/constants';
-import { getCityFallbackGradient } from '@/config/cloudinaryConfig';
+import { MapPinIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
+import { getCityFallbackGradient } from '@/config/mediaConfig';
 import { cityImageSources } from '../utils/cityImage';
 import SaveCityButton from './SaveCityButton';
 
@@ -27,7 +25,7 @@ type WikiImageState = 'idle' | 'loading' | 'missing';
  * One city's market card.
  *
  * Owns only its own ephemeral display state — which price series is shown and
- * how far the image fallback chain (curated photo → convention Cloudinary id →
+ * how far the image fallback chain (curated photo → convention city photo →
  * Wikipedia → gradient) has got. Both belong to the card, not to the page, so
  * two tabs can render the same city without sharing a keyed map of per-card
  * flags.
@@ -65,7 +63,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
     wikiState.current = 'idle';
   }, [imageSources]);
 
-  const cloudinaryFailed = sourceIndex >= imageSources.length;
+  const libraryFailed = sourceIndex >= imageSources.length;
 
   /**
    * This source missed — try the next one, and once they are exhausted try
@@ -103,11 +101,12 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
   }, [city.city, city.country, sourceIndex, imageSources.length]);
 
   const trend = city.marketTrend;
-  const trendIcon = trend === 'rising'
-    ? <ArrowTrendingUpIcon className="w-4 h-4 text-green-600" />
-    : trend === 'declining'
-      ? <ArrowTrendingDownIcon className="w-4 h-4 text-red-600" />
-      : <ChartBarIcon className="w-4 h-4 text-neutral-500" />;
+  const trendIcon = (
+    <SoftIcon
+      name={trend === 'rising' ? 'trendUp' : trend === 'declining' ? 'trendDown' : 'chart'}
+      className="w-4 h-4 flex-shrink-0"
+    />
+  );
   const trendColor = trend === 'rising'
     ? 'text-green-600 bg-green-50'
     : trend === 'declining'
@@ -131,8 +130,8 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
       ? { label: t('cityCard.investmentGood', 'Good'), color: 'text-blue-600', barColor: 'from-blue-400 to-blue-500' }
       : { label: t('cityCard.investmentFair', 'Fair'), color: 'text-neutral-500', barColor: 'from-neutral-400 to-neutral-500' };
 
-  const showWiki = cloudinaryFailed && typeof wikiImage === 'string';
-  const showGradient = cloudinaryFailed && !showWiki;
+  const showWiki = libraryFailed && typeof wikiImage === 'string';
+  const showGradient = libraryFailed && !showWiki;
   const displayPricePerSqm = showListingPrice && city.listingAvgPricePerSqm
     ? city.listingAvgPricePerSqm
     : city.avgPricePerSqm;
@@ -144,7 +143,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
     >
       {/* City Image Header */}
       <div className="relative h-36 overflow-hidden">
-        {!cloudinaryFailed && (
+        {!libraryFailed && (
           <img
             src={imageSources[sourceIndex]}
             alt={city.city}
@@ -172,7 +171,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <MapPinIcon className="w-4 h-4 text-white/90 flex-shrink-0" />
+              <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
               <h3 className="text-lg font-bold text-white group-hover:text-primary-light transition-colors truncate">
                 {city.city}
               </h3>
@@ -196,11 +195,11 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
 
         <div className="absolute bottom-2.5 left-3 right-3 flex items-center gap-2">
           <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
-            <HomeIcon className="w-3.5 h-3.5 text-white/80" />
+            <SoftIcon name="home" className="w-4 h-4" />
             <span className="text-xs font-medium text-white/90">{city.listingsCount} {t('footer.listings')}</span>
           </div>
           <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
-            <CalendarIcon className="w-3.5 h-3.5 text-white/80" />
+            <SoftIcon name="calendar" className="w-4 h-4" />
             <span className="text-xs font-medium text-white/90">{city.soldLastMonth} {t('footer.soldPerMonth')}</span>
           </div>
         </div>
@@ -211,20 +210,20 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
         <div className="flex items-stretch gap-3 mb-4">
           <div className="flex-1 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-3 border border-primary/10">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-[11px] font-medium text-neutral-500">Avg. Price /m²</p>
+              <p className="text-[11px] font-medium text-neutral-500">{t('exploreCities:ui.cityMarketCard.avgPriceM', 'Avg. Price /m²')}</p>
               {city.listingAvgPricePerSqm && (
                 <div className="flex gap-0.5 bg-neutral-100 rounded-full p-0.5">
                   <button
                     onClick={e => { e.stopPropagation(); setShowListingPrice(false); }}
                     className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${!showListingPrice ? 'bg-white text-primary shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
                   >
-                    Market
+                    {t('exploreCities:ui.cityMarketCard.market', 'Market')}
                   </button>
                   <button
                     onClick={e => { e.stopPropagation(); setShowListingPrice(true); }}
                     className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${showListingPrice ? 'bg-white text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
                   >
-                    Listings
+                    {t('exploreCities:ui.cityMarketCard.listings', 'Listings')}
                   </button>
                 </div>
               )}
@@ -236,7 +235,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
               <span className="text-xs font-medium text-neutral-400">/m²</span>
             </div>
             <p className="text-[10px] text-neutral-400 mt-1">
-              {showListingPrice ? `${city.listingsCount} active listings` : 'Market research'}
+              {showListingPrice ? `${city.listingsCount} active listings` : t('exploreCities:ui.cityMarketCard.marketResearch', 'Market research')}
             </p>
           </div>
           <div className="flex-1 bg-neutral-50 rounded-xl p-3 border border-neutral-100">
@@ -251,9 +250,9 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
           }`}>
             <div className="flex items-center justify-center gap-0.5 mb-0.5">
               {city.priceGrowthYoY > 0 ? (
-                <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-green-500" />
+                <SoftIcon name="trendUp" className="w-4 h-4" />
               ) : city.priceGrowthYoY < 0 ? (
-                <ArrowTrendingDownIcon className="w-3.5 h-3.5 text-red-500" />
+                <SoftIcon name="trendDown" className="w-4 h-4" />
               ) : null}
               <span className={`text-base font-bold ${
                 city.priceGrowthYoY > 0 ? 'text-green-600' : city.priceGrowthYoY < 0 ? 'text-red-600' : 'text-neutral-600'
@@ -280,7 +279,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
-                <FireIcon className="w-3.5 h-3.5 text-amber-500" />
+                <SoftIcon name="flame" className="w-4 h-4" />
                 {t('cityCard.demand')}
               </span>
               <span className={`text-xs font-bold ${demand.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
@@ -297,7 +296,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-medium text-neutral-600 flex items-center gap-1.5">
-                <StarIcon className="w-3.5 h-3.5 text-blue-500" />
+                <SoftIcon name="star" className="w-4 h-4" />
                 {t('cityCard.investment')}
               </span>
               <span className={`text-xs font-bold ${investment.color} px-2 py-0.5 rounded-full bg-white border border-current/15`}>
@@ -316,7 +315,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
         {city.topNeighborhoods && city.topNeighborhoods.length > 0 && (
           <div className="border-t border-neutral-100 pt-3 mb-3">
             <h4 className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-              <BuildingOfficeIcon className="w-3 h-3" />
+              <SoftIcon name="building" className="w-4 h-4" />
               {t('sections.topNeighborhoods')}
             </h4>
             <div className="flex flex-wrap gap-1.5">
@@ -332,7 +331,7 @@ const CityMarketCard: React.FC<CityMarketCardProps> = ({
         {city.highlights && city.highlights.length > 0 && (
           <div className="border-t border-neutral-100 pt-3">
             <h4 className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-              <ChartBarIcon className="w-3 h-3" />
+              <SoftIcon name="chart" className="w-4 h-4" />
               {t('sections.marketInsights')}
             </h4>
             <ul className="space-y-1.5">

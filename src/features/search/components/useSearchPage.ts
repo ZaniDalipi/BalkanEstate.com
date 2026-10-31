@@ -7,7 +7,7 @@ import { generateSearchName, generateSearchNameFromCoords } from '@/services/gem
 import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { outOfAreaFallback, type OutOfAreaKind } from '../outOfArea';
-import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
+import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
@@ -19,6 +19,8 @@ import type { Suggestion } from '../universal/types';
 import { isPropertyTypeFilter } from '@/shared/types/property.types';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { readMapView, rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
+import { getSearchLayout } from '@/src/shared/utils/searchLayout';
 
 // Helper to serialize Leaflet bounds to a consistent JSON format
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
@@ -48,7 +50,7 @@ export function useSearchPage() {
 
     // Local, non-persistent state
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
+    const [isTablet, setIsTablet] = useState(() => getSearchLayout() === 'tablet');
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isSaving, setIsSaving] = useState(false);
@@ -90,7 +92,7 @@ export function useSearchPage() {
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
-            setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+            setIsTablet(getSearchLayout() === 'tablet');
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -280,12 +282,18 @@ export function useSearchPage() {
         // Handles: "North Macedonia" → "north-macedonia", "Bosnia and Herzegovina" → "bosnia-herzegovina"
         const countryParam = countryParamRaw ? normalizeCountryKey(countryParamRaw) : null;
 
+        // Back on this page (e.g. from a listing): the map reopens where the user
+        // left it, so the URL's place must not fly it anywhere.
+        if (readMapView()) {
+            hasExplicitFocusRef.current = true;
+        }
+
         // Handle direct lat/lng coordinates (e.g., from viewing saved measurements)
         if (latParam && lngParam) {
             const lat = parseFloat(latParam);
             const lng = parseFloat(lngParam);
             const zoom = zoomParam ? parseInt(zoomParam, 10) : 18;
-            if (!isNaN(lat) && !isNaN(lng)) {
+            if (!isNaN(lat) && !isNaN(lng) && !hasExplicitFocusRef.current) {
                 setFlyToTarget({
                     center: [lat, lng],
                     zoom: zoom
@@ -334,7 +342,7 @@ export function useSearchPage() {
                         });
                     }
                 });
-            } else if (countryParam && !cityParam) {
+            } else if (countryParam && !cityParam && !hasExplicitFocusRef.current) {
                 // If only country is specified (no city), fly to country center
                 const countryData = BALKAN_COUNTRIES[countryParam];
                 if (countryData) {
@@ -671,6 +679,7 @@ export function useSearchPage() {
             // Same route a listing card opens, so a listing found through the
             // search box lands exactly where one found by scrolling does.
             const property = suggestion.property;
+            rememberOpenedProperty(property.id);
             navigate(paths.property(generatePropertySlug(property)), { state: { property } });
             return;
         }

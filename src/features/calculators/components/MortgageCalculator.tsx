@@ -11,6 +11,7 @@ import {
   formatEur,
   MORTGAGE_DATA_YEAR,
 } from '../data/mortgageMarketData';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface MortgageCalculatorProps {
   propertyPrice: number;
@@ -294,7 +295,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
         <div className="bg-white rounded-2xl shadow-xl border border-neutral-200/80 overflow-hidden animate-fade-in">
             {/* Header */}
             <div className="flex items-center gap-2.5 px-5 py-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-neutral-100">
-                <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-lg flex-shrink-0">💰</span>
+                <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 flex-shrink-0"><SoftIcon name="moneybag" className="w-7 h-7" /></span>
                 <div className="min-w-0">
                     <h3 className="text-sm font-bold text-neutral-800 leading-tight truncate">{t('calculators:mortgage.title')}</h3>
                     <p className="text-[11px] text-neutral-500 truncate">{profile.name}</p>
@@ -344,7 +345,7 @@ const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ propertyPrice, 
                             disabled={sliderMax <= 0}
                             active={isSliderActive}
                             tone={depositTone}
-                            icon={<span className="text-xs">💵</span>}
+                            icon={<SoftIcon name="cash" className="w-4 h-4" />}
                             ariaLabel={t('calculators:mortgage.fields.downPayment')}
                             valueText={`${depositTone.label}: ${downPaymentType === 'percent' ? `${downPayment}%` : fmt(downPayment)}`}
                             bubbleLabel={downPaymentType === 'percent' ? `${downPayment}%` : fmt(downPayment)}

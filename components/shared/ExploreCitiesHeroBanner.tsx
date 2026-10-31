@@ -1,12 +1,10 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 import {
   MapPinIcon,
   BuildingOfficeIcon,
-  GlobeAltIcon,
-  ChartBarIcon,
-  ArrowTrendingUpIcon,
-  HomeIcon
+  GlobeAltIcon
 } from '@/constants';
 
 interface ExploreCitiesHeroBannerProps {
@@ -67,7 +65,7 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 landscape:py-6">
         <div className="max-w-7xl mx-auto">
           {/* Badge */}
           <div className="flex justify-center mb-6">
@@ -80,7 +78,7 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
 
           {/* Main heading */}
           <div className="text-center mb-8 sm:mb-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight landscape:text-3xl">
               {t('hero.title', 'Explore Real Estate')}
               <span className="block mt-2 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
                 {t('hero.titleHighlight', 'Markets Across the Balkans')}
@@ -96,8 +94,8 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
-                  <MapPinIcon className="w-5 h-5 sm:w-5 sm:h-5 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
+                  <SoftIcon name="pin" className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-1">{totalCities}</div>
                 <div className="text-[10px] sm:text-xs text-white/60 font-medium uppercase tracking-wide">
@@ -109,8 +107,8 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-fuchsia-500 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
-                  <GlobeAltIcon className="w-5 h-5 sm:w-5 sm:h-5 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-500/30">
+                  <SoftIcon name="globe" className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-1">{totalCountries}</div>
                 <div className="text-[10px] sm:text-xs text-white/60 font-medium uppercase tracking-wide">
@@ -122,8 +120,8 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  <ArrowTrendingUpIcon className="w-5 h-5 sm:w-5 sm:h-5 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <SoftIcon name="trendUp" className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-400 mb-1">+{avgGrowth.toFixed(1)}%</div>
                 <div className="text-[10px] sm:text-xs text-white/60 font-medium uppercase tracking-wide">
@@ -135,8 +133,8 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               <div className="relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 border border-white/20 text-center hover:bg-white/15 transition-all">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/30">
-                  <HomeIcon className="w-5 h-5 sm:w-5 sm:h-5 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 bg-white/95 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/30">
+                  <SoftIcon name="home" className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-1">{totalListings.toLocaleString()}</div>
                 <div className="text-[10px] sm:text-xs text-white/60 font-medium uppercase tracking-wide">
@@ -189,17 +187,17 @@ const ExploreCitiesHeroBanner: React.FC<ExploreCitiesHeroBannerProps> = ({
           {/* Trust badges */}
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8 sm:mt-10">
             <div className="flex items-center gap-2 text-white/50">
-              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
+              <SoftIcon name="chart" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-xs sm:text-sm font-medium">{t('badges.realTimeData', 'Real-Time Data')}</span>
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">
-              <GlobeAltIcon className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-400" />
+              <SoftIcon name="globe" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-xs sm:text-sm font-medium">{t('badges.aiInsights', 'Market Insights')}</span>
             </div>
             <div className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
             <div className="flex items-center gap-2 text-white/50">
-              <ArrowTrendingUpIcon className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
+              <SoftIcon name="trendUp" className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="text-xs sm:text-sm font-medium">{t('badges.marketTrends', 'Market Trends')}</span>
             </div>
           </div>

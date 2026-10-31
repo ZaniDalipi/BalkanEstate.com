@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getFeaturedCities, CityMarketData as ApiCityMarketData } from '@/services/apiService';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
+import { useTranslation } from 'react-i18next';
 interface MarketInsightsAnimationProps {
     city?: string;
     country?: string;
@@ -11,7 +13,7 @@ interface InsightCard {
     type: 'market' | 'tip' | 'stat' | 'trend';
     title: string;
     content: string;
-    icon: string;
+    icon: SoftIconName;
     highlight?: string;
     trend?: 'up' | 'down' | 'neutral';
 }
@@ -21,6 +23,7 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
     country,
     propertyType = 'apartment'
 }) => {
+  const { t } = useTranslation();
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
     const [cityData, setCityData] = useState<ApiCityMarketData | null>(null);
@@ -78,63 +81,63 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
             title: `${displayCity} Market Overview`,
             content: `Average price in ${displayCity}`,
             highlight: `€${avgPrice.toLocaleString()}/m²`,
-            icon: '📊',
+            icon: 'chart',
             trend: 'up'
         },
         {
             type: 'trend',
-            title: 'Market Trends',
+            title: t('seller:ui.marketInsightsAnimation.marketTrends', 'Market Trends'),
             content: 'Properties in your area are selling',
             highlight: `${sellingSpeed}% faster`,
-            icon: '📈',
+            icon: 'trendUp',
             trend: 'up'
         },
         {
             type: 'stat',
-            title: 'Time on Market',
+            title: t('seller:ui.marketInsightsAnimation.timeOnMarket', 'Time on Market'),
             content: 'Average days to sell',
             highlight: `${daysToSell} days`,
-            icon: '⏱️',
+            icon: 'clock',
             trend: 'neutral'
         },
         {
             type: 'tip',
-            title: 'Pro Tip',
+            title: t('seller:ui.marketInsightsAnimation.proTip', 'Pro Tip'),
             content: 'Listings with professional photos sell 32% faster and for',
             highlight: '11% more',
-            icon: '📸',
+            icon: 'camera',
             trend: 'up'
         },
         {
             type: 'stat',
-            title: 'Success Rate',
+            title: t('seller:ui.marketInsightsAnimation.successRate', 'Success Rate'),
             content: 'Properties in your area sell within asking price',
             highlight: '89% of time',
-            icon: '🎯',
+            icon: 'target',
             trend: 'up'
         },
         {
             type: 'tip',
-            title: 'Best Practice',
+            title: t('seller:ui.marketInsightsAnimation.bestPractice', 'Best Practice'),
             content: 'Adding a virtual tour increases buyer inquiries by',
             highlight: '67%',
-            icon: '🏠',
+            icon: 'home',
             trend: 'up'
         },
         {
             type: 'market',
-            title: 'Year Over Year',
+            title: t('seller:ui.marketInsightsAnimation.yearOverYear', 'Year Over Year'),
             content: `${displayCity} property values`,
             highlight: yoyGrowth > 0 ? `+${yoyGrowth}%` : `${yoyGrowth}%`,
-            icon: '💰',
+            icon: 'moneybag',
             trend: yoyGrowth > 0 ? 'up' : yoyGrowth < 0 ? 'down' : 'neutral'
         },
         {
             type: 'tip',
-            title: 'Pricing Strategy',
+            title: t('seller:ui.marketInsightsAnimation.pricingStrategy', 'Pricing Strategy'),
             content: 'Competitively priced properties receive first inquiry within',
             highlight: '3 days',
-            icon: '💡',
+            icon: 'lightbulb',
             trend: 'neutral'
         }
     ];
@@ -197,7 +200,7 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
                 {/* Icon and Type Badge */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <span className="text-4xl">{currentInsight.icon}</span>
+                        <SoftIcon name={currentInsight.icon} className="w-12 h-12" />
                         <span className="px-3 py-1 bg-white/60 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-700 uppercase tracking-wide">
                             {currentInsight.type}
                         </span>
@@ -205,14 +208,10 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
                     {currentInsight.trend && (
                         <div className={`flex items-center gap-1 ${getTrendColor(currentInsight.trend)}`}>
                             {currentInsight.trend === 'up' && (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
+                                <SoftIcon name="trendUp" className="w-7 h-7" />
                             )}
                             {currentInsight.trend === 'down' && (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                                </svg>
+                                <SoftIcon name="trendDown" className="w-7 h-7" />
                             )}
                         </div>
                     )}
@@ -256,10 +255,10 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
                         <div className="w-2 h-2 bg-primary rounded-full animate-ping absolute"></div>
                         <div className="w-2 h-2 bg-primary rounded-full"></div>
                     </div>
-                    Analyzing Your Property...
+                    {t('seller:ui.marketInsightsAnimation.analyzingYourProperty', 'Analyzing Your Property...')}
                 </h3>
                 <p className="text-neutral-600 mt-2 max-w-md mx-auto">
-                    While our AI works, learn about the {displayCity} real estate market
+                    {t('seller:ui.marketInsightsAnimation.whileOurAiWorksLearn', 'While our AI works, learn about the')} {displayCity} {t('seller:ui.marketInsightsAnimation.realEstateMarket', 'real estate market')}
                 </p>
             </div>
 
@@ -267,17 +266,17 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
             <div className="grid grid-cols-3 gap-4 mt-8 w-full max-w-2xl">
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 text-center">
                     <div className="text-2xl font-bold text-primary">€{avgPrice.toLocaleString()}</div>
-                    <div className="text-xs text-gray-600 mt-1">Avg. Price/m²</div>
+                    <div className="text-xs text-gray-600 mt-1">{t('seller:ui.marketInsightsAnimation.avgPriceM', 'Avg. Price/m²')}</div>
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 text-center">
                     <div className="text-2xl font-bold text-green-600">{daysToSell}</div>
-                    <div className="text-xs text-gray-600 mt-1">Days to Sell</div>
+                    <div className="text-xs text-gray-600 mt-1">{t('seller:ui.marketInsightsAnimation.daysToSell', 'Days to Sell')}</div>
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 text-center">
                     <div className={`text-2xl font-bold ${yoyGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {yoyGrowth > 0 ? '+' : ''}{yoyGrowth}%
                     </div>
-                    <div className="text-xs text-gray-600 mt-1">YoY Growth</div>
+                    <div className="text-xs text-gray-600 mt-1">{t('seller:ui.marketInsightsAnimation.yoyGrowth', 'YoY Growth')}</div>
                 </div>
             </div>
 
@@ -285,7 +284,8 @@ const MarketInsightsAnimation: React.FC<MarketInsightsAnimationProps> = ({
             {cityData && (
                 <div className="mt-4 text-center">
                     <p className="text-xs text-neutral-500">
-                        📊 Live market data powered by AI • Updated {new Date(cityData.lastUpdated).toLocaleDateString()}
+                        <SoftIcon name="chart" className="inline-block w-4 h-4 mr-1 align-[-3px]" />
+                        {t('seller:ui.marketInsightsAnimation.liveMarketDataPoweredBy', 'Live market data powered by AI • Updated')} {new Date(cityData.lastUpdated).toLocaleDateString()}
                     </p>
                 </div>
             )}

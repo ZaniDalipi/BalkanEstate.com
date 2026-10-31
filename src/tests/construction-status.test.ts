@@ -206,7 +206,7 @@ describe('validateListing — construction pair', () => {
     listingData: {
       ...initialListingData,
       title: 'New build by the marina',
-      description: 'Two bedrooms, handover next year.',
+      description: 'Two bedrooms in a new building with a lift, handover next year.',
       price: 180000,
       propertyType: 'apartment' as const,
       totalFloors: 6,

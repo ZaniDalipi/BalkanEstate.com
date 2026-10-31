@@ -1168,7 +1168,7 @@ export const useListingForm = (
         }
 
         try {
-            // Step 1: Upload images to Cloudinary before creating the property
+            // Step 1: Upload images to R2 before creating the property
             let imageUrls: PropertyImage[] = [];
 
             // Get all image files that need to be uploaded (new images with file objects)
@@ -1192,14 +1192,14 @@ export const useListingForm = (
                     const totalSize = imageFiles.reduce((sum, file) => sum + file.size, 0);
                     // Log removed
 
-                    // Upload to Cloudinary (without propertyId first, we'll get temp URLs)
+                    // Upload to R2 (without propertyId first — they're stored as drafts)
                     const uploadedImages = await api.uploadPropertyImages(imageFiles);
 
                     setUploadProgress(100);
                     setIsUploading(false);
                     // Log removed
 
-                    // Map the uploaded Cloudinary URLs back to our image array with proper tags
+                    // Map the uploaded photo URLs back to our image array with proper tags
                     let uploadIndex = 0;
                     imageUrls = images.map((img, index) => {
                         const tagInfo = listingData.image_tags.find(t => t.index === index);
@@ -1207,10 +1207,10 @@ export const useListingForm = (
 
                         if (img.file !== null) {
                             // This is a new image that was just uploaded
-                            const cloudinaryData = uploadedImages[uploadIndex++];
+                            const uploaded = uploadedImages[uploadIndex++];
                             return {
-                                url: cloudinaryData.url,
-                                publicId: cloudinaryData.publicId,
+                                url: uploaded.url,
+                                publicId: uploaded.publicId,
                                 tag,
                                 ...(img.floorplanSpot ? { floorplanSpot: img.floorplanSpot } : {}),
                             };
@@ -1245,7 +1245,7 @@ export const useListingForm = (
                 // Warning removed
             }
 
-            // Step 2: Upload any new floor plans to Cloudinary (one request, in order)
+            // Step 2: Upload any new floor plans to R2 (one request, in order)
             let floorplanLevels: { url: string; label: string }[] = [];
             try {
                 const newFiles = floorplans.filter(f => f.file).map(f => f.file!);

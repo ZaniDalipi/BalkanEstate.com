@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import type { ImportedDraft } from '../../api/importReviewApi';
 import { formatDraftValue } from '../../utils/draftFormat';
 import DraftIssueList from './DraftIssueList';
@@ -56,7 +56,7 @@ const ImportDraftCard: React.FC<ImportDraftCardProps> = ({
         className="relative w-28 h-24 sm:w-36 sm:h-28 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center text-xs text-gray-400 group"
       >
         {cover ? (
-          <img src={optimizeCloudinaryUrl(cover, { width: 288, quality: 'auto' })} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+          <img src={optimizeImageUrl(cover, { width: 288, quality: 'auto' })} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
         ) : t('listingFeeds:review.noPhotos')}
         {data.images.length > 1 && (
           <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px]">{data.images.length}</span>

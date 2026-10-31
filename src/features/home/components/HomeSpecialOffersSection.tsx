@@ -2,7 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { usePromotionPlans, type PromotionPlan } from '@/src/features/pricing/hooks/usePricingData';
-import { BoltIcon, CheckIcon } from '@/constants';
+import { SoftIcon, SOFT_ICONS, type SoftIconName } from '@/src/shared/illustrations';
+
+/** Plan icons are admin data; older plans stored an emoji there. Only a
+ *  known SoftIcon name is shown as-is, anything else gets the default. */
+const offerIcon = (icon?: string): SoftIconName =>
+  icon && (SOFT_ICONS as readonly string[]).includes(icon) ? (icon as SoftIconName) : 'flame';
 
 /* ── colour presets keyed by cardStyle.gradientFrom ── */
 interface ColorPreset {
@@ -77,7 +82,7 @@ const HomeSpecialOffersSection: React.FC<Props> = ({ onNavigate }) => {
           className="text-center mb-10"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100 text-rose-600 text-sm font-semibold mb-4">
-            <BoltIcon className="w-4 h-4" />
+            <SoftIcon name="bolt" className="w-5 h-5" />
             {t('pricing:specialOffers.limitedTime', 'Limited Time')}
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -110,16 +115,14 @@ const HomeSpecialOffersSection: React.FC<Props> = ({ onNavigate }) => {
                 {offer.offerLabel && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                     <span className={`inline-flex items-center gap-1 bg-gradient-to-r ${c.badge} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg`}>
-                      <BoltIcon className="w-3 h-3" />
+                      <SoftIcon name="bolt" className="w-4 h-4" />
                       {offer.offerLabel}
                     </span>
                   </div>
                 )}
 
                 {/* Icon */}
-                <div className={`w-12 h-12 bg-gradient-to-br ${c.iconBg} rounded-xl flex items-center justify-center mb-4 ${offer.offerLabel ? 'mt-2' : ''}`}>
-                  <span className="text-2xl">{offer.icon || '🔥'}</span>
-                </div>
+                <SoftIcon name={offerIcon(offer.icon)} className={`w-12 h-12 mb-4 ${offer.offerLabel ? 'mt-2' : ''}`} />
 
                 {/* Title */}
                 <h3 className={`text-xl font-bold ${dark ? 'text-white' : 'text-gray-900'}`}>{offer.name}</h3>
@@ -154,7 +157,7 @@ const HomeSpecialOffersSection: React.FC<Props> = ({ onNavigate }) => {
                 {/* Countdown */}
                 {left !== null && left > 0 && (
                   <div className={`mt-4 flex items-center gap-1.5 text-xs font-semibold ${c.countdown}`}>
-                    <BoltIcon className="w-3.5 h-3.5" />
+                    <SoftIcon name="clock" className="w-5 h-5" />
                     {left === 1
                       ? t('pricing:specialOffers.lastDay', 'Last day!')
                       : t('pricing:specialOffers.daysLeft', '{{days}} days left', { days: left })}
@@ -179,7 +182,7 @@ const HomeSpecialOffersSection: React.FC<Props> = ({ onNavigate }) => {
           className="text-center mt-8"
         >
           <button
-            onClick={() => onNavigate(`/pricing?tab=listing&offer=${offer.id}`)}
+            onClick={() => onNavigate('/pricing?tab=listing')}
             className="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors"
           >
             {t('pricing:specialOffers.viewAllDeals', 'View All Promotion Plans')}

@@ -2,14 +2,15 @@ import React, { useCallback, useMemo, useRef, useEffect, memo, useState } from '
 import { Property } from '@/types';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import Footer from '@/components/shared/Footer';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 
+import { useTranslation } from 'react-i18next';
 // Preloads optimised card-size images before they scroll into view
 const preloadImages = (urls: string[]) => {
   urls.forEach(url => {
     if (url) {
       const img = new Image();
-      img.src = optimizeCloudinaryUrl(url, { width: 640, quality: 'auto', crop: 'fill' });
+      img.src = optimizeImageUrl(url, { width: 640, quality: 'auto', crop: 'fill' });
     }
   });
 };
@@ -73,6 +74,7 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
   gap = 28,
   showFooter = true,
 }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH);
@@ -175,7 +177,7 @@ const VirtualizedPropertyGrid: React.FC<VirtualizedPropertyGridProps> = ({
         {/* Load more trigger */}
         {hasMore && (
           <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
-            <div className="text-neutral-400 text-sm">Loading more...</div>
+            <div className="text-neutral-400 text-sm">{t('search:ui.virtualizedPropertyGrid.loadingMore', 'Loading more...')}</div>
           </div>
         )}
 

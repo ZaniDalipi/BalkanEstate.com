@@ -1,13 +1,12 @@
 import Property from '../../models/Property';
 import ArchivedListing from '../../models/ArchivedListing';
-import cloudinary from '../../config/cloudinary';
 import { mediaLogger } from '../../utils/logger';
-import { deleteByTag, deleteImages } from '../cloudinaryService';
-import { listingTag } from './mediaNaming';
+import { deleteImages } from '../mediaService';
+import { deleteWhere } from './r2MediaStore';
 import { readMediaRetentionPolicy, retentionCutoff, type MediaRetentionPolicy } from './mediaRetentionPolicy';
 
 /**
- * Clears Cloudinary media for listings that ended long ago.
+ * Clears stored media for listings that ended long ago.
  *
  *  - Deleted listings: the one archive thumbnail kept at deletion time is
  *    removed after `deletedYears`.
@@ -15,8 +14,7 @@ import { readMediaRetentionPolicy, retentionCutoff, type MediaRetentionPolicy } 
  *    `soldYears`. The listing record stays (sales history, SEO) and shows the
  *    "photos removed" placeholder instead.
  *
- * Each run handles a bounded batch — Cloudinary's Admin API is rate-limited
- * (~500 calls/hour on the free plan) — and marks what it cleared with
+ * Each run handles a bounded batch and marks what it cleared with
  * `mediaPurgedAt`, so a later run picks up where this one stopped.
  */
 
@@ -95,14 +93,8 @@ export const purgeSoldListingMedia = async (
       for (let i = 0; i < publicIds.length; i += 100) {
         await deleteImages(publicIds.slice(i, i + 100));
       }
-      if (listing.generatedVideoPublicId) {
-        // Upload API call — not counted against the Admin API limit.
-        await cloudinary.uploader
-          .destroy(listing.generatedVideoPublicId, { resource_type: 'video' })
-          .catch(() => undefined);
-      }
-      // Catches anything tagged to the listing that the record no longer lists.
-      await deleteByTag(listingTag(propertyId));
+      // Catches any photo of the listing that the record no longer lists.
+      await deleteWhere({ propertyId });
 
       // videoUrl mirrors the generated video when one was embedded; a YouTube
       // or Instagram link is not ours to remove.

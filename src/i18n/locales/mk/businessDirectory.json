@@ -97,7 +97,8 @@
     "noLocations": "Нема локации за прикажување",
     "noLocationsHint": "Бизниси со адреси ќе се појават тука на мапата",
     "viewDetails": "Погледни детали",
-    "directions": "Насоки"
+    "directions": "Насоки",
+    "listingCount": "{{count}} на картата"
   },
   "verified": "Верифициран",
   "detail": {
@@ -141,7 +142,8 @@
       "subtitle": "Контактирајте денес за да го дискутирате вашиот проект и добиете бесплатна консултација.",
       "callNow": "Јави се на {{phone}}",
       "sendEmail": "Испрати е-пошта"
-    }
+    },
+    "established": "Основано {{year}}"
   },
   "days": {
     "monday": "Понеделник",
@@ -278,6 +280,33 @@
     "delete": "Избриши",
     "emptyTitle": "Сè уште нема бизниси",
     "emptyMessage": "Креирајте го вашиот прв бизнис оглас за да ги прикажете вашите услуги во именикот.",
-    "createFirst": "Креирај бизнис оглас"
+    "createFirst": "Креирај бизнис оглас",
+    "editSuccessTitle": "Ажурирано",
+    "editSuccessMessage": "Огласот за бизнисот е ажуриран.",
+    "errorTitle": "Неуспешно вчитување на бизнисите",
+    "errorMessage": "Нешто тргна наопаку. Обидете се подоцна.",
+    "backToList": "Назад кон Мои бизниси"
+  },
+  "delete": {
+    "confirmTitle": "Избриши оглас",
+    "successTitle": "Избришано",
+    "successMessage": "Огласот за бизнисот е избришан.",
+    "errorTitle": "Грешка",
+    "errorMessage": "Неуспешно бришење на огласот. Обидете се повторно.",
+    "confirmMessage": "Дали сте сигурни дека сакате да го избришете „{{name}}“? Ова дејство не може да се врати."
+  },
+  "status": {
+    "active": "Активно",
+    "inactive": "Неактивно"
+  },
+  "ui": {
+    "editBusinessListingForm": {
+      "preview": "Преглед",
+      "bannerPreview": "Преглед на банер"
+    },
+    "createBusinessListingForm": {
+      "preview": "Преглед",
+      "bannerPreview": "Преглед на банер"
+    }
   }
 }

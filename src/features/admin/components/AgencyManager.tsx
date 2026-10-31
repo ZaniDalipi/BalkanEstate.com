@@ -1,7 +1,8 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PencilIcon, TrashIcon, EyeIcon, BuildingOfficeIcon, CheckCircleIcon, XCircleIcon } from '@/constants';
+import { PencilIcon, TrashIcon, EyeIcon, CheckCircleIcon, XCircleIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { useAgencyManager } from './useAgencyManager';
 import AgencyManagerDetail from './AgencyManagerDetail';
 
@@ -79,14 +80,14 @@ const AgencyManager: React.FC = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agency</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agents</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.agencyManager.agency', 'Agency')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.agencyManager.owner', 'Owner')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.agencyManager.contact', 'Contact')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.agencyManager.location', 'Location')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.agencyManager.agents', 'Agents')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:agencies.subscription', 'Subscription')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.agencyManager.created', 'Created')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin:ui.agencyManager.actions', 'Actions')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -101,16 +102,14 @@ const AgencyManager: React.FC = () => {
                     <div className="flex items-center">
                       {agency.logo ? (
                         <img
-                          src={optimizeCloudinaryUrl(agency.logo, { width: 128 }) || agency.logo}
+                          src={optimizeImageUrl(agency.logo, { width: 128 }) || agency.logo}
                           alt={agency.name}
                           loading="lazy"
                           decoding="async"
                           className="w-12 h-12 rounded object-cover mr-3"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded bg-blue-100 flex items-center justify-center mr-3">
-                          <BuildingOfficeIcon className="w-6 h-6 text-blue-600" />
-                        </div>
+                        <SoftIcon name="building" className="w-12 h-12 mr-3 flex-shrink-0" />
                       )}
                       <div>
                         <div className="font-medium text-gray-900">{agency.name}</div>
@@ -122,7 +121,7 @@ const AgencyManager: React.FC = () => {
                     {agency.ownerId ? (
                       <div>
                         <div className="text-sm text-gray-900">
-                          {typeof agency.ownerId === 'object' ? agency.ownerId.name : 'Owner'}
+                          {typeof agency.ownerId === 'object' ? agency.ownerId.name : t('admin:ui.agencyManager.owner', 'Owner')}
                         </div>
                         <div className="text-xs text-gray-500">
                           {typeof agency.ownerId === 'object' ? agency.ownerId.email : agency.ownerId}
@@ -235,7 +234,7 @@ const AgencyManager: React.FC = () => {
       {totalPages > 1 && (
         <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
+            {t('admin:ui.agencyManager.page', 'Page')} {currentPage} of {totalPages}
           </div>
           <div className="flex gap-2">
             <button
@@ -243,14 +242,14 @@ const AgencyManager: React.FC = () => {
               disabled={currentPage === 1}
               className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Previous
+              {t('admin:ui.agencyManager.previous', 'Previous')}
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
               className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
-              Next
+              {t('admin:ui.agencyManager.next', 'Next')}
             </button>
           </div>
         </div>

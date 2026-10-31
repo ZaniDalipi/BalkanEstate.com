@@ -14,31 +14,32 @@ import { useTranslation } from 'react-i18next';
 import { useMap } from 'react-leaflet';
 import { useHighlightedProperties, PROMOTION_TIER_COLORS } from '../../context/HighlightedPropertiesContext';
 import { formatPrice } from '../../../utils/currency';
-import { optimizeCloudinaryUrl } from '../../../config/cloudinaryConfig';
+import { optimizeImageUrl } from '../../../config/mediaConfig';
 import { formatCityPlace } from '@/shared/geo';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 
 interface MapAgentAvatarProps {
   onPropertySelect: (propertyId: string) => void;
 }
 
 // Tier configuration with colors and labels
-const TIER_CONFIG: Record<string, { color: string; gradient: string; icon: string; label: string }> = {
+const TIER_CONFIG: Record<string, { color: string; gradient: string; icon: SoftIconName; label: string }> = {
   premium: {
     color: '#FFB800',
     gradient: 'from-amber-500 via-yellow-400 to-orange-400',
-    icon: '👑',
+    icon: 'crown',
     label: 'Premium'
   },
   highlight: {
     color: '#0EA5E9',
     gradient: 'from-sky-500 via-sky-400 to-cyan-400',
-    icon: '💎',
+    icon: 'diamond',
     label: 'Highlight'
   },
   featured: {
     color: '#7C3AED',
     gradient: 'from-violet-600 via-purple-500 to-violet-400',
-    icon: '⭐',
+    icon: 'star',
     label: 'Featured'
   },
 };
@@ -147,8 +148,8 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
           {/* Header with gradient - more compact on mobile */}
           <div className={`bg-gradient-to-r ${tierConfig.gradient} px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-between`}>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-xs sm:text-sm">{tierConfig.icon}</span>
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-white/95 rounded-full flex items-center justify-center">
+                <SoftIcon name={tierConfig.icon} className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
                 <p className="text-white text-[8px] sm:text-[10px] font-medium opacity-90">{t('property:map.popup.recommendation')}</p>
@@ -158,7 +159,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
             <button
               onClick={() => setShowPanel(false)}
               className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all active:scale-95 touch-manipulation bg-white/20 hover:bg-white/30"
-              aria-label="Close panel"
+              aria-label={t('common:ui.mapAgentAvatar.closePanel', 'Close panel')}
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -171,7 +172,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
             {/* Image - smaller on mobile */}
             <div className="relative rounded-lg overflow-hidden mb-1.5 sm:mb-2 group cursor-pointer" onClick={handleViewProperty}>
               <img
-                src={optimizeCloudinaryUrl(currentMapFeatured.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })}
+                src={optimizeImageUrl(currentMapFeatured.imageUrl, { width: 384, quality: 'auto', crop: 'fill' })}
                 alt={currentMapFeatured.title || currentMapFeatured.address}
                 loading="lazy"
                 decoding="async"
@@ -194,7 +195,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                   className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500 text-white text-[8px] sm:text-[10px] font-bold px-1 sm:px-1.5 py-0.5 rounded animate-pulse flex items-center gap-0.5"
                   style={{ boxShadow: '0 0 10px 2px rgba(239, 68, 68, 0.6), 0 0 16px 4px rgba(239, 68, 68, 0.3)' }}
                 >
-                  <span>🔥</span> <span className="hidden xs:inline">{t('property:status.urgent')}</span>
+                  <SoftIcon name="flame" className="w-4 h-4" /> <span className="hidden xs:inline">{t('property:status.urgent')}</span>
                 </div>
               )}
             </div>
@@ -205,9 +206,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
                 {currentMapFeatured.title || currentMapFeatured.address}
               </h3>
               <p className="text-gray-500 text-[10px] sm:text-xs flex items-center gap-0.5 sm:gap-1 line-clamp-1">
-                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                </svg>
+                <SoftIcon name="pin" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span className="truncate">{formatCityPlace(currentMapFeatured.city, currentMapFeatured.country).full}</span>
               </p>
             </div>
@@ -326,7 +325,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
           }}
         >
           {/* House icon */}
-          <span className="text-xl md:text-2xl">🏠</span>
+          <SoftIcon name="home" className="w-8 h-8 md:w-9 md:h-9" />
         </div>
 
         {/* Count badge - bottom right */}
@@ -348,7 +347,7 @@ const MapAgentAvatar: React.FC<MapAgentAvatarProps> = ({ onPropertySelect }) => 
             border: '1.5px solid white',
           }}
         >
-          <span className="text-[10px]">{tierConfig.icon}</span>
+          <SoftIcon name={tierConfig.icon} className="w-4 h-4" />
         </div>
 
         {/* Tooltip on hover - hidden on mobile */}

@@ -1,4 +1,4 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Agency } from '../types';
@@ -8,29 +8,7 @@ import { UserRole } from '../types';
 import { getAgencies } from '../src/features/agencies/api';
 import AgencyScoringPanel from '../src/features/agencies/components/AgencyScoringPanel';
 import { calcAgencyScore } from '../src/features/agencies/utils/agencyScoring';
-import {
-  BuildingOfficeIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  MapPinIcon,
-  StarIcon,
-  SearchIcon,
-  FilterIcon,
-  TrophyIcon,
-  UsersIcon,
-  UserIcon,
-  HomeIcon,
-  CalendarIcon,
-  SparklesIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-  GlobeAltIcon,
-  ShieldCheckIcon,
-  CheckBadgeIcon,
-  AcademicCapIcon,
-  ExclamationTriangleIcon
-} from '../constants';
+import { ChevronRightIcon } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import Footer from './shared/Footer';
 import { SEO } from '../src/components/seo';
@@ -41,6 +19,7 @@ import { API_URL } from '../src/shared/api/config';
 import { tokenService } from '../src/shared/api/tokenService';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 // Gradient presets for agency banners (same as AgencyDetailPage)
 const GRADIENT_PRESETS = [
@@ -211,10 +190,10 @@ const AgenciesListPage: React.FC = () => {
   };
 
   const getRankStyle = (index: number) => {
-    if (index === 0) return { bg: 'from-amber-400 to-amber-600', css: 'linear-gradient(135deg, #fbbf24, #d97706)', text: t('agencies.rank1st'), emoji: '🏆' };
-    if (index === 1) return { bg: 'from-slate-300 to-slate-500', css: 'linear-gradient(135deg, #cbd5e1, #64748b)', text: t('agencies.rank2nd'), emoji: '🥈' };
-    if (index === 2) return { bg: 'from-orange-400 to-orange-600', css: 'linear-gradient(135deg, #fb923c, #ea580c)', text: t('agencies.rank3rd'), emoji: '🥉' };
-    return { bg: 'from-primary to-primary-dark', css: 'linear-gradient(135deg, #1e293b, #0f172a, #1e1b4b)', text: `${index + 1}`, emoji: '' };
+    if (index === 0) return { bg: 'from-amber-400 to-amber-600', css: 'linear-gradient(135deg, #fbbf24, #d97706)', text: t('agencies.rank1st'), medal: 'medal1' as const };
+    if (index === 1) return { bg: 'from-slate-300 to-slate-500', css: 'linear-gradient(135deg, #cbd5e1, #64748b)', text: t('agencies.rank2nd'), medal: 'medal2' as const };
+    if (index === 2) return { bg: 'from-orange-400 to-orange-600', css: 'linear-gradient(135deg, #fb923c, #ea580c)', text: t('agencies.rank3rd'), medal: 'medal3' as const };
+    return { bg: 'from-primary to-primary-dark', css: 'linear-gradient(135deg, #1e293b, #0f172a, #1e1b4b)', text: `${index + 1}`, medal: null };
   };
 
   const renderAgencyCard = (agency: Agency, index: number, isCompact: boolean = false) => {
@@ -241,7 +220,7 @@ const AgenciesListPage: React.FC = () => {
           >
             {agency.coverImage && (
               <img
-                src={optimizeCloudinaryUrl(agency.coverImage, { width: 640 }) || agency.coverImage}
+                src={optimizeImageUrl(agency.coverImage, { width: 640 }) || agency.coverImage}
                 alt={`${agency.name} banner`}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
@@ -264,14 +243,14 @@ const AgenciesListPage: React.FC = () => {
 
             {/* Score badge — top left */}
             <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-black/40 backdrop-blur-sm rounded-lg border border-white/20">
-              <TrophyIcon className="w-3 h-3 text-amber-400" />
+              <SoftIcon name="trophy" className="w-4 h-4" />
               <span className="text-white text-xs font-bold">{score} pts</span>
             </div>
 
             {/* Rank badge — top right */}
             {index < 10 && (
               <div className="absolute top-3 right-3 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-bold flex items-center gap-1 border border-white/30">
-                {rankStyle.emoji && <span>{rankStyle.emoji}</span>}
+                {rankStyle.medal && <SoftIcon name={rankStyle.medal} className="w-4 h-4" />}
                 <span>#{index + 1}</span>
               </div>
             )}
@@ -279,7 +258,7 @@ const AgenciesListPage: React.FC = () => {
             {/* Featured badge replaces score if featured */}
             {agency.isFeatured && (
               <div className="absolute top-3 left-3 px-2.5 py-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg text-white text-xs font-bold flex items-center gap-1 shadow-lg">
-                <SparklesIcon className="w-3 h-3" />
+                <SoftIcon name="sparkles" className="w-4 h-4 flex-shrink-0" />
                 <span>{t('agencies.featured')}</span>
               </div>
             )}
@@ -293,7 +272,7 @@ const AgenciesListPage: React.FC = () => {
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-primary hover:text-white transition-all shadow-md hover:scale-110"
                   aria-label={t('agencies.call')}
                 >
-                  <PhoneIcon className="w-3.5 h-3.5" />
+                  <SoftIcon name="phone" className="w-6 h-6" />
                 </a>
               )}
               {agency.email && (
@@ -303,7 +282,7 @@ const AgenciesListPage: React.FC = () => {
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-primary hover:text-white transition-all shadow-md hover:scale-110"
                   aria-label={t('agencies.email')}
                 >
-                  <EnvelopeIcon className="w-3.5 h-3.5" />
+                  <SoftIcon name="envelope" className="w-6 h-6" />
                 </a>
               )}
             </div>
@@ -316,10 +295,10 @@ const AgenciesListPage: React.FC = () => {
               style={{ width: `${logoSize}px`, height: `${logoSize}px`, minWidth: `${logoSize}px`, minHeight: `${logoSize}px` }}
             >
               {agency.logo ? (
-                <img src={optimizeCloudinaryUrl(agency.logo, { width: 240 }) || agency.logo} alt={agency.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" draggable={false} />
+                <img src={optimizeImageUrl(agency.logo, { width: 240 }) || agency.logo} alt={agency.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" draggable={false} />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                  <BuildingOfficeIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+                  <SoftIcon name="building" className="w-10 h-10 sm:w-12 sm:h-12" />
                 </div>
               )}
             </div>
@@ -332,7 +311,7 @@ const AgenciesListPage: React.FC = () => {
                 {agency.name}
               </h3>
               <div className="flex items-center gap-1.5 text-gray-500">
-                <MapPinIcon className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
+                <SoftIcon name="pin" className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm truncate">{agency.city}, {agency.country}</span>
               </div>
             </div>
@@ -512,7 +491,7 @@ const AgenciesListPage: React.FC = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                   }`}
                 >
-                  <FilterIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <SoftIcon name="filter" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   {t('agencies.filterAll')}
                 </button>
                 <button
@@ -523,7 +502,7 @@ const AgenciesListPage: React.FC = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                   }`}
                 >
-                  <StarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <SoftIcon name="star" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                   {t('agencies.filterFeatured')}
                 </button>
                 {hasAgency && (
@@ -535,7 +514,7 @@ const AgenciesListPage: React.FC = () => {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                     }`}
                   >
-                    <BuildingOfficeIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <SoftIcon name="building" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                     {t('agencies.filterMyAgency')}
                   </button>
                 )}
@@ -581,9 +560,7 @@ const AgenciesListPage: React.FC = () => {
               {agencies.length > 0 && (
                 <div className="flex items-center gap-4 sm:gap-6 mt-4 sm:mt-6 py-3 sm:py-4 px-4 sm:px-6 bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center">
-                      <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    </div>
+                    <SoftIcon name="home" className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
                         {agencyStats.mostProperties}
@@ -595,9 +572,7 @@ const AgenciesListPage: React.FC = () => {
                   <div className="w-px h-8 bg-gray-200" />
 
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-500 rounded-lg sm:rounded-xl flex items-center justify-center">
-                      <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    </div>
+                    <SoftIcon name="users" className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
                         {agencyStats.mostAgents}
@@ -609,9 +584,7 @@ const AgenciesListPage: React.FC = () => {
                   <div className="w-px h-8 bg-gray-200" />
 
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-500 rounded-lg sm:rounded-xl flex items-center justify-center">
-                      <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    </div>
+                    <SoftIcon name="calendar" className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0" />
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-gray-900 leading-none">
                         {agencyStats.mostExperience}+
@@ -626,9 +599,7 @@ const AgenciesListPage: React.FC = () => {
             {/* Content */}
             {error ? (
               <div className="bg-gradient-to-br from-red-50 to-white rounded-2xl sm:rounded-3xl border-2 border-red-100 p-8 sm:p-12 text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-red-100 to-red-50 rounded-full flex items-center justify-center">
-                  <ExclamationTriangleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
-                </div>
+                <SoftIcon name="warning" className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6" />
                 <h3 className="text-xl sm:text-2xl font-bold text-red-900 mb-2 sm:mb-3">{t('agencies.unableToLoad')}</h3>
                 <p className="text-red-700 mb-4 sm:mb-6 max-w-md mx-auto text-sm sm:text-base">{error}</p>
                 <button
@@ -643,8 +614,8 @@ const AgenciesListPage: React.FC = () => {
                 <div className="max-w-md mx-auto">
                   <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark rounded-full opacity-20 animate-ping"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark rounded-full flex items-center justify-center">
-                      <MagnifyingGlassIcon className="w-12 h-12 sm:w-16 sm:h-16 text-white animate-pulse" />
+                    <div className="absolute inset-0 bg-white/95 shadow-lg ring-1 ring-primary/10 rounded-full flex items-center justify-center">
+                      <SoftIcon name="search" className="w-16 h-16 sm:w-24 sm:h-24 animate-pulse" />
                     </div>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-center text-gray-900 mb-2 sm:mb-3">
@@ -665,10 +636,10 @@ const AgenciesListPage: React.FC = () => {
                 <div className="max-w-md mx-auto">
                   <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 sm:mb-6 relative">
                     <div className="absolute inset-0 bg-gray-200 rounded-2xl flex items-center justify-center transform rotate-6">
-                      <BuildingOfficeIcon className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400" />
+                      <SoftIcon name="building" className="w-16 h-16 sm:w-20 sm:h-20" />
                     </div>
                     <div className="absolute top-0 right-0 w-6 h-6 sm:w-8 sm:h-8 bg-amber-100 rounded-full flex items-center justify-center animate-bounce">
-                      <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                      <SoftIcon name="sparkles" className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
@@ -686,7 +657,7 @@ const AgenciesListPage: React.FC = () => {
                     onClick={handleCreateEnterprise}
                     className="inline-flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-primary to-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold hover:shadow-xl hover:scale-105 transition-all text-sm sm:text-base"
                   >
-                    <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <SoftIcon name="building" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                     {t('agencies.createAgency')}
                   </button>
                 </div>
@@ -700,7 +671,7 @@ const AgenciesListPage: React.FC = () => {
                 {agencies.length >= 3 && (
                   <div className="mb-6 sm:mb-10">
                     <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                      <TrophyIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+                      <SoftIcon name="trophy" className="w-7 h-7 sm:w-8 sm:h-8" />
                       <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('agencies.topAgencies')}</h3>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -760,8 +731,8 @@ const AgenciesListPage: React.FC = () => {
           {/* Create Your Agency CTA */}
           <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-white rounded-2xl sm:rounded-3xl border border-primary/20 sm:border-2 p-6 sm:p-8 md:p-12 mb-6 sm:mb-8">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-primary to-primary-dark rounded-xl sm:rounded-full mb-4 sm:mb-6">
-                <BuildingOfficeIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-white shadow-md ring-1 ring-primary/10 rounded-xl sm:rounded-full mb-4 sm:mb-6">
+                <SoftIcon name="building" className="w-8 h-8 sm:w-10 sm:h-10" />
               </div>
               <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-2 sm:mb-4">
                 {t('agencies.readyToGrow')}
@@ -773,7 +744,7 @@ const AgenciesListPage: React.FC = () => {
                 onClick={handleCreateEnterprise}
                 className="inline-flex items-center gap-2 sm:gap-3 bg-primary hover:bg-primary-dark text-white px-5 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-semibold transition-all active:scale-95 text-sm sm:text-base"
               >
-                <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <SoftIcon name="sparkles" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 {t('agencies.createAgencyToday')}
               </button>
             </div>

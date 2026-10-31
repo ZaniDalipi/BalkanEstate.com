@@ -7,7 +7,6 @@ process.env.SKIP_TEST_DB = 'true';
 
 import { extractYouTubeId, toYouTubeEmbedUrl, validateYouTubeLink } from '../utils/videoLinks';
 import { validateVideoRequest } from '../controllers/videoController';
-import { publicIdFromVideoUrl } from '../scripts/removeStoredVideos';
 
 describe('YouTube links', () => {
   it.each([
@@ -64,17 +63,5 @@ describe('validateVideoRequest', () => {
     const result = validateVideoRequest(body);
     expect(result.isValid).toBe(false);
     if (!result.isValid) expect(result.error).toMatch(message);
-  });
-});
-
-describe('publicIdFromVideoUrl', () => {
-  it('strips version and extension', () => {
-    expect(
-      publicIdFromVideoUrl('https://res.cloudinary.com/demo/video/upload/v1700000000/balkan-estate/users/u1/listings/p1/videos/showcase.mp4')
-    ).toBe('balkan-estate/users/u1/listings/p1/videos/showcase');
-  });
-
-  it('ignores anything that is not a Cloudinary video', () => {
-    expect(publicIdFromVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBeNull();
   });
 });

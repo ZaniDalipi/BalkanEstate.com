@@ -13,9 +13,10 @@ import {
   resolveRoute,
 } from '@/app/navigation/sidebarNavigation';
 import { createLogger } from '@/shared/utils/logger';
-import { LogoIcon, AgentsIcon, SearchIcon, MagnifyingGlassPlusIcon, HeartIcon, EnvelopeIcon, UserCircleIcon, UsersIcon, ArrowLeftOnRectangleIcon, XMarkIcon, PencilIcon, StarIconSolid, BuildingOfficeIcon, BuildingStorefrontIcon, ShieldCheckIcon, SparklesIcon, ChartBarIcon, CurrencyDollarIcon, ChevronDownIcon, ChevronUpIcon, CalculatorIcon, WrenchScrewdriverIcon, InformationCircleIcon, RentIcon, HomeIcon, BookOpenIcon, LuxuryVillaIcon } from '../../constants';
+import { LogoIcon, UsersIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon } from '../../constants';
 import LanguageSwitcher from '../../src/components/LanguageSwitcher';
 import UserAvatar from './UserAvatar';
+import { SoftIcon, NavPicture, type NavPictureName } from '@/src/shared/illustrations';
 
 const navLogger = createLogger('SidebarNav');
 
@@ -33,6 +34,15 @@ function preloadHandlers(view: AppView) {
   return { onPointerEnter: warm, onPointerDown: warm, onFocus: warm };
 }
 
+/**
+ * A 3D nav illustration from public/images/nav. Drawn larger than the 20px
+ * icon box so its detail survives, without shifting the label. Hovering a
+ * row magnifies it Dock-style — see `.sidebar-dock` in src/index.css.
+ */
+const NavImage: React.FC<{ name: NavPictureName }> = ({ name }) => (
+  <NavPicture name={name} className="nav-dock-icon w-7 h-7 max-w-none -m-1" />
+);
+
 const NavItem: React.FC<{
   view: AppView;
   label: string;
@@ -48,7 +58,7 @@ const NavItem: React.FC<{
       {...preloadHandlers(view)}
       aria-label={badge && badge > 0 ? `${label} (${badge} unread)` : label}
       aria-current={isActive ? 'page' : undefined}
-      className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative min-h-[44px] ${
+      className={`flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start relative min-h-[44px] landscape:min-h-[36px] ${
         isActive
           ? 'bg-primary-light text-primary-dark'
           : 'text-neutral-700 hover:bg-neutral-100'
@@ -62,7 +72,7 @@ const NavItem: React.FC<{
           </span>
         )}
       </div>
-      <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{label}</span>
+      <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{label}</span>
     </button>
   );
 };
@@ -76,8 +86,8 @@ const ToolsSection: React.FC<{
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toolItems = [
-    { view: 'valuation' as AppView, label: t('nav:valuation'), icon: <CurrencyDollarIcon /> },
-    { view: 'mortgage-calculator' as AppView, label: t('nav:mortgageCalculator'), icon: <CalculatorIcon /> },
+    { view: 'valuation' as AppView, label: t('nav:valuation'), icon: <SoftIcon name="moneybag" className="nav-dock-icon w-6 h-6 max-w-none -m-0.5" /> },
+    { view: 'mortgage-calculator' as AppView, label: t('nav:mortgageCalculator'), icon: <SoftIcon name="calculator" className="nav-dock-icon w-6 h-6 max-w-none -m-0.5" /> },
   ];
 
   const isToolActive = toolItems.some(item => item.view === activeView);
@@ -88,14 +98,14 @@ const ToolsSection: React.FC<{
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
-        className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start min-h-[44px] ${
+        className={`flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left md:justify-center group-hover:md:justify-start min-h-[44px] landscape:min-h-[36px] ${
           isToolActive ? 'bg-primary-light text-primary-dark' : 'text-neutral-700 hover:bg-neutral-100'
         }`}
       >
-        <div className={`w-5 h-5 flex-shrink-0 ${isToolActive ? 'text-primary' : 'text-neutral-700'}`}>
-          <WrenchScrewdriverIcon />
+        <div className="w-5 h-5 flex-shrink-0" aria-hidden="true">
+          <NavImage name="tools" />
         </div>
-        <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm flex-1">{t('nav:extras')}</span>
+        <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm flex-1">{t('nav:extras')}</span>
         <div className="md:hidden group-hover:md:block">
           {isExpanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
         </div>
@@ -118,7 +128,7 @@ const ToolsSection: React.FC<{
               <div className={`w-4 h-4 flex-shrink-0 ${activeView === item.view ? 'text-primary' : 'text-neutral-600'}`}>
                 {item.icon}
               </div>
-              <span className="md:hidden group-hover:md:inline whitespace-nowrap">{item.label}</span>
+              <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap">{item.label}</span>
             </button>
           ))}
         </div>
@@ -229,23 +239,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     // Luxury villas are their own curated market (for rent OR for sale), so the
     // entry is always visible — a permanent home in the sidebar.
     const baseNavItems = [
-      { view: 'home' as AppView, label: t('nav:home'), icon: <HomeIcon /> },
-      { view: 'search' as AppView, label: t('nav:search'), icon: <SearchIcon /> },
-      { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <RentIcon /> },
-      { view: 'villas' as AppView, label: t('nav:villas'), icon: <LuxuryVillaIcon className="h-5 w-5 text-[#FFA500]" /> },
-      { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <SparklesIcon /> },
-      { view: 'saved-searches' as AppView, label: t('nav:savedSearches'), icon: <MagnifyingGlassPlusIcon /> },
-      { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <HeartIcon /> },
-      { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <AgentsIcon /> },
-      { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <BuildingOfficeIcon /> },
-      { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <BuildingStorefrontIcon /> },
-      { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <InformationCircleIcon /> },
-      { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <BookOpenIcon /> },
+      { view: 'home' as AppView, label: t('nav:home'), icon: <NavImage name="home" /> },
+      { view: 'search' as AppView, label: t('nav:search'), icon: <NavImage name="buy" /> },
+      { view: 'rentals' as AppView, label: t('nav:rentals'), icon: <NavImage name="rent" /> },
+      { view: 'villas' as AppView, label: t('nav:villas'), icon: <NavImage name="villas" /> },
+      { view: 'explore-cities' as AppView, label: t('nav:exploreCities'), icon: <NavImage name="explore" /> },
+      { view: 'saved-searches' as AppView, label: t('nav:savedSearches'), icon: <NavImage name="saved-searches" /> },
+      { view: 'saved-properties' as AppView, label: t('nav:savedProperties'), icon: <NavImage name="saved" /> },
+      { view: 'agents' as AppView, label: t('nav:topAgents'), icon: <NavImage name="agents" /> },
+      { view: 'agencies' as AppView, label: t('nav:agencies'), icon: <NavImage name="agencies" /> },
+      { view: 'business-directory' as AppView, label: t('nav:businessDirectory'), icon: <NavImage name="business" /> },
+      { view: 'developments' as AppView, label: t('nav:developments', 'Residences'), icon: <SoftIcon name="building" className="nav-dock-icon w-7 h-7 max-w-none -m-1" /> },
+      { view: 'how-it-works' as AppView, label: t('nav:howItWorks'), icon: <NavImage name="how-it-works" /> },
+      { view: 'blog' as AppView, label: t('nav:blog', 'Blog & Articles'), icon: <NavImage name="blog" /> },
     ];
 
     // Add admin panel for admin users
     const navItems = currentUser?.role === 'admin' || currentUser?.role === 'super_admin'
-      ? [...baseNavItems, { view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <ShieldCheckIcon /> }]
+      ? [...baseNavItems, { view: 'admin' as AppView, label: t('nav:adminPanel'), icon: <SoftIcon name="shield" className="nav-dock-icon w-7 h-7 max-w-none -m-1" /> }]
       : baseNavItems;
 
     // Close sidebar on Escape key
@@ -288,7 +299,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 md:z-50 flex flex-col transition-transform duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] group overflow-hidden ${isOpen ? 'z-[1300] translate-x-0 w-64' : 'z-50 -translate-x-full w-64 invisible md:visible'} md:w-20 md:translate-x-0 hover:md:w-64`}
+                className={`fixed top-0 left-0 h-full bg-white border-r border-neutral-200 md:z-50 flex flex-col sidebar-dock transition-transform duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] group overflow-hidden ${isOpen ? 'z-[1300] translate-x-0 w-64' : 'z-50 -translate-x-full w-64 invisible md:visible'} md:w-(--sidebar-rail-w) md:translate-x-0 hover:md:w-[calc(16rem+env(safe-area-inset-left,0px))]`}
                 aria-label={t('nav:mainNavigation', 'Main navigation')}
                 style={{
                   paddingTop: 'env(safe-area-inset-top, 0px)',
@@ -302,7 +313,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   willChange: isOpen ? 'transform' : undefined,
                 }}
             >
-                <div className="flex items-center justify-between p-3 h-[56px] border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
+                <div className="flex items-center justify-between p-3 h-[56px] landscape:h-11 border-b border-neutral-200 flex-shrink-0 md:justify-center group-hover:md:justify-start">
                     <button
                         onClick={() => handleNavClick('home')}
                         {...preloadHandlers('home')}
@@ -310,9 +321,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         aria-label={t('nav:goToHome', 'Go to home page')}
                     >
                         <LogoIcon className="w-7 h-7 text-primary flex-shrink-0" aria-hidden="true" />
-                        <h1 className="text-lg font-bold text-neutral-800 md:hidden group-hover:md:inline whitespace-nowrap">
+                        {/* A span, not an h1: the sidebar is on every page, and the
+                            page's own heading should be its only h1. */}
+                        <span className="text-lg font-bold text-neutral-800 dock-label md:hidden group-hover:md:inline whitespace-nowrap">
                             Balkan<span className="text-primary">Estate</span><sup className="text-primary text-xs font-bold ml-0.5">AI</sup>
-                        </h1>
+                        </span>
                     </button>
                     <button
                         onClick={onClose}
@@ -346,26 +359,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         <button
                             onClick={handleNewListingClick}
                             {...preloadHandlers('create-listing')}
-                            className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-white bg-secondary min-h-[44px] hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
+                            className="flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-white bg-secondary min-h-[44px] landscape:min-h-[36px] hover:bg-opacity-90 md:justify-center group-hover:md:justify-start"
                             aria-label={t('nav:createNewListing', 'Create a new listing')}
                         >
-                            <PencilIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
+                            <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="new-listing" /></div>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">+ {t('nav:newListing')}</span>
                         </button>
                         <button
                             onClick={handleSubscriptionClick}
                             {...preloadHandlers('pricing')}
-                            className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
+                            className={`flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] landscape:min-h-[36px] md:justify-center group-hover:md:justify-start text-neutral-700 hover:bg-neutral-100`}
                             aria-label={t('nav:viewSubscription', 'View subscription plans')}
                         >
-                            <div className={`w-5 h-5 flex-shrink-0 text-neutral-700`} aria-hidden="true"><StarIconSolid /></div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
+                            <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="subscription" /></div>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:subscription')}</span>
                         </button>
                         {isAuthenticated && (
                             <button
                                 onClick={() => handleNavClick('analytics')}
                                 {...preloadHandlers('analytics')}
-                                className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start ${
+                                className={`flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] landscape:min-h-[36px] md:justify-center group-hover:md:justify-start ${
                                     activeView === 'analytics'
                                         ? 'bg-primary-light text-primary-dark'
                                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -373,16 +386,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('nav:viewAnalytics', 'View analytics dashboard')}
                                 aria-current={activeView === 'analytics' ? 'page' : undefined}
                             >
-                                <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'analytics' ? 'text-primary' : 'text-neutral-700'}`} aria-hidden="true">
-                                    <ChartBarIcon />
+                                <div className="w-5 h-5 flex-shrink-0" aria-hidden="true">
+                                    <NavImage name="analytics" />
                                 </div>
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:analytics')}</span>
+                                <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:analytics')}</span>
                             </button>
                         )}
                         <button
                             onClick={() => handleNavClick('inbox')}
                             {...preloadHandlers('inbox')}
-                            className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start relative ${
+                            className={`flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] landscape:min-h-[36px] md:justify-center group-hover:md:justify-start relative ${
                                 activeView === 'inbox'
                                     ? 'bg-primary-light text-primary-dark'
                                     : 'text-neutral-700 hover:bg-neutral-100'
@@ -390,15 +403,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             aria-label={totalUnreadCount > 0 ? t('nav:inboxWithUnread', 'Inbox ({{count}} unread)', { count: totalUnreadCount }) : t('nav:inbox')}
                             aria-current={activeView === 'inbox' ? 'page' : undefined}
                         >
-                            <div className={`w-5 h-5 flex-shrink-0 ${activeView === 'inbox' ? 'text-primary' : 'text-neutral-700'} relative`} aria-hidden="true">
-                                <EnvelopeIcon />
+                            <div className="w-5 h-5 flex-shrink-0 relative" aria-hidden="true">
+                                <NavImage name="inbox" />
                                 {totalUnreadCount > 0 && (
                                     <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 ring-2 ring-white shadow" aria-hidden="true">
                                         {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
                                     </span>
                                 )}
                             </div>
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:inbox')}</span>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:inbox')}</span>
                         </button>
                     </div>
                 </nav>
@@ -412,7 +425,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                              <button
                                 onClick={() => handleNavClick('account')}
                                 {...preloadHandlers('account')}
-                                className={`flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] md:justify-center group-hover:md:justify-start ${
+                                className={`flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] landscape:min-h-[36px] md:justify-center group-hover:md:justify-start ${
                                     activeView === 'account'
                                     ? 'bg-primary-light text-primary-dark'
                                     : 'text-neutral-700 hover:bg-neutral-100'
@@ -420,28 +433,33 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                                 aria-label={t('nav:goToAccount', 'Go to my account')}
                                 aria-current={activeView === 'account' ? 'page' : undefined}
                             >
-                                <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100">
-                                <UserAvatar src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} className="w-full h-full object-cover" />
-                                </div>
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
+                                {currentUser.avatarUrl ? (
+                                    <div className="w-5 h-5 flex-shrink-0 rounded-full overflow-hidden bg-neutral-100">
+                                    <UserAvatar src={currentUser.avatarUrl} alt={t('nav:userAvatar', 'User avatar')} gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} className="w-full h-full object-cover" />
+                                    </div>
+                                ) : (
+                                    // No photo of their own yet: the branded account icon
+                                    <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="account" /></div>
+                                )}
+                                <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:myAccount')}</span>
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start"
+                                className="flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] landscape:min-h-[36px] text-red-600 hover:bg-red-50 md:justify-center group-hover:md:justify-start"
                                 aria-label={t('auth:logoutAccount', 'Log out of your account')}
                             >
-                                <ArrowLeftOnRectangleIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                                <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:buttons.logout')}</span>
+                                <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="logout" /></div>
+                                <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('auth:buttons.logout')}</span>
                             </button>
                         </div>
                     ) : (
                          <button
                             onClick={() => { dispatch({ type: 'TOGGLE_AUTH_MODAL', payload: { isOpen: true, view: 'login' } }); onClose(); }}
-                            className="flex items-center gap-2.5 px-3 py-3 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
+                            className="flex items-center gap-2.5 px-3 py-3 landscape:py-1.5 rounded-lg font-semibold transition-colors w-full text-left min-h-[44px] landscape:min-h-[36px] text-neutral-700 hover:bg-neutral-100 md:justify-center group-hover:md:justify-start"
                             aria-label={t('nav:loginOrRegister', 'Login or register an account')}
                          >
-                            <UserCircleIcon className="w-5 h-5 text-neutral-700 flex-shrink-0" aria-hidden="true" />
-                            <span className="md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
+                            <div className="w-5 h-5 flex-shrink-0" aria-hidden="true"><NavImage name="account" /></div>
+                            <span className="dock-label md:hidden group-hover:md:inline whitespace-nowrap text-sm">{t('nav:loginRegister')}</span>
                         </button>
                     )}
                 </div>

@@ -16,7 +16,9 @@ import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { getCountryData } from '@/constants/countries';
 import { generatePropertySlug } from '@/utils/slug';
 import { navigate } from '@/src/app/router/navigation';
+import { rememberOpenedProperty } from '@/src/features/map/mapViewMemory';
 import { paths } from '@/src/app/router/paths';
+import { getSearchLayout } from '@/src/shared/utils/searchLayout';
 
 export const serializeBounds = (bounds: L.LatLngBounds): string => {
     const sw = bounds.getSouthWest();
@@ -82,7 +84,7 @@ export function useRentalSearch() {
 
     // Local state
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
+    const [isTablet, setIsTablet] = useState(() => getSearchLayout() === 'tablet');
     // Open on the map first on mobile/tablet (e.g. when navigating in from the sidebar).
     const [mobileView, setMobileView] = useState<'list' | 'map'>('map');
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
@@ -179,7 +181,7 @@ export function useRentalSearch() {
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
-            setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+            setIsTablet(getSearchLayout() === 'tablet');
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -563,6 +565,7 @@ export function useRentalSearch() {
             // Same route a listing card opens, so a rental found through the
             // search box lands exactly where one found by scrolling does.
             const property = suggestion.property;
+            rememberOpenedProperty(property.id);
             navigate(paths.property(generatePropertySlug(property)), { state: { property } });
             return;
         }

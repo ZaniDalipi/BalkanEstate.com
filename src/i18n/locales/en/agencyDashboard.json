@@ -26,7 +26,7 @@
     "navLabel": "Dashboard navigation",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar",
-    "imports": "Property Imports"
+    "residences": "Residences"
   },
   "header": {
     "listings": "Listings",
@@ -151,7 +151,18 @@
     "emptyDesc": "Try adjusting your filters or add new listings.",
     "emptyTitle": "No properties found",
     "promote": "Promote",
-    "showing": "Showing {{from}}-{{to}} of {{total}}"
+    "showing": "Showing {{from}}-{{to}} of {{total}}",
+    "statusAll": "All Statuses",
+    "statusActive": "Active",
+    "statusSold": "Sold",
+    "statusRented": "Rented",
+    "statusPending": "Pending",
+    "statusDraft": "Draft",
+    "typeAll": "All Types",
+    "dateAll": "All Time",
+    "date7": "Last 7 days",
+    "date30": "Last 30 days",
+    "date90": "Last 90 days"
   },
   "leads": {
     "title": "Leads & Inquiries",
@@ -182,7 +193,13 @@
     "emptyTitle": "No inquiries found",
     "noAgents": "No agents available",
     "showing": "Showing {{from}}-{{to}} of {{total}}",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "statusAll": "All Statuses",
+    "statusInProgress": "In Progress",
+    "dateAll": "All Time",
+    "date7": "Last 7 days",
+    "date30": "Last 30 days",
+    "date90": "Last 90 days"
   },
   "analytics": {
     "title": "Analytics & Reports",
@@ -259,267 +276,9 @@
     "posting": "Posting...",
     "noNotes": "No team notes yet. Be the first to post!"
   },
-  "imports": {
-    "title": "Property Imports",
-    "subtitle": "Connect the XML feed from your website or CRM. Listings and photos are imported and refreshed every 24 hours.",
-    "managersOnly": "Only the agency owner or an agency admin can manage property imports.",
-    "empty": "No feed connected yet. Connect your website or CRM feed to import your listings automatically.",
-    "confirmDelete": "Disconnect this feed? Imported listings stay on BalkanEstateAI but are no longer updated.",
-    "actions": {
-      "add": "Connect a feed",
-      "syncNow": "Sync now",
-      "pause": "Pause daily sync",
-      "resume": "Resume daily sync",
-      "edit": "Edit",
-      "delete": "Disconnect feed",
-      "preview": "Test connection & preview"
-    },
-    "status": {
-      "draft": "Not activated",
-      "active": "Daily sync on",
-      "paused": "Paused",
-      "queued": "Queued",
-      "fetching": "Downloading",
-      "staged": "Validating",
-      "applying": "Importing",
-      "previewed": "Preview ready",
-      "succeeded": "Succeeded",
-      "partial": "Completed with issues",
-      "awaiting_review": "Needs review",
-      "failed": "Failed"
-    },
-    "trigger": {
-      "preview": "Preview",
-      "manual": "Sync now",
-      "scheduled": "Daily sync"
-    },
-    "counts": {
-      "created": "Created",
-      "updated": "Updated",
-      "unchanged": "Unchanged",
-      "rejected": "Rejected",
-      "deactivated": "Deactivated"
-    },
-    "card": {
-      "running": "Import in progress",
-      "lastSuccess": "Last successful sync",
-      "nextSync": "Next scheduled sync",
-      "notScheduled": "Not scheduled",
-      "mode": "Feed type",
-      "reviewNeeded": "Many listings disappeared from the feed. Review before they are deactivated.",
-      "failedTimes": "(failed {{count}} times in a row)",
-      "onUpload": "When you upload a file"
-    },
-    "mode": {
-      "snapshot": "Complete listing (snapshot)",
-      "delta": "Changes only (delta)"
-    },
-    "form": {
-      "newTitle": "Connect a property feed",
-      "editTitle": "Edit feed",
-      "reactivateNote": "Changing the URL, format, mapping, feed type or credentials stops daily sync until you preview and activate the feed again.",
-      "name": "Name",
-      "namePlaceholder": "Website feed",
-      "url": "Feed URL",
-      "format": "Format",
-      "formatCanonical": "BalkanEstateAI XML (no mapping needed)",
-      "formatCustom": "Other XML format (map fields)",
-      "mode": "Feed contents",
-      "snapshotHelp": "Listings missing from a complete, valid feed are deactivated (never deleted).",
-      "deltaHelp": "Only listings marked \"removed\" are deactivated; missing listings are left alone.",
-      "agent": "Publish listings as",
-      "ownerDefault": "Agency owner (default)",
-      "agentHelp": "New listings count towards this agent's plan allowance.",
-      "auth": "Feed access",
-      "authType": "Authentication",
-      "authNone": "None (public URL)",
-      "authBasic": "Username and password",
-      "authHeader": "API key header",
-      "username": "Username",
-      "headerName": "Header name",
-      "secret": "Password / key",
-      "secretKept": "Saved — leave blank to keep",
-      "safeguards": "Removal safeguard",
-      "maxRemoval": "Ask me first if more than this share disappears (%)",
-      "minRemovals": "…and more than this many listings",
-      "saving": "Saving…",
-      "save": "Save",
-      "formatAuto": "Auto-detect (any XML property feed)",
-      "advanced": "Advanced settings",
-      "advancedHint": "format, password, field mapping, removal safeguards"
-    },
-    "mapping": {
-      "title": "Field mapping",
-      "help": "Paths are element names relative to one listing, separated by \"/\". Use @name for an attribute, e.g. price/@currency or photos/photo/@src; * for any element, e.g. desc/*; and [@lang=en] to pick one, e.g. title[@lang=en].",
-      "recordElement": "Listing element",
-      "areaUnit": "Area unit",
-      "defaultCountry": "Country if not stated",
-      "defaultCurrency": "Currency if not stated",
-      "totalCount": "Total count path (feed root)",
-      "nextPage": "Next page path (feed root)",
-      "valueMap": {
-        "listingType": "Sale/rent values",
-        "propertyType": "Property type values",
-        "status": "Status values"
-      }
-    },
-    "panel": {
-      "draftHelp": "Test the connection and check how your listings will look. Nothing is published until you activate the feed.",
-      "previewRunning": "Checking the feed…",
-      "inProgress": "This import is still running; results appear here automatically.",
-      "uploadDraftHelp": "Upload your XML file to check how your listings will look. Nothing is published until you activate the feed.",
-      "uploadActiveHelp": "Upload a new XML file whenever your listings change. It is imported with the same checks as a feed."
-    },
-    "activate": {
-      "title": "Activate daily imports",
-      "statement": "I confirm that this agency owns or is authorized to publish the listings, descriptions and photos in this feed on BalkanEstateAI.",
-      "acceptLimit": "Import only up to my plan allowance ({{remaining}} listings). The other {{excess}} stay unpublished until I have room.",
-      "activating": "Activating…",
-      "button": "Activate and import now"
-    },
-    "report": {
-      "received": "{{count}} listings in feed",
-      "pages": "{{count}} pages",
-      "previewSummary": "{{valid}} of {{received}} listings are valid and ready to import; {{rejected}} have problems to fix.",
-      "limitTitle": "Your plan allows {{remaining}} more listings, but the feed has {{count}} new ones.",
-      "limitHelp": "These listings are not published and nothing is charged. Upgrade the plan or wait for next month’s allowance, and they will be imported on a later sync:",
-      "heldTitle": "{{count}} imported listings are missing from the feed.",
-      "heldHelp": "That is more than your safeguard allows, so nothing was deactivated. If the listings really were removed, approve; if the feed was wrong, dismiss and fix it.",
-      "wouldDeactivate": "Importing now would deactivate {{count}} listings that are no longer in the feed.",
-      "samples": "Sample listings",
-      "issues": "Validation results",
-      "recognised": "Format recognised automatically: {{format}}",
-      "readAs": "Read as: {{format}}",
-      "customMapping": "your field mapping"
-    },
-    "review": {
-      "approve": "Deactivate {{count}} listings",
-      "dismiss": "Keep them active"
-    },
-    "issues": {
-      "none": "No problems found.",
-      "error": "Not imported",
-      "warning": "Warning",
-      "more": "Show more ({{count}} left)",
-      "truncated": "Only the first 500 problems are listed."
-    },
-    "history": {
-      "title": "Import history",
-      "empty": "No imports yet.",
-      "when": "When",
-      "type": "Type",
-      "result": "Result"
-    },
-    "preview": {
-      "addressHidden": "exact address hidden",
-      "priceOnRequest": "Price on request",
-      "rent": "Rent",
-      "sale": "Sale"
-    },
-    "rules": {
-      "title": "What the feed updates — and what stays yours",
-      "managedTitle": "Updated from the feed",
-      "localEdits": "If you edit one of these on BalkanEstateAI, your edit is kept and reported in the import results instead of being overwritten.",
-      "localTitle": "Only edited here, never by the feed",
-      "removal": "Listings are never deleted. A listing missing from a complete feed is moved to draft and comes back automatically if it reappears. Listings you created by hand are never touched.",
-      "local": {
-        "0": "promotions and badges",
-        "1": "videos and virtual tours",
-        "2": "viewing availability",
-        "3": "special features and materials",
-        "4": "furnishing, heating, condition and view",
-        "5": "rental terms and tenant details",
-        "6": "your internal property ID"
-      }
-    },
-    "fields": {
-      "externalId": "Listing ID",
-      "status": "Status",
-      "sourceUrl": "Listing URL",
-      "title": "Title",
-      "description": "Description",
-      "listingType": "Sale or rent",
-      "rentPeriod": "Rent period",
-      "propertyType": "Property type",
-      "price": "Price",
-      "currency": "Currency",
-      "priceOnRequest": "Price on request",
-      "isNegotiable": "Price on request",
-      "country": "Country",
-      "city": "City",
-      "district": "District",
-      "address": "Address",
-      "addressVisibility": "Address visibility",
-      "latitude": "Latitude",
-      "longitude": "Longitude",
-      "lat": "Latitude",
-      "lng": "Longitude",
-      "area": "Floor area",
-      "sqft": "Floor area",
-      "landArea": "Land area",
-      "bedrooms": "Bedrooms",
-      "beds": "Bedrooms",
-      "bathrooms": "Bathrooms",
-      "baths": "Bathrooms",
-      "livingRooms": "Living rooms",
-      "floor": "Floor",
-      "floorNumber": "Floor",
-      "totalFloors": "Total floors",
-      "yearBuilt": "Year built",
-      "energyRating": "Energy rating",
-      "amenities": "Amenities",
-      "images": "Photos",
-      "floorplans": "Floor plans",
-      "updatedAt": "Last updated"
-    },
-    "source": {
-      "title": "Where do your listings come from?",
-      "url": "Feed URL",
-      "urlHelp": "We fetch your website or CRM feed and sync it every 24 hours.",
-      "upload": "Upload XML file",
-      "uploadHelp": "Upload or paste an XML file whenever your listings change. No URL needed."
-    },
-    "upload": {
-      "chooseFile": "Choose file",
-      "paste": "Paste XML",
-      "pick": "Select an .xml file",
-      "limit": "XML only, up to {{mb}} MB",
-      "tooLarge": "This file is larger than {{mb}} MB.",
-      "previewOnly": "Preview only — check the file without changing any listings",
-      "preview": "Upload and preview",
-      "import": "Upload and import"
-    },
-    "quickUpload": {
-      "button": "Upload XML",
-      "busy": "Uploading…",
-      "feedName": "XML upload"
-    },
-    "workerOffline": "Your import is queued, but the import service is not running, so it has not started. It will start automatically once the service is back — contact support if this lasts more than a few minutes.",
-    "detect": {
-      "title": "Your file uses a different layout.",
-      "found": "Each property is a <{{element}}> element ({{count}} found in the first part of the file). We matched these fields:",
-      "missing": "Not found automatically — set these in the mapping:",
-      "apply": "Use this mapping and preview again",
-      "review": "Review mapping first"
-    },
-    "catalog": {
-      "title": "All fields in this file ({{count}})",
-      "help": "Everything your file contains for a listing, with an example value. Fields marked \"not used\" are ignored — map them under Edit to import them.",
-      "search": "Search fields or values",
-      "path": "Path",
-      "example": "Example",
-      "usedFor": "Imported as",
-      "repeated": "repeats within a listing",
-      "unused": "not used"
-    },
-    "quickLink": {
-      "title": "Import your listings",
-      "help": "Paste the XML link from your website or CRM. We recognise the format, show you a preview, and after you confirm, keep your listings updated every day.",
-      "label": "XML feed link",
-      "button": "Import",
-      "busy": "Checking…",
-      "or": "No link?",
-      "advanced": "Advanced setup (password-protected feed, own field mapping)"
+  "ui": {
+    "overviewCharts": {
+      "noDataAvailable": "No data available"
     }
   }
 }

@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Conversation } from '@/types';
 import { useAppContext } from '@/context/AppContext';
-import { BuildingOfficeIcon } from '@/constants';
 import { markConversationAsRead } from '@/services/apiService';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface ConversationListItemProps {
     conversation: Conversation;
@@ -133,8 +133,8 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                         />
                     </div>
                 ) : imageError ? (
-                    <div className="w-14 h-14 bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center rounded-xl">
-                        <BuildingOfficeIcon className="w-7 h-7 text-neutral-400" />
+                    <div className="w-14 h-14 bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center rounded-xl">
+                        <SoftIcon name="building" className="w-10 h-10" />
                     </div>
                 ) : (
                     <img
@@ -181,7 +181,9 @@ const ConversationListItem: React.FC<ConversationListItemProps> = ({ conversatio
                                     ? `${t('messages:inbox.you', 'You')}: `
                                     : `${otherPersonName}: `}
                             </span>
-                            {lastMessage.text || t('messages:inbox.image', '📷 Image')}
+                            {lastMessage.text || (
+                                <><SoftIcon name="photo" className="inline-block w-4 h-4 mr-0.5 align-[-3px]" />{t('messages:inbox.image', 'Image')}</>
+                            )}
                         </p>
 
                         {/* Read receipt for my sent messages */}

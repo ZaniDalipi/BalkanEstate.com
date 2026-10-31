@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { optimizeCloudinaryUrl, getPropertyImagePlaceholder } from '@/config/cloudinaryConfig';
-import { BuildingOfficeIcon } from '@/constants';
+import React, { useEffect, useState } from 'react';
+import { optimizeImageUrl, getPropertyImagePlaceholder } from '@/config/mediaConfig';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface PropertyImageProps {
   src: string | undefined;
@@ -36,9 +36,9 @@ export const getPropertyImageSources = (
 
   const placeholder =
     getPropertyImagePlaceholder(src) ||
-    optimizeCloudinaryUrl(src, { width: 40, quality: 'auto:eco', crop });
+    optimizeImageUrl(src, { width: 40, quality: 'auto:eco', crop });
 
-  const mainSrc = optimizeCloudinaryUrl(src, {
+  const mainSrc = optimizeImageUrl(src, {
     width: displayWidth,
     height: displayHeight,
     quality: 'auto',
@@ -48,7 +48,7 @@ export const getPropertyImageSources = (
 
   const srcSet = widths
     .map((w) => {
-      const url = optimizeCloudinaryUrl(src, {
+      const url = optimizeImageUrl(src, {
         width: w,
         height: Math.round(w * 0.75),
         quality: 'auto',
@@ -66,7 +66,7 @@ export const getPropertyImageSources = (
  * Renders a property image with:
  *  - An immediately-loaded (eager) blurred LQIP backdrop
  *  - A main image that fades in once loaded
- *  - Responsive srcSet from Cloudinary
+ *  - Responsive srcSet from the media CDN
  *  - Priority mode for above-the-fold / LCP images
  *  - Error fallback (gradient + building icon)
  *
@@ -86,12 +86,24 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   onLoad,
 }) => {
   const [loaded, setLoaded] = useState(false);
+  // The blurred placeholder is a blur(40px) layer at 150% of the card — on a
+  // phone each one is an offscreen GPU buffer. Once the photo has faded in
+  // nothing can see it, so it goes.
+  const [placeholderGone, setPlaceholderGone] = useState(false);
   const [error, setError] = useState(!src);
+
+  // Wait out the fade (the longest is 300ms; callers can also override the
+  // transition through imgClassName, so don't rely on transitionend).
+  useEffect(() => {
+    if (!loaded) return;
+    const timer = window.setTimeout(() => setPlaceholderGone(true), 600);
+    return () => window.clearTimeout(timer);
+  }, [loaded]);
 
   if (error || !src) {
     return (
       <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 via-neutral-200 to-neutral-300 flex items-center justify-center">
-        <BuildingOfficeIcon className="w-10 h-10 text-neutral-400" />
+        <SoftIcon name="building" className="w-12 h-12 opacity-70" />
       </div>
     );
   }
@@ -102,16 +114,18 @@ const PropertyImage: React.FC<PropertyImageProps> = ({
   return (
     <>
       {/* Blurred LQIP backdrop — loads immediately, fills the container while the main image arrives */}
-      <img
-        src={placeholder}
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        width={40}
-        height={30}
-        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80 pointer-events-none select-none"
-      />
+      {!placeholderGone && (
+        <img
+          src={placeholder}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          width={40}
+          height={30}
+          className="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-80 pointer-events-none select-none"
+        />
+      )}
       {/* Main image — fades in once loaded; priority images get high fetchpriority for LCP */}
       <img
         src={mainSrc}

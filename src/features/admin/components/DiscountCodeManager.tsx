@@ -65,7 +65,7 @@ const DiscountCodeManager: React.FC = () => {
               onClick={() => refetch()}
               disabled={isRefetching}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg disabled:opacity-50"
-              title="Refresh discount codes"
+              title={t('admin:ui.discountCodeManager.refreshDiscountCodes', 'Refresh discount codes')}
             >
               <ArrowPathIcon className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
             </button>

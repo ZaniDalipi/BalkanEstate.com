@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property } from '@/types';
 import { BuildingOfficeIcon, XMarkIcon } from '@/constants';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 
 const MAX_COMPARE = 5;
 
@@ -26,7 +26,7 @@ const CompareImage: React.FC<{ prop: Property; onRemove: (id: string) => void }>
                     </div>
                 ) : (
                     <img
-                        src={optimizeCloudinaryUrl(prop.imageUrl, { width: 80, quality: 'auto', crop: 'thumb' })}
+                        src={optimizeImageUrl(prop.imageUrl, { width: 80, quality: 'auto', crop: 'thumb' })}
                         alt={prop.address}
                         loading="lazy"
                         decoding="async"
@@ -60,7 +60,7 @@ const ComparisonBar: React.FC<ComparisonBarProps> = ({ properties, onCompareNow,
 
     return (
         <div
-            className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-white/30 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-3 pt-3"
+            className="fixed bottom-0 left-0 md:left-(--sidebar-rail-w) right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-white/30 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-3 pt-3"
             style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
         >
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">

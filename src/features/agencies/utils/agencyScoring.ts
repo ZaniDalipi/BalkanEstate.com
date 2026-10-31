@@ -1,4 +1,5 @@
 import type { Agency } from '@/src/shared/types';
+import type { SoftIconName } from '@/src/shared/illustrations';
 
 export const AGENCY_MAX_SCORE = 160;
 
@@ -13,12 +14,13 @@ export interface AgencyScoreBreakdown {
 export interface AgencyAchievementBadge {
   key: string;
   label: string;
+  icon: SoftIconName;
   color: string;
 }
 
 export interface AgencyScoringMetricDef {
   key: keyof Omit<AgencyScoreBreakdown, 'total'>;
-  icon: string;
+  icon: SoftIconName;
   labelKey: string;
   formulaKey: string;
   descKey: string;
@@ -32,7 +34,7 @@ export interface AgencyScoringMetricDef {
 export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   {
     key: 'listings',
-    icon: '🏠',
+    icon: 'home',
     labelKey: 'agencies:scoring.metrics.listings.label',
     formulaKey: 'agencies:scoring.metrics.listings.formula',
     descKey: 'agencies:scoring.metrics.listings.desc',
@@ -44,7 +46,7 @@ export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   },
   {
     key: 'team',
-    icon: '👥',
+    icon: 'users',
     labelKey: 'agencies:scoring.metrics.team.label',
     formulaKey: 'agencies:scoring.metrics.team.formula',
     descKey: 'agencies:scoring.metrics.team.desc',
@@ -56,7 +58,7 @@ export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   },
   {
     key: 'experience',
-    icon: '📅',
+    icon: 'calendar',
     labelKey: 'agencies:scoring.metrics.experience.label',
     formulaKey: 'agencies:scoring.metrics.experience.formula',
     descKey: 'agencies:scoring.metrics.experience.desc',
@@ -68,7 +70,7 @@ export const AGENCY_SCORING_METRIC_DEFS: AgencyScoringMetricDef[] = [
   },
   {
     key: 'featured',
-    icon: '✨',
+    icon: 'sparkles',
     labelKey: 'agencies:scoring.metrics.featured.label',
     formulaKey: 'agencies:scoring.metrics.featured.formula',
     descKey: 'agencies:scoring.metrics.featured.desc',
@@ -115,10 +117,10 @@ export function getAgencyAchievementBadge(agency: Agency): AgencyAchievementBadg
   const agents   = clampPositive(agency.totalAgents);
   const years    = clampPositive(agency.yearsInBusiness);
 
-  if (props >= 20)                    return { key: 'marketLeader',  label: '🏆 Market Leader',   color: '#f59e0b' };
-  if (agency.isFeatured)              return { key: 'featured',      label: '✨ Featured Agency',  color: '#8b5cf6' };
-  if (agents >= 8)                    return { key: 'topTeam',       label: '👥 Top Team',         color: '#3b82f6' };
-  if (years >= 10)                    return { key: 'established',   label: '📅 Established',      color: '#10b981' };
-  if (props >= 5 && agents >= 3)      return { key: 'growingFast',   label: '📈 Growing Fast',     color: '#06b6d4' };
+  if (props >= 20)                    return { key: 'marketLeader',  label: 'Market Leader',   icon: 'trophy', color: '#f59e0b' };
+  if (agency.isFeatured)              return { key: 'featured',      label: 'Featured Agency',  icon: 'sparkles', color: '#8b5cf6' };
+  if (agents >= 8)                    return { key: 'topTeam',       label: 'Top Team',         icon: 'users', color: '#3b82f6' };
+  if (years >= 10)                    return { key: 'established',   label: 'Established',      icon: 'calendar', color: '#10b981' };
+  if (props >= 5 && agents >= 3)      return { key: 'growingFast',   label: 'Growing Fast',     icon: 'trendUp', color: '#06b6d4' };
   return null;
 }

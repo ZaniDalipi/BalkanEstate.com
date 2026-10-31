@@ -192,7 +192,7 @@ export interface Property {
   videoUrl?: string; // URL for embedded video (YouTube, TikTok, Instagram, Vimeo, etc.)
   // Generated video fields (auto-generated property showcase video)
   generatedVideoUrl?: string; // URL for the auto-generated property video
-  generatedVideoPublicId?: string; // Cloudinary public_id for the generated video
+  generatedVideoPublicId?: string; // storage key for the generated video
   generatedVideoFormat?: 'vertical' | 'horizontal' | 'square'; // Video format
   generatedVideoDuration?: number; // Duration in seconds
   hasGeneratedVideo?: boolean; // Flag indicating if generated video is available

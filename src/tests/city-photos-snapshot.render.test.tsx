@@ -41,7 +41,7 @@ import type { AdminCityPhoto } from '../features/admin/api/adminApi';
 const OUT = process.env.CITY_PHOTOS_HTML_OUT;
 
 const url = (name: string) =>
-    `https://res.cloudinary.com/demo/image/upload/w_400,h_300,c_fill/sample.jpg#${name}`;
+    `https://media.test/sample.jpg#${name}/original.jpg`;
 
 const rows: AdminCityPhoto[] = [
     {

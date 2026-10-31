@@ -1,7 +1,8 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XMarkIcon, PhotoIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import type { AdBannerAdmin } from '@/src/features/promo/types';
 import { AdBannerFormData, PLACEMENT_OPTIONS, PAGE_OPTIONS } from './useAdBannerManager';
 import AdLocationPreview, { buildAdPreviewUrl } from './AdLocationPreview';
@@ -103,14 +104,14 @@ const AdBannerManagerForm: React.FC<Props> = ({
                   <>
                     {/* Blurred fill — mirrors how the live ad slot renders. */}
                     <img
-                      src={optimizeCloudinaryUrl(formData.imageUrl, { width: 800 }) || formData.imageUrl}
+                      src={optimizeImageUrl(formData.imageUrl, { width: 800 }) || formData.imageUrl}
                       alt=""
                       aria-hidden="true"
                       className="absolute inset-0 w-full h-full"
                       style={{ objectFit: 'cover', filter: 'blur(14px)', transform: 'scale(1.15)', opacity: 0.9 }}
                     />
                     <img
-                      src={optimizeCloudinaryUrl(formData.imageUrl, { width: 800 }) || formData.imageUrl}
+                      src={optimizeImageUrl(formData.imageUrl, { width: 800 }) || formData.imageUrl}
                       alt="preview"
                       className="relative w-full h-full"
                       style={{ objectFit: 'contain', display: 'block', zIndex: 1 }}
@@ -124,7 +125,7 @@ const AdBannerManagerForm: React.FC<Props> = ({
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <PhotoIcon className="w-6 h-6 text-gray-300" />
+                    <SoftIcon name="photo" className="w-8 h-8" />
                   </div>
                 )}
               </div>
@@ -157,9 +158,10 @@ const AdBannerManagerForm: React.FC<Props> = ({
                 </p>
                 {imgDims && (
                   <p className={`text-xs mt-1 ${tooSmall ? 'text-amber-600 font-medium' : 'text-green-600'}`}>
+                    {tooSmall && <SoftIcon name="warning" className="inline-block w-4 h-4 mr-1 align-[-3px]" />}
                     {tooSmall
                       ? t('admin:adBanners.imageLowRes', {
-                          defaultValue: '⚠ Image is only {{w}}×{{h}}px — it may look blurry. Use a larger image (~1000px or more).',
+                          defaultValue: 'Image is only {{w}}×{{h}}px — it may look blurry. Use a larger image (~1000px or more).',
                           w: imgDims.w,
                           h: imgDims.h,
                         })

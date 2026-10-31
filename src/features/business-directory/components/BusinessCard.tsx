@@ -1,8 +1,9 @@
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { BusinessListing } from '@/src/shared/types/businessListing.types';
-import { PhoneIcon, MapPinIcon, CheckBadgeIcon, UserIcon, BuildingStorefrontIcon, EnvelopeIcon, GlobeAltIcon, EyeIcon } from '@/constants';
+import { PhoneIcon, EnvelopeIcon, GlobeAltIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import MagneticTiltCard from './MagneticTiltCard';
 
 interface BusinessCardProps {
@@ -86,7 +87,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
         <div className={`h-20 sm:h-22 ${listing.bannerUrl ? '' : `bg-gradient-to-r ${gradient}`} relative overflow-hidden`}>
           {listing.bannerUrl ? (
             <img
-              src={optimizeCloudinaryUrl(listing.bannerUrl, { width: 640 }) || listing.bannerUrl}
+              src={optimizeImageUrl(listing.bannerUrl, { width: 640 }) || listing.bannerUrl}
               alt={`${listing.name} banner`}
               className="w-full h-full object-cover"
               style={{ objectPosition: `center ${listing.bannerPosition ?? 50}%` }}
@@ -165,7 +166,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
                 ? 'bg-violet-500/30 text-white border border-violet-300/30'
                 : 'bg-white/20 text-white border border-white/20'
             }`}>
-              {isIndividual ? <UserIcon className="w-3 h-3" /> : <BuildingStorefrontIcon className="w-3 h-3" />}
+              <SoftIcon name={isIndividual ? 'user' : 'store'} className="w-4 h-4" />
               {isIndividual ? t('types.individual') : t('types.business')}
             </span>
           </div>
@@ -174,7 +175,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
           {listing.isVerified && (
             <div className="absolute top-3 left-3">
               <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/30 backdrop-blur-md rounded-lg text-white text-[10px] font-bold border border-emerald-300/30 shadow-sm">
-                <CheckBadgeIcon className="w-3 h-3" />
+                <SoftIcon name="shield" className="w-4 h-4" />
                 {t('verified')}
               </span>
             </div>
@@ -186,7 +187,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
           <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center flex-shrink-0 overflow-hidden border-[3px] border-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 ring-1 ring-neutral-100/50">
             {listing.logoUrl ? (
               <img
-                src={optimizeCloudinaryUrl(listing.logoUrl, { width: 128 }) || listing.logoUrl}
+                src={optimizeImageUrl(listing.logoUrl, { width: 128 }) || listing.logoUrl}
                 alt={listing.name}
                 className="w-full h-full object-cover rounded-lg"
                 loading="lazy"
@@ -209,7 +210,7 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
               {listing.name}
             </h3>
             {listing.isVerified && (
-              <CheckBadgeIcon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              <SoftIcon name="shield" className="w-5 h-5 flex-shrink-0" />
             )}
           </div>
 
@@ -266,17 +267,17 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ listing, onClick, onQuoteRe
         {/* Footer */}
         <div className="px-4 sm:px-5 py-2.5 sm:py-3 border-t border-neutral-100/80 flex items-center justify-between bg-gradient-to-r from-neutral-50/80 to-neutral-50/30">
           <span className="flex items-center gap-1 sm:gap-1.5 truncate min-w-0">
-            <MapPinIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5 flex-shrink-0 text-neutral-400" />
+            <SoftIcon name="pin" className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             <span className="truncate text-[11px] sm:text-xs text-neutral-500">{listing.city}, {listing.country}</span>
           </span>
           {listing.views != null && listing.views > 0 ? (
             <span className="flex items-center gap-1 flex-shrink-0 text-neutral-400 text-[11px] sm:text-xs ml-2">
-              <EyeIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+              <SoftIcon name="eye" className="w-4 h-4 sm:w-5 sm:h-5" />
               {listing.views}
             </span>
           ) : (
             <span className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 text-primary font-medium text-[11px] sm:text-xs ml-2">
-              <PhoneIcon className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+              <SoftIcon name="phone" className="w-4 h-4 sm:w-5 sm:h-5" />
               {listing.contactPhone}
             </span>
           )}

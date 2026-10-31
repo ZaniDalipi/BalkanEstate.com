@@ -10,30 +10,6 @@ import { protect } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
 import { createMockUser } from './setup';
 
-// Mock Cloudinary to avoid actual uploads during tests
-jest.mock('../config/cloudinary', () => ({
-  __esModule: true,
-  default: {
-    uploader: {
-      upload_stream: jest.fn((options, callback) => {
-        // Simulate successful upload
-        const mockResult = {
-          secure_url: 'https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg',
-          public_id: 'balkan-estate/properties/user-test123/listing-test456/img1',
-          width: 1920,
-          height: 1080,
-          format: 'jpg',
-          bytes: 245678,
-        };
-        callback(null, mockResult);
-        return {
-          on: jest.fn(),
-        };
-      }),
-    },
-  },
-}));
-
 // Mock Sharp for image processing
 jest.mock('sharp', () => {
   return jest.fn(() => ({

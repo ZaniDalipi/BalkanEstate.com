@@ -44,6 +44,26 @@ src/components/property/  # Shared property UI (used by multiple features)
 └── NeighborhoodInsights.tsx
 ```
 
+### Code Organisation: Small Files, One Job Each
+Inside a feature, every file has one concern, so it can be read, tested and
+changed on its own:
+
+| Kind | Holds | Example |
+|------|-------|---------|
+| `utils/*.ts` | pure logic, unit-tested without rendering | `budgetMatch.ts`: parse a budget, find bargains |
+| `hooks/use*.ts` | server data (TanStack Query), state, effects | `useLocationPrice`, `usePanZoom` |
+| `components/**/use*.ts` | one component group's state or flow | `useFlyToUnit`: the explorer's guided trip |
+| `components/**/*.tsx` | rendering only, ~150 lines at most | `BudgetPanel`, `BudgetPickCard`, `StageTopBar` |
+
+- When a component grows past ~150 lines, split it along a real seam: a bar,
+  an overlay or a card becomes a sub-component, and derived data or a
+  multi-step flow becomes a hook.
+- A group of more than two related files gets its own folder
+  (`explorer/budget/`, `inventory/import/`).
+- Reuse shared types, helpers and style constants instead of near-copies.
+
+The working rules (validation, translations, tests) are in [`CLAUDE.md`](CLAUDE.md).
+
 ### Routing
 The URL is the only record of which page is on screen. React Router renders
 the route that matches it; nothing else decides the page.
@@ -1154,6 +1174,51 @@ Key decisions:
 
 ---
 
+## Residences (Developments)
+
+New-build residences live in `src/features/developments` (API, hooks, types,
+validation and `components/{dashboard,public,scene,shared}`) with thin
+controllers and services under `backend/src/services/developments`. The full
+design — data model, endpoints, permission matrix, the interactive explorer and
+how-tos — is in [`docs/RESIDENCE_EXPLORER.md`](docs/RESIDENCE_EXPLORER.md).
+
+- Form pieces used by more than one form live once: `components/dashboard/details/`
+  holds `LocationFields` (+ `useLocationFields`), shared by *Create residence* and
+  *Residence details*, and `AmenitiesInput`.
+- Edit forms send only changed fields (`detailsDraft.changedFields`), so a save
+  never overwrites a teammate's change to a field the form didn't touch.
+- Validation returns i18n keys (`validation/developmentValidation.ts`); the server
+  repeats every check (`developmentService.normalizeAmenities/normalizeContact`).
+- **Server refusals carry a code, never shown as English.** Every 4xx from the
+  residence API is `{ message, code, details: { field?, params? } }`: services
+  throw `ValidationError(message, { code, field, params })` (and the same for the
+  not-found / forbidden errors, `errorMeta.ts`). `message` is for logs only.
+  - The client reads it with `utils/apiError.readApiError` (httpClient puts the
+    body in `err.details`, so the field is at `err.details.details.field`) and
+    shows it with `hooks/useApiErrorText`: the code's text from
+    `developments:apiErrors.<CODE>` with its params, or a text for the HTTP
+    status (`apiErrors.status.*`, "offline" when the request got no answer).
+  - A `field` that is a form field puts the text next to that field
+    (`role="alert"`, `aria-describedby`); otherwise it is the form-level message.
+  - `apiErrorText.test.ts` scans the backend for codes and fails when one has
+    no English text or any of the 10 locales lacks its key.
+  - Residence notifications store English plus `data.textKey`/`textParams`;
+    the bell shows `developments:notices.<key>` (`shared/utils/notificationText`).
+    Emails are still sent in English (no stored user language).
+- **Residence Pass:** creating is free, and the first publish starts a 15-day
+  public trial. After it, a pass (12 months, 5 buildings) or the owner's
+  premium plan keeps the residence public.
+  - The rules are pure functions in `billing/residencePlan.ts`.
+  - Every public query uses `publicResidenceFilter()`.
+  - The building limit is enforced in `createBuilding`; an admin can override it.
+  - Agencies get one free residence per subscription year, public while
+    subscribed plus a 15-day grace (`billing/agencyResidences.ts`).
+  - The numbers come from the `Product` documents (`residenceTerms()`), so the
+    admin pricing screen changes both the rules and the texts.
+  - Admin › Residences (`features/admin/components/residences/`) sets building
+    limits, gives passes and adds agency free residences.
+  - See *Residence Pass* in `docs/RESIDENCE_EXPLORER.md`.
+
 ## Internationalisation (i18n)
 
 **Library**: `react-i18next`
@@ -1202,6 +1267,180 @@ SqftIcon        // expand arrows (area/m²)
 
 ---
 
+## Illustration System (`src/shared/illustrations`)
+
+Branded 3D pictures sit alongside the line icons above. Small functional
+controls (close, arrows, chevrons, menu, form inputs) keep the line icons;
+anything that names a thing — a room, a feature, a section, a status, a
+destination — uses one of these. All are decorative (`alt=""`,
+`aria-hidden`): the label next to them carries the meaning.
+
+```
+src/shared/illustrations/
+├── index.ts                 # public API — import everything from here
+├── types.ts                 # typed name unions + NAV_PICTURES / CATEGORY_PICTURES
+├── assets.ts                # the only place that builds file URLs (+ softIconHtml)
+├── components/              # one component per file
+│   ├── DecorativeImage.tsx  #   the shared <img>: decorative, hides itself on error
+│   ├── SoftIcon.tsx
+│   ├── SpecIllustration.tsx
+│   ├── NavPicture.tsx
+│   ├── CategoryPicture.tsx
+│   └── ListingTypePicture.tsx
+└── generated/names.ts       # written by the generator — do not edit
+
+public/images/illustrations/
+├── soft/        *.svg   generated — scripts/illustrations/soft.mjs
+├── spec/        *.svg   generated — scripts/illustrations/iso.mjs
+├── nav/         *.webp  hand-made sidebar pictures
+└── categories/  *.webp  hand-made home category pictures
+```
+
+```ts
+import { SoftIcon, ListingTypePicture, type SoftIconName } from '@/src/shared/illustrations';
+```
+
+| Component | Used for |
+|-----------|----------|
+| `SoftIcon` | in-page icons: section headers, stat tiles, tabs, badges, filters, dashboards |
+| `SpecIllustration` | isometric property-spec scenes (beds, baths, plot, amenities, distances) |
+| `NavPicture` | sidebar, bottom bar, quick access — anything pointing at a sidebar destination |
+| `CategoryPicture` | home page category tiles |
+| `ListingTypePicture` | rent / buy, wherever a listing type is shown |
+
+```bash
+node scripts/illustrations/generate.mjs   # regenerate soft/ + spec/ SVGs and generated/names.ts
+```
+
+- **Import from the barrel only** (`@/src/shared/illustrations`), never from
+  a file inside it.
+- **Names are typed.** A misspelt name is a type error, not a broken image.
+  Never write a path to these files by hand: components use the URL builders
+  in `assets.ts`, and HTML strings for map popups use `softIconHtml(name)`.
+- **Every file is checked.** `src/tests/illustrations.render.test.tsx` fails
+  if any typed name has no file on disk.
+- **A missing file hides itself.** `DecorativeImage` hides the image (keeping
+  its box) if the file fails to load, so a dropped asset never shows a
+  broken-image glyph.
+- **No emoji as icons.** Use a `SoftIcon` next to the text instead, and keep
+  emoji out of translation strings (typographic marks like ✓ ★ ✦ are fine).
+- **Adding an icon:** draw it in `scripts/illustrations/soft.mjs` (64×64
+  grid, `blob`/`tube`/`disc` helpers, existing tones), run the generator,
+  and check it in `docs/illustrations-preview.html`.
+- **Each scene hides the BalkanEstate two-tower mark** somewhere small; keep
+  that when adding one.
+- **Dock-style hover**: `.sidebar-dock` (sidebar) and `.category-dock`
+  (category row, Quick Access) in `src/index.css` magnify only the hovered
+  picture; both are off for touch and for `prefers-reduced-motion`.
+
+---
+
+## List / Map Switch (`LiquidGlassSwitch`)
+
+- The orb and pill move by `transform` only (never `left`/`transition-all`), so
+  the slide runs on the compositor.
+- A tap updates the switch at once and calls `onChange` two animation frames
+  later: the slide is already running when the parent mounts the map or swaps
+  the list, so that work can't make the orb stutter.
+- Orb icons all stay mounted and crossfade; transitions are off under
+  `prefers-reduced-motion`.
+- The switch is `touch-action: manipulation` with no tap highlight: two quick
+  taps switch twice and never trigger iOS double-tap zoom.
+- **Panels** (Search, Rentals, Villas, phone and tablet only): the list panel
+  carries `search-list-panel`, the map's inner wrapper `search-map-stage`, each
+  with `data-shown`. The CSS in `src/index.css` slides the list off to the left
+  while the map eases in from the right and fades up (transform and opacity
+  only, so a tap mid-slide simply reverses it). The map stage is never scaled
+  (it holds the WebGL map). A panel that has slid away goes `visibility:
+  hidden` after the slide and its animations pause. Split view (lg+) is
+  untouched; reduced motion gets a short crossfade.
+- **iOS memory budget.** Safari kills the page ("A problem repeatedly
+  occurred") when compositing memory runs out, and both panels stay mounted.
+  So inside the list on phones `backdrop-blur` is switched off (each blur is a
+  GPU buffer, a list holds hundreds), `PropertyImage` drops its blurred
+  placeholder once the photo has faded in, and `HighlightedPropertyCard` mounts
+  only the current, previous and next slide and pauses autoplay off screen.
+  Once the list has finished sliding away (`useSettledHidden`), it gets
+  `content-visibility: hidden`: still mounted, scroll kept, but not rendered.
+- **Map pins are built for the screen only.** The Google map clusters with
+  `SuperClusterViewportAlgorithm` (`useGoogleMap.ts`): bubbles and pins exist
+  only inside the visible area plus a margin. The whole-region algorithm put
+  every listing in the Balkans on the map as its own styled element once zoomed
+  in, which is too many layers for an iPhone.
+
+---
+
+## Responsive Layout — any device, either orientation
+
+Breakpoints are width-based, so a phone held sideways (≥768px wide, ~360–460px
+tall) gets the desktop shell: sidebar rail, floating header, split list/map.
+Height is handled separately:
+
+- **`landscape:` variant** (`src/index.css`) = `(orientation: landscape) and
+  (max-height: 500px)`. Its JS twin is `SHORT_LANDSCAPE_QUERY` /
+  `useShortLandscape()` in `src/hooks/useMediaQuery.ts` — keep them in step.
+  Use `landscape:` to tighten padding, headline sizes and control heights; never
+  to swap layouts.
+- **Fluid root size** (`--fluid-root` in `src/index.css`, composed with the
+  zoom compensation): on a short landscape screen the root follows the screen
+  height (`clamp(75%, 3.1dvh, 87.5%)`, ≈12–14px); narrow portrait phones ease
+  from 16px to 15px. Every rem-based size scales together, so text is tied to
+  the screen, not fixed. Form fields follow it too (`maximum-scale=1` in the
+  viewport meta stops iOS zooming on focus), and touch targets drop from 44px to 32px minimum in
+  landscape.
+- **Search controls are one toolbar row** on a sideways phone (mode switch,
+  Filters, Search, Reset, Save; the filter panel opens as a full-width row
+  below) and fold away on the first move down the results.
+- **Listings go two (search) or three (rentals, villas) across** when the list
+  is full-width on a sideways phone (`max-lg:landscape:grid-cols-*`).
+- **Floating header** (`components/shared/Header.tsx`): short labels and
+  avatar-only account button under `landscape:`, and `useHideOnScroll` slides it
+  away while page content scrolls down (back on the way up, always near the
+  top). The hook listens to every scroll in the capture phase and ignores the
+  sidebar, menus and dialogs.
+- **Sidebar rail width** is `--sidebar-rail-w` = `5rem + safe-area-inset-left`.
+  The rail pads itself by the inset, so on a notched phone in landscape a flat
+  5rem left the icons ~2rem. Anything placed beside the rail uses
+  `md:pl-(--sidebar-rail-w)` / `md:left-(--sidebar-rail-w)`, never `md:pl-20`.
+- **One panel at a time on a sideways phone.** `getSearchLayout()`
+  (`src/shared/utils/searchLayout.ts`) returns `mobile` / `tablet` / `split`;
+  any short landscape screen is `tablet`, even at 1024px+, so Search, Rentals
+  and Villas show the List/Map switch and one full panel instead of a cramped
+  split. The panels' `lg:` split widths are undone with `landscape:` classes,
+  and the slide rules in `src/index.css` cover short landscape too. In tablet
+  mode the floating search bar replaces the desktop list header (Rentals had
+  neither on tablets before).
+- **`--floating-header-w`** on `<html>` is published by the floating header
+  (Subscribe / New / account): how much of the top-right corner it takes, 0
+  when it isn't shown. Floating search bars pad their right side by it so they
+  stop short of the header instead of sliding under it.
+- **Search / Rentals / Villas list column**: on a short landscape screen the
+  search controls (mode tabs, filters, header chips) fold away while the results
+  scroll down and return on the way up, so the column shows listings, not
+  controls.
+- **Page heroes**: hero `h1`s carry `landscape:text-2xl/3xl` and hero wrappers
+  `landscape:py-6/8`, so a hero never fills a sideways phone on its own.
+- **Layering (z-index) — keep overlays aware of the chrome.** Sidebar rail 50,
+  floating header 1001, full-screen sheets (the filter sheets on Search,
+  Rentals, Villas) 1100, menu drawer 1300, dialogs 5000+. A full-screen sheet
+  sits above the rail and header (it can stay open while a phone rotates into
+  the ≥768px layout that shows them); a fixed bar that should sit *beside*
+  the rail (comparison bar, property action bar) starts at
+  `md:left-(--sidebar-rail-w)`.
+- **Login / sign-up** (`AuthModal.tsx`): sideways, the card goes wide (up to
+  `max-w-3xl`) with the logo and heading on the left and the form on the
+  right; fields pair up two across (log in: email | password; sign up: email,
+  phone, then password | confirm), so every field and the submit button are on
+  screen without scrolling. Portrait and desktop keep the single column.
+- **Centred dialogs** use `.dialog-fit` (`src/index.css`): capped at the visible
+  height (minus notch and backdrop padding) and scrolling inside, so their
+  buttons stay reachable at 360px tall. `Modal.tsx` already caps itself.
+- `e2e/responsive-layout.spec.ts` guards it: no sideways scroll on key pages
+  from 360px phones to desktop in both orientations, and a compact header on a
+  sideways phone.
+
+---
+
 ## Schedule Viewing Modal
 
 3-step wizard:
@@ -1225,134 +1464,14 @@ Availability source priority:
 
 ---
 
-## Cloudinary Image Pipeline
+## Image Pipeline (Cloudflare R2)
 
-Goal: stay inside Cloudinary's free 25 credits/month (1 credit = 1,000
-transformations **or** 1 GB storage **or** 1 GB bandwidth).
-
-### Delivery (frontend)
-
-```
-Raw URL → optimizeCloudinaryUrl(url, { width, height?, blur?, format? }) → <img src>
-            ├── res.cloudinary.com  → …/upload/t_<preset>/v123/…   (named transformation)
-            ├── googleusercontent   → =s{size}
-            ├── unsplash / wikimedia / own site → unchanged
-            └── anything else (feeds) → {API_URL}/image-proxy?url=…&w={bucket}
-        cloudinarySrcSet(url, widths)  (deduped after snapping)
-```
-
-**Strict-transformations compatible.** Cloudinary's "Strict transformations"
-(Settings → Security) is ON, so only *named transformations allowed for strict
-mode* can be delivered — an ad-hoc `w_480,c_limit` URL is refused. Every
-Cloudinary URL the app builds therefore uses exactly one preset from
-`backend/src/config/cloudinaryPresets.ts` (imported by the frontend too, so the
-two cannot drift):
-
-| Preset | Definition | Used for |
-|---|---|---|
-| `be_w{N}` | `f_auto,q_auto,c_limit,w_N` | any width-only request |
-| `be_r{ratio}_w{N}` | `f_auto,q_auto,c_fill,g_auto,ar_{ratio},w_N` | width×height boxes (1x1, 4x3, 3x4, 3x2, 16x9, 2x1) |
-| `be_lqip` | `f_auto,q_auto:eco,w_32,e_blur:400` | blur-up placeholders |
-| `be_og` | `f_jpg,q_auto,w_1200,h_630,c_pad,b_white` | share cards |
-
-N ∈ 32, 64, 128, 240, 320, 480, 640, 800, 1080, 1280, 1600, 1920 — requests
-round *up*; boxes snap to the nearest ratio. 86 presets in all, registered by
-the backend **at startup** (`services/media/cloudinaryPresetSync.ts`,
-idempotent) or by `npm run cloudinary:sync-presets`. To change a definition,
-give the preset a new name rather than editing it in place.
-
-- A unit test (`src/tests/cloudinary-budget.test.ts`) sweeps widths and boxes
-  and fails if the app could ever build a URL with an unregistered preset.
-- Server-side fetches of Cloudinary images (e.g. the room restyler) use the
-  untransformed original (`utils/cloudinaryUrl.ts → originalCloudinaryUrl`),
-  which strict mode always allows, and resize with sharp.
-- Raw `<img src={…Url}>` is not used for Cloudinary images — originals still
-  load under strict mode but ship the full-size master.
-
-### Upload (backend)
-
-- `sharp` resizes + re-encodes every upload on our server (mozjpeg q82, max
-  1920; `preserveQuality` q90 4:4:4). No incoming or eager transformations —
-  both are billed per upload. Decodes are capped at 50 MP.
-- Chat images: compressed to 1600px before upload (`compressImageForUpload`).
-
-### Video — links only, never stored
-
-Cloudinary bills video by the second and by the GB, so **no video is ever
-uploaded**:
-
-- **Listings** link to YouTube / TikTok / Instagram (`videoUrl`).
-- **"How it works"** items take a YouTube link only — the upload endpoint is
-  gone and `siteContentController` rejects anything else
-  (`utils/videoLinks.ts`, `validateYouTubeUrl` on the client).
-- **Video generator** (My Listings → Generate video) renders the MP4 with
-  FFmpeg and streams it back as a download (`POST /api/videos/generate/:id`,
-  `video/mp4`), then deletes the temp file. The seller posts it and pastes the
-  link into the listing.
-- `npm run cleanup:videos` (dry run) / `cleanup:videos:apply` removes videos
-  stored before this rule.
-
-### News covers — `backend/src/services/news/newsCover.ts`
-
-Chosen once, when the article is saved, and stored as a **link** (no upload):
-1. City Gallery photo for a city the article names (same country only —
-   "Split"/"Bar" are also English words),
-2. the article's own `og:image` (shown through `/api/image-proxy`),
-3. a City Gallery photo from the article's country.
-
-### Naming — `backend/src/services/media/mediaNaming.ts`
-
-```
-balkan-estate/
-├── agencies/{a-z}/{agency-name}_{agencyId}/{logo|cover}
-├── businesses/{a-z}/{business-name}_{businessId}/{logo|banner}
-├── external-feeds/{source}/{listingId}      (only with ALLOW_EXTERNAL_IMAGE_REHOST)
-├── messages/…   news/covers   site/…
-└── users/{a-z}/{user-name}_{userId}/
-    ├── avatar   documents/{license|credentials/{id}}
-    └── listings/{temp | {listing-title}_{propertyId}/{photos|floorplans|videos}}
-```
-
-Names come first so the Media Library sorts A–Z; the id always follows so a
-folder stays unique and searchable. Names are looked up from the ids at
-upload time (`mediaOwnerResolver`); a failed lookup falls back to the id.
-
-**Every asset is tagged** `owner_{userId}`, `listing_{propertyId}`,
-`agency_{id}`, `business_{id}`, `kind_{type}`. Cleanup deletes **by tag**
-(`deleteByTag`), then sweeps the pre-tag folder layouts — so renames and
-layout changes never strand files.
-
-### Lifecycle — what gets removed, when
-
-| Event | Removed |
-|---|---|
-| Listing deleted | all media except one archive thumbnail |
-| Deleted listing older than `MEDIA_RETENTION_DELETED_YEARS` (1) | that thumbnail |
-| Sold listing older than `MEDIA_RETENTION_SOLD_YEARS` (2) | all photos, plans, video → placeholder image |
-| Abandoned listing form (temp upload > 48h, unreferenced) | the uploads |
-| Account closed | avatar + verification documents |
-| User removed by admin | their listings' media + avatar and documents |
-| Agency deleted | logo + cover |
-
-Retention runs daily (`cron/index.ts`, 4:15 AM) in batches of 50 and marks
-records with `mediaPurgedAt`, respecting the Admin API rate limit.
-
-### External feed images — `/api/image-proxy`
-
-Feed photos are **never stored on Cloudinary**. `GET /api/image-proxy?url=&w=`
-(`services/imageProxy/`) fetches the source, resizes to WebP (q72) and caches:
-memory LRU (`IMAGE_PROXY_MEMORY_MB`, 64) → disk (`IMAGE_PROXY_CACHE_DIR`,
-`IMAGE_PROXY_DISK_MB` 512, `IMAGE_PROXY_CACHE_DAYS` 7) → browser/CDN
-(`max-age` 7d, `s-maxage` 30d, ETag/304). Concurrent requests share one
-fetch; failures are remembered for 10 minutes.
-
-Security: `utils/ssrfGuard.ts` resolves DNS and rejects any non-public
-address (private, loopback, link-local/metadata, CGNAT, IPv6 ULA, mapped
-IPv4), pins the socket to the vetted address, and re-checks every redirect
-hop. SVG is refused. Own rate limiter (1,500 / 5 min / IP), excluded from
-the general API limiter.
-
----
+Photos are stored in Cloudflare R2 and served from its CDN. Each upload is
+resized once by sharp on our server into the sizes it needs (`w160…w1920.webp`,
+`lqip.webp`, `original.jpg`) under a per-user / per-listing folder, and indexed
+in MongoDB (`MediaAsset`). Nothing is resized on request. Full description —
+layout, every upload case, setup, migration from Cloudinary and the
+`media:check` script — in [docs/MEDIA_STORAGE.md](docs/MEDIA_STORAGE.md).
 
 ## Security Notes
 - All API mutations use CSRF cookie (`credentials: 'include'`)

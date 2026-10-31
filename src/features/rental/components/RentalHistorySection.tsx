@@ -4,6 +4,7 @@ import { Property } from '@/types';
 import { RentalHistoryEntry } from '@/src/shared/types/property.types';
 import { getCurrencySymbol } from '@/utils/currency';
 import * as api from '@/services/apiService';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface RentalHistorySectionProps {
   property: Property;
@@ -128,9 +129,7 @@ const RentalHistorySection: React.FC<RentalHistorySectionProps> = ({ property, i
       <div className="px-4 sm:px-6 py-4 bg-emerald-50 border-b border-emerald-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
+            <SoftIcon name="clock" className="w-7 h-7 flex-shrink-0" />
             <h3 className="text-lg font-bold text-neutral-800">{t('rental:history.title')}</h3>
           </div>
           {isOwner && (
@@ -217,9 +216,7 @@ const RentalHistorySection: React.FC<RentalHistorySectionProps> = ({ property, i
         {/* Timeline by Year */}
         {allEntries.length === 0 ? (
           <div className="text-center py-8">
-            <svg className="w-10 h-10 text-neutral-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
+            <SoftIcon name="clipboard" className="w-12 h-12 mx-auto mb-2 opacity-80" />
             <p className="text-sm text-neutral-400">{t('rental:history.noHistory')}</p>
             {isOwner && (
               <p className="text-xs text-neutral-400 mt-1">{t('rental:history.noHistoryHint')}</p>

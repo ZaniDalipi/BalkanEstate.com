@@ -1,16 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAgencyOverview } from '../../hooks/useAgencyOverview';
-import {
-  HomeIcon,
-  UsersIcon,
-  EnvelopeIcon,
-  EyeIcon,
-  ArrowTrendingUpIcon,
-} from '@/constants';
 import KpiCard from './KpiCard';
 import OverviewCharts from './OverviewCharts';
 import AgencyInfoCard from './AgencyInfoCard';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface OverviewSectionProps {
   agencyId: string;
@@ -23,11 +17,7 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({ agencyId }) => {
   if (error) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-        <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01" />
-          </svg>
-        </div>
+        <SoftIcon name="warning" className="w-14 h-14 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           {t('agencyDashboard:overview.errorTitle', 'Failed to load overview')}
         </h3>
@@ -48,26 +38,26 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({ agencyId }) => {
     {
       title: t('agencyDashboard:overview.activeListings', 'Active Listings'),
       value: overview?.activeListings ?? 0,
-      icon: <HomeIcon className="w-6 h-6" />,
-      color: 'bg-green-500',
+      icon: <SoftIcon name="home" className="w-8 h-8" />,
+      color: 'bg-green-50',
     },
     {
       title: t('agencyDashboard:overview.totalAgents', 'Total Agents'),
       value: overview?.totalAgents ?? 0,
-      icon: <UsersIcon className="w-6 h-6" />,
-      color: 'bg-blue-500',
+      icon: <SoftIcon name="users" className="w-8 h-8" />,
+      color: 'bg-blue-50',
     },
     {
       title: t('agencyDashboard:overview.inquiriesThisMonth', 'Inquiries This Month'),
       value: overview?.inquiriesThisMonth ?? 0,
-      icon: <EnvelopeIcon className="w-6 h-6" />,
-      color: 'bg-amber-500',
+      icon: <SoftIcon name="envelope" className="w-8 h-8" />,
+      color: 'bg-amber-50',
     },
     {
       title: t('agencyDashboard:overview.totalViews', 'Total Views'),
       value: overview?.totalViews ?? 0,
-      icon: <EyeIcon className="w-6 h-6" />,
-      color: 'bg-purple-500',
+      icon: <SoftIcon name="eye" className="w-8 h-8" />,
+      color: 'bg-purple-50',
     },
   ];
 
@@ -79,7 +69,7 @@ const OverviewSection: React.FC<OverviewSectionProps> = ({ agencyId }) => {
         </h2>
         {!isLoading && overview && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium">
-            <ArrowTrendingUpIcon className="w-4 h-4" />
+            <SoftIcon name="trendUp" className="w-5 h-5 flex-shrink-0" />
             <span>
               {t('agencyDashboard:overview.conversionRate', 'Conversion')}: {overview.conversionRate.toFixed(1)}%
             </span>

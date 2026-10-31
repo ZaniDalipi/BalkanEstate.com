@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SoftIcon } from '@/src/shared/illustrations';
 
 interface SubscriptionData {
   status: string;
@@ -63,14 +64,12 @@ const SubscriptionCard: React.FC<SubscriptionCardProps> = ({ subscription, isLoa
   if (!subscription) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <SoftIcon name="creditCard" className="w-7 h-7 flex-shrink-0" />
           {t('agencyDashboard:financial.subscription', 'Subscription')}
         </h3>
         <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-          <svg className="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-          </svg>
+          <SoftIcon name="creditCard" className="w-14 h-14 mb-3" />
           <p className="text-sm font-medium">
             {t('agencyDashboard:financial.noSubscription', 'No active subscription')}
           </p>
@@ -88,7 +87,8 @@ const SubscriptionCard: React.FC<SubscriptionCardProps> = ({ subscription, isLoa
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <SoftIcon name="creditCard" className="w-7 h-7 flex-shrink-0" />
           {t('agencyDashboard:financial.subscription', 'Subscription')}
         </h3>
         <span className={`px-3 py-1 text-xs font-bold rounded-full ${statusStyle.bg} ${statusStyle.text}`}>

@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Property, PropertyImageTag } from '@/types';
 import { useAppContext } from '@/context/AppContext';
 import { useRealtimeProperties, useProperty } from '@/src/features/properties/hooks';
-import { ArrowLeftIcon, SparklesIcon, UserIcon, HomeIcon, XMarkIcon } from '@/constants';
+import { ArrowLeftIcon, SparklesIcon, UserIcon, XMarkIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import { formatPrice } from '@/utils/currency';
 import DefaultAvatar from '@/components/shared/DefaultAvatar';
 import ImageViewerModal from './ImageViewerModal';
@@ -45,12 +46,14 @@ import { buildMapFocusTarget, resolveMapDestination } from '@/shared/map/mapDest
 import Footer from '@/components/shared/Footer';
 import Modal from '@/components/shared/Modal';
 import * as api from '@/services/apiService';
-import { optimizeCloudinaryUrl } from '@/config/cloudinaryConfig';
+import { optimizeImageUrl } from '@/config/mediaConfig';
 import { AdSlot } from '@/src/features/promo';
 import SellerAvatar from '@/shared/components/property/SellerAvatar';
 import { buildGalleryImages, groupGalleryImagesByTag } from '@/shared/property/galleryImages';
-import { paths } from '@/src/app/router/paths';
+import { paths, withQuery } from '@/src/app/router/paths';
+import { AppLink } from '@/src/app/router/AppLink';
 import { navigate, goBack } from '@/src/app/router/navigation';
+import { ListingResidenceBadge } from '@/src/features/developments/components/public/listing/ListingResidenceBadge';
 
 /**
  * PropertyDetailsPage Component
@@ -620,8 +623,17 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         defaultValue: `${bedsPrefix}${propertyTypeLabel} for ${listingAction} in ${property.city}, ${property.country} - ${priceStr}`,
       });
 
-  // Generate SEO description
-  const seoDescription = t('property:seo.description', {
+  // Generate SEO description. The full sentence needs a size and a location;
+  // imported listings often lack one, and "0m²" or "undefined" in a search
+  // snippet is worse than a shorter description.
+  const seoLocation = [property.city, property.country].filter(Boolean).join(', ');
+  const seoHasFullFacts = (property.sqft ?? 0) > 0 && !!property.city && !!property.country;
+  const seoFallbackDescription = [
+    `${roomsSentence}${property.propertyType || 'property'} for ${listingAction}${seoLocation ? ` in ${seoLocation}` : ''}`,
+    (property.sqft ?? 0) > 0 ? `${property.sqft} m²` : '',
+    (property.price ?? 0) > 0 && !property.isNegotiable ? priceStr : '',
+  ].filter(Boolean).join(' · ') + '.';
+  const seoDescription = (seoHasFullFacts ? t('property:seo.description', {
     beds: seoBeds,
     baths: seoBaths,
     type: property.propertyType || 'property',
@@ -631,7 +643,16 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
     sqft: property.sqft,
     price: property.price?.toLocaleString(),
     defaultValue: `${roomsSentence}${property.propertyType || 'property'} for ${listingAction} in ${property.city}, ${property.country}. ${property.sqft}m² for ${priceStr}.`,
-  }) + (property.description ? ` ${property.description.slice(0, 120)}` : '');
+  }) : seoFallbackDescription) + (property.description ? ` ${property.description.slice(0, 120)}` : '');
+
+  // Listings imported from another website carry that site's text and photos.
+  // They stay useful to visitors (with attribution to the source), but they are
+  // not this site's original content: keep them out of search indexes and
+  // never put ads next to them. Listings that are no longer on the market are
+  // likewise kept out of the index.
+  const isImportedListing = !!property.source;
+  const isOffMarket = !!property.status && property.status !== 'active';
+  const showAds = !isImportedListing;
 
   // Get all images for SEO
   const seoImages = allImages.map(img => img.url).filter(Boolean);
@@ -651,6 +672,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
         canonical={`${window.location.origin}/property/${propertySlug}`}
         image={seoImages[0] || property.imageUrl}
         type="product"
+        noindex={isImportedListing || isOffMarket}
         property={{
           price: property.price,
           originalPrice: property.originalPrice,
@@ -802,9 +824,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {property.status === 'sold' && (
         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))' }}>
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <SoftIcon name="check" className="w-6 h-6 flex-shrink-0" />
             <span className="font-semibold text-sm md:text-base">
               {t('property:status.soldBanner', 'This property has been sold')}
             </span>
@@ -816,9 +836,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {localStatus === 'rented' && (
         <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 px-4" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0.75rem))' }}>
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-            </svg>
+            <SoftIcon name="key" className="w-6 h-6 flex-shrink-0" />
             <span className="font-semibold text-sm md:text-base">
               {property.rentedUntil ? (
                 <>
@@ -880,18 +898,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
             <div className="hidden sm:flex items-center gap-2 sm:gap-3 text-xs text-neutral-500">
               {daysListedText && (
                 <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <SoftIcon name="clock" className="w-4 h-4" />
                   <span className="whitespace-nowrap">{daysListedText}</span>
                 </span>
               )}
               {property.views !== undefined && property.views > 0 && (
                 <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                  <SoftIcon name="eye" className="w-4 h-4" />
                   <span>{property.views.toLocaleString()}</span>
                 </span>
               )}
@@ -945,76 +958,83 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               )
             )}
 
-            {/* Share Button */}
-            <button
-              onClick={handleShare}
-              className="bg-white p-2 rounded-full border border-neutral-200 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
-              aria-label={t('property:actions.share')}
-              title={t('property:actions.share')}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-[18px] w-[18px] sm:h-5 sm:w-5 md:h-[22px] md:w-[22px] text-neutral-500 hover:text-primary transition-colors"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            {/* Floating action deck — Share, Favorite and Profile share one
+                 frosted-glass pill (iOS floating toolbar style) and every slot
+                 is the same 40px circle so the three read as one control. */}
+            <div className="flex items-center gap-0.5 p-1 rounded-full bg-white/75 backdrop-blur-xl backdrop-saturate-150 border border-white/70 ring-1 ring-black/[0.04] shadow-[0_8px_24px_-8px_rgba(15,23,42,0.25),0_2px_6px_-1px_rgba(15,23,42,0.08)]">
+              {/* Share Button */}
+              <button
+                type="button"
+                onClick={handleShare}
+                className="group w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full text-neutral-600 hover:text-primary hover:bg-white active:scale-90 active:bg-neutral-100 transition-all duration-150 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                aria-label={t('property:actions.share')}
+                title={t('property:actions.share')}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                  />
+                </svg>
+              </button>
 
-            {/* Favorite Button */}
-            <div
-              onClick={property.status === 'sold' ? undefined : handleFavoriteClick}
-              className={`bg-white p-2 rounded-full border border-neutral-200 ${
-                property.status === 'sold'
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'cursor-pointer hover:shadow-md'
-              }`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-[18px] w-[18px] sm:h-5 sm:w-5 md:h-[22px] md:w-[22px] transition-colors duration-300 ${
+              {/* Favorite Button */}
+              <button
+                type="button"
+                onClick={property.status === 'sold' ? undefined : handleFavoriteClick}
+                disabled={property.status === 'sold'}
+                aria-pressed={isFavorited}
+                aria-label={t('property:actions.favorite', 'Favorite')}
+                className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-150 touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                   property.status === 'sold'
-                    ? 'text-neutral-300'
+                    ? 'opacity-50 cursor-not-allowed text-neutral-300'
                     : isFavorited
-                    ? 'text-red-500 fill-current'
-                    : 'text-neutral-500 hover:text-red-500'
+                    ? 'text-red-500 bg-red-50 active:scale-90'
+                    : 'text-neutral-600 hover:text-red-500 hover:bg-white active:scale-90 active:bg-neutral-100'
                 }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-5 w-5 transition-colors duration-300 ${isFavorited && property.status !== 'sold' ? 'fill-current' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </button>
 
-            {/* Profile Button - compact avatar for PWA navigation */}
-            <button
-              onClick={handleProfileClick}
-              className="rounded-full border-2 border-neutral-200 bg-white cursor-pointer hover:shadow-md hover:border-primary/30 transition-all overflow-hidden flex-shrink-0 w-9 h-9"
-              aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
-            >
-              {currentUser?.avatarUrl ? (
-                <img src={optimizeCloudinaryUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
-              ) : currentUser ? (
-                <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
-              ) : (
-                <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
-                  <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-400" />
-                </div>
-              )}
-            </button>
+              {/* Profile Button - same 40px slot as the icons */}
+              <button
+                type="button"
+                onClick={handleProfileClick}
+                className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden ring-2 ring-white shadow-sm active:scale-90 transition-transform duration-150 touch-manipulation focus:outline-none focus-visible:ring-primary/50"
+                aria-label={currentUser ? t('common:myAccount', 'My Account') : t('common:login', 'Login')}
+              >
+                {currentUser?.avatarUrl ? (
+                  <img src={optimizeImageUrl(currentUser.avatarUrl, { width: 128 }) || currentUser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : currentUser ? (
+                  <DefaultAvatar gender={currentUser.gender} seed={currentUser.id || currentUser.name} avatarOptions={currentUser.avatarOptions} />
+                ) : (
+                  <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-neutral-400" />
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1060,6 +1080,9 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                 <ExternalSourceBadge source={property.source} sourceUrl={property.sourceUrl} variant="link" />
               </div>
             )}
+
+            {/* "Part of <residence>": links to the apartment in the residence explorer */}
+            <ListingResidenceBadge listingId={property.id} className="mx-4 lg:mx-0" />
 
             {/* Mobile Only: Property Info (description) shown early */}
             <div data-section="details" className="scroll-mt-24 lg:hidden animate-slide-up" style={{ animationDelay: '50ms' }}>
@@ -1111,7 +1134,23 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       </main>
 
       {/* Ad — horizontal leaderboard between the property details and the location map */}
-      <AdSlot page="property-details" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" />
+      {/* Listings are published by their owners and agents, not checked by us
+          one by one — give every visitor a direct way to flag a bad one. */}
+      <p className="w-full px-4 lg:px-6 mt-6 text-sm text-neutral-500">
+        {t('property:report.prompt', 'Something wrong with this listing?')}{' '}
+        <AppLink
+          to={withQuery(paths.contact(), {
+            topic: 'report',
+            listing: `https://balkanestateai.com${paths.property(propertySlug)}`,
+          })}
+          className="font-medium text-primary-700 underline hover:text-primary-800"
+          rel="nofollow"
+        >
+          {t('property:report.link', 'Report it to us')}
+        </AppLink>
+      </p>
+
+      {showAds && <AdSlot page="property-details" placement="in-content" className="w-full px-3 sm:px-4 lg:px-6 my-6 sm:my-8" showPlaceholder />}
 
       {/* 3D Map — full-bleed full-width band, rendered outside the main container so it
           spans the full screen width, right after the description to keep readers engaged.
@@ -1175,7 +1214,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
           {/* Ad — vertical skyscraper in the otherwise-empty right column (desktop only) */}
           <div className="hidden lg:block lg:col-span-1 min-w-0">
             <div className="sticky top-24">
-              <AdSlot page="property-details" placement="sidebar" format="halfpage" />
+              {showAds && <AdSlot page="property-details" placement="sidebar" format="halfpage" />}
             </div>
           </div>
 
@@ -1185,7 +1224,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               the shape — a 300x600 rail image squeezed into a wide box does
               neither advertiser nor reader any favours. */}
           <div className="lg:hidden">
-            <AdSlot page="property-details" placement="in-content" index={2} format="leaderboard" />
+            {showAds && <AdSlot page="property-details" placement="in-content" index={2} format="leaderboard" />}
           </div>
         </div>
       </main>
@@ -1193,7 +1232,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
       {/* Sticky Bottom Action Bar - Mobile Only (Zillow-style) */}
       {!isOwner && property.status !== 'sold' && (
         <div
-          className="lg:hidden fixed bottom-0 left-0 right-0 md:left-20 z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] px-3 py-2.5 flex items-center gap-2.5"
+          className="lg:hidden fixed bottom-0 left-0 right-0 md:left-(--sidebar-rail-w) z-30 bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_24px_rgba(0,0,0,0.10)] px-3 py-2.5 flex items-center gap-2.5"
           style={{ paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom, 0px))' }}
         >
           {/* Agent avatar + info - tap to view profile, long-press to preview other listings */}
@@ -1283,7 +1322,7 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
               />
               <div className="min-w-0 flex-1">
                 <p className="font-bold text-sm text-neutral-900 truncate leading-tight">{sellerDisplay.name}</p>
-                <p className="text-xs text-neutral-500 leading-tight">{t('property:seller.moreFromAgent', 'More listings from this agent')} ✨</p>
+                <p className="text-xs text-neutral-500 leading-tight">{t('property:seller.moreFromAgent', 'More listings from this agent')} <SoftIcon name="sparkles" className="inline-block w-4 h-4 align-[-3px]" /></p>
               </div>
               <button
                 type="button"
@@ -1310,13 +1349,13 @@ const PropertyDetailsPage: React.FC<{ property: Property }> = ({ property: cache
                     <div className="w-32 h-20 bg-neutral-100 flex items-center justify-center overflow-hidden">
                       {p.images?.[0]?.url ? (
                         <img
-                          src={optimizeCloudinaryUrl(p.images[0].url, { width: 160, quality: 'auto', crop: 'fill' })}
+                          src={optimizeImageUrl(p.images[0].url, { width: 160, quality: 'auto', crop: 'fill' })}
                           alt={p.title}
                           loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <HomeIcon className="w-6 h-6 text-neutral-300" />
+                        <SoftIcon name="home" className="w-8 h-8 opacity-60" />
                       )}
                     </div>
                     <div className="p-2">

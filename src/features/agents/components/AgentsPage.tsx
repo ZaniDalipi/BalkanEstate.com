@@ -12,13 +12,14 @@ import { AdSlot } from '@/src/features/promo';
 import AgentScoringPanel from './AgentScoringPanel';
 import AgentProfilePage from './AgentProfilePage';
 import AgencyBadge from '@/components/shared/AgencyBadge';
-import { MagnifyingGlassIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, PhoneIcon, BuildingOfficeIcon, HomeIcon, UsersIcon, UserCircleIcon } from '@/constants';
+import { ChevronDownIcon, ChevronUpIcon, PhoneIcon, UserCircleIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 import Footer from '@/components/shared/Footer';
 import { SEO } from '@/src/components/seo';
 import { BALKAN_COUNTRIES } from '@/constants/countries';
 import { FloatingSphere, GlossyPill, AbstractBlob, RealEstateOrb, Decorative3DStyles } from '@/components/shared/Decorative3D';
 import AgentsHeroBanner from '@/components/shared/AgentsHeroBanner';
-import { HERO_IMAGES } from '@/config/cloudinaryConfig';
+import { HERO_IMAGES } from '@/config/mediaConfig';
 import { apiRequest } from '@/src/shared/api';
 import PhoneInput from '@/src/shared/components/ui/PhoneInput';
 
@@ -578,7 +579,7 @@ const AgentsPage: React.FC = () => {
       <main className="w-full flex-grow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           {/* Ad — horizontal leaderboard above the agent filters/list */}
-          <AdSlot page="agents" placement="in-content" className="mb-6" />
+          <AdSlot page="agents" placement="in-content" className="mb-6" showPlaceholder />
 
           {/* Filters and Sort Section */}
           <div className="mb-6">
@@ -649,7 +650,7 @@ const AgentsPage: React.FC = () => {
                         {t('agents:filters.licensedOnly', 'Licensed Agents Only')}
                       </span>
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">
-                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                        <SoftIcon name="shield" className="w-4 h-4" />
                         {t('agents:filters.verified', 'Verified')}
                       </span>
                     </div>
@@ -794,7 +795,7 @@ const AgentsPage: React.FC = () => {
             </div>
           ) : filteredAgents.length === 0 ? (
             <div className="bg-white rounded-xl shadow-md border p-8 sm:p-12 text-center">
-              <UserGroupIcon className="w-12 h-12 sm:w-16 sm:h-16 text-neutral-300 mx-auto mb-4" />
+              <SoftIcon name="users" className="block w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4" />
               <h3 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-2">{t('agents:results.noAgentsFound')}</h3>
               <p className="text-neutral-600 text-sm sm:text-base">
                 {t('agents:results.tryAdjusting')}
@@ -815,7 +816,7 @@ const AgentsPage: React.FC = () => {
                     {t('agents:results.showing', {
                       shown: visibleAgentsCount,
                       total: filteredAgents.length,
-                      defaultValue: `Showing ${visibleAgentsCount} of ${filteredAgents.length} agents`
+                      defaultValue: 'Showing {{shown}} of {{total}} agents'
                     })}
                   </p>
                   <button

@@ -6,8 +6,7 @@ import Property from '../models/Property';
 import Agent from '../models/Agent';
 import User, { IUser } from '../models/User';
 import { SECURITY_WARNING } from '../utils/messageFilter';
-import cloudinary from '../config/cloudinary';
-import { compressImageForUpload } from '../services/cloudinaryService';
+import { compressImageForUpload, uploadMedia, deleteImage } from '../services/mediaService';
 import { sendNewMessageNotification } from '../services/emailService';
 import { createNotificationWithPush } from '../services/engagementService';
 import { getSocketInstance } from '../utils/socketInstance';
@@ -334,7 +333,7 @@ export const sendMessage = async (
       conversationId: conversation._id,
       senderId: String((req.user as IUser)._id),
       imageUrl,
-      imagePublicId, // Store Cloudinary public ID for cleanup
+      imagePublicId, // Stored photo key, for cleanup
     };
 
     // E2E encrypted message
@@ -397,7 +396,7 @@ export const sendMessage = async (
     if (io) {
       const rawConversationId = String((conversation as any)._id);
 
-      // SECURITY: Only send safe message fields — exclude imagePublicId (internal Cloudinary ID) and __v
+      // SECURITY: Only send safe message fields — exclude imagePublicId (internal storage key) and __v
       const safeMessage = {
         _id: message._id,
         conversationId: message.conversationId,
@@ -491,10 +490,7 @@ export const uploadMessageImage = async (
       return;
     }
 
-    // Upload to Cloudinary with organized folder structure
-    // Store images by both user IDs for tracking who is in the conversation
     // Phone photos arrive at 3–8 MB; a chat image never needs more than 1600px.
-    // Compressing here keeps Cloudinary storage and bandwidth small.
     let compressed: Buffer;
     try {
       compressed = await compressImageForUpload(req.file.buffer, { maxWidth: 1600, maxHeight: 1600, quality: 80 });
@@ -502,36 +498,16 @@ export const uploadMessageImage = async (
       res.status(400).json({ message: 'The file is not a valid image' });
       return;
     }
-    const dataURI = `data:image/jpeg;base64,${compressed.toString('base64')}`;
 
-    // Create folder path that includes both users
-    // Format: balkan-estate/messages/user-{userId1}-user-{userId2}/conv-{conversationId}
-    const buyerId = String(conversation.buyerId);
-    const sellerId = String(conversation.sellerId);
-    const conversationId = String(conversation._id);
-
-    // Sort user IDs alphabetically for consistent folder naming
-    const [user1, user2] = [buyerId, sellerId].sort();
-    const folderPath = `balkan-estate/messages/user-${user1}-user-${user2}/conv-${conversationId}`;
-
-    const result = await cloudinary.uploader.upload(dataURI, {
-      folder: folderPath,
-      resource_type: 'image',
-      // Add context for tracking
-      context: {
-        conversation_id: conversationId,
-        buyer_id: buyerId,
-        seller_id: sellerId,
-        uploaded_by: String((req.user as IUser)._id),
-      },
-    });
-
-    apiLogger.info(`📸 Message image uploaded: ${result.public_id}`);
-
-    res.json({
-      imageUrl: result.secure_url,
-      publicId: result.public_id, // Return public ID for message storage
-    });
+    // messages/{conversationId}/{photoId} — indexed in MediaAsset by conversation
+    const stored = await uploadMedia(
+      compressed,
+      'message',
+      { conversationId: String(conversation._id), userId: String((req.user as IUser)._id) },
+      { maxWidth: 1600, maxHeight: 1600, quality: 80 }
+    );
+    apiLogger.info(`📸 Message image uploaded: ${stored.publicId}`);
+    res.json({ imageUrl: stored.url, publicId: stored.publicId });
   } catch (error: any) {
     apiLogger.error('Upload message image error:', error);
     res.status(500).json({ message: 'Error uploading image' });
@@ -687,20 +663,19 @@ export const deleteConversation = async (
       return;
     }
 
-    // Get all messages with images to delete from Cloudinary
+    // Get all messages with images to delete from storage
     const messagesWithImages = await Message.find({
       conversationId: conversation._id,
       imagePublicId: { $exists: true, $ne: null },
     }).select('imagePublicId');
 
-    // Delete images from Cloudinary
+    // Delete images from storage
     if (messagesWithImages.length > 0) {
-      apiLogger.info(`🗑️  Deleting ${messagesWithImages.length} images from Cloudinary...`);
+      apiLogger.info(`🗑️  Deleting ${messagesWithImages.length} stored images...`);
 
       const deletePromises = messagesWithImages.map(async (message) => {
         try {
-          await cloudinary.uploader.destroy(message.imagePublicId!);
-          // Deleted image from Cloudinary
+          await deleteImage(message.imagePublicId!);
         } catch (error) {
           apiLogger.error(`❌ Failed to delete image ${message.imagePublicId}:`, error);
           // Continue even if some images fail to delete

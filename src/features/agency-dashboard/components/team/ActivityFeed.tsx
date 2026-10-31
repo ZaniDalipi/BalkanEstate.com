@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClockIcon } from '@/constants';
+import { SoftIcon, type SoftIconName } from '@/src/shared/illustrations';
 import type { TeamFeedItem } from '../../types';
 
 interface ActivityFeedProps {
@@ -9,13 +9,13 @@ interface ActivityFeedProps {
   error: Error | null;
 }
 
-const typeColors: Record<string, string> = {
-  listing_created: 'bg-green-100 text-green-700',
-  listing_updated: 'bg-blue-100 text-blue-700',
-  inquiry_received: 'bg-amber-100 text-amber-700',
-  inquiry_responded: 'bg-indigo-100 text-indigo-700',
-  agent_joined: 'bg-purple-100 text-purple-700',
-  agent_left: 'bg-red-100 text-red-700',
+const typeIcons: Record<string, SoftIconName> = {
+  listing_created: 'home',
+  listing_updated: 'pencil',
+  inquiry_received: 'envelope',
+  inquiry_responded: 'chat',
+  agent_joined: 'users',
+  agent_left: 'user',
 };
 
 const ActivityFeed: React.FC<ActivityFeedProps> = ({ feed, isLoading, error }) => {
@@ -50,7 +50,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ feed, isLoading, error }) =
   if (feed.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <ClockIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+        <SoftIcon name="clock" className="w-14 h-14 mx-auto mb-3" />
         <p className="text-gray-500 text-sm">
           {t('agencyDashboard:team.noActivity', 'No recent activity.')}
         </p>
@@ -62,9 +62,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ feed, isLoading, error }) =
     <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
       {feed.map((item) => (
         <div key={item.id} className="flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors">
-          <div className={`p-2 rounded-full flex-shrink-0 ${typeColors[item.type] || 'bg-gray-100 text-gray-700'}`}>
-            <ClockIcon className="w-4 h-4" />
-          </div>
+          <SoftIcon name={typeIcons[item.type] || 'clock'} className="w-9 h-9 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-900">
               <span className="font-medium">{item.agentName}</span>

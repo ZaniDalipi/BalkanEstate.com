@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { readMapView } from '@/src/features/map/mapViewMemory';
 import { useAppContext } from '@/context/AppContext';
 import { Property, Filters, initialFilters, SavedSearch } from '@/types';
 import type { Suggestion } from '@/src/features/search/universal/types';
@@ -14,6 +15,7 @@ import { useRealtimeProperties, useClosedProperties } from '@/src/features/prope
 import { API_CONFIG } from '@/src/shared/constants/app.constants';
 import { serializeBounds } from '@/src/features/rental/hooks/useRentalSearch';
 import { resolveVillaSearchTarget } from './villaSearchTarget';
+import { getSearchLayout } from '@/src/shared/utils/searchLayout';
 
 const VILLA_DEFAULTS: Partial<Filters> = {
     listingType: 'rent',
@@ -132,11 +134,14 @@ export function useVillaSearch() {
     }, []);
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
+    const [isTablet, setIsTablet] = useState(() => getSearchLayout() === 'tablet');
     const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
     const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
     const [isDrawing, setIsDrawing] = useState(false);
-    const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(deepLink.focus);
+    const [flyToTarget, setFlyToTarget] = useState<{ center: [number, number]; zoom: number } | null>(
+        // Back on this page: the map reopens where the user left it instead.
+        () => (readMapView() ? null : deepLink.focus)
+    );
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
     const [mapBoundsJSON, setMapBoundsJSON] = useState<string | null>(null);
@@ -244,7 +249,7 @@ export function useVillaSearch() {
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
-            setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+            setIsTablet(getSearchLayout() === 'tablet');
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);

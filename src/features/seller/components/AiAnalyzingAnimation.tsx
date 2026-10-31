@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { BedIcon, BathIcon, LivingRoomIcon, SqftIcon, ParkingIcon, CubeIcon } from '@/constants';
+import { SoftIcon } from '@/src/shared/illustrations';
 
+import { useTranslation } from 'react-i18next';
 const baseIcons = [
-    { id: 1, icon: <BedIcon className="w-6 h-6 text-primary" /> },
-    { id: 2, icon: <BathIcon className="w-6 h-6 text-primary" /> },
-    { id: 3, icon: <LivingRoomIcon className="w-6 h-6 text-primary" /> },
-    { id: 4, icon: <SqftIcon className="w-6 h-6 text-primary" /> },
-    { id: 5, icon: <ParkingIcon className="w-6 h-6 text-primary" /> },
-    { id: 6, icon: <CubeIcon className="w-6 h-6 text-primary" /> },
+    { id: 1, icon: <SoftIcon name="bed" className="w-8 h-8" /> },
+    { id: 2, icon: <SoftIcon name="bath" className="w-8 h-8" /> },
+    { id: 3, icon: <SoftIcon name="sofa" className="w-8 h-8" /> },
+    { id: 4, icon: <SoftIcon name="area" className="w-8 h-8" /> },
+    { id: 5, icon: <SoftIcon name="car" className="w-8 h-8" /> },
+    { id: 6, icon: <SoftIcon name="cube" className="w-8 h-8" /> },
 ];
 
 const GRAVITY = 0.1;
@@ -21,6 +22,7 @@ interface AiAnalyzingAnimationProps {
 }
 
 const AiAnalyzingAnimation: React.FC<AiAnalyzingAnimationProps> = ({ isOfferGame, onGameComplete }) => {
+  const { t } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const animationFrameId = useRef<number | null>(null);
     const [gameButtonVisible, setGameButtonVisible] = useState(false);
@@ -137,17 +139,17 @@ const AiAnalyzingAnimation: React.FC<AiAnalyzingAnimationProps> = ({ isOfferGame
                 ))}
             </div>
             <h3 className="text-xl font-bold text-neutral-800 mt-8">
-                {isOfferGame ? 'Claim Your Discount!' : 'Analyzing Property...'}
+                {isOfferGame ? t('seller:ui.aiAnalyzingAnimation.claimYourDiscount', 'Claim Your Discount!') : t('seller:ui.aiAnalyzingAnimation.analyzingProperty', 'Analyzing Property...')}
             </h3>
             <p className="text-neutral-600 mt-2 max-w-sm mx-auto text-center">
-                {isOfferGame ? 'Click the button to reveal your special one-time discount for listing your property.' : 'Our AI is hard at work. Feel free to play around with the icons while you wait!'}
+                {isOfferGame ? t('seller:ui.aiAnalyzingAnimation.clickTheButtonToReveal', 'Click the button to reveal your special one-time discount for listing your property.') : t('seller:ui.aiAnalyzingAnimation.ourAiIsHardAt', 'Our AI is hard at work. Feel free to play around with the icons while you wait!')}
             </p>
             {isOfferGame && gameButtonVisible && (
                 <button 
                     onClick={handleClaimDiscount} 
                     className="mt-6 px-8 py-3 bg-secondary text-white font-bold rounded-lg shadow-lg hover:bg-opacity-90 transition-transform hover:scale-105 animate-fade-in"
                 >
-                    Reveal My Discount!
+                    {t('seller:ui.aiAnalyzingAnimation.revealMyDiscount', 'Reveal My Discount!')}
                 </button>
             )}
         </div>

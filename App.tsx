@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo, lazy, Suspense, startTransition, useReducer } from 'react';
-import { RouterProvider, Outlet, useLocation } from 'react-router-dom';
+import { RouterProvider, Outlet } from 'react-router-dom';
 import { useSubscriptionExpiry } from './src/features/subscription/hooks/useSubscriptionExpiry';
 import { useTranslation } from 'react-i18next';
 // Page transitions use lightweight CSS instead of framer-motion to reduce initial bundle
-import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { HelmetProvider } from 'react-helmet-async';
 import { MotionConfig } from 'framer-motion';
+import { MobileHomeBell } from './src/app/components/MobileHomeBell';
+import { residenceUpPath } from './src/features/developments/utils/residenceUpPath';
+import { MobileTopBarActions } from './src/app/components/MobileTopBarActions';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AlertProvider } from './context/AlertContext';
 import { ConfirmationProvider } from './src/shared/hooks/useConfirmation';
@@ -27,10 +30,10 @@ import { useZoomCompensation } from './src/app/hooks/useZoomCompensation';
 import { usePWALinkInterceptor } from './src/shared/hooks/usePWALinkInterceptor';
 import { useCookieConsent } from './src/shared/utils/cookieConsent';
 // Lazy load SEO components (don't block initial render)
-const SEO = lazy(() => import('./src/components/seo').then(m => ({ default: m.SEO })));
 const OrganizationSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.OrganizationSchema })));
-const FAQSchema = lazy(() => import('./src/components/seo').then(m => ({ default: m.FAQSchema })));
-import { realEstateFAQs } from './src/components/seo';
+// Static: the page outlet's default <SEO> must mount before the page's own,
+// which a lazy component would not guarantee.
+import { SEO, RouteNoindexContext } from './src/components/seo';
 
 // Lazy load Analytics (only loads if env vars exist)
 const Analytics = lazy(() => import('./src/components/marketing/Analytics'));
@@ -152,14 +155,17 @@ const PageOutlet: React.FC = () => {
   return (
     <ViewTransition>
       <ErrorBoundary level="route" key={pageKey}>
-        {noindex && (
-          <Helmet>
-            <meta name="robots" content="noindex, nofollow" />
-          </Helmet>
-        )}
-        <Suspense fallback={<PageLoader />}>
-          <Outlet />
-        </Suspense>
+        <RouteNoindexContext.Provider value={!!noindex}>
+          {/* Defaults for this URL (canonical, robots). Mounted before the
+              page, so the page's own <SEO> takes precedence; pages without
+              one still get a correct canonical. No hreflang here: Helmet
+              merges alternate links from every instance, so defaults would
+              leak onto pages that are deliberately single-language. */}
+          <SEO alternates={false} />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
+        </RouteNoindexContext.Provider>
       </ErrorBoundary>
     </ViewTransition>
   );
@@ -173,10 +179,10 @@ const PageOutlet: React.FC = () => {
 const GlobalHead: React.FC = () => {
   const { i18n } = useTranslation();
   const currentLang = (i18n.language || 'en').split('-')[0];
-  const { pathname } = useLocation();
 
-  // Get analytics IDs from environment variables
-  const googleAnalyticsId = import.meta.env.VITE_GA_ID;
+  // Get analytics IDs from environment variables. GA falls back to this site's
+  // own measurement ID so a build without the secret still reports.
+  const googleAnalyticsId = import.meta.env.VITE_GA_ID || 'G-JJ7H3FLB50';
   const facebookPixelId = import.meta.env.VITE_FB_PIXEL_ID;
 
   // Analytics and marketing tags may only load once the user has consented to
@@ -185,9 +191,7 @@ const GlobalHead: React.FC = () => {
 
   return (
     <Suspense fallback={null}>
-      <SEO key={pathname} />
       <OrganizationSchema language={currentLang} />
-      <FAQSchema faqs={realEstateFAQs} language={currentLang} />
       {/* Analytics - only loaded if IDs are provided AND the user consented */}
       {((googleAnalyticsId && cookieConsent.analytics) ||
         (facebookPixelId && cookieConsent.marketing)) && (
@@ -257,7 +261,7 @@ const MainLayout: React.FC = () => {
   const isMainTabView = !isAgentDetail && !isAgencyDetail && !isBusinessDetail && [
     'agents', 'agencies', 'saved-properties', 'saved-searches', 'explore-cities', 'city-dashboard',
     'inbox', 'pricing', 'how-it-works', 'valuation', 'mortgage-calculator', 'analytics', 'admin', 'agency-dashboard', 'business-directory',
-    'account', 'blog', 'guides',
+    'account', 'blog', 'guides', 'about',
   ].includes(view);
 
   // Map the current view to an ad-banner "page" so advertisers can target placements.
@@ -288,6 +292,18 @@ const MainLayout: React.FC = () => {
       case 'createAgencyPayment':
       case 'createAgencyConfirm':
       case 'not-found':
+      // Pages without publisher content of their own — legal text, forms,
+      // sign-in, checkout, the visitor's own saved lists. AdSense does not
+      // allow ads on screens like these, and they gain nothing from them.
+      case 'privacy':
+      case 'terms':
+      case 'cookies':
+      case 'refund':
+      case 'contact':
+      case 'about':
+      case 'pricing':
+      case 'saved-searches':
+      case 'saved-properties':
         return null;
       default: return 'all';
     }
@@ -333,6 +349,12 @@ const MainLayout: React.FC = () => {
     // to, like the platform's own back button. Opened straight onto a detail
     // page (a shared link, a fresh install) there is nothing behind it, so fall
     // back to its parent list, animated as a step back.
+    // A residence steps up one level (apartment → building → residence → list).
+    const residenceUp = residenceUpPath(window.location.pathname, window.location.search);
+    if (residenceUp) {
+      goBack(residenceUp, { replace: true });
+      return;
+    }
     const parent = isAgencyDetail
       ? paths.agencies()
       : isAgentDetail
@@ -417,8 +439,10 @@ const MainLayout: React.FC = () => {
             so position:fixed works in iOS Safari PWA standalone mode. Hidden on
             admin/dashboard/auth views (adPage === null), and on the property
             details page which has its own in-content + sidebar ad slots (so the
-            sticky bar doesn't overlap them). */}
-        {adPage && !isPropertyDetail && (
+            sticky bar doesn't overlap them), and on the full-height map/search
+            pages, where a bar pinned over the map gets in the way of panning,
+            the results sheet and the map controls. */}
+        {adPage && !isFullHeightView && (
           <Suspense fallback={null}>
             <StickyAdBanner page={adPage} placement="sticky-bottom" />
           </Suspense>
@@ -448,8 +472,9 @@ const MainLayout: React.FC = () => {
             </svg>
           </button>
         )}
+        {isMobile && isHomeView && state.isAuthenticated && !isPropertyDetail && !isAgentDetail && !isAgencyDetail && !isBusinessDetail && <MobileHomeBell />}
 
-        <div className={`relative transition-[filter] duration-300 ease-in-out h-full flex flex-col md:pl-20 overflow-x-hidden max-w-full ${isBlurredBehindModal ? 'blur-sm' : ''} ${isOverlayVisible ? 'pointer-events-none' : ''}`}>
+        <div className={`relative transition-[filter] duration-300 ease-in-out h-full flex flex-col md:pl-(--sidebar-rail-w) overflow-x-hidden max-w-full ${isBlurredBehindModal ? 'blur-sm' : ''} ${isOverlayVisible ? 'pointer-events-none' : ''}`}>
             <Suspense fallback={null}>
               {showHeader && <Header onToggleSidebar={() => setIsSidebarOpen(true)} isFloating={isFloatingHeaderView} />}
             </Suspense>
@@ -464,13 +489,13 @@ const MainLayout: React.FC = () => {
                   paddingRight: 'env(safe-area-inset-right, 0px)',
                 }}
               >
-                <div className="grid grid-cols-[auto_1fr_auto] items-center h-11 px-1">
+                <div className="grid grid-cols-[minmax(88px,auto)_minmax(0,1fr)_minmax(88px,auto)] items-center h-11 px-1">
                   {/* Left: Hamburger menu for main tabs, Back button for detail pages */}
                   {isMainTabView ? (
                     <button
                       type="button"
                       onClick={() => setIsSidebarOpen(true)}
-                      className="flex items-center justify-center min-w-[44px] min-h-[44px] text-neutral-700 active:opacity-70 transition-opacity pl-2"
+                      className="justify-self-start flex items-center justify-center min-w-[44px] min-h-[44px] text-neutral-700 active:opacity-70 transition-opacity pl-2"
                       aria-label={t('common:aria.openMenu', 'Open menu')}
                     >
                       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -481,7 +506,7 @@ const MainLayout: React.FC = () => {
                     <button
                       type="button"
                       onClick={handlePWABack}
-                      className="flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
+                      className="justify-self-start flex items-center gap-1 text-primary font-medium text-sm min-w-[44px] min-h-[44px] pl-2 pr-3 active:opacity-70 transition-opacity"
                       aria-label={t('common:aria.goBack')}
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -494,17 +519,8 @@ const MainLayout: React.FC = () => {
                   {/* Center: Page title */}
                   <span className="text-sm font-semibold text-neutral-800 truncate text-center">{pageTitle}</span>
 
-                  {/* Right: Home button - quick shortcut to search from deep navigation */}
-                  <button
-                    type="button"
-                    onClick={() => navigate(paths.home())}
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-neutral-500 active:text-primary active:opacity-70 transition-opacity pr-2"
-                    aria-label={t('common:aria.goHome', 'Go to home')}
-                  >
-                    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                  </button>
+                  {/* Right: notifications (signed in) and a home shortcut */}
+                  <MobileTopBarActions isAuthenticated={state.isAuthenticated} />
                 </div>
               </div>
             )}
