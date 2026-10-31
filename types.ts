@@ -584,6 +584,8 @@ export interface Filters {
     constructionStatus?: 'any' | ConstructionStatus;
     /** Minimum number of kitchens. Unset in filters saved before it existed. */
     minKitchens?: number | null;
+    /** Leave out listings whose distance is unknown when a distance filter is set. Set by AI search. */
+    requireKnownDistances?: boolean;
 }
 
 export const initialFilters: Filters = {

@@ -130,11 +130,17 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   if (filters.minFloorNumber && property.floorNumber && property.floorNumber < filters.minFloorNumber) return false;
   if (filters.maxFloorNumber && property.floorNumber && property.floorNumber > filters.maxFloorNumber) return false;
 
-  // Distance filters
-  if (filters.maxDistanceToCenter && property.distanceToCenter && property.distanceToCenter > filters.maxDistanceToCenter) return false;
-  if (filters.maxDistanceToSea && property.distanceToSea && property.distanceToSea > filters.maxDistanceToSea) return false;
-  if (filters.maxDistanceToSchool && property.distanceToSchool && property.distanceToSchool > filters.maxDistanceToSchool) return false;
-  if (filters.maxDistanceToHospital && property.distanceToHospital && property.distanceToHospital > filters.maxDistanceToHospital) return false;
+  // Distance filters. An unknown distance passes, unless the search asks for
+  // known distances only (an AI search does).
+  const withinDistance = (value: number | null | undefined, max: number | null | undefined): boolean => {
+    if (!max) return true;
+    if (value == null || !Number.isFinite(value)) return filters.requireKnownDistances !== true;
+    return value <= max;
+  };
+  if (!withinDistance(property.distanceToCenter, filters.maxDistanceToCenter)) return false;
+  if (!withinDistance(property.distanceToSea, filters.maxDistanceToSea)) return false;
+  if (!withinDistance(property.distanceToSchool, filters.maxDistanceToSchool)) return false;
+  if (!withinDistance(property.distanceToHospital, filters.maxDistanceToHospital)) return false;
 
   // Text query (search in address, city, description)
   if (filters.query && filters.query.trim()) {

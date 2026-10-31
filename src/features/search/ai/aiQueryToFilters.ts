@@ -119,6 +119,8 @@ export const aiQueryToFilters = (query: AiSearchQuery): Filters => {
         viewType: oneOf(VIEW, query.viewType) ?? 'any',
         energyRating: oneOf(ENERGY, query.energyRating) ?? 'any',
         amenities: tags,
+        // Everything the user asked for must be shown to hold, distances too.
+        requireKnownDistances: true,
     };
 
     for (const key of BOOLEAN_KEYS) {

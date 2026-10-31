@@ -25,7 +25,9 @@ describe('aiQueryToFilters', () => {
     });
 
     it('starts from the defaults, so nothing from an earlier search lingers', () => {
-        expect(aiQueryToFilters({})).toEqual({ ...initialFilters, constructionStatus: 'any', minKitchens: null });
+        expect(aiQueryToFilters({})).toEqual({
+            ...initialFilters, constructionStatus: 'any', minKitchens: null, requireKnownDistances: true,
+        });
     });
 
     it('treats a country given as the location as the country, not a place name', () => {
@@ -95,7 +97,26 @@ describe('an AI search keeps only listings that meet every criterion', () => {
         ['no kitchen', { kitchens: 0 }],
         ['a missing amenity', { amenities: [], specialFeatures: ['Electric floor heating'] }],
         ['a school too far away', { distanceToSchool: 2 }],
+        ['no school distance on record', { distanceToSchool: undefined }],
+        ['a school distance stored as null', { distanceToSchool: null }],
     ])('leaves out a listing with %s', (_label, change) => {
         expect(filterProperties([{ ...match, ...change } as Property], filters)).toEqual([]);
+    });
+});
+
+describe('unknown distances', () => {
+    const unknown = { ...({} as Property), id: 'unknown', lat: 41.33, lng: 19.82, price: 1, sqft: 1,
+        propertyType: 'apartment', listingType: 'sale', status: 'active', seller: { type: 'agent' } } as Property;
+
+    it('pass a manual distance filter, as before', () => {
+        expect(filterProperties([unknown], { ...initialFilters, maxDistanceToSea: 1 })).toHaveLength(1);
+    });
+
+    it('are left out of an AI search with a distance filter', () => {
+        expect(filterProperties([unknown], aiQueryToFilters({ maxDistanceToSea: 1 }))).toEqual([]);
+    });
+
+    it('do not matter to an AI search without a distance filter', () => {
+        expect(filterProperties([unknown], aiQueryToFilters({}))).toHaveLength(1);
     });
 });

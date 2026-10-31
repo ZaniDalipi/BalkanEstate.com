@@ -42,6 +42,8 @@ export interface IFilters {
   constructionStatus?: 'any' | 'ready' | 'under-construction';
   /** Absent on searches saved before it existed. */
   minKitchens?: number | null;
+  /** Set by AI search: a listing with an unknown distance does not match a distance filter. */
+  requireKnownDistances?: boolean;
 }
 
 export interface ISavedSearch extends Document {

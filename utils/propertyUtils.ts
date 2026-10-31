@@ -124,15 +124,19 @@ export const filterProperties = (properties: Property[], filters: Filters): Prop
         const minFloorNumberMatch = filters.minFloorNumber !== null ? (p.floorNumber !== undefined && p.floorNumber >= filters.minFloorNumber) : true;
         const maxFloorNumberMatch = filters.maxFloorNumber !== null ? (p.floorNumber !== undefined && p.floorNumber <= filters.maxFloorNumber) : true;
 
-        // Distance filters - include properties without distance data (treat as unknown/not yet calculated)
-        const maxDistanceToCenterMatch = filters.maxDistanceToCenter !== null ?
-            (p.distanceToCenter === undefined || p.distanceToCenter <= filters.maxDistanceToCenter) : true;
-        const maxDistanceToSeaMatch = filters.maxDistanceToSea !== null ?
-            (p.distanceToSea === undefined || p.distanceToSea <= filters.maxDistanceToSea) : true;
-        const maxDistanceToSchoolMatch = filters.maxDistanceToSchool !== null ?
-            (p.distanceToSchool === undefined || p.distanceToSchool <= filters.maxDistanceToSchool) : true;
-        const maxDistanceToHospitalMatch = filters.maxDistanceToHospital !== null ?
-            (p.distanceToHospital === undefined || p.distanceToHospital <= filters.maxDistanceToHospital) : true;
+        // Distance filters. A listing whose distance was never calculated passes
+        // unless the search asks for known distances only (an AI search does:
+        // there, every criterion must be shown to hold).
+        const strictDistances = filters.requireKnownDistances === true;
+        const withinDistance = (value: number | null | undefined, max: number | null): boolean => {
+            if (max === null) return true;
+            if (value == null || !Number.isFinite(value)) return !strictDistances;
+            return value <= max;
+        };
+        const maxDistanceToCenterMatch = withinDistance(p.distanceToCenter, filters.maxDistanceToCenter);
+        const maxDistanceToSeaMatch = withinDistance(p.distanceToSea, filters.maxDistanceToSea);
+        const maxDistanceToSchoolMatch = withinDistance(p.distanceToSchool, filters.maxDistanceToSchool);
+        const maxDistanceToHospitalMatch = withinDistance(p.distanceToHospital, filters.maxDistanceToHospital);
 
         // Amenities filter - check if property has all required amenities (bidirectional substring matching)
         const amenitiesMatch = filters.amenities && filters.amenities.length > 0 ?
