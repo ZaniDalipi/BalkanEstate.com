@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/src/lib/utils';
-import type { DevelopmentBuilding, Hotspot, PublicSceneView, PublicUnit, UnitAvailability } from '../../../types';
+import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicSceneView, PublicUnit, UnitAvailability } from '../../../types';
 import { ExplorerCanvas } from './ExplorerCanvas';
 import { ViewSwitcher } from './ViewSwitcher';
 import type { Crumb } from './ExplorerBreadcrumb';
@@ -31,6 +31,7 @@ export interface ExplorerStageProps {
   unitsById: Map<string, PublicUnit>;
   matchedIds?: Set<string>;
   buildingsById: Map<string, DevelopmentBuilding>;
+  entrancesById?: Map<string, DevelopmentEntrance>;
   buildingFacts?: Map<string, BuildingFacts>;
   onActivate: (h: Hotspot) => void;
   /** The shared filter panel, shown over the stage on demand. */
@@ -94,6 +95,7 @@ export const ExplorerStage: React.FC<ExplorerStageProps> = (p) => {
               unitsById={p.unitsById}
               matchedIds={p.matchedIds}
               buildingsById={p.buildingsById}
+              entrancesById={p.entrancesById}
               buildingFacts={p.buildingFacts}
               mode={mode}
               onActivate={p.onActivate}

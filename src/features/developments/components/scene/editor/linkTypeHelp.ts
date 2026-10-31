@@ -22,7 +22,7 @@ export const linkTypeHelp = (t: TFunction, lt: HotspotLinkType): string => {
         'A published BalkanEstate listing (e.g. a resale flat). The card shows the listing’s photo, price, m², floor and rooms; clicking opens the listing page. To show a listing on one of your apartments, link the region to the unit and attach the listing to that unit instead.'
       );
     case 'entrance':
-      return t('editor.linkHelp.entrance', 'Marks a building entrance. It shows a label but does not open anything.');
+      return t('editor.linkHelp.entranceDoor', 'Marks a door with a pin in its kind’s colour. Buyers see the kind, step-free access and how many homes it serves, and can show those homes.');
     default:
       return '';
   }

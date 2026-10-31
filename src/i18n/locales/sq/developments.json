@@ -67,7 +67,11 @@
     "selectCountry": "Zgjidhni një shtet",
     "selectCity": "Zgjidhni një qytet",
     "selectCountryFirst": "Zgjidhni fillimisht shtetin",
-    "addressHelper": "Adresa e rrugës (opsionale) — plotësohet automatikisht nga qyteti."
+    "addressHelper": "Adresa e rrugës (opsionale) — plotësohet automatikisht nga qyteti.",
+    "importHeading": "Banesat nga një tabelë (opsionale)",
+    "importHint": "I keni ndërtesat dhe banesat në Excel ose CSV? Shtoni skedarin tani — menjëherë pas krijimit e hapim importin me të, që të kontrolloni çdo kolonë para se të ruhet diçka.",
+    "importChoose": "Zgjidh tabelën",
+    "importRemove": "Hiq {{name}}"
   },
   "detail": {
     "overview": "Përmbledhje",
@@ -617,7 +621,8 @@
       "floor": "Hap foton e atij kati, p.sh. një plan kati ku çdo apartament është i klikueshëm.",
       "unit": "Një apartament nga Inventari juaj. Karta tregon numrin, katin, m², dhomat e gjumit, çmimin dhe statusin aktual; klikimi hap detajet. Përdoreni për apartamentet që shitni në këtë rezidencë.",
       "listing": "Një shpallje e publikuar në BalkanEstate (p.sh. një banesë në rishitje). Karta tregon foton, çmimin, m², katin dhe dhomat; klikimi hap faqen e shpalljes. Për të shfaqur një shpallje në një nga apartamentet tuaja, lidheni zonën me njësinë dhe bashkëngjitni shpalljen te ajo njësi.",
-      "entrance": "Shënon një hyrje ndërtese. Shfaq një etiketë por nuk hap asgjë."
+      "entrance": "Shënon një hyrje ndërtese. Shfaq një etiketë por nuk hap asgjë.",
+      "entranceDoor": "Shënon një derë me një kunj në ngjyrën e llojit të saj. Blerësit shohin llojin, qasjen pa shkallë dhe sa banesa shërben, dhe mund t’i shfaqin ato."
     },
     "guide": {
       "title": "Si funksionon: fotoja e rezidencës, ndërtesat, njësitë dhe shpalljet",
@@ -1038,7 +1043,8 @@
       "tooBig": "Skedari është më i madh se 10 MB.",
       "empty": "Skedari duhet të ketë një rresht titujsh dhe të paktën një njësi.",
       "unreadable": "Ky skedar nuk mund të lexohej. Ruajeni si .xlsx ose .csv dhe provoni përsëri.",
-      "oldExcel": "Ky është një skedar i vjetër Excel (.xls). Në Excel zgjidhni File → Save as → Excel Workbook (.xlsx), pastaj importoni atë."
+      "oldExcel": "Ky është një skedar i vjetër Excel (.xls). Në Excel zgjidhni File → Save as → Excel Workbook (.xlsx), pastaj importoni atë.",
+      "wrongType": "Zgjidhni një skedar Excel (.xlsx) ose CSV."
     },
     "columns": "Kolonat",
     "unnamed": "(pa emër)",
@@ -1057,7 +1063,8 @@
       "new": "Njësi të reja",
       "updated": "Njësi të përditësuara",
       "buildings": "Ndërtesa të reja",
-      "floors": "Kate të reja"
+      "floors": "Kate të reja",
+      "entrances": "Hyrje të reja"
     },
     "unchanged": "Tashmë të përditësuara: {{unchanged}} · Njësi ekzistuese të lëna siç janë: {{skipped}}",
     "floorsFromNumbers": "Pa kolonë kati: katet lexohen nga numrat e njësive (401 → kati 4).",
@@ -1099,11 +1106,16 @@
       "viewType": "Pamja",
       "features": "Veçoritë",
       "description": "Përshkrimi",
-      "ignore": "Mos e importo"
+      "ignore": "Mos e importo",
+      "entrance": "Hyrja"
     },
     "dropHintXlsx": "Excel (.xlsx) ose CSV — direkt nga Excel, Google Sheets ose Numbers. Kolonat mund të jenë në çdo renditje dhe gjuhë; ne i njohim.",
     "sheet": "Fleta",
-    "buildingLimit": "Ky skedar shton {{n}} ndërtesa të reja, por kjo rezidencë mund të ketë {{limit}} ({{allowed}} më shumë). Zhbllokoni më shumë ndërtesa te skeda Përmbledhje, ose përdorni emra ndërtesash ekzistuese."
+    "buildingLimit": "Ky skedar shton {{n}} ndërtesa të reja, por kjo rezidencë mund të ketë {{limit}} ({{allowed}} më shumë). Zhbllokoni më shumë ndërtesa te skeda Përmbledhje, ose përdorni emra ndërtesash ekzistuese.",
+    "doneEntrances": "Hyrje të reja: {{n}}",
+    "titleFor": "Importo njësi në {{building}}",
+    "openFor": "Importo njësi në {{building}}",
+    "openShort": "Importo"
   },
   "unitView": {
     "sea": "Det",
@@ -1380,7 +1392,9 @@
       "listing_already_attached_elsewhere": "Ky njoftim është i lidhur me një njësi tjetër. Nëse e lidhni këtu, zhvendoset."
     },
     "PHONE_INVALID": "Shkruani një numër telefoni të vlefshëm, si +389 2 123 4567.",
-    "SOCIAL_HOST": "Kjo duhet të jetë një lidhje në {{network}}."
+    "SOCIAL_HOST": "Kjo duhet të jetë një lidhje në {{network}}.",
+    "ENTRANCE_NAME_TAKEN": "Kjo ndërtesë ka tashmë një hyrje me emrin “{{name}}”.",
+    "ENTRANCE_IN_USE": "{{count}} njësi e përdorin ende këtë hyrje. Kalojini më parë në një hyrje tjetër."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1439,5 +1453,46 @@
     "license": "Licenca",
     "office": "Zyra",
     "email": "Email"
+  },
+  "entrance": {
+    "label": "Hyrja",
+    "filter": "Hyrja",
+    "kind": {
+      "main": "Hyrja kryesore",
+      "side": "Hyrje anësore",
+      "garage": "Hyrja e parkimit",
+      "service": "Hyrje shërbimi"
+    },
+    "sectionTitle": "Ndërtesat dhe hyrjet",
+    "sectionHint": "Emërtoni çdo derë që përdorin blerësit — hyrjen kryesore, derën anësore, parkimin. Pastaj shënojeni në fotot tuaja te Eksploruesi interaktiv.",
+    "none": "Një derë për gjithë ndërtesën? Atëherë nuk ju duhen hyrje. Shtojini kur banesat arrihen nga dyer ose shkallë të ndryshme.",
+    "add": "Shto hyrje",
+    "addTitle": "Shto një hyrje te {{building}}",
+    "editTitle": "Ndrysho {{name}}",
+    "name": "Emri",
+    "namePlaceholder": "p.sh. Hyrja A",
+    "code": "Kodi i shkurtër",
+    "kindLabel": "Lloji",
+    "accessible": "Hyrje pa shkallë (karrige me rrota, karrocë)",
+    "note": "Shënim për blerësit",
+    "notePlaceholder": "p.sh. Nga rruga kryesore · portier 8:00–20:00",
+    "saving": "Po ruhet…",
+    "save": "Ruaj hyrjen",
+    "stepFree": "Pa shkallë",
+    "edit": "Ndrysho {{name}}",
+    "delete": "Fshi {{name}}",
+    "deleteTitle": "Të fshihet “{{name}}”?",
+    "deleteMessage": "Zonat që e shënojnë këtë hyrje në fotot tuaja fshihen gjithashtu. Banesat duhet të kalohen më parë në një hyrje tjetër.",
+    "deleteConfirm": "Fshi hyrjen",
+    "noneChosen": "Asnjë hyrje e veçantë",
+    "homesAvailable_one": "{{count}} banesë e lirë",
+    "homesAvailable_other": "{{count}} banesa të lira",
+    "homes": "Banesat",
+    "access": "Qasja",
+    "noteShort": "Shënim",
+    "showHomes": "Shfaq banesat e saj",
+    "needBuilding": "Shtoni më parë një ndërtesë; hyrjet i përkasin një ndërtese.",
+    "inBuilding": "Hyrje e ndërtesës",
+    "newHere": "Hyrje e re"
   }
 }

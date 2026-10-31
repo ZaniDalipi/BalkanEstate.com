@@ -59,6 +59,7 @@ describe('buildImportRows', () => {
     expect(result.rows[1]).toEqual({
       row: 3,
       building: 'Object A',
+      entrance: 'Entrance 1',
       level: 1,
       floorLabel: 'Floor 1',
       unitNumber: 'A-101',
@@ -66,6 +67,18 @@ describe('buildImportRows', () => {
       fields: { beds: 2, baths: 1, totalArea: 64.5, price: 96000, unitType: 'apartment', availability: 'available', currency: 'EUR', orientation: 'southEast' },
     });
     expect(result.rows[0]).toMatchObject({ level: 0, floorLabel: 'Ground floor', fields: { unitType: 'retail' } });
+    // Object B has one door: no entrance on its rows.
+    expect(result.rows[4]).not.toHaveProperty('entrance');
+    expect(result.entrances).toEqual(['Object A · Entrance 1', 'Object A · Entrance 2']);
+  });
+
+  it('recognises entrance columns in several languages, and puts every row in the building it is imported for', () => {
+    expect(guessColumns(['Objekat', 'Ulaz', 'Sprat', 'Stan'])).toEqual(['building', 'entrance', 'floor', 'unitNumber']);
+    expect(guessColumns(['Ndertesa', 'Hyrja', 'Kati', 'Banesa'])).toEqual(['building', 'entrance', 'floor', 'unitNumber']);
+    const table = parseCsv('Building;Entrance;Floor;Unit\nTower X;B;1;101\n;;2;201');
+    const result = buildImportRows(table, guessColumns(table[0]), { defaultBuilding: '', floorNames: names, forceBuilding: 'Plaza Tower' });
+    expect(result.rows.map((r) => [r.building, r.entrance])).toEqual([['Plaza Tower', 'B'], ['Plaza Tower', undefined]]);
+    expect(result.buildings).toEqual(['Plaza Tower']);
   });
 
   it('uses the chosen building and reads floors from unit numbers when columns are missing', () => {

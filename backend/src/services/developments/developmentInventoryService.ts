@@ -93,21 +93,6 @@ export const createBuilding = async (
   return building;
 };
 
-export const createEntrance = async (
-  developmentId: Id,
-  buildingId: Id,
-  input: { name: string; code?: string; order?: number }
-) => {
-  if (!text(input.name)) throw new ValidationError('entrance name is required', { code: 'FIELD_REQUIRED', field: 'name' });
-  return DevelopmentEntrance.create({
-    developmentId,
-    buildingId,
-    name: text(input.name),
-    code: input.code,
-    order: input.order ?? 0,
-  });
-};
-
 export const createFloor = async (
   developmentId: Id,
   buildingId: unknown,

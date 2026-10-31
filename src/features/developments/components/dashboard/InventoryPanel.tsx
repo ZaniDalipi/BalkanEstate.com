@@ -4,6 +4,7 @@ import { QuickAddInventory } from './inventory/QuickAddInventory';
 import { InventoryTable } from './inventory/InventoryTable';
 import { ImportUnitsButton } from './inventory/import/ImportUnitsButton';
 import { roleCan } from './inventory/permissions';
+import { BuildingsEntrances } from './entrances/BuildingsEntrances';
 
 interface InventoryPanelProps {
   developmentId: string;
@@ -11,7 +12,7 @@ interface InventoryPanelProps {
   role?: string;
 }
 
-/** Inventory tab: spreadsheet import and the quick builder (buildings, floors, units) above the unit table. */
+/** Inventory tab: spreadsheet import and the quick builder, buildings with their entrances, then the unit table. */
 export const InventoryPanel: React.FC<InventoryPanelProps> = ({ developmentId, slug, role }) => {
   const { t } = useTranslation('developments');
   return (
@@ -25,6 +26,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ developmentId, s
         </div>
         <QuickAddInventory developmentId={developmentId} role={role} />
       </section>
+      <BuildingsEntrances developmentId={developmentId} role={role} />
       <section aria-labelledby="units-heading">
         <h2 id="units-heading" className="mb-3 text-base font-semibold text-slate-900">
           {t('detail.units', 'Units')}

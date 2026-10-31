@@ -67,7 +67,11 @@
     "selectCountry": "Odaberite državu",
     "selectCity": "Odaberite grad",
     "selectCountryFirst": "Prvo odaberite državu",
-    "addressHelper": "Adresa ulice (neobavezno) — automatski se popunjava iz grada."
+    "addressHelper": "Adresa ulice (neobavezno) — automatski se popunjava iz grada.",
+    "importHeading": "Stanovi iz tabele (neobavezno)",
+    "importHint": "Već imate zgrade i stanove u Excelu ili CSV-u? Dodajte fajl sada — odmah nakon kreiranja otvaramo uvoz sa njim, da provjerite svaku kolonu prije nego što se išta sačuva.",
+    "importChoose": "Izaberi tabelu",
+    "importRemove": "Ukloni {{name}}"
   },
   "detail": {
     "overview": "Pregled",
@@ -619,7 +623,8 @@
       "floor": "Otvara sliku tog sprata, npr. osnovu na kojoj je svaki stan klikabilan.",
       "unit": "Stan iz vašeg Inventara. Kartica prikazuje broj, sprat, m², spavaće sobe, cijenu i trenutni status; klik otvara detalje. Koristite za stanove koje prodajete u ovoj rezidenciji.",
       "listing": "Objavljeni oglas na BalkanEstate (npr. stan u preprodaji). Kartica prikazuje fotografiju, cijenu, m², sprat i sobe; klik otvara stranicu oglasa. Da prikažete oglas na nekom od svojih stanova, povežite oblast sa jedinicom i priložite oglas toj jedinici.",
-      "entrance": "Označava ulaz u zgradu. Prikazuje oznaku, ali ništa ne otvara."
+      "entrance": "Označava ulaz u zgradu. Prikazuje oznaku, ali ništa ne otvara.",
+      "entranceDoor": "Označava vrata oznakom u boji njihove vrste. Kupci vide vrstu, pristup bez stepenica i koliko stanova ulaz opslužuje, i mogu prikazati te stanove."
     },
     "guide": {
       "title": "Kako radi: slika rezidencije, zgrade, jedinice i oglasi",
@@ -1044,7 +1049,8 @@
       "tooBig": "Datoteka je veća od 10 MB.",
       "empty": "Datoteka treba red zaglavlja i barem jednu jedinicu.",
       "unreadable": "Ova datoteka se ne može pročitati. Sačuvajte je kao .xlsx ili .csv i pokušajte ponovo.",
-      "oldExcel": "Ovo je stara Excel datoteka (.xls). U Excelu odaberite File → Save as → Excel Workbook (.xlsx), pa uvezite nju."
+      "oldExcel": "Ovo je stara Excel datoteka (.xls). U Excelu odaberite File → Save as → Excel Workbook (.xlsx), pa uvezite nju.",
+      "wrongType": "Izaberite Excel (.xlsx) ili CSV fajl."
     },
     "columns": "Kolone",
     "unnamed": "(bez naziva)",
@@ -1063,7 +1069,8 @@
       "new": "Nove jedinice",
       "updated": "Ažurirane jedinice",
       "buildings": "Nove zgrade",
-      "floors": "Novi spratovi"
+      "floors": "Novi spratovi",
+      "entrances": "Novi ulazi"
     },
     "unchanged": "Već ažurno: {{unchanged}} · Postojeće jedinice ostavljene kakve jesu: {{skipped}}",
     "floorsFromNumbers": "Nema kolone sprata: spratovi se čitaju iz brojeva jedinica (401 → sprat 4).",
@@ -1105,11 +1112,16 @@
       "viewType": "Pogled",
       "features": "Karakteristike",
       "description": "Opis",
-      "ignore": "Ne uvoziti"
+      "ignore": "Ne uvoziti",
+      "entrance": "Ulaz"
     },
     "dropHintXlsx": "Excel (.xlsx) ili CSV — direktno iz Excela, Google Sheets ili Numbers. Kolone mogu biti bilo kojim redom i na bilo kojem jeziku; prepoznajemo ih.",
     "sheet": "Radni list",
-    "buildingLimit": "Ova datoteka dodaje {{n}} novih zgrada, a ova rezidencija može imati {{limit}} (još {{allowed}}). Otključajte još zgrada na kartici Pregled ili koristite postojeće nazive zgrada."
+    "buildingLimit": "Ova datoteka dodaje {{n}} novih zgrada, a ova rezidencija može imati {{limit}} (još {{allowed}}). Otključajte još zgrada na kartici Pregled ili koristite postojeće nazive zgrada.",
+    "doneEntrances": "Novi ulazi: {{n}}",
+    "titleFor": "Uvezi jedinice u {{building}}",
+    "openFor": "Uvezi jedinice u {{building}}",
+    "openShort": "Uvezi"
   },
   "unitView": {
     "sea": "More",
@@ -1390,7 +1402,9 @@
       "listing_already_attached_elsewhere": "Ovaj oglas je povezan s drugom jedinicom. Ako ga povežete ovdje, premjestit će se."
     },
     "PHONE_INVALID": "Unesite ispravan broj telefona, npr. +389 2 123 4567.",
-    "SOCIAL_HOST": "Ovo mora biti link na {{network}}."
+    "SOCIAL_HOST": "Ovo mora biti link na {{network}}.",
+    "ENTRANCE_NAME_TAKEN": "Ova zgrada već ima ulaz pod nazivom „{{name}}”.",
+    "ENTRANCE_IN_USE": "Ovaj ulaz još koristi jedinica: {{count}}. Prvo ih premjestite u drugi ulaz."
   },
   "notices": {
     "trialEndsSoon": {
@@ -1449,5 +1463,47 @@
     "license": "Licenca",
     "office": "Ured",
     "email": "E-pošta"
+  },
+  "entrance": {
+    "label": "Ulaz",
+    "filter": "Ulaz",
+    "kind": {
+      "main": "Glavni ulaz",
+      "side": "Sporedni ulaz",
+      "garage": "Ulaz u garažu",
+      "service": "Servisni ulaz"
+    },
+    "sectionTitle": "Zgrade i ulazi",
+    "sectionHint": "Imenujte svaka vrata koja kupci koriste — glavni ulaz, sporedna vrata, garažu. Zatim ih označite na slikama u Interaktivnom pregledu.",
+    "none": "Jedna vrata za cijelu zgradu? Onda vam ulazi ne trebaju. Dodajte ih kada se do stanova dolazi kroz različita vrata ili stepeništa.",
+    "add": "Dodaj ulaz",
+    "addTitle": "Dodaj ulaz u {{building}}",
+    "editTitle": "Uredi {{name}}",
+    "name": "Naziv",
+    "namePlaceholder": "npr. Ulaz A",
+    "code": "Kratka oznaka",
+    "kindLabel": "Vrsta",
+    "accessible": "Pristup bez stepenica (invalidska kolica, kolica za bebe)",
+    "note": "Napomena za kupce",
+    "notePlaceholder": "npr. Sa glavne ulice · portir 8:00–20:00",
+    "saving": "Čuvanje…",
+    "save": "Sačuvaj ulaz",
+    "stepFree": "Bez stepenica",
+    "edit": "Uredi {{name}}",
+    "delete": "Obriši {{name}}",
+    "deleteTitle": "Obrisati „{{name}}”?",
+    "deleteMessage": "Oblasti koje označavaju ovaj ulaz na vašim slikama takođe se brišu. Stanove prvo treba premjestiti u drugi ulaz.",
+    "deleteConfirm": "Obriši ulaz",
+    "noneChosen": "Bez posebnog ulaza",
+    "homesAvailable_one": "{{count}} slobodan stan",
+    "homesAvailable_other": "{{count}} slobodnih stanova",
+    "homes": "Stanovi",
+    "access": "Pristup",
+    "noteShort": "Napomena",
+    "showHomes": "Prikaži njegove stanove",
+    "needBuilding": "Prvo dodajte zgradu; ulazi pripadaju zgradi.",
+    "inBuilding": "Ulaz zgrade",
+    "newHere": "Novi ulaz",
+    "homesAvailable_few": "{{count}} slobodna stana"
   }
 }

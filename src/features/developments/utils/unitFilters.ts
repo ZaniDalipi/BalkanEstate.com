@@ -25,6 +25,8 @@ export interface UnitCriteria {
   orientations?: string[];
   /** Derived apartment flags (terrace, balcony, …); matched with AND. */
   flags?: UnitFlag[];
+  /** Selected entrance ids; matched with OR (a buyer who clicked an entrance sees the homes it serves). */
+  entrances?: string[];
   minArea?: number;
   maxArea?: number;
   minLevel?: number;
@@ -72,6 +74,8 @@ export interface FilterBounds {
   flags: UnitFlag[];
   /** Distinct orientations present (as written on the units). */
   orientations: string[];
+  /** Entrances the units use, by first appearance; the building is added to names used in two buildings. */
+  entrances: { id: string; name: string }[];
   availability: UnitAvailability[];
   areaMin: number | null;
   areaMax: number | null;
@@ -87,6 +91,13 @@ const minMax = (xs: number[], round = false): [number | null, number | null] =>
     ? [round ? Math.floor(Math.min(...xs)) : Math.min(...xs), round ? Math.ceil(Math.max(...xs)) : Math.max(...xs)]
     : [null, null];
 
+/** "Entrance A", or "Entrance A · Block B" when two buildings both have an Entrance A. */
+const entranceOptions = (found: Map<string, { name: string; building?: string }>): { id: string; name: string }[] => {
+  const all = Array.from(found, ([id, e]) => ({ id, ...e }));
+  const count = (n: string) => all.filter((e) => e.name.toLowerCase() === n.toLowerCase()).length;
+  return all.map((e) => ({ id: e.id, name: count(e.name) > 1 && e.building ? `${e.name} · ${e.building}` : e.name }));
+};
+
 /** Derive the selectable options and slider bounds from the loaded units. */
 export const deriveFilterBounds = (units: PublicUnit[]): FilterBounds => {
   const beds = new Set<number>();
@@ -94,6 +105,7 @@ export const deriveFilterBounds = (units: PublicUnit[]): FilterBounds => {
   const types = new Set<string>();
   const features = new Set<string>();
   const orientations = new Set<string>();
+  const entrances = new Map<string, { name: string; building?: string }>();
   const availability = new Set<UnitAvailability>();
   const areas: number[] = [];
   const levels: number[] = [];
@@ -104,6 +116,7 @@ export const deriveFilterBounds = (units: PublicUnit[]): FilterBounds => {
     if (typeof u.baths === 'number') baths.add(u.baths);
     if (u.unitType) types.add(u.unitType);
     if (u.orientation) orientations.add(u.orientation);
+    if (u.entranceId && !entrances.has(u.entranceId)) entrances.set(u.entranceId, { name: u.entranceName || u.entranceId, building: u.buildingName ?? undefined });
     availability.add(u.availability);
     (u.features ?? []).forEach((f) => features.add(f));
     const a = unitArea(u);
@@ -122,6 +135,7 @@ export const deriveFilterBounds = (units: PublicUnit[]): FilterBounds => {
     features: Array.from(features).sort(),
     flags: UNIT_FLAGS.filter((fl) => units.some((u) => unitHasFlag(u, fl))),
     orientations: Array.from(orientations).sort(),
+    entrances: entranceOptions(entrances),
     availability: Array.from(availability),
     areaMin,
     areaMax,
@@ -143,6 +157,7 @@ export const hasActiveCriteria = (c: UnitCriteria): boolean =>
   has(c.availability) ||
   has(c.orientations) ||
   has(c.flags) ||
+  has(c.entrances) ||
   [c.minArea, c.maxArea, c.minLevel, c.maxLevel, c.minPrice, c.maxPrice].some((v) => v != null);
 
 /** Count match where the top option means "N or more". */
@@ -180,6 +195,7 @@ export const unitMatchesCriteria = (
     if (!c.features.every((f) => owned.has(f))) return false;
   }
   if (has(c.flags) && !c.flags!.every((fl) => unitHasFlag(u, fl))) return false;
+  if (has(c.entrances) && !(u.entranceId && c.entrances!.includes(u.entranceId))) return false;
   if (!inRange(unitArea(u), c.minArea, c.maxArea)) return false;
   if (!inRange(u.floorLevel, c.minLevel, c.maxLevel)) return false;
   const price = u.priceOnRequest ? undefined : u.price;

@@ -766,6 +766,77 @@ The company building the residence, shown to buyers as a professional profile.
   `builderValidation.test.ts`, `builderLinks.test.ts`,
   `BuilderSection.test.tsx` and `BuilderShowcase.test.tsx`.
 
+## 7b-9. Entrances
+
+A building can have several doors: a main entrance, a side door, the car park
+and a service door. Apartments can belong to one of them. Unit numbers are
+unique per entrance, so "A1" can exist behind both Entrance 1 and Entrance 2.
+
+- **Data:** `DevelopmentEntrance` has these fields:
+  - `name`: required, ≤120, unique within its building (case-insensitive);
+  - `code`: ≤50, shown on the pin;
+  - `kind`: `main | side | garage | service`;
+  - `accessible`: step-free access;
+  - `note`: ≤200, shown to buyers;
+  - `order`.
+
+  A unit's `entranceId` must be one of its own building's entrances. Moving a
+  unit to another building drops its entrance.
+- **Endpoints** (all need `building.manage`; refusals use codes):
+
+  | Endpoint | What it does | Refusals |
+  |---|---|---|
+  | `POST /api/dashboard/developments/:id/buildings/:buildingId/entrances` | Adds an entrance | `FIELD_REQUIRED`, `FIELD_TOO_LONG {max}`, `FIELD_INVALID` (kind, accessible), `ENTRANCE_NAME_TAKEN {name}` (409) |
+  | `PATCH …/entrances/:entranceId` | Changes the fields sent; `null` clears `code` or `note` | Same as adding |
+  | `DELETE …/entrances/:entranceId` | Removes it, its marked regions on every picture, and floor references | `ENTRANCE_IN_USE {count}` (409) while apartments still use it |
+  | `PATCH …/units/:unitId { entranceId }` | Assigns the unit to an entrance; `null` takes it out | `ENTRANCE_NOT_IN_BUILDING` |
+
+  Validation is the same on both sides
+  (`validation/entranceValidation.ts` ⇄ `services/developments/entranceRules.ts`).
+  Each refusal is shown next to its field (`role="alert"`).
+- **Dashboard:** the Inventory tab has a **Buildings & entrances** section with
+  one card per building:
+  - the building's entrances, each showing its kind icon, code and step-free mark;
+  - Add, Edit and Delete (the delete confirmation says what goes with it);
+  - an **Import** button for that building alone.
+
+  The unit editor has an **Entrance** dropdown when the building has entrances.
+  In the picture editor, a region linked to an entrance offers **New entrance**,
+  which creates one and links the region to it.
+- **Buyers see:**
+  - a door pin on each marked entrance, in the kind's colour (main teal, side
+    sky, car park slate, service amber), with its code or name and a wheelchair
+    mark when step-free;
+  - an entrance card: kind, "N of M available" homes, step-free access and the
+    note;
+  - **Show its homes**, which sets the **Entrance** filter (`?ent=` in the link):
+    the matching apartments light up on the picture and the list below narrows;
+  - the Entrance filter chips, shown when the homes use two or more entrances;
+    names used in two buildings get the building added ("Entrance A · Block B");
+  - "Entrance A" on the apartment's hover card and in its details sheet.
+
+  Public responses carry `entrances[]` (with `stats {units, available}`) and
+  each unit's `entranceName`.
+- **Spreadsheet import:**
+  - **Entrance column:** recognised in several languages (Entrance, Ulaz,
+    Hyrja, Вход, Είσοδος, Intrare, …) and included in the template. Missing
+    entrances are created, and the import preview counts "New entrances".
+  - **Matching:** rows match apartments by building + entrance + number. A row
+    with an entrance also moves an existing apartment that has none into it.
+    Each apartment is matched by one row only.
+  - **Per building:** each building card's **Import** puts every row into that
+    building, whatever the file's building column says.
+  - **On the create page:** an optional Excel or CSV file can be attached
+    (checked for type and size, with the reason shown). Right after creating, the
+    residence opens on the Inventory tab with the import already loaded from that
+    file. Nothing is saved until the owner confirms the import.
+- **Tests:**
+  - backend: `__tests__/developments/entrances.test.ts`;
+  - shared rules and import: `entranceValidation.test.ts`, `csvImport.test.ts`,
+    `unitFilters.test.ts`, `useExplorerUrlState.test.ts`;
+  - components: `EntranceMarkers.test.tsx`, `BuildingEntrancesCard.test.tsx`,
+    `CreateImportPicker.test.tsx`.
+
 ## 7b-3. Errors in the reader's language
 
 - **Contract:** every refusal is `{ message, code, details: { field?, params? } }`.

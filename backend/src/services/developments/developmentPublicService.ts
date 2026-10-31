@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 import Development, { IDevelopment } from '../../models/Development';
 import DevelopmentBuilding from '../../models/DevelopmentBuilding';
 import DevelopmentFloor from '../../models/DevelopmentFloor';
+import DevelopmentEntrance, { IDevelopmentEntrance } from '../../models/DevelopmentEntrance';
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import Property from '../../models/Property';
 import { encodeId } from '../../utils/idObfuscation';
@@ -113,10 +114,23 @@ const stripImage = (img: unknown): Record<string, unknown> | undefined => {
 interface UnitContext {
   listings: Map<string, ListingLite>;
   buildingName: Map<string, string>;
+  /** Entrance names, for "Entrance A" on the apartment. */
+  entranceName?: Map<string, string>;
   floorById: Map<string, { label: string; level: number }>;
   /** Units sold together, among the units being shown (see unitLinks). */
   links?: ReturnType<typeof linkMaps>;
 }
+
+/** An entrance for buyers: its name, kind, access and note, and the homes it serves. */
+export const toPublicEntrance = (e: IDevelopmentEntrance, stats?: { units: number; available: number }): Record<string, unknown> => {
+  const json = e.toJSON() as Record<string, unknown>;
+  delete json.deletedAt;
+  delete json.developmentId;
+  json.kind = e.kind ?? 'main';
+  json.accessible = !!e.accessible;
+  json.stats = stats ?? { units: 0, available: 0 };
+  return json;
+};
 
 /** Project one visible unit for the public. */
 export const toPublicUnit = (
@@ -171,6 +185,7 @@ export const toPublicUnit = (
 
   const floor = ctx.floorById.get(String(unit.floorId));
   json.buildingName = ctx.buildingName.get(String(unit.buildingId)) ?? null;
+  json.entranceName = unit.entranceId ? ctx.entranceName?.get(String(unit.entranceId)) ?? null : null;
   json.floorLabel = floor?.label ?? null;
   json.floorLevel = floor?.level ?? null;
 
@@ -187,14 +202,17 @@ export const toPublicUnit = (
 };
 
 const loadStructureMaps = async (developmentId: mongoose.Types.ObjectId) => {
-  const [buildings, floors] = await Promise.all([
+  const [buildings, floors, entrances] = await Promise.all([
     DevelopmentBuilding.find({ developmentId, deletedAt: LIVE }).sort({ order: 1 }),
     DevelopmentFloor.find({ developmentId, deletedAt: LIVE }).sort({ order: 1 }),
+    DevelopmentEntrance.find({ developmentId, deletedAt: LIVE }).sort({ order: 1 }),
   ]);
   return {
     buildings,
     floors,
+    entrances,
     buildingName: new Map(buildings.map((b) => [String(b._id), b.name])),
+    entranceName: new Map(entrances.map((e) => [String(e._id), e.name])),
     floorById: new Map(floors.map((f) => [String(f._id), { label: f.label, level: f.level }])),
   };
 };
@@ -203,21 +221,29 @@ const loadStructureMaps = async (developmentId: mongoose.Types.ObjectId) => {
 export const getPublicDevelopmentDetail = async (slug: unknown) => {
   const development = await loadPublishedDevelopment(slug);
   const developmentId = development._id as mongoose.Types.ObjectId;
-  const [{ buildings, floors }, units] = await Promise.all([
+  const [{ buildings, floors, entrances }, units] = await Promise.all([
     loadStructureMaps(developmentId),
     DevelopmentUnit.find(visibleUnitFilter(developmentId)).select(
-      'buildingId availability listingIds primaryListingId virtualTourUrl'
+      'buildingId entranceId availability listingIds primaryListingId virtualTourUrl'
     ),
   ]);
   const listings = await loadListingStatuses(units);
 
   const stats = new Map<string, { units: number; available: number; withTour: number }>();
+  const entranceStats = new Map<string, { units: number; available: number }>();
   for (const u of units) {
     const key = String(u.buildingId);
     const s = stats.get(key) ?? { units: 0, available: 0, withTour: 0 };
     s.units += 1;
     const statuses = (u.listingIds ?? []).map((id) => listings.get(String(id))?.status);
-    if (resolveEffectiveAvailability(u.availability, statuses).availability === 'available') s.available += 1;
+    const isAvailable = resolveEffectiveAvailability(u.availability, statuses).availability === 'available';
+    if (isAvailable) s.available += 1;
+    if (u.entranceId) {
+      const es = entranceStats.get(String(u.entranceId)) ?? { units: 0, available: 0 };
+      es.units += 1;
+      if (isAvailable) es.available += 1;
+      entranceStats.set(String(u.entranceId), es);
+    }
     const publicListings = (u.listingIds ?? [])
       .map((id) => listings.get(String(id)))
       .filter((l): l is ListingLite => !!l && l.status !== 'draft')
@@ -242,6 +268,7 @@ export const getPublicDevelopmentDetail = async (slug: unknown) => {
       delete json.deletedAt;
       return json;
     }),
+    entrances: entrances.map((e) => toPublicEntrance(e, entranceStats.get(String(e._id)))),
   };
 };
 
@@ -256,7 +283,7 @@ export const listPublicUnits = async (slug: unknown) => {
       .sort({ buildingId: 1, unitNumber: 1 }),
   ]);
   const listings = await loadListingStatuses(units);
-  const ctx: UnitContext = { listings, buildingName: maps.buildingName, floorById: maps.floorById, links: linkMaps(units) };
+  const ctx: UnitContext = { listings, buildingName: maps.buildingName, entranceName: maps.entranceName, floorById: maps.floorById, links: linkMaps(units) };
   const projected = units.map((u) => toPublicUnit(u, ctx));
 
   // Price range over publicly priced units only.
@@ -305,7 +332,7 @@ export const getPublicUnitDetail = async (slug: unknown, rawUnitId: unknown) => 
     listingDocs.map((l) => [String(l._id), { _id: l._id as mongoose.Types.ObjectId, status: l.status, virtualTour360Url: l.virtualTour360Url }])
   );
   const links = linkMaps([unit, ...related]);
-  const ctx: UnitContext = { listings, buildingName: maps.buildingName, floorById: maps.floorById, links };
+  const ctx: UnitContext = { listings, buildingName: maps.buildingName, entranceName: maps.entranceName, floorById: maps.floorById, links };
   const relatedCtx: UnitContext = { ...ctx, listings: relatedListings };
   const comesWith = new Set(links.comesWith.get(String(unit._id)) ?? []);
 

@@ -29,6 +29,8 @@ export type UnitFormState = Record<NumericField | NullableTextField, string> & {
   unitType: string;
   buildingId: string;
   floorId: string;
+  /** '' when it uses no particular entrance. */
+  entranceId: string;
   availability: UnitAvailability;
   visibility: UnitVisibility;
   priceVisibility: PriceVisibility;
@@ -50,6 +52,7 @@ export const unitToForm = (u: DevelopmentUnit): UnitFormState => ({
   unitType: u.unitType ?? '',
   buildingId: u.buildingId ?? '',
   floorId: u.floorId ?? '',
+  entranceId: u.entranceId ?? '',
   beds: str(u.beds),
   baths: str(u.baths),
   livingRooms: str(u.livingRooms),
@@ -113,6 +116,7 @@ export const diffUnitForm = (original: UnitFormState, current: UnitFormState): U
   for (const k of ['buildingId', 'floorId', 'availability', 'visibility', 'priceVisibility'] as const) {
     if (current[k] !== original[k]) p[k] = current[k];
   }
+  if (current.entranceId !== original.entranceId) p.entranceId = current.entranceId || null;
   for (const k of [...INT_FIELDS, ...DECIMAL_FIELDS]) {
     const a = original[k].trim();
     const b = current[k].trim();

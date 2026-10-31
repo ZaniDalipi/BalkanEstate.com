@@ -4,6 +4,7 @@ import type { ColumnTarget } from '../../../../utils/csvImport';
 const DEFAULTS: Record<ColumnTarget, string> = {
   unitNumber: 'Unit number',
   building: 'Building',
+  entrance: 'Entrance',
   floor: 'Floor',
   unitType: 'Type',
   beds: 'Bedrooms',

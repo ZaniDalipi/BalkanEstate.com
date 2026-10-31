@@ -18,7 +18,7 @@ export interface ExplorerUrlState {
 
 /** Every query param this hook owns; anything else in the URL (e.g. `unit`) is left alone. */
 export const EXPLORER_PARAM_KEYS = [
-  'beds', 'baths', 'type', 'feat', 'av', 'or', 'flags', 'area', 'floor', 'price', 'b', 'f', 'v',
+  'beds', 'baths', 'type', 'feat', 'av', 'or', 'flags', 'ent', 'area', 'floor', 'price', 'b', 'f', 'v',
 ] as const;
 
 const list = (p: URLSearchParams, key: string): string[] =>
@@ -55,6 +55,7 @@ export function parseExplorerSearch(search: string): ExplorerUrlState {
     ),
     orientations: list(p, 'or'),
     flags: list(p, 'flags').filter((s): s is UnitFlag => (UNIT_FLAGS as readonly string[]).includes(s)),
+    entrances: list(p, 'ent'),
     minArea, maxArea, minLevel, maxLevel, minPrice, maxPrice,
   };
   const nav: ExplorerNav = {
@@ -82,6 +83,7 @@ export function buildExplorerSearch({ criteria: c, nav }: ExplorerUrlState, base
   setList('av', c.availability);
   setList('or', c.orientations);
   setList('flags', c.flags);
+  setList('ent', c.entrances);
   setRange('area', c.minArea, c.maxArea);
   setRange('floor', c.minLevel, c.maxLevel);
   setRange('price', c.minPrice, c.maxPrice);

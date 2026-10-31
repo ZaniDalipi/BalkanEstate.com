@@ -5,6 +5,7 @@ import type { DevelopmentBuilding, DevelopmentFloor } from '../../../types';
 import { NumberField, SelectField, TextField, type UnitSectionProps } from './UnitFieldControls';
 import { useUnitChoices } from './useUnitChoices';
 import { useStructureOptions } from './useStructureOptions';
+import { useDevelopmentStructure } from '../../../hooks';
 
 
 const Fieldset: React.FC<{ legend: string; children: React.ReactNode }> = ({ legend, children }) => (
@@ -26,6 +27,7 @@ export const UnitIdentitySection: React.FC<IdentityProps> = ({ developmentId, bu
   const choices = useUnitChoices();
   // Real data: buildings with floor/unit counts, the chosen building's floors with unit counts.
   const structure = useStructureOptions(developmentId, buildings, floors);
+  const entrances = useDevelopmentStructure(developmentId).entrances.filter((e) => e.buildingId === p.form.buildingId);
 
   return (
     <Fieldset legend={t('inventory.edit.identity', 'Unit')}>
@@ -36,7 +38,11 @@ export const UnitIdentitySection: React.FC<IdentityProps> = ({ developmentId, bu
         set={(key, value) => {
           p.set(key, value);
           // Changing building invalidates the floor (a floor belongs to one building).
-          if (key === 'buildingId') p.set('floorId', '');
+          // …and the entrance (an entrance belongs to one building too).
+          if (key === 'buildingId') {
+            p.set('floorId', '');
+            p.set('entranceId', '');
+          }
         }}
         name="buildingId"
         label={t('inventory.filters.building', 'Building')}
@@ -54,6 +60,16 @@ export const UnitIdentitySection: React.FC<IdentityProps> = ({ developmentId, bu
         options={structure.floorOptions(p.form.buildingId)}
         placeholder={t('inventory.edit.selectFloor', 'Select a floor')}
       />
+      {entrances.length > 0 && (
+        <SelectField
+          {...p}
+          name="entranceId"
+          label={t('entrance.label', 'Entrance')}
+          disabled={p.disabled.unit}
+          options={entrances.map((e) => ({ value: e.id, label: e.code ? `${e.name} (${e.code})` : e.name }))}
+          placeholder={t('entrance.noneChosen', 'No particular entrance')}
+        />
+      )}
       <SelectField
         {...p}
         name="availability"

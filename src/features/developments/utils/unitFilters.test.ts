@@ -175,3 +175,26 @@ describe('extended criteria', () => {
     expect(hasActiveCriteria({ ...base, maxPrice: 5 })).toBe(true);
   });
 });
+
+describe('entrance filter', () => {
+  const homes = [
+    unit({ id: 'a1', entranceId: 'e1', entranceName: 'Entrance A', buildingName: 'Block A' }),
+    unit({ id: 'a2', entranceId: 'e2', entranceName: 'Entrance B', buildingName: 'Block A' }),
+    unit({ id: 'b1', entranceId: 'e3', entranceName: 'Entrance A', buildingName: 'Block B' }),
+    unit({ id: 'x', buildingName: 'Block C' }),
+  ];
+
+  it('keeps the homes reached through the chosen entrances', () => {
+    const c = { beds: [], types: [], features: [], entrances: ['e1', 'e3'] };
+    expect(hasActiveCriteria(c)).toBe(true);
+    expect(filterUnits(homes, c).map((u) => u.id)).toEqual(['a1', 'b1']);
+  });
+
+  it('offers each entrance once, adding the building when two share a name', () => {
+    expect(deriveFilterBounds(homes).entrances).toEqual([
+      { id: 'e1', name: 'Entrance A · Block A' },
+      { id: 'e2', name: 'Entrance B' },
+      { id: 'e3', name: 'Entrance A · Block B' },
+    ]);
+  });
+});

@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { encodeRefsOnJSON } from '../utils/encodeRefsOnJSON';
+import { ENTRANCE_KINDS, type EntranceKind } from '../config/developments';
 
 /**
  * An entrance / section within a building. Optional: many buildings have a
@@ -12,6 +13,12 @@ export interface IDevelopmentEntrance extends Document {
   buildingId: mongoose.Types.ObjectId;
   name: string;
   code?: string;
+  /** Main door, side door, car park or service door. */
+  kind: EntranceKind;
+  /** Step-free (wheelchair / pram) access. */
+  accessible: boolean;
+  /** A short note for buyers, e.g. where it is or when it is staffed. */
+  note?: string;
   order: number;
   deletedAt?: Date;
   createdAt: Date;
@@ -34,6 +41,9 @@ const DevelopmentEntranceSchema: Schema = new Schema(
     },
     name: { type: String, required: true, trim: true, maxlength: 120 },
     code: { type: String, trim: true, maxlength: 50 },
+    kind: { type: String, enum: ENTRANCE_KINDS, default: 'main' },
+    accessible: { type: Boolean, default: false },
+    note: { type: String, trim: true, maxlength: 200 },
     order: { type: Number, default: 0 },
     deletedAt: { type: Date, index: true },
   },

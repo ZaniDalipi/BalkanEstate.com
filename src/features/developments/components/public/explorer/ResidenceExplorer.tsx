@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '@/src/app/router/navigation';
 import { paths } from '@/src/app/router/paths';
-import type { DevelopmentBuilding, DevelopmentFloor, Hotspot, PublicUnit } from '../../../types';
+import type { DevelopmentBuilding, DevelopmentEntrance, DevelopmentFloor, Hotspot, PublicUnit } from '../../../types';
 import type { ExplorerNav } from '../../../hooks/useExplorerUrlState';
 import { hasActiveCriteria, toggleIn, type UnitCriteria } from '../../../utils/unitFilters';
 import { UnitFilters } from '../UnitFilters';
@@ -19,6 +19,8 @@ export interface ResidenceExplorerProps {
   residenceName: string;
   buildings: DevelopmentBuilding[];
   floors: DevelopmentFloor[];
+  /** Entrances with the homes they serve; marked on the pictures as door pins. */
+  entrances?: DevelopmentEntrance[];
   units: PublicUnit[];
   criteria: UnitCriteria;
   onCriteriaChange: (c: UnitCriteria) => void;
@@ -49,9 +51,10 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
 
   const { type, buildingId } = target;
   const floorId = p.nav.floor;
-  const { unitsById, buildingsById, buildingFacts, matched, matchedIds, legend } = useExplorerData({
+  const { unitsById, buildingsById, entrancesById, buildingFacts, matched, matchedIds, legend } = useExplorerData({
     units: p.units,
     buildings: p.buildings,
+    entrances: p.entrances,
     criteria: p.criteria,
     type,
     buildingId,
@@ -84,6 +87,8 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
     else if (h.linkType === 'building') go({ building: h.linkId });
     else if (h.linkType === 'floor') go({ building: target.buildingId, floor: h.linkId });
     else if (h.linkType === 'listing') navigate(paths.property(h.linkId));
+    // An entrance shows the homes reached through it (the Entrance filter, also in the link).
+    else if (h.linkType === 'entrance') p.onCriteriaChange({ ...p.criteria, entrances: [h.linkId] });
   };
 
   const building = target.buildingId ? buildingsById.get(target.buildingId) : undefined;
@@ -134,6 +139,7 @@ export const ResidenceExplorer: React.FC<ResidenceExplorerProps> = (p) => {
       unitsById={unitsById}
       matchedIds={matchedIds}
       buildingsById={buildingsById}
+      entrancesById={entrancesById}
       buildingFacts={buildingFacts}
       onActivate={onActivate}
       activeFilters={hasActiveCriteria(p.criteria)}

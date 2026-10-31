@@ -4,7 +4,11 @@
  * The browser reads the CSV and maps its columns (see the frontend
  * `utils/csvImport`); this service receives clean rows and:
  *  - validates every row, collecting per-row errors instead of failing all;
- *  - finds buildings by name and floors by level, creating missing ones;
+ *  - finds buildings by name, entrances by name within their building and
+ *    floors by level, creating missing ones;
+ *  - matches apartments by building + entrance + number (numbers may repeat
+ *    across entrances); a row naming an entrance also moves an apartment that
+ *    has none yet into it;
  *  - creates new units and (optionally) updates existing ones — only the
  *    fields the file actually contains, so blank cells never wipe data;
  *  - enforces the same permissions as manual edits (building/floor/unit
@@ -14,6 +18,7 @@
 import mongoose from 'mongoose';
 import DevelopmentBuilding from '../../models/DevelopmentBuilding';
 import DevelopmentFloor from '../../models/DevelopmentFloor';
+import DevelopmentEntrance from '../../models/DevelopmentEntrance';
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
 import {
   UNIT_AVAILABILITY_STATES,
@@ -44,6 +49,8 @@ export interface ImportRow {
   /** 1-based row in the file, for messages. */
   row: number;
   building: string;
+  /** Entrance name within the building; blank when the building has none. */
+  entrance?: string;
   level: number;
   floorLabel?: string;
   unitNumber: string;
@@ -54,6 +61,8 @@ export interface ImportRow {
 export interface UnitImportSummary {
   rows: number;
   buildingsCreated: string[];
+  /** "Building · Entrance" for each entrance the file adds. */
+  entrancesCreated: string[];
   /** Set when the file adds more buildings than the residence's plan allows. */
   buildingLimit?: { limit: number; current: number; allowed: number };
   floorsCreated: number;
@@ -114,7 +123,8 @@ export const normalizeImportRow = (raw: unknown, index: number): ImportRow | Imp
   }
   const floorLabel = str(r.floorLabel, 60) || undefined;
   const features = Array.isArray(r.features) ? sanitizeFeatures(r.features) : undefined;
-  return { row, building, level, unitNumber, floorLabel, features, fields };
+  const entrance = str(r.entrance, 120) || undefined;
+  return { row, building, entrance, level, unitNumber, floorLabel, features, fields };
 };
 
 const defaultFloorLabel = (level: number) => (level === 0 ? 'Ground floor' : level < 0 ? `Basement ${-level}` : `Floor ${level}`);
@@ -141,16 +151,16 @@ export const importUnits = async (params: {
   if (!Array.isArray(params.rows) || params.rows.length === 0) throw new ValidationError('The file has no rows to import', { code: 'IMPORT_EMPTY' });
   if (params.rows.length > MAX_IMPORT_ROWS) throw new ValidationError(`At most ${MAX_IMPORT_ROWS} rows per import`, { code: 'IMPORT_TOO_MANY', params: { max: MAX_IMPORT_ROWS } });
 
-  const summary: UnitImportSummary = { rows: params.rows.length, buildingsCreated: [], floorsCreated: 0, unitsCreated: 0, unitsUpdated: 0, unchanged: 0, skippedExisting: 0, errors: [], dryRun };
+  const summary: UnitImportSummary = { rows: params.rows.length, buildingsCreated: [], entrancesCreated: [], floorsCreated: 0, unitsCreated: 0, unitsUpdated: 0, unchanged: 0, skippedExisting: 0, errors: [], dryRun };
   const rows: ImportRow[] = [];
   const seen = new Set<string>();
   params.rows.forEach((raw, i) => {
     const r = normalizeImportRow(raw, i);
     if ('code' in r) return void summary.errors.push(r);
-    const k = key(r.building, r.unitNumber);
+    const k = key(r.building, r.entrance ?? '', r.unitNumber);
     if (seen.has(k)) return void summary.errors.push({
         row: r.row,
-        message: `Unit ${r.unitNumber} appears twice in ${r.building}`,
+        message: `Unit ${r.unitNumber} appears twice in ${r.building}${r.entrance ? ` (${r.entrance})` : ''}`,
         code: 'IMPORT_DUPLICATE_ROW',
         field: 'unitNumber',
         params: { unit: r.unitNumber, building: r.building },
@@ -160,18 +170,34 @@ export const importUnits = async (params: {
   });
 
   const live = { developmentId, deletedAt: null };
-  const [buildings, floors, units] = await Promise.all([
+  const [buildings, floors, entrances, units] = await Promise.all([
     DevelopmentBuilding.find(live).select('_id name order'),
     DevelopmentFloor.find(live).select('_id buildingId level'),
+    DevelopmentEntrance.find(live).select('_id buildingId name order'),
     DevelopmentUnit.find(live),
   ]);
   const buildingByName = new Map(buildings.map((b) => [key(b.name), b._id as Oid]));
   const floorByLevel = new Map(floors.map((f) => [key(String(f.buildingId), f.level), f._id as Oid]));
-  const unitByNumber = new Map(units.map((u) => [key(String(u.buildingId), u.unitNumber), u]));
+  const entranceByName = new Map(entrances.map((e) => [key(String(e.buildingId), e.name), e._id as Oid]));
+  const unitByNumber = new Map(units.map((u) => [key(String(u.buildingId), u.entranceId ? String(u.entranceId) : '', u.unitNumber), u]));
+  const unitsByNumber = new Map<string, IDevelopmentUnit[]>();
+  for (const u of units) {
+    const k = key(String(u.buildingId), u.unitNumber);
+    unitsByNumber.set(k, [...(unitsByNumber.get(k) ?? []), u]);
+  }
+  /** The apartment a row means: same building, entrance and number; else one without an entrance yet (it moves in); a row without an entrance matches the only one with that number. */
+  const findUnit = (bId: Oid, r: ImportRow): IDevelopmentUnit | undefined => {
+    const eId = r.entrance ? entranceByName.get(key(String(bId), r.entrance)) : undefined;
+    if (r.entrance) return (eId && unitByNumber.get(key(String(bId), String(eId), r.unitNumber))) || unitByNumber.get(key(String(bId), '', r.unitNumber));
+    const same = unitsByNumber.get(key(String(bId), r.unitNumber)) ?? [];
+    return same.length === 1 ? same[0] : undefined;
+  };
 
   // Plan, so a dry run and a real run agree exactly.
   const newBuildings = [...new Set(rows.filter((r) => !buildingByName.has(key(r.building))).map((r) => r.building))];
   const newFloors = new Map<string, { building: string; level: number; label: string }>();
+  const newEntrances = new Map<string, { building: string; name: string }>();
+  const claimed = new Set<string>();
   const creates: ImportRow[] = [];
   const updates: { row: ImportRow; unit: IDevelopmentUnit; changes: Record<string, unknown> }[] = [];
   for (const r of rows) {
@@ -180,11 +206,20 @@ export const importUnits = async (params: {
       const fk = key(r.building, r.level);
       if (!newFloors.has(fk)) newFloors.set(fk, { building: r.building, level: r.level, label: r.floorLabel || defaultFloorLabel(r.level) });
     }
-    const existing = bId ? unitByNumber.get(key(String(bId), r.unitNumber)) : undefined;
+    if (r.entrance && !(bId && entranceByName.has(key(String(bId), r.entrance)))) {
+      const ek = key(r.building, r.entrance);
+      if (!newEntrances.has(ek)) newEntrances.set(ek, { building: r.building, name: r.entrance });
+    }
+    const found = bId ? findUnit(bId, r) : undefined;
+    // Each apartment is matched by one row only; a second row with another entrance is a new apartment.
+    const existing = found && !claimed.has(String(found._id)) ? found : undefined;
+    if (existing) claimed.add(String(existing._id));
     if (!existing) creates.push(r);
     else if (!updateExisting) summary.skippedExisting += 1;
     else {
       const changes = changesFor(r, existing);
+      // Moving into the named entrance (resolved to its id once entrances exist).
+      if (r.entrance && !existing.entranceId) changes.entranceId = r.entrance;
       if (Object.keys(changes).length === 0) summary.unchanged += 1;
       else updates.push({ row: r, unit: existing, changes });
     }
@@ -192,11 +227,12 @@ export const importUnits = async (params: {
 
   // Same rules as editing by hand.
   const needed = new Set<DevelopmentPermission>();
-  if (newBuildings.length) needed.add('building.manage');
+  if (newBuildings.length || newEntrances.size) needed.add('building.manage');
   if (newFloors.size) needed.add('floor.manage');
   if (creates.length) needed.add('unit.manage');
   for (const r of creates) Object.keys(r.fields).forEach((f) => needed.add(permissionForUnitField(f)));
   for (const u of updates) Object.keys(u.changes).forEach((f) => needed.add(permissionForUnitField(f)));
+  summary.entrancesCreated = [...newEntrances.values()].map((e) => `${e.building} · ${e.name}`);
   const denied = [...needed].filter((p) => !role || !roleHasPermission(role, p));
   if (denied.length) throw new AuthorizationError(`Your role cannot import this file (requires ${denied.join(', ')})`, { code: 'FORBIDDEN_FIELDS', params: { permissions: denied.join(', ') } });
 
@@ -220,6 +256,20 @@ export const importUnits = async (params: {
     const b = await createBuilding(developmentId, { name, order: (order += 1) });
     buildingByName.set(key(name), b._id as Oid);
   }
+  const entranceDocs = [...newEntrances.values()].map((e, i) => ({
+    developmentId,
+    buildingId: buildingByName.get(key(e.building)),
+    name: e.name,
+    kind: 'main',
+    order: entrances.filter((x) => String(x.buildingId) === String(buildingByName.get(key(e.building)))).length + i,
+  }));
+  if (entranceDocs.length) {
+    const inserted = await DevelopmentEntrance.insertMany(entranceDocs);
+    inserted.forEach((e) => entranceByName.set(key(String(e.buildingId), e.name), e._id as Oid));
+  }
+  for (const u of updates) {
+    if (typeof u.changes.entranceId === 'string') u.changes.entranceId = entranceByName.get(key(String(u.unit.buildingId), u.changes.entranceId));
+  }
   const floorDocs = [...newFloors.values()].map((f) => ({
     developmentId,
     buildingId: buildingByName.get(key(f.building)),
@@ -239,6 +289,7 @@ export const importUnits = async (params: {
       developmentId,
       buildingId,
       floorId: floorByLevel.get(key(String(buildingId), r.level)),
+      ...(r.entrance ? { entranceId: entranceByName.get(key(String(buildingId), r.entrance)) } : {}),
       unitNumber: r.unitNumber,
       unitType: r.fields.unitType || 'apartment',
       ...r.fields,
@@ -282,6 +333,7 @@ export const importUnits = async (params: {
     metadata: {
       rows: summary.rows,
       buildingsCreated: summary.buildingsCreated.length,
+      entrancesCreated: summary.entrancesCreated.length,
       floorsCreated: summary.floorsCreated,
       unitsCreated: summary.unitsCreated,
       unitsUpdated: summary.unitsUpdated,

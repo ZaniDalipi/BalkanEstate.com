@@ -38,6 +38,7 @@ export const UnitFacts: React.FC<{ unit: PublicUnit; companions?: { comesWith: P
       value: unit.unitNumber,
     },
     unit.floorLabel ? { label: t('explorer.floor', 'Floor'), value: String(unit.floorLevel ?? unit.floorLabel) } : null,
+    unit.entranceName ? { label: t('entrance.label', 'Entrance'), value: unit.entranceName } : null,
     txt.area(unit) ? { label: t('explorer.card.area', 'Area'), value: txt.area(unit) } : null,
     typeof unit.beds === 'number' ? { label: t('explorer.card.rooms', 'Bedrooms'), value: unit.beds === 0 ? t('explorer.studio', 'Studio') : String(unit.beds) } : null,
     { label: t('explorer.card.price', 'Price'), value: txt.price(unit) },

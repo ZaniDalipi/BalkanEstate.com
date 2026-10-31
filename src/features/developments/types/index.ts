@@ -105,6 +105,34 @@ export interface DevelopmentBuilding {
   stats?: { units: number; available: number; withTour?: number };
 }
 
+/** What kind of door an entrance is (same list as the server). */
+export const ENTRANCE_KINDS = ['main', 'side', 'garage', 'service'] as const;
+export type EntranceKind = (typeof ENTRANCE_KINDS)[number];
+
+/** A building's entrance: on the dashboard and, with `stats`, for buyers. */
+export interface DevelopmentEntrance {
+  id: string;
+  buildingId: string;
+  name: string;
+  code?: string;
+  kind: EntranceKind;
+  /** Step-free access. */
+  accessible: boolean;
+  note?: string;
+  order: number;
+  /** Public only: the visible homes it serves, and how many are available. */
+  stats?: { units: number; available: number };
+}
+
+/** Fields the owner sends when adding or changing an entrance. */
+export interface EntrancePayload {
+  name?: string;
+  code?: string | null;
+  kind?: EntranceKind;
+  accessible?: boolean;
+  note?: string | null;
+}
+
 export interface DevelopmentFloor {
   id: string;
   developmentId: string;
@@ -345,6 +373,8 @@ export interface Paginated<T> {
 /** A unit as exposed to the public, enriched with its building/floor labels. */
 export interface PublicUnit extends DevelopmentUnit {
   buildingName?: string | null;
+  /** Its entrance's name, when the building has entrances. */
+  entranceName?: string | null;
   floorLabel?: string | null;
   floorLevel?: number | null;
   /** `availability` here is EFFECTIVE (unit ∧ linked listings); this says which decided it. */
@@ -513,6 +543,8 @@ export interface UnitFacets {
 export interface UnitImportSummary {
   rows: number;
   buildingsCreated: string[];
+  /** "Building · Entrance" for each entrance the file adds (absent from older servers). */
+  entrancesCreated?: string[];
   /** Set when the file adds more buildings than the residence's plan allows. */
   buildingLimit?: { limit: number; current: number; allowed: number };
   floorsCreated: number;
@@ -635,6 +667,8 @@ export interface UpdateUnitPayload {
   unitType?: string;
   buildingId?: string;
   floorId?: string;
+  /** One of its building's entrances; null takes it out of any. */
+  entranceId?: string | null;
   beds?: number | null;
   baths?: number | null;
   livingRooms?: number | null;

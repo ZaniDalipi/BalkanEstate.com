@@ -8,6 +8,7 @@ import type { DevelopmentRole } from '../../../types';
 
 export type InventoryPermission =
   | 'unit.manage'
+  | 'building.manage'
   | 'price.change'
   | 'availability.change'
   | 'listing.attach'
@@ -18,7 +19,7 @@ export type InventoryPermission =
   | 'team.manage';
 
 const ALL: readonly InventoryPermission[] = [
-  'unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish', 'project.edit', 'media.upload', 'team.manage',
+  'unit.manage', 'building.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'publish', 'project.edit', 'media.upload', 'team.manage',
 ];
 
 const ROLE_PERMISSIONS: Record<DevelopmentRole, readonly InventoryPermission[]> = {
@@ -26,7 +27,7 @@ const ROLE_PERMISSIONS: Record<DevelopmentRole, readonly InventoryPermission[]> 
   manager: ALL,
   sales_manager: ['unit.manage', 'price.change', 'availability.change', 'listing.attach', 'listing.detach', 'media.upload'],
   sales_agent: ['availability.change', 'listing.attach', 'listing.detach'],
-  editor: ['unit.manage', 'project.edit', 'media.upload'],
+  editor: ['unit.manage', 'building.manage', 'project.edit', 'media.upload'],
   viewer: [],
 };
 

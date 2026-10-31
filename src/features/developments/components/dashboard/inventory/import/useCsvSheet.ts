@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   buildImportRows,
   guessColumns,
@@ -8,8 +8,8 @@ import {
   type SheetRows,
 } from '../../../../utils/csvImport';
 import { useFloorNames } from '../useFloorNames';
+import { MAX_SHEET_BYTES } from './checkSheetFile';
 
-const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 /** The worksheet to open first: one whose header names a unit number, else the one with most rows. */
 export const bestSheet = (sheets: SheetRows[]): number => {
@@ -27,7 +27,7 @@ export type SheetError = 'tooBig' | 'empty' | 'unreadable' | 'oldExcel';
  * matches a building), and whether existing units
  * are updated. Rows are rebuilt from these.
  */
-export const useCsvSheet = (defaultBuildingName: string, buildingNames: string[] = []) => {
+export const useCsvSheet = (defaultBuildingName: string, buildingNames: string[] = [], forBuilding?: string, initialFile?: File) => {
   const floorNames = useFloorNames();
   const [fileName, setFileName] = useState<string | null>(null);
   const [sheets, setSheets] = useState<SheetRows[]>([]);
@@ -44,7 +44,7 @@ export const useCsvSheet = (defaultBuildingName: string, buildingNames: string[]
 
   const load = async (file: File) => {
     setError(null);
-    if (file.size > MAX_FILE_BYTES) return setError('tooBig');
+    if (file.size > MAX_SHEET_BYTES) return setError('tooBig');
     try {
       const read = (await readSpreadsheet(file)).filter((s) => s.rows.length >= 2);
       if (read.length === 0) return setError('empty');
@@ -69,9 +69,20 @@ export const useCsvSheet = (defaultBuildingName: string, buildingNames: string[]
     setColumns((prev) => prev.map((c, i) => (i === index ? target : c !== 'ignore' && c === target ? 'ignore' : c)));
 
   const prepared = useMemo(
-    () => (table.length ? buildImportRows(table, columns, { defaultBuilding: building, floorNames }) : null),
-    [table, columns, building, floorNames]
+    () => (table.length ? buildImportRows(table, columns, { defaultBuilding: building, floorNames, forceBuilding: forBuilding }) : null),
+    [table, columns, building, floorNames, forBuilding]
   );
+
+  // A file handed over (from the create page) is read once, as if just chosen.
+  const loadRef = useRef(load);
+  loadRef.current = load;
+  const handedOver = useRef<File | null>(null);
+  useEffect(() => {
+    if (initialFile && handedOver.current !== initialFile) {
+      handedOver.current = initialFile;
+      void loadRef.current(initialFile);
+    }
+  }, [initialFile]);
 
   const reset = () => {
     setFileName(null);

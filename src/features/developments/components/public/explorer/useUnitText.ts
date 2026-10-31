@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DevelopmentBuilding, Hotspot, PublicUnit } from '../../../types';
+import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicUnit } from '../../../types';
 import { formatArea, formatPrice } from '../../../utils/format';
 import { unitArea } from '../../../utils/unitFilters';
 import { isExtraUnit } from '../../../utils/unitCompanions';
@@ -64,7 +64,7 @@ export function useUnitText() {
 
   /** Accessible name for any region on the picture. */
   const hotspotLabel = useCallback(
-    (h: Hotspot, unitsById: Map<string, PublicUnit>, buildingsById?: Map<string, DevelopmentBuilding>): string | undefined => {
+    (h: Hotspot, unitsById: Map<string, PublicUnit>, buildingsById?: Map<string, DevelopmentBuilding>, entrancesById?: Map<string, DevelopmentEntrance>): string | undefined => {
       if (h.linkType === 'unit') {
         const u = unitsById.get(h.linkId);
         return u ? ariaLabel(u) : h.label;
@@ -72,6 +72,12 @@ export function useUnitText() {
       if (h.linkType === 'building') return buildingLabel(h, buildingsById?.get(h.linkId));
       if (h.linkType === 'floor') return h.label || t('scene.linkTypes.floor', 'Floor');
       if (h.linkType === 'listing') return h.label || t('unit.viewListing', 'View listing');
+      if (h.linkType === 'entrance') {
+        // "Entrance A · 6 homes available"
+        const e = entrancesById?.get(h.linkId);
+        const name = e?.name || h.label || t('scene.linkTypes.entrance', 'Entrance');
+        return e?.stats ? `${name} · ${t('entrance.homesAvailable', { count: e.stats.available, defaultValue: '{{count}} homes available' })}` : name;
+      }
       return h.label;
     },
     [ariaLabel, buildingLabel, t]

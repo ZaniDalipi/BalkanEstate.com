@@ -20,6 +20,8 @@ export const API_ERROR_TEXT: Record<string, string> = {
   CURRENCY_EUR_ONLY: 'Prices are in euros (EUR).',
   FLOOR_NOT_IN_BUILDING: 'This floor belongs to another building. Pick a floor of the chosen building.',
   ENTRANCE_NOT_IN_BUILDING: 'This entrance belongs to another building.',
+  ENTRANCE_NAME_TAKEN: 'This building already has an entrance called “{{name}}”.',
+  ENTRANCE_IN_USE: '{{count}} units still use this entrance. Move them to another entrance first.',
   REF_NOT_FOUND: 'This no longer exists. Reload the page and try again.',
   UNIT_NOT_FOUND: 'This unit no longer exists. Reload the page.',
   BUILDING_NOT_FOUND: 'This building no longer exists. Reload the page.',

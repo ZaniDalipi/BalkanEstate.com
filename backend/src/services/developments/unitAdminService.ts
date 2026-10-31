@@ -11,6 +11,7 @@ import Property from '../../models/Property';
 import DevelopmentBuilding, { IDevelopmentBuilding } from '../../models/DevelopmentBuilding';
 import DevelopmentFloor, { IDevelopmentFloor } from '../../models/DevelopmentFloor';
 import DevelopmentUnit, { IDevelopmentUnit } from '../../models/DevelopmentUnit';
+import DevelopmentEntrance from '../../models/DevelopmentEntrance';
 import { IDevelopment } from '../../models/Development';
 import { encodeId } from '../../utils/idObfuscation';
 import { escapeRegex } from '../../utils/escapeRegex';
@@ -324,6 +325,7 @@ const UPDATABLE_FIELDS = [
   'unitType',
   'buildingId',
   'floorId',
+  'entranceId',
   ...NUMBER_FIELDS,
   'orientation',
   'viewType',
@@ -484,6 +486,21 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
     if (String(buildingId) !== String(unit.buildingId) && unit.entranceId) $unset.entranceId = '';
   }
 
+  // Its entrance: one of its building's entrances, or none (null / '').
+  if (touched.includes('entranceId')) {
+    const buildingId = ($set.buildingId ?? unit.buildingId) as mongoose.Types.ObjectId;
+    if (body.entranceId === null || body.entranceId === '') {
+      if (unit.entranceId) $unset.entranceId = '';
+    } else {
+      const entrance = await requireRefInDevelopment(DevelopmentEntrance, body.entranceId, developmentId, 'entranceId');
+      if (String(entrance.buildingId) !== String(buildingId)) {
+        throw new ValidationError('entranceId must belong to the building', { code: 'ENTRANCE_NOT_IN_BUILDING', field: 'entranceId' });
+      }
+      $set.entranceId = entrance._id;
+      delete $unset.entranceId;
+    }
+  }
+
   const update: mongoose.UpdateQuery<IDevelopmentUnit> = {};
   if (Object.keys($set).length) update.$set = $set;
   if (Object.keys($unset).length) update.$unset = $unset;
@@ -508,7 +525,7 @@ export const updateUnit = async (params: UpdateUnitParams): Promise<DashboardUni
   if (!updated) throw new NotFoundError('unitId not found in this development', { code: 'UNIT_NOT_FOUND' });
 
   const after = updated.toObject() as unknown as Record<string, unknown>;
-  const changes = diffFields(before, after, touched.concat(touched.includes('buildingId') || touched.includes('floorId') ? ['entranceId'] : []));
+  const changes = diffFields(before, after, touched.concat((touched.includes('buildingId') || touched.includes('floorId')) && !touched.includes('entranceId') ? ['entranceId'] : []));
 
   if (Object.keys(changes).length > 0) {
     await recordDevelopmentAudit({

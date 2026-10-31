@@ -34,7 +34,7 @@ const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({
 const PublicDevelopmentPage: React.FC = () => {
   const { t } = useTranslation('developments');
   const { slug } = useParams();
-  const { development, buildings, floors, isLoading, error } = usePublicDevelopment(slug);
+  const { development, buildings, floors, entrances, isLoading, error } = usePublicDevelopment(slug);
   const { units, summary } = usePublicDevelopmentUnits(slug);
   const explorerRef = useRef<HTMLDivElement>(null);
   const { criteria, setCriteria, nav, setNav } = useExplorerUrlState();
@@ -82,6 +82,7 @@ const PublicDevelopmentPage: React.FC = () => {
           residenceName={development.name}
           buildings={buildings}
           floors={floors}
+          entrances={entrances}
           units={units}
           criteria={criteria}
           onCriteriaChange={setCriteria}

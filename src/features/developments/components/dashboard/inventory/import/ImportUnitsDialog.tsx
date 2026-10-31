@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2 } from 'lucide-react';
 import Modal from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/shared/components/ui/Input';
@@ -8,6 +7,7 @@ import { useUnitImport } from '../../../../hooks/useUnitImport';
 import { missingRequired } from '../../../../utils/csvImport';
 import { ColumnMapping } from './ColumnMapping';
 import { ImportFilePicker } from './ImportFilePicker';
+import { ImportDone } from './ImportDone';
 import { ImportReview } from './ImportReview';
 import { RowsPreview } from './RowsPreview';
 import { useCsvSheet } from './useCsvSheet';
@@ -19,6 +19,10 @@ interface ImportUnitsDialogProps {
   defaultBuildingName: string;
   /** Existing building names, to match worksheet names against. */
   buildingNames?: string[];
+  /** Import for this one building: every row goes into it. */
+  forBuilding?: string;
+  /** A file chosen before the dialog opened (e.g. on the create page). */
+  initialFile?: File;
   onClose: () => void;
 }
 
@@ -27,28 +31,25 @@ interface ImportUnitsDialogProps {
  * recognised (columns, a preview, the server's dry run and any problems) →
  * import. Nothing is written until "Import".
  */
-export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmentId, defaultBuildingName, buildingNames, onClose }) => {
+export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmentId, defaultBuildingName, buildingNames, forBuilding, initialFile, onClose }) => {
   const { t } = useTranslation('developments');
   const apiText = useApiErrorText();
   const errorText = (e: unknown) => (e ? apiText.text(e) : null);
-  const sheet = useCsvSheet(defaultBuildingName, buildingNames);
+  const sheet = useCsvSheet(defaultBuildingName, buildingNames, forBuilding, initialFile);
   const rows = sheet.prepared?.rows ?? [];
   const { preview, run } = useUnitImport(developmentId, rows, sheet.updateExisting);
   const missing = missingRequired(sheet.columns);
   const result = run.data;
 
   return (
-    <Modal isOpen onClose={onClose} title={t('import.title', 'Import units from a spreadsheet')} size="4xl">
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={forBuilding ? t('import.titleFor', { building: forBuilding, defaultValue: 'Import units into {{building}}' }) : t('import.title', 'Import units from a spreadsheet')}
+      size="4xl"
+    >
       {result ? (
-        <div className="space-y-4 py-2 text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" aria-hidden="true" />
-          <p className="text-lg font-semibold text-slate-900">{t('import.done', 'Import finished')}</p>
-          <p className="text-sm text-slate-700">
-            {t('import.doneSummary', { created: result.unitsCreated, updated: result.unitsUpdated, floors: result.floorsCreated, buildings: result.buildingsCreated.length, defaultValue: 'New units: {{created}} · Updated: {{updated}} · New floors: {{floors}} · New buildings: {{buildings}}' })}
-          </p>
-          {result.errors.length > 0 && <p className="text-sm text-amber-800">{t('import.doneSkipped', { n: result.errors.length, defaultValue: 'Rows skipped: {{n}}' })}</p>}
-          <Button onClick={onClose}>{t('import.close', 'Done')}</Button>
-        </div>
+        <ImportDone result={result} onClose={onClose} />
       ) : !sheet.prepared ? (
         <ImportFilePicker onFile={sheet.load} error={sheet.error} />
       ) : (
@@ -75,7 +76,7 @@ export const ImportUnitsDialog: React.FC<ImportUnitsDialogProps> = ({ developmen
             {missing.length > 0 && <p role="alert" className="text-sm text-red-700">{t('import.needUnitNumber', 'Tell us which column holds the unit number.')}</p>}
           </section>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-end">
-            {!sheet.columns.includes('building') && (
+            {!forBuilding && !sheet.columns.includes('building') && (
               <Input label={t('import.buildingForAll', 'Building for all rows')} value={sheet.building} onChange={(e) => sheet.setBuilding(e.target.value)} helperText={t('import.buildingHint', 'An existing building name, or a new one to create.')} />
             )}
             <label className="flex min-h-[44px] items-center gap-2 text-sm text-slate-800">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BedDouble, Bath, Maximize, Compass, Layers, Sun, Trees } from 'lucide-react';
+import { BedDouble, Bath, Maximize, Compass, DoorOpen, Layers, Sun, Trees } from 'lucide-react';
 import type { PublicUnit } from '../../../../types';
 import { formatArea } from '../../../../utils/format';
 import { unitArea } from '../../../../utils/unitFilters';
@@ -35,6 +35,7 @@ export const UnitSpecs: React.FC<{ unit: PublicUnit }> = ({ unit }) => {
   if (unit.externalArea) specs.push({ icon: <Trees className={i} />, label: t('explorer.spec.outdoor', 'Outdoor area'), value: formatArea(unit.externalArea) });
   if (unit.balconies) specs.push({ icon: <Sun className={i} />, label: t('explorer.spec.balconies', 'Balconies'), value: unit.balconies });
   if (unit.floorLabel) specs.push({ icon: <Layers className={i} />, label: t('explorer.floor', 'Floor'), value: unit.floorLabel });
+  if (unit.entranceName) specs.push({ icon: <DoorOpen className={i} />, label: t('entrance.label', 'Entrance'), value: unit.entranceName });
   if (unit.orientation) specs.push({ icon: <Compass className={i} />, label: t('unit.orientation', 'Orientation'), value: t(`explorer.orientation.${unit.orientation.toLowerCase()}`, unit.orientation) });
 
   const features = unit.features ?? [];

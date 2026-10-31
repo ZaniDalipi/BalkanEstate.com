@@ -11,6 +11,8 @@ import { levelFromUnitNumber, parseAvailability, parseCurrency, parseFeatures, p
 export interface ImportRowPayload {
   row: number;
   building: string;
+  /** The entrance within the building, when the sheet has an Entrance column. */
+  entrance?: string;
   level: number;
   floorLabel?: string;
   unitNumber: string;
@@ -30,6 +32,8 @@ export interface PreparedImport {
   rows: ImportRowPayload[];
   problems: ImportProblem[];
   buildings: string[];
+  /** "Building · Entrance" for every entrance the rows name. */
+  entrances: string[];
   floors: number;
   /** True when floors were read from unit numbers. */
   floorsFromUnitNumbers: boolean;
@@ -41,7 +45,12 @@ const TEXT: ImportField[] = ['description'];
 export const buildImportRows = (
   table: string[][],
   columns: ColumnTarget[],
-  options: { defaultBuilding: string; floorNames: FloorNames }
+  options: {
+    defaultBuilding: string;
+    floorNames: FloorNames;
+    /** Importing for one building: every row goes there, whatever a building column says. */
+    forceBuilding?: string;
+  }
 ): PreparedImport => {
   const at = (cells: string[], field: ImportField) => {
     const i = columns.indexOf(field);
@@ -55,7 +64,8 @@ export const buildImportRows = (
     const row = i + 2; // the header is row 1
     const unitNumber = at(cells, 'unitNumber');
     if (!unitNumber) return void problems.push({ row, code: 'noUnitNumber' });
-    const building = at(cells, 'building') || options.defaultBuilding.trim();
+    const building = options.forceBuilding?.trim() || at(cells, 'building') || options.defaultBuilding.trim();
+    const entrance = at(cells, 'entrance');
     if (!building) return void problems.push({ row, code: 'noBuilding' });
 
     const floorCell = at(cells, 'floor');
@@ -86,12 +96,13 @@ export const buildImportRows = (
     if (currency) fields.currency = currency;
     const features = parseFeatures(at(cells, 'features'));
 
-    rows.push({ row, building, level, floorLabel, unitNumber, fields, ...(features ? { features } : {}) });
+    rows.push({ row, building, ...(entrance ? { entrance } : {}), level, floorLabel, unitNumber, fields, ...(features ? { features } : {}) });
   });
 
   const buildings = [...new Set(rows.map((r) => r.building))];
   const floors = new Set(rows.map((r) => `${r.building.toLowerCase()}|${r.level}`)).size;
-  return { rows, problems, buildings, floors, floorsFromUnitNumbers: !hasFloor };
+  const entrances = [...new Set(rows.filter((r) => r.entrance).map((r) => `${r.building} · ${r.entrance}`))];
+  return { rows, problems, buildings, entrances, floors, floorsFromUnitNumbers: !hasFloor };
 };
 
 /** Columns the sheet must provide (or that can be inferred). */

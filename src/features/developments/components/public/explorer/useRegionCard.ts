@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import type { DevelopmentBuilding, Hotspot, PublicUnit } from '../../../types';
+import type { DevelopmentBuilding, DevelopmentEntrance, Hotspot, PublicUnit } from '../../../types';
+import { useEntranceKindLabel } from '../../shared/entranceKind';
 import { formatArea, formatPrice } from '../../../utils/format';
 import type { Fact } from './RegionCardFacts';
 import { companionsOf, isExtraUnit } from '../../../utils/unitCompanions';
@@ -31,9 +32,11 @@ export interface RegionCardContent {
 export function useRegionCard(
   unitsById: Map<string, PublicUnit>,
   buildingsById: Map<string, DevelopmentBuilding> | undefined,
-  buildingFacts: Map<string, BuildingFacts> | undefined
+  buildingFacts: Map<string, BuildingFacts> | undefined,
+  entrancesById?: Map<string, DevelopmentEntrance>
 ) {
   const { t } = useTranslation('developments');
+  const kindLabel = useEntranceKindLabel();
 
   const tourFact = (n: number): Fact => ({ label: t('explorer.tour.label', '360° tour'), value: t('explorer.tour.homes', { n, defaultValue: 'Homes: {{n}}' }) });
 
@@ -110,6 +113,26 @@ export function useRegionCard(
         imageUrl: l?.imageUrl,
         badge,
         actionLabel: t('unit.viewListing', 'View listing'),
+      };
+    }
+    if (h.linkType === 'entrance') {
+      const e = entrancesById?.get(h.linkId);
+      if (!e) return { title: h.label || t('scene.linkTypes.entrance', 'Entrance') };
+      const facts: Fact[] = [];
+      if (e.stats && e.stats.units > 0) {
+        facts.push({
+          label: t('entrance.homes', 'Homes'),
+          value: t('explorer.availableOfTotal', { available: e.stats.available, total: e.stats.units, defaultValue: '{{available}} of {{total}} available' }),
+        });
+      }
+      if (e.accessible) facts.push({ label: t('entrance.access', 'Access'), value: t('entrance.stepFree', 'Step-free') });
+      if (e.note) facts.push({ label: t('entrance.noteShort', 'Note'), value: e.note });
+      return {
+        title: e.name,
+        badge: kindLabel(e.kind),
+        facts,
+        // Only an entrance that serves homes has some to show.
+        actionLabel: e.stats && e.stats.units > 0 ? t('entrance.showHomes', 'Show its homes') : undefined,
       };
     }
     return { title: h.label };
