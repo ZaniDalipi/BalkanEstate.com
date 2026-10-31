@@ -12,14 +12,14 @@ describe('sanitizeAiSearchQuery', () => {
   it('keeps every criterion of a detailed request', () => {
     const query = sanitizeAiSearchQuery({
       location: 'Tirana', country: 'Albania', propertyType: 'apartment',
-      minSqft: 76, maxSqft: 76, beds: 1, kitchens: 1, maxPrice: 200000,
+      minSqft: 76, maxSqft: 76, beds: 1, maxBeds: 1, kitchens: 1, maxPrice: 200000,
       constructionStatus: 'under-construction', heatingType: 'electric',
       minFloorNumber: 15, maxFloorNumber: 15, energyRating: 'A+',
       maxDistanceToSchool: 0.5, amenities: ['Floor heating', 'panoramic view'],
     });
     expect(query).toEqual({
       location: 'Tirana', country: 'Albania', propertyType: 'apartment',
-      minSqft: 76, maxSqft: 76, beds: 1, kitchens: 1, maxPrice: 200000,
+      minSqft: 76, maxSqft: 76, beds: 1, maxBeds: 1, kitchens: 1, maxPrice: 200000,
       constructionStatus: 'under-construction', heatingType: 'electric',
       minFloorNumber: 15, maxFloorNumber: 15, energyRating: 'A+',
       maxDistanceToSchool: 0.5, amenities: ['floor heating', 'panoramic view'],
@@ -39,8 +39,8 @@ describe('sanitizeAiSearchQuery', () => {
   });
 
   it('swaps a range given back to front', () => {
-    expect(sanitizeAiSearchQuery({ minSqft: 80, maxSqft: 60, minPrice: 150000, maxPrice: 100000 }))
-      .toEqual({ minSqft: 60, maxSqft: 80, minPrice: 100000, maxPrice: 150000 });
+    expect(sanitizeAiSearchQuery({ minSqft: 80, maxSqft: 60, minPrice: 150000, maxPrice: 100000, beds: 3, maxBeds: 2 }))
+      .toEqual({ minSqft: 60, maxSqft: 80, minPrice: 100000, maxPrice: 150000, beds: 2, maxBeds: 3 });
   });
 
   it('reads the older "features" list and de-duplicates amenities', () => {

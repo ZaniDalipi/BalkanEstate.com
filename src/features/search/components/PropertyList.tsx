@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Property, ChatMessage, AiSearchQuery, Filters, SellerType, FurnishingStatus, HeatingType, PropertyCondition, ViewType, EnergyRating, Orientation } from '@/types';
 import { amenityAlternatives, amenityLabel } from '@/utils/amenityMatch';
+import { bedroomOptionLabel } from '@/utils/bedroomFilter';
 import PropertyCard from '@/src/features/property-details/components/PropertyCard';
 import HighlightedPropertiesSection from '@/src/features/property-details/components/HighlightedPropertiesSection';
 import { SearchIcon, XMarkIcon, BellIcon, ChevronUpIcon, ChevronDownIcon, PencilIcon, XCircleIcon, MapPinIcon, SpinnerIcon } from '@/constants';
@@ -381,7 +382,7 @@ const FilterControls: React.FC<Omit<PropertyListProps, 'properties' | 'showList'
                             <FilterButtonGroup
                                 label={t('search:filters.bedrooms')}
                                 icon="bed"
-                                options={[ {value: null, label: t('search:options.any')}, {value: 1, label: '1+'}, {value: 2, label: '2+'}, {value: 3, label: '3+'}, {value: 4, label: '4+'}, ]}
+                                options={[ {value: null, label: t('search:options.any')}, ...[1, 2, 3, 4].map(n => ({ value: n, label: bedroomOptionLabel(n, filters) })) ]}
                                 selectedValue={filters.beds}
                                 onChange={(value) => onFilterChange('beds', value)}
                             />

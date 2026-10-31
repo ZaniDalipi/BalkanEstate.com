@@ -29,7 +29,7 @@ const STRING_KEYS = ['location', 'country'] as const;
 
 /** Numbers that must be above zero. */
 const POSITIVE_KEYS = [
-  'minPrice', 'maxPrice', 'beds', 'baths', 'livingRooms', 'kitchens',
+  'minPrice', 'maxPrice', 'beds', 'maxBeds', 'baths', 'livingRooms', 'kitchens',
   'minSqft', 'maxSqft', 'minPricePerSqm', 'maxPricePerSqm',
   'minYearBuilt', 'maxYearBuilt', 'minParking', 'maxDaysListed',
   'maxDistanceToCenter', 'maxDistanceToSea', 'maxDistanceToSchool', 'maxDistanceToHospital',
@@ -44,7 +44,7 @@ const BOOLEAN_KEYS = [
 ] as const;
 
 const RANGE_PAIRS = [
-  ['minPrice', 'maxPrice'], ['minSqft', 'maxSqft'], ['minPricePerSqm', 'maxPricePerSqm'],
+  ['minPrice', 'maxPrice'], ['beds', 'maxBeds'], ['minSqft', 'maxSqft'], ['minPricePerSqm', 'maxPricePerSqm'],
   ['minYearBuilt', 'maxYearBuilt'], ['minFloorNumber', 'maxFloorNumber'],
 ] as const;
 
@@ -71,7 +71,8 @@ export const AI_SEARCH_QUERY_SCHEMA = {
     listingType: choice('listingType', '"rent" only when the user wants to rent; "sale" when they want to buy.'),
     minPrice: num('Lowest price in EUR.'),
     maxPrice: num('Highest price in EUR.'),
-    beds: int('Bedrooms (at least).'),
+    beds: int('Fewest bedrooms. For an exact count, equal to maxBeds.'),
+    maxBeds: int('Most bedrooms. For an exact count ("2 bedrooms"), equal to beds.'),
     baths: int('Bathrooms (at least).'),
     livingRooms: int('Living rooms (at least).'),
     kitchens: int('Kitchens (at least).'),
@@ -124,7 +125,9 @@ export const AI_SEARCH_RULES = `
         - "under / up to / max / at most / below X": only the max. "over / at least / min / from X": only the min.
         - "around / about X" for a size: min X*0.9, max X*1.1 (rounded). For price "around X": min X*0.9, max X*1.1.
         - The same rules apply to price, price per m², year built and floor ("on floor 15" → minFloorNumber 15 AND maxFloorNumber 15; "ground floor" → both 0; "above 5th floor" → minFloorNumber 6).
-        - Counts (beds, baths, livingRooms, kitchens, minParking) are minimums: "1 bedroom" → beds 1.
+        - BEDROOMS ARE EXACT. "2 bedrooms", "2-bedroom", "two bedroom flat", "2 spavaće sobe", "2 dhoma gjumi" → beds 2 AND maxBeds 2. Balkan "N+1" notation ("1+1", "2+1") means N bedrooms plus a living room → beds N, maxBeds N, livingRooms 1.
+          Only an explicit minimum is open-ended: "at least 2", "2+", "2 or more", "minimum 2" → beds 2, no maxBeds. "up to 3" → maxBeds 3. "2 to 3 bedrooms" → beds 2, maxBeds 3.
+        - Other counts (baths, livingRooms, kitchens, minParking) are minimums: "2 bathrooms" → baths 2.
         - "under construction", "off-plan", "new build not finished", "në ndërtim", "u izgradnji" → constructionStatus "under-construction". "ready to move in", "finished" → "ready".
         - Heating: "electric", "floor heating (electric)" → heatingType "electric"; "central" → "central"; "heat pump" → "heat-pump"; "gas" → "gas". Put the specific system ("floor heating", "underfloor heating") ALSO in amenities.
         - View: sea/mountain/city/park/garden/street go in viewType. Any other view ("panoramic view", "lake view") goes in amenities.

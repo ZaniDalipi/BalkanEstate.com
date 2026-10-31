@@ -6,7 +6,7 @@ import { aiQueryToFilters, countryKeyFromAi } from './aiQueryToFilters';
 
 const tiranaRequest = {
     location: 'Tirana', country: 'Albania', propertyType: 'apartment' as const,
-    minSqft: 76, maxSqft: 76, beds: 1, kitchens: 1, maxPrice: 200000,
+    minSqft: 76, maxSqft: 76, beds: 1, maxBeds: 1, kitchens: 1, maxPrice: 200000,
     constructionStatus: 'under-construction' as const, heatingType: 'electric' as const,
     minFloorNumber: 15, maxFloorNumber: 15, energyRating: 'A+' as const,
     maxDistanceToSchool: 0.5, amenities: ['floor heating', 'panoramic view'],
@@ -17,7 +17,7 @@ describe('aiQueryToFilters', () => {
         const f = aiQueryToFilters(tiranaRequest);
         expect(f).toMatchObject({
             query: 'Tirana', country: 'albania', propertyType: 'apartment',
-            minSqft: 76, maxSqft: 76, beds: 1, minKitchens: 1, maxPrice: 200000, minPrice: null,
+            minSqft: 76, maxSqft: 76, beds: 1, maxBeds: 1, minKitchens: 1, maxPrice: 200000, minPrice: null,
             constructionStatus: 'under-construction', heatingType: 'electric',
             minFloorNumber: 15, maxFloorNumber: 15, energyRating: 'A+',
             maxDistanceToSchool: 0.5, amenities: ['floor heating', 'panoramic view'],
@@ -26,7 +26,7 @@ describe('aiQueryToFilters', () => {
 
     it('starts from the defaults, so nothing from an earlier search lingers', () => {
         expect(aiQueryToFilters({})).toEqual({
-            ...initialFilters, constructionStatus: 'any', minKitchens: null, requireKnownDistances: true, orientation: 'any',
+            ...initialFilters, constructionStatus: 'any', minKitchens: null, requireKnownDistances: true, orientation: 'any', maxBeds: null,
         });
     });
 
@@ -51,6 +51,12 @@ describe('aiQueryToFilters', () => {
         const f = aiQueryToFilters({ amenities: ['Floor heating|Ngrohje në dysheme', 'elevator|ashensor', 'floor heating|other'] });
         expect(f.amenities).toEqual(['floor heating|ngrohje në dysheme']);
         expect(f.hasElevator).toBe(true);
+    });
+
+    it('keeps an exact bedroom count, and an open minimum', () => {
+        expect(aiQueryToFilters({ beds: 2, maxBeds: 2 })).toMatchObject({ beds: 2, maxBeds: 2 });
+        expect(aiQueryToFilters({ beds: 2 })).toMatchObject({ beds: 2, maxBeds: null });
+        expect(aiQueryToFilters({ beds: 3, maxBeds: 2 })).toMatchObject({ beds: 2, maxBeds: 3 });
     });
 
     it('applies orientation', () => {
@@ -102,6 +108,7 @@ describe('an AI search keeps only listings that meet every criterion', () => {
 
     it.each([
         ['a different size', { sqft: 77 }],
+        ['an extra bedroom', { beds: 2 }],
         ['a finished building', { constructionStatus: 'ready' }],
         ['another floor', { floorNumber: 14 }],
         ['a lower energy rating', { energyRating: 'A' }],

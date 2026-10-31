@@ -872,22 +872,29 @@ export const getAiChatResponse = async (
 
         User: "make it 2 bedrooms"
         {
-          "responseMessage": "Updated to 2+ bedroom apartments in Albania under €100,000. Let me know if you'd like to change anything else!",
-          "searchQuery": { "country": "Albania", "propertyType": "apartment", "maxPrice": 100000, "beds": 2 },
+          "responseMessage": "Updated to 2-bedroom apartments in Albania under €100,000. Let me know if you'd like to change anything else!",
+          "searchQuery": { "country": "Albania", "propertyType": "apartment", "maxPrice": 100000, "beds": 2, "maxBeds": 2 },
           "isFinalQuery": true
         }
 
         User: "Tražim kuću u Beogradu, 3 spavaće sobe, do 200000 evra"
         {
-          "responseMessage": "Odlično! Evo kuća u Beogradu sa 3+ spavaće sobe do €200.000. Želite li da prilagodim nešto — možda veću površinu ili drugi deo grada?",
-          "searchQuery": { "location": "Belgrade", "country": "Serbia", "propertyType": "house", "beds": 3, "maxPrice": 200000 },
+          "responseMessage": "Odlično! Evo kuća u Beogradu sa 3 spavaće sobe do €200.000. Želite li da prilagodim nešto — možda veću površinu ili drugi deo grada?",
+          "searchQuery": { "location": "Belgrade", "country": "Serbia", "propertyType": "house", "beds": 3, "maxBeds": 3, "maxPrice": 200000 },
           "isFinalQuery": true
         }
 
         User: "Apartment in Tirana, exactly 76 m2, 1 bedroom, under 200k, under construction, one kitchen, electric floor heating, floor 15, A+ energy, panoramic view, less than 0.5 km from a school"
         {
-          "responseMessage": "Here are apartments in Tirana of exactly 76 m² with 1+ bedroom and 1+ kitchen, under €200,000, under construction, on floor 15, with electric floor heating, A+ energy rating, a panoramic view and a school within 0.5 km. Want me to adjust anything?",
-          "searchQuery": { "location": "Tirana", "country": "Albania", "propertyType": "apartment", "minSqft": 76, "maxSqft": 76, "beds": 1, "kitchens": 1, "maxPrice": 200000, "constructionStatus": "under-construction", "heatingType": "electric", "minFloorNumber": 15, "maxFloorNumber": 15, "energyRating": "A+", "maxDistanceToSchool": 0.5, "amenities": ["floor heating|underfloor heating|ngrohje në dysheme|podno grejanje|podno grijanje|подно греење|подово отопление|ενδοδαπέδια θέρμανση|încălzire în pardoseală", "panoramic view|pamje panoramike|panoramski pogled|панорамски поглед|панорамна гледка|πανοραμική θέα|vedere panoramică"] },
+          "responseMessage": "Here are apartments in Tirana of exactly 76 m² with 1 bedroom and 1+ kitchen, under €200,000, under construction, on floor 15, with electric floor heating, A+ energy rating, a panoramic view and a school within 0.5 km. Want me to adjust anything?",
+          "searchQuery": { "location": "Tirana", "country": "Albania", "propertyType": "apartment", "minSqft": 76, "maxSqft": 76, "beds": 1, "maxBeds": 1, "kitchens": 1, "maxPrice": 200000, "constructionStatus": "under-construction", "heatingType": "electric", "minFloorNumber": 15, "maxFloorNumber": 15, "energyRating": "A+", "maxDistanceToSchool": 0.5, "amenities": ["floor heating|underfloor heating|ngrohje në dysheme|podno grejanje|podno grijanje|подно греење|подово отопление|ενδοδαπέδια θέρμανση|încălzire în pardoseală", "panoramic view|pamje panoramike|panoramski pogled|панорамски поглед|панорамна гледка|πανοραμική θέα|vedere panoramică"] },
+          "isFinalQuery": true
+        }
+
+        User: "kërkoj apartament 2+1 në Durrës me qira, të paktën 2 banjo"
+        {
+          "responseMessage": "Ja apartamente me qira 2+1 në Durrës (2 dhoma gjumi, 1 dhomë ndenjeje) me të paktën 2 banjo. Dëshironi të ndryshoj diçka?",
+          "searchQuery": { "location": "Durrës", "country": "Albania", "listingType": "rent", "propertyType": "apartment", "beds": 2, "maxBeds": 2, "livingRooms": 1, "baths": 2 },
           "isFinalQuery": true
         }
 

@@ -85,6 +85,7 @@ function propertyMatchesFilters(property: IProperty, filters: IFilters): boolean
   // parking — reads as zero here, so a search asking for two bedrooms skips it
   // rather than matching on a missing field.
   if (filters.beds && (property.beds ?? 0) < filters.beds) return false;
+  if (filters.maxBeds != null && (property.beds ?? 0) > filters.maxBeds) return false;
   if (filters.baths && (property.baths ?? 0) < filters.baths) return false;
   if (filters.livingRooms && (property.livingRooms ?? 0) < filters.livingRooms) return false;
   if (filters.minKitchens && (property.kitchens ?? 0) < filters.minKitchens) return false;

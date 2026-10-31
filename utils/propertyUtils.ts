@@ -3,6 +3,7 @@ import { BALKAN_COUNTRIES } from '../constants/countries';
 import { createPropertyMatcher, rankProperties } from '../src/shared/search';
 import { normalizeConstructionStatus } from '../src/shared/property/construction';
 import { listingHasAmenity } from './amenityMatch';
+import { bedsWithinRange } from './bedroomFilter';
 import { hasFeatureRequest } from './featureMatchRequest';
 
 /**
@@ -71,7 +72,7 @@ export const filterProperties = (properties: Property[], filters: Filters, optio
         // Basic filters
         const minPriceMatch = filters.minPrice ? p.price >= filters.minPrice : true;
         const maxPriceMatch = filters.maxPrice ? p.price <= filters.maxPrice : true;
-        const bedsMatch = filters.beds ? p.beds >= filters.beds : true;
+        const bedsMatch = filters.beds || filters.maxBeds != null ? bedsWithinRange(p.beds, filters) : true;
         const bathsMatch = filters.baths ? p.baths >= filters.baths : true;
         const livingRoomsMatch = filters.livingRooms ? p.livingRooms >= filters.livingRooms : true;
         const kitchensMatch = filters.minKitchens ? (p.kitchens ?? 0) >= filters.minKitchens : true;

@@ -10,6 +10,8 @@ import { outOfAreaFallback, type OutOfAreaKind } from '../outOfArea';
 import { filterAndSortProperties, filterProperties, mergeById } from '@/utils/propertyUtils';
 import { useFeatureMatches } from '@/src/features/search/hooks/useFeatureMatches';
 import { aiQueryToFilters, countryKeyFromAi } from '../ai/aiQueryToFilters';
+import { applyFilterChange } from '@/utils/bedroomFilter';
+import { rentHandoffState } from '../ai/rentHandoff';
 import { rankProperties } from '@/shared/search';
 import { BALKAN_COUNTRIES, normalizeCountryKey } from '@/constants/countries';
 import { generateSearchSEOTitle, generateSearchSEODescription } from '@/src/components/seo/seoKeywords';
@@ -561,7 +563,7 @@ export function useSearchPage() {
 
 
     const handleFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
-        const newFilters = { ...filters, [name]: value };
+        const newFilters = applyFilterChange(filters, name, value);
 
         // If country filter is changed, fly to the country bounds
         if (name === 'country' && value && value !== 'any') {
@@ -715,7 +717,7 @@ export function useSearchPage() {
 
 
     const handleLocalFilterChange = useCallback(<K extends keyof Filters>(name: K, value: Filters[K]) => {
-        setLocalFilters(prev => ({ ...prev, [name]: value }));
+        setLocalFilters(prev => applyFilterChange(prev, name, value));
     }, []);
 
     const handleResetFilters = useCallback(() => {
@@ -866,6 +868,17 @@ export function useSearchPage() {
     const handleApplyAiFilters = useCallback(async (aiQuery: AiSearchQuery) => {
         // Every criterion the AI understood becomes a filter; see aiQueryToFilters.
         const updatedFilters = aiQueryToFilters(aiQuery);
+
+        // This page only holds homes for sale; a rental search is answered on
+        // the rentals page, which starts from these same filters.
+        if (updatedFilters.listingType === 'rent') {
+            updateSearchPageState({ isAiChatModalOpen: false });
+            navigate(paths.rentals(updatedFilters.query ? { q: updatedFilters.query } : undefined), {
+                state: rentHandoffState(updatedFilters),
+            });
+            return;
+        }
+
         const countryKey = updatedFilters.country;
         const locationIsCountry = countryKeyFromAi(aiQuery.location) !== null;
 

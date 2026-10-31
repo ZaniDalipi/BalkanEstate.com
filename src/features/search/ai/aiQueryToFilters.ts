@@ -97,6 +97,7 @@ export const aiQueryToFilters = (query: AiSearchQuery): Filters => {
     const [minPricePerSqm, maxPricePerSqm] = range(query.minPricePerSqm, query.maxPricePerSqm);
     const [minYearBuilt, maxYearBuilt] = range(query.minYearBuilt, query.maxYearBuilt);
     const [minFloorNumber, maxFloorNumber] = range(query.minFloorNumber, query.maxFloorNumber, true);
+    const [beds, maxBeds] = range(query.beds, query.maxBeds);
     const { booleans, tags } = splitAmenities(query);
 
     const filters: Filters = {
@@ -107,7 +108,7 @@ export const aiQueryToFilters = (query: AiSearchQuery): Filters => {
         listingType: oneOf(['sale', 'rent'] as const, query.listingType) ?? initialFilters.listingType,
         minPrice, maxPrice, minSqft, maxSqft, minPricePerSqm, maxPricePerSqm,
         minYearBuilt, maxYearBuilt, minFloorNumber, maxFloorNumber,
-        beds: num(query.beds),
+        beds, maxBeds,
         baths: num(query.baths),
         livingRooms: num(query.livingRooms),
         minKitchens: num(query.kitchens),

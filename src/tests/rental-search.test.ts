@@ -3,6 +3,8 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { createTestQueryClient } from '@/src/tests/test-utils';
+import { initialFilters } from '@/types';
+import { rentHandoffState } from '@/src/features/search/ai/rentHandoff';
 
 /**
  * Searching the rent page.
@@ -184,5 +186,33 @@ describe('useRentalSearch — searching', () => {
     expect(result.current.mapProperties).toEqual(
       expect.arrayContaining(result.current.listProperties)
     );
+  });
+});
+
+describe('useRentalSearch — an AI search handed over from the buy page', () => {
+  afterEach(() => window.history.replaceState(null, ''));
+
+  it('starts from every filter the AI search set, and keeps an exact bedroom count', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ properties: [rental({ id: 'two', beds: 2 }), rental({ id: 'three', beds: 3 })] }),
+    } as Response);
+    const aiFilters = { ...initialFilters, listingType: 'rent' as const, beds: 2, maxBeds: 2, maxPrice: 600, saleStatus: 'all' as const };
+    window.history.replaceState({ usr: rentHandoffState(aiFilters) }, '');
+
+    const { result } = await mountHook();
+
+    expect(result.current.filters).toMatchObject({ listingType: 'rent', beds: 2, maxBeds: 2, maxPrice: 600 });
+    expect(result.current.baseFilteredProperties.map(p => p.id)).toEqual(['two']);
+  });
+
+  it('drops the exact count when bedrooms are then picked by hand', async () => {
+    window.history.replaceState({ usr: rentHandoffState({ ...initialFilters, listingType: 'rent', beds: 2, maxBeds: 2 }) }, '');
+    const { result } = await mountHook();
+
+    act(() => result.current.handleFilterChange('beds', 3));
+
+    expect(result.current.filters.beds).toBe(3);
+    expect(result.current.filters.maxBeds).toBeNull();
   });
 });

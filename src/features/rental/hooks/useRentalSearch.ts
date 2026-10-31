@@ -10,6 +10,8 @@ import { searchLocation, getZoomFromBoundingBox } from '@/services/osmService';
 import L from 'leaflet';
 import { filterAndSortProperties, filterProperties } from '@/utils/propertyUtils';
 import { useFeatureMatches } from '@/src/features/search/hooks/useFeatureMatches';
+import { applyFilterChange } from '@/utils/bedroomFilter';
+import { readRentHandoff } from '@/src/features/search/ai/rentHandoff';
 import { narrowToMapView } from '@/src/features/search/mapList';
 import { frameSearchTarget } from '@/src/features/search/frameSearch';
 import { useRealtimeProperties } from '@/src/features/properties/hooks';
@@ -53,7 +55,12 @@ export function useRentalSearch() {
     // (the home-page city gallery's Rent button, a shared URL) would otherwise
     // land on an unfiltered list. A lazy initialiser means the very first
     // render already has the filter, so no results flash unfiltered first.
+    //
+    // An AI search started on the buy page arrives with its whole filter set in
+    // the navigation state (see rentHandoff) and starts from that instead.
     const [filters, setFilters] = useState<Filters>(() => {
+        const fromAi = readRentHandoff((window.history.state as { usr?: unknown } | null)?.usr);
+        if (fromAi) return fromAi;
         const query = new URLSearchParams(window.location.search).get('q')?.trim() ?? '';
         return {
             ...RENTAL_DEFAULTS,
@@ -323,7 +330,7 @@ export function useRentalSearch() {
     }, []);
 
     const handleFilterChange = useCallback((key: keyof Filters, value: any) => {
-        const next = { ...filters, [key]: value } as Filters;
+        const next = applyFilterChange(filters, key, value);
 
         // Picking a country moves the map to it — the filter and the view
         // should never disagree about where the user is looking. The select

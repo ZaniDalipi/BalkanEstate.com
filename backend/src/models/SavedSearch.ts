@@ -44,6 +44,8 @@ export interface IFilters {
   minKitchens?: number | null;
   /** Set by AI search: a listing with an unknown distance does not match a distance filter. */
   requireKnownDistances?: boolean;
+  /** Most bedrooms; equal to `beds` for an exact count. Set by AI search. */
+  maxBeds?: number | null;
 }
 
 export interface ISavedSearch extends Document {
